@@ -356,7 +356,7 @@ export default function Home() {
   font-size: 30px;
   margin: 0 auto 10px;
   position: relative;
-
+    
   color: white; /* icon stays white */
 }
 
@@ -638,13 +638,6 @@ export default function Home() {
         }
 
         .benefits div:last-child { border-right: none; }
-
-        .benefits span {
-          color: ${BRAND_YELLOW};
-          font-size: 56px;
-          line-height: 1;
-          font-family: 'Bebas Neue', sans-serif;
-        }
 
         .benefits h3 {
           margin: 10px 0 6px;
