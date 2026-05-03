@@ -90,23 +90,23 @@ export default function Home() {
         <div className="hero-content">
           <h1>FREE HEAVY<br />EQUIPMENT MARKETPLACE</h1>
 
-         <div className="hero-icons">
+        <div className="hero-icons">
   <div>
-    <span className="hero-icon hero-red slash-icon">
+    <span className="hero-icon red slash-icon">
       <i className="fa-solid fa-dollar-sign"></i>
     </span>
     <strong>NO FEES</strong>
   </div>
 
   <div>
-    <span className="hero-icon hero-red slash-icon">
+    <span className="hero-icon red slash-icon">
       <i className="fa-regular fa-credit-card"></i>
     </span>
     <strong>NO CREDIT CARDS</strong>
   </div>
 
   <div>
-    <span className="hero-icon hero-green">
+    <span className="hero-icon green">
       <i className="fa-regular fa-clock"></i>
     </span>
     <strong>LISTINGS LIVE<br />IN MINUTES</strong>
