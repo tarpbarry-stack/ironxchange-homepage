@@ -356,18 +356,22 @@ export default function Home() {
   font-size: 30px;
   margin: 0 auto 10px;
   position: relative;
+
+  color: white; /* icon stays white */
 }
 
-.hero-red {
+/* RED = circle + slash */
+.hero-icon.red {
   border: 3px solid #C53030;
-  color: #C53030;
 }
 
-.hero-green {
+/* GREEN = live */
+.hero-icon.green {
   border: 3px solid #2F855A;
   color: #2F855A;
 }
 
+/* SLASH */
 .slash-icon::after {
   content: "";
   position: absolute;
