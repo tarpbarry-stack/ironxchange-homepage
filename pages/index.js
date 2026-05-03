@@ -92,25 +92,25 @@ export default function Home() {
 
          <div className="hero-icons">
   <div>
-  <span className="icon red slash-icon">
-    <i className="fa-solid fa-dollar-sign"></i>
-  </span>
-  <strong>NO FEES</strong>
-</div>
+    <span className="hero-icon hero-red slash-icon">
+      <i className="fa-solid fa-dollar-sign"></i>
+    </span>
+    <strong>NO FEES</strong>
+  </div>
 
-<div>
-  <span className="icon red slash-icon">
-    <i className="fa-regular fa-credit-card"></i>
-  </span>
-  <strong>NO CREDIT CARDS</strong>
-</div>
+  <div>
+    <span className="hero-icon hero-red slash-icon">
+      <i className="fa-regular fa-credit-card"></i>
+    </span>
+    <strong>NO CREDIT CARDS</strong>
+  </div>
 
-<div>
-  <span className="icon green">
-    <i className="fa-regular fa-clock"></i>
-  </span>
-  <strong>LISTINGS LIVE<br />IN MINUTES</strong>
-</div>
+  <div>
+    <span className="hero-icon hero-green">
+      <i className="fa-regular fa-clock"></i>
+    </span>
+    <strong>LISTINGS LIVE<br />IN MINUTES</strong>
+  </div>
 </div>
 
           <div className="cta-buttons">
@@ -183,10 +183,9 @@ export default function Home() {
       <section id="how" className="how">
         <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
 
-        <div className="benefits">
-
+       <div className="benefits">
   <div>
-    <span className="icon yellow x-icon">
+    <span className="benefit-icon yellow x-icon">
       <i className="fa-regular fa-file-lines"></i>
     </span>
     <h3>NO CONTRACTS</h3>
@@ -194,7 +193,7 @@ export default function Home() {
   </div>
 
   <div>
-    <span className="icon yellow x-icon">
+    <span className="benefit-icon yellow x-icon">
       <i className="fa-solid fa-users"></i>
     </span>
     <h3>NO REPS</h3>
@@ -202,7 +201,7 @@ export default function Home() {
   </div>
 
   <div>
-    <span className="icon yellow x-icon">
+    <span className="benefit-icon yellow x-icon">
       <i className="fa-solid fa-dollar-sign"></i>
     </span>
     <h3>NO FEES</h3>
@@ -210,13 +209,12 @@ export default function Home() {
   </div>
 
   <div>
-    <span className="icon green">
+    <span className="benefit-icon green">
       <i className="fa-solid fa-bolt"></i>
     </span>
     <h3>GO LIVE INSTANTLY</h3>
     <p>Listings live in minutes.</p>
   </div>
-
 </div>
       </section>
 
@@ -349,8 +347,7 @@ export default function Home() {
           font-size: 13px;
           line-height: 1.25;
         }
-
-      .icon {
+.hero-icon {
   width: 62px;
   height: 62px;
   border-radius: 50%;
@@ -361,44 +358,64 @@ export default function Home() {
   position: relative;
 }
 
-/* YELLOW BASE (brand) */
-.icon.yellow {
-  border: 3px solid #FFC400;
-  color: #FFC400;
+.hero-red {
+  border: 3px solid #C53030;
+  color: #C53030;
 }
 
-/* GREEN (GO LIVE) */
-.icon.green {
+.hero-green {
   border: 3px solid #2F855A;
   color: #2F855A;
 }
 
-/* ICON ALIGNMENT */
-.icon i {
-  line-height: 1;
+.slash-icon::after {
+  content: "";
+  position: absolute;
+  width: 78px;
+  height: 4px;
+  background: #C53030;
+  transform: rotate(-38deg);
+  border-radius: 999px;
 }
 
-/* RED X OVERLAY */
+.benefit-icon {
+  display: block;
+  font-size: 46px;
+  margin: 0 auto 12px;
+  position: relative;
+}
+
+.benefit-icon.yellow {
+  color: #FFC400;
+}
+
+.benefit-icon.green {
+  color: #2F855A;
+}
+
 .x-icon::before,
 .x-icon::after {
   content: "";
   position: absolute;
-  width: 70px;
+  left: 50%;
+  top: 50%;
+  width: 58px;
   height: 4px;
   background: #C53030;
+  border-radius: 999px;
+  transform-origin: center;
 }
 
 .x-icon::before {
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .x-icon::after {
-  transform: rotate(-45deg);
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-/* sharpen bolt */
-.icon.green i {
-  font-size: 32px;
+.benefit-icon.green i {
+  font-size: 50px;
 }
 
         .btn-primary,
