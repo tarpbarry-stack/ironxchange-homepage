@@ -34,10 +34,10 @@ const categories = [
 ];
 
 const listings = [
-  ["2018 BELL B30E", "Articulated Truck", "6,807 Hrs", "Waco, TX", "$98,900"],
-  ["2019 CAT 336FL", "Excavator", "5,317 Hrs", "Odessa, TX", "$182,500"],
+  ["2019 CAT 336FL", "Excavator • Hydraulic", "5,317 Hrs", "Odessa, TX", "$182,500"],
   ["2016 KOMATSU D61PX-24", "Dozer", "4,650 Hrs", "Fort Worth, TX", "$124,900"],
-  ["2020 VOLVO L120H", "Wheel Loader", "2,950 Hrs", "Amarillo, TX", "$169,900"]
+  ["2020 VOLVO L120H", "Wheel Loader", "2,950 Hrs", "Amarillo, TX", "$169,900"],
+  ["2018 BELL B30E", "Articulated Truck", "6,807 Hrs", "Waco, TX", "$98,900"]
 ];
 
 export default function Home() {
@@ -70,27 +70,40 @@ export default function Home() {
 
         <div className="nav-links">
           <a href={`${STAGING}/s`}>Browse Equipment</a>
-          <a href={`${STAGING}/l/new`} className="post-btn">Post Equipment</a>
+          <a href={`${STAGING}/l/new`} className="yellow-link">Post Equipment</a>
           <a href="#how">How It Works</a>
           <a href="#about">About</a>
+          <a href="mailto:info@ironxchange.com">Contact</a>
+          <a href={`${STAGING}/login`} className="login-icon">◎</a>
         </div>
       </nav>
 
       <section className="hero">
         <div className="hero-content">
-          <h1>FREE HEAVY EQUIPMENT MARKETPLACE</h1>
-          <p className="subtitle">No fees. No credit cards. Listings live in minutes.</p>
+          <h1>FREE HEAVY<br />EQUIPMENT MARKETPLACE</h1>
 
-          <div className="features">
-            <div>NO FEES</div>
-            <div>NO CREDIT CARDS</div>
-            <div>LISTINGS LIVE IN MINUTES</div>
+          <div className="hero-icons">
+            <div>
+              <span>$</span>
+              <strong>NO FEES</strong>
+            </div>
+            <div>
+              <span>▱</span>
+              <strong>NO CREDIT CARDS</strong>
+            </div>
+            <div>
+              <span>◷</span>
+              <strong>LISTINGS LIVE<br />IN MINUTES</strong>
+            </div>
           </div>
 
           <div className="cta-buttons">
             <a href={`${STAGING}/l/new`} className="btn-primary">POST EQUIPMENT FREE →</a>
-            <a href={`${STAGING}/s`} className="btn-secondary">BROWSE EQUIPMENT</a>
           </div>
+
+          <p className="built-line">
+            BUILT BY PEOPLE WHO ACTUALLY BUY AND SELL <b>IRON.</b>
+          </p>
         </div>
       </section>
 
@@ -101,7 +114,7 @@ export default function Home() {
         <div className="search-container">
           <input
             type="text"
-            placeholder="Search equipment — CAT 320, D6 Dozer, Bell B30E..."
+            placeholder="Search equipment (e.g. Caterpillar 320, Komatsu dozer, trailer...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -112,6 +125,15 @@ export default function Home() {
           </select>
 
           <button onClick={handleSearch} className="search-btn">SEARCH</button>
+        </div>
+
+        <div className="popular">
+          <span>Popular Searches:</span>
+          {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
+            <button key={x} onClick={() => window.location.href = `${STAGING}/s?keywords=${encodeURIComponent(x)}`}>
+              {x}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -124,13 +146,13 @@ export default function Home() {
         <div className="cards">
           {listings.map((item) => (
             <div className="card" key={item[0]}>
-              <div className="card-photo" />
+              <div className="card-photo"><span>♡</span></div>
               <div className="card-body">
                 <h3>{item[0]}</h3>
                 <p>{item[1]}</p>
                 <div className="meta">
-                  <span>{item[2]}</span>
-                  <span>{item[3]}</span>
+                  <span>◷ {item[2]}</span>
+                  <span>⌖ {item[3]}</span>
                 </div>
                 <div className="price-row">
                   <strong>{item[4]}</strong>
@@ -147,43 +169,63 @@ export default function Home() {
 
         <div className="benefits">
           <div>
-            <span>01</span>
+            <span>◇</span>
             <h3>NO CONTRACTS</h3>
-            <p>List as long as you need. No long-term commitment.</p>
+            <p>List as long as you need.</p>
           </div>
 
           <div>
-            <span>02</span>
+            <span>♚</span>
             <h3>NO REPS</h3>
-            <p>No sales rep required. Create your listing direct.</p>
+            <p>You deal direct with buyers.</p>
           </div>
 
           <div>
-            <span>03</span>
+            <span>$</span>
             <h3>NO FEES</h3>
-            <p>No listing fees. No credit card. No commission.</p>
+            <p>100% free. Always.</p>
           </div>
 
           <div>
-            <span>04</span>
-            <h3>LIVE FAST</h3>
-            <p>Post equipment and get it in front of buyers in minutes.</p>
+            <span>ϟ</span>
+            <h3>GO LIVE INSTANTLY</h3>
+            <p>Listings live in minutes.</p>
           </div>
         </div>
       </section>
 
-      <section className="final-cta">
+      <section className="ready">
+        <div className="ready-icon">✎</div>
         <div>
-          <h2>READY TO MOVE IRON?</h2>
+          <h2>READY TO SELL?</h2>
           <p>Post your machine free and deal direct with buyers.</p>
         </div>
         <a href={`${STAGING}/l/new`}>POST EQUIPMENT FREE →</a>
       </section>
 
       <footer id="about">
-        <img src="/images/ironxchange-logo.png" alt="IronXchange" />
-        <p>Free Heavy Equipment Marketplace. No fees. No credit cards. Listings live in minutes.</p>
-        <small>© 2026 IronXchange. All rights reserved.</small>
+        <div>
+          <img src="/images/ironxchange-logo.png" alt="IronXchange" />
+          <p>© 2026 IronXchange. All rights reserved.</p>
+        </div>
+
+        <div className="foot-cols">
+          <div>
+            <h4>MARKETPLACE</h4>
+            <a href={`${STAGING}/s`}>Browse Equipment</a>
+            <a href={`${STAGING}/l/new`}>Post Equipment</a>
+          </div>
+          <div>
+            <h4>COMPANY</h4>
+            <a href="#about">About</a>
+            <a href="mailto:info@ironxchange.com">Contact</a>
+          </div>
+          <div>
+            <h4>SUPPORT</h4>
+            <a href="#how">How It Works</a>
+            <a href={`${STAGING}/terms-of-service`}>Terms</a>
+          </div>
+        </div>
       </footer>
 
       <style jsx>{`
@@ -199,8 +241,8 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 18px 5%;
-          background: #0a0a0a;
+          padding: 14px 5%;
+          background: #050505;
           position: sticky;
           top: 0;
           z-index: 100;
@@ -216,31 +258,36 @@ export default function Home() {
         .nav-links {
           display: flex;
           align-items: center;
-          gap: 30px;
+          gap: 28px;
         }
 
         .nav-links a {
           color: white;
           text-decoration: none;
           font-family: 'Montserrat', sans-serif;
-          font-weight: 800;
+          font-weight: 900;
           font-size: 13px;
           letter-spacing: .6px;
           text-transform: uppercase;
         }
 
-        .post-btn {
-          background: ${BRAND_YELLOW};
-          color: black !important;
-          padding: 12px 22px;
-          border-radius: 6px;
+        .yellow-link { color: ${BRAND_YELLOW} !important; }
+
+        .login-icon {
+          border: 2px solid white;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: grid;
+          place-items: center;
+          font-size: 15px !important;
         }
 
         .hero {
           height: 85vh;
           min-height: 680px;
           background:
-            linear-gradient(90deg, rgba(0,0,0,.86), rgba(0,0,0,.62), rgba(0,0,0,.25)),
+            linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
             url('/images/hero-equipment-yard.jpg');
           background-size: cover;
           background-position: center;
@@ -252,69 +299,67 @@ export default function Home() {
 
         .hero-content { max-width: 850px; }
 
-        .hero-content h1 {
+        .hero h1 {
           font-family: 'Bebas Neue', sans-serif;
-          font-size: 6.2rem;
+          font-size: 6.4rem;
           line-height: .9;
           margin: 0;
           letter-spacing: 1px;
           font-weight: 400;
         }
 
-        .subtitle {
-          font-size: 1.45rem;
-          font-weight: 700;
-          margin-top: 22px;
-          color: rgba(255,255,255,.92);
-        }
-
-        .features {
+        .hero-icons {
           display: flex;
-          gap: 28px;
+          gap: 34px;
           margin: 34px 0;
           flex-wrap: wrap;
         }
 
-        .features div {
+        .hero-icons div {
+          text-align: center;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
-          font-size: 14px;
-          letter-spacing: .6px;
-          border-left: 5px solid ${BRAND_YELLOW};
-          padding-left: 12px;
+          font-size: 13px;
+          line-height: 1.25;
         }
 
-        .cta-buttons {
-          display: flex;
-          gap: 14px;
-          flex-wrap: wrap;
+        .hero-icons span {
+          width: 58px;
+          height: 58px;
+          border: 3px solid ${BRAND_YELLOW};
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          color: ${BRAND_YELLOW};
+          font-size: 30px;
+          margin: 0 auto 9px;
         }
 
         .btn-primary,
-        .btn-secondary,
-        .final-cta a {
-          padding: 18px 32px;
-          font-family: 'Montserrat', sans-serif;
-          font-size: .95rem;
-          font-weight: 900;
+        .ready a {
+          display: inline-block;
+          background: ${BRAND_YELLOW};
+          color: black;
+          padding: 18px 34px;
           border-radius: 8px;
           text-decoration: none;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
           letter-spacing: .4px;
         }
 
-        .btn-primary,
-        .final-cta a {
-          background: ${BRAND_YELLOW};
-          color: black;
+        .built-line {
+          margin-top: 64px;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          letter-spacing: .5px;
+          font-size: 14px;
         }
 
-        .btn-secondary {
-          color: white;
-          border: 2px solid white;
-        }
+        .built-line b { color: ${BRAND_YELLOW}; }
 
         .search-section {
-          padding: 44px 5%;
+          padding: 42px 5% 32px;
           background: #f8f8f8;
           text-align: center;
         }
@@ -322,7 +367,7 @@ export default function Home() {
         .search-section h2,
         .featured h2,
         .how h2,
-        .final-cta h2 {
+        .ready h2 {
           font-family: 'Bebas Neue', sans-serif;
           font-size: 3rem;
           font-weight: 400;
@@ -331,7 +376,7 @@ export default function Home() {
         }
 
         .search-section p {
-          color: #444;
+          color: #333;
           font-size: 1.05rem;
           margin-top: 8px;
         }
@@ -373,8 +418,25 @@ export default function Home() {
           cursor: pointer;
         }
 
+        .popular {
+          max-width: 1100px;
+          margin: 18px auto 0;
+          text-align: left;
+          color: #444;
+          font-size: 14px;
+        }
+
+        .popular button {
+          background: transparent;
+          border: none;
+          margin-left: 18px;
+          text-decoration: underline;
+          cursor: pointer;
+          color: #333;
+        }
+
         .featured {
-          padding: 60px 5%;
+          padding: 56px 5%;
           background: white;
         }
 
@@ -386,7 +448,7 @@ export default function Home() {
         }
 
         .section-head a {
-          color: #111;
+          color: #1b334b;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
           font-size: 13px;
@@ -408,11 +470,18 @@ export default function Home() {
 
         .card-photo {
           height: 185px;
-          background:
-            linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)),
-            url('/images/hero-equipment-yard.jpg');
+          background: url('/images/hero-equipment-yard.jpg');
           background-size: cover;
           background-position: center;
+          position: relative;
+        }
+
+        .card-photo span {
+          position: absolute;
+          top: 12px;
+          right: 14px;
+          color: white;
+          font-size: 25px;
         }
 
         .card-body { padding: 18px; }
@@ -464,7 +533,7 @@ export default function Home() {
 
         .how {
           background: #f3f3f3;
-          padding: 65px 5%;
+          padding: 62px 5%;
           text-align: center;
         }
 
@@ -476,20 +545,22 @@ export default function Home() {
         }
 
         .benefits div {
-          background: white;
-          padding: 28px;
-          border-radius: 14px;
-          box-shadow: 0 10px 25px rgba(0,0,0,.08);
+          background: transparent;
+          padding: 18px 26px;
+          border-right: 1px solid #ccc;
         }
+
+        .benefits div:last-child { border-right: none; }
 
         .benefits span {
           color: ${BRAND_YELLOW};
+          font-size: 56px;
+          line-height: 1;
           font-family: 'Bebas Neue', sans-serif;
-          font-size: 3.5rem;
         }
 
         .benefits h3 {
-          margin: 4px 0 8px;
+          margin: 10px 0 6px;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
         }
@@ -499,37 +570,65 @@ export default function Home() {
           margin: 0;
         }
 
-        .final-cta {
-          background: #080808;
+        .ready {
+          background: #070707;
           color: white;
-          padding: 48px 5%;
-          display: flex;
+          padding: 42px 5%;
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          gap: 22px;
           align-items: center;
-          justify-content: space-between;
         }
 
-        .final-cta p {
+        .ready-icon {
+          width: 62px;
+          height: 62px;
+          border: 4px solid ${BRAND_YELLOW};
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          color: ${BRAND_YELLOW};
+          font-size: 30px;
+        }
+
+        .ready p {
           color: #aaa;
-          margin-bottom: 0;
+          margin: 4px 0 0;
         }
 
         footer {
           background: #050505;
           color: white;
           padding: 42px 5%;
+          display: flex;
+          justify-content: space-between;
+          gap: 50px;
         }
 
-        footer img {
-          height: 52px;
-        }
+        footer img { height: 52px; }
 
         footer p {
-          color: #aaa;
-          max-width: 620px;
+          color: #777;
+          font-size: 13px;
         }
 
-        footer small {
-          color: #666;
+        .foot-cols {
+          display: flex;
+          gap: 70px;
+        }
+
+        .foot-cols h4 {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 13px;
+          margin: 0 0 14px;
+        }
+
+        .foot-cols a {
+          display: block;
+          color: #aaa;
+          text-decoration: none;
+          margin-bottom: 8px;
+          font-size: 13px;
         }
 
         @media (max-width: 850px) {
@@ -542,16 +641,17 @@ export default function Home() {
             justify-content: center;
           }
 
-          .hero-content h1 { font-size: 4rem; }
+          .hero h1 { font-size: 4rem; }
 
-          .features,
+          .hero-icons,
           .cta-buttons {
             justify-content: center;
           }
 
           .search-container,
           .cards,
-          .benefits {
+          .benefits,
+          .ready {
             grid-template-columns: 1fr;
           }
 
@@ -564,10 +664,18 @@ export default function Home() {
           .search-btn { padding: 20px; }
 
           .section-head,
-          .final-cta {
+          footer {
             flex-direction: column;
-            gap: 20px;
-            text-align: center;
+          }
+
+          .foot-cols {
+            flex-direction: column;
+            gap: 25px;
+          }
+
+          .benefits div {
+            border-right: none;
+            border-bottom: 1px solid #ccc;
           }
         }
       `}</style>
