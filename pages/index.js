@@ -390,7 +390,7 @@ export default function Home() {
 }
 
 .benefit-icon.green {
-  color: #2F855A;
+  color: #38A169;
 }
 
 .x-icon::before,
