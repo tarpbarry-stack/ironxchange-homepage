@@ -92,19 +92,25 @@ export default function Home() {
 
          <div className="hero-icons">
   <div>
-    <span className="slash-icon"><i className="fa-solid fa-dollar-sign"></i></span>
-    <strong>NO FEES</strong>
-  </div>
+  <span className="icon red slash-icon">
+    <i className="fa-solid fa-dollar-sign"></i>
+  </span>
+  <strong>NO FEES</strong>
+</div>
 
-  <div>
-    <span><i className="fa-regular fa-credit-card"></i></span>
-    <strong>NO CREDIT CARDS</strong>
-  </div>
+<div>
+  <span className="icon red slash-icon">
+    <i className="fa-regular fa-credit-card"></i>
+  </span>
+  <strong>NO CREDIT CARDS</strong>
+</div>
 
-  <div>
-    <span><i className="fa-regular fa-clock"></i></span>
-    <strong>LISTINGS LIVE<br />IN MINUTES</strong>
-  </div>
+<div>
+  <span className="icon green">
+    <i className="fa-regular fa-clock"></i>
+  </span>
+  <strong>LISTINGS LIVE<br />IN MINUTES</strong>
+</div>
 </div>
 
           <div className="cta-buttons">
