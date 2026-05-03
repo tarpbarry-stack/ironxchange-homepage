@@ -340,31 +340,41 @@ export default function Home() {
           line-height: 1.25;
         }
 
-       .hero-icons span,
-.benefits span {
+      .icon {
   width: 62px;
   height: 62px;
-  border: 3px solid #FFC400;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #FFC400;
-  font-size: 28px;
+  font-size: 30px;
   margin: 0 auto 10px;
   position: relative;
 }
 
-.hero-icons span i,
-.benefits span i {
+/* RED = NO / REMOVE */
+.icon.red {
+  border: 3px solid #C53030;
+  color: #C53030;
+}
+
+/* GREEN = GO / FAST */
+.icon.green {
+  border: 3px solid #2F855A;
+  color: #2F855A;
+}
+
+/* ICON ALIGNMENT */
+.icon i {
   line-height: 1;
 }
 
+/* SLASH */
 .slash-icon::after {
   content: "";
   position: absolute;
   width: 78px;
   height: 4px;
-  background: #FFC400;
+  background: #C53030;
   transform: rotate(-38deg);
 }
 
