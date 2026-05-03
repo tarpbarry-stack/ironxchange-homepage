@@ -244,7 +244,7 @@ export default function Home() {
         }
 
        .logo {
-  height: 72px;
+  height: 80px;
   width: auto;
   display: block;
   filter: brightness(1.05) contrast(1.1);
