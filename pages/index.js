@@ -233,23 +233,23 @@ export default function Home() {
           <p>© 2026 IronXchange. All rights reserved.</p>
         </div>
 
-        <div className="foot-cols">
-          <div>
-            <h4>MARKETPLACE</h4>
-            <a href={`${STAGING}/s`}>Browse Equipment</a>
-            <a href={`${STAGING}/l/new`}>Post Equipment</a>
-          </div>
-          <div>
-            <h4>COMPANY</h4>
-            <a href="#about">About</a>
-            <a href="mailto:info@ironxchange.com">Contact</a>
-          </div>
-          <div>
-            <h4>SUPPORT</h4>
-            <a href="#how">How It Works</a>
-            <a href={`${STAGING}/terms-of-service`}>Terms</a>
-          </div>
-        </div>
+       <div className="foot-cols">
+  <div>
+    <h4>MARKETPLACE</h4>
+    <a href={`${STAGING}/s`}>Browse Equipment</a>
+    <a href={`${STAGING}/l/new`}>Post Equipment</a>
+  </div>
+
+  <div>
+    <h4>COMPANY</h4>
+    <a href="/contact">Contact</a>
+  </div>
+
+  <div>
+    <h4>LEGAL</h4>
+    <a href={`${STAGING}/terms-of-service`}>Terms</a>
+  </div>
+</div>
       </footer>
 
       <style jsx>{`
