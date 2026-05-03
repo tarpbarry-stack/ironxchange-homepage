@@ -184,29 +184,39 @@ export default function Home() {
         <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
 
         <div className="benefits">
+
   <div>
-    <span><i className="fa-regular fa-file-lines"></i></span>
+    <span className="icon yellow x-icon">
+      <i className="fa-regular fa-file-lines"></i>
+    </span>
     <h3>NO CONTRACTS</h3>
     <p>List as long as you need.</p>
   </div>
 
   <div>
-    <span><i className="fa-solid fa-users"></i></span>
+    <span className="icon yellow x-icon">
+      <i className="fa-solid fa-users"></i>
+    </span>
     <h3>NO REPS</h3>
     <p>You deal direct with buyers.</p>
   </div>
 
   <div>
-    <span className="slash-icon"><i className="fa-solid fa-dollar-sign"></i></span>
+    <span className="icon yellow x-icon">
+      <i className="fa-solid fa-dollar-sign"></i>
+    </span>
     <h3>NO FEES</h3>
     <p>100% free. Always.</p>
   </div>
 
   <div>
-    <span><i className="fa-solid fa-upload"></i></span>
+    <span className="icon green">
+      <i className="fa-solid fa-bolt"></i>
+    </span>
     <h3>GO LIVE INSTANTLY</h3>
     <p>Listings live in minutes.</p>
   </div>
+
 </div>
       </section>
 
