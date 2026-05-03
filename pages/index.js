@@ -33,6 +33,13 @@ const categories = [
   "UTILITY CARTS"
 ];
 
+const listings = [
+  ["2018 BELL B30E", "Articulated Truck", "6,807 Hrs", "Waco, TX", "$98,900"],
+  ["2019 CAT 336FL", "Excavator", "5,317 Hrs", "Odessa, TX", "$182,500"],
+  ["2016 KOMATSU D61PX-24", "Dozer", "4,650 Hrs", "Fort Worth, TX", "$124,900"],
+  ["2020 VOLVO L120H", "Wheel Loader", "2,950 Hrs", "Amarillo, TX", "$169,900"]
+];
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -81,12 +88,8 @@ export default function Home() {
           </div>
 
           <div className="cta-buttons">
-            <a href={`${STAGING}/l/new`} className="btn-primary">
-              POST EQUIPMENT FREE →
-            </a>
-            <a href={`${STAGING}/s`} className="btn-secondary">
-              BROWSE EQUIPMENT
-            </a>
+            <a href={`${STAGING}/l/new`} className="btn-primary">POST EQUIPMENT FREE →</a>
+            <a href={`${STAGING}/s`} className="btn-secondary">BROWSE EQUIPMENT</a>
           </div>
         </div>
       </section>
@@ -105,9 +108,7 @@ export default function Home() {
           />
 
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
+            {categories.map((c) => <option key={c}>{c}</option>)}
           </select>
 
           <button onClick={handleSearch} className="search-btn">SEARCH</button>
@@ -115,13 +116,78 @@ export default function Home() {
       </section>
 
       <section className="featured">
-        <h2>FEATURED EQUIPMENT</h2>
+        <div className="section-head">
+          <h2>FEATURED EQUIPMENT</h2>
+          <a href={`${STAGING}/s`}>VIEW ALL EQUIPMENT →</a>
+        </div>
+
+        <div className="cards">
+          {listings.map((item) => (
+            <div className="card" key={item[0]}>
+              <div className="card-photo" />
+              <div className="card-body">
+                <h3>{item[0]}</h3>
+                <p>{item[1]}</p>
+                <div className="meta">
+                  <span>{item[2]}</span>
+                  <span>{item[3]}</span>
+                </div>
+                <div className="price-row">
+                  <strong>{item[4]}</strong>
+                  <a href={`${STAGING}/s`}>VIEW DETAILS</a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
+      <section id="how" className="how">
+        <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
+
+        <div className="benefits">
+          <div>
+            <span>01</span>
+            <h3>NO CONTRACTS</h3>
+            <p>List as long as you need. No long-term commitment.</p>
+          </div>
+
+          <div>
+            <span>02</span>
+            <h3>NO REPS</h3>
+            <p>No sales rep required. Create your listing direct.</p>
+          </div>
+
+          <div>
+            <span>03</span>
+            <h3>NO FEES</h3>
+            <p>No listing fees. No credit card. No commission.</p>
+          </div>
+
+          <div>
+            <span>04</span>
+            <h3>LIVE FAST</h3>
+            <p>Post equipment and get it in front of buyers in minutes.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="final-cta">
+        <div>
+          <h2>READY TO MOVE IRON?</h2>
+          <p>Post your machine free and deal direct with buyers.</p>
+        </div>
+        <a href={`${STAGING}/l/new`}>POST EQUIPMENT FREE →</a>
+      </section>
+
+      <footer id="about">
+        <img src="/images/ironxchange-logo.png" alt="IronXchange" />
+        <p>Free Heavy Equipment Marketplace. No fees. No credit cards. Listings live in minutes.</p>
+        <small>© 2026 IronXchange. All rights reserved.</small>
+      </footer>
+
       <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         :global(body) {
           margin: 0;
@@ -139,11 +205,6 @@ export default function Home() {
           top: 0;
           z-index: 100;
           border-bottom: 1px solid rgba(255,255,255,.08);
-        }
-
-        .logo-wrap {
-          display: flex;
-          align-items: center;
         }
 
         .logo-img {
@@ -189,9 +250,7 @@ export default function Home() {
           padding: 0 5%;
         }
 
-        .hero-content {
-          max-width: 850px;
-        }
+        .hero-content { max-width: 850px; }
 
         .hero-content h1 {
           font-family: 'Bebas Neue', sans-serif;
@@ -232,7 +291,8 @@ export default function Home() {
         }
 
         .btn-primary,
-        .btn-secondary {
+        .btn-secondary,
+        .final-cta a {
           padding: 18px 32px;
           font-family: 'Montserrat', sans-serif;
           font-size: .95rem;
@@ -242,7 +302,8 @@ export default function Home() {
           letter-spacing: .4px;
         }
 
-        .btn-primary {
+        .btn-primary,
+        .final-cta a {
           background: ${BRAND_YELLOW};
           color: black;
         }
@@ -259,7 +320,9 @@ export default function Home() {
         }
 
         .search-section h2,
-        .featured h2 {
+        .featured h2,
+        .how h2,
+        .final-cta h2 {
           font-family: 'Bebas Neue', sans-serif;
           font-size: 3rem;
           font-weight: 400;
@@ -311,19 +374,167 @@ export default function Home() {
         }
 
         .featured {
-          padding: 50px 5%;
+          padding: 60px 5%;
           background: white;
-          min-height: 240px;
+        }
+
+        .section-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 28px;
+        }
+
+        .section-head a {
+          color: #111;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .cards {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+
+        .card {
+          border: 1px solid #e8e8e8;
+          border-radius: 14px;
+          overflow: hidden;
+          box-shadow: 0 12px 30px rgba(0,0,0,.1);
+          background: white;
+        }
+
+        .card-photo {
+          height: 185px;
+          background:
+            linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)),
+            url('/images/hero-equipment-yard.jpg');
+          background-size: cover;
+          background-position: center;
+        }
+
+        .card-body { padding: 18px; }
+
+        .card h3 {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 18px;
+          margin: 0;
+          font-weight: 900;
+        }
+
+        .card p {
+          margin: 6px 0 14px;
+          color: #555;
+          font-weight: 600;
+        }
+
+        .meta {
+          display: flex;
+          gap: 12px;
+          color: #555;
+          font-size: 13px;
+          flex-wrap: wrap;
+        }
+
+        .price-row {
+          margin-top: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .price-row strong {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 22px;
+          font-weight: 900;
+        }
+
+        .price-row a {
+          border: 1px solid #ccc;
+          padding: 9px 12px;
+          border-radius: 6px;
+          color: #111;
+          text-decoration: none;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 11px;
+          font-weight: 900;
+        }
+
+        .how {
+          background: #f3f3f3;
+          padding: 65px 5%;
+          text-align: center;
+        }
+
+        .benefits {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+          margin-top: 32px;
+        }
+
+        .benefits div {
+          background: white;
+          padding: 28px;
+          border-radius: 14px;
+          box-shadow: 0 10px 25px rgba(0,0,0,.08);
+        }
+
+        .benefits span {
+          color: ${BRAND_YELLOW};
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3.5rem;
+        }
+
+        .benefits h3 {
+          margin: 4px 0 8px;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+        }
+
+        .benefits p {
+          color: #555;
+          margin: 0;
+        }
+
+        .final-cta {
+          background: #080808;
+          color: white;
+          padding: 48px 5%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .final-cta p {
+          color: #aaa;
+          margin-bottom: 0;
+        }
+
+        footer {
+          background: #050505;
+          color: white;
+          padding: 42px 5%;
+        }
+
+        footer img {
+          height: 52px;
+        }
+
+        footer p {
+          color: #aaa;
+          max-width: 620px;
+        }
+
+        footer small {
+          color: #666;
         }
 
         @media (max-width: 850px) {
-          .nav-links {
-            display: none;
-          }
-
-          .logo-img {
-            height: 56px;
-          }
+          .nav-links { display: none; }
+          .logo-img { height: 56px; }
 
           .hero {
             min-height: 620px;
@@ -331,16 +542,16 @@ export default function Home() {
             justify-content: center;
           }
 
-          .hero-content h1 {
-            font-size: 4rem;
-          }
+          .hero-content h1 { font-size: 4rem; }
 
           .features,
           .cta-buttons {
             justify-content: center;
           }
 
-          .search-container {
+          .search-container,
+          .cards,
+          .benefits {
             grid-template-columns: 1fr;
           }
 
@@ -350,8 +561,13 @@ export default function Home() {
             border-bottom: 1px solid #e5e5e5;
           }
 
-          .search-btn {
-            padding: 20px;
+          .search-btn { padding: 20px; }
+
+          .section-head,
+          .final-cta {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
           }
         }
       `}</style>
