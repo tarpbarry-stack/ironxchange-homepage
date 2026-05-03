@@ -361,13 +361,13 @@ export default function Home() {
   position: relative;
 }
 
-/* RED = NO / REMOVE */
-.icon.red {
-  border: 3px solid #C53030;
-  color: #C53030;
+/* YELLOW BASE (brand) */
+.icon.yellow {
+  border: 3px solid #FFC400;
+  color: #FFC400;
 }
 
-/* GREEN = GO / FAST */
+/* GREEN (GO LIVE) */
 .icon.green {
   border: 3px solid #2F855A;
   color: #2F855A;
@@ -378,14 +378,27 @@ export default function Home() {
   line-height: 1;
 }
 
-/* SLASH */
-.slash-icon::after {
+/* RED X OVERLAY */
+.x-icon::before,
+.x-icon::after {
   content: "";
   position: absolute;
-  width: 78px;
+  width: 70px;
   height: 4px;
   background: #C53030;
-  transform: rotate(-38deg);
+}
+
+.x-icon::before {
+  transform: rotate(45deg);
+}
+
+.x-icon::after {
+  transform: rotate(-45deg);
+}
+
+/* sharpen bolt */
+.icon.green i {
+  font-size: 32px;
 }
 
         .btn-primary,
