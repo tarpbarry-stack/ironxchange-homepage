@@ -231,7 +231,7 @@ export default function Home() {
         }
 
         .nav {
-          height: 78px;
+          height: 96px;
           background: #050505;
           display: flex;
           align-items: center;
@@ -243,11 +243,12 @@ export default function Home() {
           border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        .logo {
-          height: 46px;
-          width: auto;
-          display: block;
-        }
+       .logo {
+  height: 72px;
+  width: auto;
+  display: block;
+  filter: brightness(1.05) contrast(1.1);
+}
 
         nav {
           display: flex;
