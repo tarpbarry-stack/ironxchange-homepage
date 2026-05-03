@@ -57,15 +57,20 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>IronXchange - Free Heavy Equipment Marketplace</title>
-        <meta name="description" content="Free Heavy Equipment Marketplace. List and browse machinery with no fees." />
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&
-    <link
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  rel="stylesheet"
-/>>
-      </Head>
+     <Head>
+  <title>IronXchange - Free Heavy Equipment Marketplace</title>
+  <meta name="description" content="Free Heavy Equipment Marketplace. List and browse machinery with no fees." />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</Head>
 
       <nav className="nav">
         <a href="/" className="logo-wrap">
