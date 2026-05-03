@@ -85,7 +85,48 @@ export default function Home() {
 
         </div>
       </section>
+{/* SEARCH SECTION */}
+<section style={{
+  padding: '60px 20px',
+  background: '#f5f5f5',
+  display: 'flex',
+  justifyContent: 'center'
+}}>
+  <div style={{
+    background: 'white',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+    width: '100%',
+    maxWidth: '900px',
+    display: 'flex',
+    gap: '10px'
+  }}>
+    
+    <input
+      placeholder="Search equipment (CAT 320, D6 Dozer, etc...)"
+      style={{
+        flex: 1,
+        padding: '15px',
+        fontSize: '16px',
+        border: '1px solid #ccc',
+        borderRadius: '5px'
+      }}
+    />
 
-    </div>
+    <a href="https://staging.ironxchange.com/s">
+      <button style={{
+        padding: '15px 25px',
+        background: '#F98512',
+        border: 'none',
+        fontWeight: '900',
+        cursor: 'pointer'
+      }}>
+        SEARCH
+      </button>
+    </a>
+
+  </div>
+</section>    </div>
   );
 }
