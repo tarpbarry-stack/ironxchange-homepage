@@ -247,10 +247,10 @@ export default function Home() {
 
   <div>
     <h4>LEGAL</h4>
-<a href="https://www.sharetribe.com/privacy-policy/" target="_blank" rel="noopener noreferrer">
+<a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
   Privacy
 </a>
-<a href="https://www.sharetribe.com/terms-of-service/" target="_blank" rel="noopener noreferrer">
+<a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
   Terms
 </a>
   </div>
