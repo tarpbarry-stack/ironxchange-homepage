@@ -247,7 +247,12 @@ export default function Home() {
 
   <div>
     <h4>LEGAL</h4>
-    <a href={`${STAGING}/terms-of-service`}>Terms</a>
+<a href="https://www.sharetribe.com/privacy-policy/" target="_blank" rel="noopener noreferrer">
+  Privacy
+</a>
+<a href="https://www.sharetribe.com/terms-of-service/" target="_blank" rel="noopener noreferrer">
+  Terms
+</a>
   </div>
 </div>
       </footer>
