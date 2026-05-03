@@ -60,7 +60,11 @@ export default function Home() {
       <Head>
         <title>IronXchange - Free Heavy Equipment Marketplace</title>
         <meta name="description" content="Free Heavy Equipment Marketplace. List and browse machinery with no fees." />
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet"
+    <link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  rel="stylesheet"
+/>>
       </Head>
 
       <nav className="nav">
@@ -82,20 +86,22 @@ export default function Home() {
         <div className="hero-content">
           <h1>FREE HEAVY<br />EQUIPMENT MARKETPLACE</h1>
 
-          <div className="hero-icons">
-            <div>
-              <span>$</span>
-              <strong>NO FEES</strong>
-            </div>
-            <div>
-              <span>▱</span>
-              <strong>NO CREDIT CARDS</strong>
-            </div>
-            <div>
-              <span>◷</span>
-              <strong>LISTINGS LIVE<br />IN MINUTES</strong>
-            </div>
-          </div>
+         <div className="hero-icons">
+  <div>
+    <span className="slash-icon"><i className="fa-solid fa-dollar-sign"></i></span>
+    <strong>NO FEES</strong>
+  </div>
+
+  <div>
+    <span><i className="fa-regular fa-credit-card"></i></span>
+    <strong>NO CREDIT CARDS</strong>
+  </div>
+
+  <div>
+    <span><i className="fa-regular fa-clock"></i></span>
+    <strong>LISTINGS LIVE<br />IN MINUTES</strong>
+  </div>
+</div>
 
           <div className="cta-buttons">
             <a href={`${STAGING}/l/new`} className="btn-primary">POST EQUIPMENT FREE →</a>
@@ -168,30 +174,30 @@ export default function Home() {
         <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
 
         <div className="benefits">
-          <div>
-            <span>◇</span>
-            <h3>NO CONTRACTS</h3>
-            <p>List as long as you need.</p>
-          </div>
+  <div>
+    <span><i className="fa-regular fa-file-lines"></i></span>
+    <h3>NO CONTRACTS</h3>
+    <p>List as long as you need.</p>
+  </div>
 
-          <div>
-            <span>♚</span>
-            <h3>NO REPS</h3>
-            <p>You deal direct with buyers.</p>
-          </div>
+  <div>
+    <span><i className="fa-solid fa-users"></i></span>
+    <h3>NO REPS</h3>
+    <p>You deal direct with buyers.</p>
+  </div>
 
-          <div>
-            <span>$</span>
-            <h3>NO FEES</h3>
-            <p>100% free. Always.</p>
-          </div>
+  <div>
+    <span className="slash-icon"><i className="fa-solid fa-dollar-sign"></i></span>
+    <h3>NO FEES</h3>
+    <p>100% free. Always.</p>
+  </div>
 
-          <div>
-            <span>ϟ</span>
-            <h3>GO LIVE INSTANTLY</h3>
-            <p>Listings live in minutes.</p>
-          </div>
-        </div>
+  <div>
+    <span><i className="fa-solid fa-upload"></i></span>
+    <h3>GO LIVE INSTANTLY</h3>
+    <p>Listings live in minutes.</p>
+  </div>
+</div>
       </section>
 
       <section className="ready">
@@ -284,7 +290,8 @@ export default function Home() {
         }
 
         .hero {
-          height: 85vh;
+        box-shadow: inset 0 -120px 200px rgba(0,0,0,0.9);          
+        height: 85vh;
           min-height: 680px;
           background:
             linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
@@ -323,17 +330,33 @@ export default function Home() {
           line-height: 1.25;
         }
 
-        .hero-icons span {
-          width: 58px;
-          height: 58px;
-          border: 3px solid ${BRAND_YELLOW};
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          color: ${BRAND_YELLOW};
-          font-size: 30px;
-          margin: 0 auto 9px;
-        }
+       .hero-icons span,
+.benefits span {
+  width: 62px;
+  height: 62px;
+  border: 3px solid #FFC400;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #FFC400;
+  font-size: 28px;
+  margin: 0 auto 10px;
+  position: relative;
+}
+
+.hero-icons span i,
+.benefits span i {
+  line-height: 1;
+}
+
+.slash-icon::after {
+  content: "";
+  position: absolute;
+  width: 78px;
+  height: 4px;
+  background: #FFC400;
+  transform: rotate(-38deg);
+}
 
         .btn-primary,
         .ready a {
