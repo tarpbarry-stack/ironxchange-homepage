@@ -47,7 +47,7 @@ const listings = [
     type: "Dozer",
     hours: "4,017 Hrs",
     location: "Wilson, OK",
-    price: "129,000.00",
+    price: "$129,000",
     image: "/images/2021-deere-750l.jpg"
   },
   {
@@ -55,7 +55,7 @@ const listings = [
     type: "Wheel Loader",
     hours: "5,790 Hrs",
     location: "Post, TX",
-    price: "175,500.00",
+    price: "$175,500",
     image: "/images/2023-komatsu-wa475-10.jpg"
   },
   {
@@ -63,7 +63,7 @@ const listings = [
     type: "Motor Grader",
     hours: "3,907 Hrs",
     location: "Lamesa, TX",
-    price: "184,000.00",
+    price: "$184,000",
     image: "/images/2020-deere-872gp.jpg"
   },
   {
@@ -71,7 +71,7 @@ const listings = [
     type: "Compact Tractor",
     hours: "861 Hrs",
     location: "Ringling, OK",
-    price: "13,200.00",
+    price: "$13,200",
     image: "/images/2023-deere-1025r.jpg"
   },
   {
