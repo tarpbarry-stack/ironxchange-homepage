@@ -34,10 +34,46 @@ const categories = [
 ];
 
 const listings = [
-  ["2019 CAT 336FL", "Excavator • Hydraulic", "5,317 Hrs", "Odessa, TX", "$182,500"],
-  ["2016 KOMATSU D61PX-24", "Dozer", "4,650 Hrs", "Fort Worth, TX", "$124,900"],
-  ["2020 VOLVO L120H", "Wheel Loader", "2,950 Hrs", "Amarillo, TX", "$169,900"],
-  ["2018 BELL B30E", "Articulated Truck", "6,807 Hrs", "Waco, TX", "$98,900"]
+  {
+    title: "2018 BELL B30E",
+    type: "Articulated Truck",
+    hours: "6,800 Hrs",
+    location: "Waco, TX",
+    price: "89,500.00",
+    image: "/images/2018-bell-b30e.jpg"
+  },
+  {
+    title: "2021 DEERE 750L",
+    type: "Dozer",
+    hours: "4,017 Hrs",
+    location: "Wilson, OK",
+    price: "129,000.00",
+    image: "/images/2021-deere-750l.jpg"
+  },
+  {
+    title: "2023 KOMATSU WA475-10",
+    type: "Wheel Loader",
+    hours: "5,790 Hrs",
+    location: "Post, TX",
+    price: "175,700.00",
+    image: "/images/2023-komatsu-wa475-10.jpg"
+  },
+  {
+    title: "2020 DEERE 872GP",
+    type: "Motor Grader",
+    hours: "3,907 Hrs",
+    location: "Lamesa, TX",
+    price: "184,000.00",
+    image: "/images/2020-deere-872gp.jpg"
+  },
+  {
+    title: "2023 DEERE 1025R",
+    type: "Compact Tractor",
+    hours: "861 Hrs",
+    location: "Ringling, OK",
+    price: "13,200.00",
+    image: "/images/2023-deere-1025r.jpg"
+  }
 ];
 
 export default function Home() {
