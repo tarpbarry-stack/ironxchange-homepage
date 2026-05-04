@@ -40,7 +40,8 @@ const listings = [
     hours: "6,800 Hrs",
     location: "Waco, TX",
     price: "$98,900",
-    image: "/images/2018-bell-b30e.jpg"
+    image: "/images/2018-bell-b30e.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2018 BELL B30E")}`
   },
   {
     title: "2021 DEERE 750L",
@@ -48,7 +49,8 @@ const listings = [
     hours: "4,017 Hrs",
     location: "Wilson, OK",
     price: "$129,000",
-    image: "/images/2021-deere-750l.jpg"
+    image: "/images/2021-deere-750l.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2021 DEERE 750L")}`
   },
   {
     title: "2023 KOMATSU WA475-10",
@@ -56,7 +58,8 @@ const listings = [
     hours: "5,790 Hrs",
     location: "Post, TX",
     price: "$175,500",
-    image: "/images/2023-komatsu-wa475-10.jpg"
+    image: "/images/2023-komatsu-wa475-10.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2023 KOMATSU WA475-10")}`
   },
   {
     title: "2020 DEERE 872GP",
@@ -64,7 +67,8 @@ const listings = [
     hours: "3,907 Hrs",
     location: "Lamesa, TX",
     price: "$184,000",
-    image: "/images/2020-deere-872gp.jpg"
+    image: "/images/2020-deere-872gp.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2020 DEERE 872GP")}`
   },
   {
     title: "2023 DEERE 1025R",
@@ -72,7 +76,8 @@ const listings = [
     hours: "861 Hrs",
     location: "Ringling, OK",
     price: "$13,200",
-    image: "/images/2023-deere-1025r.jpg"
+    image: "/images/2023-deere-1025r.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2023 DEERE 1025R")}`
   },
   {
     title: "2017 DEERE 85G",
@@ -80,7 +85,8 @@ const listings = [
     hours: "3,105 Hrs",
     location: "Many, LA",
     price: "$52,500",
-    image: "/images/2017-deere-85g.jpg"
+    image: "/images/2017-deere-85g.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2017 DEERE 85G")}`
   },
   {
     title: "2007 PETERBILT 389",
@@ -88,7 +94,8 @@ const listings = [
     hours: "298,000 Miles",
     location: "Hobbs, NM",
     price: "$44,900",
-    image: "/images/2007-peterbilt-389.jpg"
+    image: "/images/2007-peterbilt-389.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2007 PETERBILT 389")}`
   },
   {
     title: "2019 MCCLOSKEY I54",
@@ -96,7 +103,8 @@ const listings = [
     hours: "4,016 Hrs",
     location: "Jal, NM",
     price: "$315,000",
-    image: "/images/2019-mccloskey-i54.jpg"
+    image: "/images/2019-mccloskey-i54.jpg",
+    link: `${STAGING}/s?keywords=${encodeURIComponent("2019 MCCLOSKEY I54")}`
   }
 ];
 export default function Home() {
@@ -222,11 +230,13 @@ export default function Home() {
         {listings.map((item) => (
   <div className="card" key={item.title}>
     <div
-      className="card-photo"
-      style={{ backgroundImage: `url(${item.image})` }}
-    >
-      <span>♡</span>
-    </div>
+      <a
+  href={item.link}
+  className="card-photo"
+  style={{ backgroundImage: `url(${item.image})` }}
+>
+  <span>♡</span>
+</a>
 
     <div className="card-body">
       <h3>{item.title}</h3>
@@ -239,7 +249,7 @@ export default function Home() {
 
       <div className="price-row">
         <strong>{item.price}</strong>
-        <a href={`${STAGING}/s`}>VIEW DETAILS</a>
+      <a href={item.link}>VIEW DETAILS</a>
       </div>
     </div>
   </div>
@@ -643,13 +653,13 @@ export default function Home() {
   box-shadow: 0 18px 38px rgba(0,0,0,.16);
 }
 
-        .card-photo {
-          height: 185px;
-          background: url('/images/hero-equipment-yard.jpg');
-          background-size: cover;
-          background-position: center;
-          position: relative;
-        }
+       .card-photo {
+  height: 185px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: block;
+}
 
         .card-photo span {
           position: absolute;
