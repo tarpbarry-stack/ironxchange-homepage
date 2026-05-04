@@ -67,7 +67,7 @@ const listings = [
     hours: "3,907 Hrs",
     location: "Colorado City, TX",
     price: "$179,000",
-    image: "/images/2020-deere-872gp.jpg",
+    image: "/images/2020-Deere-772GP.jpg",
     link: "https://staging.ironxchange.com/l/2020-deere-772gp-4-790-hrs/69f7ffd8-f07e-4587-a4dd-4a1fa7626d91"
   },
   {
