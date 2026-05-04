@@ -229,8 +229,7 @@ export default function Home() {
         <div className="cards">
         {listings.map((item) => (
   <div className="card" key={item.title}>
-    <div
-      <a
+   <a
   href={item.link}
   className="card-photo"
   style={{ backgroundImage: `url(${item.image})` }}
