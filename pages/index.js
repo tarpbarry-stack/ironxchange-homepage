@@ -47,7 +47,7 @@ const listings = [
     type: "Dozer",
     hours: "4,017 Hrs",
     location: "Wilson, OK",
-    price: "Call for Price",
+    price: "129,000.00",
     image: "/images/2021-deere-750l.jpg"
   },
   {
@@ -55,7 +55,7 @@ const listings = [
     type: "Wheel Loader",
     hours: "5,790 Hrs",
     location: "Post, TX",
-    price: "Call for Price",
+    price: "175,500.00",
     image: "/images/2023-komatsu-wa475-10.jpg"
   },
   {
@@ -63,7 +63,7 @@ const listings = [
     type: "Motor Grader",
     hours: "3,907 Hrs",
     location: "Lamesa, TX",
-    price: "Call for Price",
+    price: "184,000.00",
     image: "/images/2020-deere-872gp.jpg"
   },
   {
@@ -71,14 +71,14 @@ const listings = [
     type: "Compact Tractor",
     hours: "861 Hrs",
     location: "Ringling, OK",
-    price: "Call for Price",
+    price: "13,200.00",
     image: "/images/2023-deere-1025r.jpg"
   },
   {
     title: "2017 DEERE 85G",
     type: "Mini Excavator",
     hours: "3,105 Hrs",
-    location: "Texas",
+    location: "Many, LA",
     price: "$52,500",
     image: "/images/2017-deere-85g.jpg"
   },
@@ -86,7 +86,7 @@ const listings = [
     title: "2007 PETERBILT 389",
     type: "Water Truck",
     hours: "298,000 Miles",
-    location: "Texas",
+    location: "Hobbs, NM",
     price: "$44,900",
     image: "/images/2007-peterbilt-389.jpg"
   },
@@ -94,7 +94,7 @@ const listings = [
     title: "2019 MCCLOSKEY I54",
     type: "Crusher",
     hours: "4,016 Hrs",
-    location: "Texas",
+    location: "Jal, NM",
     price: "$315,000",
     image: "/images/2019-mccloskey-i54.jpg"
   }
