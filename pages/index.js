@@ -52,23 +52,23 @@ const listings = [
     image: "/images/2021-deere-750l.jpg",
     link: `${STAGING}/s?keywords=${encodeURIComponent("2021 DEERE 750L")}`
   },
+ {
+  title: "2023 KOMATSU WA475-10",
+  type: "Wheel Loader",
+  hours: "5,790 Hrs",
+  location: "Post, TX",
+  price: "$175,500",
+  image: "/images/2023-komatsu-wa475-10.jpg",
+  link: "https://staging.ironxchange.com/l/2023-komatsu-wa475-4-989-hrs/69f80a91-ef02-446d-bfa8-61f00353e32e"
+},
   {
-    title: "2023 KOMATSU WA475-10",
-    type: "Wheel Loader",
-    hours: "5,790 Hrs",
-    location: "Post, TX",
-    price: "$175,500",
-    image: "/images/2023-komatsu-wa475-10.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2023 KOMATSU WA475-10")}`
-  },
-  {
-    title: "2020 DEERE 872GP",
+    title: "2020 DEERE 772GP",
     type: "Motor Grader",
     hours: "3,907 Hrs",
-    location: "Lamesa, TX",
-    price: "$184,000",
+    location: "Colorado City, TX",
+    price: "$179,000",
     image: "/images/2020-deere-872gp.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2020 DEERE 872GP")}`
+    link: "https://staging.ironxchange.com/l/2020-deere-772gp-4-790-hrs/69f7ffd8-f07e-4587-a4dd-4a1fa7626d91"
   },
   {
     title: "2023 DEERE 1025R",
@@ -77,7 +77,7 @@ const listings = [
     location: "Ringling, OK",
     price: "$13,200",
     image: "/images/2023-deere-1025r.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2023 DEERE 1025R")}`
+    link: "https://staging.ironxchange.com/l/2022-john-deere-897-hrs/69f82823-cad7-4b70-acc5-f51d70abed41"
   },
   {
     title: "2017 DEERE 85G",
@@ -86,7 +86,7 @@ const listings = [
     location: "Many, LA",
     price: "$52,500",
     image: "/images/2017-deere-85g.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2017 DEERE 85G")}`
+    link: "https://staging.ironxchange.com/l/2017-deere-85g-3-273-hrs/69f7fcbe-1276-446c-87ab-ca2e6e59b422"
   },
   {
     title: "2007 PETERBILT 389",
@@ -95,17 +95,17 @@ const listings = [
     location: "Hobbs, NM",
     price: "$44,900",
     image: "/images/2007-peterbilt-389.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2007 PETERBILT 389")}`
+    link: "https://staging.ironxchange.com/l/2007-water-298-900-hrs/69f80726-578b-40b3-8b46-88f9e633f379"
   },
-  {
-    title: "2019 MCCLOSKEY I54",
-    type: "Crusher",
-    hours: "4,016 Hrs",
-    location: "Jal, NM",
-    price: "$315,000",
-    image: "/images/2019-mccloskey-i54.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2019 MCCLOSKEY I54")}`
-  }
+ {
+  title: "2019 MCCLOSKEY I54",
+  type: "Crusher",
+  hours: "4,016 Hrs",
+  location: "Jal, NM",
+  price: "$315,000",
+  image: "/images/2019-mccloskey-i54.jpg",
+  link: "https://staging.ironxchange.com/l/2019-mccloskey-i54-4-118-hrs/69f8117f-38b5-4218-893f-bbdab94b929d"
+}
 ];
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
