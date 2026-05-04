@@ -145,7 +145,7 @@ export default function Home() {
         </a>
 
         <div className="nav-links">
-  <a href={`${STAGING}/s`}>Browse Equipment</a>
+  <a href="/browse">Browse Equipment</a>
   <a href={`${STAGING}/l/new`} className="yellow-link">Post Equipment Free</a>
   <a href={`${STAGING}/login`} className="login-icon">
     <i className="fa-regular fa-user"></i>
