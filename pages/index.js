@@ -196,23 +196,31 @@ export default function Home() {
         </div>
 
         <div className="cards">
-          {listings.map((item) => (
-            <div className="card" key={item[0]}>
-              <div className="card-photo"><span>♡</span></div>
-              <div className="card-body">
-                <h3>{item[0]}</h3>
-                <p>{item[1]}</p>
-                <div className="meta">
-                  <span>◷ {item[2]}</span>
-                  <span>⌖ {item[3]}</span>
-                </div>
-                <div className="price-row">
-                  <strong>{item[4]}</strong>
-                  <a href={`${STAGING}/s`}>VIEW DETAILS</a>
-                </div>
-              </div>
-            </div>
-          ))}
+        {listings.map((item) => (
+  <div className="card" key={item.title}>
+    <div
+      className="card-photo"
+      style={{ backgroundImage: `url(${item.image})` }}
+    >
+      <span>♡</span>
+    </div>
+
+    <div className="card-body">
+      <h3>{item.title}</h3>
+      <p>{item.type}</p>
+
+      <div className="meta">
+        <span>◷ {item.hours}</span>
+        <span>⌖ {item.location}</span>
+      </div>
+
+      <div className="price-row">
+        <strong>{item.price}</strong>
+        <a href={`${STAGING}/s`}>VIEW DETAILS</a>
+      </div>
+    </div>
+  </div>
+))}
         </div>
       </section>
 
