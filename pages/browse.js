@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -47,6 +47,16 @@ const listings = [
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
+  const [liveListings, setLiveListings] = useState([]);
+
+  useEffect(() => {
+    fetch(`${STAGING}/api/listings`)
+      .then(res => res.json())
+      .then(data => setLiveListings(data))
+      .catch(() => {});
+  }, []);
+
+  const displayListings = liveListings.length ? liveListings : listings;
 
   const handleSearch = () => {
     const terms = [
@@ -65,7 +75,6 @@ export default function Browse() {
         <title>Browse Equipment | IronXchange</title>
       </Head>
 
-      {/* NAV */}
       <nav className="nav">
         <a href="/">
           <img src="/images/ironxchange-logo.png" className="logo-img" />
@@ -79,7 +88,6 @@ export default function Browse() {
         </div>
       </nav>
 
-      {/* SEARCH */}
       <section className="search-section">
         <h2>Browse Equipment</h2>
 
@@ -101,10 +109,9 @@ export default function Browse() {
         </div>
       </section>
 
-      {/* LISTINGS */}
       <section className="featured">
         <div className="cards">
-          {listings.map((item) => (
+          {displayListings.map((item) => (
             <div className="card" key={item.title}>
               <a
                 href={item.link}
@@ -131,17 +138,8 @@ export default function Browse() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer>
-        <p>© 2026 IronXchange</p>
-      </footer>
-
-      {/* CSS */}
       <style jsx>{`
-        body {
-          margin: 0;
-          font-family: Inter;
-        }
+        body { margin: 0; font-family: Inter; }
 
         .nav {
           background: #050505;
@@ -151,9 +149,7 @@ export default function Browse() {
           justify-content: space-between;
         }
 
-        .logo-img {
-          height: 60px;
-        }
+        .logo-img { height: 60px; }
 
         .nav-links a {
           margin-left: 20px;
@@ -161,9 +157,7 @@ export default function Browse() {
           text-decoration: none;
         }
 
-        .yellow-link {
-          color: ${BRAND_YELLOW};
-        }
+        .yellow-link { color: ${BRAND_YELLOW}; }
 
         .search-section {
           padding: 40px;
@@ -178,10 +172,7 @@ export default function Browse() {
           margin: auto;
         }
 
-        input,
-        select {
-          padding: 12px;
-        }
+        input, select { padding: 12px; }
 
         button {
           background: ${BRAND_YELLOW};
@@ -208,9 +199,7 @@ export default function Browse() {
           display: block;
         }
 
-        .card-body {
-          padding: 15px;
-        }
+        .card-body { padding: 15px; }
 
         .price-row {
           display: flex;
