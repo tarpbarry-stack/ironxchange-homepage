@@ -141,13 +141,7 @@ export default function Browse() {
             ))}
           </select>
 
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-  {categories.map((c) => (
-    <option key={c}>{c}</option>
-  ))}
-</select>
 
-<button type="button">SEARCH</button>
         </div>
 
         <div className="popular">
@@ -505,16 +499,16 @@ export default function Browse() {
           font-weight: 900;
         }
 
-        .price-row a {
-          border: 1px solid #ccc;
-          padding: 9px 12px;
-          border-radius: 6px;
-          color: #111;
-          text-decoration: none;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 11px;
-          font-weight: 900;
-        }
+       .price-row span {
+  border: 1px solid #ccc;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: #111;
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+}
 
         .empty {
           margin: 38px auto 0;
