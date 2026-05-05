@@ -111,7 +111,7 @@ const filteredListings = useMemo(() => {
     return matchesCategory && matchesMake && matchesModel && matchesSearch;
   });
 }, [searchQuery, category, make, model, liveListings]);
-  }, [searchQuery, category, make, model, liveListings]);
+
 
   return (
     <>
