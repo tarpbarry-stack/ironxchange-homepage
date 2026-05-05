@@ -38,6 +38,16 @@ function getId(value) {
   return value?.uuid || value;
 }
 
+function cleanLabel(value) {
+  if (!value) return "";
+
+  return String(value)
+    .replace(/-/g, " ")
+    .replace(/_/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
 function getBestImageUrl(imageAsset) {
   const variants = imageAsset?.attributes?.variants || {};
 
@@ -57,20 +67,7 @@ function getBestImageUrl(imageAsset) {
 }
 
 function formatCategory(value) {
-  if (!value) return "Equipment";
-
-  if (typeof value === "string") {
-    return value
-      .replace(/-/g, " ")
-      .replace(/_/g, " ")
-      .trim()
-      .toUpperCase();
-  }
-
-  if (value.label) return String(value.label).toUpperCase();
-  if (value.key) return String(value.key).replace(/-/g, " ").toUpperCase();
-
-  return "Equipment";
+  return cleanLabel(value) || "Equipment";
 }
 
 function getCategory(publicData) {
@@ -80,6 +77,20 @@ function getCategory(publicData) {
       publicData.type ||
       "Equipment"
   );
+}
+
+function getMake(publicData) {
+  const makeRaw = publicData.categoryLevel2 || "";
+  const categoryRaw = publicData.categoryLevel1 || "";
+
+  return cleanLabel(String(makeRaw).replace(`${categoryRaw}-`, ""));
+}
+
+function getModel(publicData) {
+  const modelRaw = publicData.categoryLevel3 || "";
+  const makeRaw = publicData.categoryLevel2 || "";
+
+  return cleanLabel(String(modelRaw).replace(`${makeRaw}-`, ""));
 }
 
 function formatHours(value) {
@@ -162,6 +173,8 @@ export default async function handler(req, res) {
           id,
           title: attrs.title || "Equipment",
           type: getCategory(publicData),
+          make: getMake(publicData),
+          model: getModel(publicData),
           hours: formatHours(publicData.hours),
           location: getLocation(publicData),
           price: getPrice(attrs.price?.amount),
