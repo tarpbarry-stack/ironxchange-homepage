@@ -34,16 +34,45 @@ async function getAccessToken() {
   return data.access_token;
 }
 
+function getId(value) {
+  return value?.uuid || value;
+}
+
+function getBestImageUrl(imageAsset) {
+  const variants = imageAsset?.attributes?.variants || {};
+
+  return (
+    variants["landscape-crop2x"]?.url ||
+    variants["landscape-crop"]?.url ||
+    variants["default"]?.url ||
+    variants["scaled-large"]?.url ||
+    variants["scaled-medium"]?.url ||
+    variants["scaled-small"]?.url ||
+    variants["square-small"]?.url ||
+    Object.values(variants).find((variant) => variant?.url)?.url ||
+    imageAsset?.attributes?.url ||
+    ""
+  );
+}
+
+function formatCategory(category) {
+  if (!category) return "Equipment";
+  if (typeof category === "string") return category;
+  if (category.label) return category.label;
+  if (category.key) return category.key;
+  return "Equipment";
+}
+
 export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
 
     const response = await fetch(
-      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=20&include=images",
+      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images",
       {
         method: "GET",
         headers: {
-          Authorization: `bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           Accept: "application/json"
         }
       }
@@ -58,18 +87,15 @@ export default async function handler(req, res) {
     const included = data.included || [];
 
     const imageById = {};
-    included.forEach((asset) => {
-      if (asset.type === "image") {
-        const id = asset.id?.uuid || asset.id;
-        const variants = asset.attributes?.variants || {};
 
-        imageById[id] =
-          variants["landscape-crop"]?.url ||
-          variants["landscape-crop2x"]?.url ||
-          variants["scaled-small"]?.url ||
-          variants["scaled-medium"]?.url ||
-          variants["scaled-large"]?.url ||
-          asset.attributes?.url;
+    included.forEach((asset) => {
+      if (asset.type !== "image") return;
+
+      const id = getId(asset.id);
+      const url = getBestImageUrl(asset);
+
+      if (id && url) {
+        imageById[id] = url;
       }
     });
 
@@ -80,20 +106,23 @@ export default async function handler(req, res) {
         const publicData = attrs.publicData || {};
         const priceAmount = attrs.price?.amount;
 
-        const id = item.id?.uuid || item.id;
+        const id = getId(item.id);
 
         const slug = (attrs.slug || attrs.title || "equipment")
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "");
 
-        const firstImageId =
-          item.relationships?.images?.data?.[0]?.id?.uuid ||
-          item.relationships?.images?.data?.[0]?.id;
+        const firstImageId = getId(
+          item.relationships?.images?.data?.[0]?.id
+        );
+
+        const imageUrl =
+          imageById[firstImageId] || "/images/hero-equipment-yard.jpg";
 
         return {
           title: attrs.title || "Equipment",
-          type: publicData.category || publicData.type || "Equipment",
+          type: formatCategory(publicData.category || publicData.type),
           hours: publicData.hours
             ? `${Number(publicData.hours).toLocaleString()} Hrs`
             : "",
@@ -105,7 +134,8 @@ export default async function handler(req, res) {
           price: priceAmount
             ? `$${Math.round(priceAmount / 100).toLocaleString()}`
             : "Call",
-          image: imageById[firstImageId] || "/images/hero-equipment-yard.jpg",
+          image: imageUrl,
+          imageUrl,
           link: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
