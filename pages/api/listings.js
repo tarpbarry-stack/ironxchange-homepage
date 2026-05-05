@@ -119,18 +119,29 @@ export default async function handler(req, res) {
 
         const imageUrl =
           imageById[firstImageId] || "/images/hero-equipment-yard.jpg";
-
+console.log("PUBLIC DATA FOR LISTING:", attrs.title, publicData);
         return {
           title: attrs.title || "Equipment",
-          type: formatCategory(publicData.category || publicData.type),
-          hours: publicData.hours
-            ? `${Number(publicData.hours).toLocaleString()} Hrs`
-            : "",
-          location:
-            publicData.location ||
-            publicData.cityState ||
-            publicData.state ||
-            "",
+         type:
+  formatCategory(
+    publicData.equipmentType ||
+    publicData.category ||
+    publicData.machineCategory ||
+    publicData.type
+  ),
+
+hours:
+  publicData.hours
+    ? `${Number(String(publicData.hours).replace(/,/g, "")).toLocaleString()} Hrs`
+    : "",
+
+location:
+  publicData.location ||
+  publicData.cityState ||
+  publicData.city ||
+  publicData.marketLocation ||
+  publicData.state ||
+  "Location available on request",
           price: priceAmount
             ? `$${Math.round(priceAmount / 100).toLocaleString()}`
             : "Call",
