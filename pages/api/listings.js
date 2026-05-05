@@ -55,29 +55,37 @@ export default async function handler(req, res) {
       throw new Error(`Listings failed: ${JSON.stringify(data)}`);
     }
 
-    const listings = (data.data || [])
-      .filter((item) => item.attributes?.state === "published")
-      .map((item) => {
-        const attrs = item.attributes || {};
-        const publicData = attrs.publicData || {};
-        const priceAmount = attrs.price?.amount;
+   const listings = (data.data || [])
+  .filter((item) => item.attributes?.state === "published")
+  .map((item) => {
+    const attrs = item.attributes || {};
+    const publicData = attrs.publicData || {};
+    const priceAmount = attrs.price?.amount;
 
-        return {
-          title: attrs.title || "Equipment",
-          type: publicData.category || publicData.type || "Equipment",
-          hours: publicData.hours ? `${publicData.hours} Hrs` : "",
-          location:
-            publicData.location ||
-            publicData.cityState ||
-            publicData.state ||
-            "",
-          price: priceAmount
-            ? `$${Math.round(priceAmount / 100).toLocaleString()}`
-            : "Call",
-          image: "/images/hero-equipment-yard.jpg",
-          link: `https://staging.ironxchange.com/l/${attrs.slug || item.id.uuid}/${item.id.uuid}`
-        };
-      });
+    const id = item.id?.uuid || item.id;
+    const slug = (attrs.slug || attrs.title || "equipment")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    return {
+      title: attrs.title || "Equipment",
+      type: publicData.category || publicData.type || "Equipment",
+      hours: publicData.hours
+        ? `${Number(publicData.hours).toLocaleString()} Hrs`
+        : "",
+      location:
+        publicData.location ||
+        publicData.cityState ||
+        publicData.state ||
+        "",
+      price: priceAmount
+        ? `$${Math.round(priceAmount / 100).toLocaleString()}`
+        : "Call",
+      image: "/images/hero-equipment-yard.jpg",
+      link: `https://staging.ironxchange.com/l/${slug}/${id}`
+    };
+  });
 
     res.status(200).json(listings);
   } catch (err) {
