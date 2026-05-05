@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
-import motorGradersTaxonomy from "../data/taxonomy-motor-graders.json";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -45,22 +44,20 @@ export default function Browse() {
     fetch("/api/listings")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setLiveListings(data);
+        if (Array.isArray(data)) {
+          setLiveListings(data);
+        }
       })
       .catch(() => {});
   }, []);
 
   const availableMakes = useMemo(() => {
-    if (category === "MOTOR GRADERS") {
-      const makes = motorGradersTaxonomy
-        .map((item) => item.make)
-        .filter(Boolean);
-
-      return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
-    }
-
     const makes = liveListings
-      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
+      .filter(
+        (item) =>
+          category === "ALL CATEGORIES" ||
+          String(item.type || "").toUpperCase() === category
+      )
       .map((item) => item.make)
       .filter(Boolean);
 
@@ -68,18 +65,16 @@ export default function Browse() {
   }, [liveListings, category]);
 
   const availableModels = useMemo(() => {
-    if (category === "MOTOR GRADERS" && make !== "ALL MAKES") {
-      const models = motorGradersTaxonomy
-        .filter((item) => item.make === make)
-        .map((item) => item.model)
-        .filter(Boolean);
-
-      return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
-    }
-
     const models = liveListings
-      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
-      .filter((item) => make === "ALL MAKES" || item.make === make)
+      .filter(
+        (item) =>
+          category === "ALL CATEGORIES" ||
+          String(item.type || "").toUpperCase() === category
+      )
+      .filter(
+        (item) =>
+          make === "ALL MAKES" || item.make === make
+      )
       .map((item) => item.model)
       .filter(Boolean);
 
@@ -94,8 +89,13 @@ export default function Browse() {
         category === "ALL CATEGORIES" ||
         String(item.type || "").toUpperCase() === category;
 
-      const matchesMake = make === "ALL MAKES" || item.make === make;
-      const matchesModel = model === "ALL MODELS" || item.model === model;
+      const matchesMake =
+        make === "ALL MAKES" ||
+        item.make === make;
+
+      const matchesModel =
+        model === "ALL MODELS" ||
+        item.model === model;
 
       const matchesSearch =
         !q ||
@@ -107,7 +107,12 @@ export default function Browse() {
         (item.hours || "").toLowerCase().includes(q) ||
         (item.price || "").toLowerCase().includes(q);
 
-      return matchesCategory && matchesMake && matchesModel && matchesSearch;
+      return (
+        matchesCategory &&
+        matchesMake &&
+        matchesModel &&
+        matchesSearch
+      );
     });
   }, [searchQuery, category, make, model, liveListings]);
 
@@ -115,20 +120,35 @@ export default function Browse() {
     <>
       <Head>
         <title>Browse Equipment | IronXchange</title>
-        <meta name="description" content="Browse heavy equipment for sale on IronXchange." />
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+        <meta
+          name="description"
+          content="Browse heavy equipment for sale on IronXchange."
+        />
       </Head>
 
       <nav className="nav">
         <a href="/" className="logo-wrap">
-          <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
+          <img
+            src="/images/ironxchange-logo.png"
+            className="logo-img"
+            alt="IronXchange"
+          />
         </a>
 
         <div className="nav-links">
           <a href="/browse">Browse Equipment</a>
-          <a href={`${STAGING}/l/new`} className="yellow-link">Post Equipment Free</a>
-          <a href={`${STAGING}/login`} className="login-icon">
+
+          <a
+            href={`${STAGING}/l/new`}
+            className="yellow-link"
+          >
+            Post Equipment Free
+          </a>
+
+          <a
+            href={`${STAGING}/login`}
+            className="login-icon"
+          >
             <i className="fa-regular fa-user"></i>
           </a>
         </div>
@@ -136,7 +156,11 @@ export default function Browse() {
 
       <section className="search-section">
         <h1>Browse Equipment</h1>
-        <p>Search heavy equipment for sale from owners, dealers, and fleet operators.</p>
+
+        <p>
+          Search heavy equipment for sale from owners,
+          dealers, and fleet operators.
+        </p>
 
         <div className="search-container">
           <input
@@ -171,13 +195,19 @@ export default function Browse() {
             ))}
           </select>
 
-          <select value={model} onChange={(e) => setModel(e.target.value)}>
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          >
             {availableModels.map((m) => (
               <option key={m}>{m}</option>
             ))}
           </select>
 
-          <button type="button" className="search-btn">
+          <button
+            type="button"
+            className="search-btn"
+          >
             SEARCH
           </button>
         </div>
@@ -186,30 +216,38 @@ export default function Browse() {
       <section className="featured">
         <div className="section-head">
           <h2>AVAILABLE EQUIPMENT</h2>
-          <span>{filteredListings.length} LISTINGS</span>
+
+          <span>
+            {filteredListings.length} LISTINGS
+          </span>
         </div>
 
         <div className="cards">
           {filteredListings.map((item) => (
-            <a href={item.link} className="card" key={item.id || item.link || item.title}>
+            <a
+              href={item.link}
+              className="card"
+              key={item.id || item.link || item.title}
+            >
               <div
                 className="card-photo"
                 style={{
                   backgroundImage: `url(${
                     item.imageUrl ||
                     item.image ||
-                    item.photo ||
-                    item.thumbnail ||
                     "/images/hero-equipment-yard.jpg"
                   })`
                 }}
-              >
-                <span>♡</span>
-              </div>
+              />
 
               <div className="card-body">
                 <h3>{item.title}</h3>
-                <p>{item.type}</p>
+
+                <p>
+                  {item.type}
+                  {item.make ? ` • ${item.make}` : ""}
+                  {item.model ? ` • ${item.model}` : ""}
+                </p>
 
                 <div className="meta">
                   <span>◷ {item.hours}</span>
@@ -218,6 +256,7 @@ export default function Browse() {
 
                 <div className="price-row">
                   <strong>{item.price}</strong>
+
                   <span>VIEW DETAILS</span>
                 </div>
               </div>
@@ -227,53 +266,20 @@ export default function Browse() {
 
         {filteredListings.length === 0 && (
           <div className="empty">
-            <h3>No live listings loaded.</h3>
-            <p>Check /api/listings or refresh the page.</p>
+            <h3>No listings found.</h3>
+            <p>Try another category or search term.</p>
           </div>
         )}
       </section>
 
-      <section className="ready">
-        <div className="ready-icon">✎</div>
-        <div>
-          <h2>READY TO SELL?</h2>
-          <p>Post your machine free and deal direct with buyers.</p>
-        </div>
-        <a href={`${STAGING}/l/new`}>POST EQUIPMENT FREE →</a>
-      </section>
-
-      <footer>
-        <div>
-          <img src="/images/ironxchange-logo.png" alt="IronXchange" />
-          <p>© 2026 IronXchange. All rights reserved.</p>
-        </div>
-
-        <div className="foot-cols">
-          <div>
-            <h4>MARKETPLACE</h4>
-            <a href="/browse">Browse Equipment</a>
-            <a href={`${STAGING}/l/new`}>Post Equipment</a>
-          </div>
-
-          <div>
-            <h4>COMPANY</h4>
-            <a href="/contact">Contact</a>
-          </div>
-
-          <div>
-            <h4>LEGAL</h4>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">Privacy</a>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">Terms</a>
-          </div>
-        </div>
-      </footer>
-
       <style jsx>{`
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
         :global(body) {
           margin: 0;
-          font-family: 'Inter', sans-serif;
+          font-family: Arial, sans-serif;
           background: #fff;
         }
 
@@ -283,133 +289,70 @@ export default function Browse() {
           align-items: center;
           padding: 14px 5%;
           background: #050505;
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          border-bottom: 1px solid rgba(255,255,255,.08);
         }
 
         .logo-img {
-          height: 78px;
-          width: auto;
-          display: block;
+          height: 72px;
         }
 
         .nav-links {
           display: flex;
-          align-items: center;
           gap: 28px;
+          align-items: center;
         }
 
         .nav-links a {
           color: white;
           text-decoration: none;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          font-size: 13px;
-          letter-spacing: .6px;
+          font-weight: 700;
           text-transform: uppercase;
+          font-size: 13px;
         }
 
-        .yellow-link { color: ${BRAND_YELLOW} !important; }
-
-        .login-icon {
-          border: 2px solid white;
-          border-radius: 50%;
-          width: 28px;
-          height: 28px;
-          display: grid;
-          place-items: center;
-          font-size: 15px !important;
+        .yellow-link {
+          color: ${BRAND_YELLOW};
         }
 
         .search-section {
-          padding: 38px 5% 30px;
+          padding: 38px 5%;
           background: #f8f8f8;
           text-align: center;
         }
 
-        .search-section h1 {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 3.8rem;
-          font-weight: 400;
-          letter-spacing: 1px;
-          margin: 0;
-        }
-
-        .search-section p {
-          color: #444;
-          margin: 6px 0 26px;
-          font-weight: 600;
-        }
-
         .search-container {
           max-width: 1250px;
-          margin: 0 auto;
+          margin: 24px auto 0;
           display: grid;
           grid-template-columns: 1fr 210px 175px 175px 120px;
           background: white;
-          border-radius: 12px;
+          border-radius: 10px;
           overflow: hidden;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-          border: 1px solid #e8e8e8;
+          border: 1px solid #ddd;
         }
 
-        input, select {
-          padding: 22px;
+        input,
+        select {
           border: none;
           border-right: 1px solid #e5e5e5;
-          font-size: 1rem;
-          font-family: 'Inter', sans-serif;
-          outline: none;
-          background: white;
-          min-width: 0;
-        }
-
-        select {
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 800;
-          font-size: .78rem;
+          padding: 18px;
+          font-size: 14px;
         }
 
         .search-btn {
-          background: ${BRAND_YELLOW};
-          color: #000;
           border: none;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
+          background: ${BRAND_YELLOW};
+          font-weight: 800;
           cursor: pointer;
-          letter-spacing: .6px;
-          transition: background .18s ease;
         }
 
-        .search-btn:hover { background: #e6b000; }
-
         .featured {
-          padding: 56px 5%;
-          background: white;
+          padding: 50px 5%;
         }
 
         .section-head {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          margin-bottom: 28px;
-        }
-
-        .section-head h2 {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 3rem;
-          font-weight: 400;
-          letter-spacing: 1px;
-          margin: 0;
-        }
-
-        .section-head span {
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          font-size: 13px;
-          color: #1b334b;
+          margin-bottom: 24px;
         }
 
         .cards {
@@ -421,213 +364,60 @@ export default function Browse() {
         .card {
           text-decoration: none;
           color: inherit;
-          display: block;
-          border: 1px solid #e8e8e8;
-          border-radius: 14px;
+          border: 1px solid #e5e5e5;
+          border-radius: 12px;
           overflow: hidden;
-          box-shadow: 0 12px 30px rgba(0,0,0,.1);
           background: white;
-          transition: transform .18s ease, box-shadow .18s ease;
-        }
-
-        .card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 18px 38px rgba(0,0,0,.16);
-          cursor: pointer;
         }
 
         .card-photo {
-          height: 185px;
+          height: 190px;
           background-size: cover;
           background-position: center;
-          position: relative;
         }
 
-        .card-photo span {
-          position: absolute;
-          top: 12px;
-          right: 14px;
-          color: white;
-          font-size: 25px;
-        }
-
-        .card-body { padding: 18px; }
-
-        .card h3 {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 18px;
-          margin: 0;
-          font-weight: 900;
-        }
-
-        .card p {
-          margin: 6px 0 14px;
-          color: #555;
-          font-weight: 600;
+        .card-body {
+          padding: 18px;
         }
 
         .meta {
           display: flex;
           gap: 12px;
-          color: #555;
           font-size: 13px;
-          flex-wrap: wrap;
+          color: #666;
         }
 
         .price-row {
-          margin-top: 18px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-        }
-
-        .price-row strong {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 22px;
-          font-weight: 900;
-        }
-
-        .price-row span {
-          border: 1px solid #ccc;
-          padding: 9px 12px;
-          border-radius: 6px;
-          color: #111;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 11px;
-          font-weight: 900;
+          align-items: center;
+          margin-top: 16px;
         }
 
         .empty {
-          margin: 38px auto 0;
-          max-width: 760px;
-          padding: 30px;
-          border: 1px solid #ddd;
-          border-radius: 12px;
+          padding: 40px;
           text-align: center;
-          background: #fafafa;
-        }
-
-        .ready {
-          background: #070707;
-          color: white;
-          padding: 42px 5%;
-          display: grid;
-          grid-template-columns: auto 1fr auto;
-          gap: 22px;
-          align-items: center;
-        }
-
-        .ready-icon {
-          width: 62px;
-          height: 62px;
-          border: 4px solid ${BRAND_YELLOW};
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          color: ${BRAND_YELLOW};
-          font-size: 30px;
-        }
-
-        .ready h2 {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 3rem;
-          font-weight: 400;
-          letter-spacing: 1px;
-          margin: 0;
-        }
-
-        .ready p {
-          color: #aaa;
-          margin: 4px 0 0;
-        }
-
-        .ready a {
-          display: inline-block;
-          background: ${BRAND_YELLOW};
-          color: black;
-          padding: 18px 36px;
-          border-radius: 6px;
-          text-decoration: none;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          letter-spacing: .5px;
-        }
-
-        footer {
-          background: #050505;
-          color: white;
-          padding: 42px 5%;
-          display: flex;
-          justify-content: space-between;
-          gap: 50px;
-        }
-
-        footer img { height: 52px; }
-
-        footer p {
-          color: #777;
-          font-size: 13px;
-        }
-
-        .foot-cols {
-          display: flex;
-          gap: 70px;
-        }
-
-        .foot-cols h4 {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 13px;
-          margin: 0 0 14px;
-        }
-
-        .foot-cols a {
-          display: block;
-          color: #aaa;
-          text-decoration: none;
-          margin-bottom: 8px;
-          font-size: 13px;
         }
 
         @media (max-width: 1100px) {
-          .cards { grid-template-columns: repeat(3, 1fr); }
-          .search-container {
-            grid-template-columns: 1fr 180px 150px 150px 110px;
+          .cards {
+            grid-template-columns: repeat(3, 1fr);
           }
         }
 
         @media (max-width: 850px) {
-          .nav-links { display: none; }
-          .logo-img { height: 56px; }
-
-          .search-container,
           .cards,
-          .ready {
+          .search-container {
             grid-template-columns: 1fr;
           }
 
-          input, select {
+          input,
+          select {
             border-right: none;
             border-bottom: 1px solid #e5e5e5;
-          }
-
-          .search-btn { height: 58px; }
-
-          .section-head,
-          footer {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .ready { text-align: center; }
-          .ready-icon { margin: 0 auto; }
-
-          .foot-cols {
-            flex-direction: column;
-            gap: 25px;
           }
         }
       `}</style>
     </>
   );
-}
 }
