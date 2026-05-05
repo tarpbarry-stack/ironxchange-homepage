@@ -33,7 +33,7 @@ const categories = [
   "UTILITY CARTS"
 ];
 
-const listings = [
+const fallbackListings = [
   {
     title: "2023 KOMATSU WA475-10",
     type: "WHEEL LOADERS",
@@ -70,15 +70,14 @@ export default function Browse() {
 
   useEffect(() => {
     fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
-        console.log("LIVE LISTINGS:", data);
-        setLiveListings(data);
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setLiveListings(data);
       })
-      .catch((err) => console.log("FETCH ERROR:", err));
+      .catch(() => {});
   }, []);
 
-  const sourceListings = liveListings.length ? liveListings : listings;
+  const sourceListings = liveListings.length ? liveListings : fallbackListings;
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -103,93 +102,19 @@ export default function Browse() {
     <>
       <Head>
         <title>Browse Equipment | IronXchange</title>
-      </Head>
-
-      <section className="search-section">
-        <h1>Browse Equipment</h1>
-
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search equipment..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-      </section>
-
-      <section className="featured">
-        <div className="cards">
-          {filteredListings.map((item) => (
-            <a href={item.link} className="card" key={item.title}>
-              <div
-                className="card-photo"
-                style={{ backgroundImage: `url(${item.image})` }}
-              />
-              <div className="card-body">
-                <h3>{item.title}</h3>
-                <p>{item.type}</p>
-                <div className="meta">
-                  <span>{item.hours}</span>
-                  <span>{item.location}</span>
-                </div>
-                <div className="price-row">
-                  <strong>{item.price}</strong>
-                  <span>VIEW DETAILS</span>
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
-
-        {filteredListings.length === 0 && (
-          <div style={{ padding: 40, textAlign: "center" }}>
-            No listings found
-          </div>
-        )}
-      </section>
-    </>
-  );
-}, [searchQuery, category]);
-
-  return (
-    <>
-      <Head>
-        <title>Browse Equipment | IronXchange</title>
-        <meta
-          name="description"
-          content="Browse heavy equipment for sale on IronXchange."
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          rel="stylesheet"
-        />
+        <meta name="description" content="Browse heavy equipment for sale on IronXchange." />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
       </Head>
 
       <nav className="nav">
         <a href="/" className="logo-wrap">
-          <img
-            src="/images/ironxchange-logo.png"
-            className="logo-img"
-            alt="IronXchange"
-          />
+          <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
         </a>
 
         <div className="nav-links">
-         <a href="/browse">Browse Equipment</a>
-          <a href={`${STAGING}/l/new`} className="yellow-link">
-            Post Equipment Free
-          </a>
+          <a href="/browse">Browse Equipment</a>
+          <a href={`${STAGING}/l/new`} className="yellow-link">Post Equipment Free</a>
           <a href={`${STAGING}/login`} className="login-icon">
             <i className="fa-regular fa-user"></i>
           </a>
@@ -197,8 +122,9 @@ export default function Browse() {
       </nav>
 
       <section className="search-section">
-  <h1>Browse Equipment</h1>
-<p>Search heavy equipment for sale from owners, dealers, and fleet operators.</p>
+        <h1>Browse Equipment</h1>
+        <p>Search heavy equipment for sale from owners, dealers, and fleet operators.</p>
+
         <div className="search-container">
           <input
             type="text"
@@ -212,20 +138,11 @@ export default function Browse() {
               <option key={c}>{c}</option>
             ))}
           </select>
-
-
         </div>
 
         <div className="popular">
           <span>Popular Searches:</span>
-          {[
-            "EXCAVATORS",
-            "SKID STEER/CTL",
-            "DOZERS",
-            "DUMP TRUCKS - ARTIC/RIGID",
-            "TRAILERS",
-            "WHEEL LOADERS"
-          ].map((x) => (
+          {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
             <button
               key={x}
               onClick={() => {
@@ -246,32 +163,32 @@ export default function Browse() {
         </div>
 
         <div className="cards">
-  {filteredListings.map((item) => (
-    <a href={item.link} className="card" key={item.title}>
-      <div
-        className="card-photo"
-        style={{ backgroundImage: `url(${item.image})` }}
-      >
-        <span>♡</span>
-      </div>
+          {filteredListings.map((item) => (
+            <a href={item.link} className="card" key={item.link || item.title}>
+              <div
+                className="card-photo"
+                style={{ backgroundImage: `url(${item.image || "/images/hero-equipment-yard.jpg"})` }}
+              >
+                <span>♡</span>
+              </div>
 
-      <div className="card-body">
-        <h3>{item.title}</h3>
-        <p>{item.type}</p>
+              <div className="card-body">
+                <h3>{item.title}</h3>
+                <p>{item.type}</p>
 
-        <div className="meta">
-          <span>◷ {item.hours}</span>
-          <span>⌖ {item.location}</span>
+                <div className="meta">
+                  <span>◷ {item.hours}</span>
+                  <span>⌖ {item.location}</span>
+                </div>
+
+                <div className="price-row">
+                  <strong>{item.price}</strong>
+                  <span>VIEW DETAILS</span>
+                </div>
+              </div>
+            </a>
+          ))}
         </div>
-
-        <div className="price-row">
-          <strong>{item.price}</strong>
-          <span>VIEW DETAILS</span>
-        </div>
-      </div>
-    </a>
-  ))}
-</div>
 
         {filteredListings.length === 0 && (
           <div className="empty">
@@ -310,20 +227,14 @@ export default function Browse() {
 
           <div>
             <h4>LEGAL</h4>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
-              Privacy
-            </a>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
-              Terms
-            </a>
+            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">Privacy</a>
+            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">Terms</a>
           </div>
         </div>
       </footer>
 
       <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         :global(body) {
           margin: 0;
@@ -365,9 +276,7 @@ export default function Browse() {
           text-transform: uppercase;
         }
 
-        .yellow-link {
-          color: ${BRAND_YELLOW} !important;
-        }
+        .yellow-link { color: ${BRAND_YELLOW} !important; }
 
         .login-icon {
           border: 2px solid white;
@@ -379,31 +288,29 @@ export default function Browse() {
           font-size: 15px !important;
         }
 
-  
-
         .search-section {
           padding: 38px 5% 30px;
           background: #f8f8f8;
           text-align: center;
         }
 
-.search-section h1 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3.8rem;
-  font-weight: 400;
-  letter-spacing: 1px;
-  margin: 0;
-}
+        .search-section h1 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3.8rem;
+          font-weight: 400;
+          letter-spacing: 1px;
+          margin: 0;
+        }
 
-.search-section p {
-  color: #444;
-  margin: 6px 0 26px;
-  font-weight: 600;
-}
+        .search-section p {
+          color: #444;
+          margin: 6px 0 26px;
+          font-weight: 600;
+        }
+
         .search-container {
           max-width: 1100px;
-          margin: 0 auto;
-          margin-bottom: 20px;
+          margin: 0 auto 20px;
           display: grid;
           grid-template-columns: 1fr 285px;
           background: white;
@@ -413,8 +320,7 @@ export default function Browse() {
           border: 1px solid #e8e8e8;
         }
 
-        input,
-        select {
+        input, select {
           padding: 22px;
           border: none;
           border-right: 1px solid #e5e5e5;
@@ -500,24 +406,25 @@ export default function Browse() {
           grid-template-columns: repeat(4, 1fr);
           gap: 24px;
         }
-.card {
-  text-decoration: none;
-  color: inherit;
-  display: block;
 
-  border: 1px solid #e8e8e8;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,.1);
-  background: white;
-  transition: transform .18s ease, box-shadow .18s ease;
-}
+        .card {
+          text-decoration: none;
+          color: inherit;
+          display: block;
+          border: 1px solid #e8e8e8;
+          border-radius: 14px;
+          overflow: hidden;
+          box-shadow: 0 12px 30px rgba(0,0,0,.1);
+          background: white;
+          transition: transform .18s ease, box-shadow .18s ease;
+        }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 38px rgba(0,0,0,.16);
-  cursor: pointer;
-}
+        .card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 18px 38px rgba(0,0,0,.16);
+          cursor: pointer;
+        }
+
         .card-photo {
           height: 185px;
           background-size: cover;
@@ -534,9 +441,7 @@ export default function Browse() {
           font-size: 25px;
         }
 
-        .card-body {
-          padding: 18px;
-        }
+        .card-body { padding: 18px; }
 
         .card h3 {
           font-family: 'Montserrat', sans-serif;
@@ -572,16 +477,15 @@ export default function Browse() {
           font-weight: 900;
         }
 
-       .price-row span {
-  border: 1px solid #ccc;
-  padding: 9px 12px;
-  border-radius: 6px;
-  color: #111;
-  text-decoration: none;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  font-weight: 900;
-}
+        .price-row span {
+          border: 1px solid #ccc;
+          padding: 9px 12px;
+          border-radius: 6px;
+          color: #111;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 11px;
+          font-weight: 900;
+        }
 
         .empty {
           margin: 38px auto 0;
@@ -665,9 +569,7 @@ export default function Browse() {
           gap: 50px;
         }
 
-        footer img {
-          height: 52px;
-        }
+        footer img { height: 52px; }
 
         footer p {
           color: #777;
@@ -694,13 +596,8 @@ export default function Browse() {
         }
 
         @media (max-width: 850px) {
-          .nav-links {
-            display: none;
-          }
-
-          .logo-img {
-            height: 56px;
-          }
+          .nav-links { display: none; }
+          .logo-img { height: 56px; }
 
           .search-container,
           .cards,
@@ -708,8 +605,7 @@ export default function Browse() {
             grid-template-columns: 1fr;
           }
 
-          input,
-          select {
+          input, select {
             border-right: none;
             border-bottom: 1px solid #e5e5e5;
           }
@@ -720,13 +616,9 @@ export default function Browse() {
             align-items: flex-start;
           }
 
-          .ready {
-            text-align: center;
-          }
+          .ready { text-align: center; }
 
-          .ready-icon {
-            margin: 0 auto;
-          }
+          .ready-icon { margin: 0 auto; }
 
           .foot-cols {
             flex-direction: column;
