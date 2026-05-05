@@ -180,33 +180,32 @@ export default function Browse() {
         </div>
 
         <div className="cards">
-          {filteredListings.map((item) => (
-            <div className="card" key={item.title}>
-              <a
-                href={item.link}
-                className="card-photo"
-                style={{ backgroundImage: `url(${item.image})` }}
-              >
-                <span>♡</span>
-              </a>
+  {filteredListings.map((item) => (
+    <a href={item.link} className="card" key={item.title}>
+      <div
+        className="card-photo"
+        style={{ backgroundImage: `url(${item.image})` }}
+      >
+        <span>♡</span>
+      </div>
 
-              <div className="card-body">
-                <h3>{item.title}</h3>
-                <p>{item.type}</p>
+      <div className="card-body">
+        <h3>{item.title}</h3>
+        <p>{item.type}</p>
 
-                <div className="meta">
-                  <span>◷ {item.hours}</span>
-                  <span>⌖ {item.location}</span>
-                </div>
-
-                <div className="price-row">
-                  <strong>{item.price}</strong>
-                  <a href={item.link}>VIEW DETAILS</a>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="meta">
+          <span>◷ {item.hours}</span>
+          <span>⌖ {item.location}</span>
         </div>
+
+        <div className="price-row">
+          <strong>{item.price}</strong>
+          <span>VIEW DETAILS</span>
+        </div>
+      </div>
+    </a>
+  ))}
+</div>
 
         {filteredListings.length === 0 && (
           <div className="empty">
@@ -434,21 +433,24 @@ export default function Browse() {
           grid-template-columns: repeat(4, 1fr);
           gap: 24px;
         }
+.card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 
-        .card {
-          border: 1px solid #e8e8e8;
-          border-radius: 14px;
-          overflow: hidden;
-          box-shadow: 0 12px 30px rgba(0,0,0,.1);
-          background: white;
-          transition: transform .18s ease, box-shadow .18s ease;
-        }
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,.1);
+  background: white;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
 
-        .card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 18px 38px rgba(0,0,0,.16);
-        }
-
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(0,0,0,.16);
+  cursor: pointer;
+}
         .card-photo {
           height: 185px;
           background-size: cover;
