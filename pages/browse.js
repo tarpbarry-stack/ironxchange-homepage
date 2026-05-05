@@ -50,70 +50,69 @@ export default function Browse() {
       .catch(() => {});
   }, []);
 
- const availableMakes = useMemo(() => {
-  if (category === "MOTOR GRADERS") {
-    const makes = motorGradersTaxonomy
+  const availableMakes = useMemo(() => {
+    if (category === "MOTOR GRADERS") {
+      const makes = motorGradersTaxonomy
+        .map((item) => item.make)
+        .filter(Boolean);
+
+      return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
+    }
+
+    const makes = liveListings
+      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
       .map((item) => item.make)
       .filter(Boolean);
 
     return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
-  }
+  }, [liveListings, category]);
 
-  const makes = liveListings
-    .filter((item) => category === "ALL CATEGORIES" || item.type === category)
-    .map((item) => item.make)
-    .filter(Boolean);
+  const availableModels = useMemo(() => {
+    if (category === "MOTOR GRADERS" && make !== "ALL MAKES") {
+      const models = motorGradersTaxonomy
+        .filter((item) => item.make === make)
+        .map((item) => item.model)
+        .filter(Boolean);
 
-  return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
-}, [liveListings, category]);
+      return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
+    }
 
-const availableModels = useMemo(() => {
-  if (category === "MOTOR GRADERS" && make !== "ALL MAKES") {
-    const models = motorGradersTaxonomy
-      .filter((item) => item.make === make)
+    const models = liveListings
+      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
+      .filter((item) => make === "ALL MAKES" || item.make === make)
       .map((item) => item.model)
       .filter(Boolean);
 
     return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
-  }
+  }, [liveListings, category, make]);
 
-  const models = liveListings
-    .filter((item) => category === "ALL CATEGORIES" || item.type === category)
-    .filter((item) => make === "ALL MAKES" || item.make === make)
-    .map((item) => item.model)
-    .filter(Boolean);
+  const filteredListings = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
 
-  return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
-}, [liveListings, category, make]);
+    return liveListings.filter((item) => {
+      const matchesCategory =
+        category === "ALL CATEGORIES" ||
+        String(item.type || "").toUpperCase() === category;
 
-const filteredListings = useMemo(() => {
-  const q = searchQuery.trim().toLowerCase();
+      const matchesMake =
+        make === "ALL MAKES" || item.make === make;
 
-  return liveListings.filter((item) => {
-    const matchesCategory =
-      category === "ALL CATEGORIES" ||
-      String(item.type || "").toUpperCase() === category;
+      const matchesModel =
+        model === "ALL MODELS" || item.model === model;
 
-    const matchesMake =
-      make === "ALL MAKES" || item.make === make;
+      const matchesSearch =
+        !q ||
+        (item.title || "").toLowerCase().includes(q) ||
+        (item.type || "").toLowerCase().includes(q) ||
+        (item.make || "").toLowerCase().includes(q) ||
+        (item.model || "").toLowerCase().includes(q) ||
+        (item.location || "").toLowerCase().includes(q) ||
+        (item.hours || "").toLowerCase().includes(q) ||
+        (item.price || "").toLowerCase().includes(q);
 
-    const matchesModel =
-      model === "ALL MODELS" || item.model === model;
-
-    const matchesSearch =
-      !q ||
-      (item.title || "").toLowerCase().includes(q) ||
-      (item.type || "").toLowerCase().includes(q) ||
-      (item.make || "").toLowerCase().includes(q) ||
-      (item.model || "").toLowerCase().includes(q) ||
-      (item.location || "").toLowerCase().includes(q) ||
-      (item.hours || "").toLowerCase().includes(q) ||
-      (item.price || "").toLowerCase().includes(q);
-
-    return matchesCategory && matchesMake && matchesModel && matchesSearch;
-  });
-}, [searchQuery, category, make, model, liveListings]);
-
+      return matchesCategory && matchesMake && matchesModel && matchesSearch;
+    });
+  }, [searchQuery, category, make, model, liveListings]);
 
   return (
     <>
