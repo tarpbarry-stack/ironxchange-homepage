@@ -67,51 +67,96 @@ export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
   const [liveListings, setLiveListings] = useState([]);
-    useEffect(() => {
+
+  useEffect(() => {
     fetch("/api/listings")
       .then(res => res.json())
-      .then(data => setLiveListings(data))
-      .catch(() => {});
+      .then(data => {
+        console.log("LIVE LISTINGS:", data);
+        setLiveListings(data);
+      })
+      .catch((err) => console.log("FETCH ERROR:", err));
   }, []);
+
   const sourceListings = liveListings.length ? liveListings : listings;
 
-const filteredListings = useMemo(() => {
-  const q = searchQuery.trim().toLowerCase();
+  const filteredListings = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
 
-  return sourceListings.filter((item) => {
-    const matchesCategory =
-      category === "ALL CATEGORIES" || item.type === category;
-
-    const matchesSearch =
-      !q ||
-      (item.title || "").toLowerCase().includes(q) ||
-      (item.type || "").toLowerCase().includes(q) ||
-      (item.location || "").toLowerCase().includes(q) ||
-      (item.hours || "").toLowerCase().includes(q) ||
-      (item.price || "").toLowerCase().includes(q);
-
-    return matchesCategory && matchesSearch;
-  });
-}, [searchQuery, category, sourceListings]);
-
-const filteredListings = useMemo(() => {
-  const q = searchQuery.trim().toLowerCase();
-
-  return sourceListings.filter((item) => {
+    return sourceListings.filter((item) => {
       const matchesCategory =
         category === "ALL CATEGORIES" || item.type === category;
 
       const matchesSearch =
         !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.type.toLowerCase().includes(q) ||
-        item.location.toLowerCase().includes(q) ||
-        item.hours.toLowerCase().includes(q) ||
-        item.price.toLowerCase().includes(q);
+        (item.title || "").toLowerCase().includes(q) ||
+        (item.type || "").toLowerCase().includes(q) ||
+        (item.location || "").toLowerCase().includes(q) ||
+        (item.hours || "").toLowerCase().includes(q) ||
+        (item.price || "").toLowerCase().includes(q);
 
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, category]);
+  }, [searchQuery, category, sourceListings]);
+
+  return (
+    <>
+      <Head>
+        <title>Browse Equipment | IronXchange</title>
+      </Head>
+
+      <section className="search-section">
+        <h1>Browse Equipment</h1>
+
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search equipment..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            {categories.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      <section className="featured">
+        <div className="cards">
+          {filteredListings.map((item) => (
+            <a href={item.link} className="card" key={item.title}>
+              <div
+                className="card-photo"
+                style={{ backgroundImage: `url(${item.image})` }}
+              />
+              <div className="card-body">
+                <h3>{item.title}</h3>
+                <p>{item.type}</p>
+                <div className="meta">
+                  <span>{item.hours}</span>
+                  <span>{item.location}</span>
+                </div>
+                <div className="price-row">
+                  <strong>{item.price}</strong>
+                  <span>VIEW DETAILS</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {filteredListings.length === 0 && (
+          <div style={{ padding: 40, textAlign: "center" }}>
+            No listings found
+          </div>
+        )}
+      </section>
+    </>
+  );
+}, [searchQuery, category]);
 
   return (
     <>
