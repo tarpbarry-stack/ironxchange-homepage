@@ -114,7 +114,7 @@ export default function Browse() {
         </a>
 
         <div className="nav-links">
-          <a href="/browse">Browse Equipment</a>
+         <a href="/browse">Browse Equipment</a>
           <a href={`${STAGING}/l/new`} className="yellow-link">
             Post Equipment Free
           </a>
