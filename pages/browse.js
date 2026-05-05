@@ -73,7 +73,26 @@ export default function Browse() {
       .then(data => setLiveListings(data))
       .catch(() => {});
   }, []);
-  const sourceListings = liveListings;
+  const sourceListings = liveListings.length ? liveListings : listings;
+
+const filteredListings = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
+
+  return sourceListings.filter((item) => {
+    const matchesCategory =
+      category === "ALL CATEGORIES" || item.type === category;
+
+    const matchesSearch =
+      !q ||
+      (item.title || "").toLowerCase().includes(q) ||
+      (item.type || "").toLowerCase().includes(q) ||
+      (item.location || "").toLowerCase().includes(q) ||
+      (item.hours || "").toLowerCase().includes(q) ||
+      (item.price || "").toLowerCase().includes(q);
+
+    return matchesCategory && matchesSearch;
+  });
+}, [searchQuery, category, sourceListings]);
 
 const filteredListings = useMemo(() => {
   const q = searchQuery.trim().toLowerCase();
