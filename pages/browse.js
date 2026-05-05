@@ -72,12 +72,13 @@ export default function Browse() {
     fetch("/api/listings")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setLiveListings(data);
-      })
+  console.log("LIVE LISTINGS FROM API:", data);
+  if (Array.isArray(data)) setLiveListings(data);
+})
       .catch(() => {});
   }, []);
 
-  const sourceListings = liveListings.length ? liveListings : fallbackListings;
+  const sourceListings = liveListings;
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -167,7 +168,15 @@ export default function Browse() {
             <a href={item.link} className="card" key={item.link || item.title}>
               <div
                 className="card-photo"
-                style={{ backgroundImage: `url(${item.image || "/images/hero-equipment-yard.jpg"})` }}
+                style={{
+  backgroundImage: `url(${
+    item.imageUrl ||
+    item.image ||
+    item.photo ||
+    item.thumbnail ||
+    "/images/hero-equipment-yard.jpg"
+  })`
+}}
               >
                 <span>♡</span>
               </div>
@@ -190,12 +199,12 @@ export default function Browse() {
           ))}
         </div>
 
-        {filteredListings.length === 0 && (
-          <div className="empty">
-            <h3>No listings matched that search.</h3>
-            <p>Try another keyword or category.</p>
-          </div>
-        )}
+     {filteredListings.length === 0 && (
+  <div className="empty">
+    <h3>No live listings loaded.</h3>
+    <p>Check /api/listings or refresh the page.</p>
+  </div>
+)}
       </section>
 
       <section className="ready">
