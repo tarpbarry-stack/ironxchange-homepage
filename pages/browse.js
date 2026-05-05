@@ -339,8 +339,9 @@ const filteredListings = useMemo(() => {
         .search-container {
           max-width: 1100px;
           margin: 0 auto;
+          margin-bottom: 20px;
           display: grid;
-          grid-template-columns: 1fr 285px 155px;
+          grid-template-columns: 1fr 285px;
           background: white;
           border-radius: 12px;
           overflow: hidden;
