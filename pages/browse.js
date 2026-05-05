@@ -192,7 +192,7 @@ export default function Browse() {
           <span>{filteredListings.length} LISTINGS</span>
         </div>
 
-        <div className="cards">
+             <div className="cards">
           {filteredListings.map((item) => (
             <a href={item.link} className="card" key={item.id || item.link || item.title}>
               <div
