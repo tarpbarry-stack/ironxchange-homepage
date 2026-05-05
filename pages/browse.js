@@ -33,36 +33,6 @@ const categories = [
   "UTILITY CARTS"
 ];
 
-const fallbackListings = [
-  {
-    title: "2023 KOMATSU WA475-10",
-    type: "WHEEL LOADERS",
-    hours: "5,790 Hrs",
-    location: "Post, TX",
-    price: "$175,500",
-    image: "/images/2023-komatsu-wa475-10.jpg",
-    link: "https://staging.ironxchange.com/l/2023-komatsu-wa475-4-989-hrs/69f80a91-ef02-446d-bfa8-61f00353e32e"
-  },
-  {
-    title: "2020 DEERE 772GP",
-    type: "MOTOR GRADERS",
-    hours: "3,907 Hrs",
-    location: "Colorado City, TX",
-    price: "$179,000",
-    image: "/images/2020-Deere-772GP.jpg",
-    link: "https://staging.ironxchange.com/l/2020-deere-772gp-4-790-hrs/69f7ffd8-f07e-4587-a4dd-4a1fa7626d91"
-  },
-  {
-    title: "2019 MCCLOSKEY I54",
-    type: "OTHER SPECIALTY",
-    hours: "4,016 Hrs",
-    location: "Jal, NM",
-    price: "$315,000",
-    image: "/images/2019-mccloskey-i54.jpg",
-    link: "https://staging.ironxchange.com/l/2019-mccloskey-i54-4-118-hrs/69f8117f-38b5-4218-893f-bbdab94b929d"
-  }
-];
-
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -72,20 +42,18 @@ export default function Browse() {
     fetch("/api/listings")
       .then((res) => res.json())
       .then((data) => {
-  console.log("LIVE LISTINGS FROM API:", data);
-  if (Array.isArray(data)) setLiveListings(data);
-})
+        if (Array.isArray(data)) setLiveListings(data);
+      })
       .catch(() => {});
   }, []);
-
-  const sourceListings = liveListings;
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    return sourceListings.filter((item) => {
+    return liveListings.filter((item) => {
       const matchesCategory =
-        category === "ALL CATEGORIES" || item.type === category;
+        category === "ALL CATEGORIES" ||
+        String(item.type || "").toUpperCase() === category;
 
       const matchesSearch =
         !q ||
@@ -93,11 +61,13 @@ export default function Browse() {
         (item.type || "").toLowerCase().includes(q) ||
         (item.location || "").toLowerCase().includes(q) ||
         (item.hours || "").toLowerCase().includes(q) ||
-        (item.price || "").toLowerCase().includes(q);
+        (item.price || "").toLowerCase().includes(q) ||
+        (item.make || "").toLowerCase().includes(q) ||
+        (item.model || "").toLowerCase().includes(q);
 
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, category, sourceListings]);
+  }, [searchQuery, category, liveListings]);
 
   return (
     <>
@@ -139,21 +109,10 @@ export default function Browse() {
               <option key={c}>{c}</option>
             ))}
           </select>
-        </div>
 
-        <div className="popular">
-          <span>Popular Searches:</span>
-          {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
-            <button
-              key={x}
-              onClick={() => {
-                setCategory(x);
-                setSearchQuery("");
-              }}
-            >
-              {x}
-            </button>
-          ))}
+          <button type="button" className="search-btn">
+            SEARCH
+          </button>
         </div>
       </section>
 
@@ -169,14 +128,14 @@ export default function Browse() {
               <div
                 className="card-photo"
                 style={{
-  backgroundImage: `url(${
-    item.imageUrl ||
-    item.image ||
-    item.photo ||
-    item.thumbnail ||
-    "/images/hero-equipment-yard.jpg"
-  })`
-}}
+                  backgroundImage: `url(${
+                    item.imageUrl ||
+                    item.image ||
+                    item.photo ||
+                    item.thumbnail ||
+                    "/images/hero-equipment-yard.jpg"
+                  })`
+                }}
               >
                 <span>♡</span>
               </div>
@@ -199,12 +158,12 @@ export default function Browse() {
           ))}
         </div>
 
-     {filteredListings.length === 0 && (
-  <div className="empty">
-    <h3>No live listings loaded.</h3>
-    <p>Check /api/listings or refresh the page.</p>
-  </div>
-)}
+        {filteredListings.length === 0 && (
+          <div className="empty">
+            <h3>No live listings loaded.</h3>
+            <p>Check /api/listings or refresh the page.</p>
+          </div>
+        )}
       </section>
 
       <section className="ready">
@@ -319,9 +278,9 @@ export default function Browse() {
 
         .search-container {
           max-width: 1100px;
-          margin: 0 auto 20px;
+          margin: 0 auto;
           display: grid;
-          grid-template-columns: 1fr 285px;
+          grid-template-columns: 1fr 285px 135px;
           background: white;
           border-radius: 12px;
           overflow: hidden;
@@ -345,42 +304,19 @@ export default function Browse() {
           font-size: .82rem;
         }
 
-        button {
+        .search-btn {
           background: ${BRAND_YELLOW};
+          color: #000;
           border: none;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
           cursor: pointer;
-          transition: background .18s ease, transform .18s ease;
+          letter-spacing: .6px;
+          transition: background .18s ease;
         }
 
-        button:hover {
-          transform: translateY(-1px);
-          background: #ffd43b;
-        }
-
-        .popular {
-          max-width: 1100px;
-          margin: 18px auto 0;
-          text-align: left;
-          color: #444;
-          font-size: 14px;
-        }
-
-        .popular button {
-          background: transparent;
-          border: none;
-          margin: 6px 0 0 18px;
-          text-decoration: underline;
-          cursor: pointer;
-          color: #333;
-          font-weight: 700;
-        }
-
-        .popular button:hover {
-          transform: none;
-          background: transparent;
-          color: #000;
+        .search-btn:hover {
+          background: #e6b000;
         }
 
         .featured {
@@ -439,7 +375,6 @@ export default function Browse() {
           background-size: cover;
           background-position: center;
           position: relative;
-          display: block;
         }
 
         .card-photo span {
@@ -619,6 +554,10 @@ export default function Browse() {
             border-bottom: 1px solid #e5e5e5;
           }
 
+          .search-btn {
+            height: 58px;
+          }
+
           .section-head,
           footer {
             flex-direction: column;
@@ -637,4 +576,5 @@ export default function Browse() {
       `}</style>
     </>
   );
+}
 }
