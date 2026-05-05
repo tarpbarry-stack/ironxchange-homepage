@@ -42,9 +42,10 @@ function getBestImageUrl(imageAsset) {
   const variants = imageAsset?.attributes?.variants || {};
 
   return (
+    variants["listing-card-2x"]?.url ||
+    variants["listing-card"]?.url ||
     variants["landscape-crop2x"]?.url ||
     variants["landscape-crop"]?.url ||
-    variants["default"]?.url ||
     variants["scaled-large"]?.url ||
     variants["scaled-medium"]?.url ||
     variants["scaled-small"]?.url ||
@@ -72,6 +73,15 @@ function formatCategory(value) {
   return "Equipment";
 }
 
+function getCategory(publicData) {
+  return formatCategory(
+    publicData.categoryLevel1 ||
+      publicData.category ||
+      publicData.type ||
+      "Equipment"
+  );
+}
+
 function formatHours(value) {
   if (!value && value !== 0) return "";
 
@@ -82,54 +92,13 @@ function formatHours(value) {
 }
 
 function getLocation(publicData) {
-  const possibleLocation =
-    publicData.machineLocation ||
-    publicData.equipmentLocation ||
-    publicData.listingLocation ||
-    publicData.marketLocation ||
-    publicData.cityState ||
-    publicData.location ||
-    publicData.city ||
-    publicData.state ||
-    "";
+  const loc = publicData.loc;
 
-  if (typeof possibleLocation === "string" && possibleLocation.trim()) {
-    return possibleLocation.trim();
+  if (typeof loc === "string" && loc.trim()) {
+    return loc.trim().toUpperCase();
   }
-
-  if (possibleLocation?.address) return possibleLocation.address;
-  if (possibleLocation?.selectedPlace?.address) {
-    return possibleLocation.selectedPlace.address;
-  }
-
-  const city =
-    publicData.city ||
-    publicData.machineCity ||
-    publicData.equipmentCity ||
-    "";
-
-  const state =
-    publicData.state ||
-    publicData.machineState ||
-    publicData.equipmentState ||
-    "";
-
-  if (city && state) return `${city}, ${state}`;
-  if (city) return city;
-  if (state) return state;
 
   return "Location available on request";
-}
-
-function getCategory(publicData) {
-  return formatCategory(
-    publicData.equipmentType ||
-      publicData.machineType ||
-      publicData.category ||
-      publicData.machineCategory ||
-      publicData.equipmentCategory ||
-      publicData.type
-  );
 }
 
 function getPrice(priceAmount) {
@@ -177,7 +146,6 @@ export default async function handler(req, res) {
       .map((item) => {
         const attrs = item.attributes || {};
         const publicData = attrs.publicData || {};
-        const priceAmount = attrs.price?.amount;
         const id = getId(item.id);
 
         const slug = (attrs.slug || attrs.title || "equipment")
@@ -196,7 +164,7 @@ export default async function handler(req, res) {
           type: getCategory(publicData),
           hours: formatHours(publicData.hours),
           location: getLocation(publicData),
-          price: getPrice(priceAmount),
+          price: getPrice(attrs.price?.amount),
           image: imageUrl,
           imageUrl,
           link: `https://staging.ironxchange.com/l/${slug}/${id}`
