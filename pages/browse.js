@@ -36,6 +36,8 @@ const categories = [
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
+  const [make, setMake] = useState("ALL MAKES");
+  const [model, setModel] = useState("ALL MODELS");
   const [liveListings, setLiveListings] = useState([]);
 
   useEffect(() => {
@@ -47,6 +49,25 @@ export default function Browse() {
       .catch(() => {});
   }, []);
 
+  const availableMakes = useMemo(() => {
+    const makes = liveListings
+      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
+      .map((item) => item.make)
+      .filter(Boolean);
+
+    return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
+  }, [liveListings, category]);
+
+  const availableModels = useMemo(() => {
+    const models = liveListings
+      .filter((item) => category === "ALL CATEGORIES" || item.type === category)
+      .filter((item) => make === "ALL MAKES" || item.make === make)
+      .map((item) => item.model)
+      .filter(Boolean);
+
+    return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
+  }, [liveListings, category, make]);
+
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
@@ -55,19 +76,25 @@ export default function Browse() {
         category === "ALL CATEGORIES" ||
         String(item.type || "").toUpperCase() === category;
 
+      const matchesMake =
+        make === "ALL MAKES" || item.make === make;
+
+      const matchesModel =
+        model === "ALL MODELS" || item.model === model;
+
       const matchesSearch =
         !q ||
         (item.title || "").toLowerCase().includes(q) ||
         (item.type || "").toLowerCase().includes(q) ||
+        (item.make || "").toLowerCase().includes(q) ||
+        (item.model || "").toLowerCase().includes(q) ||
         (item.location || "").toLowerCase().includes(q) ||
         (item.hours || "").toLowerCase().includes(q) ||
-        (item.price || "").toLowerCase().includes(q) ||
-        (item.make || "").toLowerCase().includes(q) ||
-        (item.model || "").toLowerCase().includes(q);
+        (item.price || "").toLowerCase().includes(q);
 
-      return matchesCategory && matchesSearch;
+      return matchesCategory && matchesMake && matchesModel && matchesSearch;
     });
-  }, [searchQuery, category, liveListings]);
+  }, [searchQuery, category, make, model, liveListings]);
 
   return (
     <>
@@ -104,9 +131,34 @@ export default function Browse() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setMake("ALL MAKES");
+              setModel("ALL MODELS");
+            }}
+          >
             {categories.map((c) => (
               <option key={c}>{c}</option>
+            ))}
+          </select>
+
+          <select
+            value={make}
+            onChange={(e) => {
+              setMake(e.target.value);
+              setModel("ALL MODELS");
+            }}
+          >
+            {availableMakes.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
+
+          <select value={model} onChange={(e) => setModel(e.target.value)}>
+            {availableModels.map((m) => (
+              <option key={m}>{m}</option>
             ))}
           </select>
 
@@ -124,7 +176,7 @@ export default function Browse() {
 
         <div className="cards">
           {filteredListings.map((item) => (
-            <a href={item.link} className="card" key={item.link || item.title}>
+            <a href={item.link} className="card" key={item.id || item.link || item.title}>
               <div
                 className="card-photo"
                 style={{
@@ -277,10 +329,10 @@ export default function Browse() {
         }
 
         .search-container {
-          max-width: 1100px;
+          max-width: 1250px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: 1fr 285px 135px;
+          grid-template-columns: 1fr 210px 175px 175px 120px;
           background: white;
           border-radius: 12px;
           overflow: hidden;
@@ -296,12 +348,13 @@ export default function Browse() {
           font-family: 'Inter', sans-serif;
           outline: none;
           background: white;
+          min-width: 0;
         }
 
         select {
           font-family: 'Montserrat', sans-serif;
           font-weight: 800;
-          font-size: .82rem;
+          font-size: .78rem;
         }
 
         .search-btn {
@@ -537,6 +590,16 @@ export default function Browse() {
           text-decoration: none;
           margin-bottom: 8px;
           font-size: 13px;
+        }
+
+        @media (max-width: 1100px) {
+          .cards {
+            grid-template-columns: repeat(3, 1fr);
+          }
+
+          .search-container {
+            grid-template-columns: 1fr 180px 150px 150px 110px;
+          }
         }
 
         @media (max-width: 850px) {
