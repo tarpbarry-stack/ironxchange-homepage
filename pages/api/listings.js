@@ -55,12 +55,86 @@ function getBestImageUrl(imageAsset) {
   );
 }
 
-function formatCategory(category) {
-  if (!category) return "Equipment";
-  if (typeof category === "string") return category;
-  if (category.label) return category.label;
-  if (category.key) return category.key;
+function formatCategory(value) {
+  if (!value) return "Equipment";
+
+  if (typeof value === "string") {
+    return value
+      .replace(/-/g, " ")
+      .replace(/_/g, " ")
+      .trim()
+      .toUpperCase();
+  }
+
+  if (value.label) return String(value.label).toUpperCase();
+  if (value.key) return String(value.key).replace(/-/g, " ").toUpperCase();
+
   return "Equipment";
+}
+
+function formatHours(value) {
+  if (!value && value !== 0) return "";
+
+  const cleaned = String(value).replace(/,/g, "").replace(/[^\d]/g, "");
+  if (!cleaned) return "";
+
+  return `${Number(cleaned).toLocaleString()} Hrs`;
+}
+
+function getLocation(publicData) {
+  const possibleLocation =
+    publicData.machineLocation ||
+    publicData.equipmentLocation ||
+    publicData.listingLocation ||
+    publicData.marketLocation ||
+    publicData.cityState ||
+    publicData.location ||
+    publicData.city ||
+    publicData.state ||
+    "";
+
+  if (typeof possibleLocation === "string" && possibleLocation.trim()) {
+    return possibleLocation.trim();
+  }
+
+  if (possibleLocation?.address) return possibleLocation.address;
+  if (possibleLocation?.selectedPlace?.address) {
+    return possibleLocation.selectedPlace.address;
+  }
+
+  const city =
+    publicData.city ||
+    publicData.machineCity ||
+    publicData.equipmentCity ||
+    "";
+
+  const state =
+    publicData.state ||
+    publicData.machineState ||
+    publicData.equipmentState ||
+    "";
+
+  if (city && state) return `${city}, ${state}`;
+  if (city) return city;
+  if (state) return state;
+
+  return "Location available on request";
+}
+
+function getCategory(publicData) {
+  return formatCategory(
+    publicData.equipmentType ||
+      publicData.machineType ||
+      publicData.category ||
+      publicData.machineCategory ||
+      publicData.equipmentCategory ||
+      publicData.type
+  );
+}
+
+function getPrice(priceAmount) {
+  if (!priceAmount && priceAmount !== 0) return "Call";
+  return `$${Math.round(priceAmount / 100).toLocaleString()}`;
 }
 
 export default async function handler(req, res) {
@@ -85,7 +159,6 @@ export default async function handler(req, res) {
     }
 
     const included = data.included || [];
-
     const imageById = {};
 
     included.forEach((asset) => {
@@ -105,7 +178,6 @@ export default async function handler(req, res) {
         const attrs = item.attributes || {};
         const publicData = attrs.publicData || {};
         const priceAmount = attrs.price?.amount;
-
         const id = getId(item.id);
 
         const slug = (attrs.slug || attrs.title || "equipment")
@@ -113,38 +185,18 @@ export default async function handler(req, res) {
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "");
 
-        const firstImageId = getId(
-          item.relationships?.images?.data?.[0]?.id
-        );
+        const firstImageId = getId(item.relationships?.images?.data?.[0]?.id);
 
         const imageUrl =
           imageById[firstImageId] || "/images/hero-equipment-yard.jpg";
-console.log("PUBLIC DATA FOR LISTING:", attrs.title, publicData);
+
         return {
+          id,
           title: attrs.title || "Equipment",
-         type:
-  formatCategory(
-    publicData.equipmentType ||
-    publicData.category ||
-    publicData.machineCategory ||
-    publicData.type
-  ),
-
-hours:
-  publicData.hours
-    ? `${Number(String(publicData.hours).replace(/,/g, "")).toLocaleString()} Hrs`
-    : "",
-
-location:
-  publicData.location ||
-  publicData.cityState ||
-  publicData.city ||
-  publicData.marketLocation ||
-  publicData.state ||
-  "Location available on request",
-          price: priceAmount
-            ? `$${Math.round(priceAmount / 100).toLocaleString()}`
-            : "Call",
+          type: getCategory(publicData),
+          hours: formatHours(publicData.hours),
+          location: getLocation(publicData),
+          price: getPrice(priceAmount),
           image: imageUrl,
           imageUrl,
           link: `https://staging.ironxchange.com/l/${slug}/${id}`
@@ -155,4 +207,5 @@ location:
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+}
 }
