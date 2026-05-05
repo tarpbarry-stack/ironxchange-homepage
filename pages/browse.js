@@ -124,17 +124,9 @@ export default function Browse() {
         </div>
       </nav>
 
-      <section className="browse-hero">
-        <div>
-          <h1>HEAVY EQUIPMENT FOR SALE</h1>
-          <p>
-            Browse equipment from owners, dealers, and fleet operators. No
-            middlemen. Contact direct.
-          </p>
-        </div>
-      </section>
-
       <section className="search-section">
+  <h1>Browse Equipment</h1>
+<p>Search heavy equipment for sale from owners, dealers, and fleet operators.</p>
         <div className="search-container">
           <input
             type="text"
@@ -316,33 +308,7 @@ export default function Browse() {
           font-size: 15px !important;
         }
 
-        .browse-hero {
-          background:
-            linear-gradient(90deg, rgba(0,0,0,.90), rgba(0,0,0,.70), rgba(0,0,0,.35)),
-            url('/images/hero-equipment-yard.jpg');
-          background-size: cover;
-          background-position: center;
-          color: white;
-          padding: 74px 5% 68px;
-          box-shadow: inset 0 -80px 160px rgba(0,0,0,.70);
-        }
-
-        .browse-hero h1 {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: clamp(4rem, 7vw, 6.7rem);
-          line-height: .88;
-          margin: 0;
-          letter-spacing: 1px;
-          font-weight: 400;
-        }
-
-        .browse-hero p {
-          margin: 18px 0 0;
-          max-width: 720px;
-          font-size: 1.1rem;
-          color: #ddd;
-          font-weight: 600;
-        }
+  
 
         .search-section {
           padding: 38px 5% 30px;
@@ -350,6 +316,19 @@ export default function Browse() {
           text-align: center;
         }
 
+.search-section h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.8rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.search-section p {
+  color: #444;
+  margin: 6px 0 26px;
+  font-weight: 600;
+}
         .search-container {
           max-width: 1100px;
           margin: 0 auto;
@@ -646,15 +625,6 @@ export default function Browse() {
 
           .logo-img {
             height: 56px;
-          }
-
-          .browse-hero {
-            text-align: center;
-            padding: 58px 24px 50px;
-          }
-
-          .browse-hero h1 {
-            font-size: 4rem;
           }
 
           .search-container,
