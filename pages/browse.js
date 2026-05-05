@@ -73,7 +73,7 @@ export default function Browse() {
       .then(data => setLiveListings(data))
       .catch(() => {});
   }, []);
-  const sourceListings = liveListings.length ? liveListings : listings;
+  const sourceListings = liveListings;
 
 const filteredListings = useMemo(() => {
   const q = searchQuery.trim().toLowerCase();
