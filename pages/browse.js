@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -66,11 +66,19 @@ const listings = [
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
+  const [liveListings, setLiveListings] = useState([]);
+    useEffect(() => {
+    fetch("/api/listings")
+      .then(res => res.json())
+      .then(data => setLiveListings(data))
+      .catch(() => {});
+  }, []);
+  const sourceListings = liveListings.length ? liveListings : listings;
 
-  const filteredListings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+const filteredListings = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
 
-    return listings.filter((item) => {
+  return sourceListings.filter((item) => {
       const matchesCategory =
         category === "ALL CATEGORIES" || item.type === category;
 
