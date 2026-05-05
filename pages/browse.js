@@ -94,11 +94,8 @@ export default function Browse() {
         category === "ALL CATEGORIES" ||
         String(item.type || "").toUpperCase() === category;
 
-      const matchesMake =
-        make === "ALL MAKES" || item.make === make;
-
-      const matchesModel =
-        model === "ALL MODELS" || item.model === model;
+      const matchesMake = make === "ALL MAKES" || item.make === make;
+      const matchesModel = model === "ALL MODELS" || item.model === model;
 
       const matchesSearch =
         !q ||
@@ -192,7 +189,7 @@ export default function Browse() {
           <span>{filteredListings.length} LISTINGS</span>
         </div>
 
-             <div className="cards">
+        <div className="cards">
           {filteredListings.map((item) => (
             <a href={item.link} className="card" key={item.id || item.link || item.title}>
               <div
@@ -386,9 +383,7 @@ export default function Browse() {
           transition: background .18s ease;
         }
 
-        .search-btn:hover {
-          background: #e6b000;
-        }
+        .search-btn:hover { background: #e6b000; }
 
         .featured {
           padding: 56px 5%;
@@ -512,16 +507,6 @@ export default function Browse() {
           background: #fafafa;
         }
 
-        .empty h3 {
-          font-family: 'Montserrat', sans-serif;
-          margin: 0 0 8px;
-        }
-
-        .empty p {
-          margin: 0;
-          color: #555;
-        }
-
         .ready {
           background: #070707;
           color: white;
@@ -566,13 +551,6 @@ export default function Browse() {
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
           letter-spacing: .5px;
-          box-shadow: 0 12px 28px rgba(0,0,0,.28);
-          transition: transform .18s ease, box-shadow .18s ease;
-        }
-
-        .ready a:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 34px rgba(0,0,0,.35);
         }
 
         footer {
@@ -611,10 +589,7 @@ export default function Browse() {
         }
 
         @media (max-width: 1100px) {
-          .cards {
-            grid-template-columns: repeat(3, 1fr);
-          }
-
+          .cards { grid-template-columns: repeat(3, 1fr); }
           .search-container {
             grid-template-columns: 1fr 180px 150px 150px 110px;
           }
@@ -635,9 +610,7 @@ export default function Browse() {
             border-bottom: 1px solid #e5e5e5;
           }
 
-          .search-btn {
-            height: 58px;
-          }
+          .search-btn { height: 58px; }
 
           .section-head,
           footer {
@@ -646,7 +619,6 @@ export default function Browse() {
           }
 
           .ready { text-align: center; }
-
           .ready-icon { margin: 0 auto; }
 
           .foot-cols {
@@ -657,4 +629,5 @@ export default function Browse() {
       `}</style>
     </>
   );
+}
 }
