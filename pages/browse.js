@@ -141,7 +141,13 @@ export default function Browse() {
             ))}
           </select>
 
-          <button onClick={() => {}}>SEARCH</button>
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+  {categories.map((c) => (
+    <option key={c}>{c}</option>
+  ))}
+</select>
+
+<button type="button">SEARCH</button>
         </div>
 
         <div className="popular">
