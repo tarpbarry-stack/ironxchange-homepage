@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
+import dozersTaxonomy from "../lib/dozersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -97,6 +98,28 @@ const availableMakes = useMemo(() => {
   "SANY",
   "SEM"
 ]
+    ,
+
+"DOZERS": [
+  "CATERPILLAR",
+  "DEERE",
+  "KOMATSU",
+  "CASE",
+  "SHANTUI",
+  "LIEBHERR",
+  "DEVELON",
+  "DRESSTA",
+  "HYUNDAI",
+  "DOOSAN",
+  "DRESSER",
+  "FIATALLIS",
+  "INTERNATIONAL",
+  "MITSUBISHI",
+  "NEW HOLLAND",
+  "SEM",
+  "XCMG",
+  "ALLIS CHALMERS"
+]
   };
 
   let taxonomy = null;
@@ -108,7 +131,10 @@ const availableMakes = useMemo(() => {
   if (category === "WHEEL LOADERS") {
     taxonomy = wheelLoadersTaxonomy;
   }
-
+  
+if (category === "DOZERS") {
+  taxonomy = dozersTaxonomy;
+}
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
     const preferred = preferredMakes[category] || [];
@@ -141,6 +167,9 @@ const availableMakes = useMemo(() => {
   if (category === "WHEEL LOADERS") {
     taxonomy = wheelLoadersTaxonomy;
   }
+    if (category === "DOZERS") {
+  taxonomy = dozersTaxonomy;
+}
 
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
