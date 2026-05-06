@@ -73,22 +73,30 @@ const availableMakes = useMemo(() => {
     ],
 
     "WHEEL LOADERS": [
-      "CATERPILLAR",
-      "DEERE",
-      "VOLVO",
-      "KOMATSU",
-      "CASE",
-      "HYUNDAI",
-      "KAWASAKI",
-      "DOOSAN",
-      "HITACHI",
-      "NEW HOLLAND",
-      "JCB",
-      "LIEBHERR",
-      "XCMG",
-      "SDLG",
-      "SEM"
-    ]
+  "CATERPILLAR",
+  "DEERE",
+  "VOLVO",
+  "KOMATSU",
+  "CASE",
+  "HYUNDAI",
+  "JCB",
+  "HITACHI",
+  "XCMG",
+  "LIEBHERR",
+  "BOBCAT",
+  "DEVELON",
+  "DOOSAN",
+  "GEHL",
+  "GIANT",
+  "KAWASAKI",
+  "KUBOTA",
+  "MANITOU",
+  "NEW HOLLAND",
+  "YANMAR",
+  "LIUGONG",
+  "SANY",
+  "SEM"
+]
   };
 
   let taxonomy = null;
