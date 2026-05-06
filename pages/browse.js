@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
+import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -51,35 +52,55 @@ export default function Browse() {
       .catch(() => {});
   }, []);
 
-  const availableMakes = useMemo(() => {
-    const makes = liveListings
-      .filter(
-        (item) =>
-          category === "ALL CATEGORIES" ||
-          String(item.type || "").toUpperCase() === category
-      )
-      .map((item) => item.make)
+const availableMakes = useMemo(() => {
+  if (category === "MOTOR GRADERS") {
+    const makes = motorGradersTaxonomy
+      .map((x) => x.make)
       .filter(Boolean);
 
     return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
-  }, [liveListings, category]);
+  }
+
+  const makes = liveListings
+    .filter(
+      (item) =>
+        category === "ALL CATEGORIES" ||
+        String(item.type || "").toUpperCase() === category
+    )
+    .map((item) => item.make)
+    .filter(Boolean);
+
+  return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
+}, [liveListings, category]);
 
   const availableModels = useMemo(() => {
-    const models = liveListings
-      .filter(
-        (item) =>
-          category === "ALL CATEGORIES" ||
-          String(item.type || "").toUpperCase() === category
-      )
-      .filter(
-        (item) =>
-          make === "ALL MAKES" || item.make === make
-      )
-      .map((item) => item.model)
-      .filter(Boolean);
+  if (
+    category === "MOTOR GRADERS" &&
+    make !== "ALL MAKES"
+  ) {
+    const models = motorGradersTaxonomy
+      .filter((x) => x.make === make)
+      .map((x) => x.model);
 
     return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
-  }, [liveListings, category, make]);
+  }
+
+  const models = liveListings
+  .filter(
+    (item) =>
+      category === "ALL CATEGORIES" ||
+      String(item.type || "").toUpperCase() === category
+  )
+    .filter(
+      (item) =>
+        make === "ALL MAKES" ||
+        item.make === make
+    )
+    .map((item) => item.model)
+    .filter(Boolean);
+
+  return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
+}, [liveListings, category, make]);
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
