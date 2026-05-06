@@ -53,12 +53,33 @@ export default function Browse() {
   }, []);
 
 const availableMakes = useMemo(() => {
+  const preferredMakes = [
+    "CATERPILLAR",
+    "DEERE",
+    "XCMG",
+    "VOLVO",
+    "CHAMPION",
+    "KOMATSU",
+    "UHI",
+    "SANY",
+    "LEEBOY",
+    "SEM",
+    "CASE",
+    "NEW HOLLAND",
+    "NORAM",
+    "GALION"
+  ];
+
   if (category === "MOTOR GRADERS") {
     const makes = motorGradersTaxonomy
       .map((x) => x.make)
       .filter(Boolean);
 
-    return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
+    const extraMakes = Array.from(new Set(makes)).filter(
+      (m) => !preferredMakes.includes(m)
+    );
+
+    return ["ALL MAKES", ...preferredMakes, ...extraMakes];
   }
 
   const makes = liveListings
@@ -70,49 +91,9 @@ const availableMakes = useMemo(() => {
     .map((item) => item.make)
     .filter(Boolean);
 
-  return [
-  "ALL MAKES",
-
-  "CATERPILLAR",
-  "DEERE",
-  "XCMG",
-  "VOLVO",
-  "CHAMPION",
-  "KOMATSU",
-  "UHI",
-  "SANY",
-  "LEEBOY",
-  "SEM",
-  "CASE",
-  "NEW HOLLAND",
-  "NORAM",
-  "GALION",
-
-  ...Array.from(
-    new Set(
-      makes.filter(
-        (m) =>
-          ![
-            "CATERPILLAR",
-            "DEERE",
-            "XCMG",
-            "VOLVO",
-            "CHAMPION",
-            "KOMATSU",
-            "UHI",
-            "SANY",
-            "LEEBOY",
-            "SEM",
-            "CASE",
-            "NEW HOLLAND",
-            "NORAM",
-            "GALION"
-          ].includes(m)
-      )
-    )
-  )
-];
-
+  return ["ALL MAKES", ...Array.from(new Set(makes)).sort()];
+}, [liveListings, category]);
+  
   const availableModels = useMemo(() => {
   if (
     category === "MOTOR GRADERS" &&
