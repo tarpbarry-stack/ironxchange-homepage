@@ -121,6 +121,28 @@ const availableMakes = useMemo(() => {
   "XCMG",
   "ALLIS CHALMERS"
 ]
+    ,
+
+"EXCAVATORS": [
+  "CATERPILLAR",
+  "DEERE",
+  "KOMATSU",
+  "HITACHI",
+  "KUBOTA",
+  "HYUNDAI",
+  "SANY",
+  "VOLVO",
+  "BOBCAT",
+  "YANMAR",
+  "TAKEUCHI",
+  "XCMG",
+  "NEW HOLLAND",
+  "LINK-BELT",
+  "LIEBHERR",
+  "CASE",
+  "DEVELON",
+  "DOOSAN"
+]
   };
 
   let taxonomy = null;
