@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
