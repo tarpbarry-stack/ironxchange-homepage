@@ -54,33 +54,61 @@ export default function Browse() {
   }, []);
 
 const availableMakes = useMemo(() => {
-  const preferredMakes = [
-    "CATERPILLAR",
-    "DEERE",
-    "XCMG",
-    "VOLVO",
-    "CHAMPION",
-    "KOMATSU",
-    "UHI",
-    "SANY",
-    "LEEBOY",
-    "SEM",
-    "CASE",
-    "NEW HOLLAND",
-    "NORAM",
-    "GALION"
-  ];
+  const preferredMakes = {
+    "MOTOR GRADERS": [
+      "CATERPILLAR",
+      "DEERE",
+      "XCMG",
+      "VOLVO",
+      "CHAMPION",
+      "KOMATSU",
+      "UHI",
+      "SANY",
+      "LEEBOY",
+      "SEM",
+      "CASE",
+      "NEW HOLLAND",
+      "NORAM",
+      "GALION"
+    ],
+
+    "WHEEL LOADERS": [
+      "CATERPILLAR",
+      "DEERE",
+      "VOLVO",
+      "KOMATSU",
+      "CASE",
+      "HYUNDAI",
+      "KAWASAKI",
+      "DOOSAN",
+      "HITACHI",
+      "NEW HOLLAND",
+      "JCB",
+      "LIEBHERR",
+      "XCMG",
+      "SDLG",
+      "SEM"
+    ]
+  };
+
+  let taxonomy = null;
 
   if (category === "MOTOR GRADERS") {
-    const makes = motorGradersTaxonomy
-      .map((x) => x.make)
-      .filter(Boolean);
+    taxonomy = motorGradersTaxonomy;
+  }
 
+  if (category === "WHEEL LOADERS") {
+    taxonomy = wheelLoadersTaxonomy;
+  }
+
+  if (taxonomy) {
+    const makes = taxonomy.map((x) => x.make).filter(Boolean);
+    const preferred = preferredMakes[category] || [];
     const extraMakes = Array.from(new Set(makes)).filter(
-      (m) => !preferredMakes.includes(m)
+      (m) => !preferred.includes(m)
     );
 
-    return ["ALL MAKES", ...preferredMakes, ...extraMakes];
+    return ["ALL MAKES", ...preferred, ...extraMakes];
   }
 
   const makes = liveListings
