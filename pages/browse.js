@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
+import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -135,6 +136,9 @@ const availableMakes = useMemo(() => {
 if (category === "DOZERS") {
   taxonomy = dozersTaxonomy;
 }
+  if (category === "EXCAVATORS") {
+  taxonomy = excavatorsTaxonomy;
+}
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
     const preferred = preferredMakes[category] || [];
@@ -169,6 +173,9 @@ if (category === "DOZERS") {
   }
     if (category === "DOZERS") {
   taxonomy = dozersTaxonomy;
+}
+    if (category === "EXCAVATORS") {
+  taxonomy = excavatorsTaxonomy;
 }
 
   if (taxonomy && make !== "ALL MAKES") {
