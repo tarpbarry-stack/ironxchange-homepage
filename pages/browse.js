@@ -124,23 +124,31 @@ const availableMakes = useMemo(() => {
 }, [liveListings, category]);
   
   const availableModels = useMemo(() => {
-  if (
-    category === "MOTOR GRADERS" &&
-    make !== "ALL MAKES"
-  ) {
-    const models = motorGradersTaxonomy
-      .filter((x) => x.make === make)
-      .map((x) => x.model);
+  let taxonomy = null;
 
-    return ["ALL MODELS", ...Array.from(new Set(models)).sort()];
+  if (category === "MOTOR GRADERS") {
+    taxonomy = motorGradersTaxonomy;
+  }
+
+  if (category === "WHEEL LOADERS") {
+    taxonomy = wheelLoadersTaxonomy;
+  }
+
+  if (taxonomy && make !== "ALL MAKES") {
+    const models = taxonomy
+      .filter((x) => x.make === make)
+      .map((x) => x.model)
+      .filter(Boolean);
+
+    return ["ALL MODELS", ...Array.from(new Set(models))];
   }
 
   const models = liveListings
-  .filter(
-    (item) =>
-      category === "ALL CATEGORIES" ||
-      String(item.type || "").toUpperCase() === category
-  )
+    .filter(
+      (item) =>
+        category === "ALL CATEGORIES" ||
+        String(item.type || "").toUpperCase() === category
+    )
     .filter(
       (item) =>
         make === "ALL MAKES" ||
