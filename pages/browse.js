@@ -187,7 +187,7 @@ const availableMakes = useMemo(() => {
 ]
   ,
 
-"AGGREGATE": [
+"AGGREGATE",: [
   "POWERSCREEN",
   "MCCLOSKEY",
   "METSO",
@@ -231,8 +231,6 @@ const availableMakes = useMemo(() => {
   "TCI",
   "TEREX FINLAY",
 ];
-
-
   
   };
 
