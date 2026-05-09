@@ -4,6 +4,7 @@ import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
 import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
+import aerialTaxonomy from "../lib/aerialTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -143,6 +144,46 @@ const availableMakes = useMemo(() => {
   "DEVELON",
   "DOOSAN"
 ]
+    ,
+
+"AERIAL EQUIPMENT": [
+  "GENIE",
+  "JLG",
+  "SKYJACK",
+  "HAULOTTE",
+  "SNORKEL",
+  "NIFTYLIFT",
+  "TEREX",
+  "LGMG",
+
+  "JCB",
+  "MANITOU",
+  "SKYTRAK",
+  "MAGNI",
+  "MERLO",
+  "DIECI",
+
+  "TOYOTA",
+  "HYSTER",
+  "YALE",
+  "CLARK",
+  "CROWN",
+  "HELI",
+  "HANGCHA",
+  "DOOSAN",
+  "HYUNDAI",
+  "KOMATSU",
+  "MITSUBISHI",
+  "NISSAN",
+  "UNI-CARRIERS",
+  "VIPER",
+  "RAYMOND",
+  "HOIST",
+  "TAYLOR",
+  "CATERPILLAR",
+  "MOFFETT",
+  "SANY"
+]
   };
 
   let taxonomy = null;
@@ -160,6 +201,9 @@ if (category === "DOZERS") {
 }
   if (category === "EXCAVATORS") {
   taxonomy = excavatorsTaxonomy;
+}
+  if (category === "AERIAL EQUIPMENT") {
+  taxonomy = aerialTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -199,7 +243,9 @@ if (category === "DOZERS") {
     if (category === "EXCAVATORS") {
   taxonomy = excavatorsTaxonomy;
 }
-
+    if (category === "AERIAL EQUIPMENT") {
+  taxonomy = aerialTaxonomy;
+}
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
       .filter((x) => x.make === make)
