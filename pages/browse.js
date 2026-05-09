@@ -5,6 +5,7 @@ import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
 import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 import aerialTaxonomy from "../lib/aerialTaxonomy";
+import aggregateTaxonomy from "../../lib/aggregateTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -184,6 +185,55 @@ const availableMakes = useMemo(() => {
   "MOFFETT",
   "SANY"
 ]
+  ,
+
+"AGGREGATE": [
+  "POWERSCREEN",
+  "MCCLOSKEY",
+  "METSO",
+  "KINGLINK",
+  "KLEEMAN",
+  "SANDVIK",
+  "ASTEC",
+  "SUPERIOR",
+  "CEDAR RAPIDS",
+  "TEREX FINLAY",
+  "ANACONDA",
+  "BARFORD",
+  "CUSTOM BILT",
+  "EAGLE CRUSHER",
+  "EARTHWORM CONVEYORS",
+  "EAGLE IRON WORKS",
+  "EDGE",
+  "EVOQUIP",
+  "EXCEL",
+  "EXTEC",
+  "FAE",
+  "FINLAY",
+  "IROCK",
+  "IRON CITY SUPPLY",
+  "JCI",
+  "JP CONVEYORS",
+  "KAFKA",
+  "KEESTRA",
+  "KOMPLET",
+  "KPI-JCI",
+  "LIPPMAN",
+  "MASABA",
+  "MDS",
+  "NORDBERG",
+  "PIONEER",
+  "ROCK SYSTEMS",
+  "RUBBLE MASTER",
+  "SCREEN MACHINE",
+  "SCREENPOD",
+  "SIMPLICITY",
+  "TCI",
+  "TEREX FINLAY",
+];
+
+
+  
   };
 
   let taxonomy = null;
@@ -203,6 +253,9 @@ if (category === "DOZERS") {
   taxonomy = excavatorsTaxonomy;
 }
   if (category === "AERIAL EQUIPMENT") {
+  taxonomy = aerialTaxonomy;
+}
+   if (category === "AGGREGATE") {
   taxonomy = aerialTaxonomy;
 }
   if (taxonomy) {
@@ -244,6 +297,9 @@ if (category === "DOZERS") {
   taxonomy = excavatorsTaxonomy;
 }
     if (category === "AERIAL EQUIPMENT") {
+  taxonomy = aerialTaxonomy;
+}
+    if (category === "AGGREGATE") {
   taxonomy = aerialTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
