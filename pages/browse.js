@@ -255,8 +255,8 @@ if (category === "DOZERS") {
   if (category === "AERIAL EQUIPMENT") {
   taxonomy = aerialTaxonomy;
 }
-   if (category === "AGGREGATE") {
-  taxonomy = aerialTaxonomy;
+  if (category === "AGGREGATE") {
+  taxonomy = aggregateTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -299,8 +299,8 @@ if (category === "DOZERS") {
     if (category === "AERIAL EQUIPMENT") {
   taxonomy = aerialTaxonomy;
 }
-    if (category === "AGGREGATE") {
-  taxonomy = aerialTaxonomy;
+  if (category === "AGGREGATE") {
+  taxonomy = aggregateTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
