@@ -5,7 +5,7 @@ import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
 import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 import aerialTaxonomy from "../lib/aerialTaxonomy";
-import aggregateTaxonomy from "../../lib/aggregateTaxonomy";
+import aggregateTaxonomy from "../lib/aggregateTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
