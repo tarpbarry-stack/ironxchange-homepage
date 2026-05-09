@@ -13,6 +13,7 @@ const BRAND_YELLOW = "#FFC400";
 const categories = [
   "ALL CATEGORIES",
   "AERIAL EQUIPMENT",
+  "AGGREGATE",
   "AGRICULTURE HARVESTERS",
   "AGRICULTURE TRACTORS",
   "ASPHALT EQUIPMENT",
@@ -187,7 +188,7 @@ const availableMakes = useMemo(() => {
 ]
   ,
 
-"AGGREGATE",: [
+"AGGREGATE": [
   "POWERSCREEN",
   "MCCLOSKEY",
   "METSO",
@@ -229,8 +230,8 @@ const availableMakes = useMemo(() => {
   "SCREENPOD",
   "SIMPLICITY",
   "TCI",
-  "TEREX FINLAY",
-];
+  "TEREX FINLAY"
+],
   
   };
 
