@@ -6,6 +6,7 @@ import dozersTaxonomy from "../lib/dozersTaxonomy";
 import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 import aerialTaxonomy from "../lib/aerialTaxonomy";
 import aggregateTaxonomy from "../lib/aggregateTaxonomy";
+import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -231,8 +232,28 @@ const availableMakes = useMemo(() => {
   "SIMPLICITY",
   "TCI",
   "TEREX FINLAY"
+]
+    ,
+    
+  "AGRICULTURE HARVESTERS": [
+  "JOHN DEERE",
+  "CASE IH",
+  "NEW HOLLAND",
+  "CLAAS",
+  "GLEANER",
+  "MASSEY FERGUSON",
+  "CHALLENGER",
+  "FENDT",
+  "AGCO",
+  "KRONE",
+  "OXBO",
+  "MACDON",
+  "DRAGO",
+  "GERINGHOFF",
+  "FANTINI",
+  "HONEY BEE",
+  "OTHER"
 ],
-  
   };
 
   let taxonomy = null;
@@ -256,6 +277,9 @@ if (category === "DOZERS") {
 }
   if (category === "AGGREGATE") {
   taxonomy = aggregateTaxonomy;
+}
+  if (category === "AGRICULTURE HARVESTERS") {
+  taxonomy = agricultureHarvestersTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -300,6 +324,9 @@ if (category === "DOZERS") {
 }
   if (category === "AGGREGATE") {
   taxonomy = aggregateTaxonomy;
+}
+    if (category === "AGRICULTURE HARVESTERS") {
+  taxonomy = agricultureHarvestersTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
