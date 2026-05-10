@@ -7,6 +7,8 @@ import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 import aerialTaxonomy from "../lib/aerialTaxonomy";
 import aggregateTaxonomy from "../lib/aggregateTaxonomy";
 import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
+import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
+
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -268,6 +270,119 @@ const availableMakes = useMemo(() => {
   "NARDI",
   "NEW IDEA",
   "OTHER"
+]
+    ,
+    "AGRICULTURE TRACTORS 300HP +": [
+  "JOHN DEERE",
+  "CASI IH",
+  "NEW HOLLAND",
+  "FENDT",
+  "VERSATILE",
+  "CHALLENGER",
+  "CLAAS",
+  "MASSEY FERGUESON",
+  "JCB",
+  "VALTRA",
+  "OTHER"
+],
+
+"AGRICULTURE TRACTORS 175 - 299 HP": [
+  "JOHN DEERE",
+  "CASE IH",
+  "FENDT",
+  "NEW HOLLAND",
+  "MASSEY FERGUESON",
+  "CLAAS",
+  "JCB",
+  "VALTRA",
+  "VERSATILE",
+  "DUETZ FAHR",
+  "AGCO",
+  "CATRELPILLAR",
+  "CHALLENGER",
+  "FORD",
+  "INTERNATIONAL",
+  "MCCORMICK",
+  "STEIGER",
+  "OTHER"
+],
+
+"AGRICULTURE TRACTORS 100 - 174 HP": [
+  "JOHN DEERE",
+  "CASE IH",
+  "NEW HOLLAND",
+  "MASSEY FERGUESON",
+  "KUBOTA",
+  "INTERNATIONAL",
+  "FENDT",
+  "DUETZ FAHR",
+  "CLAAS",
+  "MCCORMICK",
+  "ALLIS CHALMERS",
+  "CHALLENGER",
+  "FORD",
+  "J I CASE",
+  "JCB",
+  "KIOTI",
+  "MAHINDRA",
+  "VALTRA",
+  "WHITE",
+  "ZETOR",
+  "OTHER"
+],
+
+"AGRICULTURE TRACTORS 40 - 99 HP": [
+  "JOHN DEERE",
+  "NEW HOLLAND",
+  "KUBOTA",
+  "MASSEY FERGUESON",
+  "CASE IH",
+  "FORD",
+  "INTERNATIONAL",
+  "KIOTI",
+  "MAHINDRA",
+  "TYM",
+  "ALLIS CHALMERS",
+  "BAD BOY",
+  "BOBCAT",
+  "BRANSON",
+  "CLAAS",
+  "DUETZ FAHR",
+  "FENDT",
+  "J I CASE",
+  "LANDINI",
+  "MCCORMICK",
+  "OLIVER",
+  "SOLIS",
+  "UHI",
+  "WHITE",
+  "YANMAR",
+  "ZETOR",
+  "OTHER"
+],
+
+"AGRICULTURE TRACTORS LESS THAN 40 HP": [
+  "JOHN DEERE",
+  "KUBOTA",
+  "MASSEY FERGUESON",
+  "NEW HOLLAND",
+  "KIOTI",
+  "MAHINDRA",
+  "BOBCAT",
+  "INTERNATIONAL",
+  "YANMAR",
+  "LS",
+  "ALLIS-CHALMERS",
+  "BAD BOY",
+  "CASE IH",
+  "FORD",
+  "JI CASE",
+  "MCCORMICK",
+  "OLIVER",
+  "SOLIS",
+  "STEINER",
+  "TYM",
+  "VENTRAC"
 ],
   };
 
@@ -295,6 +410,9 @@ if (category === "DOZERS") {
 }
   if (category === "AGRICULTURE HARVESTERS") {
   taxonomy = agricultureHarvestersTaxonomy;
+}
+  if (category === "AGRICULTURE TRACTORS") {
+  taxonomy = agricultureTractorsTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -342,6 +460,9 @@ if (category === "DOZERS") {
 }
     if (category === "AGRICULTURE HARVESTERS") {
   taxonomy = agricultureHarvestersTaxonomy;
+}
+    if (category === "AGRICULTURE TRACTORS") {
+  taxonomy = agricultureTractorsTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
