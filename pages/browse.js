@@ -15,6 +15,7 @@ import cranesTaxonomy from "../lib/cranesTaxonomy";
 import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
 import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
 import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
+import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -595,6 +596,69 @@ const availableMakes = useMemo(() => {
 ]
     ,
     
+    "FORKLIFTS": [
+  "TOYOTA",
+  "HYSTER",
+  "YALE",
+  "CATERPILLAR",
+  "RAYMOND",
+  "LINDE",
+  "CLARK",
+  "DOOSAN",
+  "HANGCHA",
+  "MITSUBISHI",
+  "AISLE MASTER",
+  "AUSA",
+  "BAOLI",
+  "BENDI",
+  "BIG JOE",
+  "BTLIFTS",
+  "BYD",
+  "CASE",
+  "CASTLE EQUIPMENT",
+  "CHL",
+  "COMBILIFT",
+  "CROWN",
+  "DAEWOO",
+  "DREXEL",
+  "EKKO",
+  "EUROTRAC",
+  "FLEXI",
+  "GENIE",
+  "HARLO",
+  "HOIST",
+  "JCB",
+  "HYUNDAI",
+  "JUNGERICH",
+  "KALMAR",
+  "KOMATSU",
+  "LIFT HERO",
+  "LIUGONG",
+  "LOAD LIFTER",
+  "MANITOU",
+  "MITSUBISHI",
+  "MOFFETT",
+  "NAVIGATOR",
+  "NEW HOLLAND",
+  "NISSAN",
+  "NOBLELIFT",
+  "OCTANE",
+  "PALFINGER",
+  "PETTIBONE",
+  "PRINCETON",
+  "SELLICK",
+  "STILL",
+  "TAILIFT",
+  "TAYLOR",
+  "TCM",
+  "UHI",
+  "UNICARRIERS",
+  "VERSA-LIFT",
+  "VIPER",
+  "XCMG"
+]
+    ,
+    
   };
 
   let taxonomy = null;
@@ -645,6 +709,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "DUMP TRUCKS - ARTIC/RIGID") {
   taxonomy = dumpTrucksTaxonomy;
+}
+  if (category === "FORKLIFTS") {
+  taxonomy = forkliftsTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -716,6 +783,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "DUMP TRUCKS - ARTIC/RIGID") {
   taxonomy = dumpTrucksTaxonomy;
+}
+    if (category === "FORKLIFTS") {
+  taxonomy = forkliftsTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
