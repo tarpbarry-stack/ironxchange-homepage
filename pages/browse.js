@@ -8,7 +8,7 @@ import aerialTaxonomy from "../lib/aerialTaxonomy";
 import aggregateTaxonomy from "../lib/aggregateTaxonomy";
 import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
 import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
-
+import asphaltTractorsTaxonomy from "../lib/asphaltTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -383,7 +383,66 @@ const availableMakes = useMemo(() => {
   "STEINER",
   "TYM",
   "VENTRAC"
+]
+    ,
+    
+"ASPHALT": [
+  "VOGELE",
+  "WIRTGEN",
+  "LEEBOY",
+  "CATERPILLAR",
+  "HUSQVARNA",
+  "MULTIQUIP-WHITEMAN",
+  "TORO",
+  "BOMAG",
+  "ROADTEC",
+  "CHIKUSUIU CANYCOM",
+  "ABG",
+  "AESCO MADSEN",
+  "ALLEN ENG",
+  "AMAG",
+  "AMMANN",
+  "ASPHALT ZIPPER",
+  "ASTEC",
+  "BARBER GREENE",
+  "BARTELL",
+  "BERGKAMP",
+  "BETONBLOCK",
+  "BITELLI",
+  "BLAWKNOX",
+  "CARLSON",
+  "CEDAR RAPIDS",
+  "CIMLINE",
+  "CMI",
+  "CRAFCO",
+  "DIAMOND",
+  "DYNAPAC",
+  "EDCO",
+  "ETNYRE",
+  "FALCON",
+  "GOMACO",
+  "IMER",
+  "INDY",
+  "KIMERA",
+  "KM INTERNATIONAL",
+  "MARATHON",
+  "MAULDIN",
+  "METALIKA",
+  "MIDLAND",
+  "MULTIQUIP-WHITEMAN",
+  "NORMET",
+  "POWER CURBERS",
+  "PUTZMIESTER",
+  "SAMI",
+  "SCHWING",
+  "STRUEMASTER",
+  "VOLVO",
+  "WACKER NUESON",
+  "WEILER",
+  "XCMG",
+  "ZOOMLION"
 ],
+    
   };
 
   let taxonomy = null;
@@ -414,6 +473,9 @@ if (category === "DOZERS") {
   if (category === "AGRICULTURE TRACTORS") {
   taxonomy = agricultureTractorsTaxonomy;
 }
+   if (category === "ASPHALT") {
+    taxonomy = asphaltTaxonomy;
+     
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
     const preferred = preferredMakes[category] || [];
@@ -463,6 +525,9 @@ if (category === "DOZERS") {
 }
     if (category === "AGRICULTURE TRACTORS") {
   taxonomy = agricultureTractorsTaxonomy;
+}
+     if (category === "ASPHALT") {
+  taxonomy = asphaltTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
