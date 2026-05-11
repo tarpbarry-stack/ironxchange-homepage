@@ -12,6 +12,7 @@ import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
 import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
 import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
 import cranesTaxonomy from "../lib/cranesTaxonomy";
+import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -512,6 +513,31 @@ const availableMakes = useMemo(() => {
   "STELLAR"
 ]
     ,
+    "CRAWLER CARRIERS / LOADER": [
+  "PRINOTH",
+  "MOROOKA",
+  "TERRAMAC",
+  "YANMAR",
+  "IHI",
+  "ALMACRAWLER",
+  "KATO",
+  "BELL",
+  "BERGMAN",
+  "SUPERIOR",
+  "ALLIS CHALMERS",
+  "CASE",
+  "CATERPILLAR",
+  "DEERE",
+  "DRESSER",
+  "FIATALLIS",
+  "INTERNATIONAL",
+  "KOMATSU",
+  "LIEBHERR",
+  "LIUGONG",
+  "MOVEX",
+  "OLIVER"
+]
+    ,
     
   };
 
@@ -555,7 +581,9 @@ if (category === "BACKHOE LOADERS") {
    if (category === "CRANES") {
   taxonomy = cranesTaxonomy;
 }
-     
+  if (category === "CRAWLER CARRIERS / LOADER") {
+  taxonomy = crawlerCarriersTaxonomy;
+} 
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
     const preferred = preferredMakes[category] || [];
@@ -617,6 +645,9 @@ if (category === "BACKHOE LOADERS") {
 }
      if (category === "CRANES") {
   taxonomy = cranesTaxonomy;
+}
+    if (category === "CRAWLER CARRIERS / LOADER") {
+  taxonomy = crawlerCarriersTaxonomy;
 }
     
   if (taxonomy && make !== "ALL MAKES") {
