@@ -11,6 +11,7 @@ import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
 import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
 import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
 import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
+import cranesTaxonomy from "../lib/cranesTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -513,6 +514,9 @@ if (category === "BACKHOE LOADERS") {
   if (category === "COMPACTION/ROLLERS") {
   taxonomy = compactionRollersTaxonomy;
 }
+   if (category === "CRANES") {
+  taxonomy = cranesTaxonomy;
+}
      
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -572,6 +576,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "COMPACTION/ROLLERS") {
   taxonomy = compactionRollersTaxonomy;
+}
+     if (category === "CRANES") {
+  taxonomy = cranesTaxonomy;
 }
     
   if (taxonomy && make !== "ALL MAKES") {
