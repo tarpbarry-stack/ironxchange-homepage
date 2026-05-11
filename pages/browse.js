@@ -474,7 +474,8 @@ if (category === "DOZERS") {
   taxonomy = agricultureTractorsTaxonomy;
 }
    if (category === "ASPHALT EQUIPMENT") {
-    taxonomy = asphaltEquipmentTaxonomy;
+  taxonomy = asphaltEquipmentTaxonomy;
+}
      
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
