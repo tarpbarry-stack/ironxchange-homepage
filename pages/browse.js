@@ -14,6 +14,7 @@ import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
 import cranesTaxonomy from "../lib/cranesTaxonomy";
 import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
 import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
+import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -571,6 +572,29 @@ const availableMakes = useMemo(() => {
 ]
     ,
     
+"DUMP TRUCKS - ARTIC/RIGID": [
+  "CATERPILLAR",
+  "VOLVO",
+  "BELL",
+  "KOMATSU",
+  "DEERE",
+  "TEREX",
+  "HYDREMA",
+  "ROKBAK",
+  "HOLMES",
+  "HYUNDAI",
+  "DEVELON",
+  "DOOSAN",
+  "EUCLID",
+  "HITACHI",
+  "LIEBHERR",
+  "MOXY",
+  "PERLINI",
+  "SANDVIK",
+  "XCMG"
+]
+    ,
+    
   };
 
   let taxonomy = null;
@@ -618,6 +642,9 @@ if (category === "BACKHOE LOADERS") {
 } 
   if (category === "DRILLS & PILING") {
   taxonomy = drillsAndPilingTaxonomy;
+}
+  if (category === "DUMP TRUCKS - ARTIC/RIGID") {
+  taxonomy = dumpTrucksTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -686,6 +713,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "DRILLS & PILING") {
   taxonomy = drillsAndPilingTaxonomy;
+}
+    if (category === "DUMP TRUCKS - ARTIC/RIGID") {
+  taxonomy = dumpTrucksTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
