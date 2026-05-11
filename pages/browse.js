@@ -9,6 +9,7 @@ import aggregateTaxonomy from "../lib/aggregateTaxonomy";
 import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
 import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
 import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
+import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -441,6 +442,21 @@ const availableMakes = useMemo(() => {
   "WEILER",
   "XCMG",
   "ZOOMLION"
+]
+    ,
+
+    "BACKHOE LOADERS": [
+  "DEERE",
+  "CATERPILLAR",
+  "CASE",
+  "JCB",
+  "KOMATSU",
+  "NEW HOLLAND",
+  "FORD",
+  "TEREX",
+  "DELCO",
+  "BOBCAT",
+  "XCMG"
 ],
     
   };
@@ -475,6 +491,9 @@ if (category === "DOZERS") {
 }
    if (category === "ASPHALT EQUIPMENT") {
   taxonomy = asphaltEquipmentTaxonomy;
+}
+if (category === "BACKHOE LOADERS") {
+  taxonomy = backhoeLoadersTaxonomy;
 }
      
   if (taxonomy) {
@@ -530,6 +549,10 @@ if (category === "DOZERS") {
      if (category === "ASPHALT EQUIPMENT") {
   taxonomy = asphaltEquipmentTaxonomy;
 }
+    if (category === "BACKHOE LOADERS") {
+  taxonomy = backhoeLoadersTaxonomy;
+}
+    
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
       .filter((x) => x.make === make)
