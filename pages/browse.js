@@ -10,6 +10,7 @@ import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy"
 import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
 import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
 import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
+import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -458,6 +459,20 @@ const availableMakes = useMemo(() => {
   "BOBCAT",
   "XCMG"
 ],
+
+    "COMPACTION/ROLLERS": [
+  "CATERPILLAR",
+  "HAMM",
+  "BOMAG",
+  "DYNAPAC",
+  "WACKER NUESON",
+  "VOLVO",
+  "SAKAI",
+  "AMMANN",
+  "XCMG",
+  "HUSQVARNA",
+  "SANY"
+],
     
   };
 
@@ -494,6 +509,9 @@ if (category === "DOZERS") {
 }
 if (category === "BACKHOE LOADERS") {
   taxonomy = backhoeLoadersTaxonomy;
+}
+  if (category === "COMPACTION/ROLLERS") {
+  taxonomy = compactionRollersTaxonomy;
 }
      
   if (taxonomy) {
@@ -551,6 +569,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "BACKHOE LOADERS") {
   taxonomy = backhoeLoadersTaxonomy;
+}
+    if (category === "COMPACTION/ROLLERS") {
+  taxonomy = compactionRollersTaxonomy;
 }
     
   if (taxonomy && make !== "ALL MAKES") {
