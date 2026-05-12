@@ -22,7 +22,7 @@ import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 import trenchersTaxonomy from "../lib/trenchersTaxonomy";
 import trailersTaxonomy from "../lib/trailersTaxonomy";
 import trucksTaxonomy from "../lib/trucksTaxonomy";
-import attatchmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
+import attatchmentsPartsTaxonomy from "../lib/attatchmentsPartsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
