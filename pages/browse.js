@@ -661,7 +661,7 @@ const availableMakes = useMemo(() => {
   "XCMG"
 ]
     ,
-    "SCRAPERS": [
+    "SCRAPER": [
   "CATERPILLAR",
   "K-TEC",
   "ASHLAND",
@@ -684,7 +684,7 @@ const availableMakes = useMemo(() => {
   "TEREX"
 ]
     , 
-"SKIDSTEERS / CTL": [
+"SKIDSTEERS/CTL": [
   "BOBCAT",
   "DEERE",
   "CATERPILLAR",
@@ -784,10 +784,10 @@ if (category === "BACKHOE LOADERS") {
   if (category === "FORKLIFTS") {
   taxonomy = forkliftsTaxonomy;
 }
-  if (category === "SCRAPERS") {
+  if (category === "SCRAPER") {
   taxonomy = scraperTaxonomy;
 }
-  if (category === "SKID STEER / CTL") {
+  if (category === "SKID STEER/CTL") {
   taxonomy = skidSteerCtlTaxonomy;
 }
   if (category === "TELEHANDLERS") {
@@ -867,10 +867,10 @@ if (category === "BACKHOE LOADERS") {
     if (category === "FORKLIFTS") {
   taxonomy = forkliftsTaxonomy;
 }
-    if (category === "SCRAPERS") {
+    if (category === "SCRAPER") {
   taxonomy = scraperTaxonomy;
 }
-    if (category === "SKID STEER / CTL") {
+    if (category === "SKID STEER/CTL") {
   taxonomy = skidSteerCtlTaxonomy;
 }
     if (category === "TELEHANDLERS") {
