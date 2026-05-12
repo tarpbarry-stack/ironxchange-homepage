@@ -118,10 +118,9 @@ const handleSearch = () => {
   ].filter(Boolean).join(" ");
 
   window.location.href = terms
-    ? `/search?keywords=${encodeURIComponent(terms)}`
-    : `/search`;
+    ? `/browse?keywords=${encodeURIComponent(terms)}`
+    : `/browse`;
 };
-
   return (
     <>
      <Head>
@@ -213,7 +212,7 @@ const handleSearch = () => {
         <div className="popular">
           <span>Popular Searches:</span>
           {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
-           <button key={x} onClick={() => window.location.href = `/search?keywords=${encodeURIComponent(x)}`}>
+           <button key={x} onClick={() => window.location.href = `/browse?keywords=${encodeURIComponent(x)}`}>
   {x}
 </button>
           ))}
