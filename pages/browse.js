@@ -684,7 +684,7 @@ const availableMakes = useMemo(() => {
   "TEREX"
 ]
     , 
-"SKIDSTEERS/CTL": [
+"SKID STEER/CTL": [
   "BOBCAT",
   "DEERE",
   "CATERPILLAR",
