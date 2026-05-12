@@ -23,6 +23,7 @@ import trenchersTaxonomy from "../lib/trenchersTaxonomy";
 import trailersTaxonomy from "../lib/trailersTaxonomy";
 import trucksTaxonomy from "../lib/trucksTaxonomy";
 import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
+import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -1035,6 +1036,9 @@ if (category === "BACKHOE LOADERS") {
   if (category === "ATTACHMENTS / PARTS") {
   taxonomy = attachmentsPartsTaxonomy;
 }
+  if (category === "SUPPORT EQUIPMENT") {
+  taxonomy = supportEquipmentTaxonomy;
+}
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
     const preferred = preferredMakes[category] || [];
@@ -1129,6 +1133,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "ATTACHMENTS / PARTS") {
   taxonomy = attachmentsPartsTaxonomy;
+}
+    if (category === "SUPPORT EQUIPMENT") {
+  taxonomy = supportEquipmentTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
