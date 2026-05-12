@@ -960,6 +960,17 @@ const availableMakes = useMemo(() => {
   "WINCH"
 ]
     , 
+"SUPPORT EQUIPMENT": [
+  "DUMPERS",
+  "AIR COMPRESSORS",
+  "GENERATORS",
+  "HEATERS",
+  "LIGHT TOWERS",
+  "PUMPS",
+  "VACUUM EXCAVATORS",
+  "OTHER"
+]
+    , 
     
   } ;
 
