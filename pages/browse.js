@@ -22,6 +22,7 @@ import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 import trenchersTaxonomy from "../lib/trenchersTaxonomy";
 import trailersTaxonomy from "../lib/trailersTaxonomy";
 import trucksTaxonomy from "../lib/trucksTaxonomy";
+import attatchmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -847,7 +848,118 @@ const availableMakes = useMemo(() => {
   "YARD SPOTTER TRUCKS"
 ]   
     ,
- 
+ "ATTATCHMENTS / PARTS": [
+  "EXCAVATOR - PARTS / ATTACHMENTS",
+  "SKID STEER - PARTS / ATTACHMENTS",
+  "WHEEL LOADER - PARTS / ATTACHMENTS",
+  "DOZER ATTACHMENTS",
+  "BACKHOE ATTACHMENTS",
+  "ASPHALT ATTACHMENTS",
+  "CRANE ATTACHMENTS",
+  "DOZER ATTACHMENTS",
+  "MOTOR GRADER ATTACHMENTS",
+  "APRON",
+  "ARCH",
+  "ARM",
+  "ASPHALT CUTTER",
+  "ASPHALT/PAVING",
+  "AUGER",
+  "AXLE",
+  "BACKHOE",
+  "BED",
+  "BEDING CONVEYOR",
+  "BLADES",
+  "BOOMS",
+  "BOWL",
+  "BUCKETS",
+  "CABLE PLOWS",
+  "CABS",
+  "CARBODY",
+  "C-FRAME",
+  "CIRCLES",
+  "CLAMPS",
+  "COMPACTOR",
+  "COMPACTOR WHEEL",
+  "CONCRETE SAW",
+  "COUNTERWEIGHT",
+  "COUPLER",
+  "CRANE",
+  "CRUSHER",
+  "DELIMBER",
+  "DIFFERNTIAL",
+  "DRAWBAR",
+  "DRILL",
+  "EJECTOR GATE",
+  "ENGINE",
+  "EQUALIZER BARS",
+  "FAIRLEADS",
+  "FELLER BUNCHER",
+  "FINAL DRIVE",
+  "FORESTRY TILLER",
+  "FORKS",
+  "GENERATOR END",
+  "GRAPPLES",
+  "HAMMER/BREAKER",
+  "HITCH",
+  "HOOK BLOCK",
+  "HYDRAULIC CYLINDERS",
+  "HYDRAULIC PUMP",
+  "HYDRAULICS",
+  "JIB",
+  "MAGNET",
+  "MAST",
+  "MULCHER",
+  "OTHER",
+  "OUTRIGGER",
+  "PILE DRIVER",
+  "PLANETARY",
+  "PLATFORM/BASKET",
+  "POST HOLE DIGGER",
+  "PROCESSOR/HARVERSTER",
+  "PUSH BLOCK",
+  "RADIATOR",
+  "RAKES",
+  "RIDE STRUT",
+  "RIM",
+  "RIPPER",
+  "SCARIFIERS",
+  "SEAT",
+  "SHANKS",
+  "SHEARS",
+  "SHELL KIT",
+  "SHREDDER/MOWER",
+  "SIDEBOOM",
+  "SLEW RING",
+  "SNOW PLOW",
+  "SNOW WING",
+  "SNOWBLOWER",
+  "STICK",
+  "STUMP GRINDER",
+  "STUMP SPLITTER",
+  "SWEEPER",
+  "SWEEPS",
+  "SWING DRIVE",
+  "SWING MOTOR",
+  "TAILGATE",
+  "TEETH",
+  "THUMB",
+  "TIRES",
+  "TORQUE CONVERTER",
+  "TRANSMISSIONS",
+  "TRAVEL MOTOR",
+  "TREE SAW",
+  "TREE SPADE",
+  "TRENCHER",
+  "TRUCK BED",
+  "UNDERCARRIAGE PARTS",
+  "VALVE",
+  "WATER TANKS",
+  "WEIGHTS",
+  "WHEELS",
+  "WINCH"
+]
+    , 
+    
   } ;
 
   let taxonomy = null;
@@ -919,6 +1031,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "TRUCKS") {
   taxonomy = trucksTaxonomy;
+}
+  if (category === "ATTATCHMENTS / PARTS") {
+  taxonomy = attatchmentsPartsTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -1011,6 +1126,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "TRUCKS") {
   taxonomy = trucksTaxonomy;
+}
+    if (category === "ATTATCHMENTS / PARTS") {
+  taxonomy = attatchmentsPartsTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
