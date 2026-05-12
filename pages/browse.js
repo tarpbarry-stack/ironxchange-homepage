@@ -17,6 +17,7 @@ import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
 import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
 import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
 import scraperTaxonomy from "../lib/scraperTaxonomy";
+import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -682,7 +683,31 @@ const availableMakes = useMemo(() => {
   "TEREX"
 ]
     , 
-  
+    
+"SKIDSTEERS / CTL": [
+  "BOBCAT",
+  "DEERE",
+  "CATERPILLAR",
+  "NEW HOLLAND",
+  "KUBOTA",
+  "CASE",
+  "GEHL",
+  "TAKEUCHI",
+  "JCB",
+  "TORO",
+  "WACKER NEUSON",
+  "ASV",
+  "DITCH WITCH",
+  "VERMEER",
+  "YANMAR",
+  "XCMG",
+  "HYUNDAI",
+  "KIOTI",
+  "MANITOU",
+  "UHI"
+]
+    ,
+    
   };
 
   let taxonomy = null;
@@ -739,6 +764,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "SCRAPERS") {
   taxonomy = scraperTaxonomy;
+}
+  if (category === "SKID STEER / CTL") {
+  taxonomy = skidSteerCtlTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -816,6 +844,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "SCRAPERS") {
   taxonomy = scraperTaxonomy;
+}
+    if (category === "SKID STEER / CTL") {
+  taxonomy = skidSteerCtlTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
