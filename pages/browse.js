@@ -44,7 +44,7 @@ const categories = [
   "SCRAPER",
   "SKID STEER/CTL",
   "TELEHANDLERS",
-  "TRENCHERS",
+  "TRENCHERS/PLOWS",
   "TRAILERS",
   "TRUCKS",
   "WHEEL LOADERS",
@@ -731,7 +731,7 @@ const availableMakes = useMemo(() => {
 ]
     ,
 
-    "TRENCHERS": [
+    "TRENCHERS/PLOWS": [
   "DITCH WITCH",
   "VERMEER",
   "TORO",
@@ -814,7 +814,7 @@ if (category === "BACKHOE LOADERS") {
   if (category === "TELEHANDLERS") {
   taxonomy = telehandlersTaxonomy;
 }
-  if (category === "TRENCHERS") {
+  if (category === "TRENCHERS/PLOWS") {
   taxonomy = trenchersTaxonomy;
 }
   if (taxonomy) {
@@ -900,7 +900,7 @@ if (category === "BACKHOE LOADERS") {
     if (category === "TELEHANDLERS") {
   taxonomy = telehandlersTaxonomy;
 }
-    if (category === "TRENCHERS") {
+    if (category === "TRENCHERS/PLOWS") {
   taxonomy = trenchersTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
