@@ -20,6 +20,7 @@ import scraperTaxonomy from "../lib/scraperTaxonomy";
 import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
 import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 import trenchersTaxonomy from "../lib/trenchersTaxonomy";
+import trailersTaxonomy from "../lib/trailersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -750,6 +751,51 @@ const availableMakes = useMemo(() => {
   "WOLFE"
 ]
     ,
+
+    "TRAILERS": [
+  "ASPHALT TRAILERS",
+  "BEVERAGE TRAILERS",
+  "BLADE / TOWER TRAILERS",
+  "BOTTOM DUMP TRAILERS",
+  "CAR CARRIER TRAILERS",
+  "CHEMICAL / ACID TANK TRAILERS",
+  "CHIP TRAILERS",
+  "CRUDE OIL TANK TRAILERS",
+  "CURTAIN SIDE TRAILERS",
+  "DOUBLE DROP TRAILERS",
+  "DROP DECK TRAILERS",
+  "END DUMP TRAILERS",
+  "FLATBED TRAILERS",
+  "FRAC TANK TRAILERS",
+  "FUEL / LUBE TRAILERS",
+  "FUEL TANK TRAILERS",
+  "HOPPER TRAILERS",
+  "HORSE TRAILERS",
+  "INUSTRIAL GAS TANK TRAILERS",
+  "LIQUID FOOD GRADE TANK TRAILERS",
+  "LIVE BOTTOM TRAILERS",
+  "LIVESTOCK TRAILERS",
+  "LOG TRAILERS",
+  "LOWBOY TRAILERS",
+  "NON CODE TANK TRAILERS",
+  "PNUEMATIC BULK TANK TRAILERS",
+  "POLE TRAILERS",
+  "PUP TRAILERS",
+  "REEL TRAILERS",
+  "REFRIGERATED TRAILERS",
+  "ROLL OFF TRAILERS",
+  "SANITARY TANK TRAILERS",
+  "SIDE DUMP TRAILERS",
+  "TAG TRAILERS",
+  "TANKER TRAILERS",
+  "UTILITY TRAILERS",
+  "VACUUM TRAILERS",
+  "VAN TRAILERS",
+  "WASTE / SLUDGE TANK TRAILERS",
+  "WATER TANK TRAILERS",
+  "OTHER TRAILERS"
+]
+    ,
     
   };
 
@@ -816,6 +862,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "TRENCHERS/PLOWS") {
   taxonomy = trenchersTaxonomy;
+}
+  if (category === "TRAILERS") {
+  taxonomy = trailersTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -902,6 +951,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "TRENCHERS/PLOWS") {
   taxonomy = trenchersTaxonomy;
+}
+    if (category === "TRAILERS") {
+  taxonomy = trailersTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
