@@ -16,6 +16,7 @@ import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
 import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
 import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
 import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
+import scraperTaxonomy from "../lib/scraperTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -658,7 +659,30 @@ const availableMakes = useMemo(() => {
   "XCMG"
 ]
     ,
-    
+    "SCRAPERS": [
+  "CATERPILLAR",
+  "K-TEC",
+  "ASHLAND",
+  "DEERE",
+  "REYNOLDS",
+  "ROME",
+  "ORTHMAN",
+  "MOBILE TRACK SOLUTIONS",
+  "ROWSE",
+  "TOREQ",
+  "BIG DOG",
+  "DURABILT",
+  "EVERSMAN",
+  "GARFIELD",
+  "HOLCOMB",
+  "HUMDINGER",
+  "ICON",
+  "LANDOLL ICON",
+  "NOBLE",
+  "TEREX"
+]
+    , 
+  
   };
 
   let taxonomy = null;
@@ -712,6 +736,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "FORKLIFTS") {
   taxonomy = forkliftsTaxonomy;
+}
+  if (category === "SCRAPERS") {
+  taxonomy = scraperTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -786,6 +813,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "FORKLIFTS") {
   taxonomy = forkliftsTaxonomy;
+}
+    if (category === "SCRAPERS") {
+  taxonomy = scraperTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
