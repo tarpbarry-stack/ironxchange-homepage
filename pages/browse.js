@@ -22,7 +22,7 @@ import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 import trenchersTaxonomy from "../lib/trenchersTaxonomy";
 import trailersTaxonomy from "../lib/trailersTaxonomy";
 import trucksTaxonomy from "../lib/trucksTaxonomy";
-import attatchmentsPartsTaxonomy from "../lib/attatchmentsPartsTaxonomy";
+import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -848,7 +848,7 @@ const availableMakes = useMemo(() => {
   "YARD SPOTTER TRUCKS"
 ]   
     ,
- "ATTATCHMENTS / PARTS": [
+ "ATTACHMENTS / PARTS": [
   "EXCAVATOR - PARTS / ATTACHMENTS",
   "SKID STEER - PARTS / ATTACHMENTS",
   "WHEEL LOADER - PARTS / ATTACHMENTS",
@@ -1032,8 +1032,8 @@ if (category === "BACKHOE LOADERS") {
   if (category === "TRUCKS") {
   taxonomy = trucksTaxonomy;
 }
-  if (category === "ATTATCHMENTS / PARTS") {
-  taxonomy = attatchmentsPartsTaxonomy;
+  if (category === "ATTACHMENTS / PARTS") {
+  taxonomy = attachmentsPartsTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -1127,8 +1127,8 @@ if (category === "BACKHOE LOADERS") {
     if (category === "TRUCKS") {
   taxonomy = trucksTaxonomy;
 }
-    if (category === "ATTATCHMENTS / PARTS") {
-  taxonomy = attatchmentsPartsTaxonomy;
+    if (category === "ATTACHMENTS / PARTS") {
+  taxonomy = attachmentsPartsTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
