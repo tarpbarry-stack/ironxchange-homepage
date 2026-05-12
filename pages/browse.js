@@ -24,6 +24,7 @@ import trailersTaxonomy from "../lib/trailersTaxonomy";
 import trucksTaxonomy from "../lib/trucksTaxonomy";
 import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
 import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
+import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -971,6 +972,49 @@ const availableMakes = useMemo(() => {
   "OTHER"
 ]
     , 
+
+    "UTILITY CARTS": [
+  "JOHN DEERE",
+  "KUBOTA",
+  "POLARIS",
+  "KAWASAKI",
+  "BOBCAT",
+  "CAN-AM",
+  "CFMOTO",
+  "TORO",
+  "CLUB CAR",
+  "HONDA",
+  "AMERICAN LANDMASTER",
+  "ARCTIC CAT",
+  "ARGO",
+  "BAD BOY",
+  "BENNCHE",
+  "BIG HORN",
+  "CORVUS",
+  "CUB CADET",
+  "CUSHMAN",
+  "E-Z-GO",
+  "GRAVELY",
+  "GREENWORKS",
+  "HISUN",
+  "HUNTVE",
+  "INTIMADATOR",
+  "IR",
+  "KIOTI",
+  "MAHINDRA",
+  "NEW HOLLAND",
+  "SDLANCH",
+  "SCHERP",
+  "SUBARU",
+  "SUZUKI",
+  "TAYLOR DUNN",
+  "TUATARA",
+  "VITACCI",
+  "YAMAHA",
+  "YANMAR",
+  "ALL OTHERS"
+]
+    ,
     
   } ;
 
@@ -1049,6 +1093,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "SUPPORT EQUIPMENT") {
   taxonomy = supportEquipmentTaxonomy;
+}
+  if (category === "UTILITY CARTS") {
+  taxonomy = utilityCartsTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -1147,6 +1194,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "SUPPORT EQUIPMENT") {
   taxonomy = supportEquipmentTaxonomy;
+}
+    if (category === "UTILITY CARTS") {
+  taxonomy = utilityCartsTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
