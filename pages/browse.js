@@ -21,6 +21,7 @@ import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
 import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 import trenchersTaxonomy from "../lib/trenchersTaxonomy";
 import trailersTaxonomy from "../lib/trailersTaxonomy";
+import trucksTaxonomy from "../lib/trucksTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -797,8 +798,57 @@ const availableMakes = useMemo(() => {
   "OTHER TRAILERS"
 ]
     ,
-    
-  };
+"TRUCKS": [
+  "AMBULANCE",
+  "ATTENUATOR TRUCKS",
+  "BEVERAGE TRUCKS",
+  "BOOM TRUCK CRANES",
+  "BOX TRUCKS",
+  "BUCKET TRUCKS",
+  "CAB & CHASSIS TRUCKS",
+  "CAR HAULER TRUCKS",
+  "CHIPPER TRUCKS",
+  "CURTAIN SIDE TRUCKS",
+  "DAY CAB TRUCKS",
+  "DIGGER DERRICKS",
+  "DUMP - TRANSFER TRUCKS",
+  "DUMP TRUCKS",
+  "EXPEDITOR TRUCKS",
+  "FARM TRUCKS / GRAIN TRUCKS",
+  "FIRE TRUCKS",
+  "FLATBED TRUCKS",
+  "FLATBED-DUMP TRUCKS",
+  "FORESTRY BUCKET TRUCKS",
+  "FUEL & LUBE TRUCKS",
+  "GARBAGE TRUCKS",
+  "GRAPPLE TRUCKS",
+  "HOOKLIFT TRUCKS",
+  "HOT SHOT TRUCKS",
+  "KNUCKLE BOOM CRANE TRUCKS",
+  "LANDSCAPE TRUCKS",
+  "LOGGING TRUCKS",
+  "MISCELLANEOUS TRUCKS",
+  "MIXER TRUCKS",
+  "PASSENGER BUS",
+  "PICKUP TRUCKS",
+  "PLOW / SPREADER TRUCKS",
+  "RECYCLING TRUCKS",
+  "RV HAULER / TOTER TRUCKS",
+  "SERVICE TRUCKS / UTILITY / MECHANIC",
+  "SHUTTLE BUS",
+  "SLEEPER TRUCKS",
+  "STAKE TRUCKS",
+  "STONE SLINGER TRUCKS",
+  "TANK TRUCKS",
+  "TOW TRUCKS",
+  "TRUCK BODIES",
+  "VANS",
+  "WINCH / OILFIELD TRUCKS",
+  "YARD SPOTTER TRUCKS"
+]   
+    ,
+ 
+  } ;
 
   let taxonomy = null;
 
@@ -866,6 +916,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "TRAILERS") {
   taxonomy = trailersTaxonomy;
+}
+  if (category === "TRUCKS") {
+  taxonomy = trucksTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -955,6 +1008,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "TRAILERS") {
   taxonomy = trailersTaxonomy;
+}
+    if (category === "TRUCKS") {
+  taxonomy = trucksTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
