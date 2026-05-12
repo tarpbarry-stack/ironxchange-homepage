@@ -111,16 +111,16 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
 
-  const handleSearch = () => {
-    const terms = [
-      searchQuery.trim(),
-      category !== "ALL CATEGORIES" ? category : ""
-    ].filter(Boolean).join(" ");
+const handleSearch = () => {
+  const terms = [
+    searchQuery.trim(),
+    category !== "ALL CATEGORIES" ? category : ""
+  ].filter(Boolean).join(" ");
 
-    window.location.href = terms
-      ? `${STAGING}/s?keywords=${encodeURIComponent(terms)}`
-      : `${STAGING}/s`;
-  };
+  window.location.href = terms
+    ? `/search?keywords=${encodeURIComponent(terms)}`
+    : `/search`;
+};
 
   return (
     <>
@@ -213,9 +213,9 @@ export default function Home() {
         <div className="popular">
           <span>Popular Searches:</span>
           {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
-            <button key={x} onClick={() => window.location.href = `${STAGING}/s?keywords=${encodeURIComponent(x)}`}>
-              {x}
-            </button>
+           <button key={x} onClick={() => window.location.href = `/search?keywords=${encodeURIComponent(x)}`}>
+  {x}
+</button>
           ))}
         </div>
       </section>
