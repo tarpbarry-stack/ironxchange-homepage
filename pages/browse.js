@@ -18,6 +18,7 @@ import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
 import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
 import scraperTaxonomy from "../lib/scraperTaxonomy";
 import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
+import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -683,7 +684,6 @@ const availableMakes = useMemo(() => {
   "TEREX"
 ]
     , 
-    
 "SKIDSTEERS / CTL": [
   "BOBCAT",
   "DEERE",
@@ -705,6 +705,28 @@ const availableMakes = useMemo(() => {
   "KIOTI",
   "MANITOU",
   "UHI"
+]
+    ,
+    "TELEHANDLER": [
+  "JCB",
+  "SKY TRAK",
+  "JLG",
+  "GENIE",
+  "MANITOU",
+  "GEHL",
+  "CATERPILLAR",
+  "SKYJACK",
+  "MERLO",
+  "MAGNI",
+  "BOBCAT",
+  "DIECI",
+  "CLAAS",
+  "KRAMER",
+  "LOAD LIFTER",
+  "LULL",
+  "NEW HOLLAND",
+  "PETTIBONE",
+  "SANY"
 ]
     ,
     
@@ -767,6 +789,9 @@ if (category === "BACKHOE LOADERS") {
 }
   if (category === "SKID STEER / CTL") {
   taxonomy = skidSteerCtlTaxonomy;
+}
+  if (category === "TELEHANDLERS") {
+  taxonomy = telehandlersTaxonomy;
 }
   if (taxonomy) {
     const makes = taxonomy.map((x) => x.make).filter(Boolean);
@@ -847,6 +872,9 @@ if (category === "BACKHOE LOADERS") {
 }
     if (category === "SKID STEER / CTL") {
   taxonomy = skidSteerCtlTaxonomy;
+}
+    if (category === "TELEHANDLERS") {
+  taxonomy = telehandlersTaxonomy;
 }
   if (taxonomy && make !== "ALL MAKES") {
     const models = taxonomy
