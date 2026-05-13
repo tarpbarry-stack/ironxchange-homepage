@@ -5,13 +5,14 @@ export default function ListingPage() {
 
 <header
   style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: "20px",
-    marginBottom: "24px",
-    borderBottom: "1px solid #e5e5e5"
-  }}
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "18px 24px",
+  marginBottom: "24px",
+  background: "#050505",
+  borderRadius: "14px"
+}}
 >
   <a href="/" style={{ textDecoration: "none" }}>
     <img
@@ -34,7 +35,7 @@ export default function ListingPage() {
       textTransform: "uppercase"
     }}
   >
-    <a href="/browse" style={{ color: "#111", textDecoration: "none" }}>
+    <a href="/browse" style={{ color: "#fff", textDecoration: "none" }}>
       Browse
     </a>
 
@@ -48,7 +49,7 @@ export default function ListingPage() {
       Post Equipment Free
     </a>
 
-    <a href="/login" style={{ color: "#111", textDecoration: "none" }}>
+    <a href="/login" style={{ color: "#fff", textDecoration: "none" }}>
       Login
     </a>
   </div>
