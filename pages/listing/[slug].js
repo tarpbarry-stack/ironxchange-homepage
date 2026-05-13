@@ -111,16 +111,16 @@ export default function ListingPage() {
   src="/images/2020-Deere-772GP.jpg"
   alt="2020 Deere 872GP"
   style={{
-    width: "100%",
-    maxWidth: "1400px",
-    height: "72vh",
-    minHeight: "420px",
-    maxHeight: "760px",
-    objectFit: "cover",
-    display: "block",
-    marginTop: "18px",
-    borderRadius: "18px"
-  }}
+  width: "100%",
+  maxWidth: "1400px",
+  height: "auto",
+  maxHeight: "760px",
+  objectFit: "contain",
+  display: "block",
+  marginTop: "18px",
+  borderRadius: "18px",
+  background: "#111"
+}}
 />
 
 <div
