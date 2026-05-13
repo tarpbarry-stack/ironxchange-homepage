@@ -1,5 +1,5 @@
-export default function ListingPage() {
 const BRAND_YELLOW = "#FFC400";
+export default function ListingPage() {
   return (
     <main style={{ padding: "24px", fontFamily: "Arial, sans-serif" }}>
 
@@ -55,13 +55,6 @@ const BRAND_YELLOW = "#FFC400";
 </header>
 
 <div
-  style={{
-    display: "flex",
-    alignItems: "baseline",
-    gap: "12px",
-    flexWrap: "wrap"
-  }}
->
   style={{
     display: "flex",
     alignItems: "baseline",
