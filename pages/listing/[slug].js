@@ -72,9 +72,7 @@ export default function ListingPage() {
   </ul>
 </div>
       
-      <p style={{ marginTop: "18px", fontSize: "20px" }}>
-        LISTING PAGE ROUTE WORKS. CLEAN BUILD STARTS HERE.
-      </p>
+     
     </main>
   );
 }
