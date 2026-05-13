@@ -42,17 +42,21 @@ export default function ListingPage() {
   3,875 hrs · Colorado City, TX
 </p>
 
-      <img
-        src="/images/2020-Deere-772GP.jpg"
-        alt="2020 Deere 872GP"
-        style={{
-          width: "100%",
-          maxWidth: "1200px",
-          height: "auto",
-          display: "block",
-          marginTop: "30px"
-        }}
-      />
+    <img
+  src="/images/2020-Deere-772GP.jpg"
+  alt="2020 Deere 872GP"
+  style={{
+    width: "100%",
+    maxWidth: "1400px",
+    height: "72vh",
+    minHeight: "420px",
+    maxHeight: "760px",
+    objectFit: "cover",
+    display: "block",
+    marginTop: "18px",
+    borderRadius: "18px"
+  }}
+/>
 
       <p style={{ marginTop: "18px", fontSize: "20px" }}>
         LISTING PAGE ROUTE WORKS. CLEAN BUILD STARTS HERE.
