@@ -1260,6 +1260,7 @@ if (category === "BACKHOE LOADERS") {
   }, [searchQuery, category, make, model, liveListings]);
 
   return (
+    <>
   <Head>
   <title>Browse Equipment | IronXchange</title>
 
