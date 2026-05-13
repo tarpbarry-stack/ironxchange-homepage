@@ -1,7 +1,67 @@
 export default function ListingPage() {
+const BRAND_YELLOW = "#FFC400";
   return (
     <main style={{ padding: "24px", fontFamily: "Arial, sans-serif" }}>
-     <div
+
+<header
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: "20px",
+    marginBottom: "24px",
+    borderBottom: "1px solid #e5e5e5"
+  }}
+>
+  <a href="/" style={{ textDecoration: "none" }}>
+    <img
+      src="/images/ironxchange-logo.png"
+      alt="IronXchange"
+      style={{
+        height: "56px",
+        display: "block"
+      }}
+    />
+  </a>
+
+  <div
+    style={{
+      display: "flex",
+      gap: "28px",
+      alignItems: "center",
+      fontSize: "13px",
+      fontWeight: "700",
+      textTransform: "uppercase"
+    }}
+  >
+    <a href="/browse" style={{ color: "#111", textDecoration: "none" }}>
+      Browse
+    </a>
+
+    <a
+      href="/create-listing"
+      style={{
+        color: BRAND_YELLOW,
+        textDecoration: "none"
+      }}
+    >
+      Post Equipment Free
+    </a>
+
+    <a href="/login" style={{ color: "#111", textDecoration: "none" }}>
+      Login
+    </a>
+  </div>
+</header>
+
+<div
+  style={{
+    display: "flex",
+    alignItems: "baseline",
+    gap: "12px",
+    flexWrap: "wrap"
+  }}
+>
   style={{
     display: "flex",
     alignItems: "baseline",
