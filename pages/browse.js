@@ -1427,7 +1427,7 @@ if (category === "BACKHOE LOADERS") {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0B0B0B;
-  color: #F5F5F5;
+  color: #D6D6D6;
 }
 
    .nav {
