@@ -1273,8 +1273,7 @@ if (category === "BACKHOE LOADERS") {
     rel="stylesheet"
   />
 </Head>
-      </Head>
-
+      
      <nav className="nav">
   <a href="/" className="logo-wrap">
     <img
