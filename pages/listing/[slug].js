@@ -57,7 +57,21 @@ export default function ListingPage() {
     borderRadius: "18px"
   }}
 />
+<div style={{ marginTop: "22px", maxWidth: "760px" }}>
+  <h2 style={{ fontSize: "20px", marginBottom: "12px" }}>
+    Highlights
+  </h2>
 
+  <ul style={{ fontSize: "16px", lineHeight: "1.8", paddingLeft: "20px" }}>
+    <li>3,875 hours</li>
+    <li>Colorado City, TX</li>
+    <li>Clean cab</li>
+    <li>Push block</li>
+    <li>Rear ripper</li>
+    <li>Work-ready machine</li>
+  </ul>
+</div>
+      
       <p style={{ marginTop: "18px", fontSize: "20px" }}>
         LISTING PAGE ROUTE WORKS. CLEAN BUILD STARTS HERE.
       </p>
