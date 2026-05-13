@@ -9,13 +9,13 @@ export default function ListingPage() {
     flexWrap: "wrap"
   }}
 >
- <h1
+<h1
   style={{
     margin: 0,
-    fontSize: "30px",
-    fontWeight: "800",
-    lineHeight: 1.1,
-    letterSpacing: "-0.5px"
+    fontSize: "20px",
+    fontWeight: "700",
+    lineHeight: 1.2,
+    letterSpacing: "-0.1px"
   }}
 >
   2020 DEERE 872GP
@@ -23,7 +23,7 @@ export default function ListingPage() {
 
 <div
   style={{
-    fontSize: "28px",
+    fontSize: "20px",
     fontWeight: "700",
     color: "#111"
   }}
@@ -34,8 +34,8 @@ export default function ListingPage() {
 
 <p
   style={{
-    marginTop: "14px",
-    fontSize: "20px",
+    marginTop: "10px",
+    fontSize: "15px",
     color: "#666"
   }}
 >
