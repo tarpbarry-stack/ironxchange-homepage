@@ -9,26 +9,27 @@ export default function ListingPage() {
     flexWrap: "wrap"
   }}
 >
-  <h1
-    style={{
-      margin: 0,
-      fontSize: "52px",
-      fontWeight: "900",
-      lineHeight: 1
-    }}
-  >
-    2020 DEERE 872GP
-  </h1>
+ <h1
+  style={{
+    margin: 0,
+    fontSize: "30px",
+    fontWeight: "800",
+    lineHeight: 1.1,
+    letterSpacing: "-0.5px"
+  }}
+>
+  2020 DEERE 872GP
+</h1>
 
-  <div
-    style={{
-      fontSize: "42px",
-      fontWeight: "700",
-      color: "#111"
-    }}
-  >
-    $179,000
-  </div>
+<div
+  style={{
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#111"
+  }}
+>
+  $179,000
+</div>
 </div>
 
 <p
