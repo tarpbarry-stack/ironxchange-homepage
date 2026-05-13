@@ -1423,11 +1423,12 @@ if (category === "BACKHOE LOADERS") {
           box-sizing: border-box;
         }
 
-        :global(body) {
-          margin: 0;
-          font-family: Arial, sans-serif;
-          background: #fff;
-        }
+       :global(body) {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0B0B0B;
+  color: #F5F5F5;
+}
 
    .nav {
   display: flex;
@@ -1494,29 +1495,31 @@ if (category === "BACKHOE LOADERS") {
 }
 
         .search-section {
-          padding: 38px 5%;
-          background: #f8f8f8;
-          text-align: center;
-        }
+  padding: 38px 5%;
+  background: #0B0B0B;
+  text-align: center;
+  color: #F5F5F5;
+}
 
         .search-container {
-          max-width: 1250px;
-          margin: 24px auto 0;
-          display: grid;
-          grid-template-columns: 1fr 210px 175px 175px 120px;
-          background: white;
-          border-radius: 10px;
-          overflow: hidden;
-          border: 1px solid #ddd;
-        }
-
+  max-width: 1250px;
+  margin: 24px auto 0;
+  display: grid;
+  grid-template-columns: 1fr 210px 175px 175px 120px;
+  background: #151515;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #242424;
+}
         input,
-        select {
-          border: none;
-          border-right: 1px solid #e5e5e5;
-          padding: 18px;
-          font-size: 14px;
-        }
+select {
+  border: none;
+  border-right: 1px solid #2A2A2A;
+  padding: 18px;
+  font-size: 14px;
+  background: #151515;
+  color: #F5F5F5;
+}
 
         .search-btn {
           border: none;
@@ -1526,8 +1529,10 @@ if (category === "BACKHOE LOADERS") {
         }
 
         .featured {
-          padding: 50px 5%;
-        }
+  padding: 50px 5%;
+  background: #0B0B0B;
+  color: #F5F5F5;
+}
 
         .section-head {
           display: flex;
@@ -1541,14 +1546,14 @@ if (category === "BACKHOE LOADERS") {
           gap: 24px;
         }
 
-        .card {
-          text-decoration: none;
-          color: inherit;
-          border: 1px solid #e5e5e5;
-          border-radius: 12px;
-          overflow: hidden;
-          background: white;
-        }
+       .card {
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #242424;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #151515;
+}
 
         .card-photo {
           height: 190px;
@@ -1561,11 +1566,11 @@ if (category === "BACKHOE LOADERS") {
         }
 
         .meta {
-          display: flex;
-          gap: 12px;
-          font-size: 13px;
-          color: #666;
-        }
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #AAA;
+}
 
         .price-row {
           display: flex;
@@ -1594,7 +1599,7 @@ if (category === "BACKHOE LOADERS") {
           input,
           select {
             border-right: none;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid #2A2A2A;
           }
         }
       `}</style>
