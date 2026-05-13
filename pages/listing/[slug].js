@@ -1,11 +1,11 @@
 export default function ListingPage() {
   return (
-    <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
+    <main style={{ padding: "24px", fontFamily: "Arial, sans-serif" }}>
      <div
   style={{
     display: "flex",
     alignItems: "baseline",
-    gap: "20px",
+    gap: "12px",
     flexWrap: "wrap"
   }}
 >
@@ -54,7 +54,7 @@ export default function ListingPage() {
         }}
       />
 
-      <p style={{ marginTop: "30px", fontSize: "20px" }}>
+      <p style={{ marginTop: "18px", fontSize: "20px" }}>
         LISTING PAGE ROUTE WORKS. CLEAN BUILD STARTS HERE.
       </p>
     </main>
