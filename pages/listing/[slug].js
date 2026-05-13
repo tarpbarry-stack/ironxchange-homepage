@@ -1,7 +1,19 @@
+import Head from "next/head";
+
+const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
 export default function ListingPage() {
   return (
+    <>
+  <Head>
+    <title>2020 DEERE 872GP | IronXchange</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </Head>
     <main
       style={{
         padding: "24px",
@@ -12,59 +24,29 @@ export default function ListingPage() {
       }}
     >
 
-<header
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "18px 24px",
-    marginBottom: "24px",
-    background: "#050505",
-    borderRadius: "14px",
-    border: "1px solid #1A1A1A"
-  }}
->
-  <a href="/" style={{ textDecoration: "none" }}>
+<nav className="nav">
+  <a href="/" className="logo-wrap">
     <img
       src="/images/ironxchange-logo.png"
+      className="logo-img"
       alt="IronXchange"
-      style={{
-        height: "56px",
-        display: "block"
-      }}
     />
   </a>
 
-  <div
-    style={{
-      display: "flex",
-      gap: "28px",
-      alignItems: "center",
-      fontSize: "13px",
-      fontWeight: "700",
-      textTransform: "uppercase"
-    }}
-  >
-    <a href="/browse" style={{ color: "#fff", textDecoration: "none" }}>
-      Browse
+  <div className="nav-links">
+    <a href={`${STAGING}/l/new`} className="yellow-link">
+      POST FREE
     </a>
 
     <a
-      href="/create-listing"
-      style={{
-        color: BRAND_YELLOW,
-        textDecoration: "none"
-      }}
+      href={`${STAGING}/login`}
+      className="login-icon"
+      aria-label="Login"
     >
-      Post Equipment Free
-    </a>
-
-    <a href="/login" style={{ color: "#fff", textDecoration: "none" }}>
-      Login
+      <i className="fa-regular fa-user"></i>
     </a>
   </div>
-</header>
-
+</nav>
 <div
   style={{
     display: "flex",
@@ -159,7 +141,73 @@ export default function ListingPage() {
     <li>Work-ready machine</li>
   </ul>
 </div>
+<style jsx>{`
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 5%;
+    background: #050505;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    margin: -24px -24px 24px;
+  }
 
-    </main>
-  );
+  .logo-img {
+    height: 78px;
+    width: auto;
+    display: block;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: .6px;
+  }
+
+  .yellow-link {
+    color: ${BRAND_YELLOW} !important;
+  }
+
+  .login-icon {
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    font-size: 15px !important;
+  }
+
+  @media (max-width: 850px) {
+    .logo-img {
+      height: 56px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .yellow-link {
+      font-size: 12px !important;
+    }
+
+    .login-icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
+`}</style>
+   </main>
+</>
+);
 }
