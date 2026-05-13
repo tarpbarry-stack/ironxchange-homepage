@@ -1260,42 +1260,40 @@ if (category === "BACKHOE LOADERS") {
   }, [searchQuery, category, make, model, liveListings]);
 
   return (
-    <>
-      <Head>
-        <title>Browse Equipment | IronXchange</title>
-        <meta
-          name="description"
-          content="Browse heavy equipment for sale on IronXchange."
-        />
+  <Head>
+  <title>Browse Equipment | IronXchange</title>
+
+  <meta
+    name="description"
+    content="Browse heavy equipment for sale on IronXchange."
+  />
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</Head>
       </Head>
 
-      <nav className="nav">
-        <a href="/" className="logo-wrap">
-          <img
-            src="/images/ironxchange-logo.png"
-            className="logo-img"
-            alt="IronXchange"
-          />
-        </a>
+     <nav className="nav">
+  <a href="/" className="logo-wrap">
+    <img
+      src="/images/ironxchange-logo.png"
+      className="logo-img"
+      alt="IronXchange"
+    />
+  </a>
 
-        <div className="nav-links">
-          <a href="/browse">Browse Equipment</a>
+  <div className="nav-links">
+    <a href={`${STAGING}/l/new`} className="yellow-link">
+      POST FREE
+    </a>
 
-          <a
-            href={`${STAGING}/l/new`}
-            className="yellow-link"
-          >
-            Post Equipment Free
-          </a>
-
-          <a
-            href={`${STAGING}/login`}
-            className="login-icon"
-          >
-            <i className="fa-regular fa-user"></i>
-          </a>
-        </div>
-      </nav>
+    <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+      <i className="fa-regular fa-user"></i>
+    </a>
+  </div>
+</nav>
 
       <section className="search-section">
         <h1>Browse Equipment</h1>
@@ -1431,35 +1429,69 @@ if (category === "BACKHOE LOADERS") {
           background: #fff;
         }
 
-        .nav {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 14px 5%;
-          background: #050505;
-        }
+   .nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 5%;
+  background: #050505;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
 
-        .logo-img {
-          height: 72px;
-        }
+.logo-img {
+  height: 78px;
+  width: auto;
+  display: block;
+}
 
-        .nav-links {
-          display: flex;
-          gap: 28px;
-          align-items: center;
-        }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
 
-        .nav-links a {
-          color: white;
-          text-decoration: none;
-          font-weight: 700;
-          text-transform: uppercase;
-          font-size: 13px;
-        }
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .6px;
+}
 
-        .yellow-link {
-          color: ${BRAND_YELLOW};
-        }
+.yellow-link {
+  color: ${BRAND_YELLOW} !important;
+}
+
+.login-icon {
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px !important;
+}
+
+@media (max-width: 850px) {
+  .logo-img {
+    height: 56px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 18px;
+  }
+
+  .yellow-link {
+    font-size: 12px !important;
+  }
+
+  .login-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
 
         .search-section {
           padding: 38px 5%;
