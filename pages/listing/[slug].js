@@ -1,18 +1,28 @@
 const BRAND_YELLOW = "#FFC400";
+
 export default function ListingPage() {
   return (
-    <main style={{ padding: "24px", fontFamily: "Arial, sans-serif" }}>
+    <main
+      style={{
+        padding: "24px",
+        fontFamily: "Arial, sans-serif",
+        background: "#0B0B0B",
+        minHeight: "100vh",
+        color: "#F5F5F5"
+      }}
+    >
 
 <header
   style={{
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "18px 24px",
-  marginBottom: "24px",
-  background: "#050505",
-  borderRadius: "14px"
-}}
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "18px 24px",
+    marginBottom: "24px",
+    background: "#050505",
+    borderRadius: "14px",
+    border: "1px solid #1A1A1A"
+  }}
 >
   <a href="/" style={{ textDecoration: "none" }}>
     <img
@@ -69,7 +79,8 @@ export default function ListingPage() {
     fontSize: "20px",
     fontWeight: "700",
     lineHeight: 1.2,
-    letterSpacing: "-0.1px"
+    letterSpacing: "-0.1px",
+    color: "#F5F5F5"
   }}
 >
   2020 DEERE 872GP
@@ -79,7 +90,7 @@ export default function ListingPage() {
   style={{
     fontSize: "20px",
     fontWeight: "700",
-    color: "#111"
+    color: "#F5F5F5"
   }}
 >
   $179,000
@@ -90,13 +101,13 @@ export default function ListingPage() {
   style={{
     marginTop: "10px",
     fontSize: "15px",
-    color: "#666"
+    color: "#999"
   }}
 >
   3,875 hrs · Colorado City, TX
 </p>
 
-    <img
+<img
   src="/images/2020-Deere-772GP.jpg"
   alt="2020 Deere 872GP"
   style={{
@@ -111,12 +122,35 @@ export default function ListingPage() {
     borderRadius: "18px"
   }}
 />
-<div style={{ marginTop: "22px", maxWidth: "760px" }}>
-  <h2 style={{ fontSize: "20px", marginBottom: "12px" }}>
+
+<div
+  style={{
+    marginTop: "22px",
+    maxWidth: "760px",
+    background: "#151515",
+    padding: "24px",
+    borderRadius: "18px",
+    border: "1px solid #222"
+  }}
+>
+  <h2
+    style={{
+      fontSize: "20px",
+      marginBottom: "12px",
+      color: "#F5F5F5"
+    }}
+  >
     Highlights
   </h2>
 
-  <ul style={{ fontSize: "16px", lineHeight: "1.8", paddingLeft: "20px" }}>
+  <ul
+    style={{
+      fontSize: "16px",
+      lineHeight: "1.8",
+      paddingLeft: "20px",
+      color: "#DDD"
+    }}
+  >
     <li>3,875 hours</li>
     <li>Colorado City, TX</li>
     <li>Clean cab</li>
@@ -125,8 +159,7 @@ export default function ListingPage() {
     <li>Work-ready machine</li>
   </ul>
 </div>
-      
-     
+
     </main>
   );
 }
