@@ -354,7 +354,7 @@ function lightboxNext() {
   <button
   type="button"
   className={isSaved ? "saved-star" : ""}
-  onClick={() => setIsSaved(!isSaved)}
+  onClick={toggleSaved}
 >
   ★
 </button>
