@@ -888,15 +888,36 @@ function lightboxNext() {
   display: none;
 }
 
-.mobile-gallery {display: flex;overflow-x: auto;gap: 10px;scroll-snap-type: x mandatory;-webkit-overflow-scrolling: touch;padding-bottom: 10px;}
+.mobile-hero {
+  min-width: 82%;
+  height: 340px;
+  scroll-snap-align: start;
+  background: #111;
+  border-radius: 14px;
+  overflow: hidden;
+}
 
-.mobile-hero {min-width: 82%;height: 340px;scroll-snap-align: start;background: #111;border-radius: 14px;overflow: hidden;}
+.mobile-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-.mobile-hero img {width: 100%;height: 100%;object-fit: contain;}
+.mobile-pair {
+  min-width: 44vw;
+  height: 340px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  scroll-snap-align: start;
+}
 
-.mobile-pair {min-width: 44vw;height: 340px;display: grid;grid-template-rows: 1fr 1fr;gap: 10px;scroll-snap-align: start;}
-
-.mobile-pair img {width: 100%;height: 165px;object-fit: cover;border-radius: 14px;}
+.mobile-pair img {
+  width: 100%;
+  height: 165px;
+  object-fit: cover;
+  border-radius: 14px;
+}
           .info-grid {
             grid-template-columns: 1fr;
           }
