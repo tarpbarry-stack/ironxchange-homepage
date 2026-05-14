@@ -1393,7 +1393,7 @@ if (category === "BACKHOE LOADERS") {
     Push Block • Rear Ripper • SmartGrade • 20.5 Tires
   </p>
 
- <div className="price-row">
+<div className="price-row">
   <strong>{item.price}</strong>
 
   <div className="meta">
@@ -1401,7 +1401,9 @@ if (category === "BACKHOE LOADERS") {
     <span>⌖ {item.location}</span>
   </div>
 </div>
-            </a>
+
+</div>
+</a>
           ))}
         </div>
 
