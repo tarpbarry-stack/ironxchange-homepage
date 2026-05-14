@@ -684,18 +684,9 @@ function lightboxNext() {
   margin-left: 18px;
 }
 
-.mini-tool-tab button:nth-child(2) {
-  margin-left: 0;
-}
-
-.mini-tool-tab a {
-  margin-left: 0;
-}
-
-.mini-tool-tab button:nth-child(4) {
-  margin-left: -24px;
-}
-
+.mini-tool-tab button:nth-child(2),
+.mini-tool-tab a,
+.mini-tool-tab button:nth-child(4),
 .mini-tool-tab button:nth-child(5) {
   margin-left: -24px;
 }
