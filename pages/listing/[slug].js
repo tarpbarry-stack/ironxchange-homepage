@@ -493,9 +493,19 @@ export default function ListingPage() {
           }
 
           .photo-rail {
-            display: none;
-          }
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  height: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
 
+.photo-rail img {
+  min-width: 46%;
+  height: 150px;
+  scroll-snap-align: start;
+}
           .info-grid {
             grid-template-columns: 1fr;
           }
