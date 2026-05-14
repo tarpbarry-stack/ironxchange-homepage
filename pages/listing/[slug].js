@@ -484,26 +484,39 @@ export default function ListingPage() {
 
         @media (max-width: 950px) {
           .photo-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .hero-photo {
-            height: auto;
-            object-fit: contain;
-          }
-
-          .photo-rail {
   display: flex;
   overflow-x: auto;
   gap: 10px;
-  height: auto;
-  padding-bottom: 8px;
   scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hero-wrap {
+  min-width: 78%;
+  scroll-snap-align: start;
+}
+
+.hero-photo {
+  height: 360px;
+  object-fit: cover;
+}
+
+.photo-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 175px);
+  grid-auto-columns: 42vw;
+  gap: 10px;
+  height: 360px;
+  overflow: visible;
+  padding-right: 12px;
 }
 
 .photo-rail img {
-  min-width: 46%;
-  height: 150px;
+  width: 100%;
+  height: 175px;
+  object-fit: cover;
+  border-radius: 14px;
   scroll-snap-align: start;
 }
           .info-grid {
