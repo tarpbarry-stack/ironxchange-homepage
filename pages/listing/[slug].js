@@ -181,6 +181,15 @@ function lightboxNext() {
         </nav>
 
         <section className="page">
+                {cameFromBrowse && (
+  <button
+    type="button"
+    className="back-results"
+    onClick={() => router.back()}
+  >
+    ← Back to Results
+  </button>
+)}
           <div className="title-row">
   <div>
                 
