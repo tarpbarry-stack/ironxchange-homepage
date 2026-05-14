@@ -209,18 +209,6 @@ function lightboxNext() {
               <button className="arrow right" onClick={goNext} type="button">
                 ›
               </button>
-
-             <div className="photo-toolbar left">
-  <span>♡ Save</span>
-  <span>↗ Share</span>
-  <span>👁 Watch</span>
-</div>
-
-<div className="photo-toolbar right">
-  <a href="/browse">← Results</a>
-  <button>← Prev</button>
-  <button>Next →</button>
-</div>
     
             </div>
 
@@ -290,15 +278,25 @@ function lightboxNext() {
               </div>
             </div>
 
-            <div className="panel">
-              <h2>Highlights</h2>
+           <div className="right-stack">
+  <div className="mini-tool-tab">
+    <button>↗</button>
+    <button>👓</button>
+    <a href="/browse">Results</a>
+    <button>Prev</button>
+    <button>Next</button>
+  </div>
 
-              <ul className="highlights">
-                {displayHighlights.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
+  <div className="panel">
+    <h2>Highlights</h2>
+
+    <ul className="highlights">
+      {displayHighlights.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  </div>
+</div>
           </section>
 
           <section className="panel description">
