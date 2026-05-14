@@ -656,8 +656,12 @@ function lightboxNext() {
 
 .mini-tool-tab a,
 .mini-tool-tab button {
-  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: transparent;
   border: none;
+
   color: rgba(255,255,255,.62);
 
   font-size: 10px;
