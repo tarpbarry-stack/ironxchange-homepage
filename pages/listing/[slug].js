@@ -522,17 +522,56 @@ function lightboxNext() {
           transform: translateY(-1px);
         }
 
-        .photo-toolbar {
+     .photo-toolbar {
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
+
   display: flex;
-  gap: 18px;
-  background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(8px);
-  padding: 12px 16px;
-  border-radius: 10px;
-  color: #E5E5E5;
-  font-size: 14px;
+  align-items: center;
+  gap: 14px;
+
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(6px);
+
+  padding: 8px 12px;
+  border-radius: 9px;
+
+  color: rgba(255,255,255,.82);
+}
+
+.photo-toolbar.left {
+  left: 10px;
+}
+
+.photo-toolbar.right {
+  right: 10px;
+}
+
+.photo-toolbar a,
+.photo-toolbar button,
+.photo-toolbar span {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  color: rgba(255,255,255,.82);
+
+  text-decoration: none;
+  cursor: pointer;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  line-height: 1;
+  font-family: inherit;
+}
+
+.photo-toolbar a:hover,
+.photo-toolbar button:hover {
+  opacity: .72;
 }
 
 .photo-toolbar.left {
