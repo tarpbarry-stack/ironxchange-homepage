@@ -324,6 +324,7 @@ function lightboxNext() {
               </a>
             </div>
           </section>
+ </section>
 
 {lightboxOpen && (
   <div className="lightbox">
@@ -661,20 +662,6 @@ function lightboxNext() {
           color: #e5e5e5;
         }
 
-.mobile-gallery {
-  display: none;
-}
-
-        @media (max-width: 950px) {
-        .photo-grid {
-  display: block;
-}
-
-.hero-wrap,
-.photo-rail {
-  display: none;
-}
-
 .lightbox {
   position: fixed;
   inset: 0;
@@ -725,6 +712,19 @@ function lightboxNext() {
 
 .lightbox-arrow.right {
   right: 24px;
+}
+.mobile-gallery {
+  display: none;
+}
+
+        @media (max-width: 950px) {
+        .photo-grid {
+  display: block;
+}
+
+.hero-wrap,
+.photo-rail {
+  display: none;
 }
 
 .mobile-gallery {
