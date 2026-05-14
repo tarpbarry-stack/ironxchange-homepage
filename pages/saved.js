@@ -1,6 +1,9 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
+const STAGING = "https://staging.ironxchange.com";
+const BRAND_YELLOW = "#FFC400";
+
 function slugify(text = "") {
   return String(text)
     .toLowerCase()
@@ -34,9 +37,30 @@ export default function SavedListings() {
         <title>Saved Listings | IronXchange</title>
       </Head>
 
-      <main>
-        <h1>Saved Listings</h1>
+      <nav className="nav">
+  <a href="/" className="logo-wrap">
+    <img
+      src="/images/ironxchange-logo.png"
+      className="logo-img"
+      alt="IronXchange"
+    />
+  </a>
 
+  <div className="nav-links">
+    <a href="/browse">BROWSE</a>
+
+    <a href={`${STAGING}/l/new`} className="yellow-link">
+      POST FREE
+    </a>
+
+    <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+      <i className="fa-regular fa-user"></i>
+    </a>
+  </div>
+</nav>
+
+<main>
+  <h1>Saved Listings</h1>
         <div className="cards">
           {savedListings.map((item) => (
             <a
@@ -72,6 +96,50 @@ export default function SavedListings() {
           background: #0b0b0b;
           color: #d6d6d6;
         }
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 5%;
+  background: #050505;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.logo-img {
+  height: 78px;
+  width: auto;
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .6px;
+}
+
+.yellow-link {
+  color: ${BRAND_YELLOW} !important;
+}
+
+.login-icon {
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px !important;
+}
 
         main {
           padding: 40px 5%;
