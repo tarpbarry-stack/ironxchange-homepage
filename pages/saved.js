@@ -228,34 +228,77 @@ export default function SavedListings() {
   background: #181818;
 }
 
-        .photo {
-          height: 190px;
-          background-size: cover;
-          background-position: center;
-          border-bottom: 1px solid #202020;
-        }
+       .card-photo {
+  height: 190px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid #202020;
+}
 
-        .body {
-          padding: 16px;
-        }
+.card-body {
+  padding: 16px;
+}
 
-        h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-        }
+.card h3 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+}
 
-        p {
-          color: #999;
-          font-size: 13px;
-        }
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
 
-        strong {
-          color: #f2f2f2;
-        }
+.hours-inline {
+  color: #8A8A8A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
 
-        .empty {
-          color: #999;
-        }
+.feature-line {
+  min-height: 38px;
+  margin: 8px 0 18px;
+  color: #8F8F8F;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.price-row strong {
+  color: #F2F2F2;
+  font-size: 18px;
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #9A9A9A;
+  flex-wrap: wrap;
+}
+
+.meta span {
+  color: #9A9A9A;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .4px;
+}
+
+.empty {
+  color: #999;
+}
 
         @media (max-width: 850px) {
           .cards {
