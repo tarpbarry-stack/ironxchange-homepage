@@ -280,7 +280,9 @@ function lightboxNext() {
 
            <div className="right-stack">
   <div className="mini-tool-tab">
-   <button>↗</button>
+ <button>
+  <i className="fa-solid fa-arrow-up-from-bracket"></i>
+</button>
 <button>★</button>
 <a href="/browse">← Results</a>
 <button>← Prev</button>
