@@ -67,6 +67,19 @@ const [lightboxIndex, setLightboxIndex] = useState(0);
     return listings.find((item) => slugify(item.title) === slug);
   }, [slug, listings]);
 
+  const currentIndex = useMemo(() => {
+  if (!slug || listings.length === 0) return -1;
+  return listings.findIndex((item) => slugify(item.title) === slug);
+}, [slug, listings]);
+
+const prevListing =
+  currentIndex > 0 ? listings[currentIndex - 1] : null;
+
+const nextListing =
+  currentIndex >= 0 && currentIndex < listings.length - 1
+    ? listings[currentIndex + 1]
+    : null;
+
   if (!listing) {
     return (
       <main className="loading">
