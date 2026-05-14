@@ -45,7 +45,7 @@ function cleanText(value) {
 
 export default function ListingPage() {
   const router = useRouter();
-  const { slug } = router.query;
+  const { slug, from } = router.query;
 
   const [listings, setListings] = useState([]);
 const [activeImage, setActiveImage] = useState(0);
@@ -95,6 +95,7 @@ const [lightboxIndex, setLightboxIndex] = useState(0);
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "Location not listed";
+  const cameFromBrowse = from === "browser";  
   const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
   const make = cleanText(listing.make) || "—";
   const model = cleanText(listing.model) || "—";
