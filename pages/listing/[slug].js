@@ -267,8 +267,8 @@ function lightboxNext() {
                 <span>Hours</span>
                 <strong>{hours}</strong>
 
-                <span>Serial #</span>
-                <strong>{serial}</strong>
+               <span>Stock #</span>
+              <strong>{serial}</strong>
 
                 <span>Location</span>
                 <strong>{location}</strong>
