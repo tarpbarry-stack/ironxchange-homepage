@@ -1387,17 +1387,22 @@ if (category === "BACKHOE LOADERS") {
               />
 
              <div className="card-body">
+  <div className="title-row">
   <h3>{item.title}</h3>
 
-  <p className="feature-line">
-    Push Block • Rear Ripper • SmartGrade • 20.5 Tires
-  </p>
+  <span className="hours-top">
+    {item.hours}
+  </span>
+</div>
+
+<p className="feature-line">
+  Push Block • Rear Ripper • SmartGrade • 20.5 Tires
+</p>
 
 <div className="price-row">
   <strong>{item.price}</strong>
 
   <div className="meta">
-    <span>◷ {item.hours}</span>
     <span>⌖ {item.location}</span>
   </div>
 </div>
@@ -1610,6 +1615,20 @@ input::placeholder {
   color: #F2F2F2;
   font-size: 16px;
   letter-spacing: -0.2px;
+}
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.hours-top {
+  color: #8A8A8A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
 }
 
 .card p {
