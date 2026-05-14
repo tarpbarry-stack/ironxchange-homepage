@@ -631,6 +631,55 @@ function lightboxNext() {
           margin-top: 22px;
         }
 
+.info-grid {
+  align-items: stretch;
+}
+
+.right-stack {
+  display: grid;
+  grid-template-rows: 38px 1fr;
+  gap: 10px;
+  height: 100%;
+}
+
+.mini-tool-tab {
+  background: #151515;
+  border: 1px solid #282828;
+  border-radius: 12px;
+  height: 38px;
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mini-tool-tab a,
+.mini-tool-tab button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.62);
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.mini-tool-tab a:hover,
+.mini-tool-tab button:hover {
+  color: rgba(255,255,255,.9);
+}
+
+.right-stack .panel {
+  height: 100%;
+}
+
         .panel {
           background: #151515;
           border: 1px solid #282828;
