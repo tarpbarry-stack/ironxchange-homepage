@@ -83,6 +83,10 @@ export default function ListingPage() {
 
   const images = getListingImages(listing);
   const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+  const mobilePairs = [];
+  for (let i = 1; i < images.length; i += 2) {
+  mobilePairs.push(images.slice(i, i + 2));
+  }
 
   const title = cleanText(listing.title) || "Equipment Listing";
   const price = cleanText(listing.price) || "Call for Price";
@@ -187,19 +191,37 @@ export default function ListingPage() {
               </div>
             </div>
 
-            <div className="photo-rail">
-              {images.map((src, index) => (
-                <img
-                  key={`${src}-${index}`}
-                  src={src}
-                  alt=""
-                  onClick={() => setActiveImage(index)}
-                  className={index === activeImage ? "active-thumb" : ""}
-                />
-              ))}
-            </div>
-          </div>
+          <div className="photo-rail">
+  {images.map((src, index) => (
+    <img
+      key={`${src}-${index}`}
+      src={src}
+      alt=""
+      onClick={() => setActiveImage(index)}
+      className={index === activeImage ? "active-thumb" : ""}
+    />
+  ))}
+</div>
 
+<div className="mobile-gallery">
+  <div className="mobile-hero">
+    <img src={heroImage} alt={title} />
+  </div>
+
+  {mobilePairs.map((pair, pairIndex) => (
+    <div className="mobile-pair" key={pairIndex}>
+      {pair.map((src, index) => (
+        <img
+          key={`${src}-${pairIndex}-${index}`}
+          src={src}
+          alt=""
+          onClick={() => setActiveImage(pairIndex * 2 + index + 1)}
+        />
+      ))}
+    </div>
+  ))}
+</div>
+</div>
           <section className="info-grid">
             <div className="panel">
               <h2>Quick Facts</h2>
