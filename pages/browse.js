@@ -1393,13 +1393,12 @@ if (category === "BACKHOE LOADERS") {
     Push Block • Rear Ripper • SmartGrade • 20.5 Tires
   </p>
 
-  <div className="price-row">
-    <div className="meta">
-      <span>◷ {item.hours}</span>
-      <span>⌖ {item.location}</span>
-    </div>
+ <div className="price-row">
+  <strong>{item.price}</strong>
 
-    <strong>{item.price}</strong>
+  <div className="meta">
+    <span>◷ {item.hours}</span>
+    <span>⌖ {item.location}</span>
   </div>
 </div>
             </a>
