@@ -203,9 +203,6 @@ function lightboxNext() {
   </div>
 </div>
 
-  <div className="price">{price}</div>
-</div>
-
           <div className="photo-grid">
             <div className="hero-wrap">
             <img
