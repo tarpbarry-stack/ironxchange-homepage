@@ -182,8 +182,7 @@ function lightboxNext() {
         <section className="page">
           <div className="title-row">
   <div>
-   <div className="title-row">
-  <div>
+                
     <h1>{title}</h1>
 
     <p>
