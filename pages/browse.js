@@ -59,6 +59,50 @@ const categories = [
   "UTILITY CARTS"
 ];
 
+const featureKeywords = [
+  { match: ["push block", "pushblock"], label: "Push Block" },
+  { match: ["rear ripper", "ripper"], label: "Rear Ripper" },
+  { match: ["smartgrade", "smart grade"], label: "SmartGrade" },
+  { match: ["topcon"], label: "Topcon" },
+  { match: ["trimble"], label: "Trimble" },
+  { match: ["gps"], label: "GPS" },
+  { match: ["joystick"], label: "Joystick Controls" },
+  { match: ["20.5", "20.5 tires", "20.5r25"], label: "20.5 Tires" },
+  { match: ["23.5", "23.5 tires", "23.5r25"], label: "23.5 Tires" },
+  { match: ["aux hydraulics", "auxiliary hydraulics"], label: "Aux Hydraulics" },
+  { match: ["quick coupler", "hydraulic coupler"], label: "Quick Coupler" },
+  { match: ["thumb", "hydraulic thumb"], label: "Hydraulic Thumb" },
+  { match: ["high flow", "hi-flow"], label: "High Flow" },
+  { match: ["ride control"], label: "Ride Control" },
+  { match: ["scale", "payload scale"], label: "Scale" },
+  { match: ["auto lube", "autolube"], label: "Auto Lube" },
+  { match: ["cold ac", "cold a/c", "cold air"], label: "Cold A/C" },
+  { match: ["no def", "def deleted", "de-tier", "detier"], label: "No DEF" }
+];
+
+function getFeatureLine(item) {
+  const text = [
+    item.title,
+    item.description,
+    item.publicData?.description,
+    item.publicData?.details,
+    item.type,
+    item.make,
+    item.model
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const matches = featureKeywords
+    .filter((feature) =>
+      feature.match.some((term) => text.includes(term))
+    )
+    .map((feature) => feature.label);
+
+  return [...new Set(matches)].slice(0, 4).join(" • ");
+}
+
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -1398,7 +1442,7 @@ if (category === "BACKHOE LOADERS") {
 </div>
 
 <p className="feature-line">
-  Push Block • Rear Ripper • SmartGrade • 20.5 Tires
+  {getFeatureLine(item)}
 </p>
 
 <div className="price-row">
