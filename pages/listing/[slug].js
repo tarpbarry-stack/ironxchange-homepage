@@ -681,19 +681,23 @@ function lightboxNext() {
 }
 
 .mini-tool-tab button:first-child {
-  margin-right: -6px;
+  margin-left: 18px;
 }
 
 .mini-tool-tab button:nth-child(2) {
-  margin-right: 14px;
+  margin-left: 0;
 }
 
 .mini-tool-tab a {
-  margin-right: -10px;
+  margin-left: 0;
 }
 
-.mini-tool-tab button:last-child {
-  margin-left: -10px;
+.mini-tool-tab button:nth-child(4) {
+  margin-left: -24px;
+}
+
+.mini-tool-tab button:nth-child(5) {
+  margin-left: -24px;
 }
 
 .right-stack .panel {
