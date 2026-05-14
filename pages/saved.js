@@ -77,9 +77,14 @@ export default function SavedListings() {
 
   return (
     <>
-      <Head>
-        <title>Saved Listings | IronXchange</title>
-      </Head>
+     <Head>
+  <title>Saved Listings | IronXchange</title>
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</Head>
 
       <nav className="nav">
   <a href="/" className="logo-wrap">
