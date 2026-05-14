@@ -60,7 +60,19 @@ export default function SavedListings() {
 </nav>
 
 <main>
-  <h1>Saved Listings</h1>
+  <div className="saved-head">
+  <div>
+    <h1>Saved Listings</h1>
+
+    <p>
+      Machines you've starred and saved for later.
+    </p>
+  </div>
+
+  <span>
+    {savedListings.length} SAVED
+  </span>
+</div>
         <div className="cards">
           {savedListings.map((item) => (
             <a
@@ -149,6 +161,33 @@ export default function SavedListings() {
           color: #f2f2f2;
           margin-bottom: 24px;
         }
+
+.saved-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+}
+
+.saved-head h1 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 30px;
+  letter-spacing: -0.4px;
+}
+
+.saved-head p {
+  margin: 8px 0 0;
+  color: #8A8A8A;
+  font-size: 14px;
+}
+
+.saved-head span {
+  color: #777;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
 
         .cards {
           display: grid;
