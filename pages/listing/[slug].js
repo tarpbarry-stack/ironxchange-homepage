@@ -182,26 +182,27 @@ function lightboxNext() {
         <section className="page">
           <div className="title-row">
   <div>
+   <div className="title-row">
+  <div>
     <h1>{title}</h1>
 
-    <div className="sub-row">
-      <p>
-        {hours} · {location}
-      </p>
+    <p>
+      {hours} · {location}
+    </p>
+  </div>
 
-      <div className="listing-nav">
-        <a href="/browse">← RESULTS</a>
+  <div className="price-box">
+    <div className="price">{price}</div>
 
-        <span>|</span>
-
-        <button>← PREV</button>
-
-        <span>|</span>
-
-        <button>NEXT →</button>
-      </div>
+    <div className="listing-nav">
+      <a href="/browse">← RESULTS</a>
+      <span>|</span>
+      <button>← PREV</button>
+      <span>|</span>
+      <button>NEXT →</button>
     </div>
   </div>
+</div>
 
   <div className="price">{price}</div>
 </div>
@@ -454,27 +455,25 @@ function lightboxNext() {
           color: #9a9a9a;
           font-size: 16px;
         }
-
-       .sub-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-
+        
 .listing-nav {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  justify-content: flex-end;
-  margin-top: 6px;
-
+  margin-top: 8px;
   color: #777;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .listing-nav a,
