@@ -688,7 +688,7 @@ function lightboxNext() {
 .mini-tool-tab a,
 .mini-tool-tab button:nth-child(4),
 .mini-tool-tab button:nth-child(5) {
-  margin-left: -18px;
+  transform: translateX(-24px);
 }
 
 .right-stack .panel {
