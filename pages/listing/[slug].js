@@ -898,8 +898,8 @@ function lightboxNext() {
 }
 
 .mobile-hero {
-  min-width: 92%;
-  height: 215px;
+  min-width: 82%;
+  height: 340px;
   scroll-snap-align: start;
   background: #111;
   border-radius: 14px;
@@ -913,19 +913,19 @@ function lightboxNext() {
 }
 
 .mobile-pair {
-  min-width: 17vw;
-  height: 215px;
+  min-width: 44vw;
+  height: 340px;
   display: grid;
   grid-template-rows: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
   scroll-snap-align: start;
 }
 
 .mobile-pair img {
   width: 100%;
-  height: 103px;
+  height: 165px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 14px;
 }
           .info-grid {
             grid-template-columns: 1fr;
