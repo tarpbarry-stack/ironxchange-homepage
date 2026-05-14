@@ -587,41 +587,43 @@ export default function ListingPage() {
         }
 
         @media (max-width: 950px) {
-          .photo-grid {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-          }
+        .photo-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
 
-          .hero-wrap {
-            min-width: 78%;
-            scroll-snap-align: start;
-          }
+.hero-wrap {
+  min-width: 82%;
+  scroll-snap-align: start;
+}
 
-          .hero-photo {
-            height: 360px;
-            object-fit: cover;
-          }
+.hero-photo {
+  height: 330px;
+  object-fit: contain;
+  background: #111;
+}
 
-          .photo-rail {
-            display: grid;
-            grid-auto-flow: column;
-            grid-template-rows: repeat(2, 175px);
-            grid-auto-columns: 42vw;
-            gap: 10px;
-            height: 360px;
-            overflow: visible;
-            padding-right: 12px;
-          }
+.photo-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 160px);
+  grid-auto-columns: 44vw;
+  gap: 10px;
+  height: 330px;
+  overflow: visible;
+  padding-right: 12px;
+}
 
-          .photo-rail img {
-            width: 100%;
-            height: 175px;
-            object-fit: cover;
-            border-radius: 14px;
-          }
+.photo-rail img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 14px;
+}
 
           .info-grid {
             grid-template-columns: 1fr;
