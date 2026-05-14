@@ -190,18 +190,7 @@ function lightboxNext() {
     </p>
   </div>
 
-  <div className="price-box">
-    <div className="price">{price}</div>
-
-    <div className="listing-nav">
-      <a href="/browse">← RESULTS</a>
-      <span>|</span>
-      <button>← PREV</button>
-      <span>|</span>
-      <button>NEXT →</button>
-    </div>
-  </div>
-</div>
+      <div className="price">{price}</div>
 
           <div className="photo-grid">
             <div className="hero-wrap">
@@ -220,11 +209,18 @@ function lightboxNext() {
                 ›
               </button>
 
-              <div className="photo-actions">
-                <span>♡ Save</span>
-                <span>↗ Share</span>
-                <span>👁 Watch</span>
-              </div>
+             <div className="photo-toolbar left">
+  <span>♡ Save</span>
+  <span>↗ Share</span>
+  <span>👁 Watch</span>
+</div>
+
+<div className="photo-toolbar right">
+  <a href="/browse">← Results</a>
+  <button>← Prev</button>
+  <button>Next →</button>
+</div>
+    
             </div>
 
           <div className="photo-rail">
@@ -452,50 +448,6 @@ function lightboxNext() {
           font-size: 16px;
         }
         
-.listing-nav {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  color: #777;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.price-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.listing-nav a,
-.listing-nav button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: #777;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-
-.listing-nav a:hover,
-.listing-nav button:hover {
-  color: #D6D6D6;
-}
-
-.listing-nav span {
-  opacity: .4;
-}
-
         .price {
           color: #f2f2f2;
           font-size: 32px;
@@ -569,19 +521,47 @@ function lightboxNext() {
           transform: translateY(-1px);
         }
 
-        .photo-actions {
-          position: absolute;
-          left: 20px;
-          bottom: 20px;
-          display: flex;
-          gap: 18px;
-          background: rgba(0, 0, 0, 0.62);
-          backdrop-filter: blur(8px);
-          padding: 12px 16px;
-          border-radius: 10px;
-          color: #e5e5e5;
-          font-size: 14px;
-        }
+        .photo-toolbar {
+  position: absolute;
+  bottom: 20px;
+  display: flex;
+  gap: 18px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #E5E5E5;
+  font-size: 14px;
+}
+
+.photo-toolbar.left {
+  left: 20px;
+}
+
+.photo-toolbar.right {
+  right: 20px;
+}
+
+.photo-toolbar a,
+.photo-toolbar button,
+.photo-toolbar span {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #E5E5E5;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.photo-toolbar a:hover,
+.photo-toolbar button:hover {
+  opacity: .75;
+}
 
         .arrow {
           position: absolute;
