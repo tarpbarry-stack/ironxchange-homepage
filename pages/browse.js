@@ -1642,7 +1642,7 @@ input::placeholder {
 }
 
 .price-row span {
-  color: #B8AA8A;
+  color: #9A9A9A;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: .4px;
