@@ -86,7 +86,7 @@ export default function SavedListings() {
   />
 </Head>
 
-      <nav className="nav">
+     <nav className="nav">
   <a href="/" className="logo-wrap">
     <img
       src="/images/ironxchange-logo.png"
@@ -98,21 +98,19 @@ export default function SavedListings() {
   <div className="nav-links">
     <a href="/browse">BROWSE</a>
 
-  <div className="nav-links">
-  <a href={`${STAGING}/l/new`} className="yellow-link">
-    POST FREE
-  </a>
+    <a href={`${STAGING}/l/new`} className="yellow-link">
+      POST FREE
+    </a>
 
-  <a href="/saved" className="login-icon" aria-label="Saved Listings">
-    <i className="fa-regular fa-star"></i>
-  </a>
+    <a href="/saved" className="login-icon" aria-label="Saved Listings">
+      <i className="fa-regular fa-star"></i>
+    </a>
 
-  <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
-    <i className="fa-regular fa-user"></i>
-  </a>
-</div>
+    <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+      <i className="fa-regular fa-user"></i>
+    </a>
+  </div>
 </nav>
-
 <main>
   <div className="saved-head">
   <div>
