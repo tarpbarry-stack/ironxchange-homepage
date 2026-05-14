@@ -324,7 +324,6 @@ function lightboxNext() {
               </a>
             </div>
           </section>
-        </section>
 
      </section>
 
