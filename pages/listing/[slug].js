@@ -281,7 +281,7 @@ function lightboxNext() {
            <div className="right-stack">
   <div className="mini-tool-tab">
    <button>↗</button>
-<button>👓</button>
+<button>★</button>
 <a href="/browse">← Results</a>
 <button>← Prev</button>
 <button>Next →</button>
@@ -321,17 +321,17 @@ function lightboxNext() {
               </div>
             </div>
 
-            <div className="seller-actions">
-              <a href={`${STAGING}/login`} className="message-btn">
-                Message Seller
-              </a>
+           <div className="seller-actions">
+  <a href={`${STAGING}/login`} className="message-btn">
+    Message Seller
+  </a>
 
-              <a href="tel:" className="call-btn">
-                Call
-              </a>
-            </div>
+  <button type="button" className="call-btn">
+    Call
+  </button>
+</div>
           </section>
- </section>
+ 
 
 {lightboxOpen && (
   <div className="lightbox">
