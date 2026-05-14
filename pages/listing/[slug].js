@@ -349,10 +349,8 @@ function lightboxNext() {
     </button>
   </div>
 )}
-
-</main>           
-                
-      </main>
+  
+  </main>
 
       <style jsx>{`
         :global(body) {
