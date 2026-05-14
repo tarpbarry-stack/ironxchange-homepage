@@ -48,8 +48,11 @@ export default function ListingPage() {
   const { slug } = router.query;
 
   const [listings, setListings] = useState([]);
-  const [activeImage, setActiveImage] = useState(0);
+const [activeImage, setActiveImage] = useState(0);
 
+const [lightboxOpen, setLightboxOpen] = useState(false);
+const [lightboxIndex, setLightboxIndex] = useState(0);
+  
   useEffect(() => {
     fetch("/api/listings")
       .then((res) => res.json())
@@ -118,6 +121,22 @@ export default function ListingPage() {
       ? highlights
       : ["Clean presentation", "Work-ready machine", "Seller supplied listing", "Contact seller for details"];
 
+function openLightbox(index) {
+  setLightboxIndex(index);
+  setLightboxOpen(true);
+}
+
+function closeLightbox() {
+  setLightboxOpen(false);
+}
+
+function lightboxPrev() {
+  setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
+}
+
+function lightboxNext() {
+  setLightboxIndex((lightboxIndex + 1) % images.length);
+}
   function goPrev() {
     if (images.length < 2) return;
     setActiveImage((activeImage - 1 + images.length) % images.length);
