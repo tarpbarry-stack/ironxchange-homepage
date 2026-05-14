@@ -73,68 +73,44 @@ export default function SavedListings() {
     {savedListings.length} SAVED
   </span>
 </div>
-        <div className="cards">
-          <a
-  href={`/listing/${slugify(item.title)}?from=browser`}
-  className="card"
-  key={item.id || item.link || item.title}
->
-  <div
-    className="card-photo"
-    style={{
-      backgroundImage: `url(${
-        item.imageUrl ||
-        item.image ||
-        "/images/hero-equipment-yard.jpg"
-      })`
-    }}
-  />
+      <div className="cards">
+  {savedListings.map((item) => (
+    <a
+      href={`/listing/${slugify(item.title)}?from=browser`}
+      className="card"
+      key={item.id || item.link || item.title}
+    >
+      <div
+        className="card-photo"
+        style={{
+          backgroundImage: `url(${
+            item.imageUrl ||
+            item.image ||
+            "/images/hero-equipment-yard.jpg"
+          })`
+        }}
+      />
 
-  <div className="card-body">
-    <div className="title-row">
-      <h3>
-        {item.title.replace(item.hours, "").trim()}
-      </h3>
+      <div className="card-body">
+        <div className="title-row">
+          <h3>{item.title.replace(item.hours, "").trim()}</h3>
 
-      <h3 className="hours-inline">
-        {item.hours}
-      </h3>
-    </div>
-
-    <p className="feature-line">
-      {getFeatureLine(item)}
-    </p>
-
-    <div className="price-row">
-      <strong>{item.price}</strong>
-
-      <div className="meta">
-        <span>⌖ {item.location}</span>
-      </div>
-    </div>
-  </div>
-</a>
-            <a
-              href={`/listing/${slugify(item.title)}?from=browser`}
-              className="card"
-              key={item.id || item.title}
-            >
-              <div
-                className="photo"
-                style={{
-                  backgroundImage: `url(${item.imageUrl || item.image || "/images/hero-equipment-yard.jpg"})`
-                }}
-              />
-
-              <div className="body">
-                <h3>{item.title}</h3>
-                <p>{item.hours} · {item.location}</p>
-                <strong>{item.price}</strong>
-              </div>
-            </a>
-          ))}
+          <h3 className="hours-inline">{item.hours}</h3>
         </div>
 
+        <p className="feature-line">Saved Listing</p>
+
+        <div className="price-row">
+          <strong>{item.price}</strong>
+
+          <div className="meta">
+            <span>⌖ {item.location}</span>
+          </div>
+        </div>
+      </div>
+    </a>
+  ))}
+</div>
         {savedListings.length === 0 && (
           <p className="empty">No saved listings yet.</p>
         )}
