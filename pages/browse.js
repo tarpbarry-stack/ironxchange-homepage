@@ -1387,12 +1387,12 @@ if (category === "BACKHOE LOADERS") {
               />
 
              <div className="card-body">
-  <div className="title-row">
+<div className="title-row">
   <h3>{item.title}</h3>
 
-  <span className="hours-top">
+  <h3 className="hours-inline">
     {item.hours}
-  </span>
+  </h3>
 </div>
 
 <p className="feature-line">
