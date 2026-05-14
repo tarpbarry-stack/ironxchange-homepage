@@ -302,29 +302,46 @@ function lightboxNext() {
             </div>
 
            <div className="right-stack">
-  <div className="mini-tool-tab">
- <button>
-  <i className="fa-solid fa-arrow-up-from-bracket"></i>
-</button>
-<button>★</button>
-<a href="/browse">← Results</a>
-{prevListing ? (
-  <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
-    ← Prev
-  </a>
-) : (
-  <button disabled>← Prev</button>
-)}
+<div className="mini-tool-tab">
+  <button
+    type="button"
+    onClick={() => {
+      const url = window.location.href;
 
-{nextListing ? (
-  <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
-    Next →
-  </a>
-) : (
-  <button disabled>Next →</button>
-)}
-  </div>
+      if (navigator.share) {
+        navigator.share({
+          title,
+          url
+        });
+      } else {
+        navigator.clipboard.writeText(url);
+        alert("Listing link copied");
+      }
+    }}
+  >
+    <i className="fa-solid fa-arrow-up-from-bracket"></i>
+  </button>
 
+  <button>★</button>
+
+  <a href="/browse">← Results</a>
+
+  {prevListing ? (
+    <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
+      ← Prev
+    </a>
+  ) : (
+    <button disabled>← Prev</button>
+  )}
+
+  {nextListing ? (
+    <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
+      Next →
+    </a>
+  ) : (
+    <button disabled>Next →</button>
+  )}
+</div>
   <div className="panel">
     <h2>Highlights</h2>
 
