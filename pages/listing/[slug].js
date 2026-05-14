@@ -330,8 +330,9 @@ function lightboxNext() {
     Call
   </button>
 </div>
-          </section>
- 
+                    </section>
+
+        </section>
 
 {lightboxOpen && (
   <div className="lightbox">
