@@ -469,14 +469,17 @@ function lightboxNext() {
           background: #111;
         }
 
-        .photo-rail {
-          height: 620px;
-          overflow-y: auto;
-          display: grid;
-          grid-auto-rows: 146px;
-          gap: 12px;
-          padding-right: 2px;
-        }
+     .photo-rail {
+  height: 620px;
+  overflow-y: auto;
+  display: grid;
+  grid-auto-rows: 146px;
+  gap: 12px;
+  padding-right: 2px;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.12) transparent;
+}
 
         .photo-rail img {
           width: 100%;
@@ -488,6 +491,22 @@ function lightboxNext() {
           transition: opacity 0.15s ease, transform 0.15s ease;
         }
 
+.photo-rail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.photo-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.photo-rail::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+}
+
+.photo-rail::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.22);
+}
         .photo-rail img:hover,
         .photo-rail img.active-thumb {
           opacity: 1;
