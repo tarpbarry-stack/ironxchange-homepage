@@ -193,7 +193,12 @@ function lightboxNext() {
 
           <div className="photo-grid">
             <div className="hero-wrap">
-              <img src={heroImage} alt={title} className="hero-photo" />
+            <img
+  src={heroImage}
+  alt={title}
+  className="hero-photo"
+  onClick={() => openLightbox(activeImage)}
+/>
 
               <button className="arrow left" onClick={goPrev} type="button">
                 ‹
@@ -216,7 +221,10 @@ function lightboxNext() {
       key={`${src}-${index}`}
       src={src}
       alt=""
-      onClick={() => setActiveImage(index)}
+      onClick={() => {
+  setActiveImage(index);
+  openLightbox(index);
+}}
       className={index === activeImage ? "active-thumb" : ""}
     />
   ))}
@@ -234,7 +242,11 @@ function lightboxNext() {
           key={`${src}-${pairIndex}-${index}`}
           src={src}
           alt=""
-          onClick={() => setActiveImage(pairIndex * 2 + index + 1)}
+          onClick={() => {
+  const imgIndex = pairIndex * 2 + index + 1;
+  setActiveImage(imgIndex);
+  openLightbox(imgIndex);
+}}
         />
       ))}
     </div>
@@ -313,6 +325,33 @@ function lightboxNext() {
             </div>
           </section>
         </section>
+
+     </section>
+
+{lightboxOpen && (
+  <div className="lightbox">
+    <button className="lightbox-close" onClick={closeLightbox}>
+      ×
+    </button>
+
+    <button className="lightbox-arrow left" onClick={lightboxPrev}>
+      ‹
+    </button>
+
+    <img
+      src={images[lightboxIndex]}
+      alt=""
+      className="lightbox-image"
+    />
+
+    <button className="lightbox-arrow right" onClick={lightboxNext}>
+      ›
+    </button>
+  </div>
+)}
+
+</main>           
+                
       </main>
 
       <style jsx>{`
