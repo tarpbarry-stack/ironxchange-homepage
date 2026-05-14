@@ -455,17 +455,21 @@ function lightboxNext() {
           font-size: 16px;
         }
 
-        .sub-row {
+       .sub-row {
   display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .listing-nav {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  justify-content: flex-end;
+  margin-top: 6px;
+
   color: #777;
   font-size: 10px;
   font-weight: 700;
