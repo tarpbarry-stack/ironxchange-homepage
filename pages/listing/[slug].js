@@ -437,6 +437,27 @@ function lightboxNext() {
           margin: 0 auto;
         }
 
+        .back-results {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 18px;
+
+  color: rgba(255,255,255,.58);
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.back-results:hover {
+  color: rgba(255,255,255,.92);
+}
+
         .title-row {
           display: flex;
           justify-content: space-between;
