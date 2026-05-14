@@ -12,22 +12,35 @@ function slugify(text = "") {
     .replace(/^-|-$/g, "");
 }
 
+function getImageUrl(img) {
+  if (!img) return null;
+  if (typeof img === "string") return img;
+
+  return (
+    img.url ||
+    img.src ||
+    img.attributes?.variants?.default?.url ||
+    img.attributes?.variants?.landscape-crop?.url ||
+    img.attributes?.variants?.["scaled-small"]?.url ||
+    null
+  );
+}
+
 function getListingImages(listing) {
-  const possibleImages = [
+  const rawImages = [
     ...(Array.isArray(listing?.images) ? listing.images : []),
     ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
     listing?.imageUrl,
     listing?.image
-  ].filter(Boolean);
+  ];
 
-  const normalized = possibleImages
-    .map((img) => {
-      if (typeof img === "string") return img;
-      return img.url || img.src || img.attributes?.variants?.default?.url;
-    })
-    .filter(Boolean);
+  const images = rawImages.map(getImageUrl).filter(Boolean);
 
-  return [...new Set(normalized)];
+  return [...new Set(images)];
+}
+
+function cleanText(value) {
+  return value ? String(value).trim() : "";
 }
 
 export default function ListingPage() {
@@ -48,26 +61,74 @@ export default function ListingPage() {
 
   const listing = useMemo(() => {
     if (!slug || listings.length === 0) return null;
-
     return listings.find((item) => slugify(item.title) === slug);
   }, [slug, listings]);
 
-  const images = getListingImages(listing);
-
   if (!listing) {
     return (
-      <main style={{ background: "#0b0b0b", color: "#ddd", minHeight: "100vh", padding: 40 }}>
+      <main className="loading">
         Loading listing...
+        <style jsx>{`
+          .loading {
+            min-height: 100vh;
+            background: #0b0b0b;
+            color: #d6d6d6;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+          }
+        `}</style>
       </main>
     );
   }
 
+  const images = getListingImages(listing);
   const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+
+  const title = cleanText(listing.title) || "Equipment Listing";
+  const price = cleanText(listing.price) || "Call for Price";
+  const hours = cleanText(listing.hours) || "Hours not listed";
+  const location = cleanText(listing.location) || "Location not listed";
+  const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
+  const make = cleanText(listing.make) || "—";
+  const model = cleanText(listing.model) || "—";
+  const serial = cleanText(listing.serialNumber || listing.vin || listing.serial) || "Not listed";
+  const sellerName = cleanText(listing.sellerName || listing.authorName) || "Private Seller";
+  const sellerLocation = cleanText(listing.sellerLocation) || location;
+  const description =
+    cleanText(listing.description) ||
+    cleanText(listing.publicData?.description) ||
+    cleanText(listing.publicData?.details) ||
+    "Seller description has not been added yet.";
+
+  const highlights = [
+    listing.publicData?.highlight1,
+    listing.publicData?.highlight2,
+    listing.publicData?.highlight3,
+    listing.publicData?.highlight4
+  ]
+    .filter(Boolean)
+    .map(cleanText);
+
+  const displayHighlights =
+    highlights.length > 0
+      ? highlights
+      : ["Clean presentation", "Work-ready machine", "Seller supplied listing", "Contact seller for details"];
+
+  function goPrev() {
+    if (images.length < 2) return;
+    setActiveImage((activeImage - 1 + images.length) % images.length);
+  }
+
+  function goNext() {
+    if (images.length < 2) return;
+    setActiveImage((activeImage + 1) % images.length);
+  }
 
   return (
     <>
       <Head>
-        <title>{listing.title} | IronXchange</title>
+        <title>{title} | IronXchange</title>
+
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           rel="stylesheet"
@@ -77,11 +138,18 @@ export default function ListingPage() {
       <main>
         <nav className="nav">
           <a href="/" className="logo-wrap">
-            <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
+            <img
+              src="/images/ironxchange-logo.png"
+              className="logo-img"
+              alt="IronXchange"
+            />
           </a>
 
           <div className="nav-links">
-            <a href={`${STAGING}/l/new`} className="yellow-link">POST FREE</a>
+            <a href={`${STAGING}/l/new`} className="yellow-link">
+              POST FREE
+            </a>
+
             <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
               <i className="fa-regular fa-user"></i>
             </a>
@@ -91,28 +159,24 @@ export default function ListingPage() {
         <section className="page">
           <div className="title-row">
             <div>
-              <h1>{listing.title}</h1>
-              <p>{listing.hours} · {listing.location}</p>
+              <h1>{title}</h1>
+              <p>
+                {hours} · {location}
+              </p>
             </div>
 
-            <div className="price">{listing.price}</div>
+            <div className="price">{price}</div>
           </div>
 
           <div className="photo-grid">
             <div className="hero-wrap">
-              <img src={heroImage} alt={listing.title} className="hero-photo" />
+              <img src={heroImage} alt={title} className="hero-photo" />
 
-              <button
-                className="arrow left"
-                onClick={() => setActiveImage((activeImage - 1 + images.length) % images.length)}
-              >
+              <button className="arrow left" onClick={goPrev} type="button">
                 ‹
               </button>
 
-              <button
-                className="arrow right"
-                onClick={() => setActiveImage((activeImage + 1) % images.length)}
-              >
+              <button className="arrow right" onClick={goNext} type="button">
                 ›
               </button>
 
@@ -126,14 +190,87 @@ export default function ListingPage() {
             <div className="photo-rail">
               {images.map((src, index) => (
                 <img
-                  key={src}
+                  key={`${src}-${index}`}
                   src={src}
                   alt=""
                   onClick={() => setActiveImage(index)}
+                  className={index === activeImage ? "active-thumb" : ""}
                 />
               ))}
             </div>
           </div>
+
+          <section className="info-grid">
+            <div className="panel">
+              <h2>Quick Facts</h2>
+
+              <div className="facts">
+                <span>Year</span>
+                <strong>{year}</strong>
+
+                <span>Make</span>
+                <strong>{make}</strong>
+
+                <span>Model</span>
+                <strong>{model}</strong>
+
+                <span>Hours</span>
+                <strong>{hours}</strong>
+
+                <span>Serial #</span>
+                <strong>{serial}</strong>
+
+                <span>Location</span>
+                <strong>{location}</strong>
+
+                <span>Seller</span>
+                <strong>{sellerName}</strong>
+              </div>
+            </div>
+
+            <div className="panel">
+              <h2>Highlights</h2>
+
+              <ul className="highlights">
+                {displayHighlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section className="panel description">
+            <h2>Description</h2>
+
+            <p>{description}</p>
+          </section>
+
+          <section className="panel seller-panel">
+            <div>
+              <h2>Contact Seller</h2>
+
+              <div className="seller-row">
+                <div className="seller-avatar">
+                  <i className="fa-regular fa-user"></i>
+                </div>
+
+                <div>
+                  <strong>{sellerName}</strong>
+                  <p>{sellerLocation}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="seller-actions">
+              <a href={`${STAGING}/login`} className="message-btn">
+                Message Seller
+              </a>
+
+              <a href="tel:" className="call-btn">
+                Call
+              </a>
+            </div>
+          </section>
         </section>
       </main>
 
@@ -145,7 +282,9 @@ export default function ListingPage() {
           font-family: Arial, sans-serif;
         }
 
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
         main {
           min-height: 100vh;
@@ -158,7 +297,7 @@ export default function ListingPage() {
           align-items: center;
           padding: 14px 5%;
           background: #050505;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .logo-img {
@@ -179,10 +318,12 @@ export default function ListingPage() {
           font-weight: 900;
           text-transform: uppercase;
           font-size: 13px;
-          letter-spacing: .6px;
+          letter-spacing: 0.6px;
         }
 
-        .yellow-link { color: ${BRAND_YELLOW} !important; }
+        .yellow-link {
+          color: ${BRAND_YELLOW} !important;
+        }
 
         .login-icon {
           border: 2px solid white;
@@ -203,6 +344,7 @@ export default function ListingPage() {
         .title-row {
           display: flex;
           justify-content: space-between;
+          align-items: flex-start;
           gap: 24px;
           margin-bottom: 18px;
         }
@@ -213,6 +355,7 @@ export default function ListingPage() {
           font-size: 30px;
           font-weight: 800;
           letter-spacing: -0.5px;
+          line-height: 1.1;
         }
 
         .title-row p {
@@ -225,6 +368,7 @@ export default function ListingPage() {
           color: #f2f2f2;
           font-size: 32px;
           font-weight: 800;
+          letter-spacing: -0.6px;
           white-space: nowrap;
         }
 
@@ -232,6 +376,7 @@ export default function ListingPage() {
           display: grid;
           grid-template-columns: minmax(0, 1fr) 300px;
           gap: 12px;
+          margin-top: 18px;
         }
 
         .hero-wrap {
@@ -243,8 +388,8 @@ export default function ListingPage() {
           width: 100%;
           height: 620px;
           object-fit: cover;
-          border-radius: 14px;
           display: block;
+          border-radius: 14px;
           background: #111;
         }
 
@@ -254,6 +399,7 @@ export default function ListingPage() {
           display: grid;
           grid-auto-rows: 146px;
           gap: 12px;
+          padding-right: 2px;
         }
 
         .photo-rail img {
@@ -262,6 +408,14 @@ export default function ListingPage() {
           object-fit: cover;
           border-radius: 14px;
           cursor: pointer;
+          opacity: 0.82;
+          transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .photo-rail img:hover,
+        .photo-rail img.active-thumb {
+          opacity: 1;
+          transform: translateY(-1px);
         }
 
         .photo-actions {
@@ -270,7 +424,8 @@ export default function ListingPage() {
           bottom: 20px;
           display: flex;
           gap: 18px;
-          background: rgba(0,0,0,.62);
+          background: rgba(0, 0, 0, 0.62);
+          backdrop-filter: blur(8px);
           padding: 12px 16px;
           border-radius: 10px;
           color: #e5e5e5;
@@ -284,15 +439,152 @@ export default function ListingPage() {
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          border: 1px solid rgba(255,255,255,.28);
-          background: rgba(0,0,0,.42);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          background: rgba(0, 0, 0, 0.42);
           color: #f2f2f2;
           font-size: 32px;
+          line-height: 1;
           cursor: pointer;
         }
 
-        .arrow.left { left: 18px; }
-        .arrow.right { right: 18px; }
+        .arrow.left {
+          left: 18px;
+        }
+
+        .arrow.right {
+          right: 18px;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-top: 22px;
+        }
+
+        .panel {
+          background: #151515;
+          border: 1px solid #282828;
+          border-radius: 16px;
+          padding: 24px;
+        }
+
+        .panel h2 {
+          margin: 0 0 18px;
+          color: #f2f2f2;
+          font-size: 18px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
+
+        .facts {
+          display: grid;
+          grid-template-columns: 130px 1fr;
+          row-gap: 12px;
+          column-gap: 24px;
+          font-size: 15px;
+        }
+
+        .facts span {
+          color: #9a9a9a;
+        }
+
+        .facts strong {
+          color: #e5e5e5;
+          font-weight: 500;
+        }
+
+        .highlights {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: grid;
+          gap: 14px;
+          font-size: 15px;
+        }
+
+        .highlights li::before {
+          content: "✓";
+          color: ${BRAND_YELLOW};
+          margin-right: 12px;
+          font-weight: 900;
+        }
+
+        .description {
+          margin-top: 16px;
+        }
+
+        .description p {
+          color: #d0d0d0;
+          line-height: 1.7;
+          font-size: 16px;
+          margin: 0;
+          max-width: 1100px;
+        }
+
+        .seller-panel {
+          margin-top: 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+        }
+
+        .seller-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .seller-avatar {
+          width: 58px;
+          height: 58px;
+          border-radius: 50%;
+          border: 1px solid #777;
+          display: grid;
+          place-items: center;
+          font-size: 28px;
+          color: #ddd;
+        }
+
+        .seller-row strong {
+          color: #f2f2f2;
+          font-size: 16px;
+        }
+
+        .seller-row p {
+          margin: 5px 0 0;
+          color: #aaa;
+        }
+
+        .seller-actions {
+          display: flex;
+          gap: 16px;
+          min-width: 430px;
+        }
+
+        .message-btn,
+        .call-btn {
+          flex: 1;
+          text-align: center;
+          text-decoration: none;
+          text-transform: uppercase;
+          font-weight: 900;
+          border-radius: 10px;
+          padding: 18px 20px;
+          font-size: 13px;
+          letter-spacing: 0.3px;
+        }
+
+        .message-btn {
+          background: ${BRAND_YELLOW};
+          color: #050505;
+        }
+
+        .call-btn {
+          border: 1px solid #3a3a3a;
+          color: #e5e5e5;
+        }
 
         @media (max-width: 950px) {
           .photo-grid {
@@ -321,30 +613,65 @@ export default function ListingPage() {
             gap: 10px;
             height: 360px;
             overflow: visible;
+            padding-right: 12px;
           }
 
           .photo-rail img {
             width: 100%;
             height: 175px;
+            object-fit: cover;
+            border-radius: 14px;
+          }
+
+          .info-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .seller-panel {
+            align-items: stretch;
+            flex-direction: column;
+          }
+
+          .seller-actions {
+            min-width: 0;
+            width: 100%;
           }
         }
 
         @media (max-width: 850px) {
-          .logo-img { height: 56px; }
-          .nav-links { gap: 18px; }
-          .yellow-link { font-size: 12px !important; }
+          .logo-img {
+            height: 56px;
+          }
 
-          .page { padding: 22px 4%; }
+          .nav-links {
+            gap: 18px;
+          }
+
+          .yellow-link {
+            font-size: 12px !important;
+          }
+
+          .login-icon {
+            width: 28px;
+            height: 28px;
+          }
+
+          .page {
+            padding: 22px 4%;
+          }
 
           .title-row {
             flex-direction: column;
             gap: 8px;
           }
 
-          h1 { font-size: 24px; }
-          .price { font-size: 25px; }
+          h1 {
+            font-size: 24px;
+          }
 
-          .arrow { display: none; }
+          .price {
+            font-size: 25px;
+          }
 
           .photo-actions {
             left: 12px;
@@ -352,6 +679,23 @@ export default function ListingPage() {
             gap: 12px;
             font-size: 12px;
             padding: 10px 12px;
+          }
+
+          .arrow {
+            display: none;
+          }
+
+          .panel {
+            padding: 20px;
+          }
+
+          .facts {
+            grid-template-columns: 110px 1fr;
+            font-size: 14px;
+          }
+
+          .seller-actions {
+            flex-direction: column;
           }
         }
       `}</style>
