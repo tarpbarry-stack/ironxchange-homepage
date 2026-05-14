@@ -677,6 +677,58 @@ function lightboxNext() {
   display: none;
 }
 
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.94);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-image {
+  max-width: 94vw;
+  max-height: 92vh;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.12);
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.12);
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.lightbox-arrow.left {
+  left: 24px;
+}
+
+.lightbox-arrow.right {
+  right: 24px;
+}
+
 .mobile-gallery {
   display: flex;
   overflow-x: auto;
