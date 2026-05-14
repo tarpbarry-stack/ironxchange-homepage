@@ -899,7 +899,7 @@ function lightboxNext() {
 
 .mobile-hero {
   min-width: 92%;
-  height: 250px;
+  height: 215px;
   scroll-snap-align: start;
   background: #111;
   border-radius: 14px;
@@ -909,12 +909,12 @@ function lightboxNext() {
 .mobile-hero img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .mobile-pair {
-  min-width: 18vw;
-  height: 250px;
+  min-width: 17vw;
+  height: 215px;
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 8px;
@@ -923,7 +923,7 @@ function lightboxNext() {
 
 .mobile-pair img {
   width: 100%;
-  height: 121px;
+  height: 103px;
   object-fit: cover;
   border-radius: 12px;
 }
