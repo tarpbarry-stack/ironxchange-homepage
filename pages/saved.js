@@ -198,7 +198,7 @@ export default function SavedListings() {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 14px;
 }
 
 .nav-links a {
