@@ -608,45 +608,59 @@ export default function ListingPage() {
           color: #e5e5e5;
         }
 
+.mobile-gallery {
+  display: none;
+}
+
         @media (max-width: 950px) {
         .photo-grid {
+  display: block;
+}
+
+.hero-wrap,
+.photo-rail {
+  display: none;
+}
+
+.mobile-gallery {
   display: flex;
   overflow-x: auto;
   gap: 10px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
 }
 
-.hero-wrap {
+.mobile-hero {
   min-width: 82%;
+  height: 340px;
+  scroll-snap-align: start;
+  background: #111;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.mobile-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mobile-pair {
+  min-width: 44vw;
+  height: 340px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
   scroll-snap-align: start;
 }
 
-.hero-photo {
-  height: 330px;
-  object-fit: contain;
-  background: #111;
-}
-
-.photo-rail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(2, 160px);
-  grid-auto-columns: 44vw;
-  gap: 10px;
-  height: 330px;
-  overflow: visible;
-  padding-right: 12px;
-}
-
-.photo-rail img {
+.mobile-pair img {
   width: 100%;
-  height: 160px;
+  height: 165px;
   object-fit: cover;
   border-radius: 14px;
 }
-
           .info-grid {
             grid-template-columns: 1fr;
           }
