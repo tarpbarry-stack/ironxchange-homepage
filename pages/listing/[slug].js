@@ -325,8 +325,6 @@ function lightboxNext() {
             </div>
           </section>
 
-     </section>
-
 {lightboxOpen && (
   <div className="lightbox">
     <button className="lightbox-close" onClick={closeLightbox}>
