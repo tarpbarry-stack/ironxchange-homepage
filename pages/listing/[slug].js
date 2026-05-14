@@ -308,8 +308,21 @@ function lightboxNext() {
 </button>
 <button>★</button>
 <a href="/browse">← Results</a>
-<button>← Prev</button>
-<button>Next →</button>
+{prevListing ? (
+  <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
+    ← Prev
+  </a>
+) : (
+  <button disabled>← Prev</button>
+)}
+
+{nextListing ? (
+  <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
+    Next →
+  </a>
+) : (
+  <button disabled>Next →</button>
+)}
   </div>
 
   <div className="panel">
@@ -725,6 +738,11 @@ function lightboxNext() {
 .mini-tool-tab a:hover,
 .mini-tool-tab button:hover {
   color: rgba(255,255,255,.9);
+}
+
+.mini-tool-tab button:disabled {
+  opacity: .28;
+  cursor: default;
 }
 
 .mini-tool-tab i {
