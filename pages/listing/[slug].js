@@ -765,6 +765,10 @@ function lightboxNext() {
   color: rgba(255,255,255,.9);
 }
 
+.saved-star {
+  color: #FFC400 !important;
+}
+
 .mini-tool-tab button:disabled {
   opacity: .28;
   cursor: default;
