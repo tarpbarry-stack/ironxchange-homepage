@@ -164,11 +164,14 @@ export default async function handler(req, res) {
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "");
 
-        const firstImageId = getId(item.relationships?.images?.data?.[0]?.id);
+        const imageIds = item.relationships?.images?.data || [];
 
-        const imageUrl =
-          imageById[firstImageId] || "/images/hero-equipment-yard.jpg";
+const images = imageIds
+  .map((imageRef) => imageById[getId(imageRef.id)])
+  .filter(Boolean);
 
+const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
+        
         return {
           id,
           title: attrs.title || "Equipment",
@@ -179,8 +182,12 @@ export default async function handler(req, res) {
           location: getLocation(publicData),
           price: getPrice(attrs.price?.amount),
           image: imageUrl,
-          imageUrl,
-          link: `https://staging.ironxchange.com/l/${slug}/${id}`
+imageUrl,
+images,
+imageUrls: images,
+description: attrs.description || "",
+publicData,
+link: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
 
