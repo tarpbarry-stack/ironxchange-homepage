@@ -53,8 +53,8 @@ export default function ListingPage() {
           <div className="photo-grid">
             <div className="hero-wrap">
               <img
-                src="/images/2023-komatsu-wa475-10.jpg"
-                alt="2020 Deere 872GP"
+                src="/images/2023-komatsu-wa475-10-1.jpg"
+                alt="2023 KOMATSU WA475-10"
                 className="hero-photo"
               />
 
@@ -69,14 +69,14 @@ export default function ListingPage() {
             </div>
 
             <div className="photo-rail">
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
-              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-1.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-2.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-3.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-4.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-5.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-6.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-7.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10-8.jpg" alt="" />
             </div>
           </div>
 
