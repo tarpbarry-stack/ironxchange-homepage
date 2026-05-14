@@ -211,15 +211,19 @@ function lightboxNext() {
             />
           </a>
 
-          <div className="nav-links">
-            <a href={`${STAGING}/l/new`} className="yellow-link">
-              POST FREE
-            </a>
+        <div className="nav-links">
+  <a href={`${STAGING}/l/new`} className="yellow-link">
+    POST FREE
+  </a>
 
-            <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
-              <i className="fa-regular fa-user"></i>
-            </a>
-          </div>
+  <a href="/saved" className="login-icon" aria-label="Saved Listings">
+    <i className="fa-regular fa-star"></i>
+  </a>
+
+  <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+    <i className="fa-regular fa-user"></i>
+  </a>
+</div>
         </nav>
 
         <section className="page">
