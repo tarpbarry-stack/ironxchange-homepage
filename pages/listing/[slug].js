@@ -676,6 +676,26 @@ function lightboxNext() {
   color: rgba(255,255,255,.9);
 }
 
+.mini-tool-tab i {
+  font-size: 13px;
+}
+
+.mini-tool-tab button:first-child {
+  margin-right: -6px;
+}
+
+.mini-tool-tab button:nth-child(2) {
+  margin-right: 14px;
+}
+
+.mini-tool-tab a {
+  margin-right: -10px;
+}
+
+.mini-tool-tab button:last-child {
+  margin-left: -10px;
+}
+
 .right-stack .panel {
   height: 100%;
 }
