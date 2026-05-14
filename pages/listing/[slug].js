@@ -589,7 +589,7 @@ function lightboxNext() {
   border: none;
   padding: 0;
   margin: 0;
-  color: #E5E5E5;
+  color: rgba(255,255,255,.68);
   text-decoration: none;
   cursor: pointer;
   font-size: 12px;
