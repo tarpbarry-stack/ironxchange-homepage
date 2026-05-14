@@ -888,6 +888,15 @@ function lightboxNext() {
   display: none;
 }
 
+.mobile-gallery {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+}
+
 .mobile-hero {
   min-width: 82%;
   height: 340px;
