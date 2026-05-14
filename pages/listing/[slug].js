@@ -7,7 +7,7 @@ export default function ListingPage() {
   return (
     <>
       <Head>
-        <title>2020 DEERE 872GP | IronXchange</title>
+        <title>2023 KOMATSU WA475-10 | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -43,17 +43,17 @@ export default function ListingPage() {
         <section className="page">
           <div className="title-row">
             <div>
-              <h1>2020 DEERE 872GP</h1>
-              <p>3,875 hrs · Colorado City, TX</p>
+              <h1>2023 KOMATSU WA475-10</h1>
+              <p>5790 hrs · Post, TX</p>
             </div>
 
-            <div className="price">$179,000</div>
+            <div className="price">$175,900</div>
           </div>
 
           <div className="photo-grid">
             <div className="hero-wrap">
               <img
-                src="/images/2020-Deere-772GP.jpg"
+                src="/images/2023-komatsu-wa475-10.jpg"
                 alt="2020 Deere 872GP"
                 className="hero-photo"
               />
@@ -69,14 +69,14 @@ export default function ListingPage() {
             </div>
 
             <div className="photo-rail">
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
-              <img src="/images/2020-Deere-772GP.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
+              <img src="/images/2023-komatsu-wa475-10.jpg" alt="" />
             </div>
           </div>
 
@@ -86,22 +86,22 @@ export default function ListingPage() {
 
               <div className="facts">
                 <span>Year</span>
-                <strong>2020</strong>
+                <strong>2023</strong>
 
                 <span>Make</span>
-                <strong>Deere</strong>
+                <strong>Komatsu</strong>
 
                 <span>Model</span>
-                <strong>872GP</strong>
+                <strong>WA475-10</strong>
 
                 <span>Hours</span>
-                <strong>3,875</strong>
+                <strong>5,790</strong>
 
                 <span>Serial #</span>
                 <strong>1DW872GPCLF123456</strong>
 
                 <span>Location</span>
-                <strong>Colorado City, TX</strong>
+                <strong>Post</strong>
 
                 <span>Seller</span>
                 <strong>Private Seller</strong>
