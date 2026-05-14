@@ -1410,7 +1410,6 @@ if (category === "BACKHOE LOADERS") {
         <div className="cards">
           {filteredListings.map((item) => (
         <a
-  <a
   href={`/listing/${encodeURIComponent(
     (item.title || "listing")
       .toLowerCase()
