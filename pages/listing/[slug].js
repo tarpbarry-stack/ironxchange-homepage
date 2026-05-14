@@ -190,10 +190,11 @@ function lightboxNext() {
     </p>
   </div>
 
-      <div className="price">{price}</div>
+   <div className="price">{price}</div>
+</div>
 
-          <div className="photo-grid">
-            <div className="hero-wrap">
+<div className="photo-grid">
+  <div className="hero-wrap">
             <img
   src={heroImage}
   alt={title}
