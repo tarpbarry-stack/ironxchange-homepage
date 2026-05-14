@@ -54,6 +54,33 @@ const [lightboxOpen, setLightboxOpen] = useState(false);
 const [lightboxIndex, setLightboxIndex] = useState(0);
 
 const [isSaved, setIsSaved] = useState(false);
+
+useEffect(() => {
+  if (!slug) return;
+
+  const saved = JSON.parse(
+    localStorage.getItem("ironxchangeSaved") || "[]"
+  );
+
+  setIsSaved(saved.includes(slug));
+}, [slug]);
+
+function toggleSaved() {
+  const saved = JSON.parse(
+    localStorage.getItem("ironxchangeSaved") || "[]"
+  );
+
+  const updated = saved.includes(slug)
+    ? saved.filter((item) => item !== slug)
+    : [...saved, slug];
+
+  localStorage.setItem(
+    "ironxchangeSaved",
+    JSON.stringify(updated)
+  );
+
+  setIsSaved(updated.includes(slug));
+}  
   
   useEffect(() => {
     fetch("/api/listings")
