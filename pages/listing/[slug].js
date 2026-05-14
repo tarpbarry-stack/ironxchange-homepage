@@ -47,11 +47,13 @@ export default function ListingPage() {
   const router = useRouter();
   const { slug, from } = router.query;
 
-  const [listings, setListings] = useState([]);
+const [listings, setListings] = useState([]);
 const [activeImage, setActiveImage] = useState(0);
 
 const [lightboxOpen, setLightboxOpen] = useState(false);
 const [lightboxIndex, setLightboxIndex] = useState(0);
+
+const [isSaved, setIsSaved] = useState(false);
   
   useEffect(() => {
     fetch("/api/listings")
@@ -322,7 +324,13 @@ function lightboxNext() {
     <i className="fa-solid fa-arrow-up-from-bracket"></i>
   </button>
 
-  <button>★</button>
+  <button
+  type="button"
+  className={isSaved ? "saved-star" : ""}
+  onClick={() => setIsSaved(!isSaved)}
+>
+  ★
+</button>
 
   <a href="/browse">← Results</a>
 
