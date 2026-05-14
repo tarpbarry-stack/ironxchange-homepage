@@ -1388,7 +1388,9 @@ if (category === "BACKHOE LOADERS") {
 
              <div className="card-body">
 <div className="title-row">
-  <h3>{item.title}</h3>
+  <h3>
+    {item.title.replace(item.hours, "").trim()}
+  </h3>
 
   <h3 className="hours-inline">
     {item.hours}
