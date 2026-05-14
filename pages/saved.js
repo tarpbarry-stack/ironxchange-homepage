@@ -156,19 +156,29 @@ export default function SavedListings() {
           gap: 22px;
         }
 
-        .card {
-          text-decoration: none;
-          color: inherit;
-          background: #151515;
-          border: 1px solid #242424;
-          border-radius: 16px;
-          overflow: hidden;
-        }
+       .card {
+  text-decoration: none;
+  color: inherit;
+  background: #151515;
+  border: 1px solid #242424;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform .18s ease,
+              border-color .18s ease,
+              background .18s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #3A3A3A;
+  background: #181818;
+}
 
         .photo {
           height: 190px;
           background-size: cover;
           background-position: center;
+          border-bottom: 1px solid #202020;
         }
 
         .body {
