@@ -181,15 +181,30 @@ function lightboxNext() {
 
         <section className="page">
           <div className="title-row">
-            <div>
-              <h1>{title}</h1>
-              <p>
-                {hours} · {location}
-              </p>
-            </div>
+  <div>
+    <h1>{title}</h1>
 
-            <div className="price">{price}</div>
-          </div>
+    <div className="sub-row">
+      <p>
+        {hours} · {location}
+      </p>
+
+      <div className="listing-nav">
+        <a href="/browse">← RESULTS</a>
+
+        <span>|</span>
+
+        <button>← PREV</button>
+
+        <span>|</span>
+
+        <button>NEXT →</button>
+      </div>
+    </div>
+  </div>
+
+  <div className="price">{price}</div>
+</div>
 
           <div className="photo-grid">
             <div className="hero-wrap">
@@ -439,6 +454,48 @@ function lightboxNext() {
           color: #9a9a9a;
           font-size: 16px;
         }
+
+        .sub-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.listing-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #777;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.listing-nav a,
+.listing-nav button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #777;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.listing-nav a:hover,
+.listing-nav button:hover {
+  color: #D6D6D6;
+}
+
+.listing-nav span {
+  opacity: .4;
+}
 
         .price {
           color: #f2f2f2;
