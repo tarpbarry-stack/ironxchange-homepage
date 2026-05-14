@@ -844,8 +844,11 @@ function lightboxNext() {
           }
 
           .arrow {
-            display: none;
-          }
+  width: 34px;
+  height: 34px;
+  font-size: 26px;
+  background: rgba(0,0,0,.45);
+}
 
           .panel {
             padding: 20px;
