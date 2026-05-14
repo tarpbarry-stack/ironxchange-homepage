@@ -756,8 +756,8 @@ function lightboxNext() {
 }
 
 .mobile-hero {
-  min-width: 88%;
-  height: 470px;
+  min-width: 92%;
+  height: 250px;
   scroll-snap-align: start;
   background: #111;
   border-radius: 14px;
@@ -767,23 +767,23 @@ function lightboxNext() {
 .mobile-hero img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .mobile-pair {
-  min-width: 34vw;
-  height: 470px;
+  min-width: 18vw;
+  height: 250px;
   display: grid;
   grid-template-rows: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
   scroll-snap-align: start;
 }
 
 .mobile-pair img {
   width: 100%;
-  height: 230px;
+  height: 121px;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: 12px;
 }
           .info-grid {
             grid-template-columns: 1fr;
