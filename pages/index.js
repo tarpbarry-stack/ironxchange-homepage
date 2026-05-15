@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
@@ -7,6 +7,7 @@ const BRAND_YELLOW = "#FFC400";
 const categories = [
   "ALL CATEGORIES",
   "AERIAL EQUIPMENT",
+  "AGGREGATE",
   "AGRICULTURE HARVESTERS",
   "AGRICULTURE TRACTORS",
   "ASPHALT EQUIPMENT",
@@ -23,7 +24,7 @@ const categories = [
   "SCRAPER",
   "SKID STEER/CTL",
   "TELEHANDLERS",
-  "TRENCHERS",
+  "TRENCHERS/PLOWS",
   "TRAILERS",
   "TRUCKS",
   "WHEEL LOADERS",
@@ -33,265 +34,274 @@ const categories = [
   "UTILITY CARTS"
 ];
 
-const listings = [
-  {
-    title: "2018 BELL B30E",
-    type: "Articulated Truck",
-    hours: "6,800 Hrs",
-    location: "Waco, TX",
-    price: "$98,900",
-    image: "/images/2018-bell-b30e.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2018 BELL B30E")}`
-  },
-  {
-    title: "2021 DEERE 750L",
-    type: "Dozer",
-    hours: "4,017 Hrs",
-    location: "Wilson, OK",
-    price: "$129,000",
-    image: "/images/2021-deere-750l.jpg",
-    link: `${STAGING}/s?keywords=${encodeURIComponent("2021 DEERE 750L")}`
-  },
- {
-  title: "2023 KOMATSU WA475-10",
-  type: "Wheel Loader",
-  hours: "5,790 Hrs",
-  location: "Post, TX",
-  price: "$175,500",
-  image: "/images/2023-komatsu-wa475-10.jpg",
-  link: "https://staging.ironxchange.com/l/2023-komatsu-wa475-4-989-hrs/69f80a91-ef02-446d-bfa8-61f00353e32e"
-},
-  {
-    title: "2020 DEERE 772GP",
-    type: "Motor Grader",
-    hours: "3,907 Hrs",
-    location: "Colorado City, TX",
-    price: "$179,000",
-    image: "/images/2020-Deere-772GP.jpg",
-    link: "https://staging.ironxchange.com/l/2020-deere-772gp-4-790-hrs/69f7ffd8-f07e-4587-a4dd-4a1fa7626d91"
-  },
-  {
-    title: "2023 DEERE 1025R",
-    type: "Compact Tractor",
-    hours: "861 Hrs",
-    location: "Ringling, OK",
-    price: "$13,200",
-    image: "/images/2023-deere-1025r.jpg",
-    link: "https://staging.ironxchange.com/l/2022-john-deere-897-hrs/69f82823-cad7-4b70-acc5-f51d70abed41"
-  },
-  {
-    title: "2017 DEERE 85G",
-    type: "Mini Excavator",
-    hours: "3,105 Hrs",
-    location: "Many, LA",
-    price: "$52,500",
-    image: "/images/2017-deere-85g.jpg",
-    link: "https://staging.ironxchange.com/l/2017-deere-85g-3-273-hrs/69f7fcbe-1276-446c-87ab-ca2e6e59b422"
-  },
-  {
-    title: "2007 PETERBILT 389",
-    type: "Water Truck",
-    hours: "298,000 Miles",
-    location: "Hobbs, NM",
-    price: "$44,900",
-    image: "/images/2007-peterbilt-389.jpg",
-    link: "https://staging.ironxchange.com/l/2007-water-298-900-hrs/69f80726-578b-40b3-8b46-88f9e633f379"
-  },
- {
-  title: "2019 MCCLOSKEY I54",
-  type: "Crusher",
-  hours: "4,016 Hrs",
-  location: "Jal, NM",
-  price: "$315,000",
-  image: "/images/2019-mccloskey-i54.jpg",
-  link: "https://staging.ironxchange.com/l/2019-mccloskey-i54-4-118-hrs/69f8117f-38b5-4218-893f-bbdab94b929d"
-}
+const featureKeywords = [
+  { match: ["push block", "pushblock"], label: "Push Block" },
+  { match: ["ripper"], label: "Rear Ripper" },
+  { match: ["smartgrade", "smart grade"], label: "SmartGrade" },
+  { match: ["topcon"], label: "Topcon" },
+  { match: ["trimble"], label: "Trimble" },
+  { match: ["gps"], label: "GPS" },
+  { match: ["joystick"], label: "Joystick Controls" },
+  { match: ["aux hydraulics", "auxiliary hydraulics"], label: "Aux Hydraulics" },
+  { match: ["quick coupler", "hydraulic coupler"], label: "Quick Coupler" },
+  { match: ["thumb", "hydraulic thumb"], label: "Hydraulic Thumb" },
+  { match: ["high flow", "hi-flow"], label: "High Flow" },
+  { match: ["ride control"], label: "Ride Control" },
+  { match: ["scale", "payload scale"], label: "Scale" },
+  { match: ["auto lube", "autolube"], label: "Auto Lube" },
+  { match: ["cold ac", "cold a/c", "cold air"], label: "Cold A/C" },
+  { match: ["no def", "def deleted", "de-tier", "detier"], label: "No DEF" }
 ];
+
+function slugify(text = "") {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getFeatureLine(item) {
+  const text = [
+    item.title,
+    item.description,
+    item.publicData?.description,
+    item.publicData?.details,
+    item.type,
+    item.make,
+    item.model
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const matches = featureKeywords
+    .filter((feature) => feature.match.some((term) => text.includes(term)))
+    .map((feature) => feature.label);
+
+  return [...new Set(matches)].slice(0, 4).join(" • ") || item.type || "";
+}
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
+  const [liveListings, setLiveListings] = useState([]);
 
-const handleSearch = () => {
-  const terms = [
-    searchQuery.trim(),
-    category !== "ALL CATEGORIES" ? category : ""
-  ].filter(Boolean).join(" ");
+  useEffect(() => {
+    fetch("/api/listings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setLiveListings(data);
+      })
+      .catch(() => {});
+  }, []);
 
-  window.location.href = terms
-    ? `/browse?keywords=${encodeURIComponent(terms)}`
-    : `/browse`;
-};
+  const featuredListings = liveListings.slice(0, 8);
+
+  function handleSearch() {
+    const terms = [
+      searchQuery.trim(),
+      category !== "ALL CATEGORIES" ? category : ""
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    window.location.href = terms
+      ? `/browse?keywords=${encodeURIComponent(terms)}`
+      : "/browse";
+  }
+
   return (
     <>
-     <Head>
-  <title>IronXchange - Free Heavy Equipment Marketplace</title>
-  <meta name="description" content="Free Heavy Equipment Marketplace. List and browse machinery with no fees." />
+      <Head>
+        <title>IronXchange - Free Heavy Equipment Marketplace</title>
+        <meta
+          name="description"
+          content="Free Heavy Equipment Marketplace. List and browse machinery with no fees."
+        />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap"
-    rel="stylesheet"
-  />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
 
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    rel="stylesheet"
-  />
-</Head>
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          rel="stylesheet"
+        />
+      </Head>
 
       <nav className="nav">
         <a href="/" className="logo-wrap">
-          <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
+          <img
+            src="/images/ironxchange-logo.png"
+            className="logo-img"
+            alt="IronXchange"
+          />
         </a>
 
         <div className="nav-links">
-  <a href="/browse">Browse Equipment</a>
-  <a href={`${STAGING}/l/new`} className="yellow-link">Post Equipment Free</a>
-  <a href={`${STAGING}/login`} className="login-icon">
-    <i className="fa-regular fa-user"></i>
-  </a>
-</div>
+          <a href="/browse">Browse Equipment</a>
+          <a href={`${STAGING}/l/new`} className="yellow-link">
+            Post Equipment Free
+          </a>
+          <a href="/login" className="login-icon" aria-label="Login">
+            <i className="fa-regular fa-user"></i>
+          </a>
+        </div>
       </nav>
 
       <section className="hero">
         <div className="hero-content">
-          <h1>FREE HEAVY<br />EQUIPMENT MARKETPLACE</h1>
+          <h1>
+            FREE HEAVY
+            <br />
+            EQUIPMENT
+            <br />
+            MARKETPLACE
+          </h1>
 
-        <div className="hero-icons">
-  <div>
-    <span className="hero-icon red slash-icon">
-      <i className="fa-solid fa-dollar-sign"></i>
-    </span>
-    <strong>NO FEES</strong>
-  </div>
+          <div className="hero-icons">
+            <div>
+              <span className="hero-icon red slash-icon">
+                <i className="fa-solid fa-dollar-sign"></i>
+              </span>
+              <strong>NO FEES</strong>
+            </div>
 
-  <div>
-    <span className="hero-icon red slash-icon">
-      <i className="fa-regular fa-credit-card"></i>
-    </span>
-    <strong>NO CREDIT CARDS</strong>
-  </div>
+            <div>
+              <span className="hero-icon red slash-icon">
+                <i className="fa-regular fa-credit-card"></i>
+              </span>
+              <strong>NO CREDIT CARDS</strong>
+            </div>
 
-  <div>
-    <span className="hero-icon green">
-      <i className="fa-regular fa-clock"></i>
-    </span>
-    <strong>LISTINGS LIVE<br />IN MINUTES</strong>
-  </div>
-</div>
-
-          <div className="cta-buttons">
-            <a href={`${STAGING}/l/new`} className="btn-primary">POST EQUIPMENT FREE →</a>
+            <div>
+              <span className="hero-icon green">
+                <i className="fa-regular fa-clock"></i>
+              </span>
+              <strong>
+                LISTINGS LIVE
+                <br />
+                IN MINUTES
+              </strong>
+            </div>
           </div>
+
+          <a href={`${STAGING}/l/new`} className="btn-primary">
+            POST EQUIPMENT FREE →
+          </a>
 
           <p className="built-line">
             BUILT BY PEOPLE WHO ACTUALLY BUY AND SELL <b>IRON.</b>
           </p>
         </div>
-      </section>
 
-      <section className="search-section">
-       <h2>FIND EQUIPMENT</h2>
+        <div className="hero-search">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search equipment — Deere 772GP, WA475, crusher..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
 
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search equipment (e.g. Caterpillar 320, Komatsu dozer, trailer...)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          />
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              {categories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
 
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => <option key={c}>{c}</option>)}
-          </select>
-
-          <button onClick={handleSearch} className="search-btn">SEARCH</button>
+            <button type="button" onClick={handleSearch} className="search-btn">
+              SEARCH
+            </button>
+          </div>
         </div>
-              
       </section>
 
       <section className="featured">
         <div className="section-head">
           <h2>FEATURED EQUIPMENT</h2>
-          <a href={`${STAGING}/s`}>VIEW ALL EQUIPMENT →</a>
+          <a href="/browse">VIEW ALL EQUIPMENT →</a>
         </div>
 
-<div className="cards">
-  {listings.map((item) => (
-    <a
-      href={item.link}
-      className="card"
-      key={item.title}
-    >
-      <div
-        className="card-photo"
-        style={{
-          backgroundImage: `url(${item.image})`
-        }}
-      />
+        <div className="cards">
+          {featuredListings.map((item) => (
+            <a
+              href={`/listing/${slugify(item.title)}?from=browser`}
+              className="card"
+              key={item.id || item.link || item.title}
+            >
+              <div
+                className="card-photo"
+                style={{
+                  backgroundImage: `url(${
+                    item.imageUrl ||
+                    item.image ||
+                    item.images?.[0] ||
+                    "/images/hero-equipment-yard.jpg"
+                  })`
+                }}
+              />
 
-      <div className="card-body">
-        <div className="title-row">
-          <h3>{item.title.replace(item.hours, "").trim()}</h3>
+              <div className="card-body">
+                <div className="title-row">
+                  <h3>{String(item.title || "").replace(item.hours || "", "").trim()}</h3>
 
-          <h3 className="hours-inline">
-            {item.hours}
-          </h3>
+                  <h3 className="hours-top">{item.hours}</h3>
+                </div>
+
+                <p className="feature-line">{getFeatureLine(item)}</p>
+
+                <div className="price-row">
+                  <strong>{item.price || "Call for Price"}</strong>
+
+                  <div className="meta">
+                    <span>⌖ {item.location || "Location not listed"}</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
         </div>
-
-        <p className="feature-line">
-          {item.type}
-        </p>
-
-        <div className="price-row">
-          <strong>{item.price}</strong>
-
-          <div className="meta">
-            <span>⌖ {item.location}</span>
-          </div>
-        </div>
-      </div>
-    </a>
-  ))}
-</div>
       </section>
 
       <section id="how" className="how">
         <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
 
-       <div className="benefits">
-  <div>
-    <span className="benefit-icon yellow x-icon">
-      <i className="fa-regular fa-file-lines"></i>
-    </span>
-    <h3>NO CONTRACTS</h3>
-    <p>List as long as you need.</p>
-  </div>
+        <div className="benefits">
+          <div>
+            <span className="benefit-icon yellow x-icon">
+              <i className="fa-regular fa-file-lines"></i>
+            </span>
+            <h3>NO CONTRACTS</h3>
+            <p>List as long as you need.</p>
+          </div>
 
-  <div>
-    <span className="benefit-icon yellow x-icon">
-      <i className="fa-solid fa-users"></i>
-    </span>
-    <h3>NO REPS</h3>
-    <p>You deal direct with buyers.</p>
-  </div>
+          <div>
+            <span className="benefit-icon yellow x-icon">
+              <i className="fa-solid fa-users"></i>
+            </span>
+            <h3>NO REPS</h3>
+            <p>You deal direct with buyers.</p>
+          </div>
 
-  <div>
-    <span className="benefit-icon yellow x-icon">
-      <i className="fa-solid fa-dollar-sign"></i>
-    </span>
-    <h3>NO FEES</h3>
-    <p>100% free. Always.</p>
-  </div>
+          <div>
+            <span className="benefit-icon yellow x-icon">
+              <i className="fa-solid fa-dollar-sign"></i>
+            </span>
+            <h3>NO FEES</h3>
+            <p>100% free. Always.</p>
+          </div>
 
-  <div>
-    <span className="benefit-icon green">
-      <i className="fa-solid fa-bolt"></i>
-    </span>
-    <h3>GO LIVE INSTANTLY</h3>
-    <p>Listings live in minutes.</p>
-  </div>
-</div>
+          <div>
+            <span className="benefit-icon green">
+              <i className="fa-solid fa-bolt"></i>
+            </span>
+            <h3>GO LIVE INSTANTLY</h3>
+            <p>Listings live in minutes.</p>
+          </div>
+        </div>
       </section>
 
       <section className="ready">
@@ -309,53 +319,57 @@ const handleSearch = () => {
           <p>© 2026 IronXchange. All rights reserved.</p>
         </div>
 
-       <div className="foot-cols">
-  <div>
-    <h4>MARKETPLACE</h4>
-    <a href={`${STAGING}/s`}>Browse Equipment</a>
-    <a href={`${STAGING}/l/new`}>Post Equipment</a>
-  </div>
+        <div className="foot-cols">
+          <div>
+            <h4>MARKETPLACE</h4>
+            <a href="/browse">Browse Equipment</a>
+            <a href={`${STAGING}/l/new`}>Post Equipment</a>
+          </div>
 
-  <div>
-    <h4>COMPANY</h4>
-    <a href="/contact">Contact</a>
-  </div>
+          <div>
+            <h4>COMPANY</h4>
+            <a href="/contact">Contact</a>
+          </div>
 
-  <div>
-    <h4>LEGAL</h4>
-<a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
-  Privacy
-</a>
-<a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
-  Terms
-</a>
-  </div>
-</div>
+          <div>
+            <h4>LEGAL</h4>
+            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
+              Privacy
+            </a>
+            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
+              Terms
+            </a>
+          </div>
+        </div>
       </footer>
 
       <style jsx>{`
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
         :global(body) {
           margin: 0;
           font-family: 'Inter', sans-serif;
-          background: #fff;
+          background: #0b0b0b;
+          color: #d6d6d6;
         }
 
         .nav {
+          height: 86px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 14px 5%;
+          padding: 12px 5%;
           background: #050505;
           position: sticky;
           top: 0;
           z-index: 100;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .logo-img {
-          height: 78px;
+          height: 68px;
           width: auto;
           display: block;
         }
@@ -372,11 +386,13 @@ const handleSearch = () => {
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
           font-size: 13px;
-          letter-spacing: .6px;
+          letter-spacing: 0.6px;
           text-transform: uppercase;
         }
 
-        .yellow-link { color: ${BRAND_YELLOW} !important; }
+        .yellow-link {
+          color: ${BRAND_YELLOW} !important;
+        }
 
         .login-icon {
           border: 2px solid white;
@@ -388,309 +404,303 @@ const handleSearch = () => {
           font-size: 15px !important;
         }
 
-       .hero {
-  box-shadow: inset 0 -120px 200px rgba(0,0,0,0.9);
-  height: 85vh;
-  min-height: 680px;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
-    url('/images/hero-equipment-yard.jpg');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  color: white;
-  padding: 0 5%;
-}
+        .hero {
+          position: relative;
+          height: 625px;
+          min-height: 625px;
+          background:
+            linear-gradient(
+              90deg,
+              rgba(0, 0, 0, 0.9),
+              rgba(0, 0, 0, 0.55),
+              rgba(0, 0, 0, 0.18)
+            ),
+            url('/images/hero-equipment-yard.jpg');
+          background-size: cover;
+          background-position: center center;
+          color: white;
+          overflow: visible;
+        }
 
-        .hero-content { max-width: 850px; }
+        .hero-content {
+          max-width: 760px;
+          padding: 72px 5% 0;
+        }
 
-       .hero h1 {
-  font-family: 'Bebas Neue', sans-serif;
- font-size: clamp(3.6rem, 6.4vw, 5.6rem);
-  line-height: .86;
-  margin: 0;
-  letter-spacing: 1px;
-  font-weight: 400;
-  max-width: 780px;
-}
+        .hero h1 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: clamp(2.95rem, 5.15vw, 4.85rem);
+          line-height: 0.94;
+          margin: 0;
+          letter-spacing: 1px;
+          font-weight: 400;
+          max-width: 640px;
+        }
 
-      .hero-icons {
-  display: flex;
-  gap: 42px;
-  margin: 36px 0 32px;
-  flex-wrap: wrap;
-}
+        .hero-icons {
+          display: flex;
+          gap: 34px;
+          margin: 28px 0 26px;
+          flex-wrap: wrap;
+        }
 
         .hero-icons div {
           text-align: center;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
-          font-size: 13px;
+          font-size: 12px;
           line-height: 1.25;
         }
-.hero-icon {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 30px;
-  margin: 0 auto 10px;
-  position: relative;
-    
-  color: white; /* icon stays white */
-}
 
-/* RED = circle + slash */
-.hero-icon.red {
-  border: 3px solid #C53030;
-}
-
-/* GREEN = live */
-.hero-icon.green {
-  border: 3px solid #2F855A;
-  color: #2F855A;
-}
-
-/* SLASH */
-.slash-icon::after {
-  content: "";
-  position: absolute;
-  width: 78px;
-  height: 4px;
-  background: #C53030;
-  transform: rotate(-38deg);
-  border-radius: 999px;
-}
-
-.benefit-icon {
-  display: block;
-  font-size: 46px;
-  margin: 0 auto 12px;
-  position: relative;
-}
-
-.benefit-icon.yellow {
-  color: #FFC400;
-}
-
-.benefit-icon.green {
-  color: #38A169;
-}
-
-.x-icon::before,
-.x-icon::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 58px;
-  height: 4px;
-  background: #C53030;
-  border-radius: 999px;
-  transform-origin: center;
-}
-
-.x-icon::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.x-icon::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.benefit-icon.green i {
-  font-size: 50px;
-}
-
-       .btn-primary,
-.ready a {
-  display: inline-block;
-  background: ${BRAND_YELLOW};
-  color: black;
-  padding: 18px 36px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  letter-spacing: .5px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.28);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-
-.btn-primary:hover,
-.ready a:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(0,0,0,.35);
-}
-
-        .built-line {
-          margin-top: 64px;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          letter-spacing: .5px;
-          font-size: 14px;
+        .hero-icon {
+          width: 54px;
+          height: 54px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          font-size: 25px;
+          margin: 0 auto 9px;
+          position: relative;
+          color: white;
         }
 
-        .built-line b { color: ${BRAND_YELLOW}; }
+        .hero-icon.red {
+          border: 3px solid #c53030;
+        }
 
-      .search-section {
-  margin-top: 42px;
-}
+        .hero-icon.green {
+          border: 3px solid #2f855a;
+          color: #2f855a;
+        }
 
-.search-section h2 {
-  display: none;
-}
+        .slash-icon::after {
+          content: "";
+          position: absolute;
+          width: 67px;
+          height: 4px;
+          background: #c53030;
+          transform: rotate(-38deg);
+          border-radius: 999px;
+        }
+
+        .btn-primary,
+        .ready a {
+          display: inline-block;
+          background: ${BRAND_YELLOW};
+          color: black;
+          padding: 15px 28px;
+          border-radius: 7px;
+          text-decoration: none;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 13px;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .btn-primary:hover,
+        .ready a:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+        }
+
+        .built-line {
+          margin-top: 28px;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+          font-size: 13px;
+        }
+
+        .built-line b {
+          color: ${BRAND_YELLOW};
+        }
+
+        .hero-search {
+          position: absolute;
+          left: 5%;
+          right: 5%;
+          bottom: -34px;
+          z-index: 4;
+        }
 
         .search-container {
-  max-width: 1120px;
-  margin: 20px auto 0;
-  display: grid;
-  grid-template-columns: 1fr 260px 135px;
-  background: #141414;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 18px 45px rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.08);
-}
+          max-width: 1180px;
+          display: grid;
+          grid-template-columns: 1fr 270px 145px;
+          background: #141414;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
+          border: 1px solid rgba(255, 255, 255, 0.09);
+        }
 
-       input,
-  select {
-  padding: 16px 18px;
-  border: none;
-  border-right: 1px solid rgba(255,255,255,0.08);
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  background: #141414;
-  color: #f2f2f2;
-}
+        input,
+        select {
+          padding: 17px 18px;
+          border: none;
+          border-right: 1px solid rgba(255, 255, 255, 0.08);
+          font-size: 14px;
+          font-family: 'Inter', sans-serif;
+          outline: none;
+          background: #141414;
+          color: #f2f2f2;
+        }
 
-input::placeholder {
-  color: #777;
-}
+        input::placeholder {
+          color: #777;
+        }
+
         select {
           font-family: 'Montserrat', sans-serif;
           font-weight: 800;
-          font-size: .82rem;
+          font-size: 0.82rem;
         }
 
         .search-btn {
-  background: ${BRAND_YELLOW};
-  border: none;
-  color: #050505;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  cursor: pointer;
-  letter-spacing: .4px;
-}
+          background: ${BRAND_YELLOW};
+          border: none;
+          color: #050505;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          cursor: pointer;
+          letter-spacing: 0.4px;
+        }
 
         .featured {
-  padding: 26px 5% 60px;
-  background: #0B0B0B;
-  color: #D6D6D6;
-}
+          padding: 76px 5% 60px;
+          background: #0b0b0b;
+          color: #d6d6d6;
+        }
 
-.section-head h2 {
-  color: #F2F2F2;
-}
+        .section-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 24px;
+        }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
-}
+        .section-head h2,
+        .how h2,
+        .ready h2 {
+          margin: 0;
+          color: #f2f2f2;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3rem;
+          font-weight: 400;
+          letter-spacing: 1px;
+        }
 
-.card {
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid #242424;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #151515;
-  transition: transform .18s ease, border-color .18s ease, background .18s ease;
-}
+        .section-head a {
+          color: #d6d6d6;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          font-size: 13px;
+          text-decoration: none;
+        }
 
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #3A3A3A;
-  background: #181818;
-}
+        .cards {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 22px;
+        }
 
-.card-photo {
-  height: 190px;
-  background-size: cover;
-  background-position: center;
-}
+        .card {
+          text-decoration: none;
+          color: inherit;
+          border: 1px solid #242424;
+          border-radius: 16px;
+          overflow: hidden;
+          background: #151515;
+          transition: transform 0.18s ease, border-color 0.18s ease,
+            background 0.18s ease;
+        }
 
-.card-body {
-  padding: 16px;
-}
+        .card:hover {
+          transform: translateY(-3px);
+          border-color: #3a3a3a;
+          background: #181818;
+        }
 
-.card h3 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 16px;
-  letter-spacing: -0.2px;
-}
+        .card-photo {
+          height: 190px;
+          background-size: cover;
+          background-position: center;
+        }
 
-.title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
+        .card-body {
+          padding: 16px;
+        }
 
-.hours-inline {
-  color: #8A8A8A;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  white-space: nowrap;
-}
+        .card h3 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: 16px;
+          letter-spacing: -0.2px;
+        }
 
-.card p {
-  margin: 8px 0 18px;
-  color: #8F8F8F;
-  font-size: 13px;
-  line-height: 1.4;
-}
+        .title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+        }
 
-.feature-line {
-  min-height: 38px;
-}
+        .hours-top {
+          color: #8a8a8a !important;
+          font-size: 11px !important;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+        }
 
-.meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #9A9A9A;
-  flex-wrap: wrap;
-}
+        .card p {
+          margin: 8px 0 18px;
+          color: #8f8f8f;
+          font-size: 13px;
+          line-height: 1.4;
+        }
 
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
+        .feature-line {
+          min-height: 38px;
+        }
 
-.price-row strong {
-  color: #F2F2F2;
-  font-size: 18px;
-}
+        .meta {
+          display: flex;
+          gap: 12px;
+          font-size: 12px;
+          color: #9a9a9a;
+          flex-wrap: wrap;
+        }
 
-.price-row span {
-  color: #9A9A9A;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .4px;
-}
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 16px;
+        }
+
+        .price-row strong {
+          color: #f2f2f2;
+          font-size: 18px;
+        }
+
+        .price-row span {
+          color: #9a9a9a;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.4px;
+        }
+
         .how {
           background: #f3f3f3;
-          padding: 62px 5%;
+          padding: 54px 5%;
           text-align: center;
+        }
+
+        .how h2 {
+          color: #111;
         }
 
         .benefits {
@@ -706,17 +716,60 @@ input::placeholder {
           border-right: 1px solid #ccc;
         }
 
-        .benefits div:last-child { border-right: none; }
+        .benefits div:last-child {
+          border-right: none;
+        }
 
         .benefits h3 {
           margin: 10px 0 6px;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
+          color: #111;
         }
 
         .benefits p {
           color: #555;
           margin: 0;
+        }
+
+        .benefit-icon {
+          display: block;
+          font-size: 46px;
+          margin: 0 auto 12px;
+          position: relative;
+        }
+
+        .benefit-icon.yellow {
+          color: #ffc400;
+        }
+
+        .benefit-icon.green {
+          color: #38a169;
+        }
+
+        .x-icon::before,
+        .x-icon::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 58px;
+          height: 4px;
+          background: #c53030;
+          border-radius: 999px;
+          transform-origin: center;
+        }
+
+        .x-icon::before {
+          transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .x-icon::after {
+          transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .benefit-icon.green i {
+          font-size: 50px;
         }
 
         .ready {
@@ -754,7 +807,9 @@ input::placeholder {
           gap: 50px;
         }
 
-        footer img { height: 52px; }
+        footer img {
+          height: 52px;
+        }
 
         footer p {
           color: #777;
@@ -780,62 +835,90 @@ input::placeholder {
           font-size: 13px;
         }
 
+        @media (max-width: 1100px) {
+          .cards {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
         @media (max-width: 850px) {
-          .nav-links { display: none; }
-          .logo-img { height: 56px; }
+          .nav {
+            height: 70px;
+          }
+
+          .logo-img {
+            height: 54px;
+          }
+
+          .nav-links {
+            display: none;
+          }
 
           .hero {
+            height: auto;
             min-height: 620px;
+            padding-bottom: 100px;
+            background-position: center;
+          }
+
+          .hero-content {
+            padding: 58px 5% 0;
             text-align: center;
-            justify-content: center;
+            max-width: none;
           }
 
-          .hero h1 { font-size: 4rem; }
-
-          .hero-icons,
-          .cta-buttons {
-            justify-content: center;
+          .hero h1 {
+            font-size: 3.75rem;
           }
 
-          .search-container,
-          .cards,
-          .benefits,
-          .ready {
+          .hero-icons {
+            justify-content: center;
+            gap: 24px;
+          }
+
+          .hero-search {
+            left: 4%;
+            right: 4%;
+            bottom: -42px;
+          }
+
+          .search-container {
             grid-template-columns: 1fr;
           }
 
           input,
           select {
             border-right: none;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           }
 
           .search-btn {
-  background: ${BRAND_YELLOW};
-  border: none;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
-}
-
-.search-btn:hover {
-  transform: translateY(-1px);
-  background: #ffd43b;
-}
-.section-head,
-          footer {
-            flex-direction: column;
+            padding: 17px;
           }
 
-          .foot-cols {
+          .featured {
+            padding-top: 86px;
+          }
+
+          .cards,
+          .benefits,
+          .ready {
+            grid-template-columns: 1fr;
+          }
+
+          .section-head,
+          footer {
             flex-direction: column;
-            gap: 25px;
           }
 
           .benefits div {
             border-right: none;
             border-bottom: 1px solid #ccc;
+          }
+
+          .foot-cols {
+            flex-direction: column;
+            gap: 25px;
           }
         }
       `}</style>
