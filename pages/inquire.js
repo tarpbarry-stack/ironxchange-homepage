@@ -134,19 +134,32 @@ export default function InquirePage() {
               ← Back to Listing
             </button>
 
-            <div className="listing-preview">
-              <img src={image} alt={title} className="listing-image" />
+           <div className="listing-card">
+  <div
+    className="card-photo"
+    style={{
+      backgroundImage: `url(${image})`
+    }}
+  />
 
-              <div>
-                <h1>{title}</h1>
+  <div className="card-body">
+    <div className="title-row">
+      <h3>{title}</h3>
 
-                <div className="listing-meta">
-                  <span>{price}</span>
-                  <span>{hours}</span>
-                  <span>{location}</span>
-                </div>
-              </div>
-            </div>
+      <h3 className="hours-inline">
+        {hours}
+      </h3>
+    </div>
+
+    <div className="price-row">
+      <strong>{price}</strong>
+
+      <div className="meta">
+        <span>⌖ {location}</span>
+      </div>
+    </div>
+  </div>
+</div>
 
             <div className="divider" />
 
@@ -292,38 +305,79 @@ export default function InquirePage() {
           font-family: inherit;
         }
 
-        .listing-preview {
-          display: grid;
-          grid-template-columns: 220px 1fr;
-          gap: 20px;
-          margin-top: 22px;
-          align-items: center;
-        }
+        .listing-card {
+  margin-top: 22px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #242424;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #151515;
+}
 
-        .listing-image {
-          width: 100%;
-          height: 155px;
-          object-fit: cover;
-          border-radius: 14px;
-          background: #111;
-        }
+.card-photo {
+  height: 240px;
+  background-size: cover;
+  background-position: center;
+}
 
-        h1 {
-          margin: 0;
-          font-size: 30px;
-          line-height: 1.1;
-          color: #f2f2f2;
-        }
+.card-body {
+  padding: 16px;
+}
 
-        .listing-meta {
-          margin-top: 14px;
-          display: flex;
-          gap: 14px;
-          flex-wrap: wrap;
-          color: #a7a7a7;
-          font-size: 15px;
-          font-weight: 700;
-        }
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.card-body h3 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+}
+
+.hours-inline {
+  color: #8A8A8A !important;
+  font-size: 13px !important;
+  white-space: nowrap;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.price-row strong {
+  color: #F2F2F2;
+  font-size: 18px;
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #9A9A9A;
+  flex-wrap: wrap;
+}
+
+.price-row span {
+  color: #9A9A9A;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .4px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  color: #f2f2f2;
+}
 
         .divider {
           height: 1px;
