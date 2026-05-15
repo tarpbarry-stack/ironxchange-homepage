@@ -845,28 +845,22 @@ export default function Home() {
             display: none;
           }
 
-    .hero {
-  height: 620px;
-  min-height: 620px;
-  padding-bottom: 120px;
+   .hero {
+  height: 500px;
+  min-height: 500px;
+  padding-bottom: 72px;
 
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
   background-color: #0b0b0b;
 }
 
           .hero-content {
-            padding: 58px 5% 0;
-            text-align: center;
-            max-width: none;
-          }
+  padding: 28px 5% 0;
 
          .hero h1 {
-  font-size: 2.45rem;
-  line-height: 1;
-}
-
+  font-size: 2rem;
           .hero-icons {
             justify-content: center;
             gap: 24px;
@@ -875,7 +869,7 @@ export default function Home() {
           .hero-search {
             left: 4%;
             right: 4%;
-            bottom: -42px;
+            bottom: -18px;
           }
 
           .search-container {
