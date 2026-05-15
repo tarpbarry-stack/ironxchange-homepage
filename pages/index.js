@@ -389,14 +389,15 @@ const handleSearch = () => {
         }
 
         .hero {
-        box-shadow: inset 0 -120px 200px rgba(0,0,0,0.9);          
-        height: 85vh;
-          min-height: 680px;
+ .hero {
+  box-shadow: inset 0 -120px 200px rgba(0,0,0,0.9);
+  height: 72vh;
+  min-height: 585px;
           background:
             linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
             url('/images/hero-equipment-yard.jpg');
           background-size: cover;
-          background-position: center;
+          background-position: center 28%;
           display: flex;
           align-items: center;
           color: white;
@@ -407,7 +408,7 @@ const handleSearch = () => {
 
        .hero h1 {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(4.6rem, 8vw, 7.2rem);
+ font-size: clamp(3.6rem, 6.4vw, 5.6rem);
   line-height: .86;
   margin: 0;
   letter-spacing: 1px;
