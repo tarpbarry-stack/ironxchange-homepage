@@ -57,23 +57,35 @@ export default function InquirePage() {
     setStatus("");
 
     try {
-      const response = await fetch("/api/sharetribe-inquiry", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          listingId,
-          buyerName,
-          buyerEmail,
-          buyerPhone,
-          message
-        })
-      });
+    const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-      const data = await response.json();
+const sdk = SharetribeSdk.createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
 
-     if (!response.ok) {
+const result = await sdk.transactions.initiate({
+  processAlias: "default-inquiry/release-1",
+
+  transition: "transition/inquire-without-payment",
+
+  params: {
+    listingId,
+
+    protectedData: {
+      message,
+      buyerName,
+      buyerEmail,
+      buyerPhone
+    }
+  }
+});
+
+console.log("INQUIRY SUCCESS:", result);
+
+setStatus("success");
+
+return;
+      
   console.error("INQUIRY FAILED:", data);
   alert(JSON.stringify(data, null, 2));
   setStatus("error");
