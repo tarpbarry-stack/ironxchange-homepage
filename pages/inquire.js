@@ -45,7 +45,7 @@ export default function InquirePage() {
     listing?.images?.[0] ||
     "/images/hero-equipment-yard.jpg";
 
- async function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
 
   if (!listingId) {
@@ -88,18 +88,7 @@ export default function InquirePage() {
   }
 }
 
-      setStatus("success");
-    } catch (err) {
-  console.error("INQUIRY ERROR:", err);
-  alert(err.message);
-  setStatus("error");
-} 
-    finally {
-      setLoading(false);
-    }
-  }
-
-  return (
+return (
     <>
       <Head>
         <title>Message Seller | IronXchange</title>
