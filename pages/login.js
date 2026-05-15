@@ -1,12 +1,7 @@
 import Head from "next/head";
 import { useState } from "react";
-import * as SharetribeSdk from "sharetribe-flex-sdk";
+import sdk from "../lib/sharetribeSdk";
 
-const sdk = SharetribeSdk.createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
-
-export default sdk;
 const BRAND_YELLOW = "#FFC400";
 
 export default function LoginPage() {
@@ -32,7 +27,7 @@ export default function LoginPage() {
 
       window.location.href = "/";
     } catch (err) {
-      console.error(err);
+      console.error("LOGIN ERROR:", err);
 
       setError("Invalid email or password.");
     } finally {
