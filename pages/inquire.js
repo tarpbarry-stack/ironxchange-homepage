@@ -148,9 +148,9 @@ export default function InquirePage() {
         {title.replace(hours, "").trim()}
       </h3>
 
-      <h3 className="hours-inline">
-        {hours}
-      </h3>
+     <h3 className="hours-top">
+  {hours}
+</h3>
     </div>
 
     <div className="price-row">
@@ -340,9 +340,11 @@ export default function InquirePage() {
   letter-spacing: -0.2px;
 }
 
-.hours-inline {
-  color: #8A8A8A !important;
-  font-size: 13px !important;
+.hours-top {
+  color: #8A8A8A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
   white-space: nowrap;
 }
 
