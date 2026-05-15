@@ -142,25 +142,25 @@ export default function InquirePage() {
     }}
   />
 
-  <div className="card-body">
-    <div className="title-row">
-      <h3>{title}</h3>
+ <div className="card-body">
+  <div className="title-row">
+    <h3>
+      {title.replace(hours, "").trim()}
+    </h3>
 
-      <h3 className="hours-inline">
-        {hours}
-      </h3>
-    </div>
+    <h3 className="hours-inline">
+      {hours}
+    </h3>
+  </div>
 
-    <div className="price-row">
-      <strong>{price}</strong>
+  <div className="price-row">
+    <strong>{price}</strong>
 
-      <div className="meta">
-        <span>⌖ {location}</span>
-      </div>
+    <div className="meta">
+      <span>⌖ {location}</span>
     </div>
   </div>
 </div>
-
             <div className="divider" />
 
             <p className="intro">
