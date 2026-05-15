@@ -190,8 +190,7 @@ const handleSearch = () => {
       </section>
 
       <section className="search-section">
-        <h2>FIND THE RIGHT EQUIPMENT. CONTACT DIRECT.</h2>
-        <p>Browse equipment from owners, dealers, and fleet operators. No middlemen.</p>
+       <h2>FIND EQUIPMENT</h2>
 
         <div className="search-container">
           <input
@@ -537,7 +536,7 @@ const handleSearch = () => {
         .built-line b { color: ${BRAND_YELLOW}; }
 
         .search-section {
-          padding: 42px 5% 32px;
+  padding: 28px 5% 28px;
           background: #f8f8f8;
           text-align: center;
         }
@@ -560,28 +559,32 @@ const handleSearch = () => {
         }
 
         .search-container {
-          max-width: 1100px;
-          margin: 28px auto 0;
-          display: grid;
-          grid-template-columns: 1fr 285px 155px;
-          background: white;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-          border: 1px solid #e8e8e8;
-        }
+  max-width: 1120px;
+  margin: 20px auto 0;
+  display: grid;
+  grid-template-columns: 1fr 260px 135px;
+  background: #141414;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
-        input,
-        select {
-          padding: 22px;
-          border: none;
-          border-right: 1px solid #e5e5e5;
-          font-size: 1rem;
-          font-family: 'Inter', sans-serif;
-          outline: none;
-          background: white;
-        }
+       input,
+  select {
+  padding: 16px 18px;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  background: #141414;
+  color: #f2f2f2;
+}
 
+input::placeholder {
+  color: #777;
+}
         select {
           font-family: 'Montserrat', sans-serif;
           font-weight: 800;
@@ -589,12 +592,14 @@ const handleSearch = () => {
         }
 
         .search-btn {
-          background: ${BRAND_YELLOW};
-          border: none;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          cursor: pointer;
-        }
+  background: ${BRAND_YELLOW};
+  border: none;
+  color: #050505;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  cursor: pointer;
+  letter-spacing: .4px;
+}
 
         .featured {
   padding: 46px 5% 60px;
