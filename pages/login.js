@@ -53,7 +53,7 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <label>
               Email
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+             <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
             </label>
 
             <label>
