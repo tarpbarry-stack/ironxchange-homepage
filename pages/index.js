@@ -215,12 +215,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="featured">
-        <div className="section-head">
-          <h2>FEATURED EQUIPMENT</h2>
-          <a href="/browse">VIEW ALL EQUIPMENT →</a>
-        </div>
-
         <div className="cards">
           {featuredListings.map((item) => (
             <a
@@ -568,33 +562,15 @@ export default function Home() {
           background: #0b0b0b;
           color: #d6d6d6;
         }
-
-        .section-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          margin-bottom: 24px;
-        }
-
-        .section-head h2,
-        .how h2,
-        .ready h2 {
-          margin: 0;
-          color: #f2f2f2;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 3rem;
-          font-weight: 400;
-          letter-spacing: 1px;
-        }
-
-        .section-head a {
-          color: #d6d6d6;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          font-size: 13px;
-          text-decoration: none;
-        }
-
+.how h2,
+.ready h2 {
+  margin: 0;
+  color: #f2f2f2;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
         .cards {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
