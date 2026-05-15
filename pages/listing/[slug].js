@@ -126,8 +126,10 @@ const nextListing =
     );
   }
 
-  const images = getListingImages(listing);
-  const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+console.log("LISTING DEBUG:", listing);
+
+const images = getListingImages(listing);
+const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   const mobilePairs = [];
   for (let i = 1; i < images.length; i += 2) {
   mobilePairs.push(images.slice(i, i + 2));
