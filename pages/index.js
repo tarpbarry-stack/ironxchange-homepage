@@ -860,12 +860,15 @@ export default function Home() {
             display: none;
           }
 
-         .hero {
-  height: 640px;
-  min-height: 640px;
+    .hero {
+  height: 620px;
+  min-height: 620px;
   padding-bottom: 120px;
-  background-size: cover;
+
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center top;
+  background-color: #0b0b0b;
 }
 
           .hero-content {
