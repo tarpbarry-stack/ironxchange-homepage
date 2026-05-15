@@ -114,6 +114,7 @@ export default function Home() {
     <>
       <Head>
         <title>IronXchange - Free Heavy Equipment Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
           name="description"
           content="Free Heavy Equipment Marketplace. List and browse machinery with no fees."
