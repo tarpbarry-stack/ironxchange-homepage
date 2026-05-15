@@ -45,51 +45,47 @@ export default function InquirePage() {
     listing?.images?.[0] ||
     "/images/hero-equipment-yard.jpg";
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+ async function handleSubmit(e) {
+  e.preventDefault();
 
-    if (!listingId) {
-      setStatus("Missing listing ID.");
-      return;
-    }
+  if (!listingId) {
+    setStatus("error");
+    return;
+  }
 
-    setLoading(true);
-    setStatus("");
+  setLoading(true);
+  setStatus("");
 
-    try {
+  try {
     const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-const sdk = SharetribeSdk.createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
+    const sdk = SharetribeSdk.createInstance({
+      clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+    });
 
-const result = await sdk.transactions.initiate({
-  processAlias: "default-inquiry/release-1",
+    const result = await sdk.transactions.initiate({
+      processAlias: "default-inquiry/release-1",
+      transition: "transition/inquire-without-payment",
+      params: {
+        listingId,
+        protectedData: {
+          message,
+          buyerName,
+          buyerEmail,
+          buyerPhone
+        }
+      }
+    });
 
-  transition: "transition/inquire-without-payment",
-
-  params: {
-    listingId,
-
-    protectedData: {
-      message,
-      buyerName,
-      buyerEmail,
-      buyerPhone
-    }
+    console.log("INQUIRY SUCCESS:", result);
+    setStatus("success");
+  } catch (err) {
+    console.error("INQUIRY ERROR:", err);
+    alert(err?.message || "Inquiry failed.");
+    setStatus("error");
+  } finally {
+    setLoading(false);
   }
-});
-
-console.log("INQUIRY SUCCESS:", result);
-
-setStatus("success");
-
-return;
-      
-  console.error("INQUIRY FAILED:", data);
-  alert(JSON.stringify(data, null, 2));
-  setStatus("error");
-  return;
 }
 
       setStatus("success");
