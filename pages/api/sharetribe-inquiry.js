@@ -63,7 +63,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           processAlias: "default-inquiry/release-1",
-          transition: "transition/inquire-without-payment",
+          transition: "transition/inquire",
           params: {
             listingId,
             protectedData: {
