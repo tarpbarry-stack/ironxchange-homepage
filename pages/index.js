@@ -587,9 +587,10 @@ const handleSearch = () => {
         }
 
         .featured {
-          padding: 56px 5%;
-          background: white;
-        }
+  padding: 56px 5%;
+  background: #0B0B0B;
+  color: #D6D6D6;
+}
 
         .section-head {
           display: flex;
@@ -612,82 +613,58 @@ const handleSearch = () => {
 }
 
         .card {
-  border: 1px solid #e8e8e8;
-  border-radius: 14px;
+  border: 1px solid #242424;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,.1);
-  background: white;
-  transition: transform .18s ease, box-shadow .18s ease;
+  background: #151515;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 38px rgba(0,0,0,.16);
+  transform: translateY(-3px);
+  border-color: #3A3A3A;
+  background: #181818;
 }
 
-       .card-photo {
-  height: 185px;
+.card-photo {
+  height: 190px;
   background-size: cover;
   background-position: center;
   position: relative;
   display: block;
 }
 
-        .card-photo span {
-          position: absolute;
-          top: 12px;
-          right: 14px;
-          color: white;
-          font-size: 25px;
-        }
+.card-body {
+  padding: 16px;
+}
 
-        .card-body { padding: 18px; }
+.card h3 {
+  color: #F2F2F2;
+  font-size: 16px;
+  margin: 0;
+}
 
-        .card h3 {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 18px;
-          margin: 0;
-          font-weight: 900;
-        }
+.card p {
+  margin: 8px 0 18px;
+  color: #8F8F8F;
+  font-size: 13px;
+}
 
-        .card p {
-          margin: 6px 0 14px;
-          color: #555;
-          font-weight: 600;
-        }
+.meta {
+  color: #9A9A9A;
+  font-size: 12px;
+}
 
-        .meta {
-          display: flex;
-          gap: 12px;
-          color: #555;
-          font-size: 13px;
-          flex-wrap: wrap;
-        }
+.price-row strong {
+  color: #F2F2F2;
+  font-size: 18px;
+}
 
-        .price-row {
-          margin-top: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .price-row strong {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 22px;
-          font-weight: 900;
-        }
-
-        .price-row a {
-          border: 1px solid #ccc;
-          padding: 9px 12px;
-          border-radius: 6px;
-          color: #111;
-          text-decoration: none;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 11px;
-          font-weight: 900;
-        }
-
+.price-row a {
+  border: 1px solid #3a3a3a;
+  color: #e5e5e5;
+  background: transparent;
+}
         .how {
           background: #f3f3f3;
           padding: 62px 5%;
