@@ -417,12 +417,12 @@ function lightboxNext() {
 
            <div className="seller-actions">
  <a
- href={listing.link ? `${listing.link}/checkout` : `${STAGING}/login`}
+  href={`/inquire?listingId=${listing.id}`}
   className="message-btn"
 >
   Message Seller
 </a>
-
+    
   <button type="button" className="call-btn">
     Call
   </button>
