@@ -189,9 +189,6 @@ export default function Home() {
             POST EQUIPMENT FREE →
           </a>
 
-          <p className="built-line">
-            BUILT BY PEOPLE WHO ACTUALLY BUY AND SELL <b>IRON.</b>
-          </p>
         </div>
 
         <div className="hero-search">
@@ -501,18 +498,6 @@ export default function Home() {
         .ready a:hover {
           transform: translateY(-2px);
           box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
-        }
-
-        .built-line {
-          margin-top: 28px;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          letter-spacing: 0.5px;
-          font-size: 13px;
-        }
-
-        .built-line b {
-          color: ${BRAND_YELLOW};
         }
 
         .hero-search {
