@@ -388,16 +388,5 @@ export default function InquirePage() {
     </>
   );
 }
-```
 
-Also update your listing page button from this:
 
-```jsx
-href={`/inquire?listingId=${listing.id}`}
-```
-
-to this:
-
-```jsx
-href={`/inquire?listingId=${listing.id}&title=${encodeURIComponent(title)}&price=${encodeURIComponent(price)}&location=${encodeURIComponent(location)}&image=${encodeURIComponent(heroImage)}`}
-```
