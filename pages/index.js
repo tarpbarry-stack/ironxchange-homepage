@@ -153,11 +153,7 @@ export default function Home() {
 
       <section className="hero">
         <div className="hero-content">
-          <h1>
-            <h1>
-  FREE HEAVY EQUIPMENT MARKETPLACE
-</h1>
-          </h1>
+          <h1>FREE HEAVY EQUIPMENT MARKETPLACE</h1>
 
           <div className="hero-icons">
             <div>
@@ -215,6 +211,7 @@ export default function Home() {
         </div>
       </section>
 
+       <section className="featured">
         <div className="cards">
           {featuredListings.map((item) => (
             <a
