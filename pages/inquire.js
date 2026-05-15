@@ -1,6 +1,3 @@
-# Improved `pages/inquire.js`
-
-```jsx
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -11,21 +8,12 @@ const STAGING = "https://staging.ironxchange.com";
 export default function InquirePage() {
   const router = useRouter();
 
-  const {
-    listingId,
-    title,
-    price,
-    location,
-    image
-  } = router.query;
+  const { listingId, title, price, location, image } = router.query;
 
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
-  const [message, setMessage] = useState(
-    "Is this machine still available?"
-  );
-
+  const [message, setMessage] = useState("Is this machine still available?");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -76,6 +64,10 @@ export default function InquirePage() {
     <>
       <Head>
         <title>Message Seller | IronXchange</title>
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          rel="stylesheet"
+        />
       </Head>
 
       <main>
@@ -93,11 +85,11 @@ export default function InquirePage() {
               POST FREE
             </a>
 
-            <a
-              href={`${STAGING}/login`}
-              className="login-icon"
-              aria-label="Login"
-            >
+            <a href="/saved" className="login-icon" aria-label="Saved Listings">
+              <i className="fa-regular fa-star"></i>
+            </a>
+
+            <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
               <i className="fa-regular fa-user"></i>
             </a>
           </div>
@@ -105,23 +97,24 @@ export default function InquirePage() {
 
         <section className="wrapper">
           <div className="card">
-            <a
-              href="javascript:history.back()"
+            <button
+              type="button"
               className="back-link"
+              onClick={() => router.back()}
             >
               ← Back to Listing
-            </a>
+            </button>
 
             <div className="listing-preview">
-              {image && (
+              {image ? (
                 <img
                   src={image}
-                  alt={title || "Listing"}
+                  alt={title || "Equipment Listing"}
                   className="listing-image"
                 />
-              )}
+              ) : null}
 
-              <div className="listing-info">
+              <div>
                 <h1>{title || "Equipment Listing"}</h1>
 
                 <div className="listing-meta">
@@ -131,11 +124,11 @@ export default function InquirePage() {
               </div>
             </div>
 
-            <div className="divider"></div>
+            <div className="divider" />
 
-            <div className="intro">
-              Send the seller your contact information and message directly through IronXchange.
-            </div>
+            <p className="intro">
+              Send the seller your contact information and message through IronXchange.
+            </p>
 
             <form onSubmit={handleSubmit}>
               <label>
@@ -175,11 +168,11 @@ export default function InquirePage() {
                 />
               </label>
 
-              <button type="submit" disabled={loading}>
+              <button className="send-btn" type="submit" disabled={loading}>
                 {loading ? "Sending..." : "Send Message"}
               </button>
 
-              {status && <p className="status">{status}</p>}
+              {status ? <p className="status">{status}</p> : null}
             </form>
           </div>
         </section>
@@ -193,8 +186,13 @@ export default function InquirePage() {
           font-family: Arial, sans-serif;
         }
 
-        :global(*) {
+        * {
           box-sizing: border-box;
+        }
+
+        main {
+          min-height: 100vh;
+          background: #0b0b0b;
         }
 
         .nav {
@@ -203,7 +201,7 @@ export default function InquirePage() {
           align-items: center;
           padding: 14px 5%;
           background: #050505;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .logo-img {
@@ -224,7 +222,7 @@ export default function InquirePage() {
           font-weight: 900;
           text-transform: uppercase;
           font-size: 13px;
-          letter-spacing: .6px;
+          letter-spacing: 0.6px;
         }
 
         .yellow-link {
@@ -238,11 +236,7 @@ export default function InquirePage() {
           height: 28px;
           display: grid;
           place-items: center;
-        }
-
-        main {
-          min-height: 100vh;
-          background: #0b0b0b;
+          font-size: 15px !important;
         }
 
         .wrapper {
@@ -261,12 +255,17 @@ export default function InquirePage() {
         }
 
         .back-link {
-          color: rgba(255,255,255,.58);
-          text-decoration: none;
+          background: transparent;
+          border: none;
+          padding: 0;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.58);
           font-size: 11px;
           font-weight: 800;
-          letter-spacing: .55px;
+          letter-spacing: 0.55px;
           text-transform: uppercase;
+          cursor: pointer;
+          font-family: inherit;
         }
 
         .listing-preview {
@@ -289,6 +288,7 @@ export default function InquirePage() {
           margin: 0;
           font-size: 28px;
           line-height: 1.1;
+          color: #f2f2f2;
         }
 
         .listing-meta {
@@ -309,7 +309,7 @@ export default function InquirePage() {
         .intro {
           color: #b7b7b7;
           line-height: 1.6;
-          margin-bottom: 24px;
+          margin: 0 0 24px;
         }
 
         form {
@@ -324,7 +324,7 @@ export default function InquirePage() {
           font-size: 12px;
           font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: .5px;
+          letter-spacing: 0.5px;
         }
 
         input,
@@ -343,7 +343,7 @@ export default function InquirePage() {
           resize: vertical;
         }
 
-        button {
+        .send-btn {
           margin-top: 8px;
           border: none;
           border-radius: 10px;
@@ -354,11 +354,11 @@ export default function InquirePage() {
           font-weight: 900;
           text-transform: uppercase;
           cursor: pointer;
-          letter-spacing: .3px;
+          letter-spacing: 0.3px;
         }
 
-        button:disabled {
-          opacity: .6;
+        .send-btn:disabled {
+          opacity: 0.6;
           cursor: not-allowed;
         }
 
@@ -388,5 +388,3 @@ export default function InquirePage() {
     </>
   );
 }
-
-
