@@ -429,7 +429,7 @@ export default function Home() {
 
         .hero h1 {
           font-family: 'Bebas Neue', sans-serif;
-          font-size: clamp(2.95rem, 5.15vw, 4.85rem);
+          font-size: clamp(1.95rem, 3.25vw, 2.85rem);
           line-height: 0.94;
           margin: 0;
           letter-spacing: 1px;
@@ -518,12 +518,19 @@ export default function Home() {
         }
 
         .hero-search {
-          position: absolute;
-          left: 5%;
-          right: 5%;
-          bottom: -34px;
-          z-index: 4;
-        }
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: -44px;
+  z-index: 4;
+  max-width: 1240px;
+  padding: 14px;
+  background: rgba(5, 5, 5, 0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 22px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+}
 
         .search-container {
           max-width: 1180px;
@@ -531,6 +538,7 @@ export default function Home() {
           grid-template-columns: 1fr 270px 145px;
           background: #141414;
           border-radius: 16px;
+          width: 100%;
           overflow: hidden;
           box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
           border: 1px solid rgba(255, 255, 255, 0.09);
@@ -854,12 +862,13 @@ export default function Home() {
             display: none;
           }
 
-          .hero {
-            height: auto;
-            min-height: 620px;
-            padding-bottom: 100px;
-            background-position: center;
-          }
+         .hero {
+  height: 640px;
+  min-height: 640px;
+  padding-bottom: 120px;
+  background-size: cover;
+  background-position: center top;
+}
 
           .hero-content {
             padding: 58px 5% 0;
@@ -867,9 +876,10 @@ export default function Home() {
             max-width: none;
           }
 
-          .hero h1 {
-            font-size: 3.75rem;
-          }
+         .hero h1 {
+  font-size: 2.45rem;
+  line-height: 1;
+}
 
           .hero-icons {
             justify-content: center;
