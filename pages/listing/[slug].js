@@ -126,8 +126,6 @@ const nextListing =
     );
   }
 
-console.log("LISTING DEBUG:", listing);
-
 const images = getListingImages(listing);
 const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   const mobilePairs = [];
