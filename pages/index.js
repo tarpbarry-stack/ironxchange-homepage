@@ -217,33 +217,44 @@ const handleSearch = () => {
           <a href={`${STAGING}/s`}>VIEW ALL EQUIPMENT →</a>
         </div>
 
-        <div className="cards">
-        {listings.map((item) => (
-  <div className="card" key={item.title}>
-   <a
-  href={item.link}
-  className="card-photo"
-  style={{ backgroundImage: `url(${item.image})` }}
->
-  <span>♡</span>
-</a>
+<div className="cards">
+  {listings.map((item) => (
+    <a
+      href={item.link}
+      className="card"
+      key={item.title}
+    >
+      <div
+        className="card-photo"
+        style={{
+          backgroundImage: `url(${item.image})`
+        }}
+      />
 
-    <div className="card-body">
-      <h3>{item.title}</h3>
-      <p>{item.type}</p>
+      <div className="card-body">
+        <div className="title-row">
+          <h3>{item.title.replace(item.hours, "").trim()}</h3>
 
-      <div className="meta">
-        <span>◷ {item.hours}</span>
-        <span>⌖ {item.location}</span>
+          <h3 className="hours-inline">
+            {item.hours}
+          </h3>
+        </div>
+
+        <p className="feature-line">
+          {item.type}
+        </p>
+
+        <div className="price-row">
+          <strong>{item.price}</strong>
+
+          <div className="meta">
+            <span>⌖ {item.location}</span>
+          </div>
+        </div>
       </div>
-
-      <div className="price-row">
-        <strong>{item.price}</strong>
-      <a href={item.link}>VIEW DETAILS</a>
-      </div>
-    </div>
-  </div>
-))}
+    </a>
+  ))}
+</div>
         </div>
       </section>
 
@@ -587,32 +598,24 @@ const handleSearch = () => {
         }
 
         .featured {
-  padding: 56px 5%;
+  padding: 46px 5% 60px;
   background: #0B0B0B;
   color: #D6D6D6;
 }
 
-        .section-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 28px;
-        }
-
-        .section-head a {
-          color: #1b334b;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          font-size: 13px;
-        }
-
-        .cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+.section-head h2 {
+  color: #F2F2F2;
 }
 
-        .card {
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.card {
+  text-decoration: none;
+  color: inherit;
   border: 1px solid #242424;
   border-radius: 16px;
   overflow: hidden;
@@ -630,8 +633,6 @@ const handleSearch = () => {
   height: 190px;
   background-size: cover;
   background-position: center;
-  position: relative;
-  display: block;
 }
 
 .card-body {
@@ -639,20 +640,51 @@ const handleSearch = () => {
 }
 
 .card h3 {
+  margin: 0;
   color: #F2F2F2;
   font-size: 16px;
-  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.hours-inline {
+  color: #8A8A8A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
 }
 
 .card p {
   margin: 8px 0 18px;
   color: #8F8F8F;
   font-size: 13px;
+  line-height: 1.4;
+}
+
+.feature-line {
+  min-height: 38px;
 }
 
 .meta {
-  color: #9A9A9A;
+  display: flex;
+  gap: 12px;
   font-size: 12px;
+  color: #9A9A9A;
+  flex-wrap: wrap;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
 }
 
 .price-row strong {
@@ -660,10 +692,11 @@ const handleSearch = () => {
   font-size: 18px;
 }
 
-.price-row a {
-  border: 1px solid #3a3a3a;
-  color: #e5e5e5;
-  background: transparent;
+.price-row span {
+  color: #9A9A9A;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .4px;
 }
         .how {
           background: #f3f3f3;
