@@ -1,17 +1,31 @@
+# Improved `pages/inquire.js`
+
+```jsx
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
+const STAGING = "https://staging.ironxchange.com";
 
 export default function InquirePage() {
   const router = useRouter();
-  const { listingId } = router.query;
+
+  const {
+    listingId,
+    title,
+    price,
+    location,
+    image
+  } = router.query;
 
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
-  const [message, setMessage] = useState("Is this machine still available?");
+  const [message, setMessage] = useState(
+    "Is this machine still available?"
+  );
+
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,11 +34,6 @@ export default function InquirePage() {
 
     if (!listingId) {
       setStatus("Missing listing ID.");
-      return;
-    }
-
-    if (!message.trim()) {
-      setStatus("Please enter a message.");
       return;
     }
 
@@ -57,7 +66,7 @@ export default function InquirePage() {
       setStatus("Message sent successfully.");
     } catch (err) {
       console.error(err);
-      setStatus("Something went wrong sending the inquiry.");
+      setStatus("Something went wrong sending inquiry.");
     } finally {
       setLoading(false);
     }
@@ -70,61 +79,110 @@ export default function InquirePage() {
       </Head>
 
       <main>
-        <div className="card">
-          <a href="javascript:history.back()" className="back">
-            ← Back to Listing
+        <nav className="nav">
+          <a href="/" className="logo-wrap">
+            <img
+              src="/images/ironxchange-logo.png"
+              className="logo-img"
+              alt="IronXchange"
+            />
           </a>
 
-          <h1>Message Seller</h1>
-          <p className="sub">
-            Send the seller your contact information and message.
-          </p>
+          <div className="nav-links">
+            <a href={`${STAGING}/l/new`} className="yellow-link">
+              POST FREE
+            </a>
 
-          <form onSubmit={handleSubmit}>
-            <label>
-              Name
-              <input
-                value={buyerName}
-                onChange={(e) => setBuyerName(e.target.value)}
-                placeholder="Your name"
-              />
-            </label>
+            <a
+              href={`${STAGING}/login`}
+              className="login-icon"
+              aria-label="Login"
+            >
+              <i className="fa-regular fa-user"></i>
+            </a>
+          </div>
+        </nav>
 
-            <label>
-              Email
-              <input
-                type="email"
-                value={buyerEmail}
-                onChange={(e) => setBuyerEmail(e.target.value)}
-                placeholder="Your email"
-              />
-            </label>
+        <section className="wrapper">
+          <div className="card">
+            <a
+              href="javascript:history.back()"
+              className="back-link"
+            >
+              ← Back to Listing
+            </a>
 
-            <label>
-              Phone
-              <input
-                value={buyerPhone}
-                onChange={(e) => setBuyerPhone(e.target.value)}
-                placeholder="Your phone number"
-              />
-            </label>
+            <div className="listing-preview">
+              {image && (
+                <img
+                  src={image}
+                  alt={title || "Listing"}
+                  className="listing-image"
+                />
+              )}
 
-            <label>
-              Message
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={6}
-              />
-            </label>
+              <div className="listing-info">
+                <h1>{title || "Equipment Listing"}</h1>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Sending..." : "Send Message"}
-            </button>
+                <div className="listing-meta">
+                  <span>{price || "Call for Price"}</span>
+                  <span>{location || "Location not listed"}</span>
+                </div>
+              </div>
+            </div>
 
-            {status && <p className="status">{status}</p>}
-          </form>
-        </div>
+            <div className="divider"></div>
+
+            <div className="intro">
+              Send the seller your contact information and message directly through IronXchange.
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <label>
+                Name
+                <input
+                  value={buyerName}
+                  onChange={(e) => setBuyerName(e.target.value)}
+                  placeholder="Your name"
+                />
+              </label>
+
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value)}
+                  placeholder="Your email"
+                />
+              </label>
+
+              <label>
+                Phone
+                <input
+                  value={buyerPhone}
+                  onChange={(e) => setBuyerPhone(e.target.value)}
+                  placeholder="Your phone number"
+                />
+              </label>
+
+              <label>
+                Message
+                <textarea
+                  rows={6}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </label>
+
+              <button type="submit" disabled={loading}>
+                {loading ? "Sending..." : "Send Message"}
+              </button>
+
+              {status && <p className="status">{status}</p>}
+            </form>
+          </div>
+        </section>
       </main>
 
       <style jsx>{`
@@ -135,38 +193,123 @@ export default function InquirePage() {
           font-family: Arial, sans-serif;
         }
 
-        main {
-          min-height: 100vh;
+        :global(*) {
+          box-sizing: border-box;
+        }
+
+        .nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 14px 5%;
+          background: #050505;
+          border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .logo-img {
+          height: 78px;
+          width: auto;
+          display: block;
+        }
+
+        .nav-links {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .nav-links a {
+          color: white;
+          text-decoration: none;
+          font-weight: 900;
+          text-transform: uppercase;
+          font-size: 13px;
+          letter-spacing: .6px;
+        }
+
+        .yellow-link {
+          color: ${BRAND_YELLOW} !important;
+        }
+
+        .login-icon {
+          border: 2px solid white;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
           display: grid;
           place-items: center;
-          padding: 30px;
+        }
+
+        main {
+          min-height: 100vh;
+          background: #0b0b0b;
+        }
+
+        .wrapper {
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
         }
 
         .card {
           width: 100%;
-          max-width: 560px;
+          max-width: 760px;
           background: #151515;
           border: 1px solid #282828;
           border-radius: 18px;
           padding: 28px;
         }
 
-        .back {
-          color: #aaa;
+        .back-link {
+          color: rgba(255,255,255,.58);
           text-decoration: none;
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 800;
+          letter-spacing: .55px;
           text-transform: uppercase;
         }
 
-        h1 {
-          margin: 22px 0 8px;
-          font-size: 32px;
+        .listing-preview {
+          display: grid;
+          grid-template-columns: 180px 1fr;
+          gap: 18px;
+          margin-top: 20px;
+          align-items: center;
         }
 
-        .sub {
-          margin: 0 0 24px;
-          color: #aaa;
+        .listing-image {
+          width: 100%;
+          height: 130px;
+          object-fit: cover;
+          border-radius: 12px;
+          background: #111;
+        }
+
+        h1 {
+          margin: 0;
+          font-size: 28px;
+          line-height: 1.1;
+        }
+
+        .listing-meta {
+          margin-top: 12px;
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+          color: #a7a7a7;
+          font-size: 15px;
+        }
+
+        .divider {
+          height: 1px;
+          background: #282828;
+          margin: 24px 0;
+        }
+
+        .intro {
+          color: #b7b7b7;
+          line-height: 1.6;
+          margin-bottom: 24px;
         }
 
         form {
@@ -176,12 +319,12 @@ export default function InquirePage() {
 
         label {
           display: grid;
-          gap: 7px;
+          gap: 8px;
           color: #ddd;
-          font-size: 13px;
-          font-weight: 800;
+          font-size: 12px;
+          font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: 0.4px;
+          letter-spacing: .5px;
         }
 
         input,
@@ -206,24 +349,55 @@ export default function InquirePage() {
           border-radius: 10px;
           background: ${BRAND_YELLOW};
           color: #050505;
-          padding: 16px 20px;
-          font-size: 14px;
+          padding: 18px 20px;
+          font-size: 13px;
           font-weight: 900;
           text-transform: uppercase;
           cursor: pointer;
+          letter-spacing: .3px;
         }
 
         button:disabled {
-          opacity: 0.65;
+          opacity: .6;
           cursor: not-allowed;
         }
 
         .status {
           margin: 4px 0 0;
-          color: #ddd;
-          font-size: 14px;
+          color: #d6d6d6;
+        }
+
+        @media (max-width: 700px) {
+          .listing-preview {
+            grid-template-columns: 1fr;
+          }
+
+          .listing-image {
+            height: 220px;
+          }
+
+          h1 {
+            font-size: 22px;
+          }
+
+          .logo-img {
+            height: 56px;
+          }
         }
       `}</style>
     </>
   );
 }
+```
+
+Also update your listing page button from this:
+
+```jsx
+href={`/inquire?listingId=${listing.id}`}
+```
+
+to this:
+
+```jsx
+href={`/inquire?listingId=${listing.id}&title=${encodeURIComponent(title)}&price=${encodeURIComponent(price)}&location=${encodeURIComponent(location)}&image=${encodeURIComponent(heroImage)}`}
+```
