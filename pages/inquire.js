@@ -1,21 +1,49 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
+function cleanText(value) {
+  return value ? String(value).trim() : "";
+}
+
 export default function InquirePage() {
   const router = useRouter();
+  const { listingId } = router.query;
 
-  const { listingId, title, price, location, image } = router.query;
-
+  const [listings, setListings] = useState([]);
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
   const [message, setMessage] = useState("Is this machine still available?");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/listings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setListings(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const listing = useMemo(() => {
+    if (!listingId || listings.length === 0) return null;
+    return listings.find((item) => item.id === listingId);
+  }, [listingId, listings]);
+
+  const title = cleanText(listing?.title) || "Equipment Listing";
+  const price = cleanText(listing?.price) || "Call for Price";
+  const hours = cleanText(listing?.hours) || "Hours not listed";
+  const location = cleanText(listing?.location) || "Location not listed";
+  const image =
+    listing?.imageUrl ||
+    listing?.image ||
+    listing?.images?.[0] ||
+    "/images/hero-equipment-yard.jpg";
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -64,6 +92,7 @@ export default function InquirePage() {
     <>
       <Head>
         <title>Message Seller | IronXchange</title>
+
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           rel="stylesheet"
@@ -106,20 +135,15 @@ export default function InquirePage() {
             </button>
 
             <div className="listing-preview">
-              {image ? (
-                <img
-                  src={image}
-                  alt={title || "Equipment Listing"}
-                  className="listing-image"
-                />
-              ) : null}
+              <img src={image} alt={title} className="listing-image" />
 
               <div>
-                <h1>{title || "Equipment Listing"}</h1>
+                <h1>{title}</h1>
 
                 <div className="listing-meta">
-                  <span>{price || "Call for Price"}</span>
-                  <span>{location || "Location not listed"}</span>
+                  <span>{price}</span>
+                  <span>{hours}</span>
+                  <span>{location}</span>
                 </div>
               </div>
             </div>
@@ -247,7 +271,7 @@ export default function InquirePage() {
 
         .card {
           width: 100%;
-          max-width: 760px;
+          max-width: 820px;
           background: #151515;
           border: 1px solid #282828;
           border-radius: 18px;
@@ -270,40 +294,41 @@ export default function InquirePage() {
 
         .listing-preview {
           display: grid;
-          grid-template-columns: 180px 1fr;
-          gap: 18px;
-          margin-top: 20px;
+          grid-template-columns: 220px 1fr;
+          gap: 20px;
+          margin-top: 22px;
           align-items: center;
         }
 
         .listing-image {
           width: 100%;
-          height: 130px;
+          height: 155px;
           object-fit: cover;
-          border-radius: 12px;
+          border-radius: 14px;
           background: #111;
         }
 
         h1 {
           margin: 0;
-          font-size: 28px;
+          font-size: 30px;
           line-height: 1.1;
           color: #f2f2f2;
         }
 
         .listing-meta {
-          margin-top: 12px;
+          margin-top: 14px;
           display: flex;
-          gap: 16px;
+          gap: 14px;
           flex-wrap: wrap;
           color: #a7a7a7;
           font-size: 15px;
+          font-weight: 700;
         }
 
         .divider {
           height: 1px;
           background: #282828;
-          margin: 24px 0;
+          margin: 26px 0;
         }
 
         .intro {
@@ -373,15 +398,23 @@ export default function InquirePage() {
           }
 
           .listing-image {
-            height: 220px;
+            height: 240px;
           }
 
           h1 {
-            font-size: 22px;
+            font-size: 23px;
           }
 
           .logo-img {
             height: 56px;
+          }
+
+          .nav-links {
+            gap: 18px;
+          }
+
+          .yellow-link {
+            font-size: 12px !important;
           }
         }
       `}</style>
