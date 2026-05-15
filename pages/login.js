@@ -9,35 +9,41 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleLogin(e) {
-    e.preventDefault();
+async function handleLogin(e) {
+  e.preventDefault();
 
-    setLoading(true);
-    setError("");
+  const cleanEmail = email.trim().toLowerCase();
 
-    try {
-      const SharetribeSdk = await import("sharetribe-flex-sdk");
+  setLoading(true);
+  setError("");
 
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
+  try {
+    const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-      const result = await sdk.login({
-  email,
-  password
-})
-      ;
+    const sdk = SharetribeSdk.createInstance({
+      clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+    });
 
-      console.log("LOGIN SUCCESS:", result);
+    const result = await sdk.login({
+      username: cleanEmail,
+      password
+    });
 
-      window.location.href = "/";
-    } catch (err) {
-      console.error("LOGIN ERROR:", err);
-      setError("Invalid email or password.");
-    } finally {
-      setLoading(false);
-    }
+    console.log("LOGIN SUCCESS:", result);
+
+    window.location.href = "/";
+  } catch (err) {
+    console.error("LOGIN ERROR FULL:", err);
+
+    setError(
+      err?.data?.errors?.[0]?.title ||
+      err?.message ||
+      "Login failed."
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <>
