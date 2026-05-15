@@ -26,7 +26,7 @@ export default function LoginPage() {
   email,
   password
 })
-      });
+      ;
 
       console.log("LOGIN SUCCESS:", result);
 
