@@ -134,7 +134,7 @@ export default function InquirePage() {
               ← Back to Listing
             </button>
 
-           <div className="listing-card">
+  <div className="listing-card">
   <div
     className="card-photo"
     style={{
@@ -142,22 +142,23 @@ export default function InquirePage() {
     }}
   />
 
- <div className="card-body">
-  <div className="title-row">
-    <h3>
-      {title.replace(hours, "").trim()}
-    </h3>
+  <div className="card-body">
+    <div className="title-row">
+      <h3>
+        {title.replace(hours, "").trim()}
+      </h3>
 
-    <h3 className="hours-inline">
-      {hours}
-    </h3>
-  </div>
+      <h3 className="hours-inline">
+        {hours}
+      </h3>
+    </div>
 
-  <div className="price-row">
-    <strong>{price}</strong>
+    <div className="price-row">
+      <strong>{price}</strong>
 
-    <div className="meta">
-      <span>⌖ {location}</span>
+      <div className="meta">
+        <span>⌖ {location}</span>
+      </div>
     </div>
   </div>
 </div>
