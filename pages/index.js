@@ -153,11 +153,9 @@ export default function Home() {
       <section className="hero">
         <div className="hero-content">
           <h1>
-            FREE HEAVY
-            <br />
-            EQUIPMENT
-            <br />
-            MARKETPLACE
+            <h1>
+  FREE HEAVY EQUIPMENT MARKETPLACE
+</h1>
           </h1>
 
           <div className="hero-icons">
@@ -430,11 +428,11 @@ export default function Home() {
         .hero h1 {
           font-family: 'Bebas Neue', sans-serif;
           font-size: clamp(1.95rem, 3.25vw, 2.85rem);
-          line-height: 0.94;
+          line-height: 1;
           margin: 0;
           letter-spacing: 1px;
           font-weight: 400;
-          max-width: 640px;
+          max-width: 1000px;
         }
 
         .hero-icons {
