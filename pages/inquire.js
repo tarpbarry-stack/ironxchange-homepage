@@ -75,14 +75,14 @@ export default function InquirePage() {
 
       if (!response.ok) {
         console.error(data);
-        setStatus(data?.error || "Inquiry failed.");
+        setStatus("error");
         return;
       }
 
-      setStatus("Message sent successfully.");
+      setStatus("success");
     } catch (err) {
       console.error(err);
-      setStatus("Something went wrong sending inquiry.");
+     setStatus("error");
     } finally {
       setLoading(false);
     }
@@ -210,7 +210,19 @@ export default function InquirePage() {
                 {loading ? "Sending..." : "Send Message"}
               </button>
 
-              {status ? <p className="status">{status}</p> : null}
+              {status === "success" ? (
+  <div className="success-box">
+    <strong>Message Sent</strong>
+    <p>The seller has received your inquiry through IronXchange.</p>
+  </div>
+) : null}
+
+{status === "error" ? (
+  <div className="error-box">
+    <strong>Message Not Sent</strong>
+    <p>Something went wrong. Please check your information and try again.</p>
+  </div>
+) : null}
             </form>
           </div>
         </section>
@@ -448,6 +460,39 @@ h1 {
           margin: 4px 0 0;
           color: #d6d6d6;
         }
+
+        .success-box,
+.error-box {
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+}
+
+.success-box {
+  background: rgba(47, 133, 90, 0.16);
+  border: 1px solid rgba(47, 133, 90, 0.55);
+}
+
+.error-box {
+  background: rgba(197, 48, 48, 0.16);
+  border: 1px solid rgba(197, 48, 48, 0.55);
+}
+
+.success-box strong,
+.error-box strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.success-box p,
+.error-box p {
+  margin: 6px 0 0;
+  color: #cfcfcf;
+  font-size: 14px;
+}
 
         @media (max-width: 700px) {
           .listing-preview {
