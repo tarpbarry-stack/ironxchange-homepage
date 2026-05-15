@@ -388,21 +388,20 @@ const handleSearch = () => {
           font-size: 15px !important;
         }
 
-        .hero {
- .hero {
+       .hero {
   box-shadow: inset 0 -120px 200px rgba(0,0,0,0.9);
-  height: 72vh;
-  min-height: 585px;
-          background:
-            linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
-            url('/images/hero-equipment-yard.jpg');
-          background-size: cover;
-          background-position: center 28%;
-          display: flex;
-          align-items: center;
-          color: white;
-          padding: 0 5%;
-        }
+  height: 85vh;
+  min-height: 680px;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.87), rgba(0,0,0,.64), rgba(0,0,0,.24)),
+    url('/images/hero-equipment-yard.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 0 5%;
+}
 
         .hero-content { max-width: 850px; }
 
