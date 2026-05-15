@@ -355,12 +355,12 @@ function lightboxNext() {
     <i className="fa-solid fa-arrow-up-from-bracket"></i>
   </button>
 
-  <button
+ <button
   type="button"
   className={isSaved ? "saved-star" : ""}
   onClick={toggleSaved}
 >
-  ★
+  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
 </button>
 
   <a href="/browse">← Results</a>
