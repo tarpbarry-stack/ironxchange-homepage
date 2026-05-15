@@ -40,14 +40,24 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { listingId, message, buyerName, buyerEmail, buyerPhone } = req.body || {};
+    const {
+      listingId,
+      message,
+      buyerName,
+      buyerEmail,
+      buyerPhone
+    } = req.body || {};
 
     if (!listingId) {
-      return res.status(400).json({ error: "Missing listingId" });
+      return res.status(400).json({
+        error: "Missing listingId"
+      });
     }
 
     if (!message) {
-      return res.status(400).json({ error: "Missing message" });
+      return res.status(400).json({
+        error: "Missing message"
+      });
     }
 
     const token = await getAccessToken();
@@ -61,11 +71,15 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
           Accept: "application/json"
         },
+
         body: JSON.stringify({
           processAlias: "default-inquiry/release-1",
-          transition: "transition/inquire",
+
+          transition: "transition/inquire-without-payment",
+
           params: {
             listingId,
+
             protectedData: {
               message,
               buyerName: buyerName || "",
@@ -80,6 +94,8 @@ export default async function handler(req, res) {
     const data = await safeJson(response);
 
     if (!response.ok) {
+      console.error("SHARETRIBE ERROR:", data);
+
       return res.status(response.status).json({
         error: "Sharetribe inquiry failed",
         details: data
@@ -91,6 +107,10 @@ export default async function handler(req, res) {
       transaction: data
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error("SERVER ERROR:", err);
+
+    return res.status(500).json({
+      error: err.message
+    });
   }
 }
