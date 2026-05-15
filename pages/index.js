@@ -535,28 +535,13 @@ const handleSearch = () => {
 
         .built-line b { color: ${BRAND_YELLOW}; }
 
-        .search-section {
-  padding: 28px 5% 28px;
-          background: #f8f8f8;
-          text-align: center;
-        }
+      .search-section {
+  margin-top: 42px;
+}
 
-        .search-section h2,
-        .featured h2,
-        .how h2,
-        .ready h2 {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 3rem;
-          font-weight: 400;
-          letter-spacing: 1px;
-          margin: 0;
-        }
-
-        .search-section p {
-          color: #333;
-          font-size: 1.05rem;
-          margin-top: 8px;
-        }
+.search-section h2 {
+  display: none;
+}
 
         .search-container {
   max-width: 1120px;
@@ -602,7 +587,7 @@ input::placeholder {
 }
 
         .featured {
-  padding: 46px 5% 60px;
+  padding: 26px 5% 60px;
   background: #0B0B0B;
   color: #D6D6D6;
 }
