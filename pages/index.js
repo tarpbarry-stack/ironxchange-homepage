@@ -208,15 +208,7 @@ const handleSearch = () => {
 
           <button onClick={handleSearch} className="search-btn">SEARCH</button>
         </div>
-
-        <div className="popular">
-          <span>Popular Searches:</span>
-          {["EXCAVATORS", "SKID STEER/CTL", "DOZERS", "DUMP TRUCKS - ARTIC/RIGID", "TRAILERS", "WHEEL LOADERS"].map((x) => (
-           <button key={x} onClick={() => window.location.href = `/browse?keywords=${encodeURIComponent(x)}`}>
-  {x}
-</button>
-          ))}
-        </div>
+              
       </section>
 
       <section className="featured">
@@ -593,24 +585,6 @@ const handleSearch = () => {
           font-weight: 900;
           cursor: pointer;
         }
-
-        .popular {
-          max-width: 1100px;
-          margin: 18px auto 0;
-          text-align: left;
-          color: #444;
-          font-size: 14px;
-        }
-
-        .popular button {
-  background: transparent;
-  border: none;
-  margin: 6px 0 0 18px;
-  text-decoration: underline;
-  cursor: pointer;
-  color: #333;
-  font-weight: 700;
-}
 
         .featured {
           padding: 56px 5%;
