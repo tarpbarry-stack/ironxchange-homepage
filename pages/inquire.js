@@ -81,7 +81,7 @@ async function handleSubmit(e) {
     setStatus("success");
   } catch (err) {
     console.error("INQUIRY ERROR:", err);
-    alert(err?.message || "Inquiry failed.");
+    alert(JSON.stringify(err?.data?.errors?.[0] || err, null, 2));
     setStatus("error");
   } finally {
     setLoading(false);
