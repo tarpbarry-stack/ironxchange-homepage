@@ -255,7 +255,6 @@ const handleSearch = () => {
     </a>
   ))}
 </div>
-        </div>
       </section>
 
       <section id="how" className="how">
