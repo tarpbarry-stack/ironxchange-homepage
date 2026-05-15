@@ -23,8 +23,9 @@ export default function LoginPage() {
       });
 
       const result = await sdk.login({
-        username: email,
-        password
+  email,
+  password
+})
       });
 
       console.log("LOGIN SUCCESS:", result);
