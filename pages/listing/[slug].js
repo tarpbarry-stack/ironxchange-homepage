@@ -484,10 +484,10 @@ function lightboxNext() {
           display: block;
         }
 
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: 28px;
+       .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 14px;
         }
 
         .nav-links a {
