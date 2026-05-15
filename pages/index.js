@@ -842,6 +842,10 @@ export default function Home() {
             height: 54px;
           }
 
+          .cards {
+  grid-template-columns: 1fr !important;
+}
+
           .nav-links {
             display: none;
           }
