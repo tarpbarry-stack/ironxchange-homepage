@@ -73,17 +73,20 @@ export default function InquirePage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        console.error(data);
-        setStatus("error");
-        return;
-      }
+     if (!response.ok) {
+  console.error("INQUIRY FAILED:", data);
+  alert(JSON.stringify(data, null, 2));
+  setStatus("error");
+  return;
+}
 
       setStatus("success");
     } catch (err) {
-      console.error(err);
-     setStatus("error");
-    } finally {
+  console.error("INQUIRY ERROR:", err);
+  alert(err.message);
+  setStatus("error");
+} 
+    finally {
       setLoading(false);
     }
   }
