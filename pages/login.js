@@ -59,7 +59,7 @@ window.location.href = next;
         <div className="card">
           <img src="/images/ironxchange-logo.png" alt="IronXchange" className="logo" />
 
-          <h1>Marketplace Login</h1>
+        <h1>Sign In</h1>
 
           <form onSubmit={handleLogin}>
             <label>
@@ -73,8 +73,16 @@ window.location.href = next;
             </label>
 
             <button type="submit" disabled={loading}>
-              {loading ? "Signing In..." : "Login"}
-            </button>
+  {loading ? "Signing In..." : "Login"}
+</button>
+
+<div className="signup-area">
+  <span>New to IronXchange?</span>
+
+  <a href={`${STAGING}/signup`} className="signup-link">
+    CREATE ACCOUNT
+  </a>
+</div>
 
             {error ? <div className="error-box">{error}</div> : null}
           </form>
@@ -170,6 +178,23 @@ window.location.href = next;
           background: rgba(197,48,48,.15);
           border: 1px solid rgba(197,48,48,.5);
         }
+
+        .signup-area {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #9A9A9A;
+}
+
+.signup-link {
+  color: #FFC400;
+  text-decoration: none;
+  font-weight: 900;
+  letter-spacing: .3px;
+}
       `}</style>
     </>
   );
