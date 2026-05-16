@@ -4,7 +4,9 @@ export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
   const [rows, setRows] = useState([]);
-  const [crawlTargets, setCrawlTargets] = useState([]);
+  const [crawlResults, setCrawlResults] = useState([]);
+  const [totalEmails, setTotalEmails] = useState(0);
+  const [totalPhones, setTotalPhones] = useState(0);
 
   async function handleUpload() {
     if (!selectedFile) {
@@ -14,11 +16,19 @@ export default function DealerGraph() {
 
     const text = await selectedFile.text();
 
-    const lines = text.split("\n");
+    const lines = text
+      .split("\n")
+      .filter((line) => line.trim() !== "");
 
     const parsedRows = lines.map((line) => line.split(","));
 
     setRows(parsedRows);
+
+    setCrawlResults([]);
+
+    setTotalEmails(0);
+
+    setTotalPhones(0);
 
     setStatus(`Loaded ${parsedRows.length} rows`);
   }
@@ -42,17 +52,17 @@ export default function DealerGraph() {
         </div>
 
         <div style={statCard}>
-          <h2>{crawlTargets.length}</h2>
-          <p>Crawl Targets</p>
+          <h2>{crawlResults.length}</h2>
+          <p>Sites Scanned</p>
         </div>
 
         <div style={statCard}>
-          <h2>0</h2>
+          <h2>{totalEmails}</h2>
           <p>Emails</p>
         </div>
 
         <div style={statCard}>
-          <h2>0</h2>
+          <h2>{totalPhones}</h2>
           <p>Phone Numbers</p>
         </div>
       </div>
@@ -67,7 +77,9 @@ export default function DealerGraph() {
         <input
           type="file"
           accept=".csv"
-          onChange={(event) => setSelectedFile(event.target.files[0])}
+          onChange={(event) =>
+            setSelectedFile(event.target.files[0])
+          }
           style={{ marginBottom: "20px" }}
         />
 
@@ -85,6 +97,8 @@ export default function DealerGraph() {
               return;
             }
 
+            setStatus("Scanning dealer websites...");
+
             const response = await fetch("/api/dealer-crawl", {
               method: "POST",
               headers: {
@@ -95,7 +109,11 @@ export default function DealerGraph() {
 
             const data = await response.json();
 
-            setCrawlTargets(data.crawlTargets || []);
+            setCrawlResults(data.results || []);
+
+            setTotalEmails(data.totalEmails || 0);
+
+            setTotalPhones(data.totalPhones || 0);
 
             setStatus(data.message);
           }}
@@ -108,15 +126,20 @@ export default function DealerGraph() {
         </button>
 
         {status && (
-          <p style={{ marginTop: "20px", color: "#f98512" }}>
+          <p
+            style={{
+              marginTop: "20px",
+              color: "#f98512"
+            }}
+          >
             {status}
           </p>
         )}
       </div>
 
-      {crawlTargets.length > 0 && (
+      {crawlResults.length > 0 && (
         <div style={tableWrapper}>
-          <h2>Crawl Targets</h2>
+          <h2>Crawl Results</h2>
 
           <table style={tableStyle}>
             <thead>
@@ -125,16 +148,34 @@ export default function DealerGraph() {
                 <th style={cellStyle}>Website</th>
                 <th style={cellStyle}>Category</th>
                 <th style={cellStyle}>State</th>
+                <th style={cellStyle}>Emails</th>
+                <th style={cellStyle}>Phones</th>
+                <th style={cellStyle}>Error</th>
               </tr>
             </thead>
 
             <tbody>
-              {crawlTargets.map((dealer, index) => (
+              {crawlResults.map((dealer, index) => (
                 <tr key={index}>
                   <td style={cellStyle}>{dealer.company}</td>
+
                   <td style={cellStyle}>{dealer.website}</td>
+
                   <td style={cellStyle}>{dealer.category}</td>
+
                   <td style={cellStyle}>{dealer.state}</td>
+
+                  <td style={cellStyle}>
+                    {(dealer.emails || []).join(", ") || "—"}
+                  </td>
+
+                  <td style={cellStyle}>
+                    {(dealer.phones || []).join(", ") || "—"}
+                  </td>
+
+                  <td style={cellStyle}>
+                    {dealer.error || "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -198,7 +239,8 @@ const tableWrapper = {
   background: "#1a1a1a",
   padding: "30px",
   borderRadius: "12px",
-  border: "1px solid #333"
+  border: "1px solid #333",
+  overflowX: "auto"
 };
 
 const tableStyle = {
@@ -210,5 +252,6 @@ const tableStyle = {
 const cellStyle = {
   border: "1px solid #333",
   padding: "12px",
-  textAlign: "left"
+  textAlign: "left",
+  verticalAlign: "top"
 };
