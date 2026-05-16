@@ -1517,7 +1517,7 @@ if (category === "BACKHOE LOADERS") {
 }
 
 .logo-img {
-  height: 78px;
+  height: 68px;
   width: auto;
   display: block;
 }
