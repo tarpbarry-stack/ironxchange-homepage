@@ -834,7 +834,7 @@ export default function Home() {
   height: 500px;
   min-height: 500px;
   padding-bottom: 72px;
-  background-size: 145%;
+  background-size: 160%;
   background-repeat: no-repeat;
   background-position: center top;
   background-color: #0b0b0b;
