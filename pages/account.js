@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
+const STAGING = "https://staging.ironxchange.com";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,6 @@ export default function AccountPage() {
         });
 
         const response = await sdk.currentUser.show();
-
         setUser(response.data.data);
       } catch {
         window.location.href = `/login?next=${encodeURIComponent("/account")}`;
@@ -46,12 +46,12 @@ export default function AccountPage() {
   const profile = user?.attributes?.profile || {};
   const displayName = profile.displayName || "IronXchange User";
   const companyName = profile.publicData?.companyName || "Company not added";
-  const email = user?.attributes?.email || "Email not available";
+  const email = user?.attributes?.email || "";
 
   if (loading) {
     return (
       <main className="loading">
-        Loading account...
+        Loading...
         <style jsx>{`
           .loading {
             min-height: 100vh;
@@ -80,126 +80,182 @@ export default function AccountPage() {
       <main>
         <nav className="nav">
           <a href="/" className="logo-wrap">
-            <img
-              src="/images/ironxchange-logo.png"
-              className="logo-img"
-              alt="IronXchange"
-            />
+            <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
           </a>
 
           <div className="nav-links">
             <a href="/browse">SEARCH</a>
-            <a href="https://staging.ironxchange.com/l/new" className="yellow-link">
-              POST FREE
-            </a>
-
-            <button type="button" onClick={handleLogout} className="logout-btn">
-              LOGOUT
-            </button>
-
+            <a href={`${STAGING}/l/new`} className="yellow-link">POST FREE</a>
+            <button type="button" onClick={handleLogout} className="logout-btn">LOGOUT</button>
             <a href="/account" className="login-icon logged-in" aria-label="Account">
               <i className="fa-regular fa-user"></i>
             </a>
           </div>
         </nav>
 
-        <section className="shell">
-          <aside className="side">
-            <div className="account-card">
+        <section className="dashboard">
+          <aside className="rail">
+            <div className="rail-top">
               <div className="user-dot">
                 <i className="fa-regular fa-user"></i>
               </div>
 
-              <h2>{displayName}</h2>
-              <p>{companyName}</p>
-              <span>{email}</span>
+              <strong>{displayName}</strong>
+              <span>{companyName}</span>
             </div>
 
-            <div className="side-menu">
-              <a className="active" href="/account">Dashboard</a>
-              <a href="/account/listings">My Listings</a>
-              <a href="/saved">Saved Machines</a>
-              <a href="/account/messages">Messages</a>
-              <a href="/account/settings">Settings</a>
-            </div>
+            <a className="active" href="/account">
+              <i className="fa-solid fa-gauge-high"></i>
+              Dashboard
+            </a>
+
+            <a href="/account/listings">
+              <i className="fa-solid fa-list"></i>
+              Listings
+            </a>
+
+            <a href="/account/messages">
+              <i className="fa-regular fa-envelope"></i>
+              Inquiries
+            </a>
+
+            <a href="/saved">
+              <i className="fa-regular fa-star"></i>
+              Saved
+            </a>
+
+            <a href="/account/settings">
+              <i className="fa-solid fa-gear"></i>
+              Settings
+            </a>
           </aside>
 
           <section className="content">
-            <div className="hero-row">
+            <div className="topline">
               <div>
-                <h1>Account Console</h1>
-                <p>Manage your listings, saved machines, inquiries, and account tools.</p>
+                <h1>{companyName !== "Company not added" ? companyName : displayName}</h1>
+                <p>{email}</p>
               </div>
 
-              <a href="https://staging.ironxchange.com/l/new" className="post-btn">
-                POST FREE →
-              </a>
+              <div className="status-pill">
+                <span></span>
+                ACTIVE
+              </div>
             </div>
 
             <div className="stats">
-              <div>
+              <div className="stat-card">
                 <span>Active Listings</span>
                 <strong>—</strong>
+                <p>Live machines for sale</p>
               </div>
 
-              <div>
+              <div className="stat-card">
                 <span>New Inquiries</span>
                 <strong>—</strong>
+                <p>Buyer activity</p>
               </div>
 
-              <div>
+              <div className="stat-card">
                 <span>Saved Machines</span>
                 <strong>—</strong>
+                <p>Watchlist inventory</p>
               </div>
 
-              <div>
-                <span>Account Status</span>
-                <strong className="green">ACTIVE</strong>
+              <div className="stat-card">
+                <span>Listing Health</span>
+                <strong className="green">GOOD</strong>
+                <p>Account ready</p>
               </div>
             </div>
 
-            <div className="grid">
-              <div className="panel wide">
+            <div className="main-grid">
+              <section className="panel listings-panel">
                 <div className="panel-head">
                   <h2>My Listings</h2>
-                  <a href="/account/listings">View All</a>
+                  <a href="/account/listings">MANAGE ALL →</a>
                 </div>
 
-                <div className="placeholder-table">
-                  <div className="row head">
+                <div className="listing-table">
+                  <div className="table-row table-head">
                     <span>Machine</span>
                     <span>Price</span>
                     <span>Status</span>
                     <span>Inquiries</span>
+                    <span>Actions</span>
                   </div>
 
-                  <div className="empty-state">
-                    Listing management comes next: inline price edits, mark sold, pause, duplicate, and inquiry counts.
+                  <div className="table-empty">
+                    <strong>Listing controls go here.</strong>
+                    <p>
+                      Inline price edits, status changes, mark sold, pause, duplicate,
+                      image updates, and inquiry counts will live in this table.
+                    </p>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div className="panel">
+              <section className="panel side-panel">
                 <div className="panel-head">
-                  <h2>Messages</h2>
-                  <a href="/account/messages">Open</a>
+                  <h2>Recent Inquiries</h2>
+                  <a href="/account/messages">OPEN →</a>
                 </div>
 
-                <p className="muted">
-                  Email will stay primary. This area becomes your backup record for buyer/seller inquiries.
-                </p>
-              </div>
+                <div className="activity-list">
+                  <div>
+                    <span className="dot yellow"></span>
+                    <p>New buyer inquiries will appear here.</p>
+                  </div>
+                  <div>
+                    <span className="dot green"></span>
+                    <p>Email remains primary. This keeps the record.</p>
+                  </div>
+                </div>
+              </section>
 
-              <div className="panel">
+              <section className="panel side-panel">
                 <div className="panel-head">
                   <h2>Saved Machines</h2>
-                  <a href="/saved">Open</a>
+                  <a href="/saved">VIEW →</a>
                 </div>
 
-                <p className="muted">
-                  Watch equipment, compare machines, and return to saved inventory quickly.
-                </p>
-              </div>
+                <div className="activity-list">
+                  <div>
+                    <span className="dot yellow"></span>
+                    <p>Saved listings and watchlist machines will show here.</p>
+                  </div>
+                  <div>
+                    <span className="dot green"></span>
+                    <p>Price alerts and status changes later.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="panel performance-panel">
+                <div className="panel-head">
+                  <h2>Performance</h2>
+                  <span className="small-note">COMING ONLINE</span>
+                </div>
+
+                <div className="perf-grid">
+                  <div>
+                    <span>Views</span>
+                    <strong>—</strong>
+                  </div>
+                  <div>
+                    <span>Saves</span>
+                    <strong>—</strong>
+                  </div>
+                  <div>
+                    <span>Messages</span>
+                    <strong>—</strong>
+                  </div>
+                  <div>
+                    <span>Sold / Closed</span>
+                    <strong>—</strong>
+                  </div>
+                </div>
+              </section>
             </div>
           </section>
         </section>
@@ -234,8 +290,8 @@ export default function AccountPage() {
 
         .logo-img {
           height: 42px;
-          width: auto;
           display: block;
+          width: auto;
         }
 
         .nav-links {
@@ -262,7 +318,7 @@ export default function AccountPage() {
         }
 
         .logout-btn {
-          color: #9A9A9A;
+          color: #9a9a9a;
         }
 
         .login-icon {
@@ -280,119 +336,123 @@ export default function AccountPage() {
           color: #38A169 !important;
         }
 
-        .shell {
+        .dashboard {
           display: grid;
-          grid-template-columns: 290px 1fr;
+          grid-template-columns: 230px 1fr;
           gap: 22px;
-          padding: 28px 5% 60px;
-          max-width: 1500px;
+          padding: 24px 4% 60px;
+          max-width: 1600px;
           margin: 0 auto;
         }
 
-        .side,
-        .panel,
-        .stats div {
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 16px;
-        }
-
-        .side {
-          padding: 18px;
+        .rail {
+          background: #111;
+          border: 1px solid #252525;
+          border-radius: 18px;
+          padding: 16px;
           height: fit-content;
         }
 
-        .account-card {
+        .rail-top {
           text-align: center;
-          padding: 18px 12px 22px;
-          border-bottom: 1px solid #282828;
+          padding: 12px 8px 18px;
+          border-bottom: 1px solid #252525;
+          margin-bottom: 14px;
         }
 
         .user-dot {
-          width: 54px;
-          height: 54px;
+          width: 50px;
+          height: 50px;
           border: 2px solid #38A169;
           color: #38A169;
           border-radius: 50%;
           display: grid;
           place-items: center;
-          margin: 0 auto 14px;
-          font-size: 24px;
+          margin: 0 auto 12px;
+          font-size: 22px;
         }
 
-        .account-card h2 {
-          margin: 0;
+        .rail-top strong {
+          display: block;
           color: #f2f2f2;
-          font-size: 17px;
-        }
-
-        .account-card p {
-          margin: 6px 0;
-          color: #aaa;
           font-size: 14px;
         }
 
-        .account-card span {
-          color: #777;
+        .rail-top span {
+          display: block;
+          margin-top: 5px;
+          color: #888;
           font-size: 12px;
         }
 
-        .side-menu {
-          display: grid;
-          gap: 8px;
-          padding-top: 18px;
-        }
-
-        .side-menu a {
+        .rail a {
+          display: flex;
+          align-items: center;
+          gap: 10px;
           color: #bdbdbd;
           text-decoration: none;
-          font-size: 13px;
-          font-weight: 800;
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: .45px;
           text-transform: uppercase;
-          letter-spacing: .4px;
-          padding: 13px 14px;
+          padding: 13px 12px;
           border-radius: 10px;
         }
 
-        .side-menu a.active,
-        .side-menu a:hover {
-          background: #202020;
+        .rail a.active,
+        .rail a:hover {
+          background: #1b1b1b;
           color: #f2f2f2;
+        }
+
+        .rail i {
+          width: 18px;
+          color: ${BRAND_YELLOW};
         }
 
         .content {
           min-width: 0;
         }
 
-        .hero-row {
+        .topline {
           display: flex;
           justify-content: space-between;
-          gap: 20px;
-          align-items: center;
-          margin-bottom: 22px;
+          align-items: flex-start;
+          gap: 18px;
+          margin-bottom: 18px;
         }
 
         h1 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 30px;
-          letter-spacing: -0.5px;
+          font-size: 28px;
+          letter-spacing: -0.4px;
         }
 
-        .hero-row p {
-          margin: 8px 0 0;
-          color: #9A9A9A;
-        }
-
-        .post-btn {
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          text-decoration: none;
-          font-weight: 900;
-          padding: 15px 24px;
-          border-radius: 10px;
+        .topline p {
+          margin: 7px 0 0;
+          color: #888;
           font-size: 13px;
-          white-space: nowrap;
+        }
+
+        .status-pill {
+          border: 1px solid #2f855a;
+          color: #38A169;
+          border-radius: 999px;
+          padding: 8px 12px;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .5px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .status-pill span {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #38A169;
         }
 
         .stats {
@@ -402,33 +462,48 @@ export default function AccountPage() {
           margin-bottom: 18px;
         }
 
-        .stats div {
+        .stat-card,
+        .panel {
+          background: #151515;
+          border: 1px solid #282828;
+          border-radius: 16px;
+        }
+
+        .stat-card {
           padding: 18px;
         }
 
-        .stats span {
+        .stat-card span {
           display: block;
-          color: #8F8F8F;
-          font-size: 12px;
+          color: #8f8f8f;
+          font-size: 11px;
           text-transform: uppercase;
           font-weight: 900;
           letter-spacing: .5px;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
-        .stats strong {
+        .stat-card strong {
+          display: block;
           color: #f2f2f2;
-          font-size: 24px;
+          font-size: 26px;
+          margin-bottom: 6px;
         }
 
-        .stats .green {
+        .stat-card strong.green {
           color: #38A169;
-          font-size: 18px;
+          font-size: 20px;
         }
 
-        .grid {
+        .stat-card p {
+          margin: 0;
+          color: #777;
+          font-size: 12px;
+        }
+
+        .main-grid {
           display: grid;
-          grid-template-columns: 1.45fr 1fr;
+          grid-template-columns: minmax(0, 1.55fr) minmax(320px, .85fr);
           gap: 18px;
         }
 
@@ -436,87 +511,157 @@ export default function AccountPage() {
           padding: 20px;
         }
 
-        .wide {
+        .listings-panel {
           grid-row: span 2;
+        }
+
+        .performance-panel {
+          grid-column: 1 / -1;
         }
 
         .panel-head {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 14px;
           margin-bottom: 16px;
         }
 
-        .panel h2 {
+        .panel-head h2 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 16px;
+          font-size: 15px;
           text-transform: uppercase;
-          letter-spacing: .4px;
+          letter-spacing: .45px;
         }
 
-        .panel-head a {
+        .panel-head a,
+        .small-note {
           color: ${BRAND_YELLOW};
           text-decoration: none;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 900;
+          letter-spacing: .4px;
           text-transform: uppercase;
         }
 
-        .placeholder-table {
+        .listing-table {
           border: 1px solid #252525;
           border-radius: 12px;
           overflow: hidden;
         }
 
-        .row {
+        .table-row {
           display: grid;
-          grid-template-columns: 1.6fr .8fr .7fr .7fr;
-          gap: 12px;
+          grid-template-columns: 1.5fr .75fr .7fr .7fr .75fr;
+          gap: 10px;
           padding: 13px 14px;
           border-bottom: 1px solid #252525;
           font-size: 13px;
         }
 
-        .row.head {
-          color: #8F8F8F;
+        .table-head {
+          background: #101010;
+          color: #8f8f8f;
+          font-size: 11px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: .45px;
+        }
+
+        .table-empty {
+          padding: 22px 14px;
+          color: #9a9a9a;
+          line-height: 1.6;
+          font-size: 14px;
+        }
+
+        .table-empty strong {
+          display: block;
+          color: #f2f2f2;
+          margin-bottom: 6px;
+        }
+
+        .table-empty p {
+          margin: 0;
+        }
+
+        .activity-list {
+          display: grid;
+          gap: 14px;
+        }
+
+        .activity-list div {
+          display: grid;
+          grid-template-columns: 10px 1fr;
+          gap: 12px;
+          align-items: start;
+          color: #aaa;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .activity-list p {
+          margin: 0;
+        }
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          margin-top: 6px;
+        }
+
+        .dot.yellow {
+          background: ${BRAND_YELLOW};
+        }
+
+        .dot.green {
+          background: #38A169;
+        }
+
+        .perf-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+
+        .perf-grid div {
+          background: #101010;
+          border: 1px solid #252525;
+          border-radius: 12px;
+          padding: 16px;
+        }
+
+        .perf-grid span {
+          display: block;
+          color: #888;
+          font-size: 11px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: .4px;
-          background: #101010;
+          margin-bottom: 8px;
         }
 
-        .empty-state {
-          color: #9A9A9A;
-          line-height: 1.6;
-          padding: 22px 14px;
-          font-size: 14px;
+        .perf-grid strong {
+          color: #f2f2f2;
+          font-size: 22px;
         }
 
-        .muted {
-          color: #9A9A9A;
-          line-height: 1.6;
-          margin: 0;
-          font-size: 14px;
-        }
-
-        @media (max-width: 950px) {
-          .shell {
+        @media (max-width: 1050px) {
+          .dashboard {
             grid-template-columns: 1fr;
           }
 
+          .rail {
+            display: grid;
+            grid-template-columns: 1fr;
+          }
+
+          .main-grid,
           .stats,
-          .grid {
+          .perf-grid {
             grid-template-columns: 1fr;
-          }
-
-          .hero-row {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .nav-links {
-            gap: 12px;
           }
 
           .nav-links a:not(.yellow-link):not(.login-icon),
