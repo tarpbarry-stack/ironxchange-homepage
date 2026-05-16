@@ -10,8 +10,9 @@ export default function DealerGraph() {
       }}
     >
       <a href="/ixi" style={backLinkStyle}>
-  ← Back to IXI Command Center
-</a>
+        ← Back to IXI Command Center
+      </a>
+
       <h1>Dealer Graph</h1>
 
       <p style={{ color: "#888" }}>
@@ -89,4 +90,12 @@ const buttonStyle = {
   marginRight: "15px",
   borderRadius: "8px",
   cursor: "pointer"
+};
+
+const backLinkStyle = {
+  display: "inline-block",
+  marginBottom: "30px",
+  color: "#aaa",
+  textDecoration: "none",
+  fontSize: "14px"
 };
