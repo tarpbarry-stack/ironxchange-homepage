@@ -4,6 +4,7 @@ export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
   const [rows, setRows] = useState([]);
+  const [crawlTargets, setCrawlTargets] = useState([]);
 
   async function handleUpload() {
     if (!selectedFile) {
@@ -41,8 +42,8 @@ export default function DealerGraph() {
         </div>
 
         <div style={statCard}>
-          <h2>0</h2>
-          <p>Contacts</p>
+          <h2>{crawlTargets.length}</h2>
+          <p>Crawl Targets</p>
         </div>
 
         <div style={statCard}>
@@ -94,6 +95,8 @@ export default function DealerGraph() {
 
             const data = await response.json();
 
+            setCrawlTargets(data.crawlTargets || []);
+
             setStatus(data.message);
           }}
         >
@@ -111,19 +114,27 @@ export default function DealerGraph() {
         )}
       </div>
 
-      {rows.length > 0 && (
+      {crawlTargets.length > 0 && (
         <div style={tableWrapper}>
-          <h2>Imported Dealer Rows</h2>
+          <h2>Crawl Targets</h2>
 
           <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={cellStyle}>Company</th>
+                <th style={cellStyle}>Website</th>
+                <th style={cellStyle}>Category</th>
+                <th style={cellStyle}>State</th>
+              </tr>
+            </thead>
+
             <tbody>
-              {rows.map((row, index) => (
+              {crawlTargets.map((dealer, index) => (
                 <tr key={index}>
-                  {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} style={cellStyle}>
-                      {cell}
-                    </td>
-                  ))}
+                  <td style={cellStyle}>{dealer.company}</td>
+                  <td style={cellStyle}>{dealer.website}</td>
+                  <td style={cellStyle}>{dealer.category}</td>
+                  <td style={cellStyle}>{dealer.state}</td>
                 </tr>
               ))}
             </tbody>
@@ -198,5 +209,6 @@ const tableStyle = {
 
 const cellStyle = {
   border: "1px solid #333",
-  padding: "12px"
+  padding: "12px",
+  textAlign: "left"
 };
