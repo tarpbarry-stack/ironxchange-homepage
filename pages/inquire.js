@@ -118,7 +118,7 @@ return (
               <i className="fa-regular fa-star"></i>
             </a>
 
-            <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+           <a href="/login" className="login-icon" aria-label="Login">
               <i className="fa-regular fa-user"></i>
             </a>
           </div>
