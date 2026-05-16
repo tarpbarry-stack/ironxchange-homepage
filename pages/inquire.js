@@ -45,65 +45,59 @@ export default function InquirePage() {
     listing?.images?.[0] ||
     "/images/hero-equipment-yard.jpg";
 
-async function handleSubmit(e) {
-  e.preventDefault();
+  async function handleSubmit(e) {
+    e.preventDefault();
 
-  const SharetribeSdk = await import("sharetribe-flex-sdk");
+    if (!listingId) {
+      setStatus("error");
+      return;
+    }
 
-const sdk = SharetribeSdk.createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-});
+    setLoading(true);
+    setStatus("");
 
-const authInfo = sdk.authInfo();
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-if (!authInfo?.isAnonymous === false && !authInfo?.accessToken) {
-  window.location.href =
-    `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
 
-  return;
-}
+      const authInfo = sdk.authInfo();
 
-  if (!listingId) {
-    setStatus("error");
-    return;
-  }
-
-  setLoading(true);
-  setStatus("");
-
-  try {
-    const SharetribeSdk = await import("sharetribe-flex-sdk");
-
-    const sdk = SharetribeSdk.createInstance({
-      clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-    });
-
-    const result = await sdk.transactions.initiate({
-      processAlias: "default-inquiry/release-1",
-      transition: "transition/inquire-without-payment",
-      params: {
-        listingId,
-        protectedData: {
-          message,
-          buyerName,
-          buyerEmail,
-          buyerPhone
-        }
+      if (!authInfo || authInfo.isAnonymous) {
+        window.location.href = `/login?next=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`;
+        return;
       }
-    });
 
-    console.log("INQUIRY SUCCESS:", result);
-    setStatus("success");
-  } catch (err) {
-    console.error("INQUIRY ERROR:", err);
-    alert(JSON.stringify(err?.data?.errors?.[0] || err, null, 2));
-    setStatus("error");
-  } finally {
-    setLoading(false);
+      const result = await sdk.transactions.initiate({
+        processAlias: "default-inquiry/release-1",
+        transition: "transition/inquire-without-payment",
+        params: {
+          listingId,
+          protectedData: {
+            message,
+            buyerName,
+            buyerEmail,
+            buyerPhone
+          }
+        }
+      });
+
+      console.log("INQUIRY SUCCESS:", result);
+      setStatus("success");
+    } catch (err) {
+      console.error("INQUIRY ERROR:", err);
+      alert(JSON.stringify(err?.data?.errors?.[0] || err, null, 2));
+      setStatus("error");
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
-return (
+  return (
     <>
       <Head>
         <title>Message Seller | IronXchange</title>
@@ -133,7 +127,7 @@ return (
               <i className="fa-regular fa-star"></i>
             </a>
 
-           <a href="/login" className="login-icon" aria-label="Login">
+            <a href="/login" className="login-icon" aria-label="Login">
               <i className="fa-regular fa-user"></i>
             </a>
           </div>
@@ -149,34 +143,31 @@ return (
               ← Back to Listing
             </button>
 
-  <div className="listing-card">
-  <div
-    className="card-photo"
-    style={{
-      backgroundImage: `url(${image})`
-    }}
-  />
+            <div className="listing-card">
+              <div
+                className="card-photo"
+                style={{
+                  backgroundImage: `url(${image})`
+                }}
+              />
 
-  <div className="card-body">
-    <div className="title-row">
-      <h3>
-        {title.replace(hours, "").trim()}
-      </h3>
+              <div className="card-body">
+                <div className="title-row">
+                  <h3>{title.replace(hours, "").trim()}</h3>
 
-     <h3 className="hours-top">
-  {hours}
-</h3>
-    </div>
+                  <h3 className="hours-top">{hours}</h3>
+                </div>
 
-    <div className="price-row">
-      <strong>{price}</strong>
+                <div className="price-row">
+                  <strong>{price}</strong>
 
-      <div className="meta">
-        <span>⌖ {location}</span>
-      </div>
-    </div>
-  </div>
-</div>
+                  <div className="meta">
+                    <span>⌖ {location}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="divider" />
 
             <p className="intro">
@@ -226,18 +217,18 @@ return (
               </button>
 
               {status === "success" ? (
-  <div className="success-box">
-    <strong>Message Sent</strong>
-    <p>The seller has received your inquiry through IronXchange.</p>
-  </div>
-) : null}
+                <div className="success-box">
+                  <strong>Message Sent</strong>
+                  <p>The seller has received your inquiry through IronXchange.</p>
+                </div>
+              ) : null}
 
-{status === "error" ? (
-  <div className="error-box">
-    <strong>Message Not Sent</strong>
-    <p>Something went wrong. Please check your information and try again.</p>
-  </div>
-) : null}
+              {status === "error" ? (
+                <div className="error-box">
+                  <strong>Message Not Sent</strong>
+                  <p>Something went wrong. Please check your information and try again.</p>
+                </div>
+              ) : null}
             </form>
           </div>
         </section>
@@ -334,80 +325,73 @@ return (
         }
 
         .listing-card {
-  margin-top: 22px;
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid #242424;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #151515;
-}
+          margin-top: 22px;
+          text-decoration: none;
+          color: inherit;
+          border: 1px solid #242424;
+          border-radius: 16px;
+          overflow: hidden;
+          background: #151515;
+        }
 
-.card-photo {
-  height: 240px;
-  background-size: cover;
-  background-position: center;
-}
+        .card-photo {
+          height: 240px;
+          background-size: cover;
+          background-position: center;
+        }
 
-.card-body {
-  padding: 16px;
-}
+        .card-body {
+          padding: 16px;
+        }
 
-.title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
+        .title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+        }
 
-.card-body h3 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 16px;
-  letter-spacing: -0.2px;
-}
+        .card-body h3 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: 16px;
+          letter-spacing: -0.2px;
+        }
 
-.hours-top {
-  color: #8A8A8A;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  white-space: nowrap;
-}
+        .hours-top {
+          color: #8a8a8a;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+        }
 
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 16px;
+        }
 
-.price-row strong {
-  color: #F2F2F2;
-  font-size: 18px;
-}
+        .price-row strong {
+          color: #f2f2f2;
+          font-size: 18px;
+        }
 
-.meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #9A9A9A;
-  flex-wrap: wrap;
-}
+        .meta {
+          display: flex;
+          gap: 12px;
+          font-size: 12px;
+          color: #9a9a9a;
+          flex-wrap: wrap;
+        }
 
-.price-row span {
-  color: #9A9A9A;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .4px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 30px;
-  line-height: 1.1;
-  color: #f2f2f2;
-}
+        .price-row span {
+          color: #9a9a9a;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.4px;
+        }
 
         .divider {
           height: 1px;
@@ -471,55 +455,42 @@ h1 {
           cursor: not-allowed;
         }
 
-        .status {
-          margin: 4px 0 0;
-          color: #d6d6d6;
+        .success-box,
+        .error-box {
+          border-radius: 12px;
+          padding: 16px;
+          margin-top: 4px;
         }
 
-        .success-box,
-.error-box {
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 4px;
-}
+        .success-box {
+          background: rgba(47, 133, 90, 0.16);
+          border: 1px solid rgba(47, 133, 90, 0.55);
+        }
 
-.success-box {
-  background: rgba(47, 133, 90, 0.16);
-  border: 1px solid rgba(47, 133, 90, 0.55);
-}
+        .error-box {
+          background: rgba(197, 48, 48, 0.16);
+          border: 1px solid rgba(197, 48, 48, 0.55);
+        }
 
-.error-box {
-  background: rgba(197, 48, 48, 0.16);
-  border: 1px solid rgba(197, 48, 48, 0.55);
-}
+        .success-box strong,
+        .error-box strong {
+          display: block;
+          color: #f2f2f2;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
 
-.success-box strong,
-.error-box strong {
-  display: block;
-  color: #f2f2f2;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.success-box p,
-.error-box p {
-  margin: 6px 0 0;
-  color: #cfcfcf;
-  font-size: 14px;
-}
+        .success-box p,
+        .error-box p {
+          margin: 6px 0 0;
+          color: #cfcfcf;
+          font-size: 14px;
+        }
 
         @media (max-width: 700px) {
-          .listing-preview {
-            grid-template-columns: 1fr;
-          }
-
-          .listing-image {
+          .card-photo {
             height: 240px;
-          }
-
-          h1 {
-            font-size: 23px;
           }
 
           .logo-img {
