@@ -145,7 +145,7 @@ export default function Home() {
           <a href={`${STAGING}/l/new`} className="yellow-link">
             Post Free
           </a>
-          <a href="/login" className="login-icon" aria-label="Login">
+        <a href="/login" className="login-icon logged-in" aria-label="Login">
             <i className="fa-regular fa-user"></i>
           </a>
         </div>
@@ -393,6 +393,11 @@ export default function Home() {
           place-items: center;
           font-size: 15px !important;
         }
+
+        .login-icon.logged-in {
+  border-color: #38A169;
+  color: #38A169 !important;
+}
 
         .hero {
           position: relative;
