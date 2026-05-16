@@ -241,12 +241,13 @@ function lightboxNext() {
     <i className="fa-regular fa-star"></i>
   </a>
 
-  <a
+ <a
   href={loggedIn ? "/account" : "/login"}
   className={`login-icon ${loggedIn ? "logged-in" : ""}`}
   aria-label="Login"
 >
-  </a>
+  <i className="fa-regular fa-user"></i>
+</a>
 </div>
         </nav>
 
