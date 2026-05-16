@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
+  const [rows, setRows] = useState([]);
 
   async function handleUpload() {
     if (!selectedFile) {
@@ -10,7 +11,15 @@ export default function DealerGraph() {
       return;
     }
 
-    setStatus(`Selected file: ${selectedFile.name}`);
+    const text = await selectedFile.text();
+
+    const lines = text.split("\n");
+
+    const parsedRows = lines.map((line) => line.split(","));
+
+    setRows(parsedRows);
+
+    setStatus(`Loaded ${parsedRows.length} rows`);
   }
 
   return (
@@ -26,7 +35,7 @@ export default function DealerGraph() {
       </p>
 
       <div style={statsGrid}>
-        <div style={statCard}><h2>0</h2><p>Dealers</p></div>
+        <div style={statCard}><h2>{rows.length}</h2><p>CSV Rows</p></div>
         <div style={statCard}><h2>0</h2><p>Contacts</p></div>
         <div style={statCard}><h2>0</h2><p>Emails</p></div>
         <div style={statCard}><h2>0</h2><p>Phone Numbers</p></div>
@@ -66,6 +75,26 @@ export default function DealerGraph() {
           </p>
         )}
       </div>
+
+      {rows.length > 0 && (
+        <div style={tableWrapper}>
+          <h2>Imported Dealer Rows</h2>
+
+          <table style={tableStyle}>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={index}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} style={cellStyle}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </main>
   );
 }
@@ -116,4 +145,23 @@ const backLinkStyle = {
   color: "#aaa",
   textDecoration: "none",
   fontSize: "14px"
+};
+
+const tableWrapper = {
+  marginTop: "50px",
+  background: "#1a1a1a",
+  padding: "30px",
+  borderRadius: "12px",
+  border: "1px solid #333"
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "20px"
+};
+
+const cellStyle = {
+  border: "1px solid #333",
+  padding: "12px"
 };
