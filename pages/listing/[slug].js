@@ -54,6 +54,7 @@ const [lightboxOpen, setLightboxOpen] = useState(false);
 const [lightboxIndex, setLightboxIndex] = useState(0);
 
 const [isSaved, setIsSaved] = useState(false);
+const [loggedIn, setLoggedIn] = useState(false);
 
 useEffect(() => {
   if (!slug) return;
@@ -90,6 +91,26 @@ function toggleSaved() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+  async function checkAuth() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      await sdk.currentUser.show();
+
+      setLoggedIn(true);
+    } catch {
+      setLoggedIn(false);
+    }
+  }
+
+  checkAuth();
+}, []);
 
   const listing = useMemo(() => {
     if (!slug || listings.length === 0) return null;
@@ -220,8 +241,11 @@ function lightboxNext() {
     <i className="fa-regular fa-star"></i>
   </a>
 
-  <a href="/login" className="login-icon" aria-label="Login">
-    <i className="fa-regular fa-user"></i>
+  <a
+  href={loggedIn ? "/account" : "/login"}
+  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
+  aria-label="Login"
+>
   </a>
 </div>
         </nav>
@@ -515,6 +539,11 @@ function lightboxNext() {
           place-items: center;
           font-size: 15px !important;
         }
+
+        .login-icon.logged-in {
+  border-color: #38A169;
+  color: #38A169 !important;
+}
 
         .page {
           padding: 28px 3%;
