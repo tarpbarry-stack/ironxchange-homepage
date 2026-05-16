@@ -63,7 +63,18 @@ export default function DealerGraph() {
           Start Crawl
         </button>
 
-        <button style={buttonStyle}>
+        <button
+          style={buttonStyle}
+          onClick={async () => {
+            const response = await fetch("/api/dealer-upload", {
+              method: "POST"
+            });
+
+            const data = await response.json();
+
+            alert(data.message);
+          }}
+        >
           Import Dealer List
         </button>
 
