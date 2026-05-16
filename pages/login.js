@@ -116,11 +116,15 @@ window.location.href = next;
           margin: 0 auto 24px;
         }
 
-        h1 {
-          margin: 0 0 24px;
-          text-align: center;
-          font-size: 30px;
-        }
+       h1 {
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #f2f2f2;
+}
 
         form {
           display: grid;
