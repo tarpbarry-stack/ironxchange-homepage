@@ -111,7 +111,7 @@ window.location.href = next;
         }
 
         .logo {
-          height: 72px;
+          height: 42px;
           display: block;
           margin: 0 auto 24px;
         }
