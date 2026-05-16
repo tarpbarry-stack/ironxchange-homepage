@@ -80,7 +80,7 @@ window.location.href = next;
 <div className="signup-area">
   <span>New to IronXchange?</span>
 
-  <a href={`${STAGING}/signup`} className="signup-link">
+ <a href="/signup" className="signup-link">
     CREATE ACCOUNT
   </a>
 </div>
