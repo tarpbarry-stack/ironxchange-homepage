@@ -35,10 +35,25 @@ export default function DealerGraph() {
       </p>
 
       <div style={statsGrid}>
-        <div style={statCard}><h2>{rows.length}</h2><p>CSV Rows</p></div>
-        <div style={statCard}><h2>0</h2><p>Contacts</p></div>
-        <div style={statCard}><h2>0</h2><p>Emails</p></div>
-        <div style={statCard}><h2>0</h2><p>Phone Numbers</p></div>
+        <div style={statCard}>
+          <h2>{rows.length}</h2>
+          <p>CSV Rows</p>
+        </div>
+
+        <div style={statCard}>
+          <h2>0</h2>
+          <p>Contacts</p>
+        </div>
+
+        <div style={statCard}>
+          <h2>0</h2>
+          <p>Emails</p>
+        </div>
+
+        <div style={statCard}>
+          <h2>0</h2>
+          <p>Phone Numbers</p>
+        </div>
       </div>
 
       <div style={panelStyle}>
@@ -61,7 +76,17 @@ export default function DealerGraph() {
           Upload Dealer CSV
         </button>
 
-        <button style={buttonStyle}>
+        <button
+          style={buttonStyle}
+          onClick={() => {
+            if (rows.length === 0) {
+              setStatus("Upload a dealer CSV first.");
+              return;
+            }
+
+            setStatus(`Crawl queued for ${rows.length - 1} dealer websites.`);
+          }}
+        >
           Start Crawl
         </button>
 
