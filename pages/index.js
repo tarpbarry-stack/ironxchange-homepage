@@ -141,7 +141,7 @@ export default function Home() {
         </a>
 
         <div className="nav-links">
-          <a href="/browse">Browse</a>
+          <a href="/browse">SEARCH</a>
           <a href={`${STAGING}/l/new`} className="yellow-link">
             Post Free
           </a>
