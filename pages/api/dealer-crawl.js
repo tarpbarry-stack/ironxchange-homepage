@@ -14,6 +14,29 @@ function extractPhones(text) {
   return [...new Set(matches || [])];
 }
 
+function extractContacts(text) {
+  const contacts = [];
+
+  const lines = text.split("\n");
+
+  for (const line of lines) {
+    const clean = line.trim();
+
+    if (
+      clean.includes("Sales") ||
+      clean.includes("Manager") ||
+      clean.includes("Equipment") ||
+      clean.includes("Rental")
+    ) {
+      if (clean.length < 120) {
+        contacts.push(clean);
+      }
+    }
+  }
+
+  return [...new Set(contacts)].slice(0, 20);
+}
+
 async function scanWebsite(url) {
   try {
     const response = await fetch(url, {
@@ -27,12 +50,14 @@ async function scanWebsite(url) {
 
     return {
       emails: extractEmails(html),
-      phones: extractPhones(html)
+      phones: extractPhones(html),
+      contacts: extractContacts(html)
     };
   } catch (error) {
     return {
       emails: [],
       phones: [],
+      contacts: [],
       error: error.message
     };
   }
@@ -79,6 +104,7 @@ export default async function handler(req, res) {
 
     let allEmails = [];
     let allPhones = [];
+    let allContacts = [];
     let errors = [];
 
     for (const path of paths) {
@@ -91,6 +117,8 @@ export default async function handler(req, res) {
 
       allPhones.push(...scan.phones);
 
+      allContacts.push(...scan.contacts);
+
       if (scan.error) {
         errors.push(scan.error);
       }
@@ -100,10 +128,13 @@ export default async function handler(req, res) {
 
     allPhones = [...new Set(allPhones)];
 
+    allContacts = [...new Set(allContacts)];
+
     results.push({
       ...dealer,
       emails: allEmails,
       phones: allPhones,
+      contacts: allContacts,
       error: errors.length ? errors[0] : null
     });
   }
