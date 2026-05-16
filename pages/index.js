@@ -836,7 +836,7 @@ export default function Home() {
   padding-bottom: 72px;
   background-size: 160%;
   background-repeat: no-repeat;
-  background-position: center top;
+  background-position: center 18%;
   background-color: #0b0b0b;
 }
   .hero-content {
