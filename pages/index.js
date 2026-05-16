@@ -84,7 +84,8 @@ function getFeatureLine(item) {
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
-  const [liveListings, setLiveListings] = useState([]);
+   const [liveListings, setLiveListings] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -93,6 +94,26 @@ export default function Home() {
         if (Array.isArray(data)) setLiveListings(data);
       })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+        const sdk = SharetribeSdk.createInstance({
+          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+        await sdk.currentUser.show();
+
+        setLoggedIn(true);
+      } catch {
+        setLoggedIn(false);
+      }
+    }
+
+    checkAuth();
   }, []);
 
   const featuredListings = liveListings.slice(0, 8);
