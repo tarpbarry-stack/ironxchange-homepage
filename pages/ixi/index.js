@@ -51,4 +51,3 @@ const cardStyle = {
   textDecoration: "none",
   cursor: "pointer"
 };
-};
