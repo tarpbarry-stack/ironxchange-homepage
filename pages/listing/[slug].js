@@ -442,7 +442,11 @@ function lightboxNext() {
 
            <div className="seller-actions">
  <a
-  href={`/inquire?listingId=${listing.id}`}
+  href={
+    loggedIn
+      ? `/inquire?listingId=${listing.id}`
+      : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
+  }
   className="message-btn"
 >
   Message Seller
