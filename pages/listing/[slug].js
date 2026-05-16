@@ -506,7 +506,7 @@ function lightboxNext() {
         }
 
         .logo-img {
-          height: 78px;
+          height: 42px;
           width: auto;
           display: block;
         }
@@ -1101,7 +1101,7 @@ function lightboxNext() {
 
         @media (max-width: 850px) {
           .logo-img {
-            height: 56px;
+            height: 34px;
           }
 
           .nav-links {
