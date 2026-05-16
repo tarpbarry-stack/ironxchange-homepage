@@ -830,16 +830,15 @@ export default function Home() {
     overflow-x: hidden;
   }
 
-  .hero {
-    height: 500px;
-    min-height: 500px;
-    padding-bottom: 72px;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center top;
-    background-color: #0b0b0b;
-  }
-
+ .hero {
+  height: 500px;
+  min-height: 500px;
+  padding-bottom: 72px;
+  background-size: 145%;
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-color: #0b0b0b;
+}
   .hero-content {
     padding: 28px 5% 0;
   }
