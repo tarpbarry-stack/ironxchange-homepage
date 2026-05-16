@@ -48,6 +48,21 @@ export default function InquirePage() {
 async function handleSubmit(e) {
   e.preventDefault();
 
+  const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+const sdk = SharetribeSdk.createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
+
+const authInfo = sdk.authInfo();
+
+if (!authInfo?.isAnonymous === false && !authInfo?.accessToken) {
+  window.location.href =
+    `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+
+  return;
+}
+
   if (!listingId) {
     setStatus("error");
     return;
