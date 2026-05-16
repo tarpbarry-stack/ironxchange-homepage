@@ -109,6 +109,7 @@ export default function Browse() {
   const [make, setMake] = useState("ALL MAKES");
   const [model, setModel] = useState("ALL MODELS");
   const [liveListings, setLiveListings] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -121,6 +122,26 @@ export default function Browse() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+  async function checkAuth() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      await sdk.currentUser.show();
+
+      setLoggedIn(true);
+    } catch {
+      setLoggedIn(false);
+    }
+  }
+
+  checkAuth();
+}, []);
+  
 const availableMakes = useMemo(() => {
   const preferredMakes = {
     "MOTOR GRADERS": [
@@ -1337,7 +1358,11 @@ if (category === "BACKHOE LOADERS") {
     <i className="fa-regular fa-star"></i>
   </a>
 
-  <a href="/login" className="login-icon" aria-label="Login">
+  <a
+  href={loggedIn ? "/account" : "/login"}
+  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
+  aria-label="Login"
+>
     <i className="fa-regular fa-user"></i>
   </a>
 </div>
@@ -1524,6 +1549,11 @@ if (category === "BACKHOE LOADERS") {
   display: grid;
   place-items: center;
   font-size: 15px !important;
+}
+
+.login-icon.logged-in {
+  border-color: #38A169;
+  color: #38A169 !important;
 }
 
 @media (max-width: 850px) {
