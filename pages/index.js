@@ -215,7 +215,7 @@ export default function Home() {
         <div className="cards">
           {featuredListings.map((item) => (
             <a
-              href={`/listing/${slugify(item.title)}?from=browser`}
+              href={`/listing/${slugify(item.title)}-${item.id}?from=browser`}
               className="card"
               key={item.id || item.link || item.title}
             >
