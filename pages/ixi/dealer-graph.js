@@ -78,13 +78,23 @@ export default function DealerGraph() {
 
         <button
           style={buttonStyle}
-          onClick={() => {
+          onClick={async () => {
             if (rows.length === 0) {
               setStatus("Upload a dealer CSV first.");
               return;
             }
 
-            setStatus(`Crawl queued for ${rows.length - 1} dealer websites.`);
+            const response = await fetch("/api/dealer-crawl", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ rows })
+            });
+
+            const data = await response.json();
+
+            setStatus(data.message);
           }}
         >
           Start Crawl
