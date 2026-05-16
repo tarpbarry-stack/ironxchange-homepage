@@ -384,7 +384,7 @@ export default function Home() {
         }
 
         .logo-img {
-          height: 68px;
+          height: 42px;
           width: auto;
           display: block;
         }
@@ -845,7 +845,7 @@ export default function Home() {
   }
 
   .logo-img {
-    height: 54px;
+    height: 34px;
   }
 
   .nav-links {
