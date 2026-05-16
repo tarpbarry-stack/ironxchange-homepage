@@ -285,7 +285,7 @@ export default function InquirePage() {
         }
 
         .logo-img {
-          height: 78px;
+          height: 42px;
           width: auto;
           display: block;
         }
@@ -523,7 +523,7 @@ export default function InquirePage() {
           }
 
           .logo-img {
-            height: 56px;
+            height: 34px;
           }
 
           .nav-links {
