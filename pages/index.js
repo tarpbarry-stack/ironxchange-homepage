@@ -141,9 +141,9 @@ export default function Home() {
         </a>
 
         <div className="nav-links">
-          <a href="/browse">Browse Equipment</a>
+          <a href="/browse">Browse</a>
           <a href={`${STAGING}/l/new`} className="yellow-link">
-            Post Equipment Free
+            Post Free
           </a>
           <a href="/login" className="login-icon" aria-label="Login">
             <i className="fa-regular fa-user"></i>
