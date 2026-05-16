@@ -145,7 +145,11 @@ export default function Home() {
           <a href={`${STAGING}/l/new`} className="yellow-link">
             Post Free
           </a>
-        <a href="/login" className="login-icon logged-in" aria-label="Login">
+        <a
+  href={loggedIn ? "/account" : "/login"}
+  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
+  aria-label="Login"
+>
             <i className="fa-regular fa-user"></i>
           </a>
         </div>
