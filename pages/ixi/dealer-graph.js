@@ -121,7 +121,52 @@ export default function DealerGraph() {
           Start Crawl
         </button>
 
-        <button style={buttonStyle}>
+        <button
+          style={buttonStyle}
+          onClick={() => {
+            if (crawlResults.length === 0) {
+              setStatus("No crawl results to export.");
+              return;
+            }
+
+            const header =
+              "Company,Website,Category,State,Emails,Phones\n";
+
+            const rows = crawlResults.map((dealer) => {
+              return [
+                dealer.company,
+                dealer.website,
+                dealer.category,
+                dealer.state,
+                (dealer.emails || []).join(" | "),
+                (dealer.phones || []).join(" | ")
+              ].join(",");
+            });
+
+            const csvContent = header + rows.join("\n");
+
+            const blob = new Blob([csvContent], {
+              type: "text/csv;charset=utf-8;"
+            });
+
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+
+            link.href = url;
+
+            link.setAttribute(
+              "download",
+              "dealer-graph-results.csv"
+            );
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+          }}
+        >
           Export Contacts
         </button>
 
