@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
+const STAGING = "https://staging.ironxchange.com";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
