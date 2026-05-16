@@ -63,15 +63,14 @@ export default function InquirePage() {
         clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
       });
 
-      const authInfo = sdk.authInfo();
-
-      if (!authInfo || authInfo.isAnonymous) {
-        window.location.href = `/login?next=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`;
-        return;
-      }
-
+      try {
+  await sdk.currentUser.show();
+} catch {
+  window.location.href = `/login?next=${encodeURIComponent(
+    window.location.pathname + window.location.search
+  )}`;
+  return;
+}
       const result = await sdk.transactions.initiate({
         processAlias: "default-inquiry/release-1",
         transition: "transition/inquire-without-payment",
