@@ -9,6 +9,9 @@ export default function DealerGraph() {
         fontFamily: "Arial"
       }}
     >
+      <a href="/ixi" style={backLinkStyle}>
+  ← Back to IXI Command Center
+</a>
       <h1>Dealer Graph</h1>
 
       <p style={{ color: "#888" }}>
