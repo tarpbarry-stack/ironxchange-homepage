@@ -31,7 +31,11 @@ async function handleLogin(e) {
 
     console.log("LOGIN SUCCESS:", result);
 
-    window.location.href = "/";
+   const params = new URLSearchParams(window.location.search);
+
+const next = params.get("next") || "/";
+
+window.location.href = next;
   } catch (err) {
     console.error("LOGIN ERROR FULL:", err);
 
