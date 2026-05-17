@@ -1171,7 +1171,42 @@ export default function AccountPage() {
           .saved-card-body {
             padding: 8px;
           }
-        }
+
+          .right-stack {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 6px;
+  height: auto;
+}
+
+.side-panel {
+  min-height: auto;
+}
+
+.saved-card-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.saved-card {
+  min-width: 220px;
+  grid-template-columns: 1fr;
+  flex: 0 0 220px;
+}
+
+.saved-card img {
+  width: 100%;
+  height: 120px;
+}
+
+.saved-card-body {
+  padding: 8px;
+}
+
+}
 
         @media (max-width: 650px) {
           .nav {
