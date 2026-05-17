@@ -1,435 +1,219 @@
-import Head from "next/head";
-import { useMemo, useState } from "react";
+import React, { useState } from "react";
+import { Upload, Camera, CheckCircle, ArrowRight, MapPin, DollarSign } from "lucide-react";
 
 const BRAND_YELLOW = "#FFC400";
 
-const CATEGORIES = [
-  "Excavators",
-  "Wheel Loaders",
-  "Dozers",
-  "Motor Graders",
-  "Backhoes",
-  "Skid Steers",
-  "Compaction",
-  "Articulated Trucks",
-  "Support Equipment",
-  "Attachments / Parts"
-];
+export default function PostFreeMockup() {
+  const [category, setCategory] = useState("EXCAVATORS");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
 
-export default function PostFreePage() {
-  const [form, setForm] = useState({
-    category: "",
-    year: "",
-    make: "",
-    model: "",
-    hours: "",
-    price: "",
-    location: "",
-    description: ""
-  });
+  import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+  import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
+  import dozersTaxonomy from "../lib/dozersTaxonomy";
+  import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
 
-  const [photos, setPhotos] = useState([]);
-  const [error, setError] = useState("");
+  const taxonomyMap = {
+    "MOTOR GRADERS": motorGradersTaxonomy,
+    "WHEEL LOADERS": wheelLoadersTaxonomy,
+    "DOZERS": dozersTaxonomy,
+    "EXCAVATORS": excavatorsTaxonomy
+  };
 
-  function updateField(name, value) {
-    setForm(prev => ({ ...prev, [name]: value }));
-    setError("");
-  }
+  const taxonomy = taxonomyMap[category] || [];
 
-  const title = useMemo(() => {
-    const parts = [form.year, form.make, form.model].filter(Boolean).join(" ");
-    return form.hours ? `${parts} – ${form.hours} Hrs` : parts;
-  }, [form]);
+  const availableMakes = Array.from(
+    new Set(taxonomy.map(x => x.make).filter(Boolean))
+  );
 
-  function handlePhotos(e) {
-    const files = Array.from(e.target.files || []);
-
-    const mapped = files.slice(0, 24).map(file => ({
-      file,
-      url: URL.createObjectURL(file)
-    }));
-
-    setPhotos(mapped);
-  }
-
-  function validate() {
-    const required = ["category", "year", "make", "model", "hours", "price", "location"];
-
-    for (const field of required) {
-      if (!String(form[field]).trim()) {
-        return `${field.toUpperCase()} is required.`;
-      }
-    }
-
-    if (!/^\d{4}$/.test(form.year)) return "YEAR must be 4 digits.";
-    if (!/^\d{1,5}$/.test(String(form.hours).replace(/,/g, ""))) {
-      return "HOURS must be 1–5 digits.";
-    }
-
-    if (!/^\d+$/.test(String(form.price).replace(/[$,]/g, ""))) {
-      return "PRICE must be numbers only.";
-    }
-
-    return "";
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    const problem = validate();
-
-    if (problem) {
-      setError(problem);
-      return;
-    }
-
-    const draft = {
-      ...form,
-      title,
-      photosCount: photos.length,
-      savedAt: new Date().toISOString()
-    };
-
-    localStorage.setItem("ironxchangePostFreeDraft", JSON.stringify(draft));
-
-    alert("Draft saved. Next step is wiring this submit to Sharetribe listing creation.");
-  }
+  const availableModels = Array.from(
+    new Set(
+      taxonomy
+        .filter(x => x.make === make)
+        .map(x => x.model)
+        .filter(Boolean)
+    )
+  );
 
   return (
-    <>
-      <Head>
-        <title>Post Free | IronXchange</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
-      <main>
-        <nav className="nav">
-          <a href="/" className="logo-wrap">
-            <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
-          </a>
-
-          <div className="nav-links">
-            <a href="/browse">SEARCH</a>
-            <a href="/account">ACCOUNT</a>
+    <main className="min-h-screen bg-[#0b0b0b] text-[#d6d6d6] font-sans">
+      <nav className="h-16 bg-[#050505] border-b border-white/10 flex items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#FFC400] text-black font-black grid place-items-center">X</div>
+          <div>
+            <div className="text-white font-black tracking-wide">IRONXCHANGE</div>
+            <div className="text-[10px] text-zinc-500 uppercase font-bold">Post Free Listing</div>
           </div>
-        </nav>
+        </div>
 
-        <section className="page">
-          <form className="form-panel" onSubmit={handleSubmit}>
-            <div className="head">
-              <h1>Post Free Listing</h1>
-              <p>Required fields first. Photos next. Submit last.</p>
+        <div className="hidden md:flex items-center gap-5 text-xs font-black uppercase tracking-wide">
+          <a className="text-zinc-300">Browse</a>
+          <a className="text-[#FFC400]">Post Free</a>
+          <a className="text-zinc-300">Account</a>
+        </div>
+      </nav>
+
+      <section className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
+        <div>
+          <div className="rounded-2xl border border-[#282828] bg-[#151515] p-4 mb-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Post equipment free in minutes.</h1>
+                <p className="text-sm text-zinc-400 mt-1">No fees. No credit card. No rep required. Build a clean, searchable listing buyers can actually use.</p>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-xs font-black text-green-400 border border-green-700 rounded-full px-3 py-2 bg-green-500/5">
+                <CheckCircle size={14} /> FREE LISTING
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[#282828] bg-[#151515] overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#282828] flex items-center justify-between">
+              <h2 className="font-black text-white uppercase text-sm tracking-wide">Machine Details</h2>
+              <span className="text-[10px] text-zinc-500 font-black uppercase">Required fields first</span>
             </div>
 
-            {error && <div className="error">{error}</div>}
-
-            <div className="grid">
-              <label>
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label className="field md:col-span-2">
                 <span>Category</span>
-                <select value={form.category} onChange={e => updateField("category", e.target.value)}>
-                  <option value="">Select category</option>
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                <select
+                  value={category}
+                  onChange={e => {
+                    setCategory(e.target.value);
+                    setMake("");
+                    setModel("");
+                  }}
+                >
+                  {Object.keys(taxonomyMap).map(cat => (
+                    <option key={cat}>{cat}</option>
                   ))}
                 </select>
               </label>
 
-              <label>
+              <label className="field">
                 <span>Year</span>
-                <input value={form.year} onChange={e => updateField("year", e.target.value)} placeholder="2021" maxLength={4} />
+                <input placeholder="2021" />
               </label>
 
-              <label>
+              <label className="field">
                 <span>Make</span>
-                <input value={form.make} onChange={e => updateField("make", e.target.value)} placeholder="Komatsu" />
+                <select
+                  value={make}
+                  onChange={e => {
+                    setMake(e.target.value);
+                    setModel("");
+                  }}
+                >
+                  <option value="">Select Make</option>
+                  {availableMakes.map(m => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
               </label>
 
-              <label>
+              <label className="field">
                 <span>Model</span>
-                <input value={form.model} onChange={e => updateField("model", e.target.value)} placeholder="PC210LC-11" />
+                <select
+                  value={model}
+                  onChange={e => setModel(e.target.value)}
+                >
+                  <option value="">Select Model</option>
+                  {availableModels.map(m => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
               </label>
 
-              <label>
+              <label className="field">
                 <span>Hours</span>
-                <input value={form.hours} onChange={e => updateField("hours", e.target.value)} placeholder="4987" maxLength={5} />
+                <input placeholder="4987" />
               </label>
 
-              <label>
+              <label className="field">
                 <span>Price</span>
-                <input value={form.price} onChange={e => updateField("price", e.target.value)} placeholder="68900" />
+                <div className="relative">
+                  <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input className="pl-8" placeholder="68900" />
+                </div>
               </label>
 
-              <label className="wide">
+              <label className="field">
                 <span>Location</span>
-                <input value={form.location} onChange={e => updateField("location", e.target.value)} placeholder="Amarillo, TX" />
+                <div className="relative">
+                  <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <input className="pl-8" placeholder="Amarillo, TX" />
+                </div>
               </label>
             </div>
+          </div>
 
-            <label className="photos">
-              <span>Photos</span>
-              <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-            </label>
+          <div className="rounded-2xl border border-[#282828] bg-[#151515] mt-4 overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#282828] flex items-center justify-between">
+              <h2 className="font-black text-white uppercase text-sm tracking-wide">Photos</h2>
+              <span className="text-[10px] text-zinc-500 font-black uppercase">Drag / select multiple</span>
+            </div>
 
-            {photos.length > 0 && (
-              <div className="photo-grid">
-                {photos.map((photo, index) => (
-                  <img key={index} src={photo.url} alt={`Upload ${index + 1}`} />
+            <div className="p-4">
+              <div className="border border-dashed border-[#3a3a3a] rounded-2xl bg-[#101010] p-6 text-center">
+                <Upload className="mx-auto text-[#FFC400] mb-3" size={28} />
+                <div className="font-black text-white">Drop photos here or click to upload</div>
+                <p className="text-xs text-zinc-500 mt-1">Recommended: front, rear, side, cab, engine, undercarriage, meter, serial plate.</p>
+              </div>
+
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mt-3">
+                {[1,2,3,4,5,6,7,8].map(i => (
+                  <div key={i} className="aspect-square rounded-xl border border-[#282828] bg-[#101010] grid place-items-center text-zinc-600">
+                    <Camera size={18} />
+                  </div>
                 ))}
               </div>
-            )}
+            </div>
+          </div>
 
-            <label>
-              <span>Description</span>
-              <textarea
-                value={form.description}
-                onChange={e => updateField("description", e.target.value)}
-                placeholder="Straight machine. Tight. No known codes. Ready to work."
-              />
-            </label>
+          <div className="rounded-2xl border border-[#282828] bg-[#151515] mt-4 overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#282828]">
+              <h2 className="font-black text-white uppercase text-sm tracking-wide">Description</h2>
+            </div>
+            <div className="p-4">
+              <textarea className="w-full h-32 bg-[#101010] border border-[#2A2A2A] rounded-xl p-3 text-sm outline-none focus:border-[#FFC400]" placeholder="Straight machine. Tight. No known codes. Aux hydraulics. 42 inch bucket. Ready to work." />
+            </div>
+          </div>
+        </div>
 
-            <button type="submit">SAVE DRAFT</button>
-          </form>
-
-          <aside className="preview-panel">
-            <h2>Preview</h2>
-
-            <div className="preview-card">
-              <div className="preview-img">
-                {photos[0] ? <img src={photos[0].url} alt="Preview" /> : "Photo"}
+        <aside className="space-y-4">
+          <div className="rounded-2xl border border-[#282828] bg-[#151515] p-4 sticky top-4">
+            <h2 className="text-white font-black uppercase text-sm tracking-wide mb-3">Listing Preview</h2>
+            <div className="rounded-xl overflow-hidden border border-[#282828] bg-[#101010]">
+              <div className="h-44 bg-gradient-to-br from-zinc-800 to-zinc-950 grid place-items-center text-zinc-500">
+                Machine Photo
               </div>
-
-              <div className="preview-body">
-                <strong>{title || "Year Make Model – Hours"}</strong>
-                <span>{form.price ? `$${Number(String(form.price).replace(/,/g, "")).toLocaleString()}` : "Price"}</span>
-                <p>{form.location || "Location"}</p>
+              <div className="p-3">
+                <div className="text-white font-black leading-tight">2021 Komatsu PC210LC-11</div>
+                <div className="text-[#FFC400] font-black mt-1">$68,900</div>
+                <div className="text-xs text-zinc-500 mt-1">4,987 hrs • Amarillo, TX</div>
               </div>
             </div>
-          </aside>
-        </section>
 
-        <style jsx>{`
-          :global(body) {
-            margin: 0;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            font-family: Arial, sans-serif;
-          }
+            <div className="mt-4 rounded-xl border border-[#282828] bg-[#101010] p-3">
+              <div className="text-[10px] uppercase font-black text-zinc-500 mb-2">Auto-generated title</div>
+              <div className="text-sm text-white font-bold">Year + Make + Model – Hours</div>
+            </div>
 
-          * {
-            box-sizing: border-box;
-          }
+            <button className="mt-4 w-full bg-[#FFC400] text-black font-black rounded-xl py-3 flex items-center justify-center gap-2">
+              POST FREE <ArrowRight size={16} />
+            </button>
 
-          .nav {
-            height: 64px;
-            background: #050505;
-            border-bottom: 1px solid rgba(255,255,255,.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 2%;
-          }
+            <p className="text-[11px] text-zinc-500 mt-3 leading-relaxed">V1 submit will create a Sharetribe listing. IronXchange DB can come later.</p>
+          </div>
+        </aside>
+      </section>
 
-          .logo-img {
-            height: 38px;
-          }
-
-          .nav-links {
-            display: flex;
-            gap: 18px;
-          }
-
-          .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 900;
-          }
-
-          .page {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 14px 2%;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 320px;
-            gap: 10px;
-          }
-
-          .form-panel,
-          .preview-panel {
-            background: #151515;
-            border: 1px solid #282828;
-            border-radius: 14px;
-            padding: 14px;
-          }
-
-          .head h1 {
-            margin: 0;
-            color: #f2f2f2;
-            font-size: 22px;
-            font-weight: 900;
-          }
-
-          .head p {
-            margin: 4px 0 14px;
-            color: #888;
-            font-size: 12px;
-          }
-
-          .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-          }
-
-          label {
-            display: grid;
-            gap: 6px;
-            margin-bottom: 10px;
-          }
-
-          label span {
-            color: #8f8f8f;
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-          }
-
-          input,
-          select,
-          textarea {
-            width: 100%;
-            background: #101010;
-            border: 1px solid #2A2A2A;
-            color: #f2f2f2;
-            border-radius: 10px;
-            padding: 11px;
-            outline: none;
-            font-size: 14px;
-          }
-
-          textarea {
-            min-height: 110px;
-            resize: vertical;
-          }
-
-          input:focus,
-          select:focus,
-          textarea:focus {
-            border-color: ${BRAND_YELLOW};
-          }
-
-          .wide {
-            grid-column: 1 / -1;
-          }
-
-          .photos input {
-            padding: 16px;
-            border-style: dashed;
-          }
-
-          .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
-          }
-
-          .photo-grid img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #2A2A2A;
-          }
-
-          button {
-            width: 100%;
-            background: ${BRAND_YELLOW};
-            border: none;
-            color: #050505;
-            font-weight: 900;
-            padding: 13px;
-            border-radius: 10px;
-            cursor: pointer;
-          }
-
-          .error {
-            background: rgba(229, 62, 62, .12);
-            border: 1px solid #E53E3E;
-            color: #ffb4b4;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            font-weight: 800;
-          }
-
-          .preview-panel h2 {
-            margin: 0 0 10px;
-            color: #f2f2f2;
-            font-size: 14px;
-            text-transform: uppercase;
-          }
-
-          .preview-card {
-            background: #101010;
-            border: 1px solid #282828;
-            border-radius: 12px;
-            overflow: hidden;
-          }
-
-          .preview-img {
-            height: 220px;
-            display: grid;
-            place-items: center;
-            color: #666;
-            background: #0b0b0b;
-          }
-
-          .preview-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .preview-body {
-            padding: 12px;
-          }
-
-          .preview-body strong {
-            display: block;
-            color: #f2f2f2;
-            font-size: 15px;
-          }
-
-          .preview-body span {
-            display: block;
-            color: ${BRAND_YELLOW};
-            font-weight: 900;
-            margin-top: 6px;
-          }
-
-          .preview-body p {
-            margin: 5px 0 0;
-            color: #888;
-            font-size: 12px;
-          }
-
-          @media (max-width: 800px) {
-            .page {
-              grid-template-columns: 1fr;
-            }
-
-            .grid {
-              grid-template-columns: 1fr;
-            }
-
-            .photo-grid {
-              grid-template-columns: repeat(4, 1fr);
-            }
-          }
-        `}</style>
-      </main>
-    </>
+      <style>{`
+        .field { display: grid; gap: 6px; }
+        .field span { color: #8f8f8f; font-size: 10px; text-transform: uppercase; font-weight: 900; letter-spacing: .45px; }
+        .field input, .field select { background: #101010; border: 1px solid #2A2A2A; color: #f2f2f2; border-radius: 12px; padding: 12px; font-size: 14px; outline: none; width: 100%; }
+        .field input:focus, .field select:focus { border-color: #FFC400; }
+      `}</style>
+    </main>
   );
 }
