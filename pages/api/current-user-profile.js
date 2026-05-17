@@ -1,5 +1,3 @@
-// pages/api/current-user-profile.js
-
 import { getSdk } from "../../util/api";
 
 function pickImageUrl(image) {
