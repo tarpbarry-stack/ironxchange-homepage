@@ -390,7 +390,7 @@ const globalKeywords = [
 "worksite presets",
 "hydraulic presets",
 "travel presets",
-"attachment presets"
+"attachment presets,"
 ];
 
 
