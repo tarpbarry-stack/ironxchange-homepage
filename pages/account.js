@@ -231,7 +231,10 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
                   {myListings.length > 0 ? (
   myListings.map((listing) => (
     <div className="table-row" key={listing.id}>
-      <span>{listing.title}</span>
+     <div className="machine-cell">
+  <img src={listing.imageUrl || listing.image} alt={listing.title} />
+  <span>{listing.title}</span>
+</div>
  
   <input
   className="price-input"
@@ -713,6 +716,28 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         .table-empty p {
           margin: 0;
         }
+
+        .machine-cell {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.machine-cell img {
+  width: 54px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
+  background: #0b0b0b;
+}
+
+.machine-cell span {
+  font-weight: 800;
+  color: #f2f2f2;
+}
 
         .price-input {
   width: 100%;
