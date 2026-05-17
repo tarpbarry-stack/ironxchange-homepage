@@ -282,7 +282,6 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   {listing.age ?? "—"}
 </span>
       <span className="listing-status active">ACTIVE</span>
-      <span>—</span>
       <span>
         <div className="action-buttons">
   <a href={listing.link} target="_blank" rel="noreferrer">
@@ -691,7 +690,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
         .table-row {
           display: grid;
-          grid-template-columns: 1.5fr .75fr .45fr .7fr .7fr .75fr;
+          grid-template-columns: 1.8fr .75fr .45fr .7fr .9fr;
           gap: 10px;
           padding: 13px 14px;
           border-bottom: 1px solid #252525;
