@@ -581,13 +581,14 @@ export default function AccountPage() {
           margin: 0 auto;
         }
 
-        .rail {
-          background: #111;
-          border: 1px solid #252525;
-          border-radius: 12px;
-          padding: 6px;
-          height: fit-content;
-        }
+   .rail {
+  background: #111;
+  border: 1px solid #252525;
+  border-radius: 12px;
+  padding: 6px;
+  height: 100%;
+  align-self: stretch;
+}
 
         .rail-top {
           text-align: center;
