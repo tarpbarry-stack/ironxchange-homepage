@@ -698,10 +698,10 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
         .table-row {
   display: grid;
-grid-template-columns: 220px 78px 82px 42px 72px 86px;
-  gap: 12px;
+grid-template-columns: 185px 70px 74px 36px 62px 74px;
+  gap6px;
   align-items: center;
-  padding: 13px 14px;
+  padding: 11px 10px;
   border-bottom: 1px solid #252525;
   font-size: 13px;
 }
