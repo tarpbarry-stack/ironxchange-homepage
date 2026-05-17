@@ -569,18 +569,18 @@ setSavedMachines(saved);
 
         .dashboard {
           display: grid;
-          grid-template-columns: 230px 1fr;
+          grid-template-columns: 180px 1fr;
           gap: 22px;
-          padding: 24px 4% 60px;
+          padding: 18px 2% 60px;
           max-width: 1600px;
           margin: 0 auto;
         }
 
         .rail {
-          background: #111;
-          border: 1px solid #252525;
-          border-radius: 18px;
-          padding: 16px;
+  background: #111;
+  border: 1px solid #252525;
+  border-radius: 14px;
+  padding: 10px;
           height: fit-content;
         }
 
