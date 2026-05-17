@@ -72,7 +72,7 @@ const [searchQuery, setSearchQuery] = useState("");
 const protectedData = user?.attributes?.profile?.protectedData || {};
 
 const displayName = profile.displayName || "IronXchange User";
-const companyName = profile.displayName || "Company not added";
+const companyName = profile.abbreviatedName || "";
 const phoneNumber = protectedData.phoneNumber || "";
 
 const logoUrl = null;
