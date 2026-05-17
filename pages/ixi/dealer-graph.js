@@ -8,23 +8,19 @@ export default function DealerGraph() {
   const [isCrawling, setIsCrawling] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("ixiDealerGraphResults");
-
-    if (saved) {
+    async function loadSavedResults() {
       try {
-        setCrawlResults(JSON.parse(saved));
-      } catch {
-        localStorage.removeItem("ixiDealerGraphResults");
+        const response = await fetch("/api/dealer-results");
+        const data = await response.json();
+
+        setCrawlResults(data.results || []);
+      } catch (error) {
+        console.error(error);
       }
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "ixiDealerGraphResults",
-      JSON.stringify(crawlResults)
-    );
-  }, [crawlResults]);
+    loadSavedResults();
+  }, []);
 
   const totalEmails = crawlResults.reduce(
     (sum, item) => sum + (item.emails?.length || 0),
@@ -82,11 +78,6 @@ export default function DealerGraph() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setStatus(data.message || "Crawl failed.");
-        return;
-      }
-
       setCrawlResults(data.results || []);
       setStatus(data.message || "Crawl complete.");
     } catch (error) {
@@ -133,12 +124,6 @@ export default function DealerGraph() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  function clearResults() {
-    localStorage.removeItem("ixiDealerGraphResults");
-    setCrawlResults([]);
-    setStatus("Dealer Graph results cleared.");
   }
 
   return (
@@ -189,10 +174,6 @@ export default function DealerGraph() {
 
           <button style={buttonStyle} onClick={handleExport}>
             Export Contacts
-          </button>
-
-          <button style={dangerButton} onClick={clearResults}>
-            Clear Results
           </button>
         </div>
 
@@ -303,15 +284,6 @@ const buttonRow = {
 
 const buttonStyle = {
   background: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "14px 22px",
-  borderRadius: "8px",
-  cursor: "pointer"
-};
-
-const dangerButton = {
-  background: "#7a1f1f",
   color: "#fff",
   border: "none",
   padding: "14px 22px",
