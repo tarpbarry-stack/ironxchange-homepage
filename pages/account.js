@@ -698,13 +698,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
         .table-row {
   display: grid;
-  grid-template-columns:
-  minmax(260px, 1.45fr)
-  90px
-  105px
-  70px
-  85px
-  110px;
+grid-template-columns: 220px 78px 82px 42px 72px 86px;
   gap: 12px;
   align-items: center;
   padding: 13px 14px;
@@ -742,16 +736,16 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         }
 
         .machine-cell {
-  display: grid;
-  grid-template-columns: 54px 1fr;
+  display:grid;
+  grid-template-columns:48px 1fr;
   gap: 10px;
   align-items: center;
   min-width: 0;
 }
 
 .machine-cell img {
-  width: 54px;
-  height: 42px;
+  width:48px;
+  height:38px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #2A2A2A;
@@ -764,7 +758,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 }
 
         .price-input {
-  width: 100%;
+  width: 78px;
   background: #101010;
   border: 1px solid #2A2A2A;
   border-radius: 8px;
@@ -810,10 +804,10 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   justify-content: center;
   justify-self: start;
   height: 28px;
-  min-width: 74px;
-  padding: 0 12px;
+  min-width: 58px;
+  padding: 0 6px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
   letter-spacing: .5px;
   white-space: nowrap;
@@ -837,8 +831,8 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   background: #101010;
   color: #f2f2f2;
   border-radius: 8px;
-  padding: 7px 9px;
-  font-size: 10px;
+   padding: 6px 6px;
+  font-size: 9px;
   font-weight: 900;
   text-decoration: none;
   cursor: pointer;
