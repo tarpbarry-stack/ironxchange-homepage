@@ -285,14 +285,16 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 </span>
       <span className="listing-status active">ACTIVE</span>
       <span>
-        <div className="action-buttons">
-  <a href={listing.link} target="_blank" rel="noreferrer">
-    VIEW
-  </a>
-  <button type="button">
-    EDIT
-  </button>
-</div>
+       <select className="action-select" defaultValue="">
+  <option value="" disabled>
+    ACTION
+  </option>
+  <option value="pause">Pause</option>
+  <option value="sold">Mark Sold</option>
+  <option value="duplicate">Duplicate</option>
+  <option value="relist">Relist</option>
+  <option value="archive">Archive</option>
+</select>
       </span>
     </div>
   ))
