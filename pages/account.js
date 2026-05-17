@@ -771,10 +771,10 @@ export default function AccountPage() {
         }
 
         .main-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1.7fr) minmax(300px, .8fr);
-          gap: 6px;
-        }
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 245px;
+  gap: 6px;
+}
 
         .panel {
           padding: 8px 10px;
