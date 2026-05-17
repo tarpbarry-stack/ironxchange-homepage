@@ -5,10 +5,11 @@ const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
 export default function AccountPage() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [myListings, setMyListings] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+const [loading, setLoading] = useState(true);
+const [user, setUser] = useState(null);
+const [myListings, setMyListings] = useState([]);
+const [savedMachines, setSavedMachines] = useState([]);
+const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function loadAccount() {
