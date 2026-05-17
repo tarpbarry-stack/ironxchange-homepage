@@ -77,7 +77,13 @@ const displayName = profile.displayName || "IronXchange User";
 const companyName = profile.abbreviatedName || "";
 const phoneNumber = protectedData.phoneNumber || "";
 
-const logoUrl = null;
+const profileImage = user?.profileImage || user?.relationships?.profileImage?.data || null;
+
+const logoUrl =
+  profileImage?.attributes?.variants?.default?.url ||
+  profileImage?.attributes?.variants?.squareSmall?.url ||
+  profileImage?.attributes?.variants?.squareSmall2x?.url ||
+  null;
   
   if (loading) {
     return (
