@@ -79,12 +79,17 @@ console.log("ACCOUNT SAVED IDS:", savedIds);
 console.log("ACCOUNT ALL LISTINGS SAMPLE:", allListingsData?.[0]);
 
 const saved = Array.isArray(allListingsData)
-  ? allListingsData.filter(item =>
-      savedIds.includes(String(item.id)) ||
-      savedIds.includes(String(item.uuid)) ||
-      savedIds.includes(String(item.listingId)) ||
-      savedIds.includes(String(item.sharetribeId))
-    )
+  ? allListingsData.filter(item => {
+      const itemSlug = slugify(item.title);
+
+      return (
+        savedIds.includes(String(item.id)) ||
+        savedIds.includes(String(item.uuid)) ||
+        savedIds.includes(String(item.listingId)) ||
+        savedIds.includes(String(item.sharetribeId)) ||
+        savedIds.includes(itemSlug)
+      );
+    })
   : [];
 
 console.log("ACCOUNT MATCHED SAVED MACHINES:", saved);
