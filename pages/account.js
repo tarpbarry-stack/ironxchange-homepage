@@ -5,11 +5,11 @@ const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
 export default function AccountPage() {
-const [loading, setLoading] = useState(true);
-const [user, setUser] = useState(null);
-const [myListings, setMyListings] = useState([]);
-const [searchQuery, setSearchQuery] = useState("");
-  
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [myListings, setMyListings] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     async function loadAccount() {
       try {
@@ -19,21 +19,20 @@ const [searchQuery, setSearchQuery] = useState("");
           clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
         });
 
-       const response = await sdk.currentUser.show();
+        const response = await sdk.currentUser.show();
+        const currentUser = response.data.data;
 
-const currentUser = response.data.data;
+        setUser(currentUser);
 
-setUser(currentUser);
+        const userId = currentUser.id?.uuid || currentUser.id;
 
-const userId = currentUser.id?.uuid || currentUser.id;
+        const listingsRes = await fetch(
+          `/api/account-listings?authorId=${userId}`
+        );
 
-const listingsRes = await fetch(
-  `/api/account-listings?authorId=${userId}`
-);
+        const listingsData = await listingsRes.json();
 
-const listingsData = await listingsRes.json();
-
-setMyListings(Array.isArray(listingsData) ? listingsData : []);
+        setMyListings(Array.isArray(listingsData) ? listingsData : []);
       } catch {
         window.location.href = `/login?next=${encodeURIComponent("/account")}`;
       } finally {
