@@ -137,8 +137,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
     <i className="fa-regular fa-user"></i>
   )}
 </div>
-              </div>
-
+                
               <strong>{displayName}</strong>
               <span>{companyName}</span>
             </div>
