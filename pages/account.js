@@ -284,7 +284,14 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
       <span className="listing-status active">ACTIVE</span>
       <span>—</span>
       <span>
-        <a href={listing.link}>View</a>
+        <div className="action-buttons">
+  <a href={listing.link} target="_blank" rel="noreferrer">
+    VIEW
+  </a>
+  <button type="button">
+    EDIT
+  </button>
+</div>
       </span>
     </div>
   ))
@@ -798,6 +805,31 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   border: 1px solid #2f855a;
   color: #38A169;
   background: rgba(56, 161, 105, .08);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.action-buttons a,
+.action-buttons button {
+  border: 1px solid #2A2A2A;
+  background: #101010;
+  color: #f2f2f2;
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action-buttons a:hover,
+.action-buttons button:hover {
+  border-color: #FFC400;
+  color: #FFC400;
 }
         .activity-list {
           display: grid;
