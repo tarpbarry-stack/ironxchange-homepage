@@ -658,7 +658,7 @@ setSavedMachines(saved);
           grid-template-columns: 1fr auto;
           gap: 14px;
           align-items: stretch;
-          margin-bottom: 18px;
+          margin-bottom: 10px;
         }
 
         .dashboard-search {
@@ -719,51 +719,50 @@ setSavedMachines(saved);
         }
 
         .stats {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 14px;
-          margin-bottom: 18px;
-        }
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
-        .stat-card,
-        .panel {
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 16px;
-        }
+.stat-card,
+.panel {
+  background: #151515;
+  border: 1px solid #282828;
+  border-radius: 14px;
+}
 
-        .stat-card {
-          padding: 18px;
-        }
+.stat-card {
+  padding: 12px 14px;
+}
 
-        .stat-card span {
-          display: block;
-          color: #8f8f8f;
-          font-size: 11px;
-          text-transform: uppercase;
-          font-weight: 900;
-          letter-spacing: .5px;
-          margin-bottom: 8px;
-        }
+.stat-card span {
+  display: block;
+  color: #8f8f8f;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: .45px;
+  margin-bottom: 5px;
+}
 
-        .stat-card strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 26px;
-          margin-bottom: 6px;
-        }
+.stat-card strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 22px;
+  margin-bottom: 3px;
+}
 
-        .stat-card strong.green {
-          color: #38A169;
-          font-size: 20px;
-        }
+.stat-card strong.green {
+  color: #38A169;
+  font-size: 18px;
+}
 
-        .stat-card p {
-          margin: 0;
-          color: #777;
-          font-size: 12px;
-        }
-
+.stat-card p {
+  margin: 0;
+  color: #777;
+  font-size: 11px;
+}
         .main-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.55fr) minmax(320px, .85fr);
