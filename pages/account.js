@@ -781,12 +781,17 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 }
 
 .listing-status {
-  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 74px;
+  padding: 0 12px;
   border-radius: 999px;
-  padding: 6px 10px;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .5px;
+  white-space: nowrap;
 }
 
 .listing-status.active {
