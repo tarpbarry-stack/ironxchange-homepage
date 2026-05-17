@@ -656,9 +656,10 @@ export default function AccountPage() {
         }
 
         .content {
-          min-width: 0;
-        }
-
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
         .top-tools {
           display: grid;
           grid-template-columns: 1fr auto;
@@ -776,6 +777,7 @@ export default function AccountPage() {
   grid-template-columns: minmax(0, 1fr) 245px;
   gap: 6px;
   align-items: stretch;
+  flex: 1;
 }
 
 .side-panel {
