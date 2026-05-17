@@ -137,9 +137,20 @@ export default function PostFreePage() {
           </a>
 
           <div className="nav-links">
-            <a href="/browse">SEARCH</a>
-            <a href="/account">ACCOUNT</a>
-          </div>
+  <a href="/browse">SEARCH</a>
+
+  <a href="/saved" className="login-icon" aria-label="Saved Listings">
+    <i className="fa-regular fa-star"></i>
+  </a>
+
+  <a
+    href="/account"
+    className="login-icon logged-in"
+    aria-label="Account"
+  >
+    <i className="fa-regular fa-user"></i>
+  </a>
+</div>
         </nav>
 
         <section className="page">
