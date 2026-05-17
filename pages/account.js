@@ -19,25 +19,13 @@ function getSavedListingIds(profile = {}) {
   }
 
   try {
-    const savedListings = JSON.parse(
-      localStorage.getItem("savedListings") || "[]"
+    const saved = JSON.parse(
+      localStorage.getItem("ironxchangeSaved") || "[]"
     );
 
-    const savedMachines = JSON.parse(
-      localStorage.getItem("savedMachines") || "[]"
-    );
-
-    const ironxchangeSavedListings = JSON.parse(
-      localStorage.getItem("ironxchangeSavedListings") || "[]"
-    );
-
-    const combined = [
-      ...savedListings,
-      ...savedMachines,
-      ...ironxchangeSavedListings
-    ];
-
-    return combined.map(item => String(item?.id || item));
+    return Array.isArray(saved)
+      ? saved.map(item => String(item?.id || item))
+      : [];
   } catch {
     return [];
   }
