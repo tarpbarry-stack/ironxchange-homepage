@@ -839,7 +839,7 @@ export default function AccountPage() {
           grid-template-columns: minmax(170px, 1fr) 64px 74px 36px 58px 90px;
           gap: 4px;
           align-items: center;
-          padding: 6px 7px;
+          padding: 8px 7px;
           border-bottom: 1px solid #252525;
           font-size: 12px;
         }
@@ -878,15 +878,15 @@ export default function AccountPage() {
 
         .machine-cell {
           display: grid;
-          grid-template-columns: 42px 1fr;
+          grid-template-columns: 72px 1fr;
           gap: 8px;
           align-items: center;
           min-width: 0;
         }
 
         .machine-cell img {
-          width: 42px;
-          height: 34px;
+          width: 72px;
+          height: 54px;
           object-fit: cover;
           border-radius: 6px;
           border: 1px solid #2A2A2A;
