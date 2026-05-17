@@ -339,12 +339,11 @@ export default function AccountPage() {
                 <p>Watchlist inventory</p>
               </div>
 
-              <div className="stat-card">
-                <span>Listing Health</span>
-                <strong className="green">GOOD</strong>
-                <p>Account ready</p>
-              </div>
-            </div>
+             <div className="stat-card">
+  <span>Listing Avg Age</span>
+  <strong className="green">18</strong>
+  <p>Average listing age</p>
+</div>
 
             <div className="main-grid">
               <section className="panel listings-panel">
@@ -353,14 +352,14 @@ export default function AccountPage() {
                   <a href="/account/listings">MANAGE ALL →</a>
                 </div>
 
-                <div className="listing-table">
-                  <div className="table-row table-head">
-                    <span>Machine</span>
-                    <span>Price</span>
-                    <span>Status</span>
-                    <span>Inquiries</span>
-                    <span>Actions</span>
-                  </div>
+              <div className="table-row table-head">
+  <span>Machine</span>
+  <span>Price</span>
+  <span>Age</span>
+  <span>Status</span>
+  <span>Inquiries</span>
+  <span>Actions</span>
+</div>
 
                   <div className="table-empty">
                     <strong>Listing controls go here.</strong>
@@ -760,7 +759,7 @@ export default function AccountPage() {
 
         .table-row {
           display: grid;
-          grid-template-columns: 1.5fr .75fr .7fr .7fr .75fr;
+          grid-template-columns: 1.5fr .75fr .45fr .7fr .7fr .75fr;
           gap: 10px;
           padding: 13px 14px;
           border-bottom: 1px solid #252525;
