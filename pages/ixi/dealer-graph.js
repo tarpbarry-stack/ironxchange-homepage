@@ -5,14 +5,17 @@ export default function DealerGraph() {
   const [status, setStatus] = useState("");
   const [rows, setRows] = useState([]);
   const [crawlResults, setCrawlResults] = useState([]);
+  const [isCrawling, setIsCrawling] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(
-      "ixiDealerGraphResults"
-    );
+    const saved = localStorage.getItem("ixiDealerGraphResults");
 
     if (saved) {
-      setCrawlResults(JSON.parse(saved));
+      try {
+        setCrawlResults(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem("ixiDealerGraphResults");
+      }
     }
   }, []);
 
@@ -33,6 +36,11 @@ export default function DealerGraph() {
     0
   );
 
+  const totalContacts = crawlResults.reduce(
+    (sum, item) => sum + (item.contacts?.length || 0),
+    0
+  );
+
   async function handleUpload() {
     if (!selectedFile) {
       setStatus("Choose a CSV file first.");
@@ -43,15 +51,15 @@ export default function DealerGraph() {
 
     const lines = text
       .split("\n")
-      .filter((line) => line.trim() !== "");
+      .map((line) => line.trim())
+      .filter(Boolean);
 
     const parsedRows = lines.map((line) =>
-      line.split(",")
+      line.split(",").map((cell) => cell.trim())
     );
 
     setRows(parsedRows);
-
-    setStatus(`Loaded ${parsedRows.length} rows`);
+    setStatus(`Loaded ${parsedRows.length} CSV rows.`);
   }
 
   async function handleCrawl() {
@@ -60,21 +68,32 @@ export default function DealerGraph() {
       return;
     }
 
+    setIsCrawling(true);
     setStatus("Scanning dealer websites...");
 
-    const response = await fetch("/api/dealer-crawl", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ rows })
-    });
+    try {
+      const response = await fetch("/api/dealer-crawl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ rows })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setCrawlResults(data.results || []);
+      if (!response.ok) {
+        setStatus(data.message || "Crawl failed.");
+        return;
+      }
 
-    setStatus(data.message);
+      setCrawlResults(data.results || []);
+      setStatus(data.message || "Crawl complete.");
+    } catch (error) {
+      setStatus(`Crawl error: ${error.message}`);
+    } finally {
+      setIsCrawling(false);
+    }
   }
 
   function handleExport() {
@@ -84,15 +103,18 @@ export default function DealerGraph() {
     }
 
     const header =
-      "Company,Website,Contacts,Emails,Phones\n";
+      "Company,Website,Category,State,Contacts,Emails,Phones,Scanned Links\n";
 
     const csvRows = crawlResults.map((dealer) => {
       return [
-        `"${dealer.company || ""}"`,
-        `"${dealer.website || ""}"`,
-        `"${(dealer.contacts || []).join(" | ")}"`,
-        `"${(dealer.emails || []).join(" | ")}"`,
-        `"${(dealer.phones || []).join(" | ")}"`
+        cleanCsv(dealer.company),
+        cleanCsv(dealer.website),
+        cleanCsv(dealer.category),
+        cleanCsv(dealer.state),
+        cleanCsv((dealer.contacts || []).join(" | ")),
+        cleanCsv((dealer.emails || []).join(" | ")),
+        cleanCsv((dealer.phones || []).join(" | ")),
+        cleanCsv((dealer.scannedLinks || []).join(" | "))
       ].join(",");
     });
 
@@ -103,28 +125,19 @@ export default function DealerGraph() {
     });
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
 
     link.href = url;
-
-    link.setAttribute(
-      "download",
-      "dealer-graph-results.csv"
-    );
+    link.setAttribute("download", "dealer-graph-results.csv");
 
     document.body.appendChild(link);
-
     link.click();
-
     document.body.removeChild(link);
   }
 
   function clearResults() {
     localStorage.removeItem("ixiDealerGraphResults");
-
     setCrawlResults([]);
-
     setStatus("Dealer Graph results cleared.");
   }
 
@@ -136,71 +149,58 @@ export default function DealerGraph() {
 
       <h1>Dealer Graph</h1>
 
-      <p style={{ color: "#888" }}>
-        Heavy equipment dealer intelligence engine
+      <p style={mutedText}>
+        Heavy equipment dealer intelligence engine.
       </p>
 
       <div style={statsGrid}>
-        <div style={statCard}>
-          <h2>{rows.length}</h2>
-          <p>CSV Rows</p>
-        </div>
-
-        <div style={statCard}>
-          <h2>{crawlResults.length}</h2>
-          <p>Sites Scanned</p>
-        </div>
-
-        <div style={statCard}>
-          <h2>{totalEmails}</h2>
-          <p>Emails</p>
-        </div>
-
-        <div style={statCard}>
-          <h2>{totalPhones}</h2>
-          <p>Phone Numbers</p>
-        </div>
+        <StatCard label="CSV Rows" value={rows.length} />
+        <StatCard label="Sites Scanned" value={crawlResults.length} />
+        <StatCard label="Contacts" value={totalContacts} />
+        <StatCard label="Emails" value={totalEmails} />
+        <StatCard label="Phone Numbers" value={totalPhones} />
       </div>
 
-      <div style={panelStyle}>
+      <section style={panelStyle}>
         <h2>Import Dealer List</h2>
+
+        <p style={mutedText}>
+          Upload a CSV with columns: company, website, category, state.
+        </p>
 
         <input
           type="file"
           accept=".csv"
-          onChange={(event) =>
-            setSelectedFile(event.target.files[0])
-          }
+          onChange={(event) => setSelectedFile(event.target.files[0])}
         />
 
-        <br />
-        <br />
+        <div style={buttonRow}>
+          <button style={buttonStyle} onClick={handleUpload}>
+            Upload Dealer CSV
+          </button>
 
-        <button style={buttonStyle} onClick={handleUpload}>
-          Upload Dealer CSV
-        </button>
+          <button
+            style={buttonStyle}
+            onClick={handleCrawl}
+            disabled={isCrawling}
+          >
+            {isCrawling ? "Crawling..." : "Start Crawl"}
+          </button>
 
-        <button style={buttonStyle} onClick={handleCrawl}>
-          Start Crawl
-        </button>
+          <button style={buttonStyle} onClick={handleExport}>
+            Export Contacts
+          </button>
 
-        <button style={buttonStyle} onClick={handleExport}>
-          Export Contacts
-        </button>
+          <button style={dangerButton} onClick={clearResults}>
+            Clear Results
+          </button>
+        </div>
 
-        <button style={dangerButton} onClick={clearResults}>
-          Clear Results
-        </button>
-
-        {status && (
-          <p style={statusStyle}>
-            {status}
-          </p>
-        )}
-      </div>
+        {status && <p style={statusStyle}>{status}</p>}
+      </section>
 
       {crawlResults.length > 0 && (
-        <div style={tableWrapper}>
+        <section style={tableWrapper}>
           <h2>Crawl Results</h2>
 
           <table style={tableStyle}>
@@ -208,42 +208,56 @@ export default function DealerGraph() {
               <tr>
                 <th style={cellStyle}>Company</th>
                 <th style={cellStyle}>Website</th>
+                <th style={cellStyle}>Category</th>
+                <th style={cellStyle}>State</th>
                 <th style={cellStyle}>Contacts</th>
                 <th style={cellStyle}>Emails</th>
                 <th style={cellStyle}>Phones</th>
+                <th style={cellStyle}>Pages</th>
               </tr>
             </thead>
 
             <tbody>
               {crawlResults.map((dealer, index) => (
                 <tr key={index}>
+                  <td style={cellStyle}>{dealer.company || "—"}</td>
+                  <td style={cellStyle}>{dealer.website || "—"}</td>
+                  <td style={cellStyle}>{dealer.category || "—"}</td>
+                  <td style={cellStyle}>{dealer.state || "—"}</td>
                   <td style={cellStyle}>
-                    {dealer.company}
+                    {(dealer.contacts || []).join(", ") || "—"}
                   </td>
-
                   <td style={cellStyle}>
-                    {dealer.website}
+                    {(dealer.emails || []).join(", ") || "—"}
                   </td>
-
                   <td style={cellStyle}>
-                    {(dealer.contacts || []).join(", ")}
+                    {(dealer.phones || []).join(", ") || "—"}
                   </td>
-
                   <td style={cellStyle}>
-                    {(dealer.emails || []).join(", ")}
-                  </td>
-
-                  <td style={cellStyle}>
-                    {(dealer.phones || []).join(", ")}
+                    {(dealer.scannedLinks || []).length}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </section>
       )}
     </main>
   );
+}
+
+function StatCard({ label, value }) {
+  return (
+    <div style={statCard}>
+      <h2>{value}</h2>
+      <p>{label}</p>
+    </div>
+  );
+}
+
+function cleanCsv(value) {
+  const text = String(value || "").replace(/"/g, '""');
+  return `"${text}"`;
 }
 
 const pageStyle = {
@@ -254,9 +268,13 @@ const pageStyle = {
   fontFamily: "Arial"
 };
 
+const mutedText = {
+  color: "#888"
+};
+
 const statsGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
   gap: "20px",
   marginTop: "40px"
 };
@@ -276,12 +294,18 @@ const panelStyle = {
   border: "1px solid #333"
 };
 
+const buttonRow = {
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap",
+  marginTop: "24px"
+};
+
 const buttonStyle = {
   background: "#333",
   color: "#fff",
   border: "none",
   padding: "14px 22px",
-  marginRight: "15px",
   borderRadius: "8px",
   cursor: "pointer"
 };
