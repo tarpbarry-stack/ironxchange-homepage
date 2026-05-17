@@ -24,12 +24,6 @@ export default function DealerGraph() {
 
     setRows(parsedRows);
 
-    setCrawlResults([]);
-
-    setTotalEmails(0);
-
-    setTotalPhones(0);
-
     setStatus(`Loaded ${parsedRows.length} rows`);
   }
 
@@ -52,57 +46,10 @@ export default function DealerGraph() {
     const data = await response.json();
 
     setCrawlResults(data.results || []);
-
     setTotalEmails(data.totalEmails || 0);
-
     setTotalPhones(data.totalPhones || 0);
 
     setStatus(data.message);
-  }
-
-  function handleExport() {
-    if (crawlResults.length === 0) {
-      setStatus("No crawl results to export.");
-      return;
-    }
-
-    const header =
-      "Company,Website,Category,State,Contacts,Emails,Phones\n";
-
-    const csvRows = crawlResults.map((dealer) => {
-      return [
-        `"${dealer.company || ""}"`,
-        `"${dealer.website || ""}"`,
-        `"${dealer.category || ""}"`,
-        `"${dealer.state || ""}"`,
-        `"${(dealer.contacts || []).join(" | ")}"`,
-        `"${(dealer.emails || []).join(" | ")}"`,
-        `"${(dealer.phones || []).join(" | ")}"`
-      ].join(",");
-    });
-
-    const csvContent = header + csvRows.join("\n");
-
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;"
-    });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-
-    link.setAttribute(
-      "download",
-      "dealer-graph-results.csv"
-    );
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
   }
 
   return (
@@ -117,85 +64,40 @@ export default function DealerGraph() {
         Heavy equipment dealer intelligence engine
       </p>
 
-      <div style={statsGrid}>
-        <div style={statCard}>
-          <h2>{rows.length}</h2>
-          <p>CSV Rows</p>
-        </div>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={(event) =>
+          setSelectedFile(event.target.files[0])
+        }
+      />
 
-        <div style={statCard}>
-          <h2>{crawlResults.length}</h2>
-          <p>Sites Scanned</p>
-        </div>
+      <br />
+      <br />
 
-        <div style={statCard}>
-          <h2>{totalEmails}</h2>
-          <p>Emails</p>
-        </div>
+      <button style={buttonStyle} onClick={handleUpload}>
+        Upload Dealer CSV
+      </button>
 
-        <div style={statCard}>
-          <h2>{totalPhones}</h2>
-          <p>Phone Numbers</p>
-        </div>
-      </div>
+      <button style={buttonStyle} onClick={handleCrawl}>
+        Start Crawl
+      </button>
 
-      <div style={panelStyle}>
-        <h2>Import Dealer List</h2>
-
-        <p style={{ color: "#888" }}>
-          Upload a CSV with dealer company names and websites.
+      {status && (
+        <p style={{ marginTop: "20px", color: "#f98512" }}>
+          {status}
         </p>
-
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(event) =>
-            setSelectedFile(event.target.files[0])
-          }
-          style={{ marginBottom: "20px" }}
-        />
-
-        <br />
-
-        <button style={buttonStyle} onClick={handleUpload}>
-          Upload Dealer CSV
-        </button>
-
-        <button style={buttonStyle} onClick={handleCrawl}>
-          Start Crawl
-        </button>
-
-        <button style={buttonStyle} onClick={handleExport}>
-          Export Contacts
-        </button>
-
-        {status && (
-          <p
-            style={{
-              marginTop: "20px",
-              color: "#f98512"
-            }}
-          >
-            {status}
-          </p>
-        )}
-      </div>
+      )}
 
       {crawlResults.length > 0 && (
-        <div style={tableWrapper}>
-          <h2>Crawl Results</h2>
-
+        <div style={{ marginTop: "40px" }}>
           <table style={tableStyle}>
             <thead>
               <tr>
                 <th style={cellStyle}>Company</th>
-                <th style={cellStyle}>Website</th>
-                <th style={cellStyle}>Category</th>
-                <th style={cellStyle}>State</th>
-                <th style={cellStyle}>Contacts</th>
                 <th style={cellStyle}>Emails</th>
                 <th style={cellStyle}>Phones</th>
-                <th style={cellStyle}>Error</th>
+                <th style={cellStyle}>Contacts</th>
               </tr>
             </thead>
 
@@ -204,26 +106,16 @@ export default function DealerGraph() {
                 <tr key={index}>
                   <td style={cellStyle}>{dealer.company}</td>
 
-                  <td style={cellStyle}>{dealer.website}</td>
-
-                  <td style={cellStyle}>{dealer.category}</td>
-
-                  <td style={cellStyle}>{dealer.state}</td>
-
                   <td style={cellStyle}>
-                    {(dealer.contacts || []).join(", ") || "—"}
+                    {(dealer.emails || []).join(", ")}
                   </td>
 
                   <td style={cellStyle}>
-                    {(dealer.emails || []).join(", ") || "—"}
+                    {(dealer.phones || []).join(", ")}
                   </td>
 
                   <td style={cellStyle}>
-                    {(dealer.phones || []).join(", ") || "—"}
-                  </td>
-
-                  <td style={cellStyle}>
-                    {dealer.error || "—"}
+                    {(dealer.contacts || []).join(", ")}
                   </td>
                 </tr>
               ))}
@@ -243,28 +135,6 @@ const pageStyle = {
   fontFamily: "Arial"
 };
 
-const statsGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
-  gap: "20px",
-  marginTop: "40px"
-};
-
-const statCard = {
-  background: "#222",
-  padding: "20px",
-  borderRadius: "12px",
-  border: "1px solid #333"
-};
-
-const panelStyle = {
-  marginTop: "50px",
-  background: "#1a1a1a",
-  padding: "30px",
-  borderRadius: "12px",
-  border: "1px solid #333"
-};
-
 const buttonStyle = {
   background: "#333",
   color: "#fff",
@@ -279,17 +149,7 @@ const backLinkStyle = {
   display: "inline-block",
   marginBottom: "30px",
   color: "#aaa",
-  textDecoration: "none",
-  fontSize: "14px"
-};
-
-const tableWrapper = {
-  marginTop: "50px",
-  background: "#1a1a1a",
-  padding: "30px",
-  borderRadius: "12px",
-  border: "1px solid #333",
-  overflowX: "auto"
+  textDecoration: "none"
 };
 
 const tableStyle = {
@@ -303,4 +163,4 @@ const cellStyle = {
   padding: "12px",
   textAlign: "left",
   verticalAlign: "top"
-}; 
+};
