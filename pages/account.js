@@ -228,13 +228,25 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
                     <span>Actions</span>
                   </div>
 
-                  <div className="table-empty">
-                    <strong>Listing controls go here.</strong>
-                    <p>
-                      Inline price edits, status changes, mark sold, pause, duplicate,
-                      image updates, and inquiry counts will live in this table.
-                    </p>
-                  </div>
+                  {myListings.length > 0 ? (
+  myListings.map((listing) => (
+    <div className="table-row" key={listing.id}>
+      <span>{listing.title}</span>
+      <span>{listing.price}</span>
+      <span>{listing.age ?? "—"}</span>
+      <span>Active</span>
+      <span>—</span>
+      <span>
+        <a href={listing.link}>View</a>
+      </span>
+    </div>
+  ))
+) : (
+  <div className="table-empty">
+    <strong>No active listings yet.</strong>
+    <p>Your machines will show here once they are listed.</p>
+  </div>
+)}
                 </div>
               </section>
 
