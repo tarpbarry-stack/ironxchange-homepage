@@ -699,7 +699,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         .table-row {
   display: grid;
 grid-template-columns: 185px 70px 74px 36px 62px 74px;
-  gap6px;
+  gap 6px;
   align-items: center;
   padding: 11px 10px;
   border-bottom: 1px solid #252525;
