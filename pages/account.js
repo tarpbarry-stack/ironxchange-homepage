@@ -68,7 +68,8 @@ export default function AccountPage() {
   const profile = user?.attributes?.profile || {};
   const displayName = profile.displayName || "IronXchange User";
   const companyName = profile.publicData?.companyName || "Company not added";
-
+  const logoUrl = null;
+  
   if (loading) {
     return (
       <main className="loading">
