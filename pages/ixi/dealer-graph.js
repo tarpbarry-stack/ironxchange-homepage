@@ -130,7 +130,7 @@ export default function DealerGraph() {
             }
 
             const header =
-              "Company,Website,Category,State,Emails,Phones\n";
+              "Company,Website,Category,State,Contacts,Emails,Phones\n";
 
             const rows = crawlResults.map((dealer) => {
               return [
@@ -138,6 +138,7 @@ export default function DealerGraph() {
                 dealer.website,
                 dealer.category,
                 dealer.state,
+                (dealer.contacts || []).join(" | "),
                 (dealer.emails || []).join(" | "),
                 (dealer.phones || []).join(" | ")
               ].join(",");
@@ -193,6 +194,7 @@ export default function DealerGraph() {
                 <th style={cellStyle}>Website</th>
                 <th style={cellStyle}>Category</th>
                 <th style={cellStyle}>State</th>
+                <th style={cellStyle}>Contacts</th>
                 <th style={cellStyle}>Emails</th>
                 <th style={cellStyle}>Phones</th>
                 <th style={cellStyle}>Error</th>
@@ -209,6 +211,10 @@ export default function DealerGraph() {
                   <td style={cellStyle}>{dealer.category}</td>
 
                   <td style={cellStyle}>{dealer.state}</td>
+
+                  <td style={cellStyle}>
+                    {(dealer.contacts || []).join(", ") || "—"}
+                  </td>
 
                   <td style={cellStyle}>
                     {(dealer.emails || []).join(", ") || "—"}
