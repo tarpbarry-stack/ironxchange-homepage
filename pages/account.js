@@ -185,11 +185,12 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
               </div>
             </div>
 
-           <div className="stat-card">
-  <span>Active Listings</span>
-  <strong>{myListings.length}</strong>
-  <p>Live machines for sale</p>
-</div>
+<div className="stats">
+  <div className="stat-card">
+    <span>Active Listings</span>
+    <strong>{myListings.length}</strong>
+    <p>Live machines for sale</p>
+  </div>
 
               <div className="stat-card">
                 <span>New Inquiries</span>
