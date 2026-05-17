@@ -353,14 +353,15 @@ export default function AccountPage() {
                   <a href="/account/listings">MANAGE ALL →</a>
                 </div>
 
-              <div className="table-row table-head">
-  <span>Machine</span>
-  <span>Price</span>
-  <span>Age</span>
-  <span>Status</span>
-  <span>Inquiries</span>
-  <span>Actions</span>
-</div>
+              <div className="listing-table">
+  <div className="table-row table-head">
+    <span>Machine</span>
+    <span>Price</span>
+    <span>Age</span>
+    <span>Status</span>
+    <span>Inquiries</span>
+    <span>Actions</span>
+  </div>
 
                   <div className="table-empty">
                     <strong>Listing controls go here.</strong>
