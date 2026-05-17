@@ -173,8 +173,6 @@ const images = imageIds
 const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
         
         return {
-          id,
-          return {
   id,
   authorId:
     item.relationships?.author?.data?.id?.uuid ||
