@@ -25,6 +25,8 @@ const [searchQuery, setSearchQuery] = useState("");
         
         console.log("CURRENT USER PROFILE:", currentUser.attributes?.profile);
 
+        console.log("CURRENT USER FULL:", currentUser);
+
         setUser(currentUser);
 
         const userId = currentUser.id?.uuid || currentUser.id;
