@@ -69,9 +69,13 @@ const [searchQuery, setSearchQuery] = useState("");
   }
 
   const profile = user?.attributes?.profile || {};
-  const displayName = profile.displayName || "IronXchange User";
-  const companyName = profile.publicData?.companyName || "Company not added";
-  const logoUrl = null;
+const protectedData = user?.attributes?.profile?.protectedData || {};
+
+const displayName = profile.displayName || "IronXchange User";
+const companyName = profile.displayName || "Company not added";
+const phoneNumber = protectedData.phoneNumber || "";
+
+const logoUrl = null;
   
   if (loading) {
     return (
