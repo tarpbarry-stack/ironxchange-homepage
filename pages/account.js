@@ -221,6 +221,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
                 <div className="listing-table">
                   <div className="table-row table-head">
                     <span>Machine</span>
+                    <span>Hours</span>
                     <span>Price</span>
                     <span>Age</span>
                     <span>Status</span>
@@ -234,7 +235,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   <img src={listing.imageUrl || listing.image} alt={listing.title} />
   <span>{listing.title}</span>
 </div>
- 
+ <span>{listing.hours}</span>
   <input
   className="price-input"
   defaultValue={Number(
@@ -695,7 +696,13 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
         .table-row {
   display: grid;
-  grid-template-columns: minmax(320px, 1.9fr) 110px 70px 90px 120px;
+  grid-template-columns:
+  minmax(320px, 1.9fr)
+  100px
+  110px
+  70px
+  90px
+  120px;
   gap: 12px;
   align-items: center;
   padding: 13px 14px;
