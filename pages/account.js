@@ -204,7 +204,7 @@ export default function AccountPage() {
 
               <div className="stat-card">
                 <span>Saved Machines</span>
-                <strong>—</strong>
+                <strong>{savedMachines.length}</strong>
                 <p>Watchlist inventory</p>
               </div>
 
