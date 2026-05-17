@@ -775,28 +775,38 @@ export default function AccountPage() {
         .main-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 245px;
+  grid-template-rows: auto auto;
   gap: 6px;
   align-items: stretch;
   flex: 1;
 }
 
-.side-panel {
-  min-height: 0;
+.panel {
+  padding: 8px 10px;
 }
 
-        .panel {
-          padding: 8px 10px;
-        }
+.listings-panel {
+  grid-row: auto;
+}
 
-        .listings-panel {
-          grid-row: span 2;
-        }
+.right-stack {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  height: 100%;
+  align-self: stretch;
+}
 
-        .right-stack {
-          display: grid;
-          gap: 6px;
-          align-content: start;
-        }
+.side-panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-list,
+.saved-card-list {
+  overflow-y: auto;
+}
 
         .performance-panel {
           grid-column: 1 / -1;
