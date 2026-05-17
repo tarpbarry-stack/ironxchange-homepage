@@ -32,7 +32,10 @@ const [searchQuery, setSearchQuery] = useState("");
 
         console.log("CURRENT USER FULL:", currentUser);
 
-        setUser(currentUser);
+        setUser({
+  ...currentUser,
+  included: response.data.included || []
+});
 
         const userId = currentUser.id?.uuid || currentUser.id;
 
