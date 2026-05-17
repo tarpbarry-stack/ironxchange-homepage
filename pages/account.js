@@ -401,10 +401,16 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         }
 
         .logo-img {
-          height: 42px;
-          display: block;
-          width: auto;
-        }
+  height: 42px;
+  display: block;
+  width: auto;
+}
+
+@media (max-width: 650px) {
+  .logo-img {
+    height: 34px;
+  }
+}
 
         .nav-links {
           display: flex;
@@ -688,14 +694,14 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         }
 
         .table-row {
-          display: grid;
-          grid-template-columns: 1.8fr .75fr .45fr .7fr .9fr;
-          gap: 10px;
-          padding: 13px 14px;
-          border-bottom: 1px solid #252525;
-          font-size: 13px;
-        }
-
+  display: grid;
+  grid-template-columns: minmax(320px, 1.9fr) 110px 70px 90px 120px;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 14px;
+  border-bottom: 1px solid #252525;
+  font-size: 13px;
+}
         .table-head {
           background: #101010;
           color: #8f8f8f;
@@ -704,7 +710,11 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
           text-transform: uppercase;
           letter-spacing: .45px;
         }
-
+        .table-head span {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+}
         .table-empty {
           padding: 22px 14px;
           color: #9a9a9a;
