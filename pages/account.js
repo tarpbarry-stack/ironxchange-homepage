@@ -1,101 +1,13 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
-
-import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
-import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
-import dozersTaxonomy from "../lib/dozersTaxonomy";
-import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
-import aerialTaxonomy from "../lib/aerialTaxonomy";
-import aggregateTaxonomy from "../lib/aggregateTaxonomy";
-import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
-import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
-import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
-import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
-import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
-import cranesTaxonomy from "../lib/cranesTaxonomy";
-import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
-import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
-import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
-import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
-import scraperTaxonomy from "../lib/scraperTaxonomy";
-import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
-import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
-import trenchersTaxonomy from "../lib/trenchersTaxonomy";
-import trailersTaxonomy from "../lib/trailersTaxonomy";
-import trucksTaxonomy from "../lib/trucksTaxonomy";
-import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
-import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
-import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
+import { useEffect, useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
-const categories = [
-  "ALL CATEGORIES",
-  "AERIAL EQUIPMENT",
-  "AGGREGATE",
-  "AGRICULTURE HARVESTERS",
-  "AGRICULTURE TRACTORS",
-  "ASPHALT EQUIPMENT",
-  "BACKHOE LOADERS",
-  "COMPACTION/ROLLERS",
-  "CRANES",
-  "CRAWLER CARRIERS / LOADER",
-  "DOZERS",
-  "DRILLS & PILING",
-  "DUMP TRUCKS - ARTIC/RIGID",
-  "EXCAVATORS",
-  "FORKLIFTS",
-  "MOTOR GRADERS",
-  "SCRAPER",
-  "SKID STEER/CTL",
-  "TELEHANDLERS",
-  "TRENCHERS/PLOWS",
-  "TRAILERS",
-  "TRUCKS",
-  "WHEEL LOADERS",
-  "ATTACHMENTS / PARTS",
-  "OTHER SPECIALTY",
-  "SUPPORT EQUIPMENT",
-  "UTILITY CARTS"
-];
-
-const taxonomyMap = {
-  "MOTOR GRADERS": motorGradersTaxonomy,
-  "WHEEL LOADERS": wheelLoadersTaxonomy,
-  DOZERS: dozersTaxonomy,
-  EXCAVATORS: excavatorsTaxonomy,
-  "AERIAL EQUIPMENT": aerialTaxonomy,
-  AGGREGATE: aggregateTaxonomy,
-  "AGRICULTURE HARVESTERS": agricultureHarvestersTaxonomy,
-  "AGRICULTURE TRACTORS": agricultureTractorsTaxonomy,
-  "ASPHALT EQUIPMENT": asphaltEquipmentTaxonomy,
-  "BACKHOE LOADERS": backhoeLoadersTaxonomy,
-  "COMPACTION/ROLLERS": compactionRollersTaxonomy,
-  CRANES: cranesTaxonomy,
-  "CRAWLER CARRIERS / LOADER": crawlerCarriersTaxonomy,
-  "DRILLS & PILING": drillsAndPilingTaxonomy,
-  "DUMP TRUCKS - ARTIC/RIGID": dumpTrucksTaxonomy,
-  FORKLIFTS: forkliftsTaxonomy,
-  SCRAPER: scraperTaxonomy,
-  "SKID STEER/CTL": skidSteerCtlTaxonomy,
-  TELEHANDLERS: telehandlersTaxonomy,
-  "TRENCHERS/PLOWS": trenchersTaxonomy,
-  TRAILERS: trailersTaxonomy,
-  TRUCKS: trucksTaxonomy,
-  "ATTACHMENTS / PARTS": attachmentsPartsTaxonomy,
-  "SUPPORT EQUIPMENT": supportEquipmentTaxonomy,
-  "UTILITY CARTS": utilityCartsTaxonomy
-};
-
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-
   const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState("ALL CATEGORIES");
-  const [make, setMake] = useState("ALL MAKES");
-  const [model, setModel] = useState("ALL MODELS");
 
   useEffect(() => {
     async function loadAccount() {
@@ -118,41 +30,11 @@ export default function AccountPage() {
     loadAccount();
   }, []);
 
-  const availableMakes = useMemo(() => {
-    const taxonomy = taxonomyMap[category];
-
-    if (!taxonomy) return ["ALL MAKES"];
-
-    const makes = taxonomy.map((x) => x.make).filter(Boolean);
-
-    return ["ALL MAKES", ...Array.from(new Set(makes))];
-  }, [category]);
-
-  const availableModels = useMemo(() => {
-    const taxonomy = taxonomyMap[category];
-
-    if (!taxonomy || make === "ALL MAKES") return ["ALL MODELS"];
-
-    const models = taxonomy
-      .filter((x) => x.make === make)
-      .map((x) => x.model)
-      .filter(Boolean);
-
-    return ["ALL MODELS", ...Array.from(new Set(models))];
-  }, [category, make]);
-
   function handleSearch() {
-    const terms = [
-      searchQuery.trim(),
-      category !== "ALL CATEGORIES" ? category : "",
-      make !== "ALL MAKES" ? make : "",
-      model !== "ALL MODELS" ? model : ""
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const q = searchQuery.trim();
 
-    window.location.href = terms
-      ? `/browse?keywords=${encodeURIComponent(terms)}`
+    window.location.href = q
+      ? `/browse?keywords=${encodeURIComponent(q)}`
       : "/browse";
   }
 
@@ -272,42 +154,11 @@ export default function AccountPage() {
               <div className="dashboard-search">
                 <input
                   type="text"
-                  placeholder="Search equipment — Deere 772GP, WA475, crusher..."
+                  placeholder="Quick search equipment..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
-
-                <select
-                  value={category}
-                  onChange={(e) => {
-                    setCategory(e.target.value);
-                    setMake("ALL MAKES");
-                    setModel("ALL MODELS");
-                  }}
-                >
-                  {categories.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={make}
-                  onChange={(e) => {
-                    setMake(e.target.value);
-                    setModel("ALL MODELS");
-                  }}
-                >
-                  {availableMakes.map((m) => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
-
-                <select value={model} onChange={(e) => setModel(e.target.value)}>
-                  {availableModels.map((m) => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
 
                 <button type="button" onClick={handleSearch}>
                   SEARCH
@@ -339,13 +190,13 @@ export default function AccountPage() {
                 <p>Watchlist inventory</p>
               </div>
 
-             <div className="stat-card">
-            <span>Listing Avg Age</span>
-            <strong className="green">18</strong>
-            <p>Average listing age</p>
+              <div className="stat-card">
+                <span>Age</span>
+                <strong className="green">18</strong>
+                <p>Average listing age</p>
               </div>
-                  </div>
-                  
+            </div>
+
             <div className="main-grid">
               <section className="panel listings-panel">
                 <div className="panel-head">
@@ -353,15 +204,15 @@ export default function AccountPage() {
                   <a href="/account/listings">MANAGE ALL →</a>
                 </div>
 
-              <div className="listing-table">
-  <div className="table-row table-head">
-    <span>Machine</span>
-    <span>Price</span>
-    <span>Age</span>
-    <span>Status</span>
-    <span>Inquiries</span>
-    <span>Actions</span>
-  </div>
+                <div className="listing-table">
+                  <div className="table-row table-head">
+                    <span>Machine</span>
+                    <span>Price</span>
+                    <span>Age</span>
+                    <span>Status</span>
+                    <span>Inquiries</span>
+                    <span>Actions</span>
+                  </div>
 
                   <div className="table-empty">
                     <strong>Listing controls go here.</strong>
@@ -606,49 +457,26 @@ export default function AccountPage() {
         }
 
         .dashboard-search {
-  display: grid;
-  grid-template-columns:
-    minmax(180px, 1fr)
-    150px
-    120px
-    120px
-    96px;
+          display: grid;
+          grid-template-columns: 1fr 96px;
+          background: #141414;
+          border: 1px solid #282828;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 16px 45px rgba(0,0,0,.25);
+        }
 
-  background: #141414;
-  border: 1px solid #282828;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 16px 45px rgba(0,0,0,.25);
-}
+        .dashboard-search input {
+          border: none;
+          border-right: 1px solid #2A2A2A;
+          padding: 15px 14px;
+          font-size: 13px;
+          background: #141414;
+          color: #D6D6D6;
+          outline: none;
+          min-width: 0;
+        }
 
-        .dashboard-search input,
-.dashboard-search select {
-  appearance: none;
-  -webkit-appearance: none;
-  border: none;
-  border-right: 1px solid #2A2A2A;
-  padding: 15px 14px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .25px;
-  background: #141414;
-  color: #D6D6D6;
-  outline: none;
-  min-width: 0;
-  text-transform: uppercase;
-}
-
-.dashboard-search select {
-  background-image:
-    linear-gradient(45deg, transparent 50%, #777 50%),
-    linear-gradient(135deg, #777 50%, transparent 50%);
-  background-position:
-    calc(100% - 18px) 50%,
-    calc(100% - 13px) 50%;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  padding-right: 30px;
-}
         .dashboard-search input::placeholder {
           color: #777;
         }
@@ -662,21 +490,21 @@ export default function AccountPage() {
           letter-spacing: .4px;
         }
 
-       .status-pill {
-  border: 1px solid #2f855a;
-  color: #38A169;
-  border-radius: 14px;
-  padding: 0 10px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 74px;
-  background: #111;
-}
+        .status-pill {
+          border: 1px solid #2f855a;
+          color: #38A169;
+          border-radius: 14px;
+          padding: 0 10px;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          min-width: 74px;
+          background: #111;
+        }
 
         .status-pill span {
           width: 7px;
@@ -884,22 +712,8 @@ export default function AccountPage() {
           }
 
           .status-pill {
-            height: 46px;
+            height: 42px;
             width: 100%;
-          }
-
-          .dashboard-search {
-            grid-template-columns: 1fr;
-          }
-
-          .dashboard-search input,
-          .dashboard-search select {
-            border-right: none;
-            border-bottom: 1px solid #2A2A2A;
-          }
-
-          .dashboard-search button {
-            padding: 16px;
           }
         }
 
@@ -917,6 +731,21 @@ export default function AccountPage() {
           .nav-links a:not(.yellow-link):not(.login-icon),
           .logout-btn {
             display: none;
+          }
+        }
+
+        @media (max-width: 650px) {
+          .dashboard-search {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-search input {
+            border-right: none;
+            border-bottom: 1px solid #2A2A2A;
+          }
+
+          .dashboard-search button {
+            padding: 15px;
           }
         }
       `}</style>
