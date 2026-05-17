@@ -174,7 +174,13 @@ const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
         
         return {
           id,
-          title: attrs.title || "Equipment",
+          return {
+  id,
+  authorId:
+    item.relationships?.author?.data?.id?.uuid ||
+    item.relationships?.author?.data?.id ||
+    null,
+  title: attrs.title || "Equipment",
           type: getCategory(publicData),
           make: getMake(publicData),
           model: getModel(publicData),
