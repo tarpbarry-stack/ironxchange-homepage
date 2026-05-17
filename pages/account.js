@@ -6,9 +6,10 @@ const STAGING = "https://staging.ironxchange.com";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
+const [user, setUser] = useState(null);
+const [myListings, setMyListings] = useState([]);
+const [searchQuery, setSearchQuery] = useState("");
+  
   useEffect(() => {
     async function loadAccount() {
       try {
@@ -18,8 +19,21 @@ export default function AccountPage() {
           clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
         });
 
-        const response = await sdk.currentUser.show();
-        setUser(response.data.data);
+       const response = await sdk.currentUser.show();
+
+const currentUser = response.data.data;
+
+setUser(currentUser);
+
+const userId = currentUser.id?.uuid || currentUser.id;
+
+const listingsRes = await fetch(
+  `/api/account-listings?authorId=${userId}`
+);
+
+const listingsData = await listingsRes.json();
+
+setMyListings(Array.isArray(listingsData) ? listingsData : []);
       } catch {
         window.location.href = `/login?next=${encodeURIComponent("/account")}`;
       } finally {
