@@ -705,19 +705,28 @@ export default function AccountPage() {
           color: #f2f2f2;
           font-size: 22px;
         }
+@media (max-width: 1180px) {
+  .dashboard-search {
+    grid-template-columns: minmax(0, 1fr) 82px;
+  }
 
-        @media (max-width: 1180px) {
-          .top-tools {
-            grid-template-columns: 1fr;
-          }
+  .dashboard-search input {
+    padding: 13px 12px;
+    font-size: 12px;
+  }
 
-          .status-pill {
-            height: 42px;
-            width: 100%;
-          }
-        }
+  .dashboard-search button {
+    font-size: 11px;
+  }
 
-        @media (max-width: 1050px) {
+  .status-pill {
+    min-width: 68px;
+    font-size: 9px;
+    padding: 0 8px;
+  }
+}
+
+    @media (max-width: 1050px) {
           .dashboard {
             grid-template-columns: 1fr;
           }
@@ -733,6 +742,17 @@ export default function AccountPage() {
             display: none;
           }
         }
+        
+        @media (max-width: 760px) {
+  .top-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .status-pill {
+    height: 42px;
+    width: 100%;
+  }
+}
 
         @media (max-width: 650px) {
           .dashboard-search {
