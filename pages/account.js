@@ -462,53 +462,96 @@ setSavedMachines(saved);
   </div>
 </section>
 
-              <section className="panel side-panel">
-                <div className="panel-head">
-                  <h2>Recent Inquiries</h2>
-                  <a href="/account/messages">OPEN →</a>
-                </div>
+ <div className="right-stack">
+  <section className="panel side-panel">
+    <div className="panel-head">
+      <h2>Recent Inquiries</h2>
+      <a href="/account/messages">OPEN →</a>
+    </div>
 
-                <div className="activity-list">
-                  <div>
-                    <span className="dot yellow"></span>
-                    <p>New buyer inquiries will appear here.</p>
-                  </div>
+    <div className="activity-list">
+      <div>
+        <span className="dot yellow"></span>
+        <p>New buyer inquiries will appear here.</p>
+      </div>
 
-                  <div>
-                    <span className="dot green"></span>
-                    <p>Email remains primary. This keeps the record.</p>
-                  </div>
-                </div>
-              </section>
+      <div>
+        <span className="dot green"></span>
+        <p>Email remains primary. This keeps the record.</p>
+      </div>
+    </div>
+  </section>
 
-              <section className="panel performance-panel">
-                <div className="panel-head">
-                  <h2>Performance</h2>
-                  <span className="small-note">COMING ONLINE</span>
-                </div>
+  <section className="panel side-panel">
+    <div className="panel-head">
+      <h2>Saved Machines</h2>
+      <a href="/saved">VIEW ALL →</a>
+    </div>
 
-                <div className="perf-grid">
-                  <div>
-                    <span>Views</span>
-                    <strong>—</strong>
-                  </div>
+    <div className="activity-list">
+      {savedMachines.length > 0 ? (
+        savedMachines.slice(0, 4).map(machine => (
+          <a
+            key={machine.id || machine.title}
+            href={`/listing/${slugify(machine.title)}?from=account`}
+            className="saved-machine"
+          >
+            <img
+              src={
+                machine.imageUrl ||
+                machine.image ||
+                "/images/hero-equipment-yard.jpg"
+              }
+              alt={machine.title}
+            />
 
-                  <div>
-                    <span>Saves</span>
-                    <strong>—</strong>
-                  </div>
+            <div>
+              <strong>{machine.title}</strong>
+              <span>
+                {machine.price || "Call for Price"}
+                {machine.hours ? ` • ${machine.hours}` : ""}
+              </span>
+            </div>
+          </a>
+        ))
+      ) : (
+        <div>
+          <span className="dot yellow"></span>
+          <p>Saved listings and watchlist machines will show here.</p>
+        </div>
+      )}
+    </div>
+  </section>
+</div>
 
-                  <div>
-                    <span>Messages</span>
-                    <strong>—</strong>
-                  </div>
+<section className="panel performance-panel">
+  <div className="panel-head">
+    <h2>Performance</h2>
+    <span className="small-note">COMING ONLINE</span>
+  </div>
 
-                  <div>
-                    <span>Sold / Closed</span>
-                    <strong>—</strong>
-                  </div>
-                </div>
-              </section>
+  <div className="perf-grid">
+    <div>
+      <span>Views</span>
+      <strong>—</strong>
+    </div>
+
+    <div>
+      <span>Saves</span>
+      <strong>—</strong>
+    </div>
+
+    <div>
+      <span>Messages</span>
+      <strong>—</strong>
+    </div>
+
+    <div>
+      <span>Sold / Closed</span>
+      <strong>—</strong>
+    </div>
+  </div>
+</section>
             </div>
           </section>
         </section>
@@ -799,6 +842,12 @@ main {
 
 .listings-panel {
   grid-row: span 2;
+}
+
+.right-stack {
+  display: grid;
+  gap: 6px;
+  align-content: start;
 }
 
 .performance-panel {
