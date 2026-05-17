@@ -130,7 +130,12 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
           <aside className="rail">
             <div className="rail-top">
               <div className="user-dot">
-                <i className="fa-regular fa-user"></i>
+  {logoUrl ? (
+    <img src={logoUrl} alt={displayName} />
+  ) : (
+    <i className="fa-regular fa-user"></i>
+  )}
+</div>
               </div>
 
               <strong>{displayName}</strong>
@@ -458,6 +463,13 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
           border-color: #38A169;
           color: #38A169 !important;
         }
+
+        .user-dot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 
         .dashboard {
           display: grid;
