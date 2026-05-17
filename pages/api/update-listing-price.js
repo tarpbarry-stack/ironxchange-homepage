@@ -62,7 +62,7 @@ export default async function handler(req, res) {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/vnd.api+json",
+          "Content-Type": "application/json",
           Accept: "application/json"
         },
       body: JSON.stringify({
