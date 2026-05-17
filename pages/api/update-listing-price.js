@@ -57,31 +57,26 @@ export default async function handler(req, res) {
     const token = await getAccessToken();
 
     const response = await fetch(
-      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-      body: JSON.stringify({
-  data: {
-    type: "listing",
-    id: listingId,
-    attributes: {
+  "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      id: listingId,
       price: {
-        amount: Number(String(price).replace(/,/g, "")) * 100,
+        amount:
+          Number(String(price).replace(/,/g, "")) * 100,
         currency: "USD"
       }
-    }
+    })
   }
-})
-      }
-    );
+);
 
-    const data = await safeJson(response);
-
+const data = await safeJson(response);
     if (!response.ok) {
       throw new Error(JSON.stringify(data));
     }
