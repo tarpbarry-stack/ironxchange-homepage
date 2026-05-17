@@ -774,6 +774,7 @@ export default function AccountPage() {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 245px;
   gap: 6px;
+  align-items: stretch;
 }
 
         .panel {
