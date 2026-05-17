@@ -705,6 +705,7 @@ export default function AccountPage() {
           color: #f2f2f2;
           font-size: 22px;
         }
+        
 @media (max-width: 1180px) {
   .dashboard-search {
     grid-template-columns: minmax(0, 1fr) 82px;
@@ -726,24 +727,24 @@ export default function AccountPage() {
   }
 }
 
-    @media (max-width: 1050px) {
-          .dashboard {
-            grid-template-columns: 1fr;
-          }
+   @media (max-width: 700px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
 
-          .main-grid,
-          .stats,
-          .perf-grid {
-            grid-template-columns: 1fr;
-          }
+  .main-grid,
+  .stats,
+  .perf-grid {
+    grid-template-columns: 1fr;
+  }
 
-          .nav-links a:not(.yellow-link):not(.login-icon),
-          .logout-btn {
-            display: none;
-          }
-        }
+  .nav-links a:not(.yellow-link):not(.login-icon),
+  .logout-btn {
+    display: none;
+  }
+}
         
-        @media (max-width: 760px) {
+        @media (max-width: 650px) {
   .top-tools {
     grid-template-columns: 1fr;
   }
