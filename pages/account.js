@@ -22,6 +22,8 @@ const [searchQuery, setSearchQuery] = useState("");
 
         const response = await sdk.currentUser.show();
         const currentUser = response.data.data;
+        
+        console.log("CURRENT USER PROFILE:", currentUser.attributes?.profile);
 
         setUser(currentUser);
 
