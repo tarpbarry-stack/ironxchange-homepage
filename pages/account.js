@@ -232,7 +232,10 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   myListings.map((listing) => (
     <div className="table-row" key={listing.id}>
       <span>{listing.title}</span>
-      <span>{listing.price}</span>
+     <input
+  className="price-input"
+  defaultValue={listing.price.replace("$", "").replace(/,/g, "")}
+/>
       <span>{listing.age ?? "—"}</span>
       <span>Active</span>
       <span>—</span>
@@ -669,6 +672,22 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
         .table-empty p {
           margin: 0;
         }
+
+        .price-input {
+  width: 100%;
+  background: #101010;
+  border: 1px solid #2A2A2A;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #f2f2f2;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+}
+
+.price-input:focus {
+  border-color: #FFC400;
+}
 
         .activity-list {
           display: grid;
