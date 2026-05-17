@@ -234,7 +234,9 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
       <span>{listing.title}</span>
      <input
   className="price-input"
-  defaultValue={listing.price.replace("$", "").replace(/,/g, "")}
+  defaultValue={Number(
+  listing.price.replace("$", "").replace(/,/g, "")
+).toLocaleString()}
 />
       <span>{listing.age ?? "—"}</span>
       <span>Active</span>
