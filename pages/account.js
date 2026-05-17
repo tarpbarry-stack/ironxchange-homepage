@@ -4,6 +4,45 @@ import { useEffect, useState } from "react";
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
+function slugify(text = "") {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getSavedListingIds(profile = {}) {
+  const fromSharetribe = profile?.privateData?.savedListings;
+
+  if (Array.isArray(fromSharetribe)) {
+    return fromSharetribe.map(String);
+  }
+
+  try {
+    const savedListings = JSON.parse(
+      localStorage.getItem("savedListings") || "[]"
+    );
+
+    const savedMachines = JSON.parse(
+      localStorage.getItem("savedMachines") || "[]"
+    );
+
+    const ironxchangeSavedListings = JSON.parse(
+      localStorage.getItem("ironxchangeSavedListings") || "[]"
+    );
+
+    const combined = [
+      ...savedListings,
+      ...savedMachines,
+      ...ironxchangeSavedListings
+    ];
+
+    return combined.map(item => String(item?.id || item));
+  } catch {
+    return [];
+  }
+}
+
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -40,6 +79,23 @@ export default function AccountPage() {
         const listingsData = await listingsRes.json();
 
         setMyListings(Array.isArray(listingsData) ? listingsData : []);
+
+        const allListingsRes = await fetch("/api/listings");
+        const allListingsData = await allListingsRes.json();
+
+        const savedIds = getSavedListingIds(
+          currentUser.attributes?.profile || {}
+        );
+
+        const saved = Array.isArray(allListingsData)
+          ? allListingsData.filter(item =>
+              savedIds.includes(String(item.id)) ||
+              savedIds.includes(String(item.uuid)) ||
+              savedIds.includes(String(item.listingId))
+            )
+          : [];
+
+        setSavedMachines(saved);
       } catch {
         window.location.href = `/login?next=${encodeURIComponent("/account")}`;
       } finally {
@@ -153,13 +209,13 @@ export default function AccountPage() {
           <aside className="rail">
             <div className="rail-top">
               <div className="user-dot">
-  {logoUrl ? (
-    <img src={logoUrl} alt={displayName} />
-  ) : (
-    <i className="fa-regular fa-user"></i>
-  )}
-</div>
-                
+                {logoUrl ? (
+                  <img src={logoUrl} alt={displayName} />
+                ) : (
+                  <i className="fa-regular fa-user"></i>
+                )}
+              </div>
+
               <strong>{displayName}</strong>
               <span>{companyName}</span>
             </div>
@@ -197,8 +253,8 @@ export default function AccountPage() {
                   type="text"
                   placeholder="Quick search equipment..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleSearch()}
                 />
 
                 <button type="button" onClick={handleSearch}>
@@ -212,12 +268,12 @@ export default function AccountPage() {
               </div>
             </div>
 
-<div className="stats">
-  <div className="stat-card">
-    <span>Active Listings</span>
-    <strong>{myListings.length}</strong>
-    <p>Live machines for sale</p>
-  </div>
+            <div className="stats">
+              <div className="stat-card">
+                <span>Active Listings</span>
+                <strong>{myListings.length}</strong>
+                <p>Live machines for sale</p>
+              </div>
 
               <div className="stat-card">
                 <span>New Inquiries</span>
@@ -256,81 +312,132 @@ export default function AccountPage() {
                   </div>
 
                   {myListings.length > 0 ? (
-  myListings.map((listing) => (
-    <div className="table-row" key={listing.id}>
-     <div className="machine-cell">
-  <img src={listing.imageUrl || listing.image} alt={listing.title} />
-  <span>
-  {listing.title.replace(/\s\d{1,3}(,\d{3})*\sHrs/i, "")}
-</span>
-</div>
- <span>{listing.hours}</span>
-  <input
-  className="price-input"
-  defaultValue={Number(
-    listing.price.replace("$", "").replace(/,/g, "")
-  ).toLocaleString()}
-  onKeyDown={async (e) => {
-    if (e.key !== "Enter") return;
+                    myListings.map(listing => (
+                      <div className="table-row" key={listing.id}>
+                        <div className="machine-cell">
+                          <img
+                            src={listing.imageUrl || listing.image}
+                            alt={listing.title}
+                          />
+                          <span>
+                            {String(listing.title || "").replace(
+                              /\s\d{1,3}(,\d{3})*\sHrs/i,
+                              ""
+                            )}
+                          </span>
+                        </div>
 
-    e.preventDefault();
+                        <span>{listing.hours}</span>
 
-    const input = e.currentTarget;
-    const newPrice = input.value.replace(/,/g, "").trim();
+                        <input
+                          className="price-input"
+                          defaultValue={Number(
+                            String(listing.price || "")
+                              .replace("$", "")
+                              .replace(/,/g, "")
+                          ).toLocaleString()}
+                          onKeyDown={async e => {
+                            if (e.key !== "Enter") return;
 
-    input.classList.remove("saved", "error");
+                            e.preventDefault();
 
-    const response = await fetch("/api/update-listing-price", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        listingId: listing.id,
-        price: newPrice
-      })
-    });
+                            const input = e.currentTarget;
+                            const newPrice = input.value.replace(/,/g, "").trim();
 
-    if (response.ok) {
-      input.value = Number(newPrice).toLocaleString();
-      input.classList.add("saved");
-    } else {
-      input.classList.add("error");
-    }
-  }}
-/>
-      <span
-  className={
-    listing.age <= 30
-      ? "age-green"
-      : listing.age <= 45
-      ? "age-yellow"
-      : "age-red"
-  }
->
-  {listing.age ?? "—"}
-</span>
-      <span className="listing-status active">ACTIVE</span>
-      <span>
-       <select className="action-select" defaultValue="">
-  <option value="" disabled>
-    ACTION
-  </option>
-  <option value="pause">Pause</option>
-  <option value="sold">Mark Sold</option>
-  <option value="duplicate">Duplicate</option>
-  <option value="relist">Relist</option>
-  <option value="archive">Archive</option>
-</select>
-      </span>
-    </div>
-  ))
-) : (
-  <div className="table-empty">
-    <strong>No active listings yet.</strong>
-    <p>Your machines will show here once they are listed.</p>
-  </div>
-)}
+                            input.classList.remove("saved", "error");
+
+                            const response = await fetch("/api/update-listing-price", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json"
+                              },
+                              body: JSON.stringify({
+                                listingId: listing.id,
+                                price: newPrice
+                              })
+                            });
+
+                            if (response.ok) {
+                              input.value = Number(newPrice).toLocaleString();
+                              input.classList.add("saved");
+                            } else {
+                              input.classList.add("error");
+                            }
+                          }}
+                        />
+
+                        <span
+                          className={
+                            listing.age <= 30
+                              ? "age-green"
+                              : listing.age <= 45
+                              ? "age-yellow"
+                              : "age-red"
+                          }
+                        >
+                          {listing.age ?? "—"}
+                        </span>
+
+                        <span className="listing-status active">ACTIVE</span>
+
+                        <span>
+                          <select className="action-select" defaultValue="">
+                            <option value="" disabled>
+                              ACTION
+                            </option>
+                            <option value="pause">Pause</option>
+                            <option value="sold">Mark Sold</option>
+                            <option value="duplicate">Duplicate</option>
+                            <option value="relist">Relist</option>
+                            <option value="archive">Archive</option>
+                          </select>
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="table-empty">
+                      <strong>No active listings yet.</strong>
+                      <p>Your machines will show here once they are listed.</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section className="panel side-panel">
+                <div className="panel-head">
+                  <h2>Saved Machines</h2>
+                  <a href="/saved">VIEW ALL →</a>
+                </div>
+
+                <div className="activity-list">
+                  {savedMachines.length > 0 ? (
+                    savedMachines.slice(0, 4).map(machine => (
+                      <a
+                        key={machine.id || machine.title}
+                        href={`/listing/${slugify(machine.title)}?from=account`}
+                        className="saved-machine"
+                      >
+                        <img
+                          src={
+                            machine.imageUrl ||
+                            machine.image ||
+                            "/images/hero-equipment-yard.jpg"
+                          }
+                          alt={machine.title}
+                        />
+
+                        <div>
+                          <strong>{machine.title}</strong>
+                          <span>{machine.price || "Call for Price"}</span>
+                        </div>
+                      </a>
+                    ))
+                  ) : (
+                    <div>
+                      <span className="dot yellow"></span>
+                      <p>Saved listings and watchlist machines will show here.</p>
+                    </div>
+                  )}
                 </div>
               </section>
 
@@ -349,25 +456,6 @@ export default function AccountPage() {
                   <div>
                     <span className="dot green"></span>
                     <p>Email remains primary. This keeps the record.</p>
-                  </div>
-                </div>
-              </section>
-
-              <section className="panel side-panel">
-                <div className="panel-head">
-                  <h2>Saved Machines</h2>
-                  <a href="/saved">VIEW →</a>
-                </div>
-
-                <div className="activity-list">
-                  <div>
-                    <span className="dot yellow"></span>
-                    <p>Saved listings and watchlist machines will show here.</p>
-                  </div>
-
-                  <div>
-                    <span className="dot green"></span>
-                    <p>Price alerts and status changes later.</p>
                   </div>
                 </div>
               </section>
@@ -433,16 +521,10 @@ export default function AccountPage() {
         }
 
         .logo-img {
-  height: 42px;
-  display: block;
-  width: auto;
-}
-
-@media (max-width: 650px) {
-  .logo-img {
-    height: 34px;
-  }
-}
+          height: 42px;
+          display: block;
+          width: auto;
+        }
 
         .nav-links {
           display: flex;
@@ -486,13 +568,6 @@ export default function AccountPage() {
           color: #38A169 !important;
         }
 
-        .user-dot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
         .dashboard {
           display: grid;
           grid-template-columns: 230px 1fr;
@@ -527,6 +602,14 @@ export default function AccountPage() {
           place-items: center;
           margin: 0 auto 12px;
           font-size: 22px;
+          overflow: hidden;
+        }
+
+        .user-dot img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
         }
 
         .rail-top strong {
@@ -733,14 +816,15 @@ export default function AccountPage() {
         }
 
         .table-row {
-  display: grid;
-  grid-template-columns: 185px 70px 74px 36px 62px 98px;
-  gap 6px;
-  align-items: center;
-  padding: 11px 10px;
-  border-bottom: 1px solid #252525;
-  font-size: 13px;
-}
+          display: grid;
+          grid-template-columns: 185px 70px 74px 36px 62px 98px;
+          gap: 6px;
+          align-items: center;
+          padding: 11px 10px;
+          border-bottom: 1px solid #252525;
+          font-size: 13px;
+        }
+
         .table-head {
           background: #101010;
           color: #8f8f8f;
@@ -749,11 +833,13 @@ export default function AccountPage() {
           text-transform: uppercase;
           letter-spacing: .45px;
         }
+
         .table-head span {
-  display: flex;
-  align-items: center;
-  font-size: 11px;
-}
+          display: flex;
+          align-items: center;
+          font-size: 11px;
+        }
+
         .table-empty {
           padding: 22px 14px;
           color: #9a9a9a;
@@ -772,106 +858,107 @@ export default function AccountPage() {
         }
 
         .machine-cell {
-  display:grid;
-  grid-template-columns:48px 1fr;
-  gap: 10px;
-  align-items: center;
-  min-width: 0;
-}
+          display: grid;
+          grid-template-columns: 48px 1fr;
+          gap: 10px;
+          align-items: center;
+          min-width: 0;
+        }
 
-.machine-cell img {
-  width:48px;
-  height:38px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #2A2A2A;
-  background: #0b0b0b;
-}
+        .machine-cell img {
+          width: 48px;
+          height: 38px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 1px solid #2A2A2A;
+          background: #0b0b0b;
+        }
 
-.machine-cell span {
-  font-weight: 800;
-  color: #f2f2f2;
-}
+        .machine-cell span {
+          font-weight: 800;
+          color: #f2f2f2;
+        }
 
         .price-input {
-  width: 78px;
-  background: #101010;
-  border: 1px solid #2A2A2A;
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: #f2f2f2;
-  font-size: 13px;
-  font-weight: 700;
-  outline: none;
-}
+          width: 78px;
+          background: #101010;
+          border: 1px solid #2A2A2A;
+          border-radius: 8px;
+          padding: 8px 10px;
+          color: #f2f2f2;
+          font-size: 13px;
+          font-weight: 700;
+          outline: none;
+        }
 
-.price-input:focus {
-  border-color: #FFC400;
-}
+        .price-input:focus {
+          border-color: #FFC400;
+        }
 
-.price-input.saved {
-  border-color: #38A169;
-  box-shadow: 0 0 0 1px rgba(56, 161, 105, .35);
-}
+        .price-input.saved {
+          border-color: #38A169;
+          box-shadow: 0 0 0 1px rgba(56, 161, 105, .35);
+        }
 
-.price-input.error {
-  border-color: #E53E3E;
-  box-shadow: 0 0 0 1px rgba(229, 62, 62, .35);
-}
+        .price-input.error {
+          border-color: #E53E3E;
+          box-shadow: 0 0 0 1px rgba(229, 62, 62, .35);
+        }
 
-.age-green {
-  color: #38A169;
-  font-weight: 900;
-}
+        .age-green {
+          color: #38A169;
+          font-weight: 900;
+        }
 
-.age-yellow {
-  color: #D69E2E;
-  font-weight: 900;
-}
+        .age-yellow {
+          color: #D69E2E;
+          font-weight: 900;
+        }
 
-.age-red {
-  color: #E53E3E;
-  font-weight: 900;
-}
+        .age-red {
+          color: #E53E3E;
+          font-weight: 900;
+        }
 
-.listing-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: start;
-  height: 28px;
-  min-width: 58px;
-  padding: 0 6px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .5px;
-  white-space: nowrap;
-}
+        .listing-status {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          justify-self: start;
+          height: 28px;
+          min-width: 58px;
+          padding: 0 6px;
+          border-radius: 999px;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .5px;
+          white-space: nowrap;
+        }
 
-.listing-status.active {
-  border: 1px solid #2f855a;
-  color: #38A169;
-  background: rgba(56, 161, 105, .08);
-}
+        .listing-status.active {
+          border: 1px solid #2f855a;
+          color: #38A169;
+          background: rgba(56, 161, 105, .08);
+        }
 
-.action-select {
-  width: 92px;
-  height: 30px;
-  background: #101010;
-  border: 1px solid #2A2A2A;
-  border-radius: 8px;
-  color: #f2f2f2;
-  font-size: 9px;
-  font-weight: 900;
-  padding: 0 8px;
-  outline: none;
-  cursor: pointer;
-}
+        .action-select {
+          width: 92px;
+          height: 30px;
+          background: #101010;
+          border: 1px solid #2A2A2A;
+          border-radius: 8px;
+          color: #f2f2f2;
+          font-size: 9px;
+          font-weight: 900;
+          padding: 0 8px;
+          outline: none;
+          cursor: pointer;
+        }
 
-.action-select:focus {
-  border-color: #FFC400;
-}
+        .action-select:focus {
+          border-color: #FFC400;
+        }
+
         .activity-list {
           display: grid;
           gap: 14px;
@@ -889,6 +976,38 @@ export default function AccountPage() {
 
         .activity-list p {
           margin: 0;
+        }
+
+        .saved-machine {
+          display: grid !important;
+          grid-template-columns: 52px 1fr !important;
+          gap: 10px !important;
+          align-items: center !important;
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .saved-machine img {
+          width: 52px;
+          height: 40px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 1px solid #2A2A2A;
+        }
+
+        .saved-machine strong {
+          display: block;
+          color: #f2f2f2;
+          font-size: 12px;
+          line-height: 1.25;
+        }
+
+        .saved-machine span {
+          display: block;
+          color: #FFC400;
+          font-size: 11px;
+          font-weight: 900;
+          margin-top: 4px;
         }
 
         .dot {
@@ -933,57 +1052,59 @@ export default function AccountPage() {
           color: #f2f2f2;
           font-size: 22px;
         }
-        
-@media (max-width: 1180px) {
-  .dashboard-search {
-    grid-template-columns: minmax(0, 1fr) 82px;
-  }
 
-  .dashboard-search input {
-    padding: 13px 12px;
-    font-size: 12px;
-  }
+        @media (max-width: 1180px) {
+          .dashboard-search {
+            grid-template-columns: minmax(0, 1fr) 82px;
+          }
 
-  .dashboard-search button {
-    font-size: 11px;
-  }
+          .dashboard-search input {
+            padding: 13px 12px;
+            font-size: 12px;
+          }
 
-  .status-pill {
-    min-width: 68px;
-    font-size: 9px;
-    padding: 0 8px;
-  }
-}
+          .dashboard-search button {
+            font-size: 11px;
+          }
 
-   @media (max-width: 700px) {
-  .dashboard {
-    grid-template-columns: 1fr;
-  }
+          .status-pill {
+            min-width: 68px;
+            font-size: 9px;
+            padding: 0 8px;
+          }
+        }
 
-  .main-grid,
-  .stats,
-  .perf-grid {
-    grid-template-columns: 1fr;
-  }
+        @media (max-width: 700px) {
+          .dashboard {
+            grid-template-columns: 1fr;
+          }
 
-  .nav-links a:not(.yellow-link):not(.login-icon),
-  .logout-btn {
-    display: none;
-  }
-}
-        
-        @media (max-width: 650px) {
-  .top-tools {
-    grid-template-columns: 1fr;
-  }
+          .main-grid,
+          .stats,
+          .perf-grid {
+            grid-template-columns: 1fr;
+          }
 
-  .status-pill {
-    height: 42px;
-    width: 100%;
-  }
-}
+          .nav-links a:not(.yellow-link):not(.login-icon),
+          .logout-btn {
+            display: none;
+          }
+        }
 
         @media (max-width: 650px) {
+          .logo-img {
+            height: 34px;
+          }
+
+          .top-tools {
+            grid-template-columns: 1fr;
+          }
+
+          .status-pill {
+            height: 42px;
+            width: 100%;
+          }
+
           .dashboard-search {
             grid-template-columns: 1fr;
           }
