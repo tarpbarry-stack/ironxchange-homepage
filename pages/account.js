@@ -606,14 +606,20 @@ export default function AccountPage() {
         }
 
         .dashboard-search {
-          display: grid;
-          grid-template-columns: minmax(210px, 1fr) 190px 150px 150px 118px;
-          background: #141414;
-          border: 1px solid #282828;
-          border-radius: 16px;
-          overflow: hidden;
-          box-shadow: 0 16px 45px rgba(0,0,0,.25);
-        }
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    150px
+    120px
+    120px
+    96px;
+
+  background: #141414;
+  border: 1px solid #282828;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 45px rgba(0,0,0,.25);
+}
 
         .dashboard-search input,
 .dashboard-search select {
@@ -656,21 +662,10 @@ export default function AccountPage() {
           letter-spacing: .4px;
         }
 
-        .status-pill {
-          border: 1px solid #2f855a;
-          color: #38A169;
-          border-radius: 16px;
-          padding: 0 15px;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: .5px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          min-width: 96px;
-          background: #111;
-        }
+       .status-pill {
+  min-width: 74px;
+  padding: 0 10px;
+  font-size: 10px;
 
         .status-pill span {
           width: 7px;
