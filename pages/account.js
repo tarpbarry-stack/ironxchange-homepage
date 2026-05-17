@@ -233,7 +233,9 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
     <div className="table-row" key={listing.id}>
      <div className="machine-cell">
   <img src={listing.imageUrl || listing.image} alt={listing.title} />
-  <span>{listing.title}</span>
+  <span>
+  {listing.title.replace(/\s\d{1,3}(,\d{3})*\sHrs/i, "")}
+</span>
 </div>
  <span>{listing.hours}</span>
   <input
