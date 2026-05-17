@@ -224,7 +224,6 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
                     <span>Price</span>
                     <span>Age</span>
                     <span>Status</span>
-                    <span>Inquiries</span>
                     <span>Actions</span>
                   </div>
 
