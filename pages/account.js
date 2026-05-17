@@ -46,7 +46,6 @@ export default function AccountPage() {
   const profile = user?.attributes?.profile || {};
   const displayName = profile.displayName || "IronXchange User";
   const companyName = profile.publicData?.companyName || "Company not added";
-  const email = user?.attributes?.email || "";
 
   if (loading) {
     return (
@@ -132,37 +131,31 @@ export default function AccountPage() {
 
           <section className="content">
             <div className="dashboard-search">
-  <input
-    type="text"
-    placeholder="Search equipment — Deere 772GP, WA475, crusher..."
-    onKeyDown={(e) => {
-      if (e.key === "Enter" && e.currentTarget.value.trim()) {
-        window.location.href = `/browse?keywords=${encodeURIComponent(
-          e.currentTarget.value.trim()
-        )}`;
-      }
-    }}
-  />
+              <input
+                type="text"
+                placeholder="Search equipment — Deere 772GP, WA475, crusher..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                    window.location.href = `/browse?keywords=${encodeURIComponent(
+                      e.currentTarget.value.trim()
+                    )}`;
+                  }
+                }}
+              />
 
-  <button
-    type="button"
-    onClick={() => {
-      const input = document.querySelector(".dashboard-search input");
-      const value = input?.value?.trim();
+              <button
+                type="button"
+                onClick={() => {
+                  const input = document.querySelector(".dashboard-search input");
+                  const value = input?.value?.trim();
 
-      window.location.href = value
-        ? `/browse?keywords=${encodeURIComponent(value)}`
-        : "/browse";
-    }}
-  >
-    SEARCH
-  </button>
-</div>
-
-              <div className="status-pill">
-                <span></span>
-                ACTIVE
-              </div>
+                  window.location.href = value
+                    ? `/browse?keywords=${encodeURIComponent(value)}`
+                    : "/browse";
+                }}
+              >
+                SEARCH
+              </button>
             </div>
 
             <div className="stats">
@@ -436,79 +429,38 @@ export default function AccountPage() {
           min-width: 0;
         }
 
-        .topline {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 18px;
-          margin-bottom: 18px;
-        }
-
         .dashboard-search {
-  display: grid;
-  grid-template-columns: 1fr 140px;
-  background: #141414;
-  border: 1px solid #282828;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 18px;
-  box-shadow: 0 16px 45px rgba(0,0,0,.25);
-}
-
-.dashboard-search input {
-  border: none;
-  border-right: 1px solid #2A2A2A;
-  padding: 17px 18px;
-  font-size: 14px;
-  background: #141414;
-  color: #D6D6D6;
-  outline: none;
-}
-
-.dashboard-search input::placeholder {
-  color: #777;
-}
-
-.dashboard-search button {
-  border: none;
-  background: ${BRAND_YELLOW};
-  color: #050505;
-  font-weight: 900;
-  cursor: pointer;
-  letter-spacing: .4px;
-}
-
-        h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 28px;
-          letter-spacing: -0.4px;
+          display: grid;
+          grid-template-columns: 1fr 140px;
+          background: #141414;
+          border: 1px solid #282828;
+          border-radius: 16px;
+          overflow: hidden;
+          margin-bottom: 18px;
+          box-shadow: 0 16px 45px rgba(0,0,0,.25);
         }
 
-        .topline p {
-          margin: 7px 0 0;
-          color: #888;
-          font-size: 13px;
+        .dashboard-search input {
+          border: none;
+          border-right: 1px solid #2A2A2A;
+          padding: 17px 18px;
+          font-size: 14px;
+          background: #141414;
+          color: #D6D6D6;
+          outline: none;
         }
 
-        .status-pill {
-          border: 1px solid #2f855a;
-          color: #38A169;
-          border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 11px;
+        .dashboard-search input::placeholder {
+          color: #777;
+        }
+
+        .dashboard-search button {
+          border: none;
+          background: ${BRAND_YELLOW};
+          color: #050505;
           font-weight: 900;
-          letter-spacing: .5px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .status-pill span {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #38A169;
+          cursor: pointer;
+          letter-spacing: .4px;
         }
 
         .stats {
@@ -709,15 +661,23 @@ export default function AccountPage() {
             grid-template-columns: 1fr;
           }
 
-          .rail {
-            display: grid;
-            grid-template-columns: 1fr;
-          }
-
           .main-grid,
           .stats,
           .perf-grid {
             grid-template-columns: 1fr;
+          }
+
+          .dashboard-search {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-search input {
+            border-right: none;
+            border-bottom: 1px solid #2A2A2A;
+          }
+
+          .dashboard-search button {
+            padding: 16px;
           }
 
           .nav-links a:not(.yellow-link):not(.login-icon),
