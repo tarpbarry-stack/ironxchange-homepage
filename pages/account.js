@@ -267,7 +267,17 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
     }
   }}
 />
-      <span>{listing.age ?? "—"}</span>
+      <span
+  className={
+    listing.age <= 30
+      ? "age-green"
+      : listing.age <= 45
+      ? "age-yellow"
+      : "age-red"
+  }
+>
+  {listing.age ?? "—"}
+</span>
       <span>Active</span>
       <span>—</span>
       <span>
@@ -728,6 +738,21 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 .price-input.error {
   border-color: #E53E3E;
   box-shadow: 0 0 0 1px rgba(229, 62, 62, .35);
+}
+
+.age-green {
+  color: #38A169;
+  font-weight: 900;
+}
+
+.age-yellow {
+  color: #D69E2E;
+  font-weight: 900;
+}
+
+.age-red {
+  color: #E53E3E;
+  font-weight: 900;
 }
         .activity-list {
           display: grid;
