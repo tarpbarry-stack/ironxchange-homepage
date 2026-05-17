@@ -340,11 +340,12 @@ export default function AccountPage() {
               </div>
 
              <div className="stat-card">
-  <span>Listing Avg Age</span>
-  <strong className="green">18</strong>
-  <p>Average listing age</p>
-</div>
-
+            <span>Listing Avg Age</span>
+            <strong className="green">18</strong>
+            <p>Average listing age</p>
+              </div>
+                  </div>
+                  
             <div className="main-grid">
               <section className="panel listings-panel">
                 <div className="panel-head">
