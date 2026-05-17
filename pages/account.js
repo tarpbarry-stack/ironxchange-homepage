@@ -20,7 +20,12 @@ const [searchQuery, setSearchQuery] = useState("");
           clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
         });
 
-        const response = await sdk.currentUser.show();
+        const response = await sdk.currentUser.show({
+  include: ["profileImage"]
+});
+
+        console.log("CURRENT USER RESPONSE:", response.data);
+        
         const currentUser = response.data.data;
         
         console.log("CURRENT USER PROFILE:", currentUser.attributes?.profile);
