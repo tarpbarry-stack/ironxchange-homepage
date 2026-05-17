@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     const token = await getAccessToken();
 
     const response = await fetch(
-      `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/${listingId}`,
+      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
       {
         method: "PATCH",
         headers: {
@@ -65,20 +65,18 @@ export default async function handler(req, res) {
           "Content-Type": "application/vnd.api+json",
           Accept: "application/json"
         },
-        body: JSON.stringify({
-          data: {
-            type: "listing",
-            id: listingId,
-            attributes: {
-              price: {
-                amount: Number(
-                  String(price).replace(/,/g, "")
-                ) * 100,
-                currency: "USD"
-              }
-            }
-          }
-        })
+      body: JSON.stringify({
+  data: {
+    type: "listing",
+    id: listingId,
+    attributes: {
+      price: {
+        amount: Number(String(price).replace(/,/g, "")) * 100,
+        currency: "USD"
+      }
+    }
+  }
+})
       }
     );
 
