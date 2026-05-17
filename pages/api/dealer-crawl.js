@@ -1,3 +1,5 @@
+import { saveDealerResults } from "../../lib/ixi-store";
+
 function extractEmails(text) {
   const matches = text.match(
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
@@ -5,7 +7,10 @@ function extractEmails(text) {
 
   return [...new Set(matches || [])].filter((email) => {
     const bad = ["example.com", "sentry.io", "wixpress.com"];
-    return !bad.some((domain) => email.toLowerCase().includes(domain));
+
+    return !bad.some((domain) =>
+      email.toLowerCase().includes(domain)
+    );
   });
 }
 
@@ -28,7 +33,9 @@ function stripHtml(html) {
 
 function extractContacts(html) {
   const text = stripHtml(html);
+
   const contacts = [];
+
   const lines = text
     .split("\n")
     .map((line) => line.trim())
@@ -67,7 +74,10 @@ function normalizeBaseUrl(url) {
 
   let clean = url.trim();
 
-  if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+  if (
+    !clean.startsWith("http://") &&
+    !clean.startsWith("https://")
+  ) {
     clean = `https://${clean}`;
   }
 
@@ -125,7 +135,9 @@ function shouldScanLink(url) {
 
 function extractInternalLinks(html, baseUrl) {
   const baseDomain = getDomain(baseUrl);
-  const matches = html.match(/href=["']([^"']+)["']/gi) || [];
+
+  const matches =
+    html.match(/href=["']([^"']+)["']/gi) || [];
 
   const links = matches
     .map((match) => {
@@ -252,10 +264,9 @@ export default async function handler(req, res) {
 
     const discoveredLinks = homepage.links || [];
 
-    const linksToScan = [...new Set([...priorityPaths, ...discoveredLinks])].slice(
-      0,
-      20
-    );
+    const linksToScan = [
+      ...new Set([...priorityPaths, ...discoveredLinks])
+    ].slice(0, 20);
 
     for (const link of linksToScan) {
       const scan = await fetchPage(link);
@@ -274,6 +285,8 @@ export default async function handler(req, res) {
       scannedLinks: [...new Set(scannedLinks)]
     });
   }
+
+  saveDealerResults(results);
 
   const totalEmails = results.reduce(
     (sum, item) => sum + item.emails.length,
