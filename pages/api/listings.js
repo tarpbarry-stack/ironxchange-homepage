@@ -122,7 +122,7 @@ export default async function handler(req, res) {
     const token = await getAccessToken();
 
     const response = await fetch(
-      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images",
+      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images,author",
       {
         method: "GET",
         headers: {
