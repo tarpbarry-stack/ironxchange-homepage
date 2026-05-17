@@ -1,12 +1,101 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
+import dozersTaxonomy from "../lib/dozersTaxonomy";
+import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
+import aerialTaxonomy from "../lib/aerialTaxonomy";
+import aggregateTaxonomy from "../lib/aggregateTaxonomy";
+import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
+import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
+import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
+import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
+import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
+import cranesTaxonomy from "../lib/cranesTaxonomy";
+import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
+import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
+import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
+import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
+import scraperTaxonomy from "../lib/scraperTaxonomy";
+import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
+import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
+import trenchersTaxonomy from "../lib/trenchersTaxonomy";
+import trailersTaxonomy from "../lib/trailersTaxonomy";
+import trucksTaxonomy from "../lib/trucksTaxonomy";
+import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
+import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
+import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
+const categories = [
+  "ALL CATEGORIES",
+  "AERIAL EQUIPMENT",
+  "AGGREGATE",
+  "AGRICULTURE HARVESTERS",
+  "AGRICULTURE TRACTORS",
+  "ASPHALT EQUIPMENT",
+  "BACKHOE LOADERS",
+  "COMPACTION/ROLLERS",
+  "CRANES",
+  "CRAWLER CARRIERS / LOADER",
+  "DOZERS",
+  "DRILLS & PILING",
+  "DUMP TRUCKS - ARTIC/RIGID",
+  "EXCAVATORS",
+  "FORKLIFTS",
+  "MOTOR GRADERS",
+  "SCRAPER",
+  "SKID STEER/CTL",
+  "TELEHANDLERS",
+  "TRENCHERS/PLOWS",
+  "TRAILERS",
+  "TRUCKS",
+  "WHEEL LOADERS",
+  "ATTACHMENTS / PARTS",
+  "OTHER SPECIALTY",
+  "SUPPORT EQUIPMENT",
+  "UTILITY CARTS"
+];
+
+const taxonomyMap = {
+  "MOTOR GRADERS": motorGradersTaxonomy,
+  "WHEEL LOADERS": wheelLoadersTaxonomy,
+  DOZERS: dozersTaxonomy,
+  EXCAVATORS: excavatorsTaxonomy,
+  "AERIAL EQUIPMENT": aerialTaxonomy,
+  AGGREGATE: aggregateTaxonomy,
+  "AGRICULTURE HARVESTERS": agricultureHarvestersTaxonomy,
+  "AGRICULTURE TRACTORS": agricultureTractorsTaxonomy,
+  "ASPHALT EQUIPMENT": asphaltEquipmentTaxonomy,
+  "BACKHOE LOADERS": backhoeLoadersTaxonomy,
+  "COMPACTION/ROLLERS": compactionRollersTaxonomy,
+  CRANES: cranesTaxonomy,
+  "CRAWLER CARRIERS / LOADER": crawlerCarriersTaxonomy,
+  "DRILLS & PILING": drillsAndPilingTaxonomy,
+  "DUMP TRUCKS - ARTIC/RIGID": dumpTrucksTaxonomy,
+  FORKLIFTS: forkliftsTaxonomy,
+  SCRAPER: scraperTaxonomy,
+  "SKID STEER/CTL": skidSteerCtlTaxonomy,
+  TELEHANDLERS: telehandlersTaxonomy,
+  "TRENCHERS/PLOWS": trenchersTaxonomy,
+  TRAILERS: trailersTaxonomy,
+  TRUCKS: trucksTaxonomy,
+  "ATTACHMENTS / PARTS": attachmentsPartsTaxonomy,
+  "SUPPORT EQUIPMENT": supportEquipmentTaxonomy,
+  "UTILITY CARTS": utilityCartsTaxonomy
+};
+
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [category, setCategory] = useState("ALL CATEGORIES");
+  const [make, setMake] = useState("ALL MAKES");
+  const [model, setModel] = useState("ALL MODELS");
 
   useEffect(() => {
     async function loadAccount() {
@@ -28,6 +117,44 @@ export default function AccountPage() {
 
     loadAccount();
   }, []);
+
+  const availableMakes = useMemo(() => {
+    const taxonomy = taxonomyMap[category];
+
+    if (!taxonomy) return ["ALL MAKES"];
+
+    const makes = taxonomy.map((x) => x.make).filter(Boolean);
+
+    return ["ALL MAKES", ...Array.from(new Set(makes))];
+  }, [category]);
+
+  const availableModels = useMemo(() => {
+    const taxonomy = taxonomyMap[category];
+
+    if (!taxonomy || make === "ALL MAKES") return ["ALL MODELS"];
+
+    const models = taxonomy
+      .filter((x) => x.make === make)
+      .map((x) => x.model)
+      .filter(Boolean);
+
+    return ["ALL MODELS", ...Array.from(new Set(models))];
+  }, [category, make]);
+
+  function handleSearch() {
+    const terms = [
+      searchQuery.trim(),
+      category !== "ALL CATEGORIES" ? category : "",
+      make !== "ALL MAKES" ? make : "",
+      model !== "ALL MODELS" ? model : ""
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    window.location.href = terms
+      ? `/browse?keywords=${encodeURIComponent(terms)}`
+      : "/browse";
+  }
 
   async function handleLogout() {
     try {
@@ -79,13 +206,24 @@ export default function AccountPage() {
       <main>
         <nav className="nav">
           <a href="/" className="logo-wrap">
-            <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
+            <img
+              src="/images/ironxchange-logo.png"
+              className="logo-img"
+              alt="IronXchange"
+            />
           </a>
 
           <div className="nav-links">
             <a href="/browse">SEARCH</a>
-            <a href={`${STAGING}/l/new`} className="yellow-link">POST FREE</a>
-            <button type="button" onClick={handleLogout} className="logout-btn">LOGOUT</button>
+
+            <a href={`${STAGING}/l/new`} className="yellow-link">
+              POST FREE
+            </a>
+
+            <button type="button" onClick={handleLogout} className="logout-btn">
+              LOGOUT
+            </button>
+
             <a href="/account" className="login-icon logged-in" aria-label="Account">
               <i className="fa-regular fa-user"></i>
             </a>
@@ -130,32 +268,56 @@ export default function AccountPage() {
           </aside>
 
           <section className="content">
-            <div className="dashboard-search">
-              <input
-                type="text"
-                placeholder="Search equipment — Deere 772GP, WA475, crusher..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                    window.location.href = `/browse?keywords=${encodeURIComponent(
-                      e.currentTarget.value.trim()
-                    )}`;
-                  }
-                }}
-              />
+            <div className="top-tools">
+              <div className="dashboard-search">
+                <input
+                  type="text"
+                  placeholder="Search equipment — Deere 772GP, WA475, crusher..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
 
-              <button
-                type="button"
-                onClick={() => {
-                  const input = document.querySelector(".dashboard-search input");
-                  const value = input?.value?.trim();
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setMake("ALL MAKES");
+                    setModel("ALL MODELS");
+                  }}
+                >
+                  {categories.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
 
-                  window.location.href = value
-                    ? `/browse?keywords=${encodeURIComponent(value)}`
-                    : "/browse";
-                }}
-              >
-                SEARCH
-              </button>
+                <select
+                  value={make}
+                  onChange={(e) => {
+                    setMake(e.target.value);
+                    setModel("ALL MODELS");
+                  }}
+                >
+                  {availableMakes.map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+
+                <select value={model} onChange={(e) => setModel(e.target.value)}>
+                  {availableModels.map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+
+                <button type="button" onClick={handleSearch}>
+                  SEARCH
+                </button>
+              </div>
+
+              <div className="status-pill">
+                <span></span>
+                ACTIVE
+              </div>
             </div>
 
             <div className="stats">
@@ -221,6 +383,7 @@ export default function AccountPage() {
                     <span className="dot yellow"></span>
                     <p>New buyer inquiries will appear here.</p>
                   </div>
+
                   <div>
                     <span className="dot green"></span>
                     <p>Email remains primary. This keeps the record.</p>
@@ -239,6 +402,7 @@ export default function AccountPage() {
                     <span className="dot yellow"></span>
                     <p>Saved listings and watchlist machines will show here.</p>
                   </div>
+
                   <div>
                     <span className="dot green"></span>
                     <p>Price alerts and status changes later.</p>
@@ -257,14 +421,17 @@ export default function AccountPage() {
                     <span>Views</span>
                     <strong>—</strong>
                   </div>
+
                   <div>
                     <span>Saves</span>
                     <strong>—</strong>
                   </div>
+
                   <div>
                     <span>Messages</span>
                     <strong>—</strong>
                   </div>
+
                   <div>
                     <span>Sold / Closed</span>
                     <strong>—</strong>
@@ -429,25 +596,34 @@ export default function AccountPage() {
           min-width: 0;
         }
 
+        .top-tools {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 14px;
+          align-items: stretch;
+          margin-bottom: 18px;
+        }
+
         .dashboard-search {
           display: grid;
-          grid-template-columns: 1fr 140px;
+          grid-template-columns: minmax(210px, 1fr) 190px 150px 150px 118px;
           background: #141414;
           border: 1px solid #282828;
           border-radius: 16px;
           overflow: hidden;
-          margin-bottom: 18px;
           box-shadow: 0 16px 45px rgba(0,0,0,.25);
         }
 
-        .dashboard-search input {
+        .dashboard-search input,
+        .dashboard-search select {
           border: none;
           border-right: 1px solid #2A2A2A;
-          padding: 17px 18px;
-          font-size: 14px;
+          padding: 17px 15px;
+          font-size: 13px;
           background: #141414;
           color: #D6D6D6;
           outline: none;
+          min-width: 0;
         }
 
         .dashboard-search input::placeholder {
@@ -461,6 +637,29 @@ export default function AccountPage() {
           font-weight: 900;
           cursor: pointer;
           letter-spacing: .4px;
+        }
+
+        .status-pill {
+          border: 1px solid #2f855a;
+          color: #38A169;
+          border-radius: 16px;
+          padding: 0 15px;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .5px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-width: 96px;
+          background: #111;
+        }
+
+        .status-pill span {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #38A169;
         }
 
         .stats {
@@ -656,6 +855,31 @@ export default function AccountPage() {
           font-size: 22px;
         }
 
+        @media (max-width: 1180px) {
+          .top-tools {
+            grid-template-columns: 1fr;
+          }
+
+          .status-pill {
+            height: 46px;
+            width: 100%;
+          }
+
+          .dashboard-search {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-search input,
+          .dashboard-search select {
+            border-right: none;
+            border-bottom: 1px solid #2A2A2A;
+          }
+
+          .dashboard-search button {
+            padding: 16px;
+          }
+        }
+
         @media (max-width: 1050px) {
           .dashboard {
             grid-template-columns: 1fr;
@@ -665,19 +889,6 @@ export default function AccountPage() {
           .stats,
           .perf-grid {
             grid-template-columns: 1fr;
-          }
-
-          .dashboard-search {
-            grid-template-columns: 1fr;
-          }
-
-          .dashboard-search input {
-            border-right: none;
-            border-bottom: 1px solid #2A2A2A;
-          }
-
-          .dashboard-search button {
-            padding: 16px;
           }
 
           .nav-links a:not(.yellow-link):not(.login-icon),
