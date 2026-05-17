@@ -37,7 +37,29 @@ function extractContacts(text) {
   return [...new Set(contacts)].slice(0, 20);
 }
 
-async function scanWebsite(url) {
+function extractInternalLinks(html, baseUrl) {
+  const matches = html.match(/href="([^"]+)"/gi) || [];
+
+  const links = matches
+    .map((match) => {
+      const url = match.replace(/href=|"/gi, "");
+
+      if (url.startsWith("/")) {
+        return baseUrl.replace(/\/$/, "") + url;
+      }
+
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+  return [...new Set(links)].slice(0, 15);
+}
+
+async function fetchPage(url) {
   try {
     const response = await fetch(url, {
       headers: {
@@ -49,15 +71,19 @@ async function scanWebsite(url) {
     const html = await response.text();
 
     return {
+      html,
       emails: extractEmails(html),
       phones: extractPhones(html),
-      contacts: extractContacts(html)
+      contacts: extractContacts(html),
+      links: extractInternalLinks(html, url)
     };
   } catch (error) {
     return {
+      html: "",
       emails: [],
       phones: [],
       contacts: [],
+      links: [],
       error: error.message
     };
   }
@@ -92,50 +118,35 @@ export default async function handler(req, res) {
   const results = [];
 
   for (const dealer of crawlTargets) {
-    const paths = [
-      "",
-      "/contact",
-      "/contact-us",
-      "/locations",
-      "/about",
-      "/team",
-      "/staff"
-    ];
-
     let allEmails = [];
     let allPhones = [];
     let allContacts = [];
-    let errors = [];
+    let scannedLinks = [];
 
-    for (const path of paths) {
-      const targetUrl =
-        dealer.website.replace(/\/$/, "") + path;
+    const homepage = await fetchPage(dealer.website);
 
-      const scan = await scanWebsite(targetUrl);
+    allEmails.push(...homepage.emails);
+    allPhones.push(...homepage.phones);
+    allContacts.push(...homepage.contacts);
+
+    scannedLinks.push(dealer.website);
+
+    for (const link of homepage.links.slice(0, 10)) {
+      const scan = await fetchPage(link);
+
+      scannedLinks.push(link);
 
       allEmails.push(...scan.emails);
-
       allPhones.push(...scan.phones);
-
       allContacts.push(...scan.contacts);
-
-      if (scan.error) {
-        errors.push(scan.error);
-      }
     }
-
-    allEmails = [...new Set(allEmails)];
-
-    allPhones = [...new Set(allPhones)];
-
-    allContacts = [...new Set(allContacts)];
 
     results.push({
       ...dealer,
-      emails: allEmails,
-      phones: allPhones,
-      contacts: allContacts,
-      error: errors.length ? errors[0] : null
+      emails: [...new Set(allEmails)],
+      phones: [...new Set(allPhones)],
+      contacts: [...new Set(allContacts)],
+      scannedLinks
     });
   }
 
