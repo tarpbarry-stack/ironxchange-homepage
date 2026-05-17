@@ -1,5 +1,3 @@
-import { saveDealerResults } from "../../lib/ixi-store";
-
 function extractEmails(text) {
   const matches = text.match(
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
@@ -285,8 +283,6 @@ export default async function handler(req, res) {
       scannedLinks: [...new Set(scannedLinks)]
     });
   }
-
-  saveDealerResults(results);
 
   const totalEmails = results.reduce(
     (sum, item) => sum + item.emails.length,
