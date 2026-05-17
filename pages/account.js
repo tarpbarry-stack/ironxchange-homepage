@@ -25,7 +25,8 @@ const [searchQuery, setSearchQuery] = useState("");
 });
 
         console.log("CURRENT USER RESPONSE:", response.data);
-        
+        console.log("CURRENT USER INCLUDED:", response.data.included);
+
         const currentUser = response.data.data;
         
         console.log("CURRENT USER PROFILE:", currentUser.attributes?.profile);
