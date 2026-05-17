@@ -428,24 +428,45 @@ setSavedMachines(saved);
       <a href="/saved">VIEW ALL →</a>
     </div>
 
-    <div className="activity-list">
-      {savedMachines.length > 0 ? (
-        savedMachines.slice(0, 4).map(machine => (
-          <a
-            key={machine.id || machine.title}
-            href={`/listing/${slugify(machine.title)}?from=account`}
-            className="saved-machine"
-          >
-            <img
-              src={
-                machine.imageUrl ||
-                machine.image ||
-                "/images/hero-equipment-yard.jpg"
-              }
-              alt={machine.title}
-            />
+    <div className="saved-card-list">
+  {savedMachines.length > 0 ? (
+    savedMachines.slice(0, 6).map(machine => (
+      <a
+        key={machine.id || machine.title}
+        href={`/listing/${slugify(machine.title)}?from=account`}
+        className="saved-card"
+      >
+        <img
+          src={
+            machine.imageUrl ||
+            machine.image ||
+            "/images/hero-equipment-yard.jpg"
+          }
+          alt={machine.title}
+        />
 
-            <div>
+        <div className="saved-card-body">
+          <strong>
+            {String(machine.title || "").replace(
+              /\s\d{1,3}(,\d{3})*\sHrs/i,
+              ""
+            )}
+          </strong>
+
+          <span>
+            {machine.price || "Call for Price"}
+            {machine.hours ? ` • ${machine.hours}` : ""}
+          </span>
+        </div>
+      </a>
+    ))
+  ) : (
+    <div className="saved-empty">
+      <span className="dot yellow"></span>
+      <p>Saved listings and watchlist machines will show here.</p>
+    </div>
+  )}
+</div>
               <strong>{machine.title}</strong>
               <span>
                 {machine.price || "Call for Price"}
@@ -1098,6 +1119,86 @@ main {
     font-size: 8px;
     padding: 0 7px;
   }
+
+.saved-card-list {
+  display: grid;
+  gap: 8px;
+}
+
+.saved-card {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  gap: 9px;
+  text-decoration: none;
+  color: inherit;
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.saved-card:hover {
+  background: #181818;
+  border-color: #3a3a3a;
+}
+
+.saved-card img {
+  width: 86px;
+  height: 64px;
+  object-fit: cover;
+  background: #0b0b0b;
+}
+
+.saved-card-body {
+  padding: 8px 8px 8px 0;
+  min-width: 0;
+}
+
+.saved-card-body strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-bottom: 5px;
+}
+
+.saved-card-body span {
+  display: block;
+  color: #FFC400;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.saved-empty {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 8px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .saved-card-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .saved-card {
+    min-width: 220px;
+    grid-template-columns: 1fr;
+  }
+
+  .saved-card img {
+    width: 100%;
+    height: 120px;
+  }
+
+  .saved-card-body {
+    padding: 8px;
+  }
+}
 
   .table-row {
     grid-template-columns: minmax(150px, 1fr) 58px 70px 34px 56px 86px;
