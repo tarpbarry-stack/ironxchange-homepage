@@ -232,7 +232,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   myListings.map((listing) => (
     <div className="table-row" key={listing.id}>
       <span>{listing.title}</span>
-     <input
+ 
   <input
   className="price-input"
   defaultValue={Number(
