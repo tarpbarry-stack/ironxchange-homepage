@@ -496,4 +496,130 @@ export default function PostFreePage() {
           }
 
           .upload-box input {
-            display
+            display: none;
+}
+
+.upload-box i {
+  font-size: 28px;
+  color: ${BRAND_YELLOW};
+  margin-bottom: 10px;
+}
+
+.upload-box strong {
+  display: block;
+  color: #F2F2F2;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.upload-box p {
+  margin: 0;
+  color: #777;
+  font-size: 11px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.photo-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
+}
+
+.submit-btn {
+  width: 100%;
+  border: none;
+  background: ${BRAND_YELLOW};
+  color: #050505;
+  font-weight: 900;
+  letter-spacing: .45px;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.preview-card {
+  border: 1px solid #282828;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #101010;
+}
+
+.preview-image {
+  height: 240px;
+  background: #0B0B0B;
+  display: grid;
+  place-items: center;
+  color: #666;
+}
+
+.preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-body {
+  padding: 12px;
+}
+
+.preview-body h3 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.preview-body strong {
+  display: block;
+  margin-top: 8px;
+  color: ${BRAND_YELLOW};
+  font-size: 20px;
+}
+
+.preview-body p {
+  margin: 6px 0 0;
+  color: #8A8A8A;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .nav {
+    padding: 12px 4%;
+  }
+
+  .logo-img {
+    height: 34px;
+  }
+}
+        `}</style>
+      </main>
+    </>
+  );
+}
