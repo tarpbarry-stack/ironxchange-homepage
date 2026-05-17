@@ -700,7 +700,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
         .table-row {
   display: grid;
-grid-template-columns: 185px 70px 74px 36px 62px 74px;
+  grid-template-columns: 185px 70px 74px 36px 62px 98px;
   gap 6px;
   align-items: center;
   padding: 11px 10px;
@@ -821,29 +821,22 @@ grid-template-columns: 185px 70px 74px 36px 62px 74px;
   background: rgba(56, 161, 105, .08);
 }
 
-.action-buttons {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.action-buttons a,
-.action-buttons button {
-  border: 1px solid #2A2A2A;
+.action-select {
+  width: 92px;
+  height: 30px;
   background: #101010;
-  color: #f2f2f2;
+  border: 1px solid #2A2A2A;
   border-radius: 8px;
-   padding: 6px 6px;
+  color: #f2f2f2;
   font-size: 9px;
   font-weight: 900;
-  text-decoration: none;
+  padding: 0 8px;
+  outline: none;
   cursor: pointer;
 }
 
-.action-buttons a:hover,
-.action-buttons button:hover {
+.action-select:focus {
   border-color: #FFC400;
-  color: #FFC400;
 }
         .activity-list {
           display: grid;
