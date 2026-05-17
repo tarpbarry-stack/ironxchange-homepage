@@ -305,4 +305,4 @@ const cellStyle = {
   padding: "12px",
   textAlign: "left",
   verticalAlign: "top"
-};
+}; 
