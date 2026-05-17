@@ -663,9 +663,20 @@ export default function AccountPage() {
         }
 
        .status-pill {
-  min-width: 74px;
+  border: 1px solid #2f855a;
+  color: #38A169;
+  border-radius: 14px;
   padding: 0 10px;
   font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 74px;
+  background: #111;
+}
 
         .status-pill span {
           width: 7px;
