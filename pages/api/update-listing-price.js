@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     const response = await fetch(
       "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
       {
-        method: "PATCH",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/vnd.api+json",
