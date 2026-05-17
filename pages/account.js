@@ -281,7 +281,7 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 >
   {listing.age ?? "—"}
 </span>
-      <span>Active</span>
+      <span className="listing-status active">ACTIVE</span>
       <span>—</span>
       <span>
         <a href={listing.link}>View</a>
@@ -778,6 +778,21 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
 .age-red {
   color: #E53E3E;
   font-weight: 900;
+}
+
+.listing-status {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+
+.listing-status.active {
+  border: 1px solid #2f855a;
+  color: #38A169;
+  background: rgba(56, 161, 105, .08);
 }
         .activity-list {
           display: grid;
