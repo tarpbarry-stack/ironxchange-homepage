@@ -83,19 +83,25 @@ export default function AccountPage() {
         const allListingsRes = await fetch("/api/listings");
         const allListingsData = await allListingsRes.json();
 
-        const savedIds = getSavedListingIds(
-          currentUser.attributes?.profile || {}
-        );
+       const savedIds = getSavedListingIds(
+  currentUser.attributes?.profile || {}
+);
 
-        const saved = Array.isArray(allListingsData)
-          ? allListingsData.filter(item =>
-              savedIds.includes(String(item.id)) ||
-              savedIds.includes(String(item.uuid)) ||
-              savedIds.includes(String(item.listingId))
-            )
-          : [];
+console.log("ACCOUNT SAVED IDS:", savedIds);
+console.log("ACCOUNT ALL LISTINGS SAMPLE:", allListingsData?.[0]);
 
-        setSavedMachines(saved);
+const saved = Array.isArray(allListingsData)
+  ? allListingsData.filter(item =>
+      savedIds.includes(String(item.id)) ||
+      savedIds.includes(String(item.uuid)) ||
+      savedIds.includes(String(item.listingId)) ||
+      savedIds.includes(String(item.sharetribeId))
+    )
+  : [];
+
+console.log("ACCOUNT MATCHED SAVED MACHINES:", saved);
+
+setSavedMachines(saved);
       } catch {
         window.location.href = `/login?next=${encodeURIComponent("/account")}`;
       } finally {
