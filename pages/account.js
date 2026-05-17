@@ -5,11 +5,11 @@ const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
 export default function AccountPage() {
-const [loading, setLoading] = useState(true);
-const [user, setUser] = useState(null);
-const [myListings, setMyListings] = useState([]);
-const [savedMachines, setSavedMachines] = useState([]);
-const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [myListings, setMyListings] = useState([]);
+  const [savedMachines, setSavedMachines] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function loadAccount() {
@@ -21,22 +21,15 @@ const [searchQuery, setSearchQuery] = useState("");
         });
 
         const response = await sdk.currentUser.show({
-  include: ["profileImage"]
-});
-
-        console.log("CURRENT USER RESPONSE:", response.data);
-        console.log("CURRENT USER INCLUDED:", response.data.included);
+          include: ["profileImage"]
+        });
 
         const currentUser = response.data.data;
-        
-        console.log("CURRENT USER PROFILE:", currentUser.attributes?.profile);
-
-        console.log("CURRENT USER FULL:", currentUser);
 
         setUser({
-  ...currentUser,
-  included: response.data.included || []
-});
+          ...currentUser,
+          included: response.data.included || []
+        });
 
         const userId = currentUser.id?.uuid || currentUser.id;
 
@@ -80,20 +73,26 @@ const [searchQuery, setSearchQuery] = useState("");
   }
 
   const profile = user?.attributes?.profile || {};
-const protectedData = user?.attributes?.profile?.protectedData || {};
+  const protectedData = profile?.protectedData || {};
 
-const displayName = profile.displayName || "IronXchange User";
-const companyName = profile.abbreviatedName || "";
-const phoneNumber = protectedData.phoneNumber || "";
+  const displayName = profile?.displayName || "IronXchange User";
+  const companyName = profile?.abbreviatedName || "";
+  const phoneNumber = protectedData?.phoneNumber || "";
 
-const profileImage = user?.profileImage || user?.relationships?.profileImage?.data || null;
+  const imageId = user?.relationships?.profileImage?.data?.id?.uuid || null;
 
-const logoUrl =
-  profileImage?.attributes?.variants?.default?.url ||
-  profileImage?.attributes?.variants?.squareSmall?.url ||
-  profileImage?.attributes?.variants?.squareSmall2x?.url ||
-  null;
-  
+  const profileImage = user?.included?.find(
+    item => item?.type === "image" && item?.id?.uuid === imageId
+  );
+
+  const variants = profileImage?.attributes?.variants || {};
+
+  const logoUrl =
+    variants?.default?.url ||
+    variants?.squareSmall?.url ||
+    variants?.squareSmall2x?.url ||
+    null;
+
   if (loading) {
     return (
       <main className="loading">
