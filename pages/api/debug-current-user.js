@@ -1,4 +1,4 @@
-import SharetribeSdk from "sharetribe-flex-sdk";
+import * as SharetribeSdk from "sharetribe-flex-sdk";
 
 export default async function handler(req, res) {
   try {
