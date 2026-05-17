@@ -458,9 +458,7 @@ setSavedMachines(saved);
             {machine.hours ? ` • ${machine.hours}` : ""}
           </span>
         </div>
-      </a>
-    ))
-  ) : (
+      
     <div className="saved-empty">
       <span className="dot yellow"></span>
       <p>Saved listings and watchlist machines will show here.</p>
