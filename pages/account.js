@@ -777,6 +777,10 @@ export default function AccountPage() {
   align-items: stretch;
 }
 
+.side-panel {
+  min-height: 0;
+}
+
         .panel {
           padding: 8px 10px;
         }
