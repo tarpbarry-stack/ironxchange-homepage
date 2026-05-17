@@ -131,11 +131,33 @@ export default function AccountPage() {
           </aside>
 
           <section className="content">
-            <div className="topline">
-              <div>
-                <h1>{companyName !== "Company not added" ? companyName : displayName}</h1>
-                <p>{email}</p>
-              </div>
+            <div className="dashboard-search">
+  <input
+    type="text"
+    placeholder="Search equipment — Deere 772GP, WA475, crusher..."
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && e.currentTarget.value.trim()) {
+        window.location.href = `/browse?keywords=${encodeURIComponent(
+          e.currentTarget.value.trim()
+        )}`;
+      }
+    }}
+  />
+
+  <button
+    type="button"
+    onClick={() => {
+      const input = document.querySelector(".dashboard-search input");
+      const value = input?.value?.trim();
+
+      window.location.href = value
+        ? `/browse?keywords=${encodeURIComponent(value)}`
+        : "/browse";
+    }}
+  >
+    SEARCH
+  </button>
+</div>
 
               <div className="status-pill">
                 <span></span>
@@ -421,6 +443,40 @@ export default function AccountPage() {
           gap: 18px;
           margin-bottom: 18px;
         }
+
+        .dashboard-search {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  background: #141414;
+  border: 1px solid #282828;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  box-shadow: 0 16px 45px rgba(0,0,0,.25);
+}
+
+.dashboard-search input {
+  border: none;
+  border-right: 1px solid #2A2A2A;
+  padding: 17px 18px;
+  font-size: 14px;
+  background: #141414;
+  color: #D6D6D6;
+  outline: none;
+}
+
+.dashboard-search input::placeholder {
+  color: #777;
+}
+
+.dashboard-search button {
+  border: none;
+  background: ${BRAND_YELLOW};
+  color: #050505;
+  font-weight: 900;
+  cursor: pointer;
+  letter-spacing: .4px;
+}
 
         h1 {
           margin: 0;
