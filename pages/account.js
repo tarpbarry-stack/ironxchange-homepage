@@ -233,10 +233,39 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
     <div className="table-row" key={listing.id}>
       <span>{listing.title}</span>
      <input
+  <input
   className="price-input"
   defaultValue={Number(
-  listing.price.replace("$", "").replace(/,/g, "")
-).toLocaleString()}
+    listing.price.replace("$", "").replace(/,/g, "")
+  ).toLocaleString()}
+  onKeyDown={async (e) => {
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const input = e.currentTarget;
+    const newPrice = input.value.replace(/,/g, "").trim();
+
+    input.classList.remove("saved", "error");
+
+    const response = await fetch("/api/update-listing-price", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id,
+        price: newPrice
+      })
+    });
+
+    if (response.ok) {
+      input.value = Number(newPrice).toLocaleString();
+      input.classList.add("saved");
+    } else {
+      input.classList.add("error");
+    }
+  }}
 />
       <span>{listing.age ?? "—"}</span>
       <span>Active</span>
@@ -691,6 +720,15 @@ setMyListings(Array.isArray(listingsData) ? listingsData : []);
   border-color: #FFC400;
 }
 
+.price-input.saved {
+  border-color: #38A169;
+  box-shadow: 0 0 0 1px rgba(56, 161, 105, .35);
+}
+
+.price-input.error {
+  border-color: #E53E3E;
+  box-shadow: 0 0 0 1px rgba(229, 62, 62, .35);
+}
         .activity-list {
           display: grid;
           gap: 14px;
