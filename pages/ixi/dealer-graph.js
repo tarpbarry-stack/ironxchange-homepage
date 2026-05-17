@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
   const [rows, setRows] = useState([]);
   const [crawlResults, setCrawlResults] = useState([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(
+      "ixiDealerGraphResults"
+    );
+
+    if (saved) {
+      setCrawlResults(JSON.parse(saved));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "ixiDealerGraphResults",
+      JSON.stringify(crawlResults)
+    );
+  }, [crawlResults]);
 
   const totalEmails = crawlResults.reduce(
     (sum, item) => sum + (item.emails?.length || 0),
@@ -103,6 +120,14 @@ export default function DealerGraph() {
     document.body.removeChild(link);
   }
 
+  function clearResults() {
+    localStorage.removeItem("ixiDealerGraphResults");
+
+    setCrawlResults([]);
+
+    setStatus("Dealer Graph results cleared.");
+  }
+
   return (
     <main style={pageStyle}>
       <a href="/ixi" style={backLinkStyle}>
@@ -161,6 +186,10 @@ export default function DealerGraph() {
 
         <button style={buttonStyle} onClick={handleExport}>
           Export Contacts
+        </button>
+
+        <button style={dangerButton} onClick={clearResults}>
+          Clear Results
         </button>
 
         {status && (
@@ -253,6 +282,15 @@ const buttonStyle = {
   border: "none",
   padding: "14px 22px",
   marginRight: "15px",
+  borderRadius: "8px",
+  cursor: "pointer"
+};
+
+const dangerButton = {
+  background: "#7a1f1f",
+  color: "#fff",
+  border: "none",
+  padding: "14px 22px",
   borderRadius: "8px",
   cursor: "pointer"
 };
