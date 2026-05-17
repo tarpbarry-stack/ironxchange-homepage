@@ -33,6 +33,78 @@ export default function DealerGraph() {
     setStatus(`Loaded ${parsedRows.length} rows`);
   }
 
+  async function handleCrawl() {
+    if (rows.length === 0) {
+      setStatus("Upload a dealer CSV first.");
+      return;
+    }
+
+    setStatus("Scanning dealer websites...");
+
+    const response = await fetch("/api/dealer-crawl", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ rows })
+    });
+
+    const data = await response.json();
+
+    setCrawlResults(data.results || []);
+
+    setTotalEmails(data.totalEmails || 0);
+
+    setTotalPhones(data.totalPhones || 0);
+
+    setStatus(data.message);
+  }
+
+  function handleExport() {
+    if (crawlResults.length === 0) {
+      setStatus("No crawl results to export.");
+      return;
+    }
+
+    const header =
+      "Company,Website,Category,State,Contacts,Emails,Phones\n";
+
+    const csvRows = crawlResults.map((dealer) => {
+      return [
+        `"${dealer.company || ""}"`,
+        `"${dealer.website || ""}"`,
+        `"${dealer.category || ""}"`,
+        `"${dealer.state || ""}"`,
+        `"${(dealer.contacts || []).join(" | ")}"`,
+        `"${(dealer.emails || []).join(" | ")}"`,
+        `"${(dealer.phones || []).join(" | ")}"`
+      ].join(",");
+    });
+
+    const csvContent = header + csvRows.join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      "dealer-graph-results.csv"
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+  }
+
   return (
     <main style={pageStyle}>
       <a href="/ixi" style={backLinkStyle}>
@@ -89,85 +161,11 @@ export default function DealerGraph() {
           Upload Dealer CSV
         </button>
 
-        <button
-          style={buttonStyle}
-          onClick={async () => {
-            if (rows.length === 0) {
-              setStatus("Upload a dealer CSV first.");
-              return;
-            }
-
-            setStatus("Scanning dealer websites...");
-
-            const response = await fetch("/api/dealer-crawl", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ rows })
-            });
-
-            const data = await response.json();
-
-            setCrawlResults(data.results || []);
-
-            setTotalEmails(data.totalEmails || 0);
-
-            setTotalPhones(data.totalPhones || 0);
-
-            setStatus(data.message);
-          }}
-        >
+        <button style={buttonStyle} onClick={handleCrawl}>
           Start Crawl
         </button>
 
-        <button
-          style={buttonStyle}
-          onClick={() => {
-            if (crawlResults.length === 0) {
-              setStatus("No crawl results to export.");
-              return;
-            }
-
-            const header =
-              "Company,Website,Category,State,Contacts,Emails,Phones\n";
-
-            const rows = crawlResults.map((dealer) => {
-              return [
-                dealer.company,
-                dealer.website,
-                dealer.category,
-                dealer.state,
-                (dealer.contacts || []).join(" | "),
-                (dealer.emails || []).join(" | "),
-                (dealer.phones || []).join(" | ")
-              ].join(",");
-            });
-
-            const csvContent = header + rows.join("\n");
-
-            const blob = new Blob([csvContent], {
-              type: "text/csv;charset=utf-8;"
-            });
-
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-
-            link.href = url;
-
-            link.setAttribute(
-              "download",
-              "dealer-graph-results.csv"
-            );
-
-            document.body.appendChild(link);
-
-            link.click();
-
-            document.body.removeChild(link);
-          }}
-        >
+        <button style={buttonStyle} onClick={handleExport}>
           Export Contacts
         </button>
 
@@ -305,4 +303,4 @@ const cellStyle = {
   padding: "12px",
   textAlign: "left",
   verticalAlign: "top"
-}; 
+};
