@@ -616,17 +616,33 @@ export default function AccountPage() {
         }
 
         .dashboard-search input,
-        .dashboard-search select {
-          border: none;
-          border-right: 1px solid #2A2A2A;
-          padding: 17px 15px;
-          font-size: 13px;
-          background: #141414;
-          color: #D6D6D6;
-          outline: none;
-          min-width: 0;
-        }
+.dashboard-search select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-right: 1px solid #2A2A2A;
+  padding: 15px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .25px;
+  background: #141414;
+  color: #D6D6D6;
+  outline: none;
+  min-width: 0;
+  text-transform: uppercase;
+}
 
+.dashboard-search select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #777 50%),
+    linear-gradient(135deg, #777 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 30px;
+}
         .dashboard-search input::placeholder {
           color: #777;
         }
