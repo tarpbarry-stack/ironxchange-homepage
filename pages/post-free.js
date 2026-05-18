@@ -12415,7 +12415,13 @@ function cleanNumber(value = "") {
 }
 
 export default function PostFreePage() {
-  const [category, setCategory] = useState("EXCAVATORS");
+  const [category, setCategory] = useState(() => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("ix-category") || "EXCAVATORS";
+  }
+
+  return "EXCAVATORS";
+});
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
@@ -12470,13 +12476,13 @@ export default function PostFreePage() {
 const filteredKeywords = useMemo(() => {
   const search = keywordSearch.trim().toLowerCase();
 
-  if (!search) return availableKeywords.slice(0, 80);
+  if (!search) return availableKeywords.slice(0, 500);
 
   return availableKeywords
     .filter(keyword =>
       keyword.toLowerCase().includes(search)
     )
-    .slice(0, 120);
+    .slice(0, 500);
 }, [availableKeywords, keywordSearch]);
 
 function toggleKeyword(keyword) {
@@ -12529,13 +12535,22 @@ console.log("IMAGE IDS:", imageIds);
 
     console.log("LISTING CREATED WITH PHOTOS:", response);
 
-    alert("Listing created with photos.");
+    const listingId = response.data.data.id.uuid;
+
+alert("Listing created with photos.");
+
+window.location.href = `/account`;
 
   } catch (err) {
     console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
 
     alert(JSON.stringify(err));
   }
+}
+function removePhoto(indexToRemove) {
+  setPhotos(current =>
+    current.filter((_, index) => index !== indexToRemove)
+  );
 }
   
 function handlePhotos(e) {
@@ -12611,7 +12626,11 @@ return (
                 <select
                   value={category}
                   onChange={e => {
-                    setCategory(e.target.value);
+                    const nextCategory = e.target.value;
+
+                    setCategory(nextCategory);
+
+                    localStorage.setItem("ix-category", nextCategory);
                     setMake("");
                     setModel("");
                   }}
@@ -12710,12 +12729,21 @@ return (
               {photos.length > 0 && (
                 <div className="photo-grid">
                   {photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo.url}
-                      alt={`Upload ${index + 1}`}
-                    />
-                  ))}
+  <div className="photo-thumb" key={index}>
+    <img
+      src={photo.url}
+      alt={`Upload ${index + 1}`}
+    />
+
+    <button
+      type="button"
+      className="delete-photo-btn"
+      onClick={() => removePhoto(index)}
+    >
+      DELETE
+    </button>
+  </div>
+))}
                 </div>
               )}
             </div>
@@ -13067,6 +13095,24 @@ return (
   margin: 0;
   color: #777;
   font-size: 11px;
+}
+
+.photo-thumb {
+  position: relative;
+}
+
+.delete-photo-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  border: none;
+  background: #B91C1C;
+  color: white;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .photo-grid {
