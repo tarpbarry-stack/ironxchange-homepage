@@ -487,8 +487,10 @@ Listed on IronXchange.
       ))
 }
   </div>
-
-</section>
+</div>
+    
+    </section>
+    
     <section className="panel edit-panel">
   <div className="panel-head">
     <h2>Edit Listing</h2>
