@@ -12438,31 +12438,6 @@ export default function PostFreePage() {
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const [photos, setPhotos] = useState([]);
-const [isPosting, setIsPosting] = useState(false);
-const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
-const [loggedIn, setLoggedIn] = useState(false);
-
-useEffect(() => {
-  async function checkAuth() {
-    try {
-      const SharetribeSdk = await import("sharetribe-flex-sdk");
-
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
-
-      await sdk.currentUser.show();
-
-      setLoggedIn(true);
-    } catch {
-      setLoggedIn(false);
-    }
-  }
-
-  checkAuth();
-}, []);
-
 const taxonomy = taxonomyMap[category] || [];
   
   const taxonomy = taxonomyMap[category] || [];
