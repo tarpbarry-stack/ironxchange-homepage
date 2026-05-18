@@ -139,9 +139,9 @@ export default function InquirePage() {
           </a>
 
           <div className="nav-links">
-            <a href={`${STAGING}/l/new`} className="yellow-link">
-              POST FREE
-            </a>
+            <a href="/post-free" className="yellow-link">
+  POST FREE
+</a>
 
             <a href="/saved" className="login-icon" aria-label="Saved Listings">
               <i className="fa-regular fa-star"></i>
