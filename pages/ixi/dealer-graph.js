@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -6,21 +6,6 @@ export default function DealerGraph() {
   const [rows, setRows] = useState([]);
   const [crawlResults, setCrawlResults] = useState([]);
   const [isCrawling, setIsCrawling] = useState(false);
-
-  useEffect(() => {
-    async function loadSavedResults() {
-      try {
-        const response = await fetch("/api/dealer-results");
-        const data = await response.json();
-
-        setCrawlResults(data.results || []);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadSavedResults();
-  }, []);
 
   const totalEmails = crawlResults.reduce(
     (sum, item) => sum + (item.emails?.length || 0),
@@ -55,7 +40,34 @@ export default function DealerGraph() {
     );
 
     setRows(parsedRows);
+
     setStatus(`Loaded ${parsedRows.length} CSV rows.`);
+  }
+
+  async function handleLoadDiscoveryTargets() {
+    const response = await fetch("/api/discovery-targets");
+
+    const data = await response.json();
+
+    const header = [
+      "company",
+      "website",
+      "category",
+      "state"
+    ];
+
+    const targetRows = data.targets.map((target) => [
+      target.company,
+      target.website,
+      target.category,
+      target.state
+    ]);
+
+    setRows([header, ...targetRows]);
+
+    setStatus(
+      `Loaded ${targetRows.length} discovery targets`
+    );
   }
 
   async function handleCrawl() {
@@ -65,6 +77,7 @@ export default function DealerGraph() {
     }
 
     setIsCrawling(true);
+
     setStatus("Scanning dealer websites...");
 
     try {
@@ -78,7 +91,13 @@ export default function DealerGraph() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setStatus(data.message || "Crawl failed.");
+        return;
+      }
+
       setCrawlResults(data.results || []);
+
       setStatus(data.message || "Crawl complete.");
     } catch (error) {
       setStatus(`Crawl error: ${error.message}`);
@@ -116,14 +135,27 @@ export default function DealerGraph() {
     });
 
     const url = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "dealer-graph-results.csv");
+
+    link.setAttribute(
+      "download",
+      "dealer-graph-results.csv"
+    );
 
     document.body.appendChild(link);
+
     link.click();
+
     document.body.removeChild(link);
+  }
+
+  function clearResults() {
+    setCrawlResults([]);
+
+    setStatus("Dealer Graph results cleared.");
   }
 
   return (
@@ -150,18 +182,27 @@ export default function DealerGraph() {
         <h2>Import Dealer List</h2>
 
         <p style={mutedText}>
-          Upload a CSV with columns: company, website, category, state.
+          Upload a CSV or load discovery targets.
         </p>
 
         <input
           type="file"
           accept=".csv"
-          onChange={(event) => setSelectedFile(event.target.files[0])}
+          onChange={(event) =>
+            setSelectedFile(event.target.files[0])
+          }
         />
 
         <div style={buttonRow}>
           <button style={buttonStyle} onClick={handleUpload}>
             Upload Dealer CSV
+          </button>
+
+          <button
+            style={buttonStyle}
+            onClick={handleLoadDiscoveryTargets}
+          >
+            Load Discovery Targets
           </button>
 
           <button
@@ -174,6 +215,10 @@ export default function DealerGraph() {
 
           <button style={buttonStyle} onClick={handleExport}>
             Export Contacts
+          </button>
+
+          <button style={dangerButton} onClick={clearResults}>
+            Clear Results
           </button>
         </div>
 
@@ -202,18 +247,25 @@ export default function DealerGraph() {
               {crawlResults.map((dealer, index) => (
                 <tr key={index}>
                   <td style={cellStyle}>{dealer.company || "—"}</td>
+
                   <td style={cellStyle}>{dealer.website || "—"}</td>
+
                   <td style={cellStyle}>{dealer.category || "—"}</td>
+
                   <td style={cellStyle}>{dealer.state || "—"}</td>
+
                   <td style={cellStyle}>
                     {(dealer.contacts || []).join(", ") || "—"}
                   </td>
+
                   <td style={cellStyle}>
                     {(dealer.emails || []).join(", ") || "—"}
                   </td>
+
                   <td style={cellStyle}>
                     {(dealer.phones || []).join(", ") || "—"}
                   </td>
+
                   <td style={cellStyle}>
                     {(dealer.scannedLinks || []).length}
                   </td>
@@ -238,6 +290,7 @@ function StatCard({ label, value }) {
 
 function cleanCsv(value) {
   const text = String(value || "").replace(/"/g, '""');
+
   return `"${text}"`;
 }
 
@@ -284,6 +337,15 @@ const buttonRow = {
 
 const buttonStyle = {
   background: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "14px 22px",
+  borderRadius: "8px",
+  cursor: "pointer"
+};
+
+const dangerButton = {
+  background: "#7a1f1f",
   color: "#fff",
   border: "none",
   padding: "14px 22px",
