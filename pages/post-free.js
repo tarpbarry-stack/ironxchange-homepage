@@ -12773,7 +12773,7 @@ return (
       className="delete-photo-btn"
       onClick={() => removePhoto(index)}
     >
-      DELETE
+      ✕
     </button>
   </div>
 ))}
@@ -13179,32 +13179,59 @@ return (
   position: relative;
 }
 
+.photo-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.photo-grid::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 999px;
+}
+
+.photo-grid::-webkit-scrollbar-thumb {
+  background: #3A3A3A;
+  border-radius: 999px;
+}
+
+.photo-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 .delete-photo-btn {
   position: absolute;
-  right: 5px;
-  bottom: 32px;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: #B91C1C;
   color: white;
-  border-radius: 6px;
-  padding: 4px 6px;
-  font-size: 9px;
+  border-radius: 50%;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 3;
 }
 
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   margin-top: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .photo-grid img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #2A2A2A;
 }
 
