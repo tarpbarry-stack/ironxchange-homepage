@@ -12639,6 +12639,24 @@ function handlePhotos(e) {
   ]);
 }
 
+function handlePhotoDrop(e) {
+  e.preventDefault();
+
+  const files = Array.from(e.dataTransfer.files || []).filter(file =>
+    file.type.startsWith("image/")
+  );
+
+  const mapped = files.slice(0, 24).map(file => ({
+    file,
+    url: URL.createObjectURL(file)
+  }));
+
+  setPhotos(current => [
+    ...current,
+    ...mapped
+  ]);
+}
+  
 return (
   <>
       <Head>
@@ -12756,7 +12774,7 @@ return (
                 <input
                   value={hours}
                   onChange={e => setHours(cleanNumber(e.target.value).slice(0,5))}
-                  placeholder="4987"
+                  placeholder="2222"
                 />
               </label>
 
@@ -12765,7 +12783,7 @@ return (
                 <input
                   value={price}
                   onChange={e => setPrice(cleanNumber(e.target.value))}
-                  placeholder="68900"
+                  placeholder="99999"
                 />
               </label>
 
@@ -12785,7 +12803,12 @@ return (
                 <span>{photos.length} Uploaded</span>
               </div>
 
-              <label className="upload-box">
+              <label 
+                className="upload-box"
+                onDragOver={e => e.preventDefault()}
+                onDrop={handlePhotoDrop}
+                  >
+                  
                 <input
                   type="file"
                   multiple
@@ -12794,8 +12817,8 @@ return (
                 />
 
                 <i className="fa-regular fa-images"></i>
-                <strong>Select Photos</strong>
-                <p>Front • Rear • Sides • Cab • Meter • Engine • UC</p>
+                <strong>Select or Drop Photos</strong>
+                <p>Drag images here or select multiple photos at once</p>
               </label>
 
               {photos.length > 0 && (
