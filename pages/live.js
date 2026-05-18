@@ -106,6 +106,43 @@ export default function ListingLivePage() {
 
   const listingUrl = listing ? getListingUrl(listing) : "";
 
+  const listingImages = listing ? getListingImages(listing) : [];
+
+const sellerName =
+  clean(listing?.sellerName) ||
+  clean(listing?.sellerCompany) ||
+  "IronXchange Seller";
+
+const sellerLogo =
+  listing?.sellerLogo ||
+  listing?.profileImage ||
+  "";
+
+async function downloadHeroImage() {
+  const hero = listingImages[0] || listing?.imageUrl || listing?.image;
+
+  if (!hero) {
+    alert("No image found.");
+    return;
+  }
+
+  await downloadImage(hero, `${slugify(listing.title)}-hero.jpg`);
+}
+
+async function downloadAllPhotos() {
+  if (listingImages.length === 0) {
+    alert("No photos found.");
+    return;
+  }
+
+  for (let i = 0; i < listingImages.length; i += 1) {
+    await downloadImage(
+      listingImages[i],
+      `${slugify(listing.title)}-${i + 1}.jpg`
+    );
+  }
+}
+
   async function copyText(label, text) {
     try {
       await navigator.clipboard.writeText(text);
@@ -267,6 +304,41 @@ Listed on IronXchange.
                   <strong>{listing.location || "—"}</strong>
                 </div>
 
+<div className="seller-mini">
+  {sellerLogo ? (
+    <img src={sellerLogo} alt={sellerName} />
+  ) : (
+    <i className="fa-regular fa-user"></i>
+  )}
+
+  <div>
+    <span>Seller</span>
+    <strong>{sellerName}</strong>
+  </div>
+</div>
+
+<div className="performance-grid">
+  <div>
+    <span>Views</span>
+    <strong>—</strong>
+  </div>
+
+  <div>
+    <span>Saves</span>
+    <strong>—</strong>
+  </div>
+
+  <div>
+    <span>Inquiries</span>
+    <strong>—</strong>
+  </div>
+
+  <div>
+    <span>Shares</span>
+    <strong>—</strong>
+  </div>
+</div>
+                
                 <button
                   type="button"
                   className="copy-link"
@@ -274,6 +346,19 @@ Listed on IronXchange.
                 >
                   {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
                 </button>
+
+<button type="button" className="secondary-btn" onClick={downloadHeroImage}>
+  DOWNLOAD HERO IMAGE
+</button>
+
+<button type="button" className="secondary-btn" onClick={downloadAllPhotos}>
+  DOWNLOAD ALL PHOTOS
+</button>
+
+<a href={`/post-free?edit=${listing.id}`} className="secondary-btn">
+  EDIT LISTING
+</a>
+                    
               </div>
             </section>
 
@@ -581,6 +666,93 @@ Listed on IronXchange.
           width: 100%;
         }
 
+        .secondary-btn {
+  width: 100%;
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  text-decoration: none;
+  background: #101010;
+  color: #f2f2f2;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  cursor: pointer;
+}
+
+.seller-mini {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 14px;
+  align-items: center;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 16px;
+  margin: 18px 0;
+}
+
+.seller-mini img {
+  max-width: 110px;
+  max-height: 58px;
+  object-fit: contain;
+  display: block;
+}
+
+.seller-mini i {
+  width: 58px;
+  height: 58px;
+  border: 1px solid #555;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #aaa;
+}
+
+.seller-mini span {
+  display: block;
+  color: #888;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 5px;
+}
+
+.seller-mini strong {
+  color: #f2f2f2;
+  font-size: 15px;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.performance-grid div {
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.performance-grid span {
+  display: block;
+  color: #888;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.performance-grid strong {
+  color: #f2f2f2;
+  font-size: 17px;
+}
+
         .promote {
           padding: 24px;
         }
@@ -593,54 +765,87 @@ Listed on IronXchange.
         }
 
         .share-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-          margin-bottom: 18px;
-        }
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
 
-        .share-grid button {
-          min-height: 58px;
-          background: #101010;
-          border: 1px solid #333;
-          color: #f2f2f2;
-          border-radius: 12px;
-          padding: 14px;
-          font-size: 12px;
-          font-weight: 900;
-          letter-spacing: .35px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-        }
+.share-grid button {
+  min-height: 64px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)),
+    #101010;
+  border: 1px solid rgba(255,255,255,.11);
+  color: #f2f2f2;
+  border-radius: 14px;
+  padding: 15px 16px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
 
-        .share-grid button:hover {
-          border-color: ${BRAND_YELLOW};
-        }
+.share-grid button i {
+  color: ${BRAND_YELLOW};
+  font-size: 15px;
+}
+
+.share-grid button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,196,0,.72);
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,255,255,.02)),
+    #111;
+  box-shadow: 0 14px 34px rgba(0,0,0,.34);
+}
+
+.share-grid button:active {
+  transform: translateY(0);
+}
 
         .open-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-          border-top: 1px solid #2a2a2a;
-          padding-top: 18px;
-        }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,.09);
+  padding-top: 20px;
+}
 
-        .open-grid a {
-          text-align: center;
-          text-decoration: none;
-          color: ${BRAND_YELLOW};
-          background: #101010;
-          border: 1px solid #333;
-          border-radius: 10px;
-          padding: 13px 10px;
-          font-size: 11px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .35px;
-        }
+.open-grid a {
+  text-align: center;
+  text-decoration: none;
+  color: ${BRAND_YELLOW};
+  background: rgba(255,196,0,.045);
+  border: 1px solid rgba(255,196,0,.22);
+  border-radius: 999px;
+  padding: 12px 10px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  transition:
+    transform .14s ease,
+    background .14s ease,
+    border-color .14s ease;
+}
+
+.open-grid a:hover {
+  transform: translateY(-1px);
+  background: rgba(255,196,0,.09);
+  border-color: rgba(255,196,0,.55);
+}
 
         @media (max-width: 900px) {
           .hero {
