@@ -117,12 +117,65 @@ function getPrice(priceAmount) {
   return `$${Math.round(priceAmount / 100).toLocaleString()}`;
 }
 
+function getProfileImage(author, imageById) {
+  const profileImageId =
+    author?.relationships?.profileImage?.data?.id?.uuid ||
+    author?.relationships?.profileImage?.data?.id;
+
+  if (profileImageId && imageById[profileImageId]) {
+    return imageById[profileImageId];
+  }
+
+  return "";
+}
+
+function getSellerInfo(author, imageById) {
+  const attrs = author?.attributes || {};
+  const profile = attrs.profile || {};
+  const publicData = profile.publicData || {};
+  const protectedData = profile.protectedData || {};
+
+  const companyName =
+    publicData.companyName ||
+    publicData.company ||
+    publicData.dealerName ||
+    publicData.businessName ||
+    protectedData.companyName ||
+    "";
+
+  const displayName =
+    profile.displayName ||
+    attrs.name ||
+    companyName ||
+    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+    "Private Seller";
+
+  const sellerLocation =
+    publicData.location ||
+    publicData.sellerLocation ||
+    publicData.cityState ||
+    publicData.loc ||
+    protectedData.location ||
+    "";
+
+  const profileImage = getProfileImage(author, imageById);
+
+  return {
+    sellerName: companyName || displayName || "Private Seller",
+    sellerCompany: companyName || "",
+    sellerLocation: sellerLocation ? String(sellerLocation).toUpperCase() : "",
+    sellerLogo: profileImage,
+    profileImage,
+    authorProfile: profile
+  };
+}
+
 export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
 
     const response = await fetch(
-      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images,author",
+      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images,author,author.profileImage",
       {
         method: "GET",
         headers: {
@@ -140,15 +193,19 @@ export default async function handler(req, res) {
 
     const included = data.included || [];
     const imageById = {};
+    const authorById = {};
 
     included.forEach((asset) => {
-      if (asset.type !== "image") return;
-
       const id = getId(asset.id);
-      const url = getBestImageUrl(asset);
+      if (!id) return;
 
-      if (id && url) {
-        imageById[id] = url;
+      if (asset.type === "image") {
+        const url = getBestImageUrl(asset);
+        if (url) imageById[id] = url;
+      }
+
+      if (asset.type === "user") {
+        authorById[id] = asset;
       }
     });
 
@@ -159,6 +216,14 @@ export default async function handler(req, res) {
         const publicData = attrs.publicData || {};
         const id = getId(item.id);
 
+        const authorId =
+          item.relationships?.author?.data?.id?.uuid ||
+          item.relationships?.author?.data?.id ||
+          null;
+
+        const author = authorId ? authorById[authorId] : null;
+        const sellerInfo = getSellerInfo(author, imageById);
+
         const slug = (attrs.slug || attrs.title || "equipment")
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
@@ -166,20 +231,17 @@ export default async function handler(req, res) {
 
         const imageIds = item.relationships?.images?.data || [];
 
-const images = imageIds
-  .map((imageRef) => imageById[getId(imageRef.id)])
-  .filter(Boolean);
+        const images = imageIds
+          .map((imageRef) => imageById[getId(imageRef.id)])
+          .filter(Boolean);
 
-const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
-        
+        const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
+
         return {
-  id,
-  authorId:
-    item.relationships?.author?.data?.id?.uuid ||
-    item.relationships?.author?.data?.id ||
-    null,
-  createdAt: attrs.createdAt || attrs.created_at || null,
-  title: attrs.title || "Equipment",
+          id,
+          authorId,
+          createdAt: attrs.createdAt || attrs.created_at || null,
+          title: attrs.title || "Equipment",
           type: getCategory(publicData),
           make: getMake(publicData),
           model: getModel(publicData),
@@ -187,12 +249,13 @@ const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
           location: getLocation(publicData),
           price: getPrice(attrs.price?.amount),
           image: imageUrl,
-imageUrl,
-images,
-imageUrls: images,
-description: attrs.description || "",
-publicData,
-link: `https://staging.ironxchange.com/l/${slug}/${id}`
+          imageUrl,
+          images,
+          imageUrls: images,
+          description: attrs.description || "",
+          publicData,
+          ...sellerInfo,
+          link: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
 
