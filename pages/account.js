@@ -857,6 +857,26 @@ export default function AccountPage() {
   border-radius: 10px;
   overflow-y: auto;
   max-height: 605px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 196, 0, .45) rgba(255,255,255,.04);
+}
+
+.listing-table::-webkit-scrollbar {
+  width: 8px;
+}
+
+.listing-table::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.04);
+  border-radius: 999px;
+}
+
+.listing-table::-webkit-scrollbar-thumb {
+  background: rgba(255, 196, 0, .45);
+  border-radius: 999px;
+}
+
+.listing-table::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 196, 0, .7);
 }
 
         .table-row {
@@ -901,13 +921,9 @@ export default function AccountPage() {
           margin: 0;
         }
 
-        .machine-cell {
-  display: grid;
-  grid-template-columns: 132px 1fr;
-          gap: 8px;
-          align-items: center;
-          min-width: 0;
-        }
+       .machine-cell {
+  min-width: 0;
+}
 
         .machine-cell img {
   width: 132px;
@@ -936,10 +952,13 @@ export default function AccountPage() {
 }
 
 .machine-link span {
+  display: block;
   min-width: 0;
+  color: #f2f2f2;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.25;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .machine-link:hover span {
