@@ -15,6 +15,33 @@ function clean(value) {
   return value ? String(value).trim() : "";
 }
 
+function getListingImages(listing) {
+  return [
+    ...(Array.isArray(listing?.images) ? listing.images : []),
+    ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
+    listing?.imageUrl,
+    listing?.image
+  ].filter(Boolean);
+}
+
+async function downloadImage(url, filename) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+
+  const objectUrl = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(objectUrl);
+}
+
 function getListingUrl(listing) {
   if (!listing?.title) return "";
 
