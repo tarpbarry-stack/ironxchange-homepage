@@ -193,9 +193,9 @@ export default function AccountPage() {
           <div className="nav-links">
             <a href="/browse">SEARCH</a>
 
-            <a href={`${STAGING}/l/new`} className="yellow-link">
-              POST FREE
-            </a>
+            <a href="/post-free" className="yellow-link">
+  POST FREE
+</a>
 
             <button type="button" onClick={handleLogout} className="logout-btn">
               LOGOUT
