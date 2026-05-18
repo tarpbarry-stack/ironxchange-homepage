@@ -163,8 +163,29 @@ const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   const make = cleanText(listing.make) || "—";
   const model = cleanText(listing.model) || "—";
   const serial = cleanText(listing.serialNumber || listing.vin || listing.serial) || "Not listed";
-  const sellerName = cleanText(listing.sellerName || listing.authorName) || "Private Seller";
-  const sellerLocation = cleanText(listing.sellerLocation) || location;
+  const sellerName =
+  cleanText(
+    listing.sellerName ||
+    listing.authorName ||
+    listing.author?.profile?.displayName ||
+    listing.author?.attributes?.profile?.displayName
+  ) || "Private Seller";
+
+const sellerLocation =
+  cleanText(
+    listing.sellerLocation ||
+    listing.authorLocation ||
+    listing.author?.profile?.publicData?.location ||
+    listing.author?.attributes?.profile?.publicData?.location
+  ) || location;
+
+const sellerLogo =
+  listing.sellerLogo ||
+  listing.sellerImage ||
+  listing.authorImage ||
+  listing.author?.profileImage ||
+  listing.author?.attributes?.profileImage?.attributes?.variants?.default?.url ||
+  null;
   const description =
     cleanText(listing.description) ||
     cleanText(listing.publicData?.description) ||
@@ -429,8 +450,13 @@ function lightboxNext() {
               <h2>Contact Seller</h2>
 
               <div className="seller-row">
-                <div className="seller-avatar">
-                  <i className="fa-regular fa-user"></i>
+               <div className="seller-avatar">
+  {sellerLogo ? (
+    <img src={sellerLogo} alt={sellerName} />
+  ) : (
+    <i className="fa-regular fa-user"></i>
+  )}
+</div>
                 </div>
 
                 <div>
@@ -945,6 +971,13 @@ function lightboxNext() {
           font-size: 28px;
           color: #ddd;
         }
+
+        .seller-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 
         .seller-row strong {
           color: #f2f2f2;
