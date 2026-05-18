@@ -13155,6 +13155,13 @@ return (
   cursor: not-allowed;
 }
 
+.submit-btn:disabled {
+  background: #5A4A00;
+  color: #D7C37A;
+  cursor: not-allowed;
+  opacity: .75;
+}
+
 .preview-card {
   border: 1px solid #282828;
   border-radius: 12px;
