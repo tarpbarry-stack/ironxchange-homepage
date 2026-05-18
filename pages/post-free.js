@@ -12544,12 +12544,13 @@ alert("Listing created with photos.");
 
 window.location.href = `/account`;
 
-  } catch (err) {
-  console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
+   } catch (err) {
+    console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
 
-  setIsPosting(false);
+    setIsPosting(false);
 
-  alert(JSON.stringify(err));
+    alert(JSON.stringify(err));
+  }
 }
 
 function removePhoto(indexToRemove) {
