@@ -183,6 +183,7 @@ addActivity(
   "success",
   `Hero image downloaded — ${clean(listing?.title) || "Listing"}`
 );
+}
 
 async function downloadAllPhotos() {
   if (listingImages.length === 0) {
