@@ -12645,9 +12645,7 @@ console.log("IMAGE IDS:", imageIds);
 
     const listingId = response.data.data.id.uuid;
 
-alert("Listing created with photos.");
-
-window.location.href = `/account`;
+window.location.href = `/live?id=${listingId}`;
 
    } catch (err) {
     console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
