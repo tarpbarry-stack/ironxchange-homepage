@@ -755,10 +755,10 @@ useEffect(() => {
           color: ${BRAND_YELLOW};
         }
 
-        .content {
+       .content {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
 }
         .top-tools {
           display: grid;
@@ -827,8 +827,8 @@ useEffect(() => {
         }
 
         .stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(140px, 180px));
   gap: 6px;
   margin-bottom: 6px;
 }
@@ -872,9 +872,9 @@ useEffect(() => {
           font-size: 10px;
         }
 
-     .main-grid {
+    .main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 285px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 6px;
   align-items: start;
   flex: 1;
@@ -890,9 +890,10 @@ useEffect(() => {
 
 .right-stack {
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, auto));
   gap: 6px;
   align-self: start;
+  margin-top: -44px;
 }
 
 .activity-panel {
