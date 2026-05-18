@@ -207,7 +207,7 @@ export default function Home() {
             </div>
           </div>
 
-          <a href={`${STAGING}/l/new`} className="btn-primary">
+          <a href="/post-free" className="btn-primary">
             POST EQUIPMENT FREE →
           </a>
 
