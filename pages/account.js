@@ -853,14 +853,15 @@ export default function AccountPage() {
         }
 
         .listing-table {
-          border: 1px solid #252525;
-          border-radius: 10px;
-          overflow: hidden;
-        }
+  border: 1px solid #252525;
+  border-radius: 10px;
+  overflow-y: auto;
+  max-height: 605px;
+}
 
         .table-row {
           display: grid;
-          grid-template-columns: minmax(170px, 1fr) 64px 74px 36px 58px 90px;
+          grid-template-columns: minmax(260px, 1fr) 64px 74px 36px 58px 90px;
           gap: 4px;
           align-items: center;
           padding: 14px 10px;
@@ -925,13 +926,20 @@ export default function AccountPage() {
           white-space: nowrap;
         }
 
-        ..machine-link {
+       .machine-link {
   display: grid;
-  grid-template-columns: 132px 1fr;
-  gap: 8px;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
   text-decoration: none;
   color: inherit;
+}
+
+.machine-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .machine-link:hover span {
