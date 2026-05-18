@@ -12529,8 +12529,10 @@ function handlePhotos(e) {
       url: URL.createObjectURL(file)
     }));
 
-    setPhotos(mapped);
-  }
+   setPhotos(current => [
+  ...current,
+  ...mapped
+]);
 
   return (
     <>
