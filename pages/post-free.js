@@ -12432,6 +12432,7 @@ export default function PostFreePage() {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [photos, setPhotos] = useState([]);
+  const [isPosting, setIsPosting] = useState(false);
   
   const taxonomy = taxonomyMap[category] || [];
 
@@ -12494,6 +12495,8 @@ function toggleKeyword(keyword) {
 }
 
 async function handleSubmit() {
+  setIsPosting(true);
+
   try {
     const uploadedImages = await Promise.all(
       photos.map(photo =>
@@ -12542,10 +12545,12 @@ alert("Listing created with photos.");
 window.location.href = `/account`;
 
   } catch (err) {
-    console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
+  console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
 
-    alert(JSON.stringify(err));
-  }
+  setIsPosting(false);
+
+  alert(JSON.stringify(err));
+}
 }
 function removePhoto(indexToRemove) {
   setPhotos(current =>
@@ -12793,11 +12798,13 @@ return (
             </label>
 
             <button
+ <button
   className="submit-btn"
   type="button"
   onClick={handleSubmit}
+  disabled={isPosting}
 >
-  POST FREE
+  {isPosting ? "POSTING..." : "POST FREE"}
 </button>
           </section>
 
@@ -13141,6 +13148,11 @@ return (
   padding: 15px;
   cursor: pointer;
   margin-top: 12px;
+}
+
+.submit-btn:disabled {
+  opacity: .65;
+  cursor: not-allowed;
 }
 
 .preview-card {
