@@ -12427,6 +12427,7 @@ export default function PostFreePage() {
   const [year, setYear] = useState("");
   const [hours, setHours] = useState("");
   const [price, setPrice] = useState("");
+  const [stockNumber, setStockNumber] = useState("");
   const [location, setLocation] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [description, setDescription] = useState("");
@@ -12577,6 +12578,7 @@ console.log("IMAGE IDS:", imageIds);
         make,
         model,
         hours: Number(cleanNumber(hours)),
+        stockNumber,
         location: `${location}${stateCode ? `, ${stateCode}` : ""}`,
         keywords: selectedKeywords
       },
@@ -12787,6 +12789,16 @@ return (
                   placeholder="99999"
                 />
               </label>
+
+                    <label>
+  <span>Stock #</span>
+
+  <input
+    value={stockNumber}
+    onChange={e => setStockNumber(e.target.value)}
+    placeholder="IX-1024"
+  />
+</label>
 
            <div className="wide location-grid">
   <label>
@@ -13130,6 +13142,12 @@ return (
     gap: 10px;
     margin-bottom: 12px;
   }
+
+  .location-grid {
+  display: grid;
+  grid-template-columns: 2fr 120px;
+  gap: 10px;
+}
 
   .wide {
     grid-column: 1 / -1;
