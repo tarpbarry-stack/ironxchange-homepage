@@ -12478,11 +12478,30 @@ function toggleKeyword(keyword) {
       ? current.filter(item => item !== keyword)
       : [...current, keyword]
   );
-}  
-  function handlePhotos(e) {
-    const files = Array.from(e.target.files || []);
+}
 
-    const mapped = files.slice(0, 24).map(file => ({
+const listingPayload = {
+  category,
+  year,
+  make,
+  model,
+  hours,
+  price,
+  location,
+  description,
+  keywords: selectedKeywords,
+  photos
+};
+
+function handleSubmit() {
+  console.log("POST FREE LISTING PAYLOAD:", listingPayload);
+  alert("Listing payload ready. Check console.");
+}
+
+function handlePhotos(e) {
+  const files = Array.from(e.target.files || []);
+
+  const mapped = files.slice(0, 24).map(file => ({
       file,
       url: URL.createObjectURL(file)
     }));
@@ -12702,9 +12721,13 @@ function toggleKeyword(keyword) {
               />
             </label>
 
-            <button className="submit-btn" type="button">
-              POST FREE
-            </button>
+            <button
+  className="submit-btn"
+  type="button"
+  onClick={handleSubmit}
+>
+  POST FREE
+</button>
           </section>
 
           <aside className="preview-panel">
