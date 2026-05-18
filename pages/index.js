@@ -322,7 +322,7 @@ export default function Home() {
           <h2>READY TO SELL?</h2>
           <p>Post your machine free and deal direct with buyers.</p>
         </div>
-        <a href={`${STAGING}/l/new`}>POST EQUIPMENT FREE →</a>
+        <a href="/post-free"POST EQUIPMENT FREE →</a>
       </section>
 
       <footer id="about">
@@ -335,7 +335,7 @@ export default function Home() {
           <div>
             <h4>MARKETPLACE</h4>
             <a href="/browse">Browse Equipment</a>
-            <a href={`${STAGING}/l/new`}>Post Equipment</a>
+            <a href="/post-free">Post Equipment</a>
           </div>
 
           <div>
