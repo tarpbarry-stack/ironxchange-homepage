@@ -346,11 +346,26 @@ useEffect(() => {
 </div>
 
             <div className="main-grid">
-              <section className="panel listings-panel">
-                <div className="panel-head">
-                  <h2>My Listings</h2>
-                  <a href="/account/listings">MANAGE ALL →</a>
-                </div>
+  <div className="left-column">
+
+    <div className="stats">
+      ...
+    </div>
+
+    <section className="panel listings-panel">
+      ...
+    </section>
+
+    <section className="panel performance-panel">
+      ...
+    </section>
+
+  </div>
+
+  <div className="right-stack">
+    ...
+  </div>
+</div>
 
                 <div className="listing-table">
                   <div className="table-row table-head">
@@ -826,11 +841,12 @@ useEffect(() => {
           background: #38A169;
         }
 
-        .stats {
-  display: inline-grid;
-  grid-template-columns: repeat(3, minmax(140px, 180px));
+       .stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 0;
+  width: 100%;
 }
 
         .stat-card,
@@ -878,6 +894,12 @@ useEffect(() => {
   gap: 6px;
   align-items: start;
   flex: 1;
+}
+
+.left-column {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
 }
 
 .panel {
