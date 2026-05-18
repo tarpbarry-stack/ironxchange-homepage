@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
