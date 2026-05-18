@@ -12534,7 +12534,7 @@ console.log("IMAGE IDS:", imageIds);
   } catch (err) {
     console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
 
-    alert("Listing creation failed.");
+    alert(JSON.stringify(err));
   }
 }
   
