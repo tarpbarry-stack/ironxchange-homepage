@@ -325,30 +325,23 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="stats">
-              <div className="stat-card">
-                <span>Active Listings</span>
-                <strong>{myListings.length}</strong>
-                <p>Live machines for sale</p>
-              </div>
+            <div className="stat-card">
+  <span>Active Listings</span>
+  <strong>{myListings.length}</strong>
+  <p>Live machines for sale</p>
+</div>
 
-              <div className="stat-card">
-                <span>New Inquiries</span>
-                <strong>—</strong>
-                <p>Buyer activity</p>
-              </div>
+<div className="stat-card">
+  <span>Age</span>
+  <strong className="green">18</strong>
+  <p>Average listing age</p>
+</div>
 
-              <div className="stat-card">
-                <span>Saved Machines</span>
-                <strong>{savedMachines.length}</strong>
-                <p>Watchlist inventory</p>
-              </div>
-
-              <div className="stat-card">
-                <span>Age</span>
-                <strong className="green">18</strong>
-                <p>Average listing age</p>
-              </div>
+<div className="stat-card">
+  <span>Saved Machines</span>
+  <strong>{savedMachines.length}</strong>
+  <p>Watchlist inventory</p>
+</div>
             </div>
 
             <div className="main-grid">
@@ -833,11 +826,11 @@ useEffect(() => {
         }
 
         .stats {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 6px;
-          margin-bottom: 6px;
-        }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+}
 
         .stat-card,
         .panel {
@@ -878,12 +871,11 @@ useEffect(() => {
           font-size: 10px;
         }
 
-        .main-grid {
+     .main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 245px;
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr) 285px;
   gap: 6px;
-  align-items: stretch;
+  align-items: start;
   flex: 1;
 }
 
@@ -897,10 +889,9 @@ useEffect(() => {
 
 .right-stack {
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 6px;
-  height: 100%;
-  align-self: stretch;
+  align-self: start;
 }
 
 .activity-panel {
