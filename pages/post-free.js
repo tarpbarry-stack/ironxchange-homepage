@@ -12433,6 +12433,7 @@ export default function PostFreePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [photos, setPhotos] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
+  const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
   
   const taxonomy = taxonomyMap[category] || [];
 
@@ -12559,16 +12560,15 @@ function removePhoto(indexToRemove) {
   );
 }
 
-function movePhoto(index, direction) {
+function reorderPhotos(fromIndex, toIndex) {
   setPhotos(current => {
+    if (fromIndex === toIndex) return current;
+
     const next = [...current];
-    const targetIndex = index + direction;
 
-    if (targetIndex < 0 || targetIndex >= next.length) {
-      return current;
-    }
+    const [movedPhoto] = next.splice(fromIndex, 1);
 
-    [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+    next.splice(toIndex, 0, movedPhoto);
 
     return next;
   });
@@ -12723,7 +12723,7 @@ return (
                 <input
                   value={location}
                   onChange={e => setLocation(e.target.value)}
-                  placeholder="Amarillo, TX"
+                  placeholder="Lincoln, NE"
                 />
               </label>
             </div>
@@ -12750,30 +12750,24 @@ return (
               {photos.length > 0 && (
                 <div className="photo-grid">
                   {photos.map((photo, index) => (
-  <div className="photo-thumb" key={index}>
+  <div
+    className={index === 0 ? "photo-thumb hero-photo" : "photo-thumb"}
+    key={index}
+    draggable
+    onDragStart={() => setDraggedPhotoIndex(index)}
+    onDragOver={e => e.preventDefault()}
+    onDrop={() => {
+      reorderPhotos(draggedPhotoIndex, index);
+      setDraggedPhotoIndex(null);
+    }}
+  >
+    {index === 0 && <span className="hero-badge">HERO</span>}
+
     <img
       src={photo.url}
       alt={`Upload ${index + 1}`}
     />
 
-<div className="photo-actions">
-  <button
-    type="button"
-    onClick={() => movePhoto(index, -1)}
-    disabled={index === 0}
-  >
-    LEFT
-  </button>
-
-  <button
-    type="button"
-    onClick={() => movePhoto(index, 1)}
-    disabled={index === photos.length - 1}
-  >
-    RIGHT
-  </button>
-</div>
-      
     <button
       type="button"
       className="delete-photo-btn"
@@ -13136,6 +13130,25 @@ return (
   margin: 0;
   color: #777;
   font-size: 11px;
+}
+
+.hero-photo {
+  border: 2px solid ${BRAND_YELLOW};
+  border-radius: 10px;
+}
+
+.hero-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: ${BRAND_YELLOW};
+  color: #050505;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 4px 7px;
+  border-radius: 999px;
+  z-index: 2;
+  letter-spacing: .4px;
 }
 
 .photo-actions {
