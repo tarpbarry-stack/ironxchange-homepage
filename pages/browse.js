@@ -26,7 +26,6 @@ import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
 import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
-const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
