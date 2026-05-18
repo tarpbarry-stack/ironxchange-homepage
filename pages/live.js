@@ -139,6 +139,7 @@ export default function ListingLivePage() {
     tags: ""
   });
   const [photoOrder, setPhotoOrder] = useState([]);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -148,6 +149,21 @@ export default function ListingLivePage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  function changeActivePhoto(direction) {
+  const photos = photoOrder.length > 0 ? photoOrder : listingImages;
+
+  if (photos.length === 0) return;
+
+  setActivePhotoIndex(current => {
+    const next = current + direction;
+
+    if (next < 0) return photos.length - 1;
+    if (next >= photos.length) return 0;
+
+    return next;
+  });
+}
 
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
@@ -418,25 +434,59 @@ Listed on IronXchange.
 
           <section className="work-grid">
             <section className="panel machine-panel">
-              <img
-                src={photoOrder[0] || listing.imageUrl || listing.image || "/images/hero-equipment-yard.jpg"}
-                alt={listing.title}
-                className="hero-photo"
-              />
+              <div className="photo-stage">
+  <img
+    src={
+      (photoOrder.length > 0 ? photoOrder : listingImages)[activePhotoIndex] ||
+      listing.imageUrl ||
+      listing.image ||
+      "/images/hero-equipment-yard.jpg"
+    }
+    alt={listing.title}
+    className="hero-photo"
+  />
 
-              <div className="machine-body">
-                <h1>{listing.title}</h1>
+  <button
+    type="button"
+    className="photo-nav left"
+    onClick={() => changeActivePhoto(-1)}
+  >
+    ‹
+  </button>
 
-                <div className="facts">
-                  <span>Hours</span>
-                  <strong>{listing.hours || "—"}</strong>
-                  <span>Price</span>
-                  <strong>{listing.price || "Call"}</strong>
-                  <span>Location</span>
-                  <strong>{listing.location || "—"}</strong>
-                </div>
-              </div>
-            </section>
+  <button
+    type="button"
+    className="photo-nav right"
+    onClick={() => changeActivePhoto(1)}
+  >
+    ›
+  </button>
+</div>
+
+<div className="machine-body">
+  <h1>{listing.title}</h1>
+
+  <div className="facts">
+    <span>Hours</span>
+    <strong>{listing.hours || "—"}</strong>
+
+    <span>Price</span>
+    <strong>{listing.price || "Call"}</strong>
+
+    <span>Location</span>
+    <strong>{listing.location || "—"}</strong>
+  </div>
+
+  <div className="tag-row">
+    {edit.tags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(Boolean)
+      .map(tag => (
+        <span key={tag}>{tag}</span>
+      ))}
+  </div>
+</div>
 
             <section className="panel edit-panel">
               <div className="panel-head">
@@ -485,28 +535,53 @@ Listed on IronXchange.
             </section>
 
             <section className="panel seller-panel">
-              <div className="seller-mini">
-                {sellerLogo ? <img src={sellerLogo} alt={sellerName} /> : <i className="fa-regular fa-user"></i>}
+  <div className="performance-grid">
+    <div><span>Views</span><strong>—</strong></div>
+    <div><span>Saves</span><strong>—</strong></div>
+    <div><span>Inquiries</span><strong>—</strong></div>
+    <div><span>Shares</span><strong>—</strong></div>
+  </div>
 
-                <div>
-                  <span>Seller</span>
-                  <strong>{sellerName}</strong>
-                </div>
-              </div>
+  <button
+    type="button"
+    className="secondary-btn"
+    onClick={downloadHeroImage}
+  >
+    DOWNLOAD HERO IMAGE
+  </button>
 
-              <div className="performance-grid">
-                <div><span>Views</span><strong>—</strong></div>
-                <div><span>Saves</span><strong>—</strong></div>
-                <div><span>Inquiries</span><strong>—</strong></div>
-                <div><span>Shares</span><strong>—</strong></div>
-              </div>
+  <button
+    type="button"
+    className="secondary-btn"
+    onClick={downloadAllPhotos}
+  >
+    DOWNLOAD ALL PHOTOS
+  </button>
 
-              <button type="button" className="secondary-btn" onClick={downloadHeroImage}>DOWNLOAD HERO IMAGE</button>
-              <button type="button" className="secondary-btn" onClick={downloadAllPhotos}>DOWNLOAD ALL PHOTOS</button>
-              <button type="button" className="copy-link" onClick={() => copyText("Listing Link", listingUrl)}>
-                {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
-              </button>
-            </section>
+  <button
+    type="button"
+    className="copy-link"
+    onClick={() => copyText("Listing Link", listingUrl)}
+  >
+    {copied === "Listing Link"
+      ? "COPIED"
+      : "COPY LISTING LINK"}
+  </button>
+
+  <div className="seller-mini">
+    {sellerLogo ? (
+      <img src={sellerLogo} alt={sellerName} />
+    ) : (
+      <i className="fa-regular fa-user"></i>
+    )}
+
+    <div>
+      <span>Seller</span>
+      <strong>{sellerName}</strong>
+    </div>
+  </div>
+
+</section>
 
             <section className="panel promote-panel">
               <div className="panel-head">
@@ -940,33 +1015,50 @@ Listed on IronXchange.
         }
 
         .share-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-          margin-bottom: 16px;
-        }
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
 
-        .share-grid button {
-          min-height: 56px;
-          background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), #101010;
-          border: 1px solid rgba(255,255,255,.11);
-          color: #f2f2f2;
-          border-radius: 12px;
-          padding: 12px;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .35px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 9px;
-          text-transform: uppercase;
-        }
-
+.share-grid button {
+  min-height: 38px;
+  background: #101010;
+  border: 1px solid rgba(255,255,255,.11);
+  color: #f2f2f2;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  text-transform: uppercase;
+}
         .share-grid button i {
           color: ${BRAND_YELLOW};
         }
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.tag-row span {
+  background: rgba(255,196,0,.08);
+  border: 1px solid rgba(255,196,0,.25);
+  color: #ffc400;
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
 
         .open-grid {
           display: grid;
@@ -990,22 +1082,54 @@ Listed on IronXchange.
           letter-spacing: .35px;
         }
 
+        .photo-stage {
+  position: relative;
+}
+
+.photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 46px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.photo-nav.left {
+  left: 10px;
+}
+
+.photo-nav.right {
+  right: 10px;
+}
+
         .photo-panel {
-          margin-top: 10px;
-        }
+  margin-bottom: 10px;
+  padding: 14px;
+  grid-column: 1 / -1;
+}
 
-        .photo-strip {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-          gap: 10px;
-        }
+.photo-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
 
-        .photo-tile {
-          background: #101010;
-          border: 1px solid #2a2a2a;
-          border-radius: 12px;
-          overflow: hidden;
-        }
+.photo-tile {
+  flex: 0 0 170px;
+  scroll-snap-align: start;
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+}
 
         .photo-tile img {
           width: 100%;
