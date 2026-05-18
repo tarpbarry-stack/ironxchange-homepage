@@ -338,185 +338,319 @@ export default function AccountPage() {
             </div>
 
             <div className="main-grid">
-              <div className="left-column">
-                <div className="stats">
-                  <div className="stat-card">
-                    <span>Active Listings</span>
-                    <strong>{myListings.length}</strong>
-                    <p>Live machines for sale</p>
-                  </div>
 
-                  <div className="stat-card">
-                    <span>Age</span>
-                    <strong className="green">18</strong>
-                    <p>Average listing age</p>
-                  </div>
+  <div className="left-column">
 
-                  <div className="stat-card">
-                    <span>Saved Machines</span>
-                    <strong>{savedMachines.length}</strong>
-                    <p>Watchlist inventory</p>
-                  </div>
-                </div>
+    <div className="stats">
 
-                <section className="panel listings-panel">
-                  <div className="panel-head">
-                    <h2>My Listings</h2>
-                    <a href="/account/listings">MANAGE ALL →</a>
-                  </div>
+      <div className="stat-card">
+        <span>Active Listings</span>
+        <strong>{myListings.length}</strong>
+        <p>Live machines for sale</p>
+      </div>
 
-                  <div className="listing-table">
-                    <div className="table-row table-head">
-                      <span>Machine</span>
-                      <span>Hours</span>
-                      <span>Price</span>
-                      <span>Age</span>
-                      <span>Status</span>
-                      <span>Actions</span>
-                    </div>
+      <div className="stat-card">
+        <span>Age</span>
+        <strong className="green">18</strong>
+        <p>Average listing age</p>
+      </div>
 
-                    {myListings.length > 0 ? (
-                      myListings.map(listing => (
-                        <div className="table-row" key={listing.id}>
-                          <div className="machine-cell">
-                            <a href={`/live?id=${listing.id}`} className="machine-link">
-                              <img
-                                src={
-                                  listing.imageUrl ||
-                                  listing.image ||
-                                  "/images/hero-equipment-yard.jpg"
-                                }
-                                alt={listing.title}
-                              />
+      <div className="stat-card">
+        <span>Saved Machines</span>
+        <strong>{savedMachines.length}</strong>
+        <p>Watchlist inventory</p>
+      </div>
 
-                              <span>{cleanMachineTitle(listing.title)}</span>
-                            </a>
-                          </div>
+    </div>
 
-                          <span>{listing.hours}</span>
+    <section className="panel listings-panel">
 
-                          <input
-                            className="price-input"
-                            defaultValue={formatPriceInput(listing.price)}
-                            onKeyDown={async e => {
-                              if (e.key !== "Enter") return;
+      <div className="panel-head">
+        <h2>My Listings</h2>
+        <a href="/account/listings">MANAGE ALL →</a>
+      </div>
 
-                              e.preventDefault();
+      <div className="listing-table">
 
-                              const input = e.currentTarget;
-                              const newPrice = input.value.replace(/,/g, "").trim();
+        <div className="table-row table-head">
+          <span>Machine</span>
+          <span>Hours</span>
+          <span>Price</span>
+          <span>Age</span>
+          <span>Status</span>
+          <span>Actions</span>
+        </div>
 
-                              input.classList.remove("saved", "error");
+        {myListings.length > 0 ? (
+          myListings.map(listing => (
+            <div className="table-row" key={listing.id}>
 
-                              const response = await fetch("/api/update-listing-price", {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                  listingId: listing.id,
-                                  price: newPrice
-                                })
-                              });
+              <div className="machine-cell">
+                <a href={`/live?id=${listing.id}`} className="machine-link">
+                  <img
+                    src={
+                      listing.imageUrl ||
+                      listing.image ||
+                      "/images/hero-equipment-yard.jpg"
+                    }
+                    alt={listing.title}
+                  />
 
-                              if (response.ok) {
-                                input.value = Number(newPrice).toLocaleString();
-                                input.classList.add("saved");
-
-                                addActivity(
-                                  "success",
-                                  `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
-                                );
-                              } else {
-                                input.classList.add("error");
-
-                                addActivity(
-                                  "error",
-                                  `Price update failed — ${cleanMachineTitle(listing.title)}`
-                                );
-                              }
-                            }}
-                          />
-
-                          <span
-                            className={
-                              listing.age <= 30
-                                ? "age-green"
-                                : listing.age <= 45
-                                ? "age-yellow"
-                                : "age-red"
-                            }
-                          >
-                            {listing.age ?? "—"}
-                          </span>
-
-                          <span className="listing-status active">ACTIVE</span>
-
-                          <span>
-                            <select
-                              className="action-select"
-                              defaultValue=""
-                              onChange={e => {
-                                const value = e.target.value;
-
-                                if (value === "edit" || value === "promote") {
-                                  window.location.href = `/live?id=${listing.id}`;
-                                }
-                              }}
-                            >
-                              <option value="" disabled>
-                                ACTION
-                              </option>
-                              <option value="edit">Edit</option>
-                              <option value="promote">Promote</option>
-                              <option value="pause">Pause</option>
-                              <option value="sold">Mark Sold</option>
-                              <option value="duplicate">Duplicate</option>
-                              <option value="relist">Relist</option>
-                              <option value="archive">Archive</option>
-                            </select>
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="table-empty">
-                        <strong>No active listings yet.</strong>
-                        <p>Your machines will show here once they are listed.</p>
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                <section className="panel performance-panel">
-                  <div className="panel-head">
-                    <h2>Performance</h2>
-                    <span className="small-note">COMING ONLINE</span>
-                  </div>
-
-                  <div className="perf-grid">
-                    <div>
-                      <span>Views</span>
-                      <strong>—</strong>
-                    </div>
-
-                    <div>
-                      <span>Saves</span>
-                      <strong>—</strong>
-                    </div>
-
-                    <div>
-                      <span>Messages</span>
-                      <strong>—</strong>
-                    </div>
-
-                    <div>
-                      <span>Sold / Closed</span>
-                      <strong>—</strong>
-                    </div>
-                  </div>
-                </section>
+                  <span>{cleanMachineTitle(listing.title)}</span>
+                </a>
               </div>
 
+              <span>{listing.hours}</span>
+
+              <input
+                className="price-input"
+                defaultValue={formatPriceInput(listing.price)}
+                onKeyDown={async e => {
+                  if (e.key !== "Enter") return;
+
+                  e.preventDefault();
+
+                  const input = e.currentTarget;
+                  const newPrice = input.value.replace(/,/g, "").trim();
+
+                  input.classList.remove("saved", "error");
+
+                  const response = await fetch("/api/update-listing-price", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      listingId: listing.id,
+                      price: newPrice
+                    })
+                  });
+
+                  if (response.ok) {
+                    input.value = Number(newPrice).toLocaleString();
+                    input.classList.add("saved");
+
+                    addActivity(
+                      "success",
+                      `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
+                    );
+                  } else {
+                    input.classList.add("error");
+
+                    addActivity(
+                      "error",
+                      `Price update failed — ${cleanMachineTitle(listing.title)}`
+                    );
+                  }
+                }}
+              />
+
+              <span
+                className={
+                  listing.age <= 30
+                    ? "age-green"
+                    : listing.age <= 45
+                    ? "age-yellow"
+                    : "age-red"
+                }
+              >
+                {listing.age ?? "—"}
+              </span>
+
+              <span className="listing-status active">ACTIVE</span>
+
+              <span>
+                <select
+                  className="action-select"
+                  defaultValue=""
+                  onChange={e => {
+                    const value = e.target.value;
+
+                    if (value === "edit" || value === "promote") {
+                      window.location.href = `/live?id=${listing.id}`;
+                    }
+                  }}
+                >
+                  <option value="" disabled>
+                    ACTION
+                  </option>
+
+                  <option value="edit">Edit</option>
+                  <option value="promote">Promote</option>
+                  <option value="pause">Pause</option>
+                  <option value="sold">Mark Sold</option>
+                  <option value="duplicate">Duplicate</option>
+                  <option value="relist">Relist</option>
+                  <option value="archive">Archive</option>
+                </select>
+              </span>
+
+            </div>
+          ))
+        ) : (
+          <div className="table-empty">
+            <strong>No active listings yet.</strong>
+            <p>Your machines will show here once they are listed.</p>
+          </div>
+        )}
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <div className="right-stack">
+
+    <section className="panel side-panel">
+      <div className="panel-head">
+        <h2>Recent Inquiries</h2>
+        <a href="/account/messages">OPEN →</a>
+      </div>
+
+      <div className="activity-list">
+        <div>
+          <span className="dot yellow"></span>
+          <p>New buyer inquiries will appear here.</p>
+        </div>
+
+        <div>
+          <span className="dot green"></span>
+          <p>Email remains primary. This keeps the record.</p>
+        </div>
+      </div>
+    </section>
+
+    <section className="panel side-panel activity-panel">
+
+      <div className="panel-head">
+        <h2>Activity Log</h2>
+        <span className="small-note">LIVE</span>
+      </div>
+
+      <div className="activity-log">
+
+        {activityLog.length > 0 ? (
+          activityLog.slice(0, 8).map(event => (
+            <div className="activity-event" key={event.id}>
+
+              <span
+                className={
+                  event.type === "error"
+                    ? "event-dot red"
+                    : "event-dot green"
+                }
+              ></span>
+
+              <div>
+                <p>{event.message}</p>
+                <small>{formatActivityTime(event.createdAt)}</small>
+              </div>
+
+            </div>
+          ))
+        ) : (
+          <div className="activity-empty">
+            <span className="dot yellow"></span>
+            <p>
+              Listing updates, price changes, and promotions will show here.
+            </p>
+          </div>
+        )}
+
+      </div>
+
+    </section>
+
+    <section className="panel side-panel">
+
+      <div className="panel-head">
+        <h2>Saved Machines</h2>
+        <a href="/saved">VIEW ALL →</a>
+      </div>
+
+      <div className="saved-card-list">
+
+        {savedMachines.length > 0 ? (
+          savedMachines.slice(0, 6).map(machine => (
+            <a
+              key={machine.id || machine.title}
+              href={`/listing/${slugify(machine.title)}?from=account`}
+              className="saved-card"
+            >
+              <img
+                src={
+                  machine.imageUrl ||
+                  machine.image ||
+                  "/images/hero-equipment-yard.jpg"
+                }
+                alt={machine.title}
+              />
+
+              <div className="saved-card-body">
+
+                <strong>
+                  {cleanMachineTitle(machine.title)}
+                </strong>
+
+                <span>
+                  {machine.price || "Call for Price"}
+                  {machine.hours ? ` • ${machine.hours}` : ""}
+                </span>
+
+              </div>
+
+            </a>
+          ))
+        ) : (
+          <div className="saved-empty">
+            <span className="dot yellow"></span>
+            <p>
+              Saved listings and watchlist machines will show here.
+            </p>
+          </div>
+        )}
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <section className="panel performance-panel">
+
+    <div className="panel-head">
+      <h2>Performance</h2>
+      <span className="small-note">COMING ONLINE</span>
+    </div>
+
+    <div className="perf-grid">
+
+      <div>
+        <span>Views</span>
+        <strong>—</strong>
+      </div>
+
+      <div>
+        <span>Saves</span>
+        <strong>—</strong>
+      </div>
+
+      <div>
+        <span>Messages</span>
+        <strong>—</strong>
+      </div>
+
+      <div>
+        <span>Sold / Closed</span>
+        <strong>—</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
               <div className="right-stack">
                 <section className="panel side-panel">
                   <div className="panel-head">
