@@ -12551,11 +12551,26 @@ window.location.href = `/account`;
 
   alert(JSON.stringify(err));
 }
-}
+
 function removePhoto(indexToRemove) {
   setPhotos(current =>
     current.filter((_, index) => index !== indexToRemove)
   );
+}
+
+function movePhoto(index, direction) {
+  setPhotos(current => {
+    const next = [...current];
+    const targetIndex = index + direction;
+
+    if (targetIndex < 0 || targetIndex >= next.length) {
+      return current;
+    }
+
+    [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+
+    return next;
+  });
 }
   
 function handlePhotos(e) {
@@ -12740,6 +12755,24 @@ return (
       alt={`Upload ${index + 1}`}
     />
 
+<div className="photo-actions">
+  <button
+    type="button"
+    onClick={() => movePhoto(index, -1)}
+    disabled={index === 0}
+  >
+    LEFT
+  </button>
+
+  <button
+    type="button"
+    onClick={() => movePhoto(index, 1)}
+    disabled={index === photos.length - 1}
+  >
+    RIGHT
+  </button>
+</div>
+      
     <button
       type="button"
       className="delete-photo-btn"
@@ -12797,7 +12830,7 @@ return (
               />
             </label>
 
-            <button
+            
  <button
   className="submit-btn"
   type="button"
@@ -13104,6 +13137,30 @@ return (
   font-size: 11px;
 }
 
+.photo-actions {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  display: flex;
+  gap: 4px;
+}
+
+.photo-actions button {
+  border: none;
+  background: rgba(0,0,0,.75);
+  color: white;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.photo-actions button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
 .photo-thumb {
   position: relative;
 }
@@ -13111,7 +13168,7 @@ return (
 .delete-photo-btn {
   position: absolute;
   right: 5px;
-  bottom: 5px;
+  bottom: 32px;
   border: none;
   background: #B91C1C;
   color: white;
