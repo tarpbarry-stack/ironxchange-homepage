@@ -42,6 +42,30 @@ async function downloadImage(url, filename) {
   URL.revokeObjectURL(objectUrl);
 }
 
+function addActivity(type, message) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const event = {
+      id: `${Date.now()}-${Math.random()}`,
+      type,
+      message,
+      createdAt: new Date().toISOString()
+    };
+
+    const current = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
+
+    localStorage.setItem(
+      "ixActivityLog",
+      JSON.stringify([event, ...current].slice(0, 25))
+    );
+
+    window.dispatchEvent(new Event("ix-activity-updated"));
+  } catch (err) {
+    console.error("Activity log failed", err);
+  }
+}
+
 function getListingUrl(listing) {
   if (!listing?.title) return "";
 
@@ -154,7 +178,11 @@ async function downloadHeroImage() {
   }
 
   await downloadImage(hero, `${slugify(listing.title)}-hero.jpg`);
-}
+
+addActivity(
+  "success",
+  `Hero image downloaded — ${clean(listing?.title) || "Listing"}`
+);
 
 async function downloadAllPhotos() {
   if (listingImages.length === 0) {
@@ -162,12 +190,17 @@ async function downloadAllPhotos() {
     return;
   }
 
-  for (let i = 0; i < listingImages.length; i += 1) {
-    await downloadImage(
-      listingImages[i],
-      `${slugify(listing.title)}-${i + 1}.jpg`
-    );
-  }
+ for (let i = 0; i < listingImages.length; i += 1) {
+  await downloadImage(
+    listingImages[i],
+    `${slugify(listing.title)}-${i + 1}.jpg`
+  );
+}
+
+addActivity(
+  "success",
+  `Photo pack downloaded — ${clean(listing?.title) || "Listing"}`
+);
 }
 
   async function copyText(label, text) {
