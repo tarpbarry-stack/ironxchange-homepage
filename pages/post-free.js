@@ -12525,17 +12525,18 @@ function handlePhotos(e) {
   const files = Array.from(e.target.files || []);
 
   const mapped = files.slice(0, 24).map(file => ({
-      file,
-      url: URL.createObjectURL(file)
-    }));
+    file,
+    url: URL.createObjectURL(file)
+  }));
 
-   setPhotos(current => [
-  ...current,
-  ...mapped
-]);
+  setPhotos(current => [
+    ...current,
+    ...mapped
+  ]);
+}
 
-  return (
-    <>
+return (
+  <>
       <Head>
         <title>Post Free | IronXchange</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
