@@ -325,24 +325,25 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="stat-card">
-  <span>Active Listings</span>
-  <strong>{myListings.length}</strong>
-  <p>Live machines for sale</p>
-</div>
+      <div className="stats">
+  <div className="stat-card">
+    <span>Active Listings</span>
+    <strong>{myListings.length}</strong>
+    <p>Live machines for sale</p>
+  </div>
 
-<div className="stat-card">
-  <span>Age</span>
-  <strong className="green">18</strong>
-  <p>Average listing age</p>
-</div>
+  <div className="stat-card">
+    <span>Age</span>
+    <strong className="green">18</strong>
+    <p>Average listing age</p>
+  </div>
 
-<div className="stat-card">
-  <span>Saved Machines</span>
-  <strong>{savedMachines.length}</strong>
-  <p>Watchlist inventory</p>
+  <div className="stat-card">
+    <span>Saved Machines</span>
+    <strong>{savedMachines.length}</strong>
+    <p>Watchlist inventory</p>
+  </div>
 </div>
-            </div>
 
             <div className="main-grid">
               <section className="panel listings-panel">
