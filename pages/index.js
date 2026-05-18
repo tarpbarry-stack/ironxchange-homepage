@@ -322,21 +322,26 @@ export default function Home() {
           <h2>READY TO SELL?</h2>
           <p>Post your machine free and deal direct with buyers.</p>
         </div>
-        <a href="/post-free"POST EQUIPMENT FREE →</a>
-      </section>
 
-      <footer id="about">
-        <div>
-          <img src="/images/ironxchange-logo.png" alt="IronXchange" />
-          <p>© 2026 IronXchange. All rights reserved.</p>
-        </div>
+<a href="/post-free">
+  POST EQUIPMENT FREE →
+</a>
+</section>
 
-        <div className="foot-cols">
-          <div>
-            <h4>MARKETPLACE</h4>
-            <a href="/browse">Browse Equipment</a>
-            <a href="/post-free">Post Equipment</a>
-          </div>
+<footer id="about">
+  <div>
+    <img src="/images/ironxchange-logo.png" alt="IronXchange" />
+    <p>© 2026 IronXchange. All rights reserved.</p>
+  </div>
+
+  <div className="foot-cols">
+    <div>
+      <h4>MARKETPLACE</h4>
+
+      <a href="/browse">Browse Equipment</a>
+
+      <a href="/post-free">Post Equipment</a>
+    </div>
 
           <div>
             <h4>COMPANY</h4>
