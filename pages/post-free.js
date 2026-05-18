@@ -12501,6 +12501,8 @@ async function handleSubmit() {
     const imageIds = uploadedImages.map(
   upload => upload.data.data
 );
+    console.log("UPLOADED IMAGES:", uploadedImages);
+console.log("IMAGE IDS:", imageIds);
 
     const response = await sdk.ownListings.create({
       title: listingTitle,
@@ -12522,7 +12524,7 @@ async function handleSubmit() {
         "USD"
       ),
 
-      imageIds
+      images: imageIds
     });
 
     console.log("LISTING CREATED WITH PHOTOS:", response);
