@@ -12522,7 +12522,7 @@ async function handleSubmit() {
         "USD"
       ),
 
-      images: imageIds
+      imageIds
     });
 
     console.log("LISTING CREATED WITH PHOTOS:", response);
