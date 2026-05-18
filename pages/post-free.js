@@ -30,7 +30,7 @@ import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 const BRAND_YELLOW = "#FFC400";
 
-const { Money } = sdkTypes;
+const { Money, UUID } = sdkTypes;
 
 const sdk = createInstance({
   clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
@@ -12498,8 +12498,8 @@ async function handleSubmit() {
       )
     );
 
-    const imageIds = uploadedImages.map(
-  upload => upload.data.data
+   const imageIds = uploadedImages.map(
+  upload => new UUID(upload.data.data.id.uuid)
 );
     console.log("UPLOADED IMAGES:", uploadedImages);
 console.log("IMAGE IDS:", imageIds);
