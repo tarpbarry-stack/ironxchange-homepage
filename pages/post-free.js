@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { useMemo, useState } from "react";
+import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
@@ -28,6 +29,12 @@ import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 const BRAND_YELLOW = "#FFC400";
+
+const { Money } = sdkTypes;
+
+const sdk = createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
 
 const taxonomyMap = {
   "AERIAL EQUIPMENT": aerialTaxonomy,
@@ -12480,24 +12487,40 @@ function toggleKeyword(keyword) {
   );
 }
 
-const listingPayload = {
-  category,
-  year,
-  make,
-  model,
-  hours,
-  price,
-  location,
-  description,
-  keywords: selectedKeywords,
-  photos
-};
+async function handleSubmit() {
+  try {
+    const response = await sdk.ownListings.create({
+      title: listingTitle,
 
-function handleSubmit() {
-  console.log("POST FREE LISTING PAYLOAD:", listingPayload);
-  alert("Listing payload ready. Check console.");
+      description,
+
+      publicData: {
+        category,
+        year: Number(year),
+        make,
+        model,
+        hours: Number(cleanNumber(hours)),
+        location,
+        keywords: selectedKeywords
+      },
+
+      price: new Money(
+        Number(cleanNumber(price)) * 100,
+        "USD"
+      )
+    });
+
+    console.log("LISTING CREATED:", response);
+
+    alert("Listing created successfully.");
+
+  } catch (err) {
+    console.error("CREATE LISTING ERROR:", err);
+
+    alert("Listing creation failed.");
+  }
 }
-
+  
 function handlePhotos(e) {
   const files = Array.from(e.target.files || []);
 
