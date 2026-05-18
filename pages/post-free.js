@@ -12804,7 +12804,7 @@ return (
   onClick={handleSubmit}
   disabled={isPosting}
 >
-  {isPosting ? "POSTING..." : "POST FREE"}
+  {isPosting ? "UPLOADING PHOTOS..." : "POST FREE"}
 </button>
           </section>
 
