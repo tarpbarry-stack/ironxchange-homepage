@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 
 const BRAND_YELLOW = "#FFC400";
-const STAGING = "https://staging.ironxchange.com";
 
 function slugify(text = "") {
   return String(text)
@@ -17,6 +16,8 @@ function getSavedListingIds(profile = {}) {
   if (Array.isArray(fromSharetribe)) {
     return fromSharetribe.map(String);
   }
+
+  if (typeof window === "undefined") return [];
 
   try {
     const saved = JSON.parse(localStorage.getItem("ironxchangeSaved") || "[]");
@@ -83,85 +84,85 @@ export default function AccountPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activityLog, setActivityLog] = useState([]);
 
- useEffect(() => {
-  async function loadAccount() {
-    try {
-      const SharetribeSdk = await import("sharetribe-flex-sdk");
+  useEffect(() => {
+    async function loadAccount() {
+      try {
+        const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
+        const sdk = SharetribeSdk.createInstance({
+          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
 
-      const response = await sdk.currentUser.show({
-        include: ["profileImage"]
-      });
+        const response = await sdk.currentUser.show({
+          include: ["profileImage"]
+        });
 
-      const currentUser = response.data.data;
+        const currentUser = response.data.data;
 
-      setUser({
-        ...currentUser,
-        included: response.data.included || []
-      });
+        setUser({
+          ...currentUser,
+          included: response.data.included || []
+        });
 
-      const userId = currentUser.id?.uuid || currentUser.id;
+        const userId = currentUser.id?.uuid || currentUser.id;
 
-      const listingsRes = await fetch(
-        `/api/account-listings?authorId=${userId}`
-      );
+        const listingsRes = await fetch(
+          `/api/account-listings?authorId=${userId}`
+        );
 
-      const listingsData = await listingsRes.json();
-      setMyListings(Array.isArray(listingsData) ? listingsData : []);
+        const listingsData = await listingsRes.json();
+        setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
-      const allListingsRes = await fetch("/api/listings");
-      const allListingsData = await allListingsRes.json();
+        const allListingsRes = await fetch("/api/listings");
+        const allListingsData = await allListingsRes.json();
 
-      const savedIds = getSavedListingIds(
-        currentUser.attributes?.profile || {}
-      );
+        const savedIds = getSavedListingIds(
+          currentUser.attributes?.profile || {}
+        );
 
-      const saved = Array.isArray(allListingsData)
-        ? allListingsData.filter(item => {
-            const itemSlug = slugify(item.title);
+        const saved = Array.isArray(allListingsData)
+          ? allListingsData.filter(item => {
+              const itemSlug = slugify(item.title);
 
-            return (
-              savedIds.includes(String(item.id)) ||
-              savedIds.includes(String(item.uuid)) ||
-              savedIds.includes(String(item.listingId)) ||
-              savedIds.includes(String(item.sharetribeId)) ||
-              savedIds.includes(itemSlug)
-            );
-          })
-        : [];
+              return (
+                savedIds.includes(String(item.id)) ||
+                savedIds.includes(String(item.uuid)) ||
+                savedIds.includes(String(item.listingId)) ||
+                savedIds.includes(String(item.sharetribeId)) ||
+                savedIds.includes(itemSlug)
+              );
+            })
+          : [];
 
-      setSavedMachines(saved);
-    } catch {
-      window.location.href = `/login?next=${encodeURIComponent("/account")}`;
-    } finally {
-      setLoading(false);
+        setSavedMachines(saved);
+      } catch {
+        window.location.href = `/login?next=${encodeURIComponent("/account")}`;
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  loadAccount();
-}, []);
+    loadAccount();
+  }, []);
 
-useEffect(() => {
-  function loadActivity() {
-    try {
-      const events = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
-      setActivityLog(Array.isArray(events) ? events : []);
-    } catch {
-      setActivityLog([]);
+  useEffect(() => {
+    function loadActivity() {
+      try {
+        const events = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
+        setActivityLog(Array.isArray(events) ? events : []);
+      } catch {
+        setActivityLog([]);
+      }
     }
-  }
 
-  loadActivity();
+    loadActivity();
 
-  window.addEventListener("ix-activity-updated", loadActivity);
+    window.addEventListener("ix-activity-updated", loadActivity);
 
-  return () => {
-    window.removeEventListener("ix-activity-updated", loadActivity);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("ix-activity-updated", loadActivity);
+    };
+  }, []);
 
   function handleSearch() {
     const q = searchQuery.trim();
@@ -186,11 +187,18 @@ useEffect(() => {
   }
 
   const profile = user?.attributes?.profile || {};
+  const publicData = profile?.publicData || {};
   const protectedData = profile?.protectedData || {};
 
-  const displayName = profile?.displayName || "IronXchange User";
-  const companyName = profile?.abbreviatedName || "";
-  const phoneNumber = protectedData?.phoneNumber || "";
+  const displayName =
+    publicData.companyName ||
+    profile?.displayName ||
+    "IronXchange User";
+
+  const companyName =
+    publicData.sellerName ||
+    profile?.abbreviatedName ||
+    "";
 
   const imageId = user?.relationships?.profileImage?.data?.id?.uuid || null;
 
@@ -228,7 +236,6 @@ useEffect(() => {
       <Head>
         <title>Account | IronXchange</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           rel="stylesheet"
@@ -249,8 +256,8 @@ useEffect(() => {
             <a href="/browse">SEARCH</a>
 
             <a href="/post-free" className="yellow-link">
-  POST FREE
-</a>
+              POST FREE
+            </a>
 
             <button type="button" onClick={handleLogout} className="logout-btn">
               LOGOUT
@@ -297,6 +304,11 @@ useEffect(() => {
               Saved
             </a>
 
+            <a href="/profile">
+              <i className="fa-regular fa-id-card"></i>
+              Profile
+            </a>
+
             <a href="/account/settings">
               <i className="fa-solid fa-gear"></i>
               Settings
@@ -325,258 +337,185 @@ useEffect(() => {
               </div>
             </div>
 
-      <div className="stats">
-  <div className="stat-card">
-    <span>Active Listings</span>
-    <strong>{myListings.length}</strong>
-    <p>Live machines for sale</p>
-  </div>
-
-  <div className="stat-card">
-    <span>Age</span>
-    <strong className="green">18</strong>
-    <p>Average listing age</p>
-  </div>
-
-  <div className="stat-card">
-    <span>Saved Machines</span>
-    <strong>{savedMachines.length}</strong>
-    <p>Watchlist inventory</p>
-  </div>
-</div>
-
-
-<div className="main-grid">
-
-  <div className="left-column">
-
-    <section className="panel listings-panel">
-      <div className="panel-head">
-        <h2>My Listings</h2>
-        <a href="/account/listings">MANAGE ALL →</a>
-      </div>
-
-      <div className="listing-table">
-        {/* KEEP ALL YOUR EXISTING LISTING TABLE CODE HERE */}
-      </div>
-    </section>
-
-    <section className="panel performance-panel">
-      <div className="panel-head">
-        <h2>Performance</h2>
-        <span className="small-note">COMING ONLINE</span>
-      </div>
-
-      <div className="perf-grid">
-        <div>
-          <span>Views</span>
-          <strong>—</strong>
-        </div>
-
-        <div>
-          <span>Saves</span>
-          <strong>—</strong>
-        </div>
-
-        <div>
-          <span>Messages</span>
-          <strong>—</strong>
-        </div>
-
-        <div>
-          <span>Sold / Closed</span>
-          <strong>—</strong>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <div className="right-stack">
-
-    <section className="panel side-panel">
-      <div className="panel-head">
-        <h2>Recent Inquiries</h2>
-        <a href="/account/messages">OPEN →</a>
-      </div>
-
-      <div className="activity-list">
-        <div>
-          <span className="dot yellow"></span>
-          <p>New buyer inquiries will appear here.</p>
-        </div>
-
-        <div>
-          <span className="dot green"></span>
-          <p>Email remains primary. This keeps the record.</p>
-        </div>
-      </div>
-    </section>
-
-    <section className="panel side-panel activity-panel">
-      <div className="panel-head">
-        <h2>Activity Log</h2>
-        <span className="small-note">LIVE</span>
-      </div>
-
-      <div className="activity-log">
-        {activityLog.length > 0 ? (
-          activityLog.slice(0, 8).map(event => (
-            <div className="activity-event" key={event.id}>
-              <span className={event.type === "error" ? "event-dot red" : "event-dot green"}></span>
-
-              <div>
-                <p>{event.message}</p>
-                <small>{formatActivityTime(event.createdAt)}</small>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="activity-empty">
-            <span className="dot yellow"></span>
-            <p>Listing updates, price changes, and promotions will show here.</p>
-          </div>
-        )}
-      </div>
-    </section>
-
-    <section className="panel side-panel">
-      <div className="panel-head">
-        <h2>Saved Machines</h2>
-        <a href="/saved">VIEW ALL →</a>
-      </div>
-
-      <div className="saved-card-list">
-        {/* KEEP YOUR EXISTING SAVED MACHINE CODE HERE */}
-      </div>
-    </section>
-
-  </div>
-
-</div>
-  
-
-                <div className="listing-table">
-                  <div className="table-row table-head">
-                    <span>Machine</span>
-                    <span>Hours</span>
-                    <span>Price</span>
-                    <span>Age</span>
-                    <span>Status</span>
-                    <span>Actions</span>
+            <div className="main-grid">
+              <div className="left-column">
+                <div className="stats">
+                  <div className="stat-card">
+                    <span>Active Listings</span>
+                    <strong>{myListings.length}</strong>
+                    <p>Live machines for sale</p>
                   </div>
 
-                  {myListings.length > 0 ? (
-                    myListings.map(listing => (
-                      <div className="table-row" key={listing.id}>
-                        <div className="machine-cell">
-  <a href={`/live?id=${listing.id}`} className="machine-link">
-    <img
-      src={
-        listing.imageUrl ||
-        listing.image ||
-        "/images/hero-equipment-yard.jpg"
-      }
-      alt={listing.title}
-    />
+                  <div className="stat-card">
+                    <span>Age</span>
+                    <strong className="green">18</strong>
+                    <p>Average listing age</p>
+                  </div>
 
-    <span>{cleanMachineTitle(listing.title)}</span>
-  </a>
-</div>
-
-                        <span>{listing.hours}</span>
-
-                        <input
-                          className="price-input"
-                          defaultValue={formatPriceInput(listing.price)}
-                          onKeyDown={async e => {
-                            if (e.key !== "Enter") return;
-
-                            e.preventDefault();
-
-                            const input = e.currentTarget;
-                            const newPrice = input.value.replace(/,/g, "").trim();
-
-                            input.classList.remove("saved", "error");
-
-                            const response = await fetch("/api/update-listing-price", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json"
-                              },
-                              body: JSON.stringify({
-                                listingId: listing.id,
-                                price: newPrice
-                              })
-                            });
-
-                            if (response.ok) {
-  input.value = Number(newPrice).toLocaleString();
-  input.classList.add("saved");
-
-  addActivity(
-    "success",
-    `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
-  );
-} else {
-  input.classList.add("error");
-
-  addActivity(
-    "error",
-    `Price update failed — ${cleanMachineTitle(listing.title)}`
-  );
-}
-                          }}
-                        />
-
-                        <span
-                          className={
-                            listing.age <= 30
-                              ? "age-green"
-                              : listing.age <= 45
-                              ? "age-yellow"
-                              : "age-red"
-                          }
-                        >
-                          {listing.age ?? "—"}
-                        </span>
-
-                        <span className="listing-status active">ACTIVE</span>
-
-                        <span>
-                          <select
-  className="action-select"
-  defaultValue=""
-  onChange={e => {
-    const value = e.target.value;
-
-    if (value === "edit" || value === "promote") {
-      window.location.href = `/live?id=${listing.id}`;
-    }
-  }}
->
-                            <option value="" disabled>
-                              ACTION
-                            </option>
-                            <option value="edit">Edit</option>
-                            <option value="promote">Promote</option>
-                            <option value="pause">Pause</option>
-                            <option value="sold">Mark Sold</option>
-                            <option value="duplicate">Duplicate</option>
-                            <option value="relist">Relist</option>
-                            <option value="archive">Archive</option>
-                          </select>
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="table-empty">
-                      <strong>No active listings yet.</strong>
-                      <p>Your machines will show here once they are listed.</p>
-                    </div>
-                  )}
+                  <div className="stat-card">
+                    <span>Saved Machines</span>
+                    <strong>{savedMachines.length}</strong>
+                    <p>Watchlist inventory</p>
+                  </div>
                 </div>
-              </section>
+
+                <section className="panel listings-panel">
+                  <div className="panel-head">
+                    <h2>My Listings</h2>
+                    <a href="/account/listings">MANAGE ALL →</a>
+                  </div>
+
+                  <div className="listing-table">
+                    <div className="table-row table-head">
+                      <span>Machine</span>
+                      <span>Hours</span>
+                      <span>Price</span>
+                      <span>Age</span>
+                      <span>Status</span>
+                      <span>Actions</span>
+                    </div>
+
+                    {myListings.length > 0 ? (
+                      myListings.map(listing => (
+                        <div className="table-row" key={listing.id}>
+                          <div className="machine-cell">
+                            <a href={`/live?id=${listing.id}`} className="machine-link">
+                              <img
+                                src={
+                                  listing.imageUrl ||
+                                  listing.image ||
+                                  "/images/hero-equipment-yard.jpg"
+                                }
+                                alt={listing.title}
+                              />
+
+                              <span>{cleanMachineTitle(listing.title)}</span>
+                            </a>
+                          </div>
+
+                          <span>{listing.hours}</span>
+
+                          <input
+                            className="price-input"
+                            defaultValue={formatPriceInput(listing.price)}
+                            onKeyDown={async e => {
+                              if (e.key !== "Enter") return;
+
+                              e.preventDefault();
+
+                              const input = e.currentTarget;
+                              const newPrice = input.value.replace(/,/g, "").trim();
+
+                              input.classList.remove("saved", "error");
+
+                              const response = await fetch("/api/update-listing-price", {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                  listingId: listing.id,
+                                  price: newPrice
+                                })
+                              });
+
+                              if (response.ok) {
+                                input.value = Number(newPrice).toLocaleString();
+                                input.classList.add("saved");
+
+                                addActivity(
+                                  "success",
+                                  `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
+                                );
+                              } else {
+                                input.classList.add("error");
+
+                                addActivity(
+                                  "error",
+                                  `Price update failed — ${cleanMachineTitle(listing.title)}`
+                                );
+                              }
+                            }}
+                          />
+
+                          <span
+                            className={
+                              listing.age <= 30
+                                ? "age-green"
+                                : listing.age <= 45
+                                ? "age-yellow"
+                                : "age-red"
+                            }
+                          >
+                            {listing.age ?? "—"}
+                          </span>
+
+                          <span className="listing-status active">ACTIVE</span>
+
+                          <span>
+                            <select
+                              className="action-select"
+                              defaultValue=""
+                              onChange={e => {
+                                const value = e.target.value;
+
+                                if (value === "edit" || value === "promote") {
+                                  window.location.href = `/live?id=${listing.id}`;
+                                }
+                              }}
+                            >
+                              <option value="" disabled>
+                                ACTION
+                              </option>
+                              <option value="edit">Edit</option>
+                              <option value="promote">Promote</option>
+                              <option value="pause">Pause</option>
+                              <option value="sold">Mark Sold</option>
+                              <option value="duplicate">Duplicate</option>
+                              <option value="relist">Relist</option>
+                              <option value="archive">Archive</option>
+                            </select>
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="table-empty">
+                        <strong>No active listings yet.</strong>
+                        <p>Your machines will show here once they are listed.</p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="panel performance-panel">
+                  <div className="panel-head">
+                    <h2>Performance</h2>
+                    <span className="small-note">COMING ONLINE</span>
+                  </div>
+
+                  <div className="perf-grid">
+                    <div>
+                      <span>Views</span>
+                      <strong>—</strong>
+                    </div>
+
+                    <div>
+                      <span>Saves</span>
+                      <strong>—</strong>
+                    </div>
+
+                    <div>
+                      <span>Messages</span>
+                      <strong>—</strong>
+                    </div>
+
+                    <div>
+                      <span>Sold / Closed</span>
+                      <strong>—</strong>
+                    </div>
+                  </div>
+                </section>
+              </div>
 
               <div className="right-stack">
                 <section className="panel side-panel">
@@ -598,33 +537,39 @@ useEffect(() => {
                   </div>
                 </section>
 
-<section className="panel side-panel activity-panel">
-  <div className="panel-head">
-    <h2>Activity Log</h2>
-    <span className="small-note">LIVE</span>
-  </div>
+                <section className="panel side-panel activity-panel">
+                  <div className="panel-head">
+                    <h2>Activity Log</h2>
+                    <span className="small-note">LIVE</span>
+                  </div>
 
-  <div className="activity-log">
-    {activityLog.length > 0 ? (
-      activityLog.slice(0, 8).map(event => (
-        <div className="activity-event" key={event.id}>
-          <span className={event.type === "error" ? "event-dot red" : "event-dot green"}></span>
+                  <div className="activity-log">
+                    {activityLog.length > 0 ? (
+                      activityLog.slice(0, 8).map(event => (
+                        <div className="activity-event" key={event.id}>
+                          <span
+                            className={
+                              event.type === "error"
+                                ? "event-dot red"
+                                : "event-dot green"
+                            }
+                          ></span>
 
-          <div>
-            <p>{event.message}</p>
-            <small>{formatActivityTime(event.createdAt)}</small>
-          </div>
-        </div>
-      ))
-    ) : (
-      <div className="activity-empty">
-        <span className="dot yellow"></span>
-        <p>Listing updates, price changes, and promotions will show here.</p>
-      </div>
-    )}
-  </div>
-</section>
-      
+                          <div>
+                            <p>{event.message}</p>
+                            <small>{formatActivityTime(event.createdAt)}</small>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="activity-empty">
+                        <span className="dot yellow"></span>
+                        <p>Listing updates, price changes, and promotions will show here.</p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
                 <section className="panel side-panel">
                   <div className="panel-head">
                     <h2>Saved Machines</h2>
@@ -667,35 +612,6 @@ useEffect(() => {
                   </div>
                 </section>
               </div>
-
-              <section className="panel performance-panel">
-                <div className="panel-head">
-                  <h2>Performance</h2>
-                  <span className="small-note">COMING ONLINE</span>
-                </div>
-
-                <div className="perf-grid">
-                  <div>
-                    <span>Views</span>
-                    <strong>—</strong>
-                  </div>
-
-                  <div>
-                    <span>Saves</span>
-                    <strong>—</strong>
-                  </div>
-
-                  <div>
-                    <span>Messages</span>
-                    <strong>—</strong>
-                  </div>
-
-                  <div>
-                    <span>Sold / Closed</span>
-                    <strong>—</strong>
-                  </div>
-                </div>
-              </section>
             </div>
           </section>
         </section>
@@ -776,23 +692,23 @@ useEffect(() => {
           color: #38A169 !important;
         }
 
-       .dashboard {
-  display: grid;
-  grid-template-columns: 200px 1fr;
+        .dashboard {
+          display: grid;
+          grid-template-columns: 200px 1fr;
           gap: 8px;
           padding: 10px 1.25% 40px;
           max-width: 1680px;
           margin: 0 auto;
         }
 
-   .rail {
-  background: #111;
-  border: 1px solid #252525;
-  border-radius: 12px;
-  padding: 6px;
-  height: 100%;
-  align-self: stretch;
-}
+        .rail {
+          background: #111;
+          border: 1px solid #252525;
+          border-radius: 12px;
+          padding: 6px;
+          height: 100%;
+          align-self: stretch;
+        }
 
         .rail-top {
           text-align: center;
@@ -859,17 +775,18 @@ useEffect(() => {
           color: ${BRAND_YELLOW};
         }
 
-       .content {
-  min-width: 0;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-}
+        .content {
+          min-width: 0;
+          display: grid;
+          grid-template-rows: auto 1fr;
+          gap: 6px;
+        }
+
         .top-tools {
           display: grid;
           grid-template-columns: 1fr auto;
           gap: 8px;
           align-items: stretch;
-          margin-bottom: 6px;
         }
 
         .dashboard-search {
@@ -930,13 +847,25 @@ useEffect(() => {
           background: #38A169;
         }
 
-       .stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 0;
-  width: 100%;
-}
+        .main-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 320px;
+          gap: 6px;
+          align-items: start;
+        }
+
+        .left-column {
+          min-width: 0;
+          display: grid;
+          gap: 6px;
+        }
+
+        .stats {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 6px;
+          width: 100%;
+        }
 
         .stat-card,
         .panel {
@@ -977,108 +906,86 @@ useEffect(() => {
           font-size: 10px;
         }
 
-    .main-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 6px;
-  align-items: start;
-  flex: 1;
-}
+        .panel {
+          padding: 8px 10px;
+        }
 
-.left-column {
-  min-width: 0;
-  display: grid;
-  gap: 6px;
-}
+        .right-stack {
+          display: grid;
+          grid-template-rows: repeat(3, minmax(0, auto));
+          gap: 6px;
+          align-self: start;
+        }
 
-.panel {
-  padding: 8px 10px;
-}
+        .side-panel {
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+        }
 
-.listings-panel {
-  grid-row: auto;
-}
+        .activity-panel {
+          min-height: 0;
+        }
 
-.right-stack {
-  display: grid;
-  grid-template-rows: repeat(3, minmax(0, auto));
-  gap: 6px;
-  align-self: start;
-  margin-top: 0;
-}
+        .activity-log {
+          display: grid;
+          gap: 8px;
+          overflow-y: auto;
+        }
 
-.activity-panel {
-  min-height: 0;
-}
+        .activity-event {
+          display: grid;
+          grid-template-columns: 8px 1fr;
+          gap: 8px;
+          align-items: start;
+          background: #101010;
+          border: 1px solid #252525;
+          border-radius: 10px;
+          padding: 9px;
+        }
 
-.activity-log {
-  display: grid;
-  gap: 8px;
-  overflow-y: auto;
-}
+        .activity-event p {
+          margin: 0;
+          color: #d6d6d6;
+          font-size: 11px;
+          line-height: 1.35;
+        }
 
-.activity-event {
-  display: grid;
-  grid-template-columns: 8px 1fr;
-  gap: 8px;
-  align-items: start;
-  background: #101010;
-  border: 1px solid #252525;
-  border-radius: 10px;
-  padding: 9px;
-}
+        .activity-event small {
+          display: block;
+          margin-top: 4px;
+          color: #777;
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
 
-.activity-event p {
-  margin: 0;
-  color: #d6d6d6;
-  font-size: 11px;
-  line-height: 1.35;
-}
+        .event-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          margin-top: 4px;
+        }
 
-.activity-event small {
-  display: block;
-  margin-top: 4px;
-  color: #777;
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
+        .event-dot.green {
+          background: #38A169;
+        }
 
-.event-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  margin-top: 4px;
-}
+        .event-dot.red {
+          background: #E53E3E;
+        }
 
-.event-dot.green {
-  background: #38A169;
-}
+        .activity-empty {
+          display: grid;
+          grid-template-columns: 8px 1fr;
+          gap: 8px;
+          color: #aaa;
+          font-size: 12px;
+        }
 
-.event-dot.red {
-  background: #E53E3E;
-}
-
-.activity-empty {
-  display: grid;
-  grid-template-columns: 8px 1fr;
-  gap: 8px;
-  color: #aaa;
-  font-size: 12px;
-}
-.side-panel {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.activity-list,
-.saved-card-list {
-  overflow-y: auto;
-}
-
-        .performance-panel {
-          grid-column: 1 / -1;
+        .activity-list,
+        .saved-card-list {
+          overflow-y: auto;
         }
 
         .panel-head {
@@ -1108,31 +1015,31 @@ useEffect(() => {
         }
 
         .listing-table {
-  border: 1px solid #252525;
-  border-radius: 10px;
-  overflow-y: auto;
-  max-height: 605px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 196, 0, .45) rgba(255,255,255,.04);
-}
+          border: 1px solid #252525;
+          border-radius: 10px;
+          overflow-y: auto;
+          max-height: 605px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 196, 0, .45) rgba(255,255,255,.04);
+        }
 
-.listing-table::-webkit-scrollbar {
-  width: 8px;
-}
+        .listing-table::-webkit-scrollbar {
+          width: 8px;
+        }
 
-.listing-table::-webkit-scrollbar-track {
-  background: rgba(255,255,255,.04);
-  border-radius: 999px;
-}
+        .listing-table::-webkit-scrollbar-track {
+          background: rgba(255,255,255,.04);
+          border-radius: 999px;
+        }
 
-.listing-table::-webkit-scrollbar-thumb {
-  background: rgba(255, 196, 0, .45);
-  border-radius: 999px;
-}
+        .listing-table::-webkit-scrollbar-thumb {
+          background: rgba(255, 196, 0, .45);
+          border-radius: 999px;
+        }
 
-.listing-table::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 196, 0, .7);
-}
+        .listing-table::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 196, 0, .7);
+        }
 
         .table-row {
           display: grid;
@@ -1176,13 +1083,13 @@ useEffect(() => {
           margin: 0;
         }
 
-       .machine-cell {
-  min-width: 0;
-}
+        .machine-cell {
+          min-width: 0;
+        }
 
         .machine-cell img {
-  width: 132px;
-  height: 96px;
+          width: 132px;
+          height: 96px;
           object-fit: cover;
           border-radius: 6px;
           border: 1px solid #2A2A2A;
@@ -1197,28 +1104,28 @@ useEffect(() => {
           white-space: nowrap;
         }
 
-       .machine-link {
-  display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-}
+        .machine-link {
+          display: grid;
+          grid-template-columns: 132px minmax(0, 1fr);
+          gap: 10px;
+          align-items: center;
+          text-decoration: none;
+          color: inherit;
+        }
 
-.machine-link span {
-  display: block;
-  min-width: 0;
-  color: #f2f2f2;
-  font-weight: 800;
-  font-size: 13px;
-  line-height: 1.25;
-  overflow: hidden;
-}
+        .machine-link span {
+          display: block;
+          min-width: 0;
+          color: #f2f2f2;
+          font-weight: 800;
+          font-size: 13px;
+          line-height: 1.25;
+          overflow: hidden;
+        }
 
-.machine-link:hover span {
-  color: #FFC400;
-}
+        .machine-link:hover span {
+          color: #FFC400;
+        }
 
         .price-input {
           width: 72px;
@@ -1420,6 +1327,10 @@ useEffect(() => {
         }
 
         @media (max-width: 1180px) {
+          .main-grid {
+            grid-template-columns: minmax(0, 1fr) 300px;
+          }
+
           .dashboard-search {
             grid-template-columns: minmax(0, 1fr) 76px;
           }
@@ -1470,16 +1381,26 @@ useEffect(() => {
             display: none;
           }
 
+          .right-stack {
+            grid-template-rows: auto auto auto;
+          }
+
+          .side-panel {
+            min-height: auto;
+          }
+
           .saved-card-list {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
+            -webkit-overflow-scrolling: touch;
           }
 
           .saved-card {
             min-width: 220px;
             grid-template-columns: 1fr;
+            flex: 0 0 220px;
           }
 
           .saved-card img {
@@ -1490,42 +1411,7 @@ useEffect(() => {
           .saved-card-body {
             padding: 8px;
           }
-
-          .right-stack {
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 6px;
-  height: auto;
-}
-
-.side-panel {
-  min-height: auto;
-}
-
-.saved-card-list {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.saved-card {
-  min-width: 220px;
-  grid-template-columns: 1fr;
-  flex: 0 0 220px;
-}
-
-.saved-card img {
-  width: 100%;
-  height: 120px;
-}
-
-.saved-card-body {
-  padding: 8px;
-}
-
-}
+        }
 
         @media (max-width: 650px) {
           .nav {
