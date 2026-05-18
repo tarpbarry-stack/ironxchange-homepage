@@ -1,4 +1,48 @@
+import { useState } from "react";
+
 export default function DiscoveryEngine() {
+  const [status, setStatus] = useState("");
+
+  async function seedTargets() {
+    const targets = [
+      {
+        company: "HOLT CAT",
+        website: "https://www.holtcat.com",
+        category: "Heavy Equipment",
+        state: "TX"
+      },
+      {
+        company: "Warren CAT",
+        website: "https://www.warrencat.com",
+        category: "Heavy Equipment",
+        state: "TX"
+      },
+      {
+        company: "Kirby-Smith",
+        website: "https://www.kirby-smith.com",
+        category: "Heavy Equipment",
+        state: "OK"
+      }
+    ];
+
+    const response = await fetch(
+      "/api/discovery-targets",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ targets })
+      }
+    );
+
+    const data = await response.json();
+
+    setStatus(
+      `Saved ${data.saved} discovery targets`
+    );
+  }
+
   return (
     <main style={pageStyle}>
       <a href="/ixi" style={backLinkStyle}>
@@ -8,69 +52,23 @@ export default function DiscoveryEngine() {
       <h1>Discovery Engine</h1>
 
       <p style={mutedText}>
-        Find new dealer, contractor, auction, and equipment company targets for IXI.
+        Find new dealer and contractor crawl targets.
       </p>
-
-      <div style={statsGrid}>
-        <StatCard label="Sources" value="0" />
-        <StatCard label="Discovered Companies" value="0" />
-        <StatCard label="Dealer Targets" value="0" />
-        <StatCard label="Contractor Targets" value="0" />
-      </div>
-
-      <section style={panelStyle}>
-        <h2>Discovery Sources</h2>
-
-        <div style={sourceGrid}>
-          <SourceCard title="MachineryTrader Dealers" status="Coming Soon" />
-          <SourceCard title="Google Maps Searches" status="Coming Soon" />
-          <SourceCard title="Auction Sellers" status="Coming Soon" />
-          <SourceCard title="AGC / Contractor Lists" status="Coming Soon" />
-          <SourceCard title="OEM Dealer Locators" status="Coming Soon" />
-          <SourceCard title="Manual Seed Lists" status="Active" />
-        </div>
-      </section>
 
       <section style={panelStyle}>
         <h2>Discovery Controls</h2>
 
         <div style={buttonRow}>
-          <button style={buttonStyle}>
-            Run Dealer Discovery
-          </button>
-
-          <button style={buttonStyle}>
-            Run Contractor Discovery
-          </button>
-
-          <button style={buttonStyle}>
-            Export Targets
+          <button style={buttonStyle} onClick={seedTargets}>
+            Seed Discovery Targets
           </button>
         </div>
 
-        <p style={statusStyle}>
-          Discovery Engine shell is live. Next step: connect source discovery APIs.
-        </p>
+        {status && (
+          <p style={statusStyle}>{status}</p>
+        )}
       </section>
     </main>
-  );
-}
-
-function StatCard({ label, value }) {
-  return (
-    <div style={statCard}>
-      <h2>{value}</h2>
-      <p>{label}</p>
-    </div>
-  );
-}
-
-function SourceCard({ title, status }) {
-  return (
-    <div style={sourceCard}>
-      <h3>{title}</h3>
-      <p style={mutedText}>{status}</p>
-    </div>
   );
 }
 
@@ -93,38 +91,10 @@ const backLinkStyle = {
   textDecoration: "none"
 };
 
-const statsGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: "20px",
-  marginTop: "40px"
-};
-
-const statCard = {
-  background: "#222",
-  padding: "20px",
-  borderRadius: "12px",
-  border: "1px solid #333"
-};
-
 const panelStyle = {
   marginTop: "40px",
   background: "#1a1a1a",
   padding: "30px",
-  borderRadius: "12px",
-  border: "1px solid #333"
-};
-
-const sourceGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: "20px",
-  marginTop: "20px"
-};
-
-const sourceCard = {
-  background: "#222",
-  padding: "20px",
   borderRadius: "12px",
   border: "1px solid #333"
 };
