@@ -40,6 +40,41 @@ function formatPriceInput(price = "") {
   return Number.isFinite(number) && raw ? number.toLocaleString() : "";
 }
 
+function addActivity(type, message) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const event = {
+      id: `${Date.now()}-${Math.random()}`,
+      type,
+      message,
+      createdAt: new Date().toISOString()
+    };
+
+    const current = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
+
+    localStorage.setItem(
+      "ixActivityLog",
+      JSON.stringify([event, ...current].slice(0, 25))
+    );
+
+    window.dispatchEvent(new Event("ix-activity-updated"));
+  } catch (err) {
+    console.error("Activity log failed", err);
+  }
+}
+
+function formatActivityTime(value) {
+  try {
+    return new Date(value).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit"
+    });
+  } catch {
+    return "";
+  }
+}
+
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -48,57 +83,68 @@ export default function AccountPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activityLog, setActivityLog] = useState([]);
 
-  useEffect(() => {
-    async function loadAccount() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
+ useEffect(() => {
+  async function loadAccount() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-        const sdk = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
 
-        const response = await sdk.currentUser.show({
-          include: ["profileImage"]
-        });
+      const response = await sdk.currentUser.show({
+        include: ["profileImage"]
+      });
 
-        const currentUser = response.data.data;
+      const currentUser = response.data.data;
 
-        setUser({
-          ...currentUser,
-          included: response.data.included || []
-        });
+      setUser({
+        ...currentUser,
+        included: response.data.included || []
+      });
 
-        const userId = currentUser.id?.uuid || currentUser.id;
+      const userId = currentUser.id?.uuid || currentUser.id;
 
-        const listingsRes = await fetch(
-          `/api/account-listings?authorId=${userId}`
-        );
+      const listingsRes = await fetch(
+        `/api/account-listings?authorId=${userId}`
+      );
 
-        const listingsData = await listingsRes.json();
-        setMyListings(Array.isArray(listingsData) ? listingsData : []);
+      const listingsData = await listingsRes.json();
+      setMyListings(Array.isArray(listingsData) ? listingsData : []);
 
-        const allListingsRes = await fetch("/api/listings");
-        const allListingsData = await allListingsRes.json();
+      const allListingsRes = await fetch("/api/listings");
+      const allListingsData = await allListingsRes.json();
 
-        const savedIds = getSavedListingIds(
-          currentUser.attributes?.profile || {}
-        );
+      const savedIds = getSavedListingIds(
+        currentUser.attributes?.profile || {}
+      );
 
-        const saved = Array.isArray(allListingsData)
-          ? allListingsData.filter(item => {
-              const itemSlug = slugify(item.title);
+      const saved = Array.isArray(allListingsData)
+        ? allListingsData.filter(item => {
+            const itemSlug = slugify(item.title);
 
-              return (
-                savedIds.includes(String(item.id)) ||
-                savedIds.includes(String(item.uuid)) ||
-                savedIds.includes(String(item.listingId)) ||
-                savedIds.includes(String(item.sharetribeId)) ||
-                savedIds.includes(itemSlug)
-              );
-            })
-          : [];
+            return (
+              savedIds.includes(String(item.id)) ||
+              savedIds.includes(String(item.uuid)) ||
+              savedIds.includes(String(item.listingId)) ||
+              savedIds.includes(String(item.sharetribeId)) ||
+              savedIds.includes(itemSlug)
+            );
+          })
+        : [];
 
-        useEffect(() => {
+      setSavedMachines(saved);
+    } catch {
+      window.location.href = `/login?next=${encodeURIComponent("/account")}`;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadAccount();
+}, []);
+
+useEffect(() => {
   function loadActivity() {
     try {
       const events = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
