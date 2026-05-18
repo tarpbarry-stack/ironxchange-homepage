@@ -163,9 +163,9 @@ export default function Home() {
 
         <div className="nav-links">
           <a href="/browse">SEARCH</a>
-          <a href={`${STAGING}/l/new`} className="yellow-link">
-            Post Free
-          </a>
+          <a href="/post-free" className="yellow-link">
+  POST FREE
+</a>
         <a
   href={loggedIn ? "/account" : "/login"}
   className={`login-icon ${loggedIn ? "logged-in" : ""}`}
