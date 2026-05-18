@@ -345,6 +345,115 @@ useEffect(() => {
   </div>
 </div>
 
+
+<div className="main-grid">
+
+  <div className="left-column">
+
+    <section className="panel listings-panel">
+      <div className="panel-head">
+        <h2>My Listings</h2>
+        <a href="/account/listings">MANAGE ALL →</a>
+      </div>
+
+      <div className="listing-table">
+        {/* KEEP ALL YOUR EXISTING LISTING TABLE CODE HERE */}
+      </div>
+    </section>
+
+    <section className="panel performance-panel">
+      <div className="panel-head">
+        <h2>Performance</h2>
+        <span className="small-note">COMING ONLINE</span>
+      </div>
+
+      <div className="perf-grid">
+        <div>
+          <span>Views</span>
+          <strong>—</strong>
+        </div>
+
+        <div>
+          <span>Saves</span>
+          <strong>—</strong>
+        </div>
+
+        <div>
+          <span>Messages</span>
+          <strong>—</strong>
+        </div>
+
+        <div>
+          <span>Sold / Closed</span>
+          <strong>—</strong>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div className="right-stack">
+
+    <section className="panel side-panel">
+      <div className="panel-head">
+        <h2>Recent Inquiries</h2>
+        <a href="/account/messages">OPEN →</a>
+      </div>
+
+      <div className="activity-list">
+        <div>
+          <span className="dot yellow"></span>
+          <p>New buyer inquiries will appear here.</p>
+        </div>
+
+        <div>
+          <span className="dot green"></span>
+          <p>Email remains primary. This keeps the record.</p>
+        </div>
+      </div>
+    </section>
+
+    <section className="panel side-panel activity-panel">
+      <div className="panel-head">
+        <h2>Activity Log</h2>
+        <span className="small-note">LIVE</span>
+      </div>
+
+      <div className="activity-log">
+        {activityLog.length > 0 ? (
+          activityLog.slice(0, 8).map(event => (
+            <div className="activity-event" key={event.id}>
+              <span className={event.type === "error" ? "event-dot red" : "event-dot green"}></span>
+
+              <div>
+                <p>{event.message}</p>
+                <small>{formatActivityTime(event.createdAt)}</small>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="activity-empty">
+            <span className="dot yellow"></span>
+            <p>Listing updates, price changes, and promotions will show here.</p>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <section className="panel side-panel">
+      <div className="panel-head">
+        <h2>Saved Machines</h2>
+        <a href="/saved">VIEW ALL →</a>
+      </div>
+
+      <div className="saved-card-list">
+        {/* KEEP YOUR EXISTING SAVED MACHINE CODE HERE */}
+      </div>
+    </section>
+
+  </div>
+
+</div>
   
 
                 <div className="listing-table">
