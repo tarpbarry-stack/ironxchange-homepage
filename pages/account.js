@@ -163,17 +163,6 @@ useEffect(() => {
   };
 }, []);
 
-        setSavedMachines(saved);
-      } catch {
-        window.location.href = `/login?next=${encodeURIComponent("/account")}`;
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadAccount();
-  }, []);
-
   function handleSearch() {
     const q = searchQuery.trim();
 
