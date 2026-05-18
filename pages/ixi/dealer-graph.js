@@ -44,10 +44,20 @@ export default function DealerGraph() {
     setStatus(`Loaded ${parsedRows.length} CSV rows.`);
   }
 
-  async function handleLoadDiscoveryTargets() {
-    const response = await fetch("/api/discovery-targets");
+  function handleLoadDiscoveryTargets() {
+    const saved = localStorage.getItem(
+      "ixiDiscoveryTargets"
+    );
 
-    const data = await response.json();
+    if (!saved) {
+      setStatus(
+        "No discovery targets found. Go seed targets first."
+      );
+
+      return;
+    }
+
+    const targets = JSON.parse(saved);
 
     const header = [
       "company",
@@ -56,7 +66,7 @@ export default function DealerGraph() {
       "state"
     ];
 
-    const targetRows = data.targets.map((target) => [
+    const targetRows = targets.map((target) => [
       target.company,
       target.website,
       target.category,
