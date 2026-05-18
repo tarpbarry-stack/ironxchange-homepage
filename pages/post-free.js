@@ -12569,6 +12569,11 @@ async function compressImage(file, maxWidth = 1600, quality = 0.82) {
 }
   
 async function handleSubmit() {
+  if (!loggedIn) {
+    window.location.href = "/login";
+    return;
+  }
+
   setIsPosting(true);
 
   try {
