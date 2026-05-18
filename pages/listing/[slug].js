@@ -457,7 +457,6 @@ function lightboxNext() {
     <i className="fa-regular fa-user"></i>
   )}
 </div>
-                </div>
 
                 <div>
                   <strong>{sellerName}</strong>
