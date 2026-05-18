@@ -12495,19 +12495,70 @@ function toggleKeyword(keyword) {
   );
 }
 
+async function compressImage(file, maxWidth = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const reader = new FileReader();
+
+    reader.onload = event => {
+      image.onload = () => {
+        const scale = Math.min(1, maxWidth / image.width);
+        const width = Math.round(image.width * scale);
+        const height = Math.round(image.height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, width, height);
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) {
+              reject(new Error("Image compression failed."));
+              return;
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.[^.]+$/, ".jpg"),
+              {
+                type: "image/jpeg",
+                lastModified: Date.now()
+              }
+            );
+
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      image.onerror = reject;
+      image.src = event.target.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+  
 async function handleSubmit() {
   setIsPosting(true);
 
   try {
-    const uploadedImages = await Promise.all(
-      photos.map(photo =>
-        sdk.images.upload(
-          { image: photo.file },
-          { expand: true }
-        )
-      )
-    );
+  const uploadedImages = await Promise.all(
+  photos.map(async photo => {
+    const imageFile = await compressImage(photo.file);
 
+    return sdk.images.upload(
+      { image: imageFile },
+      { expand: true }
+    );
+  })
+);
    const imageIds = uploadedImages.map(
   upload => new UUID(upload.data.data.id.uuid)
 );
