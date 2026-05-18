@@ -317,17 +317,19 @@ export default function AccountPage() {
                     myListings.map(listing => (
                       <div className="table-row" key={listing.id}>
                         <div className="machine-cell">
-                          <img
-                            src={
-                              listing.imageUrl ||
-                              listing.image ||
-                              "/images/hero-equipment-yard.jpg"
-                            }
-                            alt={listing.title}
-                          />
+  <a href={`/live?id=${listing.id}`} className="machine-link">
+    <img
+      src={
+        listing.imageUrl ||
+        listing.image ||
+        "/images/hero-equipment-yard.jpg"
+      }
+      alt={listing.title}
+    />
 
-                          <span>{cleanMachineTitle(listing.title)}</span>
-                        </div>
+    <span>{cleanMachineTitle(listing.title)}</span>
+  </a>
+</div>
 
                         <span>{listing.hours}</span>
 
@@ -379,10 +381,22 @@ export default function AccountPage() {
                         <span className="listing-status active">ACTIVE</span>
 
                         <span>
-                          <select className="action-select" defaultValue="">
+                          <select
+  className="action-select"
+  defaultValue=""
+  onChange={e => {
+    const value = e.target.value;
+
+    if (value === "edit" || value === "promote") {
+      window.location.href = `/live?id=${listing.id}`;
+    }
+  }}
+>
                             <option value="" disabled>
                               ACTION
                             </option>
+                            <option value="edit">Edit</option>
+                            <option value="promote">Promote</option>
                             <option value="pause">Pause</option>
                             <option value="sold">Mark Sold</option>
                             <option value="duplicate">Duplicate</option>
@@ -572,9 +586,9 @@ export default function AccountPage() {
           color: #38A169 !important;
         }
 
-        .dashboard {
-          display: grid;
-          grid-template-columns: 180px 1fr;
+       .dashboard {
+  display: grid;
+  grid-template-columns: 220px 1fr;
           gap: 8px;
           padding: 10px 1.25% 40px;
           max-width: 1680px;
@@ -849,7 +863,7 @@ export default function AccountPage() {
           grid-template-columns: minmax(170px, 1fr) 64px 74px 36px 58px 90px;
           gap: 4px;
           align-items: center;
-          padding: 10px 8px;
+          padding: 14px 10px;
           border-bottom: 1px solid #252525;
           font-size: 12px;
         }
@@ -887,16 +901,16 @@ export default function AccountPage() {
         }
 
         .machine-cell {
-          display: grid;
-          grid-template-columns: 96px 1fr;
+  display: grid;
+  grid-template-columns: 132px 1fr;
           gap: 8px;
           align-items: center;
           min-width: 0;
         }
 
         .machine-cell img {
-          width: 96px;
-          height: 72px;
+  width: 132px;
+  height: 96px;
           object-fit: cover;
           border-radius: 6px;
           border: 1px solid #2A2A2A;
@@ -910,6 +924,19 @@ export default function AccountPage() {
           text-overflow: ellipsis;
           white-space: nowrap;
         }
+
+        ..machine-link {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 8px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.machine-link:hover span {
+  color: #FFC400;
+}
 
         .price-input {
           width: 72px;
