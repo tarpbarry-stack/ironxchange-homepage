@@ -12599,15 +12599,39 @@ console.log("IMAGE IDS:", imageIds);
       description,
 
       publicData: {
-        category,
-        year: Number(year),
-        make,
-        model,
-        hours: Number(cleanNumber(hours)),
-        stockNumber,
-        location: `${location}${stateCode ? `, ${stateCode}` : ""}`,
-        keywords: selectedKeywords
-      },
+  categoryLevel1: category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, ""),
+
+  categoryLevel2: `${category}-${make}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, ""),
+
+  categoryLevel3: `${category}-${make}-${model}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, ""),
+
+  hours: Number(cleanNumber(hours)),
+
+  listingType: "free-listing",
+
+  loc: stateCode,
+
+  transactionProcessAlias: "default-inquiry/release-1",
+
+  unitType: "inquiry",
+
+  year: String(year),
+
+  make,
+  model,
+  stockNumber,
+  city: location,
+  keywords: selectedKeywords
+},
 
       price: new Money(
         Number(cleanNumber(price)) * 100,
