@@ -12489,6 +12489,19 @@ function toggleKeyword(keyword) {
 
 async function handleSubmit() {
   try {
+    const uploadedImages = await Promise.all(
+      photos.map(photo =>
+        sdk.images.upload(
+          { image: photo.file },
+          { expand: true }
+        )
+      )
+    );
+
+    const imageIds = uploadedImages.map(
+      upload => upload.data.data.id
+    );
+
     const response = await sdk.ownListings.create({
       title: listingTitle,
 
@@ -12507,15 +12520,17 @@ async function handleSubmit() {
       price: new Money(
         Number(cleanNumber(price)) * 100,
         "USD"
-      )
+      ),
+
+      images: imageIds
     });
 
-    console.log("LISTING CREATED:", response);
+    console.log("LISTING CREATED WITH PHOTOS:", response);
 
-    alert("Listing created successfully.");
+    alert("Listing created with photos.");
 
   } catch (err) {
-    console.error("CREATE LISTING ERROR:", err);
+    console.error("CREATE LISTING WITH PHOTOS ERROR:", err);
 
     alert("Listing creation failed.");
   }
