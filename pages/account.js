@@ -345,27 +345,7 @@ useEffect(() => {
   </div>
 </div>
 
-            <div className="main-grid">
-  <div className="left-column">
-
-    <div className="stats">
-      ...
-    </div>
-
-    <section className="panel listings-panel">
-      ...
-    </section>
-
-    <section className="panel performance-panel">
-      ...
-    </section>
-
-  </div>
-
-  <div className="right-stack">
-    ...
-  </div>
-</div>
+  
 
                 <div className="listing-table">
                   <div className="table-row table-head">
@@ -915,7 +895,7 @@ useEffect(() => {
   grid-template-rows: repeat(3, minmax(0, auto));
   gap: 6px;
   align-self: start;
-  margin-top: -44px;
+  margin-top: 0;
 }
 
 .activity-panel {
