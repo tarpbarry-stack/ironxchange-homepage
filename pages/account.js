@@ -588,7 +588,7 @@ export default function AccountPage() {
 
        .dashboard {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 200px 1fr;
           gap: 8px;
           padding: 10px 1.25% 40px;
           max-width: 1680px;
