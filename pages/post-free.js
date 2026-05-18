@@ -12732,6 +12732,13 @@ function toggleKeyword(keyword) {
                     : "Hours"}
                   {location ? ` • ${location}` : ""}
                 </p>
+<div className="preview-keywords">
+  {selectedKeywords.slice(0, 12).map(keyword => (
+    <span key={keyword}>
+      {keyword}
+    </span>
+  ))}
+</div>                  
               </div>
             </div>
           </aside>
@@ -13067,6 +13074,23 @@ function toggleKeyword(keyword) {
   margin: 6px 0 0;
   color: #8A8A8A;
   font-size: 12px;
+}
+
+.preview-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.preview-keywords span {
+  background: #1B1B1B;
+  border: 1px solid #2D2D2D;
+  color: #BEBEBE;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 @media (max-width: 900px) {
