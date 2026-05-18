@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function DiscoveryEngine() {
   const [status, setStatus] = useState("");
 
-  async function seedTargets() {
+  function seedTargets() {
     const targets = [
       {
         company: "HOLT CAT",
@@ -22,25 +22,27 @@ export default function DiscoveryEngine() {
         website: "https://www.kirby-smith.com",
         category: "Heavy Equipment",
         state: "OK"
+      },
+      {
+        company: "RDO Equipment",
+        website: "https://www.rdoequipment.com",
+        category: "Heavy Equipment",
+        state: "ND"
+      },
+      {
+        company: "Bobcat of Dallas",
+        website: "https://www.bobcatofdallas.com",
+        category: "Compact Equipment",
+        state: "TX"
       }
     ];
 
-    const response = await fetch(
-      "/api/discovery-targets",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ targets })
-      }
+    localStorage.setItem(
+      "ixiDiscoveryTargets",
+      JSON.stringify(targets)
     );
 
-    const data = await response.json();
-
-    setStatus(
-      `Saved ${data.saved} discovery targets`
-    );
+    setStatus(`Saved ${targets.length} discovery targets.`);
   }
 
   return (
@@ -58,15 +60,11 @@ export default function DiscoveryEngine() {
       <section style={panelStyle}>
         <h2>Discovery Controls</h2>
 
-        <div style={buttonRow}>
-          <button style={buttonStyle} onClick={seedTargets}>
-            Seed Discovery Targets
-          </button>
-        </div>
+        <button style={buttonStyle} onClick={seedTargets}>
+          Seed Discovery Targets
+        </button>
 
-        {status && (
-          <p style={statusStyle}>{status}</p>
-        )}
+        {status && <p style={statusStyle}>{status}</p>}
       </section>
     </main>
   );
@@ -97,13 +95,6 @@ const panelStyle = {
   padding: "30px",
   borderRadius: "12px",
   border: "1px solid #333"
-};
-
-const buttonRow = {
-  display: "flex",
-  gap: "12px",
-  flexWrap: "wrap",
-  marginTop: "20px"
 };
 
 const buttonStyle = {
