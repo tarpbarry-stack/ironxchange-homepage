@@ -12499,8 +12499,8 @@ async function handleSubmit() {
     );
 
     const imageIds = uploadedImages.map(
-      upload => upload.data.data.id
-    );
+  upload => upload.data.data
+);
 
     const response = await sdk.ownListings.create({
       title: listingTitle,
