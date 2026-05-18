@@ -12923,7 +12923,9 @@ return (
 
   <div className="card-body">
     <div className="title-row">
-      <h3>{listingTitle.replace(hours, "").trim()}</h3>
+      <h3>
+  {[year, make, model].filter(Boolean).join(" ")}
+</h3>
 
       <h3 className="hours-inline">
         {hours ? `${Number(cleanNumber(hours)).toLocaleString()} Hrs` : "Hours"}
