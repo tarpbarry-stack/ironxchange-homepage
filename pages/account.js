@@ -46,6 +46,7 @@ export default function AccountPage() {
   const [myListings, setMyListings] = useState([]);
   const [savedMachines, setSavedMachines] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activityLog, setActivityLog] = useState([]);
 
   useEffect(() => {
     async function loadAccount() {
@@ -96,6 +97,25 @@ export default function AccountPage() {
               );
             })
           : [];
+
+        useEffect(() => {
+  function loadActivity() {
+    try {
+      const events = JSON.parse(localStorage.getItem("ixActivityLog") || "[]");
+      setActivityLog(Array.isArray(events) ? events : []);
+    } catch {
+      setActivityLog([]);
+    }
+  }
+
+  loadActivity();
+
+  window.addEventListener("ix-activity-updated", loadActivity);
+
+  return () => {
+    window.removeEventListener("ix-activity-updated", loadActivity);
+  };
+}, []);
 
         setSavedMachines(saved);
       } catch {
@@ -358,11 +378,21 @@ export default function AccountPage() {
                             });
 
                             if (response.ok) {
-                              input.value = Number(newPrice).toLocaleString();
-                              input.classList.add("saved");
-                            } else {
-                              input.classList.add("error");
-                            }
+  input.value = Number(newPrice).toLocaleString();
+  input.classList.add("saved");
+
+  addActivity(
+    "success",
+    `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
+  );
+} else {
+  input.classList.add("error");
+
+  addActivity(
+    "error",
+    `Price update failed — ${cleanMachineTitle(listing.title)}`
+  );
+}
                           }}
                         />
 
@@ -435,6 +465,33 @@ export default function AccountPage() {
                   </div>
                 </section>
 
+<section className="panel side-panel activity-panel">
+  <div className="panel-head">
+    <h2>Activity Log</h2>
+    <span className="small-note">LIVE</span>
+  </div>
+
+  <div className="activity-log">
+    {activityLog.length > 0 ? (
+      activityLog.slice(0, 8).map(event => (
+        <div className="activity-event" key={event.id}>
+          <span className={event.type === "error" ? "event-dot red" : "event-dot green"}></span>
+
+          <div>
+            <p>{event.message}</p>
+            <small>{formatActivityTime(event.createdAt)}</small>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="activity-empty">
+        <span className="dot yellow"></span>
+        <p>Listing updates, price changes, and promotions will show here.</p>
+      </div>
+    )}
+  </div>
+</section>
+      
                 <section className="panel side-panel">
                   <div className="panel-head">
                     <h2>Saved Machines</h2>
@@ -805,12 +862,71 @@ export default function AccountPage() {
 
 .right-stack {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   gap: 6px;
   height: 100%;
   align-self: stretch;
 }
 
+.activity-panel {
+  min-height: 0;
+}
+
+.activity-log {
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.activity-event {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 8px;
+  align-items: start;
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  padding: 9px;
+}
+
+.activity-event p {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.activity-event small {
+  display: block;
+  margin-top: 4px;
+  color: #777;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.event-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+
+.event-dot.green {
+  background: #38A169;
+}
+
+.event-dot.red {
+  background: #E53E3E;
+}
+
+.activity-empty {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 8px;
+  color: #aaa;
+  font-size: 12px;
+}
 .side-panel {
   min-height: 0;
   display: flex;
