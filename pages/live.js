@@ -152,13 +152,41 @@ export default function ListingLivePage() {
   }
 
   const shareButtons = [
-    ["Facebook Marketplace", "facebook"],
-    ["Facebook Page", "facebook"],
-    ["Instagram", "instagram"],
-    ["TikTok", "tiktok"],
-    ["X", "x"],
-    ["LinkedIn", "linkedin"]
-  ];
+  ["Facebook Marketplace Post", "facebook"],
+  ["Facebook Page Post", "facebook"],
+  ["Instagram Caption", "instagram"],
+  ["TikTok Caption", "tiktok"],
+  ["X Post", "x"],
+  ["LinkedIn Post", "linkedin"]
+];
+
+const marketplaceTitle = `${clean(listing.title)} | ${clean(
+  listing.hours
+)} | ${clean(listing.location)}`;
+
+const shortDescription = `
+${clean(listing.title)}
+${clean(listing.hours)} | ${clean(listing.location)}
+
+${clean(listing.price)}
+
+Listed on IronXchange:
+${listingUrl}
+`.trim();
+
+const longDescription = `
+${clean(listing.title)}
+
+${clean(listing.hours)} | ${clean(listing.location)}
+${clean(listing.price)}
+
+${clean(listing.description)}
+
+View full specs + photos:
+${listingUrl}
+
+Listed on IronXchange.
+`.trim();
 
   return (
     <>
@@ -258,6 +286,57 @@ export default function ListingLivePage() {
               </p>
 
               <div className="share-grid">
+                    <button
+  type="button"
+  onClick={() =>
+    copyText("Marketplace Title", marketplaceTitle)
+  }
+>
+  <i className="fa-regular fa-copy"></i>
+
+  {copied === "Marketplace Title"
+    ? "COPIED"
+    : "COPY MARKETPLACE TITLE"}
+</button>
+
+<button
+  type="button"
+  onClick={() =>
+    copyText("Short Description", shortDescription)
+  }
+>
+  <i className="fa-regular fa-copy"></i>
+
+  {copied === "Short Description"
+    ? "COPIED"
+    : "COPY SHORT DESCRIPTION"}
+</button>
+
+<button
+  type="button"
+  onClick={() =>
+    copyText("Long Description", longDescription)
+  }
+>
+  <i className="fa-regular fa-copy"></i>
+
+  {copied === "Long Description"
+    ? "COPIED"
+    : "COPY LONG DESCRIPTION"}
+</button>
+
+<button
+  type="button"
+  onClick={() =>
+    copyText("Listing Link", listingUrl)
+  }
+>
+  <i className="fa-solid fa-link"></i>
+
+  {copied === "Listing Link"
+    ? "COPIED"
+    : "COPY LISTING LINK"}
+</button>
                 {shareButtons.map(([label, platform]) => (
                   <button
                     key={label}
