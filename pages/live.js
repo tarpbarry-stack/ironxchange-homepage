@@ -484,16 +484,16 @@ Listed on IronXchange.
       .filter(Boolean)
       .map(tag => (
         <span key={tag}>{tag}</span>
-      ))}
+      ))
+}
   </div>
-</div>
 
-            <section className="panel edit-panel">
-              <div className="panel-head">
-                <h2>Edit Listing</h2>
-                <span>Machine Details</span>
-              </div>
-
+</section>
+    <section className="panel edit-panel">
+  <div className="panel-head">
+    <h2>Edit Listing</h2>
+    <span>Machine Details</span>
+  </div>
               <div className="edit-grid">
                 <label>
                   Price
