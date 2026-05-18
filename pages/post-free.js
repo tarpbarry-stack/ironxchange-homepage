@@ -12376,6 +12376,33 @@ const wheelLoaderKeywords = [
   "high visibility package"
 ];
 
+const categoryKeywordMap = {
+  "AERIAL EQUIPMENT": aerialEquipmentKeywords,
+  "AGGREGATE": aggregateKeywords,
+  "AGRICULTURE HARVESTERS": agricultureHarvesterKeywords,
+  "AGRICULTURE TRACTORS": agricultureTractorKeywords,
+  "ASPHALT EQUIPMENT": asphaltEquipmentKeywords,
+  "BACKHOE LOADERS": backhoeLoaderKeywords,
+  "COMPACTION/ROLLERS": compactionRollerKeywords,
+  "CRANES": craneKeywords,
+  "CRAWLER CARRIERS / LOADER": crawlerCarrierLoaderKeywords,
+  "DOZERS": dozerKeywords,
+  "DRILLS & PILING": drillsPilingKeywords,
+  "DUMP TRUCKS - ARTIC/RIGID": dumpTruckArticRigidKeywords,
+  "EXCAVATORS": excavatorKeywords,
+  "FORKLIFTS": forkliftKeywords,
+  "MOTOR GRADERS": motorGraderKeywords,
+  "SCRAPER": scraperKeywords,
+  "SKID STEER/CTL": skidSteerCtlKeywords,
+  "TELEHANDLERS": telehandlerKeywords,
+  "TRENCHERS/PLOWS": trenchersPlowsKeywords,
+  "TRAILERS": trailerKeywords,
+  "TRUCKS": truckKeywords,
+  "WHEEL LOADERS": wheelLoaderKeywords,
+  "SUPPORT EQUIPMENT": supportEquipmentKeywords,
+  "UTILITY CARTS": utilityCartKeywords
+};
+
 function cleanNumber(value = "") {
   return String(value).replace(/[^0-9]/g, "");
 }
@@ -12389,8 +12416,10 @@ export default function PostFreePage() {
   const [price, setPrice] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [photos, setPhotos] = useState([]);
-
+  
   const taxonomy = taxonomyMap[category] || [];
 
   const availableMakes = useMemo(() => {
@@ -12420,6 +12449,36 @@ export default function PostFreePage() {
       : parts;
   }, [year, make, model, hours]);
 
+  const availableKeywords = useMemo(() => {
+  const categoryKeywords = categoryKeywordMap[category] || [];
+
+  return Array.from(
+    new Set([
+      ...globalKeywords,
+      ...categoryKeywords
+    ])
+  ).sort();
+}, [category]);
+
+const filteredKeywords = useMemo(() => {
+  const search = keywordSearch.trim().toLowerCase();
+
+  if (!search) return availableKeywords.slice(0, 80);
+
+  return availableKeywords
+    .filter(keyword =>
+      keyword.toLowerCase().includes(search)
+    )
+    .slice(0, 120);
+}, [availableKeywords, keywordSearch]);
+
+function toggleKeyword(keyword) {
+  setSelectedKeywords(current =>
+    current.includes(keyword)
+      ? current.filter(item => item !== keyword)
+      : [...current, keyword]
+  );
+}  
   function handlePhotos(e) {
     const files = Array.from(e.target.files || []);
 
@@ -12599,6 +12658,41 @@ export default function PostFreePage() {
               )}
             </div>
 
+<div className="keywords-panel">
+  <div className="keywords-head">
+    <h2>Features / Options</h2>
+
+    <span>
+      {selectedKeywords.length} Selected
+    </span>
+  </div>
+
+  <input
+    type="text"
+    value={keywordSearch}
+    onChange={e => setKeywordSearch(e.target.value)}
+    placeholder="Search features, hydraulics, tires, GPS..."
+    className="keyword-search"
+  />
+
+  <div className="keyword-grid">
+    {filteredKeywords.map(keyword => (
+      <button
+        key={keyword}
+        type="button"
+        onClick={() => toggleKeyword(keyword)}
+        className={
+          selectedKeywords.includes(keyword)
+            ? "keyword-chip active"
+            : "keyword-chip"
+        }
+      >
+        {keyword}
+      </button>
+    ))}
+  </div>
+</div>
+              
             <label>
               <span>Description</span>
               <textarea
@@ -12790,6 +12884,62 @@ export default function PostFreePage() {
             border-color: ${BRAND_YELLOW};
           }
 
+.keywords-panel {
+  margin-bottom: 12px;
+}
+
+.keywords-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.keywords-head h2 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.keywords-head span {
+  color: #8A8A8A;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.keyword-search {
+  margin-bottom: 8px;
+}
+
+.keyword-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #252525;
+  background: #101010;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.keyword-chip {
+  border: 1px solid #333;
+  background: #181818;
+  color: #CFCFCF;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.keyword-chip.active {
+  background: ${BRAND_YELLOW};
+  color: #050505;
+  border-color: ${BRAND_YELLOW};
+}
           .photos-panel {
             margin-bottom: 12px;
           }
