@@ -12436,6 +12436,34 @@ export default function PostFreePage() {
   const [photos, setPhotos] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const [photos, setPhotos] = useState([]);
+const [isPosting, setIsPosting] = useState(false);
+const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
+const [loggedIn, setLoggedIn] = useState(false);
+
+useEffect(() => {
+  async function checkAuth() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      await sdk.currentUser.show();
+
+      setLoggedIn(true);
+    } catch {
+      setLoggedIn(false);
+    }
+  }
+
+  checkAuth();
+}, []);
+
+const taxonomy = taxonomyMap[category] || [];
   
   const taxonomy = taxonomyMap[category] || [];
 
@@ -12690,12 +12718,12 @@ return (
   </a>
 
   <a
-    href="/account"
-    className="login-icon logged-in"
-    aria-label="Account"
-  >
-    <i className="fa-regular fa-user"></i>
-  </a>
+  href={loggedIn ? "/account" : "/login"}
+  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
+  aria-label="Login"
+>
+  <i className="fa-regular fa-user"></i>
+</a>
 </div>
         </nav>
 
@@ -13073,6 +13101,21 @@ return (
     font-size: 13px;
     letter-spacing: .6px;
   }
+
+  .login-icon {
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px !important;
+}
+
+.login-icon.logged-in {
+  border-color: #38A169;
+  color: #38A169 !important;
+}
 
   .page {
     display: grid;
