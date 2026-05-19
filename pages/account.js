@@ -1513,14 +1513,37 @@ You also likely lost
 
         @media (max-width: 700px) {
           .dashboard {
-            grid-template-columns: 1fr;
-            padding: 10px 3% 40px;
-          }
+  grid-template-columns: 1fr;
+  padding: 10px 3% 40px;
+  height: auto;
+  min-height: calc(100vh - 60px);
+  overflow: visible;
+}
 
 :global(html),
 :global(body) {
   height: auto;
   overflow-y: auto;
+}
+
+.rail,
+.content,
+.main-grid,
+.left-column,
+.listings-panel,
+.right-stack,
+.side-panel,
+.performance-panel {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.listing-table,
+.activity-list,
+.activity-log,
+.saved-card-list {
+  max-height: none;
 }
 
 main {
