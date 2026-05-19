@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
+const BRAND_YELLOW = "#FFC400";
+
 function getImageUrlFromIncluded(user) {
   const imageId = user?.relationships?.profileImage?.data?.id?.uuid;
   const image = user?.included?.find(
