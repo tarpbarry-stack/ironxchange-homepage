@@ -534,8 +534,11 @@ export default function AccountProfilePage() {
   align-items: center;
   justify-content: center;
   margin: 0 auto 10px;
-  overflow: visible;
-  background: transparent;
+  background: #0B0B0B;
+  border: 1px solid #242424;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 10px;
 }
 
 .user-dot img {
