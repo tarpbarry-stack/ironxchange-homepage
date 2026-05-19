@@ -11,11 +11,18 @@ function getImageUrlFromIncluded(user) {
 
   const variants = image?.attributes?.variants || {};
 
+  const nonSquareVariant = Object.entries(variants).find(([key, value]) => {
+    return value?.url && !key.toLowerCase().includes("square");
+  });
+
   return (
     variants.default?.url ||
-    variants["square-small"]?.url ||
-    variants.squareSmall?.url ||
-    variants.squareSmall2x?.url ||
+    variants["landscape-crop"]?.url ||
+    variants["landscape-crop2x"]?.url ||
+    variants["scaled-large"]?.url ||
+    variants["scaled-medium"]?.url ||
+    variants["scaled-small"]?.url ||
+    nonSquareVariant?.[1]?.url ||
     Object.values(variants).find(v => v?.url)?.url ||
     null
   );
