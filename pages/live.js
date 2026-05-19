@@ -1151,7 +1151,7 @@ Listed on IronXchange.
 }
 
 .preview-card .live-card-body {
-  padding: 22px;
+  padding: 16px;
 }
 
 .preview-card .title-row {
@@ -1179,13 +1179,11 @@ Listed on IronXchange.
 }
 
 .preview-card .feature-line {
-  min-height: 48px;
-  margin: 12px 0 24px;
+  margin: 8px 0 18px;
   color: #8F8F8F;
   font-size: 16px;
   line-height: 1.4;
 }
-
 .preview-card .price-row {
   display: flex;
   justify-content: space-between;
