@@ -542,8 +542,8 @@ export default function AccountProfilePage() {
 }
 
 .user-dot img {
-  width: 100%;
-  height: 100%;
+  width: 145%;
+  height: 145%;
   object-fit: contain;
   object-position: center;
   display: block;
