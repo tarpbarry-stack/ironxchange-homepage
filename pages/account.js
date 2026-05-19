@@ -630,15 +630,16 @@ const logoUrl =
       </main>
 
       <style jsx>{`
-  :global(html),
-  :global(body) {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
-    background: #0b0b0b;
-    color: #d6d6d6;
-    font-family: Arial, sans-serif;
-  }
+:global(html),
+:global(body) {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #0b0b0b;
+  color: #d6d6d6;
+  font-family: Arial, sans-serif;
+}
 
   * {
     box-sizing: border-box;
