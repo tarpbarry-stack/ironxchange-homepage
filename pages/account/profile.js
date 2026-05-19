@@ -528,17 +528,14 @@ export default function AccountProfilePage() {
         }
 
        .user-dot {
-  width: 140px;
-  height: 72px;
-  border: 1px solid #2f855a;
-  border-radius: 10px;
+  width: 190px;
+  height: 88px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 10px;
-  background: #050505;
-  overflow: hidden;
-  padding: 8px;
+  overflow: visible;
+  background: transparent;
 }
 
 .user-dot img {
