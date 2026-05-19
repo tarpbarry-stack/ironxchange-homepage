@@ -745,17 +745,19 @@ Listed on IronXchange.
                 <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>›</button>
               </div>
 
-             <div className="card-body">
-  <h3>
-    {String(listing.title || "")
-      .replace(edit.hours || listing.hours || "", "")
-      .replace(/\s+[-–]\s*$/, "")
-      .trim()}
-  </h3>
+            <div className="card-body live-card-body">
+  <div className="title-row">
+    <h3>
+      {String(listing.title || "")
+        .replace(edit.hours || listing.hours || "", "")
+        .replace(/\s+[-–]\s*$/, "")
+        .trim()}
+    </h3>
 
-  <h3 className="hours-inline">
-    {edit.hours || listing.hours || "—"}
-  </h3>
+    <h3 className="hours-inline">
+      {edit.hours || listing.hours || "—"}
+    </h3>
+  </div>
 
   <p className="feature-line">
     {selectedKeywords.slice(0, 4).join(" • ")}
@@ -1146,6 +1148,70 @@ Listed on IronXchange.
 .promote-panel,
 .seller-bar {
   padding: 18px;
+}
+
+.preview-card .live-card-body {
+  padding: 22px;
+}
+
+.preview-card .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.preview-card h3 {
+  margin: 0;
+  color: #F2F2F2;
+  font-size: 24px;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+}
+
+.preview-card .hours-inline {
+  color: #8A8A8A;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.preview-card .feature-line {
+  min-height: 48px;
+  margin: 12px 0 24px;
+  color: #8F8F8F;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.preview-card .price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.preview-card .price-row strong {
+  color: #F2F2F2;
+  font-size: 26px;
+}
+
+.preview-card .meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #9A9A9A;
+  flex-wrap: wrap;
+}
+
+.preview-card .price-row span {
+  color: #9A9A9A;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  white-space: nowrap;
 }
 
 h1 {
