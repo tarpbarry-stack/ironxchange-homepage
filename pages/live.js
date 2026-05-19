@@ -746,20 +746,31 @@ Listed on IronXchange.
               </div>
 
               <div className="card-body">
-                <h1>{listing.title}</h1>
+  <div className="title-row">
+    <h3>
+  {String(listing.title || "")
+    .replace(edit.hours || listing.hours || "", "")
+    .replace(/\s+[-–]\s*$/, "")
+    .trim()}
+</h3>
+  
+    <h3 className="hours-inline">
+      {edit.hours || listing.hours || "—"}
+    </h3>
+  </div>
 
-                <div className="facts">
-                  <span>Hours</span><strong>{edit.hours || listing.hours || "—"}</strong>
-                  <span>Price</span><strong>{formatMoney(edit.price || listing.price)}</strong>
-                  <span>Location</span><strong>{edit.location || listing.location || "—"}</strong>
-                </div>
+  <p className="feature-line">
+    {selectedKeywords.slice(0, 4).join(" • ")}
+  </p>
 
-                <div className="tag-row">
-                  {selectedKeywords.slice(0, 12).map(keyword => (
-                    <span key={keyword}>{keyword}</span>
-                  ))}
-                </div>
-              </div>
+  <div className="price-row">
+    <strong>{formatMoney(edit.price || listing.price)}</strong>
+
+    <div className="meta">
+      <span>⌖ {edit.location || listing.location || "—"}</span>
+    </div>
+  </div>
+</div>
             </section>
 
             <section className="panel edit-panel">
