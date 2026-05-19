@@ -530,7 +530,7 @@ export default function AccountProfilePage() {
        .user-dot {
   width: 140px;
   height: 72px;
-  border: 1px solid #FFC400;
+  border: 1px solid #F2F2F2;
   border-radius: 10px;
   display: flex;
   align-items: center;
