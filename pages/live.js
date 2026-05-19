@@ -736,8 +736,9 @@ Listed on IronXchange.
             </div>
           </section>
 
-          <section className="main-grid">
-            <section className="panel preview-card">
+         <section className="main-grid">
+  <div className="left-stack">
+    <section className="panel preview-card">
               <div className="photo-stage">
                 <img src={heroPhoto} alt={listing.title} className="hero-photo" />
 
@@ -771,9 +772,29 @@ Listed on IronXchange.
     </div>
   </div>
 </div>
-            </section>
 
-            <section className="panel edit-panel">
+</section>
+
+<section className="panel performance-panel">
+  <div className="performance-grid">
+    <div><span>Views</span><strong>—</strong></div>
+    <div><span>Saves</span><strong>—</strong></div>
+    <div><span>Inquiries</span><strong>—</strong></div>
+    <div><span>Shares</span><strong>—</strong></div>
+  </div>
+
+  <div className="download-row">
+    <button type="button" onClick={downloadHeroImage}>DOWNLOAD HERO</button>
+    <button type="button" onClick={downloadAllPhotos}>DOWNLOAD ALL PHOTOS</button>
+    <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
+      {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
+    </button>
+  </div>
+</section>
+</div>
+
+<div className="right-stack">
+  <section className="panel edit-panel">
               <div className="panel-head">
                 <h2>Edit Listing</h2>
                 <span>Details + Keywords</span>
@@ -1230,6 +1251,63 @@ Listed on IronXchange.
   white-space: nowrap;
   line-height: 1;
 }
+
+.left-stack,
+.right-stack {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.performance-panel {
+  padding: 14px;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.performance-grid div {
+  background: #101010;
+  border: 1px solid #292929;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.performance-grid span {
+  display: block;
+  color: #888;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.performance-grid strong {
+  color: #f2f2f2;
+  font-size: 18px;
+}
+
+.download-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.download-row button {
+  border: 1px solid #333;
+  background: #101010;
+  color: #f2f2f2;
+  border-radius: 999px;
+  padding: 10px;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
         .facts {
           display: grid;
           grid-template-columns: 90px 1fr;
