@@ -709,24 +709,26 @@ export default function AccountPage() {
         }
 
         .user-dot {
-          width: 38px;
-          height: 38px;
-          border: 2px solid #38A169;
-          color: #38A169;
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          margin: 0 auto 8px;
-          font-size: 18px;
-          overflow: hidden;
-        }
+  width: 72px;
+  height: 72px;
+  border: 1px solid ##F2F2F2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  overflow: hidden;
+  background: #050505;
+  flex-shrink: 0;
+}
 
-        .user-dot img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 50%;
-        }
+.user-dot img {
+  width: 165%;
+  height: 165%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
 
         .rail-top strong {
           display: block;
@@ -902,24 +904,29 @@ export default function AccountPage() {
           padding: 8px 10px;
         }
 
-        .right-stack {
-          display: grid;
-          grid-template-rows: repeat(3, 1fr);
-          gap: 6px;
-          align-self: stretch;
-        }
+       .right-stack {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
 
-        .side-panel {
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-        }
+.side-panel {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-        .activity-list,
-        .activity-log,
-        .saved-card-list {
-          overflow-y: auto;
-        }
+.activity-list,
+.activity-log,
+.saved-card-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
 
         .activity-log {
           display: grid;
