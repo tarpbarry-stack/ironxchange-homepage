@@ -520,26 +520,27 @@ export default function AccountProfilePage() {
           margin-bottom: 6px;
         }
 
-        .user-dot {
-          width: 46px;
-          height: 46px;
-          border: 2px solid #38A169;
-          color: #38A169;
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          margin: 0 auto 8px;
-          font-size: 18px;
-          overflow: hidden;
-          background: #050505;
-        }
+       .user-dot {
+  width: 140px;
+  height: 72px;
+  border: 1px solid #2f855a;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  background: #050505;
+  overflow: hidden;
+  padding: 8px;
+}
 
-        .user-dot img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 50%;
-        }
+.user-dot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
 
         .rail-top strong {
           display: block;
