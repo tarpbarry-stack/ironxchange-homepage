@@ -794,10 +794,40 @@ Listed on IronXchange.
           {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
         </button>
       </div>
-    </section>
+</section>
+
+<section className="panel activity-panel">
+  <div className="panel-head">
+    <h2>Activity Log</h2>
+    <span>Recent Actions</span>
   </div>
 
-  <div className="right-stack">
+  <div className="activity-list">
+    <div className="activity-item success">
+      <span>PHOTO ORDER UPDATED</span>
+      <small>JUST NOW</small>
+    </div>
+
+    <div className="activity-item">
+      <span>KEYWORDS UPDATED</span>
+      <small>2 MIN AGO</small>
+    </div>
+
+    <div className="activity-item">
+      <span>LISTING LINK COPIED</span>
+      <small>4 MIN AGO</small>
+    </div>
+
+    <div className="activity-item">
+      <span>HERO IMAGE DOWNLOADED</span>
+      <small>7 MIN AGO</small>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div className="right-stack">
     <section className="panel edit-panel">
       <div className="panel-head">
         <h2>Edit Listing</h2>
@@ -1317,6 +1347,45 @@ Listed on IronXchange.
   font-size: 9px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.activity-panel {
+  padding: 14px;
+  min-height: 220px;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #101010;
+  border: 1px solid #292929;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.activity-item span {
+  color: #f2f2f2;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .3px;
+}
+
+.activity-item small {
+  color: #777;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.activity-item.success {
+  border-color: rgba(56,161,105,.35);
 }
 
         .facts {
