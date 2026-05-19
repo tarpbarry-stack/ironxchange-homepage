@@ -4,6 +4,88 @@ import { useRouter } from "next/router";
 
 const BRAND_YELLOW = "#FFC400";
 
+const commonKeywordOptions = [
+  "aggregate configuration",
+  "cold ac",
+  "cold a/c",
+  "heat",
+  "cab",
+  "enclosed cab",
+  "rops",
+  "fops",
+  "backup camera",
+  "camera system",
+  "360 camera",
+  "led lights",
+  "work lights",
+  "beacon",
+  "strobe",
+  "joystick controls",
+  "pilot controls",
+  "hydraulic controls",
+  "electro hydraulic controls",
+  "high flow hydraulics",
+  "aux hydraulics",
+  "quick coupler",
+  "hydraulic coupler",
+  "quick attach",
+  "bucket",
+  "forks",
+  "ripper",
+  "push block",
+  "ride control",
+  "payload system",
+  "payload scales",
+  "weigh system",
+  "smartgrade",
+  "smart grade",
+  "topcon",
+  "trimble",
+  "gps",
+  "grade control",
+  "2d grade control",
+  "3d grade control",
+  "machine control",
+  "machine guidance",
+  "tier 3",
+  "tier 4",
+  "tier 4 final",
+  "de-tier",
+  "detier",
+  "no def",
+  "egr delete",
+  "fresh service",
+  "service records",
+  "fleet maintained",
+  "dealer maintained",
+  "one owner",
+  "municipal owned",
+  "contractor owned",
+  "owner operator",
+  "tight machine",
+  "straight machine",
+  "ready to work",
+  "job ready",
+  "work ready",
+  "field ready",
+  "new tires",
+  "good tires",
+  "radial tires",
+  "foam filled tires",
+  "solid tires",
+  "good undercarriage",
+  "new undercarriage",
+  "excellent undercarriage",
+  "new tracks",
+  "good tracks",
+  "low hours",
+  "clean machine",
+  "excellent hydraulics",
+  "strong hydraulics",
+  "strong engine",
+  "excellent engine"
+];
+
 function slugify(text = "") {
   return String(text)
     .toLowerCase()
@@ -15,6 +97,16 @@ function clean(value) {
   return value ? String(value).trim() : "";
 }
 
+function cleanNumber(value = "") {
+  return String(value).replace(/[^0-9]/g, "");
+}
+
+function formatMoney(value) {
+  const raw = cleanNumber(value);
+  if (!raw) return "Call";
+  return `$${Number(raw).toLocaleString()}`;
+}
+
 function getListingImages(listing) {
   return [
     ...(Array.isArray(listing?.images) ? listing.images : []),
@@ -24,18 +116,24 @@ function getListingImages(listing) {
   ].filter(Boolean);
 }
 
-async function downloadImage(url, filename) {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+function getListingKeywords(listing) {
+  const raw =
+    listing?.keywords ||
+    listing?.tags ||
+    listing?.publicData?.keywords ||
+    listing?.attributes?.publicData?.keywords ||
+    [];
 
-  link.href = objectUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(objectUrl);
+  if (Array.isArray(raw)) return raw.filter(Boolean).map(String);
+
+  if (typeof raw === "string") {
+    return raw
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
 }
 
 function addActivity(type, message) {
@@ -53,7 +151,7 @@ function addActivity(type, message) {
 
     localStorage.setItem(
       "ixActivityLog",
-      JSON.stringify([event, ...current].slice(0, 25))
+      JSON.stringify([event, ...current].slice(0, 40))
     );
 
     window.dispatchEvent(new Event("ix-activity-updated"));
@@ -67,19 +165,89 @@ function getListingUrl(listing) {
   return `${window.location.origin}/listing/${slugify(listing.title)}?from=live`;
 }
 
-function buildSocialCopy(platform, listing, listingUrl) {
-  const title = clean(listing.title) || "Equipment Listing";
-  const price = clean(listing.price) || "Call for Price";
-  const hours = clean(listing.hours) || "Hours not listed";
-  const location = clean(listing.location) || "Location not listed";
+async function downloadImage(url, filename) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(objectUrl);
+}
+
+async function compressImage(file, maxWidth = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const reader = new FileReader();
+
+    reader.onload = event => {
+      image.onload = () => {
+        const scale = Math.min(1, maxWidth / image.width);
+        const width = Math.round(image.width * scale);
+        const height = Math.round(image.height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, width, height);
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) {
+              reject(new Error("Image compression failed."));
+              return;
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.[^.]+$/, ".jpg"),
+              {
+                type: "image/jpeg",
+                lastModified: Date.now()
+              }
+            );
+
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      image.onerror = reject;
+      image.src = event.target.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
+  const title = clean(listing?.title) || "Equipment Listing";
+  const price = formatMoney(listing?.price);
+  const hours = clean(listing?.hours) || "Hours not listed";
+  const location = clean(listing?.location) || "Location not listed";
   const description =
-    clean(listing.description) ||
+    clean(listing?.description) ||
     "Clean machine. Full specs and photos available on IronXchange.";
+
+  const features = selectedKeywords.slice(0, 5).join(" • ");
 
   if (platform === "x") {
     return `${title}
 ${hours} | ${location}
 ${price}
+
+${features}
 
 Listed on IronXchange:
 ${listingUrl}
@@ -93,7 +261,7 @@ ${listingUrl}
 ${hours} | ${location}
 ${price}
 
-Now listed on IronXchange.
+${features}
 
 ${description}
 
@@ -116,6 +284,8 @@ ${listingUrl}
 ${hours} | ${location}
 ${price}
 
+${features}
+
 ${description}
 
 Listed on IronXchange.
@@ -131,15 +301,20 @@ export default function ListingLivePage() {
   const [listings, setListings] = useState([]);
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
+
   const [edit, setEdit] = useState({
     price: "",
     hours: "",
     location: "",
-    description: "",
-    tags: ""
+    description: ""
   });
-  const [photoOrder, setPhotoOrder] = useState([]);
+
+  const [photoItems, setPhotoItems] = useState([]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
+
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [keywordSearch, setKeywordSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/listings")
@@ -150,28 +325,12 @@ export default function ListingLivePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  function changeActivePhoto(direction) {
-  const photos = photoOrder.length > 0 ? photoOrder : listingImages;
-
-  if (photos.length === 0) return;
-
-  setActivePhotoIndex(current => {
-    const next = current + direction;
-
-    if (next < 0) return photos.length - 1;
-    if (next >= photos.length) return 0;
-
-    return next;
-  });
-}
-
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
     return listings.find(item => String(item.id) === String(id)) || null;
   }, [id, listings]);
 
   const listingUrl = listing ? getListingUrl(listing) : "";
-  const listingImages = listing ? getListingImages(listing) : [];
 
   useEffect(() => {
     if (!listing) return;
@@ -180,43 +339,67 @@ export default function ListingLivePage() {
       price: clean(listing.price),
       hours: clean(listing.hours),
       location: clean(listing.location),
-      description: clean(listing.description),
-      tags: Array.isArray(listing.keywords)
-        ? listing.keywords.join(", ")
-        : Array.isArray(listing.tags)
-        ? listing.tags.join(", ")
-        : clean(listing.keywords || listing.tags)
+      description: clean(listing.description)
     });
 
-    setPhotoOrder(getListingImages(listing));
+    setSelectedKeywords(getListingKeywords(listing));
+
+    setPhotoItems(
+      getListingImages(listing).map((url, index) => ({
+        id: `existing-${index}-${url}`,
+        url,
+        file: null,
+        existing: true
+      }))
+    );
+
+    setActivePhotoIndex(0);
   }, [listing]);
+
+  const heroPhoto =
+    photoItems[activePhotoIndex]?.url ||
+    photoItems[0]?.url ||
+    listing?.imageUrl ||
+    listing?.image ||
+    "/images/hero-equipment-yard.jpg";
 
   const sellerName =
     clean(listing?.sellerName) ||
     clean(listing?.sellerCompany) ||
+    clean(listing?.authorName) ||
     "IronXchange Seller";
 
   const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
-  const shareButtons = [
-    ["Facebook Marketplace Post", "facebook"],
-    ["Facebook Page Post", "facebook"],
-    ["Instagram Caption", "instagram"],
-    ["TikTok Caption", "tiktok"],
-    ["X Post", "x"],
-    ["LinkedIn Post", "linkedin"]
-  ];
+  const availableKeywords = useMemo(() => {
+    return Array.from(
+      new Set([
+        ...commonKeywordOptions,
+        ...selectedKeywords
+      ])
+    ).sort();
+  }, [selectedKeywords]);
+
+  const filteredKeywords = useMemo(() => {
+    const search = keywordSearch.trim().toLowerCase();
+
+    if (!search) return availableKeywords.slice(0, 500);
+
+    return availableKeywords
+      .filter(keyword => keyword.toLowerCase().includes(search))
+      .slice(0, 500);
+  }, [availableKeywords, keywordSearch]);
 
   const marketplaceTitle = listing
-    ? `${clean(listing.title)} | ${clean(listing.hours)} | ${clean(listing.location)}`
+    ? `${clean(listing.title)} | ${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}`
     : "";
 
   const shortDescription = listing
     ? `
 ${clean(listing.title)}
-${clean(listing.hours)} | ${clean(listing.location)}
+${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
 
-${clean(listing.price)}
+${formatMoney(edit.price || listing.price)}
 
 Listed on IronXchange:
 ${listingUrl}
@@ -227,10 +410,12 @@ ${listingUrl}
     ? `
 ${clean(listing.title)}
 
-${clean(listing.hours)} | ${clean(listing.location)}
-${clean(listing.price)}
+${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
+${formatMoney(edit.price || listing.price)}
 
-${clean(listing.description)}
+${selectedKeywords.slice(0, 8).join(" • ")}
+
+${clean(edit.description || listing.description)}
 
 View full specs + photos:
 ${listingUrl}
@@ -238,6 +423,104 @@ ${listingUrl}
 Listed on IronXchange.
 `.trim()
     : "";
+
+  function toggleKeyword(keyword) {
+    setSelectedKeywords(current =>
+      current.includes(keyword)
+        ? current.filter(item => item !== keyword)
+        : [...current, keyword]
+    );
+  }
+
+  function changeActivePhoto(direction) {
+    if (photoItems.length === 0) return;
+
+    setActivePhotoIndex(current => {
+      const next = current + direction;
+
+      if (next < 0) return photoItems.length - 1;
+      if (next >= photoItems.length) return 0;
+
+      return next;
+    });
+  }
+
+  function handlePhotos(e) {
+    const files = Array.from(e.target.files || []).filter(file =>
+      file.type.startsWith("image/")
+    );
+
+    const mapped = files.slice(0, 24).map(file => ({
+      id: `${Date.now()}-${file.name}-${Math.random()}`,
+      file,
+      url: URL.createObjectURL(file),
+      existing: false
+    }));
+
+    setPhotoItems(current => [...current, ...mapped]);
+
+    addActivity(
+      "success",
+      `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`
+    );
+
+    e.target.value = "";
+  }
+
+  function handlePhotoDrop(e) {
+    e.preventDefault();
+
+    const files = Array.from(e.dataTransfer.files || []).filter(file =>
+      file.type.startsWith("image/")
+    );
+
+    const mapped = files.slice(0, 24).map(file => ({
+      id: `${Date.now()}-${file.name}-${Math.random()}`,
+      file,
+      url: URL.createObjectURL(file),
+      existing: false
+    }));
+
+    setPhotoItems(current => [...current, ...mapped]);
+
+    addActivity(
+      "success",
+      `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`
+    );
+  }
+
+  function removePhoto(indexToRemove) {
+    setPhotoItems(current =>
+      current.filter((_, index) => index !== indexToRemove)
+    );
+
+    setActivePhotoIndex(0);
+
+    addActivity(
+      "success",
+      `Photo removed — ${clean(listing?.title) || "Listing"}`
+    );
+  }
+
+  function reorderPhotos(fromIndex, toIndex) {
+    setPhotoItems(current => {
+      if (fromIndex === null || fromIndex === toIndex) return current;
+
+      const next = [...current];
+      const [movedPhoto] = next.splice(fromIndex, 1);
+
+      next.splice(toIndex, 0, movedPhoto);
+
+      return next;
+    });
+
+    setActivePhotoIndex(0);
+
+    addActivity(
+      "success",
+      `Photo order changed — ${clean(listing?.title) || "Listing"}`
+    );
+  }
 
   async function copyText(label, text) {
     try {
@@ -249,7 +532,7 @@ Listed on IronXchange.
         `${label} copied — ${clean(listing?.title) || "Listing"}`
       );
 
-      setTimeout(() => setCopied(""), 1600);
+      setTimeout(() => setCopied(""), 1500);
     } catch {
       addActivity(
         "error",
@@ -261,7 +544,7 @@ Listed on IronXchange.
   }
 
   async function downloadHeroImage() {
-    const hero = photoOrder[0] || listingImages[0] || listing?.imageUrl || listing?.image;
+    const hero = photoItems[0]?.url || heroPhoto;
 
     if (!hero) {
       alert("No image found.");
@@ -277,35 +560,21 @@ Listed on IronXchange.
   }
 
   async function downloadAllPhotos() {
-    const photos = photoOrder.length > 0 ? photoOrder : listingImages;
-
-    if (photos.length === 0) {
+    if (photoItems.length === 0) {
       alert("No photos found.");
       return;
     }
 
-    for (let i = 0; i < photos.length; i += 1) {
-      await downloadImage(photos[i], `${slugify(listing.title)}-${i + 1}.jpg`);
+    for (let i = 0; i < photoItems.length; i += 1) {
+      await downloadImage(
+        photoItems[i].url,
+        `${slugify(listing.title)}-${i + 1}.jpg`
+      );
     }
 
     addActivity(
       "success",
       `Photo pack downloaded — ${clean(listing?.title) || "Listing"}`
-    );
-  }
-
-  function movePhoto(index, direction) {
-    const next = [...photoOrder];
-    const target = index + direction;
-
-    if (target < 0 || target >= next.length) return;
-
-    [next[index], next[target]] = [next[target], next[index]];
-    setPhotoOrder(next);
-
-    addActivity(
-      "success",
-      `Photo order changed — ${clean(listing?.title) || "Listing"}`
     );
   }
 
@@ -323,24 +592,24 @@ Listed on IronXchange.
           },
           body: JSON.stringify({
             listingId: listing.id,
-            price: clean(edit.price).replace(/,/g, "")
+            price: cleanNumber(edit.price)
           })
         });
       }
 
       addActivity(
         "success",
-        `Quick edit saved — ${clean(listing?.title) || "Listing"}`
+        `Edit saved — ${clean(listing?.title) || "Listing"}`
       );
 
-      alert("Quick edit saved. Full field sync can be wired to Sharetribe next.");
+      alert("Saved. Price API is wired. Hours/location/description/keywords/photo save can be wired next.");
     } catch {
       addActivity(
         "error",
-        `Quick edit failed — ${clean(listing?.title) || "Listing"}`
+        `Edit failed — ${clean(listing?.title) || "Listing"}`
       );
 
-      alert("Quick edit failed.");
+      alert("Edit failed.");
     } finally {
       setSaving(false);
     }
@@ -354,7 +623,8 @@ Listed on IronXchange.
 
     alert(`${action} action logged. API wiring comes next.`);
   }
-   if (loading) {
+
+  if (loading) {
     return (
       <main className="loading">
         Loading live listing...
@@ -392,11 +662,6 @@ Listed on IronXchange.
     <>
       <Head>
         <title>Machine Command Center | IronXchange</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          rel="stylesheet"
-        />
       </Head>
 
       <main>
@@ -416,13 +681,10 @@ Listed on IronXchange.
 
         <section className="wrap">
           <section className="command-bar">
-            <div className="live-pill">
-              <span></span>
-              LISTING LIVE
-            </div>
+            <div className="live-pill"><span></span> LISTING LIVE</div>
 
             <div className="command-actions">
-              <a href={listingUrl} className="mini-btn yellow-btn">VIEW LIVE LISTING</a>
+              <a href={listingUrl} className="mini-btn yellow-btn">VIEW LIVE</a>
               <a href="/account" className="mini-btn">DASHBOARD</a>
               <button type="button" onClick={() => statusAction("Pause")} className="mini-btn">PAUSE</button>
               <button type="button" onClick={() => statusAction("Sold")} className="mini-btn">SOLD</button>
@@ -432,70 +694,80 @@ Listed on IronXchange.
             </div>
           </section>
 
-          <section className="work-grid">
-            <section className="panel machine-panel">
+          <section className="panel photo-row-panel">
+            <div className="panel-head">
+              <h2>Photo Order</h2>
+              <span>{photoItems.length} Photos</span>
+            </div>
+
+            <label
+              className="photo-add-box"
+              onDragOver={e => e.preventDefault()}
+              onDrop={handlePhotoDrop}
+            >
+              <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+              + Add / Drop Photos
+            </label>
+
+            <div className="photo-strip">
+              {photoItems.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={index === 0 ? "photo-tile hero-tile" : "photo-tile"}
+                  draggable
+                  onDragStart={() => setDraggedPhotoIndex(index)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => {
+                    reorderPhotos(draggedPhotoIndex, index);
+                    setDraggedPhotoIndex(null);
+                  }}
+                  onClick={() => setActivePhotoIndex(index)}
+                >
+                  {index === 0 && <span className="hero-badge">HERO</span>}
+                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <button type="button" onClick={e => {
+                    e.stopPropagation();
+                    removePhoto(index);
+                  }}>
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="main-grid">
+            <section className="panel preview-card">
               <div className="photo-stage">
-  <img
-    src={
-      (photoOrder.length > 0 ? photoOrder : listingImages)[activePhotoIndex] ||
-      listing.imageUrl ||
-      listing.image ||
-      "/images/hero-equipment-yard.jpg"
-    }
-    alt={listing.title}
-    className="hero-photo"
-  />
+                <img src={heroPhoto} alt={listing.title} className="hero-photo" />
 
-  <button
-    type="button"
-    className="photo-nav left"
-    onClick={() => changeActivePhoto(-1)}
-  >
-    ‹
-  </button>
+                <button type="button" className="photo-nav left" onClick={() => changeActivePhoto(-1)}>‹</button>
+                <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>›</button>
+              </div>
 
-  <button
-    type="button"
-    className="photo-nav right"
-    onClick={() => changeActivePhoto(1)}
-  >
-    ›
-  </button>
-</div>
+              <div className="card-body">
+                <h1>{listing.title}</h1>
 
-<div className="machine-body">
-  <h1>{listing.title}</h1>
+                <div className="facts">
+                  <span>Hours</span><strong>{edit.hours || listing.hours || "—"}</strong>
+                  <span>Price</span><strong>{formatMoney(edit.price || listing.price)}</strong>
+                  <span>Location</span><strong>{edit.location || listing.location || "—"}</strong>
+                </div>
 
-  <div className="facts">
-    <span>Hours</span>
-    <strong>{listing.hours || "—"}</strong>
+                <div className="tag-row">
+                  {selectedKeywords.slice(0, 12).map(keyword => (
+                    <span key={keyword}>{keyword}</span>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-    <span>Price</span>
-    <strong>{listing.price || "Call"}</strong>
+            <section className="panel edit-panel">
+              <div className="panel-head">
+                <h2>Edit Listing</h2>
+                <span>Details + Keywords</span>
+              </div>
 
-    <span>Location</span>
-    <strong>{listing.location || "—"}</strong>
-  </div>
-
-  <div className="tag-row">
-    {edit.tags
-      .split(",")
-      .map(tag => tag.trim())
-      .filter(Boolean)
-      .map(tag => (
-        <span key={tag}>{tag}</span>
-      ))
-}
-  </div>
-</div>
-    
-    </section>
-    
-    <section className="panel edit-panel">
-  <div className="panel-head">
-    <h2>Edit Listing</h2>
-    <span>Machine Details</span>
-  </div>
               <div className="edit-grid">
                 <label>
                   Price
@@ -507,18 +779,9 @@ Listed on IronXchange.
                   <input value={edit.hours} onChange={e => setEdit({ ...edit, hours: e.target.value })} />
                 </label>
 
-                <label>
+                <label className="wide">
                   Location
                   <input value={edit.location} onChange={e => setEdit({ ...edit, location: e.target.value })} />
-                </label>
-
-                <label>
-                  Tags / Keywords
-                  <input
-                    value={edit.tags}
-                    onChange={e => setEdit({ ...edit, tags: e.target.value })}
-                    placeholder="aggregate, clean, ready to work"
-                  />
                 </label>
 
                 <label className="wide">
@@ -526,132 +789,88 @@ Listed on IronXchange.
                   <textarea
                     value={edit.description}
                     onChange={e => setEdit({ ...edit, description: e.target.value })}
-                    rows={5}
                   />
                 </label>
+              </div>
+
+              <div className="keywords-panel">
+                <div className="keywords-head">
+                  <h2>Tags / Keywords</h2>
+                  <span>{selectedKeywords.length} Selected</span>
+                </div>
+
+                <input
+                  className="keyword-search"
+                  value={keywordSearch}
+                  onChange={e => setKeywordSearch(e.target.value)}
+                  placeholder="Search features, hydraulics, tires, GPS..."
+                />
+
+                <div className="keyword-grid">
+                  {filteredKeywords.map(keyword => (
+                    <button
+                      key={keyword}
+                      type="button"
+                      onClick={() => toggleKeyword(keyword)}
+                      className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
+                    >
+                      {keyword}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <button type="button" onClick={saveQuickEdit} className="save-btn">
                 {saving ? "SAVING..." : "SAVE CHANGES"}
               </button>
             </section>
-
-            <section className="panel seller-panel">
-  <div className="performance-grid">
-    <div><span>Views</span><strong>—</strong></div>
-    <div><span>Saves</span><strong>—</strong></div>
-    <div><span>Inquiries</span><strong>—</strong></div>
-    <div><span>Shares</span><strong>—</strong></div>
-  </div>
-
-  <button
-    type="button"
-    className="secondary-btn"
-    onClick={downloadHeroImage}
-  >
-    DOWNLOAD HERO IMAGE
-  </button>
-
-  <button
-    type="button"
-    className="secondary-btn"
-    onClick={downloadAllPhotos}
-  >
-    DOWNLOAD ALL PHOTOS
-  </button>
-
-  <button
-    type="button"
-    className="copy-link"
-    onClick={() => copyText("Listing Link", listingUrl)}
-  >
-    {copied === "Listing Link"
-      ? "COPIED"
-      : "COPY LISTING LINK"}
-  </button>
-
-  <div className="seller-mini">
-    {sellerLogo ? (
-      <img src={sellerLogo} alt={sellerName} />
-    ) : (
-      <i className="fa-regular fa-user"></i>
-    )}
-
-    <div>
-      <span>Seller</span>
-      <strong>{sellerName}</strong>
-    </div>
-  </div>
-
-</section>
-
-            <section className="panel promote-panel">
-              <div className="panel-head">
-                <h2>Promote Listing</h2>
-                <span>Social Blast</span>
-              </div>
-
-              <div className="share-grid">
-                <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
-                  <i className="fa-regular fa-copy"></i>
-                  {copied === "Marketplace Title" ? "COPIED" : "COPY MARKETPLACE TITLE"}
-                </button>
-
-                <button type="button" onClick={() => copyText("Short Description", shortDescription)}>
-                  <i className="fa-regular fa-copy"></i>
-                  {copied === "Short Description" ? "COPIED" : "COPY SHORT DESCRIPTION"}
-                </button>
-
-                <button type="button" onClick={() => copyText("Long Description", longDescription)}>
-                  <i className="fa-regular fa-copy"></i>
-                  {copied === "Long Description" ? "COPIED" : "COPY LONG DESCRIPTION"}
-                </button>
-
-                {shareButtons.map(([label, platform]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => copyText(label, buildSocialCopy(platform, listing, listingUrl))}
-                  >
-                    <i className="fa-regular fa-copy"></i>
-                    {copied === label ? "COPIED" : `COPY ${label.toUpperCase()}`}
-                  </button>
-                ))}
-              </div>
-
-              <div className="open-grid">
-                <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">Facebook Marketplace</a>
-                <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Facebook</a>
-                <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
-                <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">TikTok</a>
-                <a href="https://x.com/compose/post" target="_blank" rel="noreferrer">X</a>
-                <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">LinkedIn</a>
-              </div>
-            </section>
           </section>
 
-          <section className="panel photo-panel">
+          <section className="panel promote-panel">
             <div className="panel-head">
-              <h2>Photo Order</h2>
-              <span>Hero image is first</span>
+              <h2>Promote Listing</h2>
+              <span>Copy + Open</span>
             </div>
 
-            <div className="photo-strip">
-              {photoOrder.length > 0 ? (
-                photoOrder.map((url, index) => (
-                  <div className="photo-tile" key={`${url}-${index}`}>
-                    <img src={url} alt={`Photo ${index + 1}`} />
+            <div className="promote-grid">
+              <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
+                {copied === "Marketplace Title" ? "COPIED" : "Copy Marketplace Title"}
+              </button>
+              <button type="button" onClick={() => copyText("Short Description", shortDescription)}>
+                {copied === "Short Description" ? "COPIED" : "Copy Short Description"}
+              </button>
+              <button type="button" onClick={() => copyText("Long Description", longDescription)}>
+                {copied === "Long Description" ? "COPIED" : "Copy Long Description"}
+              </button>
+              <button type="button" onClick={() => copyText("Facebook Post", buildSocialCopy("facebook", listing, listingUrl, selectedKeywords))}>
+                {copied === "Facebook Post" ? "COPIED" : "Copy Facebook Post"}
+              </button>
+              <button type="button" onClick={() => copyText("Instagram Caption", buildSocialCopy("instagram", listing, listingUrl, selectedKeywords))}>
+                {copied === "Instagram Caption" ? "COPIED" : "Copy Instagram Caption"}
+              </button>
+              <button type="button" onClick={() => copyText("LinkedIn Post", buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords))}>
+                {copied === "LinkedIn Post" ? "COPIED" : "Copy LinkedIn Post"}
+              </button>
+              <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">Facebook Marketplace</a>
+              <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">TikTok</a>
+              <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <button type="button" onClick={downloadHeroImage}>Download Hero</button>
+              <button type="button" onClick={downloadAllPhotos}>Download All Photos</button>
+            </div>
+          </section>
 
-                    <div className="photo-controls">
-                      <strong>{index === 0 ? "HERO" : `#${index + 1}`}</strong>
-                      <button type="button" onClick={() => movePhoto(index, -1)}>←</button>
-                      <button type="button" onClick={() => movePhoto(index, 1)}>→</button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="empty">No photos found.</p>
-              )}
+          <section className="panel seller-bar">
+            {sellerLogo ? (
+              <img src={sellerLogo} alt={sellerName} />
+            ) : (
+              <div className="seller-icon"><i className="fa-regular fa-user"></i></div>
+            )}
+
+            <div>
+              <span>Seller</span>
+              <strong>{sellerName}</strong>
+              <p>Seller profile/contact expansion goes here next.</p>
             </div>
           </section>
         </section>
@@ -665,14 +884,9 @@ Listed on IronXchange.
           font-family: Arial, sans-serif;
         }
 
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        main {
-          min-height: 100vh;
-          background: #0b0b0b;
-        }
+        main { min-height: 100vh; background: #0b0b0b; }
 
         .nav {
           height: 64px;
@@ -684,17 +898,9 @@ Listed on IronXchange.
           border-bottom: 1px solid rgba(255,255,255,.08);
         }
 
-        .logo-img {
-          height: 38px;
-          width: auto;
-          display: block;
-        }
+        .logo-img { height: 38px; display: block; }
 
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
+        .nav-links { display: flex; align-items: center; gap: 14px; }
 
         .nav-links a {
           color: white;
@@ -702,12 +908,9 @@ Listed on IronXchange.
           font-weight: 900;
           text-transform: uppercase;
           font-size: 12px;
-          letter-spacing: .5px;
         }
 
-        .yellow-link {
-          color: ${BRAND_YELLOW} !important;
-        }
+        .yellow-link { color: ${BRAND_YELLOW} !important; }
 
         .login-icon {
           border: 2px solid #38A169;
@@ -717,13 +920,12 @@ Listed on IronXchange.
           height: 26px;
           display: grid;
           place-items: center;
-          font-size: 14px !important;
         }
 
         .wrap {
-          padding: 14px 2% 48px;
           max-width: 1580px;
           margin: 0 auto;
+          padding: 14px 2% 48px;
         }
 
         .panel,
@@ -734,7 +936,6 @@ Listed on IronXchange.
         }
 
         .command-bar {
-          min-height: 54px;
           padding: 10px;
           margin-bottom: 10px;
           display: flex;
@@ -753,7 +954,6 @@ Listed on IronXchange.
           padding: 7px 11px;
           font-size: 10px;
           font-weight: 900;
-          letter-spacing: .5px;
           white-space: nowrap;
         }
 
@@ -781,7 +981,6 @@ Listed on IronXchange.
           font-weight: 900;
           text-decoration: none;
           cursor: pointer;
-          letter-spacing: .35px;
         }
 
         .yellow-btn {
@@ -795,46 +994,156 @@ Listed on IronXchange.
           color: #ff9b9b;
         }
 
-        .work-grid {
-          display: grid;
-          grid-template-columns: 430px 1fr;
-          gap: 10px;
+        .photo-row-panel {
+          padding: 14px;
+          margin-bottom: 10px;
         }
 
-        .machine-panel {
+        .panel-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .panel-head h2 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: 16px;
+          text-transform: uppercase;
+        }
+
+        .panel-head span {
+          color: ${BRAND_YELLOW};
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .photo-add-box {
+          display: block;
+          border: 1px dashed #444;
+          background: #101010;
+          border-radius: 12px;
+          padding: 12px;
+          margin-bottom: 10px;
+          text-align: center;
+          color: ${BRAND_YELLOW};
+          font-size: 11px;
+          font-weight: 900;
+          cursor: pointer;
+          text-transform: uppercase;
+        }
+
+        .photo-add-box input { display: none; }
+
+        .photo-strip {
+          display: flex;
+          gap: 10px;
+          overflow-x: auto;
+          padding-bottom: 8px;
+        }
+
+        .photo-tile {
+          position: relative;
+          flex: 0 0 150px;
+          height: 110px;
+          border: 1px solid #2a2a2a;
+          border-radius: 12px;
           overflow: hidden;
+          cursor: grab;
+          background: #101010;
+        }
+
+        .photo-tile img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .hero-tile { border: 2px solid ${BRAND_YELLOW}; }
+
+        .hero-badge {
+          position: absolute;
+          top: 7px;
+          left: 7px;
+          background: ${BRAND_YELLOW};
+          color: #050505;
+          font-size: 9px;
+          font-weight: 900;
+          padding: 4px 7px;
+          border-radius: 999px;
+          z-index: 2;
+        }
+
+        .photo-tile button {
+          position: absolute;
+          top: 7px;
+          right: 7px;
+          width: 22px;
+          height: 22px;
+          border: none;
+          background: #B91C1C;
+          color: white;
+          border-radius: 50%;
+          font-size: 13px;
+          font-weight: 900;
+          cursor: pointer;
+          z-index: 3;
+        }
+
+        .main-grid {
+          display: grid;
+          grid-template-columns: minmax(420px, 540px) 1fr;
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+
+        .preview-card { overflow: hidden; }
+
+        .photo-stage {
+          position: relative;
+          background: #050505;
         }
 
         .hero-photo {
           width: 100%;
-          height: 305px;
+          height: 380px;
           object-fit: cover;
           display: block;
-          background: #050505;
         }
 
-        .machine-body,
+        .photo-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 36px;
+          height: 48px;
+          border: 1px solid rgba(255,255,255,.2);
+          background: rgba(0,0,0,.55);
+          color: white;
+          border-radius: 10px;
+          font-size: 26px;
+          cursor: pointer;
+        }
+
+        .photo-nav.left { left: 10px; }
+        .photo-nav.right { right: 10px; }
+
+        .card-body,
         .edit-panel,
-        .seller-panel,
         .promote-panel,
-        .photo-panel {
+        .seller-bar {
           padding: 18px;
         }
 
         h1 {
           margin: 0 0 16px;
           color: #f2f2f2;
-          font-size: 28px;
+          font-size: 26px;
           line-height: 1.08;
-          letter-spacing: -.5px;
-        }
-
-        h2 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 18px;
-          text-transform: uppercase;
-          letter-spacing: .35px;
         }
 
         .facts {
@@ -844,28 +1153,26 @@ Listed on IronXchange.
           font-size: 14px;
         }
 
-        .facts span {
-          color: #888;
-        }
+        .facts span { color: #888; }
+        .facts strong { color: #f2f2f2; }
 
-        .facts strong {
-          color: #f2f2f2;
-        }
-
-        .panel-head {
+        .tag-row {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 14px;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 14px;
         }
 
-        .panel-head span {
-          color: ${BRAND_YELLOW};
-          font-size: 10px;
+        .tag-row span,
+        .keyword-chip {
+          background: rgba(255,196,0,.08);
+          border: 1px solid rgba(255,196,0,.25);
+          color: #ffc400;
+          border-radius: 999px;
+          padding: 6px 9px;
+          font-size: 9px;
           font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: .4px;
         }
 
         .edit-grid {
@@ -874,6 +1181,8 @@ Listed on IronXchange.
           gap: 12px;
         }
 
+        .wide { grid-column: 1 / -1; }
+
         label {
           display: grid;
           gap: 6px;
@@ -881,7 +1190,6 @@ Listed on IronXchange.
           font-size: 10px;
           font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: .35px;
         }
 
         input,
@@ -894,14 +1202,12 @@ Listed on IronXchange.
           padding: 11px 12px;
           font-size: 13px;
           outline: none;
-          text-transform: none;
-          font-weight: 700;
         }
 
         textarea {
+          min-height: 150px;
           resize: vertical;
           font-family: Arial, sans-serif;
-          line-height: 1.45;
         }
 
         input:focus,
@@ -909,61 +1215,113 @@ Listed on IronXchange.
           border-color: ${BRAND_YELLOW};
         }
 
-        .wide {
-          grid-column: 1 / -1;
+        .keywords-panel { margin-top: 14px; }
+
+        .keywords-head {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
         }
 
-        .save-btn,
-        .copy-link,
-        .secondary-btn {
-          width: 100%;
-          border: none;
-          border-radius: 10px;
-          padding: 14px 16px;
-          font-size: 12px;
+        .keywords-head h2 {
+          margin: 0;
+          font-size: 13px;
+          color: #f2f2f2;
+          text-transform: uppercase;
+        }
+
+        .keywords-head span {
+          color: #888;
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: .4px;
+        }
+
+        .keyword-search { margin-bottom: 8px; }
+
+        .keyword-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          max-height: 220px;
+          overflow-y: auto;
+          border: 1px solid #252525;
+          background: #101010;
+          border-radius: 12px;
+          padding: 8px;
+        }
+
+        .keyword-chip {
           cursor: pointer;
+          background: #181818;
+          color: #cfcfcf;
+          border-color: #333;
+        }
+
+        .keyword-chip.active {
+          background: ${BRAND_YELLOW};
+          color: #050505;
+          border-color: ${BRAND_YELLOW};
         }
 
         .save-btn {
+          width: 100%;
           margin-top: 14px;
+          border: none;
+          border-radius: 10px;
+          padding: 14px 16px;
           background: ${BRAND_YELLOW};
           color: #050505;
+          font-size: 12px;
+          font-weight: 900;
+          cursor: pointer;
         }
 
-        .copy-link {
-          margin-top: 10px;
-          background: ${BRAND_YELLOW};
-          color: #050505;
+        .promote-panel {
+          margin-bottom: 10px;
         }
 
-        .secondary-btn {
-          display: block;
-          margin-top: 10px;
-          text-align: center;
-          text-decoration: none;
-          background: #101010;
-          color: #f2f2f2;
-          border: 1px solid #3a3a3a;
-        }
-
-        .seller-mini {
+        .promote-grid {
           display: grid;
-          grid-template-columns: 112px 1fr;
-          gap: 14px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+        }
+
+        .promote-grid button,
+        .promote-grid a {
+          min-height: 36px;
+          background: #101010;
+          border: 1px solid rgba(255,255,255,.12);
+          color: #f2f2f2;
+          border-radius: 999px;
+          padding: 9px 12px;
+          font-size: 9px;
+          font-weight: 900;
+          text-decoration: none;
+          cursor: pointer;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        .promote-grid a {
+          color: ${BRAND_YELLOW};
+          border-color: rgba(255,196,0,.25);
+          background: rgba(255,196,0,.04);
+        }
+
+        .seller-bar {
+          display: grid;
+          grid-template-columns: 130px 1fr;
+          gap: 16px;
           align-items: center;
-          margin-bottom: 16px;
         }
 
-        .seller-mini img {
-          max-width: 112px;
-          max-height: 62px;
+        .seller-bar img {
+          max-width: 120px;
+          max-height: 70px;
           object-fit: contain;
-          display: block;
         }
 
-        .seller-mini i {
+        .seller-icon {
           width: 58px;
           height: 58px;
           border: 1px solid #555;
@@ -973,204 +1331,29 @@ Listed on IronXchange.
           color: #aaa;
         }
 
-        .seller-mini span {
+        .seller-bar span {
           display: block;
           color: #888;
           font-size: 10px;
           font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: .4px;
           margin-bottom: 5px;
         }
 
-        .seller-mini strong {
+        .seller-bar strong {
           color: #f2f2f2;
-          font-size: 15px;
+          font-size: 18px;
         }
 
-        .performance-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
-          margin-bottom: 8px;
-        }
-
-        .performance-grid div {
-          background: #101010;
-          border: 1px solid #2a2a2a;
-          border-radius: 10px;
-          padding: 10px;
-        }
-
-        .performance-grid span {
-          display: block;
+        .seller-bar p {
+          margin: 6px 0 0;
           color: #888;
-          font-size: 9px;
-          font-weight: 900;
-          text-transform: uppercase;
-          margin-bottom: 5px;
-        }
-
-        .performance-grid strong {
-          color: #f2f2f2;
-          font-size: 17px;
-        }
-
-        .share-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.share-grid button {
-  min-height: 38px;
-  background: #101010;
-  border: 1px solid rgba(255,255,255,.11);
-  color: #f2f2f2;
-  border-radius: 999px;
-  padding: 9px 12px;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .35px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 9px;
-  text-transform: uppercase;
-}
-        .share-grid button i {
-          color: ${BRAND_YELLOW};
-        }
-
-.tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 14px;
-}
-
-.tag-row span {
-  background: rgba(255,196,0,.08);
-  border: 1px solid rgba(255,196,0,.25);
-  color: #ffc400;
-  border-radius: 999px;
-  padding: 6px 9px;
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-        .open-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
-          border-top: 1px solid rgba(255,255,255,.09);
-          padding-top: 16px;
-        }
-
-        .open-grid a {
-          text-align: center;
-          text-decoration: none;
-          color: ${BRAND_YELLOW};
-          background: rgba(255,196,0,.045);
-          border: 1px solid rgba(255,196,0,.22);
-          border-radius: 999px;
-          padding: 10px 8px;
-          font-size: 9px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .35px;
-        }
-
-        .photo-stage {
-  position: relative;
-}
-
-.photo-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 46px;
-  border: 1px solid rgba(255,255,255,.2);
-  background: rgba(0,0,0,.55);
-  color: #fff;
-  border-radius: 10px;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.photo-nav.left {
-  left: 10px;
-}
-
-.photo-nav.right {
-  right: 10px;
-}
-
-        .photo-panel {
-  margin-bottom: 10px;
-  padding: 14px;
-  grid-column: 1 / -1;
-}
-
-.photo-strip {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scroll-snap-type: x mandatory;
-}
-
-.photo-tile {
-  flex: 0 0 170px;
-  scroll-snap-align: start;
-  background: #101010;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-        .photo-tile img {
-          width: 100%;
-          height: 110px;
-          object-fit: cover;
-          display: block;
-        }
-
-        .photo-controls {
-          display: grid;
-          grid-template-columns: 1fr 34px 34px;
-          align-items: center;
-          gap: 6px;
-          padding: 8px;
-        }
-
-        .photo-controls strong {
-          color: ${BRAND_YELLOW};
-          font-size: 10px;
-          font-weight: 900;
-        }
-
-        .photo-controls button {
-          background: #181818;
-          border: 1px solid #333;
-          color: #f2f2f2;
-          border-radius: 8px;
-          height: 28px;
-          cursor: pointer;
-        }
-
-        .empty {
-          color: #999;
-          margin: 0;
-          font-size: 13px;
+          font-size: 12px;
         }
 
         @media (max-width: 1000px) {
-          .work-grid {
+          .main-grid,
+          .promote-grid {
             grid-template-columns: 1fr;
           }
 
@@ -1182,35 +1365,9 @@ Listed on IronXchange.
           .command-actions {
             justify-content: flex-start;
           }
-        }
 
-        @media (max-width: 650px) {
-          .nav {
-            height: 60px;
-            padding: 8px 4%;
-          }
-
-          .logo-img {
-            height: 34px;
-          }
-
-          .nav-links a:not(.yellow-link):not(.login-icon) {
-            display: none;
-          }
-
-          .wrap {
-            padding: 12px 3% 36px;
-          }
-
-          .edit-grid,
-          .share-grid,
-          .open-grid,
-          .performance-grid {
+          .seller-bar {
             grid-template-columns: 1fr;
-          }
-
-          .photo-strip {
-            grid-template-columns: repeat(2, 1fr);
           }
         }
       `}</style>
