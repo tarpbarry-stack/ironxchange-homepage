@@ -736,176 +736,166 @@ Listed on IronXchange.
             </div>
           </section>
 
-         <section className="main-grid">
-  <div className="left-stack">
-    <section className="panel preview-card">
-              <div className="photo-stage">
-                <img src={heroPhoto} alt={listing.title} className="hero-photo" />
-
-                <button type="button" className="photo-nav left" onClick={() => changeActivePhoto(-1)}>‹</button>
-                <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>›</button>
-              </div>
-
-            <div className="card-body live-card-body">
-  <div className="title-row">
-    <h3>
-      {String(listing.title || "")
-        .replace(edit.hours || listing.hours || "", "")
-        .replace(/\s+[-–]\s*$/, "")
-        .trim()}
-    </h3>
-
-    <h3 className="hours-inline">
-      {edit.hours || listing.hours || "—"}
-    </h3>
-  </div>
-
-  <p className="feature-line">
-    {selectedKeywords.slice(0, 4).join(" • ")}
-  </p>
-
-  <div className="price-row">
-    <strong>{formatMoney(edit.price || listing.price)}</strong>
-
-    <div className="meta">
-      <span>⌖ {edit.location || listing.location || "—"}</span>
-    </div>
-  </div>
-</div>
-
-</section>
-
-<section className="panel performance-panel">
-  <div className="performance-grid">
-    <div><span>Views</span><strong>—</strong></div>
-    <div><span>Saves</span><strong>—</strong></div>
-    <div><span>Inquiries</span><strong>—</strong></div>
-    <div><span>Shares</span><strong>—</strong></div>
-  </div>
-
-  <div className="download-row">
-    <button type="button" onClick={downloadHeroImage}>DOWNLOAD HERO</button>
-    <button type="button" onClick={downloadAllPhotos}>DOWNLOAD ALL PHOTOS</button>
-    <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
-      {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
-    </button>
-  </div>
-</section>
-</div>
-
-<div className="right-stack">
-  <section className="panel edit-panel">
-              <div className="panel-head">
-                <h2>Edit Listing</h2>
-                <span>Details + Keywords</span>
-              </div>
-
-              <div className="edit-grid">
-                <label>
-                  Price
-                  <input value={edit.price} onChange={e => setEdit({ ...edit, price: e.target.value })} />
-                </label>
-
-                <label>
-                  Hours
-                  <input value={edit.hours} onChange={e => setEdit({ ...edit, hours: e.target.value })} />
-                </label>
-
-                <label className="wide">
-                  Location
-                  <input value={edit.location} onChange={e => setEdit({ ...edit, location: e.target.value })} />
-                </label>
-
-                <label className="wide">
-                  Description
-                  <textarea
-                    value={edit.description}
-                    onChange={e => setEdit({ ...edit, description: e.target.value })}
-                  />
-                </label>
-              </div>
-
-              <div className="keywords-panel">
-                <div className="keywords-head">
-                  <h2>Tags / Keywords</h2>
-                  <span>{selectedKeywords.length} Selected</span>
-                </div>
-
-                <input
-                  className="keyword-search"
-                  value={keywordSearch}
-                  onChange={e => setKeywordSearch(e.target.value)}
-                  placeholder="Search features, hydraulics, tires, GPS..."
-                />
-
-                <div className="keyword-grid">
-                  {filteredKeywords.map(keyword => (
-                    <button
-                      key={keyword}
-                      type="button"
-                      onClick={() => toggleKeyword(keyword)}
-                      className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
-                    >
-                      {keyword}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-             <button type="button" onClick={saveQuickEdit} className="save-btn">
-  {saving ? "SAVING..." : "SAVE CHANGES"}
-</button>
-</section>
-
-<section className="panel promote-panel">
+         <section className="panel promote-panel">
   <div className="panel-head">
     <h2>Promote Listing</h2>
     <span>Copy + Open</span>
   </div>
 
-            <div className="promote-grid">
-              <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
-                {copied === "Marketplace Title" ? "COPIED" : "Copy Marketplace Title"}
-              </button>
-              <button type="button" onClick={() => copyText("Short Description", shortDescription)}>
-                {copied === "Short Description" ? "COPIED" : "Copy Short Description"}
-              </button>
-              <button type="button" onClick={() => copyText("Long Description", longDescription)}>
-                {copied === "Long Description" ? "COPIED" : "Copy Long Description"}
-              </button>
-              <button type="button" onClick={() => copyText("Facebook Post", buildSocialCopy("facebook", listing, listingUrl, selectedKeywords))}>
-                {copied === "Facebook Post" ? "COPIED" : "Copy Facebook Post"}
-              </button>
-              <button type="button" onClick={() => copyText("Instagram Caption", buildSocialCopy("instagram", listing, listingUrl, selectedKeywords))}>
-                {copied === "Instagram Caption" ? "COPIED" : "Copy Instagram Caption"}
-              </button>
-              <button type="button" onClick={() => copyText("LinkedIn Post", buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords))}>
-                {copied === "LinkedIn Post" ? "COPIED" : "Copy LinkedIn Post"}
-              </button>
-              <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">Facebook Marketplace</a>
-              <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
-              <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">TikTok</a>
-              <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">LinkedIn</a>
-              <button type="button" onClick={downloadHeroImage}>Download Hero</button>
-              <button type="button" onClick={downloadAllPhotos}>Download All Photos</button>
-            </div>
-          </section>
+  <div className="promote-grid">
+    <button
+      type="button"
+      onClick={() => copyText("Marketplace Title", marketplaceTitle)}
+    >
+      {copied === "Marketplace Title"
+        ? "COPIED"
+        : "Copy Marketplace Title"}
+    </button>
 
-          <section className="panel seller-bar">
-            {sellerLogo ? (
-              <img src={sellerLogo} alt={sellerName} />
-            ) : (
-              <div className="seller-icon"><i className="fa-regular fa-user"></i></div>
-            )}
+    <button
+      type="button"
+      onClick={() => copyText("Short Description", shortDescription)}
+    >
+      {copied === "Short Description"
+        ? "COPIED"
+        : "Copy Short Description"}
+    </button>
 
-            <div>
-              <span>Seller</span>
-              <strong>{sellerName}</strong>
-              <p>Seller profile/contact expansion goes here next.</p>
-            </div>
-          </section>
-        </section>
-      </main>
+    <button
+      type="button"
+      onClick={() => copyText("Long Description", longDescription)}
+    >
+      {copied === "Long Description"
+        ? "COPIED"
+        : "Copy Long Description"}
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        copyText(
+          "Facebook Post",
+          buildSocialCopy(
+            "facebook",
+            listing,
+            listingUrl,
+            selectedKeywords
+          )
+        )
+      }
+    >
+      {copied === "Facebook Post"
+        ? "COPIED"
+        : "Copy Facebook Post"}
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        copyText(
+          "Instagram Caption",
+          buildSocialCopy(
+            "instagram",
+            listing,
+            listingUrl,
+            selectedKeywords
+          )
+        )
+      }
+    >
+      {copied === "Instagram Caption"
+        ? "COPIED"
+        : "Copy Instagram Caption"}
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        copyText(
+          "LinkedIn Post",
+          buildSocialCopy(
+            "linkedin",
+            listing,
+            listingUrl,
+            selectedKeywords
+          )
+        )
+      }
+    >
+      {copied === "LinkedIn Post"
+        ? "COPIED"
+        : "Copy LinkedIn Post"}
+    </button>
+
+    <a
+      href="https://www.facebook.com/marketplace/create/vehicle"
+      target="_blank"
+      rel="noreferrer"
+    >
+      Facebook Marketplace
+    </a>
+
+    <a
+      href="https://www.instagram.com/"
+      target="_blank"
+      rel="noreferrer"
+    >
+      Instagram
+    </a>
+
+    <a
+      href="https://www.tiktok.com/upload"
+      target="_blank"
+      rel="noreferrer"
+    >
+      TikTok
+    </a>
+
+    <a
+      href="https://www.linkedin.com/feed/"
+      target="_blank"
+      rel="noreferrer"
+    >
+      LinkedIn
+    </a>
+
+    <button
+      type="button"
+      onClick={downloadHeroImage}
+    >
+      Download Hero
+    </button>
+
+    <button
+      type="button"
+      onClick={downloadAllPhotos}
+    >
+      Download All Photos
+    </button>
+  </div>
+</section>
+
+</div>
+</section>
+
+<section className="panel seller-bar">
+  {sellerLogo ? (
+    <img src={sellerLogo} alt={sellerName} />
+  ) : (
+    <div className="seller-icon">
+      <i className="fa-regular fa-user"></i>
+    </div>
+  )}
+
+  <div>
+    <span>Seller</span>
+    <strong>{sellerName}</strong>
+    <p>Seller profile/contact expansion goes here next.</p>
+  </div>
+</section>
+
+</section>
+</main>
 
       <style jsx>{`
         :global(body) {
