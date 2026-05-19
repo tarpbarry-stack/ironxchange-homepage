@@ -711,7 +711,7 @@ export default function AccountPage() {
         .user-dot {
   width: 72px;
   height: 72px;
-  border: 1px solid ##F2F2F2;
+  border: 1px solid #F2F2F2;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -840,19 +840,26 @@ export default function AccountPage() {
           background: #38A169;
         }
 
-        .main-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 320px;
-          gap: 6px;
-          align-items: stretch;
-        }
+      .main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 6px;
+  align-items: stretch;
+  min-height: 0;
+}
 
-        .left-column {
-          min-width: 0;
-          display: grid;
-          grid-template-rows: auto 1fr;
-          gap: 6px;
-        }
+.left-column {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+}
+
+.listings-panel {
+  min-height: 0;
+}
+
 
         .stats {
           display: grid;
@@ -904,12 +911,12 @@ export default function AccountPage() {
           padding: 8px 10px;
         }
 
-       .right-stack {
+ .right-stack {
+  min-height: 0;
+  height: 100%;
   display: grid;
   grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 6px;
-  height: 100%;
-  min-height: 0;
   overflow: hidden;
 }
 
@@ -920,9 +927,13 @@ export default function AccountPage() {
   flex-direction: column;
 }
 
+.side-panel .panel-head {
+  flex: 0 0 auto;
+}
 .activity-list,
 .activity-log,
 .saved-card-list {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding-right: 4px;
