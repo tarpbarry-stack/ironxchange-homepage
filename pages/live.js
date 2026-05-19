@@ -1143,7 +1143,16 @@ Listed on IronXchange.
         .photo-nav.left { left: 10px; }
         .photo-nav.right { right: 10px; }
 
-        .card-body,
+        .preview-card {
+  overflow: hidden;
+  align-self: start;
+  height: fit-content;
+}
+
+.card-body {
+  padding: 16px 16px 8px;
+}
+
 .edit-panel,
 .promote-panel,
 .seller-bar {
@@ -1151,14 +1160,15 @@ Listed on IronXchange.
 }
 
 .preview-card .live-card-body {
-  padding: 16px;
+  padding: 16px 16px 8px;
 }
 
 .preview-card .title-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 18px;
+  margin-bottom: 8px;
 }
 
 .preview-card h3 {
@@ -1166,7 +1176,7 @@ Listed on IronXchange.
   color: #F2F2F2;
   font-size: 24px;
   letter-spacing: -0.3px;
-  line-height: 1.1;
+  line-height: 1.08;
 }
 
 .preview-card .hours-inline {
@@ -1176,32 +1186,40 @@ Listed on IronXchange.
   letter-spacing: .3px;
   white-space: nowrap;
   text-align: right;
+  flex-shrink: 0;
 }
 
 .preview-card .feature-line {
-  margin: 8px 0 18px;
+  margin: 0 0 12px;
   color: #8F8F8F;
   font-size: 16px;
-  line-height: 1.4;
+  line-height: 1.3;
+  min-height: 0;
 }
+
 .preview-card .price-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 18px;
+  align-items: flex-end;
+  margin: 0;
+  padding: 0;
 }
 
 .preview-card .price-row strong {
   color: #F2F2F2;
   font-size: 26px;
+  line-height: 1;
 }
 
 .preview-card .meta {
   display: flex;
+  align-items: flex-end;
   gap: 12px;
   font-size: 13px;
   color: #9A9A9A;
   flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
 }
 
 .preview-card .price-row span {
@@ -1210,13 +1228,7 @@ Listed on IronXchange.
   font-weight: 900;
   letter-spacing: .4px;
   white-space: nowrap;
-}
-
-h1 {
-  margin: 0 0 16px;
-  color: #f2f2f2;
-  font-size: 26px;
-  line-height: 1.08;
+  line-height: 1;
 }
         .facts {
           display: grid;
