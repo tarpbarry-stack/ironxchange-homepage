@@ -1142,19 +1142,18 @@ Listed on IronXchange.
         .photo-nav.right { right: 10px; }
 
         .card-body,
-        .edit-panel,
-        .promote-panel,
-        .seller-bar {
-          padding: 18px;
-        }
+.edit-panel,
+.promote-panel,
+.seller-bar {
+  padding: 18px;
+}
 
-        h1 {
-          margin: 0 0 16px;
-          color: #f2f2f2;
-          font-size: 26px;
-          line-height: 1.08;
-        }
-
+h1 {
+  margin: 0 0 16px;
+  color: #f2f2f2;
+  font-size: 26px;
+  line-height: 1.08;
+}
         .facts {
           display: grid;
           grid-template-columns: 90px 1fr;
