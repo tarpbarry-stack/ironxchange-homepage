@@ -1517,6 +1517,24 @@ You also likely lost
             padding: 10px 3% 40px;
           }
 
+:global(html),
+:global(body) {
+  height: auto;
+  overflow-y: auto;
+}
+
+main {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.content,
+.main-grid,
+.left-column,
+.right-stack {
+  overflow: visible;
+}
           .main-grid,
           .stats,
           .perf-grid {
