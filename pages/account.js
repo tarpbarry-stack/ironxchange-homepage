@@ -340,24 +340,36 @@ const logoUrl =
             <div className="main-grid">
               <div className="left-column">
                 <div className="stats">
-                  <div className="stat-card">
-                    <span>Active Listings</span>
-                    <strong>{myListings.length}</strong>
-                    <p>Live machines for sale</p>
-                  </div>
+  <div className="stat-card">
+    <span>Active Listings</span>
+    <strong>{myListings.length}</strong>
+    <p>Live machines for sale</p>
+  </div>
 
-                  <div className="stat-card">
-                    <span>Age</span>
-                    <strong className="green">18</strong>
-                    <p>Average listing age</p>
-                  </div>
+  <div className="stat-card">
+    <span>Age</span>
+    <strong className="green">18</strong>
+    <p>Avg listing days</p>
+  </div>
 
-                  <div className="stat-card">
-                    <span>Saved Machines</span>
-                    <strong>{savedMachines.length}</strong>
-                    <p>Watchlist inventory</p>
-                  </div>
-                </div>
+  <div className="stat-card">
+    <span>Saved Machines</span>
+    <strong>{savedMachines.length}</strong>
+    <p>Watchlist inventory</p>
+  </div>
+
+  <div className="stat-card">
+    <span>Total Views</span>
+    <strong>1,248</strong>
+    <p>Last 30 days</p>
+  </div>
+
+  <div className="stat-card">
+    <span>New Inquiries</span>
+    <strong>4</strong>
+    <p>Unread messages</p>
+  </div>
+</div>
 
                 <section className="panel listings-panel">
                   <div className="panel-head">
@@ -878,11 +890,11 @@ const logoUrl =
   }
 
   .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    width: 100%;
-  }
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
 
   .stat-card,
   .panel {
