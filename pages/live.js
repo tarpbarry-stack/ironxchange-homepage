@@ -852,17 +852,16 @@ Listed on IronXchange.
                 </div>
               </div>
 
-              <button type="button" onClick={saveQuickEdit} className="save-btn">
-                {saving ? "SAVING..." : "SAVE CHANGES"}
-              </button>
-            </section>
-          </section>
+             <button type="button" onClick={saveQuickEdit} className="save-btn">
+  {saving ? "SAVING..." : "SAVE CHANGES"}
+</button>
+</section>
 
-          <section className="panel promote-panel">
-            <div className="panel-head">
-              <h2>Promote Listing</h2>
-              <span>Copy + Open</span>
-            </div>
+<section className="panel promote-panel">
+  <div className="panel-head">
+    <h2>Promote Listing</h2>
+    <span>Copy + Open</span>
+  </div>
 
             <div className="promote-grid">
               <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
