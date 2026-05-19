@@ -199,11 +199,20 @@ export default function AccountPage() {
 
   const variants = profileImage?.attributes?.variants || {};
 
-  const logoUrl =
-    variants?.default?.url ||
-    variants?.squareSmall?.url ||
-    variants?.squareSmall2x?.url ||
-    null;
+  const nonSquareVariant = Object.entries(variants).find(([key, value]) => {
+  return value?.url && !key.toLowerCase().includes("square");
+});
+
+const logoUrl =
+  variants?.default?.url ||
+  variants?.["landscape-crop"]?.url ||
+  variants?.["landscape-crop2x"]?.url ||
+  variants?.["scaled-large"]?.url ||
+  variants?.["scaled-medium"]?.url ||
+  variants?.["scaled-small"]?.url ||
+  nonSquareVariant?.[1]?.url ||
+  Object.values(variants).find(v => v?.url)?.url ||
+  null;
 
   if (loading) {
     return (
