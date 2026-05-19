@@ -1220,11 +1220,13 @@ Listed on IronXchange.
 }
 
 .preview-card .feature-line {
-  margin: 8px 0 18px;
+  margin: 12px 0 24px;
   color: #8F8F8F;
   font-size: 16px;
-  line-height: 1.35;
-  min-height: 44px;
+  line-height: 1.38;
+  min-height: 58px;
+  display: flex;
+  align-items: flex-start;
 }
 
 .preview-card .price-row {
