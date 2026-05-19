@@ -9,18 +9,14 @@ function getImageUrlFromIncluded(user) {
 
   const variants = image?.attributes?.variants || {};
 
-  const preferred =
+  return (
     variants.default?.url ||
-    variants["landscape-crop"]?.url ||
-    variants["landscape-crop2x"]?.url ||
-    variants["scaled-large"]?.url ||
-    variants["scaled-medium"]?.url ||
-    variants["scaled-small"]?.url ||
-    Object.values(variants).find(v => v?.url && !String(v?.name || "").includes("square"))?.url ||
+    variants["square-small"]?.url ||
+    variants.squareSmall?.url ||
+    variants.squareSmall2x?.url ||
     Object.values(variants).find(v => v?.url)?.url ||
-    null;
-
-  return preferred;
+    null
+  );
 }
 
 export default function AccountProfilePage() {
