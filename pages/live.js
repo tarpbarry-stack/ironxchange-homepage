@@ -1297,7 +1297,11 @@ Listed on IronXchange.
 .right-stack {
   display: grid;
   gap: 10px;
-  align-content: start;
+  grid-auto-rows: min-content;
+}
+
+.left-stack {
+  grid-template-rows: auto auto 1fr;
 }
 
 .performance-panel {
@@ -1351,7 +1355,9 @@ Listed on IronXchange.
 
 .activity-panel {
   padding: 14px;
-  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .activity-list {
