@@ -724,26 +724,26 @@ const logoUrl =
   }
 
   .user-dot {
-    width: 72px;
-    height: 72px;
-    border: 1px solid #F2F2F2;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 10px;
-    overflow: hidden;
-    background: #050505;
-    flex-shrink: 0;
-  }
+  width: 140px;
+  height: 72px;
+  border: 1px solid #F2F2F2;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  background: #050505;
+  overflow: hidden;
+  padding: 8px;
+}
 
-  .user-dot img {
-    width: 165%;
-    height: 165%;
-    object-fit: contain;
-    object-position: center;
-    display: block;
-  }
+.user-dot img {
+  width: 165%;
+  height: 165%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
 
   .rail-top strong {
     display: block;
@@ -989,6 +989,47 @@ const logoUrl =
     background: rgba(255, 196, 0, .7);
   }
 
+.table-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 64px 74px 36px 58px 90px;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 10px;
+  border-bottom: 1px solid #252525;
+  font-size: 12px;
+}
+
+.machine-cell {
+  min-width: 0;
+}
+
+.machine-link {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.machine-cell img {
+  width: 96px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #2A2A2A;
+  background: #0b0b0b;
+}
+
+.machine-link span {
+  display: block;
+  min-width: 0;
+  color: #f2f2f2;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow: hidden;
+}
     .right-stack {
     min-height: 0;
     overflow: hidden;
