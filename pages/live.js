@@ -578,42 +578,53 @@ Listed on IronXchange.
     );
   }
 
-  async function saveQuickEdit() {
-    if (!listing?.id) return;
+ async function saveQuickEdit() {
+  if (!listing?.id) return;
 
-    setSaving(true);
+  setSaving(true);
 
-    try {
-      if (clean(edit.price)) {
-        await fetch("/api/update-listing-price", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            listingId: listing.id,
-            price: cleanNumber(edit.price)
-          })
-        });
-      }
+  try {
+    const response = await fetch("/api/update-listing-details", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id,
+        title: clean(listing.title),
+        price: edit.price,
+        hours: edit.hours,
+        location: edit.location,
+        description: edit.description,
+        keywords: selectedKeywords
+      })
+    });
 
-      addActivity(
-        "success",
-        `Edit saved — ${clean(listing?.title) || "Listing"}`
-      );
+    const data = await response.json();
 
-      alert("Saved. Price API is wired. Hours/location/description/keywords/photo save can be wired next.");
-    } catch {
-      addActivity(
-        "error",
-        `Edit failed — ${clean(listing?.title) || "Listing"}`
-      );
-
-      alert("Edit failed.");
-    } finally {
-      setSaving(false);
+    if (!response.ok) {
+      throw new Error(data?.message || data?.error || "Update failed");
     }
+
+    addActivity(
+      "success",
+      `Edit saved — ${clean(listing?.title) || "Listing"}`
+    );
+
+    alert("Saved. Description, price, hours, location, and keywords updated.");
+  } catch (err) {
+    console.error("SAVE QUICK EDIT ERROR:", err);
+
+    addActivity(
+      "error",
+      `Edit failed — ${clean(listing?.title) || "Listing"}`
+    );
+
+    alert(`Edit failed: ${err.message}`);
+  } finally {
+    setSaving(false);
   }
+}
 
   function statusAction(action) {
     addActivity(
