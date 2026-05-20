@@ -388,6 +388,8 @@ const logoUrl =
   <span>Age</span>
   <span>Status</span>
   <span>Actions</span>
+  <span>Views</span>
+  <span>Saves</span>
 </div>
 
                     {myListings.length > 0 ? (
@@ -492,6 +494,15 @@ const logoUrl =
                               <option value="archive">Archive</option>
                             </select>
                           </span>
+
+<span className="listing-metric">
+  {listing.views || "—"}
+</span>
+
+<span className="listing-metric">
+  {listing.saves || "—"}
+</span>
+                              
                         </div>
 </div>
                       ))
@@ -1092,7 +1103,7 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 128px 74px 58px 74px 74px;
+  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px;
   gap: 14px;
   align-items: center;
   justify-content: start;
@@ -1100,6 +1111,13 @@ main {
 
 .listing-hours {
   color: #9A9A9A;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.listing-metric {
+  color: #8A8A8A;
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
