@@ -392,27 +392,28 @@ const logoUrl =
 
                     {myListings.length > 0 ? (
                       myListings.map(listing => (
-                        <div className="table-row" key={listing.id}>
-                          <div className="machine-cell">
-                            <a href={`/live?id=${listing.id}`} className="machine-link">
-                              <img
-                                src={
-                                  listing.imageUrl ||
-                                  listing.image ||
-                                  "/images/hero-equipment-yard.jpg"
-                                }
-                                alt={listing.title}
-                              />
+                       <div className="table-row listing-op-row" key={listing.id}>
+  <a href={`/live?id=${listing.id}`} className="machine-photo-link">
+    <img
+      src={
+        listing.imageUrl ||
+        listing.image ||
+        "/images/hero-equipment-yard.jpg"
+      }
+      alt={listing.title}
+    />
+  </a>
 
-                              <span>{cleanMachineTitle(listing.title)}</span>
-                            </a>
-                          </div>
+  <a href={`/live?id=${listing.id}`} className="machine-title-line">
+    {cleanMachineTitle(listing.title)}
+  </a>
 
-                          <span>{listing.hours}</span>
+  <div className="listing-op-controls">
+    <span className="listing-hours">{listing.hours}</span>
 
-                          <input
-                            className="price-input"
-                            defaultValue={formatPriceInput(listing.price)}
+    <input
+      className="price-input"
+      defaultValue={formatPriceInput(listing.price)}
                             onKeyDown={async e => {
                               if (e.key !== "Enter") return;
 
@@ -492,6 +493,7 @@ const logoUrl =
                             </select>
                           </span>
                         </div>
+</div>
                       ))
                     ) : (
                       <div className="table-empty">
@@ -1017,8 +1019,6 @@ const logoUrl =
   background: rgba(255,196,0,.7);
 }
 
-You also likely lost
-
   .listing-table::-webkit-scrollbar {
     width: 8px;
   }
@@ -1037,50 +1037,65 @@ You also likely lost
     background: rgba(255, 196, 0, .7);
   }
 
-.table-row {
+.listing-op-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 64px 74px 36px 58px 90px;
-  gap: 4px;
+  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "photo title"
+    "photo controls";
+  gap: 6px 12px;
   align-items: center;
-  padding: 10px 10px;
-  border-bottom: 1px solid #252525;
-  font-size: 12px;
+  padding: 10px;
+  border-bottom: 1px solid #242424;
 }
 
-.machine-cell {
-  min-width: 0;
-}
-
-.machine-link {
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-}
-
-.machine-cell img {
-  width: 96px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid #2A2A2A;
-  background: #0b0b0b;
-}
-
-.machine-link span {
+.machine-photo-link {
+  grid-area: photo;
   display: block;
-  min-width: 0;
-  color: #f2f2f2;
-  font-weight: 800;
+}
+
+.machine-photo-link img {
+  width: 86px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 9px;
+  display: block;
+}
+
+.machine-title-line {
+  grid-area: title;
+  color: #F2F2F2;
   font-size: 13px;
-  line-height: 1.25;
-  overflow: hidden;
+  font-weight: 900;
+  line-height: 1.15;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.machine-title-line::-webkit-scrollbar {
+  display: none;
+}
+
+.listing-op-controls {
+  grid-area: controls;
+  display: grid;
+  grid-template-columns: 80px 120px 62px 74px 120px;
+  gap: 8px;
+  align-items: center;
+}
+
+.listing-hours {
+  color: #9A9A9A;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .price-input {
-  width: 82px;
+  width: 100%;
   height: 30px;
   background: #0F0F0F;
   border: 1px solid #2F2F2F;
@@ -1090,6 +1105,7 @@ You also likely lost
   font-size: 12px;
   font-weight: 800;
   outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .price-input:hover {
@@ -1115,7 +1131,6 @@ You also likely lost
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  justify-self: start;
   min-width: 58px;
   height: 24px;
   padding: 0 8px;
@@ -1123,6 +1138,7 @@ You also likely lost
   font-size: 8px;
   font-weight: 900;
   letter-spacing: .45px;
+  white-space: nowrap;
   text-transform: uppercase;
 }
 
@@ -1133,7 +1149,7 @@ You also likely lost
 }
 
 .action-select {
-  width: 92px;
+  width: 100%;
   height: 30px;
   background: #0F0F0F;
   border: 1px solid #2F2F2F;
@@ -1643,28 +1659,38 @@ main {
   background: #101010;
 }
 
-.machine-cell {
-  grid-area: image;
+.listing-op-row {
+  grid-template-columns: 110px minmax(0, 1fr);
+  grid-template-areas:
+    "photo title"
+    "photo controls";
+  border: 1px solid #2A2A2A;
+  border-radius: 14px;
+  background: #101010;
 }
 
-.machine-link {
-  display: contents;
-}
-
-.machine-link img {
-  grid-area: image;
-  width: 92px;
-  height: 76px;
-  object-fit: cover;
+.machine-photo-link img {
+  width: 110px;
+  height: 86px;
   border-radius: 10px;
 }
 
-.machine-link span {
-  grid-area: title;
-  color: #F2F2F2;
+.machine-title-line {
   font-size: 14px;
-  font-weight: 900;
-  line-height: 1.15;
+}
+
+.listing-op-controls {
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.listing-hours {
+  font-size: 11px;
+}
+
+.price-input,
+.action-select {
+  height: 34px;
 }
 
 .price-input {
