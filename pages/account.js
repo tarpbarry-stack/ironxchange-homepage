@@ -1314,8 +1314,17 @@ main {
   line-height: 1.35;
 }
 
-.activity-list,
+.activity-list {
+  display: grid;
+  gap: 8px;
+}
+
 .saved-card-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
   display: grid;
   gap: 8px;
 }
@@ -1328,6 +1337,7 @@ main {
   display: grid;
   grid-template-columns: 86px 1fr;
   gap: 9px;
+  min-height: 64px;
   text-decoration: none;
   color: inherit;
   background: #101010;
