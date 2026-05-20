@@ -1026,7 +1026,7 @@ main {
   grid-template-columns: 86px 110px 92px 70px 82px 110px;
   gap: 8px;
   align-items: center;
-  padding: 8px 10px;
+  padding: 8px 18px 8px 34px;
   border-bottom: 1px solid #252525;
   background: #101010;
   color: #888;
