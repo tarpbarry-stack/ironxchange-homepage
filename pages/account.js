@@ -381,14 +381,14 @@ const logoUrl =
                   </div>
 
                   <div className="listing-table">
-                    <div className="table-row table-head">
-                      <span>Machine</span>
-                      <span>Hours</span>
-                      <span>Price</span>
-                      <span>Age</span>
-                      <span>Status</span>
-                      <span>Actions</span>
-                    </div>
+                   <div className="listing-op-head">
+  <span>Machine</span>
+  <span>Hours</span>
+  <span>Price</span>
+  <span>Age</span>
+  <span>Status</span>
+  <span>Actions</span>
+</div>
 
                     {myListings.length > 0 ? (
                       myListings.map(listing => (
@@ -1036,6 +1036,25 @@ const logoUrl =
   .listing-table::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 196, 0, .7);
   }
+
+.listing-op-head {
+  display: grid;
+  grid-template-columns: 86px 80px 120px 62px 74px 120px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid #252525;
+  background: #101010;
+  color: #888;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.listing-op-head span:first-child {
+  grid-column: 1 / span 2;
+}
 
 .listing-op-row {
   display: grid;
@@ -1706,9 +1725,9 @@ main {
   font-size: 11px;
 }
 
-          .table-head {
-            display: none;
-          }
+          .listing-op-head {
+  display: none;
+}
 
           .right-stack {
             grid-template-rows: auto auto auto;
