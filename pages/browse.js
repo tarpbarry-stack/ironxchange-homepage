@@ -123,6 +123,39 @@ function cleanMachineTitle(title = "") {
     .trim();
 }
 
+function toNumber(value) {
+  const raw = String(value || "").replace(/[^0-9]/g, "");
+  return raw ? Number(raw) : null;
+}
+
+function matchesRange(value, min, max) {
+  const num = toNumber(value);
+  const low = toNumber(min);
+  const high = toNumber(max);
+
+  if (low !== null && (num === null || num < low)) return false;
+  if (high !== null && (num === null || num > high)) return false;
+
+  return true;
+}
+
+function sortListings(listings, sortMode) {
+  const sorted = [...listings];
+
+  sorted.sort((a, b) => {
+    if (sortMode === "price-low") return (toNumber(a.price) || 0) - (toNumber(b.price) || 0);
+    if (sortMode === "price-high") return (toNumber(b.price) || 0) - (toNumber(a.price) || 0);
+    if (sortMode === "hours-low") return (toNumber(a.hours) || 0) - (toNumber(b.hours) || 0);
+    if (sortMode === "hours-high") return (toNumber(b.hours) || 0) - (toNumber(a.hours) || 0);
+    if (sortMode === "year-new") return (toNumber(b.year) || 0) - (toNumber(a.year) || 0);
+    if (sortMode === "year-old") return (toNumber(a.year) || 0) - (toNumber(b.year) || 0);
+
+    return 0;
+  });
+
+  return sorted;
+}
+
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -131,6 +164,16 @@ export default function Browse() {
   const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
+  const [sortMode, setSortMode] = useState("newest");
+
+const [filters, setFilters] = useState({
+  yearMin: "",
+  yearMax: "",
+  priceMin: "",
+  priceMax: "",
+  hoursMin: "",
+  hoursMax: ""
+});
 
   useEffect(() => {
     fetch("/api/listings")
@@ -1311,39 +1354,64 @@ if (category === "BACKHOE LOADERS") {
 }, [liveListings, category, make]);
 
   const filteredListings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+  const q = searchQuery.trim().toLowerCase();
 
-    return liveListings.filter((item) => {
-      const matchesCategory =
-        category === "ALL CATEGORIES" ||
-        String(item.type || "").toUpperCase() === category;
+  const filtered = liveListings.filter(item => {
+    const searchableText = [
+      item.title,
+      item.type,
+      item.category,
+      item.make,
+      item.model,
+      item.location,
+      item.hours,
+      item.price,
+      item.year,
+      ...(getListingKeywords(item) || [])
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-      const matchesMake =
-        make === "ALL MAKES" ||
-        item.make === make;
+    const matchesSearch =
+      !q || searchableText.includes(q);
 
-      const matchesModel =
-        model === "ALL MODELS" ||
-        item.model === model;
+    const matchesCategory =
+      category === "ALL CATEGORIES" ||
+      String(item.type || item.category || "")
+        .toUpperCase() === category;
 
-      const matchesSearch =
-        !q ||
-        (item.title || "").toLowerCase().includes(q) ||
-        (item.type || "").toLowerCase().includes(q) ||
-        (item.make || "").toLowerCase().includes(q) ||
-        (item.model || "").toLowerCase().includes(q) ||
-        (item.location || "").toLowerCase().includes(q) ||
-        (item.hours || "").toLowerCase().includes(q) ||
-        (item.price || "").toLowerCase().includes(q);
-      
-      return (
-        matchesCategory &&
-        matchesMake &&
-        matchesModel &&
-        matchesSearch
-      );
-    });
-  }, [searchQuery, category, make, model, liveListings]);
+    const matchesMake =
+      make === "ALL MAKES" ||
+      String(item.make || "")
+        .toUpperCase() === String(make).toUpperCase();
+
+    const matchesModel =
+      model === "ALL MODELS" ||
+      String(item.model || "")
+        .toUpperCase() === String(model).toUpperCase();
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesMake &&
+      matchesModel &&
+      matchesRange(item.year, filters.yearMin, filters.yearMax) &&
+      matchesRange(item.price, filters.priceMin, filters.priceMax) &&
+      matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
+    );
+  });
+
+  return sortListings(filtered, sortMode);
+}, [
+  searchQuery,
+  category,
+  make,
+  model,
+  liveListings,
+  filters,
+  sortMode
+]);
   
 function getCardImages(item = {}) {
   return [
@@ -1420,7 +1488,7 @@ function changeCardPhoto(e, item, direction) {
           Search heavy equipment for sale from owners,
           dealers, and fleet operators.
         </p>
-
+        
         <div className="search-container">
           <input
             type="text"
@@ -1463,13 +1531,101 @@ function changeCardPhoto(e, item, direction) {
             ))}
           </select>
 
-          <button
-            type="button"
-            className="search-btn"
-          >
+            <select
+  className="sort-select"
+  value={sortMode}
+  onChange={(e) => setSortMode(e.target.value)}
+>
+  <option value="newest">Newest</option>
+  <option value="price-low">Price Low → High</option>
+  <option value="price-high">Price High → Low</option>
+  <option value="hours-low">Hours Low → High</option>
+  <option value="hours-high">Hours High → Low</option>
+  <option value="year-new">Year Newest</option>
+  <option value="year-old">Year Oldest</option>
+</select>
+
+<button
+  type="button"
+  className="search-btn"
+>
             SEARCH
           </button>
         </div>
+
+<div className="filter-strip">
+  <input
+    placeholder="Year min"
+    value={filters.yearMin}
+    onChange={e =>
+      setFilters({
+        ...filters,
+        yearMin: e.target.value
+      })
+    }
+  />
+
+  <input
+    placeholder="Year max"
+    value={filters.yearMax}
+    onChange={e =>
+      setFilters({
+        ...filters,
+        yearMax: e.target.value
+      })
+    }
+  />
+
+  <input
+    placeholder="Price min"
+    value={filters.priceMin}
+    onChange={e =>
+      setFilters({
+        ...filters,
+        priceMin: e.target.value
+      })
+    }
+  />
+
+  <input
+    placeholder="Price max"
+    value={filters.priceMax}
+    onChange={e =>
+      setFilters({
+        ...filters,
+        priceMax: e.target.value
+      })
+    }
+  />
+
+  <input
+    placeholder="Hours max"
+    value={filters.hoursMax}
+    onChange={e =>
+      setFilters({
+        ...filters,
+        hoursMax: e.target.value
+      })
+    }
+  />
+
+  <button
+    type="button"
+    onClick={() =>
+      setFilters({
+        yearMin: "",
+        yearMax: "",
+        priceMin: "",
+        priceMax: "",
+        hoursMin: "",
+        hoursMax: ""
+      })
+    }
+  >
+    Clear
+  </button>
+</div>
+    
       </section>
 
       <section className="featured">
