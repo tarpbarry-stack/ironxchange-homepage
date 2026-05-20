@@ -1213,6 +1213,7 @@ main {
   outline: none;
   cursor: pointer;
   text-transform: uppercase;
+  margin-left: 14px;
 }
 
 .action-select:hover {
