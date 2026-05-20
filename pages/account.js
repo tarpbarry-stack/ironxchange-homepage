@@ -1052,6 +1052,9 @@ main {
 .listing-op-head span:nth-child(6) {
   padding-left: 18px;
 }
+.listing-op-head span:nth-child(7) {
+  padding-left: 18px;
+}
 .listing-op-row {
   display: grid;
  grid-template-columns: 104px 1fr;
@@ -1122,8 +1125,8 @@ main {
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
+  padding-left: 32px;
 }
-
 .price-input {
   width: 74px;
   height: 30px;
