@@ -1160,7 +1160,7 @@ main {
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
-  padding-left: 102px;
+  padding-left: 10px;
 }
 
 .age-green {
