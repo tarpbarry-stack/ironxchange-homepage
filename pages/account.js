@@ -1109,7 +1109,7 @@ main {
   color: #9A9A9A;
   font-size: 11px;
   font-weight: 900;
-  white-space: nowrap;
+  padding-left: 18px;
 }
 
 .listing-metric {
