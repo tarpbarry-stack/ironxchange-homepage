@@ -1421,14 +1421,14 @@ main {
     grid-template-columns: minmax(0, 1fr) 76px;
   }
 
- .listing-op-controls {
-  grid-template-columns: 98px 88px 64px 76px 96px;
-  gap: 10px;
+.listing-op-controls {
+  grid-template-columns: 96px 74px 52px 68px 70px 48px 48px;
+  gap: 8px;
 }
 
 .listing-op-head {
-  grid-template-columns: 86px 98px 88px 64px 76px 96px;
-  gap: 10px;
+  grid-template-columns: 104px 96px 74px 52px 68px 70px 48px 48px;
+  gap: 8px;
 }
 }
 
