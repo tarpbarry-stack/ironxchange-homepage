@@ -584,14 +584,13 @@ Listed on IronXchange.
   setSaving(true);
 
   try {
-    const response = await fetch("/api/update-listing-price", {
+    const detailsResponse = await fetch("/api/update-listing-details", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        listingId: listing.id,
-        title: clean(listing.title),
+        listingId: String(listing.id),
         hours: edit.hours,
         location: edit.location,
         description: edit.description,
@@ -599,10 +598,29 @@ Listed on IronXchange.
       })
     });
 
-    const data = await response.json();
+    const detailsData = await detailsResponse.json();
 
-    if (!response.ok) {
-      throw new Error(data?.message || data?.error || "Update failed");
+    if (!detailsResponse.ok) {
+      throw new Error(detailsData?.error || "Details update failed");
+    }
+
+    if (cleanNumber(edit.price)) {
+      const priceResponse = await fetch("/api/update-listing-price", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          listingId: String(listing.id),
+          price: cleanNumber(edit.price)
+        })
+      });
+
+      const priceData = await priceResponse.json();
+
+      if (!priceResponse.ok) {
+        throw new Error(priceData?.error || "Price update failed");
+      }
     }
 
     addActivity(
@@ -610,7 +628,7 @@ Listed on IronXchange.
       `Edit saved — ${clean(listing?.title) || "Listing"}`
     );
 
-    alert("Saved. Description, price, hours, location, and keywords updated.");
+    alert("Saved. Listing updates applied.");
   } catch (err) {
     console.error("SAVE QUICK EDIT ERROR:", err);
 
