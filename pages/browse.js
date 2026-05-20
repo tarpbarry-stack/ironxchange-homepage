@@ -59,6 +59,13 @@ const categories = [
   "UTILITY CARTS"
 ];
 
+function formatKeywordLabel(keyword = "") {
+  return String(keyword)
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
 function getListingKeywords(item = {}) {
   const raw =
     item?.keywords ||
@@ -68,13 +75,15 @@ function getListingKeywords(item = {}) {
     [];
 
   if (Array.isArray(raw)) {
-    return raw.filter(Boolean).map(String);
+    return raw
+      .filter(Boolean)
+      .map(formatKeywordLabel);
   }
 
   if (typeof raw === "string") {
     return raw
       .split(",")
-      .map(keyword => keyword.trim())
+      .map(formatKeywordLabel)
       .filter(Boolean);
   }
 
