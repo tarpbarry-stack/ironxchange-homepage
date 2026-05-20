@@ -1,7 +1,3 @@
-import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
-
-const { UUID, Money } = sdkTypes;
-
 function cleanNumber(value = "") {
   return String(value).replace(/[^0-9]/g, "");
 }
@@ -12,13 +8,45 @@ async function safeJson(response) {
   try {
     return JSON.parse(text);
   } catch {
-    return text;
+    throw new Error(
+      `Expected JSON but got ${response.status}: ${text.slice(0, 120)}`
+    );
   }
+}
+
+async function getAccessToken() {
+  const response = await fetch(
+    "https://flex-api.sharetribe.com/v1/auth/token",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded; charset=utf-8",
+        Accept: "application/json"
+      },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: process.env.SHARETRIBE_CLIENT_ID,
+        client_secret: process.env.SHARETRIBE_CLIENT_SECRET,
+        scope: "integ"
+      })
+    }
+  );
+
+  const data = await safeJson(response);
+
+  if (!response.ok) {
+    throw new Error(`Auth failed: ${JSON.stringify(data)}`);
+  }
+
+  return data.access_token;
 }
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
@@ -33,17 +61,18 @@ export default async function handler(req, res) {
     } = req.body;
 
     if (!listingId) {
-      return res.status(400).json({ error: "Missing listingId" });
+      return res.status(400).json({
+        error: "Missing listingId"
+      });
     }
 
-    const sdk = createInstance({
-      clientId: process.env.SHARETRIBE_CLIENT_ID,
-      clientSecret: process.env.SHARETRIBE_CLIENT_SECRET
-    });
+    const token = await getAccessToken();
 
-    const updatePayload = {
-      id: new UUID(listingId),
+    const body = {
+      id: listingId,
+
       description: description || "",
+
       publicData: {
         hours: Number(cleanNumber(hours)),
         city: location || "",
@@ -52,28 +81,44 @@ export default async function handler(req, res) {
     };
 
     if (title) {
-      updatePayload.title = title;
+      body.title = title;
     }
 
     if (cleanNumber(price)) {
-      updatePayload.price = new Money(Number(cleanNumber(price)) * 100, "USD");
+      body.price = {
+        amount: Number(cleanNumber(price)) * 100,
+        currency: "USD"
+      };
     }
 
-    const response = await sdk.ownListings.update(updatePayload, {
-      expand: true
-    });
+    const response = await fetch(
+      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
 
-    return res.status(200).json({
+    const data = await safeJson(response);
+
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    res.status(200).json({
       ok: true,
-      listing: response.data.data
+      listing: data
     });
   } catch (err) {
-    console.error("UPDATE LISTING DETAILS ERROR:", err);
+    console.error("DETAIL UPDATE ERROR:", err);
 
-    return res.status(500).json({
-      error: "Update failed",
-      message: err.message,
-      details: err.data || null
+    res.status(500).json({
+      error: err.message
     });
   }
 }
