@@ -130,6 +130,7 @@ export default function Browse() {
   const [model, setModel] = useState("ALL MODELS");
   const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [cardPhotoIndex, setCardPhotoIndex] = useState({});
 
   useEffect(() => {
     fetch("/api/listings")
@@ -1334,7 +1335,7 @@ if (category === "BACKHOE LOADERS") {
         (item.location || "").toLowerCase().includes(q) ||
         (item.hours || "").toLowerCase().includes(q) ||
         (item.price || "").toLowerCase().includes(q);
-
+      
       return (
         matchesCategory &&
         matchesMake &&
@@ -1343,7 +1344,34 @@ if (category === "BACKHOE LOADERS") {
       );
     });
   }, [searchQuery, category, make, model, liveListings]);
+  
+function getCardImages(item = {}) {
+  return [
+    ...(Array.isArray(item.images) ? item.images : []),
+    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
+    item.imageUrl,
+    item.image
+  ].filter(Boolean);
+}
 
+function changeCardPhoto(e, item, direction) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const images = getCardImages(item);
+  if (images.length < 2) return;
+
+  setCardPhotoIndex(current => {
+    const currentIndex = current[item.id] || 0;
+    const nextIndex =
+      (currentIndex + direction + images.length) % images.length;
+
+    return {
+      ...current,
+      [item.id]: nextIndex
+    };
+  });
+}
   return (
     <>
   <Head>
@@ -1466,16 +1494,41 @@ if (category === "BACKHOE LOADERS") {
   key={item.id || item.link || item.title}
 >
               <div
-                className="card-photo"
-                style={{
-                  backgroundImage: `url(${
-                    item.imageUrl ||
-                    item.image ||
-                    "/images/hero-equipment-yard.jpg"
-                  })`
-                }}
+
+className="card-photo"
+style={{
+  backgroundImage: `url(${
+    getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
+    "/images/hero-equipment-yard.jpg"
+  })`
+}}
               />
 
+                {getCardImages(item).length > 1 && (
+  <>
+    <button
+      type="button"
+      className="card-photo-nav left"
+      onClick={e => changeCardPhoto(e, item, -1)}
+    >
+      ‹
+    </button>
+
+    <button
+      type="button"
+      className="card-photo-nav right"
+      onClick={e => changeCardPhoto(e, item, 1)}
+    >
+      ›
+    </button>
+
+    <span className="photo-count">
+      {(cardPhotoIndex[item.id] || 0) + 1}/
+      {getCardImages(item).length}
+    </span>
+  </>
+)}
+                
              <div className="card-body">
 <div className="title-row">
   <h3>
@@ -1570,6 +1623,51 @@ if (category === "BACKHOE LOADERS") {
 .login-icon.logged-in {
   border-color: #38A169;
   color: #38A169 !important;
+}
+
+.card {
+  position: relative;
+}
+
+.card-photo {
+  position: relative;
+}
+
+.card-photo-nav {
+  position: absolute;
+  top: 38%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(0,0,0,.58);
+  color: white;
+  border-radius: 10px;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.card-photo-nav.left {
+  left: 10px;
+}
+
+.card-photo-nav.right {
+  right: 10px;
+}
+
+.photo-count {
+  position: absolute;
+  right: 10px;
+  top: 245px;
+  background: rgba(0,0,0,.72);
+  color: #f2f2f2;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  z-index: 5;
 }
 
 @media (max-width: 850px) {
