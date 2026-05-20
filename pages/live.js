@@ -1153,11 +1153,35 @@ Listed on IronXchange.
         .photo-add-box input { display: none; }
 
         .photo-strip {
-          display: flex;
-          gap: 10px;
-          overflow-x: auto;
-          padding-bottom: 8px;
-        }
+  display: flex;
+  gap: 10px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding-bottom: 8px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #3A3A3A #121212;
+}
+
+.photo-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.photo-strip::-webkit-scrollbar-track {
+  background: #121212;
+  border-radius: 999px;
+}
+
+.photo-strip::-webkit-scrollbar-thumb {
+  background: #3A3A3A;
+  border-radius: 999px;
+}
+
+.photo-strip::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 
         .photo-tile {
           position: relative;
