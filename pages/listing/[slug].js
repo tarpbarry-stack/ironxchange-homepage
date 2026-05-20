@@ -5,6 +5,27 @@ import { useRouter } from "next/router";
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
+const featureKeywords = [
+  { match: ["push block", "pushblock"], label: "Push Block" },
+  { match: ["rear ripper", "ripper"], label: "Rear Ripper" },
+  { match: ["smartgrade", "smart grade"], label: "SmartGrade" },
+  { match: ["topcon"], label: "Topcon" },
+  { match: ["trimble"], label: "Trimble" },
+  { match: ["gps"], label: "GPS" },
+  { match: ["joystick"], label: "Joystick Controls" },
+  { match: ["20.5", "20.5 tires", "20.5r25"], label: "20.5 Tires" },
+  { match: ["23.5", "23.5 tires", "23.5r25"], label: "23.5 Tires" },
+  { match: ["aux hydraulics", "auxiliary hydraulics"], label: "Aux Hydraulics" },
+  { match: ["quick coupler", "hydraulic coupler"], label: "Quick Coupler" },
+  { match: ["thumb", "hydraulic thumb"], label: "Hydraulic Thumb" },
+  { match: ["high flow", "hi-flow"], label: "High Flow" },
+  { match: ["ride control"], label: "Ride Control" },
+  { match: ["scale", "payload scale"], label: "Scale" },
+  { match: ["auto lube", "autolube"], label: "Auto Lube" },
+  { match: ["cold ac", "cold a/c", "cold air"], label: "Cold A/C" },
+  { match: ["no def", "def deleted", "de-tier", "detier"], label: "No DEF" }
+];
+
 function slugify(text = "") {
   return String(text)
     .toLowerCase()
@@ -41,6 +62,25 @@ function getListingImages(listing) {
 
 function cleanText(value) {
   return value ? String(value).trim() : "";
+}
+
+function inferHighlightsFromDescription(listing = {}) {
+  const text = [
+    listing.description,
+    listing.publicData?.description,
+    listing.publicData?.details
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const matches = featureKeywords
+    .filter(feature =>
+      feature.match.some(term => text.includes(term))
+    )
+    .map(feature => feature.label);
+
+  return [...new Set(matches)];
 }
 
 export default function ListingPage() {
@@ -192,19 +232,22 @@ const sellerLogo =
     cleanText(listing.publicData?.details) ||
     "Seller description has not been added yet.";
 
-  const highlights = [
-    listing.publicData?.highlight1,
-    listing.publicData?.highlight2,
-    listing.publicData?.highlight3,
-    listing.publicData?.highlight4
-  ]
-    .filter(Boolean)
-    .map(cleanText);
+ const selectedHighlights = [
+  ...(Array.isArray(listing.keywords) ? listing.keywords : []),
+  ...(Array.isArray(listing.publicData?.keywords) ? listing.publicData.keywords : []),
+  ...(Array.isArray(listing.attributes?.publicData?.keywords)
+    ? listing.attributes.publicData.keywords
+    : [])
+]
+  .filter(Boolean)
+  .map(cleanText);
 
-  const displayHighlights =
-    highlights.length > 0
-      ? highlights
-      : ["Clean presentation", "Work-ready machine", "Seller supplied listing", "Contact seller for details"];
+const inferredHighlights = inferHighlightsFromDescription(listing);
+
+const displayHighlights =
+  selectedHighlights.length > 0
+    ? selectedHighlights.slice(0, 12)
+    : inferredHighlights.slice(0, 12);
 
 function openLightbox(index) {
   setLightboxIndex(index);
