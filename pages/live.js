@@ -592,7 +592,6 @@ Listed on IronXchange.
       body: JSON.stringify({
         listingId: listing.id,
         title: clean(listing.title),
-        price: edit.price,
         hours: edit.hours,
         location: edit.location,
         description: edit.description,
