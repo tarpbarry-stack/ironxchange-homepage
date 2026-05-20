@@ -1635,25 +1635,47 @@ style={{
 
 .card-photo-nav {
   position: absolute;
-  top: 38%;
+  top: 50%;
   transform: translateY(-50%);
-  width: 34px;
-  height: 44px;
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(0,0,0,.58);
-  color: white;
-  border-radius: 10px;
-  font-size: 26px;
+
+  width: 26px;
+  height: 80px;
+
+  border: none;
+  background: rgba(0,0,0,.12);
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 28px;
+  font-weight: 300;
+
   cursor: pointer;
   z-index: 5;
+
+  opacity: 0;
+  transition:
+    opacity .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.card:hover .card-photo-nav {
+  opacity: 1;
+}
+
+.card-photo-nav:hover {
+  background: rgba(0,0,0,.28);
+  color: rgba(255,255,255,.95);
 }
 
 .card-photo-nav.left {
-  left: 10px;
+  left: 0;
+  border-radius: 0 10px 10px 0;
 }
 
 .card-photo-nav.right {
-  right: 10px;
+  right: 0;
+  border-radius: 10px 0 0 10px;
 }
 
 .photo-count {
