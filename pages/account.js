@@ -1335,9 +1335,9 @@ main {
 
 .saved-card {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 148px 1fr;
   gap: 10px;
-  min-height: 108px;
+  min-height: 92px;
   text-decoration: none;
   color: inherit;
   background: #101010;
@@ -1351,10 +1351,9 @@ main {
   border-color: #3a3a3a;
 }
 .saved-card img {
-  width: 120px;
-  height: 108px;
-  }
-
+  width: 148px;
+  height: 92px;
+{
 .saved-card-body {
   padding: 8px 8px 8px 0;
   min-width: 0;
