@@ -1180,15 +1180,15 @@ main {
 }
 
 .action-select {
-  width: 100%;
+  width: 74px;
   height: 30px;
   background: #0F0F0F;
   border: 1px solid #2F2F2F;
   border-radius: 8px;
   color: #F2F2F2;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 900;
-  padding: 0 8px;
+  padding: 0 18px 0 8px;
   outline: none;
   cursor: pointer;
   text-transform: uppercase;
