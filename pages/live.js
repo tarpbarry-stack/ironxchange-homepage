@@ -293,6 +293,12 @@ View full specs + photos:
 ${listingUrl}`;
 }
 
+function cleanMachineTitle(title = "") {
+  return String(title)
+    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
+    .trim();
+}
+
 export default function ListingLivePage() {
   const router = useRouter();
   const { id } = router.query;
@@ -782,10 +788,7 @@ Listed on IronXchange.
       <div className="card-body live-card-body">
         <div className="title-row">
           <h3>
-            {String(listing.title || "")
-              .replace(edit.hours || listing.hours || "", "")
-              .replace(/\s+[-–]\s*$/, "")
-              .trim()}
+            {cleanMachineTitle(listing.title || "")}
           </h3>
 
           <h3 className="hours-inline">
