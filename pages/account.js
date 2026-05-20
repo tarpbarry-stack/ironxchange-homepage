@@ -269,8 +269,10 @@ const logoUrl =
           </div>
         </nav>
 
-        <section className="dashboard">
-          <aside className="rail">
+        <section className="dashboard">   
+         <aside className="rail">
+  <details className="mobile-rail-menu">
+    <summary>Account Menu</summary>
             <div className="rail-top">
               <div className="user-dot">
                 {logoUrl ? (
@@ -313,6 +315,7 @@ const logoUrl =
               <i className="fa-solid fa-gear"></i>
               Settings
             </a>
+                  </details>
           </aside>
 
           <section className="content">
@@ -1525,6 +1528,49 @@ You also likely lost
 :global(body) {
   height: auto;
   overflow-y: auto;
+}
+
+.mobile-rail-menu summary {
+  list-style: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #101010;
+  border: 1px solid #2A2A2A;
+  border-radius: 12px;
+
+  padding: 12px 14px;
+
+  color: #F2F2F2;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.mobile-rail-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-rail-menu[open] summary {
+  margin-bottom: 10px;
+}
+
+.mobile-rail-menu {
+  width: 100%;
+}
+
+.rail {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.mobile-rail-menu a {
+  min-height: 42px;
 }
 
 .rail,
