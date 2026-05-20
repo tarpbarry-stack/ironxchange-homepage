@@ -63,6 +63,12 @@ function inferHighlightsFromDescription(listing = {}) {
   return [...new Set(matches)];
 }
 
+function cleanMachineTitle(title = "") {
+  return String(title)
+    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
+    .trim();
+}
+
 export default function ListingPage() {
   const router = useRouter();
   const { slug, from } = router.query;
@@ -174,7 +180,9 @@ const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   mobilePairs.push(images.slice(i, i + 2));
   }
 
-  const title = cleanText(listing.title) || "Equipment Listing";
+  const title =
+  cleanMachineTitle(cleanText(listing.title)) ||
+  "Equipment Listing";
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "Location not listed";
