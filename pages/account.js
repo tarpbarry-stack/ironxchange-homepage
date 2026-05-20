@@ -1047,7 +1047,7 @@ main {
   letter-spacing: .4px;
 }
 .listing-op-head span:nth-child(3) {
-  padding-left: 18px;
+  padding-left: 20px;
 }
 .listing-op-row {
   display: grid;
@@ -1160,6 +1160,7 @@ main {
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
+  padding-left: 10px;
 }
 
 .age-green {
