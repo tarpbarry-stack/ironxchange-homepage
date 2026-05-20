@@ -1034,10 +1034,10 @@ main {
 
 .listing-op-head {
   display: grid;
-  grid-template-columns: 104px 110px 92px 70px 82px 110px;
-  gap: 8px;
+  grid-template-columns: 104px 128px 74px 58px 74px 74px 56px 56px;
+  gap: 14px;
   align-items: center;
-  padding: 8px 18px 8px 34px;
+  padding: 8px 10px;
   border-bottom: 1px solid #252525;
   background: #101010;
   color: #888;
