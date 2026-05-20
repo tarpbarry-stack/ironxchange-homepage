@@ -1053,10 +1053,10 @@ main {
   padding-left: 18px;
 }
 .listing-op-head span:nth-child(7) {
-  padding-left: 44px;
+  padding-left: 52px;
 }
 .listing-op-head span:nth-child(8) {
-  padding-left: 32px;
+  padding-left: 65px;
 }
 .listing-op-row {
   display: grid;
