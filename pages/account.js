@@ -1092,7 +1092,7 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 110px 92px 70px 82px 110px;
+  grid-template-columns: 96px 74px 58px 74px 96px;
   gap: 14px;
   align-items: center;
   justify-content: start;
@@ -1106,7 +1106,7 @@ main {
 }
 
 .price-input {
-  width: 100%;
+  width: 74px;
   height: 30px;
   background: #0F0F0F;
   border: 1px solid #2F2F2F;
