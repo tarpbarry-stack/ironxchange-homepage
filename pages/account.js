@@ -1023,7 +1023,7 @@ main {
 
 .listing-op-head {
   display: grid;
-  grid-template-columns: 86px 80px 120px 52px 74px 110px;
+  grid-template-columns: 86px 110px 92px 70px 82px 110px;
   gap: 8px;
   align-items: center;
   padding: 8px 10px;
@@ -1092,8 +1092,8 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 80px 120px 52px 74px 110px;
-  gap: 8px;
+  grid-template-columns: 110px 92px 70px 82px 110px;
+  gap: 14px;
   align-items: center;
   justify-content: start;
 }
@@ -1407,15 +1407,15 @@ main {
     grid-template-columns: minmax(0, 1fr) 76px;
   }
 
-  .listing-op-controls {
-    grid-template-columns: 74px 108px 46px 68px 96px;
-    gap: 6px;
-  }
+ .listing-op-controls {
+  grid-template-columns: 98px 88px 64px 76px 96px;
+  gap: 10px;
+}
 
-  .listing-op-head {
-    grid-template-columns: 86px 74px 108px 46px 68px 96px;
-    gap: 6px;
-  }
+.listing-op-head {
+  grid-template-columns: 86px 98px 88px 64px 76px 96px;
+  gap: 10px;
+}
 }
 
 /* MOBILE */
