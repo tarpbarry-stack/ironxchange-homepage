@@ -139,23 +139,29 @@ function matchesRange(value, min, max) {
   return true;
 }
 
+function getListingYear(item = {}) {
+  return toNumber(
+    item.year ||
+    item.publicData?.year ||
+    item.attributes?.publicData?.year
+  );
+}
+
 function sortListings(listings, sortMode) {
   const sorted = [...listings];
 
   sorted.sort((a, b) => {
-    if (sortMode === "newest") {
-  return (toNumber(b.year) || 0) - (toNumber(a.year) || 0);
-} 
-    
-    if (sortMode === "price-low") return (toNumber(a.price) || 0) - (toNumber(b.price) || 0);
-    if (sortMode === "price-high") return (toNumber(b.price) || 0) - (toNumber(a.price) || 0);
-    if (sortMode === "hours-low") return (toNumber(a.hours) || 0) - (toNumber(b.hours) || 0);
-    if (sortMode === "hours-high") return (toNumber(b.hours) || 0) - (toNumber(a.hours) || 0);
-    if (sortMode === "year-new") return (toNumber(b.year) || 0) - (toNumber(a.year) || 0);
-    if (sortMode === "year-old") return (toNumber(a.year) || 0) - (toNumber(b.year) || 0);
+  if (sortMode === "price-low") return (toNumber(a.price) || 0) - (toNumber(b.price) || 0);
+  if (sortMode === "price-high") return (toNumber(b.price) || 0) - (toNumber(a.price) || 0);
+  if (sortMode === "hours-low") return (toNumber(a.hours) || 0) - (toNumber(b.hours) || 0);
+  if (sortMode === "hours-high") return (toNumber(b.hours) || 0) - (toNumber(a.hours) || 0);
 
-    return 0;
-  });
+  if (sortMode === "newest") return (getListingYear(b) || 0) - (getListingYear(a) || 0);
+  if (sortMode === "year-new") return (getListingYear(b) || 0) - (getListingYear(a) || 0);
+  if (sortMode === "year-old") return (getListingYear(a) || 0) - (getListingYear(b) || 0);
+
+  return 0;
+});
 
   return sorted;
 }
