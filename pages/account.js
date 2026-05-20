@@ -1046,7 +1046,9 @@ main {
   text-transform: uppercase;
   letter-spacing: .4px;
 }
-
+.listing-op-head span:nth-child(3) {
+  padding-left: 18px;
+}
 .listing-op-row {
   display: grid;
  grid-template-columns: 104px 1fr;
