@@ -1047,10 +1047,6 @@ main {
   letter-spacing: .4px;
 }
 
-.listing-op-head span:first-child {
-  grid-column: 1 / 2;
-}
-
 .listing-op-row {
   display: grid;
  grid-template-columns: 104px 1fr;
