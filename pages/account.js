@@ -1388,6 +1388,14 @@ main {
   font-size: 18px;
 }
 
+.mobile-rail-menu summary {
+  display: none;
+}
+
+.mobile-rail-menu {
+  display: block;
+}
+
 /* TABLET */
 
 @media (max-width: 1180px) {
