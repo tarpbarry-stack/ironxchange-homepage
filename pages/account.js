@@ -1092,7 +1092,7 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 96px 74px 58px 74px 96px;
+  grid-template-columns: 128px 74px 58px 74px 74px;
   gap: 14px;
   align-items: center;
   justify-content: start;
