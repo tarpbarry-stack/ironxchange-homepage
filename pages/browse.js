@@ -59,27 +59,53 @@ const categories = [
   "UTILITY CARTS"
 ];
 
-function getFeatureLine(item) {
+function getListingKeywords(item = {}) {
+  const raw =
+    item?.keywords ||
+    item?.tags ||
+    item?.publicData?.keywords ||
+    item?.attributes?.publicData?.keywords ||
+    [];
+
+  if (Array.isArray(raw)) {
+    return raw.filter(Boolean).map(String);
+  }
+
+  if (typeof raw === "string") {
+    return raw
+      .split(",")
+      .map(keyword => keyword.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function inferFeatureLine(item = {}) {
   const text = [
     item.title,
     item.description,
     item.publicData?.description,
-    item.publicData?.details,
-    item.type,
-    item.make,
-    item.model
+    item.publicData?.details
   ]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
 
-  const matches = featureKeywords
-    .filter((feature) =>
-      feature.match.some((term) => text.includes(term))
-    )
-    .map((feature) => feature.label);
+  return featureKeywords
+    .filter(feature => feature.match.some(term => text.includes(term)))
+    .map(feature => feature.label);
+}
 
-  return [...new Set(matches)].slice(0, 4).join(" • ");
+function getFeatureLine(item = {}) {
+  const selectedKeywords = getListingKeywords(item);
+
+  const features =
+    selectedKeywords.length > 0
+      ? selectedKeywords
+      : inferFeatureLine(item);
+
+  return [...new Set(features)].slice(0, 4).join(" • ");
 }
 
 export default function Browse() {
