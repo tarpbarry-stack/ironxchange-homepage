@@ -1559,21 +1559,80 @@ main {
 .right-stack {
   overflow: visible;
 }
-          .main-grid,
-          .stats,
-          .perf-grid {
-            grid-template-columns: 1fr;
-          }
+          .stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
 
+.perf-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
           .nav-links a:not(.yellow-link):not(.login-icon),
           .logout-btn {
             display: none;
           }
 
-          .table-row {
-            grid-template-columns: 1fr;
-            gap: 6px;
-          }
+         .table-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  grid-template-areas:
+    "image title"
+    "image meta"
+    "image action";
+
+  gap: 6px 10px;
+
+  padding: 10px;
+
+  border: 1px solid #2A2A2A;
+  border-radius: 14px;
+
+  background: #101010;
+}
+
+.machine-cell {
+  grid-area: image;
+}
+
+.machine-link {
+  display: contents;
+}
+
+.machine-link img {
+  grid-area: image;
+  width: 92px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.machine-link span {
+  grid-area: title;
+  color: #F2F2F2;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.price-input {
+  width: 100%;
+  max-width: 120px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.action-select {
+  width: 100%;
+  height: 34px;
+  font-size: 11px;
+}
 
           .table-head {
             display: none;
