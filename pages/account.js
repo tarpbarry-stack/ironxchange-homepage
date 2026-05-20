@@ -1053,12 +1053,12 @@ const logoUrl =
 }
 
 .listing-op-head span:first-child {
-  grid-column: 1 / span 2;
+  grid-column: 1 / 2;
 }
 
 .listing-op-row {
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: 86px 1fr;
   grid-template-rows: auto auto;
   grid-template-areas:
     "photo title"
@@ -1084,6 +1084,9 @@ const logoUrl =
 
 .machine-title-line {
   grid-area: title;
+  justify-self: start;
+  align-self: end;
+  width: 100%;
   color: #F2F2F2;
   font-size: 13px;
   font-weight: 900;
