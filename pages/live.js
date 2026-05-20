@@ -1530,43 +1530,74 @@ Listed on IronXchange.
         .keyword-search { margin-bottom: 8px; }
 
         .keyword-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          max-height: 220px;
-          overflow-y: auto;
-          border: 1px solid #252525;
-          background: #101010;
-          border-radius: 12px;
-          padding: 8px;
-        }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #252525;
+  background: #0F0F0F;
+  border-radius: 12px;
+  padding: 10px;
 
-        .keyword-chip {
-          cursor: pointer;
-          background: #181818;
-          color: #cfcfcf;
-          border-color: #333;
-        }
+  scrollbar-width: thin;
+  scrollbar-color: #3A3A3A #121212;
+}
 
-        .keyword-chip.active {
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          border-color: ${BRAND_YELLOW};
-        }
+.keyword-grid::-webkit-scrollbar {
+  width: 8px;
+}
 
-        .save-btn {
-          width: 100%;
-          margin-top: 14px;
-          border: none;
-          border-radius: 10px;
-          padding: 14px 16px;
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          font-size: 12px;
-          font-weight: 900;
-          cursor: pointer;
-        }
+.keyword-grid::-webkit-scrollbar-track {
+  background: #121212;
+  border-radius: 999px;
+}
 
+.keyword-grid::-webkit-scrollbar-thumb {
+  background: #3A3A3A;
+  border-radius: 999px;
+}
+
+.keyword-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+       .save-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.save-btn,
+.preview-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.save-btn {
+  background: ${BRAND_YELLOW};
+  color: #050505;
+}
+
+.preview-btn {
+  background: #101010;
+  border: 1px solid #333;
+  color: #F2F2F2;
+}
+
+.preview-btn:hover {
+  border-color: #555;
+  background: #151515;
+}
         .promote-panel {
           margin-bottom: 10px;
         }
