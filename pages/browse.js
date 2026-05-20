@@ -143,6 +143,10 @@ function sortListings(listings, sortMode) {
   const sorted = [...listings];
 
   sorted.sort((a, b) => {
+    if (sortMode === "newest") {
+  return (toNumber(b.year) || 0) - (toNumber(a.year) || 0);
+} 
+    
     if (sortMode === "price-low") return (toNumber(a.price) || 0) - (toNumber(b.price) || 0);
     if (sortMode === "price-high") return (toNumber(b.price) || 0) - (toNumber(a.price) || 0);
     if (sortMode === "hours-low") return (toNumber(a.hours) || 0) - (toNumber(b.hours) || 0);
