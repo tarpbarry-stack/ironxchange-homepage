@@ -117,6 +117,12 @@ function getFeatureLine(item = {}) {
   return [...new Set(features)].slice(0, 4).join(" • ");
 }
 
+function cleanMachineTitle(title = "") {
+  return String(title)
+    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
+    .trim();
+}
+
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -1473,7 +1479,7 @@ if (category === "BACKHOE LOADERS") {
              <div className="card-body">
 <div className="title-row">
   <h3>
-    {item.title.replace(item.hours, "").trim()}
+    {cleanMachineTitle(item.title)}
   </h3>
 
   <h3 className="hours-inline">
