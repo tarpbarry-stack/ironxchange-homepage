@@ -12721,16 +12721,7 @@ return (
       </Head>
 
       <main>
-        <nav className="nav">
-          <a href="/" className="logo-wrap">
-            <img
-              src="/images/ironxchange-logo.png"
-              className="logo-img"
-              alt="IronXchange"
-            />
-          </a>
-
-         <nav className="nav">
+       <nav className="nav">
   <a href="/" className="logo-wrap">
     <img
       src="/images/ironxchange-logo.png"
@@ -12741,6 +12732,11 @@ return (
 
   <div className="nav-links">
     <a href="/browse">SEARCH</a>
+
+    <a href="/post-free" className="yellow-link">
+      POST FREE
+    </a>
+
     <a
       href="/account"
       className="login-icon logged-in"
