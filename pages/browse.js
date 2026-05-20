@@ -142,6 +142,8 @@ function matchesRange(value, min, max) {
 function getListingYear(item = {}) {
   return toNumber(
     item.year ||
+    item.quickFacts?.year ||
+    item.facts?.year ||
     item.publicData?.year ||
     item.attributes?.publicData?.year
   );
@@ -1406,7 +1408,7 @@ if (category === "BACKHOE LOADERS") {
       matchesCategory &&
       matchesMake &&
       matchesModel &&
-      matchesRange(item.year, filters.yearMin, filters.yearMax) &&
+      matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
       matchesRange(item.price, filters.priceMin, filters.priceMax) &&
       matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
     );
