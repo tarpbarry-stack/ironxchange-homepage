@@ -271,7 +271,7 @@ const logoUrl =
 
         <section className="dashboard">   
          <aside className="rail">
-  <details className="mobile-rail-menu">
+  <details className="mobile-rail-menu" open>
     <summary>Account Menu</summary>
             <div className="rail-top">
               <div className="user-dot">
