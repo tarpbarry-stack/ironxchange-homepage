@@ -1188,7 +1188,7 @@ main {
   letter-spacing: .45px;
   white-space: nowrap;
   text-transform: uppercase;
-  margin-left: -10px;
+  margin-left: -15px;
 }
 
 .listing-status.active {
