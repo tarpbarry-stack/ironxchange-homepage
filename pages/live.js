@@ -584,7 +584,7 @@ Listed on IronXchange.
   setSaving(true);
 
   try {
-    const response = await fetch("/api/update-listing-details", {
+    const response = await fetch("/api/update-listing-price", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
