@@ -31,11 +31,12 @@ export default async function handler(req, res) {
       : [];
 
     const withAge = myListings.map((item) => {
-      const createdAt =
-        item.createdAt ||
-        item.created_at ||
-        item.attributes?.createdAt ||
-        item.attributes?.created_at;
+     const createdAt =
+  item.attributes?.publishedAt ||
+  item.attributes?.createdAt ||
+  item.createdAt ||
+  item.created_at ||
+  item.attributes?.created_at;
 
       let age = null;
 
