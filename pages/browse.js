@@ -1354,7 +1354,7 @@ if (category === "BACKHOE LOADERS") {
   />
 </Head>
       
-     <nav className="nav">
+    <nav className="nav">
   <a href="/" className="logo-wrap">
     <img
       src="/images/ironxchange-logo.png"
@@ -1363,24 +1363,22 @@ if (category === "BACKHOE LOADERS") {
     />
   </a>
 
- <div className="nav-links">
-  <a href="/post-free" className="yellow-link">
-  POST FREE
-</a>
-  <a href="/saved" className="login-icon" aria-label="Saved Listings">
-    <i className="fa-regular fa-star"></i>
-  </a>
+  <div className="nav-links">
+    <a href="/browse">SEARCH</a>
 
-  <a
-  href={loggedIn ? "/account" : "/login"}
-  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
-  aria-label="Login"
->
-    <i className="fa-regular fa-user"></i>
-  </a>
-</div>
+    <a href="/post-free" className="yellow-link">
+      POST FREE
+    </a>
+
+    <a
+      href="/account"
+      className="login-icon logged-in"
+      aria-label="Account"
+    >
+      <i className="fa-regular fa-user"></i>
+    </a>
+  </div>
 </nav>
-
       <section className="search-section">
         <h1>Browse Equipment</h1>
 
@@ -1520,18 +1518,18 @@ if (category === "BACKHOE LOADERS") {
   color: #D6D6D6;
 }
 
-   .nav {
+  .nav {
+  height: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 5%;
+  padding: 8px 2%;
   background: #050505;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
 .logo-img {
-  height: 42px;
-  width: auto;
+  height: 38px;
   display: block;
 }
 
@@ -1546,22 +1544,21 @@ if (category === "BACKHOE LOADERS") {
   text-decoration: none;
   font-weight: 900;
   text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: .6px;
+  font-size: 12px;
 }
 
 .yellow-link {
-  color: ${BRAND_YELLOW} !important;
+  color: #FFC400 !important;
 }
 
 .login-icon {
-  border: 2px solid white;
+  border: 2px solid #38A169;
+  color: #38A169 !important;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
-  font-size: 15px !important;
 }
 
 .login-icon.logged-in {
