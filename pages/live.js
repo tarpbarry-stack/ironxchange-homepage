@@ -911,9 +911,24 @@ Listed on IronXchange.
         </div>
       </div>
 
-      <button type="button" onClick={saveQuickEdit} className="save-btn">
-        {saving ? "SAVING..." : "SAVE CHANGES"}
-      </button>
+      <div className="save-row">
+  <button
+    type="button"
+    onClick={saveQuickEdit}
+    className="save-btn"
+  >
+    {saving ? "SAVING..." : "SAVE CHANGES"}
+  </button>
+
+  <a
+    href={listingUrl}
+    target="_blank"
+    rel="noreferrer"
+    className="preview-btn"
+  >
+    VIEW POST
+  </a>
+</div>
     </section>
 
     <section className="panel promote-panel">
