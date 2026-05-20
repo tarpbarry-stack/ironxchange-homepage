@@ -1053,7 +1053,10 @@ main {
   padding-left: 18px;
 }
 .listing-op-head span:nth-child(7) {
-  padding-left: 18px;
+  padding-left: 32px;
+}
+.listing-op-head span:nth-child(8) {
+  padding-left: 20px;
 }
 .listing-op-row {
   display: grid;
@@ -1125,7 +1128,7 @@ main {
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
-  padding-left: 32px;
+  padding-left: 64px;
 }
 .price-input {
   width: 74px;
