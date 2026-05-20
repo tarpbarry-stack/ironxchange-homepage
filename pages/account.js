@@ -1023,7 +1023,7 @@ main {
 
 .listing-op-head {
   display: grid;
-  grid-template-columns: 96px 110px 92px 70px 82px 110px;
+  grid-template-columns: 104px 110px 92px 70px 82px 110px;
   gap: 8px;
   align-items: center;
   padding: 8px 18px 8px 34px;
@@ -1042,7 +1042,7 @@ main {
 
 .listing-op-row {
   display: grid;
- grid-template-columns: 96px 1fr;
+ grid-template-columns: 104px 1fr;
   grid-template-rows: auto auto;
   grid-template-areas:
     "photo title"
@@ -1060,8 +1060,8 @@ main {
 }
 
 .machine-photo-link img {
-  width: 96px;
-  height: 72px;
+  width: 104px;
+  height: 78px;
   object-fit: cover;
   border-radius: 9px;
   border: 1px solid #2A2A2A;
