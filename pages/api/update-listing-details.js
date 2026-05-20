@@ -84,13 +84,6 @@ export default async function handler(req, res) {
       body.title = title;
     }
 
-    if (cleanNumber(price)) {
-      body.price = {
-        amount: Number(cleanNumber(price)) * 100,
-        currency: "USD"
-      };
-    }
-
     const response = await fetch(
       "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
       {
