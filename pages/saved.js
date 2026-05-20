@@ -96,17 +96,17 @@ export default function SavedListings() {
   </a>
 
   <div className="nav-links">
-    <a href="/browse">BROWSE</a>
+    <a href="/browse">SEARCH</a>
 
     <a href="/post-free" className="yellow-link">
-  POST FREE
-</a>
-
-    <a href="/saved" className="login-icon" aria-label="Saved Listings">
-      <i className="fa-regular fa-star"></i>
+      POST FREE
     </a>
 
-    <a href={`${STAGING}/login`} className="login-icon" aria-label="Login">
+    <a
+      href="/account"
+      className="login-icon logged-in"
+      aria-label="Account"
+    >
       <i className="fa-regular fa-user"></i>
     </a>
   </div>
@@ -179,17 +179,17 @@ export default function SavedListings() {
         }
 
 .nav {
+  height: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 5%;
+  padding: 8px 2%;
   background: #050505;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
 .logo-img {
-  height: 78px;
-  width: auto;
+  height: 38px;
   display: block;
 }
 
@@ -204,22 +204,21 @@ export default function SavedListings() {
   text-decoration: none;
   font-weight: 900;
   text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: .6px;
+  font-size: 12px;
 }
 
 .yellow-link {
-  color: ${BRAND_YELLOW} !important;
+  color: #FFC400 !important;
 }
 
 .login-icon {
-  border: 2px solid white;
+  border: 2px solid #38A169;
+  color: #38A169 !important;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
-  font-size: 15px !important;
 }
 
         main {
