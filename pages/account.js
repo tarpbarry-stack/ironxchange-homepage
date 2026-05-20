@@ -1160,7 +1160,7 @@ main {
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
-  padding-left: 10px;
+  padding-left: 102px;
 }
 
 .age-green {
@@ -1188,6 +1188,7 @@ main {
   letter-spacing: .45px;
   white-space: nowrap;
   text-transform: uppercase;
+  margin-left: -5px;
 }
 
 .listing-status.active {
@@ -1197,7 +1198,7 @@ main {
 }
 
 .action-select {
-  width: 74px;
+  width: 82px;
   height: 30px;
   background: #0F0F0F;
   border: 1px solid #2F2F2F;
@@ -1205,7 +1206,7 @@ main {
   color: #F2F2F2;
   font-size: 8px;
   font-weight: 900;
-  padding: 0 18px 0 8px;
+  padding: 0 20px 0 10px;
   outline: none;
   cursor: pointer;
   text-transform: uppercase;
