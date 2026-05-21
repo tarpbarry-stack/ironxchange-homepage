@@ -1886,7 +1886,7 @@ style={{
 
 .range-group {
   display: grid;
-  grid-template-columns: 78px 1px 78px;
+  grid-template-columns: 96px 1px 96px;
   align-items: center;
   height: 32px;
   border: 1px solid #343434;
@@ -1906,7 +1906,7 @@ style={{
   height: 100%;
   width: 56px;
   border: none;
-  padding: 0 6px;
+  padding: 0 10px;
   background: transparent;
   color: #D6D6D6;
   font-size: 10px;
