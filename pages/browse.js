@@ -1840,17 +1840,17 @@ style={{
   grid-template-columns: minmax(320px, 1fr) 185px 155px 155px 100px;
   background: #141414;
   border: 1px solid #252525;
-  border-radius: 14px;
+  border-radius: 11px;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0,0,0,.35);
 }
 
 .browse-search,
 .search-top-row select {
-  height: 54px;
+  height: 48px;
   border: none;
   border-right: 1px solid #2A2A2A;
-  padding: 0 16px;
+  padding: 0 13px;
   background: #141414;
   color: #D6D6D6;
   font-size: 14px;
@@ -1891,10 +1891,10 @@ style={{
   border: none;
   background: ${BRAND_YELLOW};
   color: #050505;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
-  letter-spacing: .4px;
+  letter-spacing: .25px;
 }
 
 .filter-strip {
@@ -1913,7 +1913,7 @@ style={{
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
   align-items: center;
-  height: 32px;
+  height: 30px;
   border: 1px solid #343434;
   border-radius: 0px;
   background: #101010;
@@ -1925,7 +1925,15 @@ style={{
 }
 
 .clear-btn {
-  border-radius: 0 8px 8px 0;
+  height: 30px;
+  width: 58px;
+  border: 1px solid #343434;
+  border-radius: 0 6px 6px 0;
+  background: #101010;
+  color: #777;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
 }
 .range-group span {
   width: 1px;
@@ -1951,10 +1959,10 @@ style={{
 }
 
 .sort-select {
-  height: 32px;
+  height: 30px;
   width: 108px;
   border: 1px solid #343434;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #101010;
   color: #D6D6D6;
   padding: 0 8px;
@@ -1976,9 +1984,9 @@ style={{
 
 .clear-btn {
   height: 32px;
-  width: 58px;
+  width: 46px;
   border: 1px solid #343434;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #101010;
   color: #777;
   font-size: 9px;
