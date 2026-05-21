@@ -1843,17 +1843,18 @@ style={{
   border-radius: 11px;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  min-height: 38px;
 }
 
 .browse-search,
 .search-top-row select {
-  height: 48px;
+  height: 36px;
   border: none;
   border-right: 1px solid #2A2A2A;
   padding: 0 13px;
   background: #141414;
   color: #D6D6D6;
-  font-size: 14px;
+  font-size: 13px;
   outline: none;
 }
 
@@ -1887,7 +1888,7 @@ style={{
 }
 
 .search-btn {
-  height: 54px;
+  height: 36px;
   border: none;
   background: ${BRAND_YELLOW};
   color: #050505;
@@ -1983,15 +1984,27 @@ style={{
 }
 
 .clear-btn {
-  height: 32px;
+  height: 30px;
   width: 46px;
+
   border: 1px solid #343434;
-  border-radius: 6px;
+  border-left: none;
+
+  border-radius: 0 6px 6px 0;
+
   background: #101010;
   color: #777;
+
   font-size: 9px;
   font-weight: 900;
+
   cursor: pointer;
+
+  margin-left: -1px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .clear-btn:hover {
