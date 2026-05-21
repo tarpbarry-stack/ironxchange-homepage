@@ -1371,6 +1371,13 @@ if (category === "BACKHOE LOADERS") {
   const q = searchQuery.trim().toLowerCase();
 
   const filtered = liveListings.filter(item => {
+    const listingStatus =
+  item.listingStatus ||
+  item.publicData?.listingStatus ||
+  item.attributes?.publicData?.listingStatus;
+
+const isArchived = listingStatus === "archived";
+    
     const searchableText = [
       item.title,
       item.type,
@@ -1405,11 +1412,12 @@ if (category === "BACKHOE LOADERS") {
       String(item.model || "")
         .toUpperCase() === String(model).toUpperCase();
 
-    return (
-      matchesSearch &&
-      matchesCategory &&
-      matchesMake &&
-      matchesModel &&
+   return (
+  !isArchived &&
+  matchesSearch &&
+  matchesCategory &&
+  matchesMake &&
+  matchesModel &&
       matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
       matchesRange(item.price, filters.priceMin, filters.priceMax) &&
       matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
