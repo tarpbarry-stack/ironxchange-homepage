@@ -328,7 +328,7 @@ if (!response.ok) {
 
     setMyListings(current =>
       current.map(item =>
-        item.id === listing.id
+        String(item.id) === String(listing.id)
           ? {
               ...item,
               publicData: {
@@ -956,6 +956,17 @@ if (!response.ok) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.status-pill.archived {
+  background: rgba(120,120,120,.14);
+  border-color: rgba(160,160,160,.35);
+  color: #A0A0A0;
+}
+
+.archived-card {
+  opacity: .55;
+  filter: grayscale(.45);
 }
 
 .seller-meta {
