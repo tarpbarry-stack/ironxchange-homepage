@@ -1496,7 +1496,7 @@ function changeCardPhoto(e, item, direction) {
   </div>
 </nav>
    <section className="search-section">
-  <h1>Browse Equipment</h1>
+  <h1>IronXchange Equipment Marketplace</h1>
 
   <p>
     Search heavy equipment for sale from owners,
@@ -1821,12 +1821,12 @@ style={{
 }
 
 .search-section h1 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 30px;
-  letter-spacing: -0.4px;
+  margin: 0 0 6px;
+  color: #9A9A9A;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .2px;
 }
-
 .search-section p {
   color: #9A9A9A;
   margin: 8px 0 0;
