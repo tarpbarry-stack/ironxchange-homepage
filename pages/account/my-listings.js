@@ -333,8 +333,9 @@ useEffect(() => {
           : item
       )
     );
-  } catch {
-    alert("Archive failed.");
+  } catch (error) {
+  alert(`Archive failed: ${error.message}`);
+  console.error("Archive failed:", error);
   }
 }
   return (
