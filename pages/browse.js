@@ -1886,7 +1886,7 @@ style={{
 
 .range-group {
   display: grid;
-  grid-template-columns: 96px 1px 96px;
+  grid-template-columns: 1fr 1px 1fr;
   align-items: center;
   height: 32px;
   border: 1px solid #343434;
@@ -1904,13 +1904,14 @@ style={{
 
 .range-group input {
   height: 100%;
-  width: 56px;
+  min-width: 0;
   border: none;
   padding: 0 10px;
   background: transparent;
   color: #D6D6D6;
   font-size: 10px;
   font-weight: 800;
+  text-align: center;
   outline: none;
 }
 
