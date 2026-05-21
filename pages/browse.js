@@ -1876,10 +1876,10 @@ style={{
   width: 100%;
 
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 
-  gap: 6px;
+  gap: 0;
 }
 
 .range-group {
@@ -1891,6 +1891,7 @@ style={{
   border-radius: 8px;
   background: #101010;
   overflow: hidden;
+  margin-right: -1px;
 }
 
 .range-group span {
