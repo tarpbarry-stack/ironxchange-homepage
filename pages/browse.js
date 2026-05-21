@@ -1493,152 +1493,176 @@ function changeCardPhoto(e, item, direction) {
     </a>
   </div>
 </nav>
-      <section className="search-section">
-        <h1>Browse Equipment</h1>
+   <section className="search-section">
+  <h1>Browse Equipment</h1>
 
-        <p>
-          Search heavy equipment for sale from owners,
-          dealers, and fleet operators.
-        </p>
-        
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search equipment — Deere 772GP, WA475, crusher..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+  <p>
+    Search heavy equipment for sale from owners,
+    dealers, and fleet operators.
+  </p>
 
-          <select
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setMake("ALL MAKES");
-              setModel("ALL MODELS");
-            }}
-          >
-            {categories.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+  <div className="search-top-row">
+    <input
+      type="text"
+      className="browse-search"
+      placeholder="Search equipment..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+    />
 
-          <select
-            value={make}
-            onChange={(e) => {
-              setMake(e.target.value);
-              setModel("ALL MODELS");
-            }}
-          >
-            {availableMakes.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+    <select
+      value={category}
+      onChange={(e) => {
+        setCategory(e.target.value);
+        setMake("ALL MAKES");
+        setModel("ALL MODELS");
+      }}
+    >
+      {categories.map((c) => (
+        <option key={c}>{c}</option>
+      ))}
+    </select>
 
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          >
-            {availableModels.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+    <select
+      value={make}
+      onChange={(e) => {
+        setMake(e.target.value);
+        setModel("ALL MODELS");
+      }}
+    >
+      {availableMakes.map((m) => (
+        <option key={m}>{m}</option>
+      ))}
+    </select>
 
-            <select
-  className="sort-select"
-  value={sortMode}
-  onChange={(e) => setSortMode(e.target.value)}
->
-  <option value="newest">Newest</option>
-  <option value="price-low">Price Low → High</option>
-  <option value="price-high">Price High → Low</option>
-  <option value="hours-low">Hours Low → High</option>
-  <option value="hours-high">Hours High → Low</option>
-  <option value="year-new">Year Newest</option>
-  <option value="year-old">Year Oldest</option>
-</select>
+    <select
+      value={model}
+      onChange={(e) => setModel(e.target.value)}
+    >
+      {availableModels.map((m) => (
+        <option key={m}>{m}</option>
+      ))}
+    </select>
 
-<button
-  type="button"
-  className="search-btn"
->
-            SEARCH
-          </button>
-        </div>
+    <button
+      type="button"
+      className="search-btn"
+    >
+      SEARCH
+    </button>
+  </div>
 
-<div className="filter-strip">
-  <input
-    placeholder="Year min"
-    value={filters.yearMin}
-    onChange={e =>
-      setFilters({
-        ...filters,
-        yearMin: e.target.value
-      })
-    }
-  />
+  <div className="filter-strip">
+    <div className="range-group">
+      <input
+        placeholder="Year Min"
+        value={filters.yearMin}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            yearMin: e.target.value
+          })
+        }
+      />
 
-  <input
-    placeholder="Year max"
-    value={filters.yearMax}
-    onChange={e =>
-      setFilters({
-        ...filters,
-        yearMax: e.target.value
-      })
-    }
-  />
+      <span></span>
 
-  <input
-    placeholder="Price min"
-    value={filters.priceMin}
-    onChange={e =>
-      setFilters({
-        ...filters,
-        priceMin: e.target.value
-      })
-    }
-  />
+      <input
+        placeholder="Year Max"
+        value={filters.yearMax}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            yearMax: e.target.value
+          })
+        }
+      />
+    </div>
 
-  <input
-    placeholder="Price max"
-    value={filters.priceMax}
-    onChange={e =>
-      setFilters({
-        ...filters,
-        priceMax: e.target.value
-      })
-    }
-  />
+    <div className="range-group">
+      <input
+        placeholder="Price Min"
+        value={filters.priceMin}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            priceMin: e.target.value
+          })
+        }
+      />
 
-  <input
-    placeholder="Hours max"
-    value={filters.hoursMax}
-    onChange={e =>
-      setFilters({
-        ...filters,
-        hoursMax: e.target.value
-      })
-    }
-  />
+      <span></span>
 
-  <button
-    type="button"
-    onClick={() =>
-      setFilters({
-        yearMin: "",
-        yearMax: "",
-        priceMin: "",
-        priceMax: "",
-        hoursMin: "",
-        hoursMax: ""
-      })
-    }
-  >
-    Clear
-  </button>
-</div>
-    
-      </section>
+      <input
+        placeholder="Price Max"
+        value={filters.priceMax}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            priceMax: e.target.value
+          })
+        }
+      />
+    </div>
+
+    <div className="range-group">
+      <input
+        placeholder="Hours Min"
+        value={filters.hoursMin}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            hoursMin: e.target.value
+          })
+        }
+      />
+
+      <span></span>
+
+      <input
+        placeholder="Hours Max"
+        value={filters.hoursMax}
+        onChange={(e) =>
+          setFilters({
+            ...filters,
+            hoursMax: e.target.value
+          })
+        }
+      />
+    </div>
+
+    <select
+      className="sort-select"
+      value={sortMode}
+      onChange={(e) => setSortMode(e.target.value)}
+    >
+      <option value="newest">Newest</option>
+      <option value="price-low">Price Low → High</option>
+      <option value="price-high">Price High → Low</option>
+      <option value="hours-low">Hours Low → High</option>
+      <option value="hours-high">Hours High → Low</option>
+      <option value="year-new">Year Newest</option>
+      <option value="year-old">Year Oldest</option>
+    </select>
+
+    <button
+      type="button"
+      className="clear-btn"
+      onClick={() =>
+        setFilters({
+          yearMin: "",
+          yearMax: "",
+          priceMin: "",
+          priceMax: "",
+          hoursMin: "",
+          hoursMax: ""
+        })
+      }
+    >
+      CLEAR
+    </button>
+  </div>
+</section>
 
       <section className="featured">
         <div className="section-head">
@@ -2051,6 +2075,110 @@ input::placeholder {
   font-weight: 900;
   letter-spacing: .4px;
 }
+
+.search-top-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 180px 180px 180px 110px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.browse-search,
+.search-top-row select,
+.search-btn,
+.sort-select,
+.clear-btn,
+.range-group input {
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid #2A2A2A;
+  background: #141414;
+  color: #F2F2F2;
+  font-size: 12px;
+  font-weight: 800;
+  outline: none;
+}
+
+.browse-search,
+.search-top-row select,
+.sort-select,
+.range-group input {
+  padding: 0 14px;
+}
+
+.search-btn,
+.clear-btn {
+  background: #FFC400;
+  color: #050505;
+  border: none;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.filter-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.range-group {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #3A3A3A;
+  background: #141414;
+  height: 38px;
+}
+
+.range-group span {
+  width: 1px;
+  height: 60%;
+  background: #2A2A2A;
+}
+
+.range-group input {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 11px;
+}
+
+.sort-select {
+  width: 180px;
+  height: 38px;
+}
+
+.clear-btn {
+  height: 38px;
+  padding: 0 18px;
+}
+
+@media (max-width: 1280px) {
+  .search-top-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .search-top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sort-select,
+  .clear-btn {
+    width: 100%;
+  }
+}
+
 
         .empty {
           padding: 40px;
