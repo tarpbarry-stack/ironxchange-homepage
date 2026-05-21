@@ -34,6 +34,9 @@ async function getAccessToken() {
     throw new Error(`Auth failed: ${JSON.stringify(data)}`);
   }
 
+  console.log("ARCHIVE STATUS:", response.status);
+console.log("ARCHIVE RESPONSE:", JSON.stringify(data, null, 2));
+
   return data.access_token;
 }
 
@@ -80,9 +83,9 @@ metadata: {
     }
 
     res.status(200).json({
-      ok: true,
-      listingId,
-      listingStatus: "archived"
+  ok: true,
+  listingId,
+  sharetribe: data
     });
   } catch (err) {
     console.error("ARCHIVE LISTING ERROR:", err);
