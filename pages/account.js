@@ -590,6 +590,15 @@ const logoUrl =
     <option value="archive">Archive</option>
   </select>
 
+  <button
+    type="button"
+    className="listing-delete-btn"
+    onClick={() => confirmDelete(listing)}
+  >
+    DELETE
+  </button>
+</span>
+
 <span className="listing-metric">
   {listing.views || "—"}
 </span>
@@ -598,15 +607,7 @@ const logoUrl =
   {listing.saves || "—"}
 </span>
 
-  <button
-  type="button"
-  className="listing-delete-btn"
-  onClick={() => confirmDelete(listing)}
->
-  DELETE
-</button>
-                              
-                        </div>
+</div>
 </div>
                       ))
                     ) : (
@@ -1500,10 +1501,12 @@ main {
   background: #181818;
   border-color: #3a3a3a;
 }
+
 .saved-card img {
   width: 148px;
   height: 92px;
-{
+}
+
 .saved-card-body {
   padding: 8px 8px 8px 0;
   min-width: 0;
