@@ -599,10 +599,8 @@ export default function Home() {
   letter-spacing: 1px;
 }
         .cards {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 22px;
-        }
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
 
         .card {
           text-decoration: none;
