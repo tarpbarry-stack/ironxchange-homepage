@@ -1832,10 +1832,10 @@ style={{
 }
 
 .search-top-row {
-  max-width: 1250px;
+  max-width: 1080px;
   margin: 24px auto 10px;
   display: grid;
-  grid-template-columns: minmax(520px, 1fr) 190px 165px 165px 110px;
+  grid-template-columns: minmax(320px, 1fr) 185px 155px 155px 100px;
   background: #141414;
   border: 1px solid #252525;
   border-radius: 14px;
@@ -1871,7 +1871,7 @@ style={{
 }
 
 .filter-strip {
-  max-width: 1250px;
+  max-width: 1080px;
   margin: 0 auto;
   display: flex;
   justify-content: flex-end;
