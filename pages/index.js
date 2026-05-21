@@ -117,7 +117,16 @@ export default function Home() {
     checkAuth();
   }, []);
 
-  const featuredListings = liveListings.slice(0, 8);
+  const featuredListings = liveListings
+  .filter(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus;
+
+    return listingStatus !== "archived";
+  })
+  .slice(0, 8);
 
   function handleSearch() {
     const terms = [
