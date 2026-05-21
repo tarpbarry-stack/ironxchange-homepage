@@ -559,37 +559,36 @@ const logoUrl =
     : "ACTIVE"}
 </span>
 
-                          <span>
-                           <select
-  className="action-select"
-  defaultValue=""
-  onChange={e => {
-    const value = e.target.value;
+      <span className="listing-action-stack">
+  <select
+    className="action-select"
+    defaultValue=""
+    onChange={e => {
+      const value = e.target.value;
 
-    if (value === "edit" || value === "promote") {
-      window.location.href = `/live?id=${listing.id}`;
-    }
+      if (value === "edit" || value === "promote") {
+        window.location.href = `/live?id=${listing.id}`;
+      }
 
-    if (value === "archive") {
-      archiveListing(listing);
-    }
+      if (value === "archive") {
+        archiveListing(listing);
+      }
 
-    e.target.value = "";
-  }}
->
-  <option value="" disabled>
-    ACTION
-  </option>
+      e.target.value = "";
+    }}
+  >
+    <option value="" disabled>
+      ACTION
+    </option>
 
-  <option value="edit">Edit</option>
-  <option value="promote">Promote</option>
-  <option value="pause">Pause</option>
-  <option value="sold">Mark Sold</option>
-  <option value="duplicate">Duplicate</option>
-  <option value="relist">Relist</option>
-  <option value="archive">Archive</option>
-</select>
-                          </span>
+    <option value="edit">Edit</option>
+    <option value="promote">Promote</option>
+    <option value="pause">Pause</option>
+    <option value="sold">Mark Sold</option>
+    <option value="duplicate">Duplicate</option>
+    <option value="relist">Relist</option>
+    <option value="archive">Archive</option>
+  </select>
 
 <span className="listing-metric">
   {listing.views || "—"}
@@ -1214,7 +1213,7 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px 84px;
+  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px;
   gap: 14px;
   align-items: center;
   justify-content: start;
@@ -1316,8 +1315,8 @@ main {
 }
 
 .listing-delete-btn {
-  height: 30px;
-  min-width: 74px;
+  width: 82px;
+  height: 24px;
 
   border: 1px solid rgba(229, 62, 62, 0.35);
   border-radius: 999px;
@@ -1325,9 +1324,9 @@ main {
   background: rgba(229, 62, 62, 0.10);
   color: #E53E3E;
 
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 900;
-  letter-spacing: .3px;
+  letter-spacing: .35px;
 
   display: flex;
   align-items: center;
@@ -1337,8 +1336,7 @@ main {
 
   transition:
     background .18s ease,
-    border-color .18s ease,
-    color .18s ease;
+    border-color .18s ease;
 }
 
 .listing-delete-btn:hover {
@@ -1369,6 +1367,18 @@ main {
 .action-select:focus {
   border-color: #FFC400;
   box-shadow: 0 0 0 1px rgba(255,196,0,.25);
+}
+
+.listing-action-stack {
+  display: grid;
+  grid-template-rows: 30px 24px;
+  gap: 4px;
+  align-items: start;
+  margin-left: 14px;
+}
+
+.listing-action-stack .action-select {
+  margin-left: 0;
 }
 
 .right-stack {
