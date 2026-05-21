@@ -1857,6 +1857,29 @@ style={{
   outline: none;
 }
 
+.search-top-row select,
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #FFC400 50%),
+    linear-gradient(135deg, #FFC400 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 11px) 50%;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+
+  padding-right: 34px;
+}
+
 .browse-search::placeholder {
   color: #777;
 }
@@ -1930,6 +1953,17 @@ style={{
   font-size: 10px;
   font-weight: 900;
   outline: none;
+}
+
+.search-top-row select:hover,
+.sort-select:hover {
+  background-color: #181818;
+}
+
+.search-top-row select:focus,
+.sort-select:focus {
+  border-color: #FFC400;
+  box-shadow: inset 0 0 0 1px rgba(255,196,0,.25);
 }
 
 .clear-btn {
