@@ -119,7 +119,9 @@ function getFeatureLine(item = {}) {
 
 function cleanMachineTitle(title = "") {
   return String(title)
-    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
+    .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
+    .replace(/\s*[-–]\s*$/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
