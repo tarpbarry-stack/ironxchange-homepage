@@ -1876,6 +1876,8 @@ style={{
     5px 5px;
 
   background-repeat: no-repeat;
+  
+  border: none;
 
   padding-right: 34px;
 }
@@ -1902,7 +1904,7 @@ style={{
 
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
 
   gap: 0;
 }
@@ -1913,12 +1915,18 @@ style={{
   align-items: center;
   height: 32px;
   border: 1px solid #343434;
-  border-radius: 8px;
+  border-radius: 0px;
   background: #101010;
   overflow: hidden;
   margin-right: -1px;
 }
+.range-group:first-child {
+  border-radius: 8px 0 0 8px;
+}
 
+.clear-btn {
+  border-radius: 0 8px 8px 0;
+}
 .range-group span {
   width: 1px;
   height: 58%;
