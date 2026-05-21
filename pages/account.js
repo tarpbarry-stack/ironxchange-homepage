@@ -560,33 +560,35 @@ const logoUrl =
 </span>
 
                           <span>
-                            <select
-                              className="action-select"
-                              defaultValue=""
-                              onChange={e => {
-                               onChange={e => {
-  const value = e.target.value;
+                           <select
+  className="action-select"
+  defaultValue=""
+  onChange={e => {
+    const value = e.target.value;
 
-  if (value === "edit" || value === "promote") {
-    window.location.href = `/live?id=${listing.id}`;
-  }
+    if (value === "edit" || value === "promote") {
+      window.location.href = `/live?id=${listing.id}`;
+    }
 
-  if (value === "archive") {
-    archiveListing(listing);
-  }
-}}
-                            >
-                              <option value="" disabled>
-                                ACTION
-                              </option>
-                              <option value="edit">Edit</option>
-                              <option value="promote">Promote</option>
-                              <option value="pause">Pause</option>
-                              <option value="sold">Mark Sold</option>
-                              <option value="duplicate">Duplicate</option>
-                              <option value="relist">Relist</option>
-                              <option value="archive">Archive</option>
-                            </select>
+    if (value === "archive") {
+      archiveListing(listing);
+    }
+
+    e.target.value = "";
+  }}
+>
+  <option value="" disabled>
+    ACTION
+  </option>
+
+  <option value="edit">Edit</option>
+  <option value="promote">Promote</option>
+  <option value="pause">Pause</option>
+  <option value="sold">Mark Sold</option>
+  <option value="duplicate">Duplicate</option>
+  <option value="relist">Relist</option>
+  <option value="archive">Archive</option>
+</select>
                           </span>
 
 <span className="listing-metric">
