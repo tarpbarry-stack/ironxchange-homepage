@@ -323,9 +323,6 @@ useEffect(() => {
 if (!response.ok) {
   throw new Error(data.error || "Archive failed");
 }
-
-    if (!response.ok) throw new Error("Archive failed");
-
     setMyListings(current =>
       current.map(item =>
         String(item.id) === String(listing.id)
@@ -345,6 +342,45 @@ if (!response.ok) {
   console.error("Archive failed:", error);
   }
 }
+
+ async function reactivateListing(listing) {
+  try {
+    const response = await fetch("/api/reactivate-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Reactivate failed");
+    }
+
+    setMyListings(current =>
+      current.map(item =>
+        String(item.id) === String(listing.id)
+          ? {
+              ...item,
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "live"
+              },
+              listingStatus: "live"
+            }
+          : item
+      )
+    );
+  } catch (error) {
+    alert(`Reactivate failed: ${error.message}`);
+    console.error("Reactivate failed:", error);
+  }
+} 
+  
   return (
     <>
       <Head>
@@ -557,11 +593,36 @@ if (!response.ok) {
                 </div>
 
                 <div className="seller-actions">
-                  <a href={`/live?id=${item.id}`}>EDIT</a>
-                  <a href={`/listing/${slugify(item.title)}?from=account`}>VIEW</a>
-                  <button type="button" onClick={() => archiveListing(item)}>ARCHIVE</button>
-                  <button type="button" className="danger-action" onClick={() => confirmDelete(item)}>DELETE</button>
-                </div>
+  <a href={`/live?id=${item.id}`}>EDIT</a>
+
+  <a href={`/listing/${slugify(item.title)}?from=account`}>
+    VIEW
+  </a>
+
+  {isArchived ? (
+    <button
+      type="button"
+      onClick={() => reactivateListing(item)}
+    >
+      REACTIVATE
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={() => archiveListing(item)}
+    >
+      ARCHIVE
+    </button>
+  )}
+
+  <button
+    type="button"
+    className="danger-action"
+    onClick={() => confirmDelete(item)}
+  >
+    DELETE
+  </button>
+</div>
                             </div>
             </div>
           );
