@@ -1884,7 +1884,7 @@ style={{
 
 .range-group {
   display: grid;
-  grid-template-columns: 34px 66px 1px 66px;
+  grid-template-columns: 78px 1px 78px;
   align-items: center;
   height: 32px;
   border: 1px solid #343434;
@@ -1892,18 +1892,6 @@ style={{
   background: #101010;
   overflow: hidden;
 }
-
-.range-group::before {
-  color: #777;
-  font-size: 9px;
-  font-weight: 900;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.range-group:nth-child(1)::before { content: "YR"; }
-.range-group:nth-child(2)::before { content: "$"; }
-.range-group:nth-child(3)::before { content: "HRS"; }
 
 .range-group span {
   width: 1px;
