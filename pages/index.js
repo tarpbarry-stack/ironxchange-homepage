@@ -650,8 +650,10 @@ function changeCardPhoto(e, item, direction) {
   font-weight: 400;
   letter-spacing: 1px;
 }
-        .cards {
+       .cards {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
 }
 
         .card {
@@ -676,6 +678,59 @@ function changeCardPhoto(e, item, direction) {
           background-size: cover;
           background-position: center;
         }
+
+        .card {
+  position: relative;
+}
+
+.card-photo {
+  position: relative;
+}
+
+.card-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 80px;
+  border: none;
+  background: rgba(0,0,0,.12);
+  color: rgba(255,255,255,.72);
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity .18s ease, background .18s ease, color .18s ease;
+}
+
+.card:hover .card-photo-nav {
+  opacity: 1;
+}
+
+.card-photo-nav.left {
+  left: 0;
+  border-radius: 0 10px 10px 0;
+}
+
+.card-photo-nav.right {
+  right: 0;
+  border-radius: 10px 0 0 10px;
+}
+
+.photo-count {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: rgba(0,0,0,.72);
+  color: #f2f2f2;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  z-index: 5;
+}
 
         .card-body {
           padding: 16px;
