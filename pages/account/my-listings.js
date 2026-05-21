@@ -319,6 +319,14 @@ useEffect(() => {
       })
     });
 
+    const data = await response.json();
+
+alert(`Archive API response: ${JSON.stringify(data).slice(0, 500)}`);
+
+if (!response.ok) {
+  throw new Error(data.error || "Archive failed");
+}
+
     if (!response.ok) throw new Error("Archive failed");
 
     setMyListings(current =>
