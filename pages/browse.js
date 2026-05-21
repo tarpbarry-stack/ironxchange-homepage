@@ -1638,7 +1638,7 @@ function changeCardPhoto(e, item, direction) {
       value={sortMode}
       onChange={(e) => setSortMode(e.target.value)}
     >
-      <option value="newest">Newest</option>
+      <option value="newest">Sort</option>
       <option value="price-low">Price Low → High</option>
       <option value="price-high">Price High → Low</option>
       <option value="hours-low">Hours Low → High</option>
