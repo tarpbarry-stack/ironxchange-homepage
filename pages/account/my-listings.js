@@ -300,6 +300,8 @@ useEffect(() => {
   }
 
   async function archiveListing(listing) {
+  alert("Archive function fired");
+
   const ok = window.confirm(
     `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
   );
