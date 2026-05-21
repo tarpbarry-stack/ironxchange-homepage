@@ -62,8 +62,12 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           id: listingId,
-          publicData: {
-            listingStatus: "archived"
+         publicData: {
+  ...(req.body.publicData || {}),
+  listingStatus: "archived"
+},
+metadata: {
+  listingStatus: "archived"
           }
         })
       }
