@@ -299,16 +299,44 @@ useEffect(() => {
     alert("Delete API wiring comes next.");
   }
 
-  function archiveListing(listing) {
-    const ok = window.confirm(
-      `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
+  async function archiveListing(listing) {
+  const ok = window.confirm(
+    `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
+  );
+
+  if (!ok) return;
+
+  try {
+    const response = await fetch("/api/archive-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id
+      })
+    });
+
+    if (!response.ok) throw new Error("Archive failed");
+
+    setMyListings(current =>
+      current.map(item =>
+        item.id === listing.id
+          ? {
+              ...item,
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "archived"
+              },
+              listingStatus: "archived"
+            }
+          : item
+      )
     );
-
-    if (!ok) return;
-
-    alert("Archive API wiring comes next.");
+  } catch {
+    alert("Archive failed.");
   }
-
+}
   return (
     <>
       <Head>
