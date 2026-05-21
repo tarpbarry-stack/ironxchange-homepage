@@ -289,15 +289,40 @@ useEffect(() => {
     }
   }
 
-  function confirmDelete(listing) {
-    const ok = window.confirm(
-      `Delete this listing?\n\n${cleanMachineTitle(listing.title)}\n\nThis should only be used if you really want it removed.`
+  async function confirmDelete(listing) {
+  const ok = window.confirm(
+    `Delete this listing?\n\n${cleanMachineTitle(listing.title)}\n\nThis cannot be undone.`
+  );
+
+  if (!ok) return;
+
+  try {
+    const response = await fetch("/api/delete-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Delete failed");
+    }
+
+    setMyListings(current =>
+      current.filter(
+        item => String(item.id) !== String(listing.id)
+      )
     );
-
-    if (!ok) return;
-
-    alert("Delete API wiring comes next.");
+  } catch (error) {
+    alert(`Delete failed: ${error.message}`);
+    console.error("Delete failed:", error);
   }
+}
 
   async function archiveListing(listing) {
   
