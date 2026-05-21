@@ -86,6 +86,7 @@ export default function Home() {
   const [category, setCategory] = useState("ALL CATEGORIES");
    const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [cardPhotoIndex, setCardPhotoIndex] = useState({});
 
   useEffect(() => {
     fetch("/api/listings")
@@ -131,6 +132,34 @@ export default function Home() {
       : "/browse";
   }
 
+function getCardImages(item = {}) {
+  return [
+    ...(Array.isArray(item.images) ? item.images : []),
+    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
+    item.imageUrl,
+    item.image
+  ].filter(Boolean);
+}
+
+function changeCardPhoto(e, item, direction) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const images = getCardImages(item);
+  if (images.length < 2) return;
+
+  setCardPhotoIndex(current => {
+    const currentIndex = current[item.id] || 0;
+    const nextIndex =
+      (currentIndex + direction + images.length) % images.length;
+
+    return {
+      ...current,
+      [item.id]: nextIndex
+    };
+  });
+}
+  
   return (
     <>
       <Head>
