@@ -183,6 +183,77 @@ export default function AccountPage() {
     window.location.href = "/";
   }
 
+  async function archiveListing(listing) {
+  const ok = window.confirm(
+    `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
+  );
+
+  if (!ok) return;
+
+  try {
+    const response = await fetch("/api/archive-listing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId: listing.id })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Archive failed");
+    }
+
+    setMyListings(current =>
+      current.map(item =>
+        String(item.id) === String(listing.id)
+          ? {
+              ...item,
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "archived"
+              },
+              listingStatus: "archived"
+            }
+          : item
+      )
+    );
+
+    addActivity("success", `Archived — ${cleanMachineTitle(listing.title)}`);
+  } catch (error) {
+    alert(`Archive failed: ${error.message}`);
+  }
+}
+
+async function confirmDelete(listing) {
+  const ok = window.confirm(
+    `Delete this listing?\n\n${cleanMachineTitle(listing.title)}\n\nThis cannot be undone.`
+  );
+
+  if (!ok) return;
+
+  try {
+    const response = await fetch("/api/delete-listing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId: listing.id })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Delete failed");
+    }
+
+    setMyListings(current =>
+      current.filter(item => String(item.id) !== String(listing.id))
+    );
+
+    addActivity("success", `Deleted — ${cleanMachineTitle(listing.title)}`);
+  } catch (error) {
+    alert(`Delete failed: ${error.message}`);
+  }
+}
+  
   const profile = user?.attributes?.profile || {};
   const publicData = profile?.publicData || {};
 
@@ -468,19 +539,42 @@ const logoUrl =
                             {listing.age ?? "—"}
                           </span>
 
-                          <span className="listing-status active">ACTIVE</span>
+                         <span
+  className={`listing-status ${
+    (
+      listing.listingStatus ||
+      listing.publicData?.listingStatus ||
+      listing.attributes?.publicData?.listingStatus
+    ) === "archived"
+      ? "archived"
+      : "active"
+  }`}
+>
+  {(
+    listing.listingStatus ||
+    listing.publicData?.listingStatus ||
+    listing.attributes?.publicData?.listingStatus
+  ) === "archived"
+    ? "ARCHIVED"
+    : "ACTIVE"}
+</span>
 
                           <span>
                             <select
                               className="action-select"
                               defaultValue=""
                               onChange={e => {
-                                const value = e.target.value;
+                               onChange={e => {
+  const value = e.target.value;
 
-                                if (value === "edit" || value === "promote") {
-                                  window.location.href = `/live?id=${listing.id}`;
-                                }
-                              }}
+  if (value === "edit" || value === "promote") {
+    window.location.href = `/live?id=${listing.id}`;
+  }
+
+  if (value === "archive") {
+    archiveListing(listing);
+  }
+}}
                             >
                               <option value="" disabled>
                                 ACTION
@@ -502,6 +596,14 @@ const logoUrl =
 <span className="listing-metric">
   {listing.saves || "—"}
 </span>
+
+  <button
+  type="button"
+  className="listing-delete-btn"
+  onClick={() => confirmDelete(listing)}
+>
+  DELETE
+</button>
                               
                         </div>
 </div>
@@ -1110,7 +1212,7 @@ main {
 .listing-op-controls {
   grid-area: controls;
   display: grid;
-  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px;
+  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px 84px;
   gap: 14px;
   align-items: center;
   justify-content: start;
@@ -1204,6 +1306,42 @@ main {
   border: 1px solid rgba(56,161,105,.45);
   background: rgba(56,161,105,.10);
   color: #38A169;
+}
+.listing-status.archived {
+  border: 1px solid rgba(160,160,160,.35);
+  background: rgba(120,120,120,.10);
+  color: #A0A0A0;
+}
+
+.listing-delete-btn {
+  height: 30px;
+  min-width: 74px;
+
+  border: 1px solid rgba(229, 62, 62, 0.35);
+  border-radius: 999px;
+
+  background: rgba(229, 62, 62, 0.10);
+  color: #E53E3E;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .3px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease;
+}
+
+.listing-delete-btn:hover {
+  background: rgba(229, 62, 62, 0.18);
+  border-color: rgba(229, 62, 62, 0.55);
 }
 
 .action-select {
