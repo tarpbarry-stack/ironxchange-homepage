@@ -71,9 +71,21 @@ export default function SavedListings() {
       .catch(() => {});
   }, []);
 
-  const savedListings = useMemo(() => {
-    return listings.filter((item) => savedSlugs.includes(slugify(item.title)));
-  }, [listings, savedSlugs]);
+ const savedListings = useMemo(() => {
+  return listings.filter(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus;
+
+    const isArchived = listingStatus === "archived";
+
+    return (
+      !isArchived &&
+      savedSlugs.includes(slugify(item.title))
+    );
+  });
+}, [listings, savedSlugs]);
 
   return (
     <>
