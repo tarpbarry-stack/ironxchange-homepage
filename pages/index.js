@@ -595,9 +595,9 @@ function changeCardPhoto(e, item, direction) {
         .search-container {
           max-width: 1180px;
           display: grid;
-          grid-template-columns: 1fr 270px 145px;
+         grid-template-columns: minmax(320px, 1fr) 185px 100px;
           background: #141414;
-          border-radius: 16px;
+          border-radius: 10px;
           width: 100%;
           overflow: hidden;
           box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
@@ -606,7 +606,8 @@ function changeCardPhoto(e, item, direction) {
 
         input,
         select {
-          padding: 17px 18px;
+          padding: 0 12px;
+          height: 40px;
           border: none;
           border-right: 1px solid rgba(255, 255, 255, 0.08);
           font-size: 14px;
@@ -632,6 +633,8 @@ function changeCardPhoto(e, item, direction) {
           color: #050505;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
+          height: 40px;
+          font-size: 11px;
           cursor: pointer;
           letter-spacing: 0.4px;
         }
