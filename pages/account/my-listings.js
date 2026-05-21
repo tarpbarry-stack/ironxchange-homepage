@@ -300,8 +300,7 @@ useEffect(() => {
   }
 
   async function archiveListing(listing) {
-  alert("Archive function fired");
-
+  
   const ok = window.confirm(
     `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
   );
@@ -320,8 +319,6 @@ useEffect(() => {
     });
 
     const data = await response.json();
-
-alert(`Archive API response: ${JSON.stringify(data).slice(0, 500)}`);
 
 if (!response.ok) {
   throw new Error(data.error || "Archive failed");
@@ -484,18 +481,30 @@ if (!response.ok) {
           <span>{filteredListings.length} LISTINGS</span>
         </div>
 
-        <div className="cards">
-          {filteredListings.map(item => (
-            <div className="card seller-card" key={item.id || item.link || item.title}>
-              <div
-                className="card-photo"
-                style={{
-                  backgroundImage: `url(${
-                    getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
-                    "/images/hero-equipment-yard.jpg"
-                  })`
-                }}
-              />
+   <div className="cards">
+  {filteredListings.map(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus ||
+      "live";
+
+    const isArchived = listingStatus === "archived";
+
+    return (
+      <div
+        className={`card seller-card ${isArchived ? "archived-card" : ""}`}
+        key={item.id || item.link || item.title}
+      >
+        <div
+          className="card-photo"
+          style={{
+            backgroundImage: `url(${
+              getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
+              "/images/hero-equipment-yard.jpg"
+            })`
+          }}
+        />
 
               {getCardImages(item).length > 1 && (
                 <>
@@ -537,9 +546,10 @@ if (!response.ok) {
                     disabled={savingPriceId === String(item.id)}
                   />
 
-                  <span className="status-pill">ACTIVE</span>
-                </div>
-
+                 <span className={`status-pill ${isArchived ? "archived" : ""}`}>
+  {isArchived ? "ARCHIVED" : "ACTIVE"}
+</span>
+</div>
                 <div className="seller-meta">
                   <span>Age: {item.age ?? "—"}</span>
                   <span>Views: {item.views || "—"}</span>
@@ -552,9 +562,10 @@ if (!response.ok) {
                   <button type="button" onClick={() => archiveListing(item)}>ARCHIVE</button>
                   <button type="button" className="danger-action" onClick={() => confirmDelete(item)}>DELETE</button>
                 </div>
-              </div>
+                            </div>
             </div>
-          ))}
+          );
+        })}
         </div>
 
         {filteredListings.length === 0 && (
