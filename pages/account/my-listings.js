@@ -152,6 +152,7 @@ export default function MyListingsPage() {
   const [category, setCategory] = useState("ALL CATEGORIES");
   const [sortMode, setSortMode] = useState("newest");
   const [myListings, setMyListings] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState("");
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [savingPriceId, setSavingPriceId] = useState("");
 
@@ -164,15 +165,37 @@ export default function MyListingsPage() {
     hoursMax: ""
   });
 
-  useEffect(() => {
-    fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setMyListings(data);
-      })
-      .catch(() => {});
-  }, []);
+useEffect(() => {
+  async function loadCurrentUserAndListings() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
 
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      const currentUser = await sdk.currentUser.show();
+      const userId = currentUser.data.data.id.uuid;
+
+      setCurrentUserId(userId);
+
+      const response = await fetch(
+        `/api/account-listings?authorId=${encodeURIComponent(userId)}`
+      );
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setMyListings(data);
+      }
+    } catch (error) {
+      console.error("MY LISTINGS LOAD ERROR:", error);
+      setMyListings([]);
+    }
+  }
+
+  loadCurrentUserAndListings();
+}, []);
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
