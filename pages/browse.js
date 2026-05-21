@@ -1873,9 +1873,12 @@ style={{
 .filter-strip {
   max-width: 1080px;
   margin: 0 auto;
+  width: 100%;
+
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+
   gap: 6px;
 }
 
