@@ -1833,9 +1833,9 @@ style={{
 
 .search-top-row {
   max-width: 1250px;
-  margin: 24px auto 8px;
+  margin: 24px auto 10px;
   display: grid;
-  grid-template-columns: minmax(430px, 1fr) 210px 175px 175px 120px;
+  grid-template-columns: minmax(520px, 1fr) 190px 165px 165px 110px;
   background: #141414;
   border: 1px solid #252525;
   border-radius: 14px;
@@ -1881,9 +1881,9 @@ style={{
 
 .range-group {
   display: grid;
-  grid-template-columns: 30px 56px 1px 56px;
+  grid-template-columns: 34px 66px 1px 66px;
   align-items: center;
-  height: 28px;
+  height: 32px;
   border: 1px solid #343434;
   border-radius: 8px;
   background: #101010;
@@ -1925,8 +1925,8 @@ style={{
 }
 
 .sort-select {
-  height: 28px;
-  width: 92px;
+  height: 32px;
+  width: 108px;
   border: 1px solid #343434;
   border-radius: 8px;
   background: #101010;
@@ -1938,8 +1938,8 @@ style={{
 }
 
 .clear-btn {
-  height: 28px;
-  width: 44px;
+  height: 32px;
+  width: 58px;
   border: 1px solid #343434;
   border-radius: 8px;
   background: #101010;
