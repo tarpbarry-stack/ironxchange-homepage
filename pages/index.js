@@ -274,17 +274,40 @@ function changeCardPhoto(e, item, direction) {
               className="card"
               key={item.id || item.link || item.title}
             >
-              <div
-                className="card-photo"
-                style={{
-                  backgroundImage: `url(${
-                    item.imageUrl ||
-                    item.image ||
-                    item.images?.[0] ||
-                    "/images/hero-equipment-yard.jpg"
-                  })`
-                }}
-              />
+            <div
+  className="card-photo"
+  style={{
+    backgroundImage: `url(${
+      getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
+      "/images/hero-equipment-yard.jpg"
+    })`
+  }}
+/>
+
+{getCardImages(item).length > 1 && (
+  <>
+    <button
+      type="button"
+      className="card-photo-nav left"
+      onClick={e => changeCardPhoto(e, item, -1)}
+    >
+      ‹
+    </button>
+
+    <button
+      type="button"
+      className="card-photo-nav right"
+      onClick={e => changeCardPhoto(e, item, 1)}
+    >
+      ›
+    </button>
+
+    <span className="photo-count">
+      {(cardPhotoIndex[item.id] || 0) + 1}/
+      {getCardImages(item).length}
+    </span>
+  </>
+)}
 
               <div className="card-body">
                 <div className="title-row">
