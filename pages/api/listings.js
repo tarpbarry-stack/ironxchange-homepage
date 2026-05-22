@@ -66,6 +66,22 @@ function getBestImageUrl(imageAsset) {
   );
 }
 
+function getBestProfileLogoUrl(imageAsset) {
+  const variants = imageAsset?.attributes?.variants || {};
+
+  return (
+    variants.default?.url ||
+    variants["scaled-large"]?.url ||
+    variants["scaled-medium"]?.url ||
+    variants["scaled-small"]?.url ||
+    variants["landscape-crop2x"]?.url ||
+    variants["landscape-crop"]?.url ||
+    Object.values(variants).find(v => v?.url)?.url ||
+    imageAsset?.attributes?.url ||
+    ""
+  );
+}
+
 function formatCategory(value) {
   return cleanLabel(value) || "Equipment";
 }
