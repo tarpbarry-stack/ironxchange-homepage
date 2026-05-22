@@ -809,20 +809,42 @@ main {
 
 .thread-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  align-items: center;
 }
+
 
 .thread-actions a {
-  background: #101010;
-  border: 1px solid #333;
-  border-radius: 999px;
-  padding: 10px 16px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 900;
-}
+  height: 34px;
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 16px;
+
+  background: #111111;
+  border: 1px solid #2A2A2A;
+  border-radius: 8px;
+
+  color: #EAEAEA;
+  text-decoration: none;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    color .15s ease;
+}
+.thread-actions a:hover {
+  border-color: #FFC400;
+  color: #FFC400;
+  background: #161616;
+}
 .machine-strip {
   display: grid;
   grid-template-columns: 140px 1fr;
@@ -864,14 +886,32 @@ main {
 }
 
 .reply-box button {
-  border: none;
-  border-radius: 10px;
-  background: ${BRAND_YELLOW};
-  color: #050505;
-  padding: 14px;
-  font-size: 12px;
+  height: 38px;
+
+  border: 1px solid #3A2D00;
+  border-radius: 8px;
+
+  background: #1A1400;
+  color: #FFC400;
+
+  padding: 0 18px;
+
+  font-size: 11px;
   font-weight: 900;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+
   cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.reply-box button:hover {
+  background: #241B00;
+  border-color: #FFC400;
 }
 
 .mobile-rail-menu summary {
