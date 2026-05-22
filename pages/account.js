@@ -80,6 +80,7 @@ export default function AccountPage() {
   const [savedMachines, setSavedMachines] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activityLog, setActivityLog] = useState([]);
+  const [recentInquiries, setRecentInquiries] = useState([]);
 
   useEffect(() => {
     async function loadAccount() {
@@ -160,6 +161,65 @@ export default function AccountPage() {
       window.removeEventListener("ix-activity-updated", loadActivity);
     };
   }, []);
+
+  useEffect(() => {
+  async function loadRecentInquiries() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      const response = await sdk.transactions.query({
+        only: "sale",
+        include: ["listing", "customer"],
+        perPage: 5
+      });
+
+      const transactions = response?.data?.data || [];
+      const included = response?.data?.included || [];
+
+      const listings = {};
+      const users = {};
+
+      included.forEach(item => {
+        const id = item.id?.uuid || item.id;
+
+        if (item.type === "listing") listings[id] = item;
+        if (item.type === "user") users[id] = item;
+      });
+
+      const formatted = transactions.slice(0, 4).map(tx => {
+        const listingId =
+          tx.relationships?.listing?.data?.id?.uuid ||
+          tx.relationships?.listing?.data?.id;
+
+        const customerId =
+          tx.relationships?.customer?.data?.id?.uuid ||
+          tx.relationships?.customer?.data?.id;
+
+        const listing = listings[listingId];
+        const customer = users[customerId];
+        const protectedData = tx.attributes?.protectedData || {};
+
+        return {
+          id: tx.id?.uuid || tx.id,
+          title: listing?.attributes?.title || "Equipment Listing",
+          buyer: customer?.attributes?.profile?.displayName || "Buyer",
+          message: protectedData.message || "New inquiry",
+          createdAt: tx.attributes?.createdAt
+        };
+      });
+
+      setRecentInquiries(formatted);
+    } catch (err) {
+      console.error("Recent inquiries failed:", err);
+    }
+  }
+
+  loadRecentInquiries();
+}, []);
 
   function handleSearch() {
     const q = searchQuery.trim();
@@ -1407,6 +1467,42 @@ main {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.inquiry-preview {
+  display: block;
+  text-decoration: none;
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  padding: 9px;
+}
+
+.inquiry-preview:hover {
+  border-color: #3a3a3a;
+  background: #181818;
+}
+
+.inquiry-preview strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.inquiry-preview span {
+  display: block;
+  color: #FFC400;
+  font-size: 10px;
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+
+.inquiry-preview p {
+  margin: 0;
+  color: #aaa;
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .activity-list,
