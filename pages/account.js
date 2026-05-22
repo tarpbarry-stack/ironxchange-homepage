@@ -362,7 +362,7 @@ const logoUrl =
               Dashboard
             </a>
 
-            <a href="/account/listings">
+            <a href="/account/my-listings">
               <i className="fa-solid fa-list"></i>
               Listings
             </a>
@@ -377,7 +377,7 @@ const logoUrl =
               Saved
             </a>
 
-            <a href="/profile">
+            <a href="/account/profile">
               <i className="fa-regular fa-id-card"></i>
               Profile
             </a>
