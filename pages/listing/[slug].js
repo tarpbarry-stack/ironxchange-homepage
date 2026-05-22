@@ -1061,13 +1061,21 @@ function lightboxNext() {
 .seller-avatar img {
   max-width: 100%;
   max-height: 100%;
+
   width: auto;
   height: auto;
+
   object-fit: contain;
-  object-position: center;
+  object-position: center center;
+
+  display: block;
+
+  margin: auto;
+
+  transform: translateY(-1px);
+
   border-radius: 0;
 }
-
         .seller-row strong {
           color: #f2f2f2;
           font-size: 16px;
