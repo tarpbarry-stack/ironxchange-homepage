@@ -1059,23 +1059,15 @@ function lightboxNext() {
 }
 
 .seller-avatar img {
-  max-width: 100%;
-  max-height: 100%;
-
-  width: auto;
-  height: auto;
-
+  width: 145%;
+  height: 145%;
   object-fit: contain;
   object-position: center center;
-
   display: block;
-
-  margin: auto;
-
-  transform: translateY(-1px);
-
   border-radius: 0;
+  transform: translateY(-8%);
 }
+
         .seller-row strong {
           color: #f2f2f2;
           font-size: 16px;
