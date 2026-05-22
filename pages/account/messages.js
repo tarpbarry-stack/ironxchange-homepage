@@ -45,10 +45,25 @@ export default function MessagesPage() {
 
         const listings = {};
         const users = {};
+        const images = {};
 
         included.forEach(item => {
           const id = item.id?.uuid || item.id;
 
+if (item.type === "image") {
+  const variants =
+    item.attributes?.variants || {};
+
+  images[item.id?.uuid || item.id] =
+    variants["listing-card-2x"]?.url ||
+    variants["listing-card"]?.url ||
+    variants["scaled-large"]?.url ||
+    variants["scaled-medium"]?.url ||
+    variants["scaled-small"]?.url ||
+    Object.values(variants).find(v => v?.url)?.url ||
+    "";
+}
+          
           if (item.type === "listing") {
             listings[id] = item;
           }
@@ -98,12 +113,16 @@ export default function MessagesPage() {
             email:
               protectedData?.buyerEmail || "",
 
-           image:
-  listing?.attributes?.publicData?.image ||
-  listing?.attributes?.publicData?.imageUrl ||
-  "/images/hero-equipment-yard.jpg"
-          };
-        });
+         image: (() => {
+  const imageId =
+    listing?.relationships?.images?.data?.[0]?.id?.uuid ||
+    listing?.relationships?.images?.data?.[0]?.id;
+
+  return (
+    images[imageId] ||
+    "/images/hero-equipment-yard.jpg"
+  );
+})()
 
         setThreads(formatted);
 
