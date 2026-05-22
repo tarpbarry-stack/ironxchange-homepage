@@ -1328,7 +1328,7 @@ main {
 
   width: 58px;
 
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .listing-delete-btn {
