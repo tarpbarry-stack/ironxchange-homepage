@@ -1327,22 +1327,25 @@ main {
 }
 
 .listing-delete-btn {
-  width: 82px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 58px;
   height: 24px;
+  padding: 0 8px;
 
-  border: 1px solid rgba(229, 62, 62, 0.35);
   border-radius: 999px;
-
-  background: rgba(229, 62, 62, 0.10);
-  color: #E53E3E;
 
   font-size: 8px;
   font-weight: 900;
-  letter-spacing: .35px;
+  letter-spacing: .45px;
+  white-space: nowrap;
+  text-transform: uppercase;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(229,62,62,.45);
+  background: rgba(229,62,62,.10);
+  color: #E53E3E;
 
   cursor: pointer;
 
@@ -1352,8 +1355,8 @@ main {
 }
 
 .listing-delete-btn:hover {
-  background: rgba(229, 62, 62, 0.18);
-  border-color: rgba(229, 62, 62, 0.55);
+  background: rgba(229,62,62,.18);
+  border-color: rgba(229,62,62,.6);
 }
 
 .action-select {
