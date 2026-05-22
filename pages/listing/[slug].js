@@ -1039,28 +1039,48 @@ function lightboxNext() {
         }
 
         .seller-row {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
 
       .seller-avatar {
   width: 140px;
   height: 72px;
+
+  border: 1px solid #F2F2F2;
   border-radius: 10px;
-  border: 1px solid #777;
-  display: grid;
-  place-items: center;
-  font-size: 28px;
-  color: #ddd;
+
   background: #050505;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   overflow: hidden;
+
   padding: 8px;
+
+  flex-shrink: 0;
 }
 
 .seller-avatar img {
-  width: 145%;
-  height: 145%;
+  max-width: 100%;
+  max-height: 100%;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  display: block;
+
+  border-radius: 0;
+}
+
+.seller-avatar img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center center;
   display: block;
