@@ -27,6 +27,35 @@ function getImageUrl(img) {
   );
 }
 
+function getSellerLogoUrl(listing = {}) {
+  const image =
+    listing.sellerLogo ||
+    listing.sellerImage ||
+    listing.authorImage ||
+    listing.author?.profileImage ||
+    listing.author?.attributes?.profileImage;
+
+  if (typeof image === "string") return image;
+
+  const variants = image?.attributes?.variants || image?.variants || {};
+
+  const nonSquareVariant = Object.entries(variants).find(([key, value]) => {
+    return value?.url && !key.toLowerCase().includes("square");
+  });
+
+  return (
+    variants.default?.url ||
+    variants["landscape-crop"]?.url ||
+    variants["landscape-crop2x"]?.url ||
+    variants["scaled-large"]?.url ||
+    variants["scaled-medium"]?.url ||
+    variants["scaled-small"]?.url ||
+    nonSquareVariant?.[1]?.url ||
+    Object.values(variants).find(v => v?.url)?.url ||
+    null
+  );
+}
+
 function getListingImages(listing) {
   const rawImages = [
     ...(Array.isArray(listing?.images) ? listing.images : []),
@@ -191,13 +220,28 @@ const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   const make = cleanText(listing.make) || "—";
   const model = cleanText(listing.model) || "—";
   const serial = cleanText(listing.serialNumber || listing.vin || listing.serial) || "Not listed";
-  const sellerName =
+  const sellerProfile =
+  listing.author?.profile ||
+  listing.author?.attributes?.profile ||
+  {};
+
+const sellerPublicData =
+  sellerProfile.publicData || {};
+
+const sellerName =
   cleanText(
     listing.sellerName ||
-    listing.authorName ||
-    listing.author?.profile?.displayName ||
-    listing.author?.attributes?.profile?.displayName
-  ) || "Private Seller";
+    sellerPublicData.sellerName ||
+    sellerProfile.displayName ||
+    listing.authorName
+  ) || "IronXchange Seller";
+
+const sellerCompanyName =
+  cleanText(
+    listing.companyName ||
+    sellerPublicData.companyName ||
+    sellerProfile.abbreviatedName
+  ) || "Seller Profile";
 
 const sellerLocation =
   cleanText(
@@ -489,6 +533,7 @@ function lightboxNext() {
 
                 <div>
                   <strong>{sellerName}</strong>
+                  <p>{sellerCompanyName}</p>
                   <p>{sellerLocation}</p>
                 </div>
               </div>
