@@ -1066,7 +1066,7 @@ function lightboxNext() {
 
 .seller-avatar img {
  max-width: 115%;
-max-height: 115%;
+max-height: none;
   object-fit: contain;
   object-position: center center;
   display: block;
