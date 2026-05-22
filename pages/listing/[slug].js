@@ -1065,7 +1065,7 @@ height: 92px;
 }
 
 .seller-avatar img {
- max-width: 115%;
+ max-width: 105%;
 max-height: none;
   object-fit: contain;
   object-position: center center;
