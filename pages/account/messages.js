@@ -124,6 +124,9 @@ if (item.type === "image") {
   );
 })()
 
+          };
+        });
+
         setThreads(formatted);
 
         if (formatted.length > 0) {
