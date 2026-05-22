@@ -36,7 +36,7 @@ export default function MessagesPage() {
 
         const response = await sdk.transactions.query({
           only: "sale",
-          include: ["listing", "customer"],
+          include: ["listing", "listing.images", "customer"],
           perPage: 50
         });
 
@@ -98,9 +98,10 @@ export default function MessagesPage() {
             email:
               protectedData?.buyerEmail || "",
 
-            image:
-              listing?.images?.[0] ||
-              "/images/hero-equipment-yard.jpg"
+           image:
+  listing?.attributes?.publicData?.image ||
+  listing?.attributes?.publicData?.imageUrl ||
+  "/images/hero-equipment-yard.jpg"
           };
         });
 
