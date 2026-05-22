@@ -212,55 +212,98 @@ export default function SellerYardPage() {
     sellerSeedListing?.author?.id?.uuid ||
     "";
 
-  const sellerListings = useMemo(() => {
-    if (!sellerSeedListing || !sellerAuthorId) return [];
+const sellerSeedListing = useMemo(() => {
+  if (!sellerSlug || listings.length === 0) return null;
 
-    return listings.filter(item => {
-      const itemAuthorId =
-        item.authorId ||
-        item.sellerId ||
-        item.author?.id ||
-        item.author?.id?.uuid ||
-        "";
+  const targetSlug = String(sellerSlug).toLowerCase();
 
-      const listingStatus =
-        item.listingStatus ||
-        item.publicData?.listingStatus ||
-        item.attributes?.publicData?.listingStatus ||
-        "live";
+  return listings.find(item => {
+    const displayName =
+      clean(item.sellerName) ||
+      clean(item.authorName) ||
+      "IronXchange User";
 
-      return (
-        String(itemAuthorId) === String(sellerAuthorId) &&
-        listingStatus !== "archived" &&
-        listingStatus !== "deleted"
-      );
-    });
-  }, [listings, sellerSeedListing, sellerAuthorId]);
+    const companyName =
+      clean(item.sellerCompany) ||
+      clean(item.companyName) ||
+      "Seller Profile";
 
-  const yardTitle =
-    clean(sellerSeedListing?.sellerCompany) ||
-    clean(sellerSeedListing?.companyName) ||
-    clean(sellerSeedListing?.sellerName) ||
-    "IronXchange Yard";
+    const possibleValues = [
+      item.authorId,
+      item.sellerId,
+      item.author?.id,
+      item.author?.id?.uuid,
+      displayName,
+      companyName
+    ]
+      .filter(Boolean)
+      .map(value => slugify(String(value)));
 
-  const sellerName =
-    clean(sellerSeedListing?.sellerName) ||
-    yardTitle;
+    return possibleValues.includes(targetSlug);
+  });
+}, [sellerSlug, listings]);
 
-  const sellerLocation =
-    clean(sellerSeedListing?.sellerLocation) ||
-    clean(sellerSeedListing?.location) ||
-    "Location not listed";
+const sellerAuthorId =
+  sellerSeedListing?.authorId ||
+  sellerSeedListing?.sellerId ||
+  sellerSeedListing?.author?.id ||
+  sellerSeedListing?.author?.id?.uuid ||
+  "";
 
-  const sellerLogo =
-    sellerSeedListing?.sellerLogo ||
-    sellerSeedListing?.profileImage ||
-    "";
+const sellerListings = useMemo(() => {
+  if (!sellerAuthorId) return [];
 
-  const website =
-    clean(sellerSeedListing?.publicData?.website) ||
-    clean(sellerSeedListing?.website) ||
-    "";
+  return listings.filter(item => {
+    const itemAuthorId =
+      item.authorId ||
+      item.sellerId ||
+      item.author?.id ||
+      item.author?.id?.uuid ||
+      "";
+
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus ||
+      "live";
+
+    return (
+      String(itemAuthorId) === String(sellerAuthorId) &&
+      listingStatus !== "archived" &&
+      listingStatus !== "deleted"
+    );
+  });
+}, [listings, sellerAuthorId]);
+
+const displayName =
+  clean(sellerSeedListing?.sellerName) ||
+  clean(sellerSeedListing?.authorName) ||
+  "IronXchange User";
+
+const companyName =
+  clean(sellerSeedListing?.sellerCompany) ||
+  clean(sellerSeedListing?.companyName) ||
+  "Seller Profile";
+
+const yardTitle =
+  companyName !== "Seller Profile" ? companyName : displayName;
+
+const sellerName = displayName;
+
+const sellerLocation =
+  clean(sellerSeedListing?.sellerLocation) ||
+  clean(sellerSeedListing?.location) ||
+  "Location not listed";
+
+const sellerLogo =
+  sellerSeedListing?.sellerLogo ||
+  sellerSeedListing?.profileImage ||
+  "";
+
+const website =
+  clean(sellerSeedListing?.publicData?.website) ||
+  clean(sellerSeedListing?.website) ||
+  "";
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -336,24 +379,37 @@ export default function SellerYardPage() {
     );
   }
 
-  if (!sellerSeedListing) {
-  const possibleYards = listings.slice(0, 20).map(item => {
-    const label =
-      clean(item.sellerCompany) ||
-      clean(item.companyName) ||
-      clean(item.sellerName) ||
-      clean(item.authorName) ||
-      clean(item.authorId) ||
-      "IronXchange Seller";
+if (!sellerSeedListing) {
+  const seen = new Set();
 
-    const yardSlug =
-      slugify(label) || slugify(item.authorId || "");
+  const possibleYards = listings
+    .map(item => {
+      const displayName =
+        clean(item.sellerName) ||
+        clean(item.authorName) ||
+        "IronXchange User";
 
-    return {
-      label,
-      slug: yardSlug
-    };
-  });
+      const companyName =
+        clean(item.sellerCompany) ||
+        clean(item.companyName) ||
+        "Seller Profile";
+
+      const label =
+        companyName !== "Seller Profile"
+          ? `${companyName} — ${displayName}`
+          : displayName;
+
+      const slug =
+        slugify(item.authorId || item.sellerId || label);
+
+      return { label, slug };
+    })
+    .filter(yard => {
+      if (!yard.slug || seen.has(yard.slug)) return false;
+      seen.add(yard.slug);
+      return true;
+    })
+    .slice(0, 25);
 
   return (
     <main className="loading">
