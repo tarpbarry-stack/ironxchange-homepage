@@ -224,16 +224,20 @@ export default async function handler(req, res) {
 
     const included = data.included || [];
     const imageById = {};
-    const authorById = {};
+const logoById = {};
+const authorById = {};
 
     included.forEach((asset) => {
       const id = getId(asset.id);
       if (!id) return;
 
       if (asset.type === "image") {
-        const url = getBestImageUrl(asset);
-        if (url) imageById[id] = url;
-      }
+  const url = getBestImageUrl(asset);
+  const logoUrl = getBestProfileLogoUrl(asset);
+
+  if (url) imageById[id] = url;
+  if (logoUrl) logoById[id] = logoUrl;
+}
 
       if (asset.type === "user") {
         authorById[id] = asset;
@@ -253,7 +257,7 @@ export default async function handler(req, res) {
           null;
 
         const author = authorId ? authorById[authorId] : null;
-        const sellerInfo = getSellerInfo(author, imageById);
+        const sellerInfo = getSellerInfo(author, logoById);
 
         const slug = (attrs.slug || attrs.title || "equipment")
           .toLowerCase()
