@@ -1240,8 +1240,11 @@ if (!sellerSeedListing) {
           }
 
           .cards {
-            grid-template-columns: 1fr;
-          }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 320px));
+  gap: 22px;
+  justify-content: start;
+}
         }
       `}</style>
     </>
