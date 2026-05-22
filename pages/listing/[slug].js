@@ -1079,8 +1079,8 @@ function lightboxNext() {
 }
 
 .seller-avatar img {
-  width: 100%;
-  height: 100%;
+  width: 115%;
+  height: 115%;
   object-fit: contain;
   object-position: center center;
   display: block;
