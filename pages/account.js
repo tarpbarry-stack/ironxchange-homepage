@@ -540,26 +540,37 @@ const logoUrl =
                           </span>
 
                          <span
-  className={`listing-status ${
-    (
+<div className="listing-status-stack">
+  <span
+    className={`listing-status ${
+      (
+        listing.listingStatus ||
+        listing.publicData?.listingStatus ||
+        listing.attributes?.publicData?.listingStatus
+      ) === "archived"
+        ? "archived"
+        : "active"
+    }`}
+  >
+    {(
       listing.listingStatus ||
       listing.publicData?.listingStatus ||
       listing.attributes?.publicData?.listingStatus
     ) === "archived"
-      ? "archived"
-      : "active"
-  }`}
->
-  {(
-    listing.listingStatus ||
-    listing.publicData?.listingStatus ||
-    listing.attributes?.publicData?.listingStatus
-  ) === "archived"
-    ? "ARCHIVED"
-    : "ACTIVE"}
-</span>
+      ? "ARCHIVED"
+      : "ACTIVE"}
+  </span>
 
-      <span className="listing-action-stack">
+  <button
+    type="button"
+    className="listing-delete-btn"
+    onClick={() => confirmDelete(listing)}
+  >
+    DELETE
+  </button>
+</div>
+
+<span>
   <select
     className="action-select"
     defaultValue=""
@@ -589,16 +600,9 @@ const logoUrl =
     <option value="relist">Relist</option>
     <option value="archive">Archive</option>
   </select>
-
-  <button
-    type="button"
-    className="listing-delete-btn"
-    onClick={() => confirmDelete(listing)}
-  >
-    DELETE
-  </button>
 </span>
 
+  
 <span className="listing-metric">
   {listing.views || "—"}
 </span>
@@ -1315,6 +1319,14 @@ main {
   color: #A0A0A0;
 }
 
+.listing-status-stack {
+  display: grid;
+  grid-template-rows: 24px 24px;
+  gap: 4px;
+  justify-items: center;
+  margin-left: -20px;
+}
+
 .listing-delete-btn {
   width: 82px;
   height: 24px;
@@ -1368,18 +1380,6 @@ main {
 .action-select:focus {
   border-color: #FFC400;
   box-shadow: 0 0 0 1px rgba(255,196,0,.25);
-}
-
-.listing-action-stack {
-  display: grid;
-  grid-template-rows: 30px 24px;
-  gap: 4px;
-  align-items: start;
-  margin-left: 14px;
-}
-
-.listing-action-stack .action-select {
-  margin-left: 0;
 }
 
 .right-stack {
