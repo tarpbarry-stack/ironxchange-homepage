@@ -1045,8 +1045,8 @@ function lightboxNext() {
 }
 
       .seller-avatar {
-  width: 140px;
-  height: 72px;
+ width: 180px;
+height: 92px;
 
   border: 1px solid #F2F2F2;
   border-radius: 10px;
@@ -1061,7 +1061,7 @@ function lightboxNext() {
 
   padding: 8px;
 
-  flex-shrink: 0;
+  flex: 0 0 180px;
 }
 
 .seller-avatar img {
