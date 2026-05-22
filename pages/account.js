@@ -1295,6 +1295,7 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 58px;
   min-width: 58px;
   height: 24px;
   padding: 0 8px;
@@ -1304,7 +1305,6 @@ main {
   letter-spacing: .45px;
   white-space: nowrap;
   text-transform: uppercase;
-  margin-left: -20px;
 }
 
 .listing-status.active {
@@ -1322,7 +1322,12 @@ main {
   display: grid;
   grid-template-rows: 24px 24px;
   gap: 4px;
+
   justify-items: center;
+  align-items: center;
+
+  width: 58px;
+
   margin-left: -20px;
 }
 
@@ -1331,9 +1336,9 @@ main {
   align-items: center;
   justify-content: center;
 
+  width: 58px;
   min-width: 58px;
   height: 24px;
-  padding: 0 8px;
 
   border-radius: 999px;
 
