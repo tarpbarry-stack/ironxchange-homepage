@@ -251,12 +251,22 @@ const sellerLocation =
     listing.author?.attributes?.profile?.publicData?.location
   ) || location;
 
+const sellerImageVariants =
+  listing.author?.attributes?.profileImage?.attributes?.variants ||
+  listing.author?.profileImage?.attributes?.variants ||
+  {};
+
 const sellerLogo =
   listing.sellerLogo ||
   listing.sellerImage ||
   listing.authorImage ||
-  listing.author?.profileImage ||
-  listing.author?.attributes?.profileImage?.attributes?.variants?.default?.url ||
+  sellerImageVariants.default?.url ||
+  sellerImageVariants["landscape-crop"]?.url ||
+  sellerImageVariants["landscape-crop2x"]?.url ||
+  sellerImageVariants["scaled-large"]?.url ||
+  sellerImageVariants["scaled-medium"]?.url ||
+  sellerImageVariants["scaled-small"]?.url ||
+  Object.values(sellerImageVariants).find(v => v?.url)?.url ||
   null;
   const description =
     cleanText(listing.description) ||
