@@ -260,7 +260,12 @@ async function confirmDelete(listing) {
   const displayName =
     publicData.companyName || profile?.displayName || "IronXchange User";
 
-  const companyName = publicData.sellerName || profile?.abbreviatedName || "";
+ const companyName =
+  publicData.companyName ||
+  publicData.sellerName ||
+  profile?.displayName ||
+  profile?.abbreviatedName ||
+  "";
 
   const imageId = user?.relationships?.profileImage?.data?.id?.uuid || null;
 
