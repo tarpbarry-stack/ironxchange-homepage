@@ -257,16 +257,16 @@ async function confirmDelete(listing) {
   const profile = user?.attributes?.profile || {};
   const publicData = profile?.publicData || {};
 
-  const displayName =
-    publicData.companyName || profile?.displayName || "IronXchange User";
-
- const companyName =
-  publicData.companyName ||
+const displayName =
   publicData.sellerName ||
   profile?.displayName ||
-  profile?.abbreviatedName ||
-  "";
+  "IronXchange User";
 
+const companyName =
+  publicData.companyName ||
+  profile?.abbreviatedName ||
+  "Seller Profile";
+  
   const imageId = user?.relationships?.profileImage?.data?.id?.uuid || null;
 
   const profileImage = user?.included?.find(
