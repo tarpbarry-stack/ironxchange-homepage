@@ -503,23 +503,25 @@ export default function AccountProfilePage() {
           color: #38A169 !important;
         }
 
-        .dashboard {
-          display: grid;
-          grid-template-columns: 180px 1fr;
-          gap: 8px;
-          padding: 10px 1.25% 40px;
-          max-width: 1680px;
-          margin: 0 auto;
-        }
+       .dashboard {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 1.25%;
+  max-width: 1680px;
+  height: calc(100vh - 64px);
+  margin: 0 auto;
+  overflow: hidden;
+}
 
         .rail {
-          background: #111;
-          border: 1px solid #252525;
-          border-radius: 12px;
-          padding: 6px;
-          min-height: calc(100vh - 86px);
-        }
-
+  background: #111;
+  border: 1px solid #252525;
+  border-radius: 12px;
+  padding: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
         .rail-top {
           text-align: center;
           padding: 6px 4px 8px;
