@@ -212,44 +212,6 @@ export default function SellerYardPage() {
     sellerSeedListing?.author?.id?.uuid ||
     "";
 
-const sellerSeedListing = useMemo(() => {
-  if (!sellerSlug || listings.length === 0) return null;
-
-  const targetSlug = String(sellerSlug).toLowerCase();
-
-  return listings.find(item => {
-    const displayName =
-      clean(item.sellerName) ||
-      clean(item.authorName) ||
-      "IronXchange User";
-
-    const companyName =
-      clean(item.sellerCompany) ||
-      clean(item.companyName) ||
-      "Seller Profile";
-
-    const possibleValues = [
-      item.authorId,
-      item.sellerId,
-      item.author?.id,
-      item.author?.id?.uuid,
-      displayName,
-      companyName
-    ]
-      .filter(Boolean)
-      .map(value => slugify(String(value)));
-
-    return possibleValues.includes(targetSlug);
-  });
-}, [sellerSlug, listings]);
-
-const sellerAuthorId =
-  sellerSeedListing?.authorId ||
-  sellerSeedListing?.sellerId ||
-  sellerSeedListing?.author?.id ||
-  sellerSeedListing?.author?.id?.uuid ||
-  "";
-
 const sellerListings = useMemo(() => {
   if (!sellerAuthorId) return [];
 
