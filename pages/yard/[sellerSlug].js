@@ -188,18 +188,20 @@ export default function SellerYardPage() {
   const targetSlug = String(sellerSlug).toLowerCase();
 
   return listings.find(item => {
-    const possibleLabels = [
+    const possibleValues = [
+      item.authorId,
+      item.sellerId,
+      item.author?.id,
+      item.author?.id?.uuid,
       item.sellerCompany,
       item.companyName,
       item.sellerName,
-      item.authorName,
-      item.authorId,
-      item.sellerId
+      item.authorName
     ]
       .filter(Boolean)
-      .map(value => slugify(value));
+      .map(value => slugify(String(value)));
 
-    return possibleLabels.includes(targetSlug);
+    return possibleValues.includes(targetSlug);
   });
 }, [sellerSlug, listings]);
 
@@ -335,21 +337,64 @@ export default function SellerYardPage() {
   }
 
   if (!sellerSeedListing) {
-    return (
-      <main className="loading">
-        Seller yard not found.
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-          }
-        `}</style>
-      </main>
-    );
-  }
+  const possibleYards = listings.slice(0, 20).map(item => {
+    const label =
+      clean(item.sellerCompany) ||
+      clean(item.companyName) ||
+      clean(item.sellerName) ||
+      clean(item.authorName) ||
+      clean(item.authorId) ||
+      "IronXchange Seller";
+
+    const yardSlug =
+      slugify(label) || slugify(item.authorId || "");
+
+    return {
+      label,
+      slug: yardSlug
+    };
+  });
+
+  return (
+    <main className="loading">
+      <h1>Seller yard not found.</h1>
+
+      <p>Available test yards:</p>
+
+      <ul>
+        {possibleYards.map((yard, index) => (
+          <li key={`${yard.slug}-${index}`}>
+            <a href={`/yard/${yard.slug}`}>
+              {yard.label} — /yard/{yard.slug}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <style jsx>{`
+        .loading {
+          min-height: 100vh;
+          background: #0b0b0b;
+          color: #d6d6d6;
+          padding: 40px;
+          font-family: Arial, sans-serif;
+        }
+
+        h1 {
+          color: #f2f2f2;
+        }
+
+        a {
+          color: #FFC400;
+        }
+
+        li {
+          margin: 10px 0;
+        }
+      `}</style>
+    </main>
+  );
+}
 
   return (
     <>
