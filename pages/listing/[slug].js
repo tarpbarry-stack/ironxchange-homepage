@@ -1065,13 +1065,13 @@ function lightboxNext() {
 }
 
 .seller-avatar img {
-  width: 115%;
-  height: 115%;
+ max-width: 115%;
+max-height: 115%;
   object-fit: contain;
   object-position: center center;
   display: block;
   border-radius: 0;
-  transform: translateY(4px);
+  transform: translateY(0px);
 }
 
         .seller-row strong {
