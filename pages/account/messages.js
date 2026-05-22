@@ -241,35 +241,41 @@ if (item.type === "image") {
                     No inquiries yet.
                   </div>
                 ) : (
-                  threads.map(thread => (
-                    <button
-                      key={thread.id}
-                      className={`queue-card ${
-                        selectedId === thread.id
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() => setSelectedId(thread.id)}
-                    >
-                      <div>
-                        <strong>
-                          {thread.buyer}
-                        </strong>
+                 threads.map(thread => (
+  <button
+    key={thread.id}
+    className={`queue-card ${
+      selectedId === thread.id
+        ? "active"
+        : ""
+    }`}
+    onClick={() => setSelectedId(thread.id)}
+  >
+    <img
+      src={thread.image}
+      alt={thread.title}
+      className="queue-photo"
+    />
 
-                        <span>
-                          {cleanMachineTitle(thread.title)}
-                        </span>
-                      </div>
+    <div className="queue-main">
+      <strong>
+        {thread.buyer}
+      </strong>
 
-                      <small>
-                        {formatTime(thread.createdAt)}
-                      </small>
+      <span>
+        {cleanMachineTitle(thread.title)}
+      </span>
 
-                      <p>
-                        {thread.message}
-                      </p>
-                    </button>
-                  ))
+      <small>
+        {formatTime(thread.createdAt)}
+      </small>
+
+      <p>
+        {thread.message}
+      </p>
+    </div>
+  </button>
+))
                 )}
               </section>
 
@@ -497,14 +503,77 @@ if (item.type === "image") {
         }
 
         .queue-card {
-          background: #101010;
-          border: 1px solid #252525;
-          border-radius: 12px;
-          padding: 14px;
-          text-align: left;
-          cursor: pointer;
-        }
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
 
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 12px;
+
+  padding: 12px;
+
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.queue-card:hover {
+  border-color: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+.queue-card.active {
+  border-color: #FFC400;
+}
+.queue-photo {
+  width: 92px;
+  height: 68px;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+  border: 1px solid #2A2A2A;
+
+  background: #050505;
+
+  display: block;
+}
+
+.queue-main {
+  min-width: 0;
+}
+
+.queue-main strong {
+  display: block;
+  font-size: 14px;
+}
+
+.queue-main span {
+  display: block;
+  margin-top: 4px;
+
+  color: #999;
+  font-size: 12px;
+}
+
+.queue-main small {
+  display: block;
+  margin-top: 10px;
+
+  color: #666;
+}
+
+.queue-main p {
+  margin: 10px 0 0;
+
+  color: #ccc;
+  line-height: 1.5;
+  font-size: 13px;
+}
         .queue-card.active {
           border-color: ${BRAND_YELLOW};
         }
