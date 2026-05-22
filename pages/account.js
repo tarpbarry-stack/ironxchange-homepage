@@ -539,7 +539,6 @@ const logoUrl =
                             {listing.age ?? "—"}
                           </span>
 
-                         <span
 <div className="listing-status-stack">
   <span
     className={`listing-status ${
