@@ -293,6 +293,15 @@ if (item.type === "image") {
                         <span>
                           {activeThread.buyer}
                         </span>
+                <div className="buyer-contact-row">
+  {activeThread.phone ? (
+    <span>{activeThread.phone}</span>
+  ) : null}
+
+  {activeThread.email ? (
+    <span>{activeThread.email}</span>
+  ) : null}
+</div>
                       </div>
 
                       <div className="thread-actions">
@@ -626,6 +635,27 @@ if (item.type === "image") {
           margin-top: 6px;
           color: #888;
         }
+
+.buyer-contact-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.buyer-contact-row span {
+  background: #101010;
+  border: 1px solid #333;
+  border-radius: 999px;
+  padding: 8px 12px;
+
+  color: #bbb;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: .3px;
+}
 
         .thread-actions {
           display: flex;
