@@ -161,13 +161,28 @@ function getSellerInfo(author, imageById) {
   const profileImage = getProfileImage(author, imageById);
 
   return {
-    sellerName: companyName || displayName || "Private Seller",
-    sellerCompany: companyName || "",
-    sellerLocation: sellerLocation ? String(sellerLocation).toUpperCase() : "",
-    sellerLogo: profileImage,
-    profileImage,
-    authorProfile: profile
-  };
+  sellerName:
+    publicData.sellerName ||
+    displayName ||
+    "IronXchange Seller",
+
+  sellerCompany:
+    publicData.companyName ||
+    companyName ||
+    profile.abbreviatedName ||
+    "",
+
+  sellerLocation:
+    sellerLocation
+      ? String(sellerLocation).toUpperCase()
+      : "",
+
+  sellerLogo: profileImage,
+
+  profileImage,
+
+  authorProfile: profile
+};
 }
 
 export default async function handler(req, res) {
