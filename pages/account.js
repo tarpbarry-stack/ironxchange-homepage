@@ -695,17 +695,26 @@ const logoUrl =
                     <a href="/account/messages">OPEN →</a>
                   </div>
 
-                  <div className="activity-list">
-                    <div>
-                      <span className="dot yellow"></span>
-                      <p>New buyer inquiries will appear here.</p>
-                    </div>
-
-                    <div>
-                      <span className="dot green"></span>
-                      <p>Email remains primary. This keeps the record.</p>
-                    </div>
-                  </div>
+             <div className="activity-list">
+  {recentInquiries.length > 0 ? (
+    recentInquiries.map(item => (
+      <a
+        href="/account/messages"
+        className="inquiry-preview"
+        key={item.id}
+      >
+        <strong>{item.buyer}</strong>
+        <span>{cleanMachineTitle(item.title)}</span>
+        <p>{item.message}</p>
+      </a>
+    ))
+  ) : (
+    <div>
+      <span className="dot yellow"></span>
+      <p>New buyer inquiries will appear here.</p>
+    </div>
+  )}
+</div>
                 </section>
 
                 <section className="panel side-panel activity-panel">
