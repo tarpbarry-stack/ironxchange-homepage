@@ -182,20 +182,26 @@ export default function SellerYardPage() {
     checkAuth();
   }, []);
 
-  const sellerSeedListing = useMemo(() => {
-    if (!sellerSlug || listings.length === 0) return null;
+ const sellerSeedListing = useMemo(() => {
+  if (!sellerSlug || listings.length === 0) return null;
 
-    return listings.find(item => {
-      const sellerLabel =
-        clean(item.sellerCompany) ||
-        clean(item.companyName) ||
-        clean(item.sellerName) ||
-        clean(item.authorName) ||
-        "ironxchange-seller";
+  const targetSlug = String(sellerSlug).toLowerCase();
 
-      return slugify(sellerLabel) === sellerSlug;
-    });
-  }, [sellerSlug, listings]);
+  return listings.find(item => {
+    const possibleLabels = [
+      item.sellerCompany,
+      item.companyName,
+      item.sellerName,
+      item.authorName,
+      item.authorId,
+      item.sellerId
+    ]
+      .filter(Boolean)
+      .map(value => slugify(value));
+
+    return possibleLabels.includes(targetSlug);
+  });
+}, [sellerSlug, listings]);
 
   const sellerAuthorId =
     sellerSeedListing?.authorId ||
