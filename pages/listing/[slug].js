@@ -238,10 +238,11 @@ const sellerName =
 
 const sellerCompanyName =
   cleanText(
+    listing.sellerCompany ||
     listing.companyName ||
     sellerPublicData.companyName ||
     sellerProfile.abbreviatedName
-  ) || "Seller Profile";
+  ) || "";
 
 const sellerLocation =
   cleanText(
@@ -1043,22 +1044,26 @@ function lightboxNext() {
           gap: 16px;
         }
 
-        .seller-avatar {
-          width: 58px;
-          height: 58px;
-          border-radius: 50%;
-          border: 1px solid #777;
-          display: grid;
-          place-items: center;
-          font-size: 28px;
-          color: #ddd;
-        }
+      .seller-avatar {
+  width: 140px;
+  height: 72px;
+  border-radius: 10px;
+  border: 1px solid #777;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  color: #ddd;
+  background: #050505;
+  overflow: hidden;
+  padding: 8px;
+}
 
-        .seller-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+.seller-avatar img {
+  width: 165%;
+  height: 165%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
 }
 
         .seller-row strong {
