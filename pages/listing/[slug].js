@@ -551,17 +551,24 @@ function lightboxNext() {
             </div>
 
            <div className="seller-actions">
- <a
-  href={
-    loggedIn
-      ? `/inquire?listingId=${listing.id}`
-      : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
-  }
-  className="message-btn"
->
-  Message Seller
-</a>
-    
+  <a
+    href={
+      loggedIn
+        ? `/inquire?listingId=${listing.id}`
+        : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
+    }
+    className="message-btn"
+  >
+    Message Seller
+  </a>
+
+  <a
+    href={`/yard/${listing.authorId}`}
+    className="yard-btn"
+  >
+    View Seller Yard
+  </a>
+
   <button type="button" className="call-btn">
     Call
   </button>
@@ -1112,6 +1119,39 @@ max-height: none;
           border: 1px solid #3a3a3a;
           color: #e5e5e5;
         }
+
+        .yard-btn {
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 16px;
+
+  background: #101010;
+  border: 1px solid #2A2A2A;
+  border-radius: 10px;
+
+  color: #EAEAEA;
+  text-decoration: none;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    color .15s ease;
+}
+
+.yard-btn:hover {
+  border-color: #FFC400;
+  color: #FFC400;
+  background: #161616;
+}
 
 .lightbox {
   position: fixed;
