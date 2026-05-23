@@ -40,7 +40,7 @@ function slugify(text = "") {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
- 
+
 function clean(value) {
   return value ? String(value).trim() : "";
 }
@@ -591,7 +591,6 @@ export default function SellerYardPage() {
               <span>Active Machines</span>
             </div>
           </section>
-
           <section className="search-section">
             <div className="search-top-row">
               <input
