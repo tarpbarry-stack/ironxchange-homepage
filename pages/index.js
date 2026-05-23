@@ -574,7 +574,8 @@ export default function Home() {
         }
 
        .featured {
-  padding: 72px 5% 52px;
+  min-height: 660px;
+  padding: 76px 5% 60px;
   background: #0b0b0b;
   color: #d6d6d6;
 }
@@ -592,6 +593,7 @@ export default function Home() {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
+  min-height: 560px;
 }
         .how {
           background: #f3f3f3;
