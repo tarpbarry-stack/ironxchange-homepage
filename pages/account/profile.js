@@ -110,11 +110,29 @@ export default function AccountProfilePage() {
   }, []);
 
   function updateField(key, value) {
-    setForm(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }
+  setForm(prev => ({
+    ...prev,
+    [key]: value
+  }));
+}
+
+function SocialInput({ icon, label, value, onChange, placeholder }) {
+  return (
+    <label className="social-field">
+      <span>{label}</span>
+
+      <div className="social-input">
+        <i className={icon}></i>
+
+        <input
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+        />
+      </div>
+    </label>
+  );
+}
 
   function handleLogoChange(e) {
     const file = e.target.files?.[0];
@@ -868,6 +886,38 @@ textarea {
         textarea::placeholder {
           color: #666;
         }
+
+.social-field {
+  gap: 6px;
+}
+
+.social-input {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+
+  overflow: hidden;
+}
+
+.social-input i {
+  height: 38px;
+  display: grid;
+  place-items: center;
+
+  color: #FFC400;
+  border-right: 1px solid #252525;
+  font-size: 14px;
+}
+
+.social-input input {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
 
         .actions {
           display: flex;
