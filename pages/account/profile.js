@@ -1081,8 +1081,20 @@ textarea {
 
 .social-input input {
   border: none !important;
-  background: transparent !important;
+  background: #101010 !important;
+  color: #f2f2f2 !important;
+
   box-shadow: none !important;
+  outline: none !important;
+
+  height: 36px;
+}
+.social-input input:-webkit-autofill,
+.social-input input:-webkit-autofill:hover,
+.social-input input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f2f2f2;
+  -webkit-box-shadow: 0 0 0px 1000px #101010 inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
        .actions {
