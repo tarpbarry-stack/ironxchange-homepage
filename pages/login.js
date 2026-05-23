@@ -91,112 +91,172 @@ window.location.href = next;
       </main>
 
       <style jsx>{`
-        :global(body) {
-          margin: 0;
-          background: #0b0b0b;
-          color: #f2f2f2;
-          font-family: Arial, sans-serif;
-        }
+  :global(body) {
+    margin: 0;
+    background: #0b0b0b;
+    color: #f2f2f2;
+    font-family: Arial, sans-serif;
+  }
 
-        * {
-          box-sizing: border-box;
-        }
+  * {
+    box-sizing: border-box;
+  }
 
-        main {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-        }
+  main {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    background:
+      radial-gradient(circle at top, rgba(255,196,0,.055), transparent 34%),
+      #0b0b0b;
+  }
 
-        .card {
-          width: 100%;
-          max-width: 460px;
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 18px;
-          padding: 34px;
-        }
+  .card {
+    width: 100%;
+    max-width: 430px;
 
-        .logo {
-          height: 42px;
-          display: block;
-          margin: 0 auto 24px;
-        }
+    background: #151515;
+    border: 1px solid #282828;
+    border-radius: 12px;
 
-       h1 {
-  margin: 0 0 18px;
-  text-align: center;
-  font-size: 18px;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  font-weight: 800;
-  color: #f2f2f2;
-}
+    padding: 28px;
 
-        form {
-          display: grid;
-          gap: 16px;
-        }
+    box-shadow: 0 24px 70px rgba(0,0,0,.42);
+  }
 
-        label {
-          display: grid;
-          gap: 8px;
-          font-size: 12px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
+  .logo {
+    height: 40px;
+    display: block;
+    margin: 0 auto 22px;
+  }
 
-        input {
-          width: 100%;
-          border: 1px solid #333;
-          background: #0d0d0d;
-          color: white;
-          border-radius: 10px;
-          padding: 14px;
-          font-size: 15px;
-        }
+  h1 {
+    margin: 0 0 18px;
 
-        button {
-          margin-top: 8px;
-          border: none;
-          border-radius: 10px;
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          padding: 18px 20px;
-          font-size: 13px;
-          font-weight: 900;
-          text-transform: uppercase;
-          cursor: pointer;
-        }
+    text-align: center;
 
-        .error-box {
-          margin-top: 4px;
-          border-radius: 12px;
-          padding: 14px;
-          background: rgba(197,48,48,.15);
-          border: 1px solid rgba(197,48,48,.5);
-        }
+    color: #f2f2f2;
 
-        .signup-area {
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: #9A9A9A;
-}
+    font-size: 16px;
+    font-weight: 900;
 
-.signup-link {
-  color: #FFC400;
-  text-decoration: none;
-  font-weight: 900;
-  letter-spacing: .3px;
-}
-      `}</style>
-    </>
-  );
-}
+    letter-spacing: .65px;
+    text-transform: uppercase;
+  }
+
+  form {
+    display: grid;
+    gap: 13px;
+  }
+
+  label {
+    display: grid;
+    gap: 6px;
+
+    color: #9a9a9a;
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+  }
+
+  input {
+    width: 100%;
+    height: 36px;
+
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+
+    background: #101010;
+    color: #f2f2f2;
+
+    padding: 0 12px;
+
+    font-size: 13px;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: #FFC400;
+    box-shadow: 0 0 0 1px rgba(255,196,0,.12);
+  }
+
+  button {
+    height: 36px;
+
+    margin-top: 4px;
+
+    border: 1px solid #3a2d00;
+    border-radius: 8px;
+
+    background: #151515;
+    color: #FFC400;
+
+    padding: 0 14px;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #1a1400;
+    border-color: #FFC400;
+  }
+
+  button:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+
+  .signup-area {
+    margin-top: 14px;
+    padding-top: 14px;
+
+    border-top: 1px solid #252525;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 11px;
+    color: #8a8a8a;
+  }
+
+  .signup-link {
+    color: #FFC400;
+    text-decoration: none;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+  }
+
+  .signup-link:hover {
+    color: #f2f2f2;
+  }
+
+  .error-box {
+    margin-top: 2px;
+
+    border-radius: 8px;
+    padding: 10px 12px;
+
+    background: rgba(229,62,62,.10);
+    border: 1px solid rgba(229,62,62,.38);
+    color: #ffb4b4;
+
+    font-size: 11px;
+    line-height: 1.35;
+  }
+`}</style>
