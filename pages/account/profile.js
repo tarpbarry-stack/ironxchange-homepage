@@ -216,7 +216,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
       setUser(updatedUser);
       setLogoPreview(getImageUrlFromIncluded(updatedUser) || logoPreview);
 
-      alert("Profile saved.");
+      alert("Seller profile saved.");
     } catch (err) {
       alert(`Profile save failed: ${err.message}`);
     } finally {
@@ -323,7 +323,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   Saved
 </a>
 
-<a href="/account/profile">
+<a href="/account/profile" className="active">
   <i className="fa-regular fa-id-card"></i>
   Profile
 </a>
@@ -441,7 +441,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     <input
                       value={form.website}
                       onChange={e => updateField("website", e.target.value)}
-                      placeholder="conchoinc.com"
+                      placeholder="www.yoursite.com"
                     />
                   </label>
 
@@ -496,7 +496,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     <textarea
                       value={form.bio}
                       onChange={e => updateField("bio", e.target.value)}
-                      placeholder="Tell buyers who you are, what you sell, and how you operate."
+                      placeholder="Short company overview for buyers viewing your listings and yard."
                       rows={5}
                     />
                   </label>
