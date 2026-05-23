@@ -21,8 +21,9 @@ export default function DiscoveryEngine() {
   }, []);
 
   function saveTargets(nextTargets) {
-    setTargets(nextTargets);
-    localStorage.setItem("ixiDiscoveryTargets", JSON.stringify(nextTargets));
+    const deduped = dedupeTargets(nextTargets);
+    setTargets(deduped);
+    localStorage.setItem("ixiDiscoveryTargets", JSON.stringify(deduped));
   }
 
   function addTarget() {
@@ -32,9 +33,7 @@ export default function DiscoveryEngine() {
     }
 
     const nextTarget = { company, website, category, state };
-    const nextTargets = [...targets, nextTarget];
-
-    saveTargets(nextTargets);
+    saveTargets([...targets, nextTarget]);
 
     setCompany("");
     setWebsite("");
@@ -44,27 +43,25 @@ export default function DiscoveryEngine() {
     setStatus(`Added ${nextTarget.company}`);
   }
 
-  async function runMachineryTraderDiscovery() {
-    setStatus("Running MachineryTrader discovery...");
+  async function runDiscovery(endpoint, label) {
+    setStatus(`Running ${label} discovery...`);
 
-    const response = await fetch("/api/discover-machinerytrader", {
-      method: "POST"
-    });
+    try {
+      const response = await fetch(endpoint, { method: "POST" });
+      const data = await response.json();
 
-    const data = await response.json();
+      if (!response.ok) {
+        setStatus(data.message || `${label} discovery failed.`);
+        return;
+      }
 
-    if (!response.ok) {
-      setStatus(data.message || "MachineryTrader discovery failed.");
-      return;
+      const discovered = data.targets || [];
+      saveTargets([...targets, ...discovered]);
+
+      setStatus(`Added ${discovered.length} ${label} targets.`);
+    } catch (error) {
+      setStatus(`${label} discovery error: ${error.message}`);
     }
-
-    const nextTargets = [...targets, ...(data.targets || [])];
-
-    saveTargets(nextTargets);
-
-    setStatus(
-      `Added ${data.targets.length} MachineryTrader discovery target.`
-    );
   }
 
   function seedTargets() {
@@ -163,11 +160,11 @@ export default function DiscoveryEngine() {
         <StatCard label="Saved Targets" value={targets.length} />
         <StatCard
           label="Dealer Targets"
-          value={targets.filter((t) => t.category.includes("Equipment")).length}
+          value={targets.filter((t) => (t.category || "").includes("Dealer") || (t.category || "").includes("Equipment")).length}
         />
         <StatCard
           label="Contractor Targets"
-          value={targets.filter((t) => t.category.includes("Contractor")).length}
+          value={targets.filter((t) => (t.category || "").includes("Contractor")).length}
         />
         <StatCard
           label="States"
@@ -217,8 +214,31 @@ export default function DiscoveryEngine() {
             Seed Starter Targets
           </button>
 
-          <button style={buttonStyle} onClick={runMachineryTraderDiscovery}>
+          <button
+            style={buttonStyle}
+            onClick={() =>
+              runDiscovery("/api/discover-machinerytrader", "MachineryTrader")
+            }
+          >
             Run MachineryTrader Discovery
+          </button>
+
+          <button
+            style={buttonStyle}
+            onClick={() =>
+              runDiscovery("/api/discover-google", "Google")
+            }
+          >
+            Run Google Discovery
+          </button>
+
+          <button
+            style={buttonStyle}
+            onClick={() =>
+              runDiscovery("/api/discover-oem", "OEM")
+            }
+          >
+            Run OEM Discovery
           </button>
 
           <button style={buttonStyle} onClick={exportTargets}>
@@ -276,6 +296,23 @@ function StatCard({ label, value }) {
 function cleanCsv(value) {
   const text = String(value || "").replace(/"/g, '""');
   return `"${text}"`;
+}
+
+function dedupeTargets(items) {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const key = String(item.website || item.company || "")
+      .trim()
+      .toLowerCase();
+
+    if (!key || seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
 }
 
 const pageStyle = {
