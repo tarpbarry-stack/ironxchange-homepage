@@ -2161,34 +2161,39 @@ style={{
 
 .save-star {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 8;
 
-  width: 32px;
-  height: 32px;
+  right: 64px;
+  bottom: 14px;
+
+  z-index: 6;
+
+  width: 18px;
+  height: 18px;
 
   display: grid;
   place-items: center;
 
-  background: rgba(0,0,0,.62);
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 999px;
+  background: transparent;
+  border: none;
 
-  color: #eaeaea;
+  color: rgba(255,255,255,.42);
+
   cursor: pointer;
+
+  padding: 0;
+}
+
+.save-star i {
+  font-size: 12px;
 }
 
 .save-star.saved {
   color: #FFC400;
-  border-color: rgba(255,196,0,.55);
 }
 
 .save-star:hover {
   color: #FFC400;
-  border-color: rgba(255,196,0,.65);
 }
-
 .card-photo {
   position: relative;
   height: 190px;
@@ -2268,7 +2273,7 @@ style={{
 .hours-top {
   color: #7c7c7c !important;
 
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
 
   letter-spacing: .25px;
