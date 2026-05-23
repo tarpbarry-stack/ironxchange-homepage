@@ -1118,6 +1118,11 @@ export default function SellerYardPage() {
   gap: 22px;
   justify-content: start;
 }
+@media (min-width: 700px) {
+  .cards:has(.card:only-child) {
+    grid-template-columns: 320px;
+  }
+}
 
         .card {
           position: relative;
@@ -1314,7 +1319,6 @@ export default function SellerYardPage() {
           .clear-btn {
             width: 100%;
           }
-        }
 
         @media (max-width: 600px) {
           .nav {
