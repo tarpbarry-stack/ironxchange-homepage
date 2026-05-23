@@ -158,17 +158,11 @@ export default function ListingCard({
   box-shadow:
   inset 0 -40px 70px rgba(0,0,0,.10);
 
- transition:
-  filter .18s ease,
-  transform .28s ease;
+ transition: none;
 }
 
 .card:hover .card-photo {
-  transform: scale(1.018);
-  filter:
-  contrast(1.04)
-  saturate(1.03)
-  brightness(1.01);
+  transform: none;
 }
 
 .card-photo-nav {
