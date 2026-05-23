@@ -410,10 +410,10 @@ export default function Home() {
   color: #38A169 !important;
 }
 
-        .hero {
+      .hero {
   position: relative;
-  height: 625px;
-  min-height: 625px;
+  height: 555px;
+  min-height: 555px;
   background:
     linear-gradient(
       90deg,
@@ -425,12 +425,12 @@ export default function Home() {
   background-size: cover;
   background-position: center 62%;
   color: white;
-  overflow: hidden;
+  overflow: visible;
 }
 
-       .hero-content {
+      .hero-content {
   max-width: 760px;
-  padding: 118px 5% 0;
+  padding: 86px 5% 0;
 }
 
         .hero h1 {
@@ -511,7 +511,7 @@ export default function Home() {
           box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
         }
 
-        .hero-search {
+      .hero-search {
   position: absolute;
   left: 5%;
   right: 5%;
@@ -573,11 +573,12 @@ export default function Home() {
           letter-spacing: 0.4px;
         }
 
-        .featured {
-          padding: 76px 5% 60px;
-          background: #0b0b0b;
-          color: #d6d6d6;
-        }
+       .featured {
+  padding: 72px 5% 52px;
+  background: #0b0b0b;
+  color: #d6d6d6;
+}
+
 .how h2,
 .ready h2 {
   margin: 0;
