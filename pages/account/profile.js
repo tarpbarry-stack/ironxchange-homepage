@@ -335,50 +335,44 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           </aside>
 
           <section className="content">
-            <div className="page-head">
-              <div>
-                <a href="/account" className="back-link">
-                  ← Back to Dashboard
-                </a>
+           <div className="page-head">
+  <div className="head-copy">
+    <a href="/account" className="back-link">
+      ← Back to Dashboard
+    </a>
 
-                <h1>Seller Profile</h1>
-
-                <p>
-                  Configure your public seller yard, listing identity, and dealership presence across IronXchange.
-                </p>
-
-<div className="profile-preview">
-  <div className="preview-logo">
-    {logoPreview ? (
-      <img src={logoPreview} alt={form.companyName || "Seller"} />
-    ) : (
-      <i className="fa-regular fa-user"></i>
-    )}
-  </div>
-
-  <div>
-    <span>Public Seller Yard</span>
-
-    <strong>
-      {form.companyName || "Seller Profile"}
-    </strong>
+    <h1>Seller Profile</h1>
 
     <p>
-      {form.sellerLocation || "Location not listed"}
+      Configure your public seller yard, listing identity, and dealership presence across IronXchange.
     </p>
   </div>
-</div>    
-              </div>
 
-              <button
-                type="button"
-                className="save-top"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "SAVING..." : "SAVE PROFILE"}
-              </button>
-            </div>
+  <div className="profile-preview">
+    <div className="preview-logo">
+      {logoPreview ? (
+        <img src={logoPreview} alt={form.companyName || "Seller"} />
+      ) : (
+        <i className="fa-regular fa-user"></i>
+      )}
+    </div>
+
+    <div className="preview-copy">
+      <span>Public Seller Yard</span>
+      <strong>{form.companyName || "Seller Profile"}</strong>
+      <p>{form.sellerLocation || "Location not listed"}</p>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    className="save-top"
+    onClick={handleSave}
+    disabled={saving}
+  >
+    {saving ? "SAVING..." : "SAVE PROFILE"}
+  </button>
+</div>
 
             <form className="profile-grid" onSubmit={handleSave}>
               <section className="panel logo-panel">
@@ -423,7 +417,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     <input
                       value={form.companyName}
                       onChange={e => updateField("companyName", e.target.value)}
-                      placeholder="Concho Inc."
+                      placeholder="Sell Equip Co."
                     />
                   </label>
 
@@ -432,7 +426,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     <input
                       value={form.sellerName}
                       onChange={e => updateField("sellerName", e.target.value)}
-                      placeholder="Barry"
+                      placeholder="Name Here"
                     />
                   </label>
 
@@ -727,18 +721,23 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 }
 
         .page-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px auto;
+  align-items: center;
+  gap: 14px;
 
   background: #151515;
   border: 1px solid #282828;
   border-radius: 10px;
 
-  padding: 14px 16px;
+  padding: 12px 14px;
   margin-bottom: 8px;
 }
+
+.head-copy {
+  min-width: 0;
+}
+
 
         .back-link {
           display: inline-block;
@@ -784,24 +783,6 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   max-width: 420px;
 }
 
-.preview-logo {
-  width: 82px;
-  height: 42px;
-  background: #050505;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.preview-logo img {
-  width: 150%;
-  height: 150%;
-  object-fit: contain;
-}
-
 .profile-preview span {
   display: block;
   color: #FFC400;
@@ -817,6 +798,9 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   color: #f2f2f2;
   font-size: 13px;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-preview p {
