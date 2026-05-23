@@ -461,50 +461,45 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     />
                   </label>
 
-                        <label>
-  Facebook
-  <input
-    value={form.facebookUrl}
-    onChange={e => updateField("facebookUrl", e.target.value)}
-    placeholder="https://facebook.com/company"
-  />
-</label>
+                      <SocialInput
+  icon="fa-brands fa-facebook-f"
+  label="Facebook"
+  value={form.facebookUrl}
+  onChange={e => updateField("facebookUrl", e.target.value)}
+  placeholder="facebook.com/company"
+/>
 
-<label>
-  Instagram
-  <input
-    value={form.instagramUrl}
-    onChange={e => updateField("instagramUrl", e.target.value)}
-    placeholder="https://instagram.com/company"
-  />
-</label>
+<SocialInput
+  icon="fa-brands fa-instagram"
+  label="Instagram"
+  value={form.instagramUrl}
+  onChange={e => updateField("instagramUrl", e.target.value)}
+  placeholder="instagram.com/company"
+/>
 
-<label>
-  LinkedIn
-  <input
-    value={form.linkedinUrl}
-    onChange={e => updateField("linkedinUrl", e.target.value)}
-    placeholder="https://linkedin.com/company/company-name"
-  />
-</label>
+<SocialInput
+  icon="fa-brands fa-linkedin-in"
+  label="LinkedIn"
+  value={form.linkedinUrl}
+  onChange={e => updateField("linkedinUrl", e.target.value)}
+  placeholder="linkedin.com/company/company-name"
+/>
 
-<label>
-  YouTube
-  <input
-    value={form.youtubeUrl}
-    onChange={e => updateField("youtubeUrl", e.target.value)}
-    placeholder="https://youtube.com/@company"
-  />
-</label>
+<SocialInput
+  icon="fa-brands fa-youtube"
+  label="YouTube"
+  value={form.youtubeUrl}
+  onChange={e => updateField("youtubeUrl", e.target.value)}
+  placeholder="youtube.com/@company"
+/>
 
-<label>
-  TikTok
-  <input
-    value={form.tiktokUrl}
-    onChange={e => updateField("tiktokUrl", e.target.value)}
-    placeholder="https://tiktok.com/@company"
-  />
-</label>
+<SocialInput
+  icon="fa-brands fa-tiktok"
+  label="TikTok"
+  value={form.tiktokUrl}
+  onChange={e => updateField("tiktokUrl", e.target.value)}
+  placeholder="tiktok.com/@company"
+/>
                   <div className="form-section-title">About</div>
 
 <label className="full">
