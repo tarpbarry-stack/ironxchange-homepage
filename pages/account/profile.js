@@ -717,15 +717,15 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
      .page-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px auto;
+  grid-template-columns: minmax(0, 1fr) 330px auto;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 
   background: #151515;
   border: 1px solid #282828;
   border-radius: 10px;
 
-  padding: 12px 14px;
+  padding: 11px 13px;
   margin-bottom: 8px;
 }
 
@@ -766,24 +766,25 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 .profile-preview {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 
   background: #0f0f0f;
   border: 1px solid #303030;
-  border-radius: 10px;
+  border-radius: 9px;
 
-  padding: 9px 10px;
-  min-height: 58px;
+  padding: 8px 9px;
+  min-height: 54px;
 
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
 }
 
 .preview-logo {
-  width: 82px;
-  height: 42px;
+  width: 72px;
+  height: 36px;
+
   background: #050505;
   border: 1px solid #2a2a2a;
-  border-radius: 8px;
+  border-radius: 7px;
 
   display: flex;
   align-items: center;
@@ -794,10 +795,11 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 }
 
 .preview-logo img {
-  width: 150%;
-  height: 150%;
+  width: 145%;
+  height: 145%;
   object-fit: contain;
 }
+
 .preview-logo i {
   color: #777;
   font-size: 18px;
