@@ -193,10 +193,17 @@ function getSellerInfo(author, imageById) {
       ? String(sellerLocation).toUpperCase()
       : "",
 
+  sellerWebsite: publicData.website || "",
+  sellerFacebook: publicData.facebookUrl || "",
+  sellerInstagram: publicData.instagramUrl || "",
+  sellerLinkedin: publicData.linkedinUrl || "",
+  sellerYoutube: publicData.youtubeUrl || "",
+  sellerTiktok: publicData.tiktokUrl || "",
+  sellerBio: publicData.bio || publicData.companyBio || "",
+  sellerPhone: protectedData.phoneNumber || publicData.phoneNumber || "",
+
   sellerLogo: profileImage,
-
   profileImage,
-
   authorProfile: profile
 };
 }
