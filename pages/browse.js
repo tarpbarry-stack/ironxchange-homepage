@@ -2162,8 +2162,8 @@ style={{
 .save-star {
   position: absolute;
 
- right: 60px;
-bottom: 16px;
+ right: 56px;
+bottom: 17px;
 
   z-index: 6;
 
@@ -2271,8 +2271,8 @@ bottom: 16px;
 
 .hours-inline,
 .hours-top {
-  color: #7c7c7c !important;
-
+  color: #F2F2F2 !important;
+  
   font-size: 13px !important;
   font-weight: 800 !important;
 
