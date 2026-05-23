@@ -252,7 +252,22 @@ const authorById = {};
     });
 
     const listings = (data.data || [])
-      .filter((item) => item.attributes?.state === "published")
+     .filter((item) => {
+  const attrs = item.attributes || {};
+  const publicData = attrs.publicData || {};
+  const metadata = attrs.metadata || {};
+
+  const listingStatus =
+    publicData.listingStatus ||
+    metadata.listingStatus ||
+    "";
+
+  return (
+    attrs.state === "published" &&
+    listingStatus !== "deleted" &&
+    listingStatus !== "archived"
+  );
+})
       .map((item) => {
         const attrs = item.attributes || {};
         const publicData = attrs.publicData || {};
@@ -293,11 +308,20 @@ const authorById = {};
           image: imageUrl,
           imageUrl,
           images,
-          imageUrls: images,
-          description: attrs.description || "",
-          publicData,
-          ...sellerInfo,
-          link: `https://staging.ironxchange.com/l/${slug}/${id}`
+imageUrls: images,
+
+description: attrs.description || "",
+
+publicData,
+
+listingStatus:
+  publicData.listingStatus ||
+  attrs.metadata?.listingStatus ||
+  "live",
+
+...sellerInfo,
+
+link: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
 
