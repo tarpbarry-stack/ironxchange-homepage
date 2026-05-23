@@ -130,6 +130,14 @@ function toNumber(value) {
   return raw ? Number(raw) : null;
 }
 
+function formatHours(value) {
+  const num = toNumber(value);
+
+  return num
+    ? `${num.toLocaleString()} hrs`
+    : "";
+}
+
 function matchesRange(value, min, max) {
   const num = toNumber(value);
   const low = toNumber(min);
@@ -1820,9 +1828,9 @@ style={{
     {cleanMachineTitle(item.title)}
   </h3>
 
-  <h3 className="hours-inline">
-    {item.hours}
-  </h3>
+ <h3 className="hours-inline">
+  {formatHours(item.hours)}
+</h3>
 </div>
 
 <p className="feature-line">
