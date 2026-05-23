@@ -411,27 +411,27 @@ export default function Home() {
 }
 
         .hero {
-          position: relative;
-          height: 625px;
-          min-height: 625px;
-          background:
-            linear-gradient(
-              90deg,
-              rgba(0, 0, 0, 0.9),
-              rgba(0, 0, 0, 0.55),
-              rgba(0, 0, 0, 0.18)
-            ),
-            url('/images/hero-equipment-yard.jpg');
-          background-size: cover;
-          background-position: center center;
-          color: white;
-          overflow: visible;
-        }
+  position: relative;
+  height: 625px;
+  min-height: 625px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.9),
+      rgba(0, 0, 0, 0.55),
+      rgba(0, 0, 0, 0.18)
+    ),
+    url('/images/hero-equipment-yard.jpg');
+  background-size: cover;
+  background-position: center 62%;
+  color: white;
+  overflow: hidden;
+}
 
-        .hero-content {
-          max-width: 760px;
-          padding: 72px 5% 0;
-        }
+       .hero-content {
+  max-width: 760px;
+  padding: 118px 5% 0;
+}
 
         .hero h1 {
           font-family: 'Bebas Neue', sans-serif;
