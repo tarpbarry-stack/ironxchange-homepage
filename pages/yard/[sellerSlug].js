@@ -1114,14 +1114,8 @@ export default function SellerYardPage() {
 
       .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 320px));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
-  justify-content: start;
-}
-@media (min-width: 700px) {
-  .cards:has(.card:only-child) {
-    grid-template-columns: 320px;
-  }
 }
 
         .card {
