@@ -1241,7 +1241,7 @@ main {
 }
 .listing-op-row {
   display: grid;
- grid-template-columns: 104px 1fr;
+ grid-template-columns: 120px 1fr;
   grid-template-rows: auto auto;
   grid-template-areas:
     "photo title"
@@ -1259,8 +1259,8 @@ main {
 }
 
 .machine-photo-link img {
-  width: 104px;
-  height: 78px;
+  width: 120px;
+  height: 90px;
   object-fit: cover;
   border-radius: 9px;
   border: 1px solid #2A2A2A;
