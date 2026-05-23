@@ -1,42 +1,37 @@
 function extractEmails(text) {
-  const regex =
-    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+  const matches = text.match(
+    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
+  );
 
-  const matches = text.match(regex) || [];
-
-  return [...new Set(matches)].filter((email) => {
+  return [...new Set(matches || [])].filter((email) => {
     const lower = email.toLowerCase();
 
-    const blocked = [
+    const bad = [
       "example.com",
-      "wixpress.com",
       "sentry.io",
+      "wixpress.com",
       "noreply",
       "no-reply"
     ];
 
-    return !blocked.some((bad) =>
-      lower.includes(bad)
-    );
+    return !bad.some((domain) => lower.includes(domain));
   });
 }
 
-function extractMailtoEmails(html) {
-  const matches =
-    html.match(/mailto:[^"'? ]+/gi) || [];
+function extractPhones(text) {
+  const matches = text.match(
+    /(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}/g
+  );
 
-  return matches
-    .map((match) =>
-      match.replace(/mailto:/i, "").trim()
-    )
-    .filter(Boolean);
+  return [...new Set(matches || [])];
 }
 
-function extractPhones(text) {
-  const regex =
-    /(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}/g;
+function extractMailtoEmails(html) {
+  const matches = html.match(/mailto:[^"'?\s>]+/gi) || [];
 
-  return [...new Set(text.match(regex) || [])];
+  return matches
+    .map((match) => match.replace(/mailto:/i, "").trim())
+    .filter((email) => email.includes("@"));
 }
 
 function stripHtml(html) {
@@ -61,7 +56,7 @@ function extractContacts(html) {
   for (const line of lines) {
     const lower = line.toLowerCase();
 
-    const useful =
+    const looksUseful =
       lower.includes("sales") ||
       lower.includes("manager") ||
       lower.includes("equipment") ||
@@ -69,14 +64,15 @@ function extractContacts(html) {
       lower.includes("service") ||
       lower.includes("parts");
 
-    const clean =
+    const notGarbage =
       line.length >= 4 &&
       line.length <= 120 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
-      !lower.includes("cookie");
+      !lower.includes("cookie") &&
+      !lower.includes("javascript");
 
-    if (useful && clean) {
+    if (looksUseful && notGarbage) {
       contacts.push(line);
     }
   }
@@ -130,14 +126,16 @@ function shouldScanLink(url) {
     "linkedin",
     "twitter",
     "x.com",
+    "mailto:",
+    "tel:",
     ".jpg",
     ".jpeg",
     ".png",
     ".webp",
     ".pdf",
     "#",
-    "google.com",
-    "machinerytrader.com"
+    "machinerytrader.com",
+    "google.com"
   ];
 
   if (badWords.some((word) => lower.includes(word))) {
@@ -150,8 +148,7 @@ function shouldScanLink(url) {
 function extractInternalLinks(html, baseUrl) {
   const baseDomain = getDomain(baseUrl);
 
-  const matches =
-    html.match(/href=["']([^"']+)["']/gi) || [];
+  const matches = html.match(/href=["']([^"']+)["']/gi) || [];
 
   const links = matches
     .map((match) => {
@@ -195,8 +192,7 @@ async function fetchPage(url) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 IXI Dealer Graph Bot"
+        "User-Agent": "Mozilla/5.0 IXI Dealer Graph Bot"
       }
     });
 
