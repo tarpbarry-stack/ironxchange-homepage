@@ -2268,7 +2268,7 @@ style={{
 .hours-top {
   color: #7c7c7c !important;
 
-  font-size: 12px !important;
+  font-size: 14px !important;
   font-weight: 800 !important;
 
   letter-spacing: .25px;
