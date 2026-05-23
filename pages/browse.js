@@ -1,3 +1,6 @@
+import ListingCard from "../components/ListingCard";
+import { getListingId } from "../lib/listingFormatters";
+
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
@@ -1748,107 +1751,20 @@ function changeCardPhoto(e, item, direction) {
           </span>
         </div>
 
-      <div className="cards">
-  {filteredListings.map((item) => (
-    <a
-      href={`/listing/${encodeURIComponent(
-        (item.title || "listing")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "")
-      )}?from=browser`}
-      className="card"
-      key={item.id || item.link || item.title}
-    >
+<div className="browse-grid">
+  {filteredListings.map((item) => {
+    const id = String(getListingId(item));
 
-      <button
-        type="button"
-        className={`save-star ${
-          savedIds.includes(String(item.id)) ? "saved" : ""
-        }`}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleSave(item.id);
-        }}
-        aria-label={
-          savedIds.includes(String(item.id))
-            ? "Unsave listing"
-            : "Save listing"
-        }
-      >
-        <i
-          className={
-            savedIds.includes(String(item.id))
-              ? "fa-solid fa-star"
-              : "fa-regular fa-star"
-          }
-        ></i>
-      </button>
-
-      <div
-
-className="card-photo"
-style={{
-  backgroundImage: `url(${
-    getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
-    "/images/hero-equipment-yard.jpg"
-  })`
-}}
-              />
-
-                {getCardImages(item).length > 1 && (
-  <>
-    <button
-      type="button"
-      className="card-photo-nav left"
-      onClick={e => changeCardPhoto(e, item, -1)}
-    >
-      ‹
-    </button>
-
-    <button
-      type="button"
-      className="card-photo-nav right"
-      onClick={e => changeCardPhoto(e, item, 1)}
-    >
-      ›
-    </button>
-
-    <span className="photo-count">
-      {(cardPhotoIndex[item.id] || 0) + 1}/
-      {getCardImages(item).length}
-    </span>
-  </>
-)}
-                
-             <div className="card-body">
-<div className="title-row">
-  <h3>
-    {cleanMachineTitle(item.title)}
-  </h3>
-
- <h3 className="hours-inline">
-  {formatHours(item.hours)}
-</h3>
+    return (
+      <ListingCard
+        key={id}
+        listing={item}
+        saved={savedIds.includes(id)}
+        onToggleSaved={toggleSave}
+      />
+    );
+  })}
 </div>
-
-<p className="feature-line">
-  {getFeatureLine(item)}
-</p>
-
-<div className="price-row">
-  <strong>{item.price}</strong>
-
-  <div className="meta">
-    <span>⌖ {item.location}</span>
-  </div>
-</div>
-
-</div>
-</a>
-          ))}
-        </div>
 
         {filteredListings.length === 0 && (
           <div className="empty">
@@ -2137,185 +2053,10 @@ style={{
   font-weight: 700;
 }
 
-.cards {
+.browse-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
-}
-.card {
-  position: relative;
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid #242424;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #151515;
-  transition: transform .18s ease, border-color .18s ease, background .18s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #3A3A3A;
-  background: #181818;
-}
-
-.save-star {
-  position: absolute;
-
- right: 52px;
-bottom: 17px;
-
-  z-index: 6;
-
-  width: 18px;
-  height: 18px;
-
-  display: grid;
-  place-items: center;
-
-  background: transparent;
-  border: none;
-
-  color: rgba(255,255,255,.42);
-
-  cursor: pointer;
-
-  padding: 0;
-}
-
-.save-star i {
-  font-size: 12px;
-}
-
-.save-star.saved {
-  color: #FFC400;
-}
-
-.save-star:hover {
-  color: #FFC400;
-}
-.card-photo {
-  position: relative;
-  height: 190px;
-  background-size: cover;
-  background-position: center;
-}
-
-.card-photo-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 80px;
-  border: none;
-  background: rgba(0,0,0,.12);
-  color: rgba(255,255,255,.72);
-  font-size: 28px;
-  font-weight: 300;
-  cursor: pointer;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity .18s ease, background .18s ease, color .18s ease;
-}
-
-.card:hover .card-photo-nav {
-  opacity: 1;
-}
-
-.card-photo-nav:hover {
-  background: rgba(0,0,0,.28);
-  color: rgba(255,255,255,.95);
-}
-
-.card-photo-nav.left {
-  left: 0;
-  border-radius: 0 10px 10px 0;
-}
-
-.card-photo-nav.right {
-  right: 0;
-  border-radius: 10px 0 0 10px;
-}
-
-.photo-count {
-  position: absolute;
-  right: 10px;
-  top: 245px;
-  background: rgba(0,0,0,.72);
-  color: #f2f2f2;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 10px;
-  font-weight: 900;
-  z-index: 5;
-}
-
-.card-body {
-  padding: 16px;
-}
-
-.title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.card h3 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 16px;
-  letter-spacing: -0.2px;
-}
-
-.hours-inline,
-.hours-top {
-  color: #F2F2F2 !important;
-  
-  font-size: 13px !important;
-  font-weight: 600 !important;
-
-  letter-spacing: .25px;
-
-  white-space: nowrap;
-}
-.card p {
-  margin: 8px 0 18px;
-  color: #8F8F8F;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.feature-line {
-  min-height: 38px;
-}
-
-.meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #9A9A9A;
-  flex-wrap: wrap;
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
-
-.price-row strong {
-  color: #F2F2F2;
-  font-size: 18px;
-}
-
-.price-row span {
-  color: #9A9A9A;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .4px;
 }
 
 .empty {
@@ -2324,7 +2065,7 @@ bottom: 17px;
 }
 
 @media (max-width: 1100px) {
-  .cards {
+  .browse-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -2369,7 +2110,7 @@ bottom: 17px;
     flex: 0 0 auto;
   }
 
-  .cards {
+    .browse-grid {
     grid-template-columns: 1fr;
   }
 }
