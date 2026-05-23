@@ -998,13 +998,16 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
 .form-section-title {
   grid-column: 1 / -1;
-  margin-top: 4px;
-  padding-top: 4px;
+
+  margin-top: 10px;
+  padding-top: 12px;
+
+  border-top: 1px solid #252525;
 
   color: #FFC400;
   font-size: 9px;
   font-weight: 900;
-  letter-spacing: .65px;
+  letter-spacing: .7px;
   text-transform: uppercase;
 }
 
@@ -1099,12 +1102,16 @@ textarea {
        .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 6px;
+
+  margin-top: 16px;
+  padding-top: 12px;
+
+  border-top: 1px solid #252525;
 }
 
         .cancel-btn {
-  height: 38px;
+  height: 36px;
 
   display: inline-flex;
   align-items: center;
@@ -1112,16 +1119,23 @@ textarea {
 
   text-decoration: none;
 
-  color: #d6d6d6;
+  background: #101010;
+  color: #8a8a8a;
 
-  border: 1px solid #3a3a3a;
+  border: 1px solid #2a2a2a;
   border-radius: 8px;
 
   padding: 0 14px;
 
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: .35px;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.cancel-btn:hover {
+  border-color: #3a3a3a;
+  color: #f2f2f2;
 }
 
         @media (max-width: 900px) {
