@@ -1740,19 +1740,45 @@ function changeCardPhoto(e, item, direction) {
           </span>
         </div>
 
-        <div className="cards">
-          {filteredListings.map((item) => (
-        <a
-  href={`/listing/${encodeURIComponent(
-    (item.title || "listing")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-  )}?from=browser`}
-  className="card"
-  key={item.id || item.link || item.title}
->
-              <div
+      <div className="cards">
+  {filteredListings.map((item) => (
+    <a
+      href={`/listing/${encodeURIComponent(
+        (item.title || "listing")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+      )}?from=browser`}
+      className="card"
+      key={item.id || item.link || item.title}
+    >
+
+      <button
+        type="button"
+        className={`save-star ${
+          savedIds.includes(String(item.id)) ? "saved" : ""
+        }`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleSave(item.id);
+        }}
+        aria-label={
+          savedIds.includes(String(item.id))
+            ? "Unsave listing"
+            : "Save listing"
+        }
+      >
+        <i
+          className={
+            savedIds.includes(String(item.id))
+              ? "fa-solid fa-star"
+              : "fa-regular fa-star"
+          }
+        ></i>
+      </button>
+
+      <div
 
 className="card-photo"
 style={{
@@ -2123,6 +2149,36 @@ style={{
   transform: translateY(-3px);
   border-color: #3A3A3A;
   background: #181818;
+}
+
+.save-star {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 8;
+
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(0,0,0,.62);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+
+  color: #eaeaea;
+  cursor: pointer;
+}
+
+.save-star.saved {
+  color: #FFC400;
+  border-color: rgba(255,196,0,.55);
+}
+
+.save-star:hover {
+  color: #FFC400;
+  border-color: rgba(255,196,0,.65);
 }
 
 .card-photo {
