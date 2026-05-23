@@ -1012,22 +1012,33 @@ main {
 
 .dashboard-search {
   display: grid;
-  grid-template-columns: 1fr 86px;
+  grid-template-columns: 1fr 82px;
+
   background: #141414;
-  border: 1px solid #282828;
-  border-radius: 12px;
+
+  border: 1px solid #252525;
+  border-radius: 10px;
+
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,.22);
+
+  box-shadow: 0 10px 26px rgba(0,0,0,.24);
 }
 
 .dashboard-search input {
   border: none;
-  border-right: 1px solid #2A2A2A;
-  padding: 10px 12px;
-  font-size: 12px;
+  border-right: 1px solid #252525;
+
+  padding: 0 12px;
+
+  height: 36px;
+
+  font-size: 11px;
+
   background: #141414;
   color: #D6D6D6;
+
   outline: none;
+
   min-width: 0;
 }
 
@@ -1044,9 +1055,15 @@ main {
 
   font-weight: 900;
   cursor: pointer;
+
   letter-spacing: .45px;
-  font-size: 10px;
+  font-size: 9px;
+
   text-transform: uppercase;
+}
+
+.dashboard-search button:hover {
+  background: #1a1400;
 }
 
 .dashboard-search button:hover {
