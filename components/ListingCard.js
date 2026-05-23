@@ -146,8 +146,8 @@ export default function ListingCard({
 
   border: none;
 
-  background: rgba(0,0,0,.12);
-  color: rgba(255,255,255,.72);
+  background: rgba(0,0,0,.06);
+  color: rgba(255,255,255,.42);
 
   font-size: 28px;
   font-weight: 300;
@@ -179,9 +179,9 @@ export default function ListingCard({
 }
 
         .card-photo-nav:hover {
-          background: rgba(0,0,0,.34);
-          color: white;
-        }
+  background: rgba(0,0,0,.14);
+  color: rgba(255,255,255,.68);
+}
 
        .photo-count {
   position: absolute;
