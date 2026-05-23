@@ -138,7 +138,7 @@ export default function ListingCard({
 
         .card-photo-nav {
   position: absolute;
-  top: 50%;
+  top: 62%;
   transform: translateY(-50%);
 
   width: 22px;
