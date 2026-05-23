@@ -341,7 +341,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
       ← Back to Dashboard
     </a>
 
-    <h1>Seller Profile</h1>
+   <h1>Public Seller Presence</h1>
 
     <p>
       Configure your public seller yard, listing identity, and dealership presence across IronXchange.
@@ -376,7 +376,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
             <form className="profile-grid" onSubmit={handleSave}>
               <section className="panel logo-panel">
-                <h2>Branding</h2>
+                <h2>Seller Branding</h2>
 
                 <div className="logo-preview-box">
                   {logoPreview ? (
@@ -407,7 +407,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
               </section>
 
               <section className="panel form-panel">
-               <h2>Public Seller Details</h2>
+               <h2>Public Marketplace Identity</h2>
                       
                <div className="form-grid">
   <div className="form-section-title">Seller Identity</div>
@@ -871,12 +871,11 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           cursor: default;
         }
 
-        .profile-grid {
+      .profile-grid {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
   gap: 8px;
 }
-
       .panel {
   background: #151515;
   border: 1px solid #282828;
@@ -894,17 +893,18 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
         .logo-preview-box {
   width: 100%;
-  height: 132px;
+  height: 118px;
+
   background: #090909;
   border: 1px solid #2a2a2a;
-  border-radius: 10px;
+  border-radius: 9px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 18px;
-  margin-bottom: 10px;
+  padding: 16px;
+  margin-bottom: 9px;
 }
 
         .logo-preview-box img {
@@ -956,23 +956,22 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           display: none;
         }
 
-        .help {
-  margin: 10px 0 0;
+       .help {
+  margin: 9px 0 0;
   color: #777;
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .yard-preview-btn {
-  height: 34px;
+  height: 32px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
   width: 100%;
-
-  margin-top: 10px;
+  margin-top: 9px;
 
   background: #101010;
   border: 1px solid #2a2a2a;
@@ -981,7 +980,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   color: #eaeaea;
   text-decoration: none;
 
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
   letter-spacing: .45px;
   text-transform: uppercase;
@@ -992,10 +991,10 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   color: #FFC400;
 }
 
-      .form-grid {
+     .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 9px 10px;
 }
 
 .form-section-title {
@@ -1013,10 +1012,12 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   text-transform: uppercase;
 }
 
-      label {
+     label {
   display: grid;
-  gap: 6px;
+  gap: 5px;
+
   color: #9a9a9a;
+
   font-size: 9px;
   font-weight: 900;
   letter-spacing: .45px;
@@ -1027,17 +1028,19 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           grid-column: 1 / -1;
         }
 
-        input,
+      input,
 textarea {
   width: 100%;
+
   background: #101010;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
+
   color: #f2f2f2;
 
-  padding: 10px 12px;
+  padding: 8px 11px;
 
-  font-size: 13px;
+  font-size: 12px;
   outline: none;
   font-family: Arial, sans-serif;
 
@@ -1087,12 +1090,16 @@ textarea {
 
 :global(.social-input input) {
   width: 100%;
-  height: 34px;
+  height: 32px;
+
   border: none !important;
   background: #101010 !important;
   color: #f2f2f2 !important;
-  padding: 8px 12px;
-  font-size: 13px;
+
+  padding: 8px 11px;
+
+  font-size: 12px;
+
   outline: none !important;
   box-shadow: none !important;
 }
