@@ -1465,15 +1465,21 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   width: 58px;
   min-width: 58px;
-  height: 24px;
+  height: 22px;
+
   padding: 0 8px;
+
   border-radius: 999px;
-  font-size: 8px;
+
+  font-size: 7px;
   font-weight: 900;
-  letter-spacing: .45px;
+
+  letter-spacing: .5px;
   white-space: nowrap;
+
   text-transform: uppercase;
 }
 
@@ -1490,15 +1496,16 @@ main {
 
 .listing-status-stack {
   display: grid;
-  grid-template-rows: 24px 24px;
-  gap: 4px;
+  grid-template-rows: 22px 22px;
+
+  gap: 3px;
 
   justify-items: center;
   align-items: center;
 
   width: 58px;
 
-  margin-left: 0px;
+  margin-left: 0;
 }
 
 .listing-delete-btn {
@@ -1508,18 +1515,21 @@ main {
 
   width: 58px;
   min-width: 58px;
-  height: 24px;
+  height: 22px;
 
   border-radius: 999px;
 
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 900;
-  letter-spacing: .45px;
+
+  letter-spacing: .5px;
   white-space: nowrap;
+
   text-transform: uppercase;
 
-  border: 1px solid rgba(229,62,62,.45);
-  background: rgba(229,62,62,.10);
+  border: 1px solid rgba(229,62,62,.35);
+
+  background: rgba(229,62,62,.08);
   color: #E53E3E;
 
   cursor: pointer;
