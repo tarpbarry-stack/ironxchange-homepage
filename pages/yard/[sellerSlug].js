@@ -905,7 +905,7 @@ h1 {
 }
 
 .yard-head p {
-  margin: 6px 0 0;
+  margin: 5px 0 0;
   color: #8a8a8a;
   font-size: 12px;
   font-weight: 800;
@@ -921,14 +921,18 @@ h1 {
 .yard-actions a {
   width: 30px;
   height: 30px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   background: #101010;
   border: 1px solid #2a2a2a;
   border-radius: 7px;
-  color: #eaeaea;
+
+  color: #8f8f8f;
   text-decoration: none;
+
   font-size: 13px;
 }
 
@@ -941,6 +945,12 @@ h1 {
 .yard-actions .browse-all-link {
   width: auto;
   padding: 0 11px;
+
+  background: #151515;
+  color: #FFC400;
+
+  border: 1px solid #3a2d00;
+
   font-size: 9px;
   font-weight: 900;
   letter-spacing: .45px;
@@ -959,14 +969,15 @@ h1 {
 .yard-count strong {
   display: block;
   color: #f2f2f2;
-  font-size: 26px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .yard-count span {
   display: block;
-  margin-top: 6px;
-  color: #888;
+  margin-top: 5px;
+
+  color: #777;
   font-size: 9px;
   font-weight: 900;
   text-transform: uppercase;
@@ -974,32 +985,38 @@ h1 {
 }
 
         .search-section {
-          padding: 18px 0 16px;
-        }
+  padding: 12px 0 12px;
+}
+      .search-top-row {
+  max-width: 1080px;
+  margin: 0 auto 8px;
 
-        .search-top-row {
-          max-width: 1080px;
-          margin: 0 auto 10px;
-          display: grid;
-          grid-template-columns: minmax(320px, 1fr) 220px 150px;
-          background: #141414;
-          border: 1px solid #252525;
-          border-radius: 11px;
-          overflow: hidden;
-          box-shadow: 0 18px 50px rgba(0,0,0,.35);
-        }
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 220px 145px;
+
+  background: #141414;
+  border: 1px solid #252525;
+  border-radius: 10px;
+
+  overflow: hidden;
+  box-shadow: 0 14px 42px rgba(0,0,0,.28);
+}
 
         .browse-search,
-        .search-top-row select {
-          height: 36px;
-          border: none;
-          border-right: 1px solid #2a2a2a;
-          padding: 0 13px;
-          background: #141414;
-          color: #d6d6d6;
-          font-size: 13px;
-          outline: none;
-        }
+.search-top-row select {
+  height: 34px;
+
+  border: none;
+  border-right: 1px solid #2a2a2a;
+
+  padding: 0 12px;
+
+  background: #141414;
+  color: #d6d6d6;
+
+  font-size: 12px;
+  outline: none;
+}
 
         .search-top-row select,
         .sort-select {
@@ -1033,7 +1050,7 @@ h1 {
           display: grid;
           grid-template-columns: 1fr 1px 1fr;
           align-items: center;
-          height: 30px;
+          height: 28px;
           border: 1px solid #343434;
           background: #101010;
           overflow: hidden;
@@ -1068,7 +1085,7 @@ h1 {
         }
 
         .clear-btn {
-          height: 30px;
+          height: 28px;
           border: 1px solid #343434;
           border-left: none;
           border-radius: 0 6px 6px 0;
@@ -1084,28 +1101,38 @@ h1 {
           border-color: rgba(255,196,0,.45);
         }
 
-        .inventory-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          margin: 18px 0 22px;
-        }
+       .inventory-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 
-        .inventory-head h2 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 22px;
-          text-transform: uppercase;
-          letter-spacing: .35px;
-        }
+  margin: 14px 0 16px;
+  padding-top: 4px;
 
-        .inventory-head span {
-          color: #888;
-          font-size: 12px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .45px;
-        }
+  border-top: 1px solid #202020;
+}
+
+      .inventory-head h2 {
+  margin: 0;
+
+  color: #f2f2f2;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+  letter-spacing: .45px;
+}
+
+       .inventory-head span {
+  color: #777;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+  letter-spacing: .45px;
+}
 
       .cards {
   display: grid;
@@ -1113,33 +1140,42 @@ h1 {
   gap: 22px;
 }
 
-        .card {
-          position: relative;
-          text-decoration: none;
-          color: inherit;
-          border: 1px solid #242424;
-          border-radius: 16px;
-          overflow: hidden;
-          background: #151515;
-          transition:
-            transform .18s ease,
-            border-color .18s ease,
-            background .18s ease;
-        }
+       .card {
+  position: relative;
 
-        .card:hover {
-          transform: translateY(-3px);
-          border-color: #3a3a3a;
-          background: #181818;
-        }
+  text-decoration: none;
+  color: inherit;
+
+  border: 1px solid #242424;
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  background: #151515;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+      .card:hover {
+  transform: translateY(-2px);
+
+  border-color: #353535;
+  background: #181818;
+}
 
         .card-photo {
-          position: relative;
-          height: 190px;
-          background-size: cover;
-          background-position: center;
-          border-bottom: 1px solid #202020;
-        }
+  position: relative;
+
+  height: 184px;
+
+  background-size: cover;
+  background-position: center;
+
+  border-bottom: 1px solid #202020;
+}
 
         .card-photo-nav {
           position: absolute;
@@ -1181,31 +1217,39 @@ h1 {
           border-radius: 999px;
         }
 
-        .card-body {
-          padding: 16px;
-        }
+      .card-body {
+  padding: 13px;
+}
 
         .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 10px;
-        }
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  gap: 8px;
+}
 
         .card h3 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 16px;
-          letter-spacing: -0.2px;
-        }
+  margin: 0;
 
-        .hours-inline {
-          color: #8a8a8a !important;
-          font-size: 11px !important;
-          font-weight: 700 !important;
-          letter-spacing: .3px;
-          white-space: nowrap;
-        }
+  color: #f2f2f2;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  letter-spacing: -0.15px;
+}
+
+       .hours-inline {
+  color: #7c7c7c !important;
+
+  font-size: 12px !important;
+  font-weight: 800 !important;
+
+  letter-spacing: .25px;
+
+  white-space: nowrap;
+}
 
         .feature-line {
           min-height: 38px;
