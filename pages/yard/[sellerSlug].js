@@ -585,6 +585,26 @@ export default function SellerYardPage() {
                     </a>
                   ) : null}
 
+<a
+  href={
+    loggedIn
+      ? `/inquire?listingId=${sellerListings?.[0]?.id || ""}`
+      : `/login`
+  }
+  className="contact-btn"
+>
+  Message
+</a>
+
+{sellerSeedListing?.sellerPhone ? (
+  <a
+    href={`tel:${sellerSeedListing.sellerPhone}`}
+    className="contact-btn"
+  >
+    Call
+  </a>
+) : null}
+
                  <a href="#" onClick={(e) => { e.preventDefault(); window.history.back(); }} className="browse-all-link">
                     Back to Machine
                   </a>
@@ -955,6 +975,27 @@ h1 {
   font-weight: 900;
   letter-spacing: .45px;
   text-transform: uppercase;
+}
+
+.contact-btn {
+  width: auto !important;
+
+  padding: 0 12px;
+
+  background: #151515 !important;
+  color: #FFC400 !important;
+
+  border: 1px solid #3a2d00 !important;
+
+  font-size: 9px !important;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.contact-btn:hover {
+  background: #1a1400 !important;
+  border-color: #FFC400 !important;
 }
 
 .yard-count {
