@@ -1057,30 +1057,32 @@ textarea {
 
 .social-input {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-columns: 30px minmax(0, 1fr);
   align-items: center;
 
   background: #101010;
+
   border: 1px solid #2a2a2a;
   border-radius: 8px;
 
-  overflow: hidden;
+  padding-left: 2px;
 }
 
 .social-input i {
-  height: 38px;
+  height: 100%;
+
   display: grid;
   place-items: center;
 
-  color: #FFC400;
-  border-right: 1px solid #252525;
-  font-size: 14px;
+  color: #6f6f6f;
+
+  font-size: 13px;
 }
 
 .social-input input {
-  border: none;
-  border-radius: 0;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
        .actions {
