@@ -235,6 +235,7 @@ export default function ListingCard({
   justify-content: flex-end;
   text-align: right;
   margin-left: auto;
+  margin-right: -2px;
 }
 
         .meta span {
