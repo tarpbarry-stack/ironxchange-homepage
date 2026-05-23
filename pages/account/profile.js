@@ -751,26 +751,32 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
       .save-top,
 .save-btn {
-  height: 38px;
-
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  background: #FFC400;
-  color: #050505;
+  background: #151515;
+  color: #FFC400;
 
-  border: none;
+  border: 1px solid #3a2d00;
   border-radius: 8px;
 
-  padding: 0 16px;
+  padding: 0 14px;
 
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: .35px;
+  letter-spacing: .45px;
+  text-transform: uppercase;
 
   cursor: pointer;
   white-space: nowrap;
+}
+
+.save-top:hover,
+.save-btn:hover {
+  background: #1a1400;
+  border-color: #FFC400;
 }
 
         .save-top:disabled,
