@@ -40,7 +40,7 @@ function slugify(text = "") {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
-
+ 
 function clean(value) {
   return value ? String(value).trim() : "";
 }
