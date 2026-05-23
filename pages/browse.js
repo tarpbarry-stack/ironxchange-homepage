@@ -190,7 +190,6 @@ export default function Browse() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [sdk, setSdk] = useState(null);
   const [savedIds, setSavedIds] = useState([]);
-  const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [sortMode, setSortMode] = useState("newest");
 
 const [filters, setFilters] = useState({
@@ -1461,34 +1460,6 @@ const isArchived = listingStatus === "archived";
   filters,
   sortMode
 ]);
-  
-function getCardImages(item = {}) {
-  return [
-    ...(Array.isArray(item.images) ? item.images : []),
-    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
-    item.imageUrl,
-    item.image
-  ].filter(Boolean);
-}
-
-function changeCardPhoto(e, item, direction) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const images = getCardImages(item);
-  if (images.length < 2) return;
-
-  setCardPhotoIndex(current => {
-    const currentIndex = current[item.id] || 0;
-    const nextIndex =
-      (currentIndex + direction + images.length) % images.length;
-
-    return {
-      ...current,
-      [item.id]: nextIndex
-    };
-  });
-}
   
   async function toggleSave(listingId) {
   if (!sdk) {
