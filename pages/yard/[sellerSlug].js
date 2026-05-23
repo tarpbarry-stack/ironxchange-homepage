@@ -45,6 +45,11 @@ function clean(value) {
   return value ? String(value).trim() : "";
 }
 
+function isInitials(value = "") {
+  const v = clean(value);
+  return /^[A-Z]{1,4}$/.test(v);
+}
+
 function cleanMachineTitle(title = "") {
   return String(title)
     .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
@@ -56,6 +61,13 @@ function cleanMachineTitle(title = "") {
 function toNumber(value) {
   const raw = String(value || "").replace(/[^0-9]/g, "");
   return raw ? Number(raw) : null;
+}
+
+function normalizeUrl(url = "") {
+  const value = clean(url);
+  if (!value) return "";
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  return `https://${value}`;
 }
 
 function getListingYear(item = {}) {
@@ -124,11 +136,50 @@ function sortListings(listings, sortMode) {
     if (sortMode === "hours-high") return (toNumber(b.hours) || 0) - (toNumber(a.hours) || 0);
     if (sortMode === "year-new") return (getListingYear(b) || 0) - (getListingYear(a) || 0);
     if (sortMode === "year-old") return (getListingYear(a) || 0) - (getListingYear(b) || 0);
-
     return 0;
   });
 
   return sorted;
+}
+
+function getAuthorId(item = {}) {
+  return (
+    item.authorId ||
+    item.sellerId ||
+    item.author?.id?.uuid ||
+    item.author?.id ||
+    ""
+  );
+}
+
+function getSellerDisplay(item = {}) {
+  const sellerName = clean(item.sellerName);
+  const sellerCompany = clean(item.sellerCompany);
+  const companyName = clean(item.companyName);
+  const authorName = clean(item.authorName);
+
+  const realCompany =
+    [sellerCompany, companyName, sellerName, authorName]
+      .find(value => value && !isInitials(value) && value !== "Seller Profile") ||
+    sellerName ||
+    sellerCompany ||
+    companyName ||
+    authorName ||
+    "IronXchange Yard";
+
+  const contactName =
+    [sellerName, authorName, sellerCompany, companyName]
+      .find(value => value && value !== realCompany) ||
+    "";
+
+  return {
+    yardTitle: realCompany,
+    contactName,
+    sellerName,
+    sellerCompany,
+    companyName,
+    authorName
+  };
 }
 
 export default function SellerYardPage() {
@@ -182,103 +233,69 @@ export default function SellerYardPage() {
     checkAuth();
   }, []);
 
- const sellerSeedListing = useMemo(() => {
-  if (!sellerSlug || listings.length === 0) return null;
+  const sellerSeedListing = useMemo(() => {
+    if (!sellerSlug || listings.length === 0) return null;
 
-  const targetSlug = String(sellerSlug).toLowerCase();
+    const targetSlug = String(sellerSlug).toLowerCase();
 
-  return listings.find(item => {
-    const possibleValues = [
-      item.authorId,
-      item.sellerId,
-      item.author?.id,
-      item.author?.id?.uuid,
-      item.sellerCompany,
-      item.companyName,
-      item.sellerName,
-      item.authorName
-    ]
-      .filter(Boolean)
-      .map(value => slugify(String(value)));
+    return listings.find(item => {
+      const display = getSellerDisplay(item);
 
-    return possibleValues.includes(targetSlug);
-  });
-}, [sellerSlug, listings]);
+      const possibleValues = [
+        getAuthorId(item),
+        display.yardTitle,
+        display.sellerName,
+        display.sellerCompany,
+        display.companyName,
+        display.authorName
+      ]
+        .filter(Boolean)
+        .map(value => slugify(String(value)));
 
-  const sellerAuthorId =
-    sellerSeedListing?.authorId ||
-    sellerSeedListing?.sellerId ||
-    sellerSeedListing?.author?.id ||
-    sellerSeedListing?.author?.id?.uuid ||
+      return possibleValues.includes(targetSlug);
+    });
+  }, [sellerSlug, listings]);
+
+  const sellerAuthorId = getAuthorId(sellerSeedListing);
+
+  const sellerListings = useMemo(() => {
+    if (!sellerAuthorId) return [];
+
+    return listings.filter(item => {
+      const listingStatus =
+        item.listingStatus ||
+        item.publicData?.listingStatus ||
+        item.attributes?.publicData?.listingStatus ||
+        "live";
+
+      return (
+        String(getAuthorId(item)) === String(sellerAuthorId) &&
+        listingStatus !== "archived" &&
+        listingStatus !== "deleted"
+      );
+    });
+  }, [listings, sellerAuthorId]);
+
+    const sellerDisplay = getSellerDisplay(sellerSeedListing || {});
+  const yardTitle = sellerDisplay.yardTitle;
+  const sellerName = sellerDisplay.contactName;
+
+  const sellerLocation =
+    clean(sellerSeedListing?.sellerLocation) ||
+    clean(sellerSeedListing?.location) ||
+    "Location not listed";
+
+  const sellerLogo =
+    sellerSeedListing?.sellerLogo ||
+    sellerSeedListing?.profileImage ||
     "";
 
-const sellerListings = useMemo(() => {
-  if (!sellerAuthorId) return [];
-
-  return listings.filter(item => {
-    const itemAuthorId =
-      item.authorId ||
-      item.sellerId ||
-      item.author?.id ||
-      item.author?.id?.uuid ||
-      "";
-
-    const listingStatus =
-      item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus ||
-      "live";
-
-    return (
-      String(itemAuthorId) === String(sellerAuthorId) &&
-      listingStatus !== "archived" &&
-      listingStatus !== "deleted"
-    );
-  });
-}, [listings, sellerAuthorId]);
-
-const displayName =
-  clean(sellerSeedListing?.sellerName) ||
-  clean(sellerSeedListing?.authorName) ||
-  "IronXchange User";
-
-const companyName =
-  clean(sellerSeedListing?.sellerCompany) ||
-  clean(sellerSeedListing?.companyName) ||
-  "Seller Profile";
-
-const yardTitle =
-  companyName !== "Seller Profile" ? companyName : displayName;
-
-const sellerName = displayName;
-
-const sellerLocation =
-  clean(sellerSeedListing?.sellerLocation) ||
-  clean(sellerSeedListing?.location) ||
-  "Location not listed";
-
-const sellerLogo =
-  sellerSeedListing?.sellerLogo ||
-  sellerSeedListing?.profileImage ||
-  "";
-
-const website =
-  clean(sellerSeedListing?.sellerWebsite) || "";
-
-const facebook =
-  clean(sellerSeedListing?.sellerFacebook) || "";
-
-const instagram =
-  clean(sellerSeedListing?.sellerInstagram) || "";
-
-const linkedin =
-  clean(sellerSeedListing?.sellerLinkedin) || "";
-
-const youtube =
-  clean(sellerSeedListing?.sellerYoutube) || "";
-
-const tiktok =
-  clean(sellerSeedListing?.sellerTiktok) || "";
+  const website = normalizeUrl(sellerSeedListing?.sellerWebsite || "");
+  const facebook = normalizeUrl(sellerSeedListing?.sellerFacebook || "");
+  const instagram = normalizeUrl(sellerSeedListing?.sellerInstagram || "");
+  const linkedin = normalizeUrl(sellerSeedListing?.sellerLinkedin || "");
+  const youtube = normalizeUrl(sellerSeedListing?.sellerYoutube || "");
+  const tiktok = normalizeUrl(sellerSeedListing?.sellerTiktok || "");
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -354,78 +371,110 @@ const tiktok =
     );
   }
 
-if (!sellerSeedListing) {
-  const seen = new Set();
+  if (!sellerSeedListing) {
+    return (
+      <main className="loading">
+        <div className="not-found-card">
+          <img
+            src="/images/ironxchange-logo.png"
+            alt="IronXchange"
+            className="not-found-logo"
+          />
 
-  const possibleYards = listings
-    .map(item => {
-      const displayName =
-        clean(item.sellerName) ||
-        clean(item.authorName) ||
-        "IronXchange User";
+          <h1>Seller Yard Not Found</h1>
 
-      const companyName =
-        clean(item.sellerCompany) ||
-        clean(item.companyName) ||
-        "Seller Profile";
+          <p>
+            This seller yard may have moved, been removed, or does not have active listings.
+          </p>
 
-      const label =
-        companyName !== "Seller Profile"
-          ? `${companyName} — ${displayName}`
-          : displayName;
+          <div className="not-found-actions">
+            <a href="/browse">Browse Equipment</a>
+            <a href="/">Back to IronXchange</a>
+          </div>
+        </div>
 
-      const slug =
-        slugify(item.authorId || item.sellerId || label);
+        <style jsx>{`
+          .loading {
+            min-height: 100vh;
+            background: #0b0b0b;
+            color: #d6d6d6;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
 
-      return { label, slug };
-    })
-    .filter(yard => {
-      if (!yard.slug || seen.has(yard.slug)) return false;
-      seen.add(yard.slug);
-      return true;
-    })
-    .slice(0, 25);
+          .not-found-card {
+            width: 100%;
+            max-width: 520px;
+            background: #151515;
+            border: 1px solid #282828;
+            border-radius: 16px;
+            padding: 34px;
+            text-align: center;
+          }
 
-  return (
-    <main className="loading">
-      <h1>Seller yard not found.</h1>
+          .not-found-logo {
+            height: 42px;
+            width: auto;
+            margin-bottom: 24px;
+          }
 
-      <p>Available test yards:</p>
+          h1 {
+            margin: 0;
+            color: #f2f2f2;
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+          }
 
-      <ul>
-        {possibleYards.map((yard, index) => (
-          <li key={`${yard.slug}-${index}`}>
-            <a href={`/yard/${yard.slug}`}>
-              {yard.label} — /yard/{yard.slug}
-            </a>
-          </li>
-        ))}
-      </ul>
+          p {
+            margin: 12px 0 0;
+            color: #999;
+            font-size: 14px;
+            line-height: 1.55;
+          }
 
-      <style jsx>{`
-        .loading {
-          min-height: 100vh;
-          background: #0b0b0b;
-          color: #d6d6d6;
-          padding: 40px;
-          font-family: Arial, sans-serif;
-        }
+          .not-found-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+          }
 
-        h1 {
-          color: #f2f2f2;
-        }
+          .not-found-actions a {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 14px;
+            background: #101010;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #eaeaea;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .45px;
+            text-transform: uppercase;
+          }
 
-        a {
-          color: #FFC400;
-        }
+          .not-found-actions a:first-child {
+            background: #1a1400;
+            border-color: #3a2d00;
+            color: #ffc400;
+          }
 
-        li {
-          margin: 10px 0;
-        }
-      `}</style>
-    </main>
-  );
-}
+          .not-found-actions a:hover {
+            border-color: #ffc400;
+            color: #ffc400;
+          }
+        `}</style>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -484,56 +533,56 @@ if (!sellerSeedListing) {
                 )}
               </div>
 
-              <div>
+              <div className="yard-copy">
                 <span className="eyebrow">IronXchange Yard</span>
                 <h1>{yardTitle}</h1>
 
                 <p>
                   {sellerLocation}
-                  {sellerName && sellerName !== yardTitle ? ` · ${sellerName}` : ""}
+                  {sellerName ? ` · ${sellerName}` : ""}
                 </p>
 
                 <div className="yard-actions">
-  {website ? (
-    <a href={website} target="_blank" rel="noreferrer" aria-label="Website">
-      <i className="fa-solid fa-globe"></i>
-    </a>
-  ) : null}
+                  {website ? (
+                    <a href={website} target="_blank" rel="noreferrer" aria-label="Website">
+                      <i className="fa-solid fa-globe"></i>
+                    </a>
+                  ) : null}
 
-  {facebook ? (
-    <a href={facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
-      <i className="fa-brands fa-facebook-f"></i>
-    </a>
-  ) : null}
+                  {facebook ? (
+                    <a href={facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+                      <i className="fa-brands fa-facebook-f"></i>
+                    </a>
+                  ) : null}
 
-  {instagram ? (
-    <a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
-      <i className="fa-brands fa-instagram"></i>
-    </a>
-  ) : null}
+                  {instagram ? (
+                    <a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
+                      <i className="fa-brands fa-instagram"></i>
+                    </a>
+                  ) : null}
 
-  {linkedin ? (
-    <a href={linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
-      <i className="fa-brands fa-linkedin-in"></i>
-    </a>
-  ) : null}
+                  {linkedin ? (
+                    <a href={linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                      <i className="fa-brands fa-linkedin-in"></i>
+                    </a>
+                  ) : null}
 
-  {youtube ? (
-    <a href={youtube} target="_blank" rel="noreferrer" aria-label="YouTube">
-      <i className="fa-brands fa-youtube"></i>
-    </a>
-  ) : null}
+                  {youtube ? (
+                    <a href={youtube} target="_blank" rel="noreferrer" aria-label="YouTube">
+                      <i className="fa-brands fa-youtube"></i>
+                    </a>
+                  ) : null}
 
-  {tiktok ? (
-    <a href={tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
-      <i className="fa-brands fa-tiktok"></i>
-    </a>
-  ) : null}
+                  {tiktok ? (
+                    <a href={tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
+                      <i className="fa-brands fa-tiktok"></i>
+                    </a>
+                  ) : null}
 
-  <a href="/browse" className="browse-all-link">
-    Browse All Iron
-  </a>
-</div>
+                  <a href="/browse" className="browse-all-link">
+                    Browse All Iron
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -832,6 +881,10 @@ if (!sellerSeedListing) {
           font-size: 28px;
         }
 
+        .yard-copy {
+          min-width: 0;
+        }
+
         .eyebrow {
           display: block;
           color: ${BRAND_YELLOW};
@@ -866,44 +919,36 @@ if (!sellerSeedListing) {
         }
 
         .yard-actions a {
-  width: 34px;
-  height: 34px;
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #101010;
+          border: 1px solid #2a2a2a;
+          border-radius: 8px;
+          color: #eaeaea;
+          text-decoration: none;
+          font-size: 14px;
+          transition:
+            border-color .15s ease,
+            background .15s ease,
+            color .15s ease;
+        }
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #101010;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-
-  color: #eaeaea;
-  text-decoration: none;
-
-  font-size: 14px;
-  transition:
-    border-color .15s ease,
-    background .15s ease,
-    color .15s ease;
-}
-
-.yard-actions a:hover {
-  border-color: #FFC400;
-  color: #FFC400;
-  background: #161616;
-}
-
-.yard-actions .browse-all-link {
-  width: auto;
-  padding: 0 13px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .45px;
-  text-transform: uppercase;
-}
         .yard-actions a:hover {
-          border-color: ${BRAND_YELLOW};
-          color: ${BRAND_YELLOW};
+          border-color: #FFC400;
+          color: #FFC400;
+          background: #161616;
+        }
+
+        .yard-actions .browse-all-link {
+          width: auto;
+          padding: 0 13px;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .45px;
+          text-transform: uppercase;
         }
 
         .yard-count {
@@ -1068,8 +1113,9 @@ if (!sellerSeedListing) {
 
         .cards {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(250px, 320px));
           gap: 22px;
+          justify-content: start;
         }
 
         .card {
@@ -1304,13 +1350,11 @@ if (!sellerSeedListing) {
           }
 
           .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 320px));
-  gap: 22px;
-  justify-content: start;
-}
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </>
   );
 }
+
