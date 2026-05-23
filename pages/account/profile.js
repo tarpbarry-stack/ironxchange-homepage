@@ -715,7 +715,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   min-width: 0;
 }
 
-        .page-head {
+     .page-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px auto;
   align-items: center;
@@ -732,8 +732,6 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 .head-copy {
   min-width: 0;
 }
-
-
         .back-link {
           display: inline-block;
           color: rgba(255,255,255,.55);
@@ -766,26 +764,23 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 }
 
 .profile-preview {
-  width: 320px;
-  max-width: 320px;
-
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 
-  background: #101010;
-  border: 1px solid #252525;
+  background: #0f0f0f;
+  border: 1px solid #303030;
   border-radius: 10px;
 
   padding: 9px 10px;
-  overflow: hidden;
+  min-height: 58px;
+
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
 }
 
 .preview-logo {
-  width: 74px;
-  height: 38px;
-  min-width: 74px;
-
+  width: 82px;
+  height: 42px;
   background: #050505;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
@@ -795,15 +790,14 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   justify-content: center;
 
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .preview-logo img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 150%;
+  height: 150%;
   object-fit: contain;
-  display: block;
 }
-
 .preview-logo i {
   color: #777;
   font-size: 18px;
