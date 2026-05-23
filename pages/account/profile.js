@@ -609,11 +609,8 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   padding: 8px 1.15%;
 
   max-width: 1680px;
-  height: calc(100vh - 64px);
 
   margin: 0 auto;
-
-  overflow: hidden;
 }
 
       .rail {
@@ -703,10 +700,8 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           color: ${BRAND_YELLOW};
         }
 
-       .content {
+    .content {
   min-width: 0;
-  overflow-y: auto;
-  padding-right: 2px;
 }
 
         .page-head {
