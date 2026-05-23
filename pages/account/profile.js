@@ -38,14 +38,19 @@ export default function AccountProfilePage() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [logoFile, setLogoFile] = useState(null);
 
-  const [form, setForm] = useState({
-    companyName: "",
-    sellerName: "",
-    sellerLocation: "",
-    phoneNumber: "",
-    website: "",
-    bio: ""
-  });
+ const [form, setForm] = useState({
+  companyName: "",
+  sellerName: "",
+  sellerLocation: "",
+  phoneNumber: "",
+  website: "",
+  facebookUrl: "",
+  instagramUrl: "",
+  linkedinUrl: "",
+  youtubeUrl: "",
+  tiktokUrl: "",
+  bio: ""
+});
 
   useEffect(() => {
     async function loadProfile() {
@@ -74,18 +79,23 @@ export default function AccountProfilePage() {
         setUser(currentUser);
 
         setForm({
-          companyName: publicData.companyName || profile.abbreviatedName || "",
-          sellerName: publicData.sellerName || profile.displayName || "",
-          sellerLocation:
-            publicData.sellerLocation ||
-            publicData.location ||
-            publicData.cityState ||
-            "",
-          phoneNumber: protectedData.phoneNumber || publicData.phoneNumber || "",
-          website: publicData.website || "",
-          bio: publicData.bio || publicData.companyBio || ""
-        });
-
+  companyName: publicData.companyName || profile.abbreviatedName || "",
+  sellerName: publicData.sellerName || profile.displayName || "",
+  sellerLocation:
+    publicData.sellerLocation ||
+    publicData.location ||
+    publicData.cityState ||
+    "",
+  phoneNumber: protectedData.phoneNumber || publicData.phoneNumber || "",
+  website: publicData.website || "",
+  facebookUrl: publicData.facebookUrl || "",
+  instagramUrl: publicData.instagramUrl || "",
+  linkedinUrl: publicData.linkedinUrl || "",
+  youtubeUrl: publicData.youtubeUrl || "",
+  tiktokUrl: publicData.tiktokUrl || "",
+  bio: publicData.bio || publicData.companyBio || ""
+});
+        
         setLogoPreview(getImageUrlFromIncluded(currentUser));
       } catch (err) {
         window.location.href = `/login?next=${encodeURIComponent(
@@ -147,17 +157,23 @@ export default function AccountProfilePage() {
           currentProfile.displayName ||
           "IronXchange Seller",
 
-        publicData: {
-          ...currentPublicData,
-          companyName: form.companyName.trim(),
-          sellerName: form.sellerName.trim(),
-          sellerLocation: form.sellerLocation.trim(),
-          location: form.sellerLocation.trim(),
-          cityState: form.sellerLocation.trim(),
-          website: form.website.trim(),
-          bio: form.bio.trim(),
-          companyBio: form.bio.trim()
-        },
+       publicData: {
+  ...currentPublicData,
+  companyName: form.companyName.trim(),
+  sellerName: form.sellerName.trim(),
+  sellerLocation: form.sellerLocation.trim(),
+  location: form.sellerLocation.trim(),
+  cityState: form.sellerLocation.trim(),
+  website: form.website.trim(),
+  facebookUrl: form.facebookUrl.trim(),
+  instagramUrl: form.instagramUrl.trim(),
+  linkedinUrl: form.linkedinUrl.trim(),
+  youtubeUrl: form.youtubeUrl.trim(),
+  tiktokUrl: form.tiktokUrl.trim(),
+  bio: form.bio.trim(),
+  companyBio: form.bio.trim()
+},
+        
 
         protectedData: {
           ...currentProtectedData,
@@ -402,6 +418,50 @@ export default function AccountProfilePage() {
                     />
                   </label>
 
+                        <label>
+  Facebook
+  <input
+    value={form.facebookUrl}
+    onChange={e => updateField("facebookUrl", e.target.value)}
+    placeholder="https://facebook.com/company"
+  />
+</label>
+
+<label>
+  Instagram
+  <input
+    value={form.instagramUrl}
+    onChange={e => updateField("instagramUrl", e.target.value)}
+    placeholder="https://instagram.com/company"
+  />
+</label>
+
+<label>
+  LinkedIn
+  <input
+    value={form.linkedinUrl}
+    onChange={e => updateField("linkedinUrl", e.target.value)}
+    placeholder="https://linkedin.com/company/company-name"
+  />
+</label>
+
+<label>
+  YouTube
+  <input
+    value={form.youtubeUrl}
+    onChange={e => updateField("youtubeUrl", e.target.value)}
+    placeholder="https://youtube.com/@company"
+  />
+</label>
+
+<label>
+  TikTok
+  <input
+    value={form.tiktokUrl}
+    onChange={e => updateField("tiktokUrl", e.target.value)}
+    placeholder="https://tiktok.com/@company"
+  />
+</label>
                   <label className="full">
                     About Seller
                     <textarea
