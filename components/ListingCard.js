@@ -105,20 +105,6 @@ export default function ListingCard({
     <span>⌖ {listing.location || "Location not listed"}</span>
   </div>
 </div>
-
-  <span>⌖ {listing.location || "Location not listed"}</span>
-</div>
-                type="button"
-                className={`save-star ${saved ? "saved" : ""}`}
-                onClick={toggleSave}
-                aria-label={saved ? "Unsave listing" : "Save listing"}
-                title={saved ? "Saved" : "Save"}
-              >
-                <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-              </button>
-            ) : null}
-          </div>
-        </div>
       </div>
 
       <style jsx>{`
