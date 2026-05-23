@@ -89,11 +89,21 @@ export default function ListingCard({
         <div className="price-row">
           <strong>{listing.price || "Call for price"}</strong>
 
-          <div className="meta">
-            <span>⌖ {listing.location || "Location not listed"}</span>
+         <div className="meta">
+  {showSave ? (
+    <button
+      type="button"
+      className={`save-star ${saved ? "saved" : ""}`}
+      onClick={toggleSave}
+      aria-label={saved ? "Unsave listing" : "Save listing"}
+      title={saved ? "Saved" : "Save"}
+    >
+      <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
+    </button>
+  ) : null}
 
-            {showSave ? (
-              <button
+  <span>⌖ {listing.location || "Location not listed"}</span>
+</div>
                 type="button"
                 className={`save-star ${saved ? "saved" : ""}`}
                 onClick={toggleSave}
@@ -225,22 +235,24 @@ export default function ListingCard({
           white-space: nowrap;
         }
 
-        .meta {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          font-size: 12px;
-          color: #9a9a9a;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-          text-align: right;
-        }
+      .meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  color: #9a9a9a;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  text-align: right;
+  margin-left: auto;
+}
 
         .meta span {
           color: #9a9a9a;
           font-size: 11px;
           font-weight: 900;
           letter-spacing: .4px;
+          white-space: nowrap;
         }
 
         .save-star {
