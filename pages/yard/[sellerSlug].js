@@ -585,8 +585,8 @@ export default function SellerYardPage() {
                     </a>
                   ) : null}
 
-                  <a href="/browse" className="browse-all-link">
-                    Browse All Iron
+                 <a href="#" onClick={(e) => { e.preventDefault(); window.history.back(); }} className="browse-all-link">
+                    Back to Machine
                   </a>
                 </div>
               </div>
@@ -841,146 +841,137 @@ export default function SellerYardPage() {
         }
 
         .yard-head {
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 16px;
-          padding: 22px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 24px;
-          margin-bottom: 14px;
-        }
+  background: #151515;
+  border: 1px solid #282828;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 10px;
+}
 
-        .yard-identity {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          min-width: 0;
-        }
+.yard-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
 
-        .yard-logo {
-          width: 170px;
-          height: 88px;
-          background: #080808;
-          border: 1px solid #2a2a2a;
-          border-radius: 12px;
-          padding: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          flex: 0 0 auto;
-        }
+.yard-logo {
+  width: 132px;
+  height: 64px;
+  background: #080808;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
 
-        .yard-logo img {
-          width: 150%;
-          height: 150%;
-          object-fit: contain;
-          object-position: center;
-          display: block;
-        }
+.yard-logo img {
+  width: 150%;
+  height: 150%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
 
-        .yard-logo i {
-          color: #777;
-          font-size: 28px;
-        }
+.yard-copy {
+  min-width: 0;
+}
 
-        .yard-copy {
-          min-width: 0;
-        }
+.eyebrow {
+  display: block;
+  color: #FFC400;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .65px;
+  margin-bottom: 5px;
+}
 
-        .eyebrow {
-          display: block;
-          color: ${BRAND_YELLOW};
-          font-size: 10px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .65px;
-          margin-bottom: 7px;
-        }
+h1 {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: -0.35px;
+  text-transform: uppercase;
+}
 
-        h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 32px;
-          line-height: 1.05;
-          letter-spacing: -0.5px;
-          text-transform: uppercase;
-        }
+.yard-head p {
+  margin: 6px 0 0;
+  color: #8a8a8a;
+  font-size: 12px;
+  font-weight: 800;
+}
 
-        .yard-head p {
-          margin: 8px 0 0;
-          color: #8a8a8a;
-          font-size: 13px;
-          font-weight: 700;
-        }
+.yard-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
 
-        .yard-actions {
-          margin-top: 14px;
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
+.yard-actions a {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 7px;
+  color: #eaeaea;
+  text-decoration: none;
+  font-size: 13px;
+}
 
-        .yard-actions a {
-          width: 34px;
-          height: 34px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: #101010;
-          border: 1px solid #2a2a2a;
-          border-radius: 8px;
-          color: #eaeaea;
-          text-decoration: none;
-          font-size: 14px;
-          transition:
-            border-color .15s ease,
-            background .15s ease,
-            color .15s ease;
-        }
+.yard-actions a:hover {
+  border-color: #FFC400;
+  color: #FFC400;
+  background: #161616;
+}
 
-        .yard-actions a:hover {
-          border-color: #FFC400;
-          color: #FFC400;
-          background: #161616;
-        }
+.yard-actions .browse-all-link {
+  width: auto;
+  padding: 0 11px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
 
-        .yard-actions .browse-all-link {
-          width: auto;
-          padding: 0 13px;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .45px;
-          text-transform: uppercase;
-        }
+.yard-count {
+  min-width: 118px;
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 11px;
+  padding: 12px;
+  text-align: center;
+}
 
-        .yard-count {
-          min-width: 150px;
-          background: #101010;
-          border: 1px solid #252525;
-          border-radius: 14px;
-          padding: 18px;
-          text-align: center;
-        }
+.yard-count strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 26px;
+  line-height: 1;
+}
 
-        .yard-count strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 34px;
-          line-height: 1;
-        }
-
-        .yard-count span {
-          display: block;
-          margin-top: 8px;
-          color: #888;
-          font-size: 10px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .45px;
-        }
+.yard-count span {
+  display: block;
+  margin-top: 6px;
+  color: #888;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .45px;
+}
 
         .search-section {
           padding: 18px 0 16px;
