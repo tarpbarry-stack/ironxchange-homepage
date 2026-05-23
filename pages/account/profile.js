@@ -654,16 +654,18 @@ export default function AccountProfilePage() {
         }
 
         .page-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 18px;
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 12px;
-          padding: 18px 20px;
-          margin-bottom: 8px;
-        }
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  background: #151515;
+  border: 1px solid #282828;
+  border-radius: 10px;
+
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
 
         .back-link {
           display: inline-block;
@@ -680,33 +682,45 @@ export default function AccountProfilePage() {
           color: rgba(255,255,255,.9);
         }
 
-        h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 28px;
-          letter-spacing: -0.5px;
-        }
+     h1 {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 22px;
+  letter-spacing: -0.35px;
+  text-transform: uppercase;
+}
 
-        .page-head p {
-          margin: 8px 0 0;
-          color: #999;
-          font-size: 14px;
-          line-height: 1.5;
-        }
+      .page-head p {
+  margin: 6px 0 0;
+  color: #8a8a8a;
+  font-size: 12px;
+  line-height: 1.45;
+  max-width: 700px;
+}
 
-        .save-top,
-        .save-btn {
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          border: none;
-          border-radius: 10px;
-          padding: 14px 18px;
-          font-size: 12px;
-          font-weight: 900;
-          letter-spacing: .35px;
-          cursor: pointer;
-          white-space: nowrap;
-        }
+      .save-top,
+.save-btn {
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #FFC400;
+  color: #050505;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 0 16px;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .35px;
+
+  cursor: pointer;
+  white-space: nowrap;
+}
 
         .save-top:disabled,
         .save-btn:disabled {
@@ -720,20 +734,20 @@ export default function AccountProfilePage() {
           gap: 8px;
         }
 
-        .panel {
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 12px;
-          padding: 20px;
-        }
+      .panel {
+  background: #151515;
+  border: 1px solid #282828;
+  border-radius: 10px;
+  padding: 16px;
+}
 
         .panel h2 {
-          margin: 0 0 16px;
-          color: #f2f2f2;
-          font-size: 15px;
-          text-transform: uppercase;
-          letter-spacing: .4px;
-        }
+  margin: 0 0 12px;
+  color: #f2f2f2;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
 
         .logo-preview-box {
           width: 100%;
