@@ -282,9 +282,9 @@ export default function ListingCard({
 .price-row strong {
   color: #f2f2f2;
 
-  font-size: 18.5px;
-  font-weight: 900;
-  letter-spacing: -0.2px;
+  font-size: 17.25px;
+font-weight: 850;
+letter-spacing: -0.12px;
 
   white-space: nowrap;
 }
