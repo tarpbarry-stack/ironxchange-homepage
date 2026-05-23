@@ -128,17 +128,17 @@ export default function ListingCard({
     0 18px 44px rgba(0,0,0,.22);
 
   transition:
-    transform .16s ease,
-    border-color .16s ease,
-    background .16s ease,
-    box-shadow .16s ease;
+    transform .22s ease,
+    border-color .22s ease,
+    background .22s ease,
+    box-shadow .22s ease;
 }
 
 .card:hover {
  transform:
   translateY(-2px)
   scale(1.003);
-  border-color: rgba(255,196,0,.18);
+  border-color: rgba(255,196,0,.14);
   background:
     linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
     #171717;
@@ -150,15 +150,22 @@ export default function ListingCard({
 
 .card-photo {
   position: relative;
-  height: 190px;
+  overflow: hidden;
+  height: 196px;
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid rgba(255,255,255,.065);
 
-  transition: filter .18s ease;
+  box-shadow:
+  inset 0 -40px 70px rgba(0,0,0,.10);
+
+ transition:
+  filter .18s ease,
+  transform .28s ease;
 }
 
 .card:hover .card-photo {
+  transform: scale(1.018);
   filter:
   contrast(1.04)
   saturate(1.03)
@@ -229,7 +236,7 @@ export default function ListingCard({
 }
 
 .card-body {
-  padding: 14px 14px 13px;
+  padding: 13px 13px 12px;
 }
 
 .title-row {
@@ -247,7 +254,8 @@ export default function ListingCard({
   font-weight: 900;
   line-height: 1.12;
   max-width: 92%;
-  letter-spacing: -0.18px;
+ letter-spacing: -0.28px;
+  text-rendering: geometricPrecision;
 }
 
 .hours-inline {
@@ -270,7 +278,8 @@ export default function ListingCard({
 
   font-size: 12.75px;
   font-weight: 450;
-  line-height: 1.38;
+  line-height: 1.32;
+  letter-spacing: .08px;
 }
 
 .price-row {
