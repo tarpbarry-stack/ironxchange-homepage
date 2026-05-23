@@ -132,6 +132,8 @@ export default function ListingCard({
     border-color .14s ease,
     background .14s ease,
     box-shadow .14s ease;
+
+    contain: layout paint;
 }
 
 .card:hover {
@@ -158,10 +160,11 @@ export default function ListingCard({
   box-shadow:
   inset 0 -40px 70px rgba(0,0,0,.10);
 
- transition: none;
+transition: opacity .14s ease;
 }
 
 .card:hover .card-photo {
+  opacity: .985;
   transform: none;
 }
 
@@ -225,7 +228,6 @@ export default function ListingCard({
   letter-spacing: .25px;
 
   z-index: 5;
-  backdrop-filter: blur(2px);
 }
 
 .card-body {
