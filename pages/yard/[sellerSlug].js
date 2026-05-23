@@ -2,8 +2,8 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
-import ListingCard from "../components/ListingCard";
-import { getListingId } from "../lib/listingFormatters";
+import ListingCard from "../../components/ListingCard";
+import { getListingId } from "../../lib/listingFormatters";
 
 const BRAND_YELLOW = "#FFC400";
 
