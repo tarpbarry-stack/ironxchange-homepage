@@ -360,7 +360,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 
             <form className="profile-grid" onSubmit={handleSave}>
               <section className="panel logo-panel">
-                <h2>Seller Logo</h2>
+                <h2>Branding</h2>
 
                 <div className="logo-preview-box">
                   {logoPreview ? (
@@ -385,11 +385,14 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                 <p className="help">
                   Best: transparent PNG. Recommended width: 1200px. Your logo will not be cropped, circled, or distorted.
                 </p>
+                      <a href="/account/listings" className="yard-preview-btn">
+  View Listings
+</a>
               </section>
 
               <section className="panel form-panel">
-                <h2>Seller Information</h2>
-
+               <h2>Public Seller Details</h2>
+                      
                <div className="form-grid">
   <div className="form-section-title">Identity</div>
 
@@ -494,7 +497,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                       value={form.bio}
                       onChange={e => updateField("bio", e.target.value)}
                       placeholder="Tell buyers who you are, what you sell, and how you operate."
-                      rows={7}
+                      rows={5}
                     />
                   </label>
                 </div>
@@ -871,6 +874,35 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   color: #777;
   font-size: 11px;
   line-height: 1.45;
+}
+
+.yard-preview-btn {
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  margin-top: 10px;
+
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+
+  color: #eaeaea;
+  text-decoration: none;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.yard-preview-btn:hover {
+  border-color: #FFC400;
+  color: #FFC400;
 }
 
       .form-grid {
