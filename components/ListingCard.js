@@ -141,8 +141,8 @@ export default function ListingCard({
   top: 50%;
   transform: translateY(-50%);
 
-  width: 26px;
-  height: 80px;
+  width: 22px;
+  height: 92px;
 
   border: none;
 
