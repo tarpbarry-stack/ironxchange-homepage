@@ -2274,7 +2274,7 @@ bottom: 17px;
   color: #F2F2F2 !important;
   
   font-size: 13px !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
 
   letter-spacing: .25px;
 
