@@ -142,12 +142,14 @@ function sortListings(listings, sortMode) {
   return sorted;
 }
 
-function getAuthorId(item = {}) {
+function getAuthorId(item) {
+  const safeItem = item || {};
+
   return (
-    item.authorId ||
-    item.sellerId ||
-    item.author?.id?.uuid ||
-    item.author?.id ||
+    safeItem.authorId ||
+    safeItem.sellerId ||
+    safeItem.author?.id?.uuid ||
+    safeItem.author?.id ||
     ""
   );
 }
@@ -256,7 +258,7 @@ export default function SellerYardPage() {
     });
   }, [sellerSlug, listings]);
 
-  const sellerAuthorId = getAuthorId(sellerSeedListing);
+  const sellerAuthorId = sellerSeedListing ? getAuthorId(sellerSeedListing) : "";
 
   const sellerListings = useMemo(() => {
     if (!sellerAuthorId) return [];
