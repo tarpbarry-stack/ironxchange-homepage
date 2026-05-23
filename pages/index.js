@@ -1,7 +1,9 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
-const STAGING = "https://staging.ironxchange.com";
+import ListingCard from "../components/ListingCard";
+import { getListingId } from "../lib/listingFormatters";
+
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -86,7 +88,6 @@ export default function Home() {
   const [category, setCategory] = useState("ALL CATEGORIES");
    const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [cardPhotoIndex, setCardPhotoIndex] = useState({});
 
   useEffect(() => {
     fetch("/api/listings")
@@ -140,34 +141,6 @@ export default function Home() {
       ? `/browse?keywords=${encodeURIComponent(terms)}`
       : "/browse";
   }
-
-function getCardImages(item = {}) {
-  return [
-    ...(Array.isArray(item.images) ? item.images : []),
-    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
-    item.imageUrl,
-    item.image
-  ].filter(Boolean);
-}
-
-function changeCardPhoto(e, item, direction) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const images = getCardImages(item);
-  if (images.length < 2) return;
-
-  setCardPhotoIndex(current => {
-    const currentIndex = current[item.id] || 0;
-    const nextIndex =
-      (currentIndex + direction + images.length) % images.length;
-
-    return {
-      ...current,
-      [item.id]: nextIndex
-    };
-  });
-}
   
   return (
     <>
@@ -275,70 +248,22 @@ function changeCardPhoto(e, item, direction) {
         </div>
       </section>
 
-       <section className="featured">
-        <div className="cards">
-          {featuredListings.map((item) => (
-            <a
-              href={`/listing/${slugify(item.title)}?from=browser`}
-              className="card"
-              key={item.id || item.link || item.title}
-            >
-            <div
-  className="card-photo"
-  style={{
-    backgroundImage: `url(${
-      getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
-      "/images/hero-equipment-yard.jpg"
-    })`
-  }}
-/>
+  <section className="featured">
+  <div className="cards">
+    {featuredListings.map((item) => {
+      const id = String(getListingId(item));
 
-{getCardImages(item).length > 1 && (
-  <>
-    <button
-      type="button"
-      className="card-photo-nav left"
-      onClick={e => changeCardPhoto(e, item, -1)}
-    >
-      ‹
-    </button>
-
-    <button
-      type="button"
-      className="card-photo-nav right"
-      onClick={e => changeCardPhoto(e, item, 1)}
-    >
-      ›
-    </button>
-
-    <span className="photo-count">
-      {(cardPhotoIndex[item.id] || 0) + 1}/
-      {getCardImages(item).length}
-    </span>
-  </>
-)}
-
-              <div className="card-body">
-                <div className="title-row">
-                  <h3>{String(item.title || "").replace(item.hours || "", "").trim()}</h3>
-
-                  <h3 className="hours-top">{item.hours}</h3>
-                </div>
-
-                <p className="feature-line">{getFeatureLine(item)}</p>
-
-                <div className="price-row">
-                  <strong>{item.price || "Call for Price"}</strong>
-
-                  <div className="meta">
-                    <span>⌖ {item.location || "Location not listed"}</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
+      return (
+        <ListingCard
+          key={id}
+          listing={item}
+          showSave={false}
+          from="browser"
+        />
+      );
+    })}
+  </div>
+</section>
 
       <section id="how" className="how">
         <h2>LIST YOUR EQUIPMENT IN MINUTES</h2>
@@ -667,147 +592,6 @@ function changeCardPhoto(e, item, direction) {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
 }
-
-        .card {
-          text-decoration: none;
-          color: inherit;
-          border: 1px solid #242424;
-          border-radius: 16px;
-          overflow: hidden;
-          background: #151515;
-          transition: transform 0.18s ease, border-color 0.18s ease,
-            background 0.18s ease;
-        }
-
-        .card:hover {
-          transform: translateY(-3px);
-          border-color: #3a3a3a;
-          background: #181818;
-        }
-
-        .card-photo {
-          height: 190px;
-          background-size: cover;
-          background-position: center;
-        }
-
-        .card {
-  position: relative;
-}
-
-.card-photo {
-  position: relative;
-}
-
-.card-photo-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 80px;
-  border: none;
-  background: rgba(0,0,0,.12);
-  color: rgba(255,255,255,.72);
-  font-size: 28px;
-  font-weight: 300;
-  cursor: pointer;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity .18s ease, background .18s ease, color .18s ease;
-}
-
-.card:hover .card-photo-nav {
-  opacity: 1;
-}
-
-.card-photo-nav.left {
-  left: 0;
-  border-radius: 0 10px 10px 0;
-}
-
-.card-photo-nav.right {
-  right: 0;
-  border-radius: 10px 0 0 10px;
-}
-
-.photo-count {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  background: rgba(0,0,0,.72);
-  color: #f2f2f2;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 10px;
-  font-weight: 900;
-  z-index: 5;
-}
-
-        .card-body {
-          padding: 16px;
-        }
-
-        .card h3 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 16px;
-          letter-spacing: -0.2px;
-        }
-
-        .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 10px;
-        }
-
-        .hours-top {
-          color: #8a8a8a !important;
-          font-size: 11px !important;
-          font-weight: 700;
-          letter-spacing: 0.3px;
-          white-space: nowrap;
-        }
-
-        .card p {
-          margin: 8px 0 18px;
-          color: #8f8f8f;
-          font-size: 13px;
-          line-height: 1.4;
-        }
-
-        .feature-line {
-          min-height: 38px;
-        }
-
-        .meta {
-          display: flex;
-          gap: 12px;
-          font-size: 12px;
-          color: #9a9a9a;
-          flex-wrap: wrap;
-        }
-
-        .price-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 16px;
-        }
-
-        .price-row strong {
-          color: #f2f2f2;
-          font-size: 18px;
-        }
-
-        .price-row span {
-          color: #9a9a9a;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 0.4px;
-        }
-
         .how {
           background: #f3f3f3;
           padding: 54px 5%;
