@@ -344,7 +344,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                 <h1>Seller Profile</h1>
 
                 <p>
-                  This information appears on your IronXchange listings. Your logo keeps its native shape and scales to fit.
+                  Configure your public seller yard, listing identity, and dealership presence across IronXchange.
                 </p>
               </div>
 
@@ -600,25 +600,30 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   min-height: 0;
   overflow: hidden;
 }
-        .rail-top {
-          text-align: center;
-          padding: 6px 4px 8px;
-          border-bottom: 1px solid #252525;
-          margin-bottom: 6px;
-        }
+       .rail-top {
+  text-align: center;
+  padding: 4px 4px 7px;
+  border-bottom: 1px solid #252525;
+  margin-bottom: 6px;
+}
 
        .user-dot {
-  width: 140px;
-  height: 72px;
+  width: 126px;
+  height: 64px;
+
   border: 1px solid #F2F2F2;
-  border-radius: 10px;
+  border-radius: 8px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 10px;
+
+  margin: 0 auto 8px;
+
   background: #050505;
   overflow: hidden;
-  padding: 8px;
+
+  padding: 7px;
 }
 
 .user-dot img {
@@ -642,19 +647,23 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           font-size: 10px;
         }
 
-        .rail a {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #bdbdbd;
-          text-decoration: none;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: .35px;
-          text-transform: uppercase;
-          padding: 8px 7px;
-          border-radius: 8px;
-        }
+      .rail a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #bdbdbd;
+  text-decoration: none;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+
+  padding: 7px 7px;
+
+  border-radius: 8px;
+}
 
         .rail a.active,
         .rail a:hover {
@@ -919,23 +928,33 @@ textarea {
   background: transparent;
 }
 
-        .actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          margin-top: 18px;
-        }
+       .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
 
         .cancel-btn {
-          text-decoration: none;
-          color: #d6d6d6;
-          border: 1px solid #3a3a3a;
-          border-radius: 10px;
-          padding: 14px 18px;
-          font-size: 12px;
-          font-weight: 900;
-          letter-spacing: .35px;
-        }
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+
+  color: #d6d6d6;
+
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+
+  padding: 0 14px;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .35px;
+}
 
         @media (max-width: 900px) {
           .dashboard {
