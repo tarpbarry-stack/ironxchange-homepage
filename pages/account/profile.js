@@ -346,6 +346,28 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                 <p>
                   Configure your public seller yard, listing identity, and dealership presence across IronXchange.
                 </p>
+
+<div className="profile-preview">
+  <div className="preview-logo">
+    {logoPreview ? (
+      <img src={logoPreview} alt={form.companyName || "Seller"} />
+    ) : (
+      <i className="fa-regular fa-user"></i>
+    )}
+  </div>
+
+  <div>
+    <span>Public Seller Yard</span>
+
+    <strong>
+      {form.companyName || "Seller Profile"}
+    </strong>
+
+    <p>
+      {form.sellerLocation || "Location not listed"}
+    </p>
+  </div>
+</div>    
               </div>
 
               <button
@@ -747,6 +769,60 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   font-size: 12px;
   line-height: 1.45;
   max-width: 700px;
+}
+
+.profile-preview {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: #101010;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  padding: 10px;
+  max-width: 420px;
+}
+
+.preview-logo {
+  width: 82px;
+  height: 42px;
+  background: #050505;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.preview-logo img {
+  width: 150%;
+  height: 150%;
+  object-fit: contain;
+}
+
+.profile-preview span {
+  display: block;
+  color: #FFC400;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .55px;
+}
+
+.profile-preview strong {
+  display: block;
+  margin-top: 3px;
+  color: #f2f2f2;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.profile-preview p {
+  margin: 3px 0 0;
+  color: #888;
+  font-size: 11px;
 }
 
       .save-top,
