@@ -771,16 +771,51 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 }
 
 .profile-preview {
-  margin-top: 12px;
+  width: 320px;
+  max-width: 320px;
+
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 
   background: #101010;
   border: 1px solid #252525;
   border-radius: 10px;
-  padding: 10px;
-  max-width: 420px;
+
+  padding: 9px 10px;
+  overflow: hidden;
+}
+
+.preview-logo {
+  width: 74px;
+  height: 38px;
+  min-width: 74px;
+
+  background: #050505;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.preview-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-logo i {
+  color: #777;
+  font-size: 18px;
+}
+
+.preview-copy {
+  min-width: 0;
 }
 
 .profile-preview span {
@@ -1101,9 +1136,15 @@ textarea {
             grid-template-columns: 1fr;
           }
 
-          .page-head {
-            flex-direction: column;
-          }
+.page-head {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.profile-preview {
+  width: 100%;
+  max-width: none;
+}
 
           .save-top {
             width: 100%;
