@@ -843,13 +843,13 @@ export default function SellerYardPage() {
         .yard-head {
   background: #151515;
   border: 1px solid #282828;
-  border-radius: 12px;
-  padding: 14px 16px;
+  border-radius: 10px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 10px;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
 .yard-identity {
@@ -860,12 +860,12 @@ export default function SellerYardPage() {
 }
 
 .yard-logo {
-  width: 132px;
-  height: 64px;
-  background: #080808;
+  width: 126px;
+  height: 62px;
+  background: #050505;
   border: 1px solid #2a2a2a;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 8px;
+  padding: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -898,7 +898,7 @@ export default function SellerYardPage() {
 h1 {
   margin: 0;
   color: #f2f2f2;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.05;
   letter-spacing: -0.35px;
   text-transform: uppercase;
@@ -948,11 +948,11 @@ h1 {
 }
 
 .yard-count {
-  min-width: 118px;
+  min-width: 112px;
   background: #101010;
   border: 1px solid #252525;
-  border-radius: 11px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 11px;
   text-align: center;
 }
 
