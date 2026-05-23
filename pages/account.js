@@ -1594,37 +1594,56 @@ main {
 
 .inquiry-preview {
   display: block;
+
   text-decoration: none;
+
   background: #101010;
   border: 1px solid #252525;
   border-radius: 10px;
-  padding: 9px;
+
+  padding: 8px;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease;
 }
 
 .inquiry-preview:hover {
-  border-color: #3a3a3a;
+  border-color: #353535;
   background: #181818;
 }
 
 .inquiry-preview strong {
   display: block;
+
   color: #f2f2f2;
-  font-size: 11px;
+
+  font-size: 10px;
+  font-weight: 900;
+
   margin-bottom: 4px;
 }
 
 .inquiry-preview span {
   display: block;
+
   color: #FFC400;
-  font-size: 10px;
+
+  font-size: 9px;
   font-weight: 900;
-  margin-bottom: 5px;
+
+  margin-bottom: 4px;
+
+  text-transform: uppercase;
+  letter-spacing: .35px;
 }
 
 .inquiry-preview p {
   margin: 0;
-  color: #aaa;
-  font-size: 11px;
+
+  color: #9a9a9a;
+
+  font-size: 10px;
   line-height: 1.35;
 }
 
@@ -1645,28 +1664,47 @@ main {
 .activity-event {
   display: grid;
   grid-template-columns: 8px 1fr;
+
   gap: 8px;
   align-items: start;
+
   background: #101010;
   border: 1px solid #252525;
   border-radius: 10px;
-  padding: 9px;
+
+  padding: 8px;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease;
+}
+
+.activity-event:hover {
+  border-color: #353535;
+  background: #181818;
 }
 
 .activity-event p {
   margin: 0;
+
   color: #d6d6d6;
-  font-size: 11px;
+
+  font-size: 10px;
   line-height: 1.35;
 }
 
 .activity-event small {
   display: block;
+
   margin-top: 4px;
+
   color: #777;
-  font-size: 9px;
+
+  font-size: 8px;
   font-weight: 900;
+
   text-transform: uppercase;
+  letter-spacing: .35px;
 }
 
 .event-dot {
@@ -1718,44 +1756,78 @@ main {
 .saved-card {
   display: grid;
   grid-template-columns: 148px 1fr;
-  gap: 10px;
+
+  gap: 0;
+
   min-height: 92px;
+
   text-decoration: none;
   color: inherit;
+
   background: #101010;
   border: 1px solid #252525;
   border-radius: 10px;
+
   overflow: hidden;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    transform .15s ease;
 }
 
 .saved-card:hover {
   background: #181818;
-  border-color: #3a3a3a;
+  border-color: #353535;
+
+  transform: translateY(-1px);
 }
 
 .saved-card img {
   width: 148px;
   height: 92px;
+
+  object-fit: cover;
+
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .saved-card-body {
-  padding: 8px 8px 8px 0;
+  padding: 8px 10px 8px 10px;
+
   min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .saved-card-body strong {
   display: block;
+
   color: #f2f2f2;
-  font-size: 11px;
-  line-height: 1.2;
-  margin-bottom: 5px;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  line-height: 1.25;
+
+  margin-bottom: 4px;
 }
 
 .saved-card-body span {
   display: block;
+
   color: #FFC400;
-  font-size: 10px;
+
+  font-size: 9px;
   font-weight: 900;
+
+  letter-spacing: .25px;
 }
 
 .dot {
