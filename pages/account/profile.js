@@ -181,9 +181,9 @@ export default function AccountProfilePage() {
         }
       };
 
-      if (profileImageId) {
-        params.profileImageId = profileImageId;
-      }
+      if (logoFile && profileImageId) {
+  params.profileImageId = profileImageId;
+}
 
       const response = await sdk.currentUser.updateProfile(params, {
         expand: true,
