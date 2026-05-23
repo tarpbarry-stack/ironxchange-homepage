@@ -113,7 +113,8 @@ export default function ListingCard({
   text-decoration: none;
   color: inherit;
 
-  border: 1px solid rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.06);
+  outline: 1px solid rgba(255,255,255,.018);
   border-radius: 13px;
 
   overflow: hidden;
@@ -134,7 +135,9 @@ export default function ListingCard({
 }
 
 .card:hover {
-  transform: translateY(-2px);
+ transform:
+  translateY(-2px)
+  scale(1.003);
   border-color: rgba(255,196,0,.18);
   background:
     linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
@@ -156,7 +159,10 @@ export default function ListingCard({
 }
 
 .card:hover .card-photo {
-  filter: contrast(1.035) saturate(1.025);
+  filter:
+  contrast(1.04)
+  saturate(1.03)
+  brightness(1.01);
 }
 
 .card-photo-nav {
@@ -208,8 +214,8 @@ export default function ListingCard({
   top: 8px;
   right: 8px;
 
-  background: rgba(0,0,0,.28);
-  color: rgba(255,255,255,.56);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.44);
 
   border-radius: 999px;
   padding: 3px 6px;
@@ -239,7 +245,8 @@ export default function ListingCard({
 
   font-size: 15.5px;
   font-weight: 900;
-  line-height: 1.18;
+  line-height: 1.12;
+  max-width: 92%;
   letter-spacing: -0.18px;
 }
 
@@ -259,10 +266,10 @@ export default function ListingCard({
   min-height: 36px;
   margin: 8px 0 16px;
 
-  color: rgba(255,255,255,.48);
+ color: rgba(255,255,255,.42);
 
   font-size: 12.75px;
-  font-weight: 500;
+  font-weight: 450;
   line-height: 1.38;
 }
 
@@ -340,6 +347,7 @@ letter-spacing: -0.12px;
 
 .save-star.saved {
   color: #ffc400;
+  text-shadow: 0 0 8px rgba(255,196,0,.12);
 }
 
 .save-star:hover {
