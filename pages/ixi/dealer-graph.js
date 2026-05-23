@@ -1,5 +1,17 @@
 import { useState } from "react";
 
+async function safeJson(response) {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Expected JSON but got ${response.status}: ${text.slice(0, 120)}`
+    );
+  }
+}
+
 export default function DealerGraph() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
@@ -59,6 +71,13 @@ export default function DealerGraph() {
 
     const targets = JSON.parse(saved);
 
+    const filteredTargets = targets.filter(
+      (target) =>
+        !String(target.website || "")
+          .toLowerCase()
+          .includes("machinerytrader.com/dealers")
+    );
+
     const header = [
       "company",
       "website",
@@ -66,7 +85,7 @@ export default function DealerGraph() {
       "state"
     ];
 
-    const targetRows = targets.map((target) => [
+    const targetRows = filteredTargets.map((target) => [
       target.company,
       target.website,
       target.category,
@@ -99,7 +118,7 @@ export default function DealerGraph() {
         body: JSON.stringify({ rows })
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
 
       if (!response.ok) {
         setStatus(data.message || "Crawl failed.");
