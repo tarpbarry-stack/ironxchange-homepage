@@ -2162,7 +2162,7 @@ style={{
 .save-star {
   position: absolute;
 
- right: 56px;
+ right: 52px;
 bottom: 17px;
 
   z-index: 6;
