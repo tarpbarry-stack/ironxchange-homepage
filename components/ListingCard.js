@@ -86,21 +86,25 @@ export default function ListingCard({
 
         <p className="feature-line">{getFeatureLine(listing)}</p>
 
-        <div className="price-row">
-          <strong>{listing.price || "Call for price"}</strong>
+       <div className="price-row">
+  <strong>{listing.price || "Call for price"}</strong>
 
-         <div className="meta">
-  {showSave ? (
-    <button
-      type="button"
-      className={`save-star ${saved ? "saved" : ""}`}
-      onClick={toggleSave}
-      aria-label={saved ? "Unsave listing" : "Save listing"}
-      title={saved ? "Saved" : "Save"}
-    >
-      <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-    </button>
-  ) : null}
+  <div className="meta">
+    {showSave ? (
+      <button
+        type="button"
+        className={`save-star ${saved ? "saved" : ""}`}
+        onClick={toggleSave}
+        aria-label={saved ? "Unsave listing" : "Save listing"}
+        title={saved ? "Saved" : "Save"}
+      >
+        <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
+      </button>
+    ) : null}
+
+    <span>⌖ {listing.location || "Location not listed"}</span>
+  </div>
+</div>
 
   <span>⌖ {listing.location || "Location not listed"}</span>
 </div>
