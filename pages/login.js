@@ -260,3 +260,6 @@ window.location.href = next;
     line-height: 1.35;
   }
 `}</style>
+</>
+  );
+}
