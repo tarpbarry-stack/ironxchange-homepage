@@ -2162,8 +2162,8 @@ style={{
 .save-star {
   position: absolute;
 
-  right: 64px;
-  bottom: 14px;
+ right: 60px;
+bottom: 16px;
 
   z-index: 6;
 
