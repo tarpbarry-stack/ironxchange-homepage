@@ -2266,13 +2266,15 @@ style={{
 
 .hours-inline,
 .hours-top {
-  color: #8A8A8A;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
+  color: #7c7c7c !important;
+
+  font-size: 12px !important;
+  font-weight: 800 !important;
+
+  letter-spacing: .25px;
+
   white-space: nowrap;
 }
-
 .card p {
   margin: 8px 0 18px;
   color: #8F8F8F;
