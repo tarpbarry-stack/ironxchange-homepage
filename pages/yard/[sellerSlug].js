@@ -1136,85 +1136,86 @@ h1 {
           font-size: 13px;
         }
 
-        @media (max-width: 850px) {
-          .yard-head {
-            align-items: flex-start;
-            display: grid;
-          }
+@media (max-width: 850px) {
+  .yard-head {
+    align-items: flex-start;
+    display: grid;
+  }
 
-          .yard-identity {
-            align-items: flex-start;
-          }
+  .yard-identity {
+    align-items: flex-start;
+  }
 
-          .yard-count {
-            width: 100%;
-          }
+  .yard-count {
+    width: 100%;
+  }
 
-          .search-top-row {
-            grid-template-columns: 1fr;
-          }
+  .search-top-row {
+    grid-template-columns: 1fr;
+  }
 
-          .browse-search,
-          .search-top-row select {
-            border-right: none;
-            border-bottom: 1px solid #2a2a2a;
-          }
+  .browse-search,
+  .search-top-row select {
+    border-right: none;
+    border-bottom: 1px solid #2a2a2a;
+  }
 
-          .filter-strip {
-            display: grid;
-            gap: 8px;
-          }
+  .filter-strip {
+    display: grid;
+    gap: 8px;
+  }
 
-          .range-group,
-          .range-group:first-child,
-          .clear-btn {
-            border-radius: 8px;
-            margin-right: 0;
-            border: 1px solid #343434;
-          }
+  .range-group,
+  .range-group:first-child,
+  .clear-btn {
+    border-radius: 8px;
+    margin-right: 0;
+    border: 1px solid #343434;
+  }
 
-          .clear-btn {
-            width: 100%;
-          }
+  .clear-btn {
+    width: 100%;
+  }
+}
 
-        @media (max-width: 600px) {
-          .nav {
-            padding: 8px 4%;
-          }
+@media (max-width: 600px) {
+  .nav {
+    padding: 8px 4%;
+  }
 
-          .logo-img {
-            height: 34px;
-          }
+  .logo-img {
+    height: 34px;
+  }
 
-          .nav-links a:not(.yellow-link):not(.login-icon) {
-            display: none;
-          }
+  .nav-links a:not(.yellow-link):not(.login-icon) {
+    display: none;
+  }
 
-          .yard-shell {
-            padding: 18px 4% 50px;
-          }
+  .yard-shell {
+    padding: 18px 4% 50px;
+  }
 
-          .yard-head {
-            padding: 16px;
-          }
+  .yard-head {
+    padding: 16px;
+  }
 
-          .yard-identity {
-            display: grid;
-          }
+  .yard-identity {
+    display: grid;
+  }
 
-          .yard-logo {
-            width: 100%;
-            height: 92px;
-          }
+  .yard-logo {
+    width: 100%;
+    height: 92px;
+  }
 
-          h1 {
-            font-size: 25px;
-          }
+  h1 {
+    font-size: 25px;
+  }
 
-          .cards {
-            grid-template-columns: 1fr;
-          }
-        }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
       `}</style>
     </>
   );
