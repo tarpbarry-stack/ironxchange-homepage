@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
 
+async function safeJson(response) {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Expected JSON but got ${response.status}: ${text.slice(0, 120)}`
+    );
+  }
+}
+
 export default function DiscoveryEngine() {
   const [targets, setTargets] = useState([]);
   const [status, setStatus] = useState("");
@@ -22,8 +34,13 @@ export default function DiscoveryEngine() {
 
   function saveTargets(nextTargets) {
     const deduped = dedupeTargets(nextTargets);
+
     setTargets(deduped);
-    localStorage.setItem("ixiDiscoveryTargets", JSON.stringify(deduped));
+
+    localStorage.setItem(
+      "ixiDiscoveryTargets",
+      JSON.stringify(deduped)
+    );
   }
 
   function addTarget() {
@@ -32,7 +49,13 @@ export default function DiscoveryEngine() {
       return;
     }
 
-    const nextTarget = { company, website, category, state };
+    const nextTarget = {
+      company,
+      website,
+      category,
+      state
+    };
+
     saveTargets([...targets, nextTarget]);
 
     setCompany("");
@@ -47,8 +70,11 @@ export default function DiscoveryEngine() {
     setStatus(`Running ${label} discovery...`);
 
     try {
-      const response = await fetch(endpoint, { method: "POST" });
-      const data = await response.json();
+      const response = await fetch(endpoint, {
+        method: "POST"
+      });
+
+      const data = await safeJson(response);
 
       if (!response.ok) {
         setStatus(data.message || `${label} discovery failed.`);
@@ -56,6 +82,7 @@ export default function DiscoveryEngine() {
       }
 
       const discovered = data.targets || [];
+
       saveTargets([...targets, ...discovered]);
 
       setStatus(`Added ${discovered.length} ${label} targets.`);
@@ -99,12 +126,15 @@ export default function DiscoveryEngine() {
     ];
 
     saveTargets(seeded);
+
     setStatus(`Seeded ${seeded.length} discovery targets.`);
   }
 
   function clearTargets() {
     localStorage.removeItem("ixiDiscoveryTargets");
+
     setTargets([]);
+
     setStatus("Discovery targets cleared.");
   }
 
@@ -132,13 +162,20 @@ export default function DiscoveryEngine() {
     });
 
     const url = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "ixi-discovery-targets.csv");
+
+    link.setAttribute(
+      "download",
+      "ixi-discovery-targets.csv"
+    );
 
     document.body.appendChild(link);
+
     link.click();
+
     document.body.removeChild(link);
 
     setStatus(`Exported ${targets.length} targets.`);
@@ -158,17 +195,34 @@ export default function DiscoveryEngine() {
 
       <div style={statsGrid}>
         <StatCard label="Saved Targets" value={targets.length} />
+
         <StatCard
           label="Dealer Targets"
-          value={targets.filter((t) => (t.category || "").includes("Dealer") || (t.category || "").includes("Equipment")).length}
+          value={
+            targets.filter(
+              (t) =>
+                (t.category || "").includes("Dealer") ||
+                (t.category || "").includes("Equipment")
+            ).length
+          }
         />
+
         <StatCard
           label="Contractor Targets"
-          value={targets.filter((t) => (t.category || "").includes("Contractor")).length}
+          value={
+            targets.filter((t) =>
+              (t.category || "").includes("Contractor")
+            ).length
+          }
         />
+
         <StatCard
           label="States"
-          value={new Set(targets.map((t) => t.state).filter(Boolean)).size}
+          value={
+            new Set(
+              targets.map((t) => t.state).filter(Boolean)
+            ).size
+          }
         />
       </div>
 
@@ -217,7 +271,10 @@ export default function DiscoveryEngine() {
           <button
             style={buttonStyle}
             onClick={() =>
-              runDiscovery("/api/discover-machinerytrader", "MachineryTrader")
+              runDiscovery(
+                "/api/discover-machinerytrader",
+                "MachineryTrader"
+              )
             }
           >
             Run MachineryTrader Discovery
@@ -295,6 +352,7 @@ function StatCard({ label, value }) {
 
 function cleanCsv(value) {
   const text = String(value || "").replace(/"/g, '""');
+
   return `"${text}"`;
 }
 
@@ -311,6 +369,7 @@ function dedupeTargets(items) {
     }
 
     seen.add(key);
+
     return true;
   });
 }
