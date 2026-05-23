@@ -177,6 +177,8 @@ export default function Browse() {
   const [model, setModel] = useState("ALL MODELS");
   const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [sdk, setSdk] = useState(null);
+  const [savedIds, setSavedIds] = useState([]);
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [sortMode, setSortMode] = useState("newest");
 
@@ -205,13 +207,27 @@ const [filters, setFilters] = useState({
     try {
       const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
+      const sdkInstance = SharetribeSdk.createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
 
-      await sdk.currentUser.show();
+setSdk(sdkInstance);
 
-      setLoggedIn(true);
+const currentUser = await sdkInstance.currentUser.show();
+
+const profile =
+  currentUser?.data?.data?.attributes?.profile || {};
+
+const saved =
+  profile?.privateData?.savedListings || [];
+
+setSavedIds(
+  Array.isArray(saved)
+    ? saved.map(String)
+    : []
+);
+
+setLoggedIn(true);
     } catch {
       setLoggedIn(false);
     }
@@ -1462,6 +1478,47 @@ function changeCardPhoto(e, item, direction) {
     };
   });
 }
+  
+  async function toggleSave(listingId) {
+  if (!sdk) {
+    window.location.href = "/login";
+    return;
+  }
+
+  try {
+    const currentUser = await sdk.currentUser.show();
+
+    const profile =
+      currentUser?.data?.data?.attributes?.profile || {};
+
+    const currentPrivateData =
+      profile?.privateData || {};
+
+    const currentSaved =
+      Array.isArray(currentPrivateData.savedListings)
+        ? currentPrivateData.savedListings.map(String)
+        : [];
+
+    const alreadySaved =
+      currentSaved.includes(String(listingId));
+
+    const nextSaved = alreadySaved
+      ? currentSaved.filter(id => id !== String(listingId))
+      : [...currentSaved, String(listingId)];
+
+    await sdk.currentUser.updateProfile({
+      privateData: {
+        ...currentPrivateData,
+        savedListings: nextSaved
+      }
+    });
+
+    setSavedIds(nextSaved);
+  } catch (err) {
+    console.error("Save failed", err);
+  }
+}
+  
   return (
     <>
   <Head>
