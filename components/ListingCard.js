@@ -1,291 +1,269 @@
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import {
+  cleanMachineTitle,
   formatHours,
-  formatPrice,
-  getAuctionMeta,
+  getCardImages,
   getFeatureLine,
   getListingHref,
   getListingId,
-  getListingImages,
-  getListingTitle,
-  getLocation,
-  getPublicData,
-  isAuctionListing,
 } from "../lib/listingFormatters";
 
 export default function ListingCard({
-  listing,
+  listing = {},
   saved = false,
   onToggleSaved,
   showSave = true,
-  href,
+  from = "browse",
 }) {
-  const [imageIndex, setImageIndex] = useState(0);
+  const [photoIndex, setPhotoIndex] = useState(0);
 
-  const id = getListingId(listing);
-  const pd = getPublicData(listing);
+  const id = String(getListingId(listing));
+  const images = getCardImages(listing);
+  const currentPhoto = images[photoIndex];
 
-  const title = getListingTitle(listing);
-  const price = formatPrice(listing);
-  const hours = formatHours(pd.hours);
-  const location = getLocation(listing);
-  const featureLine = getFeatureLine(listing);
-  const images = useMemo(() => getListingImages(listing), [listing]);
-  const image = images[imageIndex];
-
-  const auction = isAuctionListing(listing);
-  const auctionMeta = getAuctionMeta(listing);
-
-  const cardHref = href || getListingHref(listing);
-
-  function prevImage(e) {
+  function changePhoto(e, direction) {
     e.preventDefault();
     e.stopPropagation();
-    setImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+
+    if (images.length < 2) return;
+
+    setPhotoIndex(current =>
+      (current + direction + images.length) % images.length
+    );
   }
 
-  function nextImage(e) {
+  function toggleSave(e) {
     e.preventDefault();
     e.stopPropagation();
-    setImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
-  }
 
-  function toggleSaved(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onToggleSaved) onToggleSaved(id, listing);
+    if (onToggleSaved) {
+      onToggleSaved(id, listing);
+    }
   }
 
   return (
-    <Link href={cardHref} className="ix-card-link">
-      <article className="ix-listing-card">
-        <div className="ix-image-shell">
-          {image ? (
-            <img src={image} alt={title} className="ix-card-image" />
-          ) : (
-            <div className="ix-image-placeholder">No Image</div>
-          )}
+    <a href={getListingHref(listing, from)} className="card">
+      <div
+        className="card-photo"
+        style={{
+          backgroundImage: `url(${
+            currentPhoto || "/images/hero-equipment-yard.jpg"
+          })`,
+        }}
+      >
+        {images.length > 1 ? (
+          <>
+            <button
+              type="button"
+              className="card-photo-nav left"
+              onClick={e => changePhoto(e, -1)}
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
 
-          {images.length > 1 && (
-            <>
-              <button className="ix-arrow ix-arrow-left" onClick={prevImage}>‹</button>
-              <button className="ix-arrow ix-arrow-right" onClick={nextImage}>›</button>
-            </>
-          )}
+            <button
+              type="button"
+              className="card-photo-nav right"
+              onClick={e => changePhoto(e, 1)}
+              aria-label="Next photo"
+            >
+              ›
+            </button>
 
-          {auction && <div className="ix-auction-badge">Auction</div>}
+            <span className="photo-count">
+              {photoIndex + 1}/{images.length}
+            </span>
+          </>
+        ) : null}
+      </div>
+
+      <div className="card-body">
+        <div className="title-row">
+          <h3>{cleanMachineTitle(listing.title)}</h3>
+          <h3 className="hours-inline">{formatHours(listing.hours)}</h3>
         </div>
 
-        <div className="ix-card-body">
-          <div className="ix-price-row">
-            <div className="ix-price">{auction ? "Auction Inventory" : price}</div>
-            <div className="ix-hours">{hours}</div>
-          </div>
+        <p className="feature-line">{getFeatureLine(listing)}</p>
 
-          <h3 className="ix-title">{title}</h3>
+        <div className="price-row">
+          <strong>{listing.price || "Call for price"}</strong>
 
-          {auction ? (
-            <div className="ix-auction-line">
-              {auctionMeta.auctionType && <span>{auctionMeta.auctionType}</span>}
-              {auctionMeta.auctionDate && <span>{auctionMeta.auctionDate}</span>}
-              {auctionMeta.estimateLow && auctionMeta.estimateHigh && (
-                <span>
-                  Est. ${Number(auctionMeta.estimateLow).toLocaleString()}–$
-                  {Number(auctionMeta.estimateHigh).toLocaleString()}
-                </span>
-              )}
-            </div>
-          ) : (
-            featureLine && <div className="ix-feature-line">{featureLine}</div>
-          )}
+          <div className="meta">
+            <span>⌖ {listing.location || "Location not listed"}</span>
 
-          <div className="ix-meta-row">
-            <span className="ix-location">{location}</span>
-
-            {showSave && (
+            {showSave ? (
               <button
-                className={`ix-save ${saved ? "is-saved" : ""}`}
-                onClick={toggleSaved}
-                aria-label={saved ? "Unsave machine" : "Save machine"}
+                type="button"
+                className={`save-star ${saved ? "saved" : ""}`}
+                onClick={toggleSave}
+                aria-label={saved ? "Unsave listing" : "Save listing"}
+                title={saved ? "Saved" : "Save"}
               >
-                ★
+                <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
+      </div>
 
-        <style jsx>{`
-          .ix-card-link {
-            display: block;
-            height: 100%;
-            color: inherit;
-            text-decoration: none;
-          }
+      <style jsx>{`
+        .card {
+          position: relative;
+          text-decoration: none;
+          color: inherit;
+          border: 1px solid #242424;
+          border-radius: 12px;
+          overflow: hidden;
+          background: #151515;
+          transition:
+            transform .16s ease,
+            border-color .16s ease,
+            background .16s ease;
+        }
 
-          .ix-listing-card {
-            height: 100%;
-            overflow: hidden;
-            border-radius: 16px;
-            background: #151719;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.28);
-            transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
-          }
+        .card:hover {
+          transform: translateY(-2px);
+          border-color: #353535;
+          background: #181818;
+        }
 
-          .ix-listing-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(249,133,18,0.38);
-            box-shadow: 0 18px 42px rgba(0,0,0,0.38);
-          }
+        .card-photo {
+          position: relative;
+          height: 184px;
+          background-size: cover;
+          background-position: center;
+          border-bottom: 1px solid #202020;
+        }
 
-          .ix-image-shell {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4 / 3;
-            background: #0d0f10;
-            overflow: hidden;
-          }
+        .card-photo-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 26px;
+          height: 80px;
+          border: none;
+          background: rgba(0,0,0,.14);
+          color: rgba(255,255,255,.72);
+          font-size: 28px;
+          font-weight: 300;
+          cursor: pointer;
+          z-index: 3;
+        }
 
-          .ix-card-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-          }
+        .card-photo-nav.left {
+          left: 0;
+        }
 
-          .ix-image-placeholder {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8b8f92;
-            font-size: 13px;
-            background: #101214;
-          }
+        .card-photo-nav.right {
+          right: 0;
+        }
 
-          .ix-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 28px;
-            height: 36px;
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 999px;
-            background: rgba(10,10,10,0.55);
-            color: #fff;
-            font-size: 22px;
-            cursor: pointer;
-            opacity: 0;
-          }
+        .card-photo-nav:hover {
+          background: rgba(0,0,0,.34);
+          color: white;
+        }
 
-          .ix-image-shell:hover .ix-arrow {
-            opacity: 1;
-          }
+        .photo-count {
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          background: rgba(0,0,0,.62);
+          color: rgba(255,255,255,.86);
+          font-size: 10px;
+          font-weight: 900;
+          padding: 4px 7px;
+          border-radius: 999px;
+        }
 
-          .ix-arrow-left { left: 10px; }
-          .ix-arrow-right { right: 10px; }
+        .card-body {
+          padding: 13px;
+        }
 
-          .ix-auction-badge {
-            position: absolute;
-            left: 10px;
-            top: 10px;
-            padding: 5px 8px;
-            border-radius: 999px;
-            background: rgba(249,133,18,0.92);
-            color: #111;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-          }
+        .title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 8px;
+        }
 
-          .ix-card-body {
-            padding: 13px 14px 14px;
-          }
+        .card h3 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: 15px;
+          font-weight: 900;
+          letter-spacing: -0.15px;
+        }
 
-          .ix-price-row {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 6px;
-          }
+        .hours-inline {
+          color: #7c7c7c !important;
+          font-size: 12px !important;
+          font-weight: 800 !important;
+          letter-spacing: .25px;
+          white-space: nowrap;
+        }
 
-          .ix-price {
-            color: #f4f4f4;
-            font-size: 18px;
-            font-weight: 850;
-            letter-spacing: -0.02em;
-          }
+        .feature-line {
+          min-height: 38px;
+          margin: 8px 0 18px;
+          color: #8f8f8f;
+          font-size: 13px;
+          line-height: 1.4;
+        }
 
-          .ix-hours {
-            color: #b9bec2;
-            font-size: 12.5px;
-            white-space: nowrap;
-          }
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 16px;
+          gap: 12px;
+        }
 
-          .ix-title {
-            margin: 0;
-            color: #ffffff;
-            font-size: 15.5px;
-            line-height: 1.25;
-            font-weight: 800;
-          }
+        .price-row strong {
+          color: #f2f2f2;
+          font-size: 18px;
+          white-space: nowrap;
+        }
 
-          .ix-feature-line,
-          .ix-auction-line {
-            min-height: 18px;
-            margin-top: 7px;
-            color: #aeb4b8;
-            font-size: 12.5px;
-            line-height: 1.35;
-          }
+        .meta {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 12px;
+          color: #9a9a9a;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          text-align: right;
+        }
 
-          .ix-auction-line {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-          }
+        .meta span {
+          color: #9a9a9a;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .4px;
+        }
 
-          .ix-auction-line span {
-            color: #d8dde0;
-          }
+        .save-star {
+          width: 18px;
+          height: 18px;
+          display: grid;
+          place-items: center;
+          background: transparent;
+          border: none;
+          color: rgba(255,255,255,.38);
+          cursor: pointer;
+          padding: 0;
+        }
 
-          .ix-meta-row {
-            margin-top: 11px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-          }
+        .save-star i {
+          font-size: 12px;
+        }
 
-          .ix-location {
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: #c7cbce;
-            font-size: 12.75px;
-          }
-
-          .ix-save {
-            border: 0;
-            background: transparent;
-            color: #6f7478;
-            font-size: 15px;
-            cursor: pointer;
-            padding: 2px 0 2px 8px;
-          }
-
-          .ix-save:hover,
-          .ix-save.is-saved {
-            color: #f98512;
-          }
-        `}</style>
-      </article>
-    </Link>
+        .save-star.saved,
+        .save-star:hover {
+          color: #ffc400;
+        }
+      `}</style>
+    </a>
   );
 }
