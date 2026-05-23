@@ -44,27 +44,23 @@ function extractContacts(html) {
 
     const looksUseful =
       lower.includes("sales") ||
-      lower.includes("used equipment") ||
       lower.includes("manager") ||
-      lower.includes("rental") ||
       lower.includes("equipment") ||
-      lower.includes("branch") ||
-      lower.includes("contact");
+      lower.includes("rental");
 
     const notGarbage =
       line.length >= 4 &&
       line.length <= 120 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
-      !lower.includes("cookie") &&
-      !lower.includes("javascript");
+      !lower.includes("cookie");
 
     if (looksUseful && notGarbage) {
       contacts.push(line);
     }
   }
 
-  return [...new Set(contacts)].slice(0, 30);
+  return [...new Set(contacts)].slice(0, 20);
 }
 
 function normalizeBaseUrl(url) {
@@ -99,12 +95,7 @@ function shouldScanLink(url) {
     "staff",
     "sales",
     "locations",
-    "location",
-    "branch",
-    "about",
-    "directory",
-    "used",
-    "equipment"
+    "about"
   ];
 
   const badWords = [
@@ -121,7 +112,9 @@ function shouldScanLink(url) {
     ".png",
     ".webp",
     ".pdf",
-    "#"
+    "#",
+    "machinerytrader.com",
+    "google.com"
   ];
 
   if (badWords.some((word) => lower.includes(word))) {
@@ -165,7 +158,7 @@ function extractInternalLinks(html, baseUrl) {
     .filter(Boolean)
     .filter(shouldScanLink);
 
-  return [...new Set(links)].slice(0, 20);
+  return [...new Set(links)].slice(0, 5);
 }
 
 async function fetchPage(url) {
@@ -174,7 +167,7 @@ async function fetchPage(url) {
 
     const timeout = setTimeout(() => {
       controller.abort();
-    }, 10000);
+    }, 5000);
 
     const response = await fetch(url, {
       signal: controller.signal,
@@ -189,7 +182,6 @@ async function fetchPage(url) {
 
     return {
       url,
-      html,
       emails: extractEmails(html),
       phones: extractPhones(html),
       contacts: extractContacts(html),
@@ -198,7 +190,6 @@ async function fetchPage(url) {
   } catch (error) {
     return {
       url,
-      html: "",
       emails: [],
       phones: [],
       contacts: [],
@@ -232,7 +223,16 @@ export default async function handler(req, res) {
       category: row[2] || "",
       state: row[3] || ""
     }))
-    .filter((dealer) => dealer.website);
+    .filter((dealer) => {
+      const lower = dealer.website.toLowerCase();
+
+      return (
+        dealer.website &&
+        !lower.includes("machinerytrader.com") &&
+        !lower.includes("google.com")
+      );
+    })
+    .slice(0, 10);
 
   const results = [];
 
@@ -245,31 +245,16 @@ export default async function handler(req, res) {
     const homepage = await fetchPage(dealer.website);
 
     scannedLinks.push(homepage.url);
+
     allEmails.push(...homepage.emails);
     allPhones.push(...homepage.phones);
     allContacts.push(...homepage.contacts);
 
-    const priorityPaths = [
-      "/contact",
-      "/contact-us",
-      "/locations",
-      "/about",
-      "/team",
-      "/staff",
-      "/sales",
-      "/used-equipment"
-    ].map((path) => `${dealer.website}${path}`);
-
-    const discoveredLinks = homepage.links || [];
-
-    const linksToScan = [
-      ...new Set([...priorityPaths, ...discoveredLinks])
-    ].slice(0, 20);
-
-    for (const link of linksToScan) {
+    for (const link of homepage.links) {
       const scan = await fetchPage(link);
 
       scannedLinks.push(scan.url);
+
       allEmails.push(...scan.emails);
       allPhones.push(...scan.phones);
       allContacts.push(...scan.contacts);
@@ -279,7 +264,7 @@ export default async function handler(req, res) {
       ...dealer,
       emails: [...new Set(allEmails)],
       phones: [...new Set(allPhones)],
-      contacts: [...new Set(allContacts)].slice(0, 40),
+      contacts: [...new Set(allContacts)],
       scannedLinks: [...new Set(scannedLinks)]
     });
   }
