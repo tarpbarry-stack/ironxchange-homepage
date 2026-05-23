@@ -494,14 +494,46 @@ if (!sellerSeedListing) {
                 </p>
 
                 <div className="yard-actions">
-                  {website ? (
-                    <a href={website} target="_blank" rel="noreferrer">
-                      Website
-                    </a>
-                  ) : null}
+  {website ? (
+    <a href={website} target="_blank" rel="noreferrer" aria-label="Website">
+      <i className="fa-solid fa-globe"></i>
+    </a>
+  ) : null}
 
-                  <a href="/browse">Browse All Iron</a>
-                </div>
+  {facebook ? (
+    <a href={facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+      <i className="fa-brands fa-facebook-f"></i>
+    </a>
+  ) : null}
+
+  {instagram ? (
+    <a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
+      <i className="fa-brands fa-instagram"></i>
+    </a>
+  ) : null}
+
+  {linkedin ? (
+    <a href={linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+      <i className="fa-brands fa-linkedin-in"></i>
+    </a>
+  ) : null}
+
+  {youtube ? (
+    <a href={youtube} target="_blank" rel="noreferrer" aria-label="YouTube">
+      <i className="fa-brands fa-youtube"></i>
+    </a>
+  ) : null}
+
+  {tiktok ? (
+    <a href={tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
+      <i className="fa-brands fa-tiktok"></i>
+    </a>
+  ) : null}
+
+  <a href="/browse" className="browse-all-link">
+    Browse All Iron
+  </a>
+</div>
               </div>
             </div>
 
@@ -834,22 +866,41 @@ if (!sellerSeedListing) {
         }
 
         .yard-actions a {
-          height: 32px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 13px;
-          background: #101010;
-          border: 1px solid #2a2a2a;
-          border-radius: 8px;
-          color: #eaeaea;
-          text-decoration: none;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .45px;
-          text-transform: uppercase;
-        }
+  width: 34px;
+  height: 34px;
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+
+  color: #eaeaea;
+  text-decoration: none;
+
+  font-size: 14px;
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    color .15s ease;
+}
+
+.yard-actions a:hover {
+  border-color: #FFC400;
+  color: #FFC400;
+  background: #161616;
+}
+
+.yard-actions .browse-all-link {
+  width: auto;
+  padding: 0 13px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
         .yard-actions a:hover {
           border-color: ${BRAND_YELLOW};
           color: ${BRAND_YELLOW};
