@@ -1103,6 +1103,13 @@ main {
 
 .stat-card {
   padding: 8px 10px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
 }
 
 .stat-card span {
@@ -1117,9 +1124,13 @@ main {
 
 .stat-card strong {
   display: block;
+
   color: #f2f2f2;
+
   font-size: 20px;
-  margin-bottom: 1px;
+  line-height: 1.05;
+
+  margin: 2px 0;
 }
 
 .stat-card strong.green {
@@ -1129,8 +1140,11 @@ main {
 
 .stat-card p {
   margin: 0;
+
   color: #777;
+
   font-size: 10px;
+  line-height: 1.2;
 }
 
 .panel {
