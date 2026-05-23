@@ -1051,50 +1051,49 @@ textarea {
           color: #666;
         }
 
-.social-field {
+:global(.social-field) {
+  display: grid;
   gap: 6px;
+  color: #9a9a9a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
 }
 
-.social-input {
+:global(.social-input) {
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr);
   align-items: center;
-
   background: #101010;
-
   border: 1px solid #2a2a2a;
   border-radius: 8px;
-
   padding-left: 2px;
+  overflow: hidden;
 }
 
-.social-input i {
-  height: 100%;
-
+:global(.social-input i) {
+  height: 36px;
   display: grid;
   place-items: center;
-
   color: #6f6f6f;
-
   font-size: 13px;
 }
 
-.social-input input {
+:global(.social-input input) {
+  width: 100%;
+  height: 36px;
   border: none !important;
   background: #101010 !important;
   color: #f2f2f2 !important;
-
-  box-shadow: none !important;
+  padding: 10px 12px;
+  font-size: 13px;
   outline: none !important;
-
-  height: 36px;
+  box-shadow: none !important;
 }
-.social-input input:-webkit-autofill,
-.social-input input:-webkit-autofill:hover,
-.social-input input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #f2f2f2;
-  -webkit-box-shadow: 0 0 0px 1000px #101010 inset;
-  transition: background-color 9999s ease-in-out 0s;
+
+:global(.social-input input::placeholder) {
+  color: #666;
 }
 
        .actions {
