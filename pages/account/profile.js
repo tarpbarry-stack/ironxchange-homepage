@@ -884,11 +884,14 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
 }
 
         .panel h2 {
-  margin: 0 0 12px;
+  margin: 0 0 11px;
+
   color: #f2f2f2;
-  font-size: 12px;
+
+  font-size: 11px;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: .5px;
+  letter-spacing: .65px;
 }
 
         .logo-preview-box {
@@ -1012,6 +1015,12 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   text-transform: uppercase;
 }
 
+.form-section-title:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
      label {
   display: grid;
   gap: 5px;
@@ -1049,11 +1058,12 @@ textarea {
   resize: vertical;
 }
 
-        input:focus,
-        textarea:focus {
-          border-color: ${BRAND_YELLOW};
-        }
-
+       input:focus,
+textarea:focus,
+:global(.social-input:focus-within) {
+  border-color: #FFC400;
+  box-shadow: 0 0 0 1px rgba(255,196,0,.12);
+}
         input::placeholder,
         textarea::placeholder {
           color: #666;
