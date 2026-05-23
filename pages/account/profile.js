@@ -390,9 +390,11 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
               <section className="panel form-panel">
                 <h2>Seller Information</h2>
 
-                <div className="form-grid">
-                  <label>
-                    Company Name
+               <div className="form-grid">
+  <div className="form-section-title">Identity</div>
+
+  <label>
+    Company Name
                     <input
                       value={form.companyName}
                       onChange={e => updateField("companyName", e.target.value)}
@@ -418,8 +420,10 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     />
                   </label>
 
-                  <label>
-                    Phone
+                  <div className="form-section-title">Contact</div>
+
+<label>
+  Phone
                     <input
                       value={form.phoneNumber}
                       onChange={e => updateField("phoneNumber", e.target.value)}
@@ -427,8 +431,10 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     />
                   </label>
 
-                  <label>
-                    Website
+                 <div className="form-section-title">Web & Social</div>
+
+<label>
+  Website
                     <input
                       value={form.website}
                       onChange={e => updateField("website", e.target.value)}
@@ -480,8 +486,10 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
     placeholder="https://tiktok.com/@company"
   />
 </label>
-                  <label className="full">
-                    About Seller
+                  <div className="form-section-title">About</div>
+
+<label className="full">
+  About Seller
                     <textarea
                       value={form.bio}
                       onChange={e => updateField("bio", e.target.value)}
@@ -851,6 +859,18 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.form-section-title {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 4px;
+
+  color: #FFC400;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .65px;
+  text-transform: uppercase;
 }
 
       label {
