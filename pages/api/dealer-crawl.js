@@ -1,23 +1,42 @@
 function extractEmails(text) {
-  const matches = text.match(
-    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
-  );
+  const regex =
+    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 
-  return [...new Set(matches || [])].filter((email) => {
-    const bad = ["example.com", "sentry.io", "wixpress.com"];
+  const matches = text.match(regex) || [];
 
-    return !bad.some((domain) =>
-      email.toLowerCase().includes(domain)
+  return [...new Set(matches)].filter((email) => {
+    const lower = email.toLowerCase();
+
+    const blocked = [
+      "example.com",
+      "wixpress.com",
+      "sentry.io",
+      "noreply",
+      "no-reply"
+    ];
+
+    return !blocked.some((bad) =>
+      lower.includes(bad)
     );
   });
 }
 
-function extractPhones(text) {
-  const matches = text.match(
-    /(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}/g
-  );
+function extractMailtoEmails(html) {
+  const matches =
+    html.match(/mailto:[^"'? ]+/gi) || [];
 
-  return [...new Set(matches || [])];
+  return matches
+    .map((match) =>
+      match.replace(/mailto:/i, "").trim()
+    )
+    .filter(Boolean);
+}
+
+function extractPhones(text) {
+  const regex =
+    /(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}/g;
+
+  return [...new Set(text.match(regex) || [])];
 }
 
 function stripHtml(html) {
@@ -42,25 +61,27 @@ function extractContacts(html) {
   for (const line of lines) {
     const lower = line.toLowerCase();
 
-    const looksUseful =
+    const useful =
       lower.includes("sales") ||
       lower.includes("manager") ||
       lower.includes("equipment") ||
-      lower.includes("rental");
+      lower.includes("rental") ||
+      lower.includes("service") ||
+      lower.includes("parts");
 
-    const notGarbage =
+    const clean =
       line.length >= 4 &&
       line.length <= 120 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
       !lower.includes("cookie");
 
-    if (looksUseful && notGarbage) {
+    if (useful && clean) {
       contacts.push(line);
     }
   }
 
-  return [...new Set(contacts)].slice(0, 20);
+  return [...new Set(contacts)].slice(0, 25);
 }
 
 function normalizeBaseUrl(url) {
@@ -95,7 +116,11 @@ function shouldScanLink(url) {
     "staff",
     "sales",
     "locations",
-    "about"
+    "about",
+    "service",
+    "parts",
+    "rental",
+    "used-equipment"
   ];
 
   const badWords = [
@@ -105,16 +130,14 @@ function shouldScanLink(url) {
     "linkedin",
     "twitter",
     "x.com",
-    "mailto:",
-    "tel:",
     ".jpg",
     ".jpeg",
     ".png",
     ".webp",
     ".pdf",
     "#",
-    "machinerytrader.com",
-    "google.com"
+    "google.com",
+    "machinerytrader.com"
   ];
 
   if (badWords.some((word) => lower.includes(word))) {
@@ -158,7 +181,7 @@ function extractInternalLinks(html, baseUrl) {
     .filter(Boolean)
     .filter(shouldScanLink);
 
-  return [...new Set(links)].slice(0, 5);
+  return [...new Set(links)].slice(0, 8);
 }
 
 async function fetchPage(url) {
@@ -172,7 +195,8 @@ async function fetchPage(url) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "IXI Dealer Graph Research Bot"
+        "User-Agent":
+          "Mozilla/5.0 IXI Dealer Graph Bot"
       }
     });
 
@@ -182,7 +206,10 @@ async function fetchPage(url) {
 
     return {
       url,
-      emails: extractEmails(html),
+      emails: [
+        ...extractEmails(html),
+        ...extractMailtoEmails(html)
+      ],
       phones: extractPhones(html),
       contacts: extractContacts(html),
       links: extractInternalLinks(html, url)
@@ -228,8 +255,8 @@ export default async function handler(req, res) {
 
       return (
         dealer.website &&
-        !lower.includes("machinerytrader.com") &&
-        !lower.includes("google.com")
+        !lower.includes("google.com") &&
+        !lower.includes("machinerytrader.com")
       );
     })
     .slice(0, 10);
