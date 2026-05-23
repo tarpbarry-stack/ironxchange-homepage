@@ -128,16 +128,15 @@ export default function ListingCard({
     0 18px 44px rgba(0,0,0,.22);
 
   transition:
-    transform .22s ease,
-    border-color .22s ease,
-    background .22s ease,
-    box-shadow .22s ease;
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
 }
 
 .card:hover {
  transform:
   translateY(-2px)
-  scale(1.003);
   border-color: rgba(255,196,0,.14);
   background:
     linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
