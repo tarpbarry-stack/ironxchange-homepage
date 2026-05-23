@@ -1037,35 +1037,53 @@ main {
 
 .dashboard-search button {
   border: none;
-  background: ${BRAND_YELLOW};
-  color: #050505;
+  border-left: 1px solid #3a2d00;
+
+  background: #151515;
+  color: #FFC400;
+
   font-weight: 900;
   cursor: pointer;
-  letter-spacing: .35px;
-  font-size: 11px;
+  letter-spacing: .45px;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.dashboard-search button:hover {
+  background: #1a1400;
 }
 
 .status-pill {
-  border: 1px solid #2f855a;
+  border: 1px solid rgba(56,161,105,.45);
   color: #38A169;
-  border-radius: 12px;
-  padding: 0 8px;
+
+  border-radius: 10px;
+
+  padding: 0 10px;
+
   font-size: 9px;
   font-weight: 900;
-  letter-spacing: .35px;
+  letter-spacing: .45px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-width: 64px;
-  background: #111;
+  gap: 6px;
+
+  min-width: 72px;
+
+  background: #101010;
+  text-transform: uppercase;
 }
 
 .status-pill span {
   width: 6px;
   height: 6px;
+
   border-radius: 50%;
   background: #38A169;
+
+  box-shadow: 0 0 10px rgba(56,161,105,.45);
 }
 
 .main-grid {
@@ -1102,7 +1120,7 @@ main {
 }
 
 .stat-card {
-  padding: 8px 10px;
+  padding: 10px 10px 9px;
 
   display: flex;
   flex-direction: column;
@@ -1110,15 +1128,23 @@ main {
   justify-content: center;
 
   text-align: center;
+
+  background: #121212;
+  border: 1px solid #242424;
+  border-radius: 10px;
 }
 
 .stat-card span {
   display: block;
-  color: #8f8f8f;
+
+  color: #7c7c7c;
+
   font-size: 9px;
   text-transform: uppercase;
+
   font-weight: 900;
-  letter-spacing: .4px;
+  letter-spacing: .45px;
+
   margin-bottom: 3px;
 }
 
@@ -1127,8 +1153,8 @@ main {
 
   color: #f2f2f2;
 
-  font-size: 20px;
-  line-height: 1.05;
+  font-size: 24px;
+  line-height: 1;
 
   margin: 2px 0;
 }
@@ -1139,11 +1165,11 @@ main {
 }
 
 .stat-card p {
-  margin: 0;
+  margin: 2px 0 0;
 
-  color: #777;
+  color: #666;
 
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.2;
 }
 
@@ -1162,35 +1188,53 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   gap: 10px;
-  margin-bottom: 6px;
+
+  margin-bottom: 8px;
+  padding-bottom: 7px;
+
+  border-bottom: 1px solid #202020;
+
   flex: 0 0 auto;
 }
 
 .panel-head h2 {
   margin: 0;
+
   color: #f2f2f2;
-  font-size: 13px;
+
+  font-size: 12px;
+  font-weight: 900;
+
   text-transform: uppercase;
-  letter-spacing: .35px;
+  letter-spacing: .55px;
 }
 
 .panel-head a,
 .small-note {
-  color: ${BRAND_YELLOW};
+  color: #FFC400;
+
   text-decoration: none;
-  font-size: 10px;
+
+  font-size: 9px;
   font-weight: 900;
-  letter-spacing: .35px;
+
+  letter-spacing: .45px;
   text-transform: uppercase;
 }
 
 .listing-table {
   flex: 1 1 auto;
   min-height: 0;
+
   overflow-y: auto;
+
   border: 1px solid #252525;
   border-radius: 10px;
+
+  background: #101010;
+
   scrollbar-width: thin;
   scrollbar-color: rgba(255,196,0,.45) rgba(255,255,255,.04);
 }
@@ -1229,12 +1273,12 @@ main {
 
 .listing-op-head {
   display: grid;
-  grid-template-columns: 110px 98px 88px 64px 76px 74px 52px 52px;
+  grid-template-columns: 108px 98px 88px 64px 76px 74px 52px 52px;
   gap: 10px;
   align-items: center;
   padding: 8px 10px 8px 86px;
   border-bottom: 1px solid #252525;
-  background: #101010;
+  background: #0f0f0f;
   color: #888;
   font-size: 9px;
   font-weight: 900;
@@ -1264,7 +1308,11 @@ main {
   align-items: center;
   padding: 10px;
   border-bottom: 1px solid #242424;
-  background: #151515;
+ background: #141414;
+}
+
+.listing-op-row:hover {
+  background: #181818;
 }
 
 .machine-photo-link {
@@ -1314,17 +1362,32 @@ main {
 
 .listing-op-controls {
   grid-area: controls;
+
   display: grid;
-  grid-template-columns: 128px 74px 58px 74px 74px 56px 56px;
+
+  grid-template-columns:
+    128px
+    74px
+    58px
+    74px
+    78px
+    56px
+    56px;
+
   gap: 14px;
+
   align-items: center;
   justify-content: start;
 }
 
 .listing-hours {
-  color: #9A9A9A;
-  font-size: 11px;
-  font-weight: 900;
+  color: #7f7f7f;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: .2px;
+
   padding-left: 22px;
 }
 
@@ -1337,16 +1400,25 @@ main {
 }
 .price-input {
   width: 74px;
-  height: 30px;
+  height: 28px;
+
   background: #0F0F0F;
+
   border: 1px solid #2F2F2F;
   border-radius: 8px;
+
   padding: 0 10px;
+
   color: #F2F2F2;
-  font-size: 12px;
-  font-weight: 800;
+
+  font-size: 11px;
+  font-weight: 900;
+
   outline: none;
-  transition: border-color .15s ease, box-shadow .15s ease;
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
 }
 
 .price-input:hover {
@@ -1463,19 +1535,27 @@ main {
 }
 
 .action-select {
-  width: 82px;
-  height: 30px;
+  width: 78px;
+  height: 28px;
+
   background: #0F0F0F;
+
   border: 1px solid #2F2F2F;
   border-radius: 8px;
+
   color: #F2F2F2;
+
   font-size: 8px;
   font-weight: 900;
-  padding: 0 20px 0 10px;
+
+  padding: 0 18px 0 10px;
+
   outline: none;
   cursor: pointer;
+
   text-transform: uppercase;
-  margin-left: 14px;
+
+  margin-left: 10px;
 }
 
 .action-select:hover {
