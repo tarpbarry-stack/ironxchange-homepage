@@ -729,10 +729,10 @@ export default function AccountProfilePage() {
         }
 
         .profile-grid {
-          display: grid;
-          grid-template-columns: 360px minmax(0, 1fr);
-          gap: 8px;
-        }
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 8px;
+}
 
       .panel {
   background: #151515;
@@ -750,17 +750,19 @@ export default function AccountProfilePage() {
 }
 
         .logo-preview-box {
-          width: 100%;
-          height: 190px;
-          background: #090909;
-          border: 1px solid #2a2a2a;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 22px;
-          margin-bottom: 14px;
-        }
+  width: 100%;
+  height: 132px;
+  background: #090909;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 18px;
+  margin-bottom: 10px;
+}
 
         .logo-preview-box img {
           max-width: 100%;
@@ -785,68 +787,77 @@ export default function AccountProfilePage() {
           color: #555;
         }
 
-        .upload-btn {
-          display: grid;
-          place-items: center;
-          width: 100%;
-          background: #101010;
-          border: 1px solid #3a3a3a;
-          color: #f2f2f2;
-          border-radius: 10px;
-          padding: 14px 18px;
-          font-size: 12px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: .35px;
-          cursor: pointer;
-        }
+       .upload-btn {
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+  background: #101010;
+  border: 1px solid #3a3a3a;
+  color: #f2f2f2;
+  border-radius: 8px;
+
+  padding: 0 14px;
+
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .35px;
+
+  cursor: pointer;
+}
 
         .upload-btn input {
           display: none;
         }
 
         .help {
-          margin: 12px 0 0;
-          color: #888;
-          font-size: 12px;
-          line-height: 1.55;
-        }
+  margin: 10px 0 0;
+  color: #777;
+  font-size: 11px;
+  line-height: 1.45;
+}
 
-        .form-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-        }
+      .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 
-        label {
-          display: grid;
-          gap: 7px;
-          color: #aaa;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .45px;
-          text-transform: uppercase;
-        }
+      label {
+  display: grid;
+  gap: 6px;
+  color: #9a9a9a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
 
         label.full {
           grid-column: 1 / -1;
         }
 
         input,
-        textarea {
-          width: 100%;
-          background: #101010;
-          border: 1px solid #2a2a2a;
-          border-radius: 10px;
-          color: #f2f2f2;
-          padding: 13px 14px;
-          font-size: 14px;
-          outline: none;
-          font-family: Arial, sans-serif;
-          text-transform: none;
-          letter-spacing: 0;
-          resize: vertical;
-        }
+textarea {
+  width: 100%;
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #f2f2f2;
+
+  padding: 10px 12px;
+
+  font-size: 13px;
+  outline: none;
+  font-family: Arial, sans-serif;
+
+  text-transform: none;
+  letter-spacing: 0;
+  resize: vertical;
+}
 
         input:focus,
         textarea:focus {
