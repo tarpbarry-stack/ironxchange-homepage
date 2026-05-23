@@ -531,21 +531,25 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           background: #0b0b0b;
         }
 
-        .nav {
-          height: 64px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 8px 2%;
-          background: #050505;
-          border-bottom: 1px solid rgba(255,255,255,.08);
-        }
+      .nav {
+  height: 60px;
 
-        .logo-img {
-          height: 38px;
-          display: block;
-          width: auto;
-        }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 1.5%;
+
+  background: #050505;
+
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+       .logo-img {
+  height: 34px;
+  display: block;
+  width: auto;
+}
 
         .nav-links {
           display: flex;
@@ -553,18 +557,22 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           gap: 14px;
         }
 
-        .nav-links a,
-        .logout-btn {
-          color: white;
-          text-decoration: none;
-          background: transparent;
-          border: none;
-          font-weight: 900;
-          text-transform: uppercase;
-          font-size: 12px;
-          letter-spacing: .5px;
-          cursor: pointer;
-        }
+       .nav-links a,
+.logout-btn {
+  color: white;
+  text-decoration: none;
+
+  background: transparent;
+  border: none;
+
+  font-weight: 900;
+  text-transform: uppercase;
+
+  font-size: 11px;
+  letter-spacing: .45px;
+
+  cursor: pointer;
+}
 
         .yellow-link {
           color: ${BRAND_YELLOW} !important;
@@ -589,22 +597,29 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           color: #38A169 !important;
         }
 
-       .dashboard {
+     .dashboard {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-columns: 190px minmax(0, 1fr);
+
   gap: 8px;
-  padding: 10px 1.25%;
+
+  padding: 8px 1.15%;
+
   max-width: 1680px;
   height: calc(100vh - 64px);
+
   margin: 0 auto;
+
   overflow: hidden;
 }
 
-        .rail {
+      .rail {
   background: #111;
   border: 1px solid #252525;
-  border-radius: 12px;
-  padding: 6px;
+  border-radius: 10px;
+
+  padding: 5px;
+
   min-height: 0;
   overflow: hidden;
 }
@@ -642,18 +657,19 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
   display: block;
 }
 
-        .rail-top strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 12px;
-        }
+      .rail-top strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 11px;
+}
 
-        .rail-top span {
-          display: block;
-          margin-top: 3px;
-          color: #888;
-          font-size: 10px;
-        }
+       .rail-top span {
+  display: block;
+  margin-top: 2px;
+
+  color: #777;
+  font-size: 9px;
+}
 
       .rail a {
   display: flex;
@@ -684,9 +700,11 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
           color: ${BRAND_YELLOW};
         }
 
-        .content {
-          min-width: 0;
-        }
+       .content {
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
 
         .page-head {
   display: flex;
