@@ -2,6 +2,9 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
+import ListingCard from "../components/ListingCard";
+import { getListingId } from "../lib/listingFormatters";
+
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -191,7 +194,6 @@ export default function SellerYardPage() {
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [cardPhotoIndex, setCardPhotoIndex] = useState({});
 
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -340,25 +342,6 @@ export default function SellerYardPage() {
 
     return sortListings(filtered, sortMode);
   }, [sellerListings, searchQuery, category, filters, sortMode]);
-
-  function changeCardPhoto(e, item, direction) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const images = getCardImages(item);
-    if (images.length < 2) return;
-
-    setCardPhotoIndex(current => {
-      const currentIndex = current[item.id] || 0;
-      const nextIndex =
-        (currentIndex + direction + images.length) % images.length;
-
-      return {
-        ...current,
-        [item.id]: nextIndex
-      };
-    });
-  }
 
   if (loading) {
     return (
@@ -715,70 +698,20 @@ export default function SellerYardPage() {
             <span>{filteredListings.length} Showing</span>
           </section>
 
-          <section className="cards">
-            {filteredListings.map(item => {
-              const images = getCardImages(item);
-              const currentPhoto = images[cardPhotoIndex[item.id] || 0];
+  <section className="cards">
+  {filteredListings.map(item => {
+    const id = String(getListingId(item));
 
-              return (
-                <a
-                  href={`/listing/${slugify(item.title)}?from=yard`}
-                  className="card"
-                  key={item.id || item.link || item.title}
-                >
-                  <div
-                    className="card-photo"
-                    style={{
-                      backgroundImage: `url(${
-                        currentPhoto || "/images/hero-equipment-yard.jpg"
-                      })`
-                    }}
-                  >
-                    {images.length > 1 ? (
-                      <>
-                        <button
-                          type="button"
-                          className="card-photo-nav left"
-                          onClick={e => changeCardPhoto(e, item, -1)}
-                        >
-                          ‹
-                        </button>
-
-                        <button
-                          type="button"
-                          className="card-photo-nav right"
-                          onClick={e => changeCardPhoto(e, item, 1)}
-                        >
-                          ›
-                        </button>
-
-                        <span className="photo-count">
-                          {(cardPhotoIndex[item.id] || 0) + 1}/{images.length}
-                        </span>
-                      </>
-                    ) : null}
-                  </div>
-
-                  <div className="card-body">
-                    <div className="title-row">
-                      <h3>{cleanMachineTitle(item.title)}</h3>
-                      <h3 className="hours-inline">{item.hours}</h3>
-                    </div>
-
-                    <p className="feature-line">{getFeatureLine(item)}</p>
-
-                    <div className="price-row">
-                      <strong>{item.price}</strong>
-
-                      <div className="meta">
-                        <span>⌖ {item.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              );
-            })}
-          </section>
+    return (
+      <ListingCard
+        key={id}
+        listing={item}
+        showSave={false}
+        from="yard"
+      />
+    );
+  })}
+</section>
 
           {filteredListings.length === 0 ? (
             <div className="empty">
@@ -1180,156 +1113,6 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
 }
-
-       .card {
-  position: relative;
-
-  text-decoration: none;
-  color: inherit;
-
-  border: 1px solid #242424;
-  border-radius: 12px;
-
-  overflow: hidden;
-
-  background: #151515;
-
-  transition:
-    transform .16s ease,
-    border-color .16s ease,
-    background .16s ease;
-}
-
-      .card:hover {
-  transform: translateY(-2px);
-
-  border-color: #353535;
-  background: #181818;
-}
-
-        .card-photo {
-  position: relative;
-
-  height: 184px;
-
-  background-size: cover;
-  background-position: center;
-
-  border-bottom: 1px solid #202020;
-}
-
-        .card-photo-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 26px;
-          height: 80px;
-          border: none;
-          background: rgba(0,0,0,.14);
-          color: rgba(255,255,255,.72);
-          font-size: 28px;
-          font-weight: 300;
-          cursor: pointer;
-          z-index: 3;
-        }
-
-        .card-photo-nav.left {
-          left: 0;
-        }
-
-        .card-photo-nav.right {
-          right: 0;
-        }
-
-        .card-photo-nav:hover {
-          background: rgba(0,0,0,.34);
-          color: white;
-        }
-
-        .photo-count {
-          position: absolute;
-          right: 8px;
-          bottom: 8px;
-          background: rgba(0,0,0,.62);
-          color: rgba(255,255,255,.86);
-          font-size: 10px;
-          font-weight: 900;
-          padding: 4px 7px;
-          border-radius: 999px;
-        }
-
-      .card-body {
-  padding: 13px;
-}
-
-        .title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-
-  gap: 8px;
-}
-
-        .card h3 {
-  margin: 0;
-
-  color: #f2f2f2;
-
-  font-size: 15px;
-  font-weight: 900;
-
-  letter-spacing: -0.15px;
-}
-
-       .hours-inline {
-  color: #7c7c7c !important;
-
-  font-size: 12px !important;
-  font-weight: 800 !important;
-
-  letter-spacing: .25px;
-
-  white-space: nowrap;
-}
-
-        .feature-line {
-          min-height: 38px;
-          margin: 8px 0 18px;
-          color: #8f8f8f;
-          font-size: 13px;
-          line-height: 1.4;
-        }
-
-        .price-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 16px;
-          gap: 12px;
-        }
-
-        .price-row strong {
-          color: #f2f2f2;
-          font-size: 18px;
-          white-space: nowrap;
-        }
-
-        .meta {
-          display: flex;
-          gap: 12px;
-          font-size: 12px;
-          color: #9a9a9a;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-          text-align: right;
-        }
-
-        .meta span {
-          color: #9a9a9a;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: .4px;
-        }
 
         .empty {
           margin-top: 24px;
