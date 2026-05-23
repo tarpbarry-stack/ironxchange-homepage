@@ -280,7 +280,11 @@ export default function SellerYardPage() {
 
     const sellerDisplay = getSellerDisplay(sellerSeedListing || {});
   const yardTitle = sellerDisplay.yardTitle;
-  const sellerName = sellerDisplay.contactName;
+  const sellerName =
+  sellerDisplay.contactName &&
+  !isInitials(sellerDisplay.contactName)
+    ? sellerDisplay.contactName
+    : "";
 
   const sellerLocation =
     clean(sellerSeedListing?.sellerLocation) ||
