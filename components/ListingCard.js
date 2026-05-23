@@ -109,34 +109,57 @@ export default function ListingCard({
 
       <style jsx>{`
         .card {
-          position: relative;
-          text-decoration: none;
-          color: inherit;
-          border: 1px solid #242424;
-          border-radius: 12px;
-          overflow: hidden;
-          background: #151515;
-          transition:
-            transform .16s ease,
-            border-color .16s ease,
-            background .16s ease;
-        }
+  position: relative;
+  text-decoration: none;
+  color: inherit;
 
-        .card:hover {
-          transform: translateY(-2px);
-          border-color: #353535;
-          background: #181818;
-        }
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 13px;
 
-        .card-photo {
-          position: relative;
-          height: 184px;
-          background-size: cover;
-          background-position: center;
-          border-bottom: 1px solid #202020;
-        }
+  overflow: hidden;
 
-        .card-photo-nav {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+    #141414;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.045) inset,
+    0 18px 44px rgba(0,0,0,.22);
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,196,0,.18);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
+    #171717;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 22px 52px rgba(0,0,0,.30);
+}
+
+.card-photo {
+  position: relative;
+  height: 190px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid rgba(255,255,255,.065);
+
+  transition: filter .18s ease;
+}
+
+.card:hover .card-photo {
+  filter: contrast(1.035) saturate(1.025);
+}
+
+.card-photo-nav {
   position: absolute;
   top: 92%;
   transform: translateY(-50%);
@@ -145,7 +168,6 @@ export default function ListingCard({
   height: 92px;
 
   border: none;
-
   background: rgba(0,0,0,.06);
   color: rgba(255,255,255,.42);
 
@@ -153,9 +175,7 @@ export default function ListingCard({
   font-weight: 300;
 
   cursor: pointer;
-
   z-index: 5;
-
   opacity: 0;
 
   transition:
@@ -168,33 +188,30 @@ export default function ListingCard({
   opacity: 1;
 }
 
-       .card-photo-nav.left {
+.card-photo-nav.left {
   left: 0;
   border-radius: 0 10px 10px 0;
 }
 
-       .card-photo-nav.right {
+.card-photo-nav.right {
   right: 0;
   border-radius: 10px 0 0 10px;
 }
 
-        .card-photo-nav:hover {
+.card-photo-nav:hover {
   background: rgba(0,0,0,.14);
   color: rgba(255,255,255,.68);
 }
 
-       .photo-count {
+.photo-count {
   position: absolute;
-
   top: 8px;
   right: 8px;
 
-  background: rgba(0,0,0,.38);
-
-  color: rgba(255,255,255,.72);
+  background: rgba(0,0,0,.28);
+  color: rgba(255,255,255,.56);
 
   border-radius: 999px;
-
   padding: 3px 6px;
 
   font-size: 8px;
@@ -202,100 +219,133 @@ export default function ListingCard({
   letter-spacing: .25px;
 
   z-index: 5;
-
   backdrop-filter: blur(2px);
 }
 
-        .card-body {
-          padding: 13px;
-        }
+.card-body {
+  padding: 14px 14px 13px;
+}
 
-        .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 8px;
-        }
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
 
-        .card h3 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 15px;
-          font-weight: 900;
-          letter-spacing: -0.15px;
-        }
+.card h3 {
+  margin: 0;
+  color: #f2f2f2;
 
-        .hours-inline {
-          color: #7c7c7c !important;
-          font-size: 12px !important;
-          font-weight: 800 !important;
-          letter-spacing: .25px;
-          white-space: nowrap;
-        }
+  font-size: 15.5px;
+  font-weight: 900;
+  line-height: 1.18;
+  letter-spacing: -0.18px;
+}
 
-        .feature-line {
-          min-height: 38px;
-          margin: 8px 0 18px;
-          color: #8f8f8f;
-          font-size: 13px;
-          line-height: 1.4;
-        }
+.hours-inline {
+  color: rgba(255,255,255,.54) !important;
 
-        .price-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 16px;
-          gap: 12px;
-        }
+  font-size: 12.75px !important;
+  font-weight: 500 !important;
 
-        .price-row strong {
-          color: #f2f2f2;
-          font-size: 18px;
-          white-space: nowrap;
-        }
+  letter-spacing: .18px;
+  line-height: 1;
 
-      .meta {
+  white-space: nowrap;
+}
+
+.feature-line {
+  min-height: 36px;
+  margin: 8px 0 16px;
+
+  color: rgba(255,255,255,.48);
+
+  font-size: 12.75px;
+  font-weight: 500;
+  line-height: 1.38;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 14px;
+  padding-top: 11px;
+
+  border-top: 1px solid rgba(255,255,255,.055);
+
+  gap: 12px;
+}
+
+.price-row strong {
+  color: #f2f2f2;
+
+  font-size: 18.5px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+
+  white-space: nowrap;
+}
+
+.meta {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 12px;
+
   color: #9a9a9a;
+
   flex-wrap: nowrap;
   justify-content: flex-end;
   text-align: right;
+
   margin-left: auto;
-  margin-right: -2px;
 }
 
-        .meta span {
-          color: #9a9a9a;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: .4px;
-          white-space: nowrap;
-        }
+.meta span {
+  color: rgba(255,255,255,.48);
 
-        .save-star {
-          width: 18px;
-          height: 18px;
-          display: grid;
-          place-items: center;
-          background: transparent;
-          border: none;
-          color: rgba(255,255,255,.38);
-          cursor: pointer;
-          padding: 0;
-        }
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .42px;
 
-        .save-star i {
-          font-size: 12px;
-        }
+  white-space: nowrap;
+  text-transform: uppercase;
+}
 
-        .save-star.saved,
-        .save-star:hover {
-          color: #ffc400;
-        }
+.save-star {
+  width: 18px;
+  height: 18px;
+
+  display: grid;
+  place-items: center;
+
+  background: transparent;
+  border: none;
+
+  color: rgba(255,255,255,.28);
+
+  cursor: pointer;
+  padding: 0;
+
+  margin-right: -2px;
+
+  transition: color .14s ease, transform .14s ease;
+}
+
+.save-star i {
+  font-size: 12px;
+}
+
+.save-star.saved {
+  color: #ffc400;
+}
+
+.save-star:hover {
+  color: rgba(255,196,0,.82);
+  transform: scale(1.06);
+}
       `}</style>
     </a>
   );
