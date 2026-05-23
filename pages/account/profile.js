@@ -1073,7 +1073,7 @@ textarea {
 }
 
 :global(.social-input i) {
-  height: 36px;
+  height: 34px;
   display: grid;
   place-items: center;
   color: #6f6f6f;
@@ -1082,11 +1082,11 @@ textarea {
 
 :global(.social-input input) {
   width: 100%;
-  height: 36px;
+  height: 34px;
   border: none !important;
   background: #101010 !important;
   color: #f2f2f2 !important;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font-size: 13px;
   outline: none !important;
   box-shadow: none !important;
