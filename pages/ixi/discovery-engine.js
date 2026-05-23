@@ -22,11 +22,7 @@ export default function DiscoveryEngine() {
 
   function saveTargets(nextTargets) {
     setTargets(nextTargets);
-
-    localStorage.setItem(
-      "ixiDiscoveryTargets",
-      JSON.stringify(nextTargets)
-    );
+    localStorage.setItem("ixiDiscoveryTargets", JSON.stringify(nextTargets));
   }
 
   function addTarget() {
@@ -35,13 +31,7 @@ export default function DiscoveryEngine() {
       return;
     }
 
-    const nextTarget = {
-      company,
-      website,
-      category,
-      state
-    };
-
+    const nextTarget = { company, website, category, state };
     const nextTargets = [...targets, nextTarget];
 
     saveTargets(nextTargets);
@@ -52,6 +42,29 @@ export default function DiscoveryEngine() {
     setState("");
 
     setStatus(`Added ${nextTarget.company}`);
+  }
+
+  async function runMachineryTraderDiscovery() {
+    setStatus("Running MachineryTrader discovery...");
+
+    const response = await fetch("/api/discover-machinerytrader", {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setStatus(data.message || "MachineryTrader discovery failed.");
+      return;
+    }
+
+    const nextTargets = [...targets, ...(data.targets || [])];
+
+    saveTargets(nextTargets);
+
+    setStatus(
+      `Added ${data.targets.length} MachineryTrader discovery target.`
+    );
   }
 
   function seedTargets() {
@@ -89,15 +102,12 @@ export default function DiscoveryEngine() {
     ];
 
     saveTargets(seeded);
-
     setStatus(`Seeded ${seeded.length} discovery targets.`);
   }
 
   function clearTargets() {
     localStorage.removeItem("ixiDiscoveryTargets");
-
     setTargets([]);
-
     setStatus("Discovery targets cleared.");
   }
 
@@ -125,7 +135,6 @@ export default function DiscoveryEngine() {
     });
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
 
     link.href = url;
@@ -169,10 +178,6 @@ export default function DiscoveryEngine() {
       <section style={panelStyle}>
         <h2>Add Discovery Target</h2>
 
-        <p style={mutedText}>
-          Add a company website here, then Dealer Graph can load and crawl it.
-        </p>
-
         <div style={formGrid}>
           <input
             style={inputStyle}
@@ -212,6 +217,10 @@ export default function DiscoveryEngine() {
             Seed Starter Targets
           </button>
 
+          <button style={buttonStyle} onClick={runMachineryTraderDiscovery}>
+            Run MachineryTrader Discovery
+          </button>
+
           <button style={buttonStyle} onClick={exportTargets}>
             Export Targets
           </button>
@@ -227,10 +236,6 @@ export default function DiscoveryEngine() {
       {targets.length > 0 && (
         <section style={tableWrapper}>
           <h2>Saved Discovery Targets</h2>
-
-          <p style={mutedText}>
-            These targets are stored locally and can be loaded by Dealer Graph.
-          </p>
 
           <table style={tableStyle}>
             <thead>
@@ -270,7 +275,6 @@ function StatCard({ label, value }) {
 
 function cleanCsv(value) {
   const text = String(value || "").replace(/"/g, '""');
-
   return `"${text}"`;
 }
 
