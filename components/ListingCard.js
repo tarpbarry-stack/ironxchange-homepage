@@ -137,44 +137,74 @@ export default function ListingCard({
         }
 
         .card-photo-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 26px;
-          height: 80px;
-          border: none;
-          background: rgba(0,0,0,.14);
-          color: rgba(255,255,255,.72);
-          font-size: 28px;
-          font-weight: 300;
-          cursor: pointer;
-          z-index: 3;
-        }
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 
-        .card-photo-nav.left {
-          left: 0;
-        }
+  width: 26px;
+  height: 80px;
 
-        .card-photo-nav.right {
-          right: 0;
-        }
+  border: none;
+
+  background: rgba(0,0,0,.12);
+  color: rgba(255,255,255,.72);
+
+  font-size: 28px;
+  font-weight: 300;
+
+  cursor: pointer;
+
+  z-index: 5;
+
+  opacity: 0;
+
+  transition:
+    opacity .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.card:hover .card-photo-nav {
+  opacity: 1;
+}
+
+       .card-photo-nav.left {
+  left: 0;
+  border-radius: 0 10px 10px 0;
+}
+
+       .card-photo-nav.right {
+  right: 0;
+  border-radius: 10px 0 0 10px;
+}
 
         .card-photo-nav:hover {
           background: rgba(0,0,0,.34);
           color: white;
         }
 
-        .photo-count {
-          position: absolute;
-          right: 8px;
-          bottom: 8px;
-          background: rgba(0,0,0,.62);
-          color: rgba(255,255,255,.86);
-          font-size: 10px;
-          font-weight: 900;
-          padding: 4px 7px;
-          border-radius: 999px;
-        }
+       .photo-count {
+  position: absolute;
+
+  top: 8px;
+  right: 8px;
+
+  background: rgba(0,0,0,.38);
+
+  color: rgba(255,255,255,.72);
+
+  border-radius: 999px;
+
+  padding: 3px 6px;
+
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .25px;
+
+  z-index: 5;
+
+  backdrop-filter: blur(2px);
+}
 
         .card-body {
           padding: 13px;
