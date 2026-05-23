@@ -1215,7 +1215,7 @@ main {
 
 .listing-op-head {
   display: grid;
-  grid-template-columns: 148px 98px 88px 64px 76px 74px 52px 52px;
+  grid-template-columns: 124px 98px 88px 64px 76px 74px 52px 52px;
   gap: 10px;
   align-items: center;
   padding: 8px 10px 8px 86px;
