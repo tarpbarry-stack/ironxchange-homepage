@@ -410,7 +410,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                <h2>Public Seller Details</h2>
                       
                <div className="form-grid">
-  <div className="form-section-title">Identity</div>
+  <div className="form-section-title">Seller Identity</div>
 
   <label>
     Company Name
@@ -430,7 +430,9 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     />
                   </label>
 
-                  <label>
+                  <div className="form-section-title">Contact</div>
+
+                         <label>
                     Seller Location
                     <input
                       value={form.sellerLocation}
@@ -438,8 +440,6 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                       placeholder="Midland, TX"
                     />
                   </label>
-
-                  <div className="form-section-title">Contact</div>
 
 <label>
   Phone
@@ -450,7 +450,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                     />
                   </label>
 
-                 <div className="form-section-title">Web & Social</div>
+                 <div className="form-section-title">Web Presence</div>
 
 <label>
   Website
