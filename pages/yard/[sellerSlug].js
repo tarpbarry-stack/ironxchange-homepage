@@ -263,9 +263,22 @@ const sellerLogo =
   "";
 
 const website =
-  clean(sellerSeedListing?.publicData?.website) ||
-  clean(sellerSeedListing?.website) ||
-  "";
+  clean(sellerSeedListing?.sellerWebsite) || "";
+
+const facebook =
+  clean(sellerSeedListing?.sellerFacebook) || "";
+
+const instagram =
+  clean(sellerSeedListing?.sellerInstagram) || "";
+
+const linkedin =
+  clean(sellerSeedListing?.sellerLinkedin) || "";
+
+const youtube =
+  clean(sellerSeedListing?.sellerYoutube) || "";
+
+const tiktok =
+  clean(sellerSeedListing?.sellerTiktok) || "";
 
   const filteredListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
