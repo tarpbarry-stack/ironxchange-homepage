@@ -1256,15 +1256,25 @@ main {
 .machine-photo-link {
   grid-area: photo;
   display: block;
+
+  overflow: hidden;
+  border-radius: 10px 0 0 10px;
 }
 
 .machine-photo-link img {
   width: 148px;
   height: 92px;
+
   object-fit: cover;
-  border-radius: 9px;
-  border: 1px solid #2A2A2A;
-  background: #0b0b0b;
+
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  border: none;
+
   display: block;
 }
 
