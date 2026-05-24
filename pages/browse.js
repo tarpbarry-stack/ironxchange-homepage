@@ -1,9 +1,14 @@
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
+import {
+  fetchCurrentUserWithSavedListings,
+  getSavedListingIdsFromUser,
+  toggleSavedListing
+} from "../lib/savedListings";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
@@ -226,18 +231,10 @@ const [filters, setFilters] = useState({
 
 setSdk(sdkInstance);
 
-const currentUser = await sdkInstance.currentUser.show();
-
-const profile =
-  currentUser?.data?.data?.attributes?.profile || {};
-
-const saved =
-  profile?.privateData?.savedListings || [];
+const currentUser = await fetchCurrentUserWithSavedListings(sdkInstance);
 
 setSavedIds(
-  Array.isArray(saved)
-    ? saved.map(String)
-    : []
+  getSavedListingIdsFromUser(currentUser)
 );
 
 setLoggedIn(true);
@@ -1464,41 +1461,19 @@ const isArchived = listingStatus === "archived";
   sortMode
 ]);
   
-  async function toggleSave(listingId) {
+ async function toggleSave(listing) {
   if (!sdk) {
     window.location.href = "/login";
     return;
   }
 
   try {
-    const currentUser = await sdk.currentUser.show();
-
-    const profile =
-      currentUser?.data?.data?.attributes?.profile || {};
-
-    const currentPrivateData =
-      profile?.privateData || {};
-
-    const currentSaved =
-      Array.isArray(currentPrivateData.savedListings)
-        ? currentPrivateData.savedListings.map(String)
-        : [];
-
-    const alreadySaved =
-      currentSaved.includes(String(listingId));
-
-    const nextSaved = alreadySaved
-      ? currentSaved.filter(id => id !== String(listingId))
-      : [...currentSaved, String(listingId)];
-
-    await sdk.currentUser.updateProfile({
-      privateData: {
-        ...currentPrivateData,
-        savedListings: nextSaved
-      }
+    const result = await toggleSavedListing({
+      sdk,
+      listing
     });
 
-    setSavedIds(nextSaved);
+    setSavedIds(result.savedIds);
   } catch (err) {
     console.error("Save failed", err);
   }
@@ -1717,7 +1692,7 @@ const isArchived = listingStatus === "archived";
         key={id}
         listing={item}
         saved={savedIds.includes(id)}
-        onToggleSaved={toggleSave}
+        onToggleSaved={() => toggleSave(item)}
       />
     );
   })}
