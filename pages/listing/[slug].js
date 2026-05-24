@@ -981,13 +981,37 @@ function lightboxNext() {
           letter-spacing: 0.4px;
         }
 
-        .facts {
-          display: grid;
-          grid-template-columns: 130px 1fr;
-          row-gap: 12px;
-          column-gap: 24px;
-          font-size: 15px;
-        }
+        .facts-highlights-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.facts-column {
+  padding-right: 22px;
+  border-right: 1px solid rgba(255,255,255,.10);
+}
+
+.highlights-column {
+  padding-left: 2px;
+}
+
+.highlight-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.highlight-chips span {
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 999px;
+  background: rgba(255,255,255,.025);
+  color: rgba(255,255,255,.48);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .15px;
+}
 
         .facts span {
           color: #9a9a9a;
@@ -1311,6 +1335,21 @@ max-height: none;
   background: rgba(0,0,0,.45);
 }
 
+.facts-highlights-panel {
+  grid-template-columns: 1fr;
+}
+
+.facts-column {
+  padding-right: 0;
+  border-right: none;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding-bottom: 18px;
+}
+
+.highlights-column {
+  padding-left: 0;
+  padding-top: 4px;
+}
           .panel {
             padding: 20px;
           }
