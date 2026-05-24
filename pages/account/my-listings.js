@@ -143,6 +143,9 @@ export default function MyListingsPage() {
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [savingPriceId, setSavingPriceId] = useState("");
 
+  const [workflowFilter, setWorkflowFilter] = useState("all");
+  const [viewMode, setViewMode] = useState("cards");
+
   const [filters, setFilters] = useState({
     yearMin: "",
     yearMax: "",
@@ -151,7 +154,7 @@ export default function MyListingsPage() {
     hoursMin: "",
     hoursMax: ""
   });
-
+  
 useEffect(() => {
   async function loadCurrentUserAndListings() {
     try {
@@ -209,17 +212,49 @@ useEffect(() => {
         category === "ALL CATEGORIES" ||
         String(item.type || item.category || "").toUpperCase() === category;
 
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
-        matchesRange(item.price, filters.priceMin, filters.priceMax) &&
-        matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
-      );
+      const listingStatus =
+  item.listingStatus ||
+  item.publicData?.listingStatus ||
+  item.attributes?.publicData?.listingStatus ||
+  "live";
+
+const isArchived = listingStatus === "archived";
+
+const hasPrice = toNumber(item.price) !== null;
+const hasPhotos = getCardImages(item).length > 0;
+const ageDays = item.age ?? 0;
+const saves = toNumber(item.saves) || 0;
+const views = toNumber(item.views) || 0;
+
+const matchesWorkflow =
+  workflowFilter === "all" ||
+  (workflowFilter === "active" && !isArchived) ||
+  (workflowFilter === "archived" && isArchived) ||
+  (workflowFilter === "needs-price" && !hasPrice) ||
+  (workflowFilter === "needs-photos" && !hasPhotos) ||
+  (workflowFilter === "aged" && ageDays >= 30) ||
+  (workflowFilter === "hot" && (saves >= 3 || views >= 25)) ||
+  (workflowFilter === "quiet" && saves === 0 && views === 0 && ageDays >= 14);
+
+return (
+  matchesSearch &&
+  matchesCategory &&
+  matchesWorkflow &&
+  matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
+  matchesRange(item.price, filters.priceMin, filters.priceMax) &&
+  matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
+);
     });
 
     return sortListings(filtered, sortMode);
-  }, [searchQuery, category, myListings, filters, sortMode]);
+  }, [
+  searchQuery,
+  category,
+  myListings,
+  filters,
+  sortMode,
+  workflowFilter
+]);
 
  function changeCardPhoto(e, item, direction) {
   e.preventDefault();
