@@ -1738,26 +1738,30 @@ main {
   gap: 8px;
 }
 
-.saved-card-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: 100%;
-  overflow-y: auto;
-  padding-right: 4px;
-  display: grid;
-  gap: 8px;
-}
-
 .activity-list p {
   margin: 0;
 }
 
+.saved-card-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 4px;
+
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
 .saved-card {
   display: grid;
-  grid-template-columns: 148px 1fr;
+  grid-template-columns: 148px minmax(0, 1fr);
+
   align-items: stretch;
-  
-  gap: 0;
 
   min-height: 92px;
 
@@ -1779,7 +1783,6 @@ main {
 .saved-card:hover {
   background: #181818;
   border-color: #353535;
-
   transform: translateY(-1px);
 }
 
@@ -1789,6 +1792,10 @@ main {
 
   object-fit: cover;
 
+  display: block;
+
+  align-self: start;
+
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 
@@ -1796,34 +1803,23 @@ main {
   border-bottom-right-radius: 0;
 }
 
-.saved-card-list .saved-card:only-child {
-  display: grid;
-  grid-template-columns: 148px 1fr;
-  align-items: center;
-}
-
-.saved-card-list .saved-card:only-child .saved-card-body {
-  height: 92px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 10px;
-}
-
 .saved-card-body {
-  padding: 8px 10px;
-
   min-width: 0;
   min-height: 92px;
 
+  padding: 8px 10px;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
+
   align-self: stretch;
 }
 
 .saved-card-body strong {
   display: block;
+
+  margin: 0 0 4px;
 
   color: #f2f2f2;
 
@@ -1831,12 +1827,12 @@ main {
   font-weight: 900;
 
   line-height: 1.25;
-
-  margin-bottom: 4px;
 }
 
 .saved-card-body span {
   display: block;
+
+  margin: 0;
 
   color: #FFC400;
 
@@ -1844,6 +1840,7 @@ main {
   font-weight: 900;
 
   letter-spacing: .25px;
+  line-height: 1.25;
 }
 
 .dot {
