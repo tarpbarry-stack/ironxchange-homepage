@@ -1069,27 +1069,26 @@ function lightboxNext() {
     0 0 18px rgba(255,196,0,.08);
 }
 
- .facts-highlights-panel {
+.facts-highlights-panel {
   display: grid;
-  grid-template-columns: 250px 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
   align-items: start;
 }
 
 .facts-column {
-  padding-right: 16px;
+  padding-right: 22px;
   border-right: 1px solid rgba(255,255,255,.12);
 }
 
-
 .highlights-column {
-  padding-left: 0;
+  padding-left: 22px;
 }
 
 .facts {
   display: grid;
-  grid-template-columns: 70px 1fr;
-  column-gap: 8px;
+  grid-template-columns: 38% 62%;
+  column-gap: 12px;
   row-gap: 12px;
   align-items: baseline;
 }
@@ -1112,14 +1111,20 @@ function lightboxNext() {
 }
 
 .highlight-chips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  align-content: flex-start;
+  align-content: start;
 }
 
 .highlight-chips span {
-  padding: 6px 10px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  padding: 6px 8px;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 999px;
   background: rgba(255,255,255,.035);
@@ -1127,9 +1132,10 @@ function lightboxNext() {
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .2px;
-  line-height: 1;
+  line-height: 1.1;
   text-transform: uppercase;
 }
+
         .highlights li::before {
           content: "✓";
           color: ${BRAND_YELLOW};
