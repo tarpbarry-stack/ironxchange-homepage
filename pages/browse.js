@@ -2007,10 +2007,17 @@ grid-template-columns:
   border-color: rgba(255,196,0,.38);
   color: #FFC400;
 }
+
 .featured {
-  padding: 46px 5% 60px;
-  background: #0B0B0B;
+  padding: 34px 5% 54px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
+    #0B0B0B;
+
   color: #D6D6D6;
+
+  border-top: 1px solid rgba(255,255,255,.045);
 }
 
 .section-head {
@@ -2048,6 +2055,7 @@ grid-template-columns:
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
+  align-items: start;
 }
 
 .browse-grid.single-card {
@@ -2056,8 +2064,36 @@ grid-template-columns:
 }
 
 .empty {
-  padding: 40px;
+  padding: 46px 28px;
+
   text-align: center;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #111;
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+.empty h3 {
+  margin: 0 0 8px;
+
+  color: #F2F2F2;
+
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.empty p {
+  margin: 0;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 12px;
 }
 
 @media (max-width: 1100px) {
@@ -2067,22 +2103,6 @@ grid-template-columns:
 }
 
 @media (max-width: 850px) {
-  .logo-img {
-    height: 34px;
-  }
-
-  .nav-links {
-    gap: 18px;
-  }
-
-  .yellow-link {
-    font-size: 12px !important;
-  }
-
-  .login-icon {
-    width: 28px;
-    height: 28px;
-  }
 
 .browse-search-shell {
   max-width: 520px;
