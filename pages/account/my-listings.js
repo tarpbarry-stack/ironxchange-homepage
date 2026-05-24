@@ -415,7 +415,8 @@ if (!response.ok) {
           Manage your active IronXchange inventory.
         </p>
 
-        <div className="search-top-row">
+       <div className="browse-search-shell">
+  <div className="search-top-row">
           <input
             type="text"
             className="browse-search"
@@ -512,6 +513,7 @@ if (!response.ok) {
             CLEAR
           </button>
         </div>
+              </div>
       </section>
 
       <section className="featured">
@@ -661,8 +663,21 @@ if (!response.ok) {
   background: #0B0B0B;
   color: #D6D6D6;
 }
-
-.search-section {
+.browse-search-shell {
+  max-width: 690px;
+  margin: 18px auto 0;
+  padding: 7px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.035),
+      rgba(255,196,0,0)
+    ),
+    rgba(8,8,8,.72);
+  border: 1px solid rgba(255,255,255,.045);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.24);
+}.search-section {
   padding: 34px 5% 30px;
   background: #0B0B0B;
   text-align: center;
