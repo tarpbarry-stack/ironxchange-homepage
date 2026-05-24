@@ -12632,11 +12632,12 @@ console.log("IMAGE IDS:", imageIds);
 
   year: String(year),
 
-  make,
-  model,
-  stockNumber,
-  city: location,
-  keywords: selectedKeywords
+ make,
+model,
+stockNumber,
+serialNumber,
+city: location,
+keywords: selectedKeywords
 },
 
       price: new Money(
