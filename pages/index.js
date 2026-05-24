@@ -173,6 +173,16 @@ export default function Home() {
   </a>
 
   <div className="nav-links">
+
+<div className="social-mini">
+  <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f"></i></a>
+  <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+  <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
+  <a href="#" aria-label="YouTube"><i className="fa-brands fa-youtube"></i></a>
+</div>
+
+<a href="/browse">SEARCH</a>
+        
     <a href="/browse">SEARCH</a>
 
     <a href="/post-free" className="yellow-link">
@@ -384,6 +394,32 @@ export default function Home() {
 .logo-img {
   height: 36px;
   display: block;
+}
+
+.social-mini {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: 4px;
+}
+
+.social-mini a {
+  width: 14px;
+  height: 18px;
+
+  display: grid;
+  place-items: center;
+
+  color: rgba(255,255,255,.44) !important;
+
+  font-size: 9.5px;
+  line-height: 1;
+
+  text-decoration: none;
+}
+
+.social-mini a:hover {
+  color: rgba(255,196,0,.78) !important;
 }
 
 .nav-links {
