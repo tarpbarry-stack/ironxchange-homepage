@@ -2,6 +2,9 @@ import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
@@ -12721,31 +12724,7 @@ return (
       </Head>
 
       <main>
-       <nav className="nav">
-  <a href="/" className="logo-wrap">
-    <img
-      src="/images/ironxchange-logo.png"
-      className="logo-img"
-      alt="IronXchange"
-    />
-  </a>
-
-  <div className="nav-links">
-    <a href="/browse">SEARCH</a>
-
-    <a href="/post-free" className="yellow-link">
-      POST FREE
-    </a>
-
-    <a
-      href="/account"
-      className="login-icon logged-in"
-      aria-label="Account"
-    >
-      <i className="fa-regular fa-user"></i>
-    </a>
-  </div>
-</nav>
+      <Navbar />
 
         <section className="page">
           <section className="form-panel">
@@ -13079,6 +13058,7 @@ return (
   </div>
 </aside>
         </section>
+  <Footer />
 
 <style jsx>{`
   * {
@@ -13091,49 +13071,6 @@ return (
     background: #0B0B0B;
     color: #D6D6D6;
   }
-
- .nav {
-  height: 64px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 2%;
-  background: #050505;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.logo-img {
-  height: 38px;
-  display: block;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
-}
-
-.yellow-link {
-  color: #FFC400 !important;
-}
-
-.login-icon {
-  border: 2px solid #38A169;
-  color: #38A169 !important;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-}
 
   .page {
     display: grid;
