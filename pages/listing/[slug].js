@@ -1447,11 +1447,16 @@ max-height: none;
   text-transform: uppercase;
 }
 
-        .seller-actions {
-          display: flex;
-          gap: 16px;
-          min-width: 430px;
-        }
+       .seller-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+  flex-wrap: wrap;
+}
 
        .message-btn,
 .yard-btn,
@@ -1494,6 +1499,15 @@ max-height: none;
   border-color: rgba(255,196,0,.24);
 
   color: #FFC400;
+}
+
+.message-btn {
+  min-width: 138px;
+}
+
+.yard-btn,
+.call-btn {
+  min-width: 104px;
 }
 
 .message-btn:hover,
@@ -1771,15 +1785,24 @@ max-height: none;
             padding: 20px;
           }
 
-          .seller-actions {
-  width: 100%;
-  flex-direction: column;
+         .seller-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
-.message-btn,
+.message-btn {
+  min-width: 138px;
+}
+
 .yard-btn,
 .call-btn {
-  width: 100%;
+  min-width: 104px;
 }
         }
       `}</style>
