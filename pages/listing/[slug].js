@@ -981,56 +981,66 @@ function lightboxNext() {
           letter-spacing: 0.4px;
         }
 
-        .facts-highlights-panel {
+   .facts-highlights-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: minmax(360px, 0.85fr) minmax(260px, 1fr);
+  gap: 26px;
+  align-items: stretch;
 }
 
 .facts-column {
-  padding-right: 22px;
-  border-right: 1px solid rgba(255,255,255,.10);
+  padding-right: 26px;
+  border-right: 1px solid rgba(255,255,255,.12);
 }
 
 .highlights-column {
-  padding-left: 2px;
+  padding-left: 4px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 13px;
+  align-items: baseline;
+}
+
+.facts span {
+  color: rgba(255,255,255,.44);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.facts strong {
+  min-width: 0;
+  color: #ededed;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .highlight-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 8px;
+  align-content: flex-start;
 }
 
 .highlight-chips span {
-  padding: 4px 8px;
-  border: 1px solid rgba(255,255,255,.065);
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,.08);
   border-radius: 999px;
-  background: rgba(255,255,255,.025);
-  color: rgba(255,255,255,.48);
+  background: rgba(255,255,255,.035);
+  color: rgba(255,255,255,.58);
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .15px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1;
+  text-transform: uppercase;
 }
-
-        .facts span {
-          color: #9a9a9a;
-        }
-
-        .facts strong {
-          color: #e5e5e5;
-          font-weight: 500;
-        }
-
-        .highlights {
-          margin: 0;
-          padding: 0;
-          list-style: none;
-          display: grid;
-          gap: 14px;
-          font-size: 15px;
-        }
-
         .highlights li::before {
           content: "✓";
           color: ${BRAND_YELLOW};
