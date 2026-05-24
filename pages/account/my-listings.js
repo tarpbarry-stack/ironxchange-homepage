@@ -522,7 +522,11 @@ if (!response.ok) {
           <span>{filteredListings.length} LISTINGS</span>
         </div>
 
-   <div className="cards">
+   <div
+  className={`cards ${
+    filteredListings.length === 1 ? "single-card" : ""
+  }`}
+>
   {filteredListings.map(item => {
     const listingId = getListingId(item);
     const cardImages = getCardImages(item);
@@ -914,6 +918,11 @@ if (!response.ok) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
+}
+
+.cards.single-card {
+  grid-template-columns: minmax(250px, 300px);
+  justify-content: center;
 }
 
 .card {
