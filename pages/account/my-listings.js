@@ -9,8 +9,8 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -662,6 +662,13 @@ if (!response.ok) {
 * .search-section *,
 .featured * {
   box-sizing: border-box;
+}
+
+:global(body) {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0B0B0B;
+  color: #D6D6D6;
 }
 
 .search-section {
