@@ -2,14 +2,16 @@ function extractEmails(text) {
   const normalEmails =
     text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
 
-  const obfuscatedEmails = text
+  const obfuscatedText = text
     .replace(/\s*\[at\]\s*/gi, "@")
     .replace(/\s*\(at\)\s*/gi, "@")
     .replace(/\s+at\s+/gi, "@")
     .replace(/\s*\[dot\]\s*/gi, ".")
     .replace(/\s*\(dot\)\s*/gi, ".")
-    .replace(/\s+dot\s+/gi, ".")
-    .match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+    .replace(/\s+dot\s+/gi, ".");
+
+  const obfuscatedEmails =
+    obfuscatedText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
 
   return [...new Set([...normalEmails, ...obfuscatedEmails])].filter((email) => {
     const lower = email.toLowerCase();
@@ -24,7 +26,9 @@ function extractEmails(text) {
       "support@wordpress",
       "domain.com",
       "email.com",
-      "yourname@"
+      "yourname@",
+      "name@",
+      "test@"
     ];
 
     return !blocked.some((bad) => lower.includes(bad));
@@ -72,11 +76,13 @@ function extractContacts(html) {
       lower.includes("contact") ||
       lower.includes("equipment") ||
       lower.includes("territory") ||
-      lower.includes("representative");
+      lower.includes("representative") ||
+      lower.includes("director") ||
+      lower.includes("fleet");
 
     const clean =
       line.length >= 4 &&
-      line.length <= 160 &&
+      line.length <= 180 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
       !lower.includes("cookie") &&
@@ -88,7 +94,7 @@ function extractContacts(html) {
     }
   }
 
-  return [...new Set(contacts)].slice(0, 50);
+  return [...new Set(contacts)].slice(0, 60);
 }
 
 function normalizeBaseUrl(url) {
@@ -96,10 +102,7 @@ function normalizeBaseUrl(url) {
 
   let clean = url.trim();
 
-  if (
-    !clean.startsWith("http://") &&
-    !clean.startsWith("https://")
-  ) {
+  if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
     clean = `https://${clean}`;
   }
 
@@ -139,7 +142,11 @@ function shouldScanLink(url) {
     "rep",
     "branches",
     "branch",
-    "departments"
+    "departments",
+    "credit",
+    "application",
+    "forms",
+    "brochure"
   ];
 
   const badWords = [
@@ -163,6 +170,10 @@ function shouldScanLink(url) {
 
   if (badWords.some((word) => lower.includes(word))) {
     return false;
+  }
+
+  if (lower.endsWith(".pdf")) {
+    return true;
   }
 
   return goodWords.some((word) => lower.includes(word));
@@ -201,7 +212,7 @@ function extractInternalLinks(html, baseUrl) {
     .filter(Boolean)
     .filter(shouldScanLink);
 
-  return [...new Set(links)].slice(0, 15);
+  return [...new Set(links)].slice(0, 20);
 }
 
 function priorityPages(baseUrl) {
@@ -227,7 +238,10 @@ function priorityPages(baseUrl) {
     "/rental",
     "/branches",
     "/about",
-    "/about-us"
+    "/about-us",
+    "/forms",
+    "/credit",
+    "/credit-application"
   ].map((path) => `${base}${path}`);
 }
 
@@ -243,13 +257,26 @@ async function fetchPage(url) {
       signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 IXI Email Hunter Bot",
-        Accept: "text/html"
+        Accept: "text/html,application/pdf"
       }
     });
 
     clearTimeout(timeout);
 
     const contentType = response.headers.get("content-type") || "";
+
+    if (contentType.includes("application/pdf") || url.toLowerCase().endsWith(".pdf")) {
+      const buffer = await response.arrayBuffer();
+
+      const rawText = Buffer.from(buffer).toString("latin1");
+
+      return {
+        url,
+        emails: extractEmails(rawText),
+        contacts: [],
+        links: []
+      };
+    }
 
     if (!contentType.includes("text/html")) {
       return {
@@ -264,10 +291,7 @@ async function fetchPage(url) {
 
     return {
       url,
-      emails: [
-        ...extractEmails(html),
-        ...extractMailtoEmails(html)
-      ],
+      emails: [...extractEmails(html), ...extractMailtoEmails(html)],
       contacts: extractContacts(html),
       links: extractInternalLinks(html, url)
     };
@@ -324,14 +348,12 @@ export default async function handler(req, res) {
     let allContacts = [];
     let scannedLinks = [];
 
-    const queuedPages = [
-      ...priorityPages(dealer.website)
-    ];
+    const queuedPages = [...priorityPages(dealer.website)];
 
     let pagesScannedForDealer = 0;
 
     for (const page of queuedPages) {
-      if (pagesScannedForDealer >= 18) {
+      if (pagesScannedForDealer >= 24) {
         break;
       }
 
@@ -343,8 +365,8 @@ export default async function handler(req, res) {
       allEmails.push(...scan.emails);
       allContacts.push(...scan.contacts);
 
-      for (const link of scan.links.slice(0, 6)) {
-        if (pagesScannedForDealer >= 18) {
+      for (const link of scan.links.slice(0, 8)) {
+        if (pagesScannedForDealer >= 24) {
           break;
         }
 
