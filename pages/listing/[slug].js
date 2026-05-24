@@ -349,7 +349,13 @@ function lightboxNext() {
           <div className="title-row">
   <div>
                 
-    <h1>{title}</h1>
+    <h1>
+  {cleanMachineTitle(title)}
+
+  <span className="title-hours">
+    {hours}
+  </span>
+</h1>
 
     <p>
       {hours} · {location}
@@ -698,6 +704,20 @@ h1 {
 
   text-transform: uppercase;
 }
+
+.title-hours {
+  margin-left: 12px;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: .62em;
+  font-weight: 700;
+
+  letter-spacing: -.2px;
+
+  white-space: nowrap;
+}
+
 
 .title-row p {
   display: none;
