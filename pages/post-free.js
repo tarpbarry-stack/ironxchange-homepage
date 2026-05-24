@@ -13069,13 +13069,19 @@ main {
 
  .page {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    320px;
 
   gap: 26px;
 
   align-items: start;
 
   padding: 34px 5% 54px;
+
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
   .form-panel {
@@ -13093,17 +13099,14 @@ main {
     0 18px 44px rgba(0,0,0,.26);
 }
 
-  .preview-panel {
-    background: transparent;
-    border: none;
-    padding: 0;
-    padding-top: 2px;
+ .preview-panel {
+  width: 320px;
 
-    position: sticky;
-    top: 82px;
+  position: sticky;
+  top: 82px;
 
-     align-self: start;
-  }
+  align-self: start;
+}
 
   .preview-card-wrap {
   width: 300px;
