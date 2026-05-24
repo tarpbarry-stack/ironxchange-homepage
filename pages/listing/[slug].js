@@ -459,54 +459,67 @@ function lightboxNext() {
   </div>
 </div>
 
-           <div className="right-stack">
-<div className="mini-tool-tab">
-  <button
-    type="button"
-    onClick={() => {
-      const url = window.location.href;
+          <div className="right-stack">
+  <div className="mini-tool-tab">
+    <button
+      type="button"
+      onClick={() => {
+        const url = window.location.href;
 
-      if (navigator.share) {
-        navigator.share({
-          title,
-          url
-        });
-      } else {
-        navigator.clipboard.writeText(url);
-        alert("Listing link copied");
-      }
-    }}
-  >
-    <i className="fa-solid fa-arrow-up-from-bracket"></i>
-  </button>
+        if (navigator.share) {
+          navigator.share({ title, url });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert("Listing link copied");
+        }
+      }}
+    >
+      <i className="fa-solid fa-arrow-up-from-bracket"></i>
+    </button>
 
- <button
-  type="button"
-  className={isSaved ? "saved-star" : ""}
-  onClick={toggleSaved}
->
-  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-</button>
+    <button
+      type="button"
+      className={isSaved ? "saved-star" : ""}
+      onClick={toggleSaved}
+    >
+      <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
+    </button>
 
-  <a href="/browse">← Results</a>
+    <a href="/browse">← Results</a>
 
-  {prevListing ? (
-    <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
-      ← Prev
-    </a>
-  ) : (
-    <button disabled>← Prev</button>
-  )}
+    {prevListing ? (
+      <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
+        ← Prev
+      </a>
+    ) : (
+      <button disabled>← Prev</button>
+    )}
 
-  {nextListing ? (
-    <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
-      Next →
-    </a>
-  ) : (
-    <button disabled>Next →</button>
-  )}
-</div>
-  
+    {nextListing ? (
+      <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
+        Next →
+      </a>
+    ) : (
+      <button disabled>Next →</button>
+    )}
+  </div>
+
+  <div className="panel video-panel">
+    <h2>Machine Video</h2>
+
+    <div className="video-box">
+      <video controls poster={heroImage}>
+        <source src={listing.videoUrl || listing.publicData?.videoUrl || ""} />
+      </video>
+
+      {!listing.videoUrl && !listing.publicData?.videoUrl ? (
+        <div className="video-placeholder">
+          <i className="fa-solid fa-play"></i>
+          <span>Video Coming Soon</span>
+        </div>
+      ) : null}
+    </div>
+  </div>
 </div>
           </section>
 
