@@ -2,6 +2,13 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import featureKeywords from "../../lib/featureKeywords";
 
+import {
+  getListingId,
+  getCardImages,
+  getListingHref,
+  cleanMachineTitle as formatCleanMachineTitle
+} from "../../lib/listingFormatters";
+
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -126,15 +133,6 @@ function getFeatureLine(item = {}) {
   return [...new Set(features)].slice(0, 4).join(" • ");
 }
 
-function getCardImages(item = {}) {
-  return [
-    ...(Array.isArray(item.images) ? item.images : []),
-    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
-    item.imageUrl,
-    item.image
-  ].filter(Boolean);
-}
-
 function sortListings(listings, sortMode) {
   const sorted = [...listings];
 
@@ -237,23 +235,25 @@ useEffect(() => {
     return sortListings(filtered, sortMode);
   }, [searchQuery, category, myListings, filters, sortMode]);
 
-  function changeCardPhoto(e, item, direction) {
-    e.preventDefault();
-    e.stopPropagation();
+ function changeCardPhoto(e, item, direction) {
+  e.preventDefault();
+  e.stopPropagation();
 
-    const images = getCardImages(item);
-    if (images.length < 2) return;
+  const listingId = getListingId(item);
+  const images = getCardImages(item);
 
-    setCardPhotoIndex(current => {
-      const currentIndex = current[item.id] || 0;
-      const nextIndex = (currentIndex + direction + images.length) % images.length;
+  if (!listingId || images.length < 2) return;
 
-      return {
-        ...current,
-        [item.id]: nextIndex
-      };
-    });
-  }
+  setCardPhotoIndex(current => {
+    const currentIndex = current[listingId] || 0;
+    const nextIndex = (currentIndex + direction + images.length) % images.length;
+
+    return {
+      ...current,
+      [listingId]: nextIndex
+    };
+  });
+}
 
   async function savePrice(e, listing) {
     if (e.key !== "Enter") return;
@@ -531,6 +531,11 @@ if (!response.ok) {
 
    <div className="cards">
   {filteredListings.map(item => {
+    const listingId = getListingId(item);
+    const cardImages = getCardImages(item);
+    const listingHref = getListingHref(item);
+    const cleanTitle = formatCleanMachineTitle(item.title);
+
     const listingStatus =
       item.listingStatus ||
       item.publicData?.listingStatus ||
@@ -538,108 +543,110 @@ if (!response.ok) {
       "live";
 
     const isArchived = listingStatus === "archived";
+    const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
     return (
       <div
         className={`card seller-card ${isArchived ? "archived-card" : ""}`}
-        key={item.id || item.link || item.title}
+        key={listingId || item.link || item.title}
       >
         <div
           className="card-photo"
           style={{
             backgroundImage: `url(${
-              getCardImages(item)[cardPhotoIndex[item.id] || 0] ||
+              cardImages[currentPhotoIndex] ||
               "/images/hero-equipment-yard.jpg"
             })`
           }}
         />
 
-              {getCardImages(item).length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    className="card-photo-nav left"
-                    onClick={e => changeCardPhoto(e, item, -1)}
-                  >
-                    ‹
-                  </button>
+        {cardImages.length > 1 && (
+          <>
+            <button
+              type="button"
+              className="card-photo-nav left"
+              onClick={e => changeCardPhoto(e, item, -1)}
+            >
+              ‹
+            </button>
 
-                  <button
-                    type="button"
-                    className="card-photo-nav right"
-                    onClick={e => changeCardPhoto(e, item, 1)}
-                  >
-                    ›
-                  </button>
+            <button
+              type="button"
+              className="card-photo-nav right"
+              onClick={e => changeCardPhoto(e, item, 1)}
+            >
+              ›
+            </button>
 
-                  <span className="photo-count">
-                    {(cardPhotoIndex[item.id] || 0) + 1}/{getCardImages(item).length}
-                  </span>
-                </>
-              )}
+            <span className="photo-count">
+              {currentPhotoIndex + 1}/{cardImages.length}
+            </span>
+          </>
+        )}
 
-              <div className="card-body">
-                <div className="title-row">
-                  <h3>{cleanMachineTitle(item.title)}</h3>
-                  <h3 className="hours-inline">{item.hours}</h3>
-                </div>
+        <div className="card-body">
+          <div className="title-row">
+            <h3>{cleanTitle}</h3>
+            <h3 className="hours-inline">{item.hours}</h3>
+          </div>
 
-                <p className="feature-line">{getFeatureLine(item)}</p>
+          <p className="feature-line">{getFeatureLine(item)}</p>
 
-                <div className="seller-price-row">
-                  <input
-                    className="price-input"
-                    defaultValue={formatPriceInput(item.price)}
-                    onKeyDown={e => savePrice(e, item)}
-                    disabled={savingPriceId === String(item.id)}
-                  />
+          <div className="seller-price-row">
+            <input
+              className="price-input"
+              defaultValue={formatPriceInput(item.price)}
+              onKeyDown={e => savePrice(e, item)}
+              disabled={savingPriceId === String(listingId)}
+            />
 
-                 <span className={`status-pill ${isArchived ? "archived" : ""}`}>
-  {isArchived ? "ARCHIVED" : "ACTIVE"}
-</span>
-</div>
-                <div className="seller-meta">
-                  <span>Age: {item.age ?? "—"}</span>
-                  <span>Views: {item.views || "—"}</span>
-                  <span>Saves: {item.saves || "—"}</span>
-                </div>
+            <span className={`status-pill ${isArchived ? "archived" : ""}`}>
+              {isArchived ? "ARCHIVED" : "ACTIVE"}
+            </span>
+          </div>
 
-                <div className="seller-actions">
-  <a href={`/live?id=${item.id}`}>EDIT</a>
+          <div className="seller-meta">
+            <span>Age: {item.age ?? "—"}</span>
+            <span>Views: {item.views || "—"}</span>
+            <span>Saves: {item.saves || "—"}</span>
+          </div>
 
-  <a href={`/listing/${slugify(item.title)}?from=account`}>
-    VIEW
-  </a>
+          <div className="seller-actions">
+            <a href={`/live?id=${listingId}`}>EDIT</a>
 
-  {isArchived ? (
-    <button
-      type="button"
-      onClick={() => reactivateListing(item)}
-    >
-      REACTIVATE
-    </button>
-  ) : (
-    <button
-      type="button"
-      onClick={() => archiveListing(item)}
-    >
-      ARCHIVE
-    </button>
-  )}
+            <a href={`${listingHref}?from=account`}>
+              VIEW
+            </a>
 
-  <button
-    type="button"
-    className="danger-action"
-    onClick={() => confirmDelete(item)}
-  >
-    DELETE
-  </button>
-</div>
-                            </div>
-            </div>
-          );
-        })}
+            {isArchived ? (
+              <button
+                type="button"
+                onClick={() => reactivateListing(item)}
+              >
+                REACTIVATE
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => archiveListing(item)}
+              >
+                ARCHIVE
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="danger-action"
+              onClick={() => confirmDelete(item)}
+            >
+              DELETE
+            </button>
+          </div>
         </div>
+      </div>
+    );
+  })}
+</div>
 
         {filteredListings.length === 0 && (
           <div className="empty">
