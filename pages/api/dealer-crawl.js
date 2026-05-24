@@ -1,29 +1,23 @@
 function extractEmails(text) {
-  const matches = text.match(
-    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
-  );
+  const matches =
+    text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
 
-  return [...new Set(matches || [])].filter((email) => {
+  return [...new Set(matches)].filter((email) => {
     const lower = email.toLowerCase();
 
-    const bad = [
+    const blocked = [
       "example.com",
       "sentry.io",
       "wixpress.com",
       "noreply",
-      "no-reply"
+      "no-reply",
+      "privacy@",
+      "support@wordpress",
+      "domain.com"
     ];
 
-    return !bad.some((domain) => lower.includes(domain));
+    return !blocked.some((bad) => lower.includes(bad));
   });
-}
-
-function extractPhones(text) {
-  const matches = text.match(
-    /(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}/g
-  );
-
-  return [...new Set(matches || [])];
 }
 
 function extractMailtoEmails(html) {
@@ -46,38 +40,41 @@ function stripHtml(html) {
 function extractContacts(html) {
   const text = stripHtml(html);
 
-  const contacts = [];
-
   const lines = text
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
 
+  const contacts = [];
+
   for (const line of lines) {
     const lower = line.toLowerCase();
 
-    const looksUseful =
+    const useful =
       lower.includes("sales") ||
+      lower.includes("used equipment") ||
       lower.includes("manager") ||
-      lower.includes("equipment") ||
       lower.includes("rental") ||
       lower.includes("service") ||
-      lower.includes("parts");
+      lower.includes("parts") ||
+      lower.includes("contact") ||
+      lower.includes("branch");
 
-    const notGarbage =
+    const clean =
       line.length >= 4 &&
-      line.length <= 120 &&
+      line.length <= 140 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
       !lower.includes("cookie") &&
-      !lower.includes("javascript");
+      !lower.includes("javascript") &&
+      !lower.includes("all rights reserved");
 
-    if (looksUseful && notGarbage) {
+    if (useful && clean) {
       contacts.push(line);
     }
   }
 
-  return [...new Set(contacts)].slice(0, 25);
+  return [...new Set(contacts)].slice(0, 30);
 }
 
 function normalizeBaseUrl(url) {
@@ -108,15 +105,21 @@ function shouldScanLink(url) {
 
   const goodWords = [
     "contact",
+    "contact-us",
     "team",
     "staff",
     "sales",
     "locations",
+    "location",
     "about",
     "service",
     "parts",
     "rental",
-    "used-equipment"
+    "used-equipment",
+    "used",
+    "directory",
+    "employees",
+    "people"
   ];
 
   const badWords = [
@@ -133,9 +136,10 @@ function shouldScanLink(url) {
     ".png",
     ".webp",
     ".pdf",
+    ".zip",
     "#",
-    "machinerytrader.com",
-    "google.com"
+    "google.com",
+    "machinerytrader.com"
   ];
 
   if (badWords.some((word) => lower.includes(word))) {
@@ -178,7 +182,26 @@ function extractInternalLinks(html, baseUrl) {
     .filter(Boolean)
     .filter(shouldScanLink);
 
-  return [...new Set(links)].slice(0, 8);
+  return [...new Set(links)].slice(0, 12);
+}
+
+function priorityPages(baseUrl) {
+  const base = baseUrl.replace(/\/$/, "");
+
+  return [
+    "",
+    "/contact",
+    "/contact-us",
+    "/locations",
+    "/team",
+    "/staff",
+    "/sales",
+    "/used-equipment",
+    "/parts",
+    "/service",
+    "/rental",
+    "/about"
+  ].map((path) => `${base}${path}`);
 }
 
 async function fetchPage(url) {
@@ -187,12 +210,13 @@ async function fetchPage(url) {
 
     const timeout = setTimeout(() => {
       controller.abort();
-    }, 5000);
+    }, 6000);
 
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 IXI Dealer Graph Bot"
+        "User-Agent": "Mozilla/5.0 IXI Email Discovery Bot",
+        Accept: "text/html"
       }
     });
 
@@ -206,7 +230,6 @@ async function fetchPage(url) {
         ...extractEmails(html),
         ...extractMailtoEmails(html)
       ],
-      phones: extractPhones(html),
       contacts: extractContacts(html),
       links: extractInternalLinks(html, url)
     };
@@ -214,7 +237,6 @@ async function fetchPage(url) {
     return {
       url,
       emails: [],
-      phones: [],
       contacts: [],
       links: [],
       error: error.message
@@ -261,32 +283,43 @@ export default async function handler(req, res) {
 
   for (const dealer of crawlTargets) {
     let allEmails = [];
-    let allPhones = [];
     let allContacts = [];
     let scannedLinks = [];
 
-    const homepage = await fetchPage(dealer.website);
+    const firstPages = priorityPages(dealer.website);
 
-    scannedLinks.push(homepage.url);
-
-    allEmails.push(...homepage.emails);
-    allPhones.push(...homepage.phones);
-    allContacts.push(...homepage.contacts);
-
-    for (const link of homepage.links) {
-      const scan = await fetchPage(link);
+    for (const page of firstPages) {
+      const scan = await fetchPage(page);
 
       scannedLinks.push(scan.url);
-
       allEmails.push(...scan.emails);
-      allPhones.push(...scan.phones);
       allContacts.push(...scan.contacts);
+
+      if (allEmails.length >= 3) {
+        break;
+      }
+
+      for (const link of scan.links.slice(0, 4)) {
+        const deeperScan = await fetchPage(link);
+
+        scannedLinks.push(deeperScan.url);
+        allEmails.push(...deeperScan.emails);
+        allContacts.push(...deeperScan.contacts);
+
+        if (allEmails.length >= 3) {
+          break;
+        }
+      }
+
+      if (allEmails.length >= 3) {
+        break;
+      }
     }
 
     results.push({
       ...dealer,
       emails: [...new Set(allEmails)],
-      phones: [...new Set(allPhones)],
+      phones: [],
       contacts: [...new Set(allContacts)],
       scannedLinks: [...new Set(scannedLinks)]
     });
@@ -297,16 +330,11 @@ export default async function handler(req, res) {
     0
   );
 
-  const totalPhones = results.reduce(
-    (sum, item) => sum + item.phones.length,
-    0
-  );
-
   return res.status(200).json({
     success: true,
-    message: `Scanned ${results.length} dealer websites. Found ${totalEmails} emails and ${totalPhones} phone numbers.`,
+    message: `Scanned ${results.length} websites. Found ${totalEmails} emails.`,
     results,
     totalEmails,
-    totalPhones
+    totalPhones: 0
   });
 }
