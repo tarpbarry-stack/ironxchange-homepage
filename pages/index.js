@@ -269,8 +269,12 @@ export default function Home() {
         </div>
       </section>
 
-  <section className="featured">
-  <div className="cards">
+<section className="featured">
+  <div
+    className={`cards ${
+      featuredListings.length === 1 ? "single-card" : ""
+    }`}
+  >
     {featuredListings.map((item) => {
       const id = String(getListingId(item));
 
@@ -751,6 +755,12 @@ min-height: 365px;
   gap: 22px;
   min-height: 560px;
 }
+
+.cards.single-card {
+  grid-template-columns: minmax(250px, 300px);
+  justify-content: center;
+}
+
         .how {
           background: #f3f3f3;
           padding: 54px 5%;
