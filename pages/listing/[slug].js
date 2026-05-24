@@ -620,54 +620,6 @@ function lightboxNext() {
           background: #0b0b0b;
         }
 
-       .nav {
-  height: 64px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 2%;
-  background: #050505;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.logo-img {
-  height: 38px;
-  display: block;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
-}
-
-.yellow-link {
-  color: #FFC400 !important;
-}
-
-.login-icon {
-  border: 2px solid #38A169;
-  color: #38A169 !important;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-}
-
-        .login-icon.logged-in {
-  border-color: #38A169;
-  color: #38A169 !important;
-}
-
         .page {
           padding: 28px 3%;
           max-width: 1500px;
@@ -691,40 +643,78 @@ function lightboxNext() {
   font-family: inherit;
 }
 
-.back-results:hover {
-  color: rgba(255,255,255,.92);
+.back-results {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 14px;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  font-family: inherit;
 }
 
         .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 24px;
-          margin-bottom: 18px;
-        }
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 24px;
 
-        h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 30px;
-          font-weight: 800;
-          letter-spacing: -0.5px;
-          line-height: 1.1;
-        }
+  margin-bottom: 16px;
+  padding-bottom: 16px;
 
-        .title-row p {
-          margin: 10px 0 0;
-          color: #9a9a9a;
-          font-size: 16px;
-        }
-        
-        .price {
-          color: #f2f2f2;
-          font-size: 32px;
-          font-weight: 800;
-          letter-spacing: -0.6px;
-          white-space: nowrap;
-        }
+  border-bottom: 1px solid rgba(255,255,255,.075);
+}
+
+h1 {
+  margin: 0;
+
+  color: rgba(255,255,255,.92);
+
+  font-size: clamp(26px, 2.4vw, 38px);
+  font-weight: 900;
+  letter-spacing: -1.05px;
+  line-height: .98;
+}
+
+.title-row p {
+  margin: 9px 0 0;
+
+  color: rgba(255,255,255,.46);
+
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.price {
+  padding: 12px 16px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)),
+    #101010;
+
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+
+  color: rgba(255,255,255,.92);
+
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: -.55px;
+  white-space: nowrap;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 14px 34px rgba(0,0,0,.18);
+}
 
         .photo-grid {
           display: grid;
@@ -976,25 +966,30 @@ function lightboxNext() {
   height: 100%;
 }
 
-        .panel {
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 16px;
-          padding: 24px;
-        }
+       .panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
+    #121212;
 
-        .panel h2 {
-          margin: 0 0 18px;
-          color: #f2f2f2;
-          font-size: 18px;
-          text-transform: uppercase;
-          letter-spacing: 0.4px;
-        }
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px;
 
-        .facts-column h2,
-.highlights-column h2 {
-  text-align: center;
+  padding: 22px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 16px 38px rgba(0,0,0,.22);
 }
+
+.panel h2 {
+  margin: 0 0 15px;
+  color: #f2f2f2;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .65px;
+}
+
 
         .video-panel {
   height: 100%;
@@ -1077,57 +1072,59 @@ function lightboxNext() {
 .facts-highlights-panel {
   display: grid;
   grid-template-columns: 1.05fr .95fr;
-  gap: 22px;
-
+  gap: 0;
+  align-items: start;
   padding: 22px;
 }
 
 .facts-column {
-  padding-right: 22px;
-  border-right: 1px solid rgba(255,255,255,.085);
+  position: relative;
+  padding-right: 24px;
 }
 
-.highlights-column {
-  padding-left: 2px;
-}
+.facts-column::after {
+  content: "";
 
-.facts-highlights-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  align-items: start;
-}
+  position: absolute;
+  top: 8px;
+  right: 0;
 
-.facts-column {
-  padding-right: 22px;
-  border-right: 1px solid rgba(255,255,255,.12);
+  width: 1px;
+  height: calc(100% - 16px);
+
+  background: rgba(255,255,255,.10);
 }
 
 .highlights-column {
   padding-left: 22px;
 }
 
+.facts-column h2,
+.highlights-column h2 {
+  text-align: left;
+}
+
 .facts {
   display: grid;
-  grid-template-columns: 38% 62%;
-  column-gap: 12px;
-  row-gap: 12px;
+  grid-template-columns: 92px 1fr;
+  column-gap: 16px;
+  row-gap: 10px;
   align-items: baseline;
 }
 
 .facts span {
-  color: rgba(255,255,255,.44);
-  font-size: 11px;
+  color: rgba(255,255,255,.38);
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: .45px;
+  letter-spacing: .55px;
   text-transform: uppercase;
 }
 
 .facts strong {
   min-width: 0;
-  color: #ededed;
-  font-size: 14px;
-  font-weight: 800;
+  color: rgba(255,255,255,.76);
+  font-size: 12.5px;
+  font-weight: 700;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
@@ -1135,28 +1132,22 @@ function lightboxNext() {
 .highlight-chips {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
-  gap: 8px;
+  gap: 7px 6px;
+  max-height: 128px;
+  overflow: hidden;
 }
 
 .highlight-chips span {
-  min-height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  padding: 6px 8px;
-  border: 1px solid rgba(255,255,255,.08);
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.06);
   border-radius: 999px;
-  background: rgba(255,255,255,.035);
-  color: rgba(255,255,255,.58);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  line-height: 1.1;
-  text-transform: uppercase;
+  background: rgba(255,255,255,.025);
+  color: rgba(255,255,255,.44);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .15px;
+  line-height: 1;
+  text-transform: lowercase;
 }
 
         .highlights li::before {
