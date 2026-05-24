@@ -222,7 +222,8 @@ const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
   const make = cleanText(listing.make) || "—";
   const model = cleanText(listing.model) || "—";
-  const serial = cleanText(listing.serialNumber || listing.vin || listing.serial) || "Not listed";
+  const serial = cleanText(listing.serialNumber || listing.publicData?.serialNumber || listing.vin || listing.serial) || "Not listed";
+  const stockNumber = cleanText(listing.stockNumber || listing.publicData?.stockNumber) || "Not listed";
   const sellerProfile =
   listing.author?.profile ||
   listing.author?.attributes?.profile ||
@@ -415,6 +416,7 @@ function lightboxNext() {
   ))}
 </div>
 </div>
+    <section className="info-grid">
           <div className="panel facts-highlights-panel">
   <div className="facts-column">
     <h2>Quick Facts</h2>
