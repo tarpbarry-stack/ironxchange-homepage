@@ -1768,12 +1768,12 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-top-row {
-  max-width: 1120px;
+  max-width: 980px;
   margin: 22px auto 10px;
 
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) 230px 150px 150px 116px;
-
+  grid-template-columns: minmax(220px, 1fr) 165px 128px 128px 96px;
+}
   background:
     linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
     #111;
@@ -1815,6 +1815,10 @@ const isArchived = listingStatus === "archived";
 
 .search-top-row select,
 .sort-select {
+  background-color: #121006;
+  border-color: rgba(255,196,0,.16);
+  color: rgba(255,255,255,.72);
+
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1861,7 +1865,7 @@ const isArchived = listingStatus === "archived";
 }
 
 .filter-strip {
-  max-width: 1120px;
+  max-width: 980px;
   margin: 0 auto;
   width: 100%;
 
@@ -1945,8 +1949,9 @@ const isArchived = listingStatus === "archived";
 
   border-radius: 0 8px 8px 0;
 
-  background: #101010;
-  color: rgba(255,255,255,.36);
+  background: #121006;
+  border-color: rgba(255,196,0,.14);
+  color: rgba(255,255,255,.42);
 
   font-size: 9px;
   font-weight: 900;
@@ -1971,9 +1976,10 @@ const isArchived = listingStatus === "archived";
   box-shadow: inset 0 0 0 1px rgba(255,196,0,.16);
 }
 
+.sort-select:hover,
 .clear-btn:hover {
-  color: #FFC400;
-  border-color: rgba(255,196,0,.35);
+  background: #1a1400;
+  border-color: rgba(255,196,0,.38);
 }
 
 .featured {
