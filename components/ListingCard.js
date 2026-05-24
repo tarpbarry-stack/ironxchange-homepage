@@ -302,7 +302,7 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  min-height: 42px;
+  min-height: 20px;
   max-height: 42px;
 
   margin: 8px 0 14px;
