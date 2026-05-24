@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 import featureKeywords from "../../lib/featureKeywords";
 
@@ -12,7 +12,7 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
-import Footer from "../components/Footer";
+import Footer from "../../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -661,7 +661,7 @@ if (!response.ok) {
 <Footer />
         
 <style jsx>{`
-* .search-section *,
+.search-section *,
 .featured * {
   box-sizing: border-box;
 }
