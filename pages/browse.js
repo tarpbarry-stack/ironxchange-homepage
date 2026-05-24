@@ -1530,6 +1530,7 @@ const isArchived = listingStatus === "archived";
     dealers, and fleet operators.
   </p>
 
+    <div className="browse-search-shell">  
   <div className="search-top-row">
     <input
       type="text"
@@ -1691,6 +1692,7 @@ const isArchived = listingStatus === "archived";
       CLEAR
     </button>
   </div>
+</div>
 </section>
 
       <section className="featured">
@@ -1743,6 +1745,24 @@ const isArchived = listingStatus === "archived";
   color: #D6D6D6;
 }
 
+.browse-search-shell {
+  max-width: 760px;
+  margin: 22px auto 0;
+  padding: 9px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
+    rgba(8,8,8,.72);
+
+  border: 1px solid rgba(255,255,255,.07);
+  outline: 1px solid rgba(255,255,255,.02);
+  border-radius: 16px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 18px 44px rgba(0,0,0,.28);
+}
+
 .search-section {
   padding: 30px 5% 26px;
   background:
@@ -1768,11 +1788,11 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-top-row {
-  max-width: 760px;
-  margin: 22px auto 10px;
-
+   max-width: none;
+  margin: 0 0 7px;
+  
   display: grid;
-  grid-template-columns: 230px 145px 115px 115px 82px;
+  grid-template-columns: 220px 140px 112px 112px 82px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
@@ -1856,8 +1876,8 @@ const isArchived = listingStatus === "archived";
 }
 
 .filter-strip {
-  max-width: 760px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   width: 100%;
 
   display: flex;
