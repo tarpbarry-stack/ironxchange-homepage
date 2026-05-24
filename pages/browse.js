@@ -1768,12 +1768,12 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-top-row {
-  max-width: 980px;
+  max-width: 760px;
   margin: 22px auto 10px;
 
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 165px 128px 128px 96px;
-}
+  grid-template-columns: 230px 145px 115px 115px 82px;
+
   background:
     linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
     #111;
@@ -1788,24 +1788,14 @@ const isArchived = listingStatus === "archived";
     0 1px 0 rgba(255,255,255,.035) inset,
     0 18px 44px rgba(0,0,0,.28);
 
-  min-height: 40px;
+  min-height: 38px;
 }
 
 .browse-search,
 .search-top-row select {
-  height: 40px;
-  border: none;
-  border-right: 1px solid rgba(255,255,255,.07);
-
-  padding: 0 13px;
-
-  background: #111;
-  color: rgba(255,255,255,.78);
-
-  font-size: 12px;
-  font-weight: 650;
-
-  outline: none;
+  height: 38px;
+  padding: 0 10px;
+  font-size: 11.5px;
 }
 
 .browse-search::placeholder {
@@ -1842,7 +1832,8 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-btn {
-  height: 40px;
+  height: 38px;
+  font-size: 9.5px;
 
   background: #151515;
   color: #FFC400;
@@ -1865,7 +1856,7 @@ const isArchived = listingStatus === "archived";
 }
 
 .filter-strip {
-  max-width: 980px;
+  max-width: 760px;
   margin: 0 auto;
   width: 100%;
 
