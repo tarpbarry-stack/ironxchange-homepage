@@ -659,6 +659,13 @@ function lightboxNext() {
     ),
     #0b0b0b;
 }
+
+button:focus-visible,
+a:focus-visible {
+  outline: 1px solid rgba(255,196,0,.42);
+  outline-offset: 3px;
+}
+
         .page {
   padding: 24px 3% 54px;
 
@@ -718,6 +725,8 @@ function lightboxNext() {
 
   margin: 0 0 10px;
   padding: 0;
+
+  border-radius: 14px;
 }
 
 .title-row::after {
@@ -804,7 +813,7 @@ h1 {
   position: relative;
   min-width: 0;
 
-  border-radius: 16px;
+  border-radius: 14px;
 
   overflow: hidden;
 
@@ -833,7 +842,7 @@ h1 {
   object-fit: cover;
   display: block;
 
-  border-radius: 16px;
+  border-radius: 14px;
 
   background: #111;
 
@@ -901,7 +910,7 @@ h1 {
   border-color: rgba(255,196,0,.18);
 
   box-shadow:
-    0 10px 24px rgba(0,0,0,.22);
+    0 10px 24px rgba(0,0,0,.18);
 }
 
        .photo-rail img:hover,
@@ -1189,13 +1198,13 @@ h1 {
   border: 1px solid rgba(255,255,255,.065);
   outline: 1px solid rgba(255,255,255,.018);
 
-  border-radius: 16px;
+  border-radius: 14px;
 
-  padding: 22px;
+ padding: 18px 20px;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.03) inset,
-    0 18px 44px rgba(0,0,0,.22);
+    0 18px 44px rgba(0,0,0,.18);
 }
 
 .panel {
@@ -1210,7 +1219,7 @@ h1 {
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.035) inset,
-    0 22px 52px rgba(0,0,0,.26);
+    0 22px 52px rgba(0,0,0,.22);
 }
 
 .panel + .panel,
@@ -1232,7 +1241,7 @@ h1 {
 
      .video-panel {
   min-height: 100%;
-  padding: 18px;
+ padding: 18px 20px;
 }
 
 .video-panel h2 {
@@ -1256,7 +1265,7 @@ h1 {
   overflow: hidden;
 
   border: 1px solid rgba(255,255,255,.055);
-  border-radius: 12px;
+  border-radius: 14px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
@@ -1319,6 +1328,8 @@ h1 {
   grid-template-columns: 1fr 1fr;
   gap: 0;
   align-items: start;
+
+  border-radius: 14px;
 
   padding: 20px 22px;
 }
@@ -1427,7 +1438,7 @@ h1 {
         }
 
         .description {
-  padding: 22px 24px;
+ padding: 18px 20px;
 }
 
 .description h2 {
@@ -1462,6 +1473,8 @@ h1 {
   justify-content: space-between;
   align-items: center;
   gap: 22px;
+
+  border-radius: 14px;
 }
 
        .seller-row {
