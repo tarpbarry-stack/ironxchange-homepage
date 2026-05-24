@@ -6,6 +6,12 @@ import featureKeywords from "../../lib/featureKeywords";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+import {
+  fetchCurrentUserWithSavedListings,
+  getSavedListingIdsFromUser,
+  toggleSavedListing
+} from "../../lib/savedListings";
+
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
@@ -106,6 +112,10 @@ export default function ListingPage() {
   const { slug, from } = router.query;
 
 const [listings, setListings] = useState([]);
+const [savedIds, setSavedIds] = useState([]);
+const [saveBusy, setSaveBusy] = useState(false);
+const [sdkInstance, setSdkInstance] = useState(null);
+  
 const [activeImage, setActiveImage] = useState(0);
 
 const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -141,14 +151,40 @@ function toggleSaved() {
   setIsSaved(updated.includes(slug));
 }  
   
-  useEffect(() => {
-    fetch("/api/listings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setListings(data);
-      })
-      .catch(() => {});
-  }, []);
+ useEffect(() => {
+  async function loadPage() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      setSdkInstance(sdk);
+
+      try {
+        const currentUser = await fetchCurrentUserWithSavedListings(sdk);
+
+        setSavedIds(
+          getSavedListingIdsFromUser(currentUser)
+        );
+      } catch {
+        setSavedIds([]);
+      }
+
+      const res = await fetch("/api/listings");
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setListings(data);
+      }
+    } catch (err) {
+      console.error("Listing page load failed:", err);
+    }
+  }
+
+  loadPage();
+}, []);
 
   useEffect(() => {
   async function checkAuth() {
@@ -230,10 +266,7 @@ const title =
   const model = cleanText(listing.model) || "—";
   const serial = cleanText(listing.serialNumber || listing.publicData?.serialNumber || listing.vin || listing.serial) || "Not listed";
   const stockNumber = cleanText(listing.stockNumber || listing.publicData?.stockNumber) || "Not listed";
-  const sellerProfile =
-  listing.author?.profile ||
-  listing.author?.attributes?.profile ||
-  {};
+  const sellerProfile = listing.author?.profile || listing.author?.attributes?.profile || {};
 
 const sellerPublicData =
   sellerProfile.publicData || {};
@@ -327,6 +360,38 @@ function lightboxNext() {
     if (images.length < 2) return;
     setActiveImage((activeImage + 1) % images.length);
   }
+
+async function handleToggleSaved(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (saveBusy) return;
+
+  if (!sdkInstance) {
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+    return;
+  }
+
+  setSaveBusy(true);
+
+  try {
+    const result = await toggleSavedListing({
+      sdk: sdkInstance,
+      listing
+    });
+
+    setSavedIds(result.savedIds);
+  } catch (err) {
+    console.error("Save toggle failed:", err);
+
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+  } finally {
+    setSaveBusy(false);
+  }
+}
+
+const listingId = getListingId(listing);
+const isSaved = savedIds.includes(String(listingId));
 
   return (
     <>
@@ -490,12 +555,14 @@ function lightboxNext() {
     </button>
 
     <button
-      type="button"
-      className={isSaved ? "saved-star" : ""}
-      onClick={toggleSaved}
-    >
-      <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-    </button>
+  type="button"
+  className={isSaved ? "saved-star" : ""}
+  onClick={handleToggleSaved}
+  disabled={saveBusy}
+  aria-label={isSaved ? "Unsave listing" : "Save listing"}
+>
+  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
+</button>
 
     <a href="/browse">← Results</a>
 
