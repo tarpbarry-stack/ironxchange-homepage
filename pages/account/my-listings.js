@@ -2,6 +2,9 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import featureKeywords from "../../lib/featureKeywords";
 
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -412,23 +415,7 @@ if (!response.ok) {
         <title>My Listings | IronXchange</title>
       </Head>
 
-      <nav className="nav">
-        <a href="/" className="logo-wrap">
-          <img
-            src="/images/ironxchange-logo.png"
-            className="logo-img"
-            alt="IronXchange"
-          />
-        </a>
-
-        <div className="nav-links">
-          <a href="/browse">SEARCH</a>
-          <a href="/post-free" className="yellow-link">POST FREE</a>
-          <a href="/account" className="login-icon logged-in" aria-label="Account">
-            <i className="fa-regular fa-user"></i>
-          </a>
-        </div>
-      </nav>
+     <Navbar />
 
       <section className="search-section">
         <h1>My Listings</h1>
@@ -661,6 +648,9 @@ if (!response.ok) {
           </div>
         )}
       </section>
+
+<Footer />
+        
 <style jsx>{`
 * {
   box-sizing: border-box;
