@@ -1645,182 +1645,248 @@ max-height: none;
   display: none;
 }
 
-        @media (max-width: 950px) {
-        .photo-grid {
-  display: block;
+@media (max-width: 950px) {
+  .page {
+    padding: 16px 3.5% 44px;
+  }
+
+  .photo-grid {
+    display: block;
+    margin-top: 10px;
+  }
+
+  .hero-wrap,
+  .photo-rail {
+    display: none;
+  }
+
+  .mobile-gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+
+    padding-bottom: 10px;
+  }
+
+  .mobile-hero {
+    min-width: 78%;
+    height: 390px;
+
+    scroll-snap-align: start;
+
+    background: #111;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.025) inset,
+      0 14px 34px rgba(0,0,0,.18);
+  }
+
+  .mobile-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mobile-pair {
+    min-width: 42vw;
+    height: 390px;
+
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+
+    scroll-snap-align: start;
+  }
+
+  .mobile-pair img {
+    width: 100%;
+    height: 190px;
+
+    object-fit: cover;
+
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 12px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .right-stack {
+    grid-template-rows: auto;
+  }
+
+  .seller-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .seller-actions {
+    min-width: 0;
+    width: 100%;
+  }
 }
 
-.hero-wrap,
-.photo-rail {
-  display: none;
+@media (max-width: 850px) {
+  .logo-img {
+    height: 34px;
+  }
+
+  .nav-links {
+    gap: 18px;
+  }
+
+  .yellow-link {
+    font-size: 12px !important;
+  }
+
+  .login-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .page {
+    padding: 14px 4% 38px;
+  }
+
+  .back-results {
+    margin-bottom: 6px;
+    font-size: 9px;
+  }
+
+  .title-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  .title-row::after {
+    margin-top: 2px;
+  }
+
+  h1 {
+    display: block;
+
+    font-size: 25px;
+    line-height: .96;
+    letter-spacing: -.75px;
+  }
+
+  .title-hours {
+    display: inline-block;
+
+    margin-left: 10px;
+    transform: none;
+
+    font-size: .58em;
+  }
+
+  .price {
+    width: fit-content;
+    height: auto;
+
+    font-size: 21px;
+    line-height: 1;
+  }
+
+  .mobile-gallery {
+    gap: 8px;
+  }
+
+  .mobile-hero {
+    min-width: 86%;
+    height: 310px;
+  }
+
+  .mobile-pair {
+    min-width: 54vw;
+    height: 310px;
+    gap: 8px;
+  }
+
+  .mobile-pair img {
+    height: 151px;
+  }
+
+  .facts-highlights-panel {
+    grid-template-columns: 1fr;
+    padding: 18px 18px;
+  }
+
+  .facts-column {
+    padding-right: 0;
+    padding-bottom: 16px;
+  }
+
+  .facts-column::after {
+    display: none;
+  }
+
+  .highlights-column {
+    padding-left: 0;
+    padding-top: 16px;
+
+    border-top: 1px solid rgba(255,255,255,.09);
+  }
+
+  .facts {
+    grid-template-columns: 86px 1fr;
+    row-gap: 9px;
+  }
+
+  .highlight-chips {
+    justify-content: flex-start;
+    max-height: none;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .mini-tool-tab {
+    padding: 0 12px;
+  }
+
+  .seller-panel {
+    display: grid;
+    gap: 16px;
+  }
+
+  .seller-row {
+    align-items: center;
+  }
+
+  .seller-avatar {
+    width: 138px;
+    height: 74px;
+    flex-basis: 138px;
+  }
+
+  .seller-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .message-btn,
+  .yard-btn,
+  .call-btn {
+    width: 100%;
+    min-width: 0;
+  }
 }
-
-.mobile-gallery {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 10px;
-}
-
-.mobile-hero {
-  min-width: 82%;
-  height: 340px;
-  scroll-snap-align: start;
-  background: #111;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.mobile-hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mobile-pair {
-  min-width: 44vw;
-  height: 340px;
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 10px;
-  scroll-snap-align: start;
-}
-
-.mobile-pair img {
-  width: 100%;
-  height: 165px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-          .info-grid {
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-          .seller-panel {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .seller-actions {
-            min-width: 0;
-            width: 100%;
-          }
-        }
-
-        @media (max-width: 850px) {
-          .logo-img {
-            height: 34px;
-          }
-
-          .nav-links {
-            gap: 18px;
-          }
-
-          .yellow-link {
-            font-size: 12px !important;
-          }
-
-          .login-icon {
-            width: 28px;
-            height: 28px;
-          }
-
-          .page {
-  padding: 16px 4% 40px;
-}
-
-          .title-row {
-  grid-template-columns: 1fr;
-  align-items: start;
-  padding: 16px;
-}
-
-          h1 {
-            font-size: 24px;
-          }
-
-          .price {
-  width: fit-content;
-  min-width: 0;
-  height: 44px;
-  font-size: 18px;
-}
-
-          .photo-actions {
-            left: 12px;
-            bottom: 12px;
-            gap: 12px;
-            font-size: 12px;
-            padding: 10px 12px;
-          }
-
-          .arrow {
-  width: 34px;
-  height: 34px;
-  font-size: 26px;
-  background: rgba(0,0,0,.45);
-}
-
-.facts-highlights-panel {
-  grid-template-columns: 1fr;
-}
-
-.facts-column {
-  padding-right: 0;
-  border-right: none;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-  padding-bottom: 18px;
-}
-
-.facts-column::after {
-  display: none;
-}
-
-.highlights-column {
-  padding-left: 0;
-  padding-top: 4px;
-}
-
-.facts {
-  grid-template-columns: 92px 1fr;
-}
-
-.seller-panel {
-  display: grid;
-  align-items: stretch;
-}
-
-.seller-row {
-  align-items: flex-start;
-}
-          .panel {
-            padding: 20px;
-          }
-
-         .seller-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-
-  gap: 10px;
-
-  min-width: 0;
-  flex-wrap: wrap;
-}
-
-.message-btn {
-  min-width: 138px;
-}
-
-.yard-btn,
-.call-btn {
-  min-width: 104px;
-}
-        }
       `}</style>
     </>
   );
