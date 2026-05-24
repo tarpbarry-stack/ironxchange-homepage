@@ -449,7 +449,7 @@ if (!response.ok) {
           </select>
 
           <a href="/post-free" className="search-btn post-btn">
-            ADD LISTING
+            SEARCH
           </a>
         </div>
 
