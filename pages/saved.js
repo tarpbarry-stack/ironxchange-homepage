@@ -1,6 +1,16 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import ListingCard from "../components/ListingCard";
+
+import {
+  fetchCurrentUserWithSavedListings,
+  getSavedListingIdsFromUser,
+  filterSavedListings
+} from "../lib/savedListings";
+
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
@@ -57,36 +67,52 @@ function slugify(text = "") {
 
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
-  const [savedSlugs, setSavedSlugs] = useState([]);
-
+  const [savedIds, setSavedIds] = useState([]);
+  
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("ironxchangeSaved") || "[]");
-    setSavedSlugs(saved);
+  async function loadSavedPage() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-    fetch("/api/listings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setListings(data);
-      })
-      .catch(() => {});
-  }, []);
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
 
- const savedListings = useMemo(() => {
-  return listings.filter(item => {
+      const currentUser = await fetchCurrentUserWithSavedListings(sdk);
+
+      setSavedIds(
+        getSavedListingIdsFromUser(currentUser)
+      );
+
+      const res = await fetch("/api/listings");
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setListings(data);
+      }
+    } catch (err) {
+      console.error("Saved page load failed:", err);
+      setSavedIds([]);
+    }
+  }
+
+  loadSavedPage();
+}, []);
+
+const savedListings = useMemo(() => {
+  const activeListings = listings.filter(item => {
     const listingStatus =
       item.listingStatus ||
       item.publicData?.listingStatus ||
       item.attributes?.publicData?.listingStatus;
 
-    const isArchived = listingStatus === "archived";
-
-    return (
-      !isArchived &&
-      savedSlugs.includes(slugify(item.title))
-    );
+    return listingStatus !== "archived";
   });
-}, [listings, savedSlugs]);
 
+  return filterSavedListings(activeListings, savedIds);
+}, [listings, savedIds]);
+
+  
   return (
     <>
      <Head>
@@ -98,31 +124,8 @@ export default function SavedListings() {
   />
 </Head>
 
-     <nav className="nav">
-  <a href="/" className="logo-wrap">
-    <img
-      src="/images/ironxchange-logo.png"
-      className="logo-img"
-      alt="IronXchange"
-    />
-  </a>
-
-  <div className="nav-links">
-    <a href="/browse">SEARCH</a>
-
-    <a href="/post-free" className="yellow-link">
-      POST FREE
-    </a>
-
-    <a
-      href="/account"
-      className="login-icon logged-in"
-      aria-label="Account"
-    >
-      <i className="fa-regular fa-user"></i>
-    </a>
-  </div>
-</nav>
+      <Navbar />
+     
 <main>
   <div className="saved-head">
   <div>
@@ -137,30 +140,18 @@ export default function SavedListings() {
     {savedListings.length} SAVED
   </span>
 </div>
-      <div className="cards">
-  {savedListings.map((item) => (
-    <a
-      href={`/listing/${slugify(item.title)}?from=browser`}
-      className="card"
-      key={item.id || item.link || item.title}
-    >
-      <div
-        className="card-photo"
-        style={{
-          backgroundImage: `url(${
-            item.imageUrl ||
-            item.image ||
-            "/images/hero-equipment-yard.jpg"
-          })`
-        }}
-      />
 
-      <div className="card-body">
-        <div className="title-row">
-          <h3>{item.title.replace(item.hours, "").trim()}</h3>
-
-          <h3 className="hours-inline">{item.hours}</h3>
-        </div>
+  <div className="cards">
+  {savedListings.map(item => (
+    <ListingCard
+      key={item.id || item.uuid || item.title}
+      listing={item}
+      saved={true}
+      showSave={false}
+      from="saved"
+    />
+  ))}
+</div>
 
        <p className="feature-line">
   {getFeatureLine(item)}
@@ -182,6 +173,8 @@ export default function SavedListings() {
         )}
       </main>
 
+        <Footer />
+        
       <style jsx>{`
         :global(body) {
           margin: 0;
@@ -189,49 +182,6 @@ export default function SavedListings() {
           background: #0b0b0b;
           color: #d6d6d6;
         }
-
-.nav {
-  height: 64px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 2%;
-  background: #050505;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.logo-img {
-  height: 38px;
-  display: block;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
-}
-
-.yellow-link {
-  color: #FFC400 !important;
-}
-
-.login-icon {
-  border: 2px solid #38A169;
-  color: #38A169 !important;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-}
 
         main {
           padding: 40px 5%;
@@ -274,92 +224,6 @@ export default function SavedListings() {
           grid-template-columns: repeat(4, 1fr);
           gap: 22px;
         }
-
-       .card {
-  text-decoration: none;
-  color: inherit;
-  background: #151515;
-  border: 1px solid #242424;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform .18s ease,
-              border-color .18s ease,
-              background .18s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #3A3A3A;
-  background: #181818;
-}
-
-       .card-photo {
-  height: 190px;
-  background-size: cover;
-  background-position: center;
-  border-bottom: 1px solid #202020;
-}
-
-.card-body {
-  padding: 16px;
-}
-
-.card h3 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 16px;
-  letter-spacing: -0.2px;
-}
-
-.title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.hours-inline {
-  color: #8A8A8A;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  white-space: nowrap;
-}
-
-.feature-line {
-  min-height: 38px;
-  margin: 8px 0 18px;
-  color: #8F8F8F;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
-
-.price-row strong {
-  color: #F2F2F2;
-  font-size: 18px;
-}
-
-.meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #9A9A9A;
-  flex-wrap: wrap;
-}
-
-.meta span {
-  color: #9A9A9A;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .4px;
-}
 
 .empty {
   color: #999;
