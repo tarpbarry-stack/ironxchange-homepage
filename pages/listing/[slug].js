@@ -670,25 +670,15 @@ function lightboxNext() {
   color: #FFC400;
 }
 
-  .title-row {
+.title-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
+  align-items: center;
+
   gap: 18px;
 
-  margin: 0 0 14px;
-  padding: 18px 20px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
-    #101010;
-
-  border: 1px solid rgba(255,255,255,.065);
-  border-radius: 16px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.03) inset,
-    0 18px 44px rgba(0,0,0,.22);
+  margin: 0 0 12px;
+  padding: 0;
 }
 
 .title-row > div:first-child {
@@ -698,53 +688,29 @@ function lightboxNext() {
 h1 {
   margin: 0;
 
-  color: rgba(255,255,255,.92);
+  color: #f2f2f2;
 
-  font-size: clamp(25px, 2.45vw, 38px);
+  font-size: clamp(28px, 2.5vw, 40px);
   font-weight: 950;
+
   letter-spacing: -1px;
   line-height: .98;
+
   text-transform: uppercase;
 }
 
 .title-row p {
-  margin: 9px 0 0;
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .58px;
-  text-transform: uppercase;
+  display: none;
 }
 
 .price {
-  min-width: 158px;
-  height: 54px;
+  color: #f2f2f2;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  font-size: clamp(24px, 2vw, 34px);
+  font-weight: 900;
 
-  padding: 0 16px;
-
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.075), rgba(255,196,0,0)),
-    #151515;
-
-  border: 1px solid rgba(255,196,0,.22);
-  border-radius: 13px;
-
-  color: #FFC400;
-
-  font-size: 20px;
-  font-weight: 950;
-  letter-spacing: -.35px;
+  letter-spacing: -.5px;
   white-space: nowrap;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset,
-    0 14px 34px rgba(0,0,0,.24);
 }
 
         .photo-grid {
