@@ -780,6 +780,8 @@ if (!response.ok) {
   align-items: center;
   justify-content: center;
 
+  margin-left: -10px;
+
   background: #151515;
   color: #FFC400;
 
