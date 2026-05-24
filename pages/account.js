@@ -1,6 +1,9 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 const BRAND_YELLOW = "#FFC400";
 
 function slugify(text = "") {
@@ -379,31 +382,7 @@ const logoUrl =
       </Head>
 
       <main>
-        <nav className="nav">
-          <a href="/" className="logo-wrap">
-            <img
-              src="/images/ironxchange-logo.png"
-              className="logo-img"
-              alt="IronXchange"
-            />
-          </a>
-
-          <div className="nav-links">
-            <a href="/browse">SEARCH</a>
-
-            <a href="/post-free" className="yellow-link">
-              POST FREE
-            </a>
-
-            <button type="button" onClick={handleLogout} className="logout-btn">
-              LOGOUT
-            </button>
-
-            <a href="/account" className="login-icon logged-in" aria-label="Account">
-              <i className="fa-regular fa-user"></i>
-            </a>
-          </div>
-        </nav>
+       </nav>
 
         <section className="dashboard">   
          <aside className="rail">
@@ -826,6 +805,8 @@ const logoUrl =
         </section>
       </main>
 
+</footer>
+                      
       <style jsx>{`
 :global(html),
 :global(body) {
