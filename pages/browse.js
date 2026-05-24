@@ -1960,48 +1960,37 @@ grid-template-columns:
 .sort-select {
   height: 28px;
   width: 64px;
-
   border: 1px solid rgba(255,196,0,.12);
-
-  background-color: #121006;
-  color: rgba(255,255,255,.66);
-
-  padding: 0 20px 0 7px;
-
-  font-size: 8.5px;
-  font-weight: 900;
-
-  margin-right: -1px;
-
   border-radius: 8px 0 0 8px;
   margin-left: 6px;
+  background-color: #121006;
+  color: rgba(255,255,255,.66);
+  padding: 0 20px 0 7px;
+  font-size: 8.5px;
+  font-weight: 900;
+  outline: none;
+  margin-right: -1px;
 }
 
 .clear-btn {
   height: 28px;
   width: 64px;
-
   border: 1px solid rgba(255,196,0,.12);
   border-left: none;
-
+  border-radius: 0 8px 8px 0;
   background: #121006;
   color: rgba(255,255,255,.40);
-
   font-size: 8.5px;
   font-weight: 900;
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  border-radius: 0 8px 8px 0;
 }
 
 .search-top-row select:hover,
-.sort-select:hover,
-.clear-btn:hover {
+.browse-search:hover,
+.range-group:hover {
   background-color: #151515;
 }
 
@@ -2016,8 +2005,8 @@ grid-template-columns:
 .clear-btn:hover {
   background: #1a1400;
   border-color: rgba(255,196,0,.38);
+  color: #FFC400;
 }
-
 .featured {
   padding: 46px 5% 60px;
   background: #0B0B0B;
