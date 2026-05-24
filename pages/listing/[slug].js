@@ -623,7 +623,10 @@ function lightboxNext() {
           color: #d6d6d6;
           font-family: Arial, sans-serif;
         }
-
+        
+        body {
+  line-height: 1.35;
+}
       * {
   box-sizing: border-box;
 
@@ -1387,7 +1390,7 @@ h1 {
   font-size: 12.5px;
   font-weight: 750;
 
-  line-height: 1.22;
+  line-height: 1.16;
 
   overflow-wrap: anywhere;
 }
@@ -1461,7 +1464,7 @@ h1 {
 
   font-size: 14px;
   font-weight: 500;
-  line-height: 1.72;
+  line-height: 1.58;
   letter-spacing: .05px;
 }
 
