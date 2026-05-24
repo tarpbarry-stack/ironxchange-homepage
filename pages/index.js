@@ -362,22 +362,34 @@ export default function Home() {
   color: #d6d6d6;
 }
 
-        .nav {
-  height: 62px;
+.nav {
+  height: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 2.5%;
+
+  padding: 7px 2.5%;
+
   background:
-    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
     #050505;
-  border-bottom: 1px solid rgba(255,255,255,.075);
-  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+
+  border-bottom: 1px solid rgba(255,255,255,.07);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 10px 28px rgba(0,0,0,.28);
 }
 
 .logo-img {
-  height: 40px;
+  height: 36px;
   display: block;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .nav-links a {
@@ -386,15 +398,8 @@ export default function Home() {
   font-weight: 900;
   text-transform: uppercase;
   font-size: 11px;
-  letter-spacing: .5px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
+  letter-spacing: .55px;
+  line-height: 1;
 }
 
 .yellow-link {
@@ -402,18 +407,26 @@ export default function Home() {
 }
 
 .login-icon {
-  border: 1px solid rgba(56,161,105,.75);
-  color: #38A169 !important;
-  border-radius: 50%;
   width: 27px;
   height: 27px;
+
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.025) inset;
+
+  border: 1px solid rgba(56,161,105,.78);
+  border-radius: 50%;
+
+  color: #38A169 !important;
+
+  font-size: 13px !important;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 0 0 1px rgba(255,255,255,.018);
 }
 
-        .login-icon.logged-in {
-  border-color: #38A169;
+.login-icon.logged-in {
+  border-color: rgba(56,161,105,.78);
   color: #38A169 !important;
 }
 
