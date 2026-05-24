@@ -521,7 +521,7 @@ min-height: 365px;
   position: absolute;
   left: 5%;
   right: 5%;
-  bottom: -24px;
+  bottom: -32px;
 
   z-index: 4;
   max-width: 1240px;
