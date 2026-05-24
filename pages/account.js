@@ -1755,7 +1755,8 @@ main {
 .saved-card {
   display: grid;
   grid-template-columns: 148px 1fr;
-
+  align-items: stretch;
+  
   gap: 0;
 
   min-height: 92px;
@@ -1796,13 +1797,15 @@ main {
 }
 
 .saved-card-body {
-  padding: 8px 10px 8px 10px;
+  padding: 8px 10px;
 
   min-width: 0;
+  min-height: 92px;
 
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-self: stretch;
 }
 
 .saved-card-body strong {
