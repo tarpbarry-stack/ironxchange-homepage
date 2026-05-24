@@ -670,49 +670,6 @@ if (!response.ok) {
   color: #D6D6D6;
 }
 
-.nav {
-  height: 64px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 2%;
-  background: #050505;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.logo-img {
-  height: 38px;
-  display: block;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
-}
-
-.yellow-link {
-  color: #FFC400 !important;
-}
-
-.login-icon {
-  border: 2px solid #38A169;
-  color: #38A169 !important;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-}
-
 .search-section {
   padding: 34px 5% 30px;
   background: #0B0B0B;
