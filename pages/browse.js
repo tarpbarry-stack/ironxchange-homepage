@@ -1819,6 +1819,8 @@ grid-template-columns:
 .search-top-row select {
   height: 34px;
 
+   overflow: visible;
+
   border: none;
   border-right: 1px solid rgba(255,255,255,.05);
 
@@ -1868,12 +1870,15 @@ grid-template-columns:
 
 .search-btn {
   height: 34px;
+  width: 100%;
 
   background: #151515;
   color: #FFC400;
 
-  border: none;
-  border-left: 1px solid rgba(255,255,255,.05);
+  border: 1px solid #3a2d00;
+  border-left: 1px solid #2a2a2a;
+
+  border-radius: 7px;
 
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
@@ -1887,10 +1892,7 @@ grid-template-columns:
   box-shadow:
     0 1px 0 rgba(255,255,255,.035) inset;
 
-  transition:
-    transform .14s ease,
-    border-color .14s ease,
-    background .14s ease;
+    margin-left: 4px;
 }
 
 .search-btn:hover {
