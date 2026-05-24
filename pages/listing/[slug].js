@@ -629,15 +629,22 @@ function lightboxNext() {
         }
 
         main {
-          min-height: 100vh;
-          background: #0b0b0b;
-        }
+  min-height: 100vh;
 
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255,196,0,.025),
+      transparent 26%
+    ),
+    #0b0b0b;
+}
         .page {
-          padding: 28px 3%;
-          max-width: 1500px;
-          margin: 0 auto;
-        }
+  padding: 24px 3% 54px;
+
+  max-width: 1500px;
+  margin: 0 auto;
+}
 
         .back-results {
   background: transparent;
@@ -685,11 +692,11 @@ function lightboxNext() {
 .title-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: baseline;
 
   gap: 18px;
 
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   padding: 0;
 }
 
@@ -702,13 +709,16 @@ h1 {
 
   color: #f2f2f2;
 
-  font-size: clamp(28px, 2.5vw, 40px);
+  font-size: clamp(30px, 2.55vw, 42px);
   font-weight: 950;
 
-  letter-spacing: -1px;
-  line-height: .98;
+  letter-spacing: -1.15px;
+  line-height: .92;
 
   text-transform: uppercase;
+
+  display: flex;
+  align-items: baseline;
 }
 
 .title-hours {
@@ -738,7 +748,9 @@ h1 {
   font-size: clamp(24px, 2vw, 34px);
   font-weight: 900;
 
-  letter-spacing: -.5px;
+  letter-spacing: -.7px;
+  line-height: 1;
+
   white-space: nowrap;
 }
 
@@ -1504,30 +1516,45 @@ max-height: none;
 .lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.94);
+
   z-index: 9999;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background: rgba(0,0,0,.94);
+  backdrop-filter: blur(3px);
 }
 
 .lightbox-image {
   max-width: 94vw;
   max-height: 92vh;
+
   object-fit: contain;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 28px 80px rgba(0,0,0,.55);
 }
 
 .lightbox-close {
   position: absolute;
   top: 22px;
   right: 22px;
-  width: 42px;
-  height: 42px;
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid rgba(255,255,255,.08);
   border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,.12);
-  color: white;
-  font-size: 30px;
+
+  background: rgba(20,20,20,.82);
+  color: rgba(255,255,255,.72);
+
+  font-size: 26px;
   cursor: pointer;
 }
 
@@ -1535,14 +1562,26 @@ max-height: none;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,.12);
-  color: white;
-  font-size: 40px;
+
+  width: 42px;
+  height: 92px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+
+  background: rgba(20,20,20,.62);
+  color: rgba(255,255,255,.58);
+
+  font-size: 38px;
+  font-weight: 300;
+
   cursor: pointer;
+}
+
+.lightbox-close:hover,
+.lightbox-arrow:hover {
+  color: #FFC400;
+  border-color: rgba(255,196,0,.24);
 }
 
 .lightbox-arrow.left {
