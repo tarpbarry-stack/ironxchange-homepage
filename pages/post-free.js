@@ -5,6 +5,8 @@ import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+import ListingCard from "../components/ListingCard";
+
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
@@ -12710,6 +12712,23 @@ function handlePhotoDrop(e) {
     ...mapped
   ]);
 }
+
+const previewListing = {
+  id: "preview-listing",
+  title:
+    year && make && model
+      ? `${year} ${make} ${model}`
+      : "Your Machine Preview",
+
+  year,
+  make,
+  model,
+  hours,
+  price: price ? `$${price}` : "Call for price",
+  location: location || "Location not listed",
+  keywords,
+  images: previewImages || [],
+};
   
 return (
   <>
@@ -13016,46 +13035,13 @@ return (
           </section>
 
           <aside className="preview-panel">
-            <div className="card preview-card">
-  <div
-    className="card-photo"
-    style={{
-      backgroundImage: `url(${
-        photos[0]?.url || "/images/hero-equipment-yard.jpg"
-      })`
-    }}
+            <div className="preview-card-wrap">
+  <ListingCard
+    listing={previewListing}
+    showSave={false}
+    from="preview"
   />
-
-  <div className="card-body">
-    <div className="title-row">
-      <h3>
-  {[year, make, model].filter(Boolean).join(" ")}
-</h3>
-
-      <h3 className="hours-inline">
-        {hours ? `${Number(cleanNumber(hours)).toLocaleString()} Hrs` : "Hours"}
-      </h3>
-    </div>
-
-    <p className="feature-line">
-      {selectedKeywords.slice(0, 4).join(" • ")}
-    </p>
-
-        <div className="price-row">
-        <strong>
-          {price ? `$${Number(cleanNumber(price)).toLocaleString()}` : "$0"}
-        </strong>
-
-        <div className="meta">
-          <span>
-  ⌖ {location
-    ? `${location}${stateCode ? `, ${stateCode}` : ""}`
-    : "Location"}
-</span>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 </aside>
         </section>
   <Footer />
@@ -13391,87 +13377,10 @@ return (
     opacity: .75;
   }
 
-  .card {
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid #242424;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #151515;
-    transition: transform .18s ease, border-color .18s ease, background .18s ease;
-  }
-
-  .preview-card {
-    position: sticky;
-    top: 14px;
-  }
-
-  .card-photo {
-    height: 190px;
-    background-size: cover;
-    background-position: center;
-  }
-
-  .card-body {
-    padding: 16px;
-  }
-
-  .title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
-  }
-
-  .card h3 {
-    margin: 0;
-    color: #F2F2F2;
-    font-size: 16px;
-    letter-spacing: -0.2px;
-  }
-
-  .hours-inline {
-    color: #8A8A8A;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .3px;
-    white-space: nowrap;
-  }
-
-  .feature-line {
-    min-height: 38px;
-    margin: 8px 0 18px;
-    color: #8F8F8F;
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .price-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 16px;
-  }
-
-  .price-row strong {
-    color: #F2F2F2;
-    font-size: 18px;
-  }
-
-  .meta {
-    display: flex;
-    gap: 12px;
-    font-size: 12px;
-    color: #9A9A9A;
-    flex-wrap: wrap;
-  }
-
-  .price-row span {
-    color: #9A9A9A;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: .4px;
-  }
+  .preview-card-wrap {
+  width: 300px;
+  max-width: 100%;
+}
 
   @media (max-width: 900px) {
     .page {
