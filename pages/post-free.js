@@ -12724,12 +12724,11 @@ const previewListing = {
   make,
   model,
   hours,
-  price: price ? `$${price}` : "Call for price",
-  location: location || "Location not listed",
-  keywords,
-  images: previewImages || [],
+  price: price ? `$${Number(cleanNumber(price)).toLocaleString()}` : "Call for price",
+  location: stateCode || location || "Location not listed",
+  keywords: selectedKeywords,
+  images: photos.map(photo => photo.url),
 };
-  
 return (
   <>
       <Head>
