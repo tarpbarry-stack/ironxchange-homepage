@@ -531,7 +531,8 @@ function lightboxNext() {
 
           <section className="panel seller-panel">
             <div>
-              <h2>Contact Seller</h2>
+            <span className="seller-eyebrow">IronXchange Seller</span>
+                      <h2>Contact Seller</h2>
 
               <div className="seller-row">
                <div className="seller-avatar">
@@ -1479,6 +1480,32 @@ max-height: none;
   background: #161616;
 }
 
+.seller-eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #FFC400;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: .65px;
+  text-transform: uppercase;
+}
+
+.seller-panel h2 {
+  margin: 0 0 14px;
+
+  color: #f2f2f2;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  letter-spacing: -.25px;
+  text-transform: uppercase;
+}
+
 .lightbox {
   position: fixed;
   inset: 0;
@@ -1584,8 +1611,10 @@ max-height: none;
   border-radius: 14px;
 }
           .info-grid {
-            grid-template-columns: 1fr;
-          }
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
 
           .seller-panel {
             align-items: stretch;
@@ -1621,17 +1650,21 @@ max-height: none;
           }
 
           .title-row {
-            flex-direction: column;
-            gap: 8px;
-          }
+  grid-template-columns: 1fr;
+  align-items: start;
+  padding: 16px;
+}
 
           h1 {
             font-size: 24px;
           }
 
           .price {
-            font-size: 25px;
-          }
+  width: fit-content;
+  min-width: 0;
+  height: 44px;
+  font-size: 18px;
+}
 
           .photo-actions {
             left: 12px;
@@ -1659,9 +1692,26 @@ max-height: none;
   padding-bottom: 18px;
 }
 
+.facts-column::after {
+  display: none;
+}
+
 .highlights-column {
   padding-left: 0;
   padding-top: 4px;
+}
+
+.facts {
+  grid-template-columns: 92px 1fr;
+}
+
+.seller-panel {
+  display: grid;
+  align-items: stretch;
+}
+
+.seller-row {
+  align-items: flex-start;
 }
           .panel {
             padding: 20px;
@@ -1673,8 +1723,15 @@ max-height: none;
           }
 
           .seller-actions {
-            flex-direction: column;
-          }
+  width: 100%;
+  flex-direction: column;
+}
+
+.message-btn,
+.yard-btn,
+.call-btn {
+  width: 100%;
+}
         }
       `}</style>
     </>
