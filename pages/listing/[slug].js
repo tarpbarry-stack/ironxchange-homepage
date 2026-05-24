@@ -1086,56 +1086,71 @@ function lightboxNext() {
   padding-left: 2px;
 }
 
-.facts-highlights-panel h2 {
-  margin-bottom: 16px;
-  font-size: 13px;
-  letter-spacing: .55px;
+.facts-highlights-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: start;
+}
+
+.facts-column {
+  padding-right: 22px;
+  border-right: 1px solid rgba(255,255,255,.12);
+}
+
+.highlights-column {
+  padding-left: 22px;
 }
 
 .facts {
-  grid-template-columns: 96px 1fr;
-  row-gap: 10px;
-  column-gap: 18px;
-  font-size: 13px;
+  display: grid;
+  grid-template-columns: 38% 62%;
+  column-gap: 12px;
+  row-gap: 12px;
+  align-items: baseline;
 }
 
 .facts span {
-  color: rgba(255,255,255,.38);
-  font-size: 10px;
+  color: rgba(255,255,255,.44);
+  font-size: 11px;
   font-weight: 900;
-  letter-spacing: .55px;
+  letter-spacing: .45px;
   text-transform: uppercase;
 }
 
 .facts strong {
-  color: rgba(255,255,255,.76);
-  font-size: 12.5px;
-  font-weight: 650;
+  min-width: 0;
+  color: #ededed;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .highlight-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px 6px;
-  max-height: 128px;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-content: start;
 }
 
 .highlight-chips span {
-  padding: 4px 8px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
-  border: 1px solid rgba(255,255,255,.06);
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,.08);
   border-radius: 999px;
-
-  background: rgba(255,255,255,.025);
-
-  color: rgba(255,255,255,.44);
-
-  font-size: 9.5px;
-  font-weight: 800;
-
-  letter-spacing: .15px;
-  text-transform: lowercase;
+  background: rgba(255,255,255,.035);
+  color: rgba(255,255,255,.58);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
         .highlights li::before {
