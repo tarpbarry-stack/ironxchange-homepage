@@ -412,19 +412,24 @@ export default function Home() {
 
       .hero {
   position: relative;
-  height: 555px;
-  min-height: 555px;
+  height: 505px;
+  min-height: 505px;
+
   background:
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.9),
-      rgba(0, 0, 0, 0.55),
-      rgba(0, 0, 0, 0.18)
+      rgba(0,0,0,.46),
+      rgba(0,0,0,.16),
+      rgba(0,0,0,0)
     ),
     url('/images/hero-equipment-yard.jpg');
+
   background-size: cover;
-  background-position: center 62%;
+
+  background-position: center 74%;
+
   color: white;
+
   overflow: visible;
 }
 
@@ -511,19 +516,25 @@ export default function Home() {
           box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
         }
 
-      .hero-search {
+     .hero-search {
   position: absolute;
   left: 5%;
   right: 5%;
   bottom: -44px;
+
   z-index: 4;
+
   max-width: 1240px;
+
   padding: 14px;
-  background: rgba(5, 5, 5, 0.72);
-  border: 1px solid rgba(255,255,255,0.10);
+
+  background: rgba(8,8,8,.56);
+
+  border: 1px solid rgba(255,255,255,.08);
+
   border-radius: 22px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+
+  box-shadow: 0 18px 44px rgba(0,0,0,.30);
 }
 
         .search-container {
