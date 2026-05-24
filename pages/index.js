@@ -433,9 +433,9 @@ min-height: 365px;
   overflow: visible;
 }
 
-      .hero-content {
+    .hero-content {
   max-width: 760px;
-  padding: 86px 5% 0;
+  padding: 58px 5% 0;
 }
 
         .hero h1 {
@@ -443,15 +443,16 @@ min-height: 365px;
           font-size: clamp(1.95rem, 3.25vw, 2.85rem);
           line-height: 1;
           margin: 0;
-          letter-spacing: 1px;
+          letter-spacing: .5px;
           font-weight: 400;
           max-width: 1000px;
+          text-shadow: 0 3px 18px rgba(0,0,0,.34);
         }
 
         .hero-icons {
           display: flex;
-          gap: 34px;
-          margin: 28px 0 26px;
+          gap: 26px;
+          margin: 22px 0 22px;
           flex-wrap: wrap;
         }
 
@@ -535,24 +536,26 @@ min-height: 365px;
   border-radius: 22px;
 
   box-shadow: 0 18px 44px rgba(0,0,0,.30);
+
+  outline: 1px solid rgba(255,255,255,.025);
 }
 
         .search-container {
           max-width: 1180px;
           display: grid;
          grid-template-columns: minmax(320px, 1fr) 185px 100px;
-          background: #141414;
+          background: rgba(12,12,12,.92);
           border-radius: 10px;
           width: 100%;
           overflow: hidden;
           box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
-          border: 1px solid rgba(255, 255, 255, 0.09);
+          border: 1px solid rgba(255,255,255,.06);
         }
 
         input,
         select {
           padding: 0 12px;
-          height: 40px;
+         height: 38px;
           border: none;
           border-right: 1px solid rgba(255, 255, 255, 0.08);
           font-size: 14px;
@@ -578,7 +581,7 @@ min-height: 365px;
           color: #050505;
           font-family: 'Montserrat', sans-serif;
           font-weight: 900;
-          height: 40px;
+          height: 38px;
           font-size: 11px;
           cursor: pointer;
           letter-spacing: 0.4px;
@@ -586,7 +589,7 @@ min-height: 365px;
 
        .featured {
   min-height: 660px;
-  padding: 76px 5% 60px;
+  padding: 52px 5% 54px;
   background: #0b0b0b;
   color: #d6d6d6;
 }
