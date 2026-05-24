@@ -1796,6 +1796,20 @@ main {
   border-bottom-right-radius: 0;
 }
 
+.saved-card-list .saved-card:only-child {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  align-items: center;
+}
+
+.saved-card-list .saved-card:only-child .saved-card-body {
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10px;
+}
+
 .saved-card-body {
   padding: 8px 10px;
 
