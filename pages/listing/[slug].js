@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
+import { getListingId } from "../../lib/listingFormatters";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -121,35 +122,8 @@ const [activeImage, setActiveImage] = useState(0);
 const [lightboxOpen, setLightboxOpen] = useState(false);
 const [lightboxIndex, setLightboxIndex] = useState(0);
 
-const [isSaved, setIsSaved] = useState(false);
 const [loggedIn, setLoggedIn] = useState(false);
 
-useEffect(() => {
-  if (!slug) return;
-
-  const saved = JSON.parse(
-    localStorage.getItem("ironxchangeSaved") || "[]"
-  );
-
-  setIsSaved(saved.includes(slug));
-}, [slug]);
-
-function toggleSaved() {
-  const saved = JSON.parse(
-    localStorage.getItem("ironxchangeSaved") || "[]"
-  );
-
-  const updated = saved.includes(slug)
-    ? saved.filter((item) => item !== slug)
-    : [...saved, slug];
-
-  localStorage.setItem(
-    "ironxchangeSaved",
-    JSON.stringify(updated)
-  );
-
-  setIsSaved(updated.includes(slug));
-}  
   
  useEffect(() => {
   async function loadPage() {
