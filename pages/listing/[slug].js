@@ -212,9 +212,15 @@ const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
   mobilePairs.push(images.slice(i, i + 2));
   }
 
-  const title =
-  cleanMachineTitle(cleanText(listing.title)) ||
+ const rawTitle =
+  cleanText(listing.title) ||
   "Equipment Listing";
+
+const title =
+  rawTitle
+    .replace(/\s*[-–]?\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "Location not listed";
@@ -349,8 +355,8 @@ function lightboxNext() {
           <div className="title-row">
   <div>
                 
-    <h1>
-  {cleanMachineTitle(title)}
+  <h1>
+  {title}
 
   <span className="title-hours">
     {hours}
