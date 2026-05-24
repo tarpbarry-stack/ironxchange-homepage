@@ -13057,6 +13057,16 @@ return (
     color: #D6D6D6;
   }
 
+main {
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255,196,0,.03),
+      transparent 28%
+    ),
+    #0B0B0B;
+}
+
  .page {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -13087,6 +13097,7 @@ return (
     background: transparent;
     border: none;
     padding: 0;
+    padding-top: 2px;
 
     position: sticky;
     top: 82px;
@@ -13097,6 +13108,19 @@ return (
   .preview-card-wrap {
   width: 300px;
   max-width: 100%;
+
+  padding: 10px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #101010;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 18px 44px rgba(0,0,0,.24);
 }
 
   .section-head {
@@ -13265,6 +13289,13 @@ textarea:focus {
     inset 0 0 0 1px rgba(255,196,0,.16);
   }
 
+  .photos-panel,
+.keywords-panel,
+textarea,
+.submit-btn {
+  margin-top: 18px;
+}
+
  .photos-panel {
   margin-top: 18px;
 
@@ -13405,10 +13436,37 @@ textarea:focus {
     background: #555;
   }
 
-  .photo-thumb {
-    position: relative;
-    cursor: grab;
-  }
+ .photo-thumb {
+  position: relative;
+
+  aspect-ratio: 1 / 1;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  background: #111;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 12px 28px rgba(0,0,0,.18);
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    box-shadow .14s ease;
+}
+
+.photo-thumb:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(255,196,0,.18);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 16px 36px rgba(0,0,0,.24);
+}
 
   .photo-thumb:active {
     cursor: grabbing;
@@ -13430,38 +13488,72 @@ textarea:focus {
   }
 
   .hero-badge {
-    position: absolute;
-    top: 7px;
-    left: 7px;
-    background: ${BRAND_YELLOW};
-    color: #050505;
-    font-size: 9px;
-    font-weight: 900;
-    padding: 4px 7px;
-    border-radius: 999px;
-    z-index: 2;
-    letter-spacing: .4px;
-  }
+  position: absolute;
+
+  top: 8px;
+  left: 8px;
+
+  height: 20px;
+
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.16),
+      rgba(255,196,0,0)
+    ),
+    #1a1400;
+
+  border: 1px solid rgba(255,196,0,.34);
+
+  color: #FFC400;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  display: inline-flex;
+  align-items: center;
+}
 
   .delete-photo-btn {
-    position: absolute;
-    top: 7px;
-    right: 7px;
-    width: 22px;
-    height: 22px;
-    border: none;
-    background: #B91C1C;
-    color: white;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 900;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    z-index: 3;
-  }
+  position: absolute;
+
+  top: 8px;
+  right: 8px;
+
+  width: 20px;
+  height: 20px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(0,0,0,.58);
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    background .14s ease,
+    color .14s ease;
+}
+
+.delete-photo-btn:hover {
+  background: rgba(140,0,0,.82);
+  color: white;
+}
 
  .keyword-search {
   width: 100%;
@@ -13529,6 +13621,23 @@ textarea:focus {
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.025) inset;
+
+    .keyword-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.keyword-grid::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+
+.keyword-grid::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.10);
+  border-radius: 999px;
+}
+
+.keyword-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,196,0,.24);
+}
 }
 
   .keyword-chip {
