@@ -722,6 +722,9 @@ h1 {
   letter-spacing: -.2px;
 
   white-space: nowrap;
+
+  display: inline-block;
+  transform: translateX(32px);
 }
 
 
