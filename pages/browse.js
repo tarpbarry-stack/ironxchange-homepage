@@ -2016,21 +2016,32 @@ grid-template-columns:
 .section-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 24px;
+  align-items: center;
+
+  margin-bottom: 22px;
 }
 
 .section-head h2 {
   margin: 0;
+
   color: #F2F2F2;
-  font-size: 22px;
-  letter-spacing: -0.2px;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  letter-spacing: -.25px;
+
+  text-transform: uppercase;
 }
 
 .section-head span {
-  color: #888;
-  font-size: 13px;
-  font-weight: 700;
+  color: rgba(255,255,255,.36);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: .55px;
+  text-transform: uppercase;
 }
 
 .browse-grid {
