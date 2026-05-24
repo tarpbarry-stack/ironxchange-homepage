@@ -3,6 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+
 const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
@@ -330,31 +333,7 @@ function lightboxNext() {
       </Head>
 
       <main>
-        <nav className="nav">
-  <a href="/" className="logo-wrap">
-    <img
-      src="/images/ironxchange-logo.png"
-      className="logo-img"
-      alt="IronXchange"
-    />
-  </a>
-
-  <div className="nav-links">
-    <a href="/browse">SEARCH</a>
-
-    <a href="/post-free" className="yellow-link">
-      POST FREE
-    </a>
-
-    <a
-      href="/account"
-      className="login-icon logged-in"
-      aria-label="Account"
-    >
-      <i className="fa-regular fa-user"></i>
-    </a>
-  </div>
-</nav>
+       <Navbar />
 
         <section className="page">
                 {cameFromBrowse && (
@@ -601,6 +580,8 @@ function lightboxNext() {
   
   </main>
 
+  <Footer />
+  
       <style jsx>{`
         :global(body) {
           margin: 0;
