@@ -1875,17 +1875,27 @@ grid-template-columns:
   border: none;
   border-left: 1px solid rgba(255,255,255,.05);
 
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
   font-size: 9px;
-  font-weight: 950;
 
   cursor: pointer;
 
-  letter-spacing: .5px;
+  letter-spacing: .55px;
   text-transform: uppercase;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease;
 }
+
 .search-btn:hover {
   background: #1a1400;
-  color: #FFC400;
+  border-color: #FFC400;
 }
 
 .filter-strip {
