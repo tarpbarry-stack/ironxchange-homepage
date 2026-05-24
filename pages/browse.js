@@ -1702,7 +1702,11 @@ const isArchived = listingStatus === "archived";
           </span>
         </div>
 
-<div className="browse-grid">
+<div
+  className={`browse-grid ${
+    filteredListings.length === 1 ? "single-card" : ""
+  }`}
+>
   {filteredListings.map((item) => {
     const id = String(getListingId(item));
 
@@ -1967,6 +1971,11 @@ const isArchived = listingStatus === "archived";
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 22px;
+}
+
+.browse-grid.single-card {
+  grid-template-columns: minmax(250px, 300px);
+  justify-content: center;
 }
 
 .empty {
