@@ -382,7 +382,8 @@ const logoUrl =
       </Head>
 
       <main>
-       </nav>
+            
+     <Navbar />
 
         <section className="dashboard">   
          <aside className="rail">
@@ -805,7 +806,7 @@ const logoUrl =
         </section>
       </main>
 
-</footer>
+<Footer />
                       
       <style jsx>{`
 :global(html),
@@ -1888,39 +1889,15 @@ main {
 
 @media (max-width: 1180px) {
   .main-grid {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-
-  .dashboard-search {
-    grid-template-columns: minmax(0, 1fr) 76px;
-  }
-
-.listing-op-controls {
-  grid-template-columns: 96px 74px 52px 68px 70px 48px 48px;
-  gap: 8px;
-}
-
-.listing-op-head {
-  grid-template-columns: 104px 96px 74px 52px 68px 70px 48px 48px;
-  gap: 8px;
-}
-}
-
-/* MOBILE */
-
-@media (max-width: 700px) {
-  .dashboard {
     grid-template-columns: 1fr;
-    padding: 10px 3% 40px;
-    height: auto;
-    min-height: calc(100vh - 60px);
+    grid-template-rows: auto;
     overflow: visible;
   }
 
-  :global(html),
-  :global(body) {
+  .dashboard {
     height: auto;
-    overflow-y: auto;
+    min-height: calc(100vh - 64px);
+    overflow: visible;
   }
 
   main {
@@ -1929,15 +1906,54 @@ main {
     overflow-y: auto;
   }
 
+  .right-stack {
+    grid-template-rows: auto;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .content,
+  .main-grid,
+  .left-column,
+  .listings-panel,
+  .right-stack,
+  .side-panel {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .listing-table,
+  .activity-list,
+  .activity-log,
+  .saved-card-list {
+    max-height: none;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 10px 3% 40px;
+    gap: 10px;
+  }
+
   .mobile-rail-menu summary {
     list-style: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     background: #101010;
     border: 1px solid #2A2A2A;
     border-radius: 12px;
+
     padding: 12px 14px;
+
     color: #F2F2F2;
     font-size: 12px;
     font-weight: 900;
@@ -1953,149 +1969,24 @@ main {
     margin-bottom: 10px;
   }
 
-  .mobile-rail-menu {
-    width: 100%;
-  }
-
   .rail {
     padding: 0;
     background: transparent;
     border: none;
   }
 
-  .mobile-rail-menu a {
+  .rail-top {
+    background: #111;
+    border: 1px solid #252525;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+
+  .rail a {
     min-height: 42px;
-  }
-
-  .rail,
-  .content,
-  .main-grid,
-  .left-column,
-  .listings-panel,
-  .right-stack,
-  .side-panel,
-  .performance-panel {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .content,
-  .main-grid,
-  .left-column,
-  .right-stack {
-    overflow: visible;
-  }
-
-  .listing-table,
-  .activity-list,
-  .activity-log,
-  .saved-card-list {
-    max-height: none;
-  }
-
-  .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .perf-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .main-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .nav-links a:not(.yellow-link):not(.login-icon),
-  .logout-btn {
-    display: none;
-  }
-
-  .listing-op-head {
-    display: none;
-  }
-
-  .listing-op-row {
-    grid-template-columns: 110px minmax(0, 1fr);
-    grid-template-areas:
-      "photo title"
-      "photo controls";
-    border: 1px solid #2A2A2A;
-    border-radius: 14px;
-    background: #101010;
-    margin-bottom: 10px;
-  }
-
-  .machine-photo-link img {
-    width: 110px;
-    height: 86px;
-    border-radius: 10px;
-  }
-
-  .machine-title-line {
-    font-size: 14px;
-    align-self: start;
-  }
-
-  .listing-op-controls {
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-  }
-
-  .listing-hours {
-    font-size: 11px;
-  }
-
-  .price-input,
-  .action-select {
-    height: 34px;
-    font-size: 11px;
-  }
-
-  .right-stack {
-    grid-template-rows: auto auto auto;
-  }
-
-  .side-panel {
-    min-height: auto;
-  }
-
-  .saved-card-list {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .saved-card {
-    min-width: 220px;
-    grid-template-columns: 1fr;
-    flex: 0 0 220px;
-  }
-
-  .saved-card img {
-    width: 100%;
-    height: 120px;
-  }
-
-  .saved-card-body {
-    padding: 8px;
-  }
-}
-
-@media (max-width: 650px) {
-  .nav {
-    height: 60px;
-    padding: 8px 4%;
-  }
-
-  .logo-img {
-    height: 34px;
+    background: #111;
+    border: 1px solid #252525;
+    margin-bottom: 6px;
   }
 
   .top-tools {
@@ -2112,12 +2003,116 @@ main {
   }
 
   .dashboard-search input {
+    height: 38px;
     border-right: none;
     border-bottom: 1px solid #2A2A2A;
   }
 
   .dashboard-search button {
-    padding: 10px;
+    height: 36px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .main-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .listing-op-head {
+    display: none;
+  }
+
+  .listing-op-row {
+    grid-template-columns: 112px minmax(0, 1fr);
+    grid-template-areas:
+      "photo title"
+      "photo controls";
+
+    gap: 8px 10px;
+
+    border: 1px solid #2A2A2A;
+    border-radius: 14px;
+    background: #101010;
+
+    margin-bottom: 10px;
+    padding: 8px;
+  }
+
+  .machine-photo-link img {
+    width: 112px;
+    height: 88px;
+    border-radius: 10px;
+  }
+
+  .machine-title-line {
+    font-size: 13px;
+    align-self: end;
+  }
+
+  .listing-op-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .listing-hours,
+  .listing-metric {
+    padding-left: 0;
+    font-size: 10px;
+  }
+
+  .price-input,
+  .action-select {
+    width: 100%;
+    height: 34px;
+  }
+
+  .listing-status-stack {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .listing-status,
+  .listing-delete-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .saved-card-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .saved-card {
+    min-width: 220px;
+    grid-template-columns: 1fr;
+    flex: 0 0 220px;
+  }
+
+  .saved-card img {
+    width: 100%;
+    height: 120px;
+  }
+
+  .perf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .nav-links a:not(.yellow-link):not(.login-icon),
+  .logout-btn {
+    display: none;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
   }
 }
 `}</style>
