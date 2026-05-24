@@ -873,7 +873,7 @@ if (!response.ok) {
   height: 38px;
   width: 92px;
   border: 1px solid rgba(255,196,0,.12);
-  border-radius: 8px 0 0 8px;
+ border-radius: 0;
   margin-left: 6px;
   background-color: #121006;
   color: rgba(255,255,255,.66);
