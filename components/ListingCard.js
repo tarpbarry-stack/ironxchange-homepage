@@ -146,20 +146,27 @@ export default function ListingCard({
   border-color: rgba(255,196,0,.14);
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.038),
+      rgba(255,255,255,0)
+    ),
     #171717;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.06) inset,
     0 22px 52px rgba(0,0,0,.30);
 }
-
 .card-photo {
   position: relative;
+
   height: 196px;
+
   background-size: cover;
   background-position: center;
+
   border-bottom: 1px solid rgba(255,255,255,.065);
+
   overflow: hidden;
 
   box-shadow:
@@ -178,7 +185,6 @@ export default function ListingCard({
 
   transform: scale(1.018);
 }
-
 .card-photo-nav {
   position: absolute;
   top: 92%;
