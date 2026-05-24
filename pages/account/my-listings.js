@@ -398,8 +398,13 @@ if (!response.ok) {
   return (
     <>
       <Head>
-        <title>My Listings | IronXchange</title>
-      </Head>
+  <title>My Listings | IronXchange</title>
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</Head>
 
      <Navbar />
 
