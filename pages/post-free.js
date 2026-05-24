@@ -12433,6 +12433,7 @@ export default function PostFreePage() {
   const [hours, setHours] = useState("");
   const [price, setPrice] = useState("");
   const [stockNumber, setStockNumber] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
   const [location, setLocation] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [description, setDescription] = useState("");
@@ -12836,14 +12837,27 @@ return (
               </label>
 
                     <label>
-  <span>Stock #</span>
+  <div className="wide serial-stock-grid">
+  <label>
+    <span>Serial #</span>
 
-  <input
-    value={stockNumber}
-    onChange={e => setStockNumber(e.target.value)}
-    placeholder="IX-1024"
-  />
-</label>
+    <input
+      value={serialNumber}
+      onChange={e => setSerialNumber(e.target.value)}
+      placeholder="CAT00D6TABC12345"
+    />
+  </label>
+
+  <label>
+    <span>Stock #</span>
+
+    <input
+      value={stockNumber}
+      onChange={e => setStockNumber(e.target.value)}
+      placeholder="IX-1024"
+    />
+  </label>
+</div>
 
            <div className="wide location-grid">
   <label>
@@ -13291,6 +13305,12 @@ textarea:focus {
      box-shadow:
     inset 0 0 0 1px rgba(255,196,0,.16);
   }
+
+  .serial-stock-grid {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 10px;
+}
 
   .photos-panel,
 .keywords-panel,
