@@ -415,33 +415,47 @@ function lightboxNext() {
   ))}
 </div>
 </div>
-          <section className="info-grid">
-            <div className="panel">
-              <h2>Quick Facts</h2>
+          <div className="panel facts-highlights-panel">
+  <div className="facts-column">
+    <h2>Quick Facts</h2>
 
-              <div className="facts">
-                <span>Year</span>
-                <strong>{year}</strong>
+    <div className="facts">
+      <span>Year</span>
+      <strong>{year}</strong>
 
-                <span>Make</span>
-                <strong>{make}</strong>
+      <span>Make</span>
+      <strong>{make}</strong>
 
-                <span>Model</span>
-                <strong>{model}</strong>
+      <span>Model</span>
+      <strong>{model}</strong>
 
-                <span>Hours</span>
-                <strong>{hours}</strong>
+      <span>Hours</span>
+      <strong>{hours}</strong>
 
-               <span>Stock #</span>
-              <strong>{serial}</strong>
+      <span>Serial #</span>
+      <strong>{serial}</strong>
 
-                <span>Location</span>
-                <strong>{location}</strong>
+      <span>Stock #</span>
+      <strong>{stockNumber}</strong>
 
-                <span>Seller</span>
-                <strong>{sellerName}</strong>
-              </div>
-            </div>
+      <span>Location</span>
+      <strong>{location}</strong>
+
+      <span>Seller</span>
+      <strong>{sellerName}</strong>
+    </div>
+  </div>
+
+  <div className="highlights-column">
+    <h2>Highlights</h2>
+
+    <div className="highlight-chips">
+      {displayHighlights.map((item) => (
+        <span key={item}>{String(item).toLowerCase()}</span>
+      ))}
+    </div>
+  </div>
+</div>
 
            <div className="right-stack">
 <div className="mini-tool-tab">
@@ -490,15 +504,7 @@ function lightboxNext() {
     <button disabled>Next →</button>
   )}
 </div>
-  <div className="panel">
-    <h2>Highlights</h2>
-
-    <ul className="highlights">
-      {displayHighlights.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  </div>
+  
 </div>
           </section>
 
