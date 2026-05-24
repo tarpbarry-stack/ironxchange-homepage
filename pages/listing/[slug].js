@@ -1045,44 +1045,60 @@ h1 {
     0 1px 0 rgba(255,255,255,.03) inset;
 }
 
-.mini-tool-tab button:first-child {
-  margin-left: 18px;
+.mini-tool-tab a,
+.mini-tool-tab button {
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: transparent;
+  border: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: rgba(255,255,255,.58) !important;
+
+  text-decoration: none !important;
+
+  font-size: 10px;
+  font-weight: 850;
+
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  transition:
+    color .14s ease,
+    transform .14s ease;
 }
 
-.mini-tool-tab button:nth-child(2),
-.mini-tool-tab {
-  height: 38px;
-
-  padding: 0 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
-    #111;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 12px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.03) inset;
+.mini-tool-tab a:visited {
+  color: rgba(255,255,255,.58) !important;
 }
 
 .mini-tool-tab a:hover,
 .mini-tool-tab button:hover {
-  color: #FFC400;
+  color: #FFC400 !important;
   transform: translateY(-1px);
-}
-
-.mini-tool-tab button:nth-child(4),
-.mini-tool-tab button:nth-child(5) {
-  transform: translateX(-24px);
 }
 
 .mini-tool-tab i {
   font-size: 11px;
+}
+
+.saved-star {
+  color: #FFC400 !important;
+}
+
+.mini-tool-tab button:disabled {
+  opacity: .28;
+  cursor: default;
 }
 
 .right-stack .panel {
