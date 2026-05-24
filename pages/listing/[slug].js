@@ -1133,10 +1133,11 @@ function lightboxNext() {
 }
 
 .highlight-chips {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
   gap: 8px;
-  align-content: start;
 }
 
 .highlight-chips span {
