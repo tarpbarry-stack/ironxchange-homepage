@@ -41,6 +41,18 @@ export default function ListingCard({
     }
   }
 
+const keywords = Array.isArray(listing?.keywords)
+  ? listing.keywords
+  : Array.isArray(listing?.publicData?.keywords)
+    ? listing.publicData.keywords
+    : [];
+
+const normalizedKeywords = keywords
+  .filter(Boolean)
+  .map((k) => String(k).trim().toLowerCase())
+  .slice(0, 8);
+
+  
   return (
     <a href={getListingHref(listing, from)} className="card">
       <div
@@ -84,7 +96,13 @@ export default function ListingCard({
           <h3 className="hours-inline">{formatHours(listing.hours)}</h3>
         </div>
 
-        <p className="feature-line">{getFeatureLine(listing)}</p>
+       <div className="keyword-row">
+  {normalizedKeywords.map((keyword, index) => (
+    <span key={`${keyword}-${index}`} className="keyword-chip">
+      {keyword}
+    </span>
+  ))}
+</div>
 
        <div className="price-row">
   <strong>{listing.price || "Call for price"}</strong>
@@ -283,18 +301,39 @@ export default function ListingCard({
   white-space: nowrap;
 }
 
-.feature-line {
-  min-height: 36px;
-  margin: 8px 0 16px;
+.keyword-row {
+  min-height: 42px;
+  max-height: 42px;
 
- color: rgba(255,255,255,.42);
+  margin: 8px 0 14px;
 
-  font-size: 12.75px;
-  font-weight: 450;
-  line-height: 1.32;
-  letter-spacing: .08px;
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 5px 6px;
+
+  overflow: hidden;
 }
 
+.keyword-chip {
+  padding: 3px 6px;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.025);
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 9.5px;
+  font-weight: 750;
+
+  line-height: 1;
+
+  letter-spacing: .15px;
+
+  text-transform: lowercase;
+}
 .price-row {
   display: flex;
   justify-content: space-between;
