@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
+import Footer from "../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -340,37 +341,7 @@ export default function Home() {
 </a>
 </section>
 
-<footer id="about">
-  <div>
-    <img src="/images/ironxchange-logo.png" alt="IronXchange" />
-    <p>© 2026 IronXchange. All rights reserved.</p>
-  </div>
-
-  <div className="foot-cols">
-    <div>
-      <h4>MARKETPLACE</h4>
-
-      <a href="/browse">Browse Equipment</a>
-
-      <a href="/post-free">Post Equipment</a>
-    </div>
-
-          <div>
-            <h4>COMPANY</h4>
-            <a href="/contact">Contact</a>
-          </div>
-
-          <div>
-            <h4>LEGAL</h4>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
-              Privacy
-            </a>
-            <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
-              Terms
-            </a>
-          </div>
-        </div>
-      </footer>
+<Footer />
 
       <style jsx>{`
         * {
