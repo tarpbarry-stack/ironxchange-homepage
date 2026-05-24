@@ -363,24 +363,30 @@ export default function Home() {
 }
 
         .nav {
-  height: 64px;
+  height: 62px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 2%;
-  background: #050505;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 8px 2.5%;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),
+    #050505;
+  border-bottom: 1px solid rgba(255,255,255,.075);
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
 }
 
 .logo-img {
-  height: 38px;
+  height: 40px;
   display: block;
 }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.nav-links a {
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: .5px;
 }
 
 .nav-links a {
@@ -396,13 +402,14 @@ export default function Home() {
 }
 
 .login-icon {
-  border: 2px solid #38A169;
+  border: 1px solid rgba(56,161,105,.75);
   color: #38A169 !important;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
   display: grid;
   place-items: center;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.025) inset;
 }
 
         .login-icon.logged-in {
