@@ -516,26 +516,47 @@ min-height: 365px;
         }
 
         .btn-primary,
-        .ready a {
-          display: inline-block;
-          background: ${BRAND_YELLOW};
-          color: black;
-          padding: 15px 28px;
-          border-radius: 7px;
-          text-decoration: none;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 13px;
-          font-weight: 900;
-          letter-spacing: 0.5px;
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-          transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
+.ready a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-        .btn-primary:hover,
-        .ready a:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
-        }
+  height: 38px;
+  padding: 0 16px;
+
+  background: #151515;
+  color: #FFC400;
+
+  border: 1px solid #3a2d00;
+  border-radius: 8px;
+
+  text-decoration: none;
+
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 10px 24px rgba(0,0,0,.22);
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease;
+}
+
+.btn-primary:hover,
+.ready a:hover {
+  transform: translateY(-1px);
+
+  background: #1a1400;
+
+  border-color: #FFC400;
+}
 
      .hero-search {
   position: absolute;
