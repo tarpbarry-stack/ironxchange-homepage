@@ -91,45 +91,6 @@ export default function DiscoveryEngine() {
     }
   }
 
-  function seedTargets() {
-    const seeded = [
-      {
-        company: "HOLT CAT",
-        website: "https://www.holtcat.com",
-        category: "Heavy Equipment",
-        state: "TX"
-      },
-      {
-        company: "Warren CAT",
-        website: "https://www.warrencat.com",
-        category: "Heavy Equipment",
-        state: "TX"
-      },
-      {
-        company: "Kirby-Smith",
-        website: "https://www.kirby-smith.com",
-        category: "Heavy Equipment",
-        state: "OK"
-      },
-      {
-        company: "RDO Equipment",
-        website: "https://www.rdoequipment.com",
-        category: "Heavy Equipment",
-        state: "ND"
-      },
-      {
-        company: "Bobcat of Dallas",
-        website: "https://www.bobcatofdallas.com",
-        category: "Compact Equipment",
-        state: "TX"
-      }
-    ];
-
-    saveTargets(seeded);
-
-    setStatus(`Seeded ${seeded.length} discovery targets.`);
-  }
-
   function clearTargets() {
     localStorage.removeItem("ixiDiscoveryTargets");
 
@@ -234,38 +195,42 @@ export default function DiscoveryEngine() {
             style={inputStyle}
             placeholder="Company name"
             value={company}
-            onChange={(event) => setCompany(event.target.value)}
+            onChange={(event) =>
+              setCompany(event.target.value)
+            }
           />
 
           <input
             style={inputStyle}
             placeholder="Website URL"
             value={website}
-            onChange={(event) => setWebsite(event.target.value)}
+            onChange={(event) =>
+              setWebsite(event.target.value)
+            }
           />
 
           <input
             style={inputStyle}
             placeholder="Category"
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
+            onChange={(event) =>
+              setCategory(event.target.value)
+            }
           />
 
           <input
             style={inputStyle}
             placeholder="State"
             value={state}
-            onChange={(event) => setState(event.target.value)}
+            onChange={(event) =>
+              setState(event.target.value)
+            }
           />
         </div>
 
         <div style={buttonRow}>
           <button style={buttonStyle} onClick={addTarget}>
             Add Target
-          </button>
-
-          <button style={buttonStyle} onClick={seedTargets}>
-            Seed Starter Targets
           </button>
 
           <button
@@ -302,12 +267,17 @@ export default function DiscoveryEngine() {
             Export Targets
           </button>
 
-          <button style={dangerButton} onClick={clearTargets}>
+          <button
+            style={dangerButton}
+            onClick={clearTargets}
+          >
             Clear Targets
           </button>
         </div>
 
-        {status && <p style={statusStyle}>{status}</p>}
+        {status && (
+          <p style={statusStyle}>{status}</p>
+        )}
       </section>
 
       {targets.length > 0 && (
@@ -327,10 +297,21 @@ export default function DiscoveryEngine() {
             <tbody>
               {targets.map((target, index) => (
                 <tr key={index}>
-                  <td style={cellStyle}>{target.company}</td>
-                  <td style={cellStyle}>{target.website}</td>
-                  <td style={cellStyle}>{target.category}</td>
-                  <td style={cellStyle}>{target.state}</td>
+                  <td style={cellStyle}>
+                    {target.company}
+                  </td>
+
+                  <td style={cellStyle}>
+                    {target.website}
+                  </td>
+
+                  <td style={cellStyle}>
+                    {target.category}
+                  </td>
+
+                  <td style={cellStyle}>
+                    {target.state}
+                  </td>
                 </tr>
               ))}
             </tbody>
