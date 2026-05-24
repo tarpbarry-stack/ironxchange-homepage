@@ -1746,21 +1746,26 @@ const isArchived = listingStatus === "archived";
 }
 
 .browse-search-shell {
-  max-width: 760px;
-  margin: 22px auto 0;
-  padding: 9px;
+  max-width: 690px;
+
+  margin: 18px auto 0;
+
+  padding: 7px;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.035),
+      rgba(255,196,0,0)
+    ),
     rgba(8,8,8,.72);
 
-  border: 1px solid rgba(255,255,255,.07);
-  outline: 1px solid rgba(255,255,255,.02);
-  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.045);
+
+  border-radius: 14px;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 18px 44px rgba(0,0,0,.28);
+    0 12px 30px rgba(0,0,0,.24);
 }
 
 .search-section {
@@ -1788,34 +1793,44 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-top-row {
-   max-width: none;
-  margin: 0 0 7px;
-  
+  margin: 0 0 6px;
+
   display: grid;
-  grid-template-columns: 220px 140px 112px 112px 82px;
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
-    #111;
+  grid-template-columns:
+    180px
+    118px
+    94px
+    94px
+    66px;
 
-  border: 1px solid rgba(255,255,255,.065);
-  outline: 1px solid rgba(255,255,255,.018);
+  background: #111;
 
-  border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.045);
+
+  border-radius: 10px;
+
   overflow: hidden;
 
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 18px 44px rgba(0,0,0,.28);
-
-  min-height: 38px;
+  min-height: 34px;
 }
 
 .browse-search,
 .search-top-row select {
-  height: 38px;
-  padding: 0 10px;
-  font-size: 11.5px;
+  height: 34px;
+
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.05);
+
+  padding: 0 9px;
+
+  background: #111;
+  color: rgba(255,255,255,.74);
+
+  font-size: 10.5px;
+  font-weight: 700;
+
+  outline: none;
 }
 
 .browse-search::placeholder {
@@ -1852,24 +1867,22 @@ const isArchived = listingStatus === "archived";
 }
 
 .search-btn {
-  height: 38px;
-  font-size: 9.5px;
+  height: 34px;
 
   background: #151515;
   color: #FFC400;
 
   border: none;
-  border-left: 1px solid rgba(255,255,255,.07);
+  border-left: 1px solid rgba(255,255,255,.05);
 
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 950;
+
   cursor: pointer;
-  letter-spacing: .55px;
+
+  letter-spacing: .5px;
   text-transform: uppercase;
-
-  box-shadow: 0 1px 0 rgba(255,255,255,.035) inset;
 }
-
 .search-btn:hover {
   background: #1a1400;
   color: #FFC400;
@@ -1932,39 +1945,33 @@ const isArchived = listingStatus === "archived";
 }
 
 .sort-select {
-  height: 30px;
-  width: 118px;
+  height: 28px;
+  width: 64px;
 
-  border: 1px solid rgba(255,255,255,.075);
-  border-radius: 0;
+  border: 1px solid rgba(255,196,0,.12);
 
-  background-color: #101010;
-  color: rgba(255,255,255,.70);
+  background-color: #121006;
+  color: rgba(255,255,255,.66);
 
-  padding: 0 30px 0 9px;
+  padding: 0 20px 0 7px;
 
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 900;
-
-  outline: none;
 
   margin-right: -1px;
 }
 
 .clear-btn {
-  height: 30px;
-  width: 52px;
+  height: 28px;
+  width: 64px;
 
-  border: 1px solid rgba(255,255,255,.075);
+  border: 1px solid rgba(255,196,0,.12);
   border-left: none;
 
-  border-radius: 0 8px 8px 0;
-
   background: #121006;
-  border-color: rgba(255,196,0,.14);
-  color: rgba(255,255,255,.42);
+  color: rgba(255,255,255,.40);
 
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 900;
 
   cursor: pointer;
