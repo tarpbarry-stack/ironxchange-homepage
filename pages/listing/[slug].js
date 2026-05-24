@@ -991,6 +991,11 @@ function lightboxNext() {
           letter-spacing: 0.4px;
         }
 
+        .facts-column h2,
+.highlights-column h2 {
+  text-align: center;
+}
+
         .video-panel {
   height: 100%;
 }
