@@ -1002,7 +1002,8 @@ function lightboxNext() {
 .video-box {
   position: relative;
 
-  aspect-ratio: 16 / 9;
+  height: 210px;
+  max-height: 210px;
 
   overflow: hidden;
 
