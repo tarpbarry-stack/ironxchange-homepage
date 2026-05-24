@@ -1,8 +1,17 @@
 function extractEmails(text) {
-  const matches =
+  const normalEmails =
     text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
 
-  return [...new Set(matches)].filter((email) => {
+  const obfuscatedEmails = text
+    .replace(/\s*\[at\]\s*/gi, "@")
+    .replace(/\s*\(at\)\s*/gi, "@")
+    .replace(/\s+at\s+/gi, "@")
+    .replace(/\s*\[dot\]\s*/gi, ".")
+    .replace(/\s*\(dot\)\s*/gi, ".")
+    .replace(/\s+dot\s+/gi, ".")
+    .match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+
+  return [...new Set([...normalEmails, ...obfuscatedEmails])].filter((email) => {
     const lower = email.toLowerCase();
 
     const blocked = [
@@ -13,7 +22,9 @@ function extractEmails(text) {
       "no-reply",
       "privacy@",
       "support@wordpress",
-      "domain.com"
+      "domain.com",
+      "email.com",
+      "yourname@"
     ];
 
     return !blocked.some((bad) => lower.includes(bad));
@@ -57,12 +68,15 @@ function extractContacts(html) {
       lower.includes("rental") ||
       lower.includes("service") ||
       lower.includes("parts") ||
+      lower.includes("branch") ||
       lower.includes("contact") ||
-      lower.includes("branch");
+      lower.includes("equipment") ||
+      lower.includes("territory") ||
+      lower.includes("representative");
 
     const clean =
       line.length >= 4 &&
-      line.length <= 140 &&
+      line.length <= 160 &&
       !lower.includes("copyright") &&
       !lower.includes("privacy") &&
       !lower.includes("cookie") &&
@@ -74,7 +88,7 @@ function extractContacts(html) {
     }
   }
 
-  return [...new Set(contacts)].slice(0, 30);
+  return [...new Set(contacts)].slice(0, 50);
 }
 
 function normalizeBaseUrl(url) {
@@ -119,7 +133,13 @@ function shouldScanLink(url) {
     "used",
     "directory",
     "employees",
-    "people"
+    "people",
+    "meet",
+    "representatives",
+    "rep",
+    "branches",
+    "branch",
+    "departments"
   ];
 
   const badWords = [
@@ -135,7 +155,6 @@ function shouldScanLink(url) {
     ".jpeg",
     ".png",
     ".webp",
-    ".pdf",
     ".zip",
     "#",
     "google.com",
@@ -182,7 +201,7 @@ function extractInternalLinks(html, baseUrl) {
     .filter(Boolean)
     .filter(shouldScanLink);
 
-  return [...new Set(links)].slice(0, 12);
+  return [...new Set(links)].slice(0, 15);
 }
 
 function priorityPages(baseUrl) {
@@ -193,14 +212,22 @@ function priorityPages(baseUrl) {
     "/contact",
     "/contact-us",
     "/locations",
+    "/location",
     "/team",
+    "/our-team",
+    "/meet-the-team",
     "/staff",
+    "/staff-directory",
+    "/employees",
     "/sales",
+    "/sales-team",
     "/used-equipment",
     "/parts",
     "/service",
     "/rental",
-    "/about"
+    "/branches",
+    "/about",
+    "/about-us"
   ].map((path) => `${base}${path}`);
 }
 
@@ -215,12 +242,23 @@ async function fetchPage(url) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 IXI Email Discovery Bot",
+        "User-Agent": "Mozilla/5.0 IXI Email Hunter Bot",
         Accept: "text/html"
       }
     });
 
     clearTimeout(timeout);
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (!contentType.includes("text/html")) {
+      return {
+        url,
+        emails: [],
+        contacts: [],
+        links: []
+      };
+    }
 
     const html = await response.text();
 
@@ -277,7 +315,7 @@ export default async function handler(req, res) {
         !lower.includes("machinerytrader.com")
       );
     })
-    .slice(0, 10);
+    .slice(0, 8);
 
   const results = [];
 
@@ -286,33 +324,37 @@ export default async function handler(req, res) {
     let allContacts = [];
     let scannedLinks = [];
 
-    const firstPages = priorityPages(dealer.website);
+    const queuedPages = [
+      ...priorityPages(dealer.website)
+    ];
 
-    for (const page of firstPages) {
+    let pagesScannedForDealer = 0;
+
+    for (const page of queuedPages) {
+      if (pagesScannedForDealer >= 18) {
+        break;
+      }
+
       const scan = await fetchPage(page);
+
+      pagesScannedForDealer += 1;
 
       scannedLinks.push(scan.url);
       allEmails.push(...scan.emails);
       allContacts.push(...scan.contacts);
 
-      if (allEmails.length >= 3) {
-        break;
-      }
+      for (const link of scan.links.slice(0, 6)) {
+        if (pagesScannedForDealer >= 18) {
+          break;
+        }
 
-      for (const link of scan.links.slice(0, 4)) {
         const deeperScan = await fetchPage(link);
+
+        pagesScannedForDealer += 1;
 
         scannedLinks.push(deeperScan.url);
         allEmails.push(...deeperScan.emails);
         allContacts.push(...deeperScan.contacts);
-
-        if (allEmails.length >= 3) {
-          break;
-        }
-      }
-
-      if (allEmails.length >= 3) {
-        break;
       }
     }
 
@@ -332,7 +374,7 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     success: true,
-    message: `Scanned ${results.length} websites. Found ${totalEmails} emails.`,
+    message: `Email Hunter scanned ${results.length} websites and found ${totalEmails} emails.`,
     results,
     totalEmails,
     totalPhones: 0
