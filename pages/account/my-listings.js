@@ -659,7 +659,8 @@ if (!response.ok) {
 <Footer />
         
 <style jsx>{`
-* {
+* .search-section *,
+.featured * {
   box-sizing: border-box;
 }
 
