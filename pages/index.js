@@ -822,44 +822,64 @@ min-height: 365px;
 }
 
         .benefit-icon {
-          display: block;
-          font-size: 46px;
-          margin: 0 auto 12px;
-          position: relative;
-        }
+  width: 44px;
+  height: 44px;
 
-        .benefit-icon.yellow {
-          color: #ffc400;
-        }
+  display: grid;
+  place-items: center;
 
-        .benefit-icon.green {
-          color: #38a169;
-        }
+  margin: 0 auto 12px;
 
-        .x-icon::before,
-        .x-icon::after {
-          content: "";
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          width: 58px;
-          height: 4px;
-          background: #c53030;
-          border-radius: 999px;
-          transform-origin: center;
-        }
+  position: relative;
 
-        .x-icon::before {
-          transform: translate(-50%, -50%) rotate(45deg);
-        }
+  border-radius: 50%;
 
-        .x-icon::after {
-          transform: translate(-50%, -50%) rotate(-45deg);
-        }
+  font-size: 20px;
 
-        .benefit-icon.green i {
-          font-size: 50px;
-        }
+  background: #0f0f0f;
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 10px 24px rgba(0,0,0,.22);
+}
+
+.benefit-icon.yellow {
+  color: #FFC400;
+}
+
+.benefit-icon.green {
+  color: #38A169;
+}
+
+.x-icon::before,
+.x-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 44px;
+  height: 3px;
+
+  background: rgba(197,48,48,.92);
+
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.x-icon::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.x-icon::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.benefit-icon.green i {
+  font-size: 21px;
+}
 
         .ready {
           background: #070707;
