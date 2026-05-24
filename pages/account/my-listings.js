@@ -664,13 +664,6 @@ if (!response.ok) {
   box-sizing: border-box;
 }
 
-:global(body) {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0B0B0B;
-  color: #D6D6D6;
-}
-
 .search-section {
   padding: 34px 5% 30px;
   background: #0B0B0B;
