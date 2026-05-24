@@ -412,8 +412,8 @@ export default function Home() {
 
       .hero {
   position: relative;
-  height: 445px;
-min-height: 445px;
+  height: 365px;
+min-height: 365px;
 
   background:
     linear-gradient(
@@ -426,7 +426,7 @@ min-height: 445px;
 
   background-size: cover;
 
-  background-position: center 120%;
+  background-position: center 74%;
 
   color: white;
 
