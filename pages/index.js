@@ -542,26 +542,17 @@ min-height: 365px;
     0 18px 44px rgba(0,0,0,.32);
 }
        .
-       search-container {
+      .search-container {
   max-width: 1180px;
-
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) 210px 112px;
-
+  grid-template-columns: minmax(320px, 1fr) 280px 160px;
+  background: #141414;
+  border-radius: 10px;
   width: 100%;
-
-  background: #101010;
-
-  border: 1px solid rgba(255,255,255,.065);
-  border-radius: 9px;
-
   overflow: hidden;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 12px 28px rgba(0,0,0,.28);
+  box-shadow: 0 20px 55px rgba(0,0,0,.48);
+  border: 1px solid rgba(255,255,255,.09);
 }
-
        input,
 select {
   height: 38px;
