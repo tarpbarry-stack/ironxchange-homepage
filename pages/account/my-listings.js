@@ -773,8 +773,6 @@ if (!response.ok) {
   color: #FFC400;
 }
 
-
-
 .search-btn {
   height: 38px;
 
@@ -872,8 +870,8 @@ if (!response.ok) {
 }
 
 .sort-select {
-  height: 28px;
-  width: 64px;
+  height: 38px;
+  width: 92px;
   border: 1px solid rgba(255,196,0,.12);
   border-radius: 8px 0 0 8px;
   margin-left: 6px;
