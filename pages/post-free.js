@@ -12836,8 +12836,7 @@ return (
                 />
               </label>
 
-                    <label>
-  <div className="wide serial-stock-grid">
+                    <div className="wide serial-stock-grid">
   <label>
     <span>Serial #</span>
 
