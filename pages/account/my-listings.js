@@ -1,5 +1,8 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
+
+import Navbar from "../components/Navbar";
+
 import featureKeywords from "../../lib/featureKeywords";
 
 import {
@@ -9,7 +12,6 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
-import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
