@@ -488,6 +488,76 @@ if (!response.ok) {
           </a>
         </div>
 
+         <div className="inventory-workbar">
+  <a href="/account">← Dashboard</a>
+  <a href="/post-free">New Post</a>
+
+  <button
+    type="button"
+    className={workflowFilter === "all" ? "active" : ""}
+    onClick={() => setWorkflowFilter("all")}
+  >
+    All
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "active" ? "active" : ""}
+    onClick={() => setWorkflowFilter("active")}
+  >
+    Active
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "archived" ? "active" : ""}
+    onClick={() => setWorkflowFilter("archived")}
+  >
+    Archived
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "needs-price" ? "active" : ""}
+    onClick={() => setWorkflowFilter("needs-price")}
+  >
+    Needs Price
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "needs-photos" ? "active" : ""}
+    onClick={() => setWorkflowFilter("needs-photos")}
+  >
+    Needs Photos
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "aged" ? "active" : ""}
+    onClick={() => setWorkflowFilter("aged")}
+  >
+    Aged
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "hot" ? "active" : ""}
+    onClick={() => setWorkflowFilter("hot")}
+  >
+    Hot
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "quiet" ? "active" : ""}
+    onClick={() => setWorkflowFilter("quiet")}
+  >
+    Quiet
+  </button>
+</div>     
+
+              
         <div className="filter-strip">
           <div className="range-group">
             <input
@@ -933,6 +1003,41 @@ if (!response.ok) {
   color: #FFC400;
   border-color: rgba(255,196,0,.45);
 }
+
+.inventory-workbar {
+  max-width: 760px;
+  margin: 12px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.inventory-workbar a,
+.inventory-workbar button {
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 999px;
+  background: #101010;
+  color: rgba(255,255,255,.52);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.inventory-workbar a:hover,
+.inventory-workbar button:hover,
+.inventory-workbar button.active {
+  border-color: rgba(255,196,0,.38);
+  color: #FFC400;
+  background: #1a1400;
+}
+
+
 
 .featured {
   padding: 46px 5% 60px;
