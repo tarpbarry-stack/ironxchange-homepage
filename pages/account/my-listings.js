@@ -1,8 +1,5 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
-
-import Navbar from "../../components/Navbar";
-
 import featureKeywords from "../../lib/featureKeywords";
 
 import {
@@ -12,6 +9,7 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
+import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
@@ -46,20 +44,6 @@ const categories = [
   "UTILITY CARTS"
 ];
 
-function slugify(text = "") {
-  return String(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function cleanMachineTitle(title = "") {
-  return String(title)
-    .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
-    .replace(/\s*[-–]\s*$/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function toNumber(value) {
   const raw = String(value || "").replace(/[^0-9]/g, "");
@@ -296,7 +280,7 @@ useEffect(() => {
 
   async function confirmDelete(listing) {
   const ok = window.confirm(
-    `Delete this listing?\n\n${cleanMachineTitle(listing.title)}\n\nThis cannot be undone.`
+   `Delete this listing?\n\n${formatCleanMachineTitle(listing.title)}\n\nThis cannot be undone.`
   );
 
   if (!ok) return;
@@ -332,7 +316,7 @@ useEffect(() => {
   async function archiveListing(listing) {
   
   const ok = window.confirm(
-    `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
+    `Archive this listing?\n\n${formatCleanMachineTitle(listing.title)}`
   );
 
   if (!ok) return;
