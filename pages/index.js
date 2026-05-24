@@ -163,7 +163,7 @@ export default function Home() {
         />
       </Head>
 
-     <nav className="nav">
+<nav className="nav">
   <div className="brand-side">
     <a href="/" className="logo-wrap">
       <img
@@ -174,69 +174,41 @@ export default function Home() {
     </a>
 
     <div className="social-mini">
-      <a href="#" aria-label="Facebook">
+      <a href="https://www.facebook.com/profile.php?id=61589249515383" aria-label="Facebook" target="_blank" rel="noreferrer">
         <i className="fa-brands fa-facebook-f"></i>
       </a>
 
-      <a href="#" aria-label="Instagram">
+      <a href="https://www.instagram.com/ironxchangehq/" aria-label="Instagram" target="_blank" rel="noreferrer">
         <i className="fa-brands fa-instagram"></i>
       </a>
 
-      <a href="#" aria-label="LinkedIn">
+      <a href="https://www.linkedin.com/company/ironxchange/" aria-label="LinkedIn" target="_blank" rel="noreferrer">
         <i className="fa-brands fa-linkedin-in"></i>
       </a>
 
-      <a href="#" aria-label="YouTube">
+      <a href="https://www.youtube.com/channel/UCjAc5SVwVEcW5EaAKi2cfFg" aria-label="YouTube" target="_blank" rel="noreferrer">
         <i className="fa-brands fa-youtube"></i>
+      </a>
+
+      <a href="https://www.tiktok.com/@ironxchangehq" aria-label="TikTok" target="_blank" rel="noreferrer">
+        <i className="fa-brands fa-tiktok"></i>
       </a>
     </div>
   </div>
 
   <div className="nav-links">
-
-<div className="social-mini">
-  <a href="YOUR_FACEBOOK_URL" aria-label="Facebook" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-facebook-f"></i>
-  </a>
-
-  <a href="YOUR_INSTAGRAM_URL" aria-label="Instagram" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-instagram"></i>
-  </a>
-
-  <a href="YOUR_LINKEDIN_URL" aria-label="LinkedIn" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-linkedin-in"></i>
-  </a>
-
-  <a href="YOUR_YOUTUBE_URL" aria-label="YouTube" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-youtube"></i>
-  </a>
-
-  <a href="YOUR_TIKTOK_URL" aria-label="TikTok" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-tiktok"></i>
-  </a>
-
-  <a href="YOUR_X_URL" aria-label="X" target="_blank" rel="noreferrer">
-    <i className="fa-brands fa-x-twitter"></i>
-  </a>
-</div>
-
-<a href="/browse">SEARCH</a>
-        
     <a href="/browse">SEARCH</a>
 
     <a href="/post-free" className="yellow-link">
       POST FREE
     </a>
 
-    <a
-      href="/account"
-      className="login-icon logged-in"
-      aria-label="Account"
-    >
+    <a href="/account" className="login-icon logged-in" aria-label="Account">
       <i className="fa-regular fa-user"></i>
     </a>
   </div>
 </nav>
+            
       <section className="hero">
         <div className="hero-content">
           <h1>FREE HEAVY EQUIPMENT MARKETPLACE</h1>
