@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
+import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 import Footer from "../components/Footer";
@@ -164,51 +165,7 @@ export default function Home() {
         />
       </Head>
 
-<nav className="nav">
-  <div className="brand-side">
-    <a href="/" className="logo-wrap">
-      <img
-        src="/images/ironxchange-logo.png"
-        className="logo-img"
-        alt="IronXchange"
-      />
-    </a>
-
-    <div className="social-mini">
-      <a href="https://www.facebook.com/profile.php?id=61589249515383" aria-label="Facebook" target="_blank" rel="noreferrer">
-        <i className="fa-brands fa-facebook-f"></i>
-      </a>
-
-      <a href="https://www.instagram.com/ironxchangehq/" aria-label="Instagram" target="_blank" rel="noreferrer">
-        <i className="fa-brands fa-instagram"></i>
-      </a>
-
-      <a href="https://www.linkedin.com/company/ironxchange/" aria-label="LinkedIn" target="_blank" rel="noreferrer">
-        <i className="fa-brands fa-linkedin-in"></i>
-      </a>
-
-      <a href="https://www.youtube.com/channel/UCjAc5SVwVEcW5EaAKi2cfFg" aria-label="YouTube" target="_blank" rel="noreferrer">
-        <i className="fa-brands fa-youtube"></i>
-      </a>
-
-      <a href="https://www.tiktok.com/@ironxchangehq" aria-label="TikTok" target="_blank" rel="noreferrer">
-        <i className="fa-brands fa-tiktok"></i>
-      </a>
-    </div>
-  </div>
-
-  <div className="nav-links">
-    <a href="/browse">SEARCH</a>
-
-    <a href="/post-free" className="yellow-link">
-      POST FREE
-    </a>
-
-    <a href="/account" className="login-icon logged-in" aria-label="Account">
-      <i className="fa-regular fa-user"></i>
-    </a>
-  </div>
-</nav>
+<Navbar />
             
       <section className="hero">
         <div className="hero-content">
