@@ -163,22 +163,61 @@ export default function Home() {
         />
       </Head>
 
-      <nav className="nav">
-  <a href="/" className="logo-wrap">
-    <img
-      src="/images/ironxchange-logo.png"
-      className="logo-img"
-      alt="IronXchange"
-    />
-  </a>
+     <nav className="nav">
+  <div className="brand-side">
+    <a href="/" className="logo-wrap">
+      <img
+        src="/images/ironxchange-logo.png"
+        className="logo-img"
+        alt="IronXchange"
+      />
+    </a>
+
+    <div className="social-mini">
+      <a href="#" aria-label="Facebook">
+        <i className="fa-brands fa-facebook-f"></i>
+      </a>
+
+      <a href="#" aria-label="Instagram">
+        <i className="fa-brands fa-instagram"></i>
+      </a>
+
+      <a href="#" aria-label="LinkedIn">
+        <i className="fa-brands fa-linkedin-in"></i>
+      </a>
+
+      <a href="#" aria-label="YouTube">
+        <i className="fa-brands fa-youtube"></i>
+      </a>
+    </div>
+  </div>
 
   <div className="nav-links">
 
 <div className="social-mini">
-  <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f"></i></a>
-  <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
-  <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
-  <a href="#" aria-label="YouTube"><i className="fa-brands fa-youtube"></i></a>
+  <a href="YOUR_FACEBOOK_URL" aria-label="Facebook" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-facebook-f"></i>
+  </a>
+
+  <a href="YOUR_INSTAGRAM_URL" aria-label="Instagram" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-instagram"></i>
+  </a>
+
+  <a href="YOUR_LINKEDIN_URL" aria-label="LinkedIn" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-linkedin-in"></i>
+  </a>
+
+  <a href="YOUR_YOUTUBE_URL" aria-label="YouTube" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-youtube"></i>
+  </a>
+
+  <a href="YOUR_TIKTOK_URL" aria-label="TikTok" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-tiktok"></i>
+  </a>
+
+  <a href="YOUR_X_URL" aria-label="X" target="_blank" rel="noreferrer">
+    <i className="fa-brands fa-x-twitter"></i>
+  </a>
 </div>
 
 <a href="/browse">SEARCH</a>
@@ -391,6 +430,12 @@ export default function Home() {
     0 10px 28px rgba(0,0,0,.28);
 }
 
+.brand-side {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .logo-img {
   height: 36px;
   display: block;
@@ -399,23 +444,19 @@ export default function Home() {
 .social-mini {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-right: 4px;
+  gap: 6px;
 }
 
 .social-mini a {
-  width: 14px;
+  width: 13px;
   height: 18px;
-
   display: grid;
   place-items: center;
-
-  color: rgba(255,255,255,.44) !important;
-
-  font-size: 9.5px;
+  color: rgba(255,255,255,.40) !important;
+  font-size: 8.75px;
   line-height: 1;
-
   text-decoration: none;
+  transition: color .14s ease;
 }
 
 .social-mini a:hover {
