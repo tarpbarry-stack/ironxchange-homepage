@@ -13760,18 +13760,63 @@ textarea,
   max-width: 100%;
 }
 
+@media (max-width: 1100px) {
+  .page {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .preview-panel {
+    position: relative;
+    top: auto;
+
+    width: 100%;
+  }
+
+  .preview-card-wrap {
+    width: 300px;
+    margin: 0 auto;
+  }
+}
+
   @media (max-width: 900px) {
     .page {
       grid-template-columns: 1fr;
     }
 
-    .preview-panel {
-      order: -1;
-    }
+    .form-panel {
+  padding: 16px;
+}
 
-    .preview-card {
-      position: static;
-    }
+.photos-panel,
+.keywords-panel {
+  padding: 14px;
+}
+
+.upload-box {
+  min-height: 108px;
+}
+
+.preview-card-wrap {
+  width: 100%;
+  max-width: 320px;
+}
+
+    .preview-panel {
+  position: static !important;
+
+  width: 100%;
+
+  top: auto;
+
+  display: flex;
+  justify-content: center;
+}
+
+ .preview-card-wrap {
+  width: min(320px, 100%);
+  margin: 0 auto;
+}
   }
 
   @media (max-width: 700px) {
