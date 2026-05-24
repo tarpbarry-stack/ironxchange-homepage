@@ -153,21 +153,6 @@ const savedListings = useMemo(() => {
   ))}
 </div>
 
-       <p className="feature-line">
-  {getFeatureLine(item)}
-</p>
-
-        <div className="price-row">
-          <strong>{item.price}</strong>
-
-          <div className="meta">
-            <span>⌖ {item.location}</span>
-          </div>
-        </div>
-      </div>
-    </a>
-  ))}
-</div>
         {savedListings.length === 0 && (
           <p className="empty">No saved listings yet.</p>
         )}
