@@ -13463,38 +13463,122 @@ textarea:focus {
     z-index: 3;
   }
 
-  .keyword-search {
-    margin-bottom: 8px;
-  }
+ .keyword-search {
+  width: 100%;
 
-  .keyword-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    max-height: 180px;
-    overflow-y: auto;
-    border: 1px solid #252525;
-    background: #101010;
-    border-radius: 12px;
-    padding: 8px;
-  }
+  height: 38px;
+
+  margin-bottom: 14px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #101010;
+
+  color: rgba(255,255,255,.76);
+
+  padding: 0 12px;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  outline: none;
+}
+
+.keyword-search:focus {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,196,0,.16);
+}
+
+  .keywords-panel {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #111;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+.keyword-grid {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  max-height: 190px;
+  overflow-y: auto;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0)),
+    #101010;
+
+  padding: 10px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
+}
 
   .keyword-chip {
-    border: 1px solid #333;
-    background: #181818;
-    color: #CFCFCF;
-    border-radius: 999px;
-    padding: 7px 10px;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-  }
+  height: 30px;
+
+  padding: 0 11px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #141414;
+
+  color: rgba(255,255,255,.46);
+
+  font-size: 10px;
+  font-weight: 850;
+
+  letter-spacing: .2px;
+  text-transform: lowercase;
+
+  cursor: pointer;
+
+  transition:
+    border-color .14s ease,
+    background .14s ease,
+    color .14s ease;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
   .keyword-chip.active {
-    background: ${BRAND_YELLOW};
-    color: #050505;
-    border-color: ${BRAND_YELLOW};
-  }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.14),
+      rgba(255,196,0,0)
+    ),
+    #1a1400;
+
+  border-color: rgba(255,196,0,.42);
+
+  color: #FFC400;
+
+  box-shadow:
+    0 0 18px rgba(255,196,0,.08);
+}
 
   .submit-btn {
   width: 100%;
