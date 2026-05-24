@@ -991,6 +991,83 @@ function lightboxNext() {
           letter-spacing: 0.4px;
         }
 
+        .video-panel {
+  height: 100%;
+}
+
+.video-panel h2 {
+  margin-bottom: 14px;
+}
+
+.video-box {
+  position: relative;
+
+  aspect-ratio: 16 / 9;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0)),
+    #050505;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+.video-box video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  gap: 10px;
+
+  color: rgba(255,255,255,.52);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.video-placeholder i {
+  width: 46px;
+  height: 46px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  color: #FFC400;
+
+  border: 1px solid rgba(255,196,0,.28);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.10),
+      rgba(255,196,0,0)
+    ),
+    #151515;
+
+  box-shadow:
+    0 0 18px rgba(255,196,0,.08);
+}
+
  .facts-highlights-panel {
   display: grid;
   grid-template-columns: 250px 1fr;
