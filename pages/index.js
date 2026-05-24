@@ -761,44 +761,65 @@ min-height: 365px;
   justify-content: center;
 }
 
-        .how {
-          background: #f3f3f3;
-          padding: 54px 5%;
-          text-align: center;
-        }
+       .how {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),
+    #0b0b0b;
 
-        .how h2 {
-          color: #111;
-        }
+  padding: 46px 5% 50px;
+  text-align: center;
 
-        .benefits {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
-          margin-top: 32px;
-        }
+  border-top: 1px solid rgba(255,255,255,.06);
+}
 
-        .benefits div {
-          background: transparent;
-          padding: 18px 26px;
-          border-right: 1px solid #ccc;
-        }
+.how h2 {
+  color: #f2f2f2;
+}
 
-        .benefits div:last-child {
-          border-right: none;
-        }
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
 
-        .benefits h3 {
-          margin: 10px 0 6px;
-          font-family: 'Montserrat', sans-serif;
-          font-weight: 900;
-          color: #111;
-        }
+.benefits div {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+    #131313;
 
-        .benefits p {
-          color: #555;
-          margin: 0;
-        }
+  padding: 20px 18px;
+
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 13px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+.benefits div:last-child {
+  border-right: 1px solid rgba(255,255,255,.065);
+}
+
+.benefits h3 {
+  margin: 10px 0 6px;
+
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+
+  letter-spacing: .45px;
+  color: #f2f2f2;
+}
+
+.benefits p {
+  color: rgba(255,255,255,.48);
+  margin: 0;
+
+  font-size: 12.5px;
+  line-height: 1.35;
+}
 
         .benefit-icon {
           display: block;
