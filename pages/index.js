@@ -426,7 +426,7 @@ min-height: 445px;
 
   background-size: cover;
 
-  background-position: center 92%;
+  background-position: center 104%;
 
   color: white;
 
