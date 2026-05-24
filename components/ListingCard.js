@@ -128,18 +128,23 @@ export default function ListingCard({
     0 18px 44px rgba(0,0,0,.22);
 
   transition:
-    transform .14s ease,
-    border-color .14s ease,
-    background .14s ease,
-    box-shadow .14s ease;
+  transform .16s ease,
+  border-color .16s ease,
+  background .16s ease,
+  box-shadow .16s ease;
+}
 
-    contain: layout paint;
+.card {
+  contain: layout paint;
 }
 
 .card:hover {
- transform:
-  translateY(-2px)
+  transform:
+    translateY(-2px)
+    scale(1.003);
+
   border-color: rgba(255,196,0,.14);
+
   background:
     linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
     #171717;
@@ -151,21 +156,27 @@ export default function ListingCard({
 
 .card-photo {
   position: relative;
-  overflow: hidden;
   height: 196px;
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid rgba(255,255,255,.065);
+  overflow: hidden;
 
   box-shadow:
-  inset 0 -40px 70px rgba(0,0,0,.10);
+    inset 0 -40px 70px rgba(0,0,0,.10);
 
-transition: opacity .14s ease;
+  transition:
+    filter .18s ease,
+    transform .28s ease;
 }
 
 .card:hover .card-photo {
-  opacity: .985;
-  transform: none;
+  filter:
+    contrast(1.04)
+    saturate(1.03)
+    brightness(1.01);
+
+  transform: scale(1.018);
 }
 
 .card-photo-nav {
@@ -220,6 +231,7 @@ transition: opacity .14s ease;
   background: rgba(0,0,0,.18);
   color: rgba(255,255,255,.44);
 
+  backdrop-filter: blur(2px);
   border-radius: 999px;
   padding: 3px 6px;
 
