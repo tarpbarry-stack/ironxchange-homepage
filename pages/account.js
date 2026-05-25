@@ -1656,7 +1656,7 @@ main {
   display: grid;
   grid-template-rows: 22px 22px;
 
-  gap: 3px;
+  gap: 10px;
 
   justify-items: center;
   align-items: center;
