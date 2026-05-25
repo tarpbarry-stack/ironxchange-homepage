@@ -4,6 +4,14 @@ import { useRouter } from "next/router";
 
 const BRAND_YELLOW = "#FFC400";
 
+const workflowOptions = [
+  "Good Listing",
+  "Reprice",
+  "Refresh Photos",
+  "Social Blast",
+  "Review"
+];
+
 const commonKeywordOptions = [
   "aggregate configuration",
   "cold ac",
@@ -103,17 +111,43 @@ function cleanNumber(value = "") {
 
 function formatMoney(value) {
   const raw = cleanNumber(value);
-  if (!raw) return "Call";
+  if (!raw) return "Call for price";
   return `$${Number(raw).toLocaleString()}`;
 }
 
+function cleanMachineTitle(title = "") {
+  return String(title)
+    .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
+    .replace(/\s*[-–]\s*$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getImageUrl(img) {
+  if (!img) return null;
+  if (typeof img === "string") return img;
+
+  return (
+    img.url ||
+    img.src ||
+    img.attributes?.variants?.default?.url ||
+    img.attributes?.variants?.["landscape-crop"]?.url ||
+    img.attributes?.variants?.["scaled-large"]?.url ||
+    img.attributes?.variants?.["scaled-medium"]?.url ||
+    img.attributes?.variants?.["scaled-small"]?.url ||
+    null
+  );
+}
+
 function getListingImages(listing) {
-  return [
+  const rawImages = [
     ...(Array.isArray(listing?.images) ? listing.images : []),
     ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
     listing?.imageUrl,
     listing?.image
-  ].filter(Boolean);
+  ];
+
+  return [...new Set(rawImages.map(getImageUrl).filter(Boolean))];
 }
 
 function getListingKeywords(listing) {
@@ -136,6 +170,26 @@ function getListingKeywords(listing) {
   return [];
 }
 
+function getWorkflowStatus(listing = {}) {
+  return (
+    listing.workflowStatus ||
+    listing.publicData?.workflowStatus ||
+    listing.attributes?.publicData?.workflowStatus ||
+    listing.metadata?.workflowStatus ||
+    "Good Listing"
+  );
+}
+
+function getListingStatus(listing = {}) {
+  return (
+    listing.listingStatus ||
+    listing.publicData?.listingStatus ||
+    listing.attributes?.publicData?.listingStatus ||
+    listing.metadata?.listingStatus ||
+    "live"
+  );
+}
+
 function addActivity(type, message) {
   if (typeof window === "undefined") return;
 
@@ -151,7 +205,7 @@ function addActivity(type, message) {
 
     localStorage.setItem(
       "ixActivityLog",
-      JSON.stringify([event, ...current].slice(0, 40))
+      JSON.stringify([event, ...current].slice(0, 50))
     );
 
     window.dispatchEvent(new Event("ix-activity-updated"));
@@ -181,56 +235,6 @@ async function downloadImage(url, filename) {
   URL.revokeObjectURL(objectUrl);
 }
 
-async function compressImage(file, maxWidth = 1600, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    const reader = new FileReader();
-
-    reader.onload = event => {
-      image.onload = () => {
-        const scale = Math.min(1, maxWidth / image.width);
-        const width = Math.round(image.width * scale);
-        const height = Math.round(image.height * scale);
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(image, 0, 0, width, height);
-
-        canvas.toBlob(
-          blob => {
-            if (!blob) {
-              reject(new Error("Image compression failed."));
-              return;
-            }
-
-            const compressedFile = new File(
-              [blob],
-              file.name.replace(/\.[^.]+$/, ".jpg"),
-              {
-                type: "image/jpeg",
-                lastModified: Date.now()
-              }
-            );
-
-            resolve(compressedFile);
-          },
-          "image/jpeg",
-          quality
-        );
-      };
-
-      image.onerror = reject;
-      image.src = event.target.result;
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
   const title = clean(listing?.title) || "Equipment Listing";
   const price = formatMoney(listing?.price);
@@ -241,19 +245,6 @@ function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
     "Clean machine. Full specs and photos available on IronXchange.";
 
   const features = selectedKeywords.slice(0, 5).join(" • ");
-
-  if (platform === "x") {
-    return `${title}
-${hours} | ${location}
-${price}
-
-${features}
-
-Listed on IronXchange:
-${listingUrl}
-
-#IronXchange #HeavyEquipment`;
-  }
 
   if (platform === "linkedin") {
     return `${title}
@@ -293,12 +284,6 @@ View full specs + photos:
 ${listingUrl}`;
 }
 
-function cleanMachineTitle(title = "") {
-  return String(title)
-    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
-    .trim();
-}
-
 export default function ListingLivePage() {
   const router = useRouter();
   const { id } = router.query;
@@ -307,6 +292,7 @@ export default function ListingLivePage() {
   const [listings, setListings] = useState([]);
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
+  const [commandBusy, setCommandBusy] = useState("");
 
   const [edit, setEdit] = useState({
     price: "",
@@ -321,6 +307,7 @@ export default function ListingLivePage() {
 
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
+  const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
 
   useEffect(() => {
     fetch("/api/listings")
@@ -328,6 +315,7 @@ export default function ListingLivePage() {
       .then(data => {
         if (Array.isArray(data)) setListings(data);
       })
+      .catch(err => console.error("Live page load failed:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -337,6 +325,8 @@ export default function ListingLivePage() {
   }, [id, listings]);
 
   const listingUrl = listing ? getListingUrl(listing) : "";
+  const listingStatus = getListingStatus(listing || {});
+  const isPaused = listingStatus === "paused";
 
   useEffect(() => {
     if (!listing) return;
@@ -345,10 +335,11 @@ export default function ListingLivePage() {
       price: clean(listing.price),
       hours: clean(listing.hours),
       location: clean(listing.location),
-      description: clean(listing.description)
+      description: clean(listing.description || listing.publicData?.description)
     });
 
     setSelectedKeywords(getListingKeywords(listing));
+    setWorkflowStatus(getWorkflowStatus(listing));
 
     setPhotoItems(
       getListingImages(listing).map((url, index) => ({
@@ -369,6 +360,8 @@ export default function ListingLivePage() {
     listing?.image ||
     "/images/hero-equipment-yard.jpg";
 
+  const title = cleanMachineTitle(listing?.title || "Machine Command Center");
+  const category = clean(listing?.type || listing?.category || listing?.publicData?.category) || "Category not listed";
   const sellerName =
     clean(listing?.sellerName) ||
     clean(listing?.sellerCompany) ||
@@ -378,12 +371,7 @@ export default function ListingLivePage() {
   const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
   const availableKeywords = useMemo(() => {
-    return Array.from(
-      new Set([
-        ...commonKeywordOptions,
-        ...selectedKeywords
-      ])
-    ).sort();
+    return Array.from(new Set([...commonKeywordOptions, ...selectedKeywords])).sort();
   }, [selectedKeywords]);
 
   const filteredKeywords = useMemo(() => {
@@ -443,10 +431,8 @@ Listed on IronXchange.
 
     setActivePhotoIndex(current => {
       const next = current + direction;
-
       if (next < 0) return photoItems.length - 1;
       if (next >= photoItems.length) return 0;
-
       return next;
     });
   }
@@ -502,10 +488,7 @@ Listed on IronXchange.
 
     setActivePhotoIndex(0);
 
-    addActivity(
-      "success",
-      `Photo removed — ${clean(listing?.title) || "Listing"}`
-    );
+    addActivity("success", `Photo removed — ${title}`);
   }
 
   function reorderPhotos(fromIndex, toIndex) {
@@ -514,18 +497,13 @@ Listed on IronXchange.
 
       const next = [...current];
       const [movedPhoto] = next.splice(fromIndex, 1);
-
       next.splice(toIndex, 0, movedPhoto);
 
       return next;
     });
 
     setActivePhotoIndex(0);
-
-    addActivity(
-      "success",
-      `Photo order changed — ${clean(listing?.title) || "Listing"}`
-    );
+    addActivity("success", `Photo order changed — ${title}`);
   }
 
   async function copyText(label, text) {
@@ -533,18 +511,11 @@ Listed on IronXchange.
       await navigator.clipboard.writeText(text);
       setCopied(label);
 
-      addActivity(
-        "success",
-        `${label} copied — ${clean(listing?.title) || "Listing"}`
-      );
+      addActivity("success", `${label} copied — ${title}`);
 
       setTimeout(() => setCopied(""), 1500);
     } catch {
-      addActivity(
-        "error",
-        `${label} copy failed — ${clean(listing?.title) || "Listing"}`
-      );
-
+      addActivity("error", `${label} copy failed — ${title}`);
       alert("Copy failed. Highlight and copy manually.");
     }
   }
@@ -557,12 +528,8 @@ Listed on IronXchange.
       return;
     }
 
-    await downloadImage(hero, `${slugify(listing.title)}-hero.jpg`);
-
-    addActivity(
-      "success",
-      `Hero image downloaded — ${clean(listing?.title) || "Listing"}`
-    );
+    await downloadImage(hero, `${slugify(title)}-hero.jpg`);
+    addActivity("success", `Hero image downloaded — ${title}`);
   }
 
   async function downloadAllPhotos() {
@@ -572,96 +539,147 @@ Listed on IronXchange.
     }
 
     for (let i = 0; i < photoItems.length; i += 1) {
-      await downloadImage(
-        photoItems[i].url,
-        `${slugify(listing.title)}-${i + 1}.jpg`
-      );
+      await downloadImage(photoItems[i].url, `${slugify(title)}-${i + 1}.jpg`);
     }
 
-    addActivity(
-      "success",
-      `Photo pack downloaded — ${clean(listing?.title) || "Listing"}`
-    );
+    addActivity("success", `Photo pack downloaded — ${title}`);
   }
 
- async function saveQuickEdit() {
-  if (!listing?.id) return;
+  async function saveQuickEdit() {
+    if (!listing?.id) return;
 
-  setSaving(true);
+    setSaving(true);
 
-  try {
-    const detailsResponse = await fetch("/api/update-listing-details", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        listingId: String(listing.id),
-        hours: edit.hours,
-        location: edit.location,
-        description: edit.description,
-        keywords: selectedKeywords
-      })
-    });
-
-    const detailsData = await detailsResponse.json();
-
-    if (!detailsResponse.ok) {
-      throw new Error(detailsData?.error || "Details update failed");
-    }
-
-    if (cleanNumber(edit.price)) {
-      const priceResponse = await fetch("/api/update-listing-price", {
+    try {
+      const detailsResponse = await fetch("/api/update-listing-details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           listingId: String(listing.id),
-          price: cleanNumber(edit.price)
+          hours: edit.hours,
+          location: edit.location,
+          description: edit.description,
+          keywords: selectedKeywords
         })
       });
 
-      const priceData = await priceResponse.json();
+      const detailsData = await detailsResponse.json();
 
-      if (!priceResponse.ok) {
-        throw new Error(priceData?.error || "Price update failed");
+      if (!detailsResponse.ok) {
+        throw new Error(detailsData?.error || "Details update failed");
       }
+
+      if (cleanNumber(edit.price)) {
+        const priceResponse = await fetch("/api/update-listing-price", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            listingId: String(listing.id),
+            price: cleanNumber(edit.price)
+          })
+        });
+
+        const priceData = await priceResponse.json();
+
+        if (!priceResponse.ok) {
+          throw new Error(priceData?.error || "Price update failed");
+        }
+      }
+
+      addActivity("success", `Edit saved — ${title}`);
+      alert("Saved. Listing updates applied.");
+    } catch (err) {
+      console.error("SAVE QUICK EDIT ERROR:", err);
+      addActivity("error", `Edit failed — ${title}`);
+      alert(`Edit failed: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
-
-    addActivity(
-      "success",
-      `Edit saved — ${clean(listing?.title) || "Listing"}`
-    );
-
-    alert("Saved. Listing updates applied.");
-  } catch (err) {
-    console.error("SAVE QUICK EDIT ERROR:", err);
-
-    addActivity(
-      "error",
-      `Edit failed — ${clean(listing?.title) || "Listing"}`
-    );
-
-    alert(`Edit failed: ${err.message}`);
-  } finally {
-    setSaving(false);
   }
-}
 
-  function statusAction(action) {
-    addActivity(
-      "success",
-      `${action} selected — ${clean(listing?.title) || "Listing"}`
-    );
+  async function updateWorkflow(nextWorkflow) {
+    if (!listing?.id) return;
 
-    alert(`${action} action logged. API wiring comes next.`);
+    setWorkflowStatus(nextWorkflow);
+
+    try {
+      const response = await fetch("/api/update-listing-workflow", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          listingId: String(listing.id),
+          workflowStatus: nextWorkflow
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Workflow update failed");
+      }
+
+      addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
+    } catch (err) {
+      console.error(err);
+      addActivity("error", `Workflow update failed — ${title}`);
+      alert("Workflow update failed.");
+    }
+  }
+
+  async function runListingCommand(action) {
+    if (!listing?.id) return;
+
+    setCommandBusy(action);
+
+    try {
+      const endpoint =
+        action === "pause"
+          ? "/api/pause-listing"
+          : action === "reactivate"
+            ? "/api/reactivate-listing"
+            : "";
+
+      if (!endpoint) {
+        addActivity("success", `${action} selected — ${title}`);
+        alert(`${action} action logged. API wiring comes next.`);
+        return;
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          listingId: String(listing.id)
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || `${action} failed`);
+      }
+
+      addActivity("success", `${action} complete — ${title}`);
+      router.reload();
+    } catch (err) {
+      console.error(err);
+      addActivity("error", `${action} failed — ${title}`);
+      alert(`${action} failed: ${err.message}`);
+    } finally {
+      setCommandBusy("");
+    }
   }
 
   if (loading) {
     return (
       <main className="loading">
-        Loading live listing...
+        Loading machine command center...
         <style jsx>{`
           .loading {
             min-height: 100vh;
@@ -693,15 +711,25 @@ Listed on IronXchange.
   }
 
   return (
+
     <>
       <Head>
-        <title>Machine Command Center | IronXchange</title>
+        <title>{title} Command Center | IronXchange</title>
+
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          rel="stylesheet"
+        />
       </Head>
 
       <main>
         <nav className="nav">
           <a href="/" className="logo-wrap">
-            <img src="/images/ironxchange-logo.png" className="logo-img" alt="IronXchange" />
+            <img
+              src="/images/ironxchange-logo.png"
+              className="logo-img"
+              alt="IronXchange"
+            />
           </a>
 
           <div className="nav-links">
@@ -715,280 +743,496 @@ Listed on IronXchange.
 
         <section className="wrap">
           <section className="command-bar">
-            <div className="live-pill"><span></span> LISTING LIVE</div>
+            <div className="command-title">
+              <button type="button" onClick={() => router.push("/account/my-listings")}>
+                ← Inventory
+              </button>
+
+              <div>
+                <span>Machine Command Center</span>
+                <h1>{title}</h1>
+              </div>
+            </div>
 
             <div className="command-actions">
-              <a href={listingUrl} className="mini-btn yellow-btn">VIEW LIVE</a>
-              <a href="/account" className="mini-btn">DASHBOARD</a>
-              <button type="button" onClick={() => statusAction("Pause")} className="mini-btn">PAUSE</button>
-              <button type="button" onClick={() => statusAction("Sold")} className="mini-btn">SOLD</button>
-              <button type="button" onClick={() => statusAction("Archive")} className="mini-btn">ARCHIVE</button>
-              <button type="button" onClick={() => statusAction("Duplicate")} className="mini-btn">DUPLICATE</button>
-              <button type="button" onClick={() => statusAction("Delete")} className="mini-btn danger-btn">DELETE</button>
+              <div className={isPaused ? "status-pill paused" : "status-pill live"}>
+                <span></span>
+                {isPaused ? "Paused" : "Live"}
+              </div>
+
+              <a href={listingUrl} target="_blank" rel="noreferrer" className="mini-btn yellow-btn">
+                View Public
+              </a>
+
+              <button
+                type="button"
+                onClick={saveQuickEdit}
+                className="mini-btn save-mini"
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
             </div>
           </section>
 
-          <section className="v10-machine-card">
-  <div className="v10-photo-stage">
-    <img src={heroPhoto} alt={listing.title} className="v10-hero-photo" />
+          <section className="hero-command-grid">
+            <section className="v10-machine-card">
+              <div className="v10-photo-stage">
+                <img src={heroPhoto} alt={listing.title} className="v10-hero-photo" />
 
-    <button type="button" className="photo-nav left" onClick={() => changeActivePhoto(-1)}>
-      ‹
-    </button>
+                <button
+                  type="button"
+                  className="photo-nav left"
+                  onClick={() => changeActivePhoto(-1)}
+                  aria-label="Previous photo"
+                >
+                  ‹
+                </button>
 
-    <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>
-      ›
-    </button>
+                <button
+                  type="button"
+                  className="photo-nav right"
+                  onClick={() => changeActivePhoto(1)}
+                  aria-label="Next photo"
+                >
+                  ›
+                </button>
 
-    <div className="v10-photo-overlay">
-      <span>{activePhotoIndex + 1} / {photoItems.length || 1}</span>
-      <strong>Drag thumbnails to reorder</strong>
-    </div>
-  </div>
+                <div className="v10-photo-overlay">
+                  <span>{activePhotoIndex + 1} / {photoItems.length || 1}</span>
+                  <strong>Drag thumbnails to reorder</strong>
+                </div>
+              </div>
 
-  <div className="v10-card-body">
-    <div className="v10-title-row">
-      <div>
-        <h1>{cleanMachineTitle(listing.title || "")}</h1>
-        <p>{selectedKeywords.slice(0, 4).join(" • ") || "Machine details ready for update"}</p>
-      </div>
+              <div className="v10-card-body">
+                <div className="v10-title-row">
+                  <div>
+                    <h2>{title}</h2>
+                    <p>
+                      {selectedKeywords.slice(0, 6).join(" • ") ||
+                        "Add key selling features, condition notes, and package details."}
+                    </p>
+                  </div>
 
-      <div className="v10-price-block">
-        <strong>{formatMoney(edit.price || listing.price)}</strong>
-        <span>{edit.hours || listing.hours || "—"} hrs</span>
-      </div>
-    </div>
+                  <div className="v10-price-block">
+                    <strong>{formatMoney(edit.price || listing.price)}</strong>
+                    <span>{edit.hours || listing.hours || "—"} hrs</span>
+                  </div>
+                </div>
 
-    <div className="v10-meta-row">
-      <span>{edit.location || listing.location || "Location not listed"}</span>
-      <span>{listing.type || listing.category || "Category not listed"}</span>
-      <span>{photoItems.length} photos</span>
-    </div>
+                <div className="v10-meta-row">
+                  <span>⌖ {edit.location || listing.location || "Location not listed"}</span>
+                  <span>{category}</span>
+                  <span>{photoItems.length} photos</span>
+                  <span>{workflowStatus}</span>
+                </div>
 
-    <label
-      className="v10-photo-drop"
-      onDragOver={e => e.preventDefault()}
-      onDrop={handlePhotoDrop}
-    >
-      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-      + Add / Drop Photos
-    </label>
+                <label
+                  className="v10-photo-drop"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={handlePhotoDrop}
+                >
+                  <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+                  + Add / Drop Photos
+                </label>
 
-    <div className="v10-thumb-strip">
-      {photoItems.map((photo, index) => (
-        <div
-          key={photo.id}
-          className={`v10-thumb ${index === activePhotoIndex ? "active" : ""} ${index === 0 ? "hero" : ""}`}
-          draggable
-          onDragStart={() => setDraggedPhotoIndex(index)}
-          onDragOver={e => e.preventDefault()}
-          onDrop={() => {
-            reorderPhotos(draggedPhotoIndex, index);
-            setDraggedPhotoIndex(null);
-          }}
-          onClick={() => setActivePhotoIndex(index)}
-        >
-          {index === 0 && <span>HERO</span>}
-          <img src={photo.url} alt={`Photo ${index + 1}`} />
+                <div className="v10-thumb-strip">
+                  {photoItems.map((photo, index) => (
+                    <div
+                      key={photo.id}
+                      className={`v10-thumb ${index === activePhotoIndex ? "active" : ""} ${
+                        index === 0 ? "hero" : ""
+                      }`}
+                      draggable
+                      onDragStart={() => setDraggedPhotoIndex(index)}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => {
+                        reorderPhotos(draggedPhotoIndex, index);
+                        setDraggedPhotoIndex(null);
+                      }}
+                      onClick={() => setActivePhotoIndex(index)}
+                    >
+                      {index === 0 && <span>HERO</span>}
+                      <img src={photo.url} alt={`Photo ${index + 1}`} />
 
-          <button
-            type="button"
-            onClick={e => {
-              e.stopPropagation();
-              removePhoto(index);
-            }}
-          >
-            ×
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          removePhoto(index);
+                        }}
+                        aria-label="Remove photo"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-    <section className="panel performance-panel">
-      <div className="performance-grid">
-        <div><span>Views</span><strong>—</strong></div>
-        <div><span>Saves</span><strong>—</strong></div>
-        <div><span>Inquiries</span><strong>—</strong></div>
-        <div><span>Shares</span><strong>—</strong></div>
-      </div>
+            <aside className="command-stack">
+              <div className="stack-head">
+                <span>Seller Controls</span>
+                <strong>Operate Listing</strong>
+              </div>
 
-      <div className="download-row">
-        <button type="button" onClick={downloadHeroImage}>DOWNLOAD HERO</button>
-        <button type="button" onClick={downloadAllPhotos}>DOWNLOAD ALL PHOTOS</button>
-        <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
-          {copied === "Listing Link" ? "COPIED" : "COPY LISTING LINK"}
-        </button>
-      </div>
-</section>
+              <button
+                type="button"
+                className="command-primary"
+                onClick={saveQuickEdit}
+                disabled={saving}
+              >
+                {saving ? "Saving Changes..." : "Save Changes"}
+              </button>
 
-<section className="panel activity-panel">
-  <div className="panel-head">
-    <h2>Activity Log</h2>
-    <span>Recent Actions</span>
-  </div>
+              <button
+                type="button"
+                className={isPaused ? "command-button green" : "command-button"}
+                onClick={() => runListingCommand(isPaused ? "reactivate" : "pause")}
+                disabled={!!commandBusy}
+              >
+                {commandBusy
+                  ? "Working..."
+                  : isPaused
+                    ? "Reactivate Listing"
+                    : "Pause Listing"}
+              </button>
 
-  <div className="activity-list">
-    <div className="activity-item success">
-      <span>PHOTO ORDER UPDATED</span>
-      <small>JUST NOW</small>
-    </div>
+              <label className="workflow-control">
+                Workflow Bucket
+                <select
+                  value={workflowStatus}
+                  onChange={e => updateWorkflow(e.target.value)}
+                >
+                  {workflowOptions.map(option => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-    <div className="activity-item">
-      <span>KEYWORDS UPDATED</span>
-      <small>2 MIN AGO</small>
-    </div>
+              <a href={listingUrl} target="_blank" rel="noreferrer" className="command-button link">
+                View Public Listing
+              </a>
 
-    <div className="activity-item">
-      <span>LISTING LINK COPIED</span>
-      <small>4 MIN AGO</small>
-    </div>
+              <button
+                type="button"
+                className="command-button"
+                onClick={() => copyText("Listing Link", listingUrl)}
+              >
+                {copied === "Listing Link" ? "Copied" : "Copy Listing Link"}
+              </button>
 
-    <div className="activity-item">
-      <span>HERO IMAGE DOWNLOADED</span>
-      <small>7 MIN AGO</small>
-    </div>
-  </div>
-</section>
+              <button
+                type="button"
+                className="command-button"
+                onClick={downloadHeroImage}
+              >
+                Download Hero Photo
+              </button>
 
-</div>
+              <button
+                type="button"
+                className="command-button"
+                onClick={downloadAllPhotos}
+              >
+                Download Photo Pack
+              </button>
 
-<div className="right-stack">
-    <section className="panel edit-panel">
-      <div className="panel-head">
-        <h2>Edit Listing</h2>
-        <span>Details + Keywords</span>
-      </div>
+              <button
+                type="button"
+                className="command-button danger"
+                onClick={() => runListingCommand("delete")}
+              >
+                Delete / Archive
+              </button>
+            </aside>
+          </section>
 
-      <div className="edit-grid">
-        <label>
-          Price
-          <input value={edit.price} onChange={e => setEdit({ ...edit, price: e.target.value })} />
-        </label>
+          <section className="main-grid">
+            <div className="left-stack">
+              <section className="panel metrics-panel">
+                <div className="metric">
+                  <span>Views</span>
+                  <strong>—</strong>
+                </div>
 
-        <label>
-          Hours
-          <input value={edit.hours} onChange={e => setEdit({ ...edit, hours: e.target.value })} />
-        </label>
+                <div className="metric">
+                  <span>Saves</span>
+                  <strong>—</strong>
+                </div>
 
-        <label className="wide">
-          Location
-          <input value={edit.location} onChange={e => setEdit({ ...edit, location: e.target.value })} />
-        </label>
+                <div className="metric">
+                  <span>Inquiries</span>
+                  <strong>—</strong>
+                </div>
 
-        <label className="wide">
-          Description
-          <textarea value={edit.description} onChange={e => setEdit({ ...edit, description: e.target.value })} />
-        </label>
-      </div>
+                <div className="metric">
+                  <span>Shares</span>
+                  <strong>—</strong>
+                </div>
+              </section>
 
-      <div className="keywords-panel">
-        <div className="keywords-head">
-          <h2>Tags / Keywords</h2>
-          <span>{selectedKeywords.length} Selected</span>
-        </div>
+              <section className="panel machine-data-panel">
+                <div className="panel-head">
+                  <h2>Machine Data</h2>
+                  <span>Core Listing Fields</span>
+                </div>
 
-        <input
-          className="keyword-search"
-          value={keywordSearch}
-          onChange={e => setKeywordSearch(e.target.value)}
-          placeholder="Search features, hydraulics, tires, GPS..."
-        />
+                <div className="machine-data-grid">
+                  <div>
+                    <span>Year</span>
+                    <strong>{listing.year || listing.publicData?.year || "—"}</strong>
+                  </div>
 
-        <div className="keyword-grid">
-          {filteredKeywords.map(keyword => (
-            <button
-              key={keyword}
-              type="button"
-              onClick={() => toggleKeyword(keyword)}
-              className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
-            >
-              {keyword}
-            </button>
-          ))}
-        </div>
-      </div>
+                  <div>
+                    <span>Make</span>
+                    <strong>{listing.make || listing.publicData?.make || "—"}</strong>
+                  </div>
 
-      <div className="save-row">
-  <button
-    type="button"
-    onClick={saveQuickEdit}
-    className="save-btn"
-  >
-    {saving ? "SAVING..." : "SAVE CHANGES"}
-  </button>
+                  <div>
+                    <span>Model</span>
+                    <strong>{listing.model || listing.publicData?.model || "—"}</strong>
+                  </div>
 
-  <a
-    href={listingUrl}
-    target="_blank"
-    rel="noreferrer"
-    className="preview-btn"
-  >
-    VIEW POST
-  </a>
-</div>
-    </section>
+                  <label>
+                    Hours
+                    <input
+                      value={edit.hours}
+                      onChange={e => setEdit({ ...edit, hours: e.target.value })}
+                    />
+                  </label>
 
-    <section className="panel promote-panel">
-      <div className="panel-head">
-        <h2>Promote Listing</h2>
-        <span>Copy + Open</span>
-      </div>
+                  <label>
+                    Price
+                    <input
+                      value={edit.price}
+                      onChange={e => setEdit({ ...edit, price: e.target.value })}
+                    />
+                  </label>
 
-      <div className="promote-grid">
-        <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
-          {copied === "Marketplace Title" ? "COPIED" : "Copy Marketplace Title"}
-        </button>
+                  <label>
+                    Location
+                    <input
+                      value={edit.location}
+                      onChange={e => setEdit({ ...edit, location: e.target.value })}
+                    />
+                  </label>
 
-        <button type="button" onClick={() => copyText("Short Description", shortDescription)}>
-          {copied === "Short Description" ? "COPIED" : "Copy Short Description"}
-        </button>
+                  <div>
+                    <span>Category</span>
+                    <strong>{category}</strong>
+                  </div>
 
-        <button type="button" onClick={() => copyText("Long Description", longDescription)}>
-          {copied === "Long Description" ? "COPIED" : "Copy Long Description"}
-        </button>
+                  <div>
+                    <span>Stock #</span>
+                    <strong>{listing.stockNumber || listing.publicData?.stockNumber || "—"}</strong>
+                  </div>
+                </div>
+              </section>
 
-        <button type="button" onClick={() => copyText("Facebook Post", buildSocialCopy("facebook", listing, listingUrl, selectedKeywords))}>
-          {copied === "Facebook Post" ? "COPIED" : "Copy Facebook Post"}
-        </button>
+              <section className="panel activity-panel">
+                <div className="panel-head">
+                  <h2>Activity Log</h2>
+                  <span>Recent Actions</span>
+                </div>
 
-        <button type="button" onClick={() => copyText("Instagram Caption", buildSocialCopy("instagram", listing, listingUrl, selectedKeywords))}>
-          {copied === "Instagram Caption" ? "COPIED" : "Copy Instagram Caption"}
-        </button>
+                <div className="activity-list">
+                  <div className="activity-item success">
+                    <span>PHOTO ORDER READY</span>
+                    <small>LIVE</small>
+                  </div>
 
-        <button type="button" onClick={() => copyText("LinkedIn Post", buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords))}>
-          {copied === "LinkedIn Post" ? "COPIED" : "Copy LinkedIn Post"}
-        </button>
+                  <div className="activity-item">
+                    <span>WORKFLOW: {workflowStatus.toUpperCase()}</span>
+                    <small>SYNCED</small>
+                  </div>
 
-        <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">Facebook Marketplace</a>
-        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
-        <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">TikTok</a>
-        <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">LinkedIn</a>
-      </div>
-    </section>
-  </div>
-</section>
+                  <div className="activity-item">
+                    <span>PUBLIC PAGE LINK READY</span>
+                    <small>READY</small>
+                  </div>
 
-<section className="panel seller-bar">
-  {sellerLogo ? (
-    <img src={sellerLogo} alt={sellerName} />
-  ) : (
-    <div className="seller-icon">
-      <i className="fa-regular fa-user"></i>
-    </div>
-  )}
+                  <div className="activity-item">
+                    <span>SELLER COMMAND CENTER LOADED</span>
+                    <small>NOW</small>
+                  </div>
+                </div>
+              </section>
+            </div>
 
-  <div>
-    <span>Seller</span>
-    <strong>{sellerName}</strong>
-    <p>Seller profile/contact expansion goes here next.</p>
-  </div>
-</section>
+            <div className="right-stack">
+              <section className="panel edit-panel">
+                <div className="panel-head">
+                  <h2>Sales Copy</h2>
+                  <span>Description + Keywords</span>
+                </div>
 
-</section>
-</main>
-         
+                <label className="wide">
+                  Description
+                  <textarea
+                    value={edit.description}
+                    onChange={e => setEdit({ ...edit, description: e.target.value })}
+                    placeholder="Describe condition, attachments, maintenance, ownership history, and buyer-relevant details..."
+                  />
+                </label>
+
+                <div className="keywords-panel">
+                  <div className="keywords-head">
+                    <h2>Feature Tags</h2>
+                    <span>{selectedKeywords.length} Selected</span>
+                  </div>
+
+                  <input
+                    className="keyword-search"
+                    value={keywordSearch}
+                    onChange={e => setKeywordSearch(e.target.value)}
+                    placeholder="Search features, hydraulics, tires, GPS..."
+                  />
+
+                  <div className="keyword-grid">
+                    {filteredKeywords.map(keyword => (
+                      <button
+                        key={keyword}
+                        type="button"
+                        onClick={() => toggleKeyword(keyword)}
+                        className={
+                          selectedKeywords.includes(keyword)
+                            ? "keyword-chip active"
+                            : "keyword-chip"
+                        }
+                      >
+                        {keyword}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="save-row">
+                  <button
+                    type="button"
+                    onClick={saveQuickEdit}
+                    className="save-btn"
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+
+                  <a
+                    href={listingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="preview-btn"
+                  >
+                    View Public
+                  </a>
+                </div>
+              </section>
+
+              <section className="panel promote-panel">
+                <div className="panel-head">
+                  <h2>Media Blast</h2>
+                  <span>Copy + Open</span>
+                </div>
+
+                <div className="promote-grid">
+                  <button
+                    type="button"
+                    onClick={() => copyText("Marketplace Title", marketplaceTitle)}
+                  >
+                    {copied === "Marketplace Title" ? "Copied" : "Marketplace Title"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => copyText("Short Description", shortDescription)}
+                  >
+                    {copied === "Short Description" ? "Copied" : "Short Copy"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => copyText("Long Description", longDescription)}
+                  >
+                    {copied === "Long Description" ? "Copied" : "Long Copy"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyText(
+                        "Facebook Post",
+                        buildSocialCopy("facebook", listing, listingUrl, selectedKeywords)
+                      )
+                    }
+                  >
+                    {copied === "Facebook Post" ? "Copied" : "Facebook"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyText(
+                        "Instagram Caption",
+                        buildSocialCopy("instagram", listing, listingUrl, selectedKeywords)
+                      )
+                    }
+                  >
+                    {copied === "Instagram Caption" ? "Copied" : "Instagram"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyText(
+                        "LinkedIn Post",
+                        buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords)
+                      )
+                    }
+                  >
+                    {copied === "LinkedIn Post" ? "Copied" : "LinkedIn"}
+                  </button>
+
+                  <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">
+                    FB Marketplace
+                  </a>
+
+                  <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">
+                    LinkedIn
+                  </a>
+
+                  <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
+                    Instagram
+                  </a>
+
+                  <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">
+                    TikTok
+                  </a>
+                </div>
+              </section>
+
+              <section className="panel seller-bar">
+                {sellerLogo ? (
+                  <img src={sellerLogo} alt={sellerName} />
+                ) : (
+                  <div className="seller-icon">
+                    <i className="fa-regular fa-user"></i>
+                  </div>
+                )}
+
+                <div>
+                  <span>Seller</span>
+                  <strong>{sellerName}</strong>
+                  <p>Profile/contact expansion hooks stay ready for V10 seller CRM.</p>
+                </div>
+              </section>
+            </div>
+          </section>
+        </section>
+      </main>
+
       <style jsx>{`
         :global(body) {
           margin: 0;
@@ -997,9 +1241,23 @@ Listed on IronXchange.
           font-family: Arial, sans-serif;
         }
 
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
-        main { min-height: 100vh; background: #0b0b0b; }
+        main {
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top, rgba(255,196,0,.025), transparent 28%),
+            #0b0b0b;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+          font-family: inherit;
+        }
 
         .nav {
           height: 64px;
@@ -1011,9 +1269,16 @@ Listed on IronXchange.
           border-bottom: 1px solid rgba(255,255,255,.08);
         }
 
-        .logo-img { height: 38px; display: block; }
+        .logo-img {
+          height: 38px;
+          display: block;
+        }
 
-        .nav-links { display: flex; align-items: center; gap: 14px; }
+        .nav-links {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
 
         .nav-links a {
           color: white;
@@ -1023,7 +1288,9 @@ Listed on IronXchange.
           font-size: 12px;
         }
 
-        .yellow-link { color: ${BRAND_YELLOW} !important; }
+        .yellow-link {
+          color: ${BRAND_YELLOW} !important;
+        }
 
         .login-icon {
           border: 2px solid #38A169;
@@ -1038,657 +1305,779 @@ Listed on IronXchange.
         .wrap {
           max-width: 1580px;
           margin: 0 auto;
-          padding: 14px 2% 48px;
+          padding: 14px 2% 54px;
         }
 
         .panel,
-        .command-bar {
-          background: #151515;
-          border: 1px solid #282828;
+        .command-bar,
+        .v10-machine-card,
+        .command-stack {
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+            #141414;
+          border: 1px solid rgba(255,255,255,.06);
+          outline: 1px solid rgba(255,255,255,.018);
           border-radius: 14px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 18px 44px rgba(0,0,0,.22);
         }
 
         .command-bar {
-          padding: 10px;
-          margin-bottom: 10px;
+          min-height: 62px;
+          margin-bottom: 12px;
+          padding: 10px 12px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
         }
 
-        .live-pill {
-          display: inline-flex;
+        .command-title {
+          display: flex;
           align-items: center;
-          gap: 8px;
-          border: 1px solid #2f855a;
-          color: #38A169;
-          border-radius: 999px;
-          padding: 7px 11px;
-          font-size: 10px;
-          font-weight: 900;
-          white-space: nowrap;
+          gap: 12px;
+          min-width: 0;
         }
 
-        .live-pill span {
-          width: 8px;
-          height: 8px;
-          background: #38A169;
-          border-radius: 50%;
+        .command-title button {
+          height: 34px;
+          padding: 0 12px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: rgba(255,255,255,.58);
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .55px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .command-title button:hover {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.28);
+        }
+
+        .command-title span {
+          display: block;
+          margin-bottom: 3px;
+          color: #FFC400;
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .72px;
+          text-transform: uppercase;
+        }
+
+        .command-title h1 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: 20px;
+          font-weight: 950;
+          letter-spacing: -.5px;
+          line-height: 1;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 720px;
         }
 
         .command-actions {
           display: flex;
-          flex-wrap: wrap;
+          align-items: center;
           justify-content: flex-end;
-          gap: 7px;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .status-pill {
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 0 11px;
+          border-radius: 999px;
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
+        .status-pill span {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+        }
+
+        .status-pill.live {
+          color: #38A169;
+          border: 1px solid rgba(56,161,105,.42);
+          background: rgba(56,161,105,.045);
+        }
+
+        .status-pill.live span {
+          background: #38A169;
+        }
+
+        .status-pill.paused {
+          color: #f6ad55;
+          border: 1px solid rgba(246,173,85,.42);
+          background: rgba(246,173,85,.055);
+        }
+
+        .status-pill.paused span {
+          background: #f6ad55;
         }
 
         .mini-btn {
-          border: 1px solid #333;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(255,255,255,.09);
           background: #101010;
           color: #f2f2f2;
           border-radius: 999px;
-          padding: 8px 10px;
+          padding: 0 12px;
           font-size: 9px;
-          font-weight: 900;
+          font-weight: 950;
+          letter-spacing: .55px;
+          text-transform: uppercase;
           text-decoration: none;
           cursor: pointer;
         }
 
-        .yellow-btn {
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          border-color: ${BRAND_YELLOW};
+        .mini-btn:hover {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.28);
         }
 
-        .danger-btn {
-          border-color: rgba(229,62,62,.6);
+        .yellow-btn,
+        .save-mini {
+          background: #FFC400;
+          color: #050505;
+          border-color: #FFC400;
+        }
+
+        .yellow-btn:hover,
+        .save-mini:hover {
+          color: #050505;
+          filter: brightness(1.05);
+        }
+
+        .hero-command-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 310px;
+          gap: 12px;
+          align-items: stretch;
+          margin-bottom: 12px;
+        }
+
+        .v10-machine-card {
+          overflow: hidden;
+          contain: layout paint;
+        }
+
+        .v10-photo-stage {
+          position: relative;
+          background: #050505;
+          overflow: hidden;
+        }
+
+        .v10-photo-stage::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,.035),
+            inset 0 -92px 120px rgba(0,0,0,.34);
+        }
+
+        .v10-hero-photo {
+          width: 100%;
+          height: 560px;
+          object-fit: cover;
+          display: block;
+          background: #050505;
+          transition:
+            filter .18s ease,
+            transform .28s ease;
+        }
+
+        .v10-machine-card:hover .v10-hero-photo {
+          filter:
+            contrast(1.035)
+            saturate(1.025)
+            brightness(1.01);
+          transform: scale(1.006);
+        }
+
+        .photo-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 3;
+          width: 34px;
+          height: 86px;
+          border: none;
+          background: rgba(0,0,0,.10);
+          color: rgba(255,255,255,.42);
+          font-size: 36px;
+          font-weight: 300;
+          cursor: pointer;
+          transition: background .16s ease, color .16s ease;
+        }
+
+        .photo-nav:hover {
+          color: rgba(255,255,255,.75);
+          background: rgba(0,0,0,.24);
+        }
+
+        .photo-nav.left {
+          left: 0;
+          border-radius: 0 12px 12px 0;
+        }
+
+        .photo-nav.right {
+          right: 0;
+          border-radius: 12px 0 0 12px;
+        }
+
+        .v10-photo-overlay {
+          position: absolute;
+          left: 14px;
+          bottom: 12px;
+          z-index: 4;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 11px;
+          background: rgba(0,0,0,.52);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 999px;
+          backdrop-filter: blur(7px);
+        }
+
+        .v10-photo-overlay span,
+        .v10-photo-overlay strong {
+          color: rgba(255,255,255,.72);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .55px;
+          text-transform: uppercase;
+        }
+
+        .v10-photo-overlay strong {
+          color: #FFC400;
+        }
+
+        .v10-card-body {
+          padding: 14px 14px 13px;
+        }
+
+        .v10-title-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 18px;
+          align-items: start;
+        }
+
+        .v10-title-row h2 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: clamp(25px, 2.2vw, 38px);
+          font-weight: 950;
+          letter-spacing: -1px;
+          line-height: .96;
+          text-transform: uppercase;
+          text-rendering: geometricPrecision;
+        }
+
+        .v10-title-row p {
+          margin: 9px 0 0;
+          color: rgba(255,255,255,.43);
+          font-size: 13px;
+          font-weight: 750;
+          line-height: 1.35;
+        }
+
+        .v10-price-block {
+          text-align: right;
+          white-space: nowrap;
+        }
+
+        .v10-price-block strong {
+          display: block;
+          color: #f2f2f2;
+          font-size: 31px;
+          font-weight: 900;
+          letter-spacing: -.7px;
+          line-height: 1;
+        }
+
+        .v10-price-block span {
+          display: block;
+          margin-top: 6px;
+          color: rgba(255,255,255,.54);
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: .18px;
+          text-transform: uppercase;
+        }
+
+        .v10-meta-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 13px;
+        }
+
+        .v10-meta-row span {
+          min-height: 24px;
+          display: inline-flex;
+          align-items: center;
+          padding: 0 8px;
+          background: rgba(255,255,255,.025);
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 999px;
+          color: rgba(255,255,255,.42);
+          font-size: 9.5px;
+          font-weight: 800;
+          letter-spacing: .22px;
+          text-transform: lowercase;
+        }
+
+        .v10-photo-drop {
+          margin-top: 13px;
+          height: 34px;
+          display: grid;
+          place-items: center;
+          background: rgba(255,196,0,.045);
+          border: 1px dashed rgba(255,196,0,.28);
+          border-radius: 10px;
+          color: #FFC400;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .v10-photo-drop input {
+          display: none;
+        }
+
+        .v10-thumb-strip {
+          margin-top: 11px;
+          display: flex;
+          gap: 9px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 8px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.14) transparent;
+        }
+
+        .v10-thumb {
+          position: relative;
+          flex: 0 0 122px;
+          height: 84px;
+          overflow: hidden;
+          background: #080808;
+          border: 1px solid rgba(255,255,255,.07);
+          border-radius: 10px;
+          cursor: grab;
+          opacity: .72;
+          transition:
+            opacity .15s ease,
+            transform .15s ease,
+            border-color .15s ease;
+        }
+
+        .v10-thumb:hover,
+        .v10-thumb.active {
+          opacity: 1;
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.30);
+        }
+
+        .v10-thumb.hero {
+          border-color: rgba(255,196,0,.55);
+        }
+
+        .v10-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .v10-thumb span {
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          z-index: 2;
+          padding: 3px 6px;
+          background: #FFC400;
+          color: #050505;
+          border-radius: 999px;
+          font-size: 8px;
+          font-weight: 950;
+        }
+
+        .v10-thumb button {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          z-index: 3;
+          width: 20px;
+          height: 20px;
+          border: none;
+          border-radius: 50%;
+          background: rgba(185,28,28,.92);
+          color: #fff;
+          font-size: 12px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .command-stack {
+          padding: 14px;
+          display: grid;
+          align-content: start;
+          gap: 9px;
+        }
+
+        .stack-head {
+          margin-bottom: 4px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .stack-head span {
+          display: block;
+          color: #FFC400;
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .7px;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+
+        .stack-head strong {
+          display: block;
+          color: #f2f2f2;
+          font-size: 20px;
+          font-weight: 950;
+          letter-spacing: -.45px;
+          text-transform: uppercase;
+        }
+
+        .command-primary,
+        .command-button,
+        .workflow-control select {
+          width: 100%;
+          min-height: 40px;
+          border-radius: 11px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: #f2f2f2;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .52px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .command-primary {
+          background: #FFC400;
+          border-color: #FFC400;
+          color: #050505;
+        }
+
+        .command-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+        }
+
+        .command-button:hover {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.26);
+        }
+
+        .command-button.green {
+          color: #38A169;
+          border-color: rgba(56,161,105,.32);
+          background: rgba(56,161,105,.04);
+        }
+
+        .command-button.danger {
           color: #ff9b9b;
+          border-color: rgba(229,62,62,.28);
+        }
+
+        .workflow-control {
+          display: grid;
+          gap: 7px;
+          color: rgba(255,255,255,.48);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .6px;
+          text-transform: uppercase;
+        }
+
+        .workflow-control select {
+          appearance: none;
+          padding: 0 11px;
+          outline: none;
+        }
+
+        .main-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 520px;
+          gap: 12px;
+          align-items: start;
+        }
+
+        .left-stack,
+        .right-stack {
+          display: grid;
+          gap: 12px;
+          grid-auto-rows: min-content;
+        }
+
+        .metrics-panel {
+          padding: 12px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+        }
+
+        .metric {
+          background: #101010;
+          border: 1px solid rgba(255,255,255,.06);
+          border-radius: 11px;
+          padding: 11px;
+        }
+
+        .metric span {
+          display: block;
+          color: rgba(255,255,255,.42);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+
+        .metric strong {
+          color: #f2f2f2;
+          font-size: 20px;
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        .panel {
+          padding: 16px;
         }
 
         .panel-head {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
+          gap: 12px;
+          margin-bottom: 13px;
         }
 
         .panel-head h2 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 16px;
+          font-size: 15px;
+          font-weight: 950;
+          letter-spacing: -.1px;
           text-transform: uppercase;
         }
 
         .panel-head span {
-          color: ${BRAND_YELLOW};
-          font-size: 10px;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-      
-        .main-grid {
-          display: grid;
-          grid-template-columns: minmax(420px, 540px) 1fr;
-          gap: 10px;
-          margin-bottom: 10px;
-        }
-
-.edit-panel,
-.promote-panel,
-.seller-bar {
-  padding: 18px;
-}
-
-.v10-machine-card {
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
-    #111;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 16px;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 18px 48px rgba(0,0,0,.28);
-}
-
-.v10-photo-stage {
-  position: relative;
-  background: #050505;
-}
-
-.v10-photo-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.035),
-    inset 0 -92px 120px rgba(0,0,0,.35);
-}
-
-.v10-hero-photo {
-  width: 100%;
-  height: 520px;
-  object-fit: cover;
-  display: block;
-  background: #050505;
-}
-
-.photo-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 3;
-  width: 34px;
-  height: 76px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(0,0,0,.22);
-  color: rgba(255,255,255,.58);
-  font-size: 34px;
-  cursor: pointer;
-}
-
-.photo-nav:hover {
-  color: #FFC400;
-  background: rgba(0,0,0,.42);
-}
-
-.photo-nav.left {
-  left: 0;
-  border-radius: 0 12px 12px 0;
-}
-
-.photo-nav.right {
-  right: 0;
-  border-radius: 12px 0 0 12px;
-}
-
-.v10-photo-overlay {
-  position: absolute;
-  left: 14px;
-  bottom: 12px;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 11px;
-  background: rgba(0,0,0,.54);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 999px;
-  backdrop-filter: blur(8px);
-}
-
-.v10-photo-overlay span,
-.v10-photo-overlay strong {
-  color: rgba(255,255,255,.72);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-
-.v10-photo-overlay strong {
-  color: #FFC400;
-}
-
-.v10-card-body {
-  padding: 16px;
-}
-
-.v10-title-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: start;
-}
-
-.v10-title-row h1 {
-  margin: 0;
-  color: #f2f2f2;
-  font-size: clamp(25px, 2.2vw, 38px);
-  font-weight: 950;
-  letter-spacing: -1px;
-  line-height: .96;
-  text-transform: uppercase;
-}
-
-.v10-title-row p {
-  margin: 9px 0 0;
-  color: rgba(255,255,255,.43);
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.35;
-}
-
-.v10-price-block {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.v10-price-block strong {
-  display: block;
-  color: #f2f2f2;
-  font-size: 30px;
-  font-weight: 950;
-  letter-spacing: -.7px;
-  line-height: 1;
-}
-
-.v10-price-block span {
-  display: block;
-  margin-top: 6px;
-  color: rgba(255,255,255,.44);
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.v10-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 14px;
-}
-
-.v10-meta-row span {
-  min-height: 25px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 9px;
-  background: rgba(255,255,255,.025);
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 999px;
-  color: rgba(255,255,255,.48);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .45px;
-  text-transform: uppercase;
-}
-
-.v10-photo-drop {
-  margin-top: 14px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,196,0,.045);
-  border: 1px dashed rgba(255,196,0,.28);
-  border-radius: 10px;
-  color: #FFC400;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .55px;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.v10-photo-drop input {
-  display: none;
-}
-
-.v10-thumb-strip {
-  margin-top: 12px;
-  display: flex;
-  gap: 9px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.14) transparent;
-}
-
-.v10-thumb {
-  position: relative;
-  flex: 0 0 118px;
-  height: 82px;
-  overflow: hidden;
-  background: #080808;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 10px;
-  cursor: grab;
-  opacity: .72;
-  transition:
-    opacity .15s ease,
-    transform .15s ease,
-    border-color .15s ease;
-}
-
-.v10-thumb:hover,
-.v10-thumb.active {
-  opacity: 1;
-  transform: translateY(-1px);
-  border-color: rgba(255,196,0,.34);
-}
-
-.v10-thumb.hero {
-  border-color: rgba(255,196,0,.55);
-}
-
-.v10-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.v10-thumb span {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  z-index: 2;
-  padding: 3px 6px;
-  background: #FFC400;
-  color: #050505;
-  border-radius: 999px;
-  font-size: 8px;
-  font-weight: 950;
-}
-
-.v10-thumb button {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 3;
-  width: 20px;
-  height: 20px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(185,28,28,.92);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-@media (max-width: 900px) {
-  .v10-hero-photo {
-    height: 360px;
-  }
-
-  .v10-title-row {
-    grid-template-columns: 1fr;
-  }
-
-  .v10-price-block {
-    text-align: left;
-  }
-}
-
-
-
-
-.left-stack,
-.right-stack {
-  display: grid;
-  gap: 10px;
-  grid-auto-rows: min-content;
-}
-
-.left-stack {
-  grid-template-rows: auto auto 1fr;
-}
-
-.performance-panel {
-  padding: 14px;
-}
-
-.performance-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.performance-grid div {
-  background: #101010;
-  border: 1px solid #292929;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.performance-grid span {
-  display: block;
-  color: #888;
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.performance-grid strong {
-  color: #f2f2f2;
-  font-size: 18px;
-}
-
-.download-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.download-row button {
-  border: 1px solid #333;
-  background: #101010;
-  color: #f2f2f2;
-  border-radius: 999px;
-  padding: 10px;
-  font-size: 9px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.activity-panel {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.activity-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  background: #101010;
-  border: 1px solid #292929;
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.activity-item span {
-  color: #f2f2f2;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .3px;
-}
-
-.activity-item small {
-  color: #777;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.activity-item.success {
-  border-color: rgba(56,161,105,.35);
-}
-
-        .facts {
-          display: grid;
-          grid-template-columns: 90px 1fr;
-          row-gap: 10px;
-          font-size: 14px;
-        }
-
-        .facts span { color: #888; }
-        .facts strong { color: #f2f2f2; }
-
-        .tag-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin-top: 14px;
-        }
-
-        .tag-row span,
-        .keyword-chip {
-          background: rgba(255,196,0,.08);
-          border: 1px solid rgba(255,196,0,.25);
-          color: #ffc400;
-          border-radius: 999px;
-          padding: 6px 9px;
+          color: #FFC400;
           font-size: 9px;
-          font-weight: 900;
+          font-weight: 950;
+          letter-spacing: .55px;
           text-transform: uppercase;
         }
 
-        .edit-grid {
+        .machine-data-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
         }
 
-        .wide { grid-column: 1 / -1; }
+        .machine-data-grid > div,
+        .machine-data-grid label {
+          min-height: 66px;
+          background: #101010;
+          border: 1px solid rgba(255,255,255,.06);
+          border-radius: 11px;
+          padding: 10px;
+        }
+
+        .machine-data-grid span,
+        label {
+          color: rgba(255,255,255,.44);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
+        .machine-data-grid strong {
+          display: block;
+          margin-top: 7px;
+          color: #f2f2f2;
+          font-size: 13px;
+          font-weight: 850;
+          line-height: 1.15;
+          overflow-wrap: anywhere;
+        }
 
         label {
           display: grid;
-          gap: 6px;
-          color: #888;
-          font-size: 10px;
-          font-weight: 900;
-          text-transform: uppercase;
+          gap: 7px;
         }
 
         input,
         textarea {
           width: 100%;
-          background: #101010;
-          border: 1px solid #303030;
+          background: #0c0c0c;
+          border: 1px solid rgba(255,255,255,.08);
           border-radius: 9px;
           color: #f2f2f2;
-          padding: 11px 12px;
+          padding: 10px 11px;
           font-size: 13px;
           outline: none;
         }
 
-        textarea {
-          min-height: 150px;
-          resize: vertical;
-          font-family: Arial, sans-serif;
-        }
-
         input:focus,
-        textarea:focus {
-          border-color: ${BRAND_YELLOW};
+        textarea:focus,
+        select:focus {
+          border-color: rgba(255,196,0,.50);
         }
 
-        .keywords-panel { margin-top: 14px; }
+        textarea {
+          min-height: 186px;
+          resize: vertical;
+          line-height: 1.5;
+        }
+
+        .wide {
+          grid-column: 1 / -1;
+        }
+
+        .keywords-panel {
+          margin-top: 14px;
+        }
 
         .keywords-head {
           display: flex;
           justify-content: space-between;
+          align-items: center;
           margin-bottom: 8px;
         }
 
         .keywords-head h2 {
           margin: 0;
-          font-size: 13px;
           color: #f2f2f2;
+          font-size: 13px;
+          font-weight: 950;
           text-transform: uppercase;
         }
 
         .keywords-head span {
-          color: #888;
-          font-size: 10px;
-          font-weight: 900;
+          color: rgba(255,255,255,.44);
+          font-size: 9px;
+          font-weight: 950;
+          text-transform: uppercase;
         }
 
-        .keyword-search { margin-bottom: 8px; }
+        .keyword-search {
+          margin-bottom: 8px;
+        }
 
         .keyword-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 220px;
-  overflow-y: auto;
-  border: 1px solid #252525;
-  background: #0F0F0F;
-  border-radius: 12px;
-  padding: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          max-height: 230px;
+          overflow-y: auto;
+          border: 1px solid rgba(255,255,255,.055);
+          background: #0f0f0f;
+          border-radius: 12px;
+          padding: 10px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.14) transparent;
+        }
 
-  scrollbar-width: thin;
-  scrollbar-color: #3A3A3A #121212;
-}
+        .keyword-chip {
+          padding: 5px 7px;
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 999px;
+          background: rgba(255,255,255,.025);
+          color: rgba(255,255,255,.42);
+          font-size: 9.5px;
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: .15px;
+          text-transform: lowercase;
+          cursor: pointer;
+        }
 
-.keyword-grid::-webkit-scrollbar {
-  width: 8px;
-}
+        .keyword-chip.active {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.34);
+          background: rgba(255,196,0,.07);
+        }
 
-.keyword-grid::-webkit-scrollbar-track {
-  background: #121212;
-  border-radius: 999px;
-}
+        .save-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 14px;
+        }
 
-.keyword-grid::-webkit-scrollbar-thumb {
-  background: #3A3A3A;
-  border-radius: 999px;
-}
+        .save-btn,
+        .preview-btn {
+          min-height: 42px;
+          border-radius: 11px;
+          border: 1px solid rgba(255,255,255,.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
 
-.keyword-grid::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
+        .save-btn {
+          background: #FFC400;
+          color: #050505;
+          border-color: #FFC400;
+        }
 
-       .save-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.save-btn,
-.preview-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 14px 16px;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.save-btn {
-  background: ${BRAND_YELLOW};
-  color: #050505;
-}
-
-.preview-btn {
-  background: #101010;
-  border: 1px solid #333;
-  color: #F2F2F2;
-}
-
-.preview-btn:hover {
-  border-color: #555;
-  background: #151515;
-}
-        .promote-panel {
-          margin-bottom: 10px;
+        .preview-btn {
+          background: #101010;
+          color: #f2f2f2;
         }
 
         .promote-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(2, 1fr);
           gap: 8px;
         }
 
@@ -1696,12 +2085,13 @@ Listed on IronXchange.
         .promote-grid a {
           min-height: 36px;
           background: #101010;
-          border: 1px solid rgba(255,255,255,.12);
+          border: 1px solid rgba(255,255,255,.09);
           color: #f2f2f2;
           border-radius: 999px;
-          padding: 9px 12px;
+          padding: 9px 10px;
           font-size: 9px;
-          font-weight: 900;
+          font-weight: 950;
+          letter-spacing: .45px;
           text-decoration: none;
           cursor: pointer;
           text-align: center;
@@ -1709,39 +2099,74 @@ Listed on IronXchange.
         }
 
         .promote-grid a {
-          color: ${BRAND_YELLOW};
+          color: #FFC400;
           border-color: rgba(255,196,0,.25);
           background: rgba(255,196,0,.04);
         }
 
+        .activity-list {
+          display: grid;
+          gap: 8px;
+        }
+
+        .activity-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          background: #101010;
+          border: 1px solid rgba(255,255,255,.06);
+          border-radius: 11px;
+          padding: 11px;
+        }
+
+        .activity-item span {
+          color: #f2f2f2;
+          font-size: 10.5px;
+          font-weight: 950;
+          letter-spacing: .35px;
+        }
+
+        .activity-item small {
+          color: rgba(255,255,255,.42);
+          font-size: 9px;
+          font-weight: 900;
+          white-space: nowrap;
+        }
+
+        .activity-item.success {
+          border-color: rgba(56,161,105,.30);
+        }
+
         .seller-bar {
           display: grid;
-          grid-template-columns: 130px 1fr;
-          gap: 16px;
+          grid-template-columns: 112px 1fr;
+          gap: 14px;
           align-items: center;
         }
 
         .seller-bar img {
-          max-width: 120px;
-          max-height: 70px;
+          width: 112px;
+          max-height: 68px;
           object-fit: contain;
         }
 
         .seller-icon {
           width: 58px;
           height: 58px;
-          border: 1px solid #555;
+          border: 1px solid rgba(255,255,255,.10);
           border-radius: 50%;
           display: grid;
           place-items: center;
-          color: #aaa;
+          color: rgba(255,255,255,.52);
         }
 
         .seller-bar span {
           display: block;
-          color: #888;
-          font-size: 10px;
-          font-weight: 900;
+          color: rgba(255,255,255,.44);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .58px;
           text-transform: uppercase;
           margin-bottom: 5px;
         }
@@ -1749,18 +2174,48 @@ Listed on IronXchange.
         .seller-bar strong {
           color: #f2f2f2;
           font-size: 18px;
+          font-weight: 950;
+          letter-spacing: -.2px;
         }
 
         .seller-bar p {
           margin: 6px 0 0;
-          color: #888;
+          color: rgba(255,255,255,.44);
           font-size: 12px;
+          line-height: 1.35;
         }
 
-        @media (max-width: 1000px) {
-          .main-grid,
-          .promote-grid {
+        @media (max-width: 1180px) {
+          .hero-command-grid,
+          .main-grid {
             grid-template-columns: 1fr;
+          }
+
+          .command-stack {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .stack-head,
+          .workflow-control {
+            grid-column: 1 / -1;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .wrap {
+            padding: 12px 4% 42px;
+          }
+
+          .nav {
+            padding: 8px 4%;
+          }
+
+          .logo-img {
+            height: 34px;
+          }
+
+          .nav-links a:not(.yellow-link):not(.login-icon) {
+            display: none;
           }
 
           .command-bar {
@@ -1768,8 +2223,32 @@ Listed on IronXchange.
             flex-direction: column;
           }
 
+          .command-title h1 {
+            max-width: 100%;
+            white-space: normal;
+          }
+
           .command-actions {
             justify-content: flex-start;
+          }
+
+          .v10-hero-photo {
+            height: 360px;
+          }
+
+          .v10-title-row {
+            grid-template-columns: 1fr;
+          }
+
+          .v10-price-block {
+            text-align: left;
+          }
+
+          .machine-data-grid,
+          .metrics-panel,
+          .promote-grid,
+          .command-stack {
+            grid-template-columns: 1fr;
           }
 
           .seller-bar {
@@ -1780,3 +2259,13 @@ Listed on IronXchange.
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+    
