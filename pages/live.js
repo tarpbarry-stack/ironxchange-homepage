@@ -1288,45 +1288,6 @@ export default function ListingLivePage() {
                 </div>
               </div>
 
-              <div className="send-dock">
-                <div className="send-dock-head">
-                  <span>Send This Machine</span>
-                  <strong>Copy-ready buyer message + IronXchange link</strong>
-                </div>
-
-                <div className="send-dock-actions">
-                  <button type="button" className="whatsapp-mini" onClick={launchWhatsApp}>
-                    <i className="fa-brands fa-whatsapp"></i>
-                    WhatsApp
-                  </button>
-
-                  <button type="button" className="messenger-mini" onClick={launchMessenger}>
-                    <i className="fa-brands fa-facebook-messenger"></i>
-                    Messenger
-                  </button>
-
-                  <button type="button" className="sms-mini" onClick={launchSms}>
-                    <i className="fa-solid fa-comment-sms"></i>
-                    Text
-                  </button>
-
-                  <button
-                    type="button"
-                    className="copy-mini"
-                    onClick={() => copyText("Listing Link", listingUrl)}
-                  >
-                    <i className="fa-solid fa-link"></i>
-                    {copied === "Listing Link" ? "Copied" : "Copy Link"}
-                  </button>
-
-                  <button type="button" className="share-mini" onClick={nativeShare}>
-                    <i className="fa-solid fa-arrow-up-from-bracket"></i>
-                    Share
-                  </button>
-                </div>
-              </div>
-            </section>
-
             <aside className="distribution-center">
               <div className="distribution-head">
                 <span>Distribution Center</span>
@@ -1473,6 +1434,17 @@ export default function ListingLivePage() {
                 <button type="button" onClick={() => copyText("Long Copy", longDescription)}>
                   {copied === "Long Copy" ? "Copied" : "Long Copy"}
                 </button>
+
+                  <button
+                  type="button"
+                  className="share-everywhere-btn"
+                  onClick={nativeShare}
+>
+                    <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                    Share Everywhere
+</button>
+
+                  
               </div>
             </aside>
           </section>
@@ -2314,93 +2286,28 @@ export default function ListingLivePage() {
           text-transform: uppercase;
         }
 
-        .send-dock {
-        width: min(100%, 430px);
+.share-everywhere-btn {
+  grid-column: 1 / -1 !important;
 
-          margin:
-          auto
-          auto
-          0;
+  background:
+    linear-gradient(
+      135deg,
+      #FFC400,
+      #ff8a00
+    ) !important;
 
-          padding: 10px;
+  border-color: rgba(255,196,0,.7) !important;
 
-          align-self: center;
+  color: #050505 !important;
+
+  box-shadow:
+    0 10px 24px rgba(255,196,0,.14);
 }
 
-        .send-dock-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 10px;
-          padding-bottom: 8px;
-          margin-bottom: 8px;
-          border-bottom: 1px solid rgba(255,255,255,.055);
-        }
+.listing-preview-card {
+  margin: 24px auto 0;
+}
 
-        .send-dock-head strong {
-          color: rgba(255,255,255,.44);
-          font-size: 9px;
-          font-weight: 850;
-        }
-
-        .send-dock-actions {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 7px;
-        }
-
-        .send-dock-actions button {
-          min-height: 34px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.08);
-          background: #101010;
-          color: #f2f2f2;
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .45px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: transform .14s ease, filter .14s ease, border-color .14s ease;
-        }
-
-        .send-dock-actions button:hover {
-          transform: translateY(-1px);
-          filter: brightness(1.04);
-        }
-
-        .send-dock-actions i {
-          margin-right: 4px;
-        }
-
-        .send-dock-actions .whatsapp-mini {
-          background: #25D366;
-          border-color: #25D366;
-          color: #07130b;
-        }
-
-        .send-dock-actions .messenger-mini {
-          background: linear-gradient(135deg, #00B2FF, #7B61FF);
-          border-color: transparent;
-          color: white;
-        }
-
-        .send-dock-actions .sms-mini {
-          background: rgba(52,199,89,.16);
-          border-color: rgba(52,199,89,.34);
-          color: #7ee39a;
-        }
-
-        .send-dock-actions .copy-mini {
-          background: rgba(255,196,0,.10);
-          border-color: rgba(255,196,0,.30);
-          color: #FFC400;
-        }
-
-        .send-dock-actions .share-mini {
-          background: #181818;
-          border-color: rgba(255,255,255,.14);
-          color: #f2f2f2;
-        }
 
         .distribution-head h2 {
           margin: 0;
