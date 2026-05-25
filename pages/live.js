@@ -1973,7 +1973,7 @@ export default function ListingLivePage() {
 
         .studio-grid {
           display: grid;
-          grid-template-columns: 230px minmax(360px, 1fr) 360px;
+          grid-template-columns: 230px minmax(360px, 1fr) 312px;
           gap: 10px;
           align-items: start;
           margin-bottom: 10px;
@@ -2416,7 +2416,7 @@ export default function ListingLivePage() {
         }
 
         .launch-btn {
-          min-height: 50px;
+          min-height: 46px;
           display: flex;
           align-items: center;
           gap: 13px;
@@ -2435,14 +2435,14 @@ export default function ListingLivePage() {
         }
 
         .launch-btn i {
-          font-size: 23px;
+          font-size: 20px;
           width: 27px;
           text-align: center;
         }
 
         .launch-btn strong {
           display: block;
-          font-size: 12.5px;
+          font-size: 11.5px;
           font-weight: 950;
         }
 
