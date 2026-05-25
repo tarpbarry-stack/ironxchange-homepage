@@ -1185,7 +1185,7 @@ export default function ListingPage() {
   max-height: var(--media-row-height);
 
   align-items: stretch;
-  overflow: hidden;
+  
 }
 
      .buyer-launch-panel,
@@ -1226,6 +1226,10 @@ export default function ListingPage() {
 
   border-radius: 9px;
   border: 1px solid rgba(255,255,255,.07);
+
+  .video-panel {
+  align-self: start;
+}
 
   background:
     linear-gradient(
@@ -1371,6 +1375,14 @@ export default function ListingPage() {
   min-height: var(--info-row-height);
   max-height: var(--info-row-height);
   overflow: hidden;
+
+  display: grid;
+  grid-template-columns: .82fr 1fr;
+  gap: 0;
+  align-items: start;
+
+  border-radius: 14px;
+  padding: 20px 22px;
 }
 
         .facts-column {
@@ -1480,9 +1492,8 @@ export default function ListingPage() {
           backdrop-filter: blur(2px);
         }
 
-       .description {
-  margin-top: 14px;
-
+      .description {
+  margin-top: 18px;
   padding: 18px 20px;
 }
 
