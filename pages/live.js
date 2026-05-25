@@ -728,87 +728,83 @@ Listed on IronXchange.
             </div>
           </section>
 
-          <section className="panel photo-row-panel">
-            <div className="panel-head">
-              <h2>Photo Order</h2>
-              <span>{photoItems.length} Photos</span>
-            </div>
+          <section className="v10-machine-card">
+  <div className="v10-photo-stage">
+    <img src={heroPhoto} alt={listing.title} className="v10-hero-photo" />
 
-            <label
-              className="photo-add-box"
-              onDragOver={e => e.preventDefault()}
-              onDrop={handlePhotoDrop}
-            >
-              <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-              + Add / Drop Photos
-            </label>
+    <button type="button" className="photo-nav left" onClick={() => changeActivePhoto(-1)}>
+      ‹
+    </button>
 
-            <div className="photo-strip">
-              {photoItems.map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className={index === 0 ? "photo-tile hero-tile" : "photo-tile"}
-                  draggable
-                  onDragStart={() => setDraggedPhotoIndex(index)}
-                  onDragOver={e => e.preventDefault()}
-                  onDrop={() => {
-                    reorderPhotos(draggedPhotoIndex, index);
-                    setDraggedPhotoIndex(null);
-                  }}
-                  onClick={() => setActivePhotoIndex(index)}
-                >
-                  {index === 0 && <span className="hero-badge">HERO</span>}
-                  <img src={photo.url} alt={`Photo ${index + 1}`} />
-                  <button type="button" onClick={e => {
-                    e.stopPropagation();
-                    removePhoto(index);
-                  }}>
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
+    <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>
+      ›
+    </button>
 
-<section className="main-grid">
-  <div className="left-stack">
-    <section className="panel preview-card">
-      <div className="photo-stage">
-        <img src={heroPhoto} alt={listing.title} className="hero-photo" />
+    <div className="v10-photo-overlay">
+      <span>{activePhotoIndex + 1} / {photoItems.length || 1}</span>
+      <strong>Drag thumbnails to reorder</strong>
+    </div>
+  </div>
 
-        <button type="button" className="photo-nav left" onClick={() => changeActivePhoto(-1)}>
-          ‹
-        </button>
-
-        <button type="button" className="photo-nav right" onClick={() => changeActivePhoto(1)}>
-          ›
-        </button>
+  <div className="v10-card-body">
+    <div className="v10-title-row">
+      <div>
+        <h1>{cleanMachineTitle(listing.title || "")}</h1>
+        <p>{selectedKeywords.slice(0, 4).join(" • ") || "Machine details ready for update"}</p>
       </div>
 
-      <div className="card-body live-card-body">
-        <div className="title-row">
-          <h3>
-            {cleanMachineTitle(listing.title || "")}
-          </h3>
-
-          <h3 className="hours-inline">
-            {edit.hours || listing.hours || "—"}
-          </h3>
-        </div>
-
-        <p className="feature-line">
-          {selectedKeywords.slice(0, 4).join(" • ")}
-        </p>
-
-        <div className="price-row">
-          <strong>{formatMoney(edit.price || listing.price)}</strong>
-
-          <div className="meta">
-            <span>⌖ {edit.location || listing.location || "—"}</span>
-          </div>
-        </div>
+      <div className="v10-price-block">
+        <strong>{formatMoney(edit.price || listing.price)}</strong>
+        <span>{edit.hours || listing.hours || "—"} hrs</span>
       </div>
-    </section>
+    </div>
+
+    <div className="v10-meta-row">
+      <span>{edit.location || listing.location || "Location not listed"}</span>
+      <span>{listing.type || listing.category || "Category not listed"}</span>
+      <span>{photoItems.length} photos</span>
+    </div>
+
+    <label
+      className="v10-photo-drop"
+      onDragOver={e => e.preventDefault()}
+      onDrop={handlePhotoDrop}
+    >
+      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+      + Add / Drop Photos
+    </label>
+
+    <div className="v10-thumb-strip">
+      {photoItems.map((photo, index) => (
+        <div
+          key={photo.id}
+          className={`v10-thumb ${index === activePhotoIndex ? "active" : ""} ${index === 0 ? "hero" : ""}`}
+          draggable
+          onDragStart={() => setDraggedPhotoIndex(index)}
+          onDragOver={e => e.preventDefault()}
+          onDrop={() => {
+            reorderPhotos(draggedPhotoIndex, index);
+            setDraggedPhotoIndex(null);
+          }}
+          onClick={() => setActivePhotoIndex(index)}
+        >
+          {index === 0 && <span>HERO</span>}
+          <img src={photo.url} alt={`Photo ${index + 1}`} />
+
+          <button
+            type="button"
+            onClick={e => {
+              e.stopPropagation();
+              removePhoto(index);
+            }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
     <section className="panel performance-panel">
       <div className="performance-grid">
@@ -1111,11 +1107,6 @@ Listed on IronXchange.
           color: #ff9b9b;
         }
 
-        .photo-row-panel {
-          padding: 14px;
-          margin-bottom: 10px;
-        }
-
         .panel-head {
           display: flex;
           justify-content: space-between;
@@ -1138,103 +1129,7 @@ Listed on IronXchange.
           text-transform: uppercase;
         }
 
-        .photo-add-box {
-          display: block;
-          border: 1px dashed #444;
-          background: #101010;
-          border-radius: 12px;
-          padding: 12px;
-          margin-bottom: 10px;
-          text-align: center;
-          color: ${BRAND_YELLOW};
-          font-size: 11px;
-          font-weight: 900;
-          cursor: pointer;
-          text-transform: uppercase;
-        }
-
-        .photo-add-box input { display: none; }
-
-        .photo-strip {
-  display: flex;
-  gap: 10px;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  padding-bottom: 8px;
-
-  scrollbar-width: thin;
-  scrollbar-color: #3A3A3A #121212;
-}
-
-.photo-strip::-webkit-scrollbar {
-  height: 8px;
-}
-
-.photo-strip::-webkit-scrollbar-track {
-  background: #121212;
-  border-radius: 999px;
-}
-
-.photo-strip::-webkit-scrollbar-thumb {
-  background: #3A3A3A;
-  border-radius: 999px;
-}
-
-.photo-strip::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-        .photo-tile {
-          position: relative;
-          flex: 0 0 150px;
-          height: 110px;
-          border: 1px solid #2a2a2a;
-          border-radius: 12px;
-          overflow: hidden;
-          cursor: grab;
-          background: #101010;
-        }
-
-        .photo-tile img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .hero-tile { border: 2px solid ${BRAND_YELLOW}; }
-
-        .hero-badge {
-          position: absolute;
-          top: 7px;
-          left: 7px;
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          font-size: 9px;
-          font-weight: 900;
-          padding: 4px 7px;
-          border-radius: 999px;
-          z-index: 2;
-        }
-
-        .photo-tile button {
-          position: absolute;
-          top: 7px;
-          right: 7px;
-          width: 22px;
-          height: 22px;
-          border: none;
-          background: #B91C1C;
-          color: white;
-          border-radius: 50%;
-          font-size: 13px;
-          font-weight: 900;
-          cursor: pointer;
-          z-index: 3;
-        }
-
+      
         .main-grid {
           display: grid;
           grid-template-columns: minmax(420px, 540px) 1fr;
@@ -1242,126 +1137,288 @@ Listed on IronXchange.
           margin-bottom: 10px;
         }
 
-        .preview-card { overflow: hidden; }
-
-        .photo-stage {
-          position: relative;
-          background: #050505;
-        }
-
-        .hero-photo {
-          width: 100%;
-          height: 380px;
-          object-fit: cover;
-          display: block;
-        }
-
-        .photo-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 36px;
-          height: 48px;
-          border: 1px solid rgba(255,255,255,.2);
-          background: rgba(0,0,0,.55);
-          color: white;
-          border-radius: 10px;
-          font-size: 26px;
-          cursor: pointer;
-        }
-
-        .photo-nav.left { left: 10px; }
-        .photo-nav.right { right: 10px; }
-
-        .preview-card {
-  overflow: hidden;
-  align-self: start;
-  height: fit-content;
-}
-
-.card-body {
-  padding: 16px 16px 8px;
-}
-
 .edit-panel,
 .promote-panel,
 .seller-bar {
   padding: 18px;
 }
 
-.preview-card .live-card-body {
-  padding: 16px 16px 8px;
+.v10-machine-card {
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+    #111;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 18px 48px rgba(0,0,0,.28);
 }
 
-.preview-card .title-row {
+.v10-photo-stage {
+  position: relative;
+  background: #050505;
+}
+
+.v10-photo-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.035),
+    inset 0 -92px 120px rgba(0,0,0,.35);
+}
+
+.v10-hero-photo {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  display: block;
+  background: #050505;
+}
+
+.photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 34px;
+  height: 76px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.22);
+  color: rgba(255,255,255,.58);
+  font-size: 34px;
+  cursor: pointer;
+}
+
+.photo-nav:hover {
+  color: #FFC400;
+  background: rgba(0,0,0,.42);
+}
+
+.photo-nav.left {
+  left: 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.photo-nav.right {
+  right: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.v10-photo-overlay {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 4;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  background: rgba(0,0,0,.54);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
 }
 
-.preview-card h3 {
-  margin: 0;
-  color: #F2F2F2;
-  font-size: 24px;
-  letter-spacing: -0.3px;
-  line-height: 1.08;
-}
-
-.preview-card .hours-inline {
-  color: #8A8A8A;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: .3px;
-  white-space: nowrap;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.preview-card .feature-line {
-  margin: 12px 0 24px;
-  color: #8F8F8F;
-  font-size: 16px;
-  line-height: 1.38;
-  min-height: 58px;
-  display: flex;
-  align-items: flex-start;
-}
-
-.preview-card .price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin: 0;
-  padding: 0;
-}
-
-.preview-card .price-row strong {
-  color: #F2F2F2;
-  font-size: 26px;
-  line-height: 1;
-}
-
-.preview-card .meta {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  font-size: 13px;
-  color: #9A9A9A;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-}
-
-.preview-card .price-row span {
-  color: #9A9A9A;
-  font-size: 13px;
+.v10-photo-overlay span,
+.v10-photo-overlay strong {
+  color: rgba(255,255,255,.72);
+  font-size: 9px;
   font-weight: 900;
-  letter-spacing: .4px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.v10-photo-overlay strong {
+  color: #FFC400;
+}
+
+.v10-card-body {
+  padding: 16px;
+}
+
+.v10-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.v10-title-row h1 {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: clamp(25px, 2.2vw, 38px);
+  font-weight: 950;
+  letter-spacing: -1px;
+  line-height: .96;
+  text-transform: uppercase;
+}
+
+.v10-title-row p {
+  margin: 9px 0 0;
+  color: rgba(255,255,255,.43);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.v10-price-block {
+  text-align: right;
   white-space: nowrap;
+}
+
+.v10-price-block strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: 30px;
+  font-weight: 950;
+  letter-spacing: -.7px;
   line-height: 1;
 }
+
+.v10-price-block span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255,255,255,.44);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v10-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.v10-meta-row span {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+  color: rgba(255,255,255,.48);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.v10-photo-drop {
+  margin-top: 14px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,196,0,.045);
+  border: 1px dashed rgba(255,196,0,.28);
+  border-radius: 10px;
+  color: #FFC400;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.v10-photo-drop input {
+  display: none;
+}
+
+.v10-thumb-strip {
+  margin-top: 12px;
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.14) transparent;
+}
+
+.v10-thumb {
+  position: relative;
+  flex: 0 0 118px;
+  height: 82px;
+  overflow: hidden;
+  background: #080808;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  cursor: grab;
+  opacity: .72;
+  transition:
+    opacity .15s ease,
+    transform .15s ease,
+    border-color .15s ease;
+}
+
+.v10-thumb:hover,
+.v10-thumb.active {
+  opacity: 1;
+  transform: translateY(-1px);
+  border-color: rgba(255,196,0,.34);
+}
+
+.v10-thumb.hero {
+  border-color: rgba(255,196,0,.55);
+}
+
+.v10-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.v10-thumb span {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  padding: 3px 6px;
+  background: #FFC400;
+  color: #050505;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 950;
+}
+
+.v10-thumb button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(185,28,28,.92);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .v10-hero-photo {
+    height: 360px;
+  }
+
+  .v10-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .v10-price-block {
+    text-align: left;
+  }
+}
+
+
+
 
 .left-stack,
 .right-stack {
