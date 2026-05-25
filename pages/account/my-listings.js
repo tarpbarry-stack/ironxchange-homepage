@@ -762,7 +762,7 @@ async function updateWorkflowStatus(listing, status) {
               disabled={savingPriceId === String(listingId)}
             />
 
-           className={`status-pill ${isPaused ? "paused" : ""}`}>
+          <span className={`status-pill ${isPaused ? "paused" : ""}`}>
   {isPaused ? "PAUSED" : "LIVE"}
 </span>
           </div>
