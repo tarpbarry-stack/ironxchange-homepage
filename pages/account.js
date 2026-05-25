@@ -246,15 +246,15 @@ export default function AccountPage() {
     window.location.href = "/";
   }
 
-  async function archiveListing(listing) {
+ async function pauseListing(listing) {
   const ok = window.confirm(
-    `Archive this listing?\n\n${cleanMachineTitle(listing.title)}`
+    `Pause this listing?\n\n${cleanMachineTitle(listing.title)}`
   );
 
   if (!ok) return;
 
   try {
-    const response = await fetch("/api/archive-listing", {
+    const response = await fetch("/api/pause-listing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listingId: listing.id })
@@ -263,7 +263,7 @@ export default function AccountPage() {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Archive failed");
+      throw new Error(data.error || "Pause failed");
     }
 
     setMyListings(current =>
@@ -273,17 +273,17 @@ export default function AccountPage() {
               ...item,
               publicData: {
                 ...(item.publicData || {}),
-                listingStatus: "archived"
+                listingStatus: "Paused"
               },
-              listingStatus: "archived"
+              listingStatus: "Paused"
             }
           : item
       )
     );
 
-    addActivity("success", `Archived — ${cleanMachineTitle(listing.title)}`);
+    addActivity("success", `Paused — ${cleanMachineTitle(listing.title)}`);
   } catch (error) {
-    alert(`Archive failed: ${error.message}`);
+    alert(`Pause failed: ${error.message}`);
   }
 }
 
@@ -1859,7 +1859,7 @@ main {
   background: rgba(56,161,105,.10);
   color: #38A169;
 }
-.listing-status.archived {
+.listing-status.paused {
   border: 1px solid rgba(160,160,160,.35);
   background: rgba(120,120,120,.10);
   color: #A0A0A0;
