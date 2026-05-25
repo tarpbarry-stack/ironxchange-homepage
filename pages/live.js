@@ -199,6 +199,36 @@ function getListingStatus(listing = {}) {
   );
 }
 
+function getAuthorId(listing = {}) {
+  return (
+    listing.authorId ||
+    listing.sellerId ||
+    listing.author?.id?.uuid ||
+    listing.author?.id ||
+    ""
+  );
+}
+
+function trackLaunchEvent(eventName, payload = {}) {
+  // POSTHOG HOOK:
+  // When PostHog is wired globally, this captures seller Launch Studio behavior.
+  // Example events:
+  // - launch_studio_opened
+  // - launch_card_saved
+  // - launch_whatsapp_clicked
+  // - launch_sms_clicked
+  // - launch_marketplace_clicked
+  // - launch_listing_paused
+  // - launch_listing_deleted
+  if (typeof window === "undefined") return;
+
+  try {
+    window.posthog?.capture?.(eventName, payload);
+  } catch (err) {
+    console.warn("PostHog capture skipped:", err);
+  }
+}
+
 function addActivity(type, message) {
   if (typeof window === "undefined") return;
 
@@ -244,18 +274,29 @@ async function downloadImage(url, filename) {
   URL.revokeObjectURL(objectUrl);
 }
 
-function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
+function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = [], edit = {}) {
   const title = clean(listing?.title) || "Equipment Listing";
-  const price = formatMoney(listing?.price);
-  const hours = formatHours(listing?.hours);
-  const location = clean(listing?.location) || "Location not listed";
+  const price = formatMoney(edit.price || listing?.price);
+  const hours = formatHours(edit.hours || listing?.hours);
+  const location = clean(edit.location || listing?.location) || "Location not listed";
   const description =
+    clean(edit.description) ||
     clean(listing?.description) ||
     clean(listing?.publicData?.description) ||
     "Clean machine. Full specs and photos available on IronXchange.";
 
   const features = selectedKeywords.slice(0, 6).join(" • ");
   const linkLine = `Full specs + photos:\n${listingUrl}`;
+
+  if (platform === "sms" || platform === "whatsapp") {
+    return `${title}
+${hours} | ${location}
+${price}
+
+${features}
+
+${linkLine}`;
+  }
 
   if (platform === "marketplace") {
     return `${title}
@@ -361,6 +402,40 @@ export default function ListingLivePage() {
   const listingStatus = getListingStatus(listing || {});
   const isPaused = listingStatus === "paused";
 
+  const sellerInventory = useMemo(() => {
+    if (!listing) return [];
+
+    const authorId = getAuthorId(listing);
+
+    const inventory = listings.filter(item => {
+      const itemStatus = getListingStatus(item);
+
+      if (itemStatus === "deleted" || itemStatus === "archived") return false;
+
+      if (authorId) {
+        return String(getAuthorId(item)) === String(authorId);
+      }
+
+      return true;
+    });
+
+    return inventory;
+  }, [listing, listings]);
+
+  const currentInventoryIndex = useMemo(() => {
+    if (!listing) return -1;
+
+    return sellerInventory.findIndex(item => String(item.id) === String(listing.id));
+  }, [sellerInventory, listing]);
+
+  const previousListing =
+    currentInventoryIndex > 0 ? sellerInventory[currentInventoryIndex - 1] : null;
+
+  const nextListing =
+    currentInventoryIndex >= 0 && currentInventoryIndex < sellerInventory.length - 1
+      ? sellerInventory[currentInventoryIndex + 1]
+      : null;
+
   useEffect(() => {
     if (!listing) return;
 
@@ -384,6 +459,13 @@ export default function ListingLivePage() {
     );
 
     setActivePhotoIndex(0);
+
+    trackLaunchEvent("launch_studio_opened", {
+      listingId: String(listing.id),
+      listingTitle: listing.title,
+      listingStatus: getListingStatus(listing),
+      workflowStatus: getWorkflowStatus(listing)
+    });
   }, [listing]);
 
   const heroPhoto =
@@ -425,34 +507,17 @@ export default function ListingLivePage() {
     : "";
 
   const shortDescription = listing
-    ? `
-${clean(listing.title)}
-${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
-
-${formatMoney(edit.price || listing.price)}
-
-Full specs + photos:
-${listingUrl}
-`.trim()
+    ? buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit)
     : "";
 
   const longDescription = listing
-    ? `
-${clean(listing.title)}
-
-${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
-${formatMoney(edit.price || listing.price)}
-
-${selectedKeywords.slice(0, 8).join(" • ")}
-
-${clean(edit.description || listing.description)}
-
-Full specs + photos:
-${listingUrl}
-
-Listed on IronXchange.
-`.trim()
+    ? buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords, edit)
     : "";
+
+  function goToListing(targetListing) {
+    if (!targetListing?.id) return;
+    router.push(`/live?id=${targetListing.id}`);
+  }
 
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
@@ -486,7 +551,13 @@ Listed on IronXchange.
     }));
 
     setPhotoItems(current => [...current, ...mapped]);
+
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`);
+    trackLaunchEvent("launch_photos_added", {
+      listingId: String(listing?.id || ""),
+      count: mapped.length
+    });
+
     e.target.value = "";
   }
 
@@ -505,13 +576,23 @@ Listed on IronXchange.
     }));
 
     setPhotoItems(current => [...current, ...mapped]);
+
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
+    trackLaunchEvent("launch_photos_dropped", {
+      listingId: String(listing?.id || ""),
+      count: mapped.length
+    });
   }
 
   function removePhoto(indexToRemove) {
     setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
     setActivePhotoIndex(0);
+
     addActivity("success", `Photo removed — ${title}`);
+    trackLaunchEvent("launch_photo_removed", {
+      listingId: String(listing?.id || ""),
+      photoIndex: indexToRemove
+    });
   }
 
   function reorderPhotos(fromIndex, toIndex) {
@@ -526,14 +607,26 @@ Listed on IronXchange.
     });
 
     setActivePhotoIndex(toIndex);
+
     addActivity("success", `Photo order changed — ${title}`);
+    trackLaunchEvent("launch_photo_reordered", {
+      listingId: String(listing?.id || ""),
+      fromIndex,
+      toIndex
+    });
   }
 
   async function copyText(label, text) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(label);
+
       addActivity("success", `${label} copied — ${title}`);
+      trackLaunchEvent("launch_copy_clicked", {
+        listingId: String(listing?.id || ""),
+        label
+      });
+
       setTimeout(() => setCopied(""), 1500);
     } catch {
       addActivity("error", `${label} copy failed — ${title}`);
@@ -550,7 +643,11 @@ Listed on IronXchange.
     }
 
     await downloadImage(hero, `${slugify(title)}-hero.jpg`);
+
     addActivity("success", `Hero image downloaded — ${title}`);
+    trackLaunchEvent("launch_hero_downloaded", {
+      listingId: String(listing?.id || "")
+    });
   }
 
   async function downloadAllPhotos() {
@@ -564,6 +661,10 @@ Listed on IronXchange.
     }
 
     addActivity("success", `Photo pack downloaded — ${title}`);
+    trackLaunchEvent("launch_photo_pack_downloaded", {
+      listingId: String(listing?.id || ""),
+      count: photoItems.length
+    });
   }
 
   async function saveQuickEdit() {
@@ -607,12 +708,18 @@ Listed on IronXchange.
         }
       }
 
-      addActivity("success", `Listing saved — ${title}`);
-      alert("Saved. Listing updates applied.");
+      addActivity("success", `Listing launched — ${title}`);
+      trackLaunchEvent("launch_card_saved", {
+        listingId: String(listing.id),
+        selectedKeywordCount: selectedKeywords.length,
+        photoCount: photoItems.length
+      });
+
+      alert("Launched. Listing updates applied.");
     } catch (err) {
       console.error("SAVE QUICK EDIT ERROR:", err);
-      addActivity("error", `Save failed — ${title}`);
-      alert(`Save failed: ${err.message}`);
+      addActivity("error", `Launch failed — ${title}`);
+      alert(`Launch failed: ${err.message}`);
     } finally {
       setSaving(false);
     }
@@ -636,6 +743,10 @@ Listed on IronXchange.
       if (!response.ok) throw new Error("Workflow update failed");
 
       addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
+      trackLaunchEvent("launch_workflow_updated", {
+        listingId: String(listing.id),
+        workflowStatus: nextWorkflow
+      });
     } catch (err) {
       console.error(err);
       addActivity("error", `Workflow update failed — ${title}`);
@@ -654,12 +765,22 @@ Listed on IronXchange.
           ? "/api/pause-listing"
           : action === "reactivate"
             ? "/api/reactivate-listing"
-            : "";
+            : action === "delete"
+              ? "/api/delete-listing"
+              : "";
 
       if (!endpoint) {
         addActivity("success", `${action} selected — ${title}`);
         alert(`${action} action logged. API wiring comes next.`);
         return;
+      }
+
+      if (action === "delete") {
+        const confirmed = window.confirm(
+          "Delete this listing? This should remove it from public inventory."
+        );
+
+        if (!confirmed) return;
       }
 
       const response = await fetch(endpoint, {
@@ -675,6 +796,15 @@ Listed on IronXchange.
       if (!response.ok) throw new Error(data?.error || `${action} failed`);
 
       addActivity("success", `${action} complete — ${title}`);
+      trackLaunchEvent(`launch_listing_${action}`, {
+        listingId: String(listing.id)
+      });
+
+      if (action === "delete") {
+        router.push("/account/my-listings");
+        return;
+      }
+
       router.reload();
     } catch (err) {
       console.error(err);
@@ -685,9 +815,53 @@ Listed on IronXchange.
     }
   }
 
-  function launchExternal(url, copyLabel, copy) {
+  function launchExternal(platform, url, copyLabel, copy) {
     copyText(copyLabel, copy);
+
+    trackLaunchEvent(`launch_${platform}_clicked`, {
+      listingId: String(listing?.id || ""),
+      listingUrl
+    });
+
     window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function launchWhatsApp() {
+    const message = buildSocialCopy("whatsapp", listing, listingUrl, selectedKeywords, edit);
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    launchExternal("whatsapp", url, "WhatsApp Message", message);
+  }
+
+  function launchSms() {
+    const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
+    const url = `sms:?&body=${encodeURIComponent(message)}`;
+
+    launchExternal("sms", url, "Text Message", message);
+  }
+
+  async function nativeShare() {
+    const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
+
+    trackLaunchEvent("launch_native_share_clicked", {
+      listingId: String(listing?.id || ""),
+      listingUrl
+    });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: message,
+          url: listingUrl
+        });
+        return;
+      } catch {
+        // User cancelled or native share failed. Fall back to copy.
+      }
+    }
+
+    await copyText("Share Message", message);
   }
 
   if (loading) {
@@ -759,39 +933,49 @@ Listed on IronXchange.
                 {isPaused ? "Paused" : "Live"}
               </div>
 
-              <select
-                className="workflow-select"
-                value={workflowStatus}
-                onChange={e => updateWorkflow(e.target.value)}
-              >
-                {workflowOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-
               <button
                 type="button"
                 className="save-top"
                 onClick={saveQuickEdit}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save"}
+                {saving ? "Launching..." : "Launch"}
               </button>
 
               <a href={listingUrl} target="_blank" rel="noreferrer" className="public-link">
                 View Public
               </a>
+
+              <button
+                type="button"
+                className="dashboard-top"
+                onClick={() => router.push("/account")}
+              >
+                Dashboard
+              </button>
+
+              <button
+                type="button"
+                className="duplicate-top"
+                onClick={() => runListingCommand("duplicate")}
+              >
+                Duplicate
+              </button>
+
+              <button
+                type="button"
+                className="delete-top"
+                onClick={() => runListingCommand("delete")}
+                disabled={commandBusy === "delete"}
+              >
+                Delete
+              </button>
             </div>
           </section>
 
           <section className="photo-workbench">
             <div className="workbench-head">
-              <div>
-                <span>Photo Workbench</span>
-                <strong>First photo is your buyer-card hero. Drag to reorder.</strong>
-              </div>
+              <span>Photo Workbench</span>
 
               <label
                 className="photo-add"
@@ -799,7 +983,7 @@ Listed on IronXchange.
                 onDrop={handlePhotoDrop}
               >
                 <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-                + Add / Drop Photos
+                + Add Photos
               </label>
             </div>
 
@@ -841,71 +1025,65 @@ Listed on IronXchange.
           </section>
 
           <section className="studio-grid">
-            <aside className="left-toolbar">
-              <div className="toolbar-head">
-                <span>Machine Data</span>
-                <strong>Source Facts</strong>
+            <aside className="inventory-rail">
+              <div className="rail-head">
+                <span>My Inventory</span>
+                <strong>{sellerInventory.length} Machines</strong>
               </div>
 
-              <div className="data-stack">
-                <div>
-                  <span>Year</span>
-                  <strong>{listing.year || listing.publicData?.year || "—"}</strong>
-                </div>
+              <div className="inventory-scroll">
+                {sellerInventory.map(item => {
+                  const itemImages = getListingImages(item);
+                  const itemStatus = getListingStatus(item);
+                  const isCurrent = String(item.id) === String(listing.id);
 
-                <div>
-                  <span>Make</span>
-                  <strong>{listing.make || listing.publicData?.make || "—"}</strong>
-                </div>
+                  return (
+                    <button
+                      key={String(item.id)}
+                      type="button"
+                      className={isCurrent ? "inventory-mini active" : "inventory-mini"}
+                      onClick={() => goToListing(item)}
+                    >
+                      <img
+                        src={itemImages[0] || "/images/hero-equipment-yard.jpg"}
+                        alt={item.title || "Inventory machine"}
+                      />
 
-                <div>
-                  <span>Model</span>
-                  <strong>{listing.model || listing.publicData?.model || "—"}</strong>
-                </div>
+                      <span>{cleanMachineTitle(item.title || "Machine")}</span>
 
-                <div>
-                  <span>Category</span>
-                  <strong>{category}</strong>
-                </div>
+                      <strong>{formatMoney(item.price)}</strong>
 
-                <div>
-                  <span>Stock #</span>
-                  <strong>{listing.stockNumber || listing.publicData?.stockNumber || "—"}</strong>
-                </div>
-
-                <div>
-                  <span>Seller</span>
-                  <strong>{sellerName}</strong>
-                </div>
-              </div>
-
-              <div className="toolbar-actions">
-                <button
-                  type="button"
-                  onClick={() => runListingCommand(isPaused ? "reactivate" : "pause")}
-                  disabled={!!commandBusy}
-                >
-                  {commandBusy
-                    ? "Working..."
-                    : isPaused
-                      ? "Reactivate"
-                      : "Pause"}
-                </button>
-
-                <button type="button" onClick={downloadHeroImage}>
-                  Hero Image
-                </button>
-
-                <button type="button" onClick={downloadAllPhotos}>
-                  Photo Pack
-                </button>
+                      <small className={itemStatus === "paused" ? "paused" : "live"}>
+                        {itemStatus === "paused" ? "Paused" : "Live"}
+                      </small>
+                    </button>
+                  );
+                })}
               </div>
             </aside>
 
             <section className="preview-zone">
-              <div className="section-label">
-                <span>Live Buyer Card</span>
-                <strong>What buyers see before they click.</strong>
+              <div className="card-nav-row">
+                <button
+                  type="button"
+                  onClick={() => goToListing(previousListing)}
+                  disabled={!previousListing}
+                >
+                  ← Previous
+                </button>
+
+                <div>
+                  <span>Live Buyer Card</span>
+                  <strong>What buyers see before they click.</strong>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => goToListing(nextListing)}
+                  disabled={!nextListing}
+                >
+                  Next →
+                </button>
               </div>
 
               <div className="listing-preview-card">
@@ -968,7 +1146,7 @@ Listed on IronXchange.
                   </div>
 
                   <div className="preview-keyword-row">
-                    {selectedKeywords.slice(0, 8).map((keyword, index) => (
+                    {selectedKeywords.slice(0, 10).map((keyword, index) => (
                       <span key={`${keyword}-${index}`}>
                         {String(keyword).trim().toLowerCase()}
                       </span>
@@ -998,8 +1176,26 @@ Listed on IronXchange.
                 </div>
               </div>
 
-              <div className="micro-note">
-                Change price, hours, location, badges, and hero photo — the card updates here before you launch.
+              <div className="under-card-actions">
+                <button type="button" className="whatsapp-mini" onClick={launchWhatsApp}>
+                  <i className="fa-brands fa-whatsapp"></i>
+                  WhatsApp
+                </button>
+
+                <button type="button" className="sms-mini" onClick={launchSms}>
+                  <i className="fa-solid fa-comment-sms"></i>
+                  Text
+                </button>
+
+                <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
+                  <i className="fa-solid fa-link"></i>
+                  {copied === "Listing Link" ? "Copied" : "Copy Link"}
+                </button>
+
+                <button type="button" onClick={nativeShare}>
+                  <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                  Share
+                </button>
               </div>
             </section>
 
@@ -1008,19 +1204,32 @@ Listed on IronXchange.
                 <span>Distribution Center</span>
                 <h2>Launch This Machine</h2>
                 <p>
-                  Copy the sales copy, open the platform, and send buyers back to the
-                  IronXchange source page.
+                  Copy the message, open the platform, and drive every buyer back to
+                  the IronXchange source page.
                 </p>
               </div>
+
+              <button
+                type="button"
+                className="launch-btn whatsapp"
+                onClick={launchWhatsApp}
+              >
+                <i className="fa-brands fa-whatsapp"></i>
+                <div>
+                  <strong>WhatsApp Blast</strong>
+                  <span>Copy machine message + open WhatsApp</span>
+                </div>
+              </button>
 
               <button
                 type="button"
                 className="launch-btn marketplace"
                 onClick={() =>
                   launchExternal(
+                    "marketplace",
                     "https://www.facebook.com/marketplace/create/vehicle",
                     "Marketplace Copy",
-                    buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords)
+                    buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords, edit)
                   )
                 }
               >
@@ -1036,9 +1245,10 @@ Listed on IronXchange.
                 className="launch-btn facebook"
                 onClick={() =>
                   launchExternal(
+                    "facebook",
                     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(listingUrl)}`,
                     "Facebook Post",
-                    buildSocialCopy("facebook", listing, listingUrl, selectedKeywords)
+                    buildSocialCopy("facebook", listing, listingUrl, selectedKeywords, edit)
                   )
                 }
               >
@@ -1054,9 +1264,10 @@ Listed on IronXchange.
                 className="launch-btn instagram"
                 onClick={() =>
                   launchExternal(
+                    "instagram",
                     "https://www.instagram.com/",
                     "Instagram Caption",
-                    buildSocialCopy("instagram", listing, listingUrl, selectedKeywords)
+                    buildSocialCopy("instagram", listing, listingUrl, selectedKeywords, edit)
                   )
                 }
               >
@@ -1072,9 +1283,10 @@ Listed on IronXchange.
                 className="launch-btn linkedin"
                 onClick={() =>
                   launchExternal(
+                    "linkedin",
                     `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(listingUrl)}`,
                     "LinkedIn Post",
-                    buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords)
+                    buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords, edit)
                   )
                 }
               >
@@ -1090,9 +1302,10 @@ Listed on IronXchange.
                 className="launch-btn tiktok"
                 onClick={() =>
                   launchExternal(
+                    "tiktok",
                     "https://www.tiktok.com/upload",
                     "TikTok Caption",
-                    buildSocialCopy("tiktok", listing, listingUrl, selectedKeywords)
+                    buildSocialCopy("tiktok", listing, listingUrl, selectedKeywords, edit)
                   )
                 }
               >
@@ -1104,8 +1317,9 @@ Listed on IronXchange.
               </button>
 
               <div className="utility-grid">
-                <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
-                  {copied === "Listing Link" ? "Copied" : "Copy Link"}
+                <button type="button" onClick={launchSms}>
+                  <i className="fa-solid fa-comment-sms"></i>
+                  Text Blast
                 </button>
 
                 <button type="button" onClick={() => copyText("Marketplace Title", marketplaceTitle)}>
@@ -1131,7 +1345,7 @@ Listed on IronXchange.
               </div>
 
               <div className="selected-badges">
-                {selectedKeywords.slice(0, 14).map((keyword, index) => (
+                {selectedKeywords.slice(0, 16).map((keyword, index) => (
                   <button
                     key={`${keyword}-${index}`}
                     type="button"
@@ -1167,7 +1381,7 @@ Listed on IronXchange.
             <section className="panel copy-panel">
               <div className="panel-head">
                 <h2>Sales Copy</h2>
-                <span>description feeds your social blast</span>
+                <span>Feeds your social blast</span>
               </div>
 
               <label className="wide">
@@ -1186,7 +1400,7 @@ Listed on IronXchange.
                   onClick={saveQuickEdit}
                   disabled={saving}
                 >
-                  {saving ? "Saving..." : "Save Listing"}
+                  {saving ? "Launching..." : "Launch Listing"}
                 </button>
 
                 <a href={listingUrl} target="_blank" rel="noreferrer" className="preview-btn">
@@ -1200,7 +1414,7 @@ Listed on IronXchange.
             <section className="panel activity-panel">
               <div className="panel-head">
                 <h2>Launch Log</h2>
-                <span>recent actions</span>
+                <span>Recent actions</span>
               </div>
 
               <div className="activity-list">
@@ -1242,7 +1456,7 @@ Listed on IronXchange.
 
       <Footer />
 
-      <style jsx>{`
+                <style jsx>{`
         :global(body) {
           margin: 0;
           background: #0b0b0b;
@@ -1264,60 +1478,60 @@ Listed on IronXchange.
         main {
           min-height: 100vh;
           background:
-            radial-gradient(circle at top, rgba(255,196,0,.025), transparent 28%),
+            radial-gradient(circle at top, rgba(255,196,0,.022), transparent 26%),
             #0b0b0b;
         }
 
         .launch-wrap {
           max-width: 1600px;
           margin: 0 auto;
-          padding: 14px 2% 54px;
+          padding: 10px 2% 44px;
         }
 
         .panel,
         .launch-header,
         .photo-workbench,
-        .left-toolbar,
+        .inventory-rail,
         .distribution-center,
         .listing-preview-card {
           background:
-            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+            linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
             #141414;
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
           border-radius: 14px;
           box-shadow:
-            0 1px 0 rgba(255,255,255,.045) inset,
-            0 18px 44px rgba(0,0,0,.22);
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 16px 38px rgba(0,0,0,.22);
         }
 
         .launch-header {
-          min-height: 68px;
-          margin-bottom: 12px;
-          padding: 12px 14px;
+          min-height: 54px;
+          margin-bottom: 8px;
+          padding: 9px 12px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
         }
 
         .launch-title {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           min-width: 0;
         }
 
         .launch-title button {
-          height: 36px;
-          padding: 0 12px;
+          height: 30px;
+          padding: 0 10px;
           border-radius: 999px;
           border: 1px solid rgba(255,255,255,.08);
           background: #101010;
           color: rgba(255,255,255,.58);
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 950;
-          letter-spacing: .58px;
+          letter-spacing: .55px;
           text-transform: uppercase;
           cursor: pointer;
         }
@@ -1329,55 +1543,73 @@ Listed on IronXchange.
 
         .launch-title span,
         .workbench-head span,
-        .toolbar-head span,
-        .section-label span,
+        .rail-head span,
+        .card-nav-row span,
         .distribution-head span {
           display: block;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
           color: #FFC400;
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 950;
-          letter-spacing: .72px;
+          letter-spacing: .7px;
           text-transform: uppercase;
         }
 
         .launch-title h1 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 22px;
+          font-size: 18px;
           font-weight: 950;
-          letter-spacing: -.65px;
+          letter-spacing: -.5px;
+          line-height: 1;
           text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 620px;
         }
 
         .launch-title p,
         .distribution-head p,
-        .seller-panel p,
-        .micro-note {
-          margin: 6px 0 0;
+        .seller-panel p {
+          margin: 4px 0 0;
           color: rgba(255,255,255,.42);
-          font-size: 12px;
-          line-height: 1.4;
+          font-size: 11px;
+          line-height: 1.35;
         }
 
         .launch-header-actions {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           flex-wrap: wrap;
         }
 
-        .status-pill {
-          height: 34px;
+        .status-pill,
+        .save-top,
+        .public-link,
+        .dashboard-top,
+        .duplicate-top,
+        .delete-top {
+          height: 30px;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 0 11px;
+          justify-content: center;
           border-radius: 999px;
-          font-size: 9px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: #f2f2f2;
+          padding: 0 10px;
+          font-size: 8.5px;
           font-weight: 950;
-          letter-spacing: .58px;
+          letter-spacing: .55px;
           text-transform: uppercase;
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .status-pill {
+          gap: 7px;
         }
 
         .status-pill span {
@@ -1388,7 +1620,7 @@ Listed on IronXchange.
 
         .status-pill.live {
           color: #38A169;
-          border: 1px solid rgba(56,161,105,.42);
+          border-color: rgba(56,161,105,.42);
           background: rgba(56,161,105,.045);
         }
 
@@ -1398,29 +1630,12 @@ Listed on IronXchange.
 
         .status-pill.paused {
           color: #f6ad55;
-          border: 1px solid rgba(246,173,85,.42);
+          border-color: rgba(246,173,85,.42);
           background: rgba(246,173,85,.055);
         }
 
         .status-pill.paused span {
           background: #f6ad55;
-        }
-
-        .workflow-select,
-        .save-top,
-        .public-link {
-          height: 34px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.08);
-          background: #101010;
-          color: #f2f2f2;
-          padding: 0 12px;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .58px;
-          text-transform: uppercase;
-          text-decoration: none;
-          cursor: pointer;
         }
 
         .save-top {
@@ -1429,38 +1644,37 @@ Listed on IronXchange.
           color: #050505;
         }
 
+        .delete-top {
+          color: #ff9b9b;
+          border-color: rgba(229,62,62,.35);
+        }
+
         .photo-workbench {
-          padding: 14px;
-          margin-bottom: 14px;
+          padding: 10px 12px;
+          margin-bottom: 10px;
         }
 
         .workbench-head {
+          height: 28px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 16px;
-          margin-bottom: 12px;
-        }
-
-        .workbench-head strong,
-        .section-label strong {
-          color: #f2f2f2;
-          font-size: 14px;
-          font-weight: 850;
+          gap: 14px;
+          margin-bottom: 8px;
         }
 
         .photo-add {
-          min-width: 180px;
-          height: 38px;
+          min-width: 126px;
+          height: 28px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
+          border-radius: 999px;
           background: rgba(255,196,0,.045);
           border: 1px dashed rgba(255,196,0,.28);
           color: #FFC400;
-          font-size: 10px;
+          font-size: 8.5px;
           font-weight: 950;
-          letter-spacing: .58px;
+          letter-spacing: .56px;
           text-transform: uppercase;
           cursor: pointer;
         }
@@ -1471,18 +1685,18 @@ Listed on IronXchange.
 
         .photo-strip {
           display: flex;
-          gap: 10px;
+          gap: 9px;
           overflow-x: auto;
           overflow-y: hidden;
-          padding-bottom: 6px;
+          padding-bottom: 5px;
           scrollbar-width: thin;
           scrollbar-color: rgba(255,255,255,.14) transparent;
         }
 
         .photo-tile {
           position: relative;
-          flex: 0 0 158px;
-          height: 112px;
+          flex: 0 0 150px;
+          height: 106px;
           overflow: hidden;
           border-radius: 12px;
           border: 1px solid rgba(255,255,255,.07);
@@ -1555,87 +1769,152 @@ Listed on IronXchange.
         .studio-grid {
           display: grid;
           grid-template-columns: 230px minmax(360px, 1fr) 360px;
-          gap: 14px;
+          gap: 10px;
           align-items: start;
-          margin-bottom: 14px;
+          margin-bottom: 10px;
         }
 
-        .left-toolbar,
+        .inventory-rail,
         .distribution-center {
-          padding: 14px;
+          height: 610px;
+          padding: 12px;
           display: grid;
           align-content: start;
+          gap: 9px;
+        }
+
+        .rail-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
           gap: 10px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(255,255,255,.06);
         }
 
-        .toolbar-head strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 20px;
+        .rail-head strong {
+          color: rgba(255,255,255,.54);
+          font-size: 9px;
           font-weight: 950;
-          letter-spacing: -.45px;
+          letter-spacing: .55px;
           text-transform: uppercase;
-          margin-bottom: 4px;
         }
 
-        .data-stack {
+        .inventory-scroll {
           display: grid;
           gap: 8px;
-          margin-top: 6px;
+          max-height: 546px;
+          overflow-y: auto;
+          padding-right: 3px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.14) transparent;
         }
 
-        .data-stack div {
-          background: #101010;
+        .inventory-mini {
+          width: 100%;
+          padding: 7px;
+          display: grid;
+          grid-template-columns: 58px 1fr;
+          grid-template-rows: auto auto auto;
+          gap: 3px 8px;
+          text-align: left;
           border: 1px solid rgba(255,255,255,.06);
           border-radius: 11px;
-          padding: 10px;
-        }
-
-        .data-stack span,
-        .seller-panel span {
-          display: block;
-          color: rgba(255,255,255,.42);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .55px;
-          text-transform: uppercase;
-          margin-bottom: 6px;
-        }
-
-        .data-stack strong {
-          color: #f2f2f2;
-          font-size: 12px;
-          font-weight: 850;
-          line-height: 1.2;
-          overflow-wrap: anywhere;
-        }
-
-        .toolbar-actions {
-          display: grid;
-          gap: 8px;
-          margin-top: 6px;
-        }
-
-        .toolbar-actions button,
-        .utility-grid button {
-          min-height: 38px;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,.08);
           background: #101010;
-          color: #f2f2f2;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .55px;
-          text-transform: uppercase;
           cursor: pointer;
+        }
+
+        .inventory-mini.active {
+          border-color: rgba(255,196,0,.45);
+          background: rgba(255,196,0,.045);
+        }
+
+        .inventory-mini img {
+          grid-row: 1 / 4;
+          width: 58px;
+          height: 44px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+
+        .inventory-mini span {
+          color: #f2f2f2;
+          font-size: 10px;
+          font-weight: 900;
+          line-height: 1.1;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+        .inventory-mini strong {
+          color: rgba(255,255,255,.72);
+          font-size: 10px;
+          font-weight: 900;
+        }
+
+        .inventory-mini small {
+          width: fit-content;
+          padding: 2px 6px;
+          border-radius: 999px;
+          font-size: 7.5px;
+          font-weight: 950;
+          text-transform: uppercase;
+        }
+
+        .inventory-mini small.live {
+          color: #38A169;
+          background: rgba(56,161,105,.07);
+          border: 1px solid rgba(56,161,105,.22);
+        }
+
+        .inventory-mini small.paused {
+          color: #f6ad55;
+          background: rgba(246,173,85,.08);
+          border: 1px solid rgba(246,173,85,.24);
         }
 
         .preview-zone {
           min-width: 0;
         }
 
-        .section-label {
-          margin-bottom: 10px;
+        .card-nav-row {
+          height: 34px;
+          max-width: 430px;
+          margin: 0 auto 8px;
+          display: grid;
+          grid-template-columns: 88px 1fr 88px;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .card-nav-row div {
+          text-align: center;
+        }
+
+        .card-nav-row strong {
+          color: rgba(255,255,255,.58);
+          font-size: 10px;
+          font-weight: 850;
+        }
+
+        .card-nav-row button {
+          height: 28px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: rgba(255,255,255,.62);
+          font-size: 8.5px;
+          font-weight: 950;
+          letter-spacing: .5px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .card-nav-row button:disabled {
+          opacity: .28;
+          cursor: default;
         }
 
         .listing-preview-card {
@@ -1649,7 +1928,7 @@ Listed on IronXchange.
 
         .preview-photo {
           position: relative;
-          height: 265px;
+          height: 250px;
           background-size: cover;
           background-position: center;
           border-bottom: 1px solid rgba(255,255,255,.065);
@@ -1733,11 +2012,13 @@ Listed on IronXchange.
         }
 
         .preview-keyword-row {
-          min-height: 22px;
-          margin: 9px 0 15px;
+          min-height: 56px;
+          margin: 10px 0 18px;
           display: flex;
+          align-content: flex-start;
           flex-wrap: wrap;
           gap: 5px 6px;
+          overflow: hidden;
         }
 
         .preview-keyword-row span {
@@ -1792,29 +2073,64 @@ Listed on IronXchange.
           text-transform: uppercase;
         }
 
-        .micro-note {
+        .under-card-actions {
           max-width: 430px;
           margin: 34px auto 0;
-          text-align: center;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+        }
+
+        .under-card-actions button {
+          min-height: 36px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: #f2f2f2;
+          font-size: 8.5px;
+          font-weight: 950;
+          letter-spacing: .48px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .under-card-actions i {
+          margin-right: 5px;
+        }
+
+        .under-card-actions .whatsapp-mini {
+          background: #25D366;
+          border-color: #25D366;
+          color: #07130b;
+        }
+
+        .under-card-actions .sms-mini {
+          background: rgba(255,196,0,.10);
+          border-color: rgba(255,196,0,.30);
+          color: #FFC400;
         }
 
         .distribution-head h2 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 25px;
+          font-size: 23px;
           font-weight: 950;
           letter-spacing: -.6px;
           text-transform: uppercase;
         }
 
+        .distribution-head p {
+          margin-bottom: 4px;
+        }
+
         .launch-btn {
-          min-height: 58px;
+          min-height: 54px;
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 13px;
           border: none;
-          border-radius: 14px;
-          padding: 12px 14px;
+          border-radius: 13px;
+          padding: 11px 13px;
           cursor: pointer;
           text-align: left;
           transition: transform .15s ease, filter .15s ease;
@@ -1826,22 +2142,27 @@ Listed on IronXchange.
         }
 
         .launch-btn i {
-          font-size: 24px;
-          width: 28px;
+          font-size: 23px;
+          width: 27px;
           text-align: center;
         }
 
         .launch-btn strong {
           display: block;
-          font-size: 13px;
+          font-size: 12.5px;
           font-weight: 950;
         }
 
         .launch-btn span {
           display: block;
           margin-top: 3px;
-          font-size: 11px;
+          font-size: 10.5px;
           opacity: .88;
+        }
+
+        .launch-btn.whatsapp {
+          background: #25D366;
+          color: #06140a;
         }
 
         .launch-btn.marketplace,
@@ -1870,18 +2191,31 @@ Listed on IronXchange.
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 8px;
-          margin-top: 4px;
+          margin-top: 2px;
+        }
+
+        .utility-grid button {
+          min-height: 34px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: #101010;
+          color: #f2f2f2;
+          font-size: 8.5px;
+          font-weight: 950;
+          letter-spacing: .55px;
+          text-transform: uppercase;
+          cursor: pointer;
         }
 
         .lower-grid {
           display: grid;
           grid-template-columns: minmax(0, 1fr) 420px;
-          gap: 14px;
-          margin-bottom: 14px;
+          gap: 10px;
+          margin-bottom: 10px;
         }
 
         .panel {
-          padding: 16px;
+          padding: 14px;
         }
 
         .panel-head {
@@ -1889,13 +2223,13 @@ Listed on IronXchange.
           justify-content: space-between;
           align-items: center;
           gap: 12px;
-          margin-bottom: 13px;
+          margin-bottom: 11px;
         }
 
         .panel-head h2 {
           margin: 0;
           color: #f2f2f2;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 950;
           letter-spacing: -.1px;
           text-transform: uppercase;
@@ -1903,7 +2237,7 @@ Listed on IronXchange.
 
         .panel-head span {
           color: #FFC400;
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 950;
           letter-spacing: .55px;
           text-transform: uppercase;
@@ -1926,34 +2260,34 @@ Listed on IronXchange.
           border: 1px solid rgba(255,255,255,.08);
           border-radius: 10px;
           color: #f2f2f2;
-          padding: 11px 12px;
+          padding: 10px 11px;
           font-size: 13px;
           outline: none;
         }
 
         textarea {
-          min-height: 170px;
+          min-height: 148px;
           resize: vertical;
-          line-height: 1.55;
+          line-height: 1.5;
         }
 
         .save-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          margin-top: 14px;
+          gap: 8px;
+          margin-top: 10px;
         }
 
         .save-btn,
         .preview-btn {
-          min-height: 42px;
+          min-height: 38px;
           border-radius: 11px;
           border: 1px solid rgba(255,255,255,.08);
           display: flex;
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 950;
           letter-spacing: .58px;
           text-transform: uppercase;
@@ -1974,8 +2308,8 @@ Listed on IronXchange.
         .selected-badges {
           display: flex;
           flex-wrap: wrap;
-          gap: 7px;
-          margin-bottom: 12px;
+          gap: 6px;
+          margin-bottom: 10px;
         }
 
         .selected-badges button {
@@ -1994,19 +2328,19 @@ Listed on IronXchange.
         }
 
         .keyword-search {
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .keyword-grid {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
-          max-height: 214px;
+          max-height: 188px;
           overflow-y: auto;
           border: 1px solid rgba(255,255,255,.055);
           background: #0f0f0f;
           border-radius: 12px;
-          padding: 10px;
+          padding: 9px;
           scrollbar-width: thin;
           scrollbar-color: rgba(255,255,255,.14) transparent;
         }
@@ -2033,12 +2367,12 @@ Listed on IronXchange.
         .footer-ops {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 14px;
+          gap: 10px;
         }
 
         .activity-list {
           display: grid;
-          gap: 8px;
+          gap: 7px;
         }
 
         .activity-item {
@@ -2049,7 +2383,7 @@ Listed on IronXchange.
           background: #101010;
           border: 1px solid rgba(255,255,255,.06);
           border-radius: 11px;
-          padding: 11px;
+          padding: 10px;
         }
 
         .activity-item.success {
@@ -2058,14 +2392,14 @@ Listed on IronXchange.
 
         .activity-item span {
           color: #f2f2f2;
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 950;
           letter-spacing: .35px;
         }
 
         .activity-item small {
           color: rgba(255,255,255,.42);
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 900;
           white-space: nowrap;
         }
@@ -2093,6 +2427,16 @@ Listed on IronXchange.
           color: rgba(255,255,255,.52);
         }
 
+        .seller-panel span {
+          display: block;
+          margin-bottom: 5px;
+          color: rgba(255,255,255,.44);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
         .seller-panel strong {
           color: #f2f2f2;
           font-size: 18px;
@@ -2101,29 +2445,63 @@ Listed on IronXchange.
         }
 
         @media (max-width: 1280px) {
-          .studio-grid,
-          .lower-grid,
-          .footer-ops {
+          .studio-grid {
             grid-template-columns: 1fr;
+          }
+
+          .preview-zone {
+            order: 1;
+          }
+
+          .inventory-rail {
+            order: 2;
+            height: auto;
+          }
+
+          .distribution-center {
+            order: 3;
+            height: auto;
+          }
+
+          .inventory-scroll {
+            display: flex;
+            max-height: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 6px;
+          }
+
+          .inventory-mini {
+            flex: 0 0 220px;
           }
 
           .listing-preview-card {
             transform: none;
           }
 
-          .micro-note {
-            margin-top: 12px;
+          .under-card-actions {
+            margin-top: 10px;
+          }
+
+          .lower-grid,
+          .footer-ops {
+            grid-template-columns: 1fr;
           }
         }
 
         @media (max-width: 860px) {
           .launch-wrap {
-            padding: 12px 4% 42px;
+            padding: 10px 4% 38px;
           }
 
           .launch-header {
             align-items: stretch;
             flex-direction: column;
+          }
+
+          .launch-title h1 {
+            max-width: 100%;
+            white-space: normal;
           }
 
           .launch-header-actions,
@@ -2132,9 +2510,12 @@ Listed on IronXchange.
             flex-direction: column;
           }
 
-          .workflow-select,
+          .status-pill,
           .save-top,
           .public-link,
+          .dashboard-top,
+          .duplicate-top,
+          .delete-top,
           .photo-add {
             width: 100%;
           }
@@ -2144,14 +2525,20 @@ Listed on IronXchange.
             height: 92px;
           }
 
+          .card-nav-row {
+            grid-template-columns: 1fr;
+            height: auto;
+          }
+
           .listing-preview-card {
             width: 100%;
           }
 
           .preview-photo {
-            height: 250px;
+            height: 240px;
           }
 
+          .under-card-actions,
           .utility-grid,
           .save-row {
             grid-template-columns: 1fr;
@@ -2164,4 +2551,4 @@ Listed on IronXchange.
       `}</style>
     </>
   );
-}
+}        
