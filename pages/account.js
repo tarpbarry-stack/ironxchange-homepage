@@ -1869,11 +1869,7 @@ main {
 .age-green,
 .age-yellow,
 .age-red {
-  font-size: 11px;
-  font-weight: 900;
-  white-space: nowrap;
-  padding-left: 10px;
-}
+  font-size: 12px;
 
 .age-green {
   color: #38A169;
@@ -1983,6 +1979,31 @@ main {
   border-color: rgba(229,62,62,.6);
 }
 
+.listing-status.active {
+  animation: livePulse 2.8s ease-in-out infinite;
+}
+
+.listing-delete-btn {
+  animation: dangerBreath 3.4s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(56,161,105,0);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(56,161,105,.28);
+  }
+}
+
+@keyframes dangerBreath {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(229,62,62,0);
+  }
+  50% {
+    box-shadow: 0 0 9px rgba(229,62,62,.22);
+  }
+}
 .action-select {
   width: 78px;
   height: 28px;
