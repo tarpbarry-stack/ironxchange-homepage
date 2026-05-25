@@ -2113,26 +2113,40 @@ export default function ListingLivePage() {
           cursor: default;
         }
 
-        .listing-preview-card {
-          width: min(100%, 430px);
-          margin: 0 auto;
-          overflow: hidden;
-          contain: layout paint;
-          transform: scale(1.08);
-          transform-origin: top center;
-          transition:
-            transform .18s ease,
-            border-color .18s ease,
-            box-shadow .18s ease;
-        }
+       .listing-preview-card {
+  width: min(100%, 430px);
+  margin: 24px auto 0;
+  overflow: hidden;
+  contain: layout paint;
+  transform: scale(1.08);
+  transform-origin: top center;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+}
 
         .listing-preview-card:hover {
-          border-color: rgba(255,196,0,.16);
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.04) inset,
-            0 20px 46px rgba(0,0,0,.30),
-            0 0 22px rgba(255,196,0,.035);
-        }
+  transform:
+    translateY(-2px)
+    scale(1.083);
+
+  border-color: rgba(255,196,0,.14);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.038),
+      rgba(255,255,255,0)
+    ),
+    #171717;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 22px 52px rgba(0,0,0,.30);
+}
 
         .preview-photo {
           position: relative;
@@ -2143,16 +2157,23 @@ export default function ListingLivePage() {
           overflow: hidden;
           box-shadow: inset 0 -40px 70px rgba(0,0,0,.10);
           cursor: pointer;
-          transition: filter .18s ease;
+          transition:
+  filter .18s ease,
+  transform .28s ease;
         }
 
-        .listing-preview-card:hover .preview-photo {
-          filter: contrast(1.04) saturate(1.04);
-        }
+       .listing-preview-card:hover .preview-photo {
+  filter:
+    contrast(1.04)
+    saturate(1.03)
+    brightness(1.01);
+
+  transform: scale(1.018);
+}
 
         .card-photo-nav {
           position: absolute;
-          top: 50%;
+          top: 92%;
           transform: translateY(-50%);
           width: 24px;
           height: 90px;
@@ -2161,7 +2182,19 @@ export default function ListingLivePage() {
           color: rgba(255,255,255,.44);
           font-size: 28px;
           cursor: pointer;
+
+          z-index: 5;
+opacity: 0;
+
+transition:
+  opacity .18s ease,
+  background .18s ease,
+  color .18s ease;
         }
+
+        .listing-preview-card:hover .card-photo-nav {
+  opacity: 1;
+}
 
         .card-photo-nav.left {
           left: 0;
@@ -2173,6 +2206,12 @@ export default function ListingLivePage() {
           border-radius: 10px 0 0 10px;
         }
 
+        .card-photo-nav:hover {
+  background: rgba(0,0,0,.14);
+  color: rgba(255,255,255,.68);
+}
+        
+
         .photo-count {
           position: absolute;
           top: 8px;
@@ -2183,6 +2222,10 @@ export default function ListingLivePage() {
           color: rgba(255,255,255,.62);
           font-size: 8px;
           font-weight: 800;
+
+          backdrop-filter: blur(2px);
+letter-spacing: .25px;
+z-index: 5;
         }
 
         .preview-body {
@@ -2214,6 +2257,8 @@ export default function ListingLivePage() {
           line-height: 1.1;
           letter-spacing: -.3px;
           text-transform: uppercase;
+
+          text-rendering: geometricPrecision;
         }
 
         .card-hours-input {
@@ -2226,7 +2271,7 @@ export default function ListingLivePage() {
 
         .preview-keyword-row {
           min-height: 56px;
-          margin: 10px 0 18px;
+          margin: 8px 0 14px;
           display: flex;
           align-content: flex-start;
           flex-wrap: wrap;
