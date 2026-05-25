@@ -346,10 +346,10 @@ return (
   }
 }
 
-  async function archiveListing(listing) {
+  async function pauseListing(listing) {
   
   const ok = window.confirm(
-    `Archive this listing?\n\n${formatCleanMachineTitle(listing.title)}`
+    `Pause this listing?\n\n${formatCleanMachineTitle(listing.title)}`
   );
 
   if (!ok) return;
@@ -368,7 +368,7 @@ return (
     const data = await response.json();
 
 if (!response.ok) {
-  throw new Error(data.error || "Archive failed");
+  throw new Error(data.error || "Pause failed");
 }
     setMyListings(current =>
       current.map(item =>
@@ -385,8 +385,8 @@ if (!response.ok) {
       )
     );
   } catch (error) {
-  alert(`Archive failed: ${error.message}`);
-  console.error("Archive failed:", error);
+  alert(`Pause failed: ${error.message}`);
+console.error("Pause failed:", error);
   }
 }
 
@@ -740,9 +740,9 @@ function updateWorkflowStatus(listing, status) {
               disabled={savingPriceId === String(listingId)}
             />
 
-            <span className={`status-pill ${isArchived ? "archived" : ""}`}>
-              {isArchived ? "ARCHIVED" : "ACTIVE"}
-            </span>
+           <span className={`status-pill ${isArchived ? "paused" : ""}`}>
+  {isArchived ? "PAUSED" : "LIVE"}
+</span>
           </div>
 
           <div className="seller-meta">
@@ -768,9 +768,9 @@ function updateWorkflowStatus(listing, status) {
             ) : (
               <button
                 type="button"
-                onClick={() => archiveListing(item)}
+                onClick={() => pauseListing(item)}
               >
-                ARCHIVE
+                PAUSE
               </button>
             )}
 
@@ -1336,7 +1336,7 @@ function updateWorkflowStatus(listing, status) {
   justify-content: center;
 }
 
-.status-pill.archived {
+.status-pill.paused {
   background: rgba(120,120,120,.14);
   border-color: rgba(160,160,160,.35);
   color: #A0A0A0;
