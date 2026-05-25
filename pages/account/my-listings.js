@@ -584,6 +584,58 @@ function updateWorkflowStatus(listing, status) {
               </div>
       </section>
 
+
+<section className="workflow-filter-shell">
+  <button
+    type="button"
+    className={workflowFilter === "all" ? "active" : ""}
+    onClick={() => setWorkflowFilter("all")}
+  >
+    All
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "good-listing" ? "active" : ""}
+    onClick={() => setWorkflowFilter("good-listing")}
+  >
+    Good Listing
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "reprice" ? "active" : ""}
+    onClick={() => setWorkflowFilter("reprice")}
+  >
+    Reprice
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "refresh-photos" ? "active" : ""}
+    onClick={() => setWorkflowFilter("refresh-photos")}
+  >
+    Refresh Photos
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "social-blast" ? "active" : ""}
+    onClick={() => setWorkflowFilter("social-blast")}
+  >
+    Social Blast
+  </button>
+
+  <button
+    type="button"
+    className={workflowFilter === "review" ? "active" : ""}
+    onClick={() => setWorkflowFilter("review")}
+  >
+    Review
+  </button>
+</section>
+
+              
       <section className="featured">
         <div className="section-head">
           <h2>MY INVENTORY</h2>
@@ -979,6 +1031,54 @@ function updateWorkflowStatus(listing, status) {
   color: #FFC400;
   border-color: rgba(255,196,0,.45);
 }
+
+.workflow-filter-shell {
+  max-width: 920px;
+  margin: 0 auto 24px;
+  padding: 8px;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
+    rgba(8,8,8,.72);
+
+  border: 1px solid rgba(255,255,255,.045);
+  border-radius: 14px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 12px 30px rgba(0,0,0,.20);
+}
+
+.workflow-filter-shell button {
+  height: 30px;
+  padding: 0 13px;
+
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 999px;
+
+  background: #101010;
+  color: rgba(255,255,255,.48);
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.workflow-filter-shell button:hover,
+.workflow-filter-shell button.active {
+  border-color: rgba(255,196,0,.38);
+  background: #1a1400;
+  color: #FFC400;
+}
+
 
 
 .featured {
