@@ -1162,17 +1162,27 @@ export default function ListingPage() {
   display: grid;
   grid-template-columns: 190px 360px;
   gap: 10px;
-  align-items: stretch;
+
   width: 560px;
   max-width: 560px;
-}
 
-      .buyer-launch-panel,
-.video-panel {
   height: 256px;
   min-height: 256px;
   max-height: 256px;
+
+  align-items: stretch;
+}
+
+     .buyer-launch-panel,
+.video-panel {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+
   padding: 12px;
+
+  display: flex;
+  flex-direction: column;
 }
 
         .buyer-launch-panel h2,
@@ -1181,13 +1191,16 @@ export default function ListingPage() {
           text-align: center;
         }
 
-       .buyer-launch-stack {
+.buyer-launch-stack {
   display: grid;
+  gap: 6px;
 
-  gap: 5px;
+  flex: 1;
+  align-content: stretch;
 }
        .buyer-launch-stack button {
-  min-height: 26px;
+  min-height: 0px;
+  height: 100%;
 
   display: flex;
   align-items: center;
@@ -1271,12 +1284,13 @@ export default function ListingPage() {
           color: rgba(255,196,0,.76);
         }
 
-       .video-box {
+      .video-box {
   position: relative;
 
-  height: 208px;
-  min-height: 208px;
-  max-height: 208px;
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  max-height: none;
 
   overflow: hidden;
 
