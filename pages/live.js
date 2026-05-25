@@ -2144,8 +2144,9 @@ export default function ListingLivePage() {
     #171717;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.06) inset,
-    0 22px 52px rgba(0,0,0,.30);
+  0 1px 0 rgba(255,255,255,.06) inset,
+  0 26px 64px rgba(0,0,0,.34),
+  0 0 24px rgba(255,196,0,.045);
 }
 
         .preview-photo {
@@ -2155,11 +2156,14 @@ export default function ListingLivePage() {
           background-position: center;
           border-bottom: 1px solid rgba(255,255,255,.065);
           overflow: hidden;
-          box-shadow: inset 0 -40px 70px rgba(0,0,0,.10);
+          box-shadow:
+  inset 0 -60px 90px rgba(0,0,0,.16),
+  inset 0 0 40px rgba(0,0,0,.04);
           cursor: pointer;
           transition:
   filter .18s ease,
   transform .28s ease;
+  will-change: transform;
         }
 
        .listing-preview-card:hover .preview-photo {
@@ -2178,8 +2182,8 @@ export default function ListingLivePage() {
           width: 24px;
           height: 90px;
           border: none;
-          background: rgba(0,0,0,.08);
-          color: rgba(255,255,255,.44);
+          background: rgba(0,0,0,.03);
+          color: rgba(255,255,255,.34);
           font-size: 28px;
           cursor: pointer;
 
@@ -2207,8 +2211,8 @@ transition:
         }
 
         .card-photo-nav:hover {
-  background: rgba(0,0,0,.14);
-  color: rgba(255,255,255,.68);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.82);
 }
         
 
@@ -2259,6 +2263,8 @@ z-index: 5;
           text-transform: uppercase;
 
           text-rendering: geometricPrecision;
+          font-smooth: always;
+-webkit-font-smoothing: antialiased;
         }
 
         .card-hours-input {
@@ -2283,7 +2289,13 @@ z-index: 5;
           padding: 3px 6px;
           border-radius: 999px;
           border: 1px solid rgba(255,255,255,.055);
-          background: rgba(255,255,255,.025);
+          background:
+  linear-gradient(
+    180deg,
+    rgba(255,255,255,.03),
+    rgba(255,255,255,.01)
+  );
+          backdrop-filter: blur(2px);
           color: rgba(255,255,255,.42);
           font-size: 9.5px;
           font-weight: 750;
@@ -2295,15 +2307,35 @@ z-index: 5;
           justify-content: space-between;
           align-items: center;
           padding-top: 12px;
-          border-top: 1px solid rgba(255,255,255,.055);
+          border-top: 1px solid rgba(255,255,255,.045);
           gap: 10px;
+          position: relative;
         }
+
+        .preview-price-row::before {
+  content: "";
+
+  position: absolute;
+  top: -1px;
+  left: 0;
+
+  width: 32%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,.26),
+      transparent
+    );
+}
 
         .card-price-input {
           width: 150px;
           color: #f2f2f2;
           font-size: 20px;
           font-weight: 900;
+          text-rendering: geometricPrecision;
         }
 
         .preview-meta {
@@ -2314,13 +2346,24 @@ z-index: 5;
           min-width: 0;
         }
 
-        .preview-meta button {
-          border: none;
-          background: transparent;
-          color: rgba(255,255,255,.28);
-          cursor: pointer;
-          padding: 0;
-        }
+      .preview-meta button {
+  border: none;
+  background: transparent;
+
+  color: rgba(255,255,255,.24);
+
+  cursor: pointer;
+  padding: 0;
+
+  transition:
+    color .14s ease,
+    transform .14s ease;
+}
+
+.preview-meta button:hover {
+  color: rgba(255,196,0,.82);
+  transform: scale(1.06);
+}
 
         .card-location-input {
           width: 150px;
