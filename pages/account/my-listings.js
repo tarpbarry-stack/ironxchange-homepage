@@ -803,7 +803,7 @@ function updateWorkflowStatus(listing, status) {
 
 .browse-search-shell {
   max-width: 690px;
-  margin: 18px auto 0;
+  margin: 12px auto 0;
   padding: 7px;
   background:
     linear-gradient(
@@ -818,7 +818,7 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .search-section {
-  padding: 34px 5% 30px;
+    padding: 22px 5% 16px;
   background: #0B0B0B;
   text-align: center;
 }
@@ -1033,9 +1033,9 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell {
-  max-width: 760px;
-  margin: -4px auto 14px;
-  padding: 8px;
+   max-width: 690px;
+  margin: -6px auto 10px;
+  padding: 7px;
 
   display: flex;
   justify-content: center;
@@ -1055,8 +1055,8 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell button {
-  height: 30px;
-  padding: 0 13px;
+  height: 27px;
+  padding: 0 10px;
 
   border: 1px solid rgba(255,255,255,.07);
   border-radius: 999px;
@@ -1082,7 +1082,7 @@ function updateWorkflowStatus(listing, status) {
 
 
 .featured {
- padding: 18px 5% 60px;
+  padding: 8px 5% 60px;
   background: #0B0B0B;
 }
 
@@ -1090,7 +1090,7 @@ function updateWorkflowStatus(listing, status) {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .section-head h2 {
