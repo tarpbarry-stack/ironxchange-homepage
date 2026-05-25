@@ -2087,9 +2087,14 @@ export default function ListingLivePage() {
           border: 1px solid rgba(246,173,85,.24);
         }
 
-        .preview-zone {
-          min-width: 0;
-        }
+       .preview-zone {
+        min-width: 0;
+
+        height: 618px;
+
+        display: flex;
+        flex-direction: column;
+}
 
         .card-nav-row {
           height: 34px;
@@ -2310,10 +2315,17 @@ export default function ListingLivePage() {
         }
 
         .send-dock {
-          max-width: 430px;
-          margin: 38px auto 0;
+        width: min(100%, 430px);
+
+          margin:
+          auto
+          auto
+          0;
+
           padding: 10px;
-        }
+
+          align-self: center;
+}
 
         .send-dock-head {
           display: flex;
