@@ -67,10 +67,10 @@ export default async function handler(req, res) {
           id: listingId,
          publicData: {
   ...(req.body.publicData || {}),
-  listingStatus: "archived"
+  listingStatus: "paused"
 },
 metadata: {
-  listingStatus: "archived"
+  listingStatus: "paused"
           }
         })
       }
