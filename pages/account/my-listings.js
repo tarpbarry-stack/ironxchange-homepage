@@ -586,7 +586,10 @@ function updateWorkflowStatus(listing, status) {
 
 
 <section className="workflow-filter-shell">
-  <a href="/account">Dashboard</a>
+
+  <a href="/account" className="tool-link">
+    Dashboard
+  </a>
 
   <button
     type="button"
@@ -601,7 +604,7 @@ function updateWorkflowStatus(listing, status) {
     className={workflowFilter === "good-listing" ? "active" : ""}
     onClick={() => setWorkflowFilter("good-listing")}
   >
-    Good
+    Good Listing
   </button>
 
   <button
@@ -636,7 +639,10 @@ function updateWorkflowStatus(listing, status) {
     Review
   </button>
 
-  <a href="/post-free">Add Machine</a>
+  <a href="/post-free" className="tool-link">
+    Add Machine
+  </a>
+
 </section>
 
               
@@ -1037,14 +1043,14 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell {
-   max-width: 700px;
+   max-width: 670px;
   margin: -6px auto 10px;
-  padding: 7px;
+  padding: 6px;
 
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
@@ -1086,7 +1092,27 @@ function updateWorkflowStatus(listing, status) {
   color: #FFC400;
 }
 
+.tool-link {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 2px !important;
 
+  color: rgba(255,255,255,.28) !important;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: .72px;
+  text-transform: uppercase;
+
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.tool-link:hover {
+  color: #FFC400 !important;
+}
 
 .featured {
   padding: 8px 5% 60px;
