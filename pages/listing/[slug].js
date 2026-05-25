@@ -1046,12 +1046,12 @@ export default function ListingPage() {
 }
 
         .right-stack {
-          display: grid;
-          grid-template-rows: 38px minmax(0, 1fr);
-          gap: 10px;
-          height: 100%;
-          min-width: 0;
-        }
+  display: grid;
+  grid-template-rows: 38px 256px;
+  gap: 8px;
+  height: auto;
+  min-width: 0;
+}
 
         .mini-tool-tab {
           height: 38px;
@@ -1166,9 +1166,9 @@ export default function ListingPage() {
   width: 560px;
   max-width: 560px;
 
-  height: 256px;
-  min-height: 256px;
-  max-height: 256px;
+ height: 248px;
+  min-height: 248px;
+  max-height: 248px;
 
   align-items: stretch;
 }
