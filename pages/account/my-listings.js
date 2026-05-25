@@ -762,8 +762,8 @@ async function updateWorkflowStatus(listing, status) {
               disabled={savingPriceId === String(listingId)}
             />
 
-           <span className={`status-pill ${isArchived ? "paused" : ""}`}>
-  {isArchived ? "PAUSED" : "LIVE"}
+           className={`status-pill ${isPaused ? "paused" : ""}`}>
+  {isPaused ? "PAUSED" : "LIVE"}
 </span>
           </div>
 
@@ -780,7 +780,7 @@ async function updateWorkflowStatus(listing, status) {
               VIEW
             </a>
 
-            {isArchived ? (
+            {isPaused ? (
               <button
                 type="button"
                 onClick={() => reactivateListing(item)}
