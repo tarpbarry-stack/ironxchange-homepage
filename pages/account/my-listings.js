@@ -625,6 +625,19 @@ function updateWorkflowStatus(listing, status) {
           }}
         />
 
+<div className="workflow-photo-pill">
+  <select
+    value={getWorkflowStatus(item)}
+    onChange={e => updateWorkflowStatus(item, e.target.value)}
+  >
+    <option value="good-listing">Good Listing</option>
+    <option value="reprice">Reprice</option>
+    <option value="refresh-photos">Refresh Photos</option>
+    <option value="social-blast">Social Blast</option>
+    <option value="review">Review</option>
+  </select>
+</div>
+
         {cardImages.length > 1 && (
           <>
             <button
@@ -1067,6 +1080,44 @@ function updateWorkflowStatus(listing, status) {
   font-size: 10px;
   font-weight: 900;
   z-index: 5;
+}
+
+.workflow-photo-pill {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 6;
+}
+
+.workflow-photo-pill select {
+  height: 24px;
+  max-width: 132px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(45deg, transparent 50%, #FFC400 50%),
+    linear-gradient(135deg, #FFC400 50%, transparent 50%),
+    rgba(0,0,0,.72);
+  background-position:
+    calc(100% - 13px) 50%,
+    calc(100% - 8px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  color: #f2f2f2;
+  padding: 0 24px 0 9px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.workflow-photo-pill select:hover,
+.workflow-photo-pill select:focus {
+  border-color: rgba(255,196,0,.45);
+  color: #FFC400;
 }
 
 .card-body {
