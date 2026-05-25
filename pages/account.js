@@ -591,8 +591,8 @@ const logoUrl =
         listing.listingStatus ||
         listing.publicData?.listingStatus ||
         listing.attributes?.publicData?.listingStatus
-      ) === "archived"
-        ? "archived"
+      ) === "paused"
+        ? "paused"
         : "active"
     }`}
   >
@@ -600,9 +600,9 @@ const logoUrl =
       listing.listingStatus ||
       listing.publicData?.listingStatus ||
       listing.attributes?.publicData?.listingStatus
-    ) === "archived"
-      ? "ARCHIVED"
-      : "ACTIVE"}
+    ) === "paused"
+      ? "PAUSED"
+      : "LIVE"}
   </span>
 
   <button
@@ -614,39 +614,61 @@ const logoUrl =
   </button>
 </div>
 
-<span>
-  <select
-    className="action-select"
-    defaultValue=""
-    onChange={e => {
-      const value = e.target.value;
+<select
+  className="workflow-select"
+  value={getWorkflowStatus(listing)}
+  onChange={e => updateWorkflowStatus(listing, e.target.value)}
+>
+  <option value="good-listing">Good</option>
+  <option value="reprice">Reprice</option>
+  <option value="refresh-photos">Photos</option>
+  <option value="social-blast">Social</option>
+  <option value="review">Review</option>
+</select>
 
-      if (value === "edit" || value === "promote") {
-        window.location.href = `/live?id=${listing.id}`;
-      }
+<select
+  className="action-select"
+  defaultValue=""
+  onChange={e => {
+    const value = e.target.value;
 
-      if (value === "archive") {
-        archiveListing(listing);
-      }
+    if (value === "edit" || value === "promote") {
+      window.location.href = `/live?id=${listing.id}`;
+    }
 
-      e.target.value = "";
-    }}
-  >
-    <option value="" disabled>
-      ACTION
-    </option>
+    if (value === "pause") {
+      pauseListing(listing);
+    }
 
-    <option value="edit">Edit</option>
-    <option value="promote">Promote</option>
+    if (value === "reactivate") {
+      reactivateListing(listing);
+    }
+
+    e.target.value = "";
+  }}
+>
+  <option value="" disabled>
+    ACTION
+  </option>
+
+  <option value="edit">Edit</option>
+  <option value="promote">Promote</option>
+
+  {(
+    listing.listingStatus ||
+    listing.publicData?.listingStatus ||
+    listing.attributes?.publicData?.listingStatus
+  ) === "paused" ? (
+    <option value="reactivate">Reactivate</option>
+  ) : (
     <option value="pause">Pause</option>
-    <option value="sold">Mark Sold</option>
-    <option value="duplicate">Duplicate</option>
-    <option value="relist">Relist</option>
-    <option value="archive">Archive</option>
-  </select>
-</span>
+  )}
 
-  
+  <option value="sold">Mark Sold</option>
+  <option value="duplicate">Duplicate</option>
+  <option value="relist">Relist</option>
+</select>
+
 <span className="listing-metric">
   {listing.views || "—"}
 </span>
@@ -1516,14 +1538,53 @@ main {
     74px
     52px
     74px
-    78px
-    52px
-    52px;
+    86px
+    86px
+    60px
+    60px;
 
   gap: 12px;
 
   align-items: center;
   justify-content: start;
+}
+
+.workflow-select {
+  width: 86px;
+  height: 28px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.035),
+      rgba(255,196,0,0)
+    ),
+    #0F0F0F;
+
+  border: 1px solid rgba(255,196,0,.14);
+  border-radius: 8px;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 8px;
+  font-weight: 900;
+
+  padding: 0 18px 0 10px;
+
+  outline: none;
+  cursor: pointer;
+
+  text-transform: uppercase;
+
+  transition:
+    border-color .14s ease,
+    background .14s ease;
+}
+
+.workflow-select:hover,
+.workflow-select:focus {
+  border-color: rgba(255,196,0,.45);
+  color: #FFC400;
 }
 
 .listing-hours {
@@ -1729,7 +1790,7 @@ main {
 
   text-transform: uppercase;
 
-  margin-left: 10px;
+  margin-left: 18px;
 
   transition:
     border-color .14s ease,
