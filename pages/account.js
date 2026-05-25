@@ -1956,6 +1956,15 @@ main {
   color: #A0A0A0;
 }
 
+.listing-status.active {
+  animation: livePulse 2.8s ease-in-out infinite !important;
+  box-shadow: 0 0 0 rgba(56,161,105,0);
+}
+
+.listing-status.paused {
+  animation: none;
+}
+
 .listing-status-stack {
   display: grid;
   grid-template-rows: 22px 22px;
