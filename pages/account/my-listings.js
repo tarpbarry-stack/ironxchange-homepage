@@ -1033,8 +1033,8 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell {
-  max-width: 920px;
-  margin: 0 auto 24px;
+  max-width: 760px;
+  margin: -4px auto 14px;
   padding: 8px;
 
   display: flex;
@@ -1082,7 +1082,7 @@ function updateWorkflowStatus(listing, status) {
 
 
 .featured {
-  padding: 46px 5% 60px;
+ padding: 18px 5% 60px;
   background: #0B0B0B;
 }
 
