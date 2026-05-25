@@ -2696,6 +2696,8 @@ transition:
     transform .14s ease,
     filter .14s ease,
     box-shadow .14s ease;
+
+animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .share-everywhere-btn:hover {
