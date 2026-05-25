@@ -1093,9 +1093,18 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .tool-link {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 2px !important;
+  height: 27px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 10px !important;
+
+  border: 1px solid rgba(255,255,255,.04) !important;
+  border-radius: 999px !important;
+
+  background: rgba(255,255,255,.018) !important;
 
   color: rgba(255,255,255,.28) !important;
 
@@ -1111,9 +1120,10 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .tool-link:hover {
+  border-color: rgba(255,196,0,.18) !important;
+  background: rgba(255,196,0,.05) !important;
   color: #FFC400 !important;
 }
-
 .featured {
   padding: 8px 5% 60px;
   background: #0B0B0B;
