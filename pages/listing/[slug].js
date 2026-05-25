@@ -1175,32 +1175,40 @@ export default function ListingPage() {
           -webkit-font-smoothing: antialiased;
         }
 
-      ..media-tools-row {
+.media-tools-row {
   display: grid;
+
   grid-template-columns: 190px 360px;
+
   gap: 10px;
+
   width: 560px;
   max-width: 560px;
+
   height: var(--media-row-height);
+
   align-items: stretch;
 }
 
-     .buyer-launch-panel,
+.buyer-launch-panel,
 .video-panel {
   height: var(--media-row-height);
   min-height: var(--media-row-height);
   max-height: var(--media-row-height);
+
   padding: 12px;
+
   display: flex;
   flex-direction: column;
+
   overflow: hidden;
 }
 
-        .buyer-launch-panel h2,
-        .video-panel h2 {
-          margin: 0 0 10px;
-          text-align: center;
-        }
+.buyer-launch-panel h2,
+.video-panel h2 {
+  margin: 0 0 10px;
+  text-align: center;
+}
 
 .buyer-launch-stack {
   display: grid;
@@ -1209,8 +1217,9 @@ export default function ListingPage() {
   flex: 1;
   align-content: stretch;
 }
-       .buyer-launch-stack button {
-  min-height: 0px;
+
+.buyer-launch-stack button {
+  min-height: 0;
   height: 100%;
 
   display: flex;
@@ -1251,40 +1260,7 @@ export default function ListingPage() {
     background .14s ease;
 }
 
-.video-panel {
-  align-self: stretch;
-}
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.014),
-      rgba(255,255,255,0)
-    ),
-    #101010;
-
-  color: rgba(255,255,255,.68);
-
-  padding: 0 8px;
-
-  font-size: 7px;
-  font-weight: 950;
-
-  letter-spacing: .52px;
-  text-transform: uppercase;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.02) inset;
-
-  transition:
-    transform .14s ease,
-    border-color .14s ease,
-    color .14s ease,
-    background .14s ease;
-}
-
-      .buyer-launch-stack button:hover {
+.buyer-launch-stack button:hover {
   transform: translateY(-1px);
 
   border-color: rgba(255,196,0,.18);
@@ -1300,12 +1276,16 @@ export default function ListingPage() {
     #151515;
 }
 
-        .buyer-launch-stack i {
+.buyer-launch-stack i {
   width: 13px;
 
   text-align: center;
 
   font-size: 10px;
+}
+
+.video-panel {
+  align-self: stretch;
 }
 
         .whatsapp-icon {
