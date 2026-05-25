@@ -718,28 +718,41 @@ async function reactivateListing(listing) {
                             }
                           >
                             {listing.age ?? "—"}
-                          </span>
 
-<div className="listing-status-stack">
-  <span
-    className={`listing-status ${
-      (
-        listing.listingStatus ||
-        listing.publicData?.listingStatus ||
-        listing.attributes?.publicData?.listingStatus
-      ) === "paused"
-        ? "paused"
-        : "active"
-    }`}
-  >
-    {(
+<button
+  type="button"
+  className={`listing-status ${
+    (
       listing.listingStatus ||
       listing.publicData?.listingStatus ||
       listing.attributes?.publicData?.listingStatus
     ) === "paused"
-      ? "PAUSED"
-      : "LIVE"}
-  </span>
+      ? "paused"
+      : "active"
+  }`}
+  onClick={() => {
+    const status =
+      listing.listingStatus ||
+      listing.publicData?.listingStatus ||
+      listing.attributes?.publicData?.listingStatus ||
+      "live";
+
+    if (status === "paused") {
+      reactivateListing(listing);
+    } else {
+      pauseListing(listing);
+    }
+  }}
+>
+  {(
+    listing.listingStatus ||
+    listing.publicData?.listingStatus ||
+    listing.attributes?.publicData?.listingStatus
+  ) === "paused"
+    ? "PAUSED"
+    : "LIVE"}
+</button>
+
 
   <button
     type="button"
@@ -1836,6 +1849,9 @@ main {
   white-space: nowrap;
 
   text-transform: uppercase;
+
+  cursor: pointer;
+  border: none;
 }
 
 .listing-status.active {
