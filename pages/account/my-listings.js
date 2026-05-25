@@ -586,6 +586,8 @@ function updateWorkflowStatus(listing, status) {
 
 
 <section className="workflow-filter-shell">
+  <a href="/account">Dashboard</a>
+
   <button
     type="button"
     className={workflowFilter === "all" ? "active" : ""}
@@ -599,7 +601,7 @@ function updateWorkflowStatus(listing, status) {
     className={workflowFilter === "good-listing" ? "active" : ""}
     onClick={() => setWorkflowFilter("good-listing")}
   >
-    Good Listing
+    Good
   </button>
 
   <button
@@ -633,6 +635,8 @@ function updateWorkflowStatus(listing, status) {
   >
     Review
   </button>
+
+  <a href="/post-free">Add Machine</a>
 </section>
 
               
@@ -1033,7 +1037,7 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell {
-   max-width: 550px;
+   max-width: 700px;
   margin: -6px auto 10px;
   padding: 7px;
 
@@ -1054,6 +1058,7 @@ function updateWorkflowStatus(listing, status) {
     0 12px 30px rgba(0,0,0,.20);
 }
 
+.workflow-filter-shell a,
 .workflow-filter-shell button {
   height: 27px;
   padding: 0 10px;
@@ -1072,8 +1077,10 @@ function updateWorkflowStatus(listing, status) {
   cursor: pointer;
 }
 
+
+.workflow-filter-shell a:hover,
 .workflow-filter-shell button:hover,
-.workflow-filter-shell button.active {
+.workflow-filter-shell button.active  {
   border-color: rgba(255,196,0,.38);
   background: #1a1400;
   color: #FFC400;
