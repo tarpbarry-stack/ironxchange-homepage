@@ -418,128 +418,124 @@ async function pauseListing(listing) {
       throw new Error(data.error || "Pause failed");
     }
 
-    setMyListings(current => {
-      const updated = current.map(item =>
-        String(item.id) === String(listingId)
-          ? {
-              ...item,
-              listingStatus: "paused",
-              publicData: {
-                ...(item.publicData || {}),
-                listingStatus: "paused"
-              },
-              metadata: {
-                ...(item.metadata || {}),
-                listingStatus: "paused"
-              }
-            }
-          : item
-      );
+setMyListings(current => {
+  const updated = current.map(item =>
+    String(item.id) === String(listingId)
+      ? {
+          ...item,
+          listingStatus: "paused",
+          publicData: {
+            ...(item.publicData || {}),
+            listingStatus: "paused"
+          },
+          metadata: {
+            ...(item.metadata || {}),
+            listingStatus: "paused"
+          }
+        }
+      : item
+  );
 
-      const pausedItem = updated.find(
-        item => String(item.id) === String(listingId)
-      );
+  const pausedItem = updated.find(
+    item => String(item.id) === String(listingId)
+  );
 
-      return [
-        ...updated.filter(
-          item => String(item.id) !== String(listingId)
-        ),
-        pausedItem
-      ].filter(Boolean);
-    });
+  return [
+    ...updated.filter(
+      item => String(item.id) !== String(listingId)
+    ),
+    pausedItem
+  ].filter(Boolean);
+});
 
-    addActivity(
-      "success",
-      `Listing paused — ${cleanMachineTitle(listing.title)}`
-    );
-  } catch (error) {
-    addActivity(
-      "error",
-      `Pause failed — ${cleanMachineTitle(listing.title)}`
-    );
+addActivity(
+  "success",
+  `Listing paused — ${cleanMachineTitle(listing.title)}`
+);
 
-    console.error("Pause failed:", error);
-  }
+} catch (error) {
+
+addActivity(
+  "error",
+  `Pause failed — ${cleanMachineTitle(listing.title)}`
+);
+
+console.error("Pause failed:", error);
+
+}
 }
 
 async function reactivateListing(listing) {
-  const listingId = listing.id || listing.id?.uuid;
 
-  if (!listingId) return;
+const listingId = listing.id || listing.id?.uuid;
 
-  try {
-    const response = await fetch("/api/reactivate-listing", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ listingId })
-    });
+if (!listingId) return;
 
-    const data = await response.json();
+try {
 
-    if (!response.ok) {
-      throw new Error(data.error || "Reactivate failed");
-    }
+  const response = await fetch("/api/reactivate-listing", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ listingId })
+  });
 
-    setMyListings(current => {
-      const updated = current.map(item =>
-        String(item.id) === String(listingId)
-          ? {
-              ...item,
-              listingStatus: "live",
-              publicData: {
-                ...(item.publicData || {}),
-                listingStatus: "live"
-              },
-              metadata: {
-                ...(item.metadata || {}),
-                listingStatus: "live"
-              }
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Reactivate failed");
+  }
+
+  setMyListings(current => {
+
+    const updated = current.map(item =>
+      String(item.id) === String(listingId)
+        ? {
+            ...item,
+            listingStatus: "live",
+            publicData: {
+              ...(item.publicData || {}),
+              listingStatus: "live"
+            },
+            metadata: {
+              ...(item.metadata || {}),
+              listingStatus: "live"
             }
-          : item
-      );
-
-      const liveItem = updated.find(
-        item => String(item.id) === String(listingId)
-      );
-
-      return [
-        liveItem,
-        ...updated.filter(
-          item => String(item.id) !== String(listingId)
-        )
-      ].filter(Boolean);
-    });
-
-    addActivity(
-      "success",
-      `Listing reactivated — ${cleanMachineTitle(listing.title)}`
-    );
-  } catch (error) {
-    addActivity(
-      "error",
-      `Reactivate failed — ${cleanMachineTitle(listing.title)}`
+          }
+        : item
     );
 
-    console.error("Reactivate failed:", error);
-  }
+    const liveItem = updated.find(
+      item => String(item.id) === String(listingId)
+    );
+
+    return [
+      liveItem,
+      ...updated.filter(
+        item => String(item.id) !== String(listingId)
+      )
+    ].filter(Boolean);
+
+  });
+
+  addActivity(
+    "success",
+    `Listing reactivated — ${cleanMachineTitle(listing.title)}`
+  );
+
+} catch (error) {
+
+  addActivity(
+    "error",
+    `Reactivate failed — ${cleanMachineTitle(listing.title)}`
+  );
+
+  console.error("Reactivate failed:", error);
+
 }
-
-    addActivity(
-      "success",
-      `Listing reactivated — ${cleanMachineTitle(listing.title)}`
-    );
-  } catch (error) {
-    addActivity(
-      "error",
-      `Reactivate failed — ${cleanMachineTitle(listing.title)}`
-    );
-
-    console.error("Reactivate failed:", error);
-  }
 }
-
+    
   return (
     <>
       <Head>
