@@ -115,6 +115,12 @@ function formatMoney(value) {
   return `$${Number(raw).toLocaleString()}`;
 }
 
+function formatHours(value) {
+  const raw = cleanNumber(value);
+  if (!raw) return "—";
+  return `${Number(raw).toLocaleString()} hrs`;
+}
+
 function cleanMachineTitle(title = "") {
   return String(title)
     .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
@@ -216,7 +222,7 @@ function addActivity(type, message) {
 
 function getListingUrl(listing) {
   if (!listing?.title || typeof window === "undefined") return "";
-  return `${window.location.origin}/listing/${slugify(listing.title)}?from=live`;
+  return `${window.location.origin}/listing/${slugify(listing.title)}?from=launch-studio`;
 }
 
 async function downloadImage(url, filename) {
@@ -238,13 +244,26 @@ async function downloadImage(url, filename) {
 function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
   const title = clean(listing?.title) || "Equipment Listing";
   const price = formatMoney(listing?.price);
-  const hours = clean(listing?.hours) || "Hours not listed";
+  const hours = formatHours(listing?.hours);
   const location = clean(listing?.location) || "Location not listed";
   const description =
     clean(listing?.description) ||
     "Clean machine. Full specs and photos available on IronXchange.";
 
-  const features = selectedKeywords.slice(0, 5).join(" • ");
+  const features = selectedKeywords.slice(0, 6).join(" • ");
+  const linkLine = `Full specs + photos:\n${listingUrl}`;
+
+  if (platform === "marketplace") {
+    return `${title}
+${hours} | ${location}
+${price}
+
+${features}
+
+${description}
+
+${linkLine}`;
+  }
 
   if (platform === "linkedin") {
     return `${title}
@@ -256,8 +275,21 @@ ${features}
 
 ${description}
 
-View full specs and photos:
-${listingUrl}`;
+${linkLine}
+
+#IronXchange #HeavyEquipment #ConstructionEquipment`;
+  }
+
+  if (platform === "instagram") {
+    return `${title}
+${hours} | ${location}
+${price}
+
+${features}
+
+${linkLine}
+
+#IronXchange #HeavyEquipment #YellowIron #ConstructionEquipment`;
   }
 
   if (platform === "tiktok") {
@@ -265,8 +297,7 @@ ${listingUrl}`;
 ${hours} | ${location}
 ${price}
 
-Full listing on IronXchange:
-${listingUrl}
+${linkLine}
 
 #IronXchange #HeavyEquipment #ConstructionEquipment`;
   }
@@ -279,9 +310,7 @@ ${features}
 
 ${description}
 
-Listed on IronXchange.
-View full specs + photos:
-${listingUrl}`;
+${linkLine}`;
 }
 
 export default function ListingLivePage() {
@@ -315,7 +344,7 @@ export default function ListingLivePage() {
       .then(data => {
         if (Array.isArray(data)) setListings(data);
       })
-      .catch(err => console.error("Live page load failed:", err))
+      .catch(err => console.error("Launch Studio load failed:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -360,7 +389,7 @@ export default function ListingLivePage() {
     listing?.image ||
     "/images/hero-equipment-yard.jpg";
 
-  const title = cleanMachineTitle(listing?.title || "Machine Command Center");
+  const title = cleanMachineTitle(listing?.title || "Machine Listing");
   const category = clean(listing?.type || listing?.category || listing?.publicData?.category) || "Category not listed";
   const sellerName =
     clean(listing?.sellerName) ||
@@ -385,17 +414,17 @@ export default function ListingLivePage() {
   }, [availableKeywords, keywordSearch]);
 
   const marketplaceTitle = listing
-    ? `${clean(listing.title)} | ${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}`
+    ? `${clean(listing.title)} | ${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}`
     : "";
 
   const shortDescription = listing
     ? `
 ${clean(listing.title)}
-${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
+${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
 
 ${formatMoney(edit.price || listing.price)}
 
-Listed on IronXchange:
+Full specs + photos:
 ${listingUrl}
 `.trim()
     : "";
@@ -404,14 +433,14 @@ ${listingUrl}
     ? `
 ${clean(listing.title)}
 
-${clean(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
+${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}
 ${formatMoney(edit.price || listing.price)}
 
 ${selectedKeywords.slice(0, 8).join(" • ")}
 
 ${clean(edit.description || listing.description)}
 
-View full specs + photos:
+Full specs + photos:
 ${listingUrl}
 
 Listed on IronXchange.
@@ -450,12 +479,7 @@ Listed on IronXchange.
     }));
 
     setPhotoItems(current => [...current, ...mapped]);
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`
-    );
-
+    addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`);
     e.target.value = "";
   }
 
@@ -474,20 +498,12 @@ Listed on IronXchange.
     }));
 
     setPhotoItems(current => [...current, ...mapped]);
-
-    addActivity(
-      "success",
-      `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`
-    );
+    addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
   }
 
   function removePhoto(indexToRemove) {
-    setPhotoItems(current =>
-      current.filter((_, index) => index !== indexToRemove)
-    );
-
+    setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
     setActivePhotoIndex(0);
-
     addActivity("success", `Photo removed — ${title}`);
   }
 
@@ -502,7 +518,7 @@ Listed on IronXchange.
       return next;
     });
 
-    setActivePhotoIndex(0);
+    setActivePhotoIndex(toIndex);
     addActivity("success", `Photo order changed — ${title}`);
   }
 
@@ -510,9 +526,7 @@ Listed on IronXchange.
     try {
       await navigator.clipboard.writeText(text);
       setCopied(label);
-
       addActivity("success", `${label} copied — ${title}`);
-
       setTimeout(() => setCopied(""), 1500);
     } catch {
       addActivity("error", `${label} copy failed — ${title}`);
@@ -590,12 +604,12 @@ Listed on IronXchange.
         }
       }
 
-      addActivity("success", `Edit saved — ${title}`);
+      addActivity("success", `Listing saved — ${title}`);
       alert("Saved. Listing updates applied.");
     } catch (err) {
       console.error("SAVE QUICK EDIT ERROR:", err);
-      addActivity("error", `Edit failed — ${title}`);
-      alert(`Edit failed: ${err.message}`);
+      addActivity("error", `Save failed — ${title}`);
+      alert(`Save failed: ${err.message}`);
     } finally {
       setSaving(false);
     }
@@ -618,9 +632,7 @@ Listed on IronXchange.
         })
       });
 
-      if (!response.ok) {
-        throw new Error("Workflow update failed");
-      }
+      if (!response.ok) throw new Error("Workflow update failed");
 
       addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
     } catch (err) {
@@ -661,9 +673,7 @@ Listed on IronXchange.
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data?.error || `${action} failed`);
-      }
+      if (!response.ok) throw new Error(data?.error || `${action} failed`);
 
       addActivity("success", `${action} complete — ${title}`);
       router.reload();
@@ -676,10 +686,15 @@ Listed on IronXchange.
     }
   }
 
+  function launchExternal(platform, url, copyLabel, copy) {
+    copyText(copyLabel, copy);
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   if (loading) {
     return (
       <main className="loading">
-        Loading machine command center...
+        Loading Launch Studio...
         <style jsx>{`
           .loading {
             min-height: 100vh;
@@ -711,10 +726,9 @@ Listed on IronXchange.
   }
 
   return (
-
     <>
       <Head>
-        <title>{title} Command Center | IronXchange</title>
+        <title>{title} Launch Studio | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -741,494 +755,469 @@ Listed on IronXchange.
           </div>
         </nav>
 
-        <section className="wrap">
-          <section className="command-bar">
-            <div className="command-title">
+        <section className="launch-wrap">
+          <section className="launch-header">
+            <div className="launch-title">
               <button type="button" onClick={() => router.push("/account/my-listings")}>
                 ← Inventory
               </button>
 
               <div>
-                <span>Machine Command Center</span>
+                <span>IronXchange Launch Studio</span>
                 <h1>{title}</h1>
+                <p>Build it once. Blast it everywhere. Keep IronXchange as the source link.</p>
               </div>
             </div>
 
-            <div className="command-actions">
+            <div className="launch-header-actions">
               <div className={isPaused ? "status-pill paused" : "status-pill live"}>
                 <span></span>
                 {isPaused ? "Paused" : "Live"}
               </div>
 
-              <a href={listingUrl} target="_blank" rel="noreferrer" className="mini-btn yellow-btn">
-                View Public
-              </a>
+              <select
+                className="workflow-select"
+                value={workflowStatus}
+                onChange={e => updateWorkflow(e.target.value)}
+              >
+                {workflowOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
 
               <button
                 type="button"
+                className="save-top"
                 onClick={saveQuickEdit}
-                className="mini-btn save-mini"
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save"}
               </button>
+
+              <a href={listingUrl} target="_blank" rel="noreferrer" className="public-link">
+                View Public
+              </a>
             </div>
           </section>
 
-          <section className="hero-command-grid">
-            <section className="v10-machine-card">
-              <div className="v10-photo-stage">
-                <img src={heroPhoto} alt={listing.title} className="v10-hero-photo" />
-
-                <button
-                  type="button"
-                  className="photo-nav left"
-                  onClick={() => changeActivePhoto(-1)}
-                  aria-label="Previous photo"
-                >
-                  ‹
-                </button>
-
-                <button
-                  type="button"
-                  className="photo-nav right"
-                  onClick={() => changeActivePhoto(1)}
-                  aria-label="Next photo"
-                >
-                  ›
-                </button>
-
-                <div className="v10-photo-overlay">
-                  <span>{activePhotoIndex + 1} / {photoItems.length || 1}</span>
-                  <strong>Drag thumbnails to reorder</strong>
-                </div>
+          <section className="photo-workbench">
+            <div className="workbench-head">
+              <div>
+                <span>Photo Workbench</span>
+                <strong>Drag the first photo into position — that is your hero everywhere.</strong>
               </div>
 
-              <div className="v10-card-body">
-                <div className="v10-title-row">
-                  <div>
-                    <h2>{title}</h2>
-                    <p>
-                      {selectedKeywords.slice(0, 6).join(" • ") ||
-                        "Add key selling features, condition notes, and package details."}
-                    </p>
-                  </div>
+              <label
+                className="photo-add"
+                onDragOver={e => e.preventDefault()}
+                onDrop={handlePhotoDrop}
+              >
+                <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+                + Add / Drop Photos
+              </label>
+            </div>
 
-                  <div className="v10-price-block">
-                    <strong>{formatMoney(edit.price || listing.price)}</strong>
-                    <span>{edit.hours || listing.hours || "—"} hrs</span>
-                  </div>
-                </div>
-
-                <div className="v10-meta-row">
-                  <span>⌖ {edit.location || listing.location || "Location not listed"}</span>
-                  <span>{category}</span>
-                  <span>{photoItems.length} photos</span>
-                  <span>{workflowStatus}</span>
-                </div>
-
-                <label
-                  className="v10-photo-drop"
+            <div className="photo-strip">
+              {photoItems.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={`photo-tile ${index === 0 ? "hero" : ""} ${
+                    index === activePhotoIndex ? "active" : ""
+                  }`}
+                  draggable
+                  onDragStart={() => setDraggedPhotoIndex(index)}
                   onDragOver={e => e.preventDefault()}
-                  onDrop={handlePhotoDrop}
+                  onDrop={() => {
+                    reorderPhotos(draggedPhotoIndex, index);
+                    setDraggedPhotoIndex(null);
+                  }}
+                  onClick={() => setActivePhotoIndex(index)}
                 >
-                  <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-                  + Add / Drop Photos
-                </label>
+                  {index === 0 ? <span className="hero-badge">HERO</span> : null}
 
-                <div className="v10-thumb-strip">
-                  {photoItems.map((photo, index) => (
-                    <div
-                      key={photo.id}
-                      className={`v10-thumb ${index === activePhotoIndex ? "active" : ""} ${
-                        index === 0 ? "hero" : ""
-                      }`}
-                      draggable
-                      onDragStart={() => setDraggedPhotoIndex(index)}
-                      onDragOver={e => e.preventDefault()}
-                      onDrop={() => {
-                        reorderPhotos(draggedPhotoIndex, index);
-                        setDraggedPhotoIndex(null);
-                      }}
-                      onClick={() => setActivePhotoIndex(index)}
-                    >
-                      {index === 0 && <span>HERO</span>}
-                      <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      removePhoto(index);
+                    }}
+                    aria-label="Remove photo"
+                  >
+                    ×
+                  </button>
+
+                  <small>{index + 1}</small>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="studio-grid">
+            <section className="preview-zone">
+              <div className="section-label">
+                <span>Buyer Card Preview</span>
+                <strong>This is the card buyers see before they click.</strong>
+              </div>
+
+              <div className="listing-preview-card">
+                <div
+                  className="preview-photo"
+                  style={{
+                    backgroundImage: `url(${heroPhoto || "/images/hero-equipment-yard.jpg"})`
+                  }}
+                  onClick={() => changeActivePhoto(1)}
+                >
+                  {photoItems.length > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="card-photo-nav left"
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          changeActivePhoto(-1);
+                        }}
+                        aria-label="Previous photo"
+                      >
+                        ‹
+                      </button>
 
                       <button
                         type="button"
+                        className="card-photo-nav right"
                         onClick={e => {
+                          e.preventDefault();
                           e.stopPropagation();
-                          removePhoto(index);
+                          changeActivePhoto(1);
                         }}
-                        aria-label="Remove photo"
+                        aria-label="Next photo"
                       >
-                        ×
+                        ›
                       </button>
+
+                      <span className="photo-count">
+                        {activePhotoIndex + 1}/{photoItems.length}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+
+                <div className="preview-body">
+                  <div className="preview-title-row">
+                    <h2>{title}</h2>
+                    <h2 className="hours-inline">{formatHours(edit.hours || listing.hours)}</h2>
+                  </div>
+
+                  <div className="preview-keyword-row">
+                    {selectedKeywords.slice(0, 8).map((keyword, index) => (
+                      <span key={`${keyword}-${index}`}>
+                        {String(keyword).trim().toLowerCase()}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="preview-price-row">
+                    <strong>{formatMoney(edit.price || listing.price)}</strong>
+
+                    <div className="preview-meta">
+                      <button type="button" aria-label="Save preview star">
+                        <i className="fa-regular fa-star"></i>
+                      </button>
+
+                      <span>⌖ {edit.location || listing.location || "Location not listed"}</span>
                     </div>
-                  ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="quick-edit-row">
+                <label>
+                  Price
+                  <input
+                    value={edit.price}
+                    onChange={e => setEdit({ ...edit, price: e.target.value })}
+                  />
+                </label>
+
+                <label>
+                  Hours
+                  <input
+                    value={edit.hours}
+                    onChange={e => setEdit({ ...edit, hours: e.target.value })}
+                  />
+                </label>
+
+                <label>
+                  Location
+                  <input
+                    value={edit.location}
+                    onChange={e => setEdit({ ...edit, location: e.target.value })}
+                  />
+                </label>
+              </div>
+            </section>
+
+            <aside className="distribution-center">
+              <div className="distribution-head">
+                <span>Distribution Center</span>
+                <h2>Launch This Machine</h2>
+                <p>Copy the right sales copy, open the right channel, and send buyers back to the IronXchange source page.</p>
+              </div>
+
+              <button
+                type="button"
+                className="launch-btn marketplace"
+                onClick={() =>
+                  launchExternal(
+                    "marketplace",
+                    "https://www.facebook.com/marketplace/create/vehicle",
+                    "Marketplace Copy",
+                    buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords)
+                  )
+                }
+              >
+                <i className="fa-brands fa-facebook"></i>
+                <div>
+                  <strong>Facebook Marketplace</strong>
+                  <span>Copy listing copy + open Marketplace</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="launch-btn facebook"
+                onClick={() =>
+                  launchExternal(
+                    "facebook",
+                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(listingUrl)}`,
+                    "Facebook Post",
+                    buildSocialCopy("facebook", listing, listingUrl, selectedKeywords)
+                  )
+                }
+              >
+                <i className="fa-brands fa-facebook-f"></i>
+                <div>
+                  <strong>Facebook Feed</strong>
+                  <span>Copy post + share source link</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="launch-btn instagram"
+                onClick={() =>
+                  launchExternal(
+                    "instagram",
+                    "https://www.instagram.com/",
+                    "Instagram Caption",
+                    buildSocialCopy("instagram", listing, listingUrl, selectedKeywords)
+                  )
+                }
+              >
+                <i className="fa-brands fa-instagram"></i>
+                <div>
+                  <strong>Instagram</strong>
+                  <span>Copy caption + open Instagram</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="launch-btn linkedin"
+                onClick={() =>
+                  launchExternal(
+                    "linkedin",
+                    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(listingUrl)}`,
+                    "LinkedIn Post",
+                    buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords)
+                  )
+                }
+              >
+                <i className="fa-brands fa-linkedin-in"></i>
+                <div>
+                  <strong>LinkedIn</strong>
+                  <span>Copy professional post + open LinkedIn</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="launch-btn tiktok"
+                onClick={() =>
+                  launchExternal(
+                    "tiktok",
+                    "https://www.tiktok.com/upload",
+                    "TikTok Caption",
+                    buildSocialCopy("tiktok", listing, listingUrl, selectedKeywords)
+                  )
+                }
+              >
+                <i className="fa-brands fa-tiktok"></i>
+                <div>
+                  <strong>TikTok</strong>
+                  <span>Copy caption + open upload</span>
+                </div>
+              </button>
+
+              <div className="utility-grid">
+                <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
+                  {copied === "Listing Link" ? "Copied" : "Copy Link"}
+                </button>
+
+                <button type="button" onClick={() => copyText("Short Copy", shortDescription)}>
+                  {copied === "Short Copy" ? "Copied" : "Short Copy"}
+                </button>
+
+                <button type="button" onClick={() => copyText("Long Copy", longDescription)}>
+                  {copied === "Long Copy" ? "Copied" : "Long Copy"}
+                </button>
+
+                <button type="button" onClick={downloadHeroImage}>
+                  Hero Image
+                </button>
+
+                <button type="button" onClick={downloadAllPhotos}>
+                  Photo Pack
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => runListingCommand(isPaused ? "reactivate" : "pause")}
+                >
+                  {isPaused ? "Reactivate" : "Pause"}
+                </button>
+              </div>
+            </aside>
+          </section>
+
+          <section className="lower-grid">
+            <section className="panel copy-panel">
+              <div className="panel-head">
+                <h2>Sales Copy</h2>
+                <span>What buyers read after they click</span>
+              </div>
+
+              <label className="wide">
+                Description
+                <textarea
+                  value={edit.description}
+                  onChange={e => setEdit({ ...edit, description: e.target.value })}
+                  placeholder="Describe condition, attachments, maintenance, ownership history, and buyer-relevant details..."
+                />
+              </label>
+
+              <div className="save-row">
+                <button type="button" className="save-btn" onClick={saveQuickEdit} disabled={saving}>
+                  {saving ? "Saving..." : "Save Listing"}
+                </button>
+
+                <a href={listingUrl} target="_blank" rel="noreferrer" className="preview-btn">
+                  View Public Page
+                </a>
+              </div>
+            </section>
+
+            <section className="panel badge-panel">
+              <div className="panel-head">
+                <h2>Badge Studio</h2>
+                <span>{selectedKeywords.length} selected</span>
+              </div>
+
+              <div className="selected-badges">
+                {selectedKeywords.slice(0, 14).map((keyword, index) => (
+                  <button
+                    key={`${keyword}-${index}`}
+                    type="button"
+                    onClick={() => toggleKeyword(keyword)}
+                  >
+                    {String(keyword).trim().toLowerCase()}
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                ))}
+              </div>
+
+              <input
+                className="keyword-search"
+                value={keywordSearch}
+                onChange={e => setKeywordSearch(e.target.value)}
+                placeholder="Search features, hydraulics, tires, GPS..."
+              />
+
+              <div className="keyword-grid">
+                {filteredKeywords.map(keyword => (
+                  <button
+                    key={keyword}
+                    type="button"
+                    onClick={() => toggleKeyword(keyword)}
+                    className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
+                  >
+                    {keyword}
+                  </button>
+                ))}
+              </div>
+            </section>
+          </section>
+
+          <section className="footer-ops">
+            <section className="panel machine-data">
+              <div className="panel-head">
+                <h2>Machine Data</h2>
+                <span>source fields</span>
+              </div>
+
+              <div className="machine-data-grid">
+                <div><span>Year</span><strong>{listing.year || listing.publicData?.year || "—"}</strong></div>
+                <div><span>Make</span><strong>{listing.make || listing.publicData?.make || "—"}</strong></div>
+                <div><span>Model</span><strong>{listing.model || listing.publicData?.model || "—"}</strong></div>
+                <div><span>Category</span><strong>{category}</strong></div>
+                <div><span>Stock #</span><strong>{listing.stockNumber || listing.publicData?.stockNumber || "—"}</strong></div>
+                <div><span>Seller</span><strong>{sellerName}</strong></div>
+              </div>
+            </section>
+
+            <section className="panel activity-panel">
+              <div className="panel-head">
+                <h2>Activity</h2>
+                <span>launch log</span>
+              </div>
+
+              <div className="activity-list">
+                <div className="activity-item success">
+                  <span>LAUNCH STUDIO READY</span>
+                  <small>NOW</small>
+                </div>
+
+                <div className="activity-item">
+                  <span>WORKFLOW: {workflowStatus.toUpperCase()}</span>
+                  <small>SYNCED</small>
+                </div>
+
+                <div className="activity-item">
+                  <span>SOURCE LINK READY</span>
+                  <small>READY</small>
                 </div>
               </div>
             </section>
 
-            <aside className="command-stack">
-              <div className="stack-head">
-                <span>Seller Controls</span>
-                <strong>Operate Listing</strong>
+            <section className="panel seller-panel">
+              {sellerLogo ? (
+                <img src={sellerLogo} alt={sellerName} />
+              ) : (
+                <div className="seller-icon">
+                  <i className="fa-regular fa-user"></i>
+                </div>
+              )}
+
+              <div>
+                <span>Seller</span>
+                <strong>{sellerName}</strong>
+                <p>IronXchange is the source page. Blast the machine anywhere buyers live.</p>
               </div>
-
-              <button
-                type="button"
-                className="command-primary"
-                onClick={saveQuickEdit}
-                disabled={saving}
-              >
-                {saving ? "Saving Changes..." : "Save Changes"}
-              </button>
-
-              <button
-                type="button"
-                className={isPaused ? "command-button green" : "command-button"}
-                onClick={() => runListingCommand(isPaused ? "reactivate" : "pause")}
-                disabled={!!commandBusy}
-              >
-                {commandBusy
-                  ? "Working..."
-                  : isPaused
-                    ? "Reactivate Listing"
-                    : "Pause Listing"}
-              </button>
-
-              <label className="workflow-control">
-                Workflow Bucket
-                <select
-                  value={workflowStatus}
-                  onChange={e => updateWorkflow(e.target.value)}
-                >
-                  {workflowOptions.map(option => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <a href={listingUrl} target="_blank" rel="noreferrer" className="command-button link">
-                View Public Listing
-              </a>
-
-              <button
-                type="button"
-                className="command-button"
-                onClick={() => copyText("Listing Link", listingUrl)}
-              >
-                {copied === "Listing Link" ? "Copied" : "Copy Listing Link"}
-              </button>
-
-              <button
-                type="button"
-                className="command-button"
-                onClick={downloadHeroImage}
-              >
-                Download Hero Photo
-              </button>
-
-              <button
-                type="button"
-                className="command-button"
-                onClick={downloadAllPhotos}
-              >
-                Download Photo Pack
-              </button>
-
-              <button
-                type="button"
-                className="command-button danger"
-                onClick={() => runListingCommand("delete")}
-              >
-                Delete / Archive
-              </button>
-            </aside>
-          </section>
-
-          <section className="main-grid">
-            <div className="left-stack">
-              <section className="panel metrics-panel">
-                <div className="metric">
-                  <span>Views</span>
-                  <strong>—</strong>
-                </div>
-
-                <div className="metric">
-                  <span>Saves</span>
-                  <strong>—</strong>
-                </div>
-
-                <div className="metric">
-                  <span>Inquiries</span>
-                  <strong>—</strong>
-                </div>
-
-                <div className="metric">
-                  <span>Shares</span>
-                  <strong>—</strong>
-                </div>
-              </section>
-
-              <section className="panel machine-data-panel">
-                <div className="panel-head">
-                  <h2>Machine Data</h2>
-                  <span>Core Listing Fields</span>
-                </div>
-
-                <div className="machine-data-grid">
-                  <div>
-                    <span>Year</span>
-                    <strong>{listing.year || listing.publicData?.year || "—"}</strong>
-                  </div>
-
-                  <div>
-                    <span>Make</span>
-                    <strong>{listing.make || listing.publicData?.make || "—"}</strong>
-                  </div>
-
-                  <div>
-                    <span>Model</span>
-                    <strong>{listing.model || listing.publicData?.model || "—"}</strong>
-                  </div>
-
-                  <label>
-                    Hours
-                    <input
-                      value={edit.hours}
-                      onChange={e => setEdit({ ...edit, hours: e.target.value })}
-                    />
-                  </label>
-
-                  <label>
-                    Price
-                    <input
-                      value={edit.price}
-                      onChange={e => setEdit({ ...edit, price: e.target.value })}
-                    />
-                  </label>
-
-                  <label>
-                    Location
-                    <input
-                      value={edit.location}
-                      onChange={e => setEdit({ ...edit, location: e.target.value })}
-                    />
-                  </label>
-
-                  <div>
-                    <span>Category</span>
-                    <strong>{category}</strong>
-                  </div>
-
-                  <div>
-                    <span>Stock #</span>
-                    <strong>{listing.stockNumber || listing.publicData?.stockNumber || "—"}</strong>
-                  </div>
-                </div>
-              </section>
-
-              <section className="panel activity-panel">
-                <div className="panel-head">
-                  <h2>Activity Log</h2>
-                  <span>Recent Actions</span>
-                </div>
-
-                <div className="activity-list">
-                  <div className="activity-item success">
-                    <span>PHOTO ORDER READY</span>
-                    <small>LIVE</small>
-                  </div>
-
-                  <div className="activity-item">
-                    <span>WORKFLOW: {workflowStatus.toUpperCase()}</span>
-                    <small>SYNCED</small>
-                  </div>
-
-                  <div className="activity-item">
-                    <span>PUBLIC PAGE LINK READY</span>
-                    <small>READY</small>
-                  </div>
-
-                  <div className="activity-item">
-                    <span>SELLER COMMAND CENTER LOADED</span>
-                    <small>NOW</small>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            <div className="right-stack">
-              <section className="panel edit-panel">
-                <div className="panel-head">
-                  <h2>Sales Copy</h2>
-                  <span>Description + Keywords</span>
-                </div>
-
-                <label className="wide">
-                  Description
-                  <textarea
-                    value={edit.description}
-                    onChange={e => setEdit({ ...edit, description: e.target.value })}
-                    placeholder="Describe condition, attachments, maintenance, ownership history, and buyer-relevant details..."
-                  />
-                </label>
-
-                <div className="keywords-panel">
-                  <div className="keywords-head">
-                    <h2>Feature Tags</h2>
-                    <span>{selectedKeywords.length} Selected</span>
-                  </div>
-
-                  <input
-                    className="keyword-search"
-                    value={keywordSearch}
-                    onChange={e => setKeywordSearch(e.target.value)}
-                    placeholder="Search features, hydraulics, tires, GPS..."
-                  />
-
-                  <div className="keyword-grid">
-                    {filteredKeywords.map(keyword => (
-                      <button
-                        key={keyword}
-                        type="button"
-                        onClick={() => toggleKeyword(keyword)}
-                        className={
-                          selectedKeywords.includes(keyword)
-                            ? "keyword-chip active"
-                            : "keyword-chip"
-                        }
-                      >
-                        {keyword}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="save-row">
-                  <button
-                    type="button"
-                    onClick={saveQuickEdit}
-                    className="save-btn"
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save Changes"}
-                  </button>
-
-                  <a
-                    href={listingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="preview-btn"
-                  >
-                    View Public
-                  </a>
-                </div>
-              </section>
-
-              <section className="panel promote-panel">
-                <div className="panel-head">
-                  <h2>Media Blast</h2>
-                  <span>Copy + Open</span>
-                </div>
-
-                <div className="promote-grid">
-                  <button
-                    type="button"
-                    onClick={() => copyText("Marketplace Title", marketplaceTitle)}
-                  >
-                    {copied === "Marketplace Title" ? "Copied" : "Marketplace Title"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => copyText("Short Description", shortDescription)}
-                  >
-                    {copied === "Short Description" ? "Copied" : "Short Copy"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => copyText("Long Description", longDescription)}
-                  >
-                    {copied === "Long Description" ? "Copied" : "Long Copy"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      copyText(
-                        "Facebook Post",
-                        buildSocialCopy("facebook", listing, listingUrl, selectedKeywords)
-                      )
-                    }
-                  >
-                    {copied === "Facebook Post" ? "Copied" : "Facebook"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      copyText(
-                        "Instagram Caption",
-                        buildSocialCopy("instagram", listing, listingUrl, selectedKeywords)
-                      )
-                    }
-                  >
-                    {copied === "Instagram Caption" ? "Copied" : "Instagram"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      copyText(
-                        "LinkedIn Post",
-                        buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords)
-                      )
-                    }
-                  >
-                    {copied === "LinkedIn Post" ? "Copied" : "LinkedIn"}
-                  </button>
-
-                  <a href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noreferrer">
-                    FB Marketplace
-                  </a>
-
-                  <a href="https://www.linkedin.com/feed/" target="_blank" rel="noreferrer">
-                    LinkedIn
-                  </a>
-
-                  <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
-                    Instagram
-                  </a>
-
-                  <a href="https://www.tiktok.com/upload" target="_blank" rel="noreferrer">
-                    TikTok
-                  </a>
-                </div>
-              </section>
-
-              <section className="panel seller-bar">
-                {sellerLogo ? (
-                  <img src={sellerLogo} alt={sellerName} />
-                ) : (
-                  <div className="seller-icon">
-                    <i className="fa-regular fa-user"></i>
-                  </div>
-                )}
-
-                <div>
-                  <span>Seller</span>
-                  <strong>{sellerName}</strong>
-                  <p>Profile/contact expansion hooks stay ready for V10 seller CRM.</p>
-                </div>
-              </section>
-            </div>
+            </section>
           </section>
         </section>
       </main>
@@ -1245,18 +1234,18 @@ Listed on IronXchange.
           box-sizing: border-box;
         }
 
-        main {
-          min-height: 100vh;
-          background:
-            radial-gradient(circle at top, rgba(255,196,0,.025), transparent 28%),
-            #0b0b0b;
-        }
-
         button,
         input,
         textarea,
         select {
           font-family: inherit;
+        }
+
+        main {
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top, rgba(255,196,0,.025), transparent 28%),
+            #0b0b0b;
         }
 
         .nav {
@@ -1302,104 +1291,134 @@ Listed on IronXchange.
           place-items: center;
         }
 
-        .wrap {
-          max-width: 1580px;
+        .launch-wrap {
+          max-width: 1600px;
           margin: 0 auto;
           padding: 14px 2% 54px;
         }
 
         .panel,
-        .command-bar,
-        .v10-machine-card,
-        .command-stack {
+        .launch-header,
+        .photo-workbench,
+        .distribution-center,
+        .listing-preview-card {
           background:
             linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
             #141414;
+
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
+
           border-radius: 14px;
+
           box-shadow:
-            0 1px 0 rgba(255,255,255,.04) inset,
+            0 1px 0 rgba(255,255,255,.045) inset,
             0 18px 44px rgba(0,0,0,.22);
         }
 
-        .command-bar {
-          min-height: 62px;
+        .launch-header {
+          min-height: 68px;
+
           margin-bottom: 12px;
-          padding: 10px 12px;
+          padding: 12px 14px;
+
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 14px;
+          gap: 16px;
         }
 
-        .command-title {
+        .launch-title {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           min-width: 0;
         }
 
-        .command-title button {
-          height: 34px;
+        .launch-title button {
+          height: 36px;
+
           padding: 0 12px;
+
           border-radius: 999px;
+
           border: 1px solid rgba(255,255,255,.08);
+
           background: #101010;
+
           color: rgba(255,255,255,.58);
+
           font-size: 9px;
-          font-weight: 900;
-          letter-spacing: .55px;
+          font-weight: 950;
+
+          letter-spacing: .58px;
           text-transform: uppercase;
+
           cursor: pointer;
         }
 
-        .command-title button:hover {
+        .launch-title button:hover {
           color: #FFC400;
           border-color: rgba(255,196,0,.28);
         }
 
-        .command-title span {
+        .launch-title span {
           display: block;
-          margin-bottom: 3px;
+
+          margin-bottom: 5px;
+
           color: #FFC400;
+
           font-size: 9px;
           font-weight: 950;
+
           letter-spacing: .72px;
           text-transform: uppercase;
         }
 
-        .command-title h1 {
+        .launch-title h1 {
           margin: 0;
+
           color: #f2f2f2;
-          font-size: 20px;
+
+          font-size: 22px;
           font-weight: 950;
-          letter-spacing: -.5px;
-          line-height: 1;
+
+          letter-spacing: -.65px;
+
           text-transform: uppercase;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 720px;
         }
 
-        .command-actions {
+        .launch-title p {
+          margin: 6px 0 0;
+
+          color: rgba(255,255,255,.42);
+
+          font-size: 12px;
+          line-height: 1.35;
+        }
+
+        .launch-header-actions {
           display: flex;
           align-items: center;
-          justify-content: flex-end;
           gap: 8px;
           flex-wrap: wrap;
         }
 
         .status-pill {
           height: 34px;
+
           display: inline-flex;
           align-items: center;
           gap: 8px;
+
           padding: 0 11px;
+
           border-radius: 999px;
+
           font-size: 9px;
           font-weight: 950;
+
           letter-spacing: .58px;
           text-transform: uppercase;
         }
@@ -1430,455 +1449,619 @@ Listed on IronXchange.
           background: #f6ad55;
         }
 
-        .mini-btn {
+        .workflow-select,
+        .save-top,
+        .public-link {
           height: 34px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(255,255,255,.09);
-          background: #101010;
-          color: #f2f2f2;
+
           border-radius: 999px;
+
+          border: 1px solid rgba(255,255,255,.08);
+
+          background: #101010;
+
+          color: #f2f2f2;
+
           padding: 0 12px;
+
           font-size: 9px;
           font-weight: 950;
-          letter-spacing: .55px;
+
+          letter-spacing: .58px;
           text-transform: uppercase;
+
           text-decoration: none;
+
           cursor: pointer;
         }
 
-        .mini-btn:hover {
-          color: #FFC400;
-          border-color: rgba(255,196,0,.28);
-        }
-
-        .yellow-btn,
-        .save-mini {
+        .save-top {
           background: #FFC400;
-          color: #050505;
           border-color: #FFC400;
-        }
-
-        .yellow-btn:hover,
-        .save-mini:hover {
           color: #050505;
-          filter: brightness(1.05);
         }
 
-        .hero-command-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 310px;
-          gap: 12px;
-          align-items: stretch;
+        .photo-workbench {
+          padding: 14px;
+          margin-bottom: 14px;
+        }
+
+        .workbench-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+
           margin-bottom: 12px;
         }
 
-        .v10-machine-card {
-          overflow: hidden;
-          contain: layout paint;
-        }
-
-        .v10-photo-stage {
-          position: relative;
-          background: #050505;
-          overflow: hidden;
-        }
-
-        .v10-photo-stage::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.035),
-            inset 0 -92px 120px rgba(0,0,0,.34);
-        }
-
-        .v10-hero-photo {
-          width: 100%;
-          height: 560px;
-          object-fit: cover;
+        .workbench-head span {
           display: block;
-          background: #050505;
-          transition:
-            filter .18s ease,
-            transform .28s ease;
-        }
 
-        .v10-machine-card:hover .v10-hero-photo {
-          filter:
-            contrast(1.035)
-            saturate(1.025)
-            brightness(1.01);
-          transform: scale(1.006);
-        }
+          margin-bottom: 5px;
 
-        .photo-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 3;
-          width: 34px;
-          height: 86px;
-          border: none;
-          background: rgba(0,0,0,.10);
-          color: rgba(255,255,255,.42);
-          font-size: 36px;
-          font-weight: 300;
-          cursor: pointer;
-          transition: background .16s ease, color .16s ease;
-        }
+          color: #FFC400;
 
-        .photo-nav:hover {
-          color: rgba(255,255,255,.75);
-          background: rgba(0,0,0,.24);
-        }
-
-        .photo-nav.left {
-          left: 0;
-          border-radius: 0 12px 12px 0;
-        }
-
-        .photo-nav.right {
-          right: 0;
-          border-radius: 12px 0 0 12px;
-        }
-
-        .v10-photo-overlay {
-          position: absolute;
-          left: 14px;
-          bottom: 12px;
-          z-index: 4;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 8px 11px;
-          background: rgba(0,0,0,.52);
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 999px;
-          backdrop-filter: blur(7px);
-        }
-
-        .v10-photo-overlay span,
-        .v10-photo-overlay strong {
-          color: rgba(255,255,255,.72);
           font-size: 9px;
           font-weight: 950;
-          letter-spacing: .55px;
+
+          letter-spacing: .72px;
           text-transform: uppercase;
         }
 
-        .v10-photo-overlay strong {
-          color: #FFC400;
-        }
-
-        .v10-card-body {
-          padding: 14px 14px 13px;
-        }
-
-        .v10-title-row {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 18px;
-          align-items: start;
-        }
-
-        .v10-title-row h2 {
-          margin: 0;
+        .workbench-head strong {
           color: #f2f2f2;
-          font-size: clamp(25px, 2.2vw, 38px);
-          font-weight: 950;
-          letter-spacing: -1px;
-          line-height: .96;
-          text-transform: uppercase;
-          text-rendering: geometricPrecision;
-        }
 
-        .v10-title-row p {
-          margin: 9px 0 0;
-          color: rgba(255,255,255,.43);
-          font-size: 13px;
-          font-weight: 750;
-          line-height: 1.35;
-        }
-
-        .v10-price-block {
-          text-align: right;
-          white-space: nowrap;
-        }
-
-        .v10-price-block strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 31px;
+          font-size: 15px;
           font-weight: 900;
-          letter-spacing: -.7px;
-          line-height: 1;
+
+          letter-spacing: -.2px;
         }
 
-        .v10-price-block span {
-          display: block;
-          margin-top: 6px;
-          color: rgba(255,255,255,.54);
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: .18px;
-          text-transform: uppercase;
-        }
+        .photo-add {
+          min-width: 180px;
+          height: 38px;
 
-        .v10-meta-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin-top: 13px;
-        }
-
-        .v10-meta-row span {
-          min-height: 24px;
-          display: inline-flex;
-          align-items: center;
-          padding: 0 8px;
-          background: rgba(255,255,255,.025);
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 999px;
-          color: rgba(255,255,255,.42);
-          font-size: 9.5px;
-          font-weight: 800;
-          letter-spacing: .22px;
-          text-transform: lowercase;
-        }
-
-        .v10-photo-drop {
-          margin-top: 13px;
-          height: 34px;
           display: grid;
           place-items: center;
-          background: rgba(255,196,0,.045);
-          border: 1px dashed rgba(255,196,0,.28);
+
           border-radius: 10px;
+
+          background: rgba(255,196,0,.045);
+
+          border: 1px dashed rgba(255,196,0,.28);
+
           color: #FFC400;
+
           font-size: 10px;
           font-weight: 950;
+
           letter-spacing: .58px;
           text-transform: uppercase;
+
           cursor: pointer;
         }
 
-        .v10-photo-drop input {
+        .photo-add input {
           display: none;
         }
 
-        .v10-thumb-strip {
-          margin-top: 11px;
+        .photo-strip {
           display: flex;
-          gap: 9px;
+          gap: 10px;
+
           overflow-x: auto;
           overflow-y: hidden;
-          padding-bottom: 8px;
+
+          padding-bottom: 6px;
+
           scrollbar-width: thin;
           scrollbar-color: rgba(255,255,255,.14) transparent;
         }
 
-        .v10-thumb {
+        .photo-tile {
           position: relative;
-          flex: 0 0 122px;
-          height: 84px;
+
+          flex: 0 0 158px;
+          height: 112px;
+
           overflow: hidden;
-          background: #080808;
+
+          border-radius: 12px;
+
           border: 1px solid rgba(255,255,255,.07);
-          border-radius: 10px;
+
+          background: #080808;
+
           cursor: grab;
+
           opacity: .72;
+
           transition:
             opacity .15s ease,
             transform .15s ease,
             border-color .15s ease;
         }
 
-        .v10-thumb:hover,
-        .v10-thumb.active {
+        .photo-tile:hover,
+        .photo-tile.active {
           opacity: 1;
+
           transform: translateY(-1px);
-          border-color: rgba(255,196,0,.30);
+
+          border-color: rgba(255,196,0,.34);
         }
 
-        .v10-thumb.hero {
-          border-color: rgba(255,196,0,.55);
+        .photo-tile.hero {
+          border: 2px solid #FFC400;
         }
 
-        .v10-thumb img {
+        .photo-tile img {
           width: 100%;
           height: 100%;
+
           object-fit: cover;
           display: block;
         }
 
-        .v10-thumb span {
+        .hero-badge {
           position: absolute;
-          top: 6px;
-          left: 6px;
-          z-index: 2;
-          padding: 3px 6px;
+          top: 7px;
+          left: 7px;
+
+          z-index: 3;
+
+          padding: 4px 7px;
+
+          border-radius: 999px;
+
           background: #FFC400;
           color: #050505;
-          border-radius: 999px;
+
           font-size: 8px;
           font-weight: 950;
         }
 
-        .v10-thumb button {
+        .photo-tile button {
           position: absolute;
-          top: 6px;
-          right: 6px;
+          top: 7px;
+          right: 7px;
+
           z-index: 3;
-          width: 20px;
-          height: 20px;
+
+          width: 22px;
+          height: 22px;
+
           border: none;
           border-radius: 50%;
+
           background: rgba(185,28,28,.92);
-          color: #fff;
-          font-size: 12px;
-          font-weight: 900;
+          color: white;
+
+          font-size: 13px;
+          font-weight: 950;
+
           cursor: pointer;
         }
 
-        .command-stack {
-          padding: 14px;
+        .photo-tile small {
+          position: absolute;
+          bottom: 7px;
+          right: 7px;
+
+          z-index: 3;
+
+          color: rgba(255,255,255,.72);
+
+          font-size: 9px;
+          font-weight: 950;
+        }
+
+        .studio-grid {
           display: grid;
-          align-content: start;
+          grid-template-columns: minmax(0, 1fr) 360px;
+
+          gap: 14px;
+
+          align-items: start;
+
+          margin-bottom: 14px;
+        }
+
+        .section-label {
+          margin-bottom: 10px;
+        }
+
+        .section-label span {
+          display: block;
+
+          margin-bottom: 5px;
+
+          color: #FFC400;
+
+          font-size: 9px;
+          font-weight: 950;
+
+          letter-spacing: .72px;
+          text-transform: uppercase;
+        }
+
+        .section-label strong {
+          color: #f2f2f2;
+
+          font-size: 14px;
+          font-weight: 850;
+        }
+
+        .listing-preview-card {
+          overflow: hidden;
+          contain: layout paint;
+        }
+
+        .preview-photo {
+          position: relative;
+
+          height: 320px;
+
+          background-size: cover;
+          background-position: center;
+
+          border-bottom: 1px solid rgba(255,255,255,.065);
+
+          overflow: hidden;
+
+          box-shadow:
+            inset 0 -40px 70px rgba(0,0,0,.10);
+        }
+
+        .card-photo-nav {
+          position: absolute;
+          top: 50%;
+
+          transform: translateY(-50%);
+
+          width: 24px;
+          height: 90px;
+
+          border: none;
+
+          background: rgba(0,0,0,.08);
+
+          color: rgba(255,255,255,.44);
+
+          font-size: 28px;
+
+          cursor: pointer;
+        }
+
+        .card-photo-nav.left {
+          left: 0;
+          border-radius: 0 10px 10px 0;
+        }
+
+        .card-photo-nav.right {
+          right: 0;
+          border-radius: 10px 0 0 10px;
+        }
+
+        .photo-count {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+
+          padding: 3px 6px;
+
+          border-radius: 999px;
+
+          background: rgba(0,0,0,.24);
+
+          color: rgba(255,255,255,.62);
+
+          font-size: 8px;
+          font-weight: 800;
+        }
+
+        .preview-body {
+          padding: 14px 14px 13px;
+        }
+
+        .preview-title-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+        }
+
+        .preview-title-row h2 {
+          margin: 0;
+
+          color: #f2f2f2;
+
+          font-size: 18px;
+          font-weight: 950;
+
+          line-height: 1.1;
+
+          letter-spacing: -.3px;
+        }
+
+        .hours-inline {
+          color: rgba(255,255,255,.54) !important;
+
+          font-size: 13px !important;
+          font-weight: 600 !important;
+
+          white-space: nowrap;
+        }
+
+        .preview-keyword-row {
+          min-height: 22px;
+
+          margin: 9px 0 15px;
+
+          display: flex;
+          flex-wrap: wrap;
+
+          gap: 5px 6px;
+        }
+
+        .preview-keyword-row span {
+          padding: 3px 6px;
+
+          border-radius: 999px;
+
+          border: 1px solid rgba(255,255,255,.055);
+
+          background: rgba(255,255,255,.025);
+
+          color: rgba(255,255,255,.42);
+
+          font-size: 9.5px;
+          font-weight: 750;
+
+          text-transform: lowercase;
+        }
+
+        .preview-price-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          padding-top: 12px;
+
+          border-top: 1px solid rgba(255,255,255,.055);
+        }
+
+        .preview-price-row strong {
+          color: #f2f2f2;
+
+          font-size: 20px;
+          font-weight: 900;
+        }
+
+        .preview-meta {
+          display: flex;
+          align-items: center;
           gap: 9px;
         }
 
-        .stack-head {
-          margin-bottom: 4px;
-          padding-bottom: 12px;
-          border-bottom: 1px solid rgba(255,255,255,.06);
-        }
+        .preview-meta button {
+          border: none;
+          background: transparent;
 
-        .stack-head span {
-          display: block;
-          color: #FFC400;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .7px;
-          text-transform: uppercase;
-          margin-bottom: 5px;
-        }
+          color: rgba(255,255,255,.28);
 
-        .stack-head strong {
-          display: block;
-          color: #f2f2f2;
-          font-size: 20px;
-          font-weight: 950;
-          letter-spacing: -.45px;
-          text-transform: uppercase;
-        }
-
-        .command-primary,
-        .command-button,
-        .workflow-control select {
-          width: 100%;
-          min-height: 40px;
-          border-radius: 11px;
-          border: 1px solid rgba(255,255,255,.08);
-          background: #101010;
-          color: #f2f2f2;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .52px;
-          text-transform: uppercase;
           cursor: pointer;
         }
 
-        .command-primary {
-          background: #FFC400;
-          border-color: #FFC400;
-          color: #050505;
-        }
-
-        .command-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-        }
-
-        .command-button:hover {
-          color: #FFC400;
-          border-color: rgba(255,196,0,.26);
-        }
-
-        .command-button.green {
-          color: #38A169;
-          border-color: rgba(56,161,105,.32);
-          background: rgba(56,161,105,.04);
-        }
-
-        .command-button.danger {
-          color: #ff9b9b;
-          border-color: rgba(229,62,62,.28);
-        }
-
-        .workflow-control {
-          display: grid;
-          gap: 7px;
+        .preview-meta span {
           color: rgba(255,255,255,.48);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .6px;
+
+          font-size: 10px;
+          font-weight: 850;
+
           text-transform: uppercase;
         }
 
-        .workflow-control select {
-          appearance: none;
-          padding: 0 11px;
+        .quick-edit-row {
+          margin-top: 12px;
+
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+
+          gap: 10px;
+        }
+
+        label {
+          display: grid;
+          gap: 6px;
+
+          color: rgba(255,255,255,.44);
+
+          font-size: 9px;
+          font-weight: 950;
+
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
+        input,
+        textarea,
+        select {
+          width: 100%;
+
+          background: #0c0c0c;
+
+          border: 1px solid rgba(255,255,255,.08);
+
+          border-radius: 10px;
+
+          color: #f2f2f2;
+
+          padding: 11px 12px;
+
+          font-size: 13px;
+
           outline: none;
         }
 
-        .main-grid {
+        textarea {
+          min-height: 210px;
+          resize: vertical;
+          line-height: 1.55;
+        }
+
+        .distribution-center {
+          padding: 14px;
+
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 520px;
-          gap: 12px;
-          align-items: start;
+          align-content: start;
+
+          gap: 10px;
         }
 
-        .left-stack,
-        .right-stack {
-          display: grid;
-          gap: 12px;
-          grid-auto-rows: min-content;
-        }
-
-        .metrics-panel {
-          padding: 12px;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
-        }
-
-        .metric {
-          background: #101010;
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 11px;
-          padding: 11px;
-        }
-
-        .metric span {
+        .distribution-head span {
           display: block;
-          color: rgba(255,255,255,.42);
+
+          margin-bottom: 5px;
+
+          color: #FFC400;
+
           font-size: 9px;
           font-weight: 950;
-          letter-spacing: .58px;
+
+          letter-spacing: .72px;
           text-transform: uppercase;
-          margin-bottom: 5px;
         }
 
-        .metric strong {
+        .distribution-head h2 {
+          margin: 0;
+
           color: #f2f2f2;
-          font-size: 20px;
-          font-weight: 900;
-          line-height: 1;
+
+          font-size: 26px;
+          font-weight: 950;
+
+          letter-spacing: -.6px;
+
+          text-transform: uppercase;
+        }
+
+        .distribution-head p {
+          margin: 9px 0 0;
+
+          color: rgba(255,255,255,.42);
+
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .launch-btn {
+          min-height: 58px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 14px;
+
+          border: none;
+
+          border-radius: 14px;
+
+          padding: 12px 14px;
+
+          cursor: pointer;
+
+          text-align: left;
+        }
+
+        .launch-btn i {
+          font-size: 24px;
+          width: 28px;
+          text-align: center;
+        }
+
+        .launch-btn strong {
+          display: block;
+
+          font-size: 13px;
+          font-weight: 950;
+        }
+
+        .launch-btn span {
+          display: block;
+
+          margin-top: 3px;
+
+          font-size: 11px;
+          opacity: .88;
+        }
+
+        .launch-btn.marketplace,
+        .launch-btn.facebook {
+          background: #1877F2;
+          color: white;
+        }
+
+        .launch-btn.instagram {
+          background:
+            linear-gradient(
+              135deg,
+              #f58529,
+              #dd2a7b,
+              #8134af,
+              #515bd4
+            );
+          color: white;
+        }
+
+        .launch-btn.linkedin {
+          background: #0A66C2;
+          color: white;
+        }
+
+        .launch-btn.tiktok {
+          background: #111111;
+          color: white;
+          border: 1px solid rgba(255,255,255,.08);
+        }
+
+        .utility-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+
+          gap: 8px;
+
+          margin-top: 4px;
+        }
+
+        .utility-grid button {
+          min-height: 38px;
+
+          border-radius: 10px;
+
+          border: 1px solid rgba(255,255,255,.08);
+
+          background: #101010;
+
+          color: #f2f2f2;
+
+          font-size: 9px;
+          font-weight: 950;
+
+          letter-spacing: .55px;
+          text-transform: uppercase;
+
+          cursor: pointer;
+        }
+
+               .lower-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 420px;
+
+          gap: 14px;
+
+          margin-bottom: 14px;
         }
 
         .panel {
@@ -1889,185 +2072,77 @@ Listed on IronXchange.
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           gap: 12px;
+
           margin-bottom: 13px;
         }
 
         .panel-head h2 {
           margin: 0;
+
           color: #f2f2f2;
+
           font-size: 15px;
           font-weight: 950;
+
           letter-spacing: -.1px;
+
           text-transform: uppercase;
         }
 
         .panel-head span {
           color: #FFC400;
+
           font-size: 9px;
           font-weight: 950;
+
           letter-spacing: .55px;
+
           text-transform: uppercase;
-        }
-
-        .machine-data-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
-        }
-
-        .machine-data-grid > div,
-        .machine-data-grid label {
-          min-height: 66px;
-          background: #101010;
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 11px;
-          padding: 10px;
-        }
-
-        .machine-data-grid span,
-        label {
-          color: rgba(255,255,255,.44);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .58px;
-          text-transform: uppercase;
-        }
-
-        .machine-data-grid strong {
-          display: block;
-          margin-top: 7px;
-          color: #f2f2f2;
-          font-size: 13px;
-          font-weight: 850;
-          line-height: 1.15;
-          overflow-wrap: anywhere;
-        }
-
-        label {
-          display: grid;
-          gap: 7px;
-        }
-
-        input,
-        textarea {
-          width: 100%;
-          background: #0c0c0c;
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 9px;
-          color: #f2f2f2;
-          padding: 10px 11px;
-          font-size: 13px;
-          outline: none;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-          border-color: rgba(255,196,0,.50);
-        }
-
-        textarea {
-          min-height: 186px;
-          resize: vertical;
-          line-height: 1.5;
         }
 
         .wide {
-          grid-column: 1 / -1;
-        }
-
-        .keywords-panel {
-          margin-top: 14px;
-        }
-
-        .keywords-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .keywords-head h2 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 13px;
-          font-weight: 950;
-          text-transform: uppercase;
-        }
-
-        .keywords-head span {
-          color: rgba(255,255,255,.44);
-          font-size: 9px;
-          font-weight: 950;
-          text-transform: uppercase;
-        }
-
-        .keyword-search {
-          margin-bottom: 8px;
-        }
-
-        .keyword-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          max-height: 230px;
-          overflow-y: auto;
-          border: 1px solid rgba(255,255,255,.055);
-          background: #0f0f0f;
-          border-radius: 12px;
-          padding: 10px;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(255,255,255,.14) transparent;
-        }
-
-        .keyword-chip {
-          padding: 5px 7px;
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 999px;
-          background: rgba(255,255,255,.025);
-          color: rgba(255,255,255,.42);
-          font-size: 9.5px;
-          font-weight: 800;
-          line-height: 1;
-          letter-spacing: .15px;
-          text-transform: lowercase;
-          cursor: pointer;
-        }
-
-        .keyword-chip.active {
-          color: #FFC400;
-          border-color: rgba(255,196,0,.34);
-          background: rgba(255,196,0,.07);
+          width: 100%;
         }
 
         .save-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
+
           gap: 10px;
+
           margin-top: 14px;
         }
 
         .save-btn,
         .preview-btn {
           min-height: 42px;
+
           border-radius: 11px;
+
           border: 1px solid rgba(255,255,255,.08);
+
           display: flex;
           align-items: center;
           justify-content: center;
+
           text-decoration: none;
+
           font-size: 10px;
           font-weight: 950;
+
           letter-spacing: .58px;
+
           text-transform: uppercase;
+
           cursor: pointer;
         }
 
         .save-btn {
           background: #FFC400;
-          color: #050505;
           border-color: #FFC400;
+          color: #050505;
         }
 
         .preview-btn {
@@ -2075,33 +2150,147 @@ Listed on IronXchange.
           color: #f2f2f2;
         }
 
-        .promote-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
+        .selected-badges {
+          display: flex;
+          flex-wrap: wrap;
+
+          gap: 7px;
+
+          margin-bottom: 12px;
         }
 
-        .promote-grid button,
-        .promote-grid a {
-          min-height: 36px;
-          background: #101010;
-          border: 1px solid rgba(255,255,255,.09);
-          color: #f2f2f2;
+        .selected-badges button {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+
+          padding: 5px 8px;
+
           border-radius: 999px;
-          padding: 9px 10px;
+
+          border: 1px solid rgba(255,196,0,.32);
+
+          background: rgba(255,196,0,.08);
+
+          color: #FFC400;
+
+          font-size: 9px;
+          font-weight: 900;
+
+          text-transform: lowercase;
+
+          cursor: pointer;
+        }
+
+        .selected-badges i {
+          font-size: 9px;
+        }
+
+        .keyword-search {
+          margin-bottom: 10px;
+        }
+
+        .keyword-grid {
+          display: flex;
+          flex-wrap: wrap;
+
+          gap: 6px;
+
+          max-height: 260px;
+
+          overflow-y: auto;
+
+          border: 1px solid rgba(255,255,255,.055);
+
+          background: #0f0f0f;
+
+          border-radius: 12px;
+
+          padding: 10px;
+
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.14) transparent;
+        }
+
+        .keyword-chip {
+          padding: 5px 7px;
+
+          border-radius: 999px;
+
+          border: 1px solid rgba(255,255,255,.055);
+
+          background: rgba(255,255,255,.025);
+
+          color: rgba(255,255,255,.42);
+
+          font-size: 9.5px;
+          font-weight: 800;
+
+          line-height: 1;
+
+          text-transform: lowercase;
+
+          cursor: pointer;
+        }
+
+        .keyword-chip.active {
+          color: #FFC400;
+
+          border-color: rgba(255,196,0,.34);
+
+          background: rgba(255,196,0,.07);
+        }
+
+        .footer-ops {
+          display: grid;
+          grid-template-columns: 1.2fr .8fr .8fr;
+
+          gap: 14px;
+        }
+
+        .machine-data-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+
+          gap: 10px;
+        }
+
+        .machine-data-grid div {
+          min-height: 70px;
+
+          background: #101010;
+
+          border: 1px solid rgba(255,255,255,.06);
+
+          border-radius: 11px;
+
+          padding: 10px;
+        }
+
+        .machine-data-grid span {
+          display: block;
+
+          color: rgba(255,255,255,.42);
+
           font-size: 9px;
           font-weight: 950;
-          letter-spacing: .45px;
-          text-decoration: none;
-          cursor: pointer;
-          text-align: center;
+
+          letter-spacing: .55px;
+
           text-transform: uppercase;
+
+          margin-bottom: 7px;
         }
 
-        .promote-grid a {
-          color: #FFC400;
-          border-color: rgba(255,196,0,.25);
-          background: rgba(255,196,0,.04);
+        .machine-data-grid strong {
+          color: #f2f2f2;
+
+          font-size: 13px;
+          font-weight: 850;
+
+          line-height: 1.2;
+
+          overflow-wrap: anywhere;
         }
 
         .activity-list {
@@ -2113,96 +2302,114 @@ Listed on IronXchange.
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           gap: 12px;
+
           background: #101010;
+
           border: 1px solid rgba(255,255,255,.06);
+
           border-radius: 11px;
+
           padding: 11px;
-        }
-
-        .activity-item span {
-          color: #f2f2f2;
-          font-size: 10.5px;
-          font-weight: 950;
-          letter-spacing: .35px;
-        }
-
-        .activity-item small {
-          color: rgba(255,255,255,.42);
-          font-size: 9px;
-          font-weight: 900;
-          white-space: nowrap;
         }
 
         .activity-item.success {
           border-color: rgba(56,161,105,.30);
         }
 
-        .seller-bar {
+        .activity-item span {
+          color: #f2f2f2;
+
+          font-size: 10.5px;
+          font-weight: 950;
+
+          letter-spacing: .35px;
+        }
+
+        .activity-item small {
+          color: rgba(255,255,255,.42);
+
+          font-size: 9px;
+          font-weight: 900;
+
+          white-space: nowrap;
+        }
+
+        .seller-panel {
           display: grid;
-          grid-template-columns: 112px 1fr;
+          grid-template-columns: 110px 1fr;
+
           gap: 14px;
+
           align-items: center;
         }
 
-        .seller-bar img {
-          width: 112px;
-          max-height: 68px;
+        .seller-panel img {
+          width: 110px;
+          max-height: 66px;
+
           object-fit: contain;
         }
 
         .seller-icon {
           width: 58px;
           height: 58px;
+
           border: 1px solid rgba(255,255,255,.10);
+
           border-radius: 50%;
+
           display: grid;
           place-items: center;
+
           color: rgba(255,255,255,.52);
         }
 
-        .seller-bar span {
+        .seller-panel span {
           display: block;
+
+          margin-bottom: 5px;
+
           color: rgba(255,255,255,.44);
+
           font-size: 9px;
           font-weight: 950;
+
           letter-spacing: .58px;
+
           text-transform: uppercase;
-          margin-bottom: 5px;
         }
 
-        .seller-bar strong {
+        .seller-panel strong {
           color: #f2f2f2;
+
           font-size: 18px;
           font-weight: 950;
+
           letter-spacing: -.2px;
         }
 
-        .seller-bar p {
+        .seller-panel p {
           margin: 6px 0 0;
+
           color: rgba(255,255,255,.44);
+
           font-size: 12px;
-          line-height: 1.35;
+
+          line-height: 1.4;
         }
 
-        @media (max-width: 1180px) {
-          .hero-command-grid,
-          .main-grid {
+        @media (max-width: 1280px) {
+          .studio-grid,
+          .lower-grid,
+          .footer-ops {
             grid-template-columns: 1fr;
           }
-
-          .command-stack {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .stack-head,
-          .workflow-control {
-            grid-column: 1 / -1;
-          }
         }
 
-        @media (max-width: 760px) {
-          .wrap {
+        @media (max-width: 860px) {
+          .launch-wrap {
             padding: 12px 4% 42px;
           }
 
@@ -2218,40 +2425,37 @@ Listed on IronXchange.
             display: none;
           }
 
-          .command-bar {
+          .launch-header {
             align-items: stretch;
             flex-direction: column;
           }
 
-          .command-title h1 {
-            max-width: 100%;
-            white-space: normal;
-          }
-
-          .command-actions {
+          .launch-header-actions {
             justify-content: flex-start;
           }
 
-          .v10-hero-photo {
-            height: 360px;
+          .workbench-head {
+            align-items: stretch;
+            flex-direction: column;
           }
 
-          .v10-title-row {
+          .quick-edit-row,
+          .save-row,
+          .utility-grid,
+          .machine-data-grid {
             grid-template-columns: 1fr;
           }
 
-          .v10-price-block {
-            text-align: left;
+          .preview-photo {
+            height: 260px;
           }
 
-          .machine-data-grid,
-          .metrics-panel,
-          .promote-grid,
-          .command-stack {
-            grid-template-columns: 1fr;
+          .photo-tile {
+            flex: 0 0 128px;
+            height: 92px;
           }
 
-          .seller-bar {
+          .seller-panel {
             grid-template-columns: 1fr;
           }
         }
@@ -2259,13 +2463,3 @@ Listed on IronXchange.
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-    
