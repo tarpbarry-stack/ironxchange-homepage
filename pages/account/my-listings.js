@@ -377,9 +377,9 @@ if (!response.ok) {
               ...item,
               publicData: {
                 ...(item.publicData || {}),
-                listingStatus: "archived"
+                listingStatus: "paused"
               },
-              listingStatus: "archived"
+             listingStatus: "paused"
             }
           : item
       )
