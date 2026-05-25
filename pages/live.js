@@ -185,6 +185,7 @@ function getWorkflowStatus(listing = {}) {
     listing.publicData?.workflowStatus ||
     listing.attributes?.publicData?.workflowStatus ||
     listing.metadata?.workflowStatus ||
+    listing.attributes?.metadata?.workflowStatus ||
     "Good Listing"
   );
 }
@@ -199,6 +200,10 @@ function getListingStatus(listing = {}) {
   );
 }
 
+function getListingId(listing = {}) {
+  return listing.id?.uuid || listing.id || listing.uuid || listing.listingId || "";
+}
+
 function getAuthorId(listing = {}) {
   return (
     listing.authorId ||
@@ -211,15 +216,8 @@ function getAuthorId(listing = {}) {
 
 function trackLaunchEvent(eventName, payload = {}) {
   // POSTHOG HOOK:
-  // When PostHog is wired globally, this captures seller Launch Studio behavior.
-  // Example events:
-  // - launch_studio_opened
-  // - launch_card_saved
-  // - launch_whatsapp_clicked
-  // - launch_sms_clicked
-  // - launch_marketplace_clicked
-  // - launch_listing_paused
-  // - launch_listing_deleted
+  // Global window.posthog can capture Launch Studio behavior here.
+  // Wire later without touching page flow.
   if (typeof window === "undefined") return;
 
   try {
@@ -288,7 +286,7 @@ function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = [], e
   const features = selectedKeywords.slice(0, 6).join(" • ");
   const linkLine = `Full specs + photos:\n${listingUrl}`;
 
-  if (platform === "sms" || platform === "whatsapp") {
+  if (platform === "sms" || platform === "whatsapp" || platform === "messenger") {
     return `${title}
 ${hours} | ${location}
 ${price}
@@ -395,9 +393,10 @@ export default function ListingLivePage() {
 
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
-    return listings.find(item => String(item.id) === String(id)) || null;
+    return listings.find(item => String(getListingId(item)) === String(id)) || null;
   }, [id, listings]);
 
+  const listingId = getListingId(listing || {});
   const listingUrl = listing ? getListingUrl(listing) : "";
   const listingStatus = getListingStatus(listing || {});
   const isPaused = listingStatus === "paused";
@@ -407,7 +406,7 @@ export default function ListingLivePage() {
 
     const authorId = getAuthorId(listing);
 
-    const inventory = listings.filter(item => {
+    return listings.filter(item => {
       const itemStatus = getListingStatus(item);
 
       if (itemStatus === "deleted" || itemStatus === "archived") return false;
@@ -418,15 +417,15 @@ export default function ListingLivePage() {
 
       return true;
     });
-
-    return inventory;
   }, [listing, listings]);
 
   const currentInventoryIndex = useMemo(() => {
     if (!listing) return -1;
 
-    return sellerInventory.findIndex(item => String(item.id) === String(listing.id));
-  }, [sellerInventory, listing]);
+    return sellerInventory.findIndex(
+      item => String(getListingId(item)) === String(listingId)
+    );
+  }, [sellerInventory, listing, listingId]);
 
   const previousListing =
     currentInventoryIndex > 0 ? sellerInventory[currentInventoryIndex - 1] : null;
@@ -461,7 +460,7 @@ export default function ListingLivePage() {
     setActivePhotoIndex(0);
 
     trackLaunchEvent("launch_studio_opened", {
-      listingId: String(listing.id),
+      listingId: String(getListingId(listing)),
       listingTitle: listing.title,
       listingStatus: getListingStatus(listing),
       workflowStatus: getWorkflowStatus(listing)
@@ -476,9 +475,6 @@ export default function ListingLivePage() {
     "/images/hero-equipment-yard.jpg";
 
   const title = cleanMachineTitle(listing?.title || "Machine Listing");
-  const category =
-    clean(listing?.type || listing?.category || listing?.publicData?.category) ||
-    "Category not listed";
 
   const sellerName =
     clean(listing?.sellerName) ||
@@ -515,8 +511,9 @@ export default function ListingLivePage() {
     : "";
 
   function goToListing(targetListing) {
-    if (!targetListing?.id) return;
-    router.push(`/live?id=${targetListing.id}`);
+    const targetId = getListingId(targetListing || {});
+    if (!targetId) return;
+    router.push(`/live?id=${targetId}`);
   }
 
   function toggleKeyword(keyword) {
@@ -554,7 +551,7 @@ export default function ListingLivePage() {
 
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`);
     trackLaunchEvent("launch_photos_added", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       count: mapped.length
     });
 
@@ -579,7 +576,7 @@ export default function ListingLivePage() {
 
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
     trackLaunchEvent("launch_photos_dropped", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       count: mapped.length
     });
   }
@@ -590,7 +587,7 @@ export default function ListingLivePage() {
 
     addActivity("success", `Photo removed — ${title}`);
     trackLaunchEvent("launch_photo_removed", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       photoIndex: indexToRemove
     });
   }
@@ -610,7 +607,7 @@ export default function ListingLivePage() {
 
     addActivity("success", `Photo order changed — ${title}`);
     trackLaunchEvent("launch_photo_reordered", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       fromIndex,
       toIndex
     });
@@ -623,7 +620,7 @@ export default function ListingLivePage() {
 
       addActivity("success", `${label} copied — ${title}`);
       trackLaunchEvent("launch_copy_clicked", {
-        listingId: String(listing?.id || ""),
+        listingId: String(listingId || ""),
         label
       });
 
@@ -646,7 +643,7 @@ export default function ListingLivePage() {
 
     addActivity("success", `Hero image downloaded — ${title}`);
     trackLaunchEvent("launch_hero_downloaded", {
-      listingId: String(listing?.id || "")
+      listingId: String(listingId || "")
     });
   }
 
@@ -662,13 +659,13 @@ export default function ListingLivePage() {
 
     addActivity("success", `Photo pack downloaded — ${title}`);
     trackLaunchEvent("launch_photo_pack_downloaded", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       count: photoItems.length
     });
   }
 
   async function saveQuickEdit() {
-    if (!listing?.id) return;
+    if (!listingId) return;
 
     setSaving(true);
 
@@ -677,7 +674,7 @@ export default function ListingLivePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          listingId: String(listing.id),
+          listingId,
           hours: edit.hours,
           location: edit.location,
           description: edit.description,
@@ -696,7 +693,7 @@ export default function ListingLivePage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            listingId: String(listing.id),
+            listingId,
             price: cleanNumber(edit.price)
           })
         });
@@ -710,7 +707,7 @@ export default function ListingLivePage() {
 
       addActivity("success", `Listing launched — ${title}`);
       trackLaunchEvent("launch_card_saved", {
-        listingId: String(listing.id),
+        listingId: String(listingId),
         selectedKeywordCount: selectedKeywords.length,
         photoCount: photoItems.length
       });
@@ -726,7 +723,7 @@ export default function ListingLivePage() {
   }
 
   async function updateWorkflow(nextWorkflow) {
-    if (!listing?.id) return;
+    if (!listingId) return;
 
     setWorkflowStatus(nextWorkflow);
 
@@ -735,7 +732,7 @@ export default function ListingLivePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          listingId: String(listing.id),
+          listingId,
           workflowStatus: nextWorkflow
         })
       });
@@ -744,7 +741,7 @@ export default function ListingLivePage() {
 
       addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
       trackLaunchEvent("launch_workflow_updated", {
-        listingId: String(listing.id),
+        listingId: String(listingId),
         workflowStatus: nextWorkflow
       });
     } catch (err) {
@@ -754,64 +751,148 @@ export default function ListingLivePage() {
     }
   }
 
-  async function runListingCommand(action) {
-    if (!listing?.id) return;
+  async function pauseListing() {
+    if (!listingId) return;
 
-    setCommandBusy(action);
+    setCommandBusy("pause");
 
     try {
-      const endpoint =
-        action === "pause"
-          ? "/api/pause-listing"
-          : action === "reactivate"
-            ? "/api/reactivate-listing"
-            : action === "delete"
-              ? "/api/delete-listing"
-              : "";
-
-      if (!endpoint) {
-        addActivity("success", `${action} selected — ${title}`);
-        alert(`${action} action logged. API wiring comes next.`);
-        return;
-      }
-
-      if (action === "delete") {
-        const confirmed = window.confirm(
-          "Delete this listing? This should remove it from public inventory."
-        );
-
-        if (!confirmed) return;
-      }
-
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/pause-listing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId: String(listing.id)
-        })
+        body: JSON.stringify({ listingId })
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data?.error || `${action} failed`);
-
-      addActivity("success", `${action} complete — ${title}`);
-      trackLaunchEvent(`launch_listing_${action}`, {
-        listingId: String(listing.id)
-      });
-
-      if (action === "delete") {
-        router.push("/account/my-listings");
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || "Pause failed");
       }
 
-      router.reload();
-    } catch (err) {
-      console.error(err);
-      addActivity("error", `${action} failed — ${title}`);
-      alert(`${action} failed: ${err.message}`);
+      setListings(current =>
+        current.map(item =>
+          String(getListingId(item)) === String(listingId)
+            ? {
+                ...item,
+                listingStatus: "paused",
+                publicData: {
+                  ...(item.publicData || {}),
+                  listingStatus: "paused"
+                },
+                metadata: {
+                  ...(item.metadata || {}),
+                  listingStatus: "paused"
+                }
+              }
+            : item
+        )
+      );
+
+      addActivity("success", `Listing paused — ${title}`);
+      trackLaunchEvent("launch_listing_paused", { listingId: String(listingId) });
+    } catch (error) {
+      addActivity("error", `Pause failed — ${title}`);
+      alert(`Pause failed: ${error.message}`);
+      console.error("Pause failed:", error);
     } finally {
       setCommandBusy("");
+    }
+  }
+
+  async function reactivateListing() {
+    if (!listingId) return;
+
+    setCommandBusy("reactivate");
+
+    try {
+      const response = await fetch("/api/reactivate-listing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Reactivate failed");
+      }
+
+      setListings(current =>
+        current.map(item =>
+          String(getListingId(item)) === String(listingId)
+            ? {
+                ...item,
+                listingStatus: "live",
+                publicData: {
+                  ...(item.publicData || {}),
+                  listingStatus: "live"
+                },
+                metadata: {
+                  ...(item.metadata || {}),
+                  listingStatus: "live"
+                }
+              }
+            : item
+        )
+      );
+
+      addActivity("success", `Listing reactivated — ${title}`);
+      trackLaunchEvent("launch_listing_reactivated", { listingId: String(listingId) });
+    } catch (error) {
+      addActivity("error", `Reactivate failed — ${title}`);
+      alert(`Reactivate failed: ${error.message}`);
+      console.error("Reactivate failed:", error);
+    } finally {
+      setCommandBusy("");
+    }
+  }
+
+  async function confirmDelete() {
+    if (!listingId) return;
+
+    const ok = window.confirm(
+      `Delete this listing?\n\n${title}\n\nThis cannot be undone.`
+    );
+
+    if (!ok) return;
+
+    setCommandBusy("delete");
+
+    try {
+      const response = await fetch("/api/delete-listing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Delete failed");
+      }
+
+      setListings(current =>
+        current.filter(item => String(getListingId(item)) !== String(listingId))
+      );
+
+      addActivity("success", `Deleted — ${title}`);
+      trackLaunchEvent("launch_listing_deleted", { listingId: String(listingId) });
+
+      router.push("/account/my-listings");
+    } catch (error) {
+      addActivity("error", `Delete failed — ${title}`);
+      alert(`Delete failed: ${error.message}`);
+      console.error("Delete failed:", error);
+    } finally {
+      setCommandBusy("");
+    }
+  }
+
+  function toggleLiveStatus() {
+    if (isPaused) {
+      reactivateListing();
+    } else {
+      pauseListing();
     }
   }
 
@@ -819,7 +900,7 @@ export default function ListingLivePage() {
     copyText(copyLabel, copy);
 
     trackLaunchEvent(`launch_${platform}_clicked`, {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       listingUrl
     });
 
@@ -833,6 +914,17 @@ export default function ListingLivePage() {
     launchExternal("whatsapp", url, "WhatsApp Message", message);
   }
 
+  function launchMessenger() {
+    const message = buildSocialCopy("messenger", listing, listingUrl, selectedKeywords, edit);
+
+    launchExternal(
+      "messenger",
+      "https://www.messenger.com/",
+      "Messenger Message",
+      message
+    );
+  }
+
   function launchSms() {
     const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
     const url = `sms:?&body=${encodeURIComponent(message)}`;
@@ -844,7 +936,7 @@ export default function ListingLivePage() {
     const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
 
     trackLaunchEvent("launch_native_share_clicked", {
-      listingId: String(listing?.id || ""),
+      listingId: String(listingId || ""),
       listingUrl
     });
 
@@ -903,6 +995,7 @@ export default function ListingLivePage() {
         <>
       <Head>
         <title>{title} Launch Studio | IronXchange</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -928,10 +1021,20 @@ export default function ListingLivePage() {
             </div>
 
             <div className="launch-header-actions">
-              <div className={isPaused ? "status-pill paused" : "status-pill live"}>
+              <button
+                type="button"
+                className={`status-command ${isPaused ? "paused" : "live"}`}
+                onClick={isPaused ? reactivateListing : pauseListing}
+                disabled={commandBusy === "pause" || commandBusy === "reactivate"}
+                title={isPaused ? "Reactivate listing" : "Pause listing"}
+              >
                 <span></span>
-                {isPaused ? "Paused" : "Live"}
-              </div>
+                {commandBusy === "pause" || commandBusy === "reactivate"
+                  ? "Working"
+                  : isPaused
+                    ? "Paused"
+                    : "Live"}
+              </button>
 
               <button
                 type="button"
@@ -957,7 +1060,13 @@ export default function ListingLivePage() {
               <button
                 type="button"
                 className="duplicate-top"
-                onClick={() => runListingCommand("duplicate")}
+                onClick={() => {
+                  addActivity("success", `Duplicate selected — ${title}`);
+                  trackLaunchEvent("launch_duplicate_clicked", {
+                    listingId: String(listing?.id || "")
+                  });
+                  alert("Duplicate hook is ready. We will wire the duplicate API next.");
+                }}
               >
                 Duplicate
               </button>
@@ -965,17 +1074,20 @@ export default function ListingLivePage() {
               <button
                 type="button"
                 className="delete-top"
-                onClick={() => runListingCommand("delete")}
+                onClick={confirmDelete}
                 disabled={commandBusy === "delete"}
               >
-                Delete
+                {commandBusy === "delete" ? "Deleting..." : "Delete"}
               </button>
             </div>
           </section>
 
           <section className="photo-workbench">
             <div className="workbench-head">
-              <span>Photo Workbench</span>
+              <div>
+                <span>Photo Workbench</span>
+                <strong>Drag to reorder • first image becomes hero</strong>
+              </div>
 
               <label
                 className="photo-add"
@@ -1074,7 +1186,7 @@ export default function ListingLivePage() {
 
                 <div>
                   <span>Live Buyer Card</span>
-                  <strong>What buyers see before they click.</strong>
+                  <strong>True marketplace-card preview</strong>
                 </div>
 
                 <button
@@ -1176,26 +1288,42 @@ export default function ListingLivePage() {
                 </div>
               </div>
 
-              <div className="under-card-actions">
-                <button type="button" className="whatsapp-mini" onClick={launchWhatsApp}>
-                  <i className="fa-brands fa-whatsapp"></i>
-                  WhatsApp
-                </button>
+              <div className="send-dock">
+                <div className="send-dock-head">
+                  <span>Send This Machine</span>
+                  <strong>Copy-ready buyer message + IronXchange link</strong>
+                </div>
 
-                <button type="button" className="sms-mini" onClick={launchSms}>
-                  <i className="fa-solid fa-comment-sms"></i>
-                  Text
-                </button>
+                <div className="send-dock-actions">
+                  <button type="button" className="whatsapp-mini" onClick={launchWhatsApp}>
+                    <i className="fa-brands fa-whatsapp"></i>
+                    WhatsApp
+                  </button>
 
-                <button type="button" onClick={() => copyText("Listing Link", listingUrl)}>
-                  <i className="fa-solid fa-link"></i>
-                  {copied === "Listing Link" ? "Copied" : "Copy Link"}
-                </button>
+                  <button type="button" className="messenger-mini" onClick={launchMessenger}>
+                    <i className="fa-brands fa-facebook-messenger"></i>
+                    Messenger
+                  </button>
 
-                <button type="button" onClick={nativeShare}>
-                  <i className="fa-solid fa-arrow-up-from-bracket"></i>
-                  Share
-                </button>
+                  <button type="button" className="sms-mini" onClick={launchSms}>
+                    <i className="fa-solid fa-comment-sms"></i>
+                    Text
+                  </button>
+
+                  <button
+                    type="button"
+                    className="copy-mini"
+                    onClick={() => copyText("Listing Link", listingUrl)}
+                  >
+                    <i className="fa-solid fa-link"></i>
+                    {copied === "Listing Link" ? "Copied" : "Copy Link"}
+                  </button>
+
+                  <button type="button" className="share-mini" onClick={nativeShare}>
+                    <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                    Share
+                  </button>
+                </div>
               </div>
             </section>
 
@@ -1218,6 +1346,18 @@ export default function ListingLivePage() {
                 <div>
                   <strong>WhatsApp Blast</strong>
                   <span>Copy machine message + open WhatsApp</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="launch-btn messenger"
+                onClick={launchMessenger}
+              >
+                <i className="fa-brands fa-facebook-messenger"></i>
+                <div>
+                  <strong>Messenger Blast</strong>
+                  <span>Copy buyer message + open Messenger</span>
                 </div>
               </button>
 
@@ -1341,7 +1481,21 @@ export default function ListingLivePage() {
             <section className="panel badge-panel">
               <div className="panel-head">
                 <h2>Badge Studio</h2>
-                <span>{selectedKeywords.length} selected</span>
+
+                <div className="badge-head-actions">
+                  <span>{selectedKeywords.length} selected</span>
+
+                  <select
+                    value={workflowStatus}
+                    onChange={e => updateWorkflow(e.target.value)}
+                  >
+                    {workflowOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="selected-badges">
@@ -1381,7 +1535,7 @@ export default function ListingLivePage() {
             <section className="panel copy-panel">
               <div className="panel-head">
                 <h2>Sales Copy</h2>
-                <span>Feeds your social blast</span>
+                <span>Feeds your blasts</span>
               </div>
 
               <label className="wide">
@@ -1389,7 +1543,7 @@ export default function ListingLivePage() {
                 <textarea
                   value={edit.description}
                   onChange={e => setEdit({ ...edit, description: e.target.value })}
-                  placeholder="Describe condition, attachments, maintenance, ownership history, and buyer-relevant details..."
+                  placeholder="Condition, attachments, service, ownership history, and buyer-relevant notes..."
                 />
               </label>
 
@@ -1424,7 +1578,7 @@ export default function ListingLivePage() {
                 </div>
 
                 <div className="activity-item">
-                  <span>WORKFLOW: {workflowStatus.toUpperCase()}</span>
+                  <span>WORKFLOW: {workflowOptions.find(item => item.value === workflowStatus)?.label?.toUpperCase() || workflowStatus.toUpperCase()}</span>
                   <small>SYNCED</small>
                 </div>
 
@@ -1457,8 +1611,11 @@ export default function ListingLivePage() {
       <Footer />
 
                 <style jsx>{`
+        :global(html),
         :global(body) {
           margin: 0;
+          min-height: 100%;
+          overflow-x: hidden;
           background: #0b0b0b;
           color: #d6d6d6;
           font-family: Arial, sans-serif;
@@ -1493,7 +1650,8 @@ export default function ListingLivePage() {
         .photo-workbench,
         .inventory-rail,
         .distribution-center,
-        .listing-preview-card {
+        .listing-preview-card,
+        .send-dock {
           background:
             linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
             #141414;
@@ -1545,7 +1703,8 @@ export default function ListingLivePage() {
         .workbench-head span,
         .rail-head span,
         .card-nav-row span,
-        .distribution-head span {
+        .distribution-head span,
+        .send-dock-head span {
           display: block;
           margin-bottom: 3px;
           color: #FFC400;
@@ -1585,7 +1744,7 @@ export default function ListingLivePage() {
           flex-wrap: wrap;
         }
 
-        .status-pill,
+        .status-command,
         .save-top,
         .public-link,
         .dashboard-top,
@@ -1606,47 +1765,76 @@ export default function ListingLivePage() {
           text-transform: uppercase;
           text-decoration: none;
           cursor: pointer;
+          transition:
+            transform .14s ease,
+            border-color .14s ease,
+            background .14s ease,
+            color .14s ease,
+            box-shadow .14s ease;
         }
 
-        .status-pill {
+        .status-command:hover,
+        .public-link:hover,
+        .dashboard-top:hover,
+        .duplicate-top:hover {
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.26);
+          color: #FFC400;
+        }
+
+        .status-command {
           gap: 7px;
         }
 
-        .status-pill span {
+        .status-command span {
           width: 7px;
           height: 7px;
           border-radius: 50%;
         }
 
-        .status-pill.live {
+        .status-command.live {
           color: #38A169;
           border-color: rgba(56,161,105,.42);
           background: rgba(56,161,105,.045);
+          animation: livePulse 2.8s ease-in-out infinite;
         }
 
-        .status-pill.live span {
+        .status-command.live span {
           background: #38A169;
+          box-shadow: 0 0 10px rgba(56,161,105,.48);
         }
 
-        .status-pill.paused {
-          color: #f6ad55;
-          border-color: rgba(246,173,85,.42);
-          background: rgba(246,173,85,.055);
+        .status-command.paused {
+          color: #a0a0a0;
+          border-color: rgba(160,160,160,.35);
+          background: rgba(120,120,120,.10);
         }
 
-        .status-pill.paused span {
-          background: #f6ad55;
+        .status-command.paused span {
+          background: #a0a0a0;
         }
 
         .save-top {
           background: #FFC400;
           border-color: #FFC400;
           color: #050505;
+          box-shadow: 0 0 18px rgba(255,196,0,.08);
+        }
+
+        .save-top:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 0 22px rgba(255,196,0,.18);
         }
 
         .delete-top {
           color: #ff9b9b;
           border-color: rgba(229,62,62,.35);
+          animation: dangerBreath 3.4s ease-in-out infinite;
+        }
+
+        .delete-top:hover {
+          background: rgba(229,62,62,.12);
+          border-color: rgba(229,62,62,.60);
         }
 
         .photo-workbench {
@@ -1655,12 +1843,20 @@ export default function ListingLivePage() {
         }
 
         .workbench-head {
-          height: 28px;
+          height: 30px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           gap: 14px;
           margin-bottom: 8px;
+        }
+
+        .workbench-head strong {
+          display: block;
+          color: rgba(255,255,255,.48);
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: .28px;
         }
 
         .photo-add {
@@ -1677,6 +1873,13 @@ export default function ListingLivePage() {
           letter-spacing: .56px;
           text-transform: uppercase;
           cursor: pointer;
+          transition: border-color .14s ease, background .14s ease, transform .14s ease;
+        }
+
+        .photo-add:hover {
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.50);
+          background: rgba(255,196,0,.08);
         }
 
         .photo-add input {
@@ -1706,7 +1909,8 @@ export default function ListingLivePage() {
           transition:
             opacity .15s ease,
             transform .15s ease,
-            border-color .15s ease;
+            border-color .15s ease,
+            box-shadow .15s ease;
         }
 
         .photo-tile:hover,
@@ -1714,6 +1918,7 @@ export default function ListingLivePage() {
           opacity: 1;
           transform: translateY(-1px);
           border-color: rgba(255,196,0,.34);
+          box-shadow: 0 0 18px rgba(255,196,0,.06);
         }
 
         .photo-tile.hero {
@@ -1776,7 +1981,7 @@ export default function ListingLivePage() {
 
         .inventory-rail,
         .distribution-center {
-          height: 610px;
+          height: 618px;
           padding: 12px;
           display: grid;
           align-content: start;
@@ -1803,7 +2008,7 @@ export default function ListingLivePage() {
         .inventory-scroll {
           display: grid;
           gap: 8px;
-          max-height: 546px;
+          max-height: 554px;
           overflow-y: auto;
           padding-right: 3px;
           scrollbar-width: thin;
@@ -1822,6 +2027,13 @@ export default function ListingLivePage() {
           border-radius: 11px;
           background: #101010;
           cursor: pointer;
+          transition: transform .14s ease, border-color .14s ease, background .14s ease;
+        }
+
+        .inventory-mini:hover {
+          transform: translateX(2px);
+          border-color: rgba(255,255,255,.12);
+          background: #151515;
         }
 
         .inventory-mini.active {
@@ -1910,6 +2122,13 @@ export default function ListingLivePage() {
           letter-spacing: .5px;
           text-transform: uppercase;
           cursor: pointer;
+          transition: border-color .14s ease, color .14s ease, transform .14s ease;
+        }
+
+        .card-nav-row button:hover:not(:disabled) {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.30);
+          transform: translateY(-1px);
         }
 
         .card-nav-row button:disabled {
@@ -1924,6 +2143,18 @@ export default function ListingLivePage() {
           contain: layout paint;
           transform: scale(1.08);
           transform-origin: top center;
+          transition:
+            transform .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+        }
+
+        .listing-preview-card:hover {
+          border-color: rgba(255,196,0,.16);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 20px 46px rgba(0,0,0,.30),
+            0 0 22px rgba(255,196,0,.035);
         }
 
         .preview-photo {
@@ -1935,6 +2166,11 @@ export default function ListingLivePage() {
           overflow: hidden;
           box-shadow: inset 0 -40px 70px rgba(0,0,0,.10);
           cursor: pointer;
+          transition: filter .18s ease;
+        }
+
+        .listing-preview-card:hover .preview-photo {
+          filter: contrast(1.04) saturate(1.04);
         }
 
         .card-photo-nav {
@@ -2073,41 +2309,85 @@ export default function ListingLivePage() {
           text-transform: uppercase;
         }
 
-        .under-card-actions {
+        .send-dock {
           max-width: 430px;
-          margin: 34px auto 0;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
+          margin: 38px auto 0;
+          padding: 10px;
         }
 
-        .under-card-actions button {
-          min-height: 36px;
+        .send-dock-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+          padding-bottom: 8px;
+          margin-bottom: 8px;
+          border-bottom: 1px solid rgba(255,255,255,.055);
+        }
+
+        .send-dock-head strong {
+          color: rgba(255,255,255,.44);
+          font-size: 9px;
+          font-weight: 850;
+        }
+
+        .send-dock-actions {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 7px;
+        }
+
+        .send-dock-actions button {
+          min-height: 34px;
           border-radius: 999px;
           border: 1px solid rgba(255,255,255,.08);
           background: #101010;
           color: #f2f2f2;
-          font-size: 8.5px;
+          font-size: 8px;
           font-weight: 950;
-          letter-spacing: .48px;
+          letter-spacing: .45px;
           text-transform: uppercase;
           cursor: pointer;
+          transition: transform .14s ease, filter .14s ease, border-color .14s ease;
         }
 
-        .under-card-actions i {
-          margin-right: 5px;
+        .send-dock-actions button:hover {
+          transform: translateY(-1px);
+          filter: brightness(1.04);
         }
 
-        .under-card-actions .whatsapp-mini {
+        .send-dock-actions i {
+          margin-right: 4px;
+        }
+
+        .send-dock-actions .whatsapp-mini {
           background: #25D366;
           border-color: #25D366;
           color: #07130b;
         }
 
-        .under-card-actions .sms-mini {
+        .send-dock-actions .messenger-mini {
+          background: linear-gradient(135deg, #00B2FF, #7B61FF);
+          border-color: transparent;
+          color: white;
+        }
+
+        .send-dock-actions .sms-mini {
+          background: rgba(52,199,89,.16);
+          border-color: rgba(52,199,89,.34);
+          color: #7ee39a;
+        }
+
+        .send-dock-actions .copy-mini {
           background: rgba(255,196,0,.10);
           border-color: rgba(255,196,0,.30);
           color: #FFC400;
+        }
+
+        .send-dock-actions .share-mini {
+          background: #181818;
+          border-color: rgba(255,255,255,.14);
+          color: #f2f2f2;
         }
 
         .distribution-head h2 {
@@ -2124,21 +2404,22 @@ export default function ListingLivePage() {
         }
 
         .launch-btn {
-          min-height: 54px;
+          min-height: 50px;
           display: flex;
           align-items: center;
           gap: 13px;
           border: none;
           border-radius: 13px;
-          padding: 11px 13px;
+          padding: 10px 13px;
           cursor: pointer;
           text-align: left;
-          transition: transform .15s ease, filter .15s ease;
+          transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
         }
 
         .launch-btn:hover {
           transform: translateY(-1px);
           filter: brightness(1.04);
+          box-shadow: 0 10px 24px rgba(0,0,0,.22);
         }
 
         .launch-btn i {
@@ -2163,6 +2444,11 @@ export default function ListingLivePage() {
         .launch-btn.whatsapp {
           background: #25D366;
           color: #06140a;
+        }
+
+        .launch-btn.messenger {
+          background: linear-gradient(135deg, #00B2FF, #7B61FF);
+          color: white;
         }
 
         .launch-btn.marketplace,
@@ -2195,7 +2481,7 @@ export default function ListingLivePage() {
         }
 
         .utility-grid button {
-          min-height: 34px;
+          min-height: 32px;
           border-radius: 10px;
           border: 1px solid rgba(255,255,255,.08);
           background: #101010;
@@ -2241,6 +2527,26 @@ export default function ListingLivePage() {
           font-weight: 950;
           letter-spacing: .55px;
           text-transform: uppercase;
+        }
+
+        .badge-head-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .badge-head-actions select {
+          height: 28px;
+          width: 126px;
+          background: #0f0f0f;
+          border: 1px solid rgba(255,196,0,.18);
+          border-radius: 8px;
+          color: rgba(255,255,255,.72);
+          font-size: 8px;
+          font-weight: 950;
+          text-transform: uppercase;
+          padding: 0 8px;
+          outline: none;
         }
 
         label {
@@ -2444,7 +2750,25 @@ export default function ListingLivePage() {
           letter-spacing: -.2px;
         }
 
-        @media (max-width: 1280px) {
+        @keyframes livePulse {
+          0%, 100% {
+            box-shadow: 0 0 0 rgba(56,161,105,0);
+          }
+          50% {
+            box-shadow: 0 0 10px rgba(56,161,105,.28);
+          }
+        }
+
+        @keyframes dangerBreath {
+          0%, 100% {
+            box-shadow: 0 0 0 rgba(229,62,62,0);
+          }
+          50% {
+            box-shadow: 0 0 9px rgba(229,62,62,.22);
+          }
+        }
+
+        @media (max-width: 980px) {
           .studio-grid {
             grid-template-columns: 1fr;
           }
@@ -2454,12 +2778,12 @@ export default function ListingLivePage() {
           }
 
           .inventory-rail {
-            order: 2;
+            order: 3;
             height: auto;
           }
 
           .distribution-center {
-            order: 3;
+            order: 2;
             height: auto;
           }
 
@@ -2479,8 +2803,8 @@ export default function ListingLivePage() {
             transform: none;
           }
 
-          .under-card-actions {
-            margin-top: 10px;
+          .send-dock {
+            margin-top: 14px;
           }
 
           .lower-grid,
@@ -2489,7 +2813,7 @@ export default function ListingLivePage() {
           }
         }
 
-        @media (max-width: 860px) {
+        @media (max-width: 700px) {
           .launch-wrap {
             padding: 10px 4% 38px;
           }
@@ -2504,18 +2828,26 @@ export default function ListingLivePage() {
             white-space: normal;
           }
 
-          .launch-header-actions,
-          .workbench-head {
-            align-items: stretch;
-            flex-direction: column;
+          .launch-header-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .status-pill,
+          .status-command,
           .save-top,
           .public-link,
           .dashboard-top,
           .duplicate-top,
-          .delete-top,
+          .delete-top {
+            width: 100%;
+          }
+
+          .workbench-head {
+            height: auto;
+            align-items: stretch;
+            flex-direction: column;
+          }
+
           .photo-add {
             width: 100%;
           }
@@ -2538,10 +2870,19 @@ export default function ListingLivePage() {
             height: 240px;
           }
 
-          .under-card-actions,
+          .send-dock-actions,
           .utility-grid,
           .save-row {
             grid-template-columns: 1fr;
+          }
+
+          .badge-head-actions {
+            align-items: flex-end;
+            flex-direction: column;
+          }
+
+          .badge-head-actions select {
+            width: 100%;
           }
 
           .seller-panel {
