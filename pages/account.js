@@ -470,24 +470,31 @@ async function reactivateListing(listing) {
       throw new Error(data.error || "Reactivate failed");
     }
 
-    setMyListings(current =>
-      current.map(item =>
-        String(item.id) === String(listingId)
-          ? {
-              ...item,
-              listingStatus: "live",
-              publicData: {
-                ...(item.publicData || {}),
-                listingStatus: "live"
-              },
-              metadata: {
-                ...(item.metadata || {}),
-                listingStatus: "live"
-              }
-            }
-          : item
-      )
-    );
+    setMyListings(current => {
+  const updated = current.map(item =>
+    String(item.id) === String(listing.id)
+      ? {
+          ...item,
+          publicData: {
+            ...(item.publicData || {}),
+            listingStatus: "paused"
+          },
+          listingStatus: "paused"
+        }
+      : item
+  );
+
+  const pausedItem = updated.find(
+    item => String(item.id) === String(listing.id)
+  );
+
+  return [
+    ...updated.filter(
+      item => String(item.id) !== String(listing.id)
+    ),
+    pausedItem
+  ];
+});
 
     addActivity(
       "success",
