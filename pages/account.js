@@ -370,6 +370,122 @@ const logoUrl =
     );
   }
 
+function getWorkflowStatus(listing) {
+  return (
+    listing.workflowStatus ||
+    listing.publicData?.workflowStatus ||
+    listing.attributes?.publicData?.workflowStatus ||
+    listing.metadata?.workflowStatus ||
+    listing.attributes?.metadata?.workflowStatus ||
+    "good-listing"
+  );
+}
+
+async function updateWorkflowStatus(listing, status) {
+  const listingId = listing.id || listing.id?.uuid;
+
+  if (!listingId) return;
+
+  try {
+    const response = await fetch("/api/update-listing-workflow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId,
+        workflowStatus: status
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Workflow update failed");
+    }
+
+    addActivity(
+      "success",
+      `Workflow updated — ${cleanMachineTitle(listing.title)} — ${status}`
+    );
+  } catch (error) {
+    addActivity(
+      "error",
+      `Workflow update failed — ${cleanMachineTitle(listing.title)}`
+    );
+
+    console.error("Workflow update failed:", error);
+  }
+}
+
+async function pauseListing(listing) {
+  const listingId = listing.id || listing.id?.uuid;
+
+  if (!listingId) return;
+
+  try {
+    const response = await fetch("/api/pause-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ listingId })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Pause failed");
+    }
+
+    addActivity(
+      "success",
+      `Listing paused — ${cleanMachineTitle(listing.title)}`
+    );
+  } catch (error) {
+    addActivity(
+      "error",
+      `Pause failed — ${cleanMachineTitle(listing.title)}`
+    );
+
+    console.error("Pause failed:", error);
+  }
+}
+
+async function reactivateListing(listing) {
+  const listingId = listing.id || listing.id?.uuid;
+
+  if (!listingId) return;
+
+  try {
+    const response = await fetch("/api/reactivate-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ listingId })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Reactivate failed");
+    }
+
+    addActivity(
+      "success",
+      `Listing reactivated — ${cleanMachineTitle(listing.title)}`
+    );
+  } catch (error) {
+    addActivity(
+      "error",
+      `Reactivate failed — ${cleanMachineTitle(listing.title)}`
+    );
+
+    console.error("Reactivate failed:", error);
+  }
+}
+
   return (
     <>
       <Head>
