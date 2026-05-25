@@ -1050,7 +1050,7 @@ function updateWorkflowStatus(listing, status) {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 3px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
@@ -1066,7 +1066,7 @@ function updateWorkflowStatus(listing, status) {
 
 .workflow-filter-shell a,
 .workflow-filter-shell button {
-  height: 27px;
+  height: 26px;
   padding: 0 10px;
 
   border: 1px solid rgba(255,255,255,.07);
@@ -1075,9 +1075,9 @@ function updateWorkflowStatus(listing, status) {
   background: #101010;
   color: rgba(255,255,255,.48);
 
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 900;
-  letter-spacing: .55px;
+  letter-spacing: .42px;
   text-transform: uppercase;
 
   cursor: pointer;
@@ -1093,13 +1093,13 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .tool-link {
-  height: 27px !important;
+  height: 26px !important;
 
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
 
-  padding: 0 10px !important;
+  padding: 0 7px !important;
 
   border: 1px solid rgba(255,255,255,.04) !important;
   border-radius: 999px !important;
@@ -1108,10 +1108,10 @@ function updateWorkflowStatus(listing, status) {
 
   color: rgba(255,255,255,.28) !important;
 
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 900;
 
-  letter-spacing: .72px;
+  letter-spacing: .42px;
   text-transform: uppercase;
 
   text-decoration: none;
