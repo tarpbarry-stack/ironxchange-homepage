@@ -418,31 +418,36 @@ async function pauseListing(listing) {
       throw new Error(data.error || "Pause failed");
     }
 
-   setMyListings(current => {
-  const updated = current.map(item =>
-    String(item.id) === String(listing.id)
-      ? {
-          ...item,
-          publicData: {
-            ...(item.publicData || {}),
-            listingStatus: "paused"
-          },
-          listingStatus: "paused"
-        }
-      : item
-  );
+    setMyListings(current => {
+      const updated = current.map(item =>
+        String(item.id) === String(listingId)
+          ? {
+              ...item,
+              listingStatus: "paused",
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "paused"
+              },
+              metadata: {
+                ...(item.metadata || {}),
+                listingStatus: "paused"
+              }
+            }
+          : item
+      );
 
-  const pausedItem = updated.find(
-    item => String(item.id) === String(listing.id)
-  );
+      const pausedItem = updated.find(
+        item => String(item.id) === String(listingId)
+      );
 
-  return [
-    ...updated.filter(
-      item => String(item.id) !== String(listing.id)
-    ),
-    pausedItem
-  ];
-});
+      return [
+        ...updated.filter(
+          item => String(item.id) !== String(listingId)
+        ),
+        pausedItem
+      ].filter(Boolean);
+    });
+
     addActivity(
       "success",
       `Listing paused — ${cleanMachineTitle(listing.title)}`
@@ -456,6 +461,7 @@ async function pauseListing(listing) {
     console.error("Pause failed:", error);
   }
 }
+
 async function reactivateListing(listing) {
   const listingId = listing.id || listing.id?.uuid;
 
@@ -477,30 +483,48 @@ async function reactivateListing(listing) {
     }
 
     setMyListings(current => {
-  const updated = current.map(item =>
-    String(item.id) === String(listing.id)
-      ? {
-          ...item,
-          publicData: {
-            ...(item.publicData || {}),
-            listingStatus: "paused"
-          },
-          listingStatus: "paused"
-        }
-      : item
-  );
+      const updated = current.map(item =>
+        String(item.id) === String(listingId)
+          ? {
+              ...item,
+              listingStatus: "live",
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "live"
+              },
+              metadata: {
+                ...(item.metadata || {}),
+                listingStatus: "live"
+              }
+            }
+          : item
+      );
 
-  const pausedItem = updated.find(
-    item => String(item.id) === String(listing.id)
-  );
+      const liveItem = updated.find(
+        item => String(item.id) === String(listingId)
+      );
 
-  return [
-    ...updated.filter(
-      item => String(item.id) !== String(listing.id)
-    ),
-    pausedItem
-  ];
-});
+      return [
+        liveItem,
+        ...updated.filter(
+          item => String(item.id) !== String(listingId)
+        )
+      ].filter(Boolean);
+    });
+
+    addActivity(
+      "success",
+      `Listing reactivated — ${cleanMachineTitle(listing.title)}`
+    );
+  } catch (error) {
+    addActivity(
+      "error",
+      `Reactivate failed — ${cleanMachineTitle(listing.title)}`
+    );
+
+    console.error("Reactivate failed:", error);
+  }
+}
 
     addActivity(
       "success",
@@ -1883,6 +1907,10 @@ main {
 .age-yellow,
 .age-red {
   font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  padding-left: 10px;
+}
 
 .age-green {
   color: #38A169;
