@@ -246,46 +246,6 @@ export default function AccountPage() {
     window.location.href = "/";
   }
 
- async function pauseListing(listing) {
-  const ok = window.confirm(
-    `Pause this listing?\n\n${cleanMachineTitle(listing.title)}`
-  );
-
-  if (!ok) return;
-
-  try {
-    const response = await fetch("/api/pause-listing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId: listing.id })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Pause failed");
-    }
-
-    setMyListings(current =>
-      current.map(item =>
-        String(item.id) === String(listing.id)
-          ? {
-              ...item,
-              publicData: {
-                ...(item.publicData || {}),
-                listingStatus: "Paused"
-              },
-              listingStatus: "Paused"
-            }
-          : item
-      )
-    );
-
-    addActivity("success", `Paused — ${cleanMachineTitle(listing.title)}`);
-  } catch (error) {
-    alert(`Pause failed: ${error.message}`);
-  }
-}
 
 async function confirmDelete(listing) {
   const ok = window.confirm(
@@ -708,51 +668,53 @@ async function reactivateListing(listing) {
                             }}
                           />
 
-                          <span
-                            className={
-                              listing.age <= 30
-                                ? "age-green"
-                                : listing.age <= 45
-                                ? "age-yellow"
-                                : "age-red"
-                            }
-                          >
-                            {listing.age ?? "—"}
 
-<button
-  type="button"
-  className={`listing-status ${
-    (
+<span
+  className={
+    listing.age <= 30
+      ? "age-green"
+      : listing.age <= 45
+      ? "age-yellow"
+      : "age-red"
+  }
+>
+  {listing.age ?? "—"}
+</span>
+
+<div className="listing-status-stack">
+  <button
+    type="button"
+    className={`listing-status ${
+      (
+        listing.listingStatus ||
+        listing.publicData?.listingStatus ||
+        listing.attributes?.publicData?.listingStatus
+      ) === "paused"
+        ? "paused"
+        : "active"
+    }`}
+    onClick={() => {
+      const status =
+        listing.listingStatus ||
+        listing.publicData?.listingStatus ||
+        listing.attributes?.publicData?.listingStatus ||
+        "live";
+
+      if (status === "paused") {
+        reactivateListing(listing);
+      } else {
+        pauseListing(listing);
+      }
+    }}
+  >
+    {(
       listing.listingStatus ||
       listing.publicData?.listingStatus ||
       listing.attributes?.publicData?.listingStatus
     ) === "paused"
-      ? "paused"
-      : "active"
-  }`}
-  onClick={() => {
-    const status =
-      listing.listingStatus ||
-      listing.publicData?.listingStatus ||
-      listing.attributes?.publicData?.listingStatus ||
-      "live";
-
-    if (status === "paused") {
-      reactivateListing(listing);
-    } else {
-      pauseListing(listing);
-    }
-  }}
->
-  {(
-    listing.listingStatus ||
-    listing.publicData?.listingStatus ||
-    listing.attributes?.publicData?.listingStatus
-  ) === "paused"
-    ? "PAUSED"
-    : "LIVE"}
-</button>
-
+      ? "PAUSED"
+      : "LIVE"}
+  </button>
 
   <button
     type="button"
@@ -762,6 +724,8 @@ async function reactivateListing(listing) {
     DELETE
   </button>
 </div>
+
+                            
 
 <select
   className="workflow-select"
