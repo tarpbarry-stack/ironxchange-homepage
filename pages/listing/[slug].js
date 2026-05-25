@@ -13,7 +13,6 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
-const STAGING = "https://staging.ironxchange.com";
 const BRAND_YELLOW = "#FFC400";
 
 function slugify(text = "") {
@@ -21,6 +20,10 @@ function slugify(text = "") {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+function cleanText(value) {
+  return value ? String(value).trim() : "";
 }
 
 function getImageUrl(img) {
@@ -31,7 +34,10 @@ function getImageUrl(img) {
     img.url ||
     img.src ||
     img.attributes?.variants?.default?.url ||
-    img.attributes?.variants?.landscape-crop?.url ||
+    img.attributes?.variants?.["landscape-crop"]?.url ||
+    img.attributes?.variants?.["landscape-crop2x"]?.url ||
+    img.attributes?.variants?.["scaled-large"]?.url ||
+    img.attributes?.variants?.["scaled-medium"]?.url ||
     img.attributes?.variants?.["scaled-small"]?.url ||
     null
   );
@@ -79,8 +85,11 @@ function getListingImages(listing) {
   return [...new Set(images)];
 }
 
-function cleanText(value) {
-  return value ? String(value).trim() : "";
+function cleanMachineTitle(title = "") {
+  return String(title)
+    .replace(/\s*[-–]?\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function inferHighlightsFromDescription(listing = {}) {
@@ -94,109 +103,113 @@ function inferHighlightsFromDescription(listing = {}) {
     .toLowerCase();
 
   const matches = featureKeywords
-    .filter(feature =>
-      feature.match.some(term => text.includes(term))
-    )
+    .filter(feature => feature.match.some(term => text.includes(term)))
     .map(feature => feature.label);
 
   return [...new Set(matches)];
 }
 
-function cleanMachineTitle(title = "") {
-  return String(title)
-    .replace(/\s*[-–]\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|Hours)?/i, "")
-    .trim();
+function buildBuyerShareCopy(listing, listingUrl, title, price, hours, location, highlights = []) {
+  const featureLine = highlights.slice(0, 6).join(" • ");
+  const description =
+    cleanText(listing.description) ||
+    cleanText(listing.publicData?.description) ||
+    cleanText(listing.publicData?.details) ||
+    "Full specs and photos available on IronXchange.";
+
+  return `${title}
+${hours} | ${location}
+${price}
+
+${featureLine}
+
+${description}
+
+Full specs + photos:
+${listingUrl}`;
 }
 
 export default function ListingPage() {
   const router = useRouter();
   const { slug, from } = router.query;
 
-const [listings, setListings] = useState([]);
-const [savedIds, setSavedIds] = useState([]);
-const [saveBusy, setSaveBusy] = useState(false);
-const [sdkInstance, setSdkInstance] = useState(null);
-  
-const [activeImage, setActiveImage] = useState(0);
-
-const [lightboxOpen, setLightboxOpen] = useState(false);
-const [lightboxIndex, setLightboxIndex] = useState(0);
-
-const [loggedIn, setLoggedIn] = useState(false);
-
-  
- useEffect(() => {
-  async function loadPage() {
-    try {
-      const SharetribeSdk = await import("sharetribe-flex-sdk");
-
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
-
-      setSdkInstance(sdk);
-
-      try {
-        const currentUser = await fetchCurrentUserWithSavedListings(sdk);
-
-        setSavedIds(
-          getSavedListingIdsFromUser(currentUser)
-        );
-      } catch {
-        setSavedIds([]);
-      }
-
-      const res = await fetch("/api/listings");
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setListings(data);
-      }
-    } catch (err) {
-      console.error("Listing page load failed:", err);
-    }
-  }
-
-  loadPage();
-}, []);
+  const [listings, setListings] = useState([]);
+  const [savedIds, setSavedIds] = useState([]);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [sdkInstance, setSdkInstance] = useState(null);
+  const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
-  async function checkAuth() {
-    try {
-      const SharetribeSdk = await import("sharetribe-flex-sdk");
+    async function loadPage() {
+      try {
+        const SharetribeSdk = await import("sharetribe-flex-sdk");
 
-      const sdk = SharetribeSdk.createInstance({
-        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-      });
+        const sdk = SharetribeSdk.createInstance({
+          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
 
-      await sdk.currentUser.show();
+        setSdkInstance(sdk);
 
-      setLoggedIn(true);
-    } catch {
-      setLoggedIn(false);
+        try {
+          const currentUser = await fetchCurrentUserWithSavedListings(sdk);
+          setSavedIds(getSavedListingIdsFromUser(currentUser));
+        } catch {
+          setSavedIds([]);
+        }
+
+        const res = await fetch("/api/listings");
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          setListings(data);
+        }
+      } catch (err) {
+        console.error("Listing page load failed:", err);
+      }
     }
-  }
 
-  checkAuth();
-}, []);
+    loadPage();
+  }, []);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+        const sdk = SharetribeSdk.createInstance({
+          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+        await sdk.currentUser.show();
+        setLoggedIn(true);
+      } catch {
+        setLoggedIn(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
 
   const listing = useMemo(() => {
     if (!slug || listings.length === 0) return null;
-    return listings.find((item) => slugify(item.title) === slug);
+    return listings.find(item => slugify(item.title) === slug);
   }, [slug, listings]);
 
   const currentIndex = useMemo(() => {
-  if (!slug || listings.length === 0) return -1;
-  return listings.findIndex((item) => slugify(item.title) === slug);
-}, [slug, listings]);
+    if (!slug || listings.length === 0) return -1;
+    return listings.findIndex(item => slugify(item.title) === slug);
+  }, [slug, listings]);
 
-const prevListing =
-  currentIndex > 0 ? listings[currentIndex - 1] : null;
+  const prevListing = currentIndex > 0 ? listings[currentIndex - 1] : null;
 
-const nextListing =
-  currentIndex >= 0 && currentIndex < listings.length - 1
-    ? listings[currentIndex + 1]
-    : null;
+  const nextListing =
+    currentIndex >= 0 && currentIndex < listings.length - 1
+      ? listings[currentIndex + 1]
+      : null;
 
   if (!listing) {
     return (
@@ -215,116 +228,122 @@ const nextListing =
     );
   }
 
-const images = getListingImages(listing);
-const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+  const images = getListingImages(listing);
+  const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+
   const mobilePairs = [];
   for (let i = 1; i < images.length; i += 2) {
-  mobilePairs.push(images.slice(i, i + 2));
+    mobilePairs.push(images.slice(i, i + 2));
   }
 
- const rawTitle =
-  cleanText(listing.title) ||
-  "Equipment Listing";
+  const rawTitle = cleanText(listing.title) || "Equipment Listing";
 
-const title =
-  rawTitle
-    .replace(/\s*[-–]?\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const title =
+    rawTitle
+      .replace(/\s*[-–]?\s*\d{1,3}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
   const price = cleanText(listing.price) || "Call for Price";
   const hours = cleanText(listing.hours) || "Hours not listed";
   const location = cleanText(listing.location) || "Location not listed";
-  const cameFromBrowse = from === "browser";  
+  const cameFromBrowse = from === "browser";
+
   const year = cleanText(listing.year) || title.match(/\b(19|20)\d{2}\b/)?.[0] || "—";
   const make = cleanText(listing.make) || "—";
   const model = cleanText(listing.model) || "—";
-  const serial = cleanText(listing.serialNumber || listing.publicData?.serialNumber || listing.vin || listing.serial) || "Not listed";
+  const serial =
+    cleanText(listing.serialNumber || listing.publicData?.serialNumber || listing.vin || listing.serial) ||
+    "Not listed";
   const stockNumber = cleanText(listing.stockNumber || listing.publicData?.stockNumber) || "Not listed";
+
   const sellerProfile = listing.author?.profile || listing.author?.attributes?.profile || {};
+  const sellerPublicData = sellerProfile.publicData || {};
 
-const sellerPublicData =
-  sellerProfile.publicData || {};
+  const sellerName =
+    cleanText(
+      listing.sellerName ||
+        sellerPublicData.sellerName ||
+        sellerProfile.displayName ||
+        listing.authorName
+    ) || "IronXchange Seller";
 
-const sellerName =
-  cleanText(
-    listing.sellerName ||
-    sellerPublicData.sellerName ||
-    sellerProfile.displayName ||
-    listing.authorName
-  ) || "IronXchange Seller";
+  const sellerCompanyName =
+    cleanText(
+      listing.sellerCompany ||
+        listing.companyName ||
+        sellerPublicData.companyName ||
+        sellerProfile.abbreviatedName
+    ) || "";
 
-const sellerCompanyName =
-  cleanText(
-    listing.sellerCompany ||
-    listing.companyName ||
-    sellerPublicData.companyName ||
-    sellerProfile.abbreviatedName
-  ) || "";
+  const sellerLocation =
+    cleanText(
+      listing.sellerLocation ||
+        listing.authorLocation ||
+        listing.author?.profile?.publicData?.location ||
+        listing.author?.attributes?.profile?.publicData?.location
+    ) || location;
 
-const sellerLocation =
-  cleanText(
-    listing.sellerLocation ||
-    listing.authorLocation ||
-    listing.author?.profile?.publicData?.location ||
-    listing.author?.attributes?.profile?.publicData?.location
-  ) || location;
+  const sellerLogo = getSellerLogoUrl(listing);
 
-const sellerImageVariants =
-  listing.author?.attributes?.profileImage?.attributes?.variants ||
-  listing.author?.profileImage?.attributes?.variants ||
-  {};
-
-const sellerLogo =
-  listing.sellerLogo ||
-  listing.sellerImage ||
-  listing.authorImage ||
-  sellerImageVariants.default?.url ||
-  sellerImageVariants["landscape-crop"]?.url ||
-  sellerImageVariants["landscape-crop2x"]?.url ||
-  sellerImageVariants["scaled-large"]?.url ||
-  sellerImageVariants["scaled-medium"]?.url ||
-  sellerImageVariants["scaled-small"]?.url ||
-  Object.values(sellerImageVariants).find(v => v?.url)?.url ||
-  null;
   const description =
     cleanText(listing.description) ||
     cleanText(listing.publicData?.description) ||
     cleanText(listing.publicData?.details) ||
     "Seller description has not been added yet.";
 
- const selectedHighlights = [
-  ...(Array.isArray(listing.keywords) ? listing.keywords : []),
-  ...(Array.isArray(listing.publicData?.keywords) ? listing.publicData.keywords : []),
-  ...(Array.isArray(listing.attributes?.publicData?.keywords)
-    ? listing.attributes.publicData.keywords
-    : [])
-]
-  .filter(Boolean)
-  .map(cleanText);
+  const selectedHighlights = [
+    ...(Array.isArray(listing.keywords) ? listing.keywords : []),
+    ...(Array.isArray(listing.publicData?.keywords) ? listing.publicData.keywords : []),
+    ...(Array.isArray(listing.attributes?.publicData?.keywords)
+      ? listing.attributes.publicData.keywords
+      : [])
+  ]
+    .filter(Boolean)
+    .map(cleanText);
 
-const inferredHighlights = inferHighlightsFromDescription(listing);
+  const inferredHighlights = inferHighlightsFromDescription(listing);
 
-const displayHighlights =
-  selectedHighlights.length > 0
-    ? selectedHighlights.slice(0, 12)
-    : inferredHighlights.slice(0, 12);
+  const displayHighlights =
+    selectedHighlights.length > 0
+      ? selectedHighlights.slice(0, 12)
+      : inferredHighlights.slice(0, 12);
 
-function openLightbox(index) {
-  setLightboxIndex(index);
-  setLightboxOpen(true);
-}
+  const listingId = getListingId(listing);
+  const isSaved = savedIds.includes(String(listingId));
 
-function closeLightbox() {
-  setLightboxOpen(false);
-}
+  const listingUrl =
+    typeof window !== "undefined"
+      ? window.location.href
+      : `https://www.ironxchange.com/listing/${slugify(title)}`;
 
-function lightboxPrev() {
-  setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
-}
+  const buyerShareCopy = buildBuyerShareCopy(
+    listing,
+    listingUrl,
+    title,
+    price,
+    hours,
+    location,
+    displayHighlights
+  );
 
-function lightboxNext() {
-  setLightboxIndex((lightboxIndex + 1) % images.length);
-}
+  function openLightbox(index) {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  }
+
+  function closeLightbox() {
+    setLightboxOpen(false);
+  }
+
+  function lightboxPrev() {
+    setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
+  }
+
+  function lightboxNext() {
+    setLightboxIndex((lightboxIndex + 1) % images.length);
+  }
+
   function goPrev() {
     if (images.length < 2) return;
     setActiveImage((activeImage - 1 + images.length) % images.length);
@@ -335,40 +354,83 @@ function lightboxNext() {
     setActiveImage((activeImage + 1) % images.length);
   }
 
-async function handleToggleSaved(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (saveBusy) return;
-
-  if (!sdkInstance) {
-    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
-    return;
+  async function copyText(label, text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(label);
+      setTimeout(() => setCopied(""), 1500);
+    } catch {
+      alert("Copy failed. Highlight and copy manually.");
+    }
   }
 
-  setSaveBusy(true);
-
-  try {
-    const result = await toggleSavedListing({
-      sdk: sdkInstance,
-      listing
-    });
-
-    setSavedIds(result.savedIds);
-  } catch (err) {
-    console.error("Save toggle failed:", err);
-
-    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
-  } finally {
-    setSaveBusy(false);
+  function openWhatsApp() {
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(buyerShareCopy)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
-}
 
-const listingId = getListingId(listing);
-const isSaved = savedIds.includes(String(listingId));
+  function openMessenger() {
+    copyText("Messenger", buyerShareCopy);
+    window.open("https://www.messenger.com/", "_blank", "noopener,noreferrer");
+  }
+
+  function openSms() {
+    window.open(
+      `sms:?&body=${encodeURIComponent(buyerShareCopy)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  async function nativeShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: buyerShareCopy,
+          url: listingUrl
+        });
+        return;
+      } catch {}
+    }
+
+    copyText("Share", buyerShareCopy);
+  }
+
+  async function handleToggleSaved(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (saveBusy) return;
+
+    if (!sdkInstance) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    setSaveBusy(true);
+
+    try {
+      const result = await toggleSavedListing({
+        sdk: sdkInstance,
+        listing
+      });
+
+      setSavedIds(result.savedIds);
+    } catch (err) {
+      console.error("Save toggle failed:", err);
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+    } finally {
+      setSaveBusy(false);
+    }
+  }
 
   return (
-    <>
+
+        <>
       <Head>
         <title>{title} | IronXchange</title>
 
@@ -379,45 +441,45 @@ const isSaved = savedIds.includes(String(listingId));
       </Head>
 
       <main>
-       <Navbar />
+        <Navbar />
 
         <section className="page">
-                {cameFromBrowse && (
-  <button
-    type="button"
-    className="back-results"
-    onClick={() => router.back()}
-  >
-    ← Back to Results
-  </button>
-)}
+          {cameFromBrowse && (
+            <button
+              type="button"
+              className="back-results"
+              onClick={() => router.back()}
+            >
+              ← Back to Results
+            </button>
+          )}
+
           <div className="title-row">
-  <div>
-                
-  <h1>
-  {title}
+            <div>
+              <h1>
+                {title}
 
-  <span className="title-hours">
-    {hours}
-  </span>
-</h1>
+                <span className="title-hours">
+                  {hours}
+                </span>
+              </h1>
 
-    <p>
-      {hours} · {location}
-    </p>
-  </div>
+              <p>
+                {hours} · {location}
+              </p>
+            </div>
 
-   <div className="price">{price}</div>
-</div>
+            <div className="price">{price}</div>
+          </div>
 
-<div className="photo-grid">
-  <div className="hero-wrap">
-            <img
-  src={heroImage}
-  alt={title}
-  className="hero-photo"
-  onClick={() => openLightbox(activeImage)}
-/>
+          <div className="photo-grid">
+            <div className="hero-wrap">
+              <img
+                src={heroImage}
+                alt={title}
+                className="hero-photo"
+                onClick={() => openLightbox(activeImage)}
+              />
 
               <button className="arrow left" onClick={goPrev} type="button">
                 ‹
@@ -426,154 +488,182 @@ const isSaved = savedIds.includes(String(listingId));
               <button className="arrow right" onClick={goNext} type="button">
                 ›
               </button>
-    
             </div>
 
-          <div className="photo-rail">
-  {images.map((src, index) => (
-    <img
-      key={`${src}-${index}`}
-      src={src}
-      alt=""
-      onClick={() => {
-  setActiveImage(index);
-  openLightbox(index);
-}}
-      className={index === activeImage ? "active-thumb" : ""}
-    />
-  ))}
-</div>
+            <div className="photo-rail">
+              {images.map((src, index) => (
+                <img
+                  key={`${src}-${index}`}
+                  src={src}
+                  alt=""
+                  onClick={() => {
+                    setActiveImage(index);
+                    openLightbox(index);
+                  }}
+                  className={index === activeImage ? "active-thumb" : ""}
+                />
+              ))}
+            </div>
 
-<div className="mobile-gallery">
-  <div className="mobile-hero">
-    <img src={heroImage} alt={title} />
-  </div>
+            <div className="mobile-gallery">
+              <div className="mobile-hero">
+                <img src={heroImage} alt={title} />
+              </div>
 
-  {mobilePairs.map((pair, pairIndex) => (
-    <div className="mobile-pair" key={pairIndex}>
-      {pair.map((src, index) => (
-        <img
-          key={`${src}-${pairIndex}-${index}`}
-          src={src}
-          alt=""
-          onClick={() => {
-  const imgIndex = pairIndex * 2 + index + 1;
-  setActiveImage(imgIndex);
-  openLightbox(imgIndex);
-}}
-        />
-      ))}
-    </div>
-  ))}
-</div>
-</div>
-    <section className="info-grid">
-          <div className="panel facts-highlights-panel">
-  <div className="facts-column">
-    <h2>Quick Facts</h2>
+              {mobilePairs.map((pair, pairIndex) => (
+                <div className="mobile-pair" key={pairIndex}>
+                  {pair.map((src, index) => (
+                    <img
+                      key={`${src}-${pairIndex}-${index}`}
+                      src={src}
+                      alt=""
+                      onClick={() => {
+                        const imgIndex = pairIndex * 2 + index + 1;
+                        setActiveImage(imgIndex);
+                        openLightbox(imgIndex);
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
 
-    <div className="facts">
-      <span>Year</span>
-      <strong>{year}</strong>
+          <section className="info-grid">
+            <div className="panel facts-highlights-panel">
+              <div className="facts-column">
+                <h2>Quick Facts</h2>
 
-      <span>Make</span>
-      <strong>{make}</strong>
+                <div className="facts">
+                  <span>Year</span>
+                  <strong>{year}</strong>
 
-      <span>Model</span>
-      <strong>{model}</strong>
+                  <span>Make</span>
+                  <strong>{make}</strong>
 
-      <span>Hours</span>
-      <strong>{hours}</strong>
+                  <span>Model</span>
+                  <strong>{model}</strong>
 
-      <span>Serial #</span>
-      <strong>{serial}</strong>
+                  <span>Hours</span>
+                  <strong>{hours}</strong>
 
-      <span>Stock #</span>
-      <strong>{stockNumber}</strong>
+                  <span>Serial #</span>
+                  <strong>{serial}</strong>
 
-      <span>Location</span>
-      <strong>{location}</strong>
+                  <span>Stock #</span>
+                  <strong>{stockNumber}</strong>
 
-      <span>Seller</span>
-      <strong>{sellerName}</strong>
-    </div>
-  </div>
+                  <span>Location</span>
+                  <strong>{location}</strong>
 
-  <div className="highlights-column">
-    <h2>Highlights</h2>
+                  <span>Seller</span>
+                  <strong>{sellerName}</strong>
+                </div>
+              </div>
 
-    <div className="highlight-chips">
-      {displayHighlights.map((item) => (
-        <span key={item}>{String(item).toLowerCase()}</span>
-      ))}
-    </div>
-  </div>
-</div>
+              <div className="highlights-column">
+                <h2>Highlights</h2>
 
-          <div className="right-stack">
-  <div className="mini-tool-tab">
-    <button
-      type="button"
-      onClick={() => {
-        const url = window.location.href;
+                <div className="highlight-chips">
+                  {displayHighlights.map(item => (
+                    <span key={item}>{String(item).toLowerCase()}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-        if (navigator.share) {
-          navigator.share({ title, url });
-        } else {
-          navigator.clipboard.writeText(url);
-          alert("Listing link copied");
-        }
-      }}
-    >
-      <i className="fa-solid fa-arrow-up-from-bracket"></i>
-    </button>
+            <div className="right-stack">
+              <div className="mini-tool-tab">
+                <button
+                  type="button"
+                  onClick={nativeShare}
+                  title="Share this listing"
+                >
+                  <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                </button>
 
-    <button
-  type="button"
-  className={isSaved ? "saved-star" : ""}
-  onClick={handleToggleSaved}
-  disabled={saveBusy}
-  aria-label={isSaved ? "Unsave listing" : "Save listing"}
->
-  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-</button>
+                <button
+                  type="button"
+                  className={isSaved ? "saved-star" : ""}
+                  onClick={handleToggleSaved}
+                  disabled={saveBusy}
+                  aria-label={isSaved ? "Unsave listing" : "Save listing"}
+                >
+                  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
+                </button>
 
-    <a href="/browse">← Results</a>
+                <a href="/browse">← Results</a>
 
-    {prevListing ? (
-      <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
-        ← Prev
-      </a>
-    ) : (
-      <button disabled>← Prev</button>
-    )}
+                {prevListing ? (
+                  <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
+                    ← Prev
+                  </a>
+                ) : (
+                  <button disabled>← Prev</button>
+                )}
 
-    {nextListing ? (
-      <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
-        Next →
-      </a>
-    ) : (
-      <button disabled>Next →</button>
-    )}
-  </div>
+                {nextListing ? (
+                  <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
+                    Next →
+                  </a>
+                ) : (
+                  <button disabled>Next →</button>
+                )}
+              </div>
 
-  <div className="panel video-panel">
-    <h2>Machine Video</h2>
+              <div className="media-tools-row">
+                <div className="panel buyer-launch-panel">
+                  <h2>Send This Machine</h2>
 
-    <div className="video-box">
-      <video controls poster={heroImage}>
-        <source src={listing.videoUrl || listing.publicData?.videoUrl || ""} />
-      </video>
+                  <div className="buyer-launch-stack">
+                    <button type="button" onClick={openWhatsApp}>
+                      <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
+                      <span>WhatsApp</span>
+                    </button>
 
-      {!listing.videoUrl && !listing.publicData?.videoUrl ? (
-        <div className="video-placeholder">
-          <i className="fa-solid fa-play"></i>
-          <span>Video Coming Soon</span>
-        </div>
-      ) : null}
-    </div>
-  </div>
-</div>
+                    <button type="button" onClick={openMessenger}>
+                      <i className="fa-brands fa-facebook-messenger messenger-icon"></i>
+                      <span>{copied === "Messenger" ? "Copied" : "Messenger"}</span>
+                    </button>
+
+                    <button type="button" onClick={openSms}>
+                      <i className="fa-solid fa-comment-sms sms-icon"></i>
+                      <span>Text</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => copyText("Link", listingUrl)}
+                    >
+                      <i className="fa-solid fa-link link-icon"></i>
+                      <span>{copied === "Link" ? "Copied" : "Copy Link"}</span>
+                    </button>
+
+                    <button type="button" onClick={nativeShare}>
+                      <i className="fa-solid fa-arrow-up-from-bracket share-icon"></i>
+                      <span>{copied === "Share" ? "Copied" : "Share"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="panel video-panel">
+                  <h2>Machine Video</h2>
+
+                  <div className="video-box">
+                    <video controls poster={heroImage}>
+                      <source src={listing.videoUrl || listing.publicData?.videoUrl || ""} />
+                    </video>
+
+                    {!listing.videoUrl && !listing.publicData?.videoUrl ? (
+                      <div className="video-placeholder">
+                        <i className="fa-solid fa-play"></i>
+                        <span>Video Coming Soon</span>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section className="panel description">
@@ -584,17 +674,21 @@ const isSaved = savedIds.includes(String(listingId));
 
           <section className="panel seller-panel">
             <div>
-            <span className="seller-eyebrow">IronXchange Seller</span>
-                      <h2>Contact Seller</h2>
+              <span className="seller-eyebrow">IronXchange Seller</span>
+              <h2>Contact Seller</h2>
 
               <div className="seller-row">
-               <div className="seller-avatar">
-  {sellerLogo ? (
-    <img src={sellerLogo} alt={sellerName} />
-  ) : (
-    <i className="fa-regular fa-user"></i>
-  )}
-</div>
+                {sellerLogo ? (
+                  <img
+                    src={sellerLogo}
+                    alt={sellerName}
+                    className="seller-logo"
+                  />
+                ) : (
+                  <div className="seller-avatar">
+                    <i className="fa-regular fa-user"></i>
+                  </div>
+                )}
 
                 <div>
                   <strong>{sellerName}</strong>
@@ -604,1330 +698,1213 @@ const isSaved = savedIds.includes(String(listingId));
               </div>
             </div>
 
-           <div className="seller-actions">
-  <a
-    href={
-      loggedIn
-        ? `/inquire?listingId=${listing.id}`
-        : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
-    }
-    className="message-btn"
-  >
-    Message Seller
-  </a>
+            <div className="seller-actions">
+              <a
+                href={
+                  loggedIn
+                    ? `/inquire?listingId=${listing.id}`
+                    : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
+                }
+                className="message-btn"
+              >
+                Message Seller
+              </a>
 
-  <a
-    href={`/yard/${listing.authorId}`}
-    className="yard-btn"
-  >
-    View Seller Yard
-  </a>
+              <a
+                href={`/yard/${listing.authorId}`}
+                className="yard-btn"
+              >
+                View Seller Yard
+              </a>
 
-  <button type="button" className="call-btn">
-    Call
-  </button>
-</div>
-                    </section>
-
+              <button type="button" className="call-btn">
+                Call
+              </button>
+            </div>
+          </section>
         </section>
 
-{lightboxOpen && (
-  <div className="lightbox">
-    <button className="lightbox-close" onClick={closeLightbox}>
-      ×
-    </button>
+        {lightboxOpen && (
+          <div className="lightbox">
+            <button className="lightbox-close" onClick={closeLightbox}>
+              ×
+            </button>
 
-    <button className="lightbox-arrow left" onClick={lightboxPrev}>
-      ‹
-    </button>
+            <button className="lightbox-arrow left" onClick={lightboxPrev}>
+              ‹
+            </button>
 
-    <img
-      src={images[lightboxIndex]}
-      alt=""
-      className="lightbox-image"
-    />
+            <img
+              src={images[lightboxIndex]}
+              alt=""
+              className="lightbox-image"
+            />
 
-    <button className="lightbox-arrow right" onClick={lightboxNext}>
-      ›
-    </button>
-  </div>
-)}
-  
-  </main>
+            <button className="lightbox-arrow right" onClick={lightboxNext}>
+              ›
+            </button>
+          </div>
+        )}
+      </main>
 
-  <Footer />
-  
-      <style jsx>{`
+      <Footer />
+
+                <style jsx>{`
+        :global(html),
         :global(body) {
           margin: 0;
+          min-height: 100%;
+          overflow-x: hidden;
           background: #0b0b0b;
           color: #d6d6d6;
           font-family: Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: geometricPrecision;
         }
-        
-        body {
-  line-height: 1.35;
-}
-      * {
-  box-sizing: border-box;
 
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.10) transparent;
-}
+        * {
+          box-sizing: border-box;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.10) transparent;
+        }
 
-*::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
+        *::-webkit-scrollbar {
+          width: 7px;
+          height: 7px;
+        }
 
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
+        *::-webkit-scrollbar-track {
+          background: transparent;
+        }
 
-*::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.10);
-  border-radius: 999px;
-}
+        *::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,.10);
+          border-radius: 999px;
+        }
 
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,196,0,.22);
-}
+        *::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,196,0,.22);
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+          font-family: inherit;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: geometricPrecision;
+        }
+
         main {
-  min-height: 100vh;
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top center, rgba(255,196,0,.032), transparent 28%),
+            radial-gradient(circle at 18% 12%, rgba(255,255,255,.018), transparent 22%),
+            #0b0b0b;
+        }
 
-  background:
-    radial-gradient(
-      circle at top,
-      rgba(255,196,0,.025),
-      transparent 26%
-    ),
-    #0b0b0b;
-}
-
-button:focus-visible,
-a:focus-visible {
-  outline: 1px solid rgba(255,196,0,.42);
-  outline-offset: 3px;
-}
+        button:focus-visible,
+        a:focus-visible {
+          outline: 1px solid rgba(255,196,0,.42);
+          outline-offset: 3px;
+        }
 
         .page {
-   padding: 18px 3% 54px;
+          max-width: 1500px;
+          margin: 0 auto;
+          padding: 18px 3% 54px;
+        }
 
-  max-width: 1500px;
-  margin: 0 auto;
-}
+        .back-results {
+          height: 28px;
+          display: inline-flex;
+          align-items: center;
+          background: transparent;
+          border: none;
+          padding: 0;
+          margin: 0 0 10px;
+          color: rgba(255,255,255,.40);
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .65px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
 
-.back-results {
-  height: 28px;
+        .back-results:hover {
+          color: #FFC400;
+        }
 
-  display: inline-flex;
-  align-items: center;
+        .title-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: baseline;
+          gap: 18px;
+          margin: 0 0 6px;
+          padding: 0;
+        }
 
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0 0 10px;
+        .title-row::after {
+          content: "";
+          grid-column: 1 / -1;
+          height: 1px;
+          background:
+            linear-gradient(
+              90deg,
+              rgba(255,255,255,.08),
+              rgba(255,255,255,.02)
+            );
+          margin-top: 4px;
+        }
 
-  color: rgba(255,255,255,.40);
+        .title-row > div:first-child {
+          min-width: 0;
+        }
 
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .65px;
-  text-transform: uppercase;
+        h1 {
+          margin: 0;
+          color: #f2f2f2;
+          font-size: clamp(30px, 2.55vw, 42px);
+          font-weight: 950;
+          letter-spacing: -1.15px;
+          line-height: .92;
+          text-transform: uppercase;
+          display: flex;
+          align-items: baseline;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
+        }
 
-  cursor: pointer;
-  font-family: inherit;
-}
+        .title-hours {
+          margin-left: 12px;
+          color: rgba(255,255,255,.42);
+          font-size: .62em;
+          font-weight: 700;
+          letter-spacing: -.2px;
+          white-space: nowrap;
+          display: inline-block;
+          transform: translateX(32px);
+        }
 
-.back-results:hover {
-  color: #FFC400;
-}
+        .title-row p {
+          display: none;
+        }
 
-.title-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-
-  gap: 18px;
-
-  margin: 0 0 6px;
-  padding: 0;
-}
-
-.title-row::after {
-  content: "";
-
-  grid-column: 1 / -1;
-
-  height: 1px;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,.08),
-      rgba(255,255,255,.02)
-    );
-
-  margin-top: 4px;
-}
-
-.title-row > div:first-child {
-  min-width: 0;
-}
-
-h1 {
-  margin: 0;
-
-  color: #f2f2f2;
-
-  font-size: clamp(30px, 2.55vw, 42px);
-  font-weight: 950;
-
-  letter-spacing: -1.15px;
-  line-height: .92;
-
-  text-transform: uppercase;
-
-  display: flex;
-  align-items: baseline;
-}
-
-.title-hours {
-  margin-left: 12px;
-
-  color: rgba(255,255,255,.42);
-
-  font-size: .62em;
-  font-weight: 700;
-
-  letter-spacing: -.2px;
-
-  white-space: nowrap;
-
-  display: inline-block;
-  transform: translateX(32px);
-}
-
-
-.title-row p {
-  display: none;
-}
-
-.price {
-  color: #f2f2f2;
-
-  font-size: clamp(24px, 2vw, 34px);
-  font-weight: 900;
-
-  letter-spacing: -.7px;
-  line-height: 1;
-
-  white-space: nowrap;
-}
+        .price {
+          color: #f2f2f2;
+          font-size: clamp(24px, 2vw, 34px);
+          font-weight: 900;
+          letter-spacing: -.7px;
+          line-height: 1;
+          white-space: nowrap;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
+        }
 
         .photo-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 12px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 300px;
+          gap: 12px;
+          margin-top: 8px;
+          margin-bottom: 0;
+        }
 
-  margin-top: 8px;
-  margin-bottom: 0;
-}
+        .hero-wrap {
+          position: relative;
+          min-width: 0;
+          border-radius: 14px;
+          overflow: hidden;
+          background: #111;
+        }
 
-       .hero-wrap {
-  position: relative;
-  min-width: 0;
+        .hero-wrap::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          border-radius: 14px;
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,.035),
+            inset 0 -70px 110px rgba(0,0,0,.13);
+        }
 
-  border-radius: 14px;
+        .hero-photo {
+          width: 100%;
+          height: 584px;
+          object-fit: cover;
+          display: block;
+          border-radius: 14px;
+          background: #111;
+          border: 1px solid rgba(255,255,255,.055);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.035) inset,
+            0 24px 60px rgba(0,0,0,.26);
+          cursor: pointer;
+          will-change: transform;
+          transition:
+            transform .22s ease,
+            filter .22s ease;
+        }
 
-  overflow: hidden;
+        .hero-photo:hover {
+          transform: scale(1.003);
+          filter:
+            contrast(1.03)
+            saturate(1.02)
+            brightness(1.01);
+        }
 
-  background: #111;
-}
+        .photo-rail {
+          height: 584px;
+          overflow-y: auto;
+          display: grid;
+          grid-auto-rows: 137px;
+          gap: 12px;
+          padding-right: 2px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.12) transparent;
+        }
 
-.hero-wrap::after {
-  content: "";
+        .photo-rail img {
+          width: 100%;
+          height: 146px;
+          object-fit: cover;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,.05);
+          cursor: pointer;
+          opacity: .72;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset,
+            0 10px 22px rgba(0,0,0,.16);
+          transition:
+            opacity .16s ease,
+            transform .16s ease,
+            border-color .16s ease,
+            box-shadow .16s ease,
+            filter .16s ease;
+        }
 
-  position: absolute;
-  inset: 0;
+        .photo-rail img:hover,
+        .photo-rail img.active-thumb {
+          opacity: 1;
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.26);
+          filter:
+            contrast(1.03)
+            saturate(1.02);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.035) inset,
+            0 12px 26px rgba(0,0,0,.24),
+            0 0 16px rgba(255,196,0,.055);
+        }
 
-  pointer-events: none;
-
-  border-radius: 14px;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.035),
-    inset 0 -60px 90px rgba(0,0,0,.10);
-}
-
-       .hero-photo {
-  width: 100%;
-  height: 584px;
-
-  object-fit: cover;
-  display: block;
-
-  border-radius: 14px;
-
-  background: #111;
-
-  border: 1px solid rgba(255,255,255,.055);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 24px 60px rgba(0,0,0,.26);
-
-  transition:
-    transform .22s ease,
-    filter .22s ease;
-}
-
-.hero-photo:hover {
-  transform: scale(1.003);
-
-  filter:
-    contrast(1.03)
-    saturate(1.02)
-    brightness(1.01);
-}
-
-    .photo-rail {
-  height: 584px;
-  overflow-y: auto;
-
-  display: grid;
-  grid-auto-rows: 137px;
-  gap: 12px;
-
-  padding-right: 2px;
-
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.12) transparent;
-}
-
-       .photo-rail img {
-  width: 100%;
-  height: 146px;
-
-  object-fit: cover;
-
-  border-radius: 12px;
-
-  border: 1px solid rgba(255,255,255,.05);
-
-  cursor: pointer;
-
-  opacity: 0.72;
-
-  transition:
-    opacity .16s ease,
-    transform .16s ease,
-    border-color .16s ease,
-    box-shadow .16s ease;
-}
-
-.photo-rail img:hover,
-.photo-rail img.active-thumb {
-  opacity: 1;
-
-  transform: translateY(-1px);
-
-  border-color: rgba(255,196,0,.18);
-
-  box-shadow:
-    0 10px 24px rgba(0,0,0,.18);
-}
-
-       .photo-rail img:hover,
-.photo-rail img.active-thumb {
-  opacity: 1;
-
-  transform: translateY(-1px);
-
-  border-color: rgba(255,196,0,.22);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 10px 24px rgba(0,0,0,.24);
-}
-
-.photo-rail img.active-thumb {
-  outline: 1px solid rgba(255,196,0,.18);
-  outline-offset: -3px;
-}
-
-     .photo-toolbar {
-  position: absolute;
-  bottom: 10px;
-
-  display: flex;
-  align-items: center;
-  gap: 14px;
-
-  background: rgba(0, 0, 0, 0.38);
-  backdrop-filter: blur(6px);
-
-  padding: 8px 12px;
-  border-radius: 9px;
-
-  color: rgba(255,255,255,.82);
-}
-
-.photo-toolbar.left {
-  left: 10px;
-}
-
-.photo-toolbar.right {
-  right: 10px;
-}
-
-.photo-toolbar a,
-.photo-toolbar button,
-.photo-toolbar span {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-
-  color: rgba(255,255,255,.82);
-
-  text-decoration: none;
-  cursor: pointer;
-
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .45px;
-  text-transform: uppercase;
-
-  line-height: 1;
-  font-family: inherit;
-}
-
-.photo-toolbar a:hover,
-.photo-toolbar button:hover {
-  opacity: .72;
-}
+        .photo-rail img.active-thumb {
+          outline: 1px solid rgba(255,196,0,.22);
+          outline-offset: -3px;
+        }
 
         .arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 34px;
-  height: 88px;
-
-  border: none;
-
-  background: rgba(0,0,0,.10);
-
-  color: rgba(255,255,255,.46);
-
-  font-size: 34px;
-  font-weight: 300;
-
-  line-height: 1;
-
-  cursor: pointer;
-
-  transition:
-    background .16s ease,
-    color .16s ease;
-}
-
-.arrow:hover {
-  background: rgba(0,0,0,.22);
-  color: rgba(255,255,255,.82);
-}
-
-.arrow.left {
-  left: 0;
-  border-radius: 0 14px 14px 0;
-}
-
-.arrow.right {
-  right: 0;
-  border-radius: 14px 0 0 14px;
-}
-
-    .info-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
-  gap: 14px;
-  margin-top: 14px;
-  align-items: stretch;
-}
-
-.right-stack {
-  display: grid;
-  grid-template-rows: 38px auto;
-  gap: 10px;
-
-  height: 100%;
-  min-width: 0;
-}
-
-.mini-tool-tab {
-  height: 38px;
-
-  padding: 0 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
-    #111;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 12px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.03) inset;
-}
-
-.mini-tool-tab a,
-.mini-tool-tab button {
-  -webkit-appearance: none;
-  appearance: none;
-
-  background: transparent;
-  border: none;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  color: rgba(255,255,255,.58) !important;
-
-  text-decoration: none !important;
-
-  font-size: 10px;
-  font-weight: 850;
-
-  letter-spacing: .55px;
-  text-transform: uppercase;
-
-  cursor: pointer;
-
-  font-family: inherit;
-
-  transition:
-    color .14s ease,
-    transform .14s ease;
-}
-
-.mini-tool-tab a:visited {
-  color: rgba(255,255,255,.58) !important;
-}
-
-.mini-tool-tab a:hover,
-.mini-tool-tab button:hover {
-  color: #FFC400 !important;
-  transform: translateY(-1px);
-}
-
-.mini-tool-tab i {
-  font-size: 11px;
-}
-
-.saved-star {
-  color: #FFC400 !important;
-}
-
-.mini-tool-tab button:disabled {
-  opacity: .28;
-  cursor: default;
-}
-
-.right-stack .panel {
-  height: 100%;
-}
-
-      .panel {
- background:
-  linear-gradient(
-    180deg,
-    rgba(255,255,255,.022),
-    rgba(255,255,255,0)
-  ),
-  radial-gradient(
-    circle at top,
-    rgba(255,255,255,.012),
-    transparent 68%
-  ),
-  #101010;
-
-  border: 1px solid rgba(255,255,255,.065);
-  outline: 1px solid rgba(255,255,255,.018);
-
-  border-radius: 14px;
-
- padding: 18px 20px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.03) inset,
-   0 14px 34px rgba(0,0,0,.18)
-   }
-
-.panel {
-  transition:
-    border-color .16s ease,
-    box-shadow .16s ease,
-    background .16s ease;
-}
-
-.panel:hover {
-  border-color: rgba(255,255,255,.085);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-   0 18px 40px rgba(0,0,0,.22)
-}
-
-.panel + .panel,
-.panel + section {
-  margin-top: 14px;
-}
-
-.panel h2 {
-  margin: 0 0 14px;
-
-  color: rgba(255,255,255,.82);
-
-  font-size: 12px;
-  font-weight: 900;
-
-  letter-spacing: .68px;
-  text-transform: uppercase;
-}
-
-     .video-panel {
-  min-height: 100%;
- padding: 18px 20px;
-}
-
-.video-panel h2 {
-  margin: 0 0 12px;
-
-  color: rgba(255,255,255,.82);
-
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.video-box {
-  position: relative;
-
-  height: 210px;
-  max-height: 210px;
-
-  overflow: hidden;
-
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 14px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #050505;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset,
-    0 14px 34px rgba(0,0,0,.18);
-}
-
-.video-box video {
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-  display: block;
-}
-
-.video-placeholder {
-  position: absolute;
-  inset: 0;
-
-  display: grid;
-  place-items: center;
-
-  color: rgba(255,255,255,.46);
-
-  font-size: 9.5px;
-  font-weight: 900;
-
-  letter-spacing: .58px;
-  text-transform: uppercase;
-}
-
-.video-placeholder i {
-  width: 44px;
-  height: 44px;
-
-  display: grid;
-  place-items: center;
-
-  margin-bottom: 8px;
-
-  border-radius: 50%;
-
-  color: rgba(255,196,0,.82);
-
-  border: 1px solid rgba(255,196,0,.26);
-
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
-    #151515;
-
-  box-shadow:
-    0 0 18px rgba(255,196,0,.08);
-}
-
-.facts-highlights-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  align-items: start;
-
-  border-radius: 14px;
-
-  padding: 20px 22px;
-}
-
-.facts-column {
-  position: relative;
-  padding-right: 22px;
-}
-
-.facts-column::after {
-  content: "";
-
-  position: absolute;
-  top: 4px;
-  right: 0;
-
-  width: 1px;
-  height: calc(100% - 8px);
-
-  background: rgba(255,255,255,.09);
-}
-
-.highlights-column {
-  padding-left: 22px;
-}
-
-.facts-column h2,
-.highlights-column h2 {
-  text-align: left;
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: 82px 1fr;
-  column-gap: 12px;
-  row-gap: 9px;
-  align-items: baseline;
-}
-
-.facts span {
-  color: rgba(255,255,255,.36);
-
-  font-size: 9.5px;
-  font-weight: 900;
-
-  letter-spacing: .58px;
-  text-transform: uppercase;
-}
-
-.facts strong {
-  min-width: 0;
-
-  color: rgba(255,255,255,.74);
-
-  font-size: 12.5px;
-  font-weight: 750;
-
-  line-height: 1.16;
-
-  overflow-wrap: anywhere;
-}
-
-.highlight-chips {
-  display: flex;
-  flex-wrap: wrap;
-
-  justify-content: center;
-  align-content: flex-start;
-
-  gap: 6px;
-
-  max-height: 118px;
-  overflow: hidden;
-}
-
-.highlight-chips span {
-  min-height: 22px;
-
-  padding: 4px 7px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 999px;
-
-  background: rgba(255,255,255,.022);
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 9px;
-  font-weight: 850;
-
-  letter-spacing: .14px;
-  line-height: 1;
-
-  text-transform: lowercase;
-}
-
-        .highlights li::before {
-          content: "✓";
-          color: ${BRAND_YELLOW};
-          margin-right: 12px;
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 34px;
+          height: 88px;
+          border: none;
+          background: rgba(0,0,0,.08);
+          color: rgba(255,255,255,.42);
+          font-size: 34px;
+          font-weight: 300;
+          line-height: 1;
+          cursor: pointer;
+          z-index: 4;
+          transition:
+            background .16s ease,
+            color .16s ease;
+        }
+
+        .arrow:hover {
+          background: rgba(0,0,0,.22);
+          color: rgba(255,255,255,.82);
+        }
+
+        .arrow.left {
+          left: 0;
+          border-radius: 0 14px 14px 0;
+        }
+
+        .arrow.right {
+          right: 0;
+          border-radius: 14px 0 0 14px;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 530px) minmax(0, 1fr);
+          gap: 14px;
+          margin-top: 14px;
+          align-items: stretch;
+        }
+
+        .right-stack {
+          display: grid;
+          grid-template-rows: 38px minmax(0, 1fr);
+          gap: 10px;
+          height: 100%;
+          min-width: 0;
+        }
+
+        .mini-tool-tab {
+          height: 38px;
+          padding: 0 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+            radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+            #141414;
+          border: 1px solid rgba(255,255,255,.065);
+          outline: 1px solid rgba(255,255,255,.018);
+          border-radius: 12px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.045) inset,
+            0 16px 38px rgba(0,0,0,.24);
+        }
+
+        .mini-tool-tab a,
+        .mini-tool-tab button {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          border: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          color: rgba(255,255,255,.58) !important;
+          text-decoration: none !important;
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: .55px;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition:
+            color .14s ease,
+            transform .14s ease;
+        }
+
+        .mini-tool-tab a:visited {
+          color: rgba(255,255,255,.58) !important;
+        }
+
+        .mini-tool-tab a:hover,
+        .mini-tool-tab button:hover {
+          color: #FFC400 !important;
+          transform: translateY(-1px);
+        }
+
+        .mini-tool-tab i {
+          font-size: 11px;
+        }
+
+        .saved-star {
+          color: #FFC400 !important;
+          text-shadow: 0 0 8px rgba(255,196,0,.12);
+        }
+
+        .mini-tool-tab button:disabled {
+          opacity: .28;
+          cursor: default;
+        }
+
+        .panel {
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+            radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+            #141414;
+          border: 1px solid rgba(255,255,255,.065);
+          outline: 1px solid rgba(255,255,255,.018);
+          border-radius: 14px;
+          padding: 18px 20px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.045) inset,
+            0 16px 38px rgba(0,0,0,.24);
+          transition:
+            border-color .16s ease,
+            box-shadow .16s ease,
+            background .16s ease;
+        }
+
+        .panel:hover {
+          border-color: rgba(255,255,255,.085);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.052) inset,
+            0 18px 44px rgba(0,0,0,.26);
+        }
+
+        .panel + .panel,
+        .panel + section {
+          margin-top: 14px;
+        }
+
+        .panel h2 {
+          margin: 0 0 14px;
+          color: rgba(255,255,255,.86);
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: .68px;
+          text-transform: uppercase;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .media-tools-row {
+          display: grid;
+          grid-template-columns: minmax(220px, 280px) minmax(220px, 1fr);
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .buyer-launch-panel,
+        .video-panel {
+          min-height: 232px;
+          padding: 14px;
+        }
+
+        .buyer-launch-panel h2,
+        .video-panel h2 {
+          margin: 0 0 10px;
+          text-align: center;
+        }
+
+        .buyer-launch-stack {
+          display: grid;
+          gap: 7px;
+        }
+
+        .buyer-launch-stack button {
+          min-height: 34px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,.08);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+            #101010;
+          color: #f2f2f2;
+          padding: 0 10px;
+          font-size: 8.5px;
+          font-weight: 950;
+          letter-spacing: .55px;
+          text-transform: uppercase;
+          cursor: pointer;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset;
+          transition:
+            transform .14s ease,
+            border-color .14s ease,
+            color .14s ease,
+            background .14s ease,
+            box-shadow .14s ease;
+        }
+
+        .buyer-launch-stack button:hover {
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.25);
+          color: #FFC400;
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
+            #151515;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.035) inset,
+            0 8px 18px rgba(0,0,0,.18);
+        }
+
+        .buyer-launch-stack i {
+          width: 17px;
+          text-align: center;
+          font-size: 13px;
+        }
+
+        .whatsapp-icon {
+          color: #25D366;
+          filter: grayscale(.25);
+        }
+
+        .messenger-icon {
+          color: #80bfff;
+          filter: grayscale(.20);
+        }
+
+        .sms-icon {
+          color: rgba(52,199,89,.82);
+          filter: grayscale(.32);
+        }
+
+        .link-icon,
+        .share-icon {
+          color: rgba(255,196,0,.76);
+        }
+
+        .video-box {
+          position: relative;
+          height: 176px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 14px;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+            #050505;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset,
+            0 14px 34px rgba(0,0,0,.18);
+        }
+
+        .video-box video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+                .video-placeholder {
+          position: absolute;
+          inset: 0;
+
+          display: grid;
+          place-items: center;
+
+          color: rgba(255,255,255,.46);
+
+          font-size: 9.5px;
           font-weight: 900;
+
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
+        .video-placeholder i {
+          width: 44px;
+          height: 44px;
+
+          display: grid;
+          place-items: center;
+
+          margin-bottom: 8px;
+
+          border-radius: 50%;
+
+          color: rgba(255,196,0,.82);
+
+          border: 1px solid rgba(255,196,0,.26);
+
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
+            #151515;
+
+          box-shadow:
+            0 0 18px rgba(255,196,0,.08);
+        }
+
+        .facts-highlights-panel {
+          display: grid;
+          grid-template-columns: .82fr 1fr;
+          gap: 0;
+          align-items: start;
+
+          border-radius: 14px;
+
+          padding: 20px 22px;
+        }
+
+        .facts-column {
+          position: relative;
+          padding-right: 22px;
+        }
+
+        .facts-column::after {
+          content: "";
+
+          position: absolute;
+          top: 4px;
+          right: 0;
+
+          width: 1px;
+          height: calc(100% - 8px);
+
+          background: rgba(255,255,255,.09);
+        }
+
+        .highlights-column {
+          padding-left: 22px;
+        }
+
+        .facts-column h2,
+        .highlights-column h2 {
+          text-align: left;
+        }
+
+        .facts {
+          display: grid;
+          grid-template-columns: 82px 1fr;
+
+          column-gap: 12px;
+          row-gap: 9px;
+
+          align-items: baseline;
+        }
+
+        .facts span {
+          color: rgba(255,255,255,.36);
+
+          font-size: 9.5px;
+          font-weight: 900;
+
+          letter-spacing: .58px;
+          text-transform: uppercase;
+        }
+
+        .facts strong {
+          min-width: 0;
+
+          color: rgba(255,255,255,.74);
+
+          font-size: 12.5px;
+          font-weight: 750;
+
+          line-height: 1.16;
+
+          overflow-wrap: anywhere;
+
+          text-rendering: geometricPrecision;
+        }
+
+        .highlight-chips {
+          display: flex;
+          flex-wrap: wrap;
+
+          justify-content: flex-start;
+          align-content: flex-start;
+
+          gap: 6px;
+
+          max-height: 132px;
+          overflow: hidden;
+        }
+
+        .highlight-chips span {
+          min-height: 22px;
+
+          padding: 4px 7px;
+
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 999px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.028),
+              rgba(255,255,255,.01)
+            );
+
+          color: rgba(255,255,255,.42);
+
+          font-size: 9px;
+          font-weight: 850;
+
+          letter-spacing: .14px;
+          line-height: 1;
+
+          text-transform: lowercase;
+
+          backdrop-filter: blur(2px);
         }
 
         .description {
- padding: 18px 20px;
-}
+          padding: 18px 20px;
+        }
 
-.description h2 {
-  margin: 0 0 14px;
+        .description h2 {
+          margin: 0 0 14px;
 
-  color: rgba(255,255,255,.84);
+          color: rgba(255,255,255,.84);
 
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+          font-size: 12px;
+          font-weight: 950;
 
-.description p {
-  margin: 0;
+          letter-spacing: .65px;
+          text-transform: uppercase;
+        }
 
-  max-width: 1180px;
+        .description p {
+          margin: 0;
 
-  color: rgba(255,255,255,.68);
+          max-width: 1180px;
 
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.58;
-  letter-spacing: .05px;
-}
+          color: rgba(255,255,255,.68);
 
-       .seller-panel {
+          font-size: 14px;
+          font-weight: 500;
 
-  padding: 18px 20px;
+          line-height: 1.58;
+          letter-spacing: .05px;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 22px;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
+        }
 
-  border-radius: 14px;
-}
+        .seller-panel {
+          padding: 18px 20px;
 
-       .seller-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
 
-     .seller-avatar {
-  width: 180px;
-  height: 92px;
+          gap: 22px;
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 12px;
+          border-radius: 14px;
+        }
 
-  background: #050505;
+        .seller-row {
+          display: flex;
+          align-items: center;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+          gap: 18px;
+        }
 
-  overflow: hidden;
+        .seller-logo {
+          width: auto;
+          max-width: 180px;
+          max-height: 82px;
 
-  padding: 8px;
+          object-fit: contain;
+          display: block;
 
-  flex: 0 0 180px;
+          filter:
+            contrast(1.03)
+            saturate(1.02)
+            drop-shadow(0 10px 22px rgba(0,0,0,.30));
+        }
 
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
-}
+        .seller-avatar {
+          width: 72px;
+          height: 72px;
 
-.seller-avatar img {
- max-width: 105%;
-max-height: none;
-  object-fit: contain;
-  object-position: center center;
-  display: block;
-  border-radius: 0;
-  transform: translateY(0px);
-}
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 50%;
 
-      .seller-row strong {
-  display: block;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+            #101010;
 
-  color: #f2f2f2;
+          display: grid;
+          place-items: center;
 
-  font-size: 17px;
-  font-weight: 900;
+          color: rgba(255,255,255,.52);
 
-  letter-spacing: -.28px;
-}
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset;
+        }
 
-.seller-row p {
-  margin: 5px 0 0;
+        .seller-row strong {
+          display: block;
 
-  color: rgba(255,255,255,.44);
+          color: #f2f2f2;
 
-  font-size: 10px;
-  font-weight: 900;
+          font-size: 17px;
+          font-weight: 950;
 
-  letter-spacing: .48px;
-  text-transform: uppercase;
-}
+          letter-spacing: -.28px;
 
-       .seller-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
+        }
 
-  gap: 10px;
+        .seller-row p {
+          margin: 5px 0 0;
 
-  min-width: 0;
-  flex-wrap: wrap;
-}
+          color: rgba(255,255,255,.44);
 
-       .message-btn,
-.yard-btn,
-.call-btn {
-  height: 38px;
+          font-size: 10px;
+          font-weight: 900;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+          letter-spacing: .48px;
+          text-transform: uppercase;
+        }
 
-  padding: 0 16px;
+        .seller-actions {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
 
-  background: #101010;
+          gap: 10px;
 
-  border: 1px solid #2A2A2A;
-  border-radius: 12px;
+          min-width: 0;
+          flex-wrap: wrap;
+        }
 
-  color: #EAEAEA;
+        .message-btn,
+        .yard-btn,
+        .call-btn {
+          height: 38px;
 
-  text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
 
-  font-size: 10px;
-  font-weight: 900;
+          padding: 0 16px;
 
-  letter-spacing: .55px;
-  text-transform: uppercase;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+            #101010;
 
-  transition:
-    border-color .15s ease,
-    background .15s ease,
-    color .15s ease,
-    transform .15s ease;
-}
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 12px;
 
-.message-btn {
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
-    #151515;
+          color: #EAEAEA;
 
-  border-color: rgba(255,196,0,.24);
+          text-decoration: none;
 
-  color: #FFC400;
-}
+          font-size: 10px;
+          font-weight: 900;
 
-.message-btn {
-  min-width: 138px;
-}
+          letter-spacing: .55px;
+          text-transform: uppercase;
 
-.yard-btn,
-.call-btn {
-  min-width: 104px;
-}
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset;
 
-.message-btn:hover,
-.yard-btn:hover,
-.call-btn:hover {
-  transform: translateY(-1px);
+          transition:
+            border-color .15s ease,
+            background .15s ease,
+            color .15s ease,
+            transform .15s ease,
+            box-shadow .15s ease;
+        }
 
-  border-color: #FFC400;
-  color: #FFC400;
+        .message-btn {
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
+            #151515;
 
-  background: #161616;
-}
+          border-color: rgba(255,196,0,.24);
 
-.seller-eyebrow {
-  display: block;
+          color: #FFC400;
 
-  margin-bottom: 6px;
+          min-width: 138px;
+        }
 
-  color: #FFC400;
+        .yard-btn,
+        .call-btn {
+          min-width: 104px;
+        }
 
-  font-size: 9px;
-  font-weight: 900;
+        .message-btn:hover,
+        .yard-btn:hover,
+        .call-btn:hover {
+          transform: translateY(-1px);
 
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+          border-color: #FFC400;
+          color: #FFC400;
 
-.seller-panel h2 {
-  margin: 0 0 14px;
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
+            #161616;
 
-  color: #f2f2f2;
+          box-shadow:
+            0 10px 22px rgba(0,0,0,.18);
+        }
 
-  font-size: 18px;
-  font-weight: 900;
+        .seller-eyebrow {
+          display: block;
 
-  letter-spacing: -.25px;
-  text-transform: uppercase;
-}
+          margin-bottom: 6px;
 
-.lightbox {
-  position: fixed;
-  inset: 0;
+          color: #FFC400;
 
-  z-index: 9999;
+          font-size: 9px;
+          font-weight: 900;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+          letter-spacing: .65px;
+          text-transform: uppercase;
+        }
 
-  background: rgba(0,0,0,.94);
-  backdrop-filter: blur(3px);
-}
+        .seller-panel h2 {
+          margin: 0 0 14px;
 
-.lightbox-image {
-  max-width: 94vw;
-  max-height: 92vh;
+          color: #f2f2f2;
 
-  object-fit: contain;
+          font-size: 18px;
+          font-weight: 950;
 
-  border-radius: 12px;
+          letter-spacing: -.25px;
+          text-transform: uppercase;
+        }
 
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset,
-    0 28px 80px rgba(0,0,0,.55);
-}
+        .lightbox {
+          position: fixed;
+          inset: 0;
 
-.lightbox-close {
-  position: absolute;
-  top: 22px;
-  right: 22px;
+          z-index: 9999;
 
-  width: 38px;
-  height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 50%;
+          background: rgba(0,0,0,.94);
+          backdrop-filter: blur(3px);
+        }
 
-  background: rgba(20,20,20,.82);
-  color: rgba(255,255,255,.72);
+        .lightbox-image {
+          max-width: 94vw;
+          max-height: 92vh;
 
-  font-size: 26px;
-  cursor: pointer;
-}
+          object-fit: contain;
 
-.lightbox-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+          border-radius: 12px;
 
-  width: 42px;
-  height: 92px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 28px 80px rgba(0,0,0,.55);
+        }
 
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 12px;
+        .lightbox-close {
+          position: absolute;
+          top: 22px;
+          right: 22px;
 
-  background: rgba(20,20,20,.62);
-  color: rgba(255,255,255,.58);
+          width: 38px;
+          height: 38px;
 
-  font-size: 38px;
-  font-weight: 300;
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 50%;
 
-  cursor: pointer;
-}
+          background: rgba(20,20,20,.82);
+          color: rgba(255,255,255,.72);
 
-.lightbox-close:hover,
-.lightbox-arrow:hover {
-  color: #FFC400;
-  border-color: rgba(255,196,0,.24);
-}
+          font-size: 26px;
+          cursor: pointer;
+        }
 
-.lightbox-arrow.left {
-  left: 24px;
-}
+        .lightbox-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
 
-.lightbox-arrow.right {
-  right: 24px;
-}
-.mobile-gallery {
-  display: none;
-}
+          width: 42px;
+          height: 92px;
 
-@media (max-width: 950px) {
-  .page {
-    padding: 16px 3.5% 44px;
-  }
+          border: 1px solid rgba(255,255,255,.06);
+          border-radius: 12px;
 
-  .photo-grid {
-    display: block;
-    margin-top: 10px;
-  }
+          background: rgba(20,20,20,.62);
+          color: rgba(255,255,255,.58);
 
-  .hero-wrap,
-  .photo-rail {
-    display: none;
-  }
+          font-size: 38px;
+          font-weight: 300;
 
-  .mobile-gallery {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
+          cursor: pointer;
+        }
 
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+        .lightbox-close:hover,
+        .lightbox-arrow:hover {
+          color: #FFC400;
+          border-color: rgba(255,196,0,.24);
+        }
 
-    padding-bottom: 10px;
-  }
+        .lightbox-arrow.left {
+          left: 24px;
+        }
 
-  .mobile-hero {
-    min-width: 78%;
-    height: 390px;
+        .lightbox-arrow.right {
+          right: 24px;
+        }
 
-    scroll-snap-align: start;
+        .mobile-gallery {
+          display: none;
+        }
 
-    background: #111;
-    border: 1px solid rgba(255,255,255,.055);
-    border-radius: 12px;
+        @media (max-width: 950px) {
+          .page {
+            padding: 16px 3.5% 44px;
+          }
 
-    overflow: hidden;
+          .photo-grid {
+            display: block;
+            margin-top: 10px;
+          }
 
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.025) inset,
-      0 14px 34px rgba(0,0,0,.18);
-  }
+          .hero-wrap,
+          .photo-rail {
+            display: none;
+          }
 
-  .mobile-hero img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+          .mobile-gallery {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
 
-  .mobile-pair {
-    min-width: 42vw;
-    height: 390px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
 
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 10px;
+            padding-bottom: 10px;
+          }
 
-    scroll-snap-align: start;
-  }
+          .mobile-hero {
+            min-width: 78%;
+            height: 390px;
 
-  .mobile-pair img {
-    width: 100%;
-    height: 190px;
+            scroll-snap-align: start;
 
-    object-fit: cover;
+            background: #111;
+            border: 1px solid rgba(255,255,255,.055);
+            border-radius: 12px;
 
-    border: 1px solid rgba(255,255,255,.055);
-    border-radius: 12px;
-  }
+            overflow: hidden;
+          }
 
-  .info-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 14px;
-  }
+          .mobile-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
 
-  .right-stack {
-    grid-template-rows: auto;
-  }
+          .mobile-pair {
+            min-width: 42vw;
+            height: 390px;
 
-  .seller-panel {
-    align-items: stretch;
-    flex-direction: column;
-  }
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
 
-  .seller-actions {
-    min-width: 0;
-    width: 100%;
-  }
-}
+            scroll-snap-align: start;
+          }
 
-@media (max-width: 850px) {
-  .logo-img {
-    height: 34px;
-  }
+          .mobile-pair img {
+            width: 100%;
+            height: 190px;
 
-  .nav-links {
-    gap: 18px;
-  }
+            object-fit: cover;
 
-  .yellow-link {
-    font-size: 12px !important;
-  }
+            border: 1px solid rgba(255,255,255,.055);
+            border-radius: 12px;
+          }
 
-  .login-icon {
-    width: 28px;
-    height: 28px;
-  }
+          .info-grid {
+            grid-template-columns: 1fr;
+          }
 
-  .page {
-    padding: 14px 4% 38px;
-  }
+          .media-tools-row {
+            grid-template-columns: 1fr;
+          }
 
-  .back-results {
-    margin-bottom: 6px;
-    font-size: 9px;
-  }
+          .seller-panel {
+            align-items: stretch;
+            flex-direction: column;
+          }
 
-  .title-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
+          .seller-actions {
+            min-width: 0;
+            width: 100%;
+          }
+        }
 
-    margin-bottom: 8px;
-    padding: 0;
-  }
+        @media (max-width: 850px) {
+          .page {
+            padding: 14px 4% 38px;
+          }
 
-  .title-row::after {
-    margin-top: 2px;
-  }
+          .title-row {
+            grid-template-columns: 1fr;
+            gap: 6px;
+          }
 
-  h1 {
-    display: block;
+          h1 {
+            display: block;
 
-    font-size: 25px;
-    line-height: .96;
-    letter-spacing: -.75px;
-  }
+            font-size: 25px;
+            line-height: .96;
+            letter-spacing: -.75px;
+          }
 
-  .title-hours {
-    display: inline-block;
+          .title-hours {
+            display: inline-block;
 
-    margin-left: 10px;
-    transform: none;
+            margin-left: 10px;
+            transform: none;
 
-    font-size: .58em;
-  }
+            font-size: .58em;
+          }
 
-  .price {
-    width: fit-content;
-    height: auto;
+          .price {
+            width: fit-content;
+            height: auto;
 
-    font-size: 21px;
-    line-height: 1;
-  }
+            font-size: 21px;
+            line-height: 1;
+          }
 
-  .mobile-gallery {
-    gap: 8px;
-  }
+          .facts-highlights-panel {
+            grid-template-columns: 1fr;
+            padding: 18px;
+          }
 
-  .mobile-hero {
-    min-width: 86%;
-    height: 310px;
-  }
+          .facts-column {
+            padding-right: 0;
+            padding-bottom: 16px;
+          }
 
-  .mobile-pair {
-    min-width: 54vw;
-    height: 310px;
-    gap: 8px;
-  }
+          .facts-column::after {
+            display: none;
+          }
 
-  .mobile-pair img {
-    height: 151px;
-  }
+          .highlights-column {
+            padding-left: 0;
+            padding-top: 16px;
 
-  .facts-highlights-panel {
-    grid-template-columns: 1fr;
-    padding: 18px 18px;
-  }
+            border-top: 1px solid rgba(255,255,255,.09);
+          }
 
-  .facts-column {
-    padding-right: 0;
-    padding-bottom: 16px;
-  }
+          .highlight-chips {
+            max-height: none;
+          }
 
-  .facts-column::after {
-    display: none;
-  }
+          .panel {
+            padding: 18px;
+          }
 
-  .highlights-column {
-    padding-left: 0;
-    padding-top: 16px;
+          .mini-tool-tab {
+            padding: 0 12px;
+          }
 
-    border-top: 1px solid rgba(255,255,255,.09);
-  }
+          .seller-row {
+            align-items: center;
+          }
 
-  .facts {
-    grid-template-columns: 86px 1fr;
-    row-gap: 9px;
-  }
+          .seller-logo {
+            max-width: 138px;
+            max-height: 70px;
+          }
 
-  .highlight-chips {
-    justify-content: flex-start;
-    max-height: none;
-  }
+          .seller-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            width: 100%;
+          }
 
-  .panel {
-    padding: 18px;
-  }
-
-  .mini-tool-tab {
-    padding: 0 12px;
-  }
-
-  .seller-panel {
-    display: grid;
-    gap: 16px;
-  }
-
-  .seller-row {
-    align-items: center;
-  }
-
-  .seller-avatar {
-    width: 138px;
-    height: 74px;
-    flex-basis: 138px;
-  }
-
-  .seller-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .message-btn,
-  .yard-btn,
-  .call-btn {
-    width: 100%;
-    min-width: 0;
-  }
-}
+          .message-btn,
+          .yard-btn,
+          .call-btn {
+            width: 100%;
+            min-width: 0;
+          }
+        }
       `}</style>
     </>
   );
