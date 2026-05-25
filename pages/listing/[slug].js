@@ -1038,19 +1038,32 @@ export default function ListingPage() {
         }
 
        .info-grid {
+  --info-row-height: 318px;
+  --mini-tool-height: 38px;
+  --info-gap: 10px;
+  --media-row-height: calc(
+    var(--info-row-height) - var(--mini-tool-height) - var(--info-gap)
+  );
+
   display: grid;
   grid-template-columns: minmax(0, 1fr) 560px;
+
   gap: 14px;
   margin-top: 14px;
+
   align-items: stretch;
 }
 
         .right-stack {
+  height: var(--info-row-height);
+
   display: grid;
-  grid-template-rows: 38px 256px;
-  gap: 8px;
-  height: auto;
+  grid-template-rows: var(--mini-tool-height) var(--media-row-height);
+
+  gap: var(--info-gap);
+
   min-width: 0;
+  align-content: start;
 }
 
         .mini-tool-tab {
@@ -1158,31 +1171,35 @@ export default function ListingPage() {
           -webkit-font-smoothing: antialiased;
         }
 
-       .media-tools-row {
+      .media-tools-row {
   display: grid;
   grid-template-columns: 190px 360px;
+
   gap: 10px;
 
   width: 560px;
   max-width: 560px;
 
- height: 248px;
-  min-height: 248px;
-  max-height: 248px;
+  height: var(--media-row-height);
+  min-height: var(--media-row-height);
+  max-height: var(--media-row-height);
 
   align-items: stretch;
+  overflow: hidden;
 }
 
      .buyer-launch-panel,
 .video-panel {
-  height: 100%;
-  min-height: 0;
-  max-height: none;
+  height: var(--media-row-height);
+  min-height: var(--media-row-height);
+  max-height: var(--media-row-height);
 
   padding: 12px;
 
   display: flex;
   flex-direction: column;
+
+  overflow: hidden;
 }
 
         .buyer-launch-panel h2,
@@ -1288,9 +1305,7 @@ export default function ListingPage() {
   position: relative;
 
   flex: 1;
-  height: auto;
   min-height: 0;
-  max-height: none;
 
   overflow: hidden;
 
@@ -1351,16 +1366,12 @@ export default function ListingPage() {
             0 0 18px rgba(255,196,0,.08);
         }
 
-        .facts-highlights-panel {
-          display: grid;
-          grid-template-columns: .82fr 1fr;
-          gap: 0;
-          align-items: start;
-
-          border-radius: 14px;
-
-          padding: 20px 22px;
-        }
+       .facts-highlights-panel {
+  height: var(--info-row-height);
+  min-height: var(--info-row-height);
+  max-height: var(--info-row-height);
+  overflow: hidden;
+}
 
         .facts-column {
           position: relative;
