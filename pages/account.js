@@ -418,6 +418,25 @@ async function pauseListing(listing) {
       throw new Error(data.error || "Pause failed");
     }
 
+    setMyListings(current =>
+      current.map(item =>
+        String(item.id) === String(listingId)
+          ? {
+              ...item,
+              listingStatus: "paused",
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "paused"
+              },
+              metadata: {
+                ...(item.metadata || {}),
+                listingStatus: "paused"
+              }
+            }
+          : item
+      )
+    );
+
     addActivity(
       "success",
       `Listing paused — ${cleanMachineTitle(listing.title)}`
@@ -431,7 +450,6 @@ async function pauseListing(listing) {
     console.error("Pause failed:", error);
   }
 }
-
 async function reactivateListing(listing) {
   const listingId = listing.id || listing.id?.uuid;
 
@@ -451,6 +469,25 @@ async function reactivateListing(listing) {
     if (!response.ok) {
       throw new Error(data.error || "Reactivate failed");
     }
+
+    setMyListings(current =>
+      current.map(item =>
+        String(item.id) === String(listingId)
+          ? {
+              ...item,
+              listingStatus: "live",
+              publicData: {
+                ...(item.publicData || {}),
+                listingStatus: "live"
+              },
+              metadata: {
+                ...(item.metadata || {}),
+                listingStatus: "live"
+              }
+            }
+          : item
+      )
+    );
 
     addActivity(
       "success",
@@ -604,196 +641,253 @@ async function reactivateListing(listing) {
   <span>Saves</span>
 </div>
 
-                    {myListings.length > 0 ? (
-                      myListings.map(listing => (
-                       <div className="table-row listing-op-row" key={listing.id}>
-  <a href={`/live?id=${listing.id}`} className="machine-photo-link">
-    <img
-      src={
-        listing.imageUrl ||
-        listing.image ||
-        "/images/hero-equipment-yard.jpg"
-      }
-      alt={listing.title}
-    />
-  </a>
 
-  <a href={`/live?id=${listing.id}`} className="machine-title-line">
-    {cleanMachineTitle(listing.title)}
-  </a>
+{myListings.length > 0 ? (
+  myListings.map(listing => {
 
-  <div className="listing-op-controls">
-    <span className="listing-hours">{listing.hours}</span>
-
-    <input
-      className="price-input"
-      defaultValue={formatPriceInput(listing.price)}
-                            onKeyDown={async e => {
-                              if (e.key !== "Enter") return;
-
-                              e.preventDefault();
-
-                              const input = e.currentTarget;
-                              const newPrice = input.value.replace(/,/g, "").trim();
-
-                              input.classList.remove("saved", "error");
-
-                              const response = await fetch("/api/update-listing-price", {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                  listingId: listing.id,
-                                  price: newPrice
-                                })
-                              });
-
-                              if (response.ok) {
-                                input.value = Number(newPrice).toLocaleString();
-                                input.classList.add("saved");
-
-                                addActivity(
-                                  "success",
-                                  `Price updated — ${cleanMachineTitle(listing.title)} — $${Number(newPrice).toLocaleString()}`
-                                );
-                              } else {
-                                input.classList.add("error");
-
-                                addActivity(
-                                  "error",
-                                  `Price update failed — ${cleanMachineTitle(listing.title)}`
-                                );
-                              }
-                            }}
-                          />
-
-
-<span
-  className={
-    listing.age <= 30
-      ? "age-green"
-      : listing.age <= 45
-      ? "age-yellow"
-      : "age-red"
-  }
->
-  {listing.age ?? "—"}
-</span>
-
-<div className="listing-status-stack">
-  <button
-    type="button"
-    className={`listing-status ${
-      (
-        listing.listingStatus ||
-        listing.publicData?.listingStatus ||
-        listing.attributes?.publicData?.listingStatus
-      ) === "paused"
-        ? "paused"
-        : "active"
-    }`}
-    onClick={() => {
-      const status =
-        listing.listingStatus ||
-        listing.publicData?.listingStatus ||
-        listing.attributes?.publicData?.listingStatus ||
-        "live";
-
-      if (status === "paused") {
-        reactivateListing(listing);
-      } else {
-        pauseListing(listing);
-      }
-    }}
-  >
-    {(
+    const listingStatus =
       listing.listingStatus ||
       listing.publicData?.listingStatus ||
-      listing.attributes?.publicData?.listingStatus
-    ) === "paused"
-      ? "PAUSED"
-      : "LIVE"}
-  </button>
+      listing.attributes?.publicData?.listingStatus ||
+      "live";
 
-  <button
-    type="button"
-    className="listing-delete-btn"
-    onClick={() => confirmDelete(listing)}
-  >
-    DELETE
-  </button>
-</div>
+    const isPaused = listingStatus === "paused";
 
-                            
+    return (
+      <div
+        className={`table-row listing-op-row ${isPaused ? "paused-row" : ""}`}
+        key={listing.id}
+      >
+        <a
+          href={`/live?id=${listing.id}`}
+          className="machine-photo-link"
+        >
+          <img
+            src={
+              listing.imageUrl ||
+              listing.image ||
+              "/images/hero-equipment-yard.jpg"
+            }
+            alt={listing.title}
+          />
+        </a>
 
-<select
-  className="workflow-select"
-  value={getWorkflowStatus(listing)}
-  onChange={e => updateWorkflowStatus(listing, e.target.value)}
->
-  <option value="good-listing">Good</option>
-  <option value="reprice">Reprice</option>
-  <option value="refresh-photos">Photos</option>
-  <option value="social-blast">Social</option>
-  <option value="review">Review</option>
-</select>
+        <a
+          href={`/live?id=${listing.id}`}
+          className="machine-title-line"
+        >
+          {cleanMachineTitle(listing.title)}
+        </a>
 
-<select
-  className="action-select"
-  defaultValue=""
-  onChange={e => {
-    const value = e.target.value;
+        <div className="listing-op-controls">
 
-    if (value === "edit" || value === "promote") {
-      window.location.href = `/live?id=${listing.id}`;
-    }
+          <span className="listing-hours">
+            {listing.hours}
+          </span>
 
-    if (value === "pause") {
-      pauseListing(listing);
-    }
+          <input
+            className="price-input"
+            defaultValue={formatPriceInput(listing.price)}
+            onKeyDown={async e => {
+              if (e.key !== "Enter") return;
 
-    if (value === "reactivate") {
-      reactivateListing(listing);
-    }
+              e.preventDefault();
 
-    e.target.value = "";
-  }}
->
-  <option value="" disabled>
-    ACTION
-  </option>
+              const input = e.currentTarget;
+              const newPrice = input.value
+                .replace(/,/g, "")
+                .trim();
 
-  <option value="edit">Edit</option>
-  <option value="promote">Promote</option>
+              input.classList.remove("saved", "error");
 
-  {(
-    listing.listingStatus ||
-    listing.publicData?.listingStatus ||
-    listing.attributes?.publicData?.listingStatus
-  ) === "paused" ? (
-    <option value="reactivate">Reactivate</option>
-  ) : (
-    <option value="pause">Pause</option>
-  )}
+              const response = await fetch(
+                "/api/update-listing-price",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    listingId: listing.id,
+                    price: newPrice
+                  })
+                }
+              );
 
-  <option value="sold">Mark Sold</option>
-  <option value="duplicate">Duplicate</option>
-  <option value="relist">Relist</option>
-</select>
+              if (response.ok) {
+                input.value =
+                  Number(newPrice).toLocaleString();
 
-<span className="listing-metric">
-  {listing.views || "—"}
-</span>
+                input.classList.add("saved");
 
-<span className="listing-metric">
-  {listing.saves || "—"}
-</span>
+                addActivity(
+                  "success",
+                  `Price updated — ${cleanMachineTitle(
+                    listing.title
+                  )} — $${Number(newPrice).toLocaleString()}`
+                );
+              } else {
+                input.classList.add("error");
 
-</div>
-</div>
-                      ))
-                    ) : (
+                addActivity(
+                  "error",
+                  `Price update failed — ${cleanMachineTitle(
+                    listing.title
+                  )}`
+                );
+              }
+            }}
+          />
+
+          <span
+            className={
+              listing.age <= 30
+                ? "age-green"
+                : listing.age <= 45
+                ? "age-yellow"
+                : "age-red"
+            }
+          >
+            {listing.age ?? "—"}
+          </span>
+
+          <div className="listing-status-stack">
+
+            <button
+              type="button"
+              className={`listing-status ${
+                isPaused ? "paused" : "active"
+              }`}
+              onClick={() => {
+                if (isPaused) {
+                  reactivateListing(listing);
+                } else {
+                  pauseListing(listing);
+                }
+              }}
+            >
+              {isPaused ? "PAUSED" : "LIVE"}
+            </button>
+
+            <button
+              type="button"
+              className="listing-delete-btn"
+              onClick={() => confirmDelete(listing)}
+            >
+              DELETE
+            </button>
+
+          </div>
+
+          <select
+            className="workflow-select"
+            value={getWorkflowStatus(listing)}
+            onChange={e =>
+              updateWorkflowStatus(
+                listing,
+                e.target.value
+              )
+            }
+          >
+            <option value="good-listing">
+              Good
+            </option>
+
+            <option value="reprice">
+              Reprice
+            </option>
+
+            <option value="refresh-photos">
+              Photos
+            </option>
+
+            <option value="social-blast">
+              Social
+            </option>
+
+            <option value="review">
+              Review
+            </option>
+          </select>
+
+          <select
+            className="action-select"
+            defaultValue=""
+            onChange={e => {
+              const value = e.target.value;
+
+              if (
+                value === "edit" ||
+                value === "promote"
+              ) {
+                window.location.href =
+                  `/live?id=${listing.id}`;
+              }
+
+              if (value === "pause") {
+                pauseListing(listing);
+              }
+
+              if (value === "reactivate") {
+                reactivateListing(listing);
+              }
+
+              e.target.value = "";
+            }}
+          >
+            <option value="" disabled>
+              ACTION
+            </option>
+
+            <option value="edit">
+              Edit
+            </option>
+
+            <option value="promote">
+              Promote
+            </option>
+
+            {isPaused ? (
+              <option value="reactivate">
+                Reactivate
+              </option>
+            ) : (
+              <option value="pause">
+                Pause
+              </option>
+            )}
+
+            <option value="sold">
+              Mark Sold
+            </option>
+
+            <option value="duplicate">
+              Duplicate
+            </option>
+
+            <option value="relist">
+              Relist
+            </option>
+
+          </select>
+
+          <span className="listing-metric">
+            {listing.views || "—"}
+          </span>
+
+          <span className="listing-metric">
+            {listing.saves || "—"}
+          </span>
+
+        </div>
+      </div>
+    );
+  })
+) : (
+
+
+
+                  
                       <div className="table-empty">
                         <strong>No active listings yet.</strong>
                         <p>Your machines will show here once they are listed.</p>
@@ -1841,6 +1935,16 @@ main {
   width: 58px;
 
   margin-left: 0;
+}
+
+.paused-row .machine-photo-link img {
+  filter: grayscale(.55) brightness(.62);
+}
+
+.paused-row .machine-title-line,
+.paused-row .listing-hours,
+.paused-row .listing-metric {
+  opacity: .58;
 }
 
 .listing-delete-btn {
