@@ -8,11 +8,11 @@ import Footer from "../components/Footer";
 const BRAND_YELLOW = "#FFC400";
 
 const workflowOptions = [
-  "Good Listing",
-  "Reprice",
-  "Refresh Photos",
-  "Social Blast",
-  "Review"
+  { value: "good-listing", label: "Good Listing" },
+  { value: "reprice", label: "Reprice" },
+  { value: "refresh-photos", label: "Refresh Photos" },
+  { value: "social-blast", label: "Social Blast" },
+  { value: "review", label: "Review" }
 ];
 
 const commonKeywordOptions = [
@@ -1287,7 +1287,7 @@ export default function ListingLivePage() {
                   </div>
                 </div>
               </div>
-
+            </section>
             <aside className="distribution-center">
               <div className="distribution-head">
                 <span>Distribution Center</span>
