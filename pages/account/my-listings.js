@@ -220,14 +220,14 @@ useEffect(() => {
   item.attributes?.publicData?.listingStatus ||
   "live";
 
-const isArchived = listingStatus === "archived";
-
+const isPaused = listingStatus === "paused";
+      
 const workflowStatus = getWorkflowStatus(item);
 
 const matchesWorkflow =
   workflowFilter === "all" ||
-  (workflowFilter === "active" && !isArchived) ||
-  (workflowFilter === "archived" && isArchived) ||
+  (workflowFilter === "active" && !isPaused) ||
+  (workflowFilter === "paused" && isPaused) ||
   (workflowFilter === "good-listing" && workflowStatus === "good-listing") ||
   (workflowFilter === "reprice" && workflowStatus === "reprice") ||
   (workflowFilter === "refresh-photos" && workflowStatus === "refresh-photos") ||
@@ -696,7 +696,7 @@ async function updateWorkflowStatus(listing, status) {
 
     return (
       <div
-        className={`card seller-card ${isArchived ? "archived-card" : ""}`}
+        className={`card seller-card ${isPaused ? "paused-card" : ""}`}
         key={listingId || item.link || item.title}
       >
         <div
@@ -1364,7 +1364,7 @@ async function updateWorkflowStatus(listing, status) {
   color: #A0A0A0;
 }
 
-.archived-card {
+.paused-card {
   opacity: .55;
   filter: grayscale(.45);
 }
