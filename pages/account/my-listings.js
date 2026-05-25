@@ -355,7 +355,7 @@ return (
   if (!ok) return;
 
   try {
-    const response = await fetch("/api/archive-listing", {
+   const response = await fetch("/api/pause-listing", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
