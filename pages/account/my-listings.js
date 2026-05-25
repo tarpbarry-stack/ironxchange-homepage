@@ -433,10 +433,12 @@ function getWorkflowStatus(listing) {
 
   return (
     listingWorkflows[listingId] ||
-    listing.workflowStatus ||
-    listing.privateData?.workflowStatus ||
-    listing.metadata?.workflowStatus ||
-    "good-listing"
+   listing.workflowStatus ||
+listing.publicData?.workflowStatus ||
+listing.attributes?.publicData?.workflowStatus ||
+listing.metadata?.workflowStatus ||
+listing.attributes?.metadata?.workflowStatus ||
+"good-listing"
   );
 }
 
