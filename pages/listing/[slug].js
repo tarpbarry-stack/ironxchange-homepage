@@ -1037,13 +1037,13 @@ export default function ListingPage() {
           border-radius: 14px 0 0 14px;
         }
 
-        .info-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 530px) minmax(0, 1fr);
-          gap: 14px;
-          margin-top: 14px;
-          align-items: stretch;
-        }
+       .info-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 560px;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: stretch;
+}
 
         .right-stack {
           display: grid;
@@ -1158,28 +1158,23 @@ export default function ListingPage() {
           -webkit-font-smoothing: antialiased;
         }
 
-        .media-tools-row {
+       .media-tools-row {
   display: grid;
-
-  grid-template-columns:
-    170px
-    minmax(0, 1fr);
-
+  grid-template-columns: 190px 360px;
   gap: 10px;
-
   align-items: stretch;
-
-  min-width: 0;
+  width: 560px;
+  max-width: 560px;
 }
 
-       .buyer-launch-panel,
+      .buyer-launch-panel,
 .video-panel {
-  height: 188px;
-  min-height: 188px;
-  max-height: 188px;
-
+  height: 256px;
+  min-height: 256px;
+  max-height: 256px;
   padding: 12px;
 }
+
         .buyer-launch-panel h2,
         .video-panel h2 {
           margin: 0 0 10px;
@@ -1279,9 +1274,9 @@ export default function ListingPage() {
        .video-box {
   position: relative;
 
-  height: 138px;
-  min-height: 138px;
-  max-height: 138px;
+  height: 208px;
+  min-height: 208px;
+  max-height: 208px;
 
   overflow: hidden;
 
@@ -1289,18 +1284,13 @@ export default function ListingPage() {
   border-radius: 12px;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
-    ),
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
     #050505;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.025) inset,
     0 10px 24px rgba(0,0,0,.16);
 }
-
         .video-box video {
           width: 100%;
           height: 100%;
@@ -1465,9 +1455,11 @@ export default function ListingPage() {
           backdrop-filter: blur(2px);
         }
 
-        .description {
-          padding: 18px 20px;
-        }
+       .description {
+  margin-top: 14px;
+
+  padding: 18px 20px;
+}
 
         .description h2 {
           margin: 0 0 14px;
