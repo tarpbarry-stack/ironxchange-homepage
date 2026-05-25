@@ -989,7 +989,7 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .clear-btn {
-  height: 28px;
+  height: 30px;
   width: 64px;
   border: 1px solid rgba(255,196,0,.12);
   border-left: none;
@@ -1033,7 +1033,7 @@ function updateWorkflowStatus(listing, status) {
 }
 
 .workflow-filter-shell {
-   max-width: 670px;
+   max-width: 600px;
   margin: -6px auto 10px;
   padding: 7px;
 
