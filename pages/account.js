@@ -404,6 +404,26 @@ async function updateWorkflowStatus(listing, status) {
       throw new Error(data.error || "Workflow update failed");
     }
 
+setMyListings(current =>
+  current.map(item =>
+    String(item.id) === String(listingId)
+      ? {
+          ...item,
+          workflowStatus: status,
+          publicData: {
+            ...(item.publicData || {}),
+            workflowStatus: status
+          },
+          metadata: {
+            ...(item.metadata || {}),
+            workflowStatus: status
+          }
+        }
+      : item
+  )
+);
+
+    
     addActivity(
       "success",
       `Workflow updated — ${cleanMachineTitle(listing.title)} — ${status}`
