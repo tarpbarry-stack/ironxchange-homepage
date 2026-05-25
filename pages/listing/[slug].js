@@ -1227,10 +1227,39 @@ export default function ListingPage() {
   border-radius: 9px;
   border: 1px solid rgba(255,255,255,.07);
 
-  .video-panel {
-  align-self: start;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.014),
+      rgba(255,255,255,0)
+    ),
+    #101010;
+
+  color: rgba(255,255,255,.68);
+
+  padding: 0 8px;
+
+  font-size: 7px;
+  font-weight: 950;
+
+  letter-spacing: .52px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.02) inset;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    color .14s ease,
+    background .14s ease;
 }
 
+.video-panel {
+  align-self: stretch;
+}
   background:
     linear-gradient(
       180deg,
