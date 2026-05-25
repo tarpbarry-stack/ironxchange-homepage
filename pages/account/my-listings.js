@@ -685,16 +685,16 @@ async function updateWorkflowStatus(listing, status) {
     const listingHref = getListingHref(item);
     const cleanTitle = formatCleanMachineTitle(item.title);
 
-    const listingStatus =
-      item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus ||
-      "live";
+   const listingStatus =
+  item.listingStatus ||
+  item.publicData?.listingStatus ||
+  item.attributes?.publicData?.listingStatus ||
+  "live";
 
-    const isArchived = listingStatus === "archived";
-    const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
+const isPaused = listingStatus === "paused";
+const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
-    return (
+return (
       <div
         className={`card seller-card ${isPaused ? "paused-card" : ""}`}
         key={listingId || item.link || item.title}
