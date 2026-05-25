@@ -440,8 +440,9 @@ function getWorkflowStatus(listing) {
   );
 }
 
-function updateWorkflowStatus(listing, status) {
+async function updateWorkflowStatus(listing, status) {
   const listingId = getListingId(listing);
+
   if (!listingId) return;
 
   setListingWorkflows(current => ({
@@ -449,16 +450,35 @@ function updateWorkflowStatus(listing, status) {
     [listingId]: status
   }));
 
-  // FUTURE: POSTHOG EVENT
-  // posthog.capture("seller_workflow_status_updated", {
-  //   listingId,
-  //   workflowStatus: status
-  // });
+  try {
+    const response = await fetch("/api/update-listing-workflow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId,
+        workflowStatus: status
+      })
+    });
 
-  // FUTURE: PERSIST SELLER WORKFLOW
-  // Save workflowStatus to seller-private listing workflow storage.
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Workflow update failed");
+    }
+
+    // FUTURE: POSTHOG EVENT
+    // posthog.capture("seller_workflow_status_updated", {
+    //   listingId,
+    //   workflowStatus: status
+    // });
+
+  } catch (error) {
+    alert(`Workflow update failed: ${error.message}`);
+    console.error("Workflow update failed:", error);
+  }
 }
-
   
   return (
     <>
