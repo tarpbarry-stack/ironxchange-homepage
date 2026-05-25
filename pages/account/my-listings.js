@@ -144,7 +144,9 @@ export default function MyListingsPage() {
   const [savingPriceId, setSavingPriceId] = useState("");
 
   const [workflowFilter, setWorkflowFilter] = useState("all");
-  const [viewMode, setViewMode] = useState("cards");
+  
+  const [listingWorkflows, setListingWorkflows] = useState({});
+  
 
   const [filters, setFilters] = useState({
     yearMin: "",
@@ -220,22 +222,18 @@ useEffect(() => {
 
 const isArchived = listingStatus === "archived";
 
-const hasPrice = toNumber(item.price) !== null;
-const hasPhotos = getCardImages(item).length > 0;
-const ageDays = item.age ?? 0;
-const saves = toNumber(item.saves) || 0;
-const views = toNumber(item.views) || 0;
+const workflowStatus = getWorkflowStatus(item);
 
 const matchesWorkflow =
   workflowFilter === "all" ||
   (workflowFilter === "active" && !isArchived) ||
   (workflowFilter === "archived" && isArchived) ||
-  (workflowFilter === "needs-price" && !hasPrice) ||
-  (workflowFilter === "needs-photos" && !hasPhotos) ||
-  (workflowFilter === "aged" && ageDays >= 30) ||
-  (workflowFilter === "hot" && (saves >= 3 || views >= 25)) ||
-  (workflowFilter === "quiet" && saves === 0 && views === 0 && ageDays >= 14);
-
+  (workflowFilter === "good-listing" && workflowStatus === "good-listing") ||
+  (workflowFilter === "reprice" && workflowStatus === "reprice") ||
+  (workflowFilter === "refresh-photos" && workflowStatus === "refresh-photos") ||
+  (workflowFilter === "social-blast" && workflowStatus === "social-blast") ||
+  (workflowFilter === "review" && workflowStatus === "review");
+      
 return (
   matchesSearch &&
   matchesCategory &&
@@ -429,6 +427,38 @@ if (!response.ok) {
     console.error("Reactivate failed:", error);
   }
 } 
+
+function getWorkflowStatus(listing) {
+  const listingId = getListingId(listing);
+
+  return (
+    listingWorkflows[listingId] ||
+    listing.workflowStatus ||
+    listing.privateData?.workflowStatus ||
+    listing.metadata?.workflowStatus ||
+    "good-listing"
+  );
+}
+
+function updateWorkflowStatus(listing, status) {
+  const listingId = getListingId(listing);
+  if (!listingId) return;
+
+  setListingWorkflows(current => ({
+    ...current,
+    [listingId]: status
+  }));
+
+  // FUTURE: POSTHOG EVENT
+  // posthog.capture("seller_workflow_status_updated", {
+  //   listingId,
+  //   workflowStatus: status
+  // });
+
+  // FUTURE: PERSIST SELLER WORKFLOW
+  // Save workflowStatus to seller-private listing workflow storage.
+}
+
   
   return (
     <>
@@ -488,74 +518,7 @@ if (!response.ok) {
           </a>
         </div>
 
-         <div className="inventory-workbar">
-  <a href="/account">← Dashboard</a>
-  <a href="/post-free">New Post</a>
-
-  <button
-    type="button"
-    className={workflowFilter === "all" ? "active" : ""}
-    onClick={() => setWorkflowFilter("all")}
-  >
-    All
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "active" ? "active" : ""}
-    onClick={() => setWorkflowFilter("active")}
-  >
-    Active
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "archived" ? "active" : ""}
-    onClick={() => setWorkflowFilter("archived")}
-  >
-    Archived
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "needs-price" ? "active" : ""}
-    onClick={() => setWorkflowFilter("needs-price")}
-  >
-    Needs Price
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "needs-photos" ? "active" : ""}
-    onClick={() => setWorkflowFilter("needs-photos")}
-  >
-    Needs Photos
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "aged" ? "active" : ""}
-    onClick={() => setWorkflowFilter("aged")}
-  >
-    Aged
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "hot" ? "active" : ""}
-    onClick={() => setWorkflowFilter("hot")}
-  >
-    Hot
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "quiet" ? "active" : ""}
-    onClick={() => setWorkflowFilter("quiet")}
-  >
-    Quiet
-  </button>
-</div>     
+         
 
               
         <div className="filter-strip">
@@ -1003,40 +966,6 @@ if (!response.ok) {
   color: #FFC400;
   border-color: rgba(255,196,0,.45);
 }
-
-.inventory-workbar {
-  max-width: 760px;
-  margin: 12px auto 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 7px;
-}
-
-.inventory-workbar a,
-.inventory-workbar button {
-  height: 30px;
-  padding: 0 11px;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 999px;
-  background: #101010;
-  color: rgba(255,255,255,.52);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .55px;
-  text-transform: uppercase;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.inventory-workbar a:hover,
-.inventory-workbar button:hover,
-.inventory-workbar button.active {
-  border-color: rgba(255,196,0,.38);
-  color: #FFC400;
-  background: #1a1400;
-}
-
 
 
 .featured {
