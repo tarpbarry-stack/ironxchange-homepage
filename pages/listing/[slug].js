@@ -1159,73 +1159,102 @@ export default function ListingPage() {
         }
 
         .media-tools-row {
-          display: grid;
-          grid-template-columns: minmax(220px, 280px) minmax(220px, 1fr);
-          gap: 10px;
-          min-width: 0;
-        }
+  display: grid;
 
-        .buyer-launch-panel,
-        .video-panel {
-          min-height: 232px;
-          padding: 14px;
-        }
+  grid-template-columns:
+    170px
+    minmax(0, 1fr);
 
+  gap: 10px;
+
+  align-items: stretch;
+
+  min-width: 0;
+}
+
+       .buyer-launch-panel,
+.video-panel {
+  height: 188px;
+  min-height: 188px;
+  max-height: 188px;
+
+  padding: 12px;
+}
         .buyer-launch-panel h2,
         .video-panel h2 {
           margin: 0 0 10px;
           text-align: center;
         }
 
-        .buyer-launch-stack {
-          display: grid;
-          gap: 7px;
-        }
+       .buyer-launch-stack {
+  display: grid;
 
-        .buyer-launch-stack button {
-          min-height: 34px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,.08);
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #101010;
-          color: #f2f2f2;
-          padding: 0 10px;
-          font-size: 8.5px;
-          font-weight: 950;
-          letter-spacing: .55px;
-          text-transform: uppercase;
-          cursor: pointer;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.025) inset;
-          transition:
-            transform .14s ease,
-            border-color .14s ease,
-            color .14s ease,
-            background .14s ease,
-            box-shadow .14s ease;
-        }
+  gap: 5px;
+}
+       .buyer-launch-stack button {
+  min-height: 26px;
 
-        .buyer-launch-stack button:hover {
-          transform: translateY(-1px);
-          border-color: rgba(255,196,0,.25);
-          color: #FFC400;
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
-            #151515;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.035) inset,
-            0 8px 18px rgba(0,0,0,.18);
-        }
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.07);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.014),
+      rgba(255,255,255,0)
+    ),
+    #101010;
+
+  color: rgba(255,255,255,.68);
+
+  padding: 0 8px;
+
+  font-size: 7px;
+  font-weight: 950;
+
+  letter-spacing: .52px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.02) inset;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    color .14s ease,
+    background .14s ease;
+}
+
+      .buyer-launch-stack button:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(255,196,0,.18);
+
+  color: #FFC400;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.035),
+      rgba(255,196,0,0)
+    ),
+    #151515;
+}
 
         .buyer-launch-stack i {
-          width: 17px;
-          text-align: center;
-          font-size: 13px;
-        }
+  width: 13px;
+
+  text-align: center;
+
+  font-size: 10px;
+}
 
         .whatsapp-icon {
           color: #25D366;
@@ -1247,19 +1276,30 @@ export default function ListingPage() {
           color: rgba(255,196,0,.76);
         }
 
-        .video-box {
-          position: relative;
-          height: 176px;
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 14px;
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #050505;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.025) inset,
-            0 14px 34px rgba(0,0,0,.18);
-        }
+       .video-box {
+  position: relative;
+
+  height: 138px;
+  min-height: 138px;
+  max-height: 138px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    #050505;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 10px 24px rgba(0,0,0,.16);
+}
 
         .video-box video {
           width: 100%;
