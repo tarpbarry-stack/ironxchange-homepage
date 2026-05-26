@@ -145,135 +145,315 @@ export default function SignupPage() {
       </main>
 
       <style jsx>{`
-        :global(body) {
-          margin: 0;
-          background: #0b0b0b;
-          color: #f2f2f2;
-          font-family: Arial, sans-serif;
-        }
+  :global(html),
+  :global(body) {
+    margin: 0;
+    min-height: 100%;
+    overflow-x: hidden;
+    background: #0b0b0b;
+    color: #f2f2f2;
+    font-family: Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
 
-        * {
-          box-sizing: border-box;
-        }
+  * {
+    box-sizing: border-box;
+  }
 
-        main {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-        }
+  main {
+    min-height: 100vh;
 
-        .card {
-          width: 100%;
-          max-width: 520px;
-          background: #151515;
-          border: 1px solid #282828;
-          border-radius: 18px;
-          padding: 34px;
-        }
+    display: grid;
+    place-items: center;
 
-        .logo {
-          height: 42px;
-          display: block;
-          margin: 0 auto 24px;
-        }
+    padding: 24px;
 
-        h1 {
-          margin: 0 0 18px;
-          text-align: center;
-          font-size: 18px;
-          letter-spacing: .4px;
-          text-transform: uppercase;
-          font-weight: 800;
-          color: #f2f2f2;
-        }
+    background:
+      radial-gradient(circle at top center, rgba(255,196,0,.055), transparent 30%),
+      radial-gradient(circle at 22% 16%, rgba(255,255,255,.025), transparent 24%),
+      #0b0b0b;
+  }
 
-        form {
-          display: grid;
-          gap: 16px;
-        }
+  .card {
+    width: 100%;
+    max-width: 520px;
 
-        .two-col {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
+    position: relative;
 
-        label {
-          display: grid;
-          gap: 8px;
-          font-size: 12px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+      radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+      #141414;
 
-        input {
-          width: 100%;
-          border: 1px solid #333;
-          background: #0d0d0d;
-          color: white;
-          border-radius: 10px;
-          padding: 14px;
-          font-size: 15px;
-        }
+    border: 1px solid rgba(255,255,255,.065);
+    outline: 1px solid rgba(255,255,255,.018);
 
-        button {
-          margin-top: 8px;
-          border: none;
-          border-radius: 10px;
-          background: ${BRAND_YELLOW};
-          color: #050505;
-          padding: 18px 20px;
-          font-size: 13px;
-          font-weight: 900;
-          text-transform: uppercase;
-          cursor: pointer;
-        }
+    border-radius: 15px;
 
-        button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
+    padding: 30px 30px 26px;
 
-        .signin-area {
-          margin-top: 18px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 10px;
-          font-size: 13px;
-          color: #9A9A9A;
-        }
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.045) inset,
+      0 28px 70px rgba(0,0,0,.38);
+  }
 
-        .signin-link {
-          color: #FFC400;
-          text-decoration: none;
-          font-weight: 900;
-          letter-spacing: .3px;
-        }
+  .card::before {
+    content: "";
 
-        .error-box {
-          margin-top: 4px;
-          border-radius: 12px;
-          padding: 14px;
-          background: rgba(197,48,48,.15);
-          border: 1px solid rgba(197,48,48,.5);
-          color: #f2f2f2;
-          font-size: 14px;
-        }
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    top: 0;
 
-        @media (max-width: 560px) {
-          .two-col {
-            grid-template-columns: 1fr;
-          }
+    height: 1px;
 
-          .card {
-            padding: 28px;
-          }
-        }
-      `}</style>
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,196,0,.42),
+        transparent
+      );
+
+    opacity: .55;
+  }
+
+  .logo {
+    height: 39px;
+    width: auto;
+
+    display: block;
+
+    margin: 0 auto 21px;
+
+    filter:
+      contrast(1.03)
+      saturate(1.02);
+  }
+
+  h1 {
+    margin: 0 0 18px;
+
+    text-align: center;
+
+    color: rgba(255,255,255,.90);
+
+    font-size: 13px;
+    font-weight: 950;
+
+    letter-spacing: .75px;
+    text-transform: uppercase;
+  }
+
+  form {
+    display: grid;
+    gap: 13px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  label {
+    display: grid;
+    gap: 6px;
+
+    color: rgba(255,255,255,.42);
+
+    font-size: 8.75px;
+    font-weight: 950;
+
+    letter-spacing: .58px;
+    text-transform: uppercase;
+  }
+
+  input {
+    width: 100%;
+    height: 38px;
+
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+      #101010;
+
+    border: 1px solid rgba(255,255,255,.075);
+    border-radius: 10px;
+
+    color: #f2f2f2;
+
+    padding: 0 12px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    outline: none;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.022) inset;
+
+    transition:
+      border-color .14s ease,
+      box-shadow .14s ease,
+      background .14s ease;
+  }
+
+  input:hover {
+    border-color: rgba(255,255,255,.13);
+  }
+
+  input:focus {
+    border-color: rgba(255,196,0,.44);
+
+    box-shadow:
+      0 0 0 1px rgba(255,196,0,.14),
+      0 1px 0 rgba(255,255,255,.028) inset;
+
+    background: #121212;
+  }
+
+  button {
+    height: 38px;
+
+    margin-top: 4px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255,196,0,.24);
+    border-radius: 10px;
+
+    background:
+      linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
+      #151515;
+
+    color: #FFC400;
+
+    padding: 0 14px;
+
+    font-size: 9.5px;
+    font-weight: 950;
+
+    letter-spacing: .6px;
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.035) inset,
+      0 0 18px rgba(255,196,0,.045);
+
+    transition:
+      transform .14s ease,
+      border-color .14s ease,
+      background .14s ease,
+      box-shadow .14s ease,
+      color .14s ease;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+
+    background:
+      linear-gradient(180deg, rgba(255,196,0,.16), rgba(255,196,0,0)),
+      #1a1400;
+
+    border-color: rgba(255,196,0,.58);
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.05) inset,
+      0 12px 28px rgba(0,0,0,.22),
+      0 0 20px rgba(255,196,0,.065);
+  }
+
+  button:disabled {
+    opacity: .58;
+    cursor: default;
+    transform: none;
+  }
+
+  .signin-area {
+    margin-top: 14px;
+    padding-top: 14px;
+
+    border-top: 1px solid rgba(255,255,255,.055);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    color: rgba(255,255,255,.42);
+
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  .signin-link {
+    color: #FFC400;
+    text-decoration: none;
+
+    font-size: 9px;
+    font-weight: 950;
+
+    letter-spacing: .58px;
+    text-transform: uppercase;
+
+    transition:
+      color .14s ease,
+      transform .14s ease;
+  }
+
+  .signin-link:hover {
+    color: #f2f2f2;
+  }
+
+  .error-box {
+    margin-top: 2px;
+
+    border-radius: 10px;
+    padding: 10px 12px;
+
+    background:
+      linear-gradient(180deg, rgba(229,62,62,.12), rgba(229,62,62,.06)),
+      #111;
+
+    border: 1px solid rgba(229,62,62,.38);
+
+    color: #ffb4b4;
+
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 560px) {
+    main {
+      padding: 18px;
+    }
+
+    .card {
+      padding: 24px 20px 21px;
+      border-radius: 14px;
+    }
+
+    .logo {
+      height: 36px;
+    }
+
+    .two-col {
+      grid-template-columns: 1fr;
+      gap: 13px;
+    }
+
+    .signin-area {
+      flex-direction: column;
+      gap: 7px;
+    }
+  }
+</style>
     </>
   );
 }
