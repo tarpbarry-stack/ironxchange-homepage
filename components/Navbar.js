@@ -182,23 +182,23 @@ useEffect(() => {
         }
 
         .login-icon {
-          width: 27px;
-          height: 27px;
+  width: 27px;
+  height: 27px;
 
-          display: grid;
-          place-items: center;
+  display: grid;
+  place-items: center;
 
-          border: 1px solid rgba(56,161,105,.78);
-          border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
 
-          color: #38A169 !important;
+  color: rgba(255,255,255,.72) !important;
 
-          font-size: 13px !important;
+  font-size: 13px !important;
 
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.05) inset,
-            0 0 0 1px rgba(255,255,255,.018);
-        }
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 0 0 1px rgba(255,255,255,.018);
+}
 
         .login-icon.logged-in {
           border-color: rgba(56,161,105,.78);
