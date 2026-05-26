@@ -158,7 +158,7 @@ export default function MachineBadges({
     ),
     #171717;
 
-  color: rgba(255,255,255,.44);
+  color: rgba(255,255,255,.40);
 
   font-size: 10.5px;
   font-weight: 500;
@@ -175,6 +175,31 @@ export default function MachineBadges({
 
   text-shadow:
     0 1px 0 rgba(0,0,0,.52);
+}
+
+.machine-badges.card span:hover {
+  transform: translateY(-1px);
+
+  color: rgba(255,255,255,.76);
+
+  border-top-color: rgba(255,255,255,.16);
+  border-left-color: rgba(255,255,255,.11);
+  border-right-color: rgba(0,0,0,.48);
+  border-bottom-color: rgba(0,0,0,.62);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.014) 46%,
+      rgba(0,0,0,.055)
+    ),
+    #1a1a1a;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    inset 0 -1px 1px rgba(0,0,0,.42),
+    0 2px 5px rgba(0,0,0,.20);
 }
 
 
