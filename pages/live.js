@@ -383,6 +383,15 @@ export default function ListingLivePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
 
+  const [externalLinks, setExternalLinks] = useState({
+  dealer: "",
+  marketplace: "",
+  auction: "",
+  machineryTrader: "",
+  linkedin: "",
+  video: ""
+});
+
   useEffect(() => {
     fetch("/api/listings")
       .then(res => res.json())
@@ -449,6 +458,15 @@ export default function ListingLivePage() {
 
     setSelectedKeywords(getListingKeywords(listing));
     setWorkflowStatus(getWorkflowStatus(listing));
+
+    setExternalLinks({
+  dealer: listing?.publicData?.externalLinks?.dealer || "",
+  marketplace: listing?.publicData?.externalLinks?.marketplace || "",
+  auction: listing?.publicData?.externalLinks?.auction || "",
+  machineryTrader: listing?.publicData?.externalLinks?.machineryTrader || "",
+  linkedin: listing?.publicData?.externalLinks?.linkedin || "",
+  video: listing?.publicData?.externalLinks?.video || ""
+});
 
     setPhotoItems(
       getListingImages(listing).map((url, index) => ({
@@ -753,6 +771,56 @@ export default function ListingLivePage() {
     }
   }
 
+
+async function saveExternalLinks() {
+  if (!listingId) return;
+
+  try {
+    const response = await fetch(
+      "/api/update-listing-external-links",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          listingId,
+          externalLinks
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "External links save failed");
+    }
+
+    addActivity(
+      "success",
+      `External links updated — ${title}`
+    );
+
+    trackLaunchEvent(
+      "launch_external_links_saved",
+      {
+        listingId: String(listingId)
+      }
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    addActivity(
+      "error",
+      `External links failed — ${title}`
+    );
+
+    alert(`Save failed: ${error.message}`);
+  }
+}
+
+  
   async function pauseListing() {
     if (!listingId) return;
 
@@ -1174,6 +1242,55 @@ export default function ListingLivePage() {
                   );
                 })}
               </div>
+
+<div className="external-link-panel">
+  <div className="external-link-head">
+    <span>Also Listed</span>
+    <strong>Outbound Links</strong>
+  </div>
+
+  {[
+    ["dealer", "Dealer Page"],
+    ["marketplace", "FB Marketplace"],
+    ["auction", "Auction Page"],
+    ["machineryTrader", "MachineryTrader"],
+    ["linkedin", "LinkedIn"],
+    ["video", "Video"]
+  ].map(([key, label]) => (
+    <label className="external-link-row" key={key}>
+      <span>{label}</span>
+
+      <input
+        type="url"
+        value={externalLinks[key]}
+        placeholder="Paste link..."
+        onChange={e =>
+          setExternalLinks(current => ({
+            ...current,
+            [key]: e.target.value
+          }))
+        }
+        onKeyDown={e => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            saveExternalLinks();
+          }
+        }}
+      />
+    </label>
+  ))}
+
+  <button
+    type="button"
+    className="external-save-btn"
+    onClick={saveExternalLinks}
+  >
+    Save Links
+  </button>
+</div>
+
+
+                  
             </aside>
 
             <section className="preview-zone">
@@ -2253,6 +2370,151 @@ select {
 
   border: 1px solid rgba(246,173,85,.28);
 }
+
+.external-link-panel {
+  margin-top: 10px;
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(255,255,255,.052);
+
+  display: grid;
+  gap: 7px;
+}
+
+.external-link-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  gap: 8px;
+}
+
+.external-link-head span {
+  color: #FFC400;
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.external-link-head strong {
+  color: rgba(255,255,255,.42);
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.external-link-row {
+  display: grid;
+  gap: 4px;
+}
+
+.external-link-row span {
+  color: rgba(255,255,255,.38);
+
+  font-size: 7.75px;
+  font-weight: 950;
+
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.external-link-row input {
+  width: 100%;
+  height: 27px;
+
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
+    #0c0c0c;
+
+  color: rgba(255,255,255,.76);
+
+  padding: 0 8px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  outline: none;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.018) inset;
+
+  transition:
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.external-link-row input::placeholder {
+  color: rgba(255,255,255,.24);
+}
+
+.external-link-row input:focus {
+  border-color: rgba(255,196,0,.38);
+
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.025), rgba(255,196,0,0)),
+    #101010;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 0 0 1px rgba(255,196,0,.10);
+}
+
+.external-save-btn {
+  height: 29px;
+
+  margin-top: 2px;
+
+  border: 1px solid rgba(255,196,0,.28);
+  border-radius: 999px;
+
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.075), rgba(255,196,0,0)),
+    #151515;
+
+  color: #FFC400;
+
+  font-size: 8.25px;
+  font-weight: 950;
+
+  letter-spacing: .58px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.external-save-btn:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(255,196,0,.55);
+
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.13), rgba(255,196,0,0)),
+    #1a1400;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 0 14px rgba(255,196,0,.06);
+}
+
 
        .preview-zone {
         min-width: 0;
