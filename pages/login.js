@@ -73,6 +73,10 @@ window.location.href = next;
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </label>
 
+  <a href="/forgot-password" className="forgot-link">
+  Forgot password?
+</a>
+  
             <button type="submit" disabled={loading}>
   {loading ? "Signing In..." : "Login"}
 </button>
@@ -330,6 +334,23 @@ window.location.href = next;
     font-size: 10.5px;
     font-weight: 700;
   }
+
+.forgot-link {
+  justify-self: end;
+
+  color: rgba(255,255,255,.42);
+  text-decoration: none;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.forgot-link:hover {
+  color: #FFC400;
+}
 
   .signup-link {
     color: #FFC400;
