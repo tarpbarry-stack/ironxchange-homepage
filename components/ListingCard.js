@@ -8,6 +8,8 @@ import {
   getListingId,
 } from "../lib/listingFormatters";
 
+import MachineBadges from "./MachineBadges";
+
 export default function ListingCard({
   listing = {},
   saved = false,
@@ -96,12 +98,11 @@ const normalizedKeywords = keywords
           <h3 className="hours-inline">{formatHours(listing.hours)}</h3>
         </div>
 
-       <div className="keyword-row">
-  {normalizedKeywords.map((keyword, index) => (
-    <span key={`${keyword}-${index}`} className="keyword-chip">
-      {keyword}
-    </span>
-  ))}
+      <div className="keyword-row">
+  <MachineBadges
+    keywords={normalizedKeywords}
+    variant="card"
+  />
 </div>
 
        <div className="price-row">
@@ -307,32 +308,11 @@ const normalizedKeywords = keywords
 
   margin: 8px 0 14px;
 
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 5px 6px;
-
   overflow: hidden;
 }
 
-.keyword-chip {
-  padding: 3px 6px;
 
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 999px;
 
-  background: rgba(255,255,255,.025);
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 9.5px;
-  font-weight: 750;
-
-  line-height: 1;
-
-  letter-spacing: .15px;
-
-  text-transform: lowercase;
 }
 .price-row {
   display: flex;
