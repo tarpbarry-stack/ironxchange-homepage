@@ -308,19 +308,19 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  height: 52px;
-  max-height: 52px;
+  height: 54px;
+  max-height: 54px;
 
-  margin: 13px 0 8px;
+  margin: 15px 0 8px;
 
   overflow: visible;
 }
 
 .keyword-row :global(.machine-badges.card) {
-  max-height: 52px;
+  max-height: 72px;
+
   overflow: hidden;
 }
-
 
 .price-row {
   position: relative;
