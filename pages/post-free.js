@@ -2374,6 +2374,15 @@ transition:
   gap: 10px;
 }
 
+.preview-title-row .card-title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.preview-title-row .card-hours-input {
+  flex: 0 0 92px;
+}
+
         .card-title-input,
         .card-hours-input,
         .card-price-input,
