@@ -1198,7 +1198,7 @@ main {
 
   flex: 0 0 auto;
 
-  margin: 0 auto 8px;
+  margin: 0 auto 20px;
 }
 
 .user-dot {
