@@ -31,70 +31,101 @@ export default function Footer() {
 </div>
       </div>
 
-      <style jsx>{`
-        .footer {
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #050505;
+     <style jsx>{`
+  .footer {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
+      radial-gradient(circle at top center, rgba(255,196,0,.018), transparent 40%),
+      #050505;
 
-          color: white;
+    color: white;
 
-          padding: 38px 5%;
+    padding: 34px 5% 36px;
 
-          display: flex;
-          justify-content: space-between;
-          gap: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 54px;
 
-          border-top: 1px solid rgba(255,255,255,.06);
-        }
+    border-top: 1px solid rgba(255,255,255,.065);
 
-        .footer img {
-          height: 30px;
-        }
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.025) inset,
+      0 -18px 44px rgba(0,0,0,.22);
+  }
 
-        .footer p {
-          color: rgba(255,255,255,.36);
-          font-size: 12px;
-          margin-top: 12px;
-        }
+  .footer img {
+    height: 30px;
+    width: auto;
+    display: block;
 
-        .foot-cols {
-          display: flex;
-          gap: 64px;
-        }
+    filter:
+      contrast(1.03)
+      saturate(1.02);
+  }
 
-        .foot-cols h4 {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 10.5px;
-          font-weight: 900;
-          letter-spacing: .65px;
-          margin: 0 0 13px;
-          color: rgba(255,255,255,.82);
-        }
+  .footer p {
+    color: rgba(255,255,255,.34);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 12px 0 0;
+  }
 
-        .foot-cols a {
-          display: block;
-          color: rgba(255,255,255,.42);
-          text-decoration: none;
-          margin-bottom: 8px;
-          font-size: 12px;
-        }
+  .foot-cols {
+    display: flex;
+    gap: 68px;
+    align-items: flex-start;
+  }
 
-        .foot-cols a:hover {
-          color: #FFC400;
-        }
+  .foot-cols h4 {
+    font-family: Arial, sans-serif;
+    font-size: 9.5px;
+    font-weight: 950;
+    letter-spacing: .72px;
+    margin: 0 0 13px;
+    color: rgba(255,255,255,.78);
+    text-transform: uppercase;
+  }
 
-        @media (max-width: 850px) {
-          .footer {
-            flex-direction: column;
-          }
+  .foot-cols a {
+    display: block;
 
-          .foot-cols {
-            flex-direction: column;
-            gap: 25px;
-          }
-        }
-      `}</style>
+    color: rgba(255,255,255,.40);
+    text-decoration: none;
+
+    margin-bottom: 8px;
+
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    transition:
+      color .14s ease,
+      transform .14s ease,
+      text-shadow .14s ease;
+  }
+
+  .foot-cols a:hover {
+    color: #FFC400;
+    transform: translateX(2px);
+    text-shadow: 0 0 14px rgba(255,196,0,.14);
+  }
+
+  @media (max-width: 850px) {
+    .footer {
+      flex-direction: column;
+      gap: 28px;
+      padding: 30px 5%;
+    }
+
+    .foot-cols {
+      width: 100%;
+      flex-direction: column;
+      gap: 24px;
+    }
+  }
+`}</style>
     </footer>
   );
 }
