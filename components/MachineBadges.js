@@ -142,7 +142,7 @@ export default function MachineBadges({
 
   padding: 2px 7px;
 
-  border-radius: 3px;
+  border-radius: 1px;
 
   border-top: 1px solid rgba(255,255,255,.11);
   border-left: 1px solid rgba(255,255,255,.075);
@@ -215,21 +215,6 @@ export default function MachineBadges({
   border-bottom-color: rgba(0,0,0,.58);
 }
 
-.machine-badges.card span {
-  min-height: 20px;
-
-  padding: 2px 6px;
-
-  font-size: 11px;
-  font-weight: 500;
-
-  letter-spacing: .01px;
-  line-height: 1;
-
-  border-radius: 999px;
-
-  white-space: nowrap;
-}
 
         /* STUDIO */
 
