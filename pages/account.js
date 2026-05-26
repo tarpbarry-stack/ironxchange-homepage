@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
+import SellerLogoDecal from "../components/SellerLogoDecal";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -556,13 +558,11 @@ try {
   <details className="mobile-rail-menu" open>
     <summary>Account Menu</summary>
             <div className="rail-top">
-              <div className="user-dot">
-                {logoUrl ? (
-                  <img src={logoUrl} alt={displayName} />
-                ) : (
-                  <i className="fa-regular fa-user"></i>
-                )}
-              </div>
+              <SellerLogoDecal
+  logo={logoUrl}
+  name={displayName}
+  className="account-seller-decal"
+/>
 
               <strong>{displayName}</strong>
               <span>{companyName}</span>
@@ -1190,6 +1190,15 @@ main {
   padding: 6px 4px 8px;
   border-bottom: 1px solid #252525;
   margin-bottom: 6px;
+}
+
+.account-seller-decal {
+  width: 150px;
+  height: 68px;
+
+  flex: 0 0 auto;
+
+  margin: 0 auto 8px;
 }
 
 .user-dot {
