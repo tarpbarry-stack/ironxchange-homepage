@@ -70,23 +70,47 @@ export default function MachineBadges({
           color: rgba(255,255,255,.72);
         }
 
-        /* SLUG PAGE */
+       /* SLUG PAGE */
 
-        .machine-badges.slug {
-          gap: 6px;
-        }
+.machine-badges.slug {
+  gap: 6px;
+}
 
-        .machine-badges.slug span {
-          min-height: 23px;
+.machine-badges.slug span {
+  min-height: 22px;
 
-          padding: 4px 8px;
+  padding: 4px 8px;
 
-          font-size: 9px;
-          font-weight: 850;
+  border-color: rgba(255,255,255,.055);
 
-          letter-spacing: .14px;
-          line-height: 1;
-        }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,.01)
+    );
+
+  color: rgba(255,255,255,.43);
+
+  font-size: 8.75px;
+  font-weight: 850;
+
+  letter-spacing: .13px;
+  line-height: 1;
+}
+
+.machine-badges.slug span:nth-child(-n+3) {
+  border-color: rgba(255,196,0,.20);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.055),
+      rgba(255,196,0,.012)
+    );
+
+  color: rgba(255,255,255,.58);
+}
 
         /* CARD */
 
