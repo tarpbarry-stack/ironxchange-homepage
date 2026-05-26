@@ -114,11 +114,14 @@ export default function MachineBadges({
 
         /* CARD */
 
-    .machine-badges.card {
+   .machine-badges.card {
   display: flex;
+
   flex-wrap: wrap;
+
+  justify-content: center;
+
   align-content: flex-start;
-  justify-content: flex-start;
 
   gap: 7px 8px;
 }
