@@ -52,7 +52,7 @@ const keywords = Array.isArray(listing?.keywords)
 const normalizedKeywords = keywords
   .filter(Boolean)
   .map((k) => String(k).trim().toLowerCase())
-  .slice(0, 8);
+  .slice(0, 6);
 
   
   return (
@@ -317,7 +317,7 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row :global(.machine-badges.card) {
-  max-height: 72px;
+  max-height: 60px;
 
   overflow: hidden;
 }
