@@ -144,20 +144,21 @@ export default function MachineBadges({
 
   border-radius: 1px;
 
-  border-top: 1px solid rgba(255,255,255,.11);
-  border-left: 1px solid rgba(255,255,255,.075);
-  border-right: 1px solid rgba(0,0,0,.40);
-  border-bottom: 1px solid rgba(0,0,0,.52);
+  border-top: 1px solid rgba(255,255,255,.075);
+  border-left: 1px solid rgba(255,255,255,.052);
+  border-right: 1px solid rgba(0,0,0,.36);
+  border-bottom: 1px solid rgba(0,0,0,.46);
 
   background:
     linear-gradient(
       180deg,
-      rgba(255,255,255,.035),
-      rgba(255,255,255,.006)
+      rgba(255,255,255,.026),
+      rgba(255,255,255,.010) 45%,
+      rgba(0,0,0,.035)
     ),
-    #151515;
+    #171717;
 
-  color: rgba(220,220,220,.68);
+  color: rgba(255,255,255,.56);
 
   font-size: 10.5px;
   font-weight: 500;
@@ -168,52 +169,14 @@ export default function MachineBadges({
   white-space: nowrap;
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    inset 0 -1px 1px rgba(0,0,0,.42),
-    0 1px 0 rgba(255,255,255,.018);
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 -1px 1px rgba(0,0,0,.34),
+    0 1px 0 rgba(255,255,255,.012);
 
   text-shadow:
-    0 1px 0 rgba(0,0,0,.55);
+    0 1px 0 rgba(0,0,0,.52);
 }
 
-.machine-badges.card span:nth-child(2n) {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.026),
-      rgba(255,255,255,.004)
-    ),
-    #121212;
-
-  border-top-color: rgba(255,255,255,.08);
-  border-left-color: rgba(255,255,255,.05);
-}
-
-.machine-badges.card span:nth-child(3n) {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.028),
-      rgba(255,255,255,.004)
-    ),
-    #16140c;
-
-  border-top-color: rgba(255,196,0,.13);
-  border-left-color: rgba(255,196,0,.075);
-}
-
-.machine-badges.card span:nth-child(4n) {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.020),
-      rgba(0,0,0,.06)
-    ),
-    #181818;
-
-  border-right-color: rgba(0,0,0,.50);
-  border-bottom-color: rgba(0,0,0,.58);
-}
 
 
         /* STUDIO */
