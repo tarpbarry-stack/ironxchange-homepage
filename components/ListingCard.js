@@ -308,11 +308,16 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  height: 48px;
-  max-height: 48px;
+  height: 52px;
+  max-height: 52px;
 
-  margin: 11px 0 8px;
+  margin: 13px 0 8px;
 
+  overflow: visible;
+}
+
+.keyword-row :global(.machine-badges.card) {
+  max-height: 52px;
   overflow: hidden;
 }
 
