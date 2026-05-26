@@ -2152,7 +2152,7 @@ select {
           text-align: center;
         }
 
-        ..card-nav-row strong {
+        .card-nav-row strong {
   color: rgba(255,255,255,.54);
 
   font-size: 9.5px;
@@ -2359,8 +2359,9 @@ transition:
         }
 
         .card-title-input {
-  min-width: 0;
-
+  flex: 1;
+  width: 100%;
+  
   color: #f2f2f2;
 
   font-size: 18px;
@@ -2376,7 +2377,7 @@ transition:
 
         .card-hours-input {
   width: 92px;
-
+ flex: 0 0 92px;
   text-align: right;
 
   color: rgba(255,255,255,.54);
