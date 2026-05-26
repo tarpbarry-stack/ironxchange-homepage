@@ -162,9 +162,32 @@ useEffect(() => {
 }
 
 .social-mini a:hover {
-  color: rgba(255,196,0,.82) !important;
   transform: translateY(-1px);
-  text-shadow: 0 0 12px rgba(255,196,0,.18);
+}
+
+.social-mini a:nth-child(1):hover {
+  color: #1877F2 !important;
+  text-shadow: 0 0 14px rgba(24,119,242,.28);
+}
+
+.social-mini a:nth-child(2):hover {
+  color: #ff4fd8 !important;
+  text-shadow: 0 0 14px rgba(255,79,216,.24);
+}
+
+.social-mini a:nth-child(3):hover {
+  color: #f2f2f2 !important;
+  text-shadow: 0 0 14px rgba(255,255,255,.20);
+}
+
+.social-mini a:nth-child(4):hover {
+  color: #FF0000 !important;
+  text-shadow: 0 0 14px rgba(255,0,0,.24);
+}
+
+.social-mini a:nth-child(5):hover {
+  color: #b86cff !important;
+  text-shadow: 0 0 14px rgba(184,108,255,.26);
 }
 
 .nav-links {
