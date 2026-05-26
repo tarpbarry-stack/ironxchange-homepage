@@ -377,7 +377,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
                 </label>
 
                 <p className="help">
-                  Best: transparent PNG. Recommended width: 1200px. Your logo will not be cropped, circled, or distorted.
+                  Best: transparent PNG. Recommended width: 2000px. Your logo will not be cropped, circled, or distorted.
                 </p>
                       <a href="/account/listings" className="yard-preview-btn">
   View Listings
