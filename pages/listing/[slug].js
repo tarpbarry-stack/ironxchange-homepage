@@ -1782,8 +1782,8 @@ video {
 }
 
 .slug-seller-decal {
-  width: 160px;
-  height: 76px;
+  width: 185px;
+  height: 82px;
   flex: 0 0 auto;
 }
         .seller-logo {
