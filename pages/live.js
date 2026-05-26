@@ -383,14 +383,12 @@ export default function ListingLivePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
 
-  const [externalLinks, setExternalLinks] = useState({
-  dealer: "",
-  marketplace: "",
-  auction: "",
-  machineryTrader: "",
-  linkedin: "",
-  video: ""
-});
+ const [externalLinks, setExternalLinks] = useState([
+  {
+    label: "",
+    url: ""
+  }
+]);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -459,14 +457,18 @@ export default function ListingLivePage() {
     setSelectedKeywords(getListingKeywords(listing));
     setWorkflowStatus(getWorkflowStatus(listing));
 
-    setExternalLinks({
-  dealer: listing?.publicData?.externalLinks?.dealer || "",
-  marketplace: listing?.publicData?.externalLinks?.marketplace || "",
-  auction: listing?.publicData?.externalLinks?.auction || "",
-  machineryTrader: listing?.publicData?.externalLinks?.machineryTrader || "",
-  linkedin: listing?.publicData?.externalLinks?.linkedin || "",
-  video: listing?.publicData?.externalLinks?.video || ""
-});
+   setExternalLinks(
+  Array.isArray(
+    listing?.publicData?.externalLinks
+  )
+    ? listing.publicData.externalLinks
+    : [
+        {
+          label: "",
+          url: ""
+        }
+      ]
+);
 
     setPhotoItems(
       getListingImages(listing).map((url, index) => ({
@@ -1127,6 +1129,14 @@ async function saveExternalLinks() {
                 Dashboard
               </button>
 
+<button
+  type="button"
+  className="profile-top"
+  onClick={() => router.push("/account/profile")}
+>
+  Profile
+</button>
+
               <button
                 type="button"
                 className="duplicate-top"
@@ -1243,33 +1253,42 @@ async function saveExternalLinks() {
                 })}
               </div>
 
+
 <div className="external-link-panel">
   <div className="external-link-head">
     <span>Also Listed</span>
     <strong>Outbound Links</strong>
   </div>
 
-  {[
-    ["dealer", "Dealer Page"],
-    ["marketplace", "FB Marketplace"],
-    ["auction", "Auction Page"],
-    ["machineryTrader", "MachineryTrader"],
-    ["linkedin", "LinkedIn"],
-    ["video", "Video"]
-  ].map(([key, label]) => (
-    <label className="external-link-row" key={key}>
-      <span>{label}</span>
+  {externalLinks.map((link, index) => (
+    <div
+      className="external-link-item"
+      key={index}
+    >
+      <input
+        type="text"
+        placeholder="Link Name"
+        value={link.label}
+        onChange={e => {
+          const next = [...externalLinks];
+
+          next[index].label = e.target.value;
+
+          setExternalLinks(next);
+        }}
+      />
 
       <input
         type="url"
-        value={externalLinks[key]}
-        placeholder="Paste link..."
-        onChange={e =>
-          setExternalLinks(current => ({
-            ...current,
-            [key]: e.target.value
-          }))
-        }
+        placeholder="Paste URL..."
+        value={link.url}
+        onChange={e => {
+          const next = [...externalLinks];
+
+          next[index].url = e.target.value;
+
+          setExternalLinks(next);
+        }}
         onKeyDown={e => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -1277,8 +1296,24 @@ async function saveExternalLinks() {
           }
         }}
       />
-    </label>
+    </div>
   ))}
+
+  <button
+    type="button"
+    className="external-add-btn"
+    onClick={() =>
+      setExternalLinks(current => [
+        ...current,
+        {
+          label: "",
+          url: ""
+        }
+      ])
+    }
+  >
+    + Add Link
+  </button>
 
   <button
     type="button"
@@ -1288,8 +1323,7 @@ async function saveExternalLinks() {
     Save Links
   </button>
 </div>
-
-
+                  
                   
             </aside>
 
@@ -1861,11 +1895,12 @@ select {
         }
 
         .status-command,
-        .save-top,
-        .public-link,
-        .dashboard-top,
-        .duplicate-top,
-        .delete-top {
+.save-top,
+.public-link,
+.dashboard-top,
+.profile-top,
+.duplicate-top,
+.delete-top {
           height: 31px;
           display: inline-flex;
           align-items: center;
@@ -1892,10 +1927,11 @@ select {
             box-shadow .14s ease;
         }
 
-        .status-command:hover,
-        .public-link:hover,
-        .dashboard-top:hover,
-        .duplicate-top:hover {
+       .status-command:hover,
+.public-link:hover,
+.dashboard-top:hover,
+.profile-top:hover,
+.duplicate-top:hover {
           transform: translateY(-1px);
           border-color: rgba(255,196,0,.26);
           color: #FFC400;
@@ -2235,7 +2271,7 @@ select {
   display: grid;
   gap: 8px;
 
-  max-height: 554px;
+  max-height: 310px;
   overflow-y: auto;
 
   padding-right: 3px;
@@ -2373,12 +2409,15 @@ select {
 
 .external-link-panel {
   margin-top: 10px;
-  padding-top: 10px;
-
-  border-top: 1px solid rgba(255,255,255,.052);
-
+  padding: 10px;
+  border: 1px solid rgba(255,196,0,.20);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at top left, rgba(255,196,0,.08), transparent 58%),
+    linear-gradient(180deg, rgba(255,196,0,.035), rgba(255,255,255,0)),
+    #111;
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .external-link-head {
