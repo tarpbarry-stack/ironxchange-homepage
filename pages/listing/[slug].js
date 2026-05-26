@@ -760,6 +760,119 @@ export default function ListingPage() {
           font-family: Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           text-rendering: geometricPrecision;
+
+          /* ================================
+   IRONXCHANGE V12 GLOBAL FOUNDATION
+   ================================ */
+
+:root {
+  --ix-bg: #0b0b0b;
+  --ix-panel: #141414;
+  --ix-panel-soft: #101010;
+  --ix-text: #f2f2f2;
+  --ix-muted: rgba(255,255,255,.52);
+  --ix-faint: rgba(255,255,255,.34);
+  --ix-border: rgba(255,255,255,.065);
+  --ix-border-soft: rgba(255,255,255,.045);
+  --ix-yellow: #FFC400;
+  --ix-green: #38A169;
+  --ix-red: #e53e3e;
+  --ix-radius: 14px;
+  --ix-radius-sm: 11px;
+  --ix-shadow-panel:
+    0 1px 0 rgba(255,255,255,.045) inset,
+    0 16px 38px rgba(0,0,0,.24);
+  --ix-shadow-card:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 24px 60px rgba(0,0,0,.30);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+  background: var(--ix-bg);
+  color: #d6d6d6;
+  font-family: Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select,
+a {
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(255,196,0,.28);
+  color: #fff;
+}
+
+*:focus-visible {
+  outline: 1px solid rgba(255,196,0,.42);
+  outline-offset: 3px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.12) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,196,0,.24);
+}
+
+.ix-v12-panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+    radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+    var(--ix-panel);
+  border: 1px solid var(--ix-border);
+  outline: 1px solid rgba(255,255,255,.018);
+  border-radius: var(--ix-radius);
+  box-shadow: var(--ix-shadow-panel);
+}
         }
 
         * {
