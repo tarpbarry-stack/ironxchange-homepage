@@ -266,14 +266,7 @@ function SocialInput({ icon, label, value, onChange, placeholder }) {
       </Head>
 
       <main>
-        <nav className="nav">
-          <a href="/" className="logo-wrap">
-            <img
-              src="/images/ironxchange-logo.png"
-              className="logo-img"
-              alt="IronXchange"
-            />
-          </a>
+       
 
        <Navbar />
 
