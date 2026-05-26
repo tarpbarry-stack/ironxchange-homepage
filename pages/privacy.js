@@ -133,7 +133,7 @@ export default function PrivacyPage() {
               right to know, access, correct, delete, opt out of certain sharing or sales,
               and not be discriminated against for exercising privacy rights. California’s
               CCPA gives consumers control over personal information businesses collect
-              about them. :contentReference[oaicite:0]{index=0}
+              about them. 
             </p>
 
             <h2>12. International Transfers</h2>
