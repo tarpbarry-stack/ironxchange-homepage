@@ -562,7 +562,7 @@ try {
   logo={logoUrl}
   name={displayName}
   className="account-seller-decal"
-  offsetX={22}
+  offsetX={27}
 />
 
               <strong>{displayName}</strong>
