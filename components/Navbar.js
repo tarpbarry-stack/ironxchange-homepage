@@ -1,4 +1,32 @@
+import { useEffect, useState } from "react";
+
 export default function Navbar() {
+
+const [loggedIn, setLoggedIn] = useState(false);
+
+useEffect(() => {
+  async function checkAuth() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      await sdk.currentUser.show();
+
+      setLoggedIn(true);
+    } catch {
+      setLoggedIn(false);
+    }
+  }
+
+  checkAuth();
+}, []);
+
+
+
+  
   return (
     <nav className="nav">
       <div className="brand-side">
@@ -65,11 +93,11 @@ export default function Navbar() {
           POST FREE
         </a>
 
-        <a
-          href="/account"
-          className="login-icon logged-in"
-          aria-label="Account"
-        >
+       <a
+  href={loggedIn ? "/account" : "/login"}
+  className={`login-icon ${loggedIn ? "logged-in" : ""}`}
+  aria-label="Account"
+>
           <i className="fa-regular fa-user"></i>
         </a>
       </div>
