@@ -558,10 +558,11 @@ try {
   <details className="mobile-rail-menu" open>
     <summary>Account Menu</summary>
             <div className="rail-top">
-              <SellerLogoDecal
+             <SellerLogoDecal
   logo={logoUrl}
   name={displayName}
   className="account-seller-decal"
+  offsetX={10}
 />
 
               <strong>{displayName}</strong>
@@ -1197,9 +1198,6 @@ main {
   height: 68px;
 
   margin: 0 0 8px;
-
-  position: relative;
-  left: 10px;
 }
 
 .user-dot {
