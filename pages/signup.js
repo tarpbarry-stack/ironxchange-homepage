@@ -9,10 +9,11 @@ export default function SignupPage() {
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+ const [password, setPassword] = useState("");
+const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
 
   async function handleSignup(e) {
     e.preventDefault();
@@ -27,6 +28,11 @@ export default function SignupPage() {
       setError("First name, last name, email, and password are required.");
       return;
     }
+
+    if (!acceptedTerms) {
+  setError("You must agree to the Terms and Privacy Policy.");
+  return;
+}
 
     setLoading(true);
     setError("");
@@ -126,6 +132,25 @@ export default function SignupPage() {
               Password
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </label>
+
+  <label className="terms-check">
+  <input
+    type="checkbox"
+    checked={acceptedTerms}
+    onChange={(e) => setAcceptedTerms(e.target.checked)}
+  />
+
+  <span>
+    I agree to the{" "}
+    <a href="/terms" target="_blank" rel="noreferrer">
+      Terms
+    </a>{" "}
+    and{" "}
+    <a href="/privacy" target="_blank" rel="noreferrer">
+      Privacy Policy
+    </a>.
+  </span>
+</label>
 
             <button type="submit" disabled={loading}>
               {loading ? "Creating Account..." : "Create Account"}
@@ -373,6 +398,48 @@ export default function SignupPage() {
     cursor: default;
     transform: none;
   }
+
+.terms-check {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+
+  align-items: start;
+  gap: 8px;
+
+  color: rgba(255,255,255,.44);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  line-height: 1.35;
+
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.terms-check input {
+  width: 14px;
+  height: 14px;
+
+  padding: 0;
+  margin-top: 1px;
+
+  accent-color: #FFC400;
+}
+
+.terms-check span {
+  display: block;
+}
+
+.terms-check a {
+  color: #FFC400;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.terms-check a:hover {
+  color: #f2f2f2;
+}
 
   .signin-area {
     margin-top: 14px;
