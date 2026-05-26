@@ -562,7 +562,7 @@ try {
   logo={logoUrl}
   name={displayName}
   variant="account"
-  offsetX={20}
+  offsetX={15}
 />
 
               <strong>{displayName}</strong>
