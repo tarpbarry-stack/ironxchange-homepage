@@ -303,14 +303,13 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  min-height: 20px;
-  max-height: 42px;
+  min-height: 16px;
+  max-height: 34px;
 
-  margin: 8px 0 14px;
+  margin: 7px 0 11px;
 
   overflow: hidden;
 }
-
 
 
 }
