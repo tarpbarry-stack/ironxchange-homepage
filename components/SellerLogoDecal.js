@@ -1,40 +1,20 @@
-export default function SellerLogoDecal({
-  logo,
-  name = "Seller",
-  className = ""
-}) {
-  if (!logo) {
-    return (
-      <div className={`seller-logo-fallback ${className}`} aria-label={name}>
-        <i className="fa-regular fa-user"></i>
-
-        <style jsx>{`
-          .seller-logo-fallback {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            color: rgba(255,255,255,.42);
-          }
-        `}</style>
-      </div>
-    );
-  }
-
+export default function SellerLogoDecal({ logo, name = "Seller", className = "" }) {
   return (
     <div className={`seller-logo-decal ${className}`}>
-      <img src={logo} alt={name} />
+      {logo ? (
+        <img src={logo} alt={name} />
+      ) : (
+        <i className="fa-regular fa-user"></i>
+      )}
 
       <style jsx>{`
         .seller-logo-decal {
+          width: 185px;
+          height: 82px;
+
           display: flex;
           align-items: center;
           justify-content: flex-start;
-
-          width: 132px;
-          height: 70px;
 
           background: transparent;
           border: none;
@@ -48,15 +28,13 @@ export default function SellerLogoDecal({
           max-height: 100%;
           width: auto;
           height: auto;
-
           object-fit: contain;
-          object-position: center;
-
           display: block;
+        }
 
-          filter:
-            contrast(1.04)
-            saturate(1.02);
+        .seller-logo-decal i {
+          color: rgba(255,255,255,.42);
+          font-size: 28px;
         }
       `}</style>
     </div>
