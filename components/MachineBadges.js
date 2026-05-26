@@ -129,14 +129,48 @@ export default function MachineBadges({
 
    .machine-badges.card {
   display: flex;
-
   flex-wrap: wrap;
-
   justify-content: center;
-
   align-content: flex-start;
 
-  gap: 8px 8px;
+  row-gap: 8px;
+  column-gap: 8px;
+}
+
+.machine-badges.card span {
+  min-height: 18px;
+
+  padding: 2px 7px;
+
+  border-radius: 4px;
+
+  border: 1px solid rgba(255,255,255,.055);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(0,0,0,.10)
+    ),
+    #101010;
+
+  color: rgba(255,255,255,.56);
+
+  font-size: 10.5px;
+  font-weight: 500;
+
+  letter-spacing: .01px;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  box-shadow:
+    inset 0 1px 1px rgba(0,0,0,.46),
+    inset 0 -1px 0 rgba(255,255,255,.025),
+    0 1px 0 rgba(255,255,255,.018);
+
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.55);
 }
 
 .machine-badges.card span {
