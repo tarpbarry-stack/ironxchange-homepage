@@ -1,13 +1,83 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
 import MachineBadges from "../components/MachineBadges";
 
+import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
+import dozersTaxonomy from "../lib/dozersTaxonomy";
+import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
+import aerialTaxonomy from "../lib/aerialTaxonomy";
+import aggregateTaxonomy from "../lib/aggregateTaxonomy";
+import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
+import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
+import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
+import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
+import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
+import cranesTaxonomy from "../lib/cranesTaxonomy";
+import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
+import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
+import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
+import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
+import scraperTaxonomy from "../lib/scraperTaxonomy";
+import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
+import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
+import trenchersTaxonomy from "../lib/trenchersTaxonomy";
+import trailersTaxonomy from "../lib/trailersTaxonomy";
+import trucksTaxonomy from "../lib/trucksTaxonomy";
+import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
+import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
+import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
+
 const BRAND_YELLOW = "#FFC400";
+
+const { Money, UUID } = sdkTypes;
+
+const sdk = createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
+
+const taxonomyMap = {
+  "AERIAL EQUIPMENT": aerialTaxonomy,
+  "AGGREGATE": aggregateTaxonomy,
+  "AGRICULTURE HARVESTERS": agricultureHarvestersTaxonomy,
+  "AGRICULTURE TRACTORS": agricultureTractorsTaxonomy,
+  "ASPHALT EQUIPMENT": asphaltEquipmentTaxonomy,
+  "BACKHOE LOADERS": backhoeLoadersTaxonomy,
+  "COMPACTION/ROLLERS": compactionRollersTaxonomy,
+  "CRANES": cranesTaxonomy,
+  "CRAWLER CARRIERS / LOADER": crawlerCarriersTaxonomy,
+  "DOZERS": dozersTaxonomy,
+  "DRILLS & PILING": drillsAndPilingTaxonomy,
+  "DUMP TRUCKS - ARTIC/RIGID": dumpTrucksTaxonomy,
+  "EXCAVATORS": excavatorsTaxonomy,
+  "FORKLIFTS": forkliftsTaxonomy,
+  "MOTOR GRADERS": motorGradersTaxonomy,
+  "SCRAPER": scraperTaxonomy,
+  "SKID STEER/CTL": skidSteerCtlTaxonomy,
+  "TELEHANDLERS": telehandlersTaxonomy,
+  "TRENCHERS/PLOWS": trenchersTaxonomy,
+  "TRAILERS": trailersTaxonomy,
+  "TRUCKS": trucksTaxonomy,
+  "WHEEL LOADERS": wheelLoadersTaxonomy,
+  "ATTACHMENTS / PARTS": attachmentsPartsTaxonomy,
+  "SUPPORT EQUIPMENT": supportEquipmentTaxonomy,
+  "UTILITY CARTS": utilityCartsTaxonomy
+};
+
+const categories = Object.keys(taxonomyMap);
+
+const stateOptions = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+];
 
 const workflowOptions = [
   { value: "good-listing", label: "Good Listing" },
@@ -126,100 +196,25 @@ function formatHours(value) {
   return `${Number(raw).toLocaleString()} hrs`;
 }
 
-function cleanMachineTitle(title = "") {
-  return String(title)
-    .replace(/\s*[-–]?\s*\d{1,5}(,\d{3})*\s*(HRS|Hrs|hrs|Hours|hours)\b/g, "")
-    .replace(/\s*[-–]\s*$/g, "")
+function buildCardTitle(year, make, model) {
+  return [year, make, model]
+    .filter(Boolean)
+    .map(item => String(item).trim())
+    .join(" ")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim() || "Machine Listing";
 }
 
-function getImageUrl(img) {
-  if (!img) return null;
-  if (typeof img === "string") return img;
+function buildSharetribeTitle(year, make, model, hours) {
+  const cardTitle = buildCardTitle(year, make, model);
+  const rawHours = cleanNumber(hours);
 
-  return (
-    img.url ||
-    img.src ||
-    img.attributes?.variants?.default?.url ||
-    img.attributes?.variants?.["landscape-crop"]?.url ||
-    img.attributes?.variants?.["scaled-large"]?.url ||
-    img.attributes?.variants?.["scaled-medium"]?.url ||
-    img.attributes?.variants?.["scaled-small"]?.url ||
-    null
-  );
-}
+  if (!rawHours) return cardTitle;
 
-function getListingImages(listing) {
-  const rawImages = [
-    ...(Array.isArray(listing?.images) ? listing.images : []),
-    ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
-    listing?.imageUrl,
-    listing?.image
-  ];
-
-  return [...new Set(rawImages.map(getImageUrl).filter(Boolean))];
-}
-
-function getListingKeywords(listing) {
-  const raw =
-    listing?.keywords ||
-    listing?.tags ||
-    listing?.publicData?.keywords ||
-    listing?.attributes?.publicData?.keywords ||
-    [];
-
-  if (Array.isArray(raw)) return raw.filter(Boolean).map(String);
-
-  if (typeof raw === "string") {
-    return raw
-      .split(",")
-      .map(item => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
-}
-
-function getWorkflowStatus(listing = {}) {
-  return (
-    listing.workflowStatus ||
-    listing.publicData?.workflowStatus ||
-    listing.attributes?.publicData?.workflowStatus ||
-    listing.metadata?.workflowStatus ||
-    listing.attributes?.metadata?.workflowStatus ||
-    "Good Listing"
-  );
-}
-
-function getListingStatus(listing = {}) {
-  return (
-    listing.listingStatus ||
-    listing.publicData?.listingStatus ||
-    listing.attributes?.publicData?.listingStatus ||
-    listing.metadata?.listingStatus ||
-    "live"
-  );
-}
-
-function getListingId(listing = {}) {
-  return listing.id?.uuid || listing.id || listing.uuid || listing.listingId || "";
-}
-
-function getAuthorId(listing = {}) {
-  return (
-    listing.authorId ||
-    listing.sellerId ||
-    listing.author?.id?.uuid ||
-    listing.author?.id ||
-    ""
-  );
+  return `${cardTitle} - ${Number(rawHours).toLocaleString()} Hrs`;
 }
 
 function trackLaunchEvent(eventName, payload = {}) {
-  // POSTHOG HOOK:
-  // Global window.posthog can capture Launch Studio behavior here.
-  // Wire later without touching page flow.
   if (typeof window === "undefined") return;
 
   try {
@@ -253,59 +248,72 @@ function addActivity(type, message) {
   }
 }
 
-function getListingUrl(listing) {
-  if (!listing?.title || typeof window === "undefined") return "";
-  return `${window.location.origin}/listing/${slugify(listing.title)}?from=launch-studio`;
+async function compressImage(file, maxWidth = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const reader = new FileReader();
+
+    reader.onload = event => {
+      image.onload = () => {
+        const scale = Math.min(1, maxWidth / image.width);
+        const width = Math.round(image.width * scale);
+        const height = Math.round(image.height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, width, height);
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) {
+              reject(new Error("Image compression failed."));
+              return;
+            }
+
+            resolve(
+              new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+                type: "image/jpeg",
+                lastModified: Date.now()
+              })
+            );
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      image.onerror = reject;
+      image.src = event.target.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-async function downloadImage(url, filename) {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = objectUrl;
-  link.download = filename;
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  URL.revokeObjectURL(objectUrl);
-}
-
-function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = [], edit = {}) {
+function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
   const title = clean(listing?.title) || "Equipment Listing";
-  const price = formatMoney(edit.price || listing?.price);
-  const hours = formatHours(edit.hours || listing?.hours);
-  const location = clean(edit.location || listing?.location) || "Location not listed";
+  const priceLabel = formatMoney(listing?.price);
+  const hoursLabel = formatHours(listing?.hours);
+  const location = clean(listing?.location) || "Location not listed";
   const description =
-    clean(edit.description) ||
     clean(listing?.description) ||
-    clean(listing?.publicData?.description) ||
     "Clean machine. Full specs and photos available on IronXchange.";
 
   const features = selectedKeywords.slice(0, 6).join(" • ");
-  const linkLine = `Full specs + photos:\n${listingUrl}`;
+  const linkLine = listingUrl
+    ? `Full specs + photos:\n${listingUrl}`
+    : "Full specs + photos available on IronXchange.";
 
   if (platform === "sms" || platform === "whatsapp" || platform === "messenger") {
     return `${title}
-${hours} | ${location}
-${price}
+${hoursLabel} | ${location}
+${priceLabel}
 
 ${features}
-
-${linkLine}`;
-  }
-
-  if (platform === "marketplace") {
-    return `${title}
-${hours} | ${location}
-${price}
-
-${features}
-
-${description}
 
 ${linkLine}`;
   }
@@ -313,8 +321,8 @@ ${linkLine}`;
   if (platform === "linkedin") {
     return `${title}
 
-${hours} | ${location}
-${price}
+${hoursLabel} | ${location}
+${priceLabel}
 
 ${features}
 
@@ -327,8 +335,8 @@ ${linkLine}
 
   if (platform === "instagram") {
     return `${title}
-${hours} | ${location}
-${price}
+${hoursLabel} | ${location}
+${priceLabel}
 
 ${features}
 
@@ -339,8 +347,8 @@ ${linkLine}
 
   if (platform === "tiktok") {
     return `${title}
-${hours} | ${location}
-${price}
+${hoursLabel} | ${location}
+${priceLabel}
 
 ${linkLine}
 
@@ -348,8 +356,8 @@ ${linkLine}
   }
 
   return `${title}
-${hours} | ${location}
-${price}
+${hoursLabel} | ${location}
+${priceLabel}
 
 ${features}
 
@@ -358,22 +366,25 @@ ${description}
 ${linkLine}`;
 }
 
-export default function ListingLivePage() {
+export default function PostFreePage() {
   const router = useRouter();
-  const { id } = router.query;
 
-  const [loading, setLoading] = useState(true);
-  const [listings, setListings] = useState([]);
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
-  const [commandBusy, setCommandBusy] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  const [edit, setEdit] = useState({
-    price: "",
-    hours: "",
-    location: "",
-    description: ""
-  });
+  const [category, setCategory] = useState("EXCAVATORS");
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [hours, setHours] = useState("");
+  const [price, setPrice] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [stockNumber, setStockNumber] = useState("");
+  const [city, setCity] = useState("");
+  const [stateCode, setStateCode] = useState("");
+
+  const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -381,110 +392,56 @@ export default function ListingLivePage() {
 
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
-  const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
+  const [workflowStatus, setWorkflowStatus] = useState("good-listing");
 
   useEffect(() => {
-    fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setListings(data);
-      })
-      .catch(err => console.error("Launch Studio load failed:", err))
-      .finally(() => setLoading(false));
+    async function checkAuth() {
+      try {
+        await sdk.currentUser.show();
+        setLoggedIn(true);
+      } catch {
+        setLoggedIn(false);
+      }
+    }
+
+    checkAuth();
   }, []);
 
-  const listing = useMemo(() => {
-    if (!id || listings.length === 0) return null;
-    return listings.find(item => String(getListingId(item)) === String(id)) || null;
-  }, [id, listings]);
-
-  const listingId = getListingId(listing || {});
-  const listingUrl = listing ? getListingUrl(listing) : "";
-  const listingStatus = getListingStatus(listing || {});
-  const isPaused = listingStatus === "paused";
-
-  const sellerInventory = useMemo(() => {
-    if (!listing) return [];
-
-    const authorId = getAuthorId(listing);
-
-    return listings.filter(item => {
-      const itemStatus = getListingStatus(item);
-
-      if (itemStatus === "deleted" || itemStatus === "archived") return false;
-
-      if (authorId) {
-        return String(getAuthorId(item)) === String(authorId);
-      }
-
-      return true;
-    });
-  }, [listing, listings]);
-
-  const currentInventoryIndex = useMemo(() => {
-    if (!listing) return -1;
-
-    return sellerInventory.findIndex(
-      item => String(getListingId(item)) === String(listingId)
-    );
-  }, [sellerInventory, listing, listingId]);
-
-  const previousListing =
-    currentInventoryIndex > 0 ? sellerInventory[currentInventoryIndex - 1] : null;
-
-  const nextListing =
-    currentInventoryIndex >= 0 && currentInventoryIndex < sellerInventory.length - 1
-      ? sellerInventory[currentInventoryIndex + 1]
-      : null;
-
   useEffect(() => {
-    if (!listing) return;
+    trackLaunchEvent("post_free_opened", { category });
+  }, [category]);
 
-    setEdit({
-      price: clean(listing.price),
-      hours: clean(listing.hours),
-      location: clean(listing.location),
-      description: clean(listing.description || listing.publicData?.description)
-    });
+  const taxonomy = taxonomyMap[category] || [];
 
-    setSelectedKeywords(getListingKeywords(listing));
-    setWorkflowStatus(getWorkflowStatus(listing));
+  const availableMakes = useMemo(() => {
+    return Array.from(new Set(taxonomy.map(item => item.make).filter(Boolean)));
+  }, [taxonomy]);
 
-    setPhotoItems(
-      getListingImages(listing).map((url, index) => ({
-        id: `existing-${index}-${url}`,
-        url,
-        file: null,
-        existing: true
-      }))
+  const availableModels = useMemo(() => {
+    return Array.from(
+      new Set(
+        taxonomy
+          .filter(item => item.make === make)
+          .map(item => item.model)
+          .filter(Boolean)
+      )
     );
+  }, [taxonomy, make]);
 
-    setActivePhotoIndex(0);
+  const cardTitle = useMemo(() => {
+    return buildCardTitle(year, make, model);
+  }, [year, make, model]);
 
-    trackLaunchEvent("launch_studio_opened", {
-      listingId: String(getListingId(listing)),
-      listingTitle: listing.title,
-      listingStatus: getListingStatus(listing),
-      workflowStatus: getWorkflowStatus(listing)
-    });
-  }, [listing]);
+  const sharetribeTitle = useMemo(() => {
+    return buildSharetribeTitle(year, make, model, hours);
+  }, [year, make, model, hours]);
+
+  const locationLabel = [city, stateCode].filter(Boolean).join(", ");
 
   const heroPhoto =
     photoItems[activePhotoIndex]?.url ||
     photoItems[0]?.url ||
-    listing?.imageUrl ||
-    listing?.image ||
     "/images/hero-equipment-yard.jpg";
-
-  const title = cleanMachineTitle(listing?.title || "Machine Listing");
-
-  const sellerName =
-    clean(listing?.sellerName) ||
-    clean(listing?.sellerCompany) ||
-    clean(listing?.authorName) ||
-    "IronXchange Seller";
-
-  const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
   const availableKeywords = useMemo(() => {
     return Array.from(new Set([...commonKeywordOptions, ...selectedKeywords])).sort();
@@ -500,23 +457,33 @@ export default function ListingLivePage() {
       .slice(0, 500);
   }, [availableKeywords, keywordSearch]);
 
-  const marketplaceTitle = listing
-    ? `${clean(listing.title)} | ${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}`
-    : "";
+  const postListingForCopy = {
+    title: sharetribeTitle,
+    price,
+    hours,
+    location: locationLabel,
+    description
+  };
 
-  const shortDescription = listing
-    ? buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit)
-    : "";
+  const listingUrl = "";
 
-  const longDescription = listing
-    ? buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords, edit)
-    : "";
+  const marketplaceTitle = `${cardTitle} | ${formatHours(hours)} | ${
+    locationLabel || "Location"
+  }`;
 
-  function goToListing(targetListing) {
-    const targetId = getListingId(targetListing || {});
-    if (!targetId) return;
-    router.push(`/live?id=${targetId}`);
-  }
+  const shortDescription = buildSocialCopy(
+    "sms",
+    postListingForCopy,
+    listingUrl,
+    selectedKeywords
+  );
+
+  const longDescription = buildSocialCopy(
+    "marketplace",
+    postListingForCopy,
+    listingUrl,
+    selectedKeywords
+  );
 
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
@@ -531,8 +498,10 @@ export default function ListingLivePage() {
 
     setActivePhotoIndex(current => {
       const next = current + direction;
+
       if (next < 0) return photoItems.length - 1;
       if (next >= photoItems.length) return 0;
+
       return next;
     });
   }
@@ -552,8 +521,8 @@ export default function ListingLivePage() {
     setPhotoItems(current => [...current, ...mapped]);
 
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`);
-    trackLaunchEvent("launch_photos_added", {
-      listingId: String(listingId || ""),
+
+    trackLaunchEvent("post_free_photos_added", {
       count: mapped.length
     });
 
@@ -577,8 +546,8 @@ export default function ListingLivePage() {
     setPhotoItems(current => [...current, ...mapped]);
 
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
-    trackLaunchEvent("launch_photos_dropped", {
-      listingId: String(listingId || ""),
+
+    trackLaunchEvent("post_free_photos_dropped", {
       count: mapped.length
     });
   }
@@ -587,11 +556,7 @@ export default function ListingLivePage() {
     setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
     setActivePhotoIndex(0);
 
-    addActivity("success", `Photo removed — ${title}`);
-    trackLaunchEvent("launch_photo_removed", {
-      listingId: String(listingId || ""),
-      photoIndex: indexToRemove
-    });
+    addActivity("success", `Photo removed — ${cardTitle}`);
   }
 
   function reorderPhotos(fromIndex, toIndex) {
@@ -607,12 +572,7 @@ export default function ListingLivePage() {
 
     setActivePhotoIndex(toIndex);
 
-    addActivity("success", `Photo order changed — ${title}`);
-    trackLaunchEvent("launch_photo_reordered", {
-      listingId: String(listingId || ""),
-      fromIndex,
-      toIndex
-    });
+    addActivity("success", `Photo order changed — ${cardTitle}`);
   }
 
   async function copyText(label, text) {
@@ -620,289 +580,125 @@ export default function ListingLivePage() {
       await navigator.clipboard.writeText(text);
       setCopied(label);
 
-      addActivity("success", `${label} copied — ${title}`);
-      trackLaunchEvent("launch_copy_clicked", {
-        listingId: String(listingId || ""),
+      addActivity("success", `${label} copied — ${cardTitle}`);
+
+      trackLaunchEvent("post_free_copy_clicked", {
         label
       });
 
       setTimeout(() => setCopied(""), 1500);
     } catch {
-      addActivity("error", `${label} copy failed — ${title}`);
+      addActivity("error", `${label} copy failed — ${cardTitle}`);
       alert("Copy failed. Highlight and copy manually.");
     }
   }
 
-  async function downloadHeroImage() {
-    const hero = photoItems[0]?.url || heroPhoto;
-
-    if (!hero) {
-      alert("No image found.");
+  async function createListing() {
+    if (!loggedIn) {
+      router.push("/login");
       return;
     }
 
-    await downloadImage(hero, `${slugify(title)}-hero.jpg`);
-
-    addActivity("success", `Hero image downloaded — ${title}`);
-    trackLaunchEvent("launch_hero_downloaded", {
-      listingId: String(listingId || "")
-    });
-  }
-
-  async function downloadAllPhotos() {
-    if (photoItems.length === 0) {
-      alert("No photos found.");
+    if (!category || !year || !make || !model || !hours || !price) {
+      alert("Category, year, make, model, hours, and price are required.");
       return;
     }
-
-    for (let i = 0; i < photoItems.length; i += 1) {
-      await downloadImage(photoItems[i].url, `${slugify(title)}-${i + 1}.jpg`);
-    }
-
-    addActivity("success", `Photo pack downloaded — ${title}`);
-    trackLaunchEvent("launch_photo_pack_downloaded", {
-      listingId: String(listingId || ""),
-      count: photoItems.length
-    });
-  }
-
-  async function saveQuickEdit() {
-    if (!listingId) return;
 
     setSaving(true);
 
     try {
-      const detailsResponse = await fetch("/api/update-listing-details", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId,
-          hours: edit.hours,
-          location: edit.location,
-          description: edit.description,
-          keywords: selectedKeywords
+      const uploadedImages = await Promise.all(
+        photoItems.map(async photo => {
+          if (!photo.file) return null;
+
+          const imageFile = await compressImage(photo.file);
+
+          return sdk.images.upload(
+            { image: imageFile },
+            { expand: true }
+          );
         })
+      );
+
+      const validUploads = uploadedImages.filter(Boolean);
+
+      const imageIds = validUploads.map(
+        upload => new UUID(upload.data.data.id.uuid)
+      );
+
+      const categorySlug = slugify(category);
+      const makeSlug = slugify(`${category}-${make}`);
+      const modelSlug = slugify(`${category}-${make}-${model}`);
+
+      const response = await sdk.ownListings.create({
+        title: sharetribeTitle,
+        description: description || "",
+
+        publicData: {
+          categoryLevel1: categorySlug,
+          categoryLevel2: makeSlug,
+          categoryLevel3: modelSlug,
+
+          category,
+          year: String(year),
+          make,
+          model,
+
+          hours: Number(cleanNumber(hours)),
+
+          stockNumber,
+          serialNumber,
+
+          city,
+          location: locationLabel,
+          loc: stateCode,
+
+          keywords: selectedKeywords,
+
+          workflowStatus,
+
+          listingType: "free-listing",
+          listingStatus: "live",
+
+          transactionProcessAlias: "default-inquiry/release-1",
+          unitType: "inquiry"
+        },
+
+        price: new Money(
+          Number(cleanNumber(price)) * 100,
+          "USD"
+        ),
+
+        images: imageIds
       });
 
-      const detailsData = await detailsResponse.json();
+      const newListingId = response.data.data.id.uuid;
 
-      if (!detailsResponse.ok) {
-        throw new Error(detailsData?.error || "Details update failed");
-      }
+      addActivity("success", `Posted free listing — ${sharetribeTitle}`);
 
-      if (cleanNumber(edit.price)) {
-        const priceResponse = await fetch("/api/update-listing-price", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            listingId,
-            price: cleanNumber(edit.price)
-          })
-        });
-
-        const priceData = await priceResponse.json();
-
-        if (!priceResponse.ok) {
-          throw new Error(priceData?.error || "Price update failed");
-        }
-      }
-
-      addActivity("success", `Listing launched — ${title}`);
-      trackLaunchEvent("launch_card_saved", {
-        listingId: String(listingId),
+      trackLaunchEvent("post_free_listing_created", {
+        listingId: newListingId,
+        title: sharetribeTitle,
         selectedKeywordCount: selectedKeywords.length,
         photoCount: photoItems.length
       });
 
-      alert("Launched. Listing updates applied.");
+      router.push(`/live?id=${newListingId}`);
     } catch (err) {
-      console.error("SAVE QUICK EDIT ERROR:", err);
-      addActivity("error", `Launch failed — ${title}`);
-      alert(`Launch failed: ${err.message}`);
+      console.error("CREATE LISTING ERROR:", err);
+
+      addActivity("error", `Post failed — ${sharetribeTitle}`);
+
+      alert(`Post failed: ${err.message || JSON.stringify(err)}`);
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function updateWorkflow(nextWorkflow) {
-    if (!listingId) return;
-
-    setWorkflowStatus(nextWorkflow);
-
-    try {
-      const response = await fetch("/api/update-listing-workflow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId,
-          workflowStatus: nextWorkflow
-        })
-      });
-
-      if (!response.ok) throw new Error("Workflow update failed");
-
-      addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
-      trackLaunchEvent("launch_workflow_updated", {
-        listingId: String(listingId),
-        workflowStatus: nextWorkflow
-      });
-    } catch (err) {
-      console.error(err);
-      addActivity("error", `Workflow update failed — ${title}`);
-      alert("Workflow update failed.");
-    }
-  }
-
-  async function pauseListing() {
-    if (!listingId) return;
-
-    setCommandBusy("pause");
-
-    try {
-      const response = await fetch("/api/pause-listing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Pause failed");
-      }
-
-      setListings(current =>
-        current.map(item =>
-          String(getListingId(item)) === String(listingId)
-            ? {
-                ...item,
-                listingStatus: "paused",
-                publicData: {
-                  ...(item.publicData || {}),
-                  listingStatus: "paused"
-                },
-                metadata: {
-                  ...(item.metadata || {}),
-                  listingStatus: "paused"
-                }
-              }
-            : item
-        )
-      );
-
-      addActivity("success", `Listing paused — ${title}`);
-      trackLaunchEvent("launch_listing_paused", { listingId: String(listingId) });
-    } catch (error) {
-      addActivity("error", `Pause failed — ${title}`);
-      alert(`Pause failed: ${error.message}`);
-      console.error("Pause failed:", error);
-    } finally {
-      setCommandBusy("");
-    }
-  }
-
-  async function reactivateListing() {
-    if (!listingId) return;
-
-    setCommandBusy("reactivate");
-
-    try {
-      const response = await fetch("/api/reactivate-listing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Reactivate failed");
-      }
-
-      setListings(current =>
-        current.map(item =>
-          String(getListingId(item)) === String(listingId)
-            ? {
-                ...item,
-                listingStatus: "live",
-                publicData: {
-                  ...(item.publicData || {}),
-                  listingStatus: "live"
-                },
-                metadata: {
-                  ...(item.metadata || {}),
-                  listingStatus: "live"
-                }
-              }
-            : item
-        )
-      );
-
-      addActivity("success", `Listing reactivated — ${title}`);
-      trackLaunchEvent("launch_listing_reactivated", { listingId: String(listingId) });
-    } catch (error) {
-      addActivity("error", `Reactivate failed — ${title}`);
-      alert(`Reactivate failed: ${error.message}`);
-      console.error("Reactivate failed:", error);
-    } finally {
-      setCommandBusy("");
-    }
-  }
-
-  async function confirmDelete() {
-    if (!listingId) return;
-
-    const ok = window.confirm(
-      `Delete this listing?\n\n${title}\n\nThis cannot be undone.`
-    );
-
-    if (!ok) return;
-
-    setCommandBusy("delete");
-
-    try {
-      const response = await fetch("/api/delete-listing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Delete failed");
-      }
-
-      setListings(current =>
-        current.filter(item => String(getListingId(item)) !== String(listingId))
-      );
-
-      addActivity("success", `Deleted — ${title}`);
-      trackLaunchEvent("launch_listing_deleted", { listingId: String(listingId) });
-
-      router.push("/account/my-listings");
-    } catch (error) {
-      addActivity("error", `Delete failed — ${title}`);
-      alert(`Delete failed: ${error.message}`);
-      console.error("Delete failed:", error);
-    } finally {
-      setCommandBusy("");
-    }
-  }
-
-  function toggleLiveStatus() {
-    if (isPaused) {
-      reactivateListing();
-    } else {
-      pauseListing();
     }
   }
 
   function launchExternal(platform, url, copyLabel, copy) {
     copyText(copyLabel, copy);
 
-    trackLaunchEvent(`launch_${platform}_clicked`, {
-      listingId: String(listingId || ""),
+    trackLaunchEvent(`post_free_${platform}_clicked`, {
       listingUrl
     });
 
@@ -910,14 +706,25 @@ export default function ListingLivePage() {
   }
 
   function launchWhatsApp() {
-    const message = buildSocialCopy("whatsapp", listing, listingUrl, selectedKeywords, edit);
+    const message = buildSocialCopy(
+      "whatsapp",
+      postListingForCopy,
+      listingUrl,
+      selectedKeywords
+    );
+
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
     launchExternal("whatsapp", url, "WhatsApp Message", message);
   }
 
   function launchMessenger() {
-    const message = buildSocialCopy("messenger", listing, listingUrl, selectedKeywords, edit);
+    const message = buildSocialCopy(
+      "messenger",
+      postListingForCopy,
+      listingUrl,
+      selectedKeywords
+    );
 
     launchExternal(
       "messenger",
@@ -928,26 +735,35 @@ export default function ListingLivePage() {
   }
 
   function launchSms() {
-    const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
+    const message = buildSocialCopy(
+      "sms",
+      postListingForCopy,
+      listingUrl,
+      selectedKeywords
+    );
+
     const url = `sms:?&body=${encodeURIComponent(message)}`;
 
     launchExternal("sms", url, "Text Message", message);
   }
 
   async function nativeShare() {
-    const message = buildSocialCopy("sms", listing, listingUrl, selectedKeywords, edit);
+    const message = buildSocialCopy(
+      "sms",
+      postListingForCopy,
+      listingUrl,
+      selectedKeywords
+    );
 
-    trackLaunchEvent("launch_native_share_clicked", {
-      listingId: String(listingId || ""),
+    trackLaunchEvent("post_free_native_share_clicked", {
       listingUrl
     });
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title,
-          text: message,
-          url: listingUrl
+          title: cardTitle,
+          text: message
         });
         return;
       } catch {
@@ -958,45 +774,10 @@ export default function ListingLivePage() {
     await copyText("Share Message", message);
   }
 
-  if (loading) {
-    return (
-      <main className="loading">
-        Loading Launch Studio...
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-          }
-        `}</style>
-      </main>
-    );
-  }
-
-  if (!listing) {
-    return (
-      <main className="loading">
-        Listing not found yet. Refresh in a few seconds.
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-          }
-        `}</style>
-      </main>
-    );
-  }
-
   return (
-
-        <>
+    <>
       <Head>
-        <title>{title} Launch Studio | IronXchange</title>
+        <title>Post Free | IronXchange</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <link
@@ -1016,40 +797,26 @@ export default function ListingLivePage() {
               </button>
 
               <div>
-                <span>IronXchange Launch Studio</span>
-                <h1>{title}</h1>
-                <p>Build the card. Blast the machine. Keep IronXchange as the source link.</p>
+                <span>IronXchange Post Free</span>
+                <h1>{cardTitle || "Machine Listing"}</h1>
+                <p>Add the machine. Build the card. Post it free. Then blast it everywhere.</p>
               </div>
             </div>
 
             <div className="launch-header-actions">
-              <button
-                type="button"
-                className={`status-command ${isPaused ? "paused" : "live"}`}
-                onClick={isPaused ? reactivateListing : pauseListing}
-                disabled={commandBusy === "pause" || commandBusy === "reactivate"}
-                title={isPaused ? "Reactivate listing" : "Pause listing"}
-              >
+              <button type="button" className="status-command live">
                 <span></span>
-                {commandBusy === "pause" || commandBusy === "reactivate"
-                  ? "Working"
-                  : isPaused
-                    ? "Paused"
-                    : "Live"}
+                Ready
               </button>
 
               <button
                 type="button"
                 className="save-top"
-                onClick={saveQuickEdit}
+                onClick={createListing}
                 disabled={saving}
               >
-                {saving ? "Launching..." : "Launch"}
+                {saving ? "Posting..." : "Post Free"}
               </button>
-
-              <a href={listingUrl} target="_blank" rel="noreferrer" className="public-link">
-                View Public
-              </a>
 
               <button
                 type="button"
@@ -1057,29 +824,6 @@ export default function ListingLivePage() {
                 onClick={() => router.push("/account")}
               >
                 Dashboard
-              </button>
-
-              <button
-                type="button"
-                className="duplicate-top"
-                onClick={() => {
-                  addActivity("success", `Duplicate selected — ${title}`);
-                  trackLaunchEvent("launch_duplicate_clicked", {
-                    listingId: String(listing?.id || "")
-                  });
-                  alert("Duplicate hook is ready. We will wire the duplicate API next.");
-                }}
-              >
-                Duplicate
-              </button>
-
-              <button
-                type="button"
-                className="delete-top"
-                onClick={confirmDelete}
-                disabled={commandBusy === "delete"}
-              >
-                {commandBusy === "delete" ? "Deleting..." : "Delete"}
               </button>
             </div>
           </section>
@@ -1141,48 +885,140 @@ export default function ListingLivePage() {
           <section className="studio-grid">
             <aside className="inventory-rail">
               <div className="rail-head">
-                <span>My Inventory</span>
-                <strong>{sellerInventory.length} Machines</strong>
+                <span>Machine Intake</span>
+                <strong>Post Free</strong>
               </div>
 
               <div className="inventory-scroll">
-                {sellerInventory.map(item => {
-                  const itemImages = getListingImages(item);
-                  const itemStatus = getListingStatus(item);
-                  const isCurrent = String(item.id) === String(listing.id);
+                <label>
+                  Category
+                  <select
+                    value={category}
+                    onChange={e => {
+                      setCategory(e.target.value);
+                      setMake("");
+                      setModel("");
+                    }}
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-                  return (
-                    <button
-                      key={String(item.id)}
-                      type="button"
-                      className={isCurrent ? "inventory-mini active" : "inventory-mini"}
-                      onClick={() => goToListing(item)}
+                <label>
+                  Year
+                  <input
+                    value={year}
+                    onChange={e => setYear(cleanNumber(e.target.value).slice(0, 4))}
+                    placeholder="2022"
+                  />
+                </label>
+
+                <label>
+                  Make
+                  <select
+                    value={make}
+                    onChange={e => {
+                      setMake(e.target.value);
+                      setModel("");
+                    }}
+                  >
+                    <option value="">Select Make</option>
+
+                    {availableMakes.map(item => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  Model
+                  <select value={model} onChange={e => setModel(e.target.value)}>
+                    <option value="">Select Model</option>
+
+                    {availableModels.map(item => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  Hours
+                  <input
+                    value={hours}
+                    onChange={e => setHours(cleanNumber(e.target.value).slice(0, 5))}
+                    placeholder="3855"
+                  />
+                </label>
+
+                <label>
+                  Price
+                  <input
+                    value={price}
+                    onChange={e => setPrice(cleanNumber(e.target.value))}
+                    placeholder="145000"
+                  />
+                </label>
+
+                <div className="split-inputs">
+                  <label>
+                    Serial #
+                    <input
+                      value={serialNumber}
+                      onChange={e => setSerialNumber(e.target.value)}
+                      placeholder="Serial"
+                    />
+                  </label>
+
+                  <label>
+                    Stock #
+                    <input
+                      value={stockNumber}
+                      onChange={e => setStockNumber(e.target.value)}
+                      placeholder="Stock"
+                    />
+                  </label>
+                </div>
+
+                <div className="split-inputs">
+                  <label>
+                    City
+                    <input
+                      value={city}
+                      onChange={e => setCity(e.target.value)}
+                      placeholder="Dallas"
+                    />
+                  </label>
+
+                  <label>
+                    State
+                    <select
+                      value={stateCode}
+                      onChange={e => setStateCode(e.target.value)}
                     >
-                      <img
-                        src={itemImages[0] || "/images/hero-equipment-yard.jpg"}
-                        alt={item.title || "Inventory machine"}
-                      />
+                      <option value="">ST</option>
 
-                      <span>{cleanMachineTitle(item.title || "Machine")}</span>
-
-                      <strong>{formatMoney(item.price)}</strong>
-
-                      <small className={itemStatus === "paused" ? "paused" : "live"}>
-                        {itemStatus === "paused" ? "Paused" : "Live"}
-                      </small>
-                    </button>
-                  );
-                })}
+                      {stateOptions.map(state => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               </div>
             </aside>
 
             <section className="preview-zone">
               <div className="card-nav-row">
-                <button
-                  type="button"
-                  onClick={() => goToListing(previousListing)}
-                  disabled={!previousListing}
-                >
+                <button type="button" disabled>
                   ← Previous
                 </button>
 
@@ -1191,11 +1027,7 @@ export default function ListingLivePage() {
                   <strong>True marketplace-card preview</strong>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => goToListing(nextListing)}
-                  disabled={!nextListing}
-                >
+                <button type="button" disabled>
                   Next →
                 </button>
               </div>
@@ -1247,30 +1079,30 @@ export default function ListingLivePage() {
                   <div className="preview-title-row">
                     <input
                       className="card-title-input"
-                      value={title}
+                      value={cardTitle}
                       readOnly
-                      title="Title is generated from listing year, make, model, and hours."
+                      title="Title is generated from year, make, and model."
                     />
 
                     <input
                       className="card-hours-input"
-                      value={formatHours(edit.hours || listing.hours)}
-                      onChange={e => setEdit({ ...edit, hours: cleanNumber(e.target.value) })}
+                      value={formatHours(hours)}
+                      onChange={e => setHours(cleanNumber(e.target.value))}
                     />
                   </div>
 
-               <div className="preview-keyword-row">
-  <MachineBadges
-    keywords={selectedKeywords.slice(0, 10)}
-    variant="studio"
-  />
-</div>
+                  <div className="preview-keyword-row">
+                    <MachineBadges
+                      keywords={selectedKeywords.slice(0, 10)}
+                      variant="studio"
+                    />
+                  </div>
 
                   <div className="preview-price-row">
                     <input
                       className="card-price-input"
-                      value={formatMoney(edit.price || listing.price)}
-                      onChange={e => setEdit({ ...edit, price: cleanNumber(e.target.value) })}
+                      value={formatMoney(price)}
+                      onChange={e => setPrice(cleanNumber(e.target.value))}
                     />
 
                     <div className="preview-meta">
@@ -1280,8 +1112,8 @@ export default function ListingLivePage() {
 
                       <input
                         className="card-location-input"
-                        value={edit.location || listing.location || ""}
-                        onChange={e => setEdit({ ...edit, location: e.target.value })}
+                        value={locationLabel}
+                        readOnly
                         placeholder="Location"
                       />
                     </div>
@@ -1289,6 +1121,7 @@ export default function ListingLivePage() {
                 </div>
               </div>
             </section>
+
             <aside className="distribution-center">
               <div className="distribution-head">
                 <span>Distribution Center</span>
@@ -1299,11 +1132,7 @@ export default function ListingLivePage() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                className="launch-btn whatsapp"
-                onClick={launchWhatsApp}
-              >
+              <button type="button" className="launch-btn whatsapp" onClick={launchWhatsApp}>
                 <i className="fa-brands fa-whatsapp"></i>
                 <div>
                   <strong>WhatsApp Blast</strong>
@@ -1311,11 +1140,7 @@ export default function ListingLivePage() {
                 </div>
               </button>
 
-              <button
-                type="button"
-                className="launch-btn messenger"
-                onClick={launchMessenger}
-              >
+              <button type="button" className="launch-btn messenger" onClick={launchMessenger}>
                 <i className="fa-brands fa-facebook-messenger"></i>
                 <div>
                   <strong>Messenger Blast</strong>
@@ -1331,7 +1156,7 @@ export default function ListingLivePage() {
                     "marketplace",
                     "https://www.facebook.com/marketplace/create/vehicle",
                     "Marketplace Copy",
-                    buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords, edit)
+                    buildSocialCopy("marketplace", postListingForCopy, listingUrl, selectedKeywords)
                   )
                 }
               >
@@ -1348,16 +1173,16 @@ export default function ListingLivePage() {
                 onClick={() =>
                   launchExternal(
                     "facebook",
-                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(listingUrl)}`,
+                    "https://www.facebook.com/",
                     "Facebook Post",
-                    buildSocialCopy("facebook", listing, listingUrl, selectedKeywords, edit)
+                    buildSocialCopy("facebook", postListingForCopy, listingUrl, selectedKeywords)
                   )
                 }
               >
                 <i className="fa-brands fa-facebook-f"></i>
                 <div>
                   <strong>Facebook Feed</strong>
-                  <span>Copy post + share source link</span>
+                  <span>Copy post + open Facebook</span>
                 </div>
               </button>
 
@@ -1369,7 +1194,7 @@ export default function ListingLivePage() {
                     "instagram",
                     "https://www.instagram.com/",
                     "Instagram Caption",
-                    buildSocialCopy("instagram", listing, listingUrl, selectedKeywords, edit)
+                    buildSocialCopy("instagram", postListingForCopy, listingUrl, selectedKeywords)
                   )
                 }
               >
@@ -1386,9 +1211,9 @@ export default function ListingLivePage() {
                 onClick={() =>
                   launchExternal(
                     "linkedin",
-                    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(listingUrl)}`,
+                    "https://www.linkedin.com/",
                     "LinkedIn Post",
-                    buildSocialCopy("linkedin", listing, listingUrl, selectedKeywords, edit)
+                    buildSocialCopy("linkedin", postListingForCopy, listingUrl, selectedKeywords)
                   )
                 }
               >
@@ -1407,7 +1232,7 @@ export default function ListingLivePage() {
                     "tiktok",
                     "https://www.tiktok.com/upload",
                     "TikTok Caption",
-                    buildSocialCopy("tiktok", listing, listingUrl, selectedKeywords, edit)
+                    buildSocialCopy("tiktok", postListingForCopy, listingUrl, selectedKeywords)
                   )
                 }
               >
@@ -1436,16 +1261,14 @@ export default function ListingLivePage() {
                   {copied === "Long Copy" ? "Copied" : "Long Copy"}
                 </button>
 
-                  <button
+                <button
                   type="button"
                   className="share-everywhere-btn"
                   onClick={nativeShare}
->
-                    <i className="fa-solid fa-arrow-up-from-bracket"></i>
-                    Share Everywhere
-</button>
-
-                  
+                >
+                  <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                  Share Everywhere
+                </button>
               </div>
             </aside>
           </section>
@@ -1460,7 +1283,7 @@ export default function ListingLivePage() {
 
                   <select
                     value={workflowStatus}
-                    onChange={e => updateWorkflow(e.target.value)}
+                    onChange={e => setWorkflowStatus(e.target.value)}
                   >
                     {workflowOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -1497,7 +1320,11 @@ export default function ListingLivePage() {
                     key={keyword}
                     type="button"
                     onClick={() => toggleKeyword(keyword)}
-                    className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
+                    className={
+                      selectedKeywords.includes(keyword)
+                        ? "keyword-chip active"
+                        : "keyword-chip"
+                    }
                   >
                     {keyword}
                   </button>
@@ -1514,8 +1341,8 @@ export default function ListingLivePage() {
               <label className="wide">
                 Description
                 <textarea
-                  value={edit.description}
-                  onChange={e => setEdit({ ...edit, description: e.target.value })}
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
                   placeholder="Condition, attachments, service, ownership history, and buyer-relevant notes..."
                 />
               </label>
@@ -1524,15 +1351,19 @@ export default function ListingLivePage() {
                 <button
                   type="button"
                   className="save-btn"
-                  onClick={saveQuickEdit}
+                  onClick={createListing}
                   disabled={saving}
                 >
-                  {saving ? "Launching..." : "Launch Listing"}
+                  {saving ? "Posting..." : "Post Free"}
                 </button>
 
-                <a href={listingUrl} target="_blank" rel="noreferrer" className="preview-btn">
-                  View Public Page
-                </a>
+                <button
+                  type="button"
+                  className="preview-btn"
+                  onClick={() => copyText("Short Copy", shortDescription)}
+                >
+                  Copy Preview
+                </button>
               </div>
             </section>
           </section>
@@ -1546,35 +1377,37 @@ export default function ListingLivePage() {
 
               <div className="activity-list">
                 <div className="activity-item success">
-                  <span>LAUNCH STUDIO READY</span>
+                  <span>POST NOW READY</span>
                   <small>NOW</small>
                 </div>
 
                 <div className="activity-item">
-                  <span>WORKFLOW: {workflowOptions.find(item => item.value === workflowStatus)?.label?.toUpperCase() || workflowStatus.toUpperCase()}</span>
+                  <span>
+                    {selectedKeywords.length} BADGE
+                    {selectedKeywords.length === 1 ? "" : "S"} SELECTED
+                  </span>
                   <small>SYNCED</small>
                 </div>
 
                 <div className="activity-item">
-                  <span>SOURCE LINK READY</span>
+                  <span>
+                    {photoItems.length} PHOTO
+                    {photoItems.length === 1 ? "" : "S"} LOADED
+                  </span>
                   <small>READY</small>
                 </div>
               </div>
             </section>
 
             <section className="panel seller-panel">
-              {sellerLogo ? (
-                <img src={sellerLogo} alt={sellerName} />
-              ) : (
-                <div className="seller-icon">
-                  <i className="fa-regular fa-user"></i>
-                </div>
-              )}
+              <div className="seller-icon">
+                <i className="fa-regular fa-user"></i>
+              </div>
 
               <div>
                 <span>Seller</span>
-                <strong>{sellerName}</strong>
-                <p>IronXchange is the source page. Blast the machine anywhere buyers live.</p>
+                <strong>IronXchange Seller</strong>
+                <p>Add the machine. Build the card. Post it free. Blast it everywhere.</p>
               </div>
             </section>
           </section>
@@ -1582,6 +1415,12 @@ export default function ListingLivePage() {
       </main>
 
       <Footer />
+                
+
+
+
+
+
 
                 <style jsx>{`
        :global(html),
@@ -2126,6 +1965,42 @@ select {
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,.14) transparent;
 }
+
+.inventory-scroll label {
+  display: grid;
+  gap: 5px;
+}
+
+.inventory-scroll input,
+.inventory-scroll select {
+  width: 100%;
+  height: 31px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
+    #0c0c0c;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+
+  color: #f2f2f2;
+
+  padding: 0 9px;
+
+  font-size: 11px;
+
+  outline: none;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.018) inset;
+}
+
+.split-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
 
         .inventory-mini {
   width: 100%;
