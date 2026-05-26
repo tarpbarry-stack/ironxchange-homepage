@@ -1448,7 +1448,7 @@ export default function PostFreePage() {
 
 
 
-                <style jsx>{`
+  <style jsx>{`
        :global(html),
 :global(body) {
   margin: 0;
@@ -2001,24 +2001,15 @@ select {
 .inventory-scroll select {
   width: 100%;
   height: 31px;
-
   background:
     linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
     #0c0c0c;
-
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 10px;
-
   color: #f2f2f2;
-
   padding: 0 9px;
-
   font-size: 11px;
-
   outline: none;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.018) inset;
 }
 
 .split-inputs {
@@ -2026,7 +2017,6 @@ select {
   grid-template-columns: 1fr 1fr;
   gap: 7px;
 }
-
 
         .inventory-mini {
   width: 100%;
@@ -2178,7 +2168,7 @@ select {
           text-align: center;
         }
 
-        .card-nav-row strong {
+        ..card-nav-row strong {
   color: rgba(255,255,255,.54);
 
   font-size: 9.5px;
@@ -2374,15 +2364,6 @@ transition:
   gap: 10px;
 }
 
-.preview-title-row .card-title-input {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.preview-title-row .card-hours-input {
-  flex: 0 0 92px;
-}
-
         .card-title-input,
         .card-hours-input,
         .card-price-input,
@@ -2394,9 +2375,8 @@ transition:
         }
 
         .card-title-input {
-  flex: 1;
-  width: 100%;
-  
+  min-width: 0;
+
   color: #f2f2f2;
 
   font-size: 18px;
@@ -2412,7 +2392,7 @@ transition:
 
         .card-hours-input {
   width: 92px;
- flex: 0 0 92px;
+
   text-align: right;
 
   color: rgba(255,255,255,.54);
@@ -3431,4 +3411,4 @@ textarea:focus,
       `}</style>
     </>
   );
-}        
+}          
