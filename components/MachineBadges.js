@@ -115,20 +115,22 @@ export default function MachineBadges({
         /* CARD */
 
         .machine-badges.card {
-          gap: 5px;
-        }
+  gap: 4px;
+}
 
-        .machine-badges.card span {
-          min-height: 19px;
+       .machine-badges.card span {
+  min-height: 16px;
 
-          padding: 3px 6px;
+  padding: 2px 5px;
 
-          font-size: 7px;
-          font-weight: 850;
+  font-size: 6.25px;
+  font-weight: 850;
 
-          letter-spacing: .12px;
-          line-height: 1;
-        }
+  letter-spacing: .08px;
+  line-height: 1;
+
+  border-radius: 999px;
+}
 
         /* STUDIO */
 
