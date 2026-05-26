@@ -1148,100 +1148,126 @@ export default function PostFreePage() {
                 </div>
               </button>
 
-              <button
-                type="button"
-                className="launch-btn marketplace"
-                onClick={() =>
-                  launchExternal(
-                    "marketplace",
-                    "https://www.facebook.com/marketplace/create/vehicle",
-                    "Marketplace Copy",
-                    buildSocialCopy("marketplace", postListingForCopy, listingUrl, selectedKeywords)
-                  )
-                }
-              >
-                <i className="fa-brands fa-facebook"></i>
-                <div>
-                  <strong>Facebook Marketplace</strong>
-                  <span>Copy listing copy + open Marketplace</span>
-                </div>
-              </button>
+<button
+  type="button"
+  className="launch-btn marketplace"
+  onClick={() =>
+    launchExternal(
+      "marketplace",
+      "https://www.facebook.com/marketplace/create/vehicle",
+      "Marketplace Copy",
+      buildSocialCopy(
+        "marketplace",
+        postListingForCopy,
+        listingUrl,
+        selectedKeywords
+      )
+    )
+  }
+>
+  <i className="fa-brands fa-facebook"></i>
+  <div>
+    <strong>Facebook Marketplace</strong>
+    <span>Copy listing copy + open Marketplace</span>
+  </div>
+</button>
 
-              <button
-                type="button"
-                className="launch-btn facebook"
-                onClick={() =>
-                  launchExternal(
-                    "facebook",
-                    "https://www.facebook.com/",
-                    "Facebook Post",
-                    buildSocialCopy("facebook", postListingForCopy, listingUrl, selectedKeywords)
-                  )
-                }
-              >
-                <i className="fa-brands fa-facebook-f"></i>
-                <div>
-                  <strong>Facebook Feed</strong>
-                  <span>Copy post + open Facebook</span>
-                </div>
-              </button>
+<button
+  type="button"
+  className="launch-btn facebook"
+  onClick={() =>
+    launchExternal(
+      "facebook",
+      "https://www.facebook.com/",
+      "Facebook Post",
+      buildSocialCopy(
+        "facebook",
+        postListingForCopy,
+        listingUrl,
+        selectedKeywords
+      )
+    )
+  }
+>
+  <i className="fa-brands fa-facebook-f"></i>
+  <div>
+    <strong>Facebook Feed</strong>
+    <span>Copy post + open Facebook</span>
+  </div>
+</button>
 
-              <button
-                type="button"
-                className="launch-btn instagram"
-                onClick={() =>
-                  launchExternal(
-                    "instagram",
-                    "https://www.instagram.com/",
-                    "Instagram Caption",
-                    buildSocialCopy("instagram", postListingForCopy, listingUrl, selectedKeywords)
-                  )
-                }
-              >
-                <i className="fa-brands fa-instagram"></i>
-                <div>
-                  <strong>Instagram</strong>
-                  <span>Copy caption + open Instagram</span>
-                </div>
-              </button>
+<button
+  type="button"
+  className="launch-btn instagram"
+  onClick={() =>
+    launchExternal(
+      "instagram",
+      "https://www.instagram.com/",
+      "Instagram Caption",
+      buildSocialCopy(
+        "instagram",
+        postListingForCopy,
+        listingUrl,
+        selectedKeywords
+      )
+    )
+  }
+>
+  <i className="fa-brands fa-instagram"></i>
+  <div>
+    <strong>Instagram</strong>
+    <span>Copy caption + open Instagram</span>
+  </div>
+</button>
 
-              <button
-                type="button"
-                className="launch-btn linkedin"
-                onClick={() =>
-                  launchExternal(
-                    "linkedin",
-                    "https://www.linkedin.com/",
-                    "LinkedIn Post",
-                    buildSocialCopy("linkedin", postListingForCopy, listingUrl, selectedKeywords)
-                  )
-                }
-              >
-                <i className="fa-brands fa-linkedin-in"></i>
-                <div>
-                  <strong>LinkedIn</strong>
-                  <span>Copy professional post + open LinkedIn</span>
-                </div>
-              </button>
+<button
+  type="button"
+  className="launch-btn linkedin"
+  onClick={() =>
+    launchExternal(
+      "linkedin",
+      "https://www.linkedin.com/",
+      "LinkedIn Post",
+      buildSocialCopy(
+        "linkedin",
+        postListingForCopy,
+        listingUrl,
+        selectedKeywords
+      )
+    )
+  }
+>
+  <i className="fa-brands fa-linkedin-in"></i>
+  <div>
+    <strong>LinkedIn</strong>
+    <span>Copy professional post + open LinkedIn</span>
+  </div>
+</button>
 
-              <button
-                type="button"
-                className="launch-btn tiktok"
-                onClick={() =>
-                  launchExternal(
-                    "tiktok",
-                    "https://www.tiktok.com/upload",
-                    "TikTok Caption",
-                    buildSocialCopy("tiktok", postListingForCopy, listingUrl, selectedKeywords)
-                  )
-                }
-              >
-                <i className="fa-brands fa-tiktok"></i>
-                <div>
-                  <strong>TikTok</strong>
-                  <span>Copy caption + open upload</span>
-                </div>
-              </button>
+<button
+  type="button"
+  className="launch-btn tiktok"
+  onClick={() =>
+    launchExternal(
+      "tiktok",
+      "https://www.tiktok.com/upload",
+      "TikTok Caption",
+      buildSocialCopy(
+        "tiktok",
+        postListingForCopy,
+        listingUrl,
+        selectedKeywords
+      )
+    )
+  }
+>
+  <i className="fa-brands fa-tiktok"></i>
+  <div>
+    <strong>TikTok</strong>
+    <span>Copy caption + open upload</span>
+  </div>
+</button>
+                    
 
               <div className="utility-grid">
                 <button type="button" onClick={launchSms}>
