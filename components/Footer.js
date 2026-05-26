@@ -18,15 +18,17 @@ export default function Footer() {
           <a href="/contact">Contact</a>
         </div>
 
-        <div>
-          <h4>LEGAL</h4>
-          <a href="https://ironxchange-c9x31o.mysharetribe-test.com/privacy-policy">
-            Privacy
-          </a>
-          <a href="https://ironxchange-c9x31o.mysharetribe-test.com/terms-of-service">
-            Terms
-          </a>
-        </div>
+     <div>
+  <h4>LEGAL</h4>
+
+  <a href="/privacy">
+    Privacy
+  </a>
+
+  <a href="/terms">
+    Terms
+  </a>
+</div>
       </div>
 
       <style jsx>{`
