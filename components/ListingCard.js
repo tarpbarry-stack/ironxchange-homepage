@@ -268,7 +268,12 @@ const normalizedKeywords = keywords
 }
 
 .card-body {
-  padding: 13px 13px 12px;
+  padding: 13px 13px 14px;
+
+  display: flex;
+  flex-direction: column;
+
+  min-height: 162px;
 }
 
 .title-row {
@@ -303,28 +308,49 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  min-height: 16px;
-  max-height: 34px;
+  min-height: 39px;
+  max-height: 39px;
 
-  margin: 7px 0 11px;
+  margin: 8px 0 13px;
 
   overflow: hidden;
 }
 
 
-}
+
 .price-row {
+  position: relative;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  margin-top: 14px;
-  padding-top: 11px;
+  margin-top: auto;
+  padding-top: 13px;
 
-  border-top: 1px solid rgba(255,255,255,.055);
+  border-top: 1px solid rgba(255,255,255,.045);
 
   gap: 12px;
 }
+
+.price-row::before {
+  content: "";
+
+  position: absolute;
+  top: -1px;
+  left: 0;
+
+  width: 34%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,.22),
+      transparent
+    );
+}
+
 
 .price-row strong {
   color: #f2f2f2;
