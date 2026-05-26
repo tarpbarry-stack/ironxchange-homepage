@@ -452,8 +452,8 @@ export default function SignupPage() {
       flex-direction: column;
       gap: 7px;
     }
-  }
-</style>
+   }
+`}</style>
     </>
   );
 }
