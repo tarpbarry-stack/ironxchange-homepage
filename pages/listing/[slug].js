@@ -7,6 +7,8 @@ import { getListingId } from "../../lib/listingFormatters";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+import MachineBadges from "../../components/MachineBadges";
+
 import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
@@ -564,11 +566,9 @@ export default function ListingPage() {
               <div className="highlights-column">
                 <h2>Highlights</h2>
 
-                <div className="highlight-chips">
-                  {displayHighlights.map(item => (
-                    <span key={item}>{String(item).toLowerCase()}</span>
-                  ))}
-                </div>
+               <div className="highlight-chips">
+  <MachineBadges keywords={displayHighlights} variant="slug" />
+</div>
               </div>
             </div>
 
@@ -1701,7 +1701,7 @@ video {
   text-transform: uppercase;
 }
 
-        ..facts strong {
+        .facts strong {
   min-width: 0;
 
   color: rgba(255,255,255,.76);
@@ -1716,63 +1716,13 @@ video {
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
 }
-        .highlight-chips {
-  display: flex;
-  flex-wrap: wrap;
 
-  justify-content: flex-start;
-  align-content: flex-start;
 
-  gap: 6px;
-
+       .highlight-chips {
   max-height: 150px;
   overflow: hidden;
 }
-
-        .highlight-chips span {
-  min-height: 23px;
-
-  padding: 4px 8px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 999px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.03),
-      rgba(255,255,255,.01)
-    );
-
-  color: rgba(255,255,255,.43);
-
-  font-size: 9px;
-  font-weight: 850;
-
-  letter-spacing: .14px;
-  line-height: 1;
-
-  text-transform: lowercase;
-
-  backdrop-filter: blur(2px);
-}
-
-.highlight-chips span:nth-child(-n+3) {
-  border-color: rgba(255,196,0,.20);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.055),
-      rgba(255,196,0,.012)
-    );
-
-  color: rgba(255,255,255,.58);
-}
+  
 
       .description {
   margin-top: 18px;
@@ -2422,11 +2372,7 @@ video {
     max-height: none;
   }
 
-  .highlight-chips span {
-    min-height: 19px;
-    padding: 3px 6px;
-    font-size: 7.5px;
-  }
+  
 
   .panel {
     padding: 14px;
