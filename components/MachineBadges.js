@@ -115,18 +115,18 @@ export default function MachineBadges({
         /* CARD */
 
         .machine-badges.card {
-  gap: 4px;
+  gap: 4px 5px;
 }
 
-       .machine-badges.card span {
-  min-height: 16px;
+      .machine-badges.card span {
+  min-height: 17px;
 
-  padding: 2px 5px;
+  padding: 2px 6px;
 
-  font-size: 6.25px;
+  font-size: 7px;
   font-weight: 850;
 
-  letter-spacing: .08px;
+  letter-spacing: .09px;
   line-height: 1;
 
   border-radius: 999px;
