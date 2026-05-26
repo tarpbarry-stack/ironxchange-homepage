@@ -227,7 +227,7 @@ function addActivity(type, message) {
   } catch (err) {
     console.error("Activity log failed", err);
   }
-
+}
 export default function PostFreePage() {
   const [category, setCategory] = useState(() => {
     if (typeof window !== "undefined") {
