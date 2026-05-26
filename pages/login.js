@@ -91,11 +91,16 @@ window.location.href = next;
       </main>
 
       <style jsx>{`
+  :global(html),
   :global(body) {
     margin: 0;
+    min-height: 100%;
+    overflow-x: hidden;
     background: #0b0b0b;
     color: #f2f2f2;
     font-family: Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
 
   * {
@@ -104,31 +109,73 @@ window.location.href = next;
 
   main {
     min-height: 100vh;
+
     display: grid;
     place-items: center;
-    padding: 22px;
+
+    padding: 24px;
+
     background:
-      radial-gradient(circle at top, rgba(255,196,0,.055), transparent 34%),
+      radial-gradient(circle at top center, rgba(255,196,0,.055), transparent 30%),
+      radial-gradient(circle at 22% 16%, rgba(255,255,255,.025), transparent 24%),
       #0b0b0b;
   }
 
   .card {
     width: 100%;
-    max-width: 430px;
+    max-width: 420px;
 
-    background: #151515;
-    border: 1px solid #282828;
-    border-radius: 12px;
+    position: relative;
 
-    padding: 28px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+      radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+      #141414;
 
-    box-shadow: 0 24px 70px rgba(0,0,0,.42);
+    border: 1px solid rgba(255,255,255,.065);
+    outline: 1px solid rgba(255,255,255,.018);
+
+    border-radius: 15px;
+
+    padding: 28px 28px 24px;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.045) inset,
+      0 28px 70px rgba(0,0,0,.38);
+  }
+
+  .card::before {
+    content: "";
+
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    top: 0;
+
+    height: 1px;
+
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,196,0,.42),
+        transparent
+      );
+
+    opacity: .55;
   }
 
   .logo {
-    height: 40px;
+    height: 39px;
+    width: auto;
+
     display: block;
-    margin: 0 auto 22px;
+
+    margin: 0 auto 21px;
+
+    filter:
+      contrast(1.03)
+      saturate(1.02);
   }
 
   h1 {
@@ -136,12 +183,12 @@ window.location.href = next;
 
     text-align: center;
 
-    color: #f2f2f2;
+    color: rgba(255,255,255,.90);
 
-    font-size: 16px;
-    font-weight: 900;
+    font-size: 13px;
+    font-weight: 950;
 
-    letter-spacing: .65px;
+    letter-spacing: .75px;
     text-transform: uppercase;
   }
 
@@ -154,92 +201,149 @@ window.location.href = next;
     display: grid;
     gap: 6px;
 
-    color: #9a9a9a;
+    color: rgba(255,255,255,.42);
 
-    font-size: 9px;
-    font-weight: 900;
+    font-size: 8.75px;
+    font-weight: 950;
 
-    letter-spacing: .45px;
+    letter-spacing: .58px;
     text-transform: uppercase;
   }
 
   input {
     width: 100%;
-    height: 36px;
+    height: 38px;
 
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+      #101010;
 
-    background: #101010;
+    border: 1px solid rgba(255,255,255,.075);
+    border-radius: 10px;
+
     color: #f2f2f2;
 
     padding: 0 12px;
 
     font-size: 13px;
+    font-weight: 600;
+
     outline: none;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.022) inset;
+
+    transition:
+      border-color .14s ease,
+      box-shadow .14s ease,
+      background .14s ease;
+  }
+
+  input:hover {
+    border-color: rgba(255,255,255,.13);
   }
 
   input:focus {
-    border-color: #FFC400;
-    box-shadow: 0 0 0 1px rgba(255,196,0,.12);
+    border-color: rgba(255,196,0,.44);
+
+    box-shadow:
+      0 0 0 1px rgba(255,196,0,.14),
+      0 1px 0 rgba(255,255,255,.028) inset;
+
+    background: #121212;
   }
 
   button {
-    height: 36px;
+    height: 38px;
 
     margin-top: 4px;
 
-    border: 1px solid #3a2d00;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    background: #151515;
+    border: 1px solid rgba(255,196,0,.24);
+    border-radius: 10px;
+
+    background:
+      linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
+      #151515;
+
     color: #FFC400;
 
     padding: 0 14px;
 
-    font-size: 10px;
-    font-weight: 900;
+    font-size: 9.5px;
+    font-weight: 950;
 
-    letter-spacing: .45px;
+    letter-spacing: .6px;
     text-transform: uppercase;
 
     cursor: pointer;
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.035) inset,
+      0 0 18px rgba(255,196,0,.045);
+
+    transition:
+      transform .14s ease,
+      border-color .14s ease,
+      background .14s ease,
+      box-shadow .14s ease,
+      color .14s ease;
   }
 
   button:hover {
-    background: #1a1400;
-    border-color: #FFC400;
+    transform: translateY(-1px);
+
+    background:
+      linear-gradient(180deg, rgba(255,196,0,.16), rgba(255,196,0,0)),
+      #1a1400;
+
+    border-color: rgba(255,196,0,.58);
+
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.05) inset,
+      0 12px 28px rgba(0,0,0,.22),
+      0 0 20px rgba(255,196,0,.065);
   }
 
   button:disabled {
-    opacity: .6;
+    opacity: .58;
     cursor: default;
+    transform: none;
   }
 
   .signup-area {
     margin-top: 14px;
     padding-top: 14px;
 
-    border-top: 1px solid #252525;
+    border-top: 1px solid rgba(255,255,255,.055);
 
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
 
-    font-size: 11px;
-    color: #8a8a8a;
+    color: rgba(255,255,255,.42);
+
+    font-size: 10.5px;
+    font-weight: 700;
   }
 
   .signup-link {
     color: #FFC400;
     text-decoration: none;
 
-    font-size: 10px;
-    font-weight: 900;
+    font-size: 9px;
+    font-weight: 950;
 
-    letter-spacing: .45px;
+    letter-spacing: .58px;
     text-transform: uppercase;
+
+    transition:
+      color .14s ease,
+      transform .14s ease;
   }
 
   .signup-link:hover {
@@ -249,17 +353,43 @@ window.location.href = next;
   .error-box {
     margin-top: 2px;
 
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 10px 12px;
 
-    background: rgba(229,62,62,.10);
+    background:
+      linear-gradient(180deg, rgba(229,62,62,.12), rgba(229,62,62,.06)),
+      #111;
+
     border: 1px solid rgba(229,62,62,.38);
+
     color: #ffb4b4;
 
     font-size: 11px;
+    font-weight: 700;
     line-height: 1.35;
   }
+
+  @media (max-width: 520px) {
+    main {
+      padding: 18px;
+    }
+
+    .card {
+      padding: 24px 20px 21px;
+      border-radius: 14px;
+    }
+
+    .logo {
+      height: 36px;
+    }
+
+    .signup-area {
+      flex-direction: column;
+      gap: 7px;
+    }
+  }
 `}</style>
-</>
+
+  </>
   );
 }
