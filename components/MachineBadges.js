@@ -123,7 +123,7 @@ export default function MachineBadges({
 
   align-content: flex-start;
 
-  gap: 7px 8px;
+  gap: 8px 8px;
 }
 
 .machine-badges.card span {
