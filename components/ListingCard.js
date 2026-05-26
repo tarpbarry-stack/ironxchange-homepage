@@ -308,14 +308,13 @@ const normalizedKeywords = keywords
 }
 
 .keyword-row {
-  min-height: 42px;
-  max-height: 42px;
+  height: 48px;
+  max-height: 48px;
 
-  margin: 7px 0 10px;
+  margin: 11px 0 8px;
 
   overflow: hidden;
 }
-
 
 
 .price-row {
