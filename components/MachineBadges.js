@@ -158,7 +158,7 @@ export default function MachineBadges({
     ),
     #171717;
 
-  color: rgba(255,255,255,.56);
+  color: rgba(255,255,255,.44);
 
   font-size: 10.5px;
   font-weight: 500;
