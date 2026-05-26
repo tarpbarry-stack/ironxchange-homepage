@@ -1746,7 +1746,7 @@ async function saveExternalLinks() {
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
-        }
+
 
         * {
           box-sizing: border-box;
@@ -1850,8 +1850,7 @@ select {
         .workbench-head span,
         .rail-head span,
         .card-nav-row span,
-        .distribution-head span,
-         {
+       .distribution-head span {
           display: block;
           margin-bottom: 3px;
           color: #FFC400;
@@ -2578,7 +2577,7 @@ select {
           text-align: center;
         }
 
-        ..card-nav-row strong {
+        .card-nav-row strong {
   color: rgba(255,255,255,.54);
 
   font-size: 9.5px;
