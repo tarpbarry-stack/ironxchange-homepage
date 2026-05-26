@@ -5,6 +5,8 @@ import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+import MachineBadges from "../components/MachineBadges";
+
 const BRAND_YELLOW = "#FFC400";
 
 const workflowOptions = [
@@ -1257,13 +1259,12 @@ export default function ListingLivePage() {
                     />
                   </div>
 
-                  <div className="preview-keyword-row">
-                    {selectedKeywords.slice(0, 10).map((keyword, index) => (
-                      <span key={`${keyword}-${index}`}>
-                        {String(keyword).trim().toLowerCase()}
-                      </span>
-                    ))}
-                  </div>
+               <div className="preview-keyword-row">
+  <MachineBadges
+    keywords={selectedKeywords.slice(0, 10)}
+    variant="studio"
+  />
+</div>
 
                   <div className="preview-price-row">
                     <input
@@ -2517,54 +2518,17 @@ transition:
   -webkit-font-smoothing: antialiased;
 }
 
-       .preview-keyword-row {
+      .preview-keyword-row {
   min-height: 56px;
 
   margin: 8px 0 14px;
 
-  display: flex;
-  align-content: flex-start;
-  flex-wrap: wrap;
-
-  gap: 5px 6px;
-
   overflow: hidden;
 }
 
-       .preview-keyword-row span {
-  padding: 3px 6px;
-
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.055);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.03),
-      rgba(255,255,255,.01)
-    );
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 9.5px;
-  font-weight: 750;
-
-  line-height: 1;
-
-  letter-spacing: .15px;
-
-  text-transform: lowercase;
-
-  backdrop-filter: blur(2px);
-}
+ 
 
 
-          backdrop-filter: blur(2px);
-          color: rgba(255,255,255,.42);
-          font-size: 9.5px;
-          font-weight: 750;
-          text-transform: lowercase;
-        }
 
         .preview-price-row {
   position: relative;
