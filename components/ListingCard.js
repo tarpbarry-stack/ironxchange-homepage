@@ -273,7 +273,7 @@ const normalizedKeywords = keywords
   display: flex;
   flex-direction: column;
 
-  min-height: 152px;
+  min-height: 150px;
 }
 
 .title-row {
