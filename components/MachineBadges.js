@@ -29,46 +29,107 @@ export default function MachineBadges({
           align-content: flex-start;
         }
 
-        .machine-badges span {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+       .machine-badges span {
+  position: relative;
 
-          border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-          border: 1px solid rgba(255,255,255,.055);
+  border-radius: 999px;
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.03),
-              rgba(255,255,255,.01)
-            );
+  border: 1px solid rgba(255,255,255,.075);
 
-          color: rgba(255,255,255,.44);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.075) 0%,
+      rgba(255,255,255,.025) 34%,
+      rgba(0,0,0,.12) 100%
+    ),
+    #131313;
 
-          text-transform: lowercase;
+  color: rgba(255,255,255,.58);
 
-          backdrop-filter: blur(2px);
+  text-transform: lowercase;
 
-          transition:
-            border-color .14s ease,
-            background .14s ease,
-            color .14s ease;
-        }
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.48),
+    0 1px 0 rgba(255,255,255,.035),
+    0 5px 12px rgba(0,0,0,.18);
 
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.45);
+
+  overflow: hidden;
+
+  transition:
+    border-color .14s ease,
+    background .14s ease,
+    color .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease;
+}
+.machine-badges span::before {
+  content: "";
+
+  position: absolute;
+
+  left: 7%;
+  right: 7%;
+  top: 1px;
+
+  height: 38%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.16),
+      rgba(255,255,255,0)
+    );
+
+  pointer-events: none;
+}
+
+.machine-badges span::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 1px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(0,0,0,.22);
+
+  pointer-events: none;
+}
         .machine-badges span:hover {
-          border-color: rgba(255,196,0,.18);
+  transform: translateY(-1px);
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,196,0,.05),
-              rgba(255,196,0,.01)
-            );
+  border-color: rgba(255,196,0,.26);
 
-          color: rgba(255,255,255,.72);
-        }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.095) 0%,
+      rgba(255,255,255,.035) 36%,
+      rgba(0,0,0,.14) 100%
+    ),
+    #16130a;
+
+  color: rgba(255,255,255,.78);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.52),
+    0 1px 0 rgba(255,255,255,.04),
+    0 6px 14px rgba(0,0,0,.22),
+    0 0 14px rgba(255,196,0,.055);
+}
 
        /* SLUG PAGE */
 
