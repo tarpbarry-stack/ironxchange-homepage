@@ -1196,9 +1196,10 @@ main {
   width: 150px;
   height: 68px;
 
-  flex: 0 0 auto;
+  margin: 0 0 8px;
 
-  margin: 0 auto 20px;
+  position: relative;
+  left: 10px;
 }
 
 .user-dot {
