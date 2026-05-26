@@ -131,18 +131,25 @@ export default function Home() {
   })
   .slice(0, 8);
 
-  function handleSearch() {
-    const terms = [
-      searchQuery.trim(),
-      category !== "ALL CATEGORIES" ? category : ""
-    ]
-      .filter(Boolean)
-      .join(" ");
+function handleSearch() {
+  const params = new URLSearchParams();
 
-    window.location.href = terms
-      ? `/browse?keywords=${encodeURIComponent(terms)}`
-      : "/browse";
+  const q = searchQuery.trim();
+
+  if (q) {
+    params.set("keywords", q);
   }
+
+  if (category && category !== "ALL CATEGORIES") {
+    params.set("category", category);
+  }
+
+  const queryString = params.toString();
+
+  window.location.href = queryString
+    ? `/browse?${queryString}`
+    : "/browse";
+}
   
   return (
     <>
