@@ -681,10 +681,10 @@ export default function ListingPage() {
 
              <div className="seller-row">
   <SellerLogoDecal
-    logo={sellerLogo}
-    name={sellerName}
-    className="slug-seller-decal"
-  />
+  logo={sellerLogo}
+  name={sellerName}
+  variant="slug"
+/>
 
   <div>
     <strong>{sellerName}</strong>
@@ -1781,11 +1781,6 @@ video {
   gap: 20px;
 }
 
-.slug-seller-decal {
-  width: 185px;
-  height: 82px;
-  flex: 0 0 auto;
-}
         .seller-logo {
   width: auto;
 
