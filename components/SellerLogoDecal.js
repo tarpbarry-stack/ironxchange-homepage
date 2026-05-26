@@ -6,12 +6,13 @@ export default function SellerLogoDecal({
 }) {
   
   return (
-    <div
-  className={`seller-logo-decal ${className}`}
-  style={{ transform: `translateX(${offsetX}px)` }}
->
+    <div className={`seller-logo-decal ${className}`}>
       {logo ? (
-        <img src={logo} alt={name} />
+        <img
+  src={logo}
+  alt={name}
+  style={{ transform: `translateX(${offsetX}px)` }}
+/>
       ) : (
         <i className="fa-regular fa-user"></i>
       )}
