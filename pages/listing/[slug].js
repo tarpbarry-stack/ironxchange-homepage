@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
+import SellerLogoDecal from "../../components/SellerLogoDecal";
+
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -677,28 +679,23 @@ export default function ListingPage() {
               <span className="seller-eyebrow">IronXchange Seller</span>
               <h2>Contact Seller</h2>
 
-              <div className="seller-row">
-                {sellerLogo ? (
-                  <img
-                    src={sellerLogo}
-                    alt={sellerName}
-                    className="seller-logo"
-                  />
-                ) : (
-                  <div className="seller-avatar">
-                    <i className="fa-regular fa-user"></i>
-                  </div>
-                )}
+             <div className="seller-row">
+  <SellerLogoDecal
+    logo={sellerLogo}
+    name={sellerName}
+    className="slug-seller-decal"
+  />
 
-                <div>
-                  <strong>{sellerName}</strong>
-                  <p>{sellerCompanyName}</p>
-                  <p>{sellerLocation}</p>
-                </div>
-              </div>
-            </div>
+  <div>
+    <strong>{sellerName}</strong>
+    <p>{sellerCompanyName}</p>
+    <p>{sellerLocation}</p>
+  </div>
+</div>
 
-            <div className="seller-actions">
+      </div>           
+      
+      <div className="seller-actions">
               <a
                 href={
                   loggedIn
@@ -1784,6 +1781,11 @@ video {
   gap: 20px;
 }
 
+.slug-seller-decal {
+  width: 160px;
+  height: 76px;
+  flex: 0 0 auto;
+}
         .seller-logo {
   width: auto;
 
@@ -1794,36 +1796,30 @@ video {
 
   display: block;
 
+  background: transparent;
+  border: none;
+  border-radius: 0;
+
   filter:
     contrast(1.03)
-    saturate(1.02)
-    drop-shadow(0 12px 24px rgba(0,0,0,.34));
+    saturate(1.02);
 }
 
         .seller-avatar {
-  width: 74px;
-  height: 74px;
+  width: 64px;
+  height: 64px;
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
-    ),
-    #101010;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 
-  display: grid;
-  place-items: center;
-
-  color: rgba(255,255,255,.52);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
+  color: rgba(255,255,255,.42);
 }
-
         .seller-row strong {
   display: block;
 
