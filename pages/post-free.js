@@ -1509,7 +1509,7 @@ export default function PostFreePage() {
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
-        }
+        
 
         * {
           box-sizing: border-box;
@@ -1613,7 +1613,7 @@ select {
         .workbench-head span,
         .rail-head span,
         .card-nav-row span,
-        .distribution-head span,
+        .distribution-head span
          {
           display: block;
           margin-bottom: 3px;
@@ -2265,6 +2265,15 @@ select {
 
 
        .card-nav-row strong {
+  color: rgba(255,255,255,.54);
+
+  font-size: 9.5px;
+  font-weight: 850;
+
+  letter-spacing: .18px;
+
+  text-rendering: geometricPrecision;
+}
 
        .preview-zone {
         min-width: 0;
