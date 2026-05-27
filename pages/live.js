@@ -383,11 +383,14 @@ export default function ListingLivePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
 
- const [externalLinks, setExternalLinks] = useState([
-  {
-    label: "",
-    url: ""
-  }
+const savedLinks = Array.isArray(listing?.publicData?.externalLinks)
+  ? listing.publicData.externalLinks
+  : [];
+
+setExternalLinks([
+  savedLinks[0] || { label: "", url: "" },
+  savedLinks[1] || { label: "", url: "" },
+  savedLinks[2] || { label: "", url: "" }
 ]);
 
   useEffect(() => {
@@ -1257,7 +1260,7 @@ async function saveExternalLinks() {
 <div className="external-link-panel">
   <div className="external-link-head">
     <span>Also Listed</span>
-    <strong>Outbound Links</strong>
+    <strong>Machine Also Listed Here</strong>
   </div>
 
   {externalLinks.map((link, index) => (
@@ -1299,21 +1302,8 @@ async function saveExternalLinks() {
     </div>
   ))}
 
-  <button
-    type="button"
-    className="external-add-btn"
-    onClick={() =>
-      setExternalLinks(current => [
-        ...current,
-        {
-          label: "",
-          url: ""
-        }
-      ])
-    }
-  >
-    + Add Link
-  </button>
+
+    
 
   <button
     type="button"
@@ -2408,149 +2398,90 @@ select {
 
 .external-link-panel {
   margin-top: 10px;
-  padding: 10px;
-  border: 1px solid rgba(255,196,0,.20);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at top left, rgba(255,196,0,.08), transparent 58%),
-    linear-gradient(180deg, rgba(255,196,0,.035), rgba(255,255,255,0)),
-    #111;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.075);
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .external-link-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-
-  gap: 8px;
+  padding: 7px 8px;
+  border-left: 3px solid #FFC400;
+  background:
+    linear-gradient(90deg, rgba(255,196,0,.13), rgba(255,196,0,0)),
+    #101010;
+  border-radius: 8px;
 }
 
+
 .external-link-head span {
+  display: block;
   color: #FFC400;
-
-  font-size: 8px;
+  font-size: 8.5px;
   font-weight: 950;
-
   letter-spacing: .72px;
   text-transform: uppercase;
 }
 
 .external-link-head strong {
-  color: rgba(255,255,255,.42);
-
+  display: block;
+  margin-top: 2px;
+  color: rgba(255,255,255,.50);
   font-size: 8px;
-  font-weight: 950;
-
-  letter-spacing: .55px;
+  font-weight: 850;
+  letter-spacing: .35px;
   text-transform: uppercase;
 }
-
-.external-link-row {
+.external-link-item {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 5px;
 }
 
-.external-link-row span {
-  color: rgba(255,255,255,.38);
-
-  font-size: 7.75px;
-  font-weight: 950;
-
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-
-.external-link-row input {
-  width: 100%;
+.external-link-item input {
   height: 27px;
-
-  border: 1px solid rgba(255,255,255,.075);
-  border-radius: 8px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
-    #0c0c0c;
-
-  color: rgba(255,255,255,.76);
-
-  padding: 0 8px;
-
-  font-size: 9px;
-  font-weight: 800;
-
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 7px;
+  background: #f2f2f2;
+  color: #111;
+  padding: 0 7px;
+  font-size: 8.5px;
+  font-weight: 850;
   outline: none;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.018) inset;
-
-  transition:
-    border-color .14s ease,
-    background .14s ease,
-    box-shadow .14s ease;
 }
 
-.external-link-row input::placeholder {
-  color: rgba(255,255,255,.24);
+.external-link-item input::placeholder {
+  color: rgba(0,0,0,.38);
 }
 
-.external-link-row input:focus {
-  border-color: rgba(255,196,0,.38);
-
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.025), rgba(255,196,0,0)),
-    #101010;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset,
-    0 0 0 1px rgba(255,196,0,.10);
+.external-link-item input:focus {
+  border-color: rgba(255,196,0,.75);
+  box-shadow: 0 0 0 1px rgba(255,196,0,.22);
 }
+
+
 
 .external-save-btn {
-  height: 29px;
-
-  margin-top: 2px;
-
-  border: 1px solid rgba(255,196,0,.28);
+  width: 104px;
+  height: 27px;
+  justify-self: end;
+  border: 1px solid rgba(255,196,0,.38);
   border-radius: 999px;
-
   background:
-    linear-gradient(180deg, rgba(255,196,0,.075), rgba(255,196,0,0)),
+    linear-gradient(180deg, rgba(255,196,0,.14), rgba(255,196,0,0)),
     #151515;
-
   color: #FFC400;
-
-  font-size: 8.25px;
+  font-size: 8px;
   font-weight: 950;
-
   letter-spacing: .58px;
   text-transform: uppercase;
-
   cursor: pointer;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
-
-  transition:
-    transform .14s ease,
-    border-color .14s ease,
-    background .14s ease,
-    box-shadow .14s ease;
 }
 
 .external-save-btn:hover {
-  transform: translateY(-1px);
-
-  border-color: rgba(255,196,0,.55);
-
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.13), rgba(255,196,0,0)),
-    #1a1400;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 0 14px rgba(255,196,0,.06);
+  background: #1a1400;
+  border-color: rgba(255,196,0,.65);
 }
 
 
