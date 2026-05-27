@@ -429,24 +429,21 @@ setExternalLinks([
 
   const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
-const listingCategory =
-  listing?.attributes?.publicData?.category ||
+const rawListingCategory =
   listing?.publicData?.category ||
   listing?.category ||
-  listing?.categoryName ||
-  listing?.categoryLabel ||
   listing?.categoryLevel1 ||
   listing?.publicData?.categoryLevel1 ||
-  listing?.attributes?.publicData?.categoryLevel1 ||
   "";
 
-  console.log("LIVE LISTING CATEGORY DEBUG", {
-  title: listing?.title,
-  listingCategory,
-  publicData: listing?.publicData,
-  attributesPublicData: listing?.attributes?.publicData,
-  listing
-});
+const listingCategory =
+  categoryDnaKeywords[rawListingCategory]
+    ? rawListingCategory
+    : categoryDnaKeywords[String(rawListingCategory).toUpperCase()]
+      ? String(rawListingCategory).toUpperCase()
+      : "";
+
+console.log("LIVE CATEGORY:", listingCategory);
 
 console.log("LIVE CATEGORY:", listingCategory);
 
