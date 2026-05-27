@@ -834,8 +834,8 @@ export default function PostFreePage() {
   setMake("");
   setModel("");
   setSelectedKeywords([]);
-
-                    }}
+  setKeywordSearch("");
+}}
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>
@@ -1312,7 +1312,7 @@ export default function PostFreePage() {
                 placeholder="Search features, hydraulics, tires, GPS..."
               />
 
-              <div className="keyword-grid">
+              <div className="keyword-grid" key={category}>
                 {filteredKeywords.map(keyword => (
                   <button
                     key={keyword}
