@@ -1,6 +1,7 @@
 import Head from "next/head";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
+import sharetribeSdk from "sharetribe-flex-sdk";
 import { normalizeListingRow } from "../../lib/normalizeListingRow";
 
 const CSV_HEADERS = [
@@ -24,6 +25,7 @@ const CSV_HEADERS = [
 
 export default function BulkUploadPage() {
   const [authorId, setAuthorId] = useState("");
+  const [sellerStatus, setSellerStatus] = useState("Checking logged-in seller...");
   const [rows, setRows] = useState([]);
   const [results, setResults] = useState([]);
   const [isImporting, setIsImporting] = useState(false);
@@ -31,6 +33,39 @@ export default function BulkUploadPage() {
 
   const validRows = useMemo(() => rows.filter(row => row.isValid), [rows]);
   const invalidRows = useMemo(() => rows.filter(row => !row.isValid), [rows]);
+
+  useEffect(() => {
+    async function loadCurrentSeller() {
+      try {
+        const clientId = process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID;
+
+        if (!clientId) {
+          setSellerStatus("Missing seller client ID");
+          return;
+        }
+
+        const sdk = sharetribeSdk.createInstance({
+          clientId,
+        });
+
+        const response = await sdk.currentUser.show();
+        const uuid = response?.data?.data?.id?.uuid;
+
+        if (!uuid) {
+          setSellerStatus("No logged-in seller found");
+          return;
+        }
+
+        setAuthorId(uuid);
+        setSellerStatus("Seller account detected");
+      } catch (err) {
+        console.error("CURRENT SELLER LOAD FAILED:", err);
+        setSellerStatus("Seller not detected. Log in and refresh.");
+      }
+    }
+
+    loadCurrentSeller();
+  }, []);
 
   function downloadTemplate() {
     const example = [
@@ -42,12 +77,12 @@ export default function BulkUploadPage() {
         "D6",
         "3210",
         "285000",
-        "Dallas, TX",
-        "Clean machine, tight undercarriage, ready to work.",
-        "gps,rops,good undercarriage",
-        "https://example.com/photo1.jpg,https://example.com/photo2.jpg",
+        "Dallas TX",
+        "Clean machine tight undercarriage ready to work.",
+        "gps rops good undercarriage",
+        "",
         "STK-1001",
-        "Facebook Marketplace|https://facebook.com/example;Dealer Site|https://example.com",
+        "",
         "CAT00D6XXXXX",
         "Good",
         "Dallas",
@@ -95,7 +130,7 @@ export default function BulkUploadPage() {
     setResults([]);
 
     if (!authorId.trim()) {
-      setError("Missing Sharetribe seller authorId. Paste seller UUID before import.");
+      setError("No logged-in seller detected. Log in and refresh.");
       return;
     }
 
@@ -120,7 +155,7 @@ export default function BulkUploadPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok && !data.results) {
         throw new Error(data?.error || "Import failed");
       }
 
@@ -165,15 +200,10 @@ export default function BulkUploadPage() {
               <small>category, year, make, model, hours, price, location</small>
             </label>
 
-            <div className="author-box">
-              <label>Sharetribe Seller Author ID</label>
-              <input
-                value={authorId}
-                onChange={event => setAuthorId(event.target.value)}
-                placeholder="Paste seller UUID here for V1"
-              />
+            <div className="seller-detect-box">
+              <strong>{sellerStatus}</strong>
               <small>
-                Temporary V1 field. We will wire this to logged-in seller account next.
+                Bulk Upload will import machines into the currently logged-in seller account.
               </small>
             </div>
           </div>
@@ -375,13 +405,6 @@ export default function BulkUploadPage() {
           margin-bottom: 18px;
         }
 
-        .panel-head {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-        }
-
         .upload-box {
           border: 1px dashed rgba(255, 196, 0, 0.45);
           background: rgba(255, 196, 0, 0.06);
@@ -406,27 +429,26 @@ export default function BulkUploadPage() {
           color: #858b94;
         }
 
-        .author-box {
+        .seller-detect-box {
           margin-top: 16px;
+          border: 1px solid rgba(255, 196, 0, 0.22);
+          background: rgba(255, 196, 0, 0.06);
+          border-radius: 14px;
+          padding: 14px;
           display: grid;
-          gap: 8px;
+          gap: 5px;
         }
 
-        .author-box label {
+        .seller-detect-box strong {
+          color: #ffc400;
           font-size: 12px;
+          font-weight: 950;
           text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: #aeb4bc;
-          font-weight: 900;
+          letter-spacing: 0.08em;
         }
 
-        .author-box input {
-          background: #08090a;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          color: #f5f5f5;
-          border-radius: 12px;
-          padding: 13px 14px;
-          outline: none;
+        .seller-detect-box small {
+          color: #858b94;
         }
 
         .status-row {
