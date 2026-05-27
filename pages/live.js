@@ -358,6 +358,12 @@ ${description}
 ${linkLine}`;
 }
 
+export async function getServerSideProps() {
+  return {
+    props: {}
+  };
+}
+
 export default function ListingLivePage() {
   const router = useRouter();
   const { id } = router.query;
