@@ -16,25 +16,46 @@ export default async function handler(req, res) {
       clientSecret: process.env.SHARETRIBE_CLIENT_SECRET
     });
 
-    const testUuid = new UUID(
-      "11111111-1111-1111-1111-111111111111"
-    );
+    const authorId =
+      req.body?.authorId ||
+      "11111111-1111-1111-1111-111111111111";
 
-    const testMoney = new Money(
-      28500000,
-      "USD"
-    );
+    const created = await sdk.listings.create({
+      title: "BULK TEST MACHINE",
+      description: "Bulk upload API test listing.",
+
+      authorId: new UUID(authorId),
+
+      state: "published",
+
+      price: new Money(28500000, "USD"),
+
+      publicData: {
+        category: "DOZERS",
+        year: 2021,
+        make: "CATERPILLAR",
+        model: "D6",
+        hours: 3210,
+        location: "Dallas, TX",
+        workflowStatus: "good-listing",
+        listingStatus: "live",
+        externalLinks: []
+      }
+    });
 
     return res.status(200).json({
       success: true,
-      integrationSdkLoaded: !!sdk,
-      uuidWorks: !!testUuid,
-      moneyWorks: !!testMoney
+      created
     });
 
   } catch (err) {
+    console.error(err);
+
     return res.status(500).json({
-      error: err?.message || "Money failed"
+      error:
+        err?.data?.errors?.[0]?.detail ||
+        err?.message ||
+        "Listing create failed"
     });
   }
 }
