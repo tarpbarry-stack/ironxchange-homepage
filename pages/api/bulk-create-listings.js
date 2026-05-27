@@ -22,13 +22,18 @@ export default async function handler(req, res) {
 
     const created = await sdk.listings.create({
       title: "BULK TEST MACHINE",
-      description: "Bulk upload API test listing.",
+
+      description:
+        "Bulk upload API test listing.",
 
       authorId: new UUID(authorId),
 
-      state: "published",
+      state: "draft",
 
-      price: new Money(28500000, "USD"),
+      price: new Money(
+        28500000,
+        "USD"
+      ),
 
       publicData: {
         category: "DOZERS",
