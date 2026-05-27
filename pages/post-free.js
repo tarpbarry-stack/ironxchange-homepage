@@ -394,6 +394,12 @@ export default function PostFreePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("good-listing");
 
+  const [externalLinks, setExternalLinks] = useState([
+  { label: "", url: "" },
+  { label: "", url: "" },
+  { label: "", url: "" }
+]);
+
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -652,8 +658,16 @@ export default function PostFreePage() {
           city,
           location: locationLabel,
           loc: stateCode,
+          
+         keywords: selectedKeywords,
 
-          keywords: selectedKeywords,
+         externalLinks: externalLinks
+        .map(link => ({
+         label: String(link.label || "").trim(),
+         url: String(link.url || "").trim()
+         }))
+        .filter(link => link.label && link.url)
+        .slice(0, 3),
 
           workflowStatus,
 
@@ -1013,6 +1027,41 @@ export default function PostFreePage() {
                     </select>
                   </label>
                 </div>
+
+              <div className="post-link-strip">
+  <div className="post-link-head">
+    <span>Distribution Hub</span>
+    <strong>Optional outbound machine links</strong>
+  </div>
+
+  {externalLinks.map((link, index) => (
+    <div className="post-link-row" key={index}>
+      <span>↗</span>
+
+      <input
+        value={link.label}
+        placeholder="Name"
+        onChange={e => {
+          const next = [...externalLinks];
+          next[index] = { ...next[index], label: e.target.value };
+          setExternalLinks(next);
+        }}
+      />
+
+      <input
+        value={link.url}
+        placeholder="URL"
+        onChange={e => {
+          const next = [...externalLinks];
+          next[index] = { ...next[index], url: e.target.value };
+          setExternalLinks(next);
+        }}
+      />
+    </div>
+  ))}
+</div>
+
+                      
               </div>
             </aside>
 
@@ -2016,6 +2065,68 @@ select {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7px;
+}
+.post-link-strip {
+  margin-top: 2px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255,255,255,.052);
+  display: grid;
+  gap: 6px;
+}
+
+.post-link-head {
+  position: relative;
+  padding-left: 8px;
+}
+
+.post-link-head::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  bottom: 1px;
+  width: 2px;
+  border-radius: 999px;
+  background: #00D1FF;
+  box-shadow: 0 0 10px rgba(0,209,255,.28);
+}
+
+.post-link-head span {
+  display: block;
+  color: #7DEBFF;
+  font-size: 7.4px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.post-link-head strong {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255,255,255,.38);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.post-link-row {
+  display: grid;
+  grid-template-columns: 13px 66px minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
+}
+
+.post-link-row span {
+  color: #00D1FF;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.post-link-row input {
+  height: 27px !important;
+  border-radius: 8px !important;
+  font-size: 8px !important;
 }
 
         .inventory-mini {
