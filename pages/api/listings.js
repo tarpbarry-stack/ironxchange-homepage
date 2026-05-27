@@ -314,6 +314,10 @@ description: attrs.description || "",
 
 publicData,
 
+externalLinks: Array.isArray(publicData.externalLinks)
+  ? publicData.externalLinks
+  : [],
+
 listingStatus:
   publicData.listingStatus ||
   attrs.metadata?.listingStatus ||
