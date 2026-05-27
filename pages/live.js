@@ -430,10 +430,12 @@ setExternalLinks([
   const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
 const listingCategory =
-  listing?.category ||
-  listing?.publicData?.category ||
   listing?.attributes?.publicData?.category ||
+  listing?.publicData?.category ||
+  listing?.category ||
   "";
+
+console.log("LIVE CATEGORY:", listingCategory);
 
   const availableKeywords = useMemo(() => {
   const dna = categoryDnaKeywords[listingCategory] || [];
