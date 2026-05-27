@@ -15,7 +15,9 @@ function extractSharetribeError(err) {
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
@@ -27,54 +29,89 @@ export default async function handler(req, res) {
     const authorId = req.body?.authorId;
 
     if (!authorId) {
-      return res.status(400).json({ error: "Missing authorId" });
+      return res.status(400).json({
+        error: "Missing authorId"
+      });
     }
 
-    const createParams = {
+    const created = await sdk.listings.create({
       title: "BULK TEST MACHINE",
-      description: "Bulk upload API test listing.",
+
+      description:
+        "Bulk upload API test listing.",
+
       authorId: new UUID(authorId),
+
       state: "published",
-      price: new Money(28500000, "USD"),
+
+      price: new Money(
+        28500000,
+        "USD"
+      ),
+
       publicData: {
         listingType: "free-listing",
-        transactionProcessAlias: "default-inquiry/release-1",
+        transactionProcessAlias:
+          "default-inquiry/release-1",
+
         unitType: "inquiry",
+
         categoryLevel1: "dozers",
         categoryLevel2: "dozers-caterpillar",
         categoryLevel3: "dozers-caterpillar-d6",
+
         loc: "TX",
         city: "Dallas",
+
         year: "2021",
         make: "CATERPILLAR",
         model: "D6",
+
         hours: 3210,
+
         workflowStatus: "good-listing",
         listingStatus: "live",
+
         keywords: [],
         externalLinks: []
       }
-    };
-
-    const created = await sdk.listings.create(createParams, {
-      expand: true
     });
 
     return res.status(200).json({
-      success: true,
-      listingId: created?.data?.data?.id?.uuid || null,
-      created
+      results: [
+        {
+          row: 2,
+          status: "created",
+          title: "BULK TEST MACHINE",
+          listingId:
+            created?.data?.data?.id?.uuid || null
+        }
+      ]
     });
 
   } catch (err) {
     console.error(
       "BULK CREATE ERROR FULL:",
-      JSON.stringify(extractSharetribeError(err), null, 2)
+      JSON.stringify(
+        extractSharetribeError(err),
+        null,
+        2
+      )
     );
 
     return res.status(500).json({
-      error: "Listing create failed",
-      sharetribe: extractSharetribeError(err)
+      results: [
+        {
+          row: 2,
+          status: "error",
+          title: "BULK TEST MACHINE",
+          error:
+            err?.data?.errors?.[0]?.title ||
+            err?.data?.errors?.[0]?.code ||
+            err?.message ||
+            "Listing create failed"
+        }
+      ]
     });
   }
 }
