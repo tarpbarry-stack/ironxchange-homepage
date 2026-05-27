@@ -7,6 +7,8 @@ import Footer from "../components/Footer";
 
 import MachineBadges from "../components/MachineBadges";
 
+import categoryDnaKeywords from "../lib/categoryDnaKeywords";
+
 const BRAND_YELLOW = "#FFC400";
 
 const workflowOptions = [
@@ -17,87 +19,6 @@ const workflowOptions = [
   { value: "review", label: "Review" }
 ];
 
-const commonKeywordOptions = [
-  "aggregate configuration",
-  "cold ac",
-  "cold a/c",
-  "heat",
-  "cab",
-  "enclosed cab",
-  "rops",
-  "fops",
-  "backup camera",
-  "camera system",
-  "360 camera",
-  "led lights",
-  "work lights",
-  "beacon",
-  "strobe",
-  "joystick controls",
-  "pilot controls",
-  "hydraulic controls",
-  "electro hydraulic controls",
-  "high flow hydraulics",
-  "aux hydraulics",
-  "quick coupler",
-  "hydraulic coupler",
-  "quick attach",
-  "bucket",
-  "forks",
-  "ripper",
-  "push block",
-  "ride control",
-  "payload system",
-  "payload scales",
-  "weigh system",
-  "smartgrade",
-  "smart grade",
-  "topcon",
-  "trimble",
-  "gps",
-  "grade control",
-  "2d grade control",
-  "3d grade control",
-  "machine control",
-  "machine guidance",
-  "tier 3",
-  "tier 4",
-  "tier 4 final",
-  "de-tier",
-  "detier",
-  "no def",
-  "egr delete",
-  "fresh service",
-  "service records",
-  "fleet maintained",
-  "dealer maintained",
-  "one owner",
-  "municipal owned",
-  "contractor owned",
-  "owner operator",
-  "tight machine",
-  "straight machine",
-  "ready to work",
-  "job ready",
-  "work ready",
-  "field ready",
-  "new tires",
-  "good tires",
-  "radial tires",
-  "foam filled tires",
-  "solid tires",
-  "good undercarriage",
-  "new undercarriage",
-  "excellent undercarriage",
-  "new tracks",
-  "good tracks",
-  "low hours",
-  "clean machine",
-  "excellent hydraulics",
-  "strong hydraulics",
-  "strong engine",
-  "excellent engine"
-];
 
 function slugify(text = "") {
   return String(text)
@@ -508,9 +429,19 @@ setExternalLinks([
 
   const sellerLogo = listing?.sellerLogo || listing?.profileImage || "";
 
+const listingCategory =
+  listing?.category ||
+  listing?.publicData?.category ||
+  listing?.attributes?.publicData?.category ||
+  "";
+
   const availableKeywords = useMemo(() => {
-    return Array.from(new Set([...commonKeywordOptions, ...selectedKeywords])).sort();
-  }, [selectedKeywords]);
+  const dna = categoryDnaKeywords[listingCategory] || [];
+
+  return Array.from(
+    new Set([...dna, ...selectedKeywords])
+  );
+}, [listingCategory, selectedKeywords]);
 
   const filteredKeywords = useMemo(() => {
     const search = keywordSearch.trim().toLowerCase();
@@ -1625,7 +1556,7 @@ async function saveExternalLinks() {
                 placeholder="Search features, hydraulics, tires, GPS..."
               />
 
-              <div className="keyword-grid">
+             <div className="keyword-grid" key={listingCategory}>
                 {filteredKeywords.map(keyword => (
                   <button
                     key={keyword}
