@@ -579,25 +579,21 @@ const externalLinks = Array.isArray(rawExternalLinks)
               <div className="highlights-column">
                 <h2>Highlights</h2>
 
-               <div className="highlight-chips">
-  <MachineBadges keywords={displayHighlights} variant="slug" />
+              <div className="highlight-chips">
+  <MachineBadges
+    keywords={displayHighlights}
+    variant="slug"
+  />
 </div>
 
-{true ? (
+{externalLinks.length > 0 ? (
   <div className="also-listed-split">
     <div className="also-listed-head">
       <span>Machine Also Listed Here</span>
     </div>
 
     <div className="also-listed-links">
-      {(externalLinks.length
-  ? externalLinks.slice(0, 3)
-  : [
-      { label: "Empire Cat", url: "https://www.google.com" },
-      { label: "Facebook Marketplace", url: "https://www.google.com" },
-      { label: "Purple Wave", url: "https://www.google.com" }
-    ]
-).map((link, index) => (
+      {externalLinks.slice(0, 3).map((link, index) => (
         <a
           key={`${link.label}-${index}`}
           href={link.url}
