@@ -432,6 +432,11 @@ export default function ListingPage() {
     }
   }
 
+const externalLinks = Array.isArray(listing?.publicData?.externalLinks)
+  ? listing.publicData.externalLinks.filter(link => link?.url && link?.label)
+  : [];
+
+
   return (
 
         <>
@@ -571,6 +576,29 @@ export default function ListingPage() {
                <div className="highlight-chips">
   <MachineBadges keywords={displayHighlights} variant="slug" />
 </div>
+
+{externalLinks.length > 0 ? (
+  <div className="also-listed-split">
+    <div className="also-listed-head">
+      <span>Machine Also Listed Here</span>
+    </div>
+
+    <div className="also-listed-links">
+      {externalLinks.slice(0, 3).map((link, index) => (
+        <a
+          key={`${link.label}-${index}`}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ↗ {link.label}
+        </a>
+      ))}
+    </div>
+  </div>
+) : null}
+
+                
               </div>
             </div>
 
@@ -1602,6 +1630,8 @@ video {
     0 0 20px rgba(255,196,0,.08);
 }
 
+//// QUICK FACTS HIGH LIGHTS ///////
+
       .facts-highlights-panel {
   height: var(--info-row-height);
   min-height: var(--info-row-height);
@@ -1611,8 +1641,9 @@ video {
 
   display: grid;
 
-  grid-template-columns: .82fr 1fr;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1fr);
 
+min-width: 0;
   gap: 0;
 
   align-items: start;
@@ -1636,6 +1667,13 @@ video {
     0 1px 0 rgba(255,255,255,.045) inset,
     0 18px 44px rgba(0,0,0,.26);
 }
+
+.facts-column,
+.highlights-column {
+  min-width: 0;
+  overflow: hidden;
+}
+
 
        .facts-column::after {
   content: "";
@@ -1698,7 +1736,7 @@ video {
   text-transform: uppercase;
 }
 
-        .facts strong {
+       .facts strong {
   min-width: 0;
 
   color: rgba(255,255,255,.76);
@@ -1708,7 +1746,9 @@ video {
 
   line-height: 1.15;
 
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -1719,7 +1759,127 @@ video {
   max-height: 150px;
   overflow: hidden;
 }
-  
+
+
+.also-listed-split {
+  position: relative;
+
+  margin-top: 14px;
+  padding-top: 13px;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+}
+
+.also-listed-split::before {
+  content: "";
+
+  position: absolute;
+  top: -1px;
+  left: 0;
+
+  width: 34%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,209,255,.42),
+      transparent
+    );
+}
+
+.also-listed-head span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #7DEBFF;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.also-listed-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.also-listed-links a {
+  min-height: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 8px;
+
+  border-radius: 1px;
+
+  border-top: 1px solid rgba(255,255,255,.075);
+  border-left: 1px solid rgba(255,255,255,.052);
+  border-right: 1px solid rgba(0,0,0,.36);
+  border-bottom: 1px solid rgba(0,0,0,.46);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,209,255,.052),
+      rgba(255,255,255,.010) 45%,
+      rgba(0,0,0,.035)
+    ),
+    #171717;
+
+  color: rgba(125,235,255,.78);
+
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08px;
+  line-height: 1;
+
+  white-space: nowrap;
+  text-decoration: none;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 -1px 1px rgba(0,0,0,.34),
+    0 1px 0 rgba(255,255,255,.012);
+
+  text-shadow:
+    0 1px 0 rgba(0,0,0,.52);
+
+  transition:
+    transform .14s ease,
+    color .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.also-listed-links a:hover {
+  transform: translateY(-1px);
+
+  color: #7DEBFF;
+
+  border-top-color: rgba(0,209,255,.28);
+  border-left-color: rgba(0,209,255,.18);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,209,255,.085),
+      rgba(255,255,255,.014) 46%,
+      rgba(0,0,0,.055)
+    ),
+    #1a1a1a;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    inset 0 -1px 1px rgba(0,0,0,.42),
+    0 0 12px rgba(0,209,255,.07);
+}  
 
       .description {
   margin-top: 18px;
