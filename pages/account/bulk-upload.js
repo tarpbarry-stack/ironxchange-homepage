@@ -25,10 +25,16 @@ const CSV_HEADERS = [
 
 export default function BulkUploadPage() {
   const [authorId, setAuthorId] = useState("");
-  const [sellerStatus, setSellerStatus] = useState("Checking logged-in seller...");
+  const [sellerStatus, setSellerStatus] = useState(
+    "Checking logged-in seller..."
+  );
+
   const [rows, setRows] = useState([]);
   const [results, setResults] = useState([]);
-  const [isImporting, setIsImporting] = useState(false);
+
+  const [isImporting, setIsImporting] =
+    useState(false);
+
   const [error, setError] = useState("");
 
   const validRows = useMemo(
@@ -45,16 +51,20 @@ export default function BulkUploadPage() {
     async function loadCurrentSeller() {
       try {
         const clientId =
-          process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID;
+          process.env
+            .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID;
 
         if (!clientId) {
-          setSellerStatus("Missing seller client ID");
+          setSellerStatus(
+            "Missing seller client ID"
+          );
           return;
         }
 
-        const sdk = sharetribeSdk.createInstance({
-          clientId,
-        });
+        const sdk =
+          sharetribeSdk.createInstance({
+            clientId,
+          });
 
         const response =
           await sdk.currentUser.show();
@@ -93,6 +103,7 @@ export default function BulkUploadPage() {
   function downloadTemplate() {
     const example = [
       CSV_HEADERS.join(","),
+
       [
         "DOZERS",
         "2021",
@@ -115,7 +126,10 @@ export default function BulkUploadPage() {
 
     const blob = new Blob(
       [example],
-      { type: "text/csv;charset=utf-8;" }
+      {
+        type:
+          "text/csv;charset=utf-8;",
+      }
     );
 
     const url =
@@ -149,11 +163,12 @@ export default function BulkUploadPage() {
 
       complete: result => {
         const normalized =
-          result.data.map((row, index) =>
-            normalizeListingRow(
-              row,
-              index
-            )
+          result.data.map(
+            (row, index) =>
+              normalizeListingRow(
+                row,
+                index
+              )
           );
 
         setRows(normalized);
@@ -162,7 +177,7 @@ export default function BulkUploadPage() {
       error: err => {
         setError(
           err?.message ||
-          "CSV parse failed"
+            "CSV parse failed"
         );
       },
     });
@@ -212,10 +227,13 @@ export default function BulkUploadPage() {
       const data =
         await response.json();
 
-      if (!response.ok && !data.results) {
+      if (
+        !response.ok &&
+        !data.results
+      ) {
         throw new Error(
           data?.error ||
-          "Import failed"
+            "Import failed"
         );
       }
 
@@ -226,7 +244,7 @@ export default function BulkUploadPage() {
     } catch (err) {
       setError(
         err?.message ||
-        "Import failed"
+          "Import failed"
       );
 
     } finally {
@@ -238,7 +256,8 @@ export default function BulkUploadPage() {
     <>
       <Head>
         <title>
-          Bulk Upload | IronXchange
+          Bulk Upload |
+          IronXchange
         </title>
       </Head>
 
@@ -246,6 +265,7 @@ export default function BulkUploadPage() {
 
         <section className="bulk-hero">
           <div>
+
             <p className="eyebrow">
               SELLER INVENTORY
             </p>
@@ -255,16 +275,21 @@ export default function BulkUploadPage() {
             </h1>
 
             <p>
-              Load multiple machines
-              into IronXchange.
+              Load multiple
+              machines into
+              IronXchange.
             </p>
+
           </div>
 
           <button
             className="ghost-btn"
-            onClick={downloadTemplate}
+            onClick={
+              downloadTemplate
+            }
           >
-            Download CSV Template
+            Download CSV
+            Template
           </button>
         </section>
 
@@ -285,7 +310,9 @@ export default function BulkUploadPage() {
               <input
                 type="file"
                 accept=".csv"
-                onChange={handleFileUpload}
+                onChange={
+                  handleFileUpload
+                }
               />
 
               <span>
@@ -293,8 +320,9 @@ export default function BulkUploadPage() {
               </span>
 
               <small>
-                category, year, make,
-                model, hours, price,
+                category, year,
+                make, model,
+                hours, price,
                 location
               </small>
             </label>
@@ -306,18 +334,22 @@ export default function BulkUploadPage() {
               </strong>
 
               <small>
-                Auto seller detection
-                is not available yet.
-                Use seller UUID for V1.
+                Auto seller
+                detection is not
+                available yet.
+                Use seller UUID
+                for V1.
               </small>
 
               <input
                 value={authorId}
+
                 onChange={event =>
                   setAuthorId(
                     event.target.value
                   )
                 }
+
                 placeholder="Seller UUID"
               />
             </div>
@@ -374,17 +406,15 @@ export default function BulkUploadPage() {
             )}
 
             <button
+              type="button"
               className="primary-btn"
-              disabled={
-                isImporting ||
-                validRows.length === 0
-              }
               onClick={importMachines}
             >
               {isImporting
                 ? "Importing..."
                 : "Import Machines"}
             </button>
+
           </div>
         </section>
 
@@ -422,13 +452,18 @@ export default function BulkUploadPage() {
                       colSpan="7"
                       className="empty-cell"
                     >
-                      Upload CSV to preview.
+                      Upload CSV
+                      to preview.
                     </td>
                   </tr>
 
                 ) : (
                   rows.map(row => (
-                    <tr key={row.rowNumber}>
+                    <tr
+                      key={
+                        row.rowNumber
+                      }
+                    >
 
                       <td>
                         {row.rowNumber}
@@ -467,7 +502,9 @@ export default function BulkUploadPage() {
                       </td>
 
                       <td>
-                        {row.errors.join(", ")}
+                        {row.errors.join(
+                          ", "
+                        )}
                       </td>
 
                     </tr>
@@ -511,47 +548,56 @@ export default function BulkUploadPage() {
                       colSpan="5"
                       className="empty-cell"
                     >
-                      No import results yet.
+                      No import
+                      results yet.
                     </td>
                   </tr>
 
                 ) : (
-                  results.map(result => (
-                    <tr
-                      key={`${result.row}-${result.title}`}
-                    >
+                  results.map(
+                    result => (
+                      <tr
+                        key={`${result.row}-${result.title}`}
+                      >
 
-                      <td>
-                        {result.row}
-                      </td>
+                        <td>
+                          {result.row}
+                        </td>
 
-                      <td>
-                        <span
-                          className={
-                            result.status ===
-                            "created"
-                              ? "pill good"
-                              : "pill bad"
+                        <td>
+                          <span
+                            className={
+                              result.status ===
+                              "created"
+                                ? "pill good"
+                                : "pill bad"
+                            }
+                          >
+                            {
+                              result.status
+                            }
+                          </span>
+                        </td>
+
+                        <td>
+                          {
+                            result.title
                           }
-                        >
-                          {result.status}
-                        </span>
-                      </td>
+                        </td>
 
-                      <td>
-                        {result.title}
-                      </td>
+                        <td>
+                          {result.listingId ||
+                            "-"}
+                        </td>
 
-                      <td>
-                        {result.listingId || "-"}
-                      </td>
+                        <td>
+                          {result.error ||
+                            "-"}
+                        </td>
 
-                      <td>
-                        {result.error || "-"}
-                      </td>
-
-                    </tr>
-                  ))
+                      </tr>
+                    )
+                  )
                 )}
 
               </tbody>
