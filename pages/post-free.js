@@ -452,8 +452,8 @@ export default function PostFreePage() {
     "/images/hero-equipment-yard.jpg";
 
   const availableKeywords = useMemo(() => {
-    return Array.from(new Set([...commonKeywordOptions, ...selectedKeywords])).sort();
-  }, [selectedKeywords]);
+  return categoryDnaKeywords[category] || [];
+}, [category]);
 
   const filteredKeywords = useMemo(() => {
     const search = keywordSearch.trim().toLowerCase();
