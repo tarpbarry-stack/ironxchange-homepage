@@ -1,4 +1,4 @@
-const sharetribeSdk = require("sharetribe-flex-sdk");
+const integrationSdk = require("sharetribe-flex-integration-sdk");
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,17 +8,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const clientId = process.env.SHARETRIBE_CLIENT_ID;
+    const sdk = integrationSdk.createInstance({
+      clientId: process.env.SHARETRIBE_CLIENT_ID,
+      clientSecret: process.env.SHARETRIBE_CLIENT_SECRET
+    });
 
     return res.status(200).json({
       success: true,
-      sdkLoaded: !!sharetribeSdk,
-      clientIdExists: !!clientId
+      integrationSdkLoaded: !!sdk
     });
 
   } catch (err) {
     return res.status(500).json({
-      error: err?.message || "SDK load failed"
+      error: err?.message || "Integration SDK failed"
     });
   }
 }
