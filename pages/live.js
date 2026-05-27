@@ -1252,58 +1252,52 @@ async function saveExternalLinks() {
 
 <div className="external-link-panel">
   <div className="external-link-head">
-    <span>Also Listed</span>
+    <span>Distribution Hub</span>
     <strong>Machine Also Listed Here</strong>
   </div>
 
   {externalLinks.map((link, index) => (
-    <div
-      className="external-link-item"
-      key={index}
-    >
+    <div className="external-link-item" key={index}>
+      <span className="external-arrow">↗</span>
+
       <input
         type="text"
-        placeholder="Link Name"
+        placeholder="NAME"
         value={link.label}
         onChange={e => {
           const next = [...externalLinks];
-
-          next[index].label = e.target.value;
-
+          next[index] = { ...next[index], label: e.target.value };
           setExternalLinks(next);
         }}
       />
 
       <input
         type="url"
-        placeholder="Paste URL..."
+        placeholder="URL"
         value={link.url}
         onChange={e => {
           const next = [...externalLinks];
-
-          next[index].url = e.target.value;
-
+          next[index] = { ...next[index], url: e.target.value };
           setExternalLinks(next);
         }}
-        onKeyDown={e => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            saveExternalLinks();
-          }
-        }}
       />
+
+      <button
+        type="button"
+        className="external-clear"
+        onClick={() => {
+          const next = [...externalLinks];
+          next[index] = { label: "", url: "" };
+          setExternalLinks(next);
+        }}
+      >
+        ×
+      </button>
     </div>
   ))}
 
-
-    
-
-  <button
-    type="button"
-    className="external-save-btn"
-    onClick={saveExternalLinks}
-  >
-    Save Links
+  <button type="button" className="external-save-btn" onClick={saveExternalLinks}>
+    Save Hub
   </button>
 </div>
                   
@@ -2390,27 +2384,52 @@ select {
 }
 
 .external-link-panel {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,.075);
+  margin-top: 9px;
+  padding: 9px;
+
   display: grid;
-  gap: 7px;
+  gap: 6px;
+
+  border: 1px solid rgba(255,255,255,.065);
+  outline: 1px solid rgba(255,255,255,.018);
+  border-radius: 12px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
+    radial-gradient(circle at top, rgba(255,196,0,.045), transparent 64%),
+    #101010;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.032) inset,
+    0 12px 26px rgba(0,0,0,.20);
 }
 
+/// External LINK PANEL /////
+
+
 .external-link-head {
-  padding: 7px 8px;
-  border-left: 3px solid #FFC400;
-  background:
-    linear-gradient(90deg, rgba(255,196,0,.13), rgba(255,196,0,0)),
-    #101010;
-  border-radius: 8px;
+  position: relative;
+  padding: 2px 0 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+}
+
+.external-link-head::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 7px;
+  width: 2px;
+  border-radius: 999px;
+  background: #FFC400;
+  box-shadow: 0 0 10px rgba(255,196,0,.32);
 }
 
 
 .external-link-head span {
   display: block;
   color: #FFC400;
-  font-size: 8.5px;
+  font-size: 7.5px;
   font-weight: 950;
   letter-spacing: .72px;
   text-transform: uppercase;
@@ -2419,62 +2438,114 @@ select {
 .external-link-head strong {
   display: block;
   margin-top: 2px;
-  color: rgba(255,255,255,.50);
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .35px;
+  color: rgba(255,255,255,.46);
+  font-size: 7.25px;
+  font-weight: 900;
+  letter-spacing: .34px;
   text-transform: uppercase;
 }
+
 .external-link-item {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  gap: 5px;
+  grid-template-columns: 14px 62px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 4px;
+}
+
+.external-arrow {
+  color: rgba(255,196,0,.82);
+  font-size: 10px;
+  font-weight: 950;
 }
 
 .external-link-item input {
-  height: 27px;
+  height: 23px;
   min-width: 0;
-  border: 1px solid rgba(255,255,255,.09);
+
+  border: 1px solid rgba(255,255,255,.075);
   border-radius: 7px;
-  background: #f2f2f2;
-  color: #111;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
+    #0b0b0b;
+
+  color: rgba(255,255,255,.78);
+
   padding: 0 7px;
-  font-size: 8.5px;
+
+  font-size: 7.75px;
   font-weight: 850;
+  letter-spacing: .18px;
+
   outline: none;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
 }
 
 .external-link-item input::placeholder {
-  color: rgba(0,0,0,.38);
+  color: rgba(255,255,255,.30);
 }
 
 .external-link-item input:focus {
-  border-color: rgba(255,196,0,.75);
-  box-shadow: 0 0 0 1px rgba(255,196,0,.22);
+  border-color: rgba(255,196,0,.48);
+  color: #f2f2f2;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 0 0 1px rgba(255,196,0,.10),
+    0 0 14px rgba(255,196,0,.055);
+}
+
+.external-clear {
+  width: 18px;
+  height: 18px;
+
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 50%;
+
+  background: #0b0b0b;
+  color: rgba(255,255,255,.35);
+
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.external-clear:hover {
+  color: #ff9b9b;
+  border-color: rgba(229,62,62,.42);
+  background: rgba(229,62,62,.08);
 }
 
 
-
 .external-save-btn {
-  width: 104px;
-  height: 27px;
+  width: 82px;
+  height: 24px;
   justify-self: end;
-  border: 1px solid rgba(255,196,0,.38);
+
+  border: 1px solid rgba(255,196,0,.34);
   border-radius: 999px;
+
   background:
-    linear-gradient(180deg, rgba(255,196,0,.14), rgba(255,196,0,0)),
-    #151515;
+    linear-gradient(180deg, rgba(255,196,0,.12), rgba(255,196,0,0)),
+    #111;
+
   color: #FFC400;
-  font-size: 8px;
+
+  font-size: 7.25px;
   font-weight: 950;
   letter-spacing: .58px;
   text-transform: uppercase;
+
   cursor: pointer;
 }
 
 .external-save-btn:hover {
-  background: #1a1400;
-  border-color: rgba(255,196,0,.65);
+  background: #171300;
+  border-color: rgba(255,196,0,.62);
+  transform: translateY(-1px);
 }
 
 
