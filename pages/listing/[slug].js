@@ -432,8 +432,14 @@ export default function ListingPage() {
     }
   }
 
-const externalLinks = Array.isArray(listing?.publicData?.externalLinks)
-  ? listing.publicData.externalLinks.filter(link => link?.url && link?.label)
+const rawExternalLinks =
+  listing?.externalLinks ||
+  listing?.publicData?.externalLinks ||
+  listing?.attributes?.publicData?.externalLinks ||
+  [];
+
+const externalLinks = Array.isArray(rawExternalLinks)
+  ? rawExternalLinks.filter(link => link?.url && link?.label)
   : [];
 
 
