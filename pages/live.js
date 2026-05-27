@@ -383,14 +383,10 @@ export default function ListingLivePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("Good Listing");
 
-const savedLinks = Array.isArray(listing?.publicData?.externalLinks)
-  ? listing.publicData.externalLinks
-  : [];
-
-setExternalLinks([
-  savedLinks[0] || { label: "", url: "" },
-  savedLinks[1] || { label: "", url: "" },
-  savedLinks[2] || { label: "", url: "" }
+const [externalLinks, setExternalLinks] = useState([
+  { label: "", url: "" },
+  { label: "", url: "" },
+  { label: "", url: "" }
 ]);
 
   useEffect(() => {
