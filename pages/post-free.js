@@ -2410,11 +2410,12 @@ transition:
 }
 
       .preview-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
 
-  gap: 10px;
+  align-items: start;
+
+  gap: 8px;
 }
 
         .card-title-input,
@@ -2427,24 +2428,29 @@ transition:
           outline: none;
         }
 
-        .card-title-input {
+       .card-title-input {
+  width: 100%;
   min-width: 0;
 
   color: #f2f2f2;
 
   font-size: 18px;
   font-weight: 950;
-  line-height: 1.1;
+  line-height: 1.08;
 
   letter-spacing: -.32px;
   text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
 
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
 }
 
         .card-hours-input {
-  width: 92px;
+  width: 84px;
 
   text-align: right;
 
