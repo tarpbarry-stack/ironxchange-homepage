@@ -60,7 +60,7 @@ function getBestImageUrl(imageAsset) {
     variants["scaled-medium"]?.url ||
     variants["scaled-small"]?.url ||
     variants["square-small"]?.url ||
-    Object.values(variants).find((variant) => variant?.url)?.url ||
+    Object.values(variants).find(variant => variant?.url)?.url ||
     imageAsset?.attributes?.url ||
     ""
   );
@@ -86,23 +86,31 @@ function formatCategory(value) {
   return cleanLabel(value) || "Equipment";
 }
 
-function getCategory(publicData) {
+function getCategory(publicData = {}) {
   return formatCategory(
-    publicData.categoryLevel1 ||
-      publicData.category ||
+    publicData.category ||
+      publicData.categoryLevel1 ||
       publicData.type ||
       "Equipment"
   );
 }
 
-function getMake(publicData) {
+function getMake(publicData = {}) {
+  if (publicData.make) {
+    return cleanLabel(publicData.make);
+  }
+
   const makeRaw = publicData.categoryLevel2 || "";
   const categoryRaw = publicData.categoryLevel1 || "";
 
   return cleanLabel(String(makeRaw).replace(`${categoryRaw}-`, ""));
 }
 
-function getModel(publicData) {
+function getModel(publicData = {}) {
+  if (publicData.model) {
+    return cleanLabel(publicData.model);
+  }
+
   const modelRaw = publicData.categoryLevel3 || "";
   const makeRaw = publicData.categoryLevel2 || "";
 
@@ -118,8 +126,11 @@ function formatHours(value) {
   return `${Number(cleaned).toLocaleString()} Hrs`;
 }
 
-function getLocation(publicData) {
-  const loc = publicData.loc;
+function getLocation(publicData = {}) {
+  const loc =
+    publicData.location ||
+    publicData.loc ||
+    [publicData.city, publicData.state].filter(Boolean).join(", ");
 
   if (typeof loc === "string" && loc.trim()) {
     return loc.trim().toUpperCase();
@@ -128,9 +139,38 @@ function getLocation(publicData) {
   return "Location available on request";
 }
 
-function getPrice(priceAmount) {
+function getPrice(attrs = {}, publicData = {}) {
+  if (publicData.callForPrice) return "Call";
+
+  if (publicData.price) {
+    const num = Number(String(publicData.price).replace(/[^0-9]/g, ""));
+    if (num) return `$${num.toLocaleString()}`;
+  }
+
+  const priceAmount = attrs.price?.amount;
+
   if (!priceAmount && priceAmount !== 0) return "Call";
+
   return `$${Math.round(priceAmount / 100).toLocaleString()}`;
+}
+
+function normalizeExternalImageUrls(publicData = {}) {
+  const raw = publicData.imageUrls || [];
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map(url => String(url || "").trim())
+      .filter(Boolean);
+  }
+
+  if (typeof raw === "string") {
+    return raw
+      .split(",")
+      .map(url => url.trim())
+      .filter(Boolean);
+  }
+
+  return [];
 }
 
 function getProfileImage(author, imageById) {
@@ -177,35 +217,39 @@ function getSellerInfo(author, imageById) {
   const profileImage = getProfileImage(author, imageById);
 
   return {
-  sellerName:
-    publicData.sellerName ||
-    displayName ||
-    "IronXchange Seller",
+    sellerName:
+      publicData.sellerName ||
+      displayName ||
+      "IronXchange Seller",
 
-  sellerCompany:
-    publicData.companyName ||
-    companyName ||
-    profile.abbreviatedName ||
-    "",
+    sellerCompany:
+      publicData.companyName ||
+      companyName ||
+      profile.abbreviatedName ||
+      "",
 
-  sellerLocation:
-    sellerLocation
-      ? String(sellerLocation).toUpperCase()
-      : "",
+    sellerLocation: sellerLocation ? String(sellerLocation).toUpperCase() : "",
 
-  sellerWebsite: publicData.website || "",
-  sellerFacebook: publicData.facebookUrl || "",
-  sellerInstagram: publicData.instagramUrl || "",
-  sellerLinkedin: publicData.linkedinUrl || "",
-  sellerYoutube: publicData.youtubeUrl || "",
-  sellerTiktok: publicData.tiktokUrl || "",
-  sellerBio: publicData.bio || publicData.companyBio || "",
-  sellerPhone: protectedData.phoneNumber || publicData.phoneNumber || "",
+    sellerWebsite: publicData.website || "",
+    sellerFacebook: publicData.facebookUrl || "",
+    sellerInstagram: publicData.instagramUrl || "",
+    sellerLinkedin: publicData.linkedinUrl || "",
+    sellerYoutube: publicData.youtubeUrl || "",
+    sellerTiktok: publicData.tiktokUrl || "",
+    sellerBio: publicData.bio || publicData.companyBio || "",
+    sellerPhone: protectedData.phoneNumber || publicData.phoneNumber || "",
 
-  sellerLogo: profileImage,
-  profileImage,
-  authorProfile: profile
-};
+    sellerLogo: profileImage,
+    profileImage,
+    authorProfile: profile
+  };
+}
+
+function buildSlug(attrs = {}, id = "") {
+  return (attrs.slug || attrs.title || id || "equipment")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 export default async function handler(req, res) {
@@ -231,20 +275,20 @@ export default async function handler(req, res) {
 
     const included = data.included || [];
     const imageById = {};
-const logoById = {};
-const authorById = {};
+    const logoById = {};
+    const authorById = {};
 
-    included.forEach((asset) => {
+    included.forEach(asset => {
       const id = getId(asset.id);
       if (!id) return;
 
       if (asset.type === "image") {
-  const url = getBestImageUrl(asset);
-  const logoUrl = getBestProfileLogoUrl(asset);
+        const url = getBestImageUrl(asset);
+        const logoUrl = getBestProfileLogoUrl(asset);
 
-  if (url) imageById[id] = url;
-  if (logoUrl) logoById[id] = logoUrl;
-}
+        if (url) imageById[id] = url;
+        if (logoUrl) logoById[id] = logoUrl;
+      }
 
       if (asset.type === "user") {
         authorById[id] = asset;
@@ -252,25 +296,26 @@ const authorById = {};
     });
 
     const listings = (data.data || [])
-     .filter((item) => {
-  const attrs = item.attributes || {};
-  const publicData = attrs.publicData || {};
-  const metadata = attrs.metadata || {};
-
-  const listingStatus =
-    publicData.listingStatus ||
-    metadata.listingStatus ||
-    "";
-
-  return (
-    attrs.state === "published" &&
-    listingStatus !== "deleted" &&
-    listingStatus !== "archived"
-  );
-})
-      .map((item) => {
+      .filter(item => {
         const attrs = item.attributes || {};
         const publicData = attrs.publicData || {};
+        const metadata = attrs.metadata || {};
+
+        const listingStatus =
+          publicData.listingStatus ||
+          metadata.listingStatus ||
+          "";
+
+        return (
+          attrs.state === "published" &&
+          listingStatus !== "deleted" &&
+          listingStatus !== "archived"
+        );
+      })
+      .map(item => {
+        const attrs = item.attributes || {};
+        const publicData = attrs.publicData || {};
+        const metadata = attrs.metadata || {};
         const id = getId(item.id);
 
         const authorId =
@@ -281,56 +326,103 @@ const authorById = {};
         const author = authorId ? authorById[authorId] : null;
         const sellerInfo = getSellerInfo(author, logoById);
 
-        const slug = (attrs.slug || attrs.title || "equipment")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
+        const slug = buildSlug(attrs, id);
 
         const imageIds = item.relationships?.images?.data || [];
 
-        const images = imageIds
-          .map((imageRef) => imageById[getId(imageRef.id)])
+        const sharetribeImages = imageIds
+          .map(imageRef => imageById[getId(imageRef.id)])
           .filter(Boolean);
 
-        const imageUrl = images[0] || "/images/hero-equipment-yard.jpg";
+        const bulkImageUrls = normalizeExternalImageUrls(publicData);
+
+        const finalImages =
+          bulkImageUrls.length > 0
+            ? bulkImageUrls
+            : sharetribeImages;
+
+        const imageUrl =
+          finalImages[0] ||
+          "/images/hero-equipment-yard.jpg";
 
         return {
           id,
           authorId,
+
           createdAt: attrs.createdAt || attrs.created_at || null,
+
           title: attrs.title || "Equipment",
+
           type: getCategory(publicData),
+          category: getCategory(publicData),
+
           make: getMake(publicData),
           model: getModel(publicData),
+
+          year: publicData.year || "",
           hours: formatHours(publicData.hours),
+
           location: getLocation(publicData),
-          price: getPrice(attrs.price?.amount),
+
+          price: getPrice(attrs, publicData),
+
           image: imageUrl,
           imageUrl,
-          images,
-imageUrls: images,
 
-description: attrs.description || "",
+          images: finalImages,
+          imageUrls: finalImages,
 
-publicData,
+          sharetribeImages,
+          bulkImageUrls,
 
-externalLinks: Array.isArray(publicData.externalLinks)
-  ? publicData.externalLinks
-  : [],
+          description:
+            publicData.description ||
+            attrs.description ||
+            "",
 
-listingStatus:
-  publicData.listingStatus ||
-  attrs.metadata?.listingStatus ||
-  "live",
+          publicData,
+          metadata,
 
-...sellerInfo,
+          keywords: Array.isArray(publicData.keywords)
+            ? publicData.keywords
+            : [],
 
-link: `https://staging.ironxchange.com/l/${slug}/${id}`
+          externalLinks: Array.isArray(publicData.externalLinks)
+            ? publicData.externalLinks
+            : [],
+
+          listingStatus:
+            publicData.listingStatus ||
+            metadata.listingStatus ||
+            "live",
+
+          workflowStatus:
+            publicData.workflowStatus ||
+            metadata.workflowStatus ||
+            "good-listing",
+
+          sellerReference:
+            publicData.sellerReference ||
+            publicData.stockNumber ||
+            metadata.sellerReference ||
+            "",
+
+          serialNumber: publicData.serialNumber || "",
+          condition: publicData.condition || "",
+
+          ...sellerInfo,
+
+          link: `/listing/${slug}`,
+          stagingLink: `https://staging.ironxchange.com/l/${slug}/${id}`
         };
       });
 
     res.status(200).json(listings);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("LISTINGS API ERROR:", err);
+
+    res.status(500).json({
+      error: err.message || "Listings API failed"
+    });
   }
 }
