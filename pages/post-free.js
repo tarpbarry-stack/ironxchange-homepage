@@ -2083,11 +2083,11 @@ select {
 }
 
 .post-link-strip {
-  margin-top: 5px;
+  margin-top: 18px;
   padding: 8px 8px 7px;
 
   display: grid;
-  gap: 6px;
+  gap: 8px;
 
   border: 1px solid rgba(255,255,255,.065);
   outline: 1px solid rgba(255,255,255,.018);
@@ -2107,7 +2107,7 @@ select {
 .post-link-head {
   position: relative;
 
-  padding: 0 0 7px 9px;
+  padding: 0 0 10px 9px;
 
   border-bottom: 1px solid rgba(255,255,255,.045);
 }
