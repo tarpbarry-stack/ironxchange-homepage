@@ -516,94 +516,116 @@ export default function BulkUploadPage() {
           </div>
         </section>
 
-        <section className="bulk-panel wide">
+      <section className="bulk-panel wide">
 
-          <p className="panel-kicker">
-            IMPORT RESULTS
-          </p>
+  <p className="panel-kicker">
+    IMPORT RESULTS
+  </p>
 
-          <h2>
-            Row Results
-          </h2>
+  <h2>
+    Row Results
+  </h2>
 
-          <div className="table-wrap">
+  <div className="table-wrap">
 
-            <table>
+    <table>
 
-              <thead>
-                <tr>
-                  <th>Row</th>
-                  <th>Status</th>
-                  <th>Title</th>
-                  <th>Listing ID</th>
-                  <th>Error</th>
-                </tr>
-              </thead>
+      <thead>
+        <tr>
+          <th>Row</th>
+          <th>Status</th>
+          <th>Title</th>
+          <th>Listing ID</th>
+          <th>Launch</th>
+          <th>Public</th>
+          <th>Error</th>
+        </tr>
+      </thead>
 
-              <tbody>
+      <tbody>
 
-                {results.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="empty-cell"
-                    >
-                      No import
-                      results yet.
-                    </td>
-                  </tr>
+        {results.length === 0 ? (
+          <tr>
+            <td
+              colSpan="7"
+              className="empty-cell"
+            >
+              No import results yet.
+            </td>
+          </tr>
 
+        ) : (
+          results.map(result => (
+            <tr
+              key={`${result.row}-${result.title}`}
+            >
+
+              <td>
+                {result.row}
+              </td>
+
+              <td>
+                <span
+                  className={
+                    result.status === "created"
+                      ? "pill good"
+                      : "pill bad"
+                  }
+                >
+                  {result.status}
+                </span>
+              </td>
+
+              <td>
+                {result.title}
+              </td>
+
+              <td>
+                {result.listingId || "-"}
+              </td>
+
+              <td>
+                {result.launchStudioUrl ? (
+                  <a
+                    href={result.launchStudioUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="result-link"
+                  >
+                    Launch Studio
+                  </a>
                 ) : (
-                  results.map(
-                    result => (
-                      <tr
-                        key={`${result.row}-${result.title}`}
-                      >
-
-                        <td>
-                          {result.row}
-                        </td>
-
-                        <td>
-                          <span
-                            className={
-                              result.status ===
-                              "created"
-                                ? "pill good"
-                                : "pill bad"
-                            }
-                          >
-                            {
-                              result.status
-                            }
-                          </span>
-                        </td>
-
-                        <td>
-                          {
-                            result.title
-                          }
-                        </td>
-
-                        <td>
-                          {result.listingId ||
-                            "-"}
-                        </td>
-
-                        <td>
-                          {result.error ||
-                            "-"}
-                        </td>
-
-                      </tr>
-                    )
-                  )
+                  "-"
                 )}
+              </td>
 
-              </tbody>
-            </table>
-          </div>
-        </section>
+              <td>
+                {result.publicUrl ? (
+                  <a
+                    href={result.publicUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="result-link"
+                  >
+                    Public Listing
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </td>
+
+              <td>
+                {result.error || "-"}
+              </td>
+
+            </tr>
+          ))
+        )}
+
+      </tbody>
+    </table>
+  </div>
+</section>
 
       </main>
 
