@@ -6,11 +6,20 @@ const { UUID, Money } = sharetribeSdk.types;
 function extractSharetribeError(err) {
   return {
     message: err?.message || null,
-    status: err?.status || err?.statusCode || err?.response?.status || null,
-    data: err?.data || null,
-    responseData: err?.response?.data || null,
-    errors: err?.data?.errors || err?.response?.data?.errors || null
+    status: err?.status || null,
+    errors:
+      err?.data?.errors ||
+      err?.response?.data?.errors ||
+      null
   };
+}
+
+function cleanNumber(value) {
+  if (!value) return null;
+
+  return Number(
+    String(value).replace(/[$,\s]/g, "")
+  );
 }
 
 export default async function handler(req, res) {
@@ -27,6 +36,7 @@ export default async function handler(req, res) {
     });
 
     const authorId = req.body?.authorId;
+    const rows = req.body?.rows || [];
 
     if (!authorId) {
       return res.status(400).json({
@@ -34,84 +44,173 @@ export default async function handler(req, res) {
       });
     }
 
-    const created = await sdk.listings.create({
-      title: "BULK TEST MACHINE",
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({
+        error: "Missing rows"
+      });
+    }
 
-      description:
-        "Bulk upload API test listing.",
+    const results = [];
 
-      authorId: new UUID(authorId),
+    for (const row of rows) {
+      try {
+        if (!row?.isValid) {
+          results.push({
+            row: row?.rowNumber || 0,
+            status: "error",
+            title: row?.title || "Invalid Row",
+            error:
+              row?.errors?.join(", ") ||
+              "Invalid row"
+          });
 
-      state: "published",
+          continue;
+        }
 
-      price: new Money(
-        28500000,
-        "USD"
-      ),
+        const numericPrice = cleanNumber(row.price);
 
-      publicData: {
-        listingType: "free-listing",
-        transactionProcessAlias:
-          "default-inquiry/release-1",
+        const created = await sdk.listings.create({
+          title: row.title,
 
-        unitType: "inquiry",
+          description:
+            row.description ||
 
-        categoryLevel1: "dozers",
-        categoryLevel2: "dozers-caterpillar",
-        categoryLevel3: "dozers-caterpillar-d6",
+            "Bulk uploaded listing.",
 
-        loc: "TX",
-        city: "Dallas",
+          authorId: new UUID(authorId),
 
-        year: "2021",
-        make: "CATERPILLAR",
-        model: "D6",
+          state: "published",
 
-        hours: 3210,
+          price: new Money(
+            numericPrice * 100,
+            "USD"
+          ),
 
-        workflowStatus: "good-listing",
-        listingStatus: "live",
+          publicData: {
+            listingType: "free-listing",
 
-        keywords: [],
-        externalLinks: []
-      }
-    });
+            transactionProcessAlias:
+              "default-inquiry/release-1",
 
-    return res.status(200).json({
-      results: [
-        {
-          row: 2,
+            unitType: "inquiry",
+
+            categoryLevel1:
+              String(row.category || "")
+                .toLowerCase()
+                .replace(/\s+/g, "-"),
+
+            categoryLevel2:
+              `${String(row.category || "")
+                .toLowerCase()
+                .replace(/\s+/g, "-")}-${String(
+                row.make || ""
+              )
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`,
+
+            categoryLevel3:
+              `${String(row.category || "")
+                .toLowerCase()
+                .replace(/\s+/g, "-")}-${String(
+                row.make || ""
+              )
+                .toLowerCase()
+                .replace(/\s+/g, "-")}-${String(
+                row.model || ""
+              )
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`,
+
+            loc: row.state || row.location || "",
+
+            city: row.city || "",
+
+            category: row.category || "",
+
+            year: String(row.year || ""),
+
+            make: row.make || "",
+
+            model: row.model || "",
+
+            hours: cleanNumber(row.hours),
+
+            location: row.location || "",
+
+            keywords:
+              row.keywords || [],
+
+            imageUrls:
+              row.imageUrls || [],
+
+            sellerReference:
+              row.sellerReference || "",
+
+            serialNumber:
+              row.serialNumber || "",
+
+            condition:
+              row.condition || "",
+
+            workflowStatus:
+              "good-listing",
+
+            listingStatus:
+              "live",
+
+            externalLinks:
+              row.externalLinks || []
+          }
+        });
+
+        results.push({
+          row: row.rowNumber,
           status: "created",
-          title: "BULK TEST MACHINE",
+          title: row.title,
           listingId:
             created?.data?.data?.id?.uuid || null
-        }
-      ]
-    });
+        });
 
-  } catch (err) {
-    console.error(
-      "BULK CREATE ERROR FULL:",
-      JSON.stringify(
-        extractSharetribeError(err),
-        null,
-        2
-      )
-    );
+      } catch (err) {
+        console.error(
+          "BULK CREATE ERROR:",
+          JSON.stringify(
+            extractSharetribeError(err),
+            null,
+            2
+          )
+        );
 
-    return res.status(500).json({
-      results: [
-        {
-          row: 2,
+        results.push({
+          row: row?.rowNumber || 0,
           status: "error",
-          title: "BULK TEST MACHINE",
+          title:
+            row?.title ||
+            "Unknown Machine",
+
           error:
             err?.data?.errors?.[0]?.title ||
             err?.data?.errors?.[0]?.code ||
             err?.message ||
             "Listing create failed"
-        }
-      ]
+        });
+      }
+    }
+
+    return res.status(200).json({
+      results
+    });
+
+  } catch (err) {
+    console.error(
+      "BULK IMPORT FATAL:",
+      err
+    );
+
+    return res.status(500).json({
+      error:
+        err?.message ||
+        "Bulk upload failed"
     });
   }
 }
