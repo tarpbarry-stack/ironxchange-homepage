@@ -15,9 +15,7 @@ function extractSharetribeError(err) {
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Method not allowed"
-    });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -29,15 +27,14 @@ export default async function handler(req, res) {
     const authorId = req.body?.authorId;
 
     if (!authorId) {
-      return res.status(400).json({
-        error: "Missing authorId"
-      });
+      return res.status(400).json({ error: "Missing authorId" });
     }
 
     const createParams = {
       title: "BULK TEST MACHINE",
       description: "Bulk upload API test listing.",
       authorId: new UUID(authorId),
+      state: "published",
       price: new Money(28500000, "USD"),
       publicData: {
         listingType: "free-listing",
@@ -70,7 +67,10 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("BULK CREATE ERROR FULL:", JSON.stringify(extractSharetribeError(err), null, 2));
+    console.error(
+      "BULK CREATE ERROR FULL:",
+      JSON.stringify(extractSharetribeError(err), null, 2)
+    );
 
     return res.status(500).json({
       error: "Listing create failed",
