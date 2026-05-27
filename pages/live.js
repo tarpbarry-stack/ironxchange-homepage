@@ -456,18 +456,15 @@ const [externalLinks, setExternalLinks] = useState([
     setSelectedKeywords(getListingKeywords(listing));
     setWorkflowStatus(getWorkflowStatus(listing));
 
-   setExternalLinks(
-  Array.isArray(
-    listing?.publicData?.externalLinks
-  )
-    ? listing.publicData.externalLinks
-    : [
-        {
-          label: "",
-          url: ""
-        }
-      ]
-);
+  const savedLinks = Array.isArray(listing?.publicData?.externalLinks)
+  ? listing.publicData.externalLinks
+  : [];
+
+setExternalLinks([
+  savedLinks[0] || { label: "", url: "" },
+  savedLinks[1] || { label: "", url: "" },
+  savedLinks[2] || { label: "", url: "" }
+]);
 
     setPhotoItems(
       getListingImages(listing).map((url, index) => ({
