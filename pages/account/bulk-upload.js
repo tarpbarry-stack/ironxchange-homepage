@@ -770,6 +770,15 @@ export default function BulkUploadPage() {
           text-align: center;
           padding: 30px;
         }
+        .result-link {
+  color: #ffc400;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.result-link:hover {
+  text-decoration: underline;
+}
       `}</style>
     </>
   );
