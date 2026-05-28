@@ -52,7 +52,11 @@ export default async function handler(req, res) {
       `,
     });
 
-    return res.status(200).json({ ok: true, result });
+    return res.status(200).json({
+  ok: true,
+  result,
+  hasResendKey: !!process.env.RESEND_API_KEY
+});
   } catch (err) {
     console.error("WELCOME EMAIL ERROR:", err);
 
