@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -14,6 +15,12 @@ import {
 } from "../lib/ixvision/pipeline/processIXPhoto";
 
 const BRAND_YELLOW = "#FFC400";
+
+const { UUID } = sdkTypes;
+
+const sdk = createInstance({
+  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+});
 
 const workflowOptions = [
   { value: "good-listing", label: "Good Listing" },
@@ -72,6 +79,17 @@ function getImageUrl(img) {
     img.attributes?.variants?.["scaled-medium"]?.url ||
     img.attributes?.variants?.["scaled-small"]?.url ||
     null
+  );
+}
+
+function getImageId(img) {
+  if (!img) return "";
+
+  return (
+    img.id?.uuid ||
+    img.id ||
+    img.uuid ||
+    ""
   );
 }
 
@@ -408,14 +426,28 @@ setExternalLinks([
   savedLinks[2] || { label: "", url: "" }
 ]);
 
-    setPhotoItems(
-      getListingImages(listing).map((url, index) => ({
-        id: `existing-${index}-${url}`,
-        url,
-        file: null,
-        existing: true
-      }))
-    );
+
+const rawImages = Array.isArray(listing?.images)
+  ? listing.images
+  : [];
+
+setPhotoItems(
+  rawImages
+    .map((img, index) => ({
+      id: `existing-${index}-${getImageUrl(img)}`,
+
+      imageId: getImageId(img),
+
+      url: getImageUrl(img),
+
+      file: null,
+
+      existing: true
+    }))
+    .filter(item => item.url)
+);
+
+    
 
     setActivePhotoIndex(0);
 
@@ -675,6 +707,33 @@ console.log("LIVE CATEGORY:", listingCategory);
     });
   }
 
+
+  async function uploadNewLivePhotos() {
+  const finalImageIds = [];
+
+  for (const photo of photoItems) {
+    if (photo.existing && photo.imageId) {
+      finalImageIds.push(new UUID(photo.imageId));
+      continue;
+    }
+
+    if (!photo.file) continue;
+
+    const upload = await sdk.images.upload(
+      { image: photo.file },
+      { expand: true }
+    );
+
+    finalImageIds.push(new UUID(upload.data.data.id.uuid));
+  }
+
+  return finalImageIds;
+}
+
+  
+
+  
+
   async function saveQuickEdit() {
     if (!listingId) return;
 
@@ -715,6 +774,23 @@ console.log("LIVE CATEGORY:", listingCategory);
           throw new Error(priceData?.error || "Price update failed");
         }
       }
+
+if (photoItems.length > 0) {
+  const imageIds = await uploadNewLivePhotos();
+
+  if (imageIds.length > 0) {
+    await sdk.ownListings.update(
+      {
+        id: new UUID(listingId),
+        images: imageIds
+      },
+      {
+        expand: true,
+        include: ["images"]
+      }
+    );
+  }
+}
 
       addActivity("success", `Listing launched — ${title}`);
       trackLaunchEvent("launch_card_saved", {
