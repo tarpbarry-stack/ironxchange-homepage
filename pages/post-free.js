@@ -1030,12 +1030,14 @@ export default function PostFreePage() {
 
               <div className="listing-preview-card">
                 <div
-                  className="preview-photo"
-                  style={{
-                    backgroundImage: `url(${heroPhoto || "/images/hero-equipment-yard.jpg"})`
-                  }}
-                  onClick={() => changeActivePhoto(1)}
-                >
+  className="preview-photo"
+  onClick={() => changeActivePhoto(1)}
+>
+  <img
+    src={heroPhoto || "/images/hero-equipment-yard.jpg"}
+    alt={title || "Machine"}
+    className="preview-photo-img"
+  />
                   {photoItems.length > 1 ? (
                     <>
                       <button
@@ -2406,24 +2408,42 @@ select {
   0 0 24px rgba(255,196,0,.045);
 }
 
-        .preview-photo {
-          position: relative;
-          height: 250px;
-          background-size: cover;
-          background-position: center;
-          border-bottom: 1px solid rgba(255,255,255,.065);
-          overflow: hidden;
-          box-shadow:
-  inset 0 -60px 90px rgba(0,0,0,.16),
-  inset 0 0 40px rgba(0,0,0,.04);
-          cursor: pointer;
-          transition:
-  filter .18s ease,
-  transform .28s ease;
-  will-change: transform;
-        }
+       .preview-photo {
+  position: relative;
+  height: 250px;
 
-       .listing-preview-card:hover .preview-photo {
+  overflow: hidden;
+
+  border-bottom: 1px solid rgba(255,255,255,.065);
+
+  background: #0f0f0f;
+
+  box-shadow:
+    inset 0 -60px 90px rgba(0,0,0,.16),
+    inset 0 0 40px rgba(0,0,0,.04);
+
+  cursor: pointer;
+}
+
+.preview-photo-img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center center;
+
+  display: block;
+
+  transition:
+    filter .18s ease,
+    transform .28s ease;
+
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform-origin: center center;
+}
+
+       .listing-preview-card:hover .preview-photo-img {
   filter:
     contrast(1.04)
     saturate(1.03)
