@@ -64,6 +64,21 @@ const [error, setError] = useState("");
         }
       );
 
+      try {
+        await fetch("/api/email/welcome", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email: cleanEmail,
+            firstName: cleanFirst
+          })
+        });
+      } catch (welcomeErr) {
+        console.error("WELCOME EMAIL TRIGGER ERROR:", welcomeErr);
+      }
+      
       await sdk.login({
         username: cleanEmail,
         password
