@@ -708,12 +708,64 @@ console.log("LIVE CATEGORY:", listingCategory);
   }
 
 
-  async function uploadNewLivePhotos() {
+  function normalizeImageUrl(url = "") {
+  return String(url).split("?")[0];
+}
+
+function getIncludedImagesFromResponse(response) {
+  const included = response?.data?.included || [];
+
+  return included
+    .filter(item => item?.type === "image")
+    .map(img => ({
+      imageId: img.id?.uuid || img.id || "",
+      url: getImageUrl(img)
+    }))
+    .filter(item => item.imageId && item.url);
+}
+
+async function fetchFreshListingImages() {
+  const response = await sdk.ownListings.show(
+    {
+      id: new UUID(listingId)
+    },
+    {
+      expand: true,
+      include: ["images"]
+    }
+  );
+
+  return getIncludedImagesFromResponse(response);
+}
+
+async function uploadNewLivePhotos() {
+  const freshExistingImages = await fetchFreshListingImages();
+
   const finalImageIds = [];
 
   for (const photo of photoItems) {
-    if (photo.existing && photo.imageId) {
-      finalImageIds.push(new UUID(photo.imageId));
+    if (photo.existing) {
+      const existingId =
+        photo.imageId ||
+        freshExistingImages.find(img =>
+          normalizeImageUrl(img.url) === normalizeImageUrl(photo.url)
+        )?.imageId;
+
+     if (!existingId) {
+  console.error("LIVE PHOTO ID MATCH FAILED", {
+    photo,
+    freshExistingImages,
+    visibleUrl: normalizeImageUrl(photo.url),
+    freshUrls: freshExistingImages.map(img => normalizeImageUrl(img.url))
+  });
+
+  throw new Error(
+    "Photo save stopped: existing Sharetribe image ID missing. Check console for LIVE PHOTO ID MATCH FAILED."
+  );
+}
+
+      finalImageIds.push(new UUID(existingId));
+
       continue;
     }
 
@@ -724,12 +776,19 @@ console.log("LIVE CATEGORY:", listingCategory);
       { expand: true }
     );
 
-    finalImageIds.push(new UUID(upload.data.data.id.uuid));
+    finalImageIds.push(
+      new UUID(upload.data.data.id.uuid)
+    );
+  }
+
+  if (finalImageIds.length < photoItems.length) {
+    throw new Error(
+      "Photo save stopped: image count mismatch."
+    );
   }
 
   return finalImageIds;
 }
-
   
 
   
