@@ -34,17 +34,17 @@ function getImageUrl(img) {
   if (!img) return null;
   if (typeof img === "string") return img;
 
-  return (
-    img.url ||
-    img.src ||
-    img.attributes?.variants?.default?.url ||
-    img.attributes?.variants?.["landscape-crop"]?.url ||
-    img.attributes?.variants?.["landscape-crop2x"]?.url ||
-    img.attributes?.variants?.["scaled-large"]?.url ||
-    img.attributes?.variants?.["scaled-medium"]?.url ||
-    img.attributes?.variants?.["scaled-small"]?.url ||
-    null
-  );
+ return (
+  img.url ||
+  img.src ||
+  img.attributes?.variants?.["scaled-large"]?.url ||
+  img.attributes?.variants?.["scaled-medium"]?.url ||
+  img.attributes?.variants?.default?.url ||
+  img.attributes?.variants?.["landscape-crop"]?.url ||
+  img.attributes?.variants?.["landscape-crop2x"]?.url ||
+  img.attributes?.variants?.["scaled-small"]?.url ||
+  null
+);
 }
 
 function getSellerLogoUrl(listing = {}) {
