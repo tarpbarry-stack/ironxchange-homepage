@@ -81,11 +81,6 @@ function getListingImages(listing) {
     ? listing.imageObjects
     : [];
 
-  console.log("SLUG IMAGE ARCHITECTURE", {
-  title: listing.title,
-  imageObjects: listing.imageObjects,
-  images,
-});
 
   const objectUrls = imageObjects
     .map(getImageUrl)
