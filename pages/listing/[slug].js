@@ -77,16 +77,33 @@ function getSellerLogoUrl(listing = {}) {
 }
 
 function getListingImages(listing) {
-  const rawImages = [
+  const imageObjects = Array.isArray(listing?.imageObjects)
+    ? listing.imageObjects
+    : [];
+
+  console.log("SLUG IMAGE ARCHITECTURE", {
+  title: listing.title,
+  imageObjects: listing.imageObjects,
+  images,
+});
+
+  const objectUrls = imageObjects
+    .map(getImageUrl)
+    .filter(Boolean);
+
+  const legacyUrls = [
     ...(Array.isArray(listing?.images) ? listing.images : []),
     ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
     listing?.imageUrl,
     listing?.image
-  ];
+  ]
+    .map(getImageUrl)
+    .filter(Boolean);
 
-  const images = rawImages.map(getImageUrl).filter(Boolean);
-
-  return [...new Set(images)];
+  return [...new Set([
+    ...objectUrls,
+    ...legacyUrls
+  ])];
 }
 
 function cleanMachineTitle(title = "") {
