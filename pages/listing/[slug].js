@@ -95,9 +95,7 @@ function getListingImages(listing) {
     .map(getImageUrl)
     .filter(Boolean);
 
-  return [...new Set([
-    ...objectUrls,
-    ...legacyUrls
+  return objectUrls;
   ])];
 }
 
