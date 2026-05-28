@@ -803,16 +803,6 @@ export default function PostFreePage() {
     </label>
   </div>
 </div>
-             
-              <label
-                className="photo-add"
-                onDragOver={e => e.preventDefault()}
-                onDrop={handlePhotoDrop}
-              >
-                <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-                + Add Photos
-              </label>
-            </div>
 
             <div className="photo-strip">
               {photoItems.map((photo, index) => (
