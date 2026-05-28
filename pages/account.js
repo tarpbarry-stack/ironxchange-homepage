@@ -598,6 +598,15 @@ try {
               <i className="fa-solid fa-gear"></i>
               Settings
             </a>
+
+<button
+  type="button"
+  className="logout-rail-btn"
+  onClick={handleLogout}
+>
+  <i className="fa-solid fa-right-from-bracket"></i>
+  Sign Out
+</button>                
                   </details>
           </aside>
 
@@ -1284,6 +1293,60 @@ main {
   grid-template-rows: auto minmax(0, 1fr);
   gap: 6px;
   overflow: hidden;
+}
+
+.logout-rail-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  min-height: 38px;
+
+  margin-top: 8px;
+
+  background: transparent;
+
+  border: none;
+  border-top: 1px solid rgba(255,255,255,.06);
+
+  color: rgba(255,255,255,.55);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: .48px;
+  text-transform: uppercase;
+
+  padding: 0 10px;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  transition:
+    background .14s ease,
+    color .14s ease,
+    transform .14s ease;
+}
+
+.logout-rail-btn:hover {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(229,62,62,.08),
+      rgba(229,62,62,0)
+    ),
+    #171717;
+
+  color: #E53E3E;
+
+  transform: translateX(2px);
+}
+
+.logout-rail-btn i {
+  width: 16px;
+  color: #E53E3E;
 }
 
 .top-tools {
