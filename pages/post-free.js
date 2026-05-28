@@ -1033,11 +1033,11 @@ export default function PostFreePage() {
   className="preview-photo"
   onClick={() => changeActivePhoto(1)}
 >
-  <img
-    src={heroPhoto || "/images/hero-equipment-yard.jpg"}
-    alt={title || "Machine"}
-    className="preview-photo-img"
-  />
+ <img
+  src={heroPhoto || "/images/hero-equipment-yard.jpg"}
+  alt="Machine"
+  className="preview-photo-img"
+/>
                   {photoItems.length > 1 ? (
                     <>
                       <button
