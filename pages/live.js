@@ -8,7 +8,10 @@ import Footer from "../components/Footer";
 import MachineBadges from "../components/MachineBadges";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
-import { processIXPhoto } from "../lib/ixvision/pipeline/processIXPhoto";
+import {
+  buildIXPhotoVariants,
+  getIXActivePhotoUrl
+} from "../lib/ixvision/pipeline/processIXPhoto";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -134,6 +137,17 @@ function getAuthorId(listing = {}) {
     listing.sellerId ||
     listing.author?.id?.uuid ||
     listing.author?.id ||
+    ""
+  );
+}
+
+function getListingMake(listing = {}) {
+  return (
+    listing.make ||
+    listing.publicData?.make ||
+    listing.attributes?.publicData?.make ||
+    listing.metadata?.make ||
+    listing.attributes?.metadata?.make ||
     ""
   );
 }
@@ -413,12 +427,12 @@ setExternalLinks([
     });
   }, [listing]);
 
-  const heroPhoto =
-    photoItems[activePhotoIndex]?.url ||
-    photoItems[0]?.url ||
-    listing?.imageUrl ||
-    listing?.image ||
-    "/images/hero-equipment-yard.jpg";
+ const heroPhoto =
+  getIXActivePhotoUrl(photoItems[activePhotoIndex]) ||
+  getIXActivePhotoUrl(photoItems[0]) ||
+  listing?.imageUrl ||
+  listing?.image ||
+  "/images/hero-equipment-yard.jpg";
 
   const title = cleanMachineTitle(listing?.title || "Machine Listing");
 
@@ -503,51 +517,80 @@ console.log("LIVE CATEGORY:", listingCategory);
     });
   }
 
-  function handlePhotos(e) {
-    const files = Array.from(e.target.files || []).filter(file =>
-      file.type.startsWith("image/")
-    );
+  async function handlePhotos(e) {
+  const files = Array.from(e.target.files || []).filter(file =>
+    file.type.startsWith("image/")
+  );
 
-    const mapped = files.slice(0, 24).map(file => ({
-      id: `${Date.now()}-${file.name}-${Math.random()}`,
-      file,
-      url: URL.createObjectURL(file),
-      existing: false
-    }));
-
-    setPhotoItems(current => [...current, ...mapped]);
-
-    addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} added`);
-    trackLaunchEvent("launch_photos_added", {
-      listingId: String(listingId || ""),
-      count: mapped.length
-    });
-
+  if (files.length === 0) {
     e.target.value = "";
+    return;
   }
 
-  function handlePhotoDrop(e) {
-    e.preventDefault();
+  const make = getListingMake(listing);
 
-    const files = Array.from(e.dataTransfer.files || []).filter(file =>
-      file.type.startsWith("image/")
-    );
+  const mapped = await Promise.all(
+    files.slice(0, 24).map(file =>
+      buildIXPhotoVariants(file, {
+        make,
+        mode: "clean",
+        userEmail: listing?.sellerEmail,
+        companyName: sellerName
+      })
+    )
+  );
 
-    const mapped = files.slice(0, 24).map(file => ({
-      id: `${Date.now()}-${file.name}-${Math.random()}`,
-      file,
-      url: URL.createObjectURL(file),
-      existing: false
-    }));
+  setPhotoItems(current => [...current, ...mapped]);
 
-    setPhotoItems(current => [...current, ...mapped]);
+  addActivity(
+    "success",
+    `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`
+  );
 
-    addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
-    trackLaunchEvent("launch_photos_dropped", {
-      listingId: String(listingId || ""),
-      count: mapped.length
-    });
-  }
+  trackLaunchEvent("launch_ix_photos_added", {
+    listingId: String(listingId || ""),
+    count: mapped.length,
+    make
+  });
+
+  e.target.value = "";
+}
+
+ async function handlePhotoDrop(e) {
+  e.preventDefault();
+
+  const files = Array.from(e.dataTransfer.files || []).filter(file =>
+    file.type.startsWith("image/")
+  );
+
+  if (files.length === 0) return;
+
+  const make = getListingMake(listing);
+
+  const mapped = await Promise.all(
+    files.slice(0, 24).map(file =>
+      buildIXPhotoVariants(file, {
+        make,
+        mode: "clean",
+        userEmail: listing?.sellerEmail,
+        companyName: sellerName
+      })
+    )
+  );
+
+  setPhotoItems(current => [...current, ...mapped]);
+
+  addActivity(
+    "success",
+    `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`
+  );
+
+  trackLaunchEvent("launch_ix_photos_dropped", {
+    listingId: String(listingId || ""),
+    count: mapped.length,
+    make
+  });
+}
 
   function removePhoto(indexToRemove) {
     setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
@@ -1143,10 +1186,55 @@ async function saveExternalLinks() {
                 >
                   {index === 0 ? <span className="hero-badge">HERO</span> : null}
 
-                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <img src={getIXActivePhotoUrl(photo)} alt={`Photo ${index + 1}`} />
 
+                    {!photo.existing ? (
+  <div
+    className="polish-toggle"
+    onClick={e => e.stopPropagation()}
+  >
+    {["original", "clean", "dealerPop"].map(mode => (
+      <button
+        key={mode}
+        type="button"
+        className={photo.activeMode === mode ? "active" : ""}
+        onClick={() => {
+          setPhotoItems(current =>
+            current.map(item =>
+              item.id === photo.id
+                ? {
+                    ...item,
+
+                    activeMode: mode,
+
+                    file:
+                      mode === "original"
+                        ? item.originalFile
+                        : mode === "dealerPop"
+                          ? item.dealerPopFile
+                          : item.cleanFile,
+
+                    url:
+                      mode === "original"
+                        ? item.originalUrl
+                        : mode === "dealerPop"
+                          ? item.dealerPopUrl
+                          : item.cleanUrl
+                  }
+                : item
+            )
+          );
+        }}
+      >
+        {mode === "dealerPop" ? "Pop" : mode}
+      </button>
+    ))}
+  </div>
+) : null}
+                    
                   <button
-                    type="button"
+                  type="button"
+                  className="photo-remove"
                     onClick={e => {
                       e.stopPropagation();
                       removePhoto(index);
@@ -2105,7 +2193,7 @@ select {
     0 0 12px rgba(255,196,0,.10);
 }
 
-        .photo-tile button {
+        .photo-remove {
   position: absolute;
   top: 7px;
   right: 7px;
@@ -2133,7 +2221,7 @@ select {
     opacity .14s ease;
 }
 
-.photo-tile button:hover {
+.photo-remove:hover {
   transform: scale(1.06);
   background: rgba(229,62,62,.96);
   opacity: 1;
@@ -2148,6 +2236,78 @@ select {
           font-size: 9px;
           font-weight: 950;
         }
+
+        .polish-toggle {
+  position: absolute;
+
+  left: 7px;
+  bottom: 7px;
+
+  z-index: 4;
+
+  display: flex;
+  gap: 3px;
+
+  padding: 3px;
+
+  border-radius: 999px;
+
+  background: rgba(0,0,0,.50);
+
+  backdrop-filter: blur(4px);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset;
+}
+
+.polish-toggle button {
+  position: static;
+
+  width: auto;
+  height: 17px;
+
+  padding: 0 5px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+
+  background: rgba(255,255,255,.08);
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 6.5px;
+  font-weight: 950;
+
+  letter-spacing: .35px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    background .14s ease,
+    color .14s ease,
+    border-color .14s ease,
+    transform .14s ease;
+}
+
+.polish-toggle button:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(255,196,0,.28);
+
+  color: #FFC400;
+}
+
+.polish-toggle button.active {
+  background: #FFC400;
+
+  border-color: #FFC400;
+
+  color: #050505;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.22) inset;
+}
 
         .studio-grid {
   display: grid;
