@@ -1189,70 +1189,47 @@ video {
           outline-offset: -3px;
         }
 
-       .arrow {
+.arrow {
   position: absolute;
-
-  top: 50%;
+  top: 92%;
   transform: translateY(-50%);
 
-  width: 38px;
-  height: 108px;
+  width: 22px;
+  height: 92px;
 
-  border: 1px solid rgba(255,255,255,.04);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.18),
-      rgba(0,0,0,.06)
-    );
-
+  border: none;
+  background: rgba(0,0,0,.06);
   color: rgba(255,255,255,.42);
 
-  font-size: 38px;
+  font-size: 28px;
   font-weight: 300;
-
-  line-height: 1;
-
   cursor: pointer;
-
-  z-index: 4;
-
-  backdrop-filter: blur(3px);
+  z-index: 5;
+  opacity: 0;
 
   transition:
-    background .16s ease,
-    color .16s ease,
-    border-color .16s ease,
-    opacity .16s ease;
-
-  opacity: 0;
+    opacity .18s ease,
+    background .18s ease,
+    color .18s ease;
 }
 
 .hero-wrap:hover .arrow {
   opacity: 1;
 }
 
-       .arrow:hover {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.34),
-      rgba(0,0,0,.18)
-    );
-
-  color: rgba(255,255,255,.92);
-
-  border-color: rgba(255,196,0,.18);
+.arrow:hover {
+  background: rgba(0,0,0,.14);
+  color: rgba(255,255,255,.68);
 }
 
        .arrow.left {
   left: 0;
-  border-radius: 0 16px 16px 0;
+  border-radius: 0 10px 10px 0;
 }
-        .arrow.right {
+
+.arrow.right {
   right: 0;
-  border-radius: 16px 0 0 16px;
+  border-radius: 10px 0 0 10px;
 }
 
        .info-grid {
