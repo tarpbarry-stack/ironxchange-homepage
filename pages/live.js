@@ -8,6 +8,11 @@ import Footer from "../components/Footer";
 
 import MachineBadges from "../components/MachineBadges";
 
+import {
+  getFrameClass,
+  getFrameStyle
+} from "../lib/ixvision/frameEngine";
+
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 import {
   buildIXPhotoVariants,
@@ -487,6 +492,11 @@ setPhotoItems(
   listing?.imageUrl ||
   listing?.image ||
   "/images/hero-equipment-yard.jpg";
+
+  const activePreviewPhoto =
+  photoItems[activePhotoIndex] ||
+  photoItems[0] ||
+  { url: heroPhoto };
 
   const title = cleanMachineTitle(listing?.title || "Machine Listing");
 
@@ -1570,11 +1580,12 @@ onClick={async () => {
   className="preview-photo"
   onClick={() => changeActivePhoto(1)}
 >
-  <img
-    src={heroPhoto || "/images/hero-equipment-yard.jpg"}
-    alt={title || "Machine"}
-    className="preview-photo-img"
-  />
+ <img
+  src={heroPhoto || "/images/hero-equipment-yard.jpg"}
+  alt={title || "Machine"}
+  className={`preview-photo-img ${getFrameClass(activePreviewPhoto, "livePreview")}`}
+  style={getFrameStyle(activePreviewPhoto, "livePreview")}
+/>
                   {photoItems.length > 1 ? (
                     <>
                       <button
@@ -3063,13 +3074,13 @@ select {
   transform-origin: center center;
 }
 
-       .listing-preview-card:hover .preview-photo-img {
+     .listing-preview-card:hover .preview-photo-img {
   filter:
     contrast(1.04)
     saturate(1.03)
     brightness(1.01);
 
-  transform: scale(1.018);
+  scale: 1.018;
 }
 
         .card-photo-nav {
