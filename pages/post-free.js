@@ -774,22 +774,36 @@ export default function PostFreePage() {
 
           <section className="photo-workbench">
             <div className="workbench-head">
-              <div>
-                <span>Photo Workbench</span>
-                <strong>Drag to reorder • first image becomes hero</strong>
-              </div>
+             <div className="workbench-actions">
 
-<div className="photo-polish-toggle">
-  {["original", "clean", "dealer-pop"].map(mode => (
-    <button
-      key={mode}
-      type="button"
-      className={photoPolishMode === mode ? "active" : ""}
-      onClick={() => setPhotoPolishMode(mode)}
-    >
-      {mode === "dealer-pop" ? "Dealer Pop" : mode}
-    </button>
-  ))}
+  <div className="photo-polish-toggle">
+    {["original", "clean", "dealer-pop"].map(mode => (
+      <button
+        key={mode}
+        type="button"
+        className={photoPolishMode === mode ? "active" : ""}
+        onClick={() => setPhotoPolishMode(mode)}
+      >
+        {mode === "dealer-pop" ? "POP" : mode}
+      </button>
+    ))}
+  </div>
+
+  <label
+    className="photo-add"
+    onDragOver={e => e.preventDefault()}
+    onDrop={handlePhotoDrop}
+  >
+    <input
+      type="file"
+      multiple
+      accept="image/*"
+      onChange={handlePhotos}
+    />
+
+    + Add Photos
+  </label>
+
 </div>
              
               <label
