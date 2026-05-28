@@ -1015,7 +1015,7 @@ video {
 }
 
       .title-hours {
-  margin-left: 14px;
+  margin-left: 150px;
 
   color: rgba(255,255,255,.42);
 
