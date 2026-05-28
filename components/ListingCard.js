@@ -38,6 +38,18 @@ export default function ListingCard({
   onToggleSaved,
   showSave = true,
   from = "browse",
+
+  sellerMode = false,
+  workflowValue = "good-listing",
+  onWorkflowChange,
+  priceValue,
+  onPriceKeyDown,
+  savingPrice = false,
+  isPaused = false,
+  onEdit,
+  onPause,
+  onReactivate,
+  onDelete,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -113,6 +125,30 @@ export default function ListingCard({
     className="card-photo-img"
     loading="lazy"
   />
+
+{sellerMode ? (
+  <div className="workflow-photo-pill">
+    <select
+      value={workflowValue}
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onChange={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        onWorkflowChange?.(listing, e.target.value);
+      }}
+    >
+      <option value="good-listing">Good Listing</option>
+      <option value="reprice">Reprice</option>
+      <option value="refresh-photos">Refresh Photos</option>
+      <option value="social-blast">Social Blast</option>
+      <option value="review">Review</option>
+    </select>
+  </div>
+) : null}
+    
         {images.length > 1 ? (
           <>
             <button
@@ -174,10 +210,24 @@ export default function ListingCard({
 
         <div className="price-row">
 
-          <strong>
-            {listing.price ||
-              "Call for price"}
-          </strong>
+          {sellerMode ? (
+  <input
+    className="price-input"
+    defaultValue={priceValue || listing.price || ""}
+    onKeyDown={e => onPriceKeyDown?.(e, listing)}
+    disabled={savingPrice}
+  />
+) : (
+  <strong>
+    {listing.price || "Call for price"}
+  </strong>
+)}
+
+{sellerMode ? (
+  <span className={`status-pill ${isPaused ? "paused" : ""}`}>
+    {isPaused ? "PAUSED" : "LIVE"}
+  </span>
+) : null}
 
           <div className="meta">
 
@@ -216,6 +266,72 @@ export default function ListingCard({
             </span>
 
           </div>
+
+{sellerMode ? (
+  <div className="seller-actions">
+    <button
+      type="button"
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEdit?.(listing);
+      }}
+    >
+      EDIT
+    </button>
+
+    <button
+      type="button"
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href =
+          getListingHref(listing, "account");
+      }}
+    >
+      VIEW
+    </button>
+
+    {isPaused ? (
+      <button
+        type="button"
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          onReactivate?.(listing);
+        }}
+      >
+        REACTIVATE
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          onPause?.(listing);
+        }}
+      >
+        PAUSE
+      </button>
+    )}
+
+    <button
+      type="button"
+      className="danger-action"
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDelete?.(listing);
+      }}
+    >
+      DELETE
+    </button>
+  </div>
+) : null}
+
+
+              
         </div>
       </div>
 
@@ -578,6 +694,140 @@ export default function ListingCard({
 
           transform: scale(1.06);
         }
+.workflow-photo-pill {
+  position: absolute;
+
+  left: 10px;
+  top: 10px;
+
+  z-index: 6;
+}
+
+.workflow-photo-pill select {
+  height: 24px;
+  max-width: 132px;
+
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+
+  background:
+    linear-gradient(45deg, transparent 50%, #FFC400 50%),
+    linear-gradient(135deg, #FFC400 50%, transparent 50%),
+    rgba(0,0,0,.72);
+
+  background-position:
+    calc(100% - 13px) 50%,
+    calc(100% - 8px) 50%;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+
+  color: #f2f2f2;
+
+  padding: 0 24px 0 9px;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: .35px;
+  text-transform: uppercase;
+
+  outline: none;
+
+  appearance: none;
+
+  cursor: pointer;
+}
+
+.price-input {
+  width: 110px;
+  height: 34px;
+
+  border: 1px solid #343434;
+  border-radius: 8px;
+
+  background: #101010;
+
+  color: #F2F2F2;
+
+  padding: 0 10px;
+
+  font-size: 12px;
+  font-weight: 900;
+
+  outline: none;
+}
+
+.status-pill {
+  height: 28px;
+
+  padding: 0 12px;
+
+  border-radius: 999px;
+
+  background: rgba(56,161,105,.12);
+
+  border: 1px solid rgba(56,161,105,.35);
+
+  color: #38A169;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-pill.paused {
+  background: rgba(120,120,120,.14);
+
+  border-color: rgba(160,160,160,.35);
+
+  color: #A0A0A0;
+}
+
+.seller-actions {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.seller-actions button {
+  height: 32px;
+
+  border-radius: 8px;
+
+  border: 1px solid #343434;
+
+  background: #101010;
+
+  color: #D6D6D6;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+.seller-actions button:hover {
+  border-color: rgba(255,196,0,.45);
+
+  color: #FFC400;
+}
+
+.danger-action:hover {
+  border-color: rgba(229,62,62,.45) !important;
+
+  color: #E53E3E !important;
+}        
       `}</style>
     </a>
   );
