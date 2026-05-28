@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import featureKeywords from "../../lib/featureKeywords";
+import ListingCard from "../../components/ListingCard";
 
 import {
   getListingId,
@@ -695,117 +696,41 @@ const isPaused = listingStatus === "paused";
 const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
 return (
-      <div
-        className={`card seller-card ${isPaused ? "paused-card" : ""}`}
-        key={listingId || item.link || item.title}
-      >
-        <div
-          className="card-photo"
-          style={{
-            backgroundImage: `url(${
-              cardImages[currentPhotoIndex] ||
-              "/images/hero-equipment-yard.jpg"
-            })`
-          }}
-        />
 
-<div className="workflow-photo-pill">
-  <select
-    value={getWorkflowStatus(item)}
-    onChange={e => updateWorkflowStatus(item, e.target.value)}
-  >
-    <option value="good-listing">Good Listing</option>
-    <option value="reprice">Reprice</option>
-    <option value="refresh-photos">Refresh Photos</option>
-    <option value="social-blast">Social Blast</option>
-    <option value="review">Review</option>
-  </select>
-</div>
 
-        {cardImages.length > 1 && (
-          <>
-            <button
-              type="button"
-              className="card-photo-nav left"
-              onClick={e => changeCardPhoto(e, item, -1)}
-            >
-              ‹
-            </button>
+return (
+  <ListingCard
+    key={listingId}
+    listing={item}
+    showSave={false}
+    from="account"
 
-            <button
-              type="button"
-              className="card-photo-nav right"
-              onClick={e => changeCardPhoto(e, item, 1)}
-            >
-              ›
-            </button>
+    sellerMode={true}
 
-            <span className="photo-count">
-              {currentPhotoIndex + 1}/{cardImages.length}
-            </span>
-          </>
-        )}
+    workflowValue={getWorkflowStatus(item)}
+    onWorkflowChange={updateWorkflowStatus}
 
-        <div className="card-body">
-          <div className="title-row">
-            <h3>{cleanTitle}</h3>
-            <h3 className="hours-inline">{item.hours}</h3>
-          </div>
+    priceValue={formatPriceInput(item.price)}
+    onPriceKeyDown={savePrice}
 
-          <p className="feature-line">{getFeatureLine(item)}</p>
+    savingPrice={
+      savingPriceId === String(listingId)
+    }
 
-          <div className="seller-price-row">
-            <input
-              className="price-input"
-              defaultValue={formatPriceInput(item.price)}
-              onKeyDown={e => savePrice(e, item)}
-              disabled={savingPriceId === String(listingId)}
-            />
+    isPaused={isPaused}
 
-          <span className={`status-pill ${isPaused ? "paused" : ""}`}>
-  {isPaused ? "PAUSED" : "LIVE"}
-</span>
-          </div>
+    onEdit={listing => {
+      window.location.href =
+        `/live?id=${getListingId(listing)}`;
+    }}
 
-          <div className="seller-meta">
-            <span>Age: {item.age ?? "—"}</span>
-            <span>Views: {item.views || "—"}</span>
-            <span>Saves: {item.saves || "—"}</span>
-          </div>
+    onPause={pauseListing}
 
-          <div className="seller-actions">
-            <a href={`/live?id=${listingId}`}>EDIT</a>
+    onReactivate={reactivateListing}
 
-            <a href={`${listingHref}?from=account`}>
-              VIEW
-            </a>
+    onDelete={confirmDelete}
+  />
 
-            {isPaused ? (
-              <button
-                type="button"
-                onClick={() => reactivateListing(item)}
-              >
-                REACTIVATE
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => pauseListing(item)}
-              >
-                PAUSE
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="danger-action"
-              onClick={() => confirmDelete(item)}
-            >
-              DELETE
-            </button>
-          </div>
-        </div>
-      </div>
     );
   })}
 </div>
