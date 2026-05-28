@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import MachineBadges from "../components/MachineBadges";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
+import { processIXPhoto } from "../lib/ixvision/pipeline/processIXPhoto";
 
 const BRAND_YELLOW = "#FFC400";
 
