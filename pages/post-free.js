@@ -34,7 +34,7 @@ import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
-import { processIXPhoto } from "../lib/ixVision/processIXPhoto";
+import { processIXPhoto } from "../lib/ixVision/pipeline/processIXPhoto";
 
 const BRAND_YELLOW = "#FFC400";
 
