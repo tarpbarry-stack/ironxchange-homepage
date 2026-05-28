@@ -334,6 +334,24 @@ export default async function handler(req, res) {
           .map(imageRef => imageById[getId(imageRef.id)])
           .filter(Boolean);
 
+const sharetribeImageObjects = imageIds
+  .map((imageRef, index) => {
+    const imageId = getId(imageRef.id);
+    const url = imageById[imageId];
+
+    if (!imageId || !url) return null;
+
+    return {
+      imageId,
+      url,
+      source: "sharetribe",
+      position: index,
+      hero: index === 0
+    };
+  })
+  .filter(Boolean);
+        
+
         const bulkImageUrls = normalizeExternalImageUrls(publicData);
 
         const finalImages =
@@ -370,10 +388,12 @@ export default async function handler(req, res) {
           imageUrl,
 
           images: finalImages,
-          imageUrls: finalImages,
+imageUrls: finalImages,
 
-          sharetribeImages,
-          bulkImageUrls,
+imageObjects: sharetribeImageObjects,
+
+sharetribeImages,
+bulkImageUrls,
 
           description:
             publicData.description ||
