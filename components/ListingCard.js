@@ -273,7 +273,7 @@ export default function ListingCard({
         }
 
         .card-photo {
-          position: relative;
+          background-size: cover;
 
           height: 196px;
 
