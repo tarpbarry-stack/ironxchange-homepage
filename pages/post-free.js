@@ -315,6 +315,9 @@ export default function PostFreePage() {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("good-listing");
+  const [photoPolishMode, setPhotoPolishMode] = useState("clean");
+
+  
 
   const [externalLinks, setExternalLinks] = useState([
   { label: "", url: "" },
@@ -540,7 +543,7 @@ export default function PostFreePage() {
           if (!photo.file) return null;
 
           const imageFile = await processIXPhoto(photo.file, {
-  mode: "clean",
+  mode: photoPolishMode,
   make,
   outputQuality: 0.9,
   maxWidth: 2200
@@ -776,6 +779,19 @@ export default function PostFreePage() {
                 <strong>Drag to reorder • first image becomes hero</strong>
               </div>
 
+<div className="photo-polish-toggle">
+  {["original", "clean", "dealer-pop"].map(mode => (
+    <button
+      key={mode}
+      type="button"
+      className={photoPolishMode === mode ? "active" : ""}
+      onClick={() => setPhotoPolishMode(mode)}
+    >
+      {mode === "dealer-pop" ? "Dealer Pop" : mode}
+    </button>
+  ))}
+</div>
+             
               <label
                 className="photo-add"
                 onDragOver={e => e.preventDefault()}
@@ -1717,6 +1733,57 @@ select {
 
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
+}
+
+.photo-polish-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.photo-polish-toggle button {
+  height: 28px;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #101010;
+
+  color: rgba(255,255,255,.54);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .52px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    color .14s ease,
+    background .14s ease;
+}
+
+.photo-polish-toggle button:hover {
+  transform: translateY(-1px);
+
+  color: #FFC400;
+  border-color: rgba(255,196,0,.30);
+}
+
+.photo-polish-toggle button.active {
+  color: #050505;
+
+  border-color: #FFC400;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0)),
+    #FFC400;
 }
 
 .photo-add {
