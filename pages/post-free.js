@@ -1737,55 +1737,69 @@ select {
   -webkit-font-smoothing: antialiased;
 }
 
+.workbench-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .photo-polish-toggle {
   display: flex;
   align-items: center;
-  gap: 5px;
-}
+  gap: 3px;
 
-.photo-polish-toggle button {
-  height: 28px;
+  padding: 2px;
 
-  padding: 0 9px;
-
+  border: 1px solid rgba(255,255,255,.05);
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.08);
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #101010;
+    #0f0f0f;
 
-  color: rgba(255,255,255,.54);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.018) inset;
+}
 
-  font-size: 8px;
+.photo-polish-toggle button {
+  height: 20px;
+
+  padding: 0 7px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: transparent;
+
+  color: rgba(255,255,255,.34);
+
+  font-size: 7px;
   font-weight: 950;
-  letter-spacing: .52px;
+  letter-spacing: .58px;
   text-transform: uppercase;
 
   cursor: pointer;
 
   transition:
-    transform .14s ease,
-    border-color .14s ease,
     color .14s ease,
-    background .14s ease;
+    background .14s ease,
+    transform .14s ease;
 }
 
 .photo-polish-toggle button:hover {
-  transform: translateY(-1px);
-
-  color: #FFC400;
-  border-color: rgba(255,196,0,.30);
+  color: rgba(255,255,255,.58);
 }
 
 .photo-polish-toggle button.active {
-  color: #050505;
-
-  border-color: #FFC400;
-
   background:
-    linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0)),
-    #FFC400;
+    linear-gradient(180deg, rgba(255,196,0,.08), rgba(255,196,0,.02));
+
+  color: rgba(255,196,0,.88);
+
+  box-shadow:
+    0 0 10px rgba(255,196,0,.04) inset;
+
+  border: 1px solid rgba(255,196,0,.18);
 }
 
 .photo-add {
