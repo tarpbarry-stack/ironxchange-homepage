@@ -102,15 +102,17 @@ export default function ListingCard({
       href={getListingHref(listing, from)}
       className="card"
     >
-      <div
-        className="card-photo"
-        style={{
-          backgroundImage: `url(${
-            currentPhoto ||
-            "/images/hero-equipment-yard.jpg"
-          })`,
-        }}
-      >
+      <div className="card-photo">
+
+  <img
+    src={
+      currentPhoto ||
+      "/images/hero-equipment-yard.jpg"
+    }
+    alt={listing.title || "Machine"}
+    className="card-photo-img"
+    loading="lazy"
+  />
         {images.length > 1 ? (
           <>
             <button
@@ -277,23 +279,38 @@ export default function ListingCard({
 
   height: 196px;
 
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
 
   border-bottom:
     1px solid rgba(255,255,255,.065);
 
-  overflow: hidden;
+  background: #0f0f0f;
 
   box-shadow:
     inset 0 -40px 70px rgba(0,0,0,.10);
+}
+
+.card-photo-img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center center;
+
+  display: block;
 
   transition:
     filter .18s ease,
     transform .28s ease;
+
+  image-rendering: auto;
+
+  backface-visibility: hidden;
+
+  transform-origin: center center;
 }
 
-        .card:hover .card-photo {
+        .card:hover .card-photo-img {
           filter:
             contrast(1.04)
             saturate(1.03)
