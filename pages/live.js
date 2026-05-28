@@ -71,15 +71,15 @@ function getImageUrl(img) {
   if (typeof img === "string") return img;
 
   return (
-    img.url ||
-    img.src ||
-    img.attributes?.variants?.default?.url ||
-    img.attributes?.variants?.["landscape-crop"]?.url ||
-    img.attributes?.variants?.["scaled-large"]?.url ||
-    img.attributes?.variants?.["scaled-medium"]?.url ||
-    img.attributes?.variants?.["scaled-small"]?.url ||
-    null
-  );
+  img.url ||
+  img.src ||
+  img.attributes?.variants?.["scaled-large"]?.url ||
+  img.attributes?.variants?.["scaled-medium"]?.url ||
+  img.attributes?.variants?.default?.url ||
+  img.attributes?.variants?.["landscape-crop"]?.url ||
+  img.attributes?.variants?.["scaled-small"]?.url ||
+  null
+);
 }
 
 function getImageId(img) {
@@ -95,12 +95,28 @@ function getImageId(img) {
 }
 
 function getListingImages(listing) {
-  const rawImages = [
+  const imageObjects = Array.isArray(listing?.imageObjects)
+    ? listing.imageObjects
+    : [];
+
+  const objectUrls = imageObjects
+    .map(getImageUrl)
+    .filter(Boolean);
+
+  const legacyUrls = [
     ...(Array.isArray(listing?.images) ? listing.images : []),
     ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
     listing?.imageUrl,
     listing?.image
-  ];
+  ]
+    .map(getImageUrl)
+    .filter(Boolean);
+
+  return [...new Set([
+    ...objectUrls,
+    ...legacyUrls
+  ])];
+}
 
   return [...new Set(rawImages.map(getImageUrl).filter(Boolean))];
 }
@@ -443,6 +459,12 @@ setPhotoItems(
 
       url: getImageUrl(img),
 
+      originalUrl: getImageUrl(img),
+      cleanUrl: getImageUrl(img),
+      dealerPopUrl: getImageUrl(img),
+
+      activeMode: "original",
+
       file: null,
 
       existing: true
@@ -591,6 +613,80 @@ console.log("LIVE CATEGORY:", listingCategory);
   e.target.value = "";
 }
 
+async function reprocessExistingPhoto(photoId, mode) {
+  if (!mode || mode === "original") return;
+
+  const targetPhoto = photoItems.find(photo => photo.id === photoId);
+
+  if (!targetPhoto?.originalUrl) return;
+
+  try {
+    setCommandBusy(`photo-${photoId}-${mode}`);
+
+    const response = await fetch(targetPhoto.originalUrl);
+    const blob = await response.blob();
+
+    const file = new File(
+      [blob],
+      `${slugify(title)}-${mode}.jpg`,
+      { type: blob.type || "image/jpeg" }
+    );
+
+    const make = getListingMake(listing);
+
+    const processed = await buildIXPhotoVariants(file, {
+      make,
+      mode,
+      userEmail: listing?.sellerEmail,
+      companyName: sellerName
+    });
+
+    setPhotoItems(current =>
+      current.map(photo => {
+        if (photo.id !== photoId) return photo;
+
+        return {
+          ...photo,
+
+          cleanUrl:
+            mode === "clean"
+              ? processed.cleanUrl
+              : photo.cleanUrl,
+
+          cleanFile:
+            mode === "clean"
+              ? processed.cleanFile
+              : photo.cleanFile,
+
+          dealerPopUrl:
+            mode === "dealerPop"
+              ? processed.dealerPopUrl
+              : photo.dealerPopUrl,
+
+          dealerPopFile:
+            mode === "dealerPop"
+              ? processed.dealerPopFile
+              : photo.dealerPopFile,
+
+          url: getIXActivePhotoUrl(processed),
+          file: processed.file,
+
+          activeMode: mode,
+          existing: false
+        };
+      })
+    );
+
+    addActivity("success", `Photo reprocessed — ${mode}`);
+  } catch (error) {
+    console.error("Existing photo reprocess failed:", error);
+    alert(`Photo reprocess failed: ${error.message}`);
+  } finally {
+    setCommandBusy("");
+  }
+}
+
+  
  async function handlePhotoDrop(e) {
   e.preventDefault();
 
@@ -715,11 +811,17 @@ async function buildLiveImageIdsForSave() {
   const finalImageIds = [];
 
   for (const photo of photoItems) {
-    if (photo.existing && photo.imageId) {
-      finalImageIds.push(new UUID(photo.imageId));
-      continue;
-    }
+   if (
+  photo.existing &&
+  photo.imageId &&
+  !photo.file
+) {
+  finalImageIds.push(
+    new UUID(photo.imageId)
+  );
 
+  continue;
+}
     if (!photo.file) continue;
 
     const upload = await sdk.images.upload(
@@ -1277,7 +1379,7 @@ async function saveExternalLinks() {
 
                   <img src={getIXActivePhotoUrl(photo)} alt={`Photo ${index + 1}`} />
 
-                    {!photo.existing ? (
+                    {true ? (
   <div
     className="polish-toggle"
     onClick={e => e.stopPropagation()}
@@ -1287,33 +1389,44 @@ async function saveExternalLinks() {
         key={mode}
         type="button"
         className={photo.activeMode === mode ? "active" : ""}
-        onClick={() => {
-          setPhotoItems(current =>
-            current.map(item =>
-              item.id === photo.id
-                ? {
-                    ...item,
 
-                    activeMode: mode,
 
-                    file:
-                      mode === "original"
-                        ? item.originalFile
-                        : mode === "dealerPop"
-                          ? item.dealerPopFile
-                          : item.cleanFile,
+onClick={async () => {
+  if (photo.existing && mode !== "original") {
+    await reprocessExistingPhoto(photo.id, mode);
+    return;
+  }
 
-                    url:
-                      mode === "original"
-                        ? item.originalUrl
-                        : mode === "dealerPop"
-                          ? item.dealerPopUrl
-                          : item.cleanUrl
-                  }
-                : item
-            )
-          );
-        }}
+  setPhotoItems(current =>
+    current.map(item =>
+      item.id === photo.id
+        ? {
+            ...item,
+
+            activeMode: mode,
+
+            file:
+              mode === "original"
+                ? item.originalFile || null
+                : mode === "dealerPop"
+                  ? item.dealerPopFile || null
+                  : item.cleanFile || null,
+
+            url:
+              mode === "original"
+                ? item.originalUrl
+                : mode === "dealerPop"
+                  ? item.dealerPopUrl
+                  : item.cleanUrl
+          }
+        : item
+    )
+  );
+}}
+
+
+
+
       >
         {mode === "dealerPop" ? "Pop" : mode}
       </button>
