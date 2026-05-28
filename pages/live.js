@@ -711,28 +711,34 @@ console.log("LIVE CATEGORY:", listingCategory);
   }
 
 
-async function appendNewLivePhotos() {
-  const newPhotos = photoItems.filter(photo => !photo.existing && photo.file);
+async function buildLiveImageIdsForSave() {
+  const finalImageIds = [];
 
-  for (const photo of newPhotos) {
+  for (const photo of photoItems) {
+    if (photo.existing && photo.imageId) {
+      finalImageIds.push(new UUID(photo.imageId));
+      continue;
+    }
+
+    if (!photo.file) continue;
+
     const upload = await sdk.images.upload(
       { image: photo.file },
       { expand: true }
     );
 
-    await sdk.ownListings.addImage(
-      {
-        id: new UUID(listingId),
-        imageId: new UUID(upload.data.data.id.uuid)
-      },
-      {
-        expand: true,
-        include: ["images"]
-      }
+    finalImageIds.push(
+      new UUID(upload.data.data.id.uuid)
     );
   }
 
-  return newPhotos.length;
+  if (photoItems.length > 0 && finalImageIds.length !== photoItems.length) {
+    throw new Error(
+      "Photo save stopped: final image count mismatch."
+    );
+  }
+
+  return finalImageIds;
 }
 
 
@@ -784,14 +790,26 @@ async function appendNewLivePhotos() {
         }
       }
 
-const appendedPhotoCount = await appendNewLivePhotos();
+const imageIds = await buildLiveImageIdsForSave();
 
-      addActivity("success", `Listing launched — ${title}`);
-      trackLaunchEvent("launch_card_saved", {
+if (imageIds.length > 0) {
+  await sdk.ownListings.update(
+    {
+      id: new UUID(listingId),
+      images: imageIds
+    },
+    {
+      expand: true,
+      include: ["images"]
+    }
+  );
+}
+
+     trackLaunchEvent("launch_card_saved", {
   listingId: String(listingId),
   selectedKeywordCount: selectedKeywords.length,
   photoCount: photoItems.length,
-  appendedPhotoCount
+  savedImageCount: imageIds.length
 });
 
       alert("Launched. Listing updates applied.");
