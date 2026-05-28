@@ -708,87 +708,34 @@ console.log("LIVE CATEGORY:", listingCategory);
   }
 
 
-  function normalizeImageUrl(url = "") {
-  return String(url).split("?")[0];
-}
+async function appendNewLivePhotos() {
+  const newPhotos = photoItems.filter(photo => !photo.existing && photo.file);
 
-function getIncludedImagesFromResponse(response) {
-  const included = response?.data?.included || [];
-
-  return included
-    .filter(item => item?.type === "image")
-    .map(img => ({
-      imageId: img.id?.uuid || img.id || "",
-      url: getImageUrl(img)
-    }))
-    .filter(item => item.imageId && item.url);
-}
-
-async function fetchFreshListingImages() {
-  const response = await sdk.ownListings.show(
-    {
-      id: new UUID(listingId)
-    },
-    {
-      expand: true,
-      include: ["images"]
-    }
-  );
-
-  return getIncludedImagesFromResponse(response);
-}
-
-async function uploadNewLivePhotos() {
-  const freshExistingImages = await fetchFreshListingImages();
-
-  const finalImageIds = [];
-
-  for (const photo of photoItems) {
-    if (photo.existing) {
-      const existingId =
-        photo.imageId ||
-        freshExistingImages.find(img =>
-          normalizeImageUrl(img.url) === normalizeImageUrl(photo.url)
-        )?.imageId;
-
-     if (!existingId) {
-  console.error("LIVE PHOTO ID MATCH FAILED", {
-    photo,
-    freshExistingImages,
-    visibleUrl: normalizeImageUrl(photo.url),
-    freshUrls: freshExistingImages.map(img => normalizeImageUrl(img.url))
-  });
-
-  throw new Error(
-    "Photo save stopped: existing Sharetribe image ID missing. Check console for LIVE PHOTO ID MATCH FAILED."
-  );
-}
-
-      finalImageIds.push(new UUID(existingId));
-
-      continue;
-    }
-
-    if (!photo.file) continue;
-
+  for (const photo of newPhotos) {
     const upload = await sdk.images.upload(
       { image: photo.file },
       { expand: true }
     );
 
-    finalImageIds.push(
-      new UUID(upload.data.data.id.uuid)
+    await sdk.ownListings.addImage(
+      {
+        id: new UUID(listingId),
+        imageId: new UUID(upload.data.data.id.uuid)
+      },
+      {
+        expand: true,
+        include: ["images"]
+      }
     );
   }
 
-  if (finalImageIds.length < photoItems.length) {
-    throw new Error(
-      "Photo save stopped: image count mismatch."
-    );
-  }
-
-  return finalImageIds;
+  return newPhotos.length;
 }
+
+
+
+
+
   
 
   
@@ -834,29 +781,15 @@ async function uploadNewLivePhotos() {
         }
       }
 
-if (photoItems.length > 0) {
-  const imageIds = await uploadNewLivePhotos();
-
-  if (imageIds.length > 0) {
-    await sdk.ownListings.update(
-      {
-        id: new UUID(listingId),
-        images: imageIds
-      },
-      {
-        expand: true,
-        include: ["images"]
-      }
-    );
-  }
-}
+const appendedPhotoCount = await appendNewLivePhotos();
 
       addActivity("success", `Listing launched — ${title}`);
       trackLaunchEvent("launch_card_saved", {
-        listingId: String(listingId),
-        selectedKeywordCount: selectedKeywords.length,
-        photoCount: photoItems.length
-      });
+  listingId: String(listingId),
+  selectedKeywordCount: selectedKeywords.length,
+  photoCount: photoItems.length,
+  appendedPhotoCount
+});
 
       alert("Launched. Listing updates applied.");
     } catch (err) {
