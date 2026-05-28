@@ -1191,7 +1191,7 @@ video {
 
 .arrow {
   position: absolute;
-  top: 92%;
+  top: 50%;
   transform: translateY(-50%);
 
   width: 22px;
