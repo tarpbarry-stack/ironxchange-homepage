@@ -13,6 +13,11 @@ import MachineBadges from "../../components/MachineBadges";
 import IXInspectLightbox from "../../components/IXInspectLightbox";
 
 import {
+  getFrameClass,
+  getFrameStyle
+} from "../../lib/ixvision/frameEngine";
+
+import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
   toggleSavedListing
@@ -246,9 +251,19 @@ export default function ListingPage() {
     );
   }
 
-  const images = getListingImages(listing);
-  const heroImage = images[activeImage] || "/images/hero-equipment-yard.jpg";
+  const imageObjects = Array.isArray(listing?.imageObjects)
+  ? listing.imageObjects
+  : [];
 
+const images = getListingImages(listing);
+
+const activeImageObject =
+  imageObjects[activeImage] ||
+  { url: images[activeImage] };
+
+const heroImage =
+  images[activeImage] ||
+  "/images/hero-equipment-yard.jpg";
   const mobilePairs = [];
   for (let i = 1; i < images.length; i += 2) {
     mobilePairs.push(images.slice(i, i + 2));
@@ -504,11 +519,12 @@ const externalLinks = Array.isArray(rawExternalLinks)
           <div className="photo-grid">
             <div className="hero-wrap">
               <img
-                src={heroImage}
-                alt={title}
-                className="hero-photo"
-                onClick={() => openLightbox(activeImage)}
-              />
+  src={heroImage}
+  alt={title}
+  className={`hero-photo ${getFrameClass(activeImageObject, "slugHero")}`}
+  style={getFrameStyle(activeImageObject, "slugHero")}
+  onClick={() => openLightbox(activeImage)}
+/>
 
               <button className="arrow left" onClick={goPrev} type="button">
                 ‹
@@ -1115,15 +1131,12 @@ video {
     filter .24s ease;
 }
 
-      .hero-photo:hover {
-  transform: scale(1.004);
-
+     .hero-photo:hover {
   filter:
     contrast(1.04)
     saturate(1.03)
     brightness(1.01);
 }
-
        .photo-rail {
   height: 610px;
 
