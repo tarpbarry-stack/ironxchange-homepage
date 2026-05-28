@@ -1566,15 +1566,13 @@ onClick={async () => {
               </div>
 
               <div className="listing-preview-card">
-               <div
+              <div
   className="preview-photo"
+  style={{
+    backgroundImage: `url(${heroPhoto || "/images/hero-equipment-yard.jpg"})`
+  }}
   onClick={() => changeActivePhoto(1)}
 >
-  <img
-    src={heroPhoto || "/images/hero-equipment-yard.jpg"}
-    alt={title || "Machine"}
-    className="preview-photo-img"
-  />
                   {photoItems.length > 1 ? (
                     <>
                       <button
