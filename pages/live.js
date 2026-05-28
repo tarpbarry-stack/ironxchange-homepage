@@ -86,6 +86,7 @@ function getImageId(img) {
   if (!img) return "";
 
   return (
+    img.imageId ||
     img.id?.uuid ||
     img.id ||
     img.uuid ||
@@ -427,9 +428,11 @@ setExternalLinks([
 ]);
 
 
-const rawImages = Array.isArray(listing?.images)
-  ? listing.images
-  : [];
+const rawImages = Array.isArray(listing?.imageObjects) && listing.imageObjects.length > 0
+  ? listing.imageObjects
+  : Array.isArray(listing?.images)
+    ? listing.images
+    : [];
 
 setPhotoItems(
   rawImages
