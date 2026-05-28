@@ -96,7 +96,7 @@ function getListingImages(listing) {
     .filter(Boolean);
 
   return objectUrls;
-  ])];
+ 
 }
 
 function cleanMachineTitle(title = "") {
