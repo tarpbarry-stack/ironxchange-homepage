@@ -11,6 +11,12 @@ import {
 
 import MachineBadges from "./MachineBadges";
 
+import {
+  getFrameClass,
+  getFrameStyle
+} from "../lib/ixvision/frameEngine";
+
+
 function getBulkImageUrls(listing = {}) {
   const raw =
     listing?.imageUrls ||
@@ -67,6 +73,10 @@ export default function ListingCard({
 
   const currentPhoto = images[photoIndex];
 
+  const currentImageObject =
+  sharetribeImages[photoIndex] ||
+  { url: currentPhoto };
+
   const keywords = Array.isArray(listing?.keywords)
     ? listing.keywords
     : Array.isArray(listing?.publicData?.keywords)
@@ -110,11 +120,12 @@ export default function ListingCard({
     >
       <div className="card-photo">
         <img
-          src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-          alt={listing.title || "Machine"}
-          className="card-photo-img"
-          loading="lazy"
-        />
+  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+  alt={listing.title || "Machine"}
+  className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
+  style={getFrameStyle(currentImageObject, "card")}
+  loading="lazy"
+/>
 
         {sellerMode ? (
           <div className="workflow-photo-pill" onClick={stopCardClick}>
@@ -377,13 +388,11 @@ export default function ListingCard({
         }
 
         .card:hover .card-photo-img {
-          filter:
-            contrast(1.04)
-            saturate(1.03)
-            brightness(1.01);
-
-          transform: scale(1.018);
-        }
+  filter:
+    contrast(1.04)
+    saturate(1.03)
+    brightness(1.01);
+}
 
         .card-photo-nav {
           position: absolute;
