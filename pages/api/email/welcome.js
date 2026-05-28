@@ -52,6 +52,8 @@ export default async function handler(req, res) {
       `,
     });
 
+    console.log("RESEND RESULT:", result);
+
     return res.status(200).json({
   ok: true,
   result,
