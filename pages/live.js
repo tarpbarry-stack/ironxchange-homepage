@@ -118,9 +118,6 @@ function getListingImages(listing) {
   ])];
 }
 
-  return [...new Set(rawImages.map(getImageUrl).filter(Boolean))];
-}
-
 function getListingKeywords(listing) {
   const raw =
     listing?.keywords ||
