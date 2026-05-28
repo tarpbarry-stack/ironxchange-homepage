@@ -695,7 +695,6 @@ async function updateWorkflowStatus(listing, status) {
 const isPaused = listingStatus === "paused";
 const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
-return (
 
 
 return (
