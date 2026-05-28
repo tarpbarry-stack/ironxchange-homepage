@@ -273,26 +273,25 @@ export default function ListingCard({
         }
 
         .card-photo {
-          background-size: cover;
+  position: relative;
 
-          height: 196px;
+  height: 196px;
 
-           background-size: cover;
-          background-position: center;
+  background-size: cover;
+  background-position: center;
 
+  border-bottom:
+    1px solid rgba(255,255,255,.065);
 
-          border-bottom:
-            1px solid rgba(255,255,255,.065);
+  overflow: hidden;
 
-          overflow: hidden;
+  box-shadow:
+    inset 0 -40px 70px rgba(0,0,0,.10);
 
-          box-shadow:
-            inset 0 -40px 70px rgba(0,0,0,.10);
-
-          transition:
-            filter .18s ease,
-            transform .28s ease;
-        }
+  transition:
+    filter .18s ease,
+    transform .28s ease;
+}
 
         .card:hover .card-photo {
           filter:
