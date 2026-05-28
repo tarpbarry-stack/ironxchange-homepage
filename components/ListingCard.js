@@ -278,9 +278,9 @@ export default function ListingCard({
           height: 196px;
 
           background-size: contain;
-          background-repeat: no-repeat;
-          background-position: center center;
-          background-color: #050505;
+background-repeat: no-repeat;
+background-position: center center;
+background-color: #050505;
 
           border-bottom:
             1px solid rgba(255,255,255,.065);
