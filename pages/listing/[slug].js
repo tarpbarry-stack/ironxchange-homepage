@@ -1136,6 +1136,8 @@ video {
     contrast(1.04)
     saturate(1.03)
     brightness(1.01);
+
+  scale: 1.004;
 }
        .photo-rail {
   height: 610px;
