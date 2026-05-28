@@ -1154,13 +1154,12 @@ export default function SellerYardPage() {
     letter-spacing: .52px;
   }
 
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-
-    gap: 22px;
-  }
-
+ .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px);
+  justify-content: center;
+  gap: 22px;
+}
   .empty {
     margin-top: 24px;
 
