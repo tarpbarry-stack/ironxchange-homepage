@@ -34,6 +34,7 @@ import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
+import { processIXPhoto } from "../lib/ixVision/processIXPhoto";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -538,7 +539,12 @@ export default function PostFreePage() {
         photoItems.map(async photo => {
           if (!photo.file) return null;
 
-          const imageFile = await compressImage(photo.file);
+          const imageFile = await processIXPhoto(photo.file, {
+  mode: "clean",
+  make,
+  outputQuality: 0.9,
+  maxWidth: 2200
+});
 
           return sdk.images.upload(
             { image: imageFile },
