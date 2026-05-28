@@ -10,6 +10,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
 import MachineBadges from "../../components/MachineBadges";
+import IXInspectLightbox from "../../components/IXInspectLightbox";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -771,27 +772,20 @@ const externalLinks = Array.isArray(rawExternalLinks)
           </section>
         </section>
 
-        {lightboxOpen && (
-          <div className="lightbox">
-            <button className="lightbox-close" onClick={closeLightbox}>
-              ×
-            </button>
-
-            <button className="lightbox-arrow left" onClick={lightboxPrev}>
-              ‹
-            </button>
-
-            <img
-              src={images[lightboxIndex]}
-              alt=""
-              className="lightbox-image"
-            />
-
-            <button className="lightbox-arrow right" onClick={lightboxNext}>
-              ›
-            </button>
-          </div>
-        )}
+       <IXInspectLightbox
+  open={lightboxOpen}
+  images={images}
+  index={lightboxIndex}
+  title={title}
+  onClose={closeLightbox}
+  onChange={setLightboxIndex}
+  onInspectEvent={(event, payload) => {
+    window.posthog?.capture?.(event, {
+      listingId,
+      ...payload
+    });
+  }}
+/>
       </main>
 
       <Footer />
