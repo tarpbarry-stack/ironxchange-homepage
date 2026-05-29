@@ -6,63 +6,56 @@ function slugify(value) {
     .trim()
     .toLowerCase()
     .replace(/&/g, "and")
+    .replace(/\//g, "-")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
 
-function buildCategory(categoryName, rows) {
+const masterPath = path.join(process.cwd(), "config", "awsTaxonomyMaster.json");
+const outputPath = path.join(process.cwd(), "config", "configCategories.js");
+
+const master = JSON.parse(fs.readFileSync(masterPath, "utf8"));
+
+function buildCategory(category) {
+  const categoryId = slugify(category.name);
   const makeMap = {};
 
-  rows.forEach(row => {
+  category.rows.forEach(row => {
     const make = String(row.make || "").trim();
     const model = String(row.model || "").trim();
 
     if (!make || !model) return;
 
-    if (!makeMap[make]) {
-      makeMap[make] = [];
-    }
-
+    if (!makeMap[make]) makeMap[make] = [];
     makeMap[make].push(model);
   });
 
   return {
-    id: slugify(categoryName),
-    name: categoryName,
-    subcategories: Object.keys(makeMap)
-      .sort()
-      .map(make => ({
-        id: `${slugify(categoryName)}-${slugify(make)}`,
-        name: make,
-        subcategories: makeMap[make]
-          .sort()
-          .map(model => ({
-            id: `${slugify(categoryName)}-${slugify(make)}-${slugify(model)}`,
-            name: model,
-            subcategories: []
-          }))
+    id: categoryId,
+    name: category.name,
+    subcategories: Object.keys(makeMap).map(make => ({
+      id: `${categoryId}-${slugify(make)}`,
+      name: make,
+      subcategories: makeMap[make].map(model => ({
+        id: `${categoryId}-${slugify(make)}-${slugify(model)}`,
+        name: model,
+        subcategories: []
       }))
+    }))
   };
 }
 
-console.log("Generator Loaded");
-
 const categoriesConfig = {
-  categories: [
-    buildCategory("SKID STEER / CTL", []),
-    buildCategory("DOZERS", [])
-  ]
+  categories: master.categories.map(buildCategory)
 };
 
-const output = `// IronXchange V12 master Sharetribe-compatible category tree.
+const output = `// IronXchange Sharetribe-compatible category tree.
 // GENERATED FILE. DO NOT HAND EDIT.
 
 const categoriesConfig = ${JSON.stringify(categoriesConfig, null, 2)};
 
 export default categoriesConfig;
 `;
-
-const outputPath = path.join(process.cwd(), "config", "configCategories.js");
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, output);
