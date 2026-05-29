@@ -1,6 +1,3 @@
-// IronXchange V12 taxonomy generator
-// Reads current taxonomy libraries and outputs Sharetribe-compatible configCategories.js
-
 const fs = require("fs");
 const path = require("path");
 
@@ -13,35 +10,39 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-function makeNode(categoryId, makeName, models = []) {
-  const makeId = `${categoryId}-${slugify(makeName)}`;
+function buildCategory(categoryName, rows) {
+  const makeMap = {};
+
+  rows.forEach(row => {
+    const make = String(row.make || "").trim();
+    const model = String(row.model || "").trim();
+
+    if (!make || !model) return;
+
+    if (!makeMap[make]) {
+      makeMap[make] = [];
+    }
+
+    makeMap[make].push(model);
+  });
 
   return {
-    id: makeId,
-    name: String(makeName || "").trim(),
-    subcategories: models.map(model => ({
-      id: `${makeId}-${slugify(model)}`,
-      name: String(model || "").trim(),
-      subcategories: []
-    }))
+    id: slugify(categoryName),
+    name: categoryName,
+    subcategories: Object.keys(makeMap)
+      .sort()
+      .map(make => ({
+        id: `${slugify(categoryName)}-${slugify(make)}`,
+        name: make,
+        subcategories: makeMap[make]
+          .sort()
+          .map(model => ({
+            id: `${slugify(categoryName)}-${slugify(make)}-${slugify(model)}`,
+            name: model,
+            subcategories: []
+          }))
+      }))
   };
 }
 
-const categoriesConfig = {
-  categories: []
-};
-
-const output = `// IronXchange V12 master Sharetribe-compatible category tree.
-// GENERATED FILE. DO NOT HAND EDIT.
-// Shape: Category → Make → Model.
-
-const categoriesConfig = ${JSON.stringify(categoriesConfig, null, 2)};
-
-export default categoriesConfig;
-`;
-
-const outputPath = path.join(process.cwd(), "config", "configCategories.js");
-
-fs.writeFileSync(outputPath, output);
-
-console.log("Generated:", outputPath);
+console.log("Generator Loaded");
