@@ -1,41 +1,48 @@
 const fs = require("fs");
 const path = require("path");
 
-console.log("AWS Taxonomy Master Builder Loaded");
-
-// Import current local taxonomy files.
-// Today we are only wiring SKID STEER / CTL.
 const taxonomyRegistry = require("../lib/taxonomyRegistry");
+
+console.log("AWS Taxonomy Master Builder Loaded");
 
 function normalizeMake(make) {
   if (make === "CAT") return "CATERPILLAR";
   return make;
 }
 
+function loadTaxonomy(file) {
+  if (!file) return [];
 
-const outputPath = path.join(process.cwd(), "config", "awsTaxonomyMaster.json");
+  const loaded = require(`../lib/${file}`);
+  return loaded.default || loaded;
+}
 
-const master = {
-  generatedAt: new Date().toISOString(),
-  note: "IronXchange AWS taxonomy master starter file. No broad cleanup applied. Only CAT → CATERPILLAR is applied for SKID STEER / CTL.",
-  categories: taxonomyRegistry.map(category => {
-  const taxonomy =
-    require(`../lib/${category.file}`).default ||
-    require(`../lib/${category.file}`);
+const categories = taxonomyRegistry.map(category => {
+  const taxonomy = loadTaxonomy(category.file);
 
   return {
     name: category.name,
+    awsName: category.awsName,
+    awsId: category.awsId,
     rows: taxonomy.map(row => ({
       ...row,
       make: normalizeMake(row.make)
     }))
   };
-})
+});
+
+const outputPath = path.join(process.cwd(), "config", "awsTaxonomyMaster.json");
+
+const master = {
+  generatedAt: new Date().toISOString(),
+  note: "IronXchange AWS taxonomy master. No broad cleanup applied. CAT → CATERPILLAR is applied during generation.",
+  categories
 };
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(master, null, 2));
 
+console.log("Generated:", outputPath);
 console.log("Categories:", master.categories.length);
 console.log(
   "Total rows:",
