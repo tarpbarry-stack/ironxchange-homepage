@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
+import { captureIXEvent } from "../lib/posthog";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -348,11 +349,18 @@ export default function ListingLivePage() {
   const [commandBusy, setCommandBusy] = useState("");
 
   const [edit, setEdit] = useState({
-    price: "",
-    hours: "",
-    location: "",
-    description: ""
+  price: "",
+  hours: "",
+  location: "",
+  description: ""
+});
+
+useEffect(() => {
+  trackLaunchEvent("launch_page_viewed", {
+    page: "live",
+    listingId: id || ""
   });
+}, [id]);
 
   const [photoItems, setPhotoItems] = useState([]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
