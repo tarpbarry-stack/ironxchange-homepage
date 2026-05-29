@@ -5,9 +5,7 @@ console.log("AWS Taxonomy Master Builder Loaded");
 
 // Import current local taxonomy files.
 // Today we are only wiring SKID STEER / CTL.
-const skidSteerCtlTaxonomy =
-  require("../lib/skidSteerCtlTaxonomy").default ||
-  require("../lib/skidSteerCtlTaxonomy");
+const taxonomyRegistry = require("../lib/taxonomyRegistry");
 
 function normalizeMake(make) {
   if (make === "CAT") return "CATERPILLAR";
