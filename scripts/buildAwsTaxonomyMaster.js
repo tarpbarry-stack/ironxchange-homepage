@@ -36,5 +36,8 @@ const master = {
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(master, null, 2));
 
-console.log("Generated:", outputPath);
-console.log("SKID STEER / CTL rows:", skidSteerRows.length);
+console.log("Categories:", master.categories.length);
+console.log(
+  "Total rows:",
+  master.categories.reduce((sum, category) => sum + category.rows.length, 0)
+);
