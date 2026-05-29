@@ -1,5 +1,6 @@
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
+import { captureIXEvent } from "../lib/posthog";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -208,6 +209,12 @@ const [filters, setFilters] = useState({
   hoursMin: "",
   hoursMax: ""
 });
+
+  useEffect(() => {
+  captureIXEvent("browse_viewed", {
+    page: "browse"
+  });
+}, []);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -1550,12 +1557,20 @@ const isArchived = listingStatus === "archived";
     </select>
 
     <button
-      type="button"
-      className="search-btn"
-    >
-      SEARCH
-    </button>
-  </div>
+  type="button"
+  className="search-btn"
+  onClick={() => {
+    captureIXEvent("search_performed", {
+      query: searchQuery,
+      category,
+      make,
+      model,
+      results: filteredListings.length
+    });
+  }}
+>
+  SEARCH
+</button>
 
   <div className="filter-strip">
     <div className="range-group">
