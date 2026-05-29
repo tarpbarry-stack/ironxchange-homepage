@@ -62550,1574 +62550,6 @@ const categoriesConfig = {
       ]
     },
     {
-      "id": "attachments-parts",
-      "name": "ATTACHMENTS / PARTS",
-      "subcategories": [
-        {
-          "id": "attachments-parts-excavator-parts-attachments",
-          "name": "EXCAVATOR - PARTS / ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-excavator-parts-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-skid-steer-parts-attachments",
-          "name": "SKID STEER - PARTS / ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-skid-steer-parts-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-wheel-loader-parts-attachments",
-          "name": "WHEEL LOADER - PARTS / ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-wheel-loader-parts-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-dozer-attachments",
-          "name": "DOZER ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-dozer-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-dozer-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-backhoe-attachments",
-          "name": "BACKHOE ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-backhoe-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-asphalt-attachments",
-          "name": "ASPHALT ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-asphalt-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-crane-attachments",
-          "name": "CRANE ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-crane-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-motor-grader-attachments",
-          "name": "MOTOR GRADER ATTACHMENTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-motor-grader-attachments-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-apron",
-          "name": "APRON",
-          "subcategories": [
-            {
-              "id": "attachments-parts-apron-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-arch",
-          "name": "ARCH",
-          "subcategories": [
-            {
-              "id": "attachments-parts-arch-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-arm",
-          "name": "ARM",
-          "subcategories": [
-            {
-              "id": "attachments-parts-arm-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-asphalt-cutter",
-          "name": "ASPHALT CUTTER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-asphalt-cutter-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-asphalt-paving",
-          "name": "ASPHALT/PAVING",
-          "subcategories": [
-            {
-              "id": "attachments-parts-asphalt-paving-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-auger",
-          "name": "AUGER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-auger-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-axle",
-          "name": "AXLE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-axle-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-backhoe",
-          "name": "BACKHOE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-backhoe-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-bed",
-          "name": "BED",
-          "subcategories": [
-            {
-              "id": "attachments-parts-bed-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-beding-conveyor",
-          "name": "BEDING CONVEYOR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-beding-conveyor-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-blades",
-          "name": "BLADES",
-          "subcategories": [
-            {
-              "id": "attachments-parts-blades-6-way",
-              "name": "6-WAY",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-angle",
-              "name": "ANGLE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-moldboard",
-              "name": "MOLDBOARD",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-s",
-              "name": "S",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-sloper",
-              "name": "SLOPER",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-su",
-              "name": "SU",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-u",
-              "name": "U",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-wing",
-              "name": "WING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-blades-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-booms",
-          "name": "BOOMS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-booms-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-bowl",
-          "name": "BOWL",
-          "subcategories": [
-            {
-              "id": "attachments-parts-bowl-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-buckets",
-          "name": "BUCKETS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-buckets-4-in-1",
-              "name": "4 in 1",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-clamshell",
-              "name": "CLAMSHELL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-crusher",
-              "name": "CRUSHER",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-ditch-cleaning",
-              "name": "DITCH CLEANING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-frost",
-              "name": "FROST",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-gp",
-              "name": "GP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-light-material",
-              "name": "LIGHT MATERIAL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-rock",
-              "name": "ROCK",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-screening",
-              "name": "SCREENING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-severe-duty",
-              "name": "SEVERE DUTY",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-side-dump",
-              "name": "SIDE DUMP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-skeleton",
-              "name": "SKELETON",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-spade-nose",
-              "name": "SPADE NOSE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-stump",
-              "name": "STUMP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-trenching",
-              "name": "TRENCHING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-buckets-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-cable-plows",
-          "name": "CABLE PLOWS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-cable-plows-static",
-              "name": "STATIC",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cable-plows-vibratory",
-              "name": "VIBRATORY",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cable-plows-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-cabs",
-          "name": "CABS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-cabs-brush-cage",
-              "name": "BRUSH CAGE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cabs-erops",
-              "name": "EROPS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cabs-orops",
-              "name": "OROPS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cabs-rops",
-              "name": "ROPS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cabs-soft",
-              "name": "SOFT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-cabs-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-carbody",
-          "name": "CARBODY",
-          "subcategories": [
-            {
-              "id": "attachments-parts-carbody-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-c-frame",
-          "name": "C-FRAME",
-          "subcategories": [
-            {
-              "id": "attachments-parts-c-frame-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-circles",
-          "name": "CIRCLES",
-          "subcategories": [
-            {
-              "id": "attachments-parts-circles-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-clamps",
-          "name": "CLAMPS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-clamps-bale",
-              "name": "BALE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-clamps-brick-block",
-              "name": "BRICK / BLOCK",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-clamps-paper-roll",
-              "name": "PAPER ROLL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-clamps-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-compactor",
-          "name": "COMPACTOR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-compactor-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-compactor-wheel",
-          "name": "COMPACTOR WHEEL",
-          "subcategories": [
-            {
-              "id": "attachments-parts-compactor-wheel-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-concrete-saw",
-          "name": "CONCRETE SAW",
-          "subcategories": [
-            {
-              "id": "attachments-parts-concrete-saw-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-counterweight",
-          "name": "COUNTERWEIGHT",
-          "subcategories": [
-            {
-              "id": "attachments-parts-counterweight-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-coupler",
-          "name": "COUPLER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-coupler-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-crane",
-          "name": "CRANE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-crane-crane-electronics-and-monitoring",
-              "name": "CRANE ELECTRONICS & MONITORING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-crane-crane-rigging",
-              "name": "CRANE RIGGING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-crane-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-crusher",
-          "name": "CRUSHER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-crusher-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-delimber",
-          "name": "DELIMBER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-delimber-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-differntial",
-          "name": "DIFFERNTIAL",
-          "subcategories": [
-            {
-              "id": "attachments-parts-differntial-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-drawbar",
-          "name": "DRAWBAR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-drawbar-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-drill",
-          "name": "DRILL",
-          "subcategories": [
-            {
-              "id": "attachments-parts-drill-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-ejector-gate",
-          "name": "EJECTOR GATE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-ejector-gate-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-engine",
-          "name": "ENGINE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-engine-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-equalizer-bars",
-          "name": "EQUALIZER BARS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-equalizer-bars-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-fairleads",
-          "name": "FAIRLEADS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-fairleads-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-feller-buncher",
-          "name": "FELLER BUNCHER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-feller-buncher-felling-saw-heads",
-              "name": "FELLING SAW HEADS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-feller-buncher-shear-felling-heads",
-              "name": "SHEAR FELLING HEADS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-feller-buncher-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-final-drive",
-          "name": "FINAL DRIVE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-final-drive-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-forestry-tiller",
-          "name": "FORESTRY TILLER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-forestry-tiller-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-forks",
-          "name": "FORKS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-forks-log-and-lumber",
-              "name": "LOG & LUMBER",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-multi-pallet",
-              "name": "MULTI-PALLET",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-pallet",
-              "name": "PALLET",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-pipe-and-pole",
-              "name": "PIPE & POLE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-push-pull",
-              "name": "PUSH PULL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-rotating-pallet",
-              "name": "ROTATING PALLET",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-side-shifter",
-              "name": "SIDE SHIFTER",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-forks-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-generator-end",
-          "name": "GENERATOR END",
-          "subcategories": [
-            {
-              "id": "attachments-parts-generator-end-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-grapples",
-          "name": "GRAPPLES",
-          "subcategories": [
-            {
-              "id": "attachments-parts-grapples-bucket",
-              "name": "BUCKET",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-brush-cage",
-              "name": "BRUSH CAGE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-claw",
-              "name": "CLAW",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-gp",
-              "name": "GP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-log",
-              "name": "LOG",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-orange-peel",
-              "name": "ORANGE PEEL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-root",
-              "name": "ROOT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-scrap",
-              "name": "SCRAP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-grapples-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hammer-breaker",
-          "name": "HAMMER/BREAKER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hammer-breaker-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hitch",
-          "name": "HITCH",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hitch-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hook-block",
-          "name": "HOOK BLOCK",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hook-block-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hydraulic-cylinders",
-          "name": "HYDRAULIC CYLINDERS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hydraulic-cylinders-blade-tilt",
-              "name": "BLADE TILT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-boom-lift",
-              "name": "BOOM LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-bucket",
-              "name": "BUCKET",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-crowd",
-              "name": "CROWD",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-dump-truck-hoist",
-              "name": "DUMP TRUCK HOIST",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-steering",
-              "name": "STEERING",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-hydraulic-cylinders-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hydraulic-pump",
-          "name": "HYDRAULIC PUMP",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hydraulic-pump-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-hydraulics",
-          "name": "HYDRAULICS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-hydraulics-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-jib",
-          "name": "JIB",
-          "subcategories": [
-            {
-              "id": "attachments-parts-jib-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-magnet",
-          "name": "MAGNET",
-          "subcategories": [
-            {
-              "id": "attachments-parts-magnet-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-mast",
-          "name": "MAST",
-          "subcategories": [
-            {
-              "id": "attachments-parts-mast-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-mulcher",
-          "name": "MULCHER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-mulcher-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-other",
-          "name": "OTHER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-other-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-outrigger",
-          "name": "OUTRIGGER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-outrigger-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-pile-driver",
-          "name": "PILE DRIVER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-pile-driver-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-planetary",
-          "name": "PLANETARY",
-          "subcategories": [
-            {
-              "id": "attachments-parts-planetary-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-platform-basket",
-          "name": "PLATFORM/BASKET",
-          "subcategories": [
-            {
-              "id": "attachments-parts-platform-basket-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-post-hole-digger",
-          "name": "POST HOLE DIGGER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-post-hole-digger-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-processor-harverster",
-          "name": "PROCESSOR/HARVERSTER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-processor-harverster-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-push-block",
-          "name": "PUSH BLOCK",
-          "subcategories": [
-            {
-              "id": "attachments-parts-push-block-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-radiator",
-          "name": "RADIATOR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-radiator-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-rakes",
-          "name": "RAKES",
-          "subcategories": [
-            {
-              "id": "attachments-parts-rakes-rock",
-              "name": "ROCK",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-rakes-root",
-              "name": "ROOT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-rakes-trash",
-              "name": "TRASH",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-rakes-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-ride-strut",
-          "name": "RIDE STRUT",
-          "subcategories": [
-            {
-              "id": "attachments-parts-ride-strut-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-rim",
-          "name": "RIM",
-          "subcategories": [
-            {
-              "id": "attachments-parts-rim-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-ripper",
-          "name": "RIPPER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-ripper-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-scarifiers",
-          "name": "SCARIFIERS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-scarifiers-center-mount",
-              "name": "CENTER MOUNT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-scarifiers-front-mount",
-              "name": "FRONT MOUNT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-scarifiers-rear-mount",
-              "name": "REAR MOUNT",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-scarifiers-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-seat",
-          "name": "SEAT",
-          "subcategories": [
-            {
-              "id": "attachments-parts-seat-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-shanks",
-          "name": "SHANKS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-shanks-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-shears",
-          "name": "SHEARS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-shears-concrete",
-              "name": "CONCRETE",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-shears-steel",
-              "name": "STEEL",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-shears-stump",
-              "name": "STUMP",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-shears-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-shell-kit",
-          "name": "SHELL KIT",
-          "subcategories": [
-            {
-              "id": "attachments-parts-shell-kit-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-shredder-mower",
-          "name": "SHREDDER/MOWER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-shredder-mower-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-sideboom",
-          "name": "SIDEBOOM",
-          "subcategories": [
-            {
-              "id": "attachments-parts-sideboom-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-slew-ring",
-          "name": "SLEW RING",
-          "subcategories": [
-            {
-              "id": "attachments-parts-slew-ring-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-snow-plow",
-          "name": "SNOW PLOW",
-          "subcategories": [
-            {
-              "id": "attachments-parts-snow-plow-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-snow-wing",
-          "name": "SNOW WING",
-          "subcategories": [
-            {
-              "id": "attachments-parts-snow-wing-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-snowblower",
-          "name": "SNOWBLOWER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-snowblower-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-stick",
-          "name": "STICK",
-          "subcategories": [
-            {
-              "id": "attachments-parts-stick-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-stump-grinder",
-          "name": "STUMP GRINDER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-stump-grinder-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-stump-splitter",
-          "name": "STUMP SPLITTER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-stump-splitter-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-sweeper",
-          "name": "SWEEPER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-sweeper-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-sweeps",
-          "name": "SWEEPS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-sweeps-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-swing-drive",
-          "name": "SWING DRIVE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-swing-drive-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-swing-motor",
-          "name": "SWING MOTOR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-swing-motor-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-tailgate",
-          "name": "TAILGATE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-tailgate-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-teeth",
-          "name": "TEETH",
-          "subcategories": [
-            {
-              "id": "attachments-parts-teeth-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-thumb",
-          "name": "THUMB",
-          "subcategories": [
-            {
-              "id": "attachments-parts-thumb-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-tires",
-          "name": "TIRES",
-          "subcategories": [
-            {
-              "id": "attachments-parts-tires-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-torque-converter",
-          "name": "TORQUE CONVERTER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-torque-converter-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-transmissions",
-          "name": "TRANSMISSIONS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-transmissions-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-travel-motor",
-          "name": "TRAVEL MOTOR",
-          "subcategories": [
-            {
-              "id": "attachments-parts-travel-motor-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-tree-saw",
-          "name": "TREE SAW",
-          "subcategories": [
-            {
-              "id": "attachments-parts-tree-saw-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-tree-spade",
-          "name": "TREE SPADE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-tree-spade-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-trencher",
-          "name": "TRENCHER",
-          "subcategories": [
-            {
-              "id": "attachments-parts-trencher-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-truck-bed",
-          "name": "TRUCK BED",
-          "subcategories": [
-            {
-              "id": "attachments-parts-truck-bed-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-undercarriage-parts",
-          "name": "UNDERCARRIAGE PARTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-undercarriage-parts-carrier-track-rollers",
-              "name": "CARRIER / TRACK ROLLERS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-rubber-tracks",
-              "name": "RUBBER TRACKS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-sprockets",
-              "name": "SPROCKETS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-adjusters-recoil-springs",
-              "name": "TRACK ADJUSTERS / RECOIL SPRINGS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-chains",
-              "name": "TRACK CHAINS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-frames",
-              "name": "TRACK FRAMES",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-groups",
-              "name": "TRACK GROUPS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-idlers",
-              "name": "TRACK IDLERS",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-track-pads-shoes",
-              "name": "TRACK PADS / SHOES",
-              "subcategories": []
-            },
-            {
-              "id": "attachments-parts-undercarriage-parts-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-valve",
-          "name": "VALVE",
-          "subcategories": [
-            {
-              "id": "attachments-parts-valve-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-water-tanks",
-          "name": "WATER TANKS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-water-tanks-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-weights",
-          "name": "WEIGHTS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-weights-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-wheels",
-          "name": "WHEELS",
-          "subcategories": [
-            {
-              "id": "attachments-parts-wheels-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "attachments-parts-winch",
-          "name": "WINCH",
-          "subcategories": [
-            {
-              "id": "attachments-parts-winch-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "backhoe-loaders",
       "name": "BACKHOE LOADERS",
       "subcategories": [
@@ -135464,914 +133896,6 @@ const categoriesConfig = {
       ]
     },
     {
-      "id": "support-equipment",
-      "name": "SUPPORT EQUIPMENT",
-      "subcategories": [
-        {
-          "id": "support-equipment-dumpers",
-          "name": "DUMPERS",
-          "subcategories": [
-            {
-              "id": "support-equipment-dumpers-wacker-nueson",
-              "name": "WACKER NUESON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-thwaites",
-              "name": "THWAITES",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-jcb",
-              "name": "JCB",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-ausa",
-              "name": "AUSA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-mecalac",
-              "name": "MECALAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-terex",
-              "name": "TEREX",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-messersi",
-              "name": "MESSERSI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-fiori",
-              "name": "FIORI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-sdlanch",
-              "name": "SDLANCH",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-cormidi",
-              "name": "CORMIDI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-barford",
-              "name": "BARFORD",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-benford",
-              "name": "BENFORD",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-bergman",
-              "name": "BERGMAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-hydrema",
-              "name": "HYDREMA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-kubota",
-              "name": "KUBOTA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-merlo",
-              "name": "MERLO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-nc-engineering",
-              "name": "NC ENGINEERING",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-uhi",
-              "name": "UHI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-yanmar",
-              "name": "YANMAR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-dumpers-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-air-compressors",
-          "name": "AIR COMPRESSORS",
-          "subcategories": [
-            {
-              "id": "support-equipment-air-compressors-atlas-copco",
-              "name": "ATLAS COPCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-sullair",
-              "name": "SULLAIR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-doosan",
-              "name": "DOOSAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-ingersoll-rand",
-              "name": "INGERSOLL-RAND",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-sullivan-palatek",
-              "name": "SULLIVAN PALATEK",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-kaeser",
-              "name": "KAESER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-compare",
-              "name": "COMPARE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-chi-pnuematic",
-              "name": "CHI PNUEMATIC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-airman",
-              "name": "AIRMAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-bobcat",
-              "name": "BOBCAT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-gardner-denver",
-              "name": "GARDNER-DENVER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-multiquip",
-              "name": "MULTIQUIP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-quincy",
-              "name": "QUINCY",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-rotair",
-              "name": "ROTAIR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-sullivan",
-              "name": "SULLIVAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-winair-compressor",
-              "name": "WINAIR COMPRESSOR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-air-compressors-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-generators",
-          "name": "GENERATORS",
-          "subcategories": [
-            {
-              "id": "support-equipment-generators-caterpillar",
-              "name": "CATERPILLAR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-multiquip-whisperwatt",
-              "name": "MULTIQUIP WHISPERWATT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-cummins",
-              "name": "CUMMINS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-atlas-copco",
-              "name": "ATLAS COPCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-generac",
-              "name": "GENERAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-wacker-nueson",
-              "name": "WACKER NUESON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-kohler",
-              "name": "KOHLER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-doosan",
-              "name": "DOOSAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-airman",
-              "name": "AIRMAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-miller",
-              "name": "MILLER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-aksa",
-              "name": "AKSA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-allmand-bros",
-              "name": "ALLMAND BROS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-ashita",
-              "name": "ASHITA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-baldor",
-              "name": "BALDOR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-baumalight",
-              "name": "BAUMALIGHT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-be-power-equip",
-              "name": "BE POWER EQUIP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-briggs-and-stratton",
-              "name": "BRIGGS & STRATTON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-champion-power",
-              "name": "CHAMPION POWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-chi-pnuematic",
-              "name": "CHI PNUEMATIC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-ck-p-ower",
-              "name": "CK P[OWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-coleman",
-              "name": "COLEMAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-deere",
-              "name": "DEERE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-detroit",
-              "name": "DETROIT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-deutz",
-              "name": "DEUTZ",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-fg-wilson",
-              "name": "FG WILSON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-genpower",
-              "name": "GENPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-giga-power",
-              "name": "GIGA POWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-gillette",
-              "name": "GILLETTE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-himoinsa",
-              "name": "HIMOINSA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-hipower",
-              "name": "HIPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-honda",
-              "name": "HONDA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-hustler",
-              "name": "HUSTLER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-ingersol-rand",
-              "name": "INGERSOL RAND",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-iveco",
-              "name": "IVECO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-jcb",
-              "name": "JCB",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-isuzu",
-              "name": "ISUZU",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-jenbacher",
-              "name": "JENBACHER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-katolight",
-              "name": "KATOLIGHT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-kubota",
-              "name": "KUBOTA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-leroy-somer",
-              "name": "LEROY SOMER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-libby",
-              "name": "LIBBY",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-lincoln-electric",
-              "name": "LINCOLN ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-magnum",
-              "name": "MAGNUM",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-makinex",
-              "name": "MAKINEX",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-marathon",
-              "name": "MARATHON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-marelli",
-              "name": "MARELLI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-miller",
-              "name": "MILLER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-mosa",
-              "name": "MOSA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-mps",
-              "name": "MPS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-multiquip-whisperwatt",
-              "name": "MULTIQUIP WHISPERWATT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-olympian",
-              "name": "OLYMPIAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-onan",
-              "name": "ONAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-perkins",
-              "name": "PERKINS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-powerlink",
-              "name": "POWERLINK",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-powersource",
-              "name": "POWERSOURCE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-pramac",
-              "name": "PRAMAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-rte",
-              "name": "RTE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-scania",
-              "name": "SCANIA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-sdmo",
-              "name": "SDMO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-shindaiwa",
-              "name": "SHINDAIWA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-spectrum",
-              "name": "SPECTRUM",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-stamford",
-              "name": "STAMFORD",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-taylor-power-sysytems",
-              "name": "TAYLOR POWER SYSYTEMS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-tecnogen",
-              "name": "TECNOGEN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-volvo-penta",
-              "name": "VOLVO PENTA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-wanco",
-              "name": "WANCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-waukesha",
-              "name": "WAUKESHA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-winco",
-              "name": "WINCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-winpower",
-              "name": "WINPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-yamaha",
-              "name": "YAMAHA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-yamakoyo",
-              "name": "YAMAKOYO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-yanmar",
-              "name": "YANMAR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-generators-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-heaters",
-          "name": "HEATERS",
-          "subcategories": [
-            {
-              "id": "support-equipment-heaters-campco-equipment",
-              "name": "CAMPCO EQUIPMENT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-lb-white",
-              "name": "LB WHITE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-wacker-nueson",
-              "name": "WACKER NUESON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-frost-fighter",
-              "name": "FROST FIGHTER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-flagro",
-              "name": "FLAGRO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-allmand-bros",
-              "name": "ALLMAND BROS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-heat-king",
-              "name": "HEAT KING",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-dewalt",
-              "name": "DEWALT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-generac",
-              "name": "GENERAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-thawzall",
-              "name": "THAWZALL",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-dryair",
-              "name": "DRYAIR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-ground-heater",
-              "name": "GROUND HEATER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-quest",
-              "name": "QUEST",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-sunfire",
-              "name": "SUNFIRE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-unspecified",
-              "name": "UNSPECIFIED",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-heaters-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-light-towers",
-          "name": "LIGHT TOWERS",
-          "subcategories": [
-            {
-              "id": "support-equipment-light-towers-magnum",
-              "name": "MAGNUM",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-allmand-bros",
-              "name": "ALLMAND BROS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-generac",
-              "name": "GENERAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-wacker-nueson",
-              "name": "WACKER NUESON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-atlas-copco",
-              "name": "ATLAS COPCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-wanco",
-              "name": "WANCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-progress-solar-solutions",
-              "name": "PROGRESS SOLAR SOLUTIONS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-terex",
-              "name": "TEREX",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-doosan",
-              "name": "DOOSAN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-uhi",
-              "name": "UHI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-axiom-equip",
-              "name": "AXIOM EQUIP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-bobcat",
-              "name": "BOBCAT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-chi-pnuematic",
-              "name": "CHI PNUEMATIC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-genie",
-              "name": "GENIE",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-genmac",
-              "name": "GENMAC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-ingersol-rand",
-              "name": "INGERSOL RAND",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-multiquip",
-              "name": "MULTIQUIP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-national-signal",
-              "name": "NATIONAL SIGNAL",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-tower-light",
-              "name": "TOWER LIGHT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-trime",
-              "name": "TRIME",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-uhi",
-              "name": "UHI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-unspecified",
-              "name": "UNSPECIFIED",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-yanmar",
-              "name": "YANMAR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-light-towers-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-pumps",
-          "name": "PUMPS",
-          "subcategories": [
-            {
-              "id": "support-equipment-pumps-wacker-nueson",
-              "name": "WACKER NUESON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-cornell",
-              "name": "CORNELL",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-multiquip",
-              "name": "MULTIQUIP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-godwin",
-              "name": "GODWIN",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-be-power-equipment",
-              "name": "BE POWER EQUIPMENT",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-tsurumi",
-              "name": "TSURUMI",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-gorman-rupp",
-              "name": "GORMAN-RUPP",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-unspecified",
-              "name": "UNSPECIFIED",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-atlas-copco",
-              "name": "ATLAS COPCO",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-honda",
-              "name": "HONDA",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-pumps-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "support-equipment-vacuum-excavator",
-          "name": "VACUUM EXCAVATOR",
-          "subcategories": [
-            {
-              "id": "support-equipment-vacuum-excavator-vermeer",
-              "name": "VERMEER",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-ditch-witch",
-              "name": "DITCH WITCH",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-ring-o-matic",
-              "name": "RING-O-MATIC",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-vac-tron",
-              "name": "VAC TRON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-camel",
-              "name": "CAMEL",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-vacmasters",
-              "name": "VACMASTERS",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-vac-con",
-              "name": "VAC CON",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-gapvax",
-              "name": "GAPVAX",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-vac-ex",
-              "name": "VAC-EX",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-vactor",
-              "name": "VACTOR",
-              "subcategories": []
-            },
-            {
-              "id": "support-equipment-vacuum-excavator-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "telehandlers",
       "name": "TELEHANDLERS",
       "subcategories": [
@@ -140103,6 +137627,1637 @@ const categoriesConfig = {
             },
             {
               "id": "telehandlers-sany-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trenchers",
+      "name": "TRENCHERS",
+      "subcategories": [
+        {
+          "id": "trenchers-ditchwitch",
+          "name": "DITCHWITCH",
+          "subcategories": [
+            {
+              "id": "trenchers-ditchwitch-100",
+              "name": "100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-255",
+              "name": "255",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-400",
+              "name": "400",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-410",
+              "name": "410",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-420",
+              "name": "420",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-1010",
+              "name": "1010",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-1020",
+              "name": "1020",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-1230",
+              "name": "1230",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-1620",
+              "name": "1620",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-1820",
+              "name": "1820",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-3500",
+              "name": "3500",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-3610",
+              "name": "3610",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-3700",
+              "name": "3700",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-4010",
+              "name": "4010",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-4500",
+              "name": "4500",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-5010",
+              "name": "5010",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-5110",
+              "name": "5110",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-5700",
+              "name": "5700",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-6510",
+              "name": "6510",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-7610",
+              "name": "7610",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-8020",
+              "name": "8020",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-c12",
+              "name": "C12",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-c14",
+              "name": "C14",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-c16",
+              "name": "C16",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-c24",
+              "name": "C24",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-c30",
+              "name": "C30",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-j20",
+              "name": "J20",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-ht100",
+              "name": "HT100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-p40",
+              "name": "P40",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-pp25",
+              "name": "PP25",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-r40",
+              "name": "R40",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-r65",
+              "name": "R65",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-r100",
+              "name": "R100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-r150",
+              "name": "R150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-r230",
+              "name": "R230",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt12",
+              "name": "RT12",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt16",
+              "name": "RT16",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt20",
+              "name": "RT20",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt24",
+              "name": "RT24",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt40",
+              "name": "RT40",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt45",
+              "name": "RT45",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt55",
+              "name": "RT55",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt70",
+              "name": "RT70",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt75",
+              "name": "RT75",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt80",
+              "name": "RT80",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt90",
+              "name": "RT90",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt95",
+              "name": "RT95",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt100",
+              "name": "RT100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt105",
+              "name": "RT105",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt115",
+              "name": "RT115",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt120",
+              "name": "RT120",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt125",
+              "name": "RT125",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-rt185",
+              "name": "RT185",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-st37",
+              "name": "ST37",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-v30",
+              "name": "V30",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-vp30",
+              "name": "VP30",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-zahn-r150",
+              "name": "ZAHN R150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-zahn-r300",
+              "name": "ZAHN R300",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-ditchwitch-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-vermeer",
+          "name": "VERMEER",
+          "subcategories": [
+            {
+              "id": "trenchers-vermeer-flextrak-75",
+              "name": "FLEXTRAK 75",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-ftx25",
+              "name": "FTX25",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-lm40",
+              "name": "LM40",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-lm42",
+              "name": "LM42",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-m437",
+              "name": "M437",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-m455",
+              "name": "M455",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-m470",
+              "name": "M470",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-m475",
+              "name": "M475",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-ptx40",
+              "name": "PTX40",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-ptx42",
+              "name": "PTX42",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-ptx44",
+              "name": "PTX44",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt100",
+              "name": "RT100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt200",
+              "name": "RT200",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt450",
+              "name": "RT450",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt650",
+              "name": "RT650",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt850",
+              "name": "RT850",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt950",
+              "name": "RT950",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rt1250",
+              "name": "RT1250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx130",
+              "name": "RTX130",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx150",
+              "name": "RTX150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx200",
+              "name": "RTX200",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx250",
+              "name": "RTX250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx450",
+              "name": "RTX450",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx550",
+              "name": "RTX550",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx750",
+              "name": "RTX750",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-rtx1250",
+              "name": "RTX1250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-spx25",
+              "name": "SPX25",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t200",
+              "name": "T200",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t555",
+              "name": "T555",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t600",
+              "name": "T600",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t650",
+              "name": "T650",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t655",
+              "name": "T655",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t655-commander-ii",
+              "name": "T655 COMMANDER II",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t655-commander-iii",
+              "name": "T655 COMMANDER III",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t755-commander",
+              "name": "T755 COMMANDER",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t755-commander-ii",
+              "name": "T755 COMMANDER II",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t755-commander-iii",
+              "name": "T755 COMMANDER III",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t758",
+              "name": "T758",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t800",
+              "name": "T800",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t850",
+              "name": "T850",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t855",
+              "name": "T855",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t955",
+              "name": "T955",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t1055",
+              "name": "T1055",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t1155",
+              "name": "T1155",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t1255",
+              "name": "T1255",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-t1555",
+              "name": "T1555",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-tc4",
+              "name": "TC4",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v120",
+              "name": "V120",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v434",
+              "name": "V434",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v450",
+              "name": "V450",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v1350",
+              "name": "V1350",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v2050",
+              "name": "V2050",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v3550",
+              "name": "V3550",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v4150",
+              "name": "V4150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v5750",
+              "name": "V5750",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v5800",
+              "name": "V5800",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v6500",
+              "name": "V6500",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v8050",
+              "name": "V8050",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-v8550",
+              "name": "V8550",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-xts1250",
+              "name": "XTS1250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-xts1250i2",
+              "name": "XTS1250I2",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-vermeer-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-toro",
+          "name": "TORO",
+          "subcategories": [
+            {
+              "id": "trenchers-toro-maxi-sneaker-370",
+              "name": "MAXI SNEAKER 370",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-pro-sneak-365",
+              "name": "PRO SNEAK 365",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-rt600",
+              "name": "RT600",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-rt1200",
+              "name": "RT1200",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-trx16",
+              "name": "TRX16",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-trx20",
+              "name": "TRX20",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-trx26",
+              "name": "TRX26",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-trx250",
+              "name": "TRX250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-rtx300",
+              "name": "RTX300",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-toro-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-tesmec",
+          "name": "TESMEC",
+          "subcategories": [
+            {
+              "id": "trenchers-tesmec-400mct",
+              "name": "400MCT",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-755dt",
+              "name": "755DT",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-885-cs",
+              "name": "885 CS",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-950r",
+              "name": "950R",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-1075",
+              "name": "1075",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-1150-evo",
+              "name": "1150 EVO",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-1150-evo-dd",
+              "name": "1150 EVO DD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-1150xhd",
+              "name": "1150XHD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-1475",
+              "name": "1475",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-city-cleanfast",
+              "name": "CITY CLEANFAST",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-cleanfast",
+              "name": "CLEANFAST",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-frb600",
+              "name": "FRB600",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-m5",
+              "name": "M5",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-sidecut-sc3c",
+              "name": "SIDECUT SC3C",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-sidecut-sc4p",
+              "name": "SIDECUT SC4P",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-tlm60-60",
+              "name": "TLM60/60",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs300",
+              "name": "TRS300",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs785",
+              "name": "TRS785",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs900",
+              "name": "TRS900",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs950",
+              "name": "TRS950",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs985",
+              "name": "TRS985",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1000",
+              "name": "TRS1000",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1075",
+              "name": "TRS1075",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1150",
+              "name": "TRS1150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1175",
+              "name": "TRS1175",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1375",
+              "name": "TRS1375",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1475",
+              "name": "TRS1475",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs15757",
+              "name": "TRS15757",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-trs1675",
+              "name": "TRS1675",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tesmec-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-barreto",
+          "name": "BARRETO",
+          "subcategories": [
+            {
+              "id": "trenchers-barreto-13stkh",
+              "name": "13STKH",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-16stkb",
+              "name": "16STKB",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-20rtk",
+              "name": "20RTK",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-23rtk",
+              "name": "23RTK",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-912",
+              "name": "912",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-1324",
+              "name": "1324",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-1624",
+              "name": "1624",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-1824",
+              "name": "1824",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-2036",
+              "name": "2036",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-2324",
+              "name": "2324",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-e924",
+              "name": "E924",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barreto-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-case",
+          "name": "CASE",
+          "subcategories": [
+            {
+              "id": "trenchers-case-60",
+              "name": "60",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-360",
+              "name": "360",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-460",
+              "name": "460",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-560",
+              "name": "560",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-660",
+              "name": "660",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-760",
+              "name": "760",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-860",
+              "name": "860",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-960",
+              "name": "960",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-dh4",
+              "name": "DH4",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-dh5",
+              "name": "DH5",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-maxi-sneaker",
+              "name": "MAXI SNEAKER",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-rt660",
+              "name": "RT660",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-tf300",
+              "name": "TF300",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-tl100",
+              "name": "TL100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-case-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-bron",
+          "name": "BRON",
+          "subcategories": [
+            {
+              "id": "trenchers-bron-150",
+              "name": "150",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-175",
+              "name": "175",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-450",
+              "name": "450",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-550",
+              "name": "550",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-585",
+              "name": "585",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-hs-ii",
+              "name": "HS-II",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-v100",
+              "name": "V100",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-v250",
+              "name": "V250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-v75-1",
+              "name": "V75-1",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-v75-3",
+              "name": "V75-3",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-bron-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-cleveland",
+          "name": "CLEVELAND",
+          "subcategories": [
+            {
+              "id": "trenchers-cleveland-236",
+              "name": "236",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-247",
+              "name": "247",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-320",
+              "name": "320",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-400",
+              "name": "400",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-400w",
+              "name": "400W",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-400w-hd",
+              "name": "400W HD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-7036d",
+              "name": "7036D",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-7648",
+              "name": "7648",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-j26",
+              "name": "J26",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-j36",
+              "name": "J36",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-j46",
+              "name": "J46",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-js36",
+              "name": "JS36",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-js36w",
+              "name": "JS36W",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-v110",
+              "name": "V110",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-cleveland-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-sherman-reilly",
+          "name": "SHERMAN REILLY",
+          "subcategories": [
+            {
+              "id": "trenchers-sherman-reilly-162c",
+              "name": "162C",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-bwt1303",
+              "name": "BWT1303",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-bwt1363",
+              "name": "BWT1363",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-bwt1584dt",
+              "name": "BWT1584DT",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ddh-75t",
+              "name": "DDH-75T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ddh100t",
+              "name": "DDH100T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ddha-75t",
+              "name": "DDHA-75T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ddha-100ddt",
+              "name": "DDHA-100DDT",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-pt2766b",
+              "name": "PT2766B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-pt3000",
+              "name": "PT3000",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-pt3366",
+              "name": "PT3366",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ptr7230",
+              "name": "PTR7230",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-ptr7230s",
+              "name": "PTR7230S",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-s785t",
+              "name": "S785T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-srp50t",
+              "name": "SRP50T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-udh70t",
+              "name": "UDH70T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-udha-70-t",
+              "name": "UDHA-70-T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-sherman-reilly-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-barber-greene",
+          "name": "BARBER GREENE",
+          "subcategories": [
+            {
+              "id": "trenchers-barber-greene-ta55",
+              "name": "TA55",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ta57",
+              "name": "TA57",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ta77",
+              "name": "TA77",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-tc30",
+              "name": "TC30",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-162c",
+              "name": "162C",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-bwt1303",
+              "name": "BWT1303",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-bwt1363",
+              "name": "BWT1363",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-bwt1548dt",
+              "name": "BWT1548DT",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ddh-75t",
+              "name": "DDH-75T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ddh100t",
+              "name": "DDH100T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ddha-75t",
+              "name": "DDHA-75T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ddha-100-dd-t",
+              "name": "DDHA-100-DD-T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-pt2766",
+              "name": "PT2766",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-pt3000",
+              "name": "PT3000",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-pt3366",
+              "name": "PT3366",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-ptr7230",
+              "name": "PTR7230",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-s785t",
+              "name": "S785T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-srp50t",
+              "name": "SRP50T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-udh70t",
+              "name": "UDH70T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-udha-70-t",
+              "name": "UDHA-70-T",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-barber-greene-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-capitol",
+          "name": "CAPITOL",
+          "subcategories": [
+            {
+              "id": "trenchers-capitol-350",
+              "name": "350",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-capitol-750",
+              "name": "750",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-capitol-810",
+              "name": "810",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-capitol-900",
+              "name": "900",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-capitol-1050",
+              "name": "1050",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-capitol-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-trencore",
+          "name": "TRENCORE",
+          "subcategories": [
+            {
+              "id": "trenchers-trencore-560",
+              "name": "560",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-760",
+              "name": "760",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-760hd",
+              "name": "760HD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-930",
+              "name": "930",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-930hd",
+              "name": "930HD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1060",
+              "name": "1060",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1260",
+              "name": "1260",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1360",
+              "name": "1360",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1460",
+              "name": "1460",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1560",
+              "name": "1560",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-1660",
+              "name": "1660",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t760",
+              "name": "T760",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t930",
+              "name": "T930",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t1060",
+              "name": "T1060",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t1260",
+              "name": "T1260",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t1360",
+              "name": "T1360",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t1460",
+              "name": "T1460",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-t1660",
+              "name": "T1660",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-tse",
+          "name": "TSE",
+          "subcategories": [
+            {
+              "id": "trenchers-tse-bwpt10060",
+              "name": "BWPT10060",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-bwpt12060",
+              "name": "BWPT12060",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-dpt30b",
+              "name": "DPT30B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-dpt40b",
+              "name": "DPT40B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-t30-36",
+              "name": "T30/36",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-t50-52bwrc",
+              "name": "T50/52BWRC",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-td40ah",
+              "name": "TD40AH",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-up70",
+              "name": "UP70",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-up70b",
+              "name": "UP70B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-up85bd",
+              "name": "UP85BD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-up85d",
+              "name": "UP85D",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-tse-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-wolfe",
+          "name": "WOLFE",
+          "subcategories": [
+            {
+              "id": "trenchers-wolfe-250",
+              "name": "250",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-400",
+              "name": "400",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-540",
+              "name": "540",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-7000",
+              "name": "7000",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-8000",
+              "name": "8000",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-ct77040",
+              "name": "CT77040",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-dwt630",
+              "name": "DWT630",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-wolfe-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "trenchers-trencore-jetco",
+          "name": "TRENCORE JETCO",
+          "subcategories": [
+            {
+              "id": "trenchers-trencore-jetco-660b",
+              "name": "660B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-860b",
+              "name": "860B",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-930bg",
+              "name": "930BG",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-1400l",
+              "name": "1400L",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-1600hdl",
+              "name": "1600HDL",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-7254650hd",
+              "name": "7254650HD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-7254-650hd",
+              "name": "7254-650HD",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-7337",
+              "name": "7337",
+              "subcategories": []
+            },
+            {
+              "id": "trenchers-trencore-jetco-other",
               "name": "OTHER",
               "subcategories": []
             }
@@ -147084,1637 +146239,6 @@ const categoriesConfig = {
       ]
     },
     {
-      "id": "trenchers",
-      "name": "TRENCHERS",
-      "subcategories": [
-        {
-          "id": "trenchers-ditchwitch",
-          "name": "DITCHWITCH",
-          "subcategories": [
-            {
-              "id": "trenchers-ditchwitch-100",
-              "name": "100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-255",
-              "name": "255",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-400",
-              "name": "400",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-410",
-              "name": "410",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-420",
-              "name": "420",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-1010",
-              "name": "1010",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-1020",
-              "name": "1020",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-1230",
-              "name": "1230",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-1620",
-              "name": "1620",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-1820",
-              "name": "1820",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-3500",
-              "name": "3500",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-3610",
-              "name": "3610",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-3700",
-              "name": "3700",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-4010",
-              "name": "4010",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-4500",
-              "name": "4500",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-5010",
-              "name": "5010",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-5110",
-              "name": "5110",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-5700",
-              "name": "5700",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-6510",
-              "name": "6510",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-7610",
-              "name": "7610",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-8020",
-              "name": "8020",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-c12",
-              "name": "C12",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-c14",
-              "name": "C14",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-c16",
-              "name": "C16",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-c24",
-              "name": "C24",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-c30",
-              "name": "C30",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-j20",
-              "name": "J20",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-ht100",
-              "name": "HT100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-p40",
-              "name": "P40",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-pp25",
-              "name": "PP25",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-r40",
-              "name": "R40",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-r65",
-              "name": "R65",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-r100",
-              "name": "R100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-r150",
-              "name": "R150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-r230",
-              "name": "R230",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt12",
-              "name": "RT12",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt16",
-              "name": "RT16",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt20",
-              "name": "RT20",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt24",
-              "name": "RT24",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt40",
-              "name": "RT40",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt45",
-              "name": "RT45",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt55",
-              "name": "RT55",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt70",
-              "name": "RT70",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt75",
-              "name": "RT75",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt80",
-              "name": "RT80",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt90",
-              "name": "RT90",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt95",
-              "name": "RT95",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt100",
-              "name": "RT100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt105",
-              "name": "RT105",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt115",
-              "name": "RT115",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt120",
-              "name": "RT120",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt125",
-              "name": "RT125",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-rt185",
-              "name": "RT185",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-st37",
-              "name": "ST37",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-v30",
-              "name": "V30",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-vp30",
-              "name": "VP30",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-zahn-r150",
-              "name": "ZAHN R150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-zahn-r300",
-              "name": "ZAHN R300",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-ditchwitch-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-vermeer",
-          "name": "VERMEER",
-          "subcategories": [
-            {
-              "id": "trenchers-vermeer-flextrak-75",
-              "name": "FLEXTRAK 75",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-ftx25",
-              "name": "FTX25",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-lm40",
-              "name": "LM40",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-lm42",
-              "name": "LM42",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-m437",
-              "name": "M437",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-m455",
-              "name": "M455",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-m470",
-              "name": "M470",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-m475",
-              "name": "M475",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-ptx40",
-              "name": "PTX40",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-ptx42",
-              "name": "PTX42",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-ptx44",
-              "name": "PTX44",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt100",
-              "name": "RT100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt200",
-              "name": "RT200",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt450",
-              "name": "RT450",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt650",
-              "name": "RT650",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt850",
-              "name": "RT850",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt950",
-              "name": "RT950",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rt1250",
-              "name": "RT1250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx130",
-              "name": "RTX130",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx150",
-              "name": "RTX150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx200",
-              "name": "RTX200",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx250",
-              "name": "RTX250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx450",
-              "name": "RTX450",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx550",
-              "name": "RTX550",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx750",
-              "name": "RTX750",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-rtx1250",
-              "name": "RTX1250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-spx25",
-              "name": "SPX25",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t200",
-              "name": "T200",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t555",
-              "name": "T555",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t600",
-              "name": "T600",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t650",
-              "name": "T650",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t655",
-              "name": "T655",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t655-commander-ii",
-              "name": "T655 COMMANDER II",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t655-commander-iii",
-              "name": "T655 COMMANDER III",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t755-commander",
-              "name": "T755 COMMANDER",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t755-commander-ii",
-              "name": "T755 COMMANDER II",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t755-commander-iii",
-              "name": "T755 COMMANDER III",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t758",
-              "name": "T758",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t800",
-              "name": "T800",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t850",
-              "name": "T850",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t855",
-              "name": "T855",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t955",
-              "name": "T955",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t1055",
-              "name": "T1055",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t1155",
-              "name": "T1155",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t1255",
-              "name": "T1255",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-t1555",
-              "name": "T1555",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-tc4",
-              "name": "TC4",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v120",
-              "name": "V120",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v434",
-              "name": "V434",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v450",
-              "name": "V450",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v1350",
-              "name": "V1350",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v2050",
-              "name": "V2050",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v3550",
-              "name": "V3550",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v4150",
-              "name": "V4150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v5750",
-              "name": "V5750",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v5800",
-              "name": "V5800",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v6500",
-              "name": "V6500",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v8050",
-              "name": "V8050",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-v8550",
-              "name": "V8550",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-xts1250",
-              "name": "XTS1250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-xts1250i2",
-              "name": "XTS1250I2",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-vermeer-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-toro",
-          "name": "TORO",
-          "subcategories": [
-            {
-              "id": "trenchers-toro-maxi-sneaker-370",
-              "name": "MAXI SNEAKER 370",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-pro-sneak-365",
-              "name": "PRO SNEAK 365",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-rt600",
-              "name": "RT600",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-rt1200",
-              "name": "RT1200",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-trx16",
-              "name": "TRX16",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-trx20",
-              "name": "TRX20",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-trx26",
-              "name": "TRX26",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-trx250",
-              "name": "TRX250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-rtx300",
-              "name": "RTX300",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-toro-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-tesmec",
-          "name": "TESMEC",
-          "subcategories": [
-            {
-              "id": "trenchers-tesmec-400mct",
-              "name": "400MCT",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-755dt",
-              "name": "755DT",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-885-cs",
-              "name": "885 CS",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-950r",
-              "name": "950R",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-1075",
-              "name": "1075",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-1150-evo",
-              "name": "1150 EVO",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-1150-evo-dd",
-              "name": "1150 EVO DD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-1150xhd",
-              "name": "1150XHD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-1475",
-              "name": "1475",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-city-cleanfast",
-              "name": "CITY CLEANFAST",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-cleanfast",
-              "name": "CLEANFAST",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-frb600",
-              "name": "FRB600",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-m5",
-              "name": "M5",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-sidecut-sc3c",
-              "name": "SIDECUT SC3C",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-sidecut-sc4p",
-              "name": "SIDECUT SC4P",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-tlm60-60",
-              "name": "TLM60/60",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs300",
-              "name": "TRS300",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs785",
-              "name": "TRS785",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs900",
-              "name": "TRS900",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs950",
-              "name": "TRS950",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs985",
-              "name": "TRS985",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1000",
-              "name": "TRS1000",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1075",
-              "name": "TRS1075",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1150",
-              "name": "TRS1150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1175",
-              "name": "TRS1175",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1375",
-              "name": "TRS1375",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1475",
-              "name": "TRS1475",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs15757",
-              "name": "TRS15757",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-trs1675",
-              "name": "TRS1675",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tesmec-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-barreto",
-          "name": "BARRETO",
-          "subcategories": [
-            {
-              "id": "trenchers-barreto-13stkh",
-              "name": "13STKH",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-16stkb",
-              "name": "16STKB",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-20rtk",
-              "name": "20RTK",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-23rtk",
-              "name": "23RTK",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-912",
-              "name": "912",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-1324",
-              "name": "1324",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-1624",
-              "name": "1624",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-1824",
-              "name": "1824",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-2036",
-              "name": "2036",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-2324",
-              "name": "2324",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-e924",
-              "name": "E924",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barreto-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-case",
-          "name": "CASE",
-          "subcategories": [
-            {
-              "id": "trenchers-case-60",
-              "name": "60",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-360",
-              "name": "360",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-460",
-              "name": "460",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-560",
-              "name": "560",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-660",
-              "name": "660",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-760",
-              "name": "760",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-860",
-              "name": "860",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-960",
-              "name": "960",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-dh4",
-              "name": "DH4",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-dh5",
-              "name": "DH5",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-maxi-sneaker",
-              "name": "MAXI SNEAKER",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-rt660",
-              "name": "RT660",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-tf300",
-              "name": "TF300",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-tl100",
-              "name": "TL100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-case-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-bron",
-          "name": "BRON",
-          "subcategories": [
-            {
-              "id": "trenchers-bron-150",
-              "name": "150",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-175",
-              "name": "175",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-450",
-              "name": "450",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-550",
-              "name": "550",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-585",
-              "name": "585",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-hs-ii",
-              "name": "HS-II",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-v100",
-              "name": "V100",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-v250",
-              "name": "V250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-v75-1",
-              "name": "V75-1",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-v75-3",
-              "name": "V75-3",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-bron-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-cleveland",
-          "name": "CLEVELAND",
-          "subcategories": [
-            {
-              "id": "trenchers-cleveland-236",
-              "name": "236",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-247",
-              "name": "247",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-320",
-              "name": "320",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-400",
-              "name": "400",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-400w",
-              "name": "400W",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-400w-hd",
-              "name": "400W HD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-7036d",
-              "name": "7036D",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-7648",
-              "name": "7648",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-j26",
-              "name": "J26",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-j36",
-              "name": "J36",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-j46",
-              "name": "J46",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-js36",
-              "name": "JS36",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-js36w",
-              "name": "JS36W",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-v110",
-              "name": "V110",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-cleveland-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-sherman-reilly",
-          "name": "SHERMAN REILLY",
-          "subcategories": [
-            {
-              "id": "trenchers-sherman-reilly-162c",
-              "name": "162C",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-bwt1303",
-              "name": "BWT1303",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-bwt1363",
-              "name": "BWT1363",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-bwt1584dt",
-              "name": "BWT1584DT",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ddh-75t",
-              "name": "DDH-75T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ddh100t",
-              "name": "DDH100T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ddha-75t",
-              "name": "DDHA-75T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ddha-100ddt",
-              "name": "DDHA-100DDT",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-pt2766b",
-              "name": "PT2766B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-pt3000",
-              "name": "PT3000",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-pt3366",
-              "name": "PT3366",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ptr7230",
-              "name": "PTR7230",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-ptr7230s",
-              "name": "PTR7230S",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-s785t",
-              "name": "S785T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-srp50t",
-              "name": "SRP50T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-udh70t",
-              "name": "UDH70T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-udha-70-t",
-              "name": "UDHA-70-T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-sherman-reilly-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-barber-greene",
-          "name": "BARBER GREENE",
-          "subcategories": [
-            {
-              "id": "trenchers-barber-greene-ta55",
-              "name": "TA55",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ta57",
-              "name": "TA57",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ta77",
-              "name": "TA77",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-tc30",
-              "name": "TC30",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-162c",
-              "name": "162C",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-bwt1303",
-              "name": "BWT1303",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-bwt1363",
-              "name": "BWT1363",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-bwt1548dt",
-              "name": "BWT1548DT",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ddh-75t",
-              "name": "DDH-75T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ddh100t",
-              "name": "DDH100T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ddha-75t",
-              "name": "DDHA-75T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ddha-100-dd-t",
-              "name": "DDHA-100-DD-T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-pt2766",
-              "name": "PT2766",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-pt3000",
-              "name": "PT3000",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-pt3366",
-              "name": "PT3366",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-ptr7230",
-              "name": "PTR7230",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-s785t",
-              "name": "S785T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-srp50t",
-              "name": "SRP50T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-udh70t",
-              "name": "UDH70T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-udha-70-t",
-              "name": "UDHA-70-T",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-barber-greene-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-capitol",
-          "name": "CAPITOL",
-          "subcategories": [
-            {
-              "id": "trenchers-capitol-350",
-              "name": "350",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-capitol-750",
-              "name": "750",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-capitol-810",
-              "name": "810",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-capitol-900",
-              "name": "900",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-capitol-1050",
-              "name": "1050",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-capitol-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-trencore",
-          "name": "TRENCORE",
-          "subcategories": [
-            {
-              "id": "trenchers-trencore-560",
-              "name": "560",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-760",
-              "name": "760",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-760hd",
-              "name": "760HD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-930",
-              "name": "930",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-930hd",
-              "name": "930HD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1060",
-              "name": "1060",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1260",
-              "name": "1260",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1360",
-              "name": "1360",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1460",
-              "name": "1460",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1560",
-              "name": "1560",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-1660",
-              "name": "1660",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t760",
-              "name": "T760",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t930",
-              "name": "T930",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t1060",
-              "name": "T1060",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t1260",
-              "name": "T1260",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t1360",
-              "name": "T1360",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t1460",
-              "name": "T1460",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-t1660",
-              "name": "T1660",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-tse",
-          "name": "TSE",
-          "subcategories": [
-            {
-              "id": "trenchers-tse-bwpt10060",
-              "name": "BWPT10060",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-bwpt12060",
-              "name": "BWPT12060",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-dpt30b",
-              "name": "DPT30B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-dpt40b",
-              "name": "DPT40B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-t30-36",
-              "name": "T30/36",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-t50-52bwrc",
-              "name": "T50/52BWRC",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-td40ah",
-              "name": "TD40AH",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-up70",
-              "name": "UP70",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-up70b",
-              "name": "UP70B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-up85bd",
-              "name": "UP85BD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-up85d",
-              "name": "UP85D",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-tse-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-wolfe",
-          "name": "WOLFE",
-          "subcategories": [
-            {
-              "id": "trenchers-wolfe-250",
-              "name": "250",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-400",
-              "name": "400",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-540",
-              "name": "540",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-7000",
-              "name": "7000",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-8000",
-              "name": "8000",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-ct77040",
-              "name": "CT77040",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-dwt630",
-              "name": "DWT630",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-wolfe-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "trenchers-trencore-jetco",
-          "name": "TRENCORE JETCO",
-          "subcategories": [
-            {
-              "id": "trenchers-trencore-jetco-660b",
-              "name": "660B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-860b",
-              "name": "860B",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-930bg",
-              "name": "930BG",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-1400l",
-              "name": "1400L",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-1600hdl",
-              "name": "1600HDL",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-7254650hd",
-              "name": "7254650HD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-7254-650hd",
-              "name": "7254-650HD",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-7337",
-              "name": "7337",
-              "subcategories": []
-            },
-            {
-              "id": "trenchers-trencore-jetco-other",
-              "name": "OTHER",
-              "subcategories": []
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "trucks",
       "name": "TRUCKS",
       "subcategories": [
@@ -154989,6 +152513,8491 @@ const categoriesConfig = {
           "subcategories": [
             {
               "id": "trucks-other-trucks-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wheel-loaders",
+      "name": "WHEEL LOADERS",
+      "subcategories": [
+        {
+          "id": "wheel-loaders-caterpillar",
+          "name": "CATERPILLAR",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-caterpillar-901",
+              "name": "901",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-901b",
+              "name": "901B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-902",
+              "name": "902",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-902b",
+              "name": "902B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-903",
+              "name": "903",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-903b",
+              "name": "903B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-903c",
+              "name": "903C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-903c2",
+              "name": "903C2",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-903d",
+              "name": "903D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-904b",
+              "name": "904B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-906",
+              "name": "906",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-906h",
+              "name": "906H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-906h2",
+              "name": "906H2",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-906m",
+              "name": "906M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-907h",
+              "name": "907H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-907h2",
+              "name": "907H2",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-907m",
+              "name": "907M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-908h",
+              "name": "908H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-908h2",
+              "name": "908H2",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-908m",
+              "name": "908M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-910g",
+              "name": "910G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-910k",
+              "name": "910K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-910m",
+              "name": "910M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-914g",
+              "name": "914G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-914k",
+              "name": "914K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-914m",
+              "name": "914M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-918g",
+              "name": "918G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-918h",
+              "name": "918H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-918m",
+              "name": "918M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-920",
+              "name": "920",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-920k",
+              "name": "920K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-920m",
+              "name": "920M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924g",
+              "name": "924G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924gz",
+              "name": "924GZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924h",
+              "name": "924H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924hz",
+              "name": "924HZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924k",
+              "name": "924K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-924m",
+              "name": "924M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-926m",
+              "name": "926M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928g",
+              "name": "928G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928gz",
+              "name": "928GZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928h",
+              "name": "928H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928hz",
+              "name": "928HZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928k",
+              "name": "928K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-928m",
+              "name": "928M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-930g",
+              "name": "930G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-930h",
+              "name": "930H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-930k",
+              "name": "930K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-930m",
+              "name": "930M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-930m-ag-handler",
+              "name": "930M AG HANDLER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-938g",
+              "name": "938G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-938g-ii",
+              "name": "938G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-938h",
+              "name": "938H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-938k",
+              "name": "938K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-938m",
+              "name": "938M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950g",
+              "name": "950G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950g-ii",
+              "name": "950G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950gc",
+              "name": "950GC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950h",
+              "name": "950H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950k",
+              "name": "950K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950l",
+              "name": "950L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950m",
+              "name": "950M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-950mz",
+              "name": "950MZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-962g",
+              "name": "962G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-962g-ii",
+              "name": "962G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-962h",
+              "name": "962H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-962k",
+              "name": "962K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-962m",
+              "name": "962M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966g",
+              "name": "966G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966g-ii",
+              "name": "966G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966gc",
+              "name": "966GC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966h",
+              "name": "966H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966k",
+              "name": "966K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966l",
+              "name": "966L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966m",
+              "name": "966M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966m-xe",
+              "name": "966M XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-966-xe",
+              "name": "966 XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972g",
+              "name": "972G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972g-ii",
+              "name": "972G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972h",
+              "name": "972H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972k",
+              "name": "972K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972m",
+              "name": "972M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972m-xe",
+              "name": "972M XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-972-xe",
+              "name": "972 XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980g",
+              "name": "980G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980g-ii",
+              "name": "980G II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980h",
+              "name": "980H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980k",
+              "name": "980K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980l",
+              "name": "980L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980m",
+              "name": "980M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-980-xe",
+              "name": "980 XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-982m",
+              "name": "982M",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-982-xe",
+              "name": "982 XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-986h",
+              "name": "986H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-986k",
+              "name": "986K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-988g",
+              "name": "988G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-988h",
+              "name": "988H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-988k",
+              "name": "988K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-988k-xe",
+              "name": "988K XE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-990h",
+              "name": "990H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-990k",
+              "name": "990K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-992g",
+              "name": "992G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-992k",
+              "name": "992K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-993k",
+              "name": "993K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-994f",
+              "name": "994F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-994h",
+              "name": "994H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-it14g",
+              "name": "IT14G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-it28g",
+              "name": "IT28G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-it38g",
+              "name": "IT38G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-caterpillar-it62g",
+              "name": "IT62G",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-deere",
+          "name": "DEERE",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-deere-184-g-tier",
+              "name": "184 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-204-g-tier",
+              "name": "204 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-204k",
+              "name": "204K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-204l",
+              "name": "204L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244e",
+              "name": "244E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244h",
+              "name": "244H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244j",
+              "name": "244J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244k",
+              "name": "244K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244k-ii",
+              "name": "244K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244l",
+              "name": "244L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-244-p-tier",
+              "name": "244 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-304-g-tier",
+              "name": "304 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-304h",
+              "name": "304H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-304j",
+              "name": "304J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-304k",
+              "name": "304K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-304l",
+              "name": "304L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-324h",
+              "name": "324H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-324j",
+              "name": "324J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-324k",
+              "name": "324K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-324l",
+              "name": "324L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-324-p-tier",
+              "name": "324 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-326-p-tier",
+              "name": "326 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344e",
+              "name": "344E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344h",
+              "name": "344H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344j",
+              "name": "344J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344k",
+              "name": "344K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344l",
+              "name": "344L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-344-p-tier",
+              "name": "344 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444c",
+              "name": "444C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444d",
+              "name": "444D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444e",
+              "name": "444E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444h",
+              "name": "444H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444j",
+              "name": "444J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444k",
+              "name": "444K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444l",
+              "name": "444L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444-g-tier",
+              "name": "444 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-444-p-tier",
+              "name": "444 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-524k",
+              "name": "524K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-524k-ii",
+              "name": "524K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-524l",
+              "name": "524L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-524-p-tier",
+              "name": "524 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544d",
+              "name": "544D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544e",
+              "name": "544E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544g",
+              "name": "544G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544h",
+              "name": "544H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544j",
+              "name": "544J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544k",
+              "name": "544K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544k-ii",
+              "name": "544K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544l",
+              "name": "544L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544-p-tier",
+              "name": "544 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544-g-tier",
+              "name": "544 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624e",
+              "name": "624E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624g",
+              "name": "624G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624h",
+              "name": "624H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624j",
+              "name": "624J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624k",
+              "name": "624K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624k-ii",
+              "name": "624K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624l",
+              "name": "624L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624-p-tier",
+              "name": "624 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644d",
+              "name": "644D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644e",
+              "name": "644E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644g",
+              "name": "644G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644h",
+              "name": "644H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644j",
+              "name": "644J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644k",
+              "name": "644K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644k-hybrid",
+              "name": "644K HYBRID",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644l",
+              "name": "644L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644l-hybrid",
+              "name": "644L HYBRID",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644-g-tier",
+              "name": "644 G-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644-p-tier",
+              "name": "644 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644-x-tier",
+              "name": "644 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724j",
+              "name": "724J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724k",
+              "name": "724K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724l",
+              "name": "724L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724-p-tier",
+              "name": "724 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744e",
+              "name": "744E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744h",
+              "name": "744H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744j",
+              "name": "744J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744k",
+              "name": "744K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744k-ii",
+              "name": "744K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744l",
+              "name": "744L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744-p-tier",
+              "name": "744 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744-x-tier",
+              "name": "744 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824j",
+              "name": "824J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824k",
+              "name": "824K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824k-ii",
+              "name": "824K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824l",
+              "name": "824L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824-p-tier",
+              "name": "824 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-824-x-tier",
+              "name": "824 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844j",
+              "name": "844J",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844k",
+              "name": "844K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844k-ii",
+              "name": "844K II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844k-iii",
+              "name": "844K III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844l",
+              "name": "844L",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844-p-tier",
+              "name": "844 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844-x-tier",
+              "name": "844 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-904-p-tier",
+              "name": "904 P-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-904-x-tier",
+              "name": "904 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-944k",
+              "name": "944K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-944k-hybrid",
+              "name": "944K HYBRID",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-944-x-tier",
+              "name": "944 X-TIER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-tc44h",
+              "name": "TC44H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-tc54h",
+              "name": "TC54H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-tc62h",
+              "name": "TC62H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544j-high-lift",
+              "name": "544J HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624j-high-lift",
+              "name": "624J HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644j-high-lift",
+              "name": "644J HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724j-high-lift",
+              "name": "724J HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744j-high-lift",
+              "name": "744J HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544k-high-lift",
+              "name": "544K HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-624k-high-lift",
+              "name": "624K HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644k-high-lift",
+              "name": "644K HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-724k-high-lift",
+              "name": "724K HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744k-high-lift",
+              "name": "744K HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-544",
+              "name": "544",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-644",
+              "name": "644",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-744",
+              "name": "744",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-deere-844",
+              "name": "844",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-volvo",
+          "name": "VOLVO",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-volvo-l20",
+              "name": "L20",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l20b",
+              "name": "L20B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l20-electric",
+              "name": "L20 ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l25",
+              "name": "L25",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l25b",
+              "name": "L25B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l25-electric",
+              "name": "L25 ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l30",
+              "name": "L30",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l30b",
+              "name": "L30B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l35",
+              "name": "L35",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l35b",
+              "name": "L35B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l45",
+              "name": "L45",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l45b",
+              "name": "L45B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50c",
+              "name": "L50C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50d",
+              "name": "L50D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50e",
+              "name": "L50E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50f",
+              "name": "L50F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50g",
+              "name": "L50G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l50h",
+              "name": "L50H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l60e",
+              "name": "L60E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l60f",
+              "name": "L60F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l60g",
+              "name": "L60G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l60h",
+              "name": "L60H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70c",
+              "name": "L70C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70d",
+              "name": "L70D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70e",
+              "name": "L70E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70f",
+              "name": "L70F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70g",
+              "name": "L70G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l70h",
+              "name": "L70H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90c",
+              "name": "L90C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90d",
+              "name": "L90D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90e",
+              "name": "L90E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90f",
+              "name": "L90F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90g",
+              "name": "L90G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l90h",
+              "name": "L90H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l110e",
+              "name": "L110E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l110f",
+              "name": "L110F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l110g",
+              "name": "L110G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l110h",
+              "name": "L110H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120c",
+              "name": "L120C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120d",
+              "name": "L120D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120e",
+              "name": "L120E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120f",
+              "name": "L120F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120g",
+              "name": "L120G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120h",
+              "name": "L120H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120-electric",
+              "name": "L120 ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150c",
+              "name": "L150C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150d",
+              "name": "L150D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150e",
+              "name": "L150E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150f",
+              "name": "L150F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150g",
+              "name": "L150G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l150h",
+              "name": "L150H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180c",
+              "name": "L180C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180d",
+              "name": "L180D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180e",
+              "name": "L180E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180f",
+              "name": "L180F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180g",
+              "name": "L180G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180h",
+              "name": "L180H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l200-high-lift",
+              "name": "L200 HIGH LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l220d",
+              "name": "L220D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l220e",
+              "name": "L220E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l220f",
+              "name": "L220F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l220g",
+              "name": "L220G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l220h",
+              "name": "L220H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l250g",
+              "name": "L250G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l260",
+              "name": "L260",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l260-rehandler",
+              "name": "L260 REHANDLER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l330c",
+              "name": "L330C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l330d",
+              "name": "L330D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l330e",
+              "name": "L330E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l330f",
+              "name": "L330F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l350f",
+              "name": "L350F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l350h",
+              "name": "L350H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l350",
+              "name": "L350",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l110h-high-lift",
+              "name": "L110H HIGH LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l120h-high-lift",
+              "name": "L120H HIGH LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-l180h-high-lift",
+              "name": "L180H HIGH LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-bm4300",
+              "name": "BM4300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-bm4400",
+              "name": "BM4400",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-bm4500",
+              "name": "BM4500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-volvo-bm4600",
+              "name": "BM4600",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-komatsu",
+          "name": "KOMATSU",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-komatsu-wa30",
+              "name": "WA30",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa30-5",
+              "name": "WA30-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa30-6",
+              "name": "WA30-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa50",
+              "name": "WA50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa50-3",
+              "name": "WA50-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa50-5",
+              "name": "WA50-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa50-6",
+              "name": "WA50-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa65",
+              "name": "WA65",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa65-3",
+              "name": "WA65-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa70",
+              "name": "WA70",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa80",
+              "name": "WA80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa80-5",
+              "name": "WA80-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa90",
+              "name": "WA90",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa100",
+              "name": "WA100",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa100m-7",
+              "name": "WA100M-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa120",
+              "name": "WA120",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa150",
+              "name": "WA150",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa180",
+              "name": "WA180",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200",
+              "name": "WA200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200-1",
+              "name": "WA200-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200-3",
+              "name": "WA200-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200-5",
+              "name": "WA200-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200-6",
+              "name": "WA200-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200-7",
+              "name": "WA200-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa200pt-5",
+              "name": "WA200PT-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250",
+              "name": "WA250",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250-1",
+              "name": "WA250-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250-3",
+              "name": "WA250-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250-5",
+              "name": "WA250-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250-6",
+              "name": "WA250-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250-7",
+              "name": "WA250-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa250pt",
+              "name": "WA250PT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa270",
+              "name": "WA270",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa270-3",
+              "name": "WA270-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa270-7",
+              "name": "WA270-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300",
+              "name": "WA300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300-1",
+              "name": "WA300-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300-3",
+              "name": "WA300-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300-5",
+              "name": "WA300-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300-6",
+              "name": "WA300-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa300-7",
+              "name": "WA300-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320",
+              "name": "WA320",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320-3",
+              "name": "WA320-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320-5",
+              "name": "WA320-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320-6",
+              "name": "WA320-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320-7",
+              "name": "WA320-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320pt",
+              "name": "WA320PT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320pz",
+              "name": "WA320PZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa320pz-6",
+              "name": "WA320PZ-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa350",
+              "name": "WA350",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa350-1",
+              "name": "WA350-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa350-3",
+              "name": "WA350-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa350-5",
+              "name": "WA350-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa350-6",
+              "name": "WA350-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380",
+              "name": "WA380",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380-3",
+              "name": "WA380-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380-5",
+              "name": "WA380-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380-6",
+              "name": "WA380-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380-7",
+              "name": "WA380-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa380-8",
+              "name": "WA380-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa430",
+              "name": "WA430",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa430-5",
+              "name": "WA430-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa430-6",
+              "name": "WA430-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa450",
+              "name": "WA450",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa450-1",
+              "name": "WA450-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa450-3",
+              "name": "WA450-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa450-5",
+              "name": "WA450-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa450-6",
+              "name": "WA450-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470",
+              "name": "WA470",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470-3",
+              "name": "WA470-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470-5",
+              "name": "WA470-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470-6",
+              "name": "WA470-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470-7",
+              "name": "WA470-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa470pz",
+              "name": "WA470PZ",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475",
+              "name": "WA475",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-3",
+              "name": "WA475-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-5",
+              "name": "WA475-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-6",
+              "name": "WA475-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-7",
+              "name": "WA475-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-8",
+              "name": "WA475-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa475-10",
+              "name": "WA475-10",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa480",
+              "name": "WA480",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa480-5",
+              "name": "WA480-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa480-6",
+              "name": "WA480-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa480-8",
+              "name": "WA480-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa485-10",
+              "name": "WA485-10",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500",
+              "name": "WA500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500-1",
+              "name": "WA500-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500-3",
+              "name": "WA500-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500-6",
+              "name": "WA500-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500-7",
+              "name": "WA500-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa500-8",
+              "name": "WA500-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa600",
+              "name": "WA600",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa600-1",
+              "name": "WA600-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa600-3",
+              "name": "WA600-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa600-6",
+              "name": "WA600-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa600-8",
+              "name": "WA600-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa700",
+              "name": "WA700",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa700-1",
+              "name": "WA700-1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa700-3",
+              "name": "WA700-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa700-8",
+              "name": "WA700-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa800",
+              "name": "WA800",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa800-3",
+              "name": "WA800-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa800-8",
+              "name": "WA800-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa900",
+              "name": "WA900",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa900-3",
+              "name": "WA900-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-wa900-3eo",
+              "name": "WA900-3EO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-we1850",
+              "name": "WE1850",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-540",
+              "name": "540",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-545",
+              "name": "545",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-komatsu-545a",
+              "name": "545A",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-case",
+          "name": "CASE",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-case-21d",
+              "name": "21D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-21e",
+              "name": "21E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-21f",
+              "name": "21F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-21f-xt",
+              "name": "21F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-121d",
+              "name": "121D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-121e",
+              "name": "121E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-121f",
+              "name": "121F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-121f-xt",
+              "name": "121F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-221d",
+              "name": "221D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-221e",
+              "name": "221E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-221f",
+              "name": "221F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-321d",
+              "name": "321D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-321e",
+              "name": "321E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-321f",
+              "name": "321F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-421d",
+              "name": "421D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-421e",
+              "name": "421E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-421f",
+              "name": "421F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-421g",
+              "name": "421G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521d",
+              "name": "521D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521d-xt",
+              "name": "521D XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521e",
+              "name": "521E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521e-xr",
+              "name": "521E XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521e-xt",
+              "name": "521E XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521f",
+              "name": "521F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521f-xr",
+              "name": "521F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521f-xt",
+              "name": "521F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521g",
+              "name": "521G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521g-xr",
+              "name": "521G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521g-xt",
+              "name": "521G XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-521g-z-bar",
+              "name": "521G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621b",
+              "name": "621B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621b-xt",
+              "name": "621B XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621c",
+              "name": "621C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621c-xr",
+              "name": "621C XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621c-xt",
+              "name": "621C XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621d",
+              "name": "621D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621d-xr",
+              "name": "621D XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621d-xt",
+              "name": "621D XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621e",
+              "name": "621E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621e-xr",
+              "name": "621E XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621e-xt",
+              "name": "621E XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621f",
+              "name": "621F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621f-xr",
+              "name": "621F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621f-xt",
+              "name": "621F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621g",
+              "name": "621G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621g-xr",
+              "name": "621G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621g-xt",
+              "name": "621G XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-621g-z-bar",
+              "name": "621G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-651g",
+              "name": "651G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-651g-xr",
+              "name": "651G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-651g-xt",
+              "name": "651G XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-651g-z-bar",
+              "name": "651G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721b",
+              "name": "721B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721c",
+              "name": "721C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721c-xr",
+              "name": "721C XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721c-xt",
+              "name": "721C XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721d",
+              "name": "721D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721d-xt",
+              "name": "721D XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721e",
+              "name": "721E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721e-xr",
+              "name": "721E XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721e-xt",
+              "name": "721E XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721f",
+              "name": "721F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721f-xr",
+              "name": "721F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721f-xt",
+              "name": "721F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721g",
+              "name": "721G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721g-xr",
+              "name": "721G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721g-xt",
+              "name": "721G XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-721g-z-bar",
+              "name": "721G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821b",
+              "name": "821B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821c",
+              "name": "821C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821c-xr",
+              "name": "821C XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821e",
+              "name": "821E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821f",
+              "name": "821F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821f-xr",
+              "name": "821F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821g",
+              "name": "821G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821g-xr",
+              "name": "821G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-821g-z-bar",
+              "name": "821G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921b",
+              "name": "921B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921c",
+              "name": "921C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921c-xr",
+              "name": "921C XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921e",
+              "name": "921E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921f",
+              "name": "921F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921f-xr",
+              "name": "921F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921g",
+              "name": "921G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921g-xr",
+              "name": "921G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-921g-z-bar",
+              "name": "921G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021d",
+              "name": "1021D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021e",
+              "name": "1021E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021f",
+              "name": "1021F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021f-xr",
+              "name": "1021F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021g",
+              "name": "1021G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021g-xr",
+              "name": "1021G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021g-z-bar",
+              "name": "1021G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121d",
+              "name": "1121D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121e",
+              "name": "1121E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121f",
+              "name": "1121F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121f-xr",
+              "name": "1121F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121g",
+              "name": "1121G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121g-xr",
+              "name": "1121G XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121g-z-bar",
+              "name": "1121G Z BAR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1221d",
+              "name": "1221D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1221e",
+              "name": "1221E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1221e-xr",
+              "name": "1221E XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1221f",
+              "name": "1221F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1221f-xr",
+              "name": "1221F XR",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-cl36ev",
+              "name": "CL36EV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w11",
+              "name": "W11",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w11b",
+              "name": "W11B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w18",
+              "name": "W18",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w20c",
+              "name": "W20C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w36",
+              "name": "W36",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1021f-xt",
+              "name": "1021F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-1121f-xt",
+              "name": "1121F XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-40xt",
+              "name": "40XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-60xt",
+              "name": "60XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w14",
+              "name": "W14",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w18",
+              "name": "W18",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w20",
+              "name": "W20",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w24",
+              "name": "W24",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w26",
+              "name": "W26",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-case-w36",
+              "name": "W36",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-hyundai",
+          "name": "HYUNDAI",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-hyundai-hl730",
+              "name": "HL730",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730-3",
+              "name": "HL730-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730-7",
+              "name": "HL730-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730-9",
+              "name": "HL730-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730a",
+              "name": "HL730A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730tm",
+              "name": "HL730TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730tm-7",
+              "name": "HL730TM-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl730tm-9",
+              "name": "HL730TM-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740",
+              "name": "HL740",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740-3",
+              "name": "HL740-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740-7",
+              "name": "HL740-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740-9",
+              "name": "HL740-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740a",
+              "name": "HL740A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740tm",
+              "name": "HL740TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740tm-7",
+              "name": "HL740TM-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl740tm-9",
+              "name": "HL740TM-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl757",
+              "name": "HL757",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl757-7",
+              "name": "HL757-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl757-9",
+              "name": "HL757-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl757tm-7",
+              "name": "HL757TM-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl757tm-9",
+              "name": "HL757TM-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760",
+              "name": "HL760",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760-3",
+              "name": "HL760-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760-7",
+              "name": "HL760-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760-9",
+              "name": "HL760-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760a",
+              "name": "HL760A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl760tm",
+              "name": "HL760TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770",
+              "name": "HL770",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770-3",
+              "name": "HL770-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770-7",
+              "name": "HL770-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770-9",
+              "name": "HL770-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770a",
+              "name": "HL770A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl770tm-7",
+              "name": "HL770TM-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl780",
+              "name": "HL780",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl780-3",
+              "name": "HL780-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl780-7",
+              "name": "HL780-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl780-9",
+              "name": "HL780-9",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl780a",
+              "name": "HL780A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl930a",
+              "name": "HL930A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl940",
+              "name": "HL940",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl940a",
+              "name": "HL940A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl940tm",
+              "name": "HL940TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl955",
+              "name": "HL955",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl955a",
+              "name": "HL955A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl955tm",
+              "name": "HL955TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl955xt",
+              "name": "HL955XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl960",
+              "name": "HL960",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl960a",
+              "name": "HL960A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl960xt",
+              "name": "HL960XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl960a-xt",
+              "name": "HL960A XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl970",
+              "name": "HL970",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl970a",
+              "name": "HL970A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl970xt",
+              "name": "HL970XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl975",
+              "name": "HL975",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl975a",
+              "name": "HL975A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl975xt",
+              "name": "HL975XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl980",
+              "name": "HL980",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl980a",
+              "name": "HL980A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl980xt",
+              "name": "HL980XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl980a-xt",
+              "name": "HL980A XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl985a",
+              "name": "HL985A",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl990",
+              "name": "HL990",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl990xt",
+              "name": "HL990XT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl930tm",
+              "name": "HL930TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl940tm",
+              "name": "HL940TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl955tm",
+              "name": "HL955TM",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl500",
+              "name": "HL500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl520",
+              "name": "HL520",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hyundai-hl520-3",
+              "name": "HL520-3",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-kawasaki",
+          "name": "KAWASAKI",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-kawasaki-30z",
+              "name": "30Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-35z",
+              "name": "35Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-40z",
+              "name": "40Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-42z",
+              "name": "42Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-42z-ii",
+              "name": "42Z II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-42z-iii",
+              "name": "42Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-45z",
+              "name": "45Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-45z-iii",
+              "name": "45Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-50z",
+              "name": "50Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-50z-ii",
+              "name": "50Z II",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-50z-iii",
+              "name": "50Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-50z-v",
+              "name": "50Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-60z",
+              "name": "60Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-60z-iii",
+              "name": "60Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-60z-iv",
+              "name": "60Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-60z-v",
+              "name": "60Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-65z",
+              "name": "65Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-65z-iv",
+              "name": "65Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-65z-v",
+              "name": "65Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-65zv-2",
+              "name": "65ZV-2",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-67z",
+              "name": "67Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-67z-iv",
+              "name": "67Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-67z-v",
+              "name": "67Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-67z7",
+              "name": "67Z7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-70z",
+              "name": "70Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-70z-iii",
+              "name": "70Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-70z-iv",
+              "name": "70Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-70z-v",
+              "name": "70Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-70z7",
+              "name": "70Z7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-75z",
+              "name": "75Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-80z",
+              "name": "80Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-80z-iii",
+              "name": "80Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-80z-iv",
+              "name": "80Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-80z-v",
+              "name": "80Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-80z7",
+              "name": "80Z7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-85z",
+              "name": "85Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-85z-iv",
+              "name": "85Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-85z-v",
+              "name": "85Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-90z",
+              "name": "90Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-90z-iii",
+              "name": "90Z III",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-90z-iv",
+              "name": "90Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-90z-v",
+              "name": "90Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-95z",
+              "name": "95Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-95z-iv",
+              "name": "95Z IV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-95z-v",
+              "name": "95Z V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-r30z",
+              "name": "R30Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-r42z",
+              "name": "R42Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-r50z",
+              "name": "R50Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-r60z",
+              "name": "R60Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-r70z",
+              "name": "R70Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-65tmv",
+              "name": "65TMV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-67tmv",
+              "name": "67TMV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-kld65z",
+              "name": "KLD65Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-kld70z",
+              "name": "KLD70Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-kld80z",
+              "name": "KLD80Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-zv65",
+              "name": "ZV65",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-zv75",
+              "name": "ZV75",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kawasaki-zv100",
+              "name": "ZV100",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-doosan",
+          "name": "DOOSAN",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-doosan-dl80",
+              "name": "DL80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl80-3",
+              "name": "DL80-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl160",
+              "name": "DL160",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl160-3",
+              "name": "DL160-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl160tc",
+              "name": "DL160TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200",
+              "name": "DL200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200-3",
+              "name": "DL200-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200-5",
+              "name": "DL200-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200-7",
+              "name": "DL200-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200tc",
+              "name": "DL200TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl200tc-5",
+              "name": "DL200TC-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl220",
+              "name": "DL220",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl220-3",
+              "name": "DL220-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl220-5",
+              "name": "DL220-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl220-7",
+              "name": "DL220-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl220tc-5",
+              "name": "DL220TC-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl250",
+              "name": "DL250",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl250-3",
+              "name": "DL250-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl250-5",
+              "name": "DL250-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl250-7",
+              "name": "DL250-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl280",
+              "name": "DL280",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl280-5",
+              "name": "DL280-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl300",
+              "name": "DL300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl300-3",
+              "name": "DL300-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl300-5",
+              "name": "DL300-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl300-7",
+              "name": "DL300-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl350",
+              "name": "DL350",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl350-3",
+              "name": "DL350-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl350-5",
+              "name": "DL350-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl400",
+              "name": "DL400",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl400-3",
+              "name": "DL400-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl400-5",
+              "name": "DL400-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl420",
+              "name": "DL420",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl420-3",
+              "name": "DL420-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl420-5",
+              "name": "DL420-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl420-7",
+              "name": "DL420-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl450",
+              "name": "DL450",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl450-3",
+              "name": "DL450-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl450-5",
+              "name": "DL450-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl500",
+              "name": "DL500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl500-3",
+              "name": "DL500-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl500-5",
+              "name": "DL500-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl550",
+              "name": "DL550",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl550-3",
+              "name": "DL550-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl550-5",
+              "name": "DL550-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl550-7",
+              "name": "DL550-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl580-5",
+              "name": "DL580-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl580-7",
+              "name": "DL580-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl250tc",
+              "name": "DL250TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-dl300tc",
+              "name": "DL300TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-160",
+              "name": "MEGA 160",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-200",
+              "name": "MEGA 200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-250",
+              "name": "MEGA 250",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-300",
+              "name": "MEGA 300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-400",
+              "name": "MEGA 400",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-200-v",
+              "name": "MEGA 200-V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-250-v",
+              "name": "MEGA 250-V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-mega-300-v",
+              "name": "MEGA 300-V",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-disd-sd200",
+              "name": "DISD SD200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-doosan-disd-sd300",
+              "name": "DISD SD300",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-hitachi",
+          "name": "HITACHI",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-hitachi-zw30",
+              "name": "ZW30",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw50",
+              "name": "ZW50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw65",
+              "name": "ZW65",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw75",
+              "name": "ZW75",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw80",
+              "name": "ZW80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw95",
+              "name": "ZW95",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw100",
+              "name": "ZW100",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw110",
+              "name": "ZW110",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw120",
+              "name": "ZW120",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw140",
+              "name": "ZW140",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw150",
+              "name": "ZW150",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw150-5",
+              "name": "ZW150-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw150-6",
+              "name": "ZW150-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw180",
+              "name": "ZW180",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw180-5",
+              "name": "ZW180-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw180-6",
+              "name": "ZW180-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220",
+              "name": "ZW220",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220-5",
+              "name": "ZW220-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220-6",
+              "name": "ZW220-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220pl",
+              "name": "ZW220PL",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250",
+              "name": "ZW250",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250-3",
+              "name": "ZW250-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250-5",
+              "name": "ZW250-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250-6",
+              "name": "ZW250-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250pl",
+              "name": "ZW250PL",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw310",
+              "name": "ZW310",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw310-3",
+              "name": "ZW310-3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw310-5",
+              "name": "ZW310-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw310-6",
+              "name": "ZW310-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw330",
+              "name": "ZW330",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw330-5",
+              "name": "ZW330-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw330-6",
+              "name": "ZW330-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw370",
+              "name": "ZW370",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw370-5",
+              "name": "ZW370-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw550",
+              "name": "ZW550",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-lx70",
+              "name": "LX70",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-lx80",
+              "name": "LX80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-lx100",
+              "name": "LX100",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-lx130",
+              "name": "LX130",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-lx160",
+              "name": "LX160",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220-toolmaster",
+              "name": "ZW220 TOOLMASTER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250-toolmaster",
+              "name": "ZW250 TOOLMASTER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw180-5b",
+              "name": "ZW180-5B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw220-5b",
+              "name": "ZW220-5B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250-5b",
+              "name": "ZW250-5B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw250",
+              "name": "ZW250",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-hitachi-zw310",
+              "name": "ZW310",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-new-holland",
+          "name": "NEW HOLLAND",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-new-holland-w50",
+              "name": "W50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w50b",
+              "name": "W50B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w50c",
+              "name": "W50C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w50d",
+              "name": "W50D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w60",
+              "name": "W60",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w60btc",
+              "name": "W60BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w60c",
+              "name": "W60C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w60d",
+              "name": "W60D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w70",
+              "name": "W70",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w70btc",
+              "name": "W70BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w70c",
+              "name": "W70C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w70d",
+              "name": "W70D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w80",
+              "name": "W80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w80btc",
+              "name": "W80BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w80c",
+              "name": "W80C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w80d",
+              "name": "W80D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110",
+              "name": "W110",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110b",
+              "name": "W110B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110btc",
+              "name": "W110BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110c",
+              "name": "W110C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110d",
+              "name": "W110D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130",
+              "name": "W130",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130b",
+              "name": "W130B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130btc",
+              "name": "W130BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130c",
+              "name": "W130C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130d",
+              "name": "W130D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170",
+              "name": "W170",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170b",
+              "name": "W170B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170btc",
+              "name": "W170BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170c",
+              "name": "W170C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170d",
+              "name": "W170D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w190",
+              "name": "W190",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w190b",
+              "name": "W190B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w190btc",
+              "name": "W190BTC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w190c",
+              "name": "W190C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w190d",
+              "name": "W190D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w230",
+              "name": "W230",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w230b",
+              "name": "W230B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w230c",
+              "name": "W230C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w230d",
+              "name": "W230D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w270",
+              "name": "W270",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w270b",
+              "name": "W270B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w270c",
+              "name": "W270C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w270d",
+              "name": "W270D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w300",
+              "name": "W300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w300b",
+              "name": "W300B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w300c",
+              "name": "W300C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w110tc",
+              "name": "W110TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w130tc",
+              "name": "W130TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-w170tc",
+              "name": "W170TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-lw80",
+              "name": "LW80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-lw110",
+              "name": "LW110",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-lw130",
+              "name": "LW130",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-new-holland-lw170",
+              "name": "LW170",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-jcb",
+          "name": "JCB",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-jcb-406",
+              "name": "406",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-406b",
+              "name": "406B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-406zx",
+              "name": "406ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-407",
+              "name": "407",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-407b",
+              "name": "407B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-407zx",
+              "name": "407ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-408",
+              "name": "408",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-408zx",
+              "name": "408ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-409",
+              "name": "409",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-409b",
+              "name": "409B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-409zx",
+              "name": "409ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-411",
+              "name": "411",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-411b",
+              "name": "411B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-411ht",
+              "name": "411HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-412",
+              "name": "412",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-412b",
+              "name": "412B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-412s",
+              "name": "412S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-412zx",
+              "name": "412ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-414",
+              "name": "414",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-414s",
+              "name": "414S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-414zx",
+              "name": "414ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416",
+              "name": "416",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416b",
+              "name": "416B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416ht",
+              "name": "416HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416s",
+              "name": "416S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416zx",
+              "name": "416ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-426",
+              "name": "426",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-426b",
+              "name": "426B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-426ht",
+              "name": "426HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-426s",
+              "name": "426S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-426zx",
+              "name": "426ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-436",
+              "name": "436",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-436b",
+              "name": "436B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-436ht",
+              "name": "436HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-436zx",
+              "name": "436ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-437",
+              "name": "437",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-437ht",
+              "name": "437HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-437zx",
+              "name": "437ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-456",
+              "name": "456",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-456b",
+              "name": "456B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-456ht",
+              "name": "456HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-456zx",
+              "name": "456ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-457",
+              "name": "457",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-457ht",
+              "name": "457HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-457zx",
+              "name": "457ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-467ht",
+              "name": "467HT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-467zx",
+              "name": "467ZX",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-tm180",
+              "name": "TM180",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-tm220",
+              "name": "TM220",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-tm320",
+              "name": "TM320",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-407-agri",
+              "name": "407 AGRI",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-411-agri",
+              "name": "411 AGRI",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-jcb-416-agri",
+              "name": "416 AGRI",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-liebherr",
+          "name": "LIEBHERR",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-liebherr-l506",
+              "name": "L506",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l507",
+              "name": "L507",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l508",
+              "name": "L508",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l509",
+              "name": "L509",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l514",
+              "name": "L514",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l514-stereo",
+              "name": "L514 STEREO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l518",
+              "name": "L518",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l518-2plus1",
+              "name": "L518 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l518-stereo",
+              "name": "L518 STEREO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l524",
+              "name": "L524",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l524-2plus1",
+              "name": "L524 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l524-stereo",
+              "name": "L524 STEREO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l528",
+              "name": "L528",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l528-2plus1",
+              "name": "L528 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l528-stereo",
+              "name": "L528 STEREO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l538",
+              "name": "L538",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l538-2plus1",
+              "name": "L538 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l538-stereo",
+              "name": "L538 STEREO",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l542",
+              "name": "L542",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l542-2plus1",
+              "name": "L542 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l546",
+              "name": "L546",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l546-2plus1",
+              "name": "L546 2PLUS1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l550",
+              "name": "L550",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l550-xpower",
+              "name": "L550 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l556",
+              "name": "L556",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l556-xpower",
+              "name": "L556 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l566",
+              "name": "L566",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l566-xpower",
+              "name": "L566 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l576",
+              "name": "L576",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l576-xpower",
+              "name": "L576 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l580",
+              "name": "L580",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l580-xpower",
+              "name": "L580 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l586",
+              "name": "L586",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l586-xpower",
+              "name": "L586 XPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l550-high-lift",
+              "name": "L550 HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l566-high-lift",
+              "name": "L566 HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l580-high-lift",
+              "name": "L580 HIGH-LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l531",
+              "name": "L531",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l541",
+              "name": "L541",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l551",
+              "name": "L551",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l561",
+              "name": "L561",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l571",
+              "name": "L571",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liebherr-l581",
+              "name": "L581",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-xcmg",
+          "name": "XCMG",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-xcmg-lw160",
+              "name": "LW160",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw180",
+              "name": "LW180",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw200",
+              "name": "LW200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw300",
+              "name": "LW300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw300f",
+              "name": "LW300F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw300fn",
+              "name": "LW300FN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw300kn",
+              "name": "LW300KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw500f",
+              "name": "LW500F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw500fn",
+              "name": "LW500FN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw500fv",
+              "name": "LW500FV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw500kn",
+              "name": "LW500KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw550fv",
+              "name": "LW550FV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw600fv",
+              "name": "LW600FV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw600kn",
+              "name": "LW600KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw700fv",
+              "name": "LW700FV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw700kn",
+              "name": "LW700KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw800fv",
+              "name": "LW800FV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw800kn",
+              "name": "LW800KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw1200kn",
+              "name": "LW1200KN",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc968-ev",
+              "name": "XC968-EV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc975-ev",
+              "name": "XC975-EV",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc9350",
+              "name": "XC9350",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc9360",
+              "name": "XC9360",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc958",
+              "name": "XC958",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc968",
+              "name": "XC968",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-xc978",
+              "name": "XC978",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-lw500kv-tc",
+              "name": "LW500KV-TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-zl30g",
+              "name": "ZL30G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-zl50g",
+              "name": "ZL50G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-xcmg-zl60g",
+              "name": "ZL60G",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-sem",
+          "name": "SEM",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-sem-618d",
+              "name": "618D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-636d",
+              "name": "636D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-639b",
+              "name": "639B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-639c",
+              "name": "639C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-639d",
+              "name": "639D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-655b",
+              "name": "655B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-655c",
+              "name": "655C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-655d",
+              "name": "655D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-656d",
+              "name": "656D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-658b",
+              "name": "658B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-658c",
+              "name": "658C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-658d",
+              "name": "658D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-660b",
+              "name": "660B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-660c",
+              "name": "660C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-660d",
+              "name": "660D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-668b",
+              "name": "668B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-668c",
+              "name": "668C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-668d",
+              "name": "668D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-676d",
+              "name": "676D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-655d-forest",
+              "name": "655D FOREST",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-zl50f",
+              "name": "ZL50F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-zl60f",
+              "name": "ZL60F",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-652d",
+              "name": "652D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sem-653d",
+              "name": "653D",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-bobcat",
+          "name": "BOBCAT",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-bobcat-l23",
+              "name": "L23",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-l28",
+              "name": "L28",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-l85",
+              "name": "L85",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-tl30-60",
+              "name": "TL30.60",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-tl35-70",
+              "name": "TL35.70",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-tl38-70hf",
+              "name": "TL38.70HF",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl32",
+              "name": "WL32",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl34",
+              "name": "WL34",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl50",
+              "name": "WL50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl52",
+              "name": "WL52",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl53",
+              "name": "WL53",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-wl56",
+              "name": "WL56",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-1600",
+              "name": "1600",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-2400",
+              "name": "2400",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-v417",
+              "name": "V417",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-v519",
+              "name": "V519",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-v723",
+              "name": "V723",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-al275",
+              "name": "AL275",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-al350",
+              "name": "AL350",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-bobcat-al440",
+              "name": "AL440",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-develon",
+          "name": "DEVELON",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-develon-dl80-7",
+              "name": "DL80-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl200-7",
+              "name": "DL200-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl200tc-7",
+              "name": "DL200TC-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl220-7",
+              "name": "DL220-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl220tc-7",
+              "name": "DL220TC-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl250-7",
+              "name": "DL250-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl280-7",
+              "name": "DL280-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl300-7",
+              "name": "DL300-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl320-7",
+              "name": "DL320-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl380-7",
+              "name": "DL380-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl420-7",
+              "name": "DL420-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl480-7",
+              "name": "DL480-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl550-7",
+              "name": "DL550-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl580-7",
+              "name": "DL580-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl200tc",
+              "name": "DL200TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl220tc",
+              "name": "DL220TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl200-7",
+              "name": "DOOSAN DL200-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl220-7",
+              "name": "DOOSAN DL220-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl250-7",
+              "name": "DOOSAN DL250-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl300-7",
+              "name": "DOOSAN DL300-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl420-7",
+              "name": "DOOSAN DL420-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-doosan-dl550-7",
+              "name": "DOOSAN DL550-7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl300",
+              "name": "DL300",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-develon-dl420",
+              "name": "DL420",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-gehl",
+          "name": "GEHL",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-gehl-al140",
+              "name": "AL140",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-al340",
+              "name": "AL340",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-al440",
+              "name": "AL440",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-al540",
+              "name": "AL540",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-al650",
+              "name": "AL650",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-al750",
+              "name": "AL750",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-340",
+              "name": "340",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-340-articulated",
+              "name": "340 ARTICULATED",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-540",
+              "name": "540",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-540-articulated",
+              "name": "540 ARTICULATED",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-650",
+              "name": "650",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-650-articulated",
+              "name": "650 ARTICULATED",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-dl6h",
+              "name": "DL6H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-dl8h",
+              "name": "DL8H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-rs5-19",
+              "name": "RS5-19",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-rs6-34",
+              "name": "RS6-34",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-rs8-42",
+              "name": "RS8-42",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-sl340",
+              "name": "SL340",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-sl540",
+              "name": "SL540",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-alt750",
+              "name": "ALT750",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-gehl-alt950",
+              "name": "ALT950",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-giant",
+          "name": "GIANT",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-giant-d204sw",
+              "name": "D204SW",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-d254sw",
+              "name": "D254SW",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-d263sw",
+              "name": "D263SW",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-d332swt",
+              "name": "D332SWT",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-d337t",
+              "name": "D337T",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v452t",
+              "name": "V452T",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v452t-x-tra",
+              "name": "V452T X-TRA",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v5003",
+              "name": "V5003",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v5003-tele",
+              "name": "V5003 TELE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v6004",
+              "name": "V6004",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-v6004-tele",
+              "name": "V6004 TELE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g1200",
+              "name": "G1200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g1500",
+              "name": "G1500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2200",
+              "name": "G2200",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2500",
+              "name": "G2500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2700",
+              "name": "G2700",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g3500",
+              "name": "G3500",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g5000",
+              "name": "G5000",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-gt5048",
+              "name": "GT5048",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-gt5048-tele",
+              "name": "GT5048 TELE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2200e",
+              "name": "G2200E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2700e",
+              "name": "G2700E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g5000e",
+              "name": "G5000E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2200-x-tra",
+              "name": "G2200 X-TRA",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-g2700-x-tra",
+              "name": "G2700 X-TRA",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-sk252d",
+              "name": "SK252D",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-giant-sk211g",
+              "name": "SK211G",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-kubota",
+          "name": "KUBOTA",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-kubota-r420",
+              "name": "R420",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r420s",
+              "name": "R420S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r430",
+              "name": "R430",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r430z",
+              "name": "R430Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r520",
+              "name": "R520",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r520s",
+              "name": "R520S",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r530",
+              "name": "R530",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r530z",
+              "name": "R530Z",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r630",
+              "name": "R630",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-rtv-xg850-sidekick",
+              "name": "RTV-XG850 SIDEKICK",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-rt-series",
+              "name": "RT SERIES",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-ra1035",
+              "name": "RA1035",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-ra1042",
+              "name": "RA1042",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r630-electric",
+              "name": "R630 ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r410",
+              "name": "R410",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-kubota-r510",
+              "name": "R510",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-manitou",
+          "name": "MANITOU",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-manitou-mla-2-25",
+              "name": "MLA 2-25",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-3-25",
+              "name": "MLA 3-25",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-3-35",
+              "name": "MLA 3-35",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-4-50",
+              "name": "MLA 4-50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-5-50",
+              "name": "MLA 5-50",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-5-60",
+              "name": "MLA 5-60",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-6-65",
+              "name": "MLA 6-65",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-7-75",
+              "name": "MLA 7-75",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-625",
+              "name": "MLT 625",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-630",
+              "name": "MLT 630",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-635",
+              "name": "MLT 635",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-737",
+              "name": "MLT 737",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-741",
+              "name": "MLT 741",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mlt-840",
+              "name": "MLT 840",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mcl2",
+              "name": "MCL2+",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mcl4",
+              "name": "MCL4+",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mcl6",
+              "name": "MCL6+",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-t-516",
+              "name": "MLA-T 516",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-mla-t-533",
+              "name": "MLA-T 533",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-emla",
+              "name": "eMLA",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-alt750",
+              "name": "ALT750",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-alt950",
+              "name": "ALT950",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-850r",
+              "name": "850R",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-manitou-1050r",
+              "name": "1050R",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-yanmar",
+          "name": "YANMAR",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-yanmar-v3",
+              "name": "V3",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v4",
+              "name": "V4",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v5",
+              "name": "V5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v7",
+              "name": "V7",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v8",
+              "name": "V8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v4-5",
+              "name": "V4-5",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v4-6",
+              "name": "V4-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v7-6",
+              "name": "V7-6",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v8e",
+              "name": "V8E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v8e",
+              "name": "V8e",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-ywl-8",
+              "name": "YWL-8",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v80",
+              "name": "V80",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-v7-electric",
+              "name": "V7 ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-ywl20",
+              "name": "YWL20",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-yanmar-ywl30",
+              "name": "YWL30",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-liugong",
+          "name": "LIUGONG",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-liugong-816",
+              "name": "816",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-816c",
+              "name": "816C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-816g",
+              "name": "816G",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-820",
+              "name": "820",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-820c",
+              "name": "820C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-820h",
+              "name": "820H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-835",
+              "name": "835",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-835h",
+              "name": "835H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-842",
+              "name": "842",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-842h",
+              "name": "842H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-848",
+              "name": "848",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-848h",
+              "name": "848H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-856",
+              "name": "856",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-856c",
+              "name": "856C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-856h",
+              "name": "856H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-858",
+              "name": "858",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-858h",
+              "name": "858H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-862",
+              "name": "862",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-862h",
+              "name": "862H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-877",
+              "name": "877",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-877h",
+              "name": "877H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-890h",
+              "name": "890H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-8128h",
+              "name": "8128H",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-856he",
+              "name": "856HE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-870he",
+              "name": "870HE",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-835t",
+              "name": "835T",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-zl30e",
+              "name": "ZL30E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-zl40b",
+              "name": "ZL40B",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-liugong-zl50c",
+              "name": "ZL50C",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "wheel-loaders-sany",
+          "name": "SANY",
+          "subcategories": [
+            {
+              "id": "wheel-loaders-sany-sw405",
+              "name": "SW405",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw953",
+              "name": "SW953",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw955",
+              "name": "SW955",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw955k",
+              "name": "SW955K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw966",
+              "name": "SW966",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw966k",
+              "name": "SW966K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw978",
+              "name": "SW978",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw978k",
+              "name": "SW978K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw936",
+              "name": "SW936",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw950",
+              "name": "SW950",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw956",
+              "name": "SW956",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw956e",
+              "name": "SW956E",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw968",
+              "name": "SW968",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw968k1",
+              "name": "SW968K1",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw405k",
+              "name": "SW405K",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw956e-electric",
+              "name": "SW956E ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-sw955k-tc",
+              "name": "SW955K-TC",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-zl50c",
+              "name": "ZL50C",
+              "subcategories": []
+            },
+            {
+              "id": "wheel-loaders-sany-zl30g",
+              "name": "ZL30G",
+              "subcategories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "attachments-parts",
+      "name": "ATTACHMENTS / PARTS",
+      "subcategories": [
+        {
+          "id": "attachments-parts-excavator-parts-attachments",
+          "name": "EXCAVATOR - PARTS / ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-excavator-parts-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-skid-steer-parts-attachments",
+          "name": "SKID STEER - PARTS / ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-skid-steer-parts-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-wheel-loader-parts-attachments",
+          "name": "WHEEL LOADER - PARTS / ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-wheel-loader-parts-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-dozer-attachments",
+          "name": "DOZER ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-dozer-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-dozer-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-backhoe-attachments",
+          "name": "BACKHOE ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-backhoe-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-asphalt-attachments",
+          "name": "ASPHALT ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-asphalt-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-crane-attachments",
+          "name": "CRANE ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-crane-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-motor-grader-attachments",
+          "name": "MOTOR GRADER ATTACHMENTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-motor-grader-attachments-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-apron",
+          "name": "APRON",
+          "subcategories": [
+            {
+              "id": "attachments-parts-apron-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-arch",
+          "name": "ARCH",
+          "subcategories": [
+            {
+              "id": "attachments-parts-arch-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-arm",
+          "name": "ARM",
+          "subcategories": [
+            {
+              "id": "attachments-parts-arm-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-asphalt-cutter",
+          "name": "ASPHALT CUTTER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-asphalt-cutter-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-asphalt-paving",
+          "name": "ASPHALT/PAVING",
+          "subcategories": [
+            {
+              "id": "attachments-parts-asphalt-paving-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-auger",
+          "name": "AUGER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-auger-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-axle",
+          "name": "AXLE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-axle-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-backhoe",
+          "name": "BACKHOE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-backhoe-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-bed",
+          "name": "BED",
+          "subcategories": [
+            {
+              "id": "attachments-parts-bed-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-beding-conveyor",
+          "name": "BEDING CONVEYOR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-beding-conveyor-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-blades",
+          "name": "BLADES",
+          "subcategories": [
+            {
+              "id": "attachments-parts-blades-6-way",
+              "name": "6-WAY",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-angle",
+              "name": "ANGLE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-moldboard",
+              "name": "MOLDBOARD",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-s",
+              "name": "S",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-sloper",
+              "name": "SLOPER",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-su",
+              "name": "SU",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-u",
+              "name": "U",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-wing",
+              "name": "WING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-blades-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-booms",
+          "name": "BOOMS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-booms-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-bowl",
+          "name": "BOWL",
+          "subcategories": [
+            {
+              "id": "attachments-parts-bowl-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-buckets",
+          "name": "BUCKETS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-buckets-4-in-1",
+              "name": "4 in 1",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-clamshell",
+              "name": "CLAMSHELL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-crusher",
+              "name": "CRUSHER",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-ditch-cleaning",
+              "name": "DITCH CLEANING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-frost",
+              "name": "FROST",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-gp",
+              "name": "GP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-light-material",
+              "name": "LIGHT MATERIAL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-rock",
+              "name": "ROCK",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-screening",
+              "name": "SCREENING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-severe-duty",
+              "name": "SEVERE DUTY",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-side-dump",
+              "name": "SIDE DUMP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-skeleton",
+              "name": "SKELETON",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-spade-nose",
+              "name": "SPADE NOSE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-stump",
+              "name": "STUMP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-trenching",
+              "name": "TRENCHING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-buckets-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-cable-plows",
+          "name": "CABLE PLOWS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-cable-plows-static",
+              "name": "STATIC",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cable-plows-vibratory",
+              "name": "VIBRATORY",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cable-plows-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-cabs",
+          "name": "CABS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-cabs-brush-cage",
+              "name": "BRUSH CAGE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cabs-erops",
+              "name": "EROPS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cabs-orops",
+              "name": "OROPS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cabs-rops",
+              "name": "ROPS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cabs-soft",
+              "name": "SOFT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-cabs-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-carbody",
+          "name": "CARBODY",
+          "subcategories": [
+            {
+              "id": "attachments-parts-carbody-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-c-frame",
+          "name": "C-FRAME",
+          "subcategories": [
+            {
+              "id": "attachments-parts-c-frame-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-circles",
+          "name": "CIRCLES",
+          "subcategories": [
+            {
+              "id": "attachments-parts-circles-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-clamps",
+          "name": "CLAMPS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-clamps-bale",
+              "name": "BALE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-clamps-brick-block",
+              "name": "BRICK / BLOCK",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-clamps-paper-roll",
+              "name": "PAPER ROLL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-clamps-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-compactor",
+          "name": "COMPACTOR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-compactor-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-compactor-wheel",
+          "name": "COMPACTOR WHEEL",
+          "subcategories": [
+            {
+              "id": "attachments-parts-compactor-wheel-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-concrete-saw",
+          "name": "CONCRETE SAW",
+          "subcategories": [
+            {
+              "id": "attachments-parts-concrete-saw-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-counterweight",
+          "name": "COUNTERWEIGHT",
+          "subcategories": [
+            {
+              "id": "attachments-parts-counterweight-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-coupler",
+          "name": "COUPLER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-coupler-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-crane",
+          "name": "CRANE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-crane-crane-electronics-and-monitoring",
+              "name": "CRANE ELECTRONICS & MONITORING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-crane-crane-rigging",
+              "name": "CRANE RIGGING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-crane-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-crusher",
+          "name": "CRUSHER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-crusher-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-delimber",
+          "name": "DELIMBER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-delimber-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-differntial",
+          "name": "DIFFERNTIAL",
+          "subcategories": [
+            {
+              "id": "attachments-parts-differntial-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-drawbar",
+          "name": "DRAWBAR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-drawbar-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-drill",
+          "name": "DRILL",
+          "subcategories": [
+            {
+              "id": "attachments-parts-drill-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-ejector-gate",
+          "name": "EJECTOR GATE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-ejector-gate-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-engine",
+          "name": "ENGINE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-engine-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-equalizer-bars",
+          "name": "EQUALIZER BARS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-equalizer-bars-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-fairleads",
+          "name": "FAIRLEADS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-fairleads-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-feller-buncher",
+          "name": "FELLER BUNCHER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-feller-buncher-felling-saw-heads",
+              "name": "FELLING SAW HEADS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-feller-buncher-shear-felling-heads",
+              "name": "SHEAR FELLING HEADS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-feller-buncher-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-final-drive",
+          "name": "FINAL DRIVE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-final-drive-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-forestry-tiller",
+          "name": "FORESTRY TILLER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-forestry-tiller-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-forks",
+          "name": "FORKS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-forks-log-and-lumber",
+              "name": "LOG & LUMBER",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-multi-pallet",
+              "name": "MULTI-PALLET",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-pallet",
+              "name": "PALLET",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-pipe-and-pole",
+              "name": "PIPE & POLE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-push-pull",
+              "name": "PUSH PULL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-rotating-pallet",
+              "name": "ROTATING PALLET",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-side-shifter",
+              "name": "SIDE SHIFTER",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-forks-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-generator-end",
+          "name": "GENERATOR END",
+          "subcategories": [
+            {
+              "id": "attachments-parts-generator-end-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-grapples",
+          "name": "GRAPPLES",
+          "subcategories": [
+            {
+              "id": "attachments-parts-grapples-bucket",
+              "name": "BUCKET",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-brush-cage",
+              "name": "BRUSH CAGE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-claw",
+              "name": "CLAW",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-gp",
+              "name": "GP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-log",
+              "name": "LOG",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-orange-peel",
+              "name": "ORANGE PEEL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-root",
+              "name": "ROOT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-scrap",
+              "name": "SCRAP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-grapples-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hammer-breaker",
+          "name": "HAMMER/BREAKER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hammer-breaker-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hitch",
+          "name": "HITCH",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hitch-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hook-block",
+          "name": "HOOK BLOCK",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hook-block-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hydraulic-cylinders",
+          "name": "HYDRAULIC CYLINDERS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hydraulic-cylinders-blade-tilt",
+              "name": "BLADE TILT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-boom-lift",
+              "name": "BOOM LIFT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-bucket",
+              "name": "BUCKET",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-crowd",
+              "name": "CROWD",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-dump-truck-hoist",
+              "name": "DUMP TRUCK HOIST",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-steering",
+              "name": "STEERING",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-hydraulic-cylinders-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hydraulic-pump",
+          "name": "HYDRAULIC PUMP",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hydraulic-pump-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-hydraulics",
+          "name": "HYDRAULICS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-hydraulics-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-jib",
+          "name": "JIB",
+          "subcategories": [
+            {
+              "id": "attachments-parts-jib-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-magnet",
+          "name": "MAGNET",
+          "subcategories": [
+            {
+              "id": "attachments-parts-magnet-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-mast",
+          "name": "MAST",
+          "subcategories": [
+            {
+              "id": "attachments-parts-mast-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-mulcher",
+          "name": "MULCHER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-mulcher-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-other",
+          "name": "OTHER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-other-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-outrigger",
+          "name": "OUTRIGGER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-outrigger-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-pile-driver",
+          "name": "PILE DRIVER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-pile-driver-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-planetary",
+          "name": "PLANETARY",
+          "subcategories": [
+            {
+              "id": "attachments-parts-planetary-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-platform-basket",
+          "name": "PLATFORM/BASKET",
+          "subcategories": [
+            {
+              "id": "attachments-parts-platform-basket-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-post-hole-digger",
+          "name": "POST HOLE DIGGER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-post-hole-digger-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-processor-harverster",
+          "name": "PROCESSOR/HARVERSTER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-processor-harverster-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-push-block",
+          "name": "PUSH BLOCK",
+          "subcategories": [
+            {
+              "id": "attachments-parts-push-block-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-radiator",
+          "name": "RADIATOR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-radiator-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-rakes",
+          "name": "RAKES",
+          "subcategories": [
+            {
+              "id": "attachments-parts-rakes-rock",
+              "name": "ROCK",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-rakes-root",
+              "name": "ROOT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-rakes-trash",
+              "name": "TRASH",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-rakes-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-ride-strut",
+          "name": "RIDE STRUT",
+          "subcategories": [
+            {
+              "id": "attachments-parts-ride-strut-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-rim",
+          "name": "RIM",
+          "subcategories": [
+            {
+              "id": "attachments-parts-rim-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-ripper",
+          "name": "RIPPER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-ripper-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-scarifiers",
+          "name": "SCARIFIERS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-scarifiers-center-mount",
+              "name": "CENTER MOUNT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-scarifiers-front-mount",
+              "name": "FRONT MOUNT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-scarifiers-rear-mount",
+              "name": "REAR MOUNT",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-scarifiers-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-seat",
+          "name": "SEAT",
+          "subcategories": [
+            {
+              "id": "attachments-parts-seat-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-shanks",
+          "name": "SHANKS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-shanks-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-shears",
+          "name": "SHEARS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-shears-concrete",
+              "name": "CONCRETE",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-shears-steel",
+              "name": "STEEL",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-shears-stump",
+              "name": "STUMP",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-shears-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-shell-kit",
+          "name": "SHELL KIT",
+          "subcategories": [
+            {
+              "id": "attachments-parts-shell-kit-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-shredder-mower",
+          "name": "SHREDDER/MOWER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-shredder-mower-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-sideboom",
+          "name": "SIDEBOOM",
+          "subcategories": [
+            {
+              "id": "attachments-parts-sideboom-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-slew-ring",
+          "name": "SLEW RING",
+          "subcategories": [
+            {
+              "id": "attachments-parts-slew-ring-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-snow-plow",
+          "name": "SNOW PLOW",
+          "subcategories": [
+            {
+              "id": "attachments-parts-snow-plow-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-snow-wing",
+          "name": "SNOW WING",
+          "subcategories": [
+            {
+              "id": "attachments-parts-snow-wing-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-snowblower",
+          "name": "SNOWBLOWER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-snowblower-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-stick",
+          "name": "STICK",
+          "subcategories": [
+            {
+              "id": "attachments-parts-stick-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-stump-grinder",
+          "name": "STUMP GRINDER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-stump-grinder-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-stump-splitter",
+          "name": "STUMP SPLITTER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-stump-splitter-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-sweeper",
+          "name": "SWEEPER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-sweeper-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-sweeps",
+          "name": "SWEEPS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-sweeps-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-swing-drive",
+          "name": "SWING DRIVE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-swing-drive-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-swing-motor",
+          "name": "SWING MOTOR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-swing-motor-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-tailgate",
+          "name": "TAILGATE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-tailgate-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-teeth",
+          "name": "TEETH",
+          "subcategories": [
+            {
+              "id": "attachments-parts-teeth-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-thumb",
+          "name": "THUMB",
+          "subcategories": [
+            {
+              "id": "attachments-parts-thumb-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-tires",
+          "name": "TIRES",
+          "subcategories": [
+            {
+              "id": "attachments-parts-tires-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-torque-converter",
+          "name": "TORQUE CONVERTER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-torque-converter-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-transmissions",
+          "name": "TRANSMISSIONS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-transmissions-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-travel-motor",
+          "name": "TRAVEL MOTOR",
+          "subcategories": [
+            {
+              "id": "attachments-parts-travel-motor-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-tree-saw",
+          "name": "TREE SAW",
+          "subcategories": [
+            {
+              "id": "attachments-parts-tree-saw-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-tree-spade",
+          "name": "TREE SPADE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-tree-spade-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-trencher",
+          "name": "TRENCHER",
+          "subcategories": [
+            {
+              "id": "attachments-parts-trencher-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-truck-bed",
+          "name": "TRUCK BED",
+          "subcategories": [
+            {
+              "id": "attachments-parts-truck-bed-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-undercarriage-parts",
+          "name": "UNDERCARRIAGE PARTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-undercarriage-parts-carrier-track-rollers",
+              "name": "CARRIER / TRACK ROLLERS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-rubber-tracks",
+              "name": "RUBBER TRACKS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-sprockets",
+              "name": "SPROCKETS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-adjusters-recoil-springs",
+              "name": "TRACK ADJUSTERS / RECOIL SPRINGS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-chains",
+              "name": "TRACK CHAINS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-frames",
+              "name": "TRACK FRAMES",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-groups",
+              "name": "TRACK GROUPS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-idlers",
+              "name": "TRACK IDLERS",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-track-pads-shoes",
+              "name": "TRACK PADS / SHOES",
+              "subcategories": []
+            },
+            {
+              "id": "attachments-parts-undercarriage-parts-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-valve",
+          "name": "VALVE",
+          "subcategories": [
+            {
+              "id": "attachments-parts-valve-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-water-tanks",
+          "name": "WATER TANKS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-water-tanks-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-weights",
+          "name": "WEIGHTS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-weights-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-wheels",
+          "name": "WHEELS",
+          "subcategories": [
+            {
+              "id": "attachments-parts-wheels-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "attachments-parts-winch",
+          "name": "WINCH",
+          "subcategories": [
+            {
+              "id": "attachments-parts-winch-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "support-equipment",
+      "name": "SUPPORT EQUIPMENT",
+      "subcategories": [
+        {
+          "id": "support-equipment-dumpers",
+          "name": "DUMPERS",
+          "subcategories": [
+            {
+              "id": "support-equipment-dumpers-wacker-nueson",
+              "name": "WACKER NUESON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-thwaites",
+              "name": "THWAITES",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-jcb",
+              "name": "JCB",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-ausa",
+              "name": "AUSA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-mecalac",
+              "name": "MECALAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-terex",
+              "name": "TEREX",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-messersi",
+              "name": "MESSERSI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-fiori",
+              "name": "FIORI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-sdlanch",
+              "name": "SDLANCH",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-cormidi",
+              "name": "CORMIDI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-barford",
+              "name": "BARFORD",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-benford",
+              "name": "BENFORD",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-bergman",
+              "name": "BERGMAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-hydrema",
+              "name": "HYDREMA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-kubota",
+              "name": "KUBOTA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-merlo",
+              "name": "MERLO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-nc-engineering",
+              "name": "NC ENGINEERING",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-uhi",
+              "name": "UHI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-yanmar",
+              "name": "YANMAR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-dumpers-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-air-compressors",
+          "name": "AIR COMPRESSORS",
+          "subcategories": [
+            {
+              "id": "support-equipment-air-compressors-atlas-copco",
+              "name": "ATLAS COPCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-sullair",
+              "name": "SULLAIR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-doosan",
+              "name": "DOOSAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-ingersoll-rand",
+              "name": "INGERSOLL-RAND",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-sullivan-palatek",
+              "name": "SULLIVAN PALATEK",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-kaeser",
+              "name": "KAESER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-compare",
+              "name": "COMPARE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-chi-pnuematic",
+              "name": "CHI PNUEMATIC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-airman",
+              "name": "AIRMAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-bobcat",
+              "name": "BOBCAT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-gardner-denver",
+              "name": "GARDNER-DENVER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-multiquip",
+              "name": "MULTIQUIP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-quincy",
+              "name": "QUINCY",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-rotair",
+              "name": "ROTAIR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-sullivan",
+              "name": "SULLIVAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-winair-compressor",
+              "name": "WINAIR COMPRESSOR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-air-compressors-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-generators",
+          "name": "GENERATORS",
+          "subcategories": [
+            {
+              "id": "support-equipment-generators-caterpillar",
+              "name": "CATERPILLAR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-multiquip-whisperwatt",
+              "name": "MULTIQUIP WHISPERWATT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-cummins",
+              "name": "CUMMINS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-atlas-copco",
+              "name": "ATLAS COPCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-generac",
+              "name": "GENERAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-wacker-nueson",
+              "name": "WACKER NUESON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-kohler",
+              "name": "KOHLER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-doosan",
+              "name": "DOOSAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-airman",
+              "name": "AIRMAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-miller",
+              "name": "MILLER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-aksa",
+              "name": "AKSA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-allmand-bros",
+              "name": "ALLMAND BROS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-ashita",
+              "name": "ASHITA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-baldor",
+              "name": "BALDOR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-baumalight",
+              "name": "BAUMALIGHT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-be-power-equip",
+              "name": "BE POWER EQUIP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-briggs-and-stratton",
+              "name": "BRIGGS & STRATTON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-champion-power",
+              "name": "CHAMPION POWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-chi-pnuematic",
+              "name": "CHI PNUEMATIC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-ck-p-ower",
+              "name": "CK P[OWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-coleman",
+              "name": "COLEMAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-deere",
+              "name": "DEERE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-detroit",
+              "name": "DETROIT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-deutz",
+              "name": "DEUTZ",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-fg-wilson",
+              "name": "FG WILSON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-genpower",
+              "name": "GENPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-giga-power",
+              "name": "GIGA POWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-gillette",
+              "name": "GILLETTE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-himoinsa",
+              "name": "HIMOINSA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-hipower",
+              "name": "HIPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-honda",
+              "name": "HONDA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-hustler",
+              "name": "HUSTLER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-ingersol-rand",
+              "name": "INGERSOL RAND",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-iveco",
+              "name": "IVECO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-jcb",
+              "name": "JCB",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-isuzu",
+              "name": "ISUZU",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-jenbacher",
+              "name": "JENBACHER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-katolight",
+              "name": "KATOLIGHT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-kubota",
+              "name": "KUBOTA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-leroy-somer",
+              "name": "LEROY SOMER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-libby",
+              "name": "LIBBY",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-lincoln-electric",
+              "name": "LINCOLN ELECTRIC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-magnum",
+              "name": "MAGNUM",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-makinex",
+              "name": "MAKINEX",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-marathon",
+              "name": "MARATHON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-marelli",
+              "name": "MARELLI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-miller",
+              "name": "MILLER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-mosa",
+              "name": "MOSA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-mps",
+              "name": "MPS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-multiquip-whisperwatt",
+              "name": "MULTIQUIP WHISPERWATT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-olympian",
+              "name": "OLYMPIAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-onan",
+              "name": "ONAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-perkins",
+              "name": "PERKINS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-powerlink",
+              "name": "POWERLINK",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-powersource",
+              "name": "POWERSOURCE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-pramac",
+              "name": "PRAMAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-rte",
+              "name": "RTE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-scania",
+              "name": "SCANIA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-sdmo",
+              "name": "SDMO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-shindaiwa",
+              "name": "SHINDAIWA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-spectrum",
+              "name": "SPECTRUM",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-stamford",
+              "name": "STAMFORD",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-taylor-power-sysytems",
+              "name": "TAYLOR POWER SYSYTEMS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-tecnogen",
+              "name": "TECNOGEN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-volvo-penta",
+              "name": "VOLVO PENTA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-wanco",
+              "name": "WANCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-waukesha",
+              "name": "WAUKESHA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-winco",
+              "name": "WINCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-winpower",
+              "name": "WINPOWER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-yamaha",
+              "name": "YAMAHA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-yamakoyo",
+              "name": "YAMAKOYO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-yanmar",
+              "name": "YANMAR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-generators-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-heaters",
+          "name": "HEATERS",
+          "subcategories": [
+            {
+              "id": "support-equipment-heaters-campco-equipment",
+              "name": "CAMPCO EQUIPMENT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-lb-white",
+              "name": "LB WHITE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-wacker-nueson",
+              "name": "WACKER NUESON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-frost-fighter",
+              "name": "FROST FIGHTER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-flagro",
+              "name": "FLAGRO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-allmand-bros",
+              "name": "ALLMAND BROS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-heat-king",
+              "name": "HEAT KING",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-dewalt",
+              "name": "DEWALT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-generac",
+              "name": "GENERAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-thawzall",
+              "name": "THAWZALL",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-dryair",
+              "name": "DRYAIR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-ground-heater",
+              "name": "GROUND HEATER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-quest",
+              "name": "QUEST",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-sunfire",
+              "name": "SUNFIRE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-unspecified",
+              "name": "UNSPECIFIED",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-heaters-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-light-towers",
+          "name": "LIGHT TOWERS",
+          "subcategories": [
+            {
+              "id": "support-equipment-light-towers-magnum",
+              "name": "MAGNUM",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-allmand-bros",
+              "name": "ALLMAND BROS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-generac",
+              "name": "GENERAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-wacker-nueson",
+              "name": "WACKER NUESON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-atlas-copco",
+              "name": "ATLAS COPCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-wanco",
+              "name": "WANCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-progress-solar-solutions",
+              "name": "PROGRESS SOLAR SOLUTIONS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-terex",
+              "name": "TEREX",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-doosan",
+              "name": "DOOSAN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-uhi",
+              "name": "UHI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-axiom-equip",
+              "name": "AXIOM EQUIP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-bobcat",
+              "name": "BOBCAT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-chi-pnuematic",
+              "name": "CHI PNUEMATIC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-genie",
+              "name": "GENIE",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-genmac",
+              "name": "GENMAC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-ingersol-rand",
+              "name": "INGERSOL RAND",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-multiquip",
+              "name": "MULTIQUIP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-national-signal",
+              "name": "NATIONAL SIGNAL",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-tower-light",
+              "name": "TOWER LIGHT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-trime",
+              "name": "TRIME",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-uhi",
+              "name": "UHI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-unspecified",
+              "name": "UNSPECIFIED",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-yanmar",
+              "name": "YANMAR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-light-towers-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-pumps",
+          "name": "PUMPS",
+          "subcategories": [
+            {
+              "id": "support-equipment-pumps-wacker-nueson",
+              "name": "WACKER NUESON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-cornell",
+              "name": "CORNELL",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-multiquip",
+              "name": "MULTIQUIP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-godwin",
+              "name": "GODWIN",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-be-power-equipment",
+              "name": "BE POWER EQUIPMENT",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-tsurumi",
+              "name": "TSURUMI",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-gorman-rupp",
+              "name": "GORMAN-RUPP",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-unspecified",
+              "name": "UNSPECIFIED",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-atlas-copco",
+              "name": "ATLAS COPCO",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-honda",
+              "name": "HONDA",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-pumps-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
+        },
+        {
+          "id": "support-equipment-vacuum-excavator",
+          "name": "VACUUM EXCAVATOR",
+          "subcategories": [
+            {
+              "id": "support-equipment-vacuum-excavator-vermeer",
+              "name": "VERMEER",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-ditch-witch",
+              "name": "DITCH WITCH",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-ring-o-matic",
+              "name": "RING-O-MATIC",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-vac-tron",
+              "name": "VAC TRON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-camel",
+              "name": "CAMEL",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-vacmasters",
+              "name": "VACMASTERS",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-vac-con",
+              "name": "VAC CON",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-gapvax",
+              "name": "GAPVAX",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-vac-ex",
+              "name": "VAC-EX",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-vactor",
+              "name": "VACTOR",
+              "subcategories": []
+            },
+            {
+              "id": "support-equipment-vacuum-excavator-other",
               "name": "OTHER",
               "subcategories": []
             }
@@ -162744,6013 +168753,9 @@ const categoriesConfig = {
       ]
     },
     {
-      "id": "wheel-loaders",
-      "name": "WHEEL LOADERS",
-      "subcategories": [
-        {
-          "id": "wheel-loaders-caterpillar",
-          "name": "CATERPILLAR",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-caterpillar-901",
-              "name": "901",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-901b",
-              "name": "901B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-902",
-              "name": "902",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-902b",
-              "name": "902B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-903",
-              "name": "903",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-903b",
-              "name": "903B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-903c",
-              "name": "903C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-903c2",
-              "name": "903C2",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-903d",
-              "name": "903D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-904b",
-              "name": "904B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-906",
-              "name": "906",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-906h",
-              "name": "906H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-906h2",
-              "name": "906H2",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-906m",
-              "name": "906M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-907h",
-              "name": "907H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-907h2",
-              "name": "907H2",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-907m",
-              "name": "907M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-908h",
-              "name": "908H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-908h2",
-              "name": "908H2",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-908m",
-              "name": "908M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-910g",
-              "name": "910G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-910k",
-              "name": "910K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-910m",
-              "name": "910M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-914g",
-              "name": "914G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-914k",
-              "name": "914K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-914m",
-              "name": "914M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-918g",
-              "name": "918G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-918h",
-              "name": "918H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-918m",
-              "name": "918M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-920",
-              "name": "920",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-920k",
-              "name": "920K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-920m",
-              "name": "920M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924g",
-              "name": "924G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924gz",
-              "name": "924GZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924h",
-              "name": "924H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924hz",
-              "name": "924HZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924k",
-              "name": "924K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-924m",
-              "name": "924M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-926m",
-              "name": "926M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928g",
-              "name": "928G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928gz",
-              "name": "928GZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928h",
-              "name": "928H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928hz",
-              "name": "928HZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928k",
-              "name": "928K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-928m",
-              "name": "928M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-930g",
-              "name": "930G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-930h",
-              "name": "930H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-930k",
-              "name": "930K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-930m",
-              "name": "930M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-930m-ag-handler",
-              "name": "930M AG HANDLER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-938g",
-              "name": "938G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-938g-ii",
-              "name": "938G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-938h",
-              "name": "938H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-938k",
-              "name": "938K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-938m",
-              "name": "938M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950g",
-              "name": "950G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950g-ii",
-              "name": "950G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950gc",
-              "name": "950GC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950h",
-              "name": "950H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950k",
-              "name": "950K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950l",
-              "name": "950L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950m",
-              "name": "950M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-950mz",
-              "name": "950MZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-962g",
-              "name": "962G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-962g-ii",
-              "name": "962G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-962h",
-              "name": "962H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-962k",
-              "name": "962K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-962m",
-              "name": "962M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966g",
-              "name": "966G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966g-ii",
-              "name": "966G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966gc",
-              "name": "966GC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966h",
-              "name": "966H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966k",
-              "name": "966K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966l",
-              "name": "966L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966m",
-              "name": "966M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966m-xe",
-              "name": "966M XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-966-xe",
-              "name": "966 XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972g",
-              "name": "972G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972g-ii",
-              "name": "972G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972h",
-              "name": "972H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972k",
-              "name": "972K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972m",
-              "name": "972M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972m-xe",
-              "name": "972M XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-972-xe",
-              "name": "972 XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980g",
-              "name": "980G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980g-ii",
-              "name": "980G II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980h",
-              "name": "980H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980k",
-              "name": "980K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980l",
-              "name": "980L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980m",
-              "name": "980M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-980-xe",
-              "name": "980 XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-982m",
-              "name": "982M",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-982-xe",
-              "name": "982 XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-986h",
-              "name": "986H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-986k",
-              "name": "986K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-988g",
-              "name": "988G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-988h",
-              "name": "988H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-988k",
-              "name": "988K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-988k-xe",
-              "name": "988K XE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-990h",
-              "name": "990H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-990k",
-              "name": "990K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-992g",
-              "name": "992G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-992k",
-              "name": "992K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-993k",
-              "name": "993K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-994f",
-              "name": "994F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-994h",
-              "name": "994H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-it14g",
-              "name": "IT14G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-it28g",
-              "name": "IT28G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-it38g",
-              "name": "IT38G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-caterpillar-it62g",
-              "name": "IT62G",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-deere",
-          "name": "DEERE",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-deere-184-g-tier",
-              "name": "184 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-204-g-tier",
-              "name": "204 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-204k",
-              "name": "204K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-204l",
-              "name": "204L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244e",
-              "name": "244E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244h",
-              "name": "244H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244j",
-              "name": "244J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244k",
-              "name": "244K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244k-ii",
-              "name": "244K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244l",
-              "name": "244L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-244-p-tier",
-              "name": "244 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-304-g-tier",
-              "name": "304 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-304h",
-              "name": "304H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-304j",
-              "name": "304J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-304k",
-              "name": "304K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-304l",
-              "name": "304L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-324h",
-              "name": "324H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-324j",
-              "name": "324J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-324k",
-              "name": "324K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-324l",
-              "name": "324L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-324-p-tier",
-              "name": "324 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-326-p-tier",
-              "name": "326 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344e",
-              "name": "344E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344h",
-              "name": "344H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344j",
-              "name": "344J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344k",
-              "name": "344K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344l",
-              "name": "344L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-344-p-tier",
-              "name": "344 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444c",
-              "name": "444C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444d",
-              "name": "444D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444e",
-              "name": "444E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444h",
-              "name": "444H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444j",
-              "name": "444J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444k",
-              "name": "444K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444l",
-              "name": "444L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444-g-tier",
-              "name": "444 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-444-p-tier",
-              "name": "444 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-524k",
-              "name": "524K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-524k-ii",
-              "name": "524K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-524l",
-              "name": "524L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-524-p-tier",
-              "name": "524 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544d",
-              "name": "544D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544e",
-              "name": "544E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544g",
-              "name": "544G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544h",
-              "name": "544H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544j",
-              "name": "544J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544k",
-              "name": "544K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544k-ii",
-              "name": "544K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544l",
-              "name": "544L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544-p-tier",
-              "name": "544 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544-g-tier",
-              "name": "544 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624e",
-              "name": "624E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624g",
-              "name": "624G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624h",
-              "name": "624H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624j",
-              "name": "624J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624k",
-              "name": "624K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624k-ii",
-              "name": "624K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624l",
-              "name": "624L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624-p-tier",
-              "name": "624 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644d",
-              "name": "644D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644e",
-              "name": "644E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644g",
-              "name": "644G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644h",
-              "name": "644H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644j",
-              "name": "644J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644k",
-              "name": "644K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644k-hybrid",
-              "name": "644K HYBRID",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644l",
-              "name": "644L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644l-hybrid",
-              "name": "644L HYBRID",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644-g-tier",
-              "name": "644 G-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644-p-tier",
-              "name": "644 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644-x-tier",
-              "name": "644 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724j",
-              "name": "724J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724k",
-              "name": "724K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724l",
-              "name": "724L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724-p-tier",
-              "name": "724 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744e",
-              "name": "744E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744h",
-              "name": "744H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744j",
-              "name": "744J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744k",
-              "name": "744K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744k-ii",
-              "name": "744K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744l",
-              "name": "744L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744-p-tier",
-              "name": "744 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744-x-tier",
-              "name": "744 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824j",
-              "name": "824J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824k",
-              "name": "824K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824k-ii",
-              "name": "824K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824l",
-              "name": "824L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824-p-tier",
-              "name": "824 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-824-x-tier",
-              "name": "824 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844j",
-              "name": "844J",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844k",
-              "name": "844K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844k-ii",
-              "name": "844K II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844k-iii",
-              "name": "844K III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844l",
-              "name": "844L",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844-p-tier",
-              "name": "844 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844-x-tier",
-              "name": "844 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-904-p-tier",
-              "name": "904 P-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-904-x-tier",
-              "name": "904 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-944k",
-              "name": "944K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-944k-hybrid",
-              "name": "944K HYBRID",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-944-x-tier",
-              "name": "944 X-TIER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-tc44h",
-              "name": "TC44H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-tc54h",
-              "name": "TC54H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-tc62h",
-              "name": "TC62H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544j-high-lift",
-              "name": "544J HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624j-high-lift",
-              "name": "624J HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644j-high-lift",
-              "name": "644J HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724j-high-lift",
-              "name": "724J HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744j-high-lift",
-              "name": "744J HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544k-high-lift",
-              "name": "544K HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-624k-high-lift",
-              "name": "624K HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644k-high-lift",
-              "name": "644K HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-724k-high-lift",
-              "name": "724K HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744k-high-lift",
-              "name": "744K HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-544",
-              "name": "544",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-644",
-              "name": "644",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-744",
-              "name": "744",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-deere-844",
-              "name": "844",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-volvo",
-          "name": "VOLVO",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-volvo-l20",
-              "name": "L20",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l20b",
-              "name": "L20B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l20-electric",
-              "name": "L20 ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l25",
-              "name": "L25",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l25b",
-              "name": "L25B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l25-electric",
-              "name": "L25 ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l30",
-              "name": "L30",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l30b",
-              "name": "L30B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l35",
-              "name": "L35",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l35b",
-              "name": "L35B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l45",
-              "name": "L45",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l45b",
-              "name": "L45B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50c",
-              "name": "L50C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50d",
-              "name": "L50D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50e",
-              "name": "L50E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50f",
-              "name": "L50F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50g",
-              "name": "L50G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l50h",
-              "name": "L50H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l60e",
-              "name": "L60E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l60f",
-              "name": "L60F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l60g",
-              "name": "L60G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l60h",
-              "name": "L60H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70c",
-              "name": "L70C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70d",
-              "name": "L70D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70e",
-              "name": "L70E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70f",
-              "name": "L70F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70g",
-              "name": "L70G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l70h",
-              "name": "L70H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90c",
-              "name": "L90C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90d",
-              "name": "L90D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90e",
-              "name": "L90E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90f",
-              "name": "L90F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90g",
-              "name": "L90G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l90h",
-              "name": "L90H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l110e",
-              "name": "L110E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l110f",
-              "name": "L110F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l110g",
-              "name": "L110G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l110h",
-              "name": "L110H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120c",
-              "name": "L120C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120d",
-              "name": "L120D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120e",
-              "name": "L120E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120f",
-              "name": "L120F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120g",
-              "name": "L120G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120h",
-              "name": "L120H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120-electric",
-              "name": "L120 ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150c",
-              "name": "L150C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150d",
-              "name": "L150D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150e",
-              "name": "L150E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150f",
-              "name": "L150F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150g",
-              "name": "L150G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l150h",
-              "name": "L150H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180c",
-              "name": "L180C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180d",
-              "name": "L180D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180e",
-              "name": "L180E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180f",
-              "name": "L180F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180g",
-              "name": "L180G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180h",
-              "name": "L180H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l200-high-lift",
-              "name": "L200 HIGH LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l220d",
-              "name": "L220D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l220e",
-              "name": "L220E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l220f",
-              "name": "L220F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l220g",
-              "name": "L220G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l220h",
-              "name": "L220H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l250g",
-              "name": "L250G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l260",
-              "name": "L260",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l260-rehandler",
-              "name": "L260 REHANDLER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l330c",
-              "name": "L330C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l330d",
-              "name": "L330D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l330e",
-              "name": "L330E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l330f",
-              "name": "L330F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l350f",
-              "name": "L350F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l350h",
-              "name": "L350H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l350",
-              "name": "L350",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l110h-high-lift",
-              "name": "L110H HIGH LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l120h-high-lift",
-              "name": "L120H HIGH LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-l180h-high-lift",
-              "name": "L180H HIGH LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-bm4300",
-              "name": "BM4300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-bm4400",
-              "name": "BM4400",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-bm4500",
-              "name": "BM4500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-volvo-bm4600",
-              "name": "BM4600",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-komatsu",
-          "name": "KOMATSU",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-komatsu-wa30",
-              "name": "WA30",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa30-5",
-              "name": "WA30-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa30-6",
-              "name": "WA30-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa50",
-              "name": "WA50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa50-3",
-              "name": "WA50-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa50-5",
-              "name": "WA50-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa50-6",
-              "name": "WA50-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa65",
-              "name": "WA65",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa65-3",
-              "name": "WA65-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa70",
-              "name": "WA70",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa80",
-              "name": "WA80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa80-5",
-              "name": "WA80-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa90",
-              "name": "WA90",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa100",
-              "name": "WA100",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa100m-7",
-              "name": "WA100M-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa120",
-              "name": "WA120",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa150",
-              "name": "WA150",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa180",
-              "name": "WA180",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200",
-              "name": "WA200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200-1",
-              "name": "WA200-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200-3",
-              "name": "WA200-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200-5",
-              "name": "WA200-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200-6",
-              "name": "WA200-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200-7",
-              "name": "WA200-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa200pt-5",
-              "name": "WA200PT-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250",
-              "name": "WA250",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250-1",
-              "name": "WA250-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250-3",
-              "name": "WA250-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250-5",
-              "name": "WA250-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250-6",
-              "name": "WA250-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250-7",
-              "name": "WA250-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa250pt",
-              "name": "WA250PT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa270",
-              "name": "WA270",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa270-3",
-              "name": "WA270-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa270-7",
-              "name": "WA270-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300",
-              "name": "WA300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300-1",
-              "name": "WA300-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300-3",
-              "name": "WA300-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300-5",
-              "name": "WA300-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300-6",
-              "name": "WA300-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa300-7",
-              "name": "WA300-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320",
-              "name": "WA320",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320-3",
-              "name": "WA320-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320-5",
-              "name": "WA320-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320-6",
-              "name": "WA320-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320-7",
-              "name": "WA320-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320pt",
-              "name": "WA320PT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320pz",
-              "name": "WA320PZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa320pz-6",
-              "name": "WA320PZ-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa350",
-              "name": "WA350",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa350-1",
-              "name": "WA350-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa350-3",
-              "name": "WA350-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa350-5",
-              "name": "WA350-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa350-6",
-              "name": "WA350-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380",
-              "name": "WA380",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380-3",
-              "name": "WA380-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380-5",
-              "name": "WA380-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380-6",
-              "name": "WA380-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380-7",
-              "name": "WA380-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa380-8",
-              "name": "WA380-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa430",
-              "name": "WA430",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa430-5",
-              "name": "WA430-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa430-6",
-              "name": "WA430-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa450",
-              "name": "WA450",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa450-1",
-              "name": "WA450-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa450-3",
-              "name": "WA450-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa450-5",
-              "name": "WA450-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa450-6",
-              "name": "WA450-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470",
-              "name": "WA470",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470-3",
-              "name": "WA470-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470-5",
-              "name": "WA470-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470-6",
-              "name": "WA470-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470-7",
-              "name": "WA470-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa470pz",
-              "name": "WA470PZ",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475",
-              "name": "WA475",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-3",
-              "name": "WA475-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-5",
-              "name": "WA475-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-6",
-              "name": "WA475-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-7",
-              "name": "WA475-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-8",
-              "name": "WA475-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa475-10",
-              "name": "WA475-10",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa480",
-              "name": "WA480",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa480-5",
-              "name": "WA480-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa480-6",
-              "name": "WA480-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa480-8",
-              "name": "WA480-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa485-10",
-              "name": "WA485-10",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500",
-              "name": "WA500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500-1",
-              "name": "WA500-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500-3",
-              "name": "WA500-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500-6",
-              "name": "WA500-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500-7",
-              "name": "WA500-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa500-8",
-              "name": "WA500-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa600",
-              "name": "WA600",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa600-1",
-              "name": "WA600-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa600-3",
-              "name": "WA600-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa600-6",
-              "name": "WA600-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa600-8",
-              "name": "WA600-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa700",
-              "name": "WA700",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa700-1",
-              "name": "WA700-1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa700-3",
-              "name": "WA700-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa700-8",
-              "name": "WA700-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa800",
-              "name": "WA800",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa800-3",
-              "name": "WA800-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa800-8",
-              "name": "WA800-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa900",
-              "name": "WA900",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa900-3",
-              "name": "WA900-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-wa900-3eo",
-              "name": "WA900-3EO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-we1850",
-              "name": "WE1850",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-540",
-              "name": "540",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-545",
-              "name": "545",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-komatsu-545a",
-              "name": "545A",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-case",
-          "name": "CASE",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-case-21d",
-              "name": "21D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-21e",
-              "name": "21E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-21f",
-              "name": "21F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-21f-xt",
-              "name": "21F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-121d",
-              "name": "121D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-121e",
-              "name": "121E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-121f",
-              "name": "121F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-121f-xt",
-              "name": "121F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-221d",
-              "name": "221D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-221e",
-              "name": "221E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-221f",
-              "name": "221F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-321d",
-              "name": "321D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-321e",
-              "name": "321E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-321f",
-              "name": "321F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-421d",
-              "name": "421D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-421e",
-              "name": "421E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-421f",
-              "name": "421F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-421g",
-              "name": "421G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521d",
-              "name": "521D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521d-xt",
-              "name": "521D XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521e",
-              "name": "521E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521e-xr",
-              "name": "521E XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521e-xt",
-              "name": "521E XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521f",
-              "name": "521F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521f-xr",
-              "name": "521F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521f-xt",
-              "name": "521F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521g",
-              "name": "521G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521g-xr",
-              "name": "521G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521g-xt",
-              "name": "521G XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-521g-z-bar",
-              "name": "521G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621b",
-              "name": "621B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621b-xt",
-              "name": "621B XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621c",
-              "name": "621C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621c-xr",
-              "name": "621C XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621c-xt",
-              "name": "621C XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621d",
-              "name": "621D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621d-xr",
-              "name": "621D XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621d-xt",
-              "name": "621D XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621e",
-              "name": "621E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621e-xr",
-              "name": "621E XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621e-xt",
-              "name": "621E XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621f",
-              "name": "621F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621f-xr",
-              "name": "621F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621f-xt",
-              "name": "621F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621g",
-              "name": "621G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621g-xr",
-              "name": "621G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621g-xt",
-              "name": "621G XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-621g-z-bar",
-              "name": "621G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-651g",
-              "name": "651G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-651g-xr",
-              "name": "651G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-651g-xt",
-              "name": "651G XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-651g-z-bar",
-              "name": "651G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721b",
-              "name": "721B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721c",
-              "name": "721C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721c-xr",
-              "name": "721C XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721c-xt",
-              "name": "721C XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721d",
-              "name": "721D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721d-xt",
-              "name": "721D XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721e",
-              "name": "721E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721e-xr",
-              "name": "721E XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721e-xt",
-              "name": "721E XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721f",
-              "name": "721F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721f-xr",
-              "name": "721F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721f-xt",
-              "name": "721F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721g",
-              "name": "721G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721g-xr",
-              "name": "721G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721g-xt",
-              "name": "721G XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-721g-z-bar",
-              "name": "721G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821b",
-              "name": "821B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821c",
-              "name": "821C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821c-xr",
-              "name": "821C XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821e",
-              "name": "821E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821f",
-              "name": "821F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821f-xr",
-              "name": "821F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821g",
-              "name": "821G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821g-xr",
-              "name": "821G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-821g-z-bar",
-              "name": "821G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921b",
-              "name": "921B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921c",
-              "name": "921C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921c-xr",
-              "name": "921C XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921e",
-              "name": "921E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921f",
-              "name": "921F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921f-xr",
-              "name": "921F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921g",
-              "name": "921G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921g-xr",
-              "name": "921G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-921g-z-bar",
-              "name": "921G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021d",
-              "name": "1021D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021e",
-              "name": "1021E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021f",
-              "name": "1021F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021f-xr",
-              "name": "1021F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021g",
-              "name": "1021G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021g-xr",
-              "name": "1021G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021g-z-bar",
-              "name": "1021G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121d",
-              "name": "1121D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121e",
-              "name": "1121E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121f",
-              "name": "1121F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121f-xr",
-              "name": "1121F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121g",
-              "name": "1121G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121g-xr",
-              "name": "1121G XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121g-z-bar",
-              "name": "1121G Z BAR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1221d",
-              "name": "1221D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1221e",
-              "name": "1221E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1221e-xr",
-              "name": "1221E XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1221f",
-              "name": "1221F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1221f-xr",
-              "name": "1221F XR",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-cl36ev",
-              "name": "CL36EV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w11",
-              "name": "W11",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w11b",
-              "name": "W11B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w18",
-              "name": "W18",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w20c",
-              "name": "W20C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w36",
-              "name": "W36",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1021f-xt",
-              "name": "1021F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-1121f-xt",
-              "name": "1121F XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-40xt",
-              "name": "40XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-60xt",
-              "name": "60XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w14",
-              "name": "W14",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w18",
-              "name": "W18",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w20",
-              "name": "W20",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w24",
-              "name": "W24",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w26",
-              "name": "W26",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-case-w36",
-              "name": "W36",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-hyundai",
-          "name": "HYUNDAI",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-hyundai-hl730",
-              "name": "HL730",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730-3",
-              "name": "HL730-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730-7",
-              "name": "HL730-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730-9",
-              "name": "HL730-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730a",
-              "name": "HL730A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730tm",
-              "name": "HL730TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730tm-7",
-              "name": "HL730TM-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl730tm-9",
-              "name": "HL730TM-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740",
-              "name": "HL740",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740-3",
-              "name": "HL740-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740-7",
-              "name": "HL740-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740-9",
-              "name": "HL740-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740a",
-              "name": "HL740A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740tm",
-              "name": "HL740TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740tm-7",
-              "name": "HL740TM-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl740tm-9",
-              "name": "HL740TM-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl757",
-              "name": "HL757",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl757-7",
-              "name": "HL757-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl757-9",
-              "name": "HL757-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl757tm-7",
-              "name": "HL757TM-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl757tm-9",
-              "name": "HL757TM-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760",
-              "name": "HL760",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760-3",
-              "name": "HL760-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760-7",
-              "name": "HL760-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760-9",
-              "name": "HL760-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760a",
-              "name": "HL760A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl760tm",
-              "name": "HL760TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770",
-              "name": "HL770",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770-3",
-              "name": "HL770-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770-7",
-              "name": "HL770-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770-9",
-              "name": "HL770-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770a",
-              "name": "HL770A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl770tm-7",
-              "name": "HL770TM-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl780",
-              "name": "HL780",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl780-3",
-              "name": "HL780-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl780-7",
-              "name": "HL780-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl780-9",
-              "name": "HL780-9",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl780a",
-              "name": "HL780A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl930a",
-              "name": "HL930A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl940",
-              "name": "HL940",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl940a",
-              "name": "HL940A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl940tm",
-              "name": "HL940TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl955",
-              "name": "HL955",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl955a",
-              "name": "HL955A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl955tm",
-              "name": "HL955TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl955xt",
-              "name": "HL955XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl960",
-              "name": "HL960",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl960a",
-              "name": "HL960A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl960xt",
-              "name": "HL960XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl960a-xt",
-              "name": "HL960A XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl970",
-              "name": "HL970",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl970a",
-              "name": "HL970A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl970xt",
-              "name": "HL970XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl975",
-              "name": "HL975",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl975a",
-              "name": "HL975A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl975xt",
-              "name": "HL975XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl980",
-              "name": "HL980",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl980a",
-              "name": "HL980A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl980xt",
-              "name": "HL980XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl980a-xt",
-              "name": "HL980A XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl985a",
-              "name": "HL985A",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl990",
-              "name": "HL990",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl990xt",
-              "name": "HL990XT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl930tm",
-              "name": "HL930TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl940tm",
-              "name": "HL940TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl955tm",
-              "name": "HL955TM",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl500",
-              "name": "HL500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl520",
-              "name": "HL520",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hyundai-hl520-3",
-              "name": "HL520-3",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-kawasaki",
-          "name": "KAWASAKI",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-kawasaki-30z",
-              "name": "30Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-35z",
-              "name": "35Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-40z",
-              "name": "40Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-42z",
-              "name": "42Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-42z-ii",
-              "name": "42Z II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-42z-iii",
-              "name": "42Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-45z",
-              "name": "45Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-45z-iii",
-              "name": "45Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-50z",
-              "name": "50Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-50z-ii",
-              "name": "50Z II",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-50z-iii",
-              "name": "50Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-50z-v",
-              "name": "50Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-60z",
-              "name": "60Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-60z-iii",
-              "name": "60Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-60z-iv",
-              "name": "60Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-60z-v",
-              "name": "60Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-65z",
-              "name": "65Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-65z-iv",
-              "name": "65Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-65z-v",
-              "name": "65Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-65zv-2",
-              "name": "65ZV-2",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-67z",
-              "name": "67Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-67z-iv",
-              "name": "67Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-67z-v",
-              "name": "67Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-67z7",
-              "name": "67Z7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-70z",
-              "name": "70Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-70z-iii",
-              "name": "70Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-70z-iv",
-              "name": "70Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-70z-v",
-              "name": "70Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-70z7",
-              "name": "70Z7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-75z",
-              "name": "75Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-80z",
-              "name": "80Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-80z-iii",
-              "name": "80Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-80z-iv",
-              "name": "80Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-80z-v",
-              "name": "80Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-80z7",
-              "name": "80Z7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-85z",
-              "name": "85Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-85z-iv",
-              "name": "85Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-85z-v",
-              "name": "85Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-90z",
-              "name": "90Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-90z-iii",
-              "name": "90Z III",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-90z-iv",
-              "name": "90Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-90z-v",
-              "name": "90Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-95z",
-              "name": "95Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-95z-iv",
-              "name": "95Z IV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-95z-v",
-              "name": "95Z V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-r30z",
-              "name": "R30Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-r42z",
-              "name": "R42Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-r50z",
-              "name": "R50Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-r60z",
-              "name": "R60Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-r70z",
-              "name": "R70Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-65tmv",
-              "name": "65TMV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-67tmv",
-              "name": "67TMV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-kld65z",
-              "name": "KLD65Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-kld70z",
-              "name": "KLD70Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-kld80z",
-              "name": "KLD80Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-zv65",
-              "name": "ZV65",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-zv75",
-              "name": "ZV75",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kawasaki-zv100",
-              "name": "ZV100",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-doosan",
-          "name": "DOOSAN",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-doosan-dl80",
-              "name": "DL80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl80-3",
-              "name": "DL80-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl160",
-              "name": "DL160",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl160-3",
-              "name": "DL160-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl160tc",
-              "name": "DL160TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200",
-              "name": "DL200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200-3",
-              "name": "DL200-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200-5",
-              "name": "DL200-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200-7",
-              "name": "DL200-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200tc",
-              "name": "DL200TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl200tc-5",
-              "name": "DL200TC-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl220",
-              "name": "DL220",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl220-3",
-              "name": "DL220-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl220-5",
-              "name": "DL220-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl220-7",
-              "name": "DL220-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl220tc-5",
-              "name": "DL220TC-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl250",
-              "name": "DL250",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl250-3",
-              "name": "DL250-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl250-5",
-              "name": "DL250-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl250-7",
-              "name": "DL250-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl280",
-              "name": "DL280",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl280-5",
-              "name": "DL280-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl300",
-              "name": "DL300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl300-3",
-              "name": "DL300-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl300-5",
-              "name": "DL300-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl300-7",
-              "name": "DL300-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl350",
-              "name": "DL350",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl350-3",
-              "name": "DL350-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl350-5",
-              "name": "DL350-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl400",
-              "name": "DL400",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl400-3",
-              "name": "DL400-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl400-5",
-              "name": "DL400-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl420",
-              "name": "DL420",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl420-3",
-              "name": "DL420-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl420-5",
-              "name": "DL420-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl420-7",
-              "name": "DL420-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl450",
-              "name": "DL450",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl450-3",
-              "name": "DL450-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl450-5",
-              "name": "DL450-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl500",
-              "name": "DL500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl500-3",
-              "name": "DL500-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl500-5",
-              "name": "DL500-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl550",
-              "name": "DL550",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl550-3",
-              "name": "DL550-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl550-5",
-              "name": "DL550-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl550-7",
-              "name": "DL550-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl580-5",
-              "name": "DL580-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl580-7",
-              "name": "DL580-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl250tc",
-              "name": "DL250TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-dl300tc",
-              "name": "DL300TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-160",
-              "name": "MEGA 160",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-200",
-              "name": "MEGA 200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-250",
-              "name": "MEGA 250",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-300",
-              "name": "MEGA 300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-400",
-              "name": "MEGA 400",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-200-v",
-              "name": "MEGA 200-V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-250-v",
-              "name": "MEGA 250-V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-mega-300-v",
-              "name": "MEGA 300-V",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-disd-sd200",
-              "name": "DISD SD200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-doosan-disd-sd300",
-              "name": "DISD SD300",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-hitachi",
-          "name": "HITACHI",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-hitachi-zw30",
-              "name": "ZW30",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw50",
-              "name": "ZW50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw65",
-              "name": "ZW65",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw75",
-              "name": "ZW75",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw80",
-              "name": "ZW80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw95",
-              "name": "ZW95",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw100",
-              "name": "ZW100",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw110",
-              "name": "ZW110",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw120",
-              "name": "ZW120",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw140",
-              "name": "ZW140",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw150",
-              "name": "ZW150",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw150-5",
-              "name": "ZW150-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw150-6",
-              "name": "ZW150-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw180",
-              "name": "ZW180",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw180-5",
-              "name": "ZW180-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw180-6",
-              "name": "ZW180-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220",
-              "name": "ZW220",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220-5",
-              "name": "ZW220-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220-6",
-              "name": "ZW220-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220pl",
-              "name": "ZW220PL",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250",
-              "name": "ZW250",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250-3",
-              "name": "ZW250-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250-5",
-              "name": "ZW250-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250-6",
-              "name": "ZW250-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250pl",
-              "name": "ZW250PL",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw310",
-              "name": "ZW310",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw310-3",
-              "name": "ZW310-3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw310-5",
-              "name": "ZW310-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw310-6",
-              "name": "ZW310-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw330",
-              "name": "ZW330",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw330-5",
-              "name": "ZW330-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw330-6",
-              "name": "ZW330-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw370",
-              "name": "ZW370",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw370-5",
-              "name": "ZW370-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw550",
-              "name": "ZW550",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-lx70",
-              "name": "LX70",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-lx80",
-              "name": "LX80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-lx100",
-              "name": "LX100",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-lx130",
-              "name": "LX130",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-lx160",
-              "name": "LX160",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220-toolmaster",
-              "name": "ZW220 TOOLMASTER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250-toolmaster",
-              "name": "ZW250 TOOLMASTER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw180-5b",
-              "name": "ZW180-5B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw220-5b",
-              "name": "ZW220-5B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250-5b",
-              "name": "ZW250-5B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw250",
-              "name": "ZW250",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-hitachi-zw310",
-              "name": "ZW310",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-new-holland",
-          "name": "NEW HOLLAND",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-new-holland-w50",
-              "name": "W50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w50b",
-              "name": "W50B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w50c",
-              "name": "W50C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w50d",
-              "name": "W50D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w60",
-              "name": "W60",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w60btc",
-              "name": "W60BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w60c",
-              "name": "W60C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w60d",
-              "name": "W60D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w70",
-              "name": "W70",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w70btc",
-              "name": "W70BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w70c",
-              "name": "W70C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w70d",
-              "name": "W70D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w80",
-              "name": "W80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w80btc",
-              "name": "W80BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w80c",
-              "name": "W80C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w80d",
-              "name": "W80D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110",
-              "name": "W110",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110b",
-              "name": "W110B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110btc",
-              "name": "W110BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110c",
-              "name": "W110C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110d",
-              "name": "W110D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130",
-              "name": "W130",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130b",
-              "name": "W130B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130btc",
-              "name": "W130BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130c",
-              "name": "W130C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130d",
-              "name": "W130D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170",
-              "name": "W170",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170b",
-              "name": "W170B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170btc",
-              "name": "W170BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170c",
-              "name": "W170C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170d",
-              "name": "W170D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w190",
-              "name": "W190",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w190b",
-              "name": "W190B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w190btc",
-              "name": "W190BTC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w190c",
-              "name": "W190C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w190d",
-              "name": "W190D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w230",
-              "name": "W230",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w230b",
-              "name": "W230B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w230c",
-              "name": "W230C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w230d",
-              "name": "W230D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w270",
-              "name": "W270",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w270b",
-              "name": "W270B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w270c",
-              "name": "W270C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w270d",
-              "name": "W270D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w300",
-              "name": "W300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w300b",
-              "name": "W300B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w300c",
-              "name": "W300C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w110tc",
-              "name": "W110TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w130tc",
-              "name": "W130TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-w170tc",
-              "name": "W170TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-lw80",
-              "name": "LW80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-lw110",
-              "name": "LW110",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-lw130",
-              "name": "LW130",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-new-holland-lw170",
-              "name": "LW170",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-jcb",
-          "name": "JCB",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-jcb-406",
-              "name": "406",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-406b",
-              "name": "406B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-406zx",
-              "name": "406ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-407",
-              "name": "407",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-407b",
-              "name": "407B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-407zx",
-              "name": "407ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-408",
-              "name": "408",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-408zx",
-              "name": "408ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-409",
-              "name": "409",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-409b",
-              "name": "409B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-409zx",
-              "name": "409ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-411",
-              "name": "411",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-411b",
-              "name": "411B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-411ht",
-              "name": "411HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-412",
-              "name": "412",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-412b",
-              "name": "412B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-412s",
-              "name": "412S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-412zx",
-              "name": "412ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-414",
-              "name": "414",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-414s",
-              "name": "414S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-414zx",
-              "name": "414ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416",
-              "name": "416",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416b",
-              "name": "416B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416ht",
-              "name": "416HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416s",
-              "name": "416S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416zx",
-              "name": "416ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-426",
-              "name": "426",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-426b",
-              "name": "426B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-426ht",
-              "name": "426HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-426s",
-              "name": "426S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-426zx",
-              "name": "426ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-436",
-              "name": "436",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-436b",
-              "name": "436B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-436ht",
-              "name": "436HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-436zx",
-              "name": "436ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-437",
-              "name": "437",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-437ht",
-              "name": "437HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-437zx",
-              "name": "437ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-456",
-              "name": "456",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-456b",
-              "name": "456B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-456ht",
-              "name": "456HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-456zx",
-              "name": "456ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-457",
-              "name": "457",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-457ht",
-              "name": "457HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-457zx",
-              "name": "457ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-467ht",
-              "name": "467HT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-467zx",
-              "name": "467ZX",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-tm180",
-              "name": "TM180",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-tm220",
-              "name": "TM220",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-tm320",
-              "name": "TM320",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-407-agri",
-              "name": "407 AGRI",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-411-agri",
-              "name": "411 AGRI",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-jcb-416-agri",
-              "name": "416 AGRI",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-liebherr",
-          "name": "LIEBHERR",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-liebherr-l506",
-              "name": "L506",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l507",
-              "name": "L507",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l508",
-              "name": "L508",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l509",
-              "name": "L509",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l514",
-              "name": "L514",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l514-stereo",
-              "name": "L514 STEREO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l518",
-              "name": "L518",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l518-2plus1",
-              "name": "L518 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l518-stereo",
-              "name": "L518 STEREO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l524",
-              "name": "L524",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l524-2plus1",
-              "name": "L524 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l524-stereo",
-              "name": "L524 STEREO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l528",
-              "name": "L528",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l528-2plus1",
-              "name": "L528 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l528-stereo",
-              "name": "L528 STEREO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l538",
-              "name": "L538",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l538-2plus1",
-              "name": "L538 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l538-stereo",
-              "name": "L538 STEREO",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l542",
-              "name": "L542",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l542-2plus1",
-              "name": "L542 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l546",
-              "name": "L546",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l546-2plus1",
-              "name": "L546 2PLUS1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l550",
-              "name": "L550",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l550-xpower",
-              "name": "L550 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l556",
-              "name": "L556",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l556-xpower",
-              "name": "L556 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l566",
-              "name": "L566",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l566-xpower",
-              "name": "L566 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l576",
-              "name": "L576",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l576-xpower",
-              "name": "L576 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l580",
-              "name": "L580",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l580-xpower",
-              "name": "L580 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l586",
-              "name": "L586",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l586-xpower",
-              "name": "L586 XPOWER",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l550-high-lift",
-              "name": "L550 HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l566-high-lift",
-              "name": "L566 HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l580-high-lift",
-              "name": "L580 HIGH-LIFT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l531",
-              "name": "L531",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l541",
-              "name": "L541",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l551",
-              "name": "L551",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l561",
-              "name": "L561",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l571",
-              "name": "L571",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liebherr-l581",
-              "name": "L581",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-xcmg",
-          "name": "XCMG",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-xcmg-lw160",
-              "name": "LW160",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw180",
-              "name": "LW180",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw200",
-              "name": "LW200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw300",
-              "name": "LW300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw300f",
-              "name": "LW300F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw300fn",
-              "name": "LW300FN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw300kn",
-              "name": "LW300KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw500f",
-              "name": "LW500F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw500fn",
-              "name": "LW500FN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw500fv",
-              "name": "LW500FV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw500kn",
-              "name": "LW500KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw550fv",
-              "name": "LW550FV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw600fv",
-              "name": "LW600FV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw600kn",
-              "name": "LW600KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw700fv",
-              "name": "LW700FV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw700kn",
-              "name": "LW700KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw800fv",
-              "name": "LW800FV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw800kn",
-              "name": "LW800KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw1200kn",
-              "name": "LW1200KN",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc968-ev",
-              "name": "XC968-EV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc975-ev",
-              "name": "XC975-EV",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc9350",
-              "name": "XC9350",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc9360",
-              "name": "XC9360",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc958",
-              "name": "XC958",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc968",
-              "name": "XC968",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-xc978",
-              "name": "XC978",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-lw500kv-tc",
-              "name": "LW500KV-TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-zl30g",
-              "name": "ZL30G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-zl50g",
-              "name": "ZL50G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-xcmg-zl60g",
-              "name": "ZL60G",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-sem",
-          "name": "SEM",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-sem-618d",
-              "name": "618D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-636d",
-              "name": "636D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-639b",
-              "name": "639B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-639c",
-              "name": "639C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-639d",
-              "name": "639D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-655b",
-              "name": "655B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-655c",
-              "name": "655C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-655d",
-              "name": "655D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-656d",
-              "name": "656D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-658b",
-              "name": "658B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-658c",
-              "name": "658C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-658d",
-              "name": "658D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-660b",
-              "name": "660B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-660c",
-              "name": "660C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-660d",
-              "name": "660D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-668b",
-              "name": "668B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-668c",
-              "name": "668C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-668d",
-              "name": "668D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-676d",
-              "name": "676D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-655d-forest",
-              "name": "655D FOREST",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-zl50f",
-              "name": "ZL50F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-zl60f",
-              "name": "ZL60F",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-652d",
-              "name": "652D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sem-653d",
-              "name": "653D",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-bobcat",
-          "name": "BOBCAT",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-bobcat-l23",
-              "name": "L23",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-l28",
-              "name": "L28",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-l85",
-              "name": "L85",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-tl30-60",
-              "name": "TL30.60",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-tl35-70",
-              "name": "TL35.70",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-tl38-70hf",
-              "name": "TL38.70HF",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl32",
-              "name": "WL32",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl34",
-              "name": "WL34",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl50",
-              "name": "WL50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl52",
-              "name": "WL52",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl53",
-              "name": "WL53",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-wl56",
-              "name": "WL56",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-1600",
-              "name": "1600",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-2400",
-              "name": "2400",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-v417",
-              "name": "V417",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-v519",
-              "name": "V519",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-v723",
-              "name": "V723",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-al275",
-              "name": "AL275",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-al350",
-              "name": "AL350",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-bobcat-al440",
-              "name": "AL440",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-develon",
-          "name": "DEVELON",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-develon-dl80-7",
-              "name": "DL80-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl200-7",
-              "name": "DL200-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl200tc-7",
-              "name": "DL200TC-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl220-7",
-              "name": "DL220-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl220tc-7",
-              "name": "DL220TC-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl250-7",
-              "name": "DL250-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl280-7",
-              "name": "DL280-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl300-7",
-              "name": "DL300-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl320-7",
-              "name": "DL320-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl380-7",
-              "name": "DL380-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl420-7",
-              "name": "DL420-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl480-7",
-              "name": "DL480-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl550-7",
-              "name": "DL550-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl580-7",
-              "name": "DL580-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl200tc",
-              "name": "DL200TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl220tc",
-              "name": "DL220TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl200-7",
-              "name": "DOOSAN DL200-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl220-7",
-              "name": "DOOSAN DL220-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl250-7",
-              "name": "DOOSAN DL250-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl300-7",
-              "name": "DOOSAN DL300-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl420-7",
-              "name": "DOOSAN DL420-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-doosan-dl550-7",
-              "name": "DOOSAN DL550-7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl300",
-              "name": "DL300",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-develon-dl420",
-              "name": "DL420",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-gehl",
-          "name": "GEHL",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-gehl-al140",
-              "name": "AL140",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-al340",
-              "name": "AL340",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-al440",
-              "name": "AL440",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-al540",
-              "name": "AL540",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-al650",
-              "name": "AL650",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-al750",
-              "name": "AL750",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-340",
-              "name": "340",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-340-articulated",
-              "name": "340 ARTICULATED",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-540",
-              "name": "540",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-540-articulated",
-              "name": "540 ARTICULATED",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-650",
-              "name": "650",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-650-articulated",
-              "name": "650 ARTICULATED",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-dl6h",
-              "name": "DL6H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-dl8h",
-              "name": "DL8H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-rs5-19",
-              "name": "RS5-19",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-rs6-34",
-              "name": "RS6-34",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-rs8-42",
-              "name": "RS8-42",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-sl340",
-              "name": "SL340",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-sl540",
-              "name": "SL540",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-alt750",
-              "name": "ALT750",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-gehl-alt950",
-              "name": "ALT950",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-giant",
-          "name": "GIANT",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-giant-d204sw",
-              "name": "D204SW",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-d254sw",
-              "name": "D254SW",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-d263sw",
-              "name": "D263SW",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-d332swt",
-              "name": "D332SWT",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-d337t",
-              "name": "D337T",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v452t",
-              "name": "V452T",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v452t-x-tra",
-              "name": "V452T X-TRA",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v5003",
-              "name": "V5003",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v5003-tele",
-              "name": "V5003 TELE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v6004",
-              "name": "V6004",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-v6004-tele",
-              "name": "V6004 TELE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g1200",
-              "name": "G1200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g1500",
-              "name": "G1500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2200",
-              "name": "G2200",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2500",
-              "name": "G2500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2700",
-              "name": "G2700",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g3500",
-              "name": "G3500",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g5000",
-              "name": "G5000",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-gt5048",
-              "name": "GT5048",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-gt5048-tele",
-              "name": "GT5048 TELE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2200e",
-              "name": "G2200E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2700e",
-              "name": "G2700E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g5000e",
-              "name": "G5000E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2200-x-tra",
-              "name": "G2200 X-TRA",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-g2700-x-tra",
-              "name": "G2700 X-TRA",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-sk252d",
-              "name": "SK252D",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-giant-sk211g",
-              "name": "SK211G",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-kubota",
-          "name": "KUBOTA",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-kubota-r420",
-              "name": "R420",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r420s",
-              "name": "R420S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r430",
-              "name": "R430",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r430z",
-              "name": "R430Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r520",
-              "name": "R520",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r520s",
-              "name": "R520S",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r530",
-              "name": "R530",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r530z",
-              "name": "R530Z",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r630",
-              "name": "R630",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-rtv-xg850-sidekick",
-              "name": "RTV-XG850 SIDEKICK",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-rt-series",
-              "name": "RT SERIES",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-ra1035",
-              "name": "RA1035",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-ra1042",
-              "name": "RA1042",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r630-electric",
-              "name": "R630 ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r410",
-              "name": "R410",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-kubota-r510",
-              "name": "R510",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-manitou",
-          "name": "MANITOU",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-manitou-mla-2-25",
-              "name": "MLA 2-25",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-3-25",
-              "name": "MLA 3-25",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-3-35",
-              "name": "MLA 3-35",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-4-50",
-              "name": "MLA 4-50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-5-50",
-              "name": "MLA 5-50",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-5-60",
-              "name": "MLA 5-60",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-6-65",
-              "name": "MLA 6-65",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-7-75",
-              "name": "MLA 7-75",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-625",
-              "name": "MLT 625",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-630",
-              "name": "MLT 630",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-635",
-              "name": "MLT 635",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-737",
-              "name": "MLT 737",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-741",
-              "name": "MLT 741",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mlt-840",
-              "name": "MLT 840",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mcl2",
-              "name": "MCL2+",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mcl4",
-              "name": "MCL4+",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mcl6",
-              "name": "MCL6+",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-t-516",
-              "name": "MLA-T 516",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-mla-t-533",
-              "name": "MLA-T 533",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-emla",
-              "name": "eMLA",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-alt750",
-              "name": "ALT750",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-alt950",
-              "name": "ALT950",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-850r",
-              "name": "850R",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-manitou-1050r",
-              "name": "1050R",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-yanmar",
-          "name": "YANMAR",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-yanmar-v3",
-              "name": "V3",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v4",
-              "name": "V4",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v5",
-              "name": "V5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v7",
-              "name": "V7",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v8",
-              "name": "V8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v4-5",
-              "name": "V4-5",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v4-6",
-              "name": "V4-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v7-6",
-              "name": "V7-6",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v8e",
-              "name": "V8E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v8e",
-              "name": "V8e",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-ywl-8",
-              "name": "YWL-8",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v80",
-              "name": "V80",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-v7-electric",
-              "name": "V7 ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-ywl20",
-              "name": "YWL20",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-yanmar-ywl30",
-              "name": "YWL30",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-liugong",
-          "name": "LIUGONG",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-liugong-816",
-              "name": "816",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-816c",
-              "name": "816C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-816g",
-              "name": "816G",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-820",
-              "name": "820",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-820c",
-              "name": "820C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-820h",
-              "name": "820H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-835",
-              "name": "835",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-835h",
-              "name": "835H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-842",
-              "name": "842",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-842h",
-              "name": "842H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-848",
-              "name": "848",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-848h",
-              "name": "848H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-856",
-              "name": "856",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-856c",
-              "name": "856C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-856h",
-              "name": "856H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-858",
-              "name": "858",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-858h",
-              "name": "858H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-862",
-              "name": "862",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-862h",
-              "name": "862H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-877",
-              "name": "877",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-877h",
-              "name": "877H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-890h",
-              "name": "890H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-8128h",
-              "name": "8128H",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-856he",
-              "name": "856HE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-870he",
-              "name": "870HE",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-835t",
-              "name": "835T",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-zl30e",
-              "name": "ZL30E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-zl40b",
-              "name": "ZL40B",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-liugong-zl50c",
-              "name": "ZL50C",
-              "subcategories": []
-            }
-          ]
-        },
-        {
-          "id": "wheel-loaders-sany",
-          "name": "SANY",
-          "subcategories": [
-            {
-              "id": "wheel-loaders-sany-sw405",
-              "name": "SW405",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw953",
-              "name": "SW953",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw955",
-              "name": "SW955",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw955k",
-              "name": "SW955K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw966",
-              "name": "SW966",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw966k",
-              "name": "SW966K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw978",
-              "name": "SW978",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw978k",
-              "name": "SW978K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw936",
-              "name": "SW936",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw950",
-              "name": "SW950",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw956",
-              "name": "SW956",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw956e",
-              "name": "SW956E",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw968",
-              "name": "SW968",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw968k1",
-              "name": "SW968K1",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw405k",
-              "name": "SW405K",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw956e-electric",
-              "name": "SW956E ELECTRIC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-sw955k-tc",
-              "name": "SW955K-TC",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-zl50c",
-              "name": "ZL50C",
-              "subcategories": []
-            },
-            {
-              "id": "wheel-loaders-sany-zl30g",
-              "name": "ZL30G",
-              "subcategories": []
-            }
-          ]
-        }
-      ]
+      "id": "other-specialty",
+      "name": "OTHER / SPECIALTY",
+      "subcategories": []
     }
   ]
 };
