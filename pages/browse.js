@@ -1572,6 +1572,8 @@ const isArchived = listingStatus === "archived";
   SEARCH
 </button>
 
+    </div>
+
   <div className="filter-strip">
     <div className="range-group">
       <input
