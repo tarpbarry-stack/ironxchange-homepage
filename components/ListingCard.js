@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { captureIXEvent } from "../lib/posthog";
+
 import {
   cleanMachineTitle,
   formatHours,
@@ -112,12 +114,24 @@ export default function ListingCard({
   }
 
   return (
-    <a
-      href={getListingHref(listing, from)}
-      className={`card ${sellerMode ? "seller-mode" : ""} ${
-        isPaused ? "paused-card" : ""
-      }`}
-    >
+   <a
+  href={getListingHref(listing, from)}
+  className={`card ${sellerMode ? "seller-mode" : ""} ${
+    isPaused ? "paused-card" : ""
+  }`}
+  onClick={() => {
+    captureIXEvent("listing_card_clicked", {
+      listingId: id,
+      title: listing.title,
+      category: listing.category || listing.type,
+      make: listing.make,
+      model: listing.model,
+      price: listing.price,
+      location: listing.location,
+      from
+    });
+  }}
+>
       <div className="card-photo">
         <img
   src={currentPhoto || "/images/hero-equipment-yard.jpg"}
