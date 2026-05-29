@@ -2,6 +2,8 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
+import { captureIXEvent } from "../lib/posthog";
+
 const BRAND_YELLOW = "#FFC400";
 const STAGING = "https://staging.ironxchange.com";
 
@@ -21,6 +23,14 @@ export default function InquirePage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+  if (!listingId) return;
+
+  captureIXEvent("inquiry_page_viewed", {
+    listingId
+  });
+}, [listingId]);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -106,8 +116,15 @@ export default function InquirePage() {
         }
       });
 
-      console.log("INQUIRY SUCCESS:", result);
-      setStatus("success");
+  console.log("INQUIRY SUCCESS:", result);
+  captureIXEvent("inquiry_sent", {
+  listingId,
+  buyerName,
+  buyerEmail,
+  hasPhone: !!buyerPhone
+});
+
+setStatus("success");
     } catch (err) {
       console.error("INQUIRY ERROR:", err);
       alert(JSON.stringify(err?.data?.errors?.[0] || err, null, 2));
