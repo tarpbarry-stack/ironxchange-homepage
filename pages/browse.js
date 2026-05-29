@@ -1700,18 +1700,18 @@ const isArchived = listingStatus === "archived";
   }`}
 >
   {filteredListings.map((item) => {
-    const id = String(getListingId(item));
+  const id = String(getListingId(item));
 
-    return (
+  return (
+    <div key={id}>
       <ListingCard
-        key={id}
         listing={item}
         saved={savedIds.includes(id)}
         onToggleSaved={() => toggleSave(item)}
       />
-    );
-  })}
-</div>
+    </div>
+  );
+})}
 
         {filteredListings.length === 0 && (
           <div className="empty">
