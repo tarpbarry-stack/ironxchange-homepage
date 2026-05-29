@@ -1713,13 +1713,16 @@ const isArchived = listingStatus === "archived";
   );
 })}
 
-        {filteredListings.length === 0 && (
-          <div className="empty">
-            <h3>No listings found.</h3>
-            <p>Try another category or search term.</p>
-          </div>
-        )}
-      </section>
+      {filteredListings.length === 0 && (
+  <div className="empty">
+    <h3>No listings found.</h3>
+    <p>Try another category or search term.</p>
+  </div>
+)}
+
+</div>
+
+</section>
 
         <Footer />
 
