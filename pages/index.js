@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
+import { captureIXEvent } from "../lib/posthog";
 import Footer from "../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
@@ -92,6 +93,12 @@ export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
+  captureIXEvent("homepage_viewed", {
+    page: "home"
+  });
+}, []);
+
+  useEffect(() => {
     fetch("/api/listings")
       .then((res) => res.json())
       .then((data) => {
@@ -146,9 +153,15 @@ function handleSearch() {
 
   const queryString = params.toString();
 
-  window.location.href = queryString
-    ? `/browse?${queryString}`
-    : "/browse";
+captureIXEvent("homepage_search_performed", {
+  query: q,
+  category,
+  destination: queryString ? `/browse?${queryString}` : "/browse"
+});
+
+window.location.href = queryString
+  ? `/browse?${queryString}`
+  : "/browse";
 }
   
   return (
