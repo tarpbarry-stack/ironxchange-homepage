@@ -65,3 +65,5 @@ fs.writeFileSync(outputPath, output);
 
 console.log("Generated:", outputPath);
 console.log("Top-level categories:", categoriesConfig.categories.length);
+const idCount = (output.match(/"id": "/g) || []).length;
+console.log("ID nodes:", idCount);
