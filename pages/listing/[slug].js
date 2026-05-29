@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
@@ -12,7 +13,6 @@ import MachineBadges from "../../components/MachineBadges";
 import IXInspectLightbox from "../../components/IXInspectLightbox";
 
 import { initPostHog, captureIXEvent } from "../../lib/posthog";
-import { useRouter } from "next/router";
 
 import {
   getFrameClass,
@@ -228,6 +228,35 @@ export default function ListingPage() {
     return listings.find(item => slugify(item.title) === slug);
   }, [slug, listings]);
 
+useEffect(() => {
+  if (!listing) return;
+
+  const viewTitle = cleanMachineTitle(cleanText(listing.title) || "Equipment Listing");
+  const viewPrice = cleanText(listing.price) || "Call for Price";
+  const viewHours = cleanText(listing.hours) || "Hours not listed";
+  const viewLocation = cleanText(listing.location) || "Location not listed";
+  const viewYear =
+    cleanText(listing.year) ||
+    viewTitle.match(/\b(19|20)\d{2}\b/)?.[0] ||
+    "—";
+
+  captureIXEvent("listing_viewed", {
+    listingId: listing.id,
+    authorId: listing.authorId,
+    title: viewTitle,
+    year: viewYear,
+    make: cleanText(listing.make) || "—",
+    model: cleanText(listing.model) || "—",
+    price: viewPrice,
+    hours: viewHours,
+    location: viewLocation,
+    category: listing.category || listing.type
+  });
+}, [listing]);
+
+
+  
+
   const currentIndex = useMemo(() => {
     if (!slug || listings.length === 0) return -1;
     return listings.findIndex(item => slugify(item.title) === slug);
@@ -355,22 +384,6 @@ const heroImage =
     typeof window !== "undefined"
       ? window.location.href
       : `https://www.ironxchange.com/listing/${slugify(title)}`;
-
-useEffect(() => {
-  if (!listing) return;
-
-  captureIXEvent("listing_viewed", {
-    listingId: listing.id,
-    authorId: listing.authorId,
-    title,
-    year,
-    make,
-    model,
-    price,
-    location,
-    category: listing.category || listing.type
-  });
-}, [listing]);
 
   const buyerShareCopy = buildBuyerShareCopy(
     listing,
