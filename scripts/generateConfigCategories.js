@@ -46,3 +46,25 @@ function buildCategory(categoryName, rows) {
 }
 
 console.log("Generator Loaded");
+
+const categoriesConfig = {
+  categories: [
+    buildCategory("SKID STEER / CTL", []),
+    buildCategory("DOZERS", [])
+  ]
+};
+
+const output = `// IronXchange V12 master Sharetribe-compatible category tree.
+// GENERATED FILE. DO NOT HAND EDIT.
+
+const categoriesConfig = ${JSON.stringify(categoriesConfig, null, 2)};
+
+export default categoriesConfig;
+`;
+
+const outputPath = path.join(process.cwd(), "config", "configCategories.js");
+
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+fs.writeFileSync(outputPath, output);
+
+console.log("Generated:", outputPath);
