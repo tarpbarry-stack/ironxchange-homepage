@@ -27,11 +27,13 @@ jobs:
       - name: Install deps
         run: npm install
 
-      - name: Build AWS taxonomy master
-        run: npm run build-aws-taxonomy-master
+    - name: Build AWS taxonomy master
+  run: npm run build-aws-taxonomy-master
 
+- name: Generate Sharetribe configCategories
+  run: npm run generate-taxonomy
       - name: Commit generated taxonomy master
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Build AWS taxonomy master"
-          file_pattern: config/awsTaxonomyMaster.json
+          file_pattern: config/awsTaxonomyMaster.json config/configCategories.js
