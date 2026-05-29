@@ -12,22 +12,25 @@ function normalizeMake(make) {
   return make;
 }
 
-const skidSteerRows = skidSteerCtlTaxonomy.map(row => ({
-  ...row,
-  make: normalizeMake(row.make)
-}));
 
 const outputPath = path.join(process.cwd(), "config", "awsTaxonomyMaster.json");
 
 const master = {
   generatedAt: new Date().toISOString(),
   note: "IronXchange AWS taxonomy master starter file. No broad cleanup applied. Only CAT → CATERPILLAR is applied for SKID STEER / CTL.",
-  categories: [
-    {
-      name: "SKID STEER / CTL",
-      rows: skidSteerRows
-    }
-  ]
+  categories: taxonomyRegistry.map(category => {
+  const taxonomy =
+    require(`../lib/${category.file}`).default ||
+    require(`../lib/${category.file}`);
+
+  return {
+    name: category.name,
+    rows: taxonomy.map(row => ({
+      ...row,
+      make: normalizeMake(row.make)
+    }))
+  };
+})
 };
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
