@@ -530,28 +530,47 @@ const listingCategory =
       ? String(rawListingCategory).toUpperCase()
       : "";
 
-console.log("LIVE CATEGORY:", listingCategory);
+  const selectedKeywordSet = useMemo(() => {
+  return new Set(selectedKeywords);
+}, [selectedKeywords]);
 
-console.log("LIVE CATEGORY:", listingCategory);
-
-  const availableKeywords = useMemo(() => {
+const availableKeywords = useMemo(() => {
   const dna = categoryDnaKeywords[listingCategory] || [];
+  return Array.from(new Set(dna));
+}, [listingCategory]);
 
-  return Array.from(
-    new Set([...dna, ...selectedKeywords])
+const filteredKeywords = useMemo(() => {
+  const search = keywordSearch.trim().toLowerCase();
+
+  const selected = selectedKeywords.filter(Boolean);
+
+  const unselected = availableKeywords.filter(
+    keyword => !selectedKeywordSet.has(keyword)
   );
-}, [listingCategory, selectedKeywords]);
 
-  const filteredKeywords = useMemo(() => {
-    const search = keywordSearch.trim().toLowerCase();
+  if (!search) {
+    return [...selected, ...unselected].slice(0, 180);
+  }
 
-    if (!search) return availableKeywords.slice(0, 500);
+  const selectedMatches = selected.filter(keyword =>
+    keyword.toLowerCase().includes(search)
+  );
 
-    return availableKeywords
-      .filter(keyword => keyword.toLowerCase().includes(search))
-      .slice(0, 500);
-  }, [availableKeywords, keywordSearch]);
+  const startsWithMatches = unselected.filter(keyword =>
+    keyword.toLowerCase().startsWith(search)
+  );
 
+  const includesMatches = unselected.filter(keyword => {
+    const lower = keyword.toLowerCase();
+    return !lower.startsWith(search) && lower.includes(search);
+  });
+
+  return [
+    ...selectedMatches,
+    ...startsWithMatches,
+    ...includesMatches
+  ].slice(0, 180);
+}, [availableKeywords, selectedKeywords, selectedKeywordSet, keywordSearch]);
   const marketplaceTitle = listing
     ? `${clean(listing.title)} | ${formatHours(edit.hours || listing.hours)} | ${clean(edit.location || listing.location)}`
     : "";
@@ -1883,7 +1902,7 @@ onClick={async () => {
                     key={keyword}
                     type="button"
                     onClick={() => toggleKeyword(keyword)}
-                    className={selectedKeywords.includes(keyword) ? "keyword-chip active" : "keyword-chip"}
+                    className={selectedKeywordSet.has(keyword) ? "keyword-chip active" : "keyword-chip"}
                   >
                     {keyword}
                   </button>
