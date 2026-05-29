@@ -14,6 +14,7 @@
     "papaparse": "^5.5.3",
     "sharetribe-flex-integration-sdk": "^1.11.0",
     "sharetribe-flex-sdk": "^1.17.0",
-    "resend": "^4.0.0"
+    "resend": "^4.0.0",
+    "posthog-js": "^1.260.1"
   }
 }
