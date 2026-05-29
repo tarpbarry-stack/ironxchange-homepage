@@ -35,6 +35,7 @@ import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 import { processIXPhoto } from "../lib/ixvision/pipeline/processIXPhoto";
+import { captureIXEvent } from "../lib/posthog";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -316,6 +317,12 @@ export default function PostFreePage() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("good-listing");
   const [photoPolishMode, setPhotoPolishMode] = useState("clean");
+
+  useEffect(() => {
+  captureIXEvent("post_free_viewed", {
+    page: "post-free"
+  });
+}, []);
 
   
 
