@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -40,3 +42,4 @@ jobs:
         with:
           commit_message: Build AWS taxonomy files
           file_pattern: config/awsTaxonomyMaster.json config/configCategories.js
+          push_options: --force-with-lease
