@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { initPostHog, captureIXEvent } from "../lib/posthog";
@@ -36,5 +37,16 @@ export default function App({ Component, pageProps }) {
     };
   }, [router.isReady, router.pathname, router.asPath, router.events]);
 
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Head>
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </Head>
+
+      <Component {...pageProps} />
+    </>
+  );
 }
