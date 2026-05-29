@@ -17,7 +17,8 @@ const outputPath = path.join(process.cwd(), "config", "configCategories.js");
 const master = JSON.parse(fs.readFileSync(masterPath, "utf8"));
 
 function buildCategory(category) {
-  const categoryId = slugify(category.name);
+  const categoryId = category.awsId || slugify(category.awsName || category.name);
+  const categoryName = category.awsName || category.name;
   const makeMap = {};
 
   category.rows.forEach(row => {
@@ -32,7 +33,7 @@ function buildCategory(category) {
 
   return {
     id: categoryId,
-    name: category.name,
+    name: categoryName,
     subcategories: Object.keys(makeMap).map(make => ({
       id: `${categoryId}-${slugify(make)}`,
       name: make,
@@ -49,8 +50,10 @@ const categoriesConfig = {
   categories: master.categories.map(buildCategory)
 };
 
-const output = `// IronXchange Sharetribe-compatible category tree.
-// GENERATED FILE. DO NOT HAND EDIT.
+const output = `// Local categories configuration.
+// This overrides categories fetched from hosted assets (Sharetribe Console).
+// To activate: remove 'categories' from appCdnAssets in configDefault.js
+// Structure: { categories: [{ name, id, subcategories: [{ name, id, subcategories: [] }] }] }
 
 const categoriesConfig = ${JSON.stringify(categoriesConfig, null, 2)};
 
@@ -61,3 +64,4 @@ fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, output);
 
 console.log("Generated:", outputPath);
+console.log("Top-level categories:", categoriesConfig.categories.length);
