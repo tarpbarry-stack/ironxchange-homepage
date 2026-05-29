@@ -1,23 +1,80 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+
+import aerialTaxonomy from "../lib/aerialTaxonomy";
+import aggregateTaxonomy from "../lib/aggregateTaxonomy";
+import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
+import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
+import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
+import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
+import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
+import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
+import cranesTaxonomy from "../lib/cranesTaxonomy";
+import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
+import dozersTaxonomy from "../lib/dozersTaxonomy";
+import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
+import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
+import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
+import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
+import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
+import scraperTaxonomy from "../lib/scraperTaxonomy";
+import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
+import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
+import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
+import trailersTaxonomy from "../lib/trailersTaxonomy";
+import trenchersTaxonomy from "../lib/trenchersTaxonomy";
+import trucksTaxonomy from "../lib/trucksTaxonomy";
+import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
+import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
+
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 
 const BRAND_YELLOW = "#FFC400";
 
+const taxonomyLibraries = {
+  "AERIAL LIFTS": aerialTaxonomy,
+  "AGGREGATE": aggregateTaxonomy,
+  "AGRICULTURE HARVESTERS": agricultureHarvestersTaxonomy,
+  "AGRICULTURE TRACTORS": agricultureTractorsTaxonomy,
+  "ASPHALT EQUIPMENT": asphaltEquipmentTaxonomy,
+  "ATTACHMENTS / PARTS": attachmentsPartsTaxonomy,
+  "BACKHOE LOADERS": backhoeLoadersTaxonomy,
+  "COMPACTION ROLLERS": compactionRollersTaxonomy,
+  "CRANES": cranesTaxonomy,
+  "CRAWLER CARRIERS": crawlerCarriersTaxonomy,
+  "DOZERS": dozersTaxonomy,
+  "DRILLS AND PILING": drillsAndPilingTaxonomy,
+  "DUMP TRUCKS": dumpTrucksTaxonomy,
+  "EXCAVATORS": excavatorsTaxonomy,
+  "FORKLIFTS": forkliftsTaxonomy,
+  "MOTOR GRADERS": motorGradersTaxonomy,
+  "SCRAPERS": scraperTaxonomy,
+  "SKID STEER / CTL": skidSteerCtlTaxonomy,
+  "SUPPORT EQUIPMENT": supportEquipmentTaxonomy,
+  "TELEHANDLERS": telehandlersTaxonomy,
+  "TRAILERS": trailersTaxonomy,
+  "TRENCHERS": trenchersTaxonomy,
+  "TRUCKS": trucksTaxonomy,
+  "UTILITY CARTS / UTV": utilityCartsTaxonomy,
+  "WHEEL LOADERS": wheelLoadersTaxonomy
+};
+
 const tabs = [
   "command",
   "taxonomy",
+  "dna",
+  "sharetribe",
   "listings",
   "accounts",
   "messages",
   "moderation",
-  "analytics",
   "logs"
 ];
 
-const MASTER_MAKES = [
+const approvedMakeNames = new Set([
   "CATERPILLAR",
   "JOHN DEERE",
   "KOMATSU",
@@ -43,7 +100,6 @@ const MASTER_MAKES = [
   "WIRTGEN",
   "LEEBOY",
   "ROADTEC",
-  "BLAW-KNOX",
   "GROVE",
   "TEREX",
   "GENIE",
@@ -52,10 +108,14 @@ const MASTER_MAKES = [
   "MANITOU",
   "MERLO",
   "GRADALL"
-];
+]);
 
 function clean(value) {
   return value ? String(value).trim() : "";
+}
+
+function upper(value) {
+  return clean(value).toUpperCase();
 }
 
 function getListingId(listing = {}) {
@@ -68,78 +128,124 @@ function getPublicData(listing = {}) {
 
 function getListingMake(listing = {}) {
   const pd = getPublicData(listing);
-  return clean(listing.make || pd.make || listing.metadata?.make || "").toUpperCase();
+  return upper(listing.make || pd.make || listing.metadata?.make || "");
 }
 
 function getListingModel(listing = {}) {
   const pd = getPublicData(listing);
-  return clean(listing.model || pd.model || listing.metadata?.model || "").toUpperCase();
+  return upper(listing.model || pd.model || listing.metadata?.model || "");
 }
 
 function getListingCategory(listing = {}) {
   const pd = getPublicData(listing);
-  return clean(
+  return upper(
     pd.category ||
       listing.category ||
       listing.categoryLevel1 ||
       pd.categoryLevel1 ||
       ""
-  ).toUpperCase();
+  );
 }
 
 function getListingStatus(listing = {}) {
   const pd = getPublicData(listing);
-  return (
-    listing.listingStatus ||
-    pd.listingStatus ||
-    listing.metadata?.listingStatus ||
-    "live"
-  );
+  return listing.listingStatus || pd.listingStatus || listing.metadata?.listingStatus || "live";
 }
 
-function normalizeCategoryKey(value = "") {
-  const raw = clean(value);
-  if (categoryDnaKeywords[raw]) return raw;
-  if (categoryDnaKeywords[raw.toUpperCase()]) return raw.toUpperCase();
-  return raw.toUpperCase();
+function pullMakesFromTaxonomy(taxonomy) {
+  if (!taxonomy) return [];
+
+  if (Array.isArray(taxonomy)) {
+    return taxonomy.map(item => {
+      if (typeof item === "string") return item;
+      return item.make || item.label || item.name || item.value || "";
+    }).filter(Boolean);
+  }
+
+  if (typeof taxonomy === "object") {
+    return Object.keys(taxonomy);
+  }
+
+  return [];
 }
 
-function auditTaxonomy() {
-  const categoryKeys = Object.keys(categoryDnaKeywords || {});
-  const badMakeFlags = [];
-  const categoryStats = [];
+function pullModelsFromTaxonomy(taxonomy, make) {
+  if (!taxonomy || !make) return [];
 
-  categoryKeys.forEach(category => {
-    const value = categoryDnaKeywords[category];
+  if (Array.isArray(taxonomy)) {
+    const found = taxonomy.find(item => {
+      const itemMake = upper(item?.make || item?.label || item?.name || item?.value);
+      return itemMake === upper(make);
+    });
 
-    let keywordCount = 0;
+    const raw =
+      found?.models ||
+      found?.children ||
+      found?.options ||
+      found?.values ||
+      [];
 
-    if (Array.isArray(value)) {
-      keywordCount = value.length;
-    } else if (value && typeof value === "object") {
-      keywordCount = JSON.stringify(value).length;
+    return Array.isArray(raw) ? raw.map(String) : [];
+  }
+
+  if (typeof taxonomy === "object") {
+    const key = Object.keys(taxonomy).find(item => upper(item) === upper(make));
+    const raw = key ? taxonomy[key] : [];
+
+    if (Array.isArray(raw)) return raw.map(String);
+
+    if (raw && typeof raw === "object") {
+      if (Array.isArray(raw.models)) return raw.models.map(String);
+      if (Array.isArray(raw.children)) return raw.children.map(String);
+      return Object.keys(raw);
     }
+  }
 
-    const text = JSON.stringify(value || {}).toUpperCase();
+  return [];
+}
 
-    if (text.includes('"CAT"') || text.includes(":\"CAT\"") || text.includes(" CAT ")) {
-      badMakeFlags.push({
+function auditTaxonomyLibrary(category, taxonomy) {
+  const makes = pullMakesFromTaxonomy(taxonomy).map(upper).filter(Boolean);
+  const badMakes = [];
+  const lowModelMakes = [];
+
+  makes.forEach(make => {
+    if (make === "CAT") {
+      badMakes.push({
         category,
-        problem: "CAT found",
-        fix: "Replace CAT with CATERPILLAR"
+        make,
+        issue: "Hardwired CAT found",
+        fix: "Replace with CATERPILLAR"
       });
     }
 
-    categoryStats.push({
-      category,
-      keywordCount
-    });
+    if (approvedMakeNames.size && make && !approvedMakeNames.has(make)) {
+      // Not automatically wrong. Just needs review.
+      if (make.length <= 3 || make === "CAT") {
+        badMakes.push({
+          category,
+          make,
+          issue: "Make needs review",
+          fix: "Confirm official make spelling"
+        });
+      }
+    }
+
+    const models = pullModelsFromTaxonomy(taxonomy, make);
+    if (models.length > 0 && models.length < 4) {
+      lowModelMakes.push({
+        category,
+        make,
+        modelCount: models.length
+      });
+    }
   });
 
   return {
-    categoryCount: categoryKeys.length,
-    badMakeFlags,
-    categoryStats
+    category,
+    makeCount: makes.length,
+    badMakes,
+    lowModelMakes
   };
 }
 
@@ -147,10 +253,13 @@ export default function AdminDaddyPage() {
   const [activeTab, setActiveTab] = useState("command");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [adminLog, setAdminLog] = useState([]);
 
+  const [selectedCategory, setSelectedCategory] = useState("MOTOR GRADERS");
+  const [selectedMake, setSelectedMake] = useState("");
   const [taxonomySearch, setTaxonomySearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [newModel, setNewModel] = useState("");
+  const [patchQueue, setPatchQueue] = useState([]);
+  const [adminLog, setAdminLog] = useState([]);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -158,41 +267,46 @@ export default function AdminDaddyPage() {
       .then(data => {
         if (Array.isArray(data)) setListings(data);
       })
-      .catch(err => {
-        console.error("Admin Daddy listing load failed:", err);
-      })
+      .catch(err => console.error("Admin Daddy listing load failed:", err))
       .finally(() => setLoading(false));
   }, []);
 
-  const taxonomyAudit = useMemo(() => auditTaxonomy(), []);
+  const categoryNames = useMemo(() => Object.keys(taxonomyLibraries).sort(), []);
 
-  const categoryKeys = useMemo(() => {
-    return Object.keys(categoryDnaKeywords || {}).sort();
+  const selectedTaxonomy = taxonomyLibraries[selectedCategory];
+
+  const makes = useMemo(() => {
+    return pullMakesFromTaxonomy(selectedTaxonomy).map(String).sort();
+  }, [selectedTaxonomy]);
+
+  const activeMake = selectedMake || makes[0] || "";
+
+  const models = useMemo(() => {
+    return pullModelsFromTaxonomy(selectedTaxonomy, activeMake).sort();
+  }, [selectedTaxonomy, activeMake]);
+
+  const filteredModels = useMemo(() => {
+    const search = taxonomySearch.trim().toLowerCase();
+    if (!search) return models.slice(0, 500);
+
+    return models
+      .filter(model => model.toLowerCase().includes(search))
+      .slice(0, 500);
+  }, [models, taxonomySearch]);
+
+  const taxonomyAudits = useMemo(() => {
+    return Object.entries(taxonomyLibraries).map(([category, taxonomy]) =>
+      auditTaxonomyLibrary(category, taxonomy)
+    );
   }, []);
 
-  const activeCategory = selectedCategory || categoryKeys[0] || "";
+  const badMakeAlerts = useMemo(() => {
+    return taxonomyAudits.flatMap(item => item.badMakes);
+  }, [taxonomyAudits]);
 
-  const activeCategoryKeywords = useMemo(() => {
-    const raw = categoryDnaKeywords[activeCategory] || [];
-
-    if (Array.isArray(raw)) return raw;
-
-    if (raw && typeof raw === "object") {
-      return Object.keys(raw);
-    }
-
-    return [];
-  }, [activeCategory]);
-
-  const filteredCategoryKeywords = useMemo(() => {
-    const search = taxonomySearch.trim().toLowerCase();
-
-    if (!search) return activeCategoryKeywords.slice(0, 400);
-
-    return activeCategoryKeywords
-      .filter(item => String(item).toLowerCase().includes(search))
-      .slice(0, 400);
-  }, [activeCategoryKeywords, taxonomySearch]);
+  const lowModelAlerts = useMemo(() => {
+    return taxonomyAudits.flatMap(item => item.lowModelMakes);
+  }, [taxonomyAudits]);
 
   const listingAudit = useMemo(() => {
     const badMakes = [];
@@ -200,40 +314,32 @@ export default function AdminDaddyPage() {
     const missingCategories = [];
 
     listings.forEach(listing => {
+      const id = getListingId(listing);
+      const title = listing.title || "Untitled";
+      const category = getListingCategory(listing);
       const make = getListingMake(listing);
       const model = getListingModel(listing);
-      const category = getListingCategory(listing);
-      const id = getListingId(listing);
 
-      if (!category) {
-        missingCategories.push({ id, title: listing.title || "Untitled" });
-      }
-
-      if (make === "CAT") {
-        badMakes.push({
-          id,
-          title: listing.title || "Untitled",
-          current: "CAT",
-          fix: "CATERPILLAR"
-        });
-      }
-
-      if (!model) {
-        missingModels.push({
-          id,
-          title: listing.title || "Untitled",
-          category,
-          make
-        });
-      }
+      if (!category) missingCategories.push({ id, title });
+      if (make === "CAT") badMakes.push({ id, title, current: "CAT", fix: "CATERPILLAR" });
+      if (!model) missingModels.push({ id, title, category, make });
     });
 
-    return {
-      badMakes,
-      missingModels,
-      missingCategories
-    };
+    return { badMakes, missingModels, missingCategories };
   }, [listings]);
+
+  const dnaCategoryNames = useMemo(() => {
+    return Object.keys(categoryDnaKeywords || {}).sort();
+  }, []);
+
+  const selectedDnaCategory = dnaCategoryNames.includes(selectedCategory)
+    ? selectedCategory
+    : dnaCategoryNames[0];
+
+  const dnaKeywords = useMemo(() => {
+    const raw = categoryDnaKeywords?.[selectedDnaCategory] || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [selectedDnaCategory]);
 
   function addLog(message, type = "info") {
     setAdminLog(current => [
@@ -244,21 +350,66 @@ export default function AdminDaddyPage() {
         createdAt: new Date().toLocaleString()
       },
       ...current
-    ].slice(0, 50));
+    ].slice(0, 100));
   }
 
-  function dangerousStub(action) {
-    const confirmText = window.prompt(
-      `ADMIN DADDY protected action:\n\n${action}\n\nType ADMIN DADDY to confirm.`
-    );
+  function queueAddModel() {
+    const value = upper(newModel);
 
-    if (confirmText !== "ADMIN DADDY") {
-      addLog(`Cancelled protected action: ${action}`, "warn");
+    if (!selectedCategory || !activeMake || !value) {
+      alert("Pick category, make, and enter a model.");
       return;
     }
 
-    addLog(`Protected action staged, not wired yet: ${action}`, "danger");
-    alert("Staged only. Backend wire-up comes next.");
+    if (models.map(upper).includes(value)) {
+      alert(`${value} already exists under ${activeMake}.`);
+      return;
+    }
+
+    const patch = {
+      id: `${Date.now()}-${Math.random()}`,
+      type: "ADD_MODEL",
+      category: selectedCategory,
+      make: activeMake,
+      model: value,
+      status: "STAGED"
+    };
+
+    setPatchQueue(current => [patch, ...current]);
+    setNewModel("");
+    addLog(`Staged model add: ${selectedCategory} / ${activeMake} / ${value}`, "success");
+  }
+
+  function queueMakeFix(category, make, fix) {
+    const patch = {
+      id: `${Date.now()}-${Math.random()}`,
+      type: "FIX_MAKE",
+      category,
+      current: make,
+      replacement: fix,
+      status: "STAGED"
+    };
+
+    setPatchQueue(current => [patch, ...current]);
+    addLog(`Staged make fix: ${category} / ${make} → ${fix}`, "warn");
+  }
+
+  function protectedAction(label) {
+    const typed = window.prompt(`${label}\n\nType ADMIN DADDY to stage this protected action.`);
+
+    if (typed !== "ADMIN DADDY") {
+      addLog(`Cancelled protected action: ${label}`, "warn");
+      return;
+    }
+
+    addLog(`Protected action staged: ${label}`, "danger");
+    alert("Staged only. Backend write endpoint comes next.");
+  }
+
+  function copyPatchQueue() {
+    const text = JSON.stringify(patchQueue, null, 2);
+    navigator.clipboard.writeText(text);
+    addLog("Copied taxonomy patch queue", "success");
   }
 
   return (
@@ -271,34 +422,24 @@ export default function AdminDaddyPage() {
       <main>
         <Navbar />
 
-        <section className="admin-wrap">
+        <section className="wrap">
           <section className="hero">
             <div>
               <span>IronXchange Operator OS</span>
               <h1>Admin Daddy</h1>
-              <p>
-                Control taxonomy, listings, accounts, moderation, messages, and launch operations from one command room.
-              </p>
+              <p>AWS/code taxonomy first. Sharetribe patching second. No migration nightmare later.</p>
             </div>
 
-            <div className="hero-stats">
-              <div>
-                <strong>{listings.length}</strong>
-                <span>Listings</span>
-              </div>
-              <div>
-                <strong>{taxonomyAudit.categoryCount}</strong>
-                <span>Taxonomy Groups</span>
-              </div>
-              <div>
-                <strong>{taxonomyAudit.badMakeFlags.length + listingAudit.badMakes.length}</strong>
-                <span>Make Alerts</span>
-              </div>
+            <div className="stats">
+              <div><strong>{categoryNames.length}</strong><span>Taxonomy Files</span></div>
+              <div><strong>{dnaCategoryNames.length}</strong><span>DNA Libraries</span></div>
+              <div><strong>{badMakeAlerts.length}</strong><span>Make Alerts</span></div>
+              <div><strong>{patchQueue.length}</strong><span>Patch Queue</span></div>
             </div>
           </section>
 
-          <section className="admin-shell">
-            <aside className="side-nav">
+          <section className="shell">
+            <aside className="nav">
               {tabs.map(tab => (
                 <button
                   key={tab}
@@ -311,111 +452,144 @@ export default function AdminDaddyPage() {
               ))}
             </aside>
 
-            <section className="admin-panel">
+            <section className="panelArea">
               {activeTab === "command" && (
                 <div className="grid">
-                  <div className="card wide">
-                    <span>Command Center</span>
-                    <h2>Launch Control</h2>
-                    <p>
-                      V1 is reading live listings and taxonomy. Destructive actions are protected and staged.
-                    </p>
-                  </div>
+                  <Card title="Command Center" label="Admin Daddy V1" wide>
+                    <p>Taxonomy files are separated from DNA badge files. Sharetribe is treated as downstream listing storage, not the master taxonomy brain.</p>
+                  </Card>
 
-                  <div className="card">
-                    <span>Taxonomy Alerts</span>
-                    <strong>{taxonomyAudit.badMakeFlags.length}</strong>
-                    <p>Hardwired taxonomy values that need inspection.</p>
-                  </div>
+                  <Metric title="Listings Loaded" value={loading ? "..." : listings.length} />
+                  <Metric title="Bad Make Alerts" value={badMakeAlerts.length} />
+                  <Metric title="Missing Listing Models" value={listingAudit.missingModels.length} />
+                  <Metric title="Patch Queue" value={patchQueue.length} />
 
-                  <div className="card">
-                    <span>Listing Make Alerts</span>
-                    <strong>{listingAudit.badMakes.length}</strong>
-                    <p>Listings currently showing bad make values like CAT.</p>
-                  </div>
-
-                  <div className="card">
-                    <span>Missing Models</span>
-                    <strong>{listingAudit.missingModels.length}</strong>
-                    <p>Listings with missing model data.</p>
-                  </div>
-
-                  <div className="card danger">
-                    <span>Protected Actions</span>
-                    <h2>Ready To Wire</h2>
-                    <button onClick={() => dangerousStub("Freeze all suspicious listings")}>
-                      Stage Freeze Sweep
-                    </button>
-                  </div>
+                  <Card title="Today’s Target" label="Taxonomy Correction" wide>
+                    <p>Fix hardwired CAT in skid steer taxonomy and identify missing Motor Grader models under CATERPILLAR.</p>
+                  </Card>
                 </div>
               )}
 
               {activeTab === "taxonomy" && (
-                <div className="taxonomy-layout">
-                  <div className="card">
-                    <span>Taxonomy Manager</span>
-                    <h2>Category Library</h2>
-
-                    <select
-                      value={activeCategory}
-                      onChange={e => setSelectedCategory(e.target.value)}
-                    >
-                      {categoryKeys.map(category => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
+                <div className="taxonomyGrid">
+                  <Card title="Taxonomy Manager" label="Category / Make / Model">
+                    <select value={selectedCategory} onChange={e => {
+                      setSelectedCategory(e.target.value);
+                      setSelectedMake("");
+                      setTaxonomySearch("");
+                    }}>
+                      {categoryNames.map(category => (
+                        <option key={category} value={category}>{category}</option>
                       ))}
                     </select>
+
+                    <select value={activeMake} onChange={e => setSelectedMake(e.target.value)}>
+                      {makes.map(make => (
+                        <option key={make} value={make}>{make}</option>
+                      ))}
+                    </select>
+
+                    <div className="addRow">
+                      <input
+                        value={newModel}
+                        onChange={e => setNewModel(e.target.value)}
+                        placeholder="Add missing model, ex: 140H"
+                      />
+                      <button type="button" onClick={queueAddModel}>Stage Add</button>
+                    </div>
 
                     <input
                       value={taxonomySearch}
                       onChange={e => setTaxonomySearch(e.target.value)}
-                      placeholder="Search this taxonomy group..."
+                      placeholder="Search models..."
                     />
 
-                    <div className="chip-scroll">
-                      {filteredCategoryKeywords.map(item => (
-                        <button key={String(item)} type="button">
-                          {String(item).toLowerCase()}
-                        </button>
+                    <div className="chipBox">
+                      {filteredModels.map(model => (
+                        <button key={model} type="button">{model}</button>
                       ))}
                     </div>
-                  </div>
+                  </Card>
 
-                  <div className="card">
-                    <span>Bad Value Detector</span>
-                    <h2>Hardwired Make Problems</h2>
+                  <Card title="Make Alerts" label="Bad hardwired dropdown values">
+                    {badMakeAlerts.length === 0 ? (
+                      <p>No hardwired make alerts found.</p>
+                    ) : badMakeAlerts.map((alert, index) => (
+                      <div className="issue" key={`${alert.category}-${alert.make}-${index}`}>
+                        <strong>{alert.category}</strong>
+                        <p>{alert.issue}: {alert.make}</p>
+                        <small>{alert.fix}</small>
+                        {alert.make === "CAT" && (
+                          <button type="button" onClick={() => queueMakeFix(alert.category, "CAT", "CATERPILLAR")}>
+                            Stage CAT Fix
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </Card>
 
-                    {taxonomyAudit.badMakeFlags.length === 0 ? (
-                      <p>No CAT-style hardwired make alerts found in loaded taxonomy object.</p>
-                    ) : (
-                      taxonomyAudit.badMakeFlags.map((flag, index) => (
-                        <div className="issue" key={`${flag.category}-${index}`}>
-                          <strong>{flag.category}</strong>
-                          <p>{flag.problem}</p>
-                          <small>{flag.fix}</small>
+                  <Card title="Low Model Count Alerts" label="Review thin taxonomy groups" wide>
+                    <div className="miniTable">
+                      {lowModelAlerts.slice(0, 80).map((item, index) => (
+                        <div className="miniRow" key={`${item.category}-${item.make}-${index}`}>
+                          <strong>{item.category}</strong>
+                          <span>{item.make}</span>
+                          <small>{item.modelCount} models</small>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+              )}
 
-                  <div className="card wide">
-                    <span>Next Wire</span>
-                    <h2>Add Make / Add Model / Export Patch</h2>
-                    <p>
-                      Next step is wiring controlled add-model forms here so Motor Grader missing models can be added from Admin Daddy instead of editing raw files by hand.
-                    </p>
-                  </div>
+              {activeTab === "dna" && (
+                <div className="grid">
+                  <Card title="DNA / Badge Manager" label="Badges, not dropdown taxonomy" wide>
+                    <p>This section uses categoryDnaKeywords and the Dna.js files. This is where HIGH FLOW, AUX HYDRAULICS, RIPPER, GPS, SMARTGRADE, etc. belong.</p>
+                  </Card>
+
+                  <Metric title="DNA Groups" value={dnaCategoryNames.length} />
+                  <Metric title="Selected DNA Keywords" value={dnaKeywords.length} />
+
+                  <Card title="DNA Preview" label={selectedDnaCategory || "DNA"}>
+                    <div className="chipBox">
+                      {dnaKeywords.slice(0, 350).map(keyword => (
+                        <button key={keyword} type="button">{String(keyword).toLowerCase()}</button>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {activeTab === "sharetribe" && (
+                <div className="grid">
+                  <Card title="Sharetribe Patch Layer" label="Downstream Sync" wide>
+                    <p>Admin Daddy owns the taxonomy. Sharetribe gets patched only when saved listing data needs correction.</p>
+                  </Card>
+
+                  <Card title="Patch Queue" label="Staged Changes" wide>
+                    {patchQueue.length === 0 ? (
+                      <p>No staged patches yet.</p>
+                    ) : patchQueue.map(patch => (
+                      <div className="issue" key={patch.id}>
+                        <strong>{patch.type}</strong>
+                        <p>{patch.category} {patch.make ? `/ ${patch.make}` : ""}</p>
+                        <small>{patch.model || `${patch.current} → ${patch.replacement}`}</small>
+                      </div>
+                    ))}
+
+                    <button type="button" onClick={copyPatchQueue}>Copy Patch Queue</button>
+                    <button type="button" onClick={() => protectedAction("Run Sharetribe patch migration")}>
+                      Stage Sharetribe Migration
+                    </button>
+                  </Card>
                 </div>
               )}
 
               {activeTab === "listings" && (
-                <div className="card wide">
-                  <span>Listings Control</span>
-                  <h2>{loading ? "Loading..." : `${listings.length} Listings Loaded`}</h2>
-
+                <Card title="Listings Control" label={loading ? "Loading..." : `${listings.length} listings`} wide>
                   <div className="table">
-                    {listings.slice(0, 80).map(listing => (
+                    {listings.slice(0, 100).map(listing => (
                       <div className="row" key={getListingId(listing)}>
                         <strong>{listing.title || "Untitled"}</strong>
                         <span>{getListingCategory(listing) || "NO CATEGORY"}</span>
@@ -425,57 +599,30 @@ export default function AdminDaddyPage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </Card>
               )}
 
               {activeTab === "accounts" && (
-                <ModuleStub
-                  title="Account Control"
-                  text="Freeze accounts, unfreeze accounts, inspect seller inventory, mark trusted sellers, and disable bad actors."
-                  onStage={dangerousStub}
-                />
+                <Stub title="Account Control" onAction={protectedAction} />
               )}
 
               {activeTab === "messages" && (
-                <ModuleStub
-                  title="Admin Daddy Messages"
-                  text="Send seller warnings, correction requests, broadcast updates, and buyer/seller support messages as Admin Daddy."
-                  onStage={dangerousStub}
-                />
+                <Stub title="Admin Daddy Messages" onAction={protectedAction} />
               )}
 
               {activeTab === "moderation" && (
-                <ModuleStub
-                  title="Moderation Queue"
-                  text="Bad photos, bad titles, missing hours, suspicious listings, duplicate listings, and incomplete seller profiles."
-                  onStage={dangerousStub}
-                />
-              )}
-
-              {activeTab === "analytics" && (
-                <ModuleStub
-                  title="Seller Intelligence"
-                  text="Views, saves, inquiries, badge clicks, external-link clicks, WhatsApp launches, and PostHog-backed seller reporting."
-                  onStage={dangerousStub}
-                />
+                <Stub title="Moderation Queue" onAction={protectedAction} />
               )}
 
               {activeTab === "logs" && (
-                <div className="card wide">
-                  <span>Admin Log</span>
-                  <h2>Recent Admin Daddy Actions</h2>
-
-                  {adminLog.length === 0 ? (
-                    <p>No admin actions logged this session yet.</p>
-                  ) : (
-                    adminLog.map(item => (
-                      <div className={`log ${item.type}`} key={item.id}>
-                        <strong>{item.message}</strong>
-                        <small>{item.createdAt}</small>
-                      </div>
-                    ))
-                  )}
-                </div>
+                <Card title="Admin Log" label="Session actions" wide>
+                  {adminLog.length === 0 ? <p>No admin actions yet.</p> : adminLog.map(item => (
+                    <div className={`log ${item.type}`} key={item.id}>
+                      <strong>{item.message}</strong>
+                      <small>{item.createdAt}</small>
+                    </div>
+                  ))}
+                </Card>
               )}
             </section>
           </section>
@@ -485,56 +632,43 @@ export default function AdminDaddyPage() {
       <Footer />
 
       <style jsx>{`
-        :global(html),
-        :global(body) {
+        :global(html), :global(body) {
           margin: 0;
           background: #080808;
           color: #f2f2f2;
           font-family: Arial, sans-serif;
         }
 
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         main {
           min-height: 100vh;
-          background:
-            radial-gradient(circle at top, rgba(255, 196, 0, 0.055), transparent 32%),
-            #080808;
+          background: radial-gradient(circle at top, rgba(255,196,0,.055), transparent 34%), #080808;
         }
 
-        .admin-wrap {
+        .wrap {
           max-width: 1600px;
           margin: 0 auto;
           padding: 14px 2% 48px;
         }
 
-        .hero,
-        .admin-shell,
-        .card {
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
-            #141414;
+        .hero, .shell, .card {
+          background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)), #141414;
           border: 1px solid rgba(255,255,255,.07);
           border-radius: 16px;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.045) inset,
-            0 20px 46px rgba(0,0,0,.30);
+          box-shadow: 0 1px 0 rgba(255,255,255,.045) inset, 0 20px 46px rgba(0,0,0,.30);
         }
 
         .hero {
-          min-height: 112px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 20px;
+          gap: 18px;
           padding: 18px 20px;
           margin-bottom: 12px;
         }
 
-        .hero span,
-        .card span {
+        .hero span, .cardLabel {
           color: ${BRAND_YELLOW};
           font-size: 8px;
           font-weight: 950;
@@ -543,61 +677,62 @@ export default function AdminDaddyPage() {
         }
 
         .hero h1 {
-          margin: 4px 0 4px;
+          margin: 3px 0;
           font-size: 38px;
           font-weight: 950;
-          letter-spacing: -1.4px;
           text-transform: uppercase;
+          letter-spacing: -1.4px;
         }
 
-        .hero p,
-        .card p {
+        .hero p, .card p {
           margin: 0;
           color: rgba(255,255,255,.46);
           font-size: 12px;
           line-height: 1.45;
         }
 
-        .hero-stats {
+        .stats {
           display: grid;
-          grid-template-columns: repeat(3, 120px);
+          grid-template-columns: repeat(4, 105px);
           gap: 8px;
         }
 
-        .hero-stats div {
-          padding: 12px;
+        .stats div {
+          padding: 11px;
           border-radius: 14px;
           background: #0d0d0d;
           border: 1px solid rgba(255,255,255,.06);
           text-align: center;
         }
 
-        .hero-stats strong {
+        .stats strong {
           display: block;
-          font-size: 26px;
           color: ${BRAND_YELLOW};
+          font-size: 24px;
           font-weight: 950;
         }
 
-        .hero-stats span {
-          color: rgba(255,255,255,.50);
-          font-size: 8px;
+        .stats span {
+          color: rgba(255,255,255,.48);
+          font-size: 7.5px;
+          font-weight: 950;
+          text-transform: uppercase;
         }
 
-        .admin-shell {
+        .shell {
           display: grid;
-          grid-template-columns: 210px 1fr;
+          grid-template-columns: 215px 1fr;
           gap: 12px;
           padding: 12px;
         }
 
-        .side-nav {
+        .nav {
           display: grid;
           align-content: start;
           gap: 7px;
         }
 
-        .side-nav button {
+        .nav button {
           height: 38px;
           border-radius: 999px;
           border: 1px solid rgba(255,255,255,.07);
@@ -610,25 +745,23 @@ export default function AdminDaddyPage() {
           cursor: pointer;
         }
 
-        .side-nav button.active {
-          background: ${BRAND_YELLOW};
+        .nav button.active {
           color: #050505;
+          background: ${BRAND_YELLOW};
           border-color: ${BRAND_YELLOW};
         }
 
-        .admin-panel {
-          min-height: 640px;
-        }
+        .panelArea { min-height: 640px; }
 
         .grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: 10px;
         }
 
-        .taxonomy-layout {
+        .taxonomyGrid {
           display: grid;
-          grid-template-columns: 1.25fr .75fr;
+          grid-template-columns: 1.15fr .85fr;
           gap: 10px;
         }
 
@@ -636,44 +769,64 @@ export default function AdminDaddyPage() {
           padding: 15px;
         }
 
-        .card.wide {
+        .wide {
           grid-column: 1 / -1;
         }
 
-        .card.danger {
-          border-color: rgba(229,62,62,.32);
-        }
-
         .card h2 {
-          margin: 6px 0 8px;
+          margin: 6px 0 9px;
           font-size: 18px;
           font-weight: 950;
-          text-transform: uppercase;
           letter-spacing: -.35px;
+          text-transform: uppercase;
         }
 
-        .card strong {
+        .metricValue {
           display: block;
-          font-size: 34px;
           color: #f2f2f2;
+          font-size: 34px;
           font-weight: 950;
         }
 
-        select,
-        input {
+        select, input {
           width: 100%;
           height: 38px;
-          margin-top: 9px;
+          margin-top: 8px;
           border-radius: 10px;
           border: 1px solid rgba(255,255,255,.08);
           background: #0b0b0b;
           color: #f2f2f2;
           padding: 0 11px;
+          font-weight: 850;
           outline: none;
-          font-weight: 800;
         }
 
-        .chip-scroll {
+        .addRow {
+          display: grid;
+          grid-template-columns: 1fr 110px;
+          gap: 8px;
+        }
+
+        button {
+          font-family: inherit;
+        }
+
+        .card button {
+          min-height: 30px;
+          margin-top: 8px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,196,0,.35);
+          background: #111;
+          color: ${BRAND_YELLOW};
+          padding: 0 12px;
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .6px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .chipBox {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
@@ -686,19 +839,15 @@ export default function AdminDaddyPage() {
           border: 1px solid rgba(255,255,255,.055);
         }
 
-        .chip-scroll button {
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.07);
-          background: #151515;
+        .chipBox button {
+          margin: 0;
+          min-height: 24px;
+          border-color: rgba(255,255,255,.07);
           color: rgba(255,255,255,.62);
-          padding: 6px 8px;
-          font-size: 9px;
-          font-weight: 850;
-          text-transform: lowercase;
+          text-transform: none;
         }
 
-        .issue,
-        .log {
+        .issue, .log {
           margin-top: 8px;
           padding: 10px;
           border-radius: 11px;
@@ -706,15 +855,20 @@ export default function AdminDaddyPage() {
           border: 1px solid rgba(255,255,255,.07);
         }
 
-        .issue small,
-        .log small {
+        .issue strong, .log strong {
+          display: block;
+          font-size: 11px;
+          color: #f2f2f2;
+        }
+
+        .issue small, .log small {
           display: block;
           margin-top: 4px;
-          color: rgba(255,255,255,.40);
+          color: rgba(255,255,255,.42);
           font-size: 9px;
         }
 
-        .table {
+        .miniTable, .table {
           display: grid;
           gap: 6px;
           max-height: 520px;
@@ -722,11 +876,10 @@ export default function AdminDaddyPage() {
           margin-top: 10px;
         }
 
-        .row {
+        .miniRow, .row {
           display: grid;
-          grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+          grid-template-columns: 1.4fr 1fr 90px;
           gap: 8px;
-          align-items: center;
           padding: 9px;
           border-radius: 10px;
           background: #0d0d0d;
@@ -734,54 +887,28 @@ export default function AdminDaddyPage() {
           font-size: 10px;
         }
 
-        .row strong {
-          font-size: 11px;
-          color: #f2f2f2;
+        .row {
+          grid-template-columns: 2fr 1fr 1fr 1fr 80px;
         }
 
-        .row span,
-        .row small {
-          color: rgba(255,255,255,.48);
+        .miniRow span, .miniRow small, .row span, .row small {
+          color: rgba(255,255,255,.50);
           font-weight: 850;
           text-transform: uppercase;
         }
 
-        button {
-          font-family: inherit;
-        }
-
-        .card button {
-          height: 34px;
-          margin-top: 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,196,0,.35);
-          background: #111;
-          color: ${BRAND_YELLOW};
-          padding: 0 14px;
-          font-size: 8.5px;
-          font-weight: 950;
-          letter-spacing: .6px;
-          text-transform: uppercase;
-          cursor: pointer;
-        }
-
-        @media (max-width: 900px) {
-          .hero,
-          .admin-shell,
-          .taxonomy-layout,
-          .grid {
+        @media (max-width: 1000px) {
+          .hero, .shell, .grid, .taxonomyGrid {
             grid-template-columns: 1fr;
           }
 
-          .hero {
-            display: grid;
+          .hero { display: grid; }
+
+          .stats {
+            grid-template-columns: repeat(2, 1fr);
           }
 
-          .hero-stats {
-            grid-template-columns: repeat(3, 1fr);
-          }
-
-          .row {
+          .row, .miniRow {
             grid-template-columns: 1fr;
           }
         }
@@ -790,16 +917,34 @@ export default function AdminDaddyPage() {
   );
 }
 
-function ModuleStub({ title, text, onStage }) {
+function Card({ title, label, wide, children }) {
   return (
-    <div className="card wide">
-      <span>Ready To Wire</span>
+    <section className={wide ? "card wide" : "card"}>
+      <span className="cardLabel">{label}</span>
       <h2>{title}</h2>
-      <p>{text}</p>
+      {children}
+    </section>
+  );
+}
 
-      <button type="button" onClick={() => onStage(title)}>
+function Metric({ title, value }) {
+  return (
+    <section className="card">
+      <span className="cardLabel">{title}</span>
+      <strong className="metricValue">{value}</strong>
+    </section>
+  );
+}
+
+function Stub({ title, onAction }) {
+  return (
+    <section className="card wide">
+      <span className="cardLabel">Ready To Wire</span>
+      <h2>{title}</h2>
+      <p>This module is staged inside Admin Daddy but not connected to destructive backend writes yet.</p>
+      <button type="button" onClick={() => onAction(title)}>
         Stage Protected Action
       </button>
-    </div>
+    </section>
   );
 }
