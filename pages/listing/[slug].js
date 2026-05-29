@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
