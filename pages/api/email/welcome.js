@@ -35,7 +35,11 @@ export default async function handler(req, res) {
         box-shadow:0 28px 70px rgba(0,0,0,.42);">
 
         <div style="padding:26px 28px 18px;border-bottom:1px solid rgba(255,255,255,.07);text-align:center;">
-          <img src="https://ironxchange.com/images/ironxchange-logo.png" alt="IronXchange" style="height:42px;width:auto;margin:0 auto 18px;display:block;" />
+         <img
+  src="https://preview.ironxchange.com/images/ironxchange-logo.png"
+  alt="IronXchange"
+  style="height:42px;width:auto;margin:0 auto 18px;display:block;"
+/>
 
           <div style="color:#FFC400;font-size:10px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;">
             Machine Distribution Platform
