@@ -2,12 +2,13 @@
   "name": "ironxchange",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "generate-taxonomy": "node scripts/generateConfigCategories.js"
-  },
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "generate-taxonomy": "node scripts/generateConfigCategories.js",
+  "build-aws-taxonomy-master": "node scripts/buildAwsTaxonomyMaster.js"
+},
   "dependencies": {
     "next": "14.2.5",
     "react": "18.2.0",
