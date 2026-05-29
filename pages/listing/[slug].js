@@ -12,6 +12,9 @@ import Footer from "../../components/Footer";
 import MachineBadges from "../../components/MachineBadges";
 import IXInspectLightbox from "../../components/IXInspectLightbox";
 
+import { initPostHog, captureIXEvent } from "../../lib/posthog";
+import { useRouter } from "next/router";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -166,6 +169,10 @@ export default function ListingPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [copied, setCopied] = useState("");
 
+  useEffect(() => {
+  initPostHog();
+}, []);
+  
   useEffect(() => {
     async function loadPage() {
       try {
@@ -349,6 +356,22 @@ const heroImage =
     typeof window !== "undefined"
       ? window.location.href
       : `https://www.ironxchange.com/listing/${slugify(title)}`;
+
+useEffect(() => {
+  if (!listing) return;
+
+  captureIXEvent("listing_viewed", {
+    listingId: listing.id,
+    authorId: listing.authorId,
+    title,
+    year,
+    make,
+    model,
+    price,
+    location,
+    category: listing.category || listing.type
+  });
+}, [listing]);
 
   const buyerShareCopy = buildBuyerShareCopy(
     listing,
