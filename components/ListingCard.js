@@ -57,11 +57,28 @@ export default function ListingCard({
   onLocationKeyDown,
 
   onEdit,
-  onPause,
-  onReactivate,
-  onDelete,
+onPause,
+onReactivate,
+onDelete,
+
+onSendFront,
+onSendBack,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
+
+  const [boardColor, setBoardColor] = useState("none");
+
+const boardColors = ["none", "green", "yellow", "cyan", "red", "blue"];
+
+function cycleBoardColor(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setBoardColor(current => {
+    const currentIndex = boardColors.indexOf(current);
+    return boardColors[(currentIndex + 1) % boardColors.length];
+  });
+}
 
   const id = String(getListingId(listing));
 
@@ -331,6 +348,41 @@ return (
             <span>Saves: {listing.saves || "—"}</span>
           </div>
                ) : null}
+<div className={`board-command-rail color-${boardColor}`}>
+  <button
+    type="button"
+    className="rail-btn rail-left"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+      onSendFront?.(listing);
+    }}
+    title="Move to front"
+  >
+    ←
+  </button>
+
+  <button
+    type="button"
+    className="rail-btn rail-color"
+    onClick={cycleBoardColor}
+    title="Color"
+  />
+
+  <button
+    type="button"
+    className="rail-btn rail-right"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+      onSendBack?.(listing);
+    }}
+    title="Move to back"
+  >
+    →
+  </button>
+</div>
+         
       </div>
 
       </div>
@@ -384,6 +436,58 @@ return (
 .card-board-zone {
   cursor: grab;
   background: rgba(255,0,0,.15);
+}
+
+.board-command-rail {
+  height: 15px;
+  margin: 11px -13px -14px;
+
+  display: grid;
+  grid-template-columns: 1fr 30px 1fr;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+  background: rgba(0,0,0,.18);
+}
+
+.rail-btn {
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.24);
+
+  cursor: pointer;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.rail-btn:hover {
+  color: #FFC400;
+  background: rgba(255,196,0,.06);
+}
+
+.rail-color {
+  border-left: 1px solid rgba(255,255,255,.05);
+  border-right: 1px solid rgba(255,255,255,.05);
+}
+
+.color-green .rail-color {
+  background: #38A169;
+}
+
+.color-yellow .rail-color {
+  background: #FFC400;
+}
+
+.color-cyan .rail-color {
+  background: #00C2FF;
+}
+
+.color-red .rail-color {
+  background: #E53E3E;
+}
+
+.color-blue .rail-color {
+  background: #3182CE;
 }
 
         .card:hover {
