@@ -847,7 +847,7 @@ return (
                }}
   </DraggableBoardCard>
 );
-  })}
+  )}
   </div>
 </DndContext>
 
