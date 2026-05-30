@@ -543,11 +543,7 @@ return (
   display: grid;
   grid-template-columns: repeat(5, 1fr);
 
-  border-top: 1px solid rgba(0,194,255,.42);
-  background: rgba(255,255,255,.008);
-
-  box-shadow:
-    0 -1px 8px rgba(0,194,255,.10);
+ border-top: 1px solid rgba(0,194,255,.12);
 }
 
 .rail-zone {
