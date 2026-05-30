@@ -752,7 +752,7 @@ overflow: hidden;
           overflow: hidden;
         }
 
-       .price-row {
+     .price-row {
   position: relative;
   height: 42px;
   min-height: 42px;
@@ -763,16 +763,15 @@ overflow: hidden;
   align-items: center;
 
   margin-top: 18px;
-  padding-top: 18px;
+  padding-top: 4px;
 
   border-top: 1px solid rgba(255,255,255,.045);
   gap: 10px;
 }
-
         .price-row::before {
           content: "";
           position: absolute;
-          top: -1px;
+          top: 0px;
           left: 0;
 
           width: 34%;
