@@ -43,3 +43,28 @@ jobs:
           commit_message: Build AWS taxonomy files
           file_pattern: config/awsTaxonomyMaster.json config/configCategories.js
           push_options: --force-with-lease
+      - name: Deploy taxonomy to AWS via SSM
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+        run: |
+          aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy IronXchange taxonomy from GitHub Actions" \
+            --parameters commands='[
+              "cd /var/www/ironxchange/src/config",
+              "sudo cp configCategories.js configCategories.BACKUP-github-actions-$(date +%Y%m%d-%H%M%S).js",
+              "sudo curl -L \"https://raw.githubusercontent.com/tarpbarry-stack/ironxchange-homepage/main/config/configCategories.js?cachebust=$(date +%s)\" -o configCategories.js",
+              "grep -c \"\\\"id\\\": \" configCategories.js",
+              "grep -n \"TESTMODEL999\" configCategories.js || true",
+              "cd /var/www/ironxchange",
+              "OLD_PID=$(sudo lsof -t -i :3000 || true)",
+              "if [ ! -z \"$OLD_PID\" ]; then sudo kill $OLD_PID || true; fi",
+              "nohup node server/index.js > /tmp/ironxchange-server.log 2>&1 &",
+              "sleep 3",
+              "sudo lsof -i :3000"
+            ]'          
