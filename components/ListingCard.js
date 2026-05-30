@@ -259,49 +259,11 @@ return (
     loading="lazy"
   />
 
-        {sellerMode ? (
-          <div className="workflow-photo-pill" onClick={stopCardClick}>
-            <select
-              value={workflowValue}
-              onChange={e => {
-                stopCardClick(e);
-                onWorkflowChange?.(listing, e.target.value);
-              }}
-            >
-              <option value="good-listing">Good Listing</option>
-              <option value="reprice">Reprice</option>
-              <option value="refresh-photos">Refresh Photos</option>
-              <option value="social-blast">Social Blast</option>
-              <option value="review">Review</option>
-            </select>
-          </div>
-        ) : null}
-
-        {images.length > 1 ? (
-          <>
-            <button
-              type="button"
-              className="card-photo-nav left"
-              onClick={e => changePhoto(e, -1)}
-              aria-label="Previous photo"
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              className="card-photo-nav right"
-              onClick={e => changePhoto(e, 1)}
-              aria-label="Next photo"
-            >
-              ›
-            </button>
-
-            <span className="photo-count">
-              {photoIndex + 1}/{images.length}
-            </span>
-          </>
-        ) : null}
+       {sellerMode ? (
+  <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
+    {isPaused ? "PAUSED" : "LIVE"}
+  </div>
+) : null}
        </div>
 </a>
 
@@ -348,11 +310,6 @@ return (
             <strong>{listing.price || "Call for price"}</strong>
           )}
 
-          {sellerMode ? (
-            <span className={`status-pill ${isPaused ? "paused" : ""}`}>
-              {isPaused ? "PAUSED" : "LIVE"}
-            </span>
-          ) : null}
 
           <div className="meta">
             {showSave ? (
@@ -393,7 +350,7 @@ return (
                 onEdit?.(listing);
               }}
             >
-              EDIT
+              LAUNCH
             </button>
 
             <button
@@ -949,6 +906,43 @@ overflow: hidden;
           transform: scale(1.06);
         }
 
+
+.status-photo-pill {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 6;
+
+  height: 24px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: rgba(0,194,255,.12);
+  border: 1px solid rgba(0,194,255,.42);
+  color: rgba(210,250,255,.86);
+
+  font-size: 8.5px;
+  font-weight: 950;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.05),
+    0 8px 20px rgba(0,0,0,.28);
+}
+
+.status-photo-pill.paused {
+  background: rgba(120,120,120,.14);
+  border-color: rgba(180,180,180,.30);
+  color: rgba(255,255,255,.52);
+}
+
+
         .workflow-photo-pill {
           position: absolute;
           left: 10px;
@@ -1070,6 +1064,17 @@ overflow: hidden;
             transform .14s ease;
         }
 
+.launch-action {
+  border-color: rgba(0,194,255,.30) !important;
+  color: rgba(180,245,255,.86) !important;
+  background: rgba(0,194,255,.055) !important;
+}
+
+.launch-action:hover {
+  border-color: rgba(0,194,255,.58) !important;
+  color: #00C2FF !important;
+  background: rgba(0,194,255,.10) !important;
+}
         .seller-actions button:hover {
           transform: translateY(-1px);
           border-color: rgba(255,196,0,.45);
