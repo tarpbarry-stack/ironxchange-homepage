@@ -557,8 +557,7 @@ return (
 }
 
 .card.grid-drag-source {
-  opacity: 0;
-  pointer-events: none;
+  opacity: 1;
 }
 
 .card.grid-ghost-target {
