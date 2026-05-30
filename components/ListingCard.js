@@ -67,7 +67,7 @@ onSendBack,
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const [boardColor, setBoardColor] = useState("none");
-const [boardOutline, setBoardOutline] = useState(1);
+  const [boardOutline, setBoardOutline] = useState(1);
 
 const boardColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
 
@@ -467,11 +467,6 @@ return (
   cursor: grab;
 }
 
-.card-board-zone {
-  cursor: grab;
-  background: rgba(255,0,0,.15);
-}
-
 .board-command-rail {
   height: 13px;
   min-height: 13px;
@@ -577,13 +572,16 @@ return (
         }
 
         .card.seller-mode {
-          min-height: 440px;
-        }
+  height: 391px;
+  min-height: 391px;
+  max-height: 391px;
+}
 
         .card.seller-mode .card-body {
-          min-height: 230px;
-        }
-
+  height: 195px;
+  min-height: 195px;
+  max-height: 195px;
+}
         .card.paused-card {
           opacity: .58;
           filter: grayscale(.42);
