@@ -109,17 +109,29 @@ export default function ListingCard({
   }
 
   function stopCardClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
+  e.preventDefault();
+  e.stopPropagation();
+}
 
-  return (
-   <a
-  href={getListingHref(listing, from)}
-  className={`card ${sellerMode ? "seller-mode" : ""} ${
-    isPaused ? "paused-card" : ""
-  }`}
-  onClick={() => {
+function handleCardClick() {
+  captureIXEvent("listing_card_clicked", {
+    listingId: id,
+    title: listing.title,
+    category: listing.category || listing.type,
+    make: listing.make,
+    model: listing.model,
+    price: listing.price,
+    location: listing.location,
+    from
+  });
+}
+
+return (
+  <div
+    className={`card ${sellerMode ? "seller-mode" : ""} ${
+      isPaused ? "paused-card" : ""
+    }`}
+  >
     captureIXEvent("listing_card_clicked", {
       listingId: id,
       title: listing.title,
