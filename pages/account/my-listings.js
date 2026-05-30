@@ -1033,7 +1033,7 @@ onBoardDragEnd={
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 2px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
@@ -1093,23 +1093,42 @@ onBoardDragEnd={
 }
 
 .ixi-color-filter {
-  width: 24px;
-  height: 14px;
+  width: 20px;
+  height: 8px;
+
   border: 1px solid rgba(255,255,255,.055);
   border-radius: 3px;
-  background: rgba(255,255,255,.018);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(0,0,0,.08)
+    ),
+    rgba(255,255,255,.018);
+
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.025),
     inset 0 -1px 0 rgba(0,0,0,.32);
 }
 
-.color-green { background: rgba(56,161,105,.38); }
-.color-yellow { background: rgba(255,196,0,.38); }
-.color-red { background: rgba(229,62,62,.38); }
-.color-cyan { background: rgba(0,194,255,.38); }
-.color-white { background: rgba(255,255,255,.30); }
-.color-blue { background: rgba(49,130,206,.38); }
-.color-orange { background: rgba(249,133,18,.38); }
+.color-none {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(0,0,0,.08)
+    ),
+    rgba(255,255,255,.018);
+}
+
+.color-green { background: rgba(56,161,105,.42); }
+.color-yellow { background: rgba(255,196,0,.42); }
+.color-red { background: rgba(229,62,62,.42); }
+.color-cyan { background: rgba(0,194,255,.42); }
+.color-white { background: rgba(255,255,255,.34); }
+.color-blue { background: rgba(49,130,206,.42); }
+.color-orange { background: rgba(249,133,18,.42); }
 
 .ixi-thickness-filter {
   width: 24px;
