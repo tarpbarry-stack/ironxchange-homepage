@@ -130880,6 +130880,11 @@ const categoriesConfig = {
               "id": "skid-steer-ctl-caterpillar-other",
               "name": "OTHER",
               "subcategories": []
+            },
+            {
+              "id": "skid-steer-ctl-caterpillar-testmodel999",
+              "name": "TESTMODEL999",
+              "subcategories": []
             }
           ]
         },
