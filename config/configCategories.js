@@ -133899,6 +133899,17 @@ const categoriesConfig = {
               "subcategories": []
             }
           ]
+        },
+        {
+          "id": "skid-steer-ctl-harlett",
+          "name": "HARLETT",
+          "subcategories": [
+            {
+              "id": "skid-steer-ctl-harlett-other",
+              "name": "OTHER",
+              "subcategories": []
+            }
+          ]
         }
       ]
     },
