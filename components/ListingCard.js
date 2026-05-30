@@ -1065,21 +1065,37 @@ overflow: hidden;
         }
 
 .launch-action {
-  border-color: rgba(0,194,255,.30) !important;
-  color: rgba(180,245,255,.86) !important;
-  background: rgba(0,194,255,.055) !important;
+  border-color: rgba(0,194,255,.42) !important;
+  color: rgba(0,194,255,.92) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.09),
+      rgba(0,194,255,.03)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 0 0 1px rgba(0,194,255,.04);
 }
 
 .launch-action:hover {
-  border-color: rgba(0,194,255,.58) !important;
-  color: #00C2FF !important;
-  background: rgba(0,194,255,.10) !important;
+  border-color: rgba(0,194,255,.72) !important;
+  color: #6FE8FF !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.14),
+      rgba(0,194,255,.05)
+    ) !important;
 }
-        .seller-actions button:hover {
-          transform: translateY(-1px);
-          border-color: rgba(255,196,0,.45);
-          color: #FFC400;
-        }
+       .seller-actions button:hover:not(.launch-action) {
+  transform: translateY(-1px);
+  border-color: rgba(255,196,0,.45);
+  color: #FFC400;
+}
 
         .danger-action:hover {
           border-color: rgba(229,62,62,.45) !important;
