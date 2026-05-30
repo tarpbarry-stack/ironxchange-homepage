@@ -505,11 +505,11 @@ return (
             0 1px 0 rgba(255,255,255,.045) inset,
             0 18px 44px rgba(0,0,0,.22);
 
-          transition:
-            transform .16s ease,
-            border-color .16s ease,
-            background .16s ease,
-            box-shadow .16s ease;
+         transition:
+  transform .22s cubic-bezier(.22,.61,.36,1),
+  border-color .16s ease,
+  background .16s ease,
+  box-shadow .16s ease;
 
           contain: layout paint;
         }
@@ -531,11 +531,13 @@ return (
 }
 
 .card.board-dragging {
-  pointer-events: none;
-  transition: none;
+  cursor: grabbing;
+
   box-shadow:
     0 1px 0 rgba(255,255,255,.06) inset,
     0 30px 80px rgba(0,0,0,.48);
+
+  transition: none;
 }
 
 .board-command-rail {
