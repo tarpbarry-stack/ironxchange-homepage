@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import featureKeywords from "../../lib/featureKeywords";
 import ListingCard from "../../components/ListingCard";
-import { getV12CategoryNames } from "../../lib/v12TaxonomyAdapter";
 
 import {
   getListingId,
@@ -11,11 +10,6 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
-import {
-  DndContext,
-  useDraggable
-} from "@dnd-kit/core";
-
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -23,7 +17,32 @@ const BRAND_YELLOW = "#FFC400";
 
 const categories = [
   "ALL CATEGORIES",
-  ...getV12CategoryNames()
+  "AERIAL EQUIPMENT",
+  "AGGREGATE",
+  "AGRICULTURE HARVESTERS",
+  "AGRICULTURE TRACTORS",
+  "ASPHALT EQUIPMENT",
+  "BACKHOE LOADERS",
+  "COMPACTION/ROLLERS",
+  "CRANES",
+  "CRAWLER CARRIERS / LOADER",
+  "DOZERS",
+  "DRILLS & PILING",
+  "DUMP TRUCKS - ARTIC/RIGID",
+  "EXCAVATORS",
+  "FORKLIFTS",
+  "MOTOR GRADERS",
+  "SCRAPER",
+  "SKID STEER/CTL",
+  "TELEHANDLERS",
+  "TRENCHERS/PLOWS",
+  "TRAILERS",
+  "TRUCKS",
+  "WHEEL LOADERS",
+  "ATTACHMENTS / PARTS",
+  "OTHER SPECIALTY",
+  "SUPPORT EQUIPMENT",
+  "UTILITY CARTS"
 ];
 
 
@@ -116,7 +135,6 @@ function sortListings(listings, sortMode) {
 
   return sorted;
 }
-
 export default function MyListingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -125,10 +143,6 @@ export default function MyListingsPage() {
   const [currentUserId, setCurrentUserId] = useState("");
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [savingPriceId, setSavingPriceId] = useState("");
-
-  const [hiddenCards, setHiddenCards] = useState([]);
-  const [cardStyles, setCardStyles] = useState({});
-  const [boardPositions, setBoardPositions] = useState({});
 
   const [workflowFilter, setWorkflowFilter] = useState("all");
   
@@ -468,80 +482,6 @@ async function updateWorkflowStatus(listing, status) {
     console.error("Workflow update failed:", error);
   }
 }
-
-const visibleListings = filteredListings.filter(
-  item => !hiddenCards.includes(String(getListingId(item)))
-);
-
-function cycleCardColor(listingId) {
-  const colors = ["none", "green", "yellow", "cyan", "red", "blue"];
-
-  setCardStyles(current => {
-    const currentColor = current[listingId]?.color || "none";
-    const nextColor =
-      colors[(colors.indexOf(currentColor) + 1) % colors.length];
-
-    return {
-      ...current,
-      [listingId]: {
-        ...(current[listingId] || {}),
-        color: nextColor
-      }
-    };
-  });
-}
-
-function cycleCardWeight(listingId) {
-  const weights = [1, 3, 5];
-
-  setCardStyles(current => {
-    const currentWeight = current[listingId]?.weight || 1;
-    const nextWeight =
-      weights[(weights.indexOf(currentWeight) + 1) % weights.length];
-
-    return {
-      ...current,
-      [listingId]: {
-        ...(current[listingId] || {}),
-        weight: nextWeight
-      }
-    };
-  });
-}
-
-function hideCardFromBoard(listingId) {
-  setHiddenCards(current =>
-    current.includes(String(listingId))
-      ? current
-      : [...current, String(listingId)]
-  );
-}
-
-function resetBoardSession() {
-  setHiddenCards([]);
-  setCardStyles({});
-}
-
-function handleDragEnd(event) {
-  const { active, delta } = event;
-
-  const id = String(active.id);
-
-  setBoardPositions(current => {
-    const previous = current[id] || {
-      x: 0,
-      y: 0
-    };
-
-    return {
-      ...current,
-      [id]: {
-        x: previous.x + delta.x,
-        y: previous.y + delta.y
-      }
-    };
-  });
-}
   
   return (
     <>
@@ -732,23 +672,15 @@ function handleDragEnd(event) {
       <section className="featured">
         <div className="section-head">
           <h2>MY INVENTORY</h2>
-          <span>{visibleListings.length} LISTINGS</span>
-<button
-  type="button"
-  className="board-reset-btn"
-  onClick={resetBoardSession}
->
-  RESET
-</button>      
+          <span>{filteredListings.length} LISTINGS</span>
         </div>
 
-   <DndContext onDragEnd={handleDragEnd}>
-  <div
-    className={`cards ${
-      visibleListings.length === 1 ? "single-card" : ""
-    }`}
-  >
-  {visibleListings.map(item => {
+   <div
+  className={`cards ${
+    filteredListings.length === 1 ? "single-card" : ""
+  }`}
+>
+  {filteredListings.map(item => {
     const listingId = getListingId(item);
     const cardImages = getCardImages(item);
     const listingHref = getListingHref(item);
@@ -761,14 +693,55 @@ function handleDragEnd(event) {
   "live";
 
 const isPaused = listingStatus === "paused";
+const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
-{visibleListings.length === 0 && (
-  <div className="empty">
-    <h3>No listings found.</h3>
-    <p>Try another search or filter.</p>
-  </div>
-)}
+
+
+return (
+  <ListingCard
+    key={listingId}
+    listing={item}
+    showSave={false}
+    from="account"
+
+    sellerMode={true}
+
+    workflowValue={getWorkflowStatus(item)}
+    onWorkflowChange={updateWorkflowStatus}
+
+    priceValue={formatPriceInput(item.price)}
+    onPriceKeyDown={savePrice}
+
+    savingPrice={
+      savingPriceId === String(listingId)
+    }
+
+    isPaused={isPaused}
+
+    onEdit={listing => {
+      window.location.href =
+        `/live?id=${getListingId(listing)}`;
+    }}
+
+    onPause={pauseListing}
+
+    onReactivate={reactivateListing}
+
+    onDelete={confirmDelete}
+  />
+
+    );
+  })}
+</div>
+
+        {filteredListings.length === 0 && (
+          <div className="empty">
+            <h3>No listings found.</h3>
+            <p>Try another search or filter.</p>
+          </div>
+        )}
       </section>
+
 <Footer />
         
 <style jsx>{`
@@ -1366,122 +1339,6 @@ const isPaused = listingStatus === "paused";
 .empty {
   padding: 40px;
   text-align: center;
-}
-
-
-.draggable-board-card {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-  touch-action: none;
-  cursor: grab;
-  will-change: transform;
-}
-
-.draggable-board-card:active {
-  cursor: grabbing;
-}
-
-.board-card-wrap {
-  position: relative;
-  border-radius: 18px;
-
-  outline: var(--board-weight) solid transparent;
-
-  transition:
-    outline-color .16s ease,
-    outline-width .16s ease,
-    transform .16s ease;
-}
-
-.board-card-wrap :global(img) {
-  width: 100% !important;
-  object-fit: cover !important;
-}
-
-.board-color-green {
-  outline-color: rgba(56,161,105,.75);
-}
-
-.board-color-yellow {
-  outline-color: rgba(255,196,0,.8);
-}
-
-.board-color-cyan {
-  outline-color: rgba(0,220,255,.75);
-}
-
-.board-color-red {
-  outline-color: rgba(229,62,62,.78);
-}
-
-.board-color-blue {
-  outline-color: rgba(66,153,225,.78);
-}
-
-.passport-strip {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 6px;
-  height: 6px;
-  display: grid;
-  grid-template-columns: 1fr 22px;
-  gap: 5px;
-  opacity: .28;
-  transition: opacity .14s ease;
-  z-index: 50;
-  pointer-events: auto;
-}
-
-.board-card-wrap:hover .passport-strip {
-  opacity: .9;
-}
-
-.passport-color-dot,
-.passport-weight-dot {
-  height: 6px;
-  border: none;
-  border-radius: 999px;
-  background: rgba(160,160,160,.34);
-  cursor: pointer;
-  padding: 0;
-}
-
-.passport-weight-dot {
-  background: rgba(255,255,255,.22);
-}
-
-.board-reset-btn {
-  height: 24px;
-  padding: 0 10px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 999px;
-  background: #101010;
-  color: rgba(255,255,255,.38);
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .45px;
-  cursor: pointer;
-}
-
-.board-reset-btn:hover {
-  color: #FFC400;
-  border-color: rgba(255,196,0,.35);
-}
-
-.board-card-wrap :global(.card-photo) {
-  height: 190px !important;
-  width: 100% !important;
-  background-size: cover !important;
-  background-position: center !important;
-}
-
-.board-card-wrap :global(.card-photo img),
-.board-card-wrap :global(img) {
-  width: 100% !important;
-  height: 190px !important;
-  object-fit: cover !important;
 }
 
 @media (max-width: 850px) {
