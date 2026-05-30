@@ -64,6 +64,9 @@ onDelete,
 onSendFront,
 onSendBack,
 
+ixiState,
+onIxiStateChange,
+
 isBoardDraggingCard = false,
 isGhostTarget = false,
 onBoardDragStart,
