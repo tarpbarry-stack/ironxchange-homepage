@@ -103125,6 +103125,11 @@ const categoriesConfig = {
               "id": "excavators-volvo-se460",
               "name": "SE460",
               "subcategories": []
+            },
+            {
+              "id": "excavators-volvo-ecr235el",
+              "name": "ECR235EL",
+              "subcategories": []
             }
           ]
         },

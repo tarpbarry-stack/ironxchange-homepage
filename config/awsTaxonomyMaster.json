@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-30T01:31:09.334Z",
+  "generatedAt": "2026-05-30T01:38:41.990Z",
   "note": "IronXchange AWS taxonomy master. No broad cleanup applied. CAT → CATERPILLAR is applied during generation.",
   "categories": [
     {
@@ -83958,6 +83958,10 @@
         {
           "make": "DOOSAN",
           "model": "DX85R"
+        },
+        {
+          "make": "VOLVO",
+          "model": "ECR235EL"
         }
       ]
     },
