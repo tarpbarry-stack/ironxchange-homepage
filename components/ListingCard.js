@@ -93,6 +93,8 @@ function cycleBoardOutline(e) {
 }
 
  const boardDragStart = useRef(null);
+const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+const [isBoardDragging, setIsBoardDragging] = useState(false);
 
 function startBoardDrag(e) {
   if (e.target.closest("button, input, select, a")) return;
@@ -102,8 +104,21 @@ function startBoardDrag(e) {
     y: e.clientY
   };
 
+  setIsBoardDragging(true);
+  setDragOffset({ x: 0, y: 0 });
+
   e.currentTarget.setPointerCapture?.(e.pointerId);
 }
+
+  function moveBoardDrag(e) {
+  if (!boardDragStart.current) return;
+
+  setDragOffset({
+    x: e.clientX - boardDragStart.current.x,
+    y: e.clientY - boardDragStart.current.y
+  });
+}
+  
 
 function endBoardDrag(e) {
   if (!boardDragStart.current) return;
@@ -112,6 +127,8 @@ function endBoardDrag(e) {
   const dy = e.clientY - boardDragStart.current.y;
 
   boardDragStart.current = null;
+  setIsBoardDragging(false);
+  setDragOffset({ x: 0, y: 0 });
 
   if (Math.abs(dx) < 70) return;
   if (Math.abs(dx) < Math.abs(dy) * 1.25) return;
@@ -121,7 +138,7 @@ function endBoardDrag(e) {
   } else {
     onSendBack?.(listing);
   }
-} 
+}
 
 
 function cycleBoardColor(e) {
@@ -198,11 +215,17 @@ function handleCardClick() {
 }
 
 return (
-  <div
-    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
-  sellerMode ? "seller-mode" : ""
-} ${isPaused ? "paused-card" : ""}`}
-  >
+ <div
+  className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+    isBoardDragging ? "board-dragging" : ""
+  } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+  style={{
+    transform: isBoardDragging
+      ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+      : undefined,
+    zIndex: isBoardDragging ? 50 : undefined
+  }}
+>
     
       <a
   href={getListingHref(listing, from)}
@@ -283,7 +306,9 @@ return (
         <div
   className="card-board-zone"
   onPointerDown={startBoardDrag}
+  onPointerMove={moveBoardDrag}
   onPointerUp={endBoardDrag}
+  onPointerCancel={endBoardDrag}
 >
 
         <div className="keyword-row">
@@ -501,6 +526,14 @@ return (
 
 .card-board-zone {
   cursor: grab;
+}
+
+.card.board-dragging {
+  pointer-events: none;
+  transition: none;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 30px 80px rgba(0,0,0,.48);
 }
 
 .board-command-rail {
