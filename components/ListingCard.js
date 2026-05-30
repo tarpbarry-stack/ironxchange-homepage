@@ -133,7 +133,12 @@ return (
     }`}
   >
     
-      <div className="card-photo">
+      <a
+  href={getListingHref(listing, from)}
+  className="photo-click-zone"
+  onClick={handleCardClick}
+>
+  <div className="card-photo">
         <img
   src={currentPhoto || "/images/hero-equipment-yard.jpg"}
   alt={listing.title || "Machine"}
@@ -185,9 +190,10 @@ return (
             </span>
           </>
         ) : null}
-      </div>
+       </div>
+</a>
 
-      <div className="card-body">
+<div className="card-body">
        <a
   href={getListingHref(listing, from)}
   className="title-click-zone"
@@ -359,6 +365,12 @@ return (
         color: inherit;
         text-decoration: none;
         }
+
+.photo-click-zone {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
 
         .card:hover {
           transform: translateY(-2px) scale(1.003);
