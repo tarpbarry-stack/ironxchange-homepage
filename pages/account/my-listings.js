@@ -832,22 +832,22 @@ return (
         aria-label="Cycle card color"
       />
 
-      <button
-        type="button"
-        className="passport-weight-dot"
-        onClick={e => {
-          e.stopPropagation();
-          cycleCardWeight(listingId);
-        }}
-        aria-label="Cycle outline weight"
-      />
-       </div>
-          </div>
-          </div>
-               }}
-  </DraggableBoardCard>
+             <button
+          type="button"
+          className="passport-weight-dot"
+          onClick={e => {
+            e.stopPropagation();
+            cycleCardWeight(listingId);
+          }}
+          aria-label="Cycle outline weight"
+        />
+      </div>
+    </div>
+  </div>
+)}
+</DraggableBoardCard>
 );
-  )}
+  })}
   </div>
 </DndContext>
 
