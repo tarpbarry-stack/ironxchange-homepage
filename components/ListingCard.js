@@ -87,6 +87,17 @@ function cycleBoardColor(e) {
   });
 }
 
+  function cycleBoardOutline(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setBoardOutline(current => {
+    if (current === 1) return 3;
+    if (current === 3) return 5;
+    return 1;
+  });
+}
+
  const boardDragStart = useRef(null);
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 const [isBoardDragging, setIsBoardDragging] = useState(false);
