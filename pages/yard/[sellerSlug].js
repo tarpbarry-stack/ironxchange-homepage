@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import SellerLogoDecal from "../../components/SellerLogoDecal";
+import { getV12CategoryNames } from "../../lib/v12TaxonomyAdapter";
 
 import ListingCard from "../../components/ListingCard";
 import { getListingId } from "../../lib/listingFormatters";
@@ -13,32 +14,7 @@ const BRAND_YELLOW = "#FFC400";
 
 const categories = [
   "ALL CATEGORIES",
-  "AERIAL EQUIPMENT",
-  "AGGREGATE",
-  "AGRICULTURE HARVESTERS",
-  "AGRICULTURE TRACTORS",
-  "ASPHALT EQUIPMENT",
-  "BACKHOE LOADERS",
-  "COMPACTION/ROLLERS",
-  "CRANES",
-  "CRAWLER CARRIERS / LOADER",
-  "DOZERS",
-  "DRILLS & PILING",
-  "DUMP TRUCKS - ARTIC/RIGID",
-  "EXCAVATORS",
-  "FORKLIFTS",
-  "MOTOR GRADERS",
-  "SCRAPER",
-  "SKID STEER/CTL",
-  "TELEHANDLERS",
-  "TRENCHERS/PLOWS",
-  "TRAILERS",
-  "TRUCKS",
-  "WHEEL LOADERS",
-  "ATTACHMENTS / PARTS",
-  "OTHER SPECIALTY",
-  "SUPPORT EQUIPMENT",
-  "UTILITY CARTS"
+  ...getV12CategoryNames()
 ];
 
 function slugify(text = "") {
