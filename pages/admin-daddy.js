@@ -1311,8 +1311,6 @@ const [deployBusy, setDeployBusy] = useState(false);
   </section>
 )}
 
-                </section>
-              )}
 
               {activeTab === "listings" && (
                 <section className="grid two">
