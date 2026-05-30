@@ -608,15 +608,15 @@ return (
         }
 
         .card.seller-mode {
-  height: 391px;
-  min-height: 391px;
-  max-height: 391px;
+  height: 440px;
+  min-height: 440px;
+  max-height: 440px;
 }
 
-        .card.seller-mode .card-body {
-  height: 195px;
-  min-height: 195px;
-  max-height: 195px;
+.card.seller-mode .card-body {
+  height: 244px;
+  min-height: 244px;
+  max-height: 244px;
 }
         .card.paused-card {
           opacity: .58;
