@@ -1093,23 +1093,50 @@ onBoardDragEnd={
 }
 
 .ixi-color-filter {
-  width: 20px;
-  height: 8px;
+  width: 20px !important;
+  height: 8px !important;
 
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 1px !important;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.025),
-      rgba(0,0,0,.08)
-    ),
-    rgba(255,255,255,.018);
+  padding: 0 !important;
+  cursor: pointer;
 
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.025),
     inset 0 -1px 0 rgba(0,0,0,.32);
+}
+
+.ixi-color-filter.color-none {
+  background: rgba(255,255,255,.035) !important;
+}
+
+.ixi-color-filter.color-green {
+  background: rgba(56,161,105,.42) !important;
+}
+
+.ixi-color-filter.color-yellow {
+  background: rgba(255,196,0,.42) !important;
+}
+
+.ixi-color-filter.color-red {
+  background: rgba(229,62,62,.42) !important;
+}
+
+.ixi-color-filter.color-cyan {
+  background: rgba(0,194,255,.42) !important;
+}
+
+.ixi-color-filter.color-white {
+  background: rgba(255,255,255,.34) !important;
+}
+
+.ixi-color-filter.color-blue {
+  background: rgba(49,130,206,.42) !important;
+}
+
+.ixi-color-filter.color-orange {
+  background: rgba(249,133,18,.42) !important;
 }
 
 .color-none {
