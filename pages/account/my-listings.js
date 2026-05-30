@@ -117,27 +117,6 @@ function sortListings(listings, sortMode) {
   return sorted;
 }
 
-function DraggableBoardCard({ id, boardPosition, onHide, children }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id });
-
-  const x = (boardPosition?.x || 0) + (transform?.x || 0);
-  const y = (boardPosition?.y || 0) + (transform?.y || 0);
-
- return (
-  <div
-    ref={setNodeRef}
-    className="draggable-board-card"
-    style={{
-      transform: `translate3d(${x}px, ${y}px, 0)`,
-      zIndex: isDragging ? 50 : 1
-    }}
-  >
-    {children({ listeners, attributes })}
-  </div>
-);
-}
-
 export default function MyListingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -783,74 +762,6 @@ function handleDragEnd(event) {
 
 const isPaused = listingStatus === "paused";
 
-return (
-  <DraggableBoardCard
-    id={String(listingId)}
-    boardPosition={boardPositions[String(listingId)]}
-    onHide={hideCardFromBoard}
-  >
-    {({ listeners, attributes }) => (
-      <div
-        className={`board-card-wrap board-color-${
-      cardStyles[listingId]?.color || "none"
-    }`}
-    style={{
-      "--board-weight": `${cardStyles[listingId]?.weight || 1}px`
-    }}
-    onDoubleClick={() => hideCardFromBoard(listingId)}
-  >
-    <ListingCard
-      listing={item}
-      showSave={false}
-      from="account"
-      sellerMode={true}
-      workflowValue={getWorkflowStatus(item)}
-      onWorkflowChange={updateWorkflowStatus}
-      priceValue={formatPriceInput(item.price)}
-      onPriceKeyDown={savePrice}
-      savingPrice={savingPriceId === String(listingId)}
-      isPaused={isPaused}
-      onEdit={() => {}}
-      onPause={pauseListing}
-      onReactivate={reactivateListing}
-      onDelete={confirmDelete}
-    />
-
-    <div
-  className="passport-drag-zone"
-  {...listeners}
-  {...attributes}
->
-  <div className="passport-strip">
-      <button
-        type="button"
-        className="passport-color-dot"
-        onClick={e => {
-          e.stopPropagation();
-          cycleCardColor(listingId);
-        }}
-        aria-label="Cycle card color"
-      />
-
-             <button
-          type="button"
-          className="passport-weight-dot"
-          onClick={e => {
-            e.stopPropagation();
-            cycleCardWeight(listingId);
-          }}
-          aria-label="Cycle outline weight"
-        />
-      </div>
-    </div>
-  </div>
-)}
-</DraggableBoardCard>
-);
-  })}
-  </div>
-</DndContext>
-
 {visibleListings.length === 0 && (
   <div className="empty">
     <h3>No listings found.</h3>
@@ -1473,18 +1384,9 @@ return (
 
 .board-card-wrap {
   position: relative;
-
-  width: 100%;
-  min-width: 0;
-
-  border-radius: 16px;
-  overflow: hidden;
-
-  background: #151515;
-  border: 1px solid #242424;
+  border-radius: 18px;
 
   outline: var(--board-weight) solid transparent;
-  outline-offset: 2px;
 
   transition:
     outline-color .16s ease,
