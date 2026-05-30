@@ -1259,48 +1259,58 @@ const [deployBusy, setDeployBusy] = useState(false);
                 </section>
               )}
 
-              {activeTab === "sharetribe sync" && (
-                <section className="grid two">
-                  <AdminCard label="Patch Queue" title="IX → Sharetribe Sync" wide>
-                    <p>
-                      Admin Daddy stages taxonomy changes first. Sharetribe sync is the downstream patch required so listing creation/search fields do not fail.
-                    </p>
+             {activeTab === "sharetribe sync" && (
 
-                    <div className="action-row">
-                      <button type="button" onClick={copyPatchQueue}>
-                        Copy Patch Queue
-                      </button>
+  <section className="grid two">
+    <AdminCard label="AWS Deploy" title="Taxonomy Deployment" wide>
+      <p>
+        Admin Daddy commits taxonomy changes to GitHub, GitHub Actions rebuilds
+        awsTaxonomyMaster.json and configCategories.js, then AWS receives the
+        generated taxonomy file and feeds Sharetribe.
+      </p>
+  <div className="action-row">
+    <button type="button" onClick={copyPatchQueue}>
+      Copy Patch Queue
+    </button>
 
-                      <button type="button" onClick={stageSharetribeSync}>
-                        Stage Sharetribe Sync
-                      </button>
+    <button
+      type="button"
+      onClick={deployAwsTaxonomy}
+      disabled={deployBusy}
+    >
+      {deployBusy ? "Deploying..." : "Deploy AWS Taxonomy"}
+    </button>
 
-                      <button type="button" onClick={clearPatchQueue}>
-                        Clear Queue
-                      </button>
-                    </div>
+    <button type="button" onClick={clearPatchQueue}>
+      Clear Queue
+    </button>
+  </div>
 
-                    {patchQueue.length === 0 ? (
-                      <p>No staged patches yet.</p>
-                    ) : (
-                      <div className="row-table">
-                        {patchQueue.map(patch => (
-                          <div className="patch-row" key={patch.id}>
-                            <strong>{patch.type}</strong>
-                            <span>{patch.category || patch.target || "GLOBAL"}</span>
-                            <span>
-                              {patch.make ||
-                                patch.currentMake ||
-                                patch.model ||
-                                patch.action ||
-                                "—"}
-                            </span>
-                            <small>{patch.sharetribeImpact || patch.status}</small>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </AdminCard>
+  {patchQueue.length === 0 ? (
+    <p>No staged patches yet.</p>
+  ) : (
+    <div className="row-table">
+      {patchQueue.map(patch => (
+        <div className="patch-row" key={patch.id}>
+          <strong>{patch.type}</strong>
+          <span>{patch.category || patch.target || "GLOBAL"}</span>
+          <span>
+            {patch.make ||
+              patch.currentMake ||
+              patch.model ||
+              patch.action ||
+              "—"}
+          </span>
+          <small>{patch.status || patch.sharetribeImpact}</small>
+        </div>
+      ))}
+    </div>
+  )}
+</AdminCard>
+
+  </section>
+)}
+
                 </section>
               )}
 
