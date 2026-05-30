@@ -1469,6 +1469,7 @@ return (
 
 .board-card-wrap {
   position: relative;
+
   width: 100%;
   min-width: 0;
 
