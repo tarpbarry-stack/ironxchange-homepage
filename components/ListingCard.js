@@ -67,8 +67,30 @@ onSendBack,
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const [boardColor, setBoardColor] = useState("none");
+const [boardOutline, setBoardOutline] = useState(1);
 
-const boardColors = ["none", "green", "yellow", "cyan", "red", "blue"];
+const boardColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
+
+function cycleBoardColor(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setBoardColor(current => {
+    const currentIndex = boardColors.indexOf(current);
+    return boardColors[(currentIndex + 1) % boardColors.length];
+  });
+}
+
+function cycleBoardOutline(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setBoardOutline(current => {
+    if (current === 1) return 3;
+    if (current === 3) return 5;
+    return 1;
+  });
+}
 
 function cycleBoardColor(e) {
   e.preventDefault();
@@ -145,9 +167,9 @@ function handleCardClick() {
 
 return (
   <div
-    className={`card ${sellerMode ? "seller-mode" : ""} ${
-      isPaused ? "paused-card" : ""
-    }`}
+    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+  sellerMode ? "seller-mode" : ""
+} ${isPaused ? "paused-card" : ""}`}
   >
     
       <a
@@ -348,39 +370,47 @@ return (
             <span>Saves: {listing.saves || "—"}</span>
           </div>
                ) : null}
-<div className={`board-command-rail color-${boardColor}`}>
+<div className="board-command-rail">
   <button
     type="button"
-    className="rail-btn rail-left"
+    className="rail-zone"
     onClick={e => {
       e.preventDefault();
       e.stopPropagation();
       onSendFront?.(listing);
     }}
-    title="Move to front"
-  >
-    ←
-  </button>
-
-  <button
-    type="button"
-    className="rail-btn rail-color"
-    onClick={cycleBoardColor}
-    title="Color"
   />
 
   <button
     type="button"
-    className="rail-btn rail-right"
+    className="rail-zone"
+    onClick={cycleBoardColor}
+  />
+
+  <button
+    type="button"
+    className="rail-zone"
+    onClick={cycleBoardOutline}
+  />
+
+  <button
+    type="button"
+    className="rail-zone"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+  />
+
+  <button
+    type="button"
+    className="rail-zone"
     onClick={e => {
       e.preventDefault();
       e.stopPropagation();
       onSendBack?.(listing);
     }}
-    title="Move to back"
-  >
-    →
-  </button>
+  />
 </div>
          
       </div>
@@ -439,55 +469,92 @@ return (
 }
 
 .board-command-rail {
-  height: 15px;
+  height: 13px;
   margin: 11px -13px -14px;
 
   display: grid;
-  grid-template-columns: 1fr 30px 1fr;
+  grid-template-columns: repeat(5, 1fr);
 
-  border-top: 1px solid rgba(255,255,255,.045);
-  background: rgba(0,0,0,.18);
+  border-top: 1px solid rgba(255,255,255,.028);
+  background: rgba(255,255,255,.008);
 }
 
-.rail-btn {
+.rail-zone {
+  position: relative;
   border: none;
+  border-right: 1px solid rgba(255,255,255,.022);
   background: transparent;
-  color: rgba(255,255,255,.24);
-
   cursor: pointer;
-
-  font-size: 10px;
-  font-weight: 900;
+  padding: 0;
 }
 
-.rail-btn:hover {
-  color: #FFC400;
-  background: rgba(255,196,0,.06);
+.rail-zone:last-child {
+  border-right: none;
 }
 
-.rail-color {
-  border-left: 1px solid rgba(255,255,255,.05);
-  border-right: 1px solid rgba(255,255,255,.05);
+.rail-zone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 13px;
+  height: 1px;
+
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.12);
 }
 
-.color-green .rail-color {
-  background: #38A169;
+.rail-zone:hover {
+  background: rgba(255,255,255,.028);
 }
 
-.color-yellow .rail-color {
-  background: #FFC400;
+.rail-zone:hover::after {
+  background: rgba(255,196,0,.30);
 }
 
-.color-cyan .rail-color {
-  background: #00C2FF;
+.card.board-outline-1 {
+  outline-width: 1px;
 }
 
-.color-red .rail-color {
-  background: #E53E3E;
+.card.board-outline-3 {
+  outline-width: 3px;
 }
 
-.color-blue .rail-color {
-  background: #3182CE;
+.card.board-outline-5 {
+  outline-width: 5px;
+}
+
+.card.board-color-none {
+  outline-color: rgba(255,255,255,.018);
+}
+
+.card.board-color-green {
+  outline-color: rgba(56,161,105,.95);
+}
+
+.card.board-color-yellow {
+  outline-color: rgba(255,196,0,.95);
+}
+
+.card.board-color-red {
+  outline-color: rgba(229,62,62,.95);
+}
+
+.card.board-color-cyan {
+  outline-color: rgba(0,194,255,.95);
+}
+
+.card.board-color-white {
+  outline-color: rgba(255,255,255,.85);
+}
+
+.card.board-color-blue {
+  outline-color: rgba(49,130,206,.95);
+}
+
+.card.board-color-orange {
+  outline-color: rgba(249,133,18,.95);
 }
 
         .card:hover {
