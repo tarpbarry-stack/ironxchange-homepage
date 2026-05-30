@@ -661,53 +661,18 @@ function handleBoardDragEnd(listing) {
     Dashboard
   </a>
 
-  <button
-    type="button"
-    className={workflowFilter === "all" ? "active" : ""}
-    onClick={() => setWorkflowFilter("all")}
-  >
-    All
-  </button>
+  <button className="ixi-color-filter color-none" />
+  <button className="ixi-color-filter color-green" />
+  <button className="ixi-color-filter color-yellow" />
+  <button className="ixi-color-filter color-red" />
+  <button className="ixi-color-filter color-cyan" />
+  <button className="ixi-color-filter color-white" />
+  <button className="ixi-color-filter color-blue" />
+  <button className="ixi-color-filter color-orange" />
 
-  <button
-    type="button"
-    className={workflowFilter === "good-listing" ? "active" : ""}
-    onClick={() => setWorkflowFilter("good-listing")}
-  >
-    Good Listing
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "reprice" ? "active" : ""}
-    onClick={() => setWorkflowFilter("reprice")}
-  >
-    Reprice
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "refresh-photos" ? "active" : ""}
-    onClick={() => setWorkflowFilter("refresh-photos")}
-  >
-    Refresh Photos
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "social-blast" ? "active" : ""}
-    onClick={() => setWorkflowFilter("social-blast")}
-  >
-    Social Blast
-  </button>
-
-  <button
-    type="button"
-    className={workflowFilter === "review" ? "active" : ""}
-    onClick={() => setWorkflowFilter("review")}
-  >
-    Review
-  </button>
+  <button className="ixi-thickness-filter thin" />
+  <button className="ixi-thickness-filter medium" />
+  <button className="ixi-thickness-filter thick" />
 
   <a href="/post-free" className="tool-link">
     Add Machine
@@ -1082,33 +1047,17 @@ onBoardDragEnd={
     0 12px 30px rgba(0,0,0,.20);
 }
 
-.workflow-filter-shell a,
 .workflow-filter-shell button {
-  height: 26px;
-  padding: 0 10px;
-
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 999px;
-
-  background: #101010;
-  color: rgba(255,255,255,.48);
-
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .42px;
-  text-transform: uppercase;
-
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
 }
 
-
-.workflow-filter-shell a:hover,
-.workflow-filter-shell button:hover,
-.workflow-filter-shell button.active  {
-  border-color: rgba(255,196,0,.38);
-  background: #1a1400;
-  color: #FFC400;
+.workflow-filter-shell button:hover {
+  transform: translateY(-1px);
 }
+
 
 .tool-link {
   height: 26px !important;
@@ -1142,6 +1091,49 @@ onBoardDragEnd={
   background: rgba(255,196,0,.05) !important;
   color: #FFC400 !important;
 }
+
+.ixi-color-filter {
+  width: 24px;
+  height: 14px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 3px;
+  background: rgba(255,255,255,.018);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 -1px 0 rgba(0,0,0,.32);
+}
+
+.color-green { background: rgba(56,161,105,.38); }
+.color-yellow { background: rgba(255,196,0,.38); }
+.color-red { background: rgba(229,62,62,.38); }
+.color-cyan { background: rgba(0,194,255,.38); }
+.color-white { background: rgba(255,255,255,.30); }
+.color-blue { background: rgba(49,130,206,.38); }
+.color-orange { background: rgba(249,133,18,.38); }
+
+.ixi-thickness-filter {
+  width: 24px;
+  height: 14px;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 3px;
+  background: rgba(255,255,255,.018) !important;
+  position: relative;
+}
+
+.ixi-thickness-filter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 15px;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.28);
+}
+
+.ixi-thickness-filter.thin::after { height: 1px; }
+.ixi-thickness-filter.medium::after { height: 3px; }
+.ixi-thickness-filter.thick::after { height: 5px; }
+
 .featured {
   padding: 8px 5% 60px;
   background: #0B0B0B;
