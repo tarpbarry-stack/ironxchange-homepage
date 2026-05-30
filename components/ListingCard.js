@@ -424,6 +424,10 @@ return (
           text-decoration: none;
           color: inherit;
 
+          height: 391px;
+          min-height: 391px;
+          max-height: 391px;
+
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
 
@@ -470,6 +474,8 @@ return (
 
 .board-command-rail {
   height: 13px;
+  min-height: 13px;
+  max-height: 13px;
   margin: 11px -13px -14px;
 
   display: grid;
@@ -686,18 +692,27 @@ return (
         }
 
         .card-body {
-          padding: 13px 13px 14px;
-          display: flex;
-          flex-direction: column;
-          min-height: 148px;
-        }
+  padding: 13px 13px 14px;
+  display: flex;
+  flex-direction: column;
 
-        .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 10px;
-        }
+  height: 195px;
+  min-height: 195px;
+  max-height: 195px;
+}
+
+     .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+
+  overflow: hidden;
+}
 
         .card h3 {
           margin: 0;
@@ -709,6 +724,10 @@ return (
           max-width: 92%;
           letter-spacing: -0.28px;
           text-rendering: geometricPrecision;
+          display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
         }
 
         .hours-inline {
@@ -720,12 +739,13 @@ return (
           white-space: nowrap;
         }
 
-        .keyword-row {
-          height: 54px;
-          max-height: 54px;
-          margin: 15px 0 8px;
-          overflow: visible;
-        }
+       .keyword-row {
+  height: 54px;
+  min-height: 54px;
+  max-height: 54px;
+  margin: 7px 0 8px;
+  overflow: hidden;
+}
 
         .keyword-row :global(.machine-badges.card) {
           max-height: 60px;
@@ -734,6 +754,10 @@ return (
 
         .price-row {
           position: relative;
+          height: 42px;
+          min-height: 42px;
+          max-height: 42px;
+          
           display: flex;
           justify-content: space-between;
           align-items: center;
