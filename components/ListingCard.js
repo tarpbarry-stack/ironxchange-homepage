@@ -188,13 +188,19 @@ return (
       </div>
 
       <div className="card-body">
-        <div className="title-row">
-          <h3>{cleanMachineTitle(listing.title)}</h3>
+       <a
+  href={getListingHref(listing, from)}
+  className="title-click-zone"
+  onClick={handleCardClick}
+>
+  <div className="title-row">
+    <h3>{cleanMachineTitle(listing.title)}</h3>
 
-          <h3 className="hours-inline">
-            {formatHours(listing.hours)}
-          </h3>
-        </div>
+    <h3 className="hours-inline">
+      {formatHours(listing.hours)}
+    </h3>
+  </div>
+</a>
 
         <div className="keyword-row">
           <MachineBadges
@@ -346,6 +352,12 @@ return (
             box-shadow .16s ease;
 
           contain: layout paint;
+        }
+
+        .title-click-zone {
+        display: block;
+        color: inherit;
+        text-decoration: none;
         }
 
         .card:hover {
