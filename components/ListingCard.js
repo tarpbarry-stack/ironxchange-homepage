@@ -372,6 +372,14 @@ return (
   text-decoration: none;
 }
 
+.card-board-zone {
+  cursor: grab;
+}
+
+.card-board-zone:active {
+  cursor: grabbing;
+}
+
         .card:hover {
           transform: translateY(-2px) scale(1.003);
           border-color: rgba(255,196,0,.14);
