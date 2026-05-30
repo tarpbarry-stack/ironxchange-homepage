@@ -499,7 +499,7 @@ return (
   top: 50%;
 
   width: 13px;
-  height: 1px;
+  height: 4px;
 
   transform: translate(-50%, -50%);
   background: rgba(255,255,255,.12);
