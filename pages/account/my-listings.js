@@ -735,20 +735,19 @@ function resetBoardSession() {
   "live";
 
 const isPaused = listingStatus === "paused";
-const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
-
-
 
 return (
   <div
-    className={`board-card-wrap board-color-${cardStyles[listingId]?.color || "none"}`}
+    key={listingId}
+    className={`board-card-wrap board-color-${
+      cardStyles[listingId]?.color || "none"
+    }`}
     style={{
       "--board-weight": `${cardStyles[listingId]?.weight || 1}px`
     }}
     onDoubleClick={() => hideCardFromBoard(listingId)}
   >
     <ListingCard
-      key={listingId}
       listing={item}
       showSave={false}
       from="account"
@@ -760,8 +759,7 @@ return (
       savingPrice={savingPriceId === String(listingId)}
       isPaused={isPaused}
       onEdit={listing => {
-        window.location.href =
-          `/live?id=${getListingId(listing)}`;
+        window.location.href = `/live?id=${getListingId(listing)}`;
       }}
       onPause={pauseListing}
       onReactivate={reactivateListing}
@@ -791,15 +789,16 @@ return (
     </div>
   </div>
 );
+  })}
+</div>
 
-        {filteredListings.length === 0 && (
-          <div className="empty">
-            <h3>No listings found.</h3>
-            <p>Try another search or filter.</p>
-          </div>
-        )}
+{visibleListings.length === 0 && (
+  <div className="empty">
+    <h3>No listings found.</h3>
+    <p>Try another search or filter.</p>
+  </div>
+)}
       </section>
-
 <Footer />
         
 <style jsx>{`
