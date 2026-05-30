@@ -162,18 +162,7 @@ function endBoardDrag(e) {
   setTimeout(() => {
     setIsBoardDragging(false);
     setDragOffset({ x: 0, y: 0 });
-  }, 120);
-}
-
-
-function cycleBoardColor(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  setBoardColor(current => {
-    const currentIndex = boardColors.indexOf(current);
-    return boardColors[(currentIndex + 1) % boardColors.length];
-  });
+  }, 180);
 }
 
   const id = String(getListingId(listing));
