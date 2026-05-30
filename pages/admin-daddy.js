@@ -483,6 +483,10 @@ export default function AdminDaddyPage() {
   const [patchQueue, setPatchQueue] = useState([]);
   const [adminLog, setAdminLog] = useState([]);
 
+  const [adminKey, setAdminKey] = useState("");
+const [commitBusy, setCommitBusy] = useState(false);
+const [deployBusy, setDeployBusy] = useState(false);
+
   useEffect(() => {
     fetch("/api/listings")
       .then(res => res.json())
