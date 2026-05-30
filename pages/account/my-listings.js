@@ -11,6 +11,11 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
+import {
+  DndContext,
+  useDraggable
+} from "@dnd-kit/core";
+
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -111,6 +116,52 @@ function sortListings(listings, sortMode) {
 
   return sorted;
 }
+
+function DraggableBoardCard({
+  id,
+  boardPosition,
+  onHide,
+  children
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id
+  });
+
+  const x =
+    (boardPosition?.x || 0) +
+    (transform?.x || 0);
+
+  const y =
+    (boardPosition?.y || 0) +
+    (transform?.y || 0);
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className="draggable-board-card"
+      style={{
+        transform: `translate3d(${x}px, ${y}px, 0)`,
+        zIndex: isDragging ? 50 : 1
+      }}
+      onDoubleClick={() => onHide(id)}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function MyListingsPage() {
+
+
+
 export default function MyListingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
@@ -122,6 +173,7 @@ export default function MyListingsPage() {
 
   const [hiddenCards, setHiddenCards] = useState([]);
   const [cardStyles, setCardStyles] = useState({});
+  const [boardPositions, setBoardPositions] = useState({});
 
   const [workflowFilter, setWorkflowFilter] = useState("all");
   
@@ -515,8 +567,26 @@ function resetBoardSession() {
   setCardStyles({});
 }
 
+function handleDragEnd(event) {
+  const { active, delta } = event;
 
+  const id = String(active.id);
 
+  setBoardPositions(current => {
+    const previous = current[id] || {
+      x: 0,
+      y: 0
+    };
+
+    return {
+      ...current,
+      [id]: {
+        x: previous.x + delta.x,
+        y: previous.y + delta.y
+      }
+    };
+  });
+}
   
   return (
     <>
@@ -717,11 +787,12 @@ function resetBoardSession() {
 </button>      
         </div>
 
-   <div
-  className={`cards ${
-    filteredListings.length === 1 ? "single-card" : ""
-  }`}
->
+   <DndContext onDragEnd={handleDragEnd}>
+  <div
+    className={`cards ${
+      visibleListings.length === 1 ? "single-card" : ""
+    }`}
+  >
   {visibleListings.map(item => {
     const listingId = getListingId(item);
     const cardImages = getCardImages(item);
@@ -737,9 +808,13 @@ function resetBoardSession() {
 const isPaused = listingStatus === "paused";
 
 return (
-  <div
-    key={listingId}
-    className={`board-card-wrap board-color-${
+  <DraggableBoardCard
+    id={String(listingId)}
+    boardPosition={boardPositions[String(listingId)]}
+    onHide={hideCardFromBoard}
+  >
+    <div
+      className={`board-card-wrap board-color-${
       cardStyles[listingId]?.color || "none"
     }`}
     style={{
@@ -786,11 +861,13 @@ return (
         }}
         aria-label="Cycle outline weight"
       />
-    </div>
-  </div>
+       </div>
+          </div>
+  </DraggableBoardCard>
 );
   })}
-</div>
+  </div>
+</DndContext>
 
 {visibleListings.length === 0 && (
   <div className="empty">
