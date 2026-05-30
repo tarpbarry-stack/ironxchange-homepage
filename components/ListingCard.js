@@ -208,6 +208,8 @@ return (
   </div>
 </a>
 
+        <div className="card-board-zone">
+
         <div className="keyword-row">
           <MachineBadges
             keywords={normalizedKeywords}
@@ -327,7 +329,9 @@ return (
             <span>Views: {listing.views || "—"}</span>
             <span>Saves: {listing.saves || "—"}</span>
           </div>
-        ) : null}
+               ) : null}
+      </div>
+
       </div>
 
       <style jsx>{`
