@@ -772,8 +772,8 @@ return (
             text-align: left;
           }
         }
-      `}</style>
-    </a>
+            `}</style>
+    </div>
   );
 }
       
