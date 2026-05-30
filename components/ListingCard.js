@@ -138,14 +138,15 @@ return (
   className="photo-click-zone"
   onClick={handleCardClick}
 >
-  <div className="card-photo">
-        <img
-  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-  alt={listing.title || "Machine"}
-  className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
-  style={getFrameStyle(currentImageObject, "card")}
-  loading="lazy"
-/>
+ <div className="card-photo">
+  <img
+    src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+    alt={listing.title || "Machine"}
+    draggable={false}
+    className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
+    style={getFrameStyle(currentImageObject, "card")}
+    loading="lazy"
+  />
 
         {sellerMode ? (
           <div className="workflow-photo-pill" onClick={stopCardClick}>
@@ -429,6 +430,9 @@ return (
           object-fit: cover;
           object-position: center center;
           display: block;
+           user-select: none;
+          -webkit-user-drag: none;
+          pointer-events: none;
 
           transition:
             filter .18s ease,
