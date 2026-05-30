@@ -127,21 +127,15 @@ function DraggableBoardCard({ id, boardPosition, onHide, children }) {
   return (
   <div
   ref={setNodeRef}
+  {...listeners}
+  {...attributes}
   className="draggable-board-card"
-  onClick={e => {
-    e.preventDefault();
-    e.stopPropagation();
+  style={{
+    transform: `translate3d(${x}px, ${y}px, 0)`,
+    zIndex: isDragging ? 50 : 1
   }}
-  onMouseDown={e => {
-    if (e.detail >= 2) return;
-  }}
-  onClickCapture={e => e.preventDefault()}
-      style={{
-        transform: `translate3d(${x}px, ${y}px, 0)`,
-        zIndex: isDragging ? 50 : 1
-      }}
-      onDoubleClick={() => onHide(id)}
-    >
+  onDoubleClick={() => onHide(id)}
+>
       {children}
     </div>
   );
@@ -799,8 +793,6 @@ return (
     onHide={hideCardFromBoard}
   >
    <div
-  {...listeners}
-  {...attributes}
   className={`board-card-wrap board-color-${
       cardStyles[listingId]?.color || "none"
     }`}
