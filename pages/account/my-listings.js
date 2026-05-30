@@ -124,21 +124,18 @@ function DraggableBoardCard({ id, boardPosition, onHide, children }) {
   const x = (boardPosition?.x || 0) + (transform?.x || 0);
   const y = (boardPosition?.y || 0) + (transform?.y || 0);
 
-  return (
+ return (
   <div
-  ref={setNodeRef}
-  {...listeners}
-  {...attributes}
-  className="draggable-board-card"
-  style={{
-    transform: `translate3d(${x}px, ${y}px, 0)`,
-    zIndex: isDragging ? 50 : 1
-  }}
-  onDoubleClick={() => onHide(id)}
->
-      {children}
-    </div>
-  );
+    ref={setNodeRef}
+    className="draggable-board-card"
+    style={{
+      transform: `translate3d(${x}px, ${y}px, 0)`,
+      zIndex: isDragging ? 50 : 1
+    }}
+  >
+    {children({ listeners, attributes })}
+  </div>
+);
 }
 
 export default function MyListingsPage() {
@@ -792,8 +789,9 @@ return (
     boardPosition={boardPositions[String(listingId)]}
     onHide={hideCardFromBoard}
   >
-   <div
-  className={`board-card-wrap board-color-${
+    {({ listeners, attributes }) => (
+      <div
+        className={`board-card-wrap board-color-${
       cardStyles[listingId]?.color || "none"
     }`}
     style={{
@@ -818,7 +816,12 @@ return (
       onDelete={confirmDelete}
     />
 
-    <div className="passport-strip">
+    <div
+  className="passport-drag-zone"
+  {...listeners}
+  {...attributes}
+>
+  <div className="passport-strip">
       <button
         type="button"
         className="passport-color-dot"
@@ -840,6 +843,8 @@ return (
       />
        </div>
           </div>
+          </div>
+               }}
   </DraggableBoardCard>
 );
   })}
