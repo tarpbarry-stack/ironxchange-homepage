@@ -376,8 +376,9 @@ return (
   cursor: grab;
 }
 
-.card-board-zone:active {
-  cursor: grabbing;
+.card-board-zone {
+  cursor: grab;
+  background: rgba(255,0,0,.15);
 }
 
         .card:hover {
