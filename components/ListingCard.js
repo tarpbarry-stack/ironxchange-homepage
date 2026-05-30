@@ -539,12 +539,15 @@ return (
   min-height: 13px;
   max-height: 13px;
   margin: 0px -13px -14px;
-  
+
   display: grid;
   grid-template-columns: repeat(5, 1fr);
 
-  border-top: 1px solid rgba(255,255,255,.028);
+  border-top: 1px solid rgba(0,194,255,.42);
   background: rgba(255,255,255,.008);
+
+  box-shadow:
+    0 -1px 8px rgba(0,194,255,.10);
 }
 
 .rail-zone {
@@ -843,7 +846,7 @@ overflow: hidden;
           height: 1px;
 
           background:
-  linear-gradient(90deg, rgba(0,194,255,.35), transparent);
+  linear-gradient(90deg, rgba(255,196,0,.22), transparent);
         }
 
         .price-row strong {
