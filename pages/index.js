@@ -11,7 +11,6 @@ import Footer from "../components/Footer";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
-  ...
 ];
 
 const featureKeywords = [
