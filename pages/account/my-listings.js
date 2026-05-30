@@ -125,11 +125,16 @@ function DraggableBoardCard({ id, boardPosition, onHide, children }) {
   const y = (boardPosition?.y || 0) + (transform?.y || 0);
 
   return (
-   <div
+  <div
   ref={setNodeRef}
-  {...listeners}
-  {...attributes}
   className="draggable-board-card"
+  onClick={e => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onMouseDown={e => {
+    if (e.detail >= 2) return;
+  }}
   onClickCapture={e => e.preventDefault()}
       style={{
         transform: `translate3d(${x}px, ${y}px, 0)`,
@@ -793,8 +798,10 @@ return (
     boardPosition={boardPositions[String(listingId)]}
     onHide={hideCardFromBoard}
   >
-    <div
-      className={`board-card-wrap board-color-${
+   <div
+  {...listeners}
+  {...attributes}
+  className={`board-card-wrap board-color-${
       cardStyles[listingId]?.color || "none"
     }`}
     style={{
@@ -1564,7 +1571,19 @@ return (
   border-color: rgba(255,196,0,.35);
 }
 
+.board-card-wrap :global(.card-photo) {
+  height: 190px !important;
+  width: 100% !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
 
+.board-card-wrap :global(.card-photo img),
+.board-card-wrap :global(img) {
+  width: 100% !important;
+  height: 190px !important;
+  object-fit: cover !important;
+}
 
 @media (max-width: 850px) {
   .search-top-row {
