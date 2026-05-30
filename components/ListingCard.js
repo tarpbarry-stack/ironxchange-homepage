@@ -87,17 +87,6 @@ function cycleBoardColor(e) {
   });
 }
 
-function cycleBoardOutline(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  setBoardOutline(current => {
-    if (current === 1) return 3;
-    if (current === 3) return 5;
-    return 1;
-  });
-}
-
  const boardDragStart = useRef(null);
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 const [isBoardDragging, setIsBoardDragging] = useState(false);
@@ -118,7 +107,7 @@ function startBoardDrag(e) {
   e.currentTarget.setPointerCapture?.(e.pointerId);
 }
 
-  function moveBoardDrag(e) {
+function moveBoardDrag(e) {
   if (!boardDragStart.current) return;
 
   setDragOffset({
@@ -126,32 +115,25 @@ function startBoardDrag(e) {
     y: e.clientY - boardDragStart.current.y
   });
 
-  const elementBelow =
-    document.elementFromPoint(
-      e.clientX,
-      e.clientY
-    );
+  const elementsBelow = document.elementsFromPoint(
+    e.clientX,
+    e.clientY
+  );
 
-  const targetCard =
-    elementBelow?.closest?.(
-      "[data-listing-card-id]"
-    );
+  const targetCard = elementsBelow
+    .map(el => el.closest?.("[data-listing-card-id]"))
+    .find(card => {
+      const targetId = card?.getAttribute("data-listing-card-id");
+      return targetId && targetId !== id;
+    });
 
   if (!targetCard) return;
 
-  const targetId =
-    targetCard.getAttribute(
-      "data-listing-card-id"
-    );
+  const targetId = targetCard.getAttribute("data-listing-card-id");
 
-  if (
-    targetId &&
-    targetId !== id
-  ) {
-    onBoardDragOver?.({
-      id: targetId
-    });
-  }
+  onBoardDragOver?.({
+    id: targetId
+  });
 }
   
 
