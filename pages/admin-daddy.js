@@ -766,13 +766,69 @@ const [deployBusy, setDeployBusy] = useState(false);
     setNewMakeName("");
   }
 
-  function stageAddModel() {
-    const model = upper(newModelName);
+ async function stageAddModel() {
+  const model = upper(newModelName);
 
-    if (!selectedCategory || !activeMake || !model) {
-      alert("Select category, make, and enter model.");
-      return;
+  if (!selectedCategory || !activeMake || !model) {
+    alert("Select category, make, and enter model.");
+    return;
+  }
+
+  if (modelsForMake.map(normalizeModel).includes(normalizeModel(model))) {
+    alert(`${model} already exists under ${activeMake}.`);
+    return;
+  }
+
+  const typed = window.prompt(
+    `Commit model to taxonomy?\n\n${selectedCategory}\n${activeMake}\n${model}\n\nType ADD MODEL to confirm.`
+  );
+
+  if (typed !== "ADD MODEL") {
+    addLog("Add model cancelled", "warn");
+    return;
+  }
+
+  setCommitBusy(true);
+
+  try {
+    const res = await fetch("/api/admin/taxonomy/add-model", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        category: selectedCategory,
+        make: activeMake,
+        model
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "Add model failed");
     }
+
+    stagePatch({
+      type: "COMMIT_MODEL",
+      category: selectedCategory,
+      make: activeMake,
+      model,
+      file: selectedRegistryItem?.file,
+      target: "GITHUB_TAXONOMY",
+      sharetribeImpact: "REQUIRES_AWS_TAXONOMY_DEPLOY"
+    });
+
+    addLog(`Model committed: ${selectedCategory} / ${activeMake} / ${model}`, "success");
+    setNewModelName("");
+  } catch (error) {
+    addLog(`Model commit failed: ${error.message}`, "danger");
+    alert(error.message);
+  } finally {
+    setCommitBusy(false);
+  }
+}
 
     if (modelsForMake.map(normalizeModel).includes(normalizeModel(model))) {
       alert(`${model} already exists under ${activeMake}.`);
@@ -1001,34 +1057,48 @@ const [deployBusy, setDeployBusy] = useState(false);
                     </div>
                   </AdminCard>
 
-                  <AdminCard label="Add / Stage" title="Taxonomy Builder">
-                    <input
-                      value={newCategoryName}
-                      onChange={e => setNewCategoryName(e.target.value)}
-                      placeholder="New category"
-                    />
-                    <button type="button" onClick={stageAddCategory}>
-                      Stage Category
-                    </button>
+                 <AdminCard label="Add / Stage" title="Taxonomy Builder">
+  <input
+    value={newCategoryName}
+    onChange={e => setNewCategoryName(e.target.value)}
+    placeholder="New category"
+  />
 
-                    <input
-                      value={newMakeName}
-                      onChange={e => setNewMakeName(e.target.value)}
-                      placeholder="New make"
-                    />
-                    <button type="button" onClick={stageAddMake}>
-                      Stage Make
-                    </button>
+  <button type="button" onClick={stageAddCategory}>
+    Stage Category
+  </button>
 
-                    <input
-                      value={newModelName}
-                      onChange={e => setNewModelName(e.target.value)}
-                      placeholder="New model"
-                    />
-                    <button type="button" onClick={stageAddModel}>
-                      Stage Model
-                    </button>
-                  </AdminCard>
+  <input
+    value={newMakeName}
+    onChange={e => setNewMakeName(e.target.value)}
+    placeholder="New make"
+  />
+
+  <button type="button" onClick={stageAddMake}>
+    Stage Make
+  </button>
+
+  <input
+    value={newModelName}
+    onChange={e => setNewModelName(e.target.value)}
+    placeholder="New model"
+  />
+
+  <button
+    type="button"
+    onClick={stageAddModel}
+    disabled={commitBusy}
+  >
+    {commitBusy ? "Committing..." : "Commit Model"}
+  </button>
+
+  <input
+    value={adminKey}
+    onChange={e => setAdminKey(e.target.value)}
+    placeholder="Admin Daddy Key"
+  />
+</AdminCard>
+
 
                   <AdminCard label="Audit" title="Bad Make Rows" wide>
                     {selectedBadMakeRows.length === 0 ? (
