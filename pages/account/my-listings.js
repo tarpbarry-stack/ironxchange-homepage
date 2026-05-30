@@ -725,8 +725,11 @@ return (
 
     onReactivate={reactivateListing}
 
-    onDelete={confirmDelete}
-  />
+     onSendFront={sendListingToFront}
+  onSendBack={sendListingToBack}
+
+  onDelete={confirmDelete}
+/>
 
     );
   })}
