@@ -125,11 +125,12 @@ function DraggableBoardCard({ id, boardPosition, onHide, children }) {
   const y = (boardPosition?.y || 0) + (transform?.y || 0);
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className="draggable-board-card"
+   <div
+  ref={setNodeRef}
+  {...listeners}
+  {...attributes}
+  className="draggable-board-card"
+  onClickCapture={e => e.preventDefault()}
       style={{
         transform: `translate3d(${x}px, ${y}px, 0)`,
         zIndex: isDragging ? 50 : 1
@@ -1485,6 +1486,11 @@ return (
     outline-color .16s ease,
     outline-width .16s ease,
     transform .16s ease;
+}
+
+.board-card-wrap :global(img) {
+  width: 100% !important;
+  object-fit: cover !important;
 }
 
 .board-color-green {
