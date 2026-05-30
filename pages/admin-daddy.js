@@ -488,6 +488,9 @@ export default function AdminDaddyPage() {
   const [deployBusy, setDeployBusy] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
+  const [addMakeBusy, setAddMakeBusy] = useState(false);
+  const [deleteMakeBusy, setDeleteMakeBusy] = useState(false);
+
   useEffect(() => {
     fetch("/api/listings")
       .then(res => res.json())
@@ -767,6 +770,127 @@ export default function AdminDaddyPage() {
     setNewMakeName("");
   }
 
+  async function commitAddMake() {
+  const make = upper(newMakeName);
+
+  if (!selectedCategory || !make) {
+    alert("Select category and enter make.");
+    return;
+  }
+
+  if (makes.includes(make)) {
+    alert(`${make} already exists in ${selectedCategory}.`);
+    return;
+  }
+
+  const typed = window.prompt(
+    `Commit make to taxonomy?\n\n${selectedCategory}\n${make}\n\nThis will create seed model OTHER.\n\nType ADD MAKE to confirm.`
+  );
+
+  if (typed !== "ADD MAKE") {
+    addLog("Add make cancelled", "warn");
+    return;
+  }
+
+  setAddMakeBusy(true);
+
+  try {
+    const res = await fetch("/api/admin/taxonomy/add-make", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        category: selectedCategory,
+        make
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "Add make failed");
+    }
+
+    stagePatch({
+      type: "COMMIT_MAKE",
+      category: selectedCategory,
+      make,
+      model: "OTHER",
+      file: selectedRegistryItem?.file,
+      target: "GITHUB_TAXONOMY",
+      sharetribeImpact: "REQUIRES_AWS_TAXONOMY_DEPLOY"
+    });
+
+    addLog(`Make committed: ${selectedCategory} / ${make}`, "success");
+    setNewMakeName("");
+  } catch (error) {
+    addLog(`Make commit failed: ${error.message}`, "danger");
+    alert(error.message);
+  } finally {
+    setAddMakeBusy(false);
+  }
+}
+
+async function commitDeleteMake() {
+  const make = upper(newMakeName || activeMake);
+
+  if (!selectedCategory || !make) {
+    alert("Select category and enter/select make to delete.");
+    return;
+  }
+
+  const typed = window.prompt(
+    `DELETE make from taxonomy?\n\n${selectedCategory}\n${make}\n\nThis deletes every model row under this make.\n\nType DELETE MAKE to confirm.`
+  );
+
+  if (typed !== "DELETE MAKE") {
+    addLog("Delete make cancelled", "warn");
+    return;
+  }
+
+  setDeleteMakeBusy(true);
+
+  try {
+    const res = await fetch("/api/admin/taxonomy/delete-make", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        category: selectedCategory,
+        make
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "Delete make failed");
+    }
+
+    stagePatch({
+      type: "DELETE_MAKE",
+      category: selectedCategory,
+      make,
+      file: selectedRegistryItem?.file,
+      target: "GITHUB_TAXONOMY",
+      status: "REQUIRES_AWS_TAXONOMY_DEPLOY"
+    });
+
+    addLog(`Make deleted: ${selectedCategory} / ${make}`, "success");
+    setNewMakeName("");
+    setSelectedMake("");
+  } catch (error) {
+    addLog(`Make delete failed: ${error.message}`, "danger");
+    alert(error.message);
+  } finally {
+    setDeleteMakeBusy(false);
+  }
+}
+  
  async function stageAddModel() {
   const model = upper(newModelName);
 
@@ -1164,6 +1288,28 @@ async function deleteSelectedModel() {
   <button type="button" onClick={stageAddMake}>
     Stage Make
   </button>
+
+     <input
+  value={newMakeName}
+  onChange={e => setNewMakeName(e.target.value)}
+  placeholder="New make"
+/>
+
+<button
+  type="button"
+  onClick={commitAddMake}
+  disabled={addMakeBusy}
+>
+  {addMakeBusy ? "Committing..." : "Commit Make"}
+</button>
+
+<button
+  type="button"
+  onClick={commitDeleteMake}
+  disabled={deleteMakeBusy}
+>
+  {deleteMakeBusy ? "Deleting..." : "Delete Make"}
+</button> 
 
   <input
     value={newModelName}
