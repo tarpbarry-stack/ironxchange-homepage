@@ -607,16 +607,16 @@ return (
             0 22px 52px rgba(0,0,0,.30);
         }
 
-        .card.seller-mode {
-  height: 440px;
-  min-height: 440px;
-  max-height: 440px;
+      .card.seller-mode {
+  height: 470px;
+  min-height: 470px;
+  max-height: 470px;
 }
 
 .card.seller-mode .card-body {
-  height: 244px;
-  min-height: 244px;
-  max-height: 244px;
+  height: 274px;
+  min-height: 274px;
+  max-height: 274px;
 }
         .card.paused-card {
           opacity: .58;
