@@ -484,8 +484,9 @@ export default function AdminDaddyPage() {
   const [adminLog, setAdminLog] = useState([]);
 
   const [adminKey, setAdminKey] = useState("");
-const [commitBusy, setCommitBusy] = useState(false);
-const [deployBusy, setDeployBusy] = useState(false);
+  const [commitBusy, setCommitBusy] = useState(false);
+  const [deployBusy, setDeployBusy] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   useEffect(() => {
     fetch("/api/listings")
@@ -830,6 +831,66 @@ const [deployBusy, setDeployBusy] = useState(false);
   }
 }
 
+async function deleteSelectedModel() {
+  const model = upper(newModelName);
+
+  if (!selectedCategory || !activeMake || !model) {
+    alert("Select category, make, and enter the model to delete.");
+    return;
+  }
+
+  const typed = window.prompt(
+    `DELETE model from taxonomy?\n\n${selectedCategory}\n${activeMake}\n${model}\n\nType DELETE MODEL to confirm.`
+  );
+
+  if (typed !== "DELETE MODEL") {
+    addLog("Delete model cancelled", "warn");
+    return;
+  }
+
+  setDeleteBusy(true);
+
+  try {
+    const res = await fetch("/api/admin/taxonomy/delete-model", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        category: selectedCategory,
+        make: activeMake,
+        model
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "Delete model failed");
+    }
+
+    stagePatch({
+      type: "DELETE_MODEL",
+      category: selectedCategory,
+      make: activeMake,
+      model,
+      file: selectedRegistryItem?.file,
+      target: "GITHUB_TAXONOMY",
+      status: "REQUIRES_AWS_TAXONOMY_DEPLOY"
+    });
+
+    addLog(`Model deleted: ${selectedCategory} / ${activeMake} / ${model}`, "success");
+    setNewModelName("");
+  } catch (error) {
+    addLog(`Model delete failed: ${error.message}`, "danger");
+    alert(error.message);
+  } finally {
+    setDeleteBusy(false);
+  }
+}
+
+  
   function stageFixMake(category, currentMake, replacementMake) {
     stagePatch({
       type: "FIX_MAKE",
@@ -1110,19 +1171,27 @@ const [deployBusy, setDeployBusy] = useState(false);
     placeholder="New model"
   />
 
-  <button
-    type="button"
-    onClick={stageAddModel}
-    disabled={commitBusy}
-  >
-    {commitBusy ? "Committing..." : "Commit Model"}
-  </button>
+<button
+  type="button"
+  onClick={stageAddModel}
+  disabled={commitBusy}
+>
+  {commitBusy ? "Committing..." : "Commit Model"}
+</button>
 
-  <input
-    value={adminKey}
-    onChange={e => setAdminKey(e.target.value)}
-    placeholder="Admin Daddy Key"
-  />
+<button
+  type="button"
+  onClick={deleteSelectedModel}
+  disabled={deleteBusy}
+>
+  {deleteBusy ? "Deleting..." : "Delete Model"}
+</button>
+
+<input
+  value={adminKey}
+  onChange={e => setAdminKey(e.target.value)}
+  placeholder="Admin Daddy Key"
+/>
 </AdminCard>
 
 
