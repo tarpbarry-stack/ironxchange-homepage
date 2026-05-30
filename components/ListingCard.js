@@ -127,17 +127,19 @@ function endBoardDrag(e) {
   const dy = e.clientY - boardDragStart.current.y;
 
   boardDragStart.current = null;
-  setIsBoardDragging(false);
-  setDragOffset({ x: 0, y: 0 });
 
-  if (Math.abs(dx) < 70) return;
-  if (Math.abs(dx) < Math.abs(dy) * 1.25) return;
-
-  if (dx < 0) {
-    onSendFront?.(listing);
-  } else {
-    onSendBack?.(listing);
+  if (Math.abs(dx) >= 70 && Math.abs(dx) >= Math.abs(dy) * 1.25) {
+    if (dx < 0) {
+      onSendFront?.(listing);
+    } else {
+      onSendBack?.(listing);
+    }
   }
+
+  setTimeout(() => {
+    setIsBoardDragging(false);
+    setDragOffset({ x: 0, y: 0 });
+  }, 120);
 }
 
 
