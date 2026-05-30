@@ -165,14 +165,7 @@ function endBoardDrag(e) {
 
   onBoardDragEnd?.();
 
-  if (Math.abs(dx) >= 70 && Math.abs(dx) >= Math.abs(dy) * 1.25) {
-    if (dx < 0) {
-      onSendFront?.(listing);
-    } else {
-      onSendBack?.(listing);
-    }
-  }
-
+ 
   setTimeout(() => {
     setIsBoardDragging(false);
     setDragOffset({ x: 0, y: 0 });
