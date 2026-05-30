@@ -1030,10 +1030,15 @@ onBoardDragEnd={
   margin: -6px auto 10px;
   padding: 6px;
 
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 2px;
+ display: grid;
+grid-template-columns:
+  80px
+  repeat(8, 1fr)
+  repeat(3, 1fr)
+  80px;
+
+align-items: center;
+gap: 6px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,0)),
