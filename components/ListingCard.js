@@ -63,6 +63,12 @@ onDelete,
 
 onSendFront,
 onSendBack,
+
+isBoardDraggingCard = false,
+isGhostTarget = false,
+onBoardDragStart,
+onBoardDragOver,
+onBoardDragEnd,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -107,6 +113,8 @@ function startBoardDrag(e) {
   setIsBoardDragging(true);
   setDragOffset({ x: 0, y: 0 });
 
+  onBoardDragStart?.(listing);
+
   e.currentTarget.setPointerCapture?.(e.pointerId);
 }
 
@@ -117,6 +125,33 @@ function startBoardDrag(e) {
     x: e.clientX - boardDragStart.current.x,
     y: e.clientY - boardDragStart.current.y
   });
+
+  const elementBelow =
+    document.elementFromPoint(
+      e.clientX,
+      e.clientY
+    );
+
+  const targetCard =
+    elementBelow?.closest?.(
+      "[data-listing-card-id]"
+    );
+
+  if (!targetCard) return;
+
+  const targetId =
+    targetCard.getAttribute(
+      "data-listing-card-id"
+    );
+
+  if (
+    targetId &&
+    targetId !== id
+  ) {
+    onBoardDragOver?.({
+      id: targetId
+    });
+  }
 }
   
 
@@ -127,6 +162,8 @@ function endBoardDrag(e) {
   const dy = e.clientY - boardDragStart.current.y;
 
   boardDragStart.current = null;
+
+  onBoardDragEnd?.();
 
   if (Math.abs(dx) >= 70 && Math.abs(dx) >= Math.abs(dy) * 1.25) {
     if (dx < 0) {
@@ -217,11 +254,14 @@ function handleCardClick() {
 }
 
 return (
- <div
-  className={`card board-color-${boardColor} board-outline-${boardOutline} ${
-    isBoardDragging ? "board-dragging" : ""
-  } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
-  style={{
+  <div
+    data-listing-card-id={id}
+    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+      isBoardDragging ? "board-dragging" : ""
+    } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
+      isGhostTarget ? "grid-ghost-target" : ""
+    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    style={{
     transform: isBoardDragging
       ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
       : undefined,
@@ -538,6 +578,27 @@ return (
     0 30px 80px rgba(0,0,0,.48);
 
   transition: none;
+}
+
+.card.grid-drag-source {
+  opacity: .82;
+}
+
+.card.grid-ghost-target {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 0 0 2px rgba(0,194,255,.44),
+    0 22px 52px rgba(0,0,0,.30);
+}
+
+.card.grid-ghost-target::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgba(0,194,255,.42);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 20;
 }
 
 .board-command-rail {
