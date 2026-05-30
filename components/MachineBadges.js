@@ -27,10 +27,18 @@ export default function MachineBadges({
           display: flex;
           flex-wrap: wrap;
           align-content: flex-start;
+
+          user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
         }
 
       .machine-badges span {
   position: relative;
+
+   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 
   display: inline-flex;
   align-items: center;
