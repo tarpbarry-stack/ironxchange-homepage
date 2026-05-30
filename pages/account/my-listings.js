@@ -120,6 +120,9 @@ export default function MyListingsPage() {
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [savingPriceId, setSavingPriceId] = useState("");
 
+  const [hiddenCards, setHiddenCards] = useState([]);
+  const [cardStyles, setCardStyles] = useState({});
+
   const [workflowFilter, setWorkflowFilter] = useState("all");
   
   const [listingWorkflows, setListingWorkflows] = useState({});
@@ -458,6 +461,62 @@ async function updateWorkflowStatus(listing, status) {
     console.error("Workflow update failed:", error);
   }
 }
+
+const visibleListings = filteredListings.filter(
+  item => !hiddenCards.includes(String(getListingId(item)))
+);
+
+function cycleCardColor(listingId) {
+  const colors = ["none", "green", "yellow", "cyan", "red", "blue"];
+
+  setCardStyles(current => {
+    const currentColor = current[listingId]?.color || "none";
+    const nextColor =
+      colors[(colors.indexOf(currentColor) + 1) % colors.length];
+
+    return {
+      ...current,
+      [listingId]: {
+        ...(current[listingId] || {}),
+        color: nextColor
+      }
+    };
+  });
+}
+
+function cycleCardWeight(listingId) {
+  const weights = [1, 3, 5];
+
+  setCardStyles(current => {
+    const currentWeight = current[listingId]?.weight || 1;
+    const nextWeight =
+      weights[(weights.indexOf(currentWeight) + 1) % weights.length];
+
+    return {
+      ...current,
+      [listingId]: {
+        ...(current[listingId] || {}),
+        weight: nextWeight
+      }
+    };
+  });
+}
+
+function hideCardFromBoard(listingId) {
+  setHiddenCards(current =>
+    current.includes(String(listingId))
+      ? current
+      : [...current, String(listingId)]
+  );
+}
+
+function resetBoardSession() {
+  setHiddenCards([]);
+  setCardStyles({});
+}
+
+
+
   
   return (
     <>
@@ -648,7 +707,14 @@ async function updateWorkflowStatus(listing, status) {
       <section className="featured">
         <div className="section-head">
           <h2>MY INVENTORY</h2>
-          <span>{filteredListings.length} LISTINGS</span>
+          <span>{visibleListings.length} LISTINGS</span>
+<button
+  type="button"
+  className="board-reset-btn"
+  onClick={resetBoardSession}
+>
+  RESET
+</button>      
         </div>
 
    <div
@@ -656,7 +722,7 @@ async function updateWorkflowStatus(listing, status) {
     filteredListings.length === 1 ? "single-card" : ""
   }`}
 >
-  {filteredListings.map(item => {
+  {visibleListings.map(item => {
     const listingId = getListingId(item);
     const cardImages = getCardImages(item);
     const listingHref = getListingHref(item);
@@ -674,41 +740,57 @@ const currentPhotoIndex = cardPhotoIndex[listingId] || 0;
 
 
 return (
-  <ListingCard
-    key={listingId}
-    listing={item}
-    showSave={false}
-    from="account"
-
-    sellerMode={true}
-
-    workflowValue={getWorkflowStatus(item)}
-    onWorkflowChange={updateWorkflowStatus}
-
-    priceValue={formatPriceInput(item.price)}
-    onPriceKeyDown={savePrice}
-
-    savingPrice={
-      savingPriceId === String(listingId)
-    }
-
-    isPaused={isPaused}
-
-    onEdit={listing => {
-      window.location.href =
-        `/live?id=${getListingId(listing)}`;
+  <div
+    className={`board-card-wrap board-color-${cardStyles[listingId]?.color || "none"}`}
+    style={{
+      "--board-weight": `${cardStyles[listingId]?.weight || 1}px`
     }}
+    onDoubleClick={() => hideCardFromBoard(listingId)}
+  >
+    <ListingCard
+      key={listingId}
+      listing={item}
+      showSave={false}
+      from="account"
+      sellerMode={true}
+      workflowValue={getWorkflowStatus(item)}
+      onWorkflowChange={updateWorkflowStatus}
+      priceValue={formatPriceInput(item.price)}
+      onPriceKeyDown={savePrice}
+      savingPrice={savingPriceId === String(listingId)}
+      isPaused={isPaused}
+      onEdit={listing => {
+        window.location.href =
+          `/live?id=${getListingId(listing)}`;
+      }}
+      onPause={pauseListing}
+      onReactivate={reactivateListing}
+      onDelete={confirmDelete}
+    />
 
-    onPause={pauseListing}
+    <div className="passport-strip">
+      <button
+        type="button"
+        className="passport-color-dot"
+        onClick={e => {
+          e.stopPropagation();
+          cycleCardColor(listingId);
+        }}
+        aria-label="Cycle card color"
+      />
 
-    onReactivate={reactivateListing}
-
-    onDelete={confirmDelete}
-  />
-
-    );
-  })}
-</div>
+      <button
+        type="button"
+        className="passport-weight-dot"
+        onClick={e => {
+          e.stopPropagation();
+          cycleCardWeight(listingId);
+        }}
+        aria-label="Cycle outline weight"
+      />
+    </div>
+  </div>
+);
 
         {filteredListings.length === 0 && (
           <div className="empty">
@@ -1316,6 +1398,89 @@ return (
   padding: 40px;
   text-align: center;
 }
+
+
+
+.board-card-wrap {
+  position: relative;
+  border-radius: 18px;
+  outline: var(--board-weight) solid transparent;
+  transition:
+    outline-color .16s ease,
+    outline-width .16s ease,
+    transform .16s ease;
+}
+
+.board-color-green {
+  outline-color: rgba(56,161,105,.75);
+}
+
+.board-color-yellow {
+  outline-color: rgba(255,196,0,.8);
+}
+
+.board-color-cyan {
+  outline-color: rgba(0,220,255,.75);
+}
+
+.board-color-red {
+  outline-color: rgba(229,62,62,.78);
+}
+
+.board-color-blue {
+  outline-color: rgba(66,153,225,.78);
+}
+
+.passport-strip {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 6px;
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  gap: 5px;
+  opacity: .28;
+  transition: opacity .14s ease;
+  z-index: 20;
+}
+
+.board-card-wrap:hover .passport-strip {
+  opacity: .9;
+}
+
+.passport-color-dot,
+.passport-weight-dot {
+  height: 6px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(160,160,160,.34);
+  cursor: pointer;
+  padding: 0;
+}
+
+.passport-weight-dot {
+  background: rgba(255,255,255,.22);
+}
+
+.board-reset-btn {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: #101010;
+  color: rgba(255,255,255,.38);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  cursor: pointer;
+}
+
+.board-reset-btn:hover {
+  color: #FFC400;
+  border-color: rgba(255,196,0,.35);
+}
+
 
 @media (max-width: 850px) {
   .search-top-row {
