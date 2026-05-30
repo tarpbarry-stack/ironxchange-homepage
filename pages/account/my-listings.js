@@ -118,6 +118,8 @@ export default function MyListingsPage() {
   const [currentUserId, setCurrentUserId] = useState("");
   const [cardPhotoIndex, setCardPhotoIndex] = useState({});
   const [savingPriceId, setSavingPriceId] = useState("");
+  const [draggingListingId, setDraggingListingId] = useState("");
+  const [ghostListingId, setGhostListingId] = useState("");
 
   const [workflowFilter, setWorkflowFilter] = useState("all");
   
@@ -480,6 +482,53 @@ function sendListingToBack(listing) {
     return target ? [...rest, target] : current;
   });
 }
+
+function moveListingToSlot(dragId, targetId) {
+  if (!dragId || !targetId || dragId === targetId) return;
+
+  setMyListings(current => {
+    const fromIndex = current.findIndex(
+      item => String(getListingId(item)) === String(dragId)
+    );
+
+    const toIndex = current.findIndex(
+      item => String(getListingId(item)) === String(targetId)
+    );
+
+    if (fromIndex === -1 || toIndex === -1) return current;
+
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+
+    return next;
+  });
+}
+
+function handleBoardDragStart(listing) {
+  setDraggingListingId(String(getListingId(listing)));
+}
+
+function handleBoardDragOver(listing) {
+  const targetId = String(getListingId(listing));
+
+  if (!draggingListingId || draggingListingId === targetId) return;
+
+  setGhostListingId(targetId);
+}
+
+function handleBoardDragEnd(listing) {
+  const dragId = draggingListingId;
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+}
+  
   
   return (
     <>
@@ -728,6 +777,28 @@ return (
      onSendFront={sendListingToFront}
   onSendBack={sendListingToBack}
 
+isBoardDraggingCard={
+  String(listingId) ===
+  String(draggingListingId)
+}
+
+isGhostTarget={
+  String(listingId) ===
+  String(ghostListingId)
+}
+
+onBoardDragStart={
+  handleBoardDragStart
+}
+
+onBoardDragOver={
+  handleBoardDragOver
+}
+
+onBoardDragEnd={
+  handleBoardDragEnd
+}
+   
   onDelete={confirmDelete}
 />
 
