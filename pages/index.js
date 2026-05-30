@@ -5,38 +5,13 @@ import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 import { captureIXEvent } from "../lib/posthog";
+import { getV12CategoryNames } from "../lib/v12TaxonomyAdapter";
 import Footer from "../components/Footer";
 
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
-  "ALL CATEGORIES",
-  "AERIAL EQUIPMENT",
-  "AGGREGATE",
-  "AGRICULTURE HARVESTERS",
-  "AGRICULTURE TRACTORS",
-  "ASPHALT EQUIPMENT",
-  "BACKHOE LOADERS",
-  "COMPACTION/ROLLERS",
-  "CRANES",
-  "CRAWLER CARRIERS / LOADER",
-  "DOZERS",
-  "DRILLS & PILING",
-  "DUMP TRUCKS - ARTIC/RIGID",
-  "EXCAVATORS",
-  "FORKLIFTS",
-  "MOTOR GRADERS",
-  "SCRAPER",
-  "SKID STEER/CTL",
-  "TELEHANDLERS",
-  "TRENCHERS/PLOWS",
-  "TRAILERS",
-  "TRUCKS",
-  "WHEEL LOADERS",
-  "ATTACHMENTS / PARTS",
-  "OTHER SPECIALTY",
-  "SUPPORT EQUIPMENT",
-  "UTILITY CARTS"
+  ...
 ];
 
 const featureKeywords = [
@@ -127,16 +102,58 @@ export default function Home() {
     checkAuth();
   }, []);
 
-  const featuredListings = liveListings
-  .filter(item => {
+ const featuredListings = useMemo(() => {
+  const active = liveListings.filter(item => {
     const listingStatus =
       item.listingStatus ||
       item.publicData?.listingStatus ||
       item.attributes?.publicData?.listingStatus;
 
     return listingStatus !== "archived";
-  })
-  .slice(0, 8);
+  });
+
+  const priorityCategories = [
+    "DOZERS",
+    "MOTOR GRADERS",
+    "SKID STEER / CTL",
+    "WHEEL LOADERS",
+    "EXCAVATORS",
+    "COMPACTION / ROLLERS",
+    "BACKHOE LOADERS",
+    "DUMP TRUCKS",
+    "TELEHANDLERS",
+    "AERIAL EQUIPMENT",
+    "AGGREGATE",
+    "TRAILERS"
+  ];
+
+  const selected = [];
+
+  priorityCategories.forEach(category => {
+    const match = active.find(item =>
+      String(
+        item.type ||
+        item.category ||
+        item.publicData?.category ||
+        ""
+      ).toUpperCase() === category.toUpperCase()
+    );
+
+    if (match) {
+      selected.push(match);
+    }
+  });
+
+  const selectedIds = new Set(
+    selected.map(item => String(getListingId(item)))
+  );
+
+  const remaining = active.filter(
+    item => !selectedIds.has(String(getListingId(item)))
+  );
+
+  return [...selected, ...remaining].slice(0, 20);
+}, [liveListings]);
 
 function handleSearch() {
   const params = new URLSearchParams();
