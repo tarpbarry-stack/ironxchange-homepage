@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
