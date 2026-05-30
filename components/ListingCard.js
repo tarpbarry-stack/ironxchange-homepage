@@ -132,18 +132,7 @@ return (
       isPaused ? "paused-card" : ""
     }`}
   >
-    captureIXEvent("listing_card_clicked", {
-      listingId: id,
-      title: listing.title,
-      category: listing.category || listing.type,
-      make: listing.make,
-      model: listing.model,
-      price: listing.price,
-      location: listing.location,
-      from
-    });
-  }}
->
+    
       <div className="card-photo">
         <img
   src={currentPhoto || "/images/hero-equipment-yard.jpg"}
