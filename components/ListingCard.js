@@ -752,22 +752,22 @@ overflow: hidden;
           overflow: hidden;
         }
 
-        .price-row {
-          position: relative;
-          height: 42px;
-          min-height: 42px;
-          max-height: 42px;
-          
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+       .price-row {
+  position: relative;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
 
-          margin-top: auto;
-          padding-top: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-          border-top: 1px solid rgba(255,255,255,.045);
-          gap: 10px;
-        }
+  margin-top: 18px;
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+  gap: 10px;
+}
 
         .price-row::before {
           content: "";
