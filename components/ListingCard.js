@@ -547,6 +547,7 @@ return (
 
 .card.board-dragging {
   cursor: grabbing;
+  opacity: 1;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.06) inset,
@@ -556,7 +557,18 @@ return (
 }
 
 .card.grid-drag-source {
-  opacity: .82;
+  opacity: .38;
+}
+
+.card.grid-drag-source::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgba(255,255,255,.16);
+  border-radius: 10px;
+  background: rgba(255,255,255,.018);
+  pointer-events: none;
+  z-index: 18;
 }
 
 .card.grid-ghost-target {
