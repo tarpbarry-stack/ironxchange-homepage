@@ -457,6 +457,29 @@ async function updateWorkflowStatus(listing, status) {
     console.error("Workflow update failed:", error);
   }
 }
+
+
+function sendListingToFront(listing) {
+  const listingId = getListingId(listing);
+
+  setMyListings(current => {
+    const target = current.find(item => String(getListingId(item)) === String(listingId));
+    const rest = current.filter(item => String(getListingId(item)) !== String(listingId));
+
+    return target ? [target, ...rest] : current;
+  });
+}
+
+function sendListingToBack(listing) {
+  const listingId = getListingId(listing);
+
+  setMyListings(current => {
+    const target = current.find(item => String(getListingId(item)) === String(listingId));
+    const rest = current.filter(item => String(getListingId(item)) !== String(listingId));
+
+    return target ? [...rest, target] : current;
+  });
+}
   
   return (
     <>
