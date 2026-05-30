@@ -812,8 +812,7 @@ return (
       onPriceKeyDown={savePrice}
       savingPrice={savingPriceId === String(listingId)}
       isPaused={isPaused}
-      onEdit={listing => {
-        window.location.href = `/live?id=${getListingId(listing)}`;
+      onEdit={() => {}}
       }}
       onPause={pauseListing}
       onReactivate={reactivateListing}
