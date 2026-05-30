@@ -507,8 +507,8 @@ return (
   height: 13px;
   min-height: 13px;
   max-height: 13px;
-  margin: 11px -13px -14px;
-
+  margin: 0px -13px -14px;
+  
   display: grid;
   grid-template-columns: repeat(5, 1fr);
 
@@ -812,7 +812,7 @@ overflow: hidden;
           height: 1px;
 
           background:
-            linear-gradient(90deg, rgba(255,196,0,.22), transparent);
+  linear-gradient(90deg, rgba(0,194,255,.35), transparent);
         }
 
         .price-row strong {
