@@ -830,24 +830,6 @@ const [deployBusy, setDeployBusy] = useState(false);
   }
 }
 
-    if (modelsForMake.map(normalizeModel).includes(normalizeModel(model))) {
-      alert(`${model} already exists under ${activeMake}.`);
-      return;
-    }
-
-    stagePatch({
-      type: "ADD_MODEL",
-      category: selectedCategory,
-      make: activeMake,
-      model,
-      file: selectedRegistryItem?.file,
-      target: "IX_AWS_TAXONOMY",
-      sharetribeImpact: "REQUIRES_SHARETRIBE_ALLOWED_VALUE_SYNC"
-    });
-
-    setNewModelName("");
-  }
-
   function stageFixMake(category, currentMake, replacementMake) {
     stagePatch({
       type: "FIX_MAKE",
