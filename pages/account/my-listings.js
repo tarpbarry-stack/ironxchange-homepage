@@ -813,7 +813,6 @@ return (
       savingPrice={savingPriceId === String(listingId)}
       isPaused={isPaused}
       onEdit={() => {}}
-      }}
       onPause={pauseListing}
       onReactivate={reactivateListing}
       onDelete={confirmDelete}
