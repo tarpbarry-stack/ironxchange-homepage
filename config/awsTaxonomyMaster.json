@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-30T05:12:59.967Z",
+  "generatedAt": "2026-05-30T05:16:53.627Z",
   "note": "IronXchange AWS taxonomy master. No broad cleanup applied. CAT → CATERPILLAR is applied during generation.",
   "categories": [
     {
@@ -104945,10 +104945,6 @@
         },
         {
           "make": "UHI",
-          "model": "OTHER"
-        },
-        {
-          "make": "HARLETT",
           "model": "OTHER"
         }
       ]
