@@ -7,6 +7,12 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MachineBadges from "../components/MachineBadges";
 
+import {
+  getV12CategoryNames,
+  getV12Makes,
+  getV12Models
+} from "../lib/v12TaxonomyAdapter";
+
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
 import dozersTaxonomy from "../lib/dozersTaxonomy";
@@ -73,7 +79,7 @@ const taxonomyMap = {
   "UTILITY CARTS": utilityCartsTaxonomy
 };
 
-const categories = Object.keys(taxonomyMap);
+const categories = getV12CategoryNames();
 
 const stateOptions = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -349,22 +355,13 @@ export default function PostFreePage() {
     trackLaunchEvent("post_free_opened", { category });
   }, [category]);
 
-  const taxonomy = taxonomyMap[category] || [];
+ const availableMakes = useMemo(() => {
+  return getV12Makes(category);
+}, [category]);
 
-  const availableMakes = useMemo(() => {
-    return Array.from(new Set(taxonomy.map(item => item.make).filter(Boolean)));
-  }, [taxonomy]);
-
-  const availableModels = useMemo(() => {
-    return Array.from(
-      new Set(
-        taxonomy
-          .filter(item => item.make === make)
-          .map(item => item.model)
-          .filter(Boolean)
-      )
-    );
-  }, [taxonomy, make]);
+const availableModels = useMemo(() => {
+  return getV12Models(category, make);
+}, [category, make]);
 
   const cardTitle = useMemo(() => {
     return buildCardTitle(year, make, model);
