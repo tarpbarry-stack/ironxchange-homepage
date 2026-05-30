@@ -1455,11 +1455,33 @@ return (
 }
 
 
+.draggable-board-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+.draggable-board-card:active {
+  cursor: grabbing;
+}
 
 .board-card-wrap {
   position: relative;
-  border-radius: 18px;
+  width: 100%;
+  min-width: 0;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #151515;
+  border: 1px solid #242424;
+
   outline: var(--board-weight) solid transparent;
+  outline-offset: 2px;
+
   transition:
     outline-color .16s ease,
     outline-width .16s ease,
@@ -1497,7 +1519,8 @@ return (
   gap: 5px;
   opacity: .28;
   transition: opacity .14s ease;
-  z-index: 20;
+  z-index: 50;
+  pointer-events: auto;
 }
 
 .board-card-wrap:hover .passport-strip {
@@ -1535,6 +1558,7 @@ return (
   color: #FFC400;
   border-color: rgba(255,196,0,.35);
 }
+
 
 
 @media (max-width: 850px) {
