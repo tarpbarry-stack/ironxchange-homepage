@@ -557,18 +557,8 @@ return (
 }
 
 .card.grid-drag-source {
-  opacity: .38;
-}
-
-.card.grid-drag-source::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border: 1px dashed rgba(255,255,255,.16);
-  border-radius: 10px;
-  background: rgba(255,255,255,.018);
+  opacity: 0;
   pointer-events: none;
-  z-index: 18;
 }
 
 .card.grid-ghost-target {
