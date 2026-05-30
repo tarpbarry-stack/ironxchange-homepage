@@ -142,10 +142,6 @@ function DraggableBoardCard({ id, boardPosition, onHide, children }) {
 }
 
 export default function MyListingsPage() {
-
-
-
-export default function MyListingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
   const [sortMode, setSortMode] = useState("newest");
