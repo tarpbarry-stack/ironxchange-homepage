@@ -117,29 +117,12 @@ function sortListings(listings, sortMode) {
   return sorted;
 }
 
-function DraggableBoardCard({
-  id,
-  boardPosition,
-  onHide,
-  children
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    isDragging
-  } = useDraggable({
-    id
-  });
+function DraggableBoardCard({ id, boardPosition, onHide, children }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id });
 
-  const x =
-    (boardPosition?.x || 0) +
-    (transform?.x || 0);
-
-  const y =
-    (boardPosition?.y || 0) +
-    (transform?.y || 0);
+  const x = (boardPosition?.x || 0) + (transform?.x || 0);
+  const y = (boardPosition?.y || 0) + (transform?.y || 0);
 
   return (
     <div
