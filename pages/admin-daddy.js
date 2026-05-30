@@ -878,6 +878,50 @@ const [deployBusy, setDeployBusy] = useState(false);
     });
   }
 
+ async function deployAwsTaxonomy() {
+  const typed = window.prompt(
+    "Deploy generated taxonomy to AWS?\n\nType DEPLOY AWS to continue."
+  );
+
+  if (typed !== "DEPLOY AWS") {
+    addLog("AWS deploy cancelled", "warn");
+    return;
+  }
+
+  setDeployBusy(true);
+
+  try {
+    const res = await fetch("/api/admin/taxonomy/deploy-aws", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      }
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "AWS deploy failed");
+    }
+
+    addLog("AWS taxonomy deployed", "success");
+
+    stagePatch({
+      type: "AWS_DEPLOY",
+      target: "AWS",
+      status: "DEPLOYED"
+    });
+
+    alert("AWS taxonomy deployed successfully.");
+  } catch (error) {
+    addLog(`AWS deploy failed: ${error.message}`, "danger");
+    alert(error.message);
+  } finally {
+    setDeployBusy(false);
+  }
+}
+
   async function copyPatchQueue() {
     const text = JSON.stringify(patchQueue, null, 2);
 
