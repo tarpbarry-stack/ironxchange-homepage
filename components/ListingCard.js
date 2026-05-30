@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { captureIXEvent } from "../lib/posthog";
 
@@ -91,6 +91,38 @@ function cycleBoardOutline(e) {
     return 1;
   });
 }
+
+ const boardDragStart = useRef(null);
+
+function startBoardDrag(e) {
+  if (e.target.closest("button, input, select, a")) return;
+
+  boardDragStart.current = {
+    x: e.clientX,
+    y: e.clientY
+  };
+
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+}
+
+function endBoardDrag(e) {
+  if (!boardDragStart.current) return;
+
+  const dx = e.clientX - boardDragStart.current.x;
+  const dy = e.clientY - boardDragStart.current.y;
+
+  boardDragStart.current = null;
+
+  if (Math.abs(dx) < 70) return;
+  if (Math.abs(dx) < Math.abs(dy) * 1.25) return;
+
+  if (dx < 0) {
+    onSendFront?.(listing);
+  } else {
+    onSendBack?.(listing);
+  }
+} 
+
 
 function cycleBoardColor(e) {
   e.preventDefault();
@@ -248,7 +280,11 @@ return (
   </div>
 </a>
 
-        <div className="card-board-zone">
+        <div
+  className="card-board-zone"
+  onPointerDown={startBoardDrag}
+  onPointerUp={endBoardDrag}
+>
 
         <div className="keyword-row">
           <MachineBadges
