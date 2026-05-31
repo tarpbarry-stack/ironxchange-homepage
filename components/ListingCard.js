@@ -258,53 +258,54 @@ return (
   }}
 >
     
-      <a
+<a
   href={getListingHref(listing, from)}
   className="photo-click-zone"
   onClick={handleCardClick}
 >
- <img
-  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-  alt={listing.title || "Machine"}
-  draggable={false}
-  className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
-  style={getFrameStyle(currentImageObject, "card")}
-  loading="lazy"
-/>
+  <div className="card-photo">
+    <img
+      src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+      alt={listing.title || "Machine"}
+      draggable={false}
+      className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
+      style={getFrameStyle(currentImageObject, "card")}
+      loading="lazy"
+    />
 
-       {sellerMode ? (
-    <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
-      {isPaused ? "PAUSED" : "LIVE"}
-    </div>
-  ) : null}
+    {sellerMode ? (
+      <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
+        {isPaused ? "PAUSED" : "LIVE"}
+      </div>
+    ) : null}
 
-  {images.length > 1 ? (
-    <>
-      <button
-        type="button"
-        className="card-photo-nav left"
-        onClick={e => changePhoto(e, -1)}
-        aria-label="Previous photo"
-      >
-        ‹
-      </button>
+    {images.length > 1 ? (
+      <>
+        <button
+          type="button"
+          className="card-photo-nav left"
+          onClick={e => changePhoto(e, -1)}
+          aria-label="Previous photo"
+        >
+          ‹
+        </button>
 
-      <button
-        type="button"
-        className="card-photo-nav right"
-        onClick={e => changePhoto(e, 1)}
-        aria-label="Next photo"
-      >
-        ›
-      </button>
+        <button
+          type="button"
+          className="card-photo-nav right"
+          onClick={e => changePhoto(e, 1)}
+          aria-label="Next photo"
+        >
+          ›
+        </button>
 
-      <span className="photo-count">
-        {photoIndex + 1}/{images.length}
-      </span>
-    </>
-  ) : null}
-</div>
-
+        <span className="photo-count">
+          {photoIndex + 1}/{images.length}
+        </span>
+      </>
+    ) : null}
+  </div>
+</a>
 That restores the glo
 </a>
 
