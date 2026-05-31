@@ -306,8 +306,6 @@ return (
     ) : null}
   </div>
 </a>
-That restores the glo
-</a>
 
 <div className="card-body">
        <a
