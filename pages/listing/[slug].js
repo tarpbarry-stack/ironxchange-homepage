@@ -168,6 +168,7 @@ export default function ListingPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [copied, setCopied] = useState("");
   const [slugIxiState, setSlugIxiState] = useState({
+  const [slugIxiState, setSlugIxiState] = useState({
   color: "none",
   outline: 1
 });
@@ -1564,6 +1565,185 @@ video {
           opacity: .28;
           cursor: default;
         }
+
+        .slug-ixi-rail {
+  display: grid;
+  grid-template-columns:
+    .55fr
+    1fr
+    1fr
+    1fr
+    1fr
+    .55fr;
+
+  gap: 0;
+  padding: 0 12px;
+}
+
+.slug-rail-zone {
+  position: relative;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.026);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease;
+}
+
+.slug-rail-zone:last-child {
+  border-right: none;
+}
+
+.slug-rail-zone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 26px;
+  height: 7px;
+
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.13);
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease,
+    opacity .14s ease,
+    width .14s ease;
+}
+
+.slug-rail-zone.rail-half::after {
+  width: 13px;
+}
+
+/* COLOR DASH */
+.slug-color-none .rail-color::after {
+  background: rgba(255,255,255,.16);
+}
+
+.slug-color-green .rail-color::after {
+  background: rgba(56,161,105,.78);
+  box-shadow: 0 0 8px rgba(56,161,105,.18);
+}
+
+.slug-color-yellow .rail-color::after {
+  background: rgba(255,196,0,.80);
+  box-shadow: 0 0 8px rgba(255,196,0,.18);
+}
+
+.slug-color-red .rail-color::after {
+  background: rgba(229,62,62,.80);
+  box-shadow: 0 0 8px rgba(229,62,62,.18);
+}
+
+.slug-color-cyan .rail-color::after {
+  background: rgba(0,194,255,.78);
+  box-shadow: 0 0 8px rgba(0,194,255,.18);
+}
+
+.slug-color-white .rail-color::after {
+  background: rgba(255,255,255,.62);
+  box-shadow: 0 0 8px rgba(255,255,255,.14);
+}
+
+.slug-color-blue .rail-color::after {
+  background: rgba(49,130,206,.80);
+  box-shadow: 0 0 8px rgba(49,130,206,.18);
+}
+
+.slug-color-orange .rail-color::after {
+  background: rgba(249,133,18,.80);
+  box-shadow: 0 0 8px rgba(249,133,18,.18);
+}
+
+/* WIDTH DASH */
+.slug-outline-1 .rail-width::after {
+  width: 18px;
+  opacity: .46;
+}
+
+.slug-outline-3 .rail-width::after {
+  width: 24px;
+  opacity: .68;
+}
+
+.slug-outline-5 .rail-width::after {
+  width: 30px;
+  opacity: .92;
+}
+
+.slug-color-none .rail-width::after {
+  background: rgba(255,255,255,.18);
+}
+
+.slug-color-green .rail-width::after {
+  background: rgba(56,161,105,.78);
+}
+
+.slug-color-yellow .rail-width::after {
+  background: rgba(255,196,0,.82);
+}
+
+.slug-color-red .rail-width::after {
+  background: rgba(229,62,62,.82);
+}
+
+.slug-color-cyan .rail-width::after {
+  background: rgba(0,194,255,.82);
+}
+
+.slug-color-white .rail-width::after {
+  background: rgba(255,255,255,.70);
+}
+
+.slug-color-blue .rail-width::after {
+  background: rgba(49,130,206,.82);
+}
+
+.slug-color-orange .rail-width::after {
+  background: rgba(249,133,18,.82);
+}
+
+/* SAVE DASH */
+.rail-save.saved::after {
+  background: rgba(255,196,0,.76);
+  box-shadow: 0 0 8px rgba(255,196,0,.24);
+}
+
+/* HOVER */
+.slug-rail-zone:hover {
+  transform: translateY(-1px);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.06),
+      rgba(0,194,255,.015)
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,194,255,.12),
+    0 0 10px rgba(0,194,255,.06);
+}
+
+.slug-rail-zone:hover::after {
+  background: rgba(0,194,255,.55);
+  box-shadow:
+    0 0 6px rgba(0,194,255,.45),
+    0 0 12px rgba(0,194,255,.20);
+}
+
+.rail-save.saved:hover::after {
+  background: rgba(255,196,0,.84);
+  box-shadow: 0 0 9px rgba(255,196,0,.30);
+}
 
        .panel {
   background:
