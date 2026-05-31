@@ -575,20 +575,23 @@ return (
 }
 
 .board-command-rail {
-  position: relative;
-  top: 2px;
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 0;
 
   height: 13px;
   min-height: 13px;
   max-height: 13px;
-  margin: 9px -13px -18px;
-  
+
   display: grid;
   grid-template-columns: repeat(5, 1fr);
 
- border-top: 1px solid rgba(0,194,255,.12);
-}
+  border-top: 1px solid rgba(0,194,255,.12);
+  background: rgba(20,20,20,.92);
 
+  z-index: 30;
+}
 .rail-zone {
   position: relative;
   border: none;
