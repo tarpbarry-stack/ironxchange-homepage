@@ -6,6 +6,9 @@ import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 
 import { getListingId } from "../lib/listingFormatters";
+import {
+  fetchIxiMachineState
+} from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
 import {
@@ -29,6 +32,7 @@ export default function SavedListings() {
   const [ghostListingId, setGhostListingId] = useState("");
 
   const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilter, setIxiColorFilter] = useState("all");
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -51,6 +55,18 @@ export default function SavedListings() {
 
         const currentUser =
           await fetchCurrentUserWithSavedListings(sdkInstance);
+
+        const userId =
+  currentUser?.id?.uuid ||
+  currentUser?.id ||
+  "guest";
+
+setIxiUserId(String(userId));
+
+const remoteIxiState =
+  await fetchIxiMachineState(String(userId));
+
+setIxiCardState(remoteIxiState);
 
         setSavedIds(
           getSavedListingIdsFromUser(currentUser)
@@ -84,13 +100,30 @@ export default function SavedListings() {
     return filterSavedListings(activeListings, savedIds);
   }, [listings, savedIds]);
 
+  const workspaceListings = useMemo(() => {
+  const activeListings = listings.filter(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus;
+
+    return listingStatus !== "archived";
+  });
+
+  const touchedIds = Object.keys(ixiCardState || {});
+
+  return activeListings.filter(item =>
+    touchedIds.includes(String(getListingId(item)))
+  );
+}, [listings, ixiCardState]);
+
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-        : savedListings;
+        : workspaceListings;
 
     return source.filter(item => {
       const id = String(getListingId(item));
