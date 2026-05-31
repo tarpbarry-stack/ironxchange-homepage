@@ -74,6 +74,7 @@ const [ghostListingId, setGhostListingId] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
 
   const [indexBoardMode, setIndexBoardMode] = useState("featured");
+  const [indexBoardListings, setIndexBoardListings] = useState([]);
 
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
@@ -281,30 +282,6 @@ function sendListingToBack(listing) {
     return target ? [...rest, target] : source;
   });
 }
-
-function sendListingToBack(listing) {
-  const listingId = getListingId(listing);
-
-  setLiveListings(current => {
-    const target = current.find(
-      item =>
-        String(getListingId(item)) ===
-        String(listingId)
-    );
-
-    const rest = current.filter(
-      item =>
-        String(getListingId(item)) !==
-        String(listingId)
-    );
-
-    return target
-      ? [...rest, target]
-      : current;
-  });
-}
-  
-  
   
   function handleSearch() {
   const params = new URLSearchParams();
