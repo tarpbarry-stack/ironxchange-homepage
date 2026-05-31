@@ -645,7 +645,6 @@ function handleBoardDragEnd() {
     }
   />
 );
-    );
   })}
 
   {filteredListings.length === 0 && (
