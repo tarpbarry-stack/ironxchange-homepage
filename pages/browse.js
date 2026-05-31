@@ -20,6 +20,10 @@ import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import featureKeywords from "../lib/featureKeywords";
 
+import {
+  fetchIxiMachineState,
+  saveIxiMachinePatch
+} from "../lib/ixiMachineStateClient";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -160,6 +164,7 @@ export default function Browse() {
   const [ghostListingId, setGhostListingId] = useState("");
 
   const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiUserId, setIxiUserId] = useState("guest");
  const [activeColorStacks, setActiveColorStacks] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -201,6 +206,17 @@ export default function Browse() {
 setSdk(sdkInstance);
 
 const currentUser = await fetchCurrentUserWithSavedListings(sdkInstance);
+
+const userId =
+  currentUser?.id?.uuid ||
+  currentUser?.id ||
+  "guest";
+
+setIxiUserId(String(userId));
+
+const remoteIxiState = await fetchIxiMachineState(String(userId));
+
+setIxiCardState(remoteIxiState);
 
 setSavedIds(
   getSavedListingIdsFromUser(currentUser)
@@ -329,15 +345,32 @@ return sortListings(filtered, sortMode);
 ]);
 
 function updateIxiCardState(listingId, patch) {
-  setIxiCardState(current => ({
-    ...current,
-    [String(listingId)]: {
+  const id = String(listingId);
+
+  setIxiCardState(current => {
+    const nextRecord = {
       color: "none",
       outline: 1,
-      ...(current[String(listingId)] || {}),
-      ...patch
-    }
-  }));
+
+      ...(current[id] || {}),
+
+      ...patch,
+
+      touched: true,
+      updatedAt: Date.now()
+    };
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: id,
+      patch: nextRecord
+    });
+
+    return {
+      ...current,
+      [id]: nextRecord
+    };
+  });
 }
 
   const raisedStackListings = useMemo(() => {
