@@ -576,6 +576,82 @@ export default function IXITheater() {
   max-width: 300px !important;
   flex: 0 0 300px !important;
 }
+
+.theater-stage {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 18px !important;
+  min-height: 455px !important;
+  overflow: hidden !important;
+}
+
+.played-card,
+.main-card,
+.next-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  height: 430px !important;
+  overflow: hidden !important;
+}
+
+.played-card {
+  width: 190px !important;
+  min-width: 190px !important;
+  max-width: 190px !important;
+  justify-content: flex-end !important;
+  opacity: .40 !important;
+}
+
+.main-card {
+  width: 330px !important;
+  min-width: 330px !important;
+  max-width: 330px !important;
+  justify-content: center !important;
+}
+
+.next-card {
+  width: 190px !important;
+  min-width: 190px !important;
+  max-width: 190px !important;
+  justify-content: flex-start !important;
+  opacity: .60 !important;
+}
+
+.theater-card-frame,
+.theater-card-frame :global(.card) {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  flex: 0 0 300px !important;
+}
+
+.theater-card-frame.current {
+  transform: scale(1.08) !important;
+}
+
+.played-card .theater-card-frame {
+  transform: translateX(70px) scale(.82) !important;
+}
+
+.next-card .theater-card-frame {
+  transform: translateX(-70px) scale(.82) !important;
+}
+
+@media (max-width: 950px) {
+  .theater-stage {
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: unset !important;
+  }
+
+  .played-card,
+  .next-card {
+    display: flex !important;
+  }
+}
       `}</style>
     </>
   );
