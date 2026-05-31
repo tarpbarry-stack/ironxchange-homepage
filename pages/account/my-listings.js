@@ -692,19 +692,62 @@ return (
     Dashboard
   </a>
 
-  <button className="ixi-color-filter color-none" />
-  <button className="ixi-color-filter color-green" />
-  <button className="ixi-color-filter color-yellow" />
-  <button className="ixi-color-filter color-red" />
-  <button className="ixi-color-filter color-cyan" />
-  <button className="ixi-color-filter color-white" />
-  <button className="ixi-color-filter color-blue" />
-  <button className="ixi-color-filter color-orange" />
+  <button
+  type="button"
+  className={`ixi-color-filter color-none ${ixiColorFilter === "none" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("none")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-green ${ixiColorFilter === "green" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("green")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-yellow ${ixiColorFilter === "yellow" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("yellow")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-red ${ixiColorFilter === "red" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("red")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-cyan ${ixiColorFilter === "cyan" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("cyan")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-white ${ixiColorFilter === "white" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("white")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-blue ${ixiColorFilter === "blue" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("blue")}
+/>
+<button
+  type="button"
+  className={`ixi-color-filter color-orange ${ixiColorFilter === "orange" ? "active" : ""}`}
+  onClick={() => toggleColorFilter("orange")}
+/>
 
-  <button className="ixi-thickness-filter thin" />
-  <button className="ixi-thickness-filter medium" />
-  <button className="ixi-thickness-filter thick" />
-
+<button
+  type="button"
+  className={`ixi-thickness-filter thin ${String(ixiOutlineFilter) === "1" ? "active" : ""}`}
+  onClick={() => toggleOutlineFilter(1)}
+/>
+<button
+  type="button"
+  className={`ixi-thickness-filter medium ${String(ixiOutlineFilter) === "3" ? "active" : ""}`}
+  onClick={() => toggleOutlineFilter(3)}
+/>
+<button
+  type="button"
+  className={`ixi-thickness-filter thick ${String(ixiOutlineFilter) === "5" ? "active" : ""}`}
+  onClick={() => toggleOutlineFilter(5)}
+/>
   <a href="/post-free" className="tool-link">
     Add Machine
   </a>
