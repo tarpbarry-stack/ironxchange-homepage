@@ -1157,8 +1157,20 @@ gap: 6px;
 
 .workflow-filter-shell button:hover {
   transform: translateY(-1px);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 0 8px rgba(255,196,0,.10);
 }
 
+.ixi-color-filter.active,
+.ixi-thickness-filter.active {
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.08),
+    0 0 12px rgba(255,196,0,.18);
+
+  border-color: rgba(255,196,0,.24) !important;
+}
 
 .tool-link {
   height: 26px !important;
