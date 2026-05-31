@@ -578,7 +578,7 @@ return (
   position: absolute;
   left: 13px;
   right: 13px;
-  bottom: 0;
+  bottom: 2;
 
   height: 13px;
   min-height: 13px;
