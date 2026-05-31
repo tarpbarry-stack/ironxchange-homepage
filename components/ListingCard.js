@@ -614,15 +614,11 @@ return (
   z-index: 30;
 }
 
-/* BASE ZONE */
 .rail-zone {
   position: relative;
-
   border: none;
   border-right: 1px solid rgba(255,255,255,.022);
-
   background: transparent;
-
   cursor: pointer;
   padding: 0;
 
@@ -636,10 +632,8 @@ return (
   border-right: none;
 }
 
-/* BASE DASH */
 .rail-zone::after {
   content: "";
-
   position: absolute;
   left: 50%;
   top: 50%;
@@ -656,98 +650,123 @@ return (
   transition:
     background .14s ease,
     box-shadow .14s ease,
-    color .14s ease,
-    transform .14s ease;
+    opacity .14s ease,
+    width .14s ease;
 }
 
-/* LEFT / RIGHT HALF DASHES */
+/* END DASHES */
 .rail-half::after {
   width: 7px;
 }
 
-/* COLOR DASH */
-.rail-color::after {
-  background: rgba(255,196,0,.24);
-}
-
-/* WIDTH DASH */
-/* WIDTH DASH — same size, state shown by edge markers */
-.rail-width::before {
-  content: "";
-
-  position: absolute;
-  left: 50%;
-  top: 50%;
-
-  width: 13px;
-  height: 4px;
-
-  transform: translate(-50%, -50%);
-
-  border-radius: 999px;
-
-  background: transparent;
-
-  pointer-events: none;
-}
-
-/* outline 1 = faint edge */
-/* WIDTH DASH — dash only, no objects */
-.rail-width::after {
-  width: 13px;
-  height: 4px;
-  border-radius: 999px;
-}
-
-.card.board-outline-1 .rail-width::after {
+/* COLOR DASH — follows selected IXI color */
+.card.board-color-none .rail-color::after {
   background: rgba(255,255,255,.14);
+}
+
+.card.board-color-green .rail-color::after {
+  background: rgba(56,161,105,.76);
+  box-shadow: 0 0 6px rgba(56,161,105,.18);
+}
+
+.card.board-color-yellow .rail-color::after {
+  background: rgba(255,196,0,.78);
+  box-shadow: 0 0 6px rgba(255,196,0,.18);
+}
+
+.card.board-color-red .rail-color::after {
+  background: rgba(229,62,62,.78);
+  box-shadow: 0 0 6px rgba(229,62,62,.18);
+}
+
+.card.board-color-cyan .rail-color::after {
+  background: rgba(0,194,255,.76);
+  box-shadow: 0 0 6px rgba(0,194,255,.18);
+}
+
+.card.board-color-white .rail-color::after {
+  background: rgba(255,255,255,.58);
+  box-shadow: 0 0 6px rgba(255,255,255,.14);
+}
+
+.card.board-color-blue .rail-color::after {
+  background: rgba(49,130,206,.78);
+  box-shadow: 0 0 6px rgba(49,130,206,.18);
+}
+
+.card.board-color-orange .rail-color::after {
+  background: rgba(249,133,18,.78);
+  box-shadow: 0 0 6px rgba(249,133,18,.18);
+}
+
+/* WIDTH DASH — follows selected color, 3 strength states */
+.card.board-outline-1 .rail-width::after {
+  width: 9px;
+  opacity: .46;
   box-shadow: none;
 }
 
 .card.board-outline-3 .rail-width::after {
-  background: rgba(255,255,255,.22);
-  box-shadow:
-    0 0 5px rgba(255,255,255,.08);
+  width: 12px;
+  opacity: .68;
+  box-shadow: 0 0 5px rgba(255,255,255,.08);
 }
 
 .card.board-outline-5 .rail-width::after {
-  background: rgba(255,255,255,.34);
-  box-shadow:
-    0 0 7px rgba(255,255,255,.12);
+  width: 15px;
+  opacity: .92;
+  box-shadow: 0 0 7px rgba(255,255,255,.12);
 }
-/* PIN PLACEHOLDER */
+
+.card.board-color-none .rail-width::after {
+  background: rgba(255,255,255,.18);
+}
+
+.card.board-color-green .rail-width::after {
+  background: rgba(56,161,105,.78);
+}
+
+.card.board-color-yellow .rail-width::after {
+  background: rgba(255,196,0,.82);
+}
+
+.card.board-color-red .rail-width::after {
+  background: rgba(229,62,62,.82);
+}
+
+.card.board-color-cyan .rail-width::after {
+  background: rgba(0,194,255,.82);
+}
+
+.card.board-color-white .rail-width::after {
+  background: rgba(255,255,255,.70);
+}
+
+.card.board-color-blue .rail-width::after {
+  background: rgba(49,130,206,.82);
+}
+
+.card.board-color-orange .rail-width::after {
+  background: rgba(249,133,18,.82);
+}
+
+/* PIN DASH — placeholder, dash only */
 .rail-pin::after {
-  width: 5px;
-  height: 5px;
-
-  border-radius: 50%;
-
-  background: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.12);
 }
 
-/* SAVE STAR */
+/* SAVE DASH — dash only, yellow when saved */
 .rail-save::after {
-  content: "★";
-
-  width: auto;
-  height: auto;
-
-  background: transparent;
-
-  color: rgba(255,255,255,.22);
-
-  font-size: 8px;
-  line-height: 1;
+  background: rgba(255,255,255,.12);
 }
 
 .rail-save.saved::after {
-  color: #FFC400;
-
-  text-shadow:
-    0 0 7px rgba(255,196,0,.22);
+  background: rgba(255,196,0,.72);
+  box-shadow:
+    0 0 6px rgba(255,196,0,.24);
 }
 
-/* HOVER STATE */
+/* HOVER */
 .rail-zone:hover {
   transform: translateY(-1px);
 
@@ -765,20 +784,16 @@ return (
 
 .rail-zone:hover::after {
   background: rgba(0,194,255,.55);
-
   box-shadow:
     0 0 6px rgba(0,194,255,.45),
     0 0 12px rgba(0,194,255,.20);
 }
 
-/* KEEP SAVE STAR FROM TURNING INTO A DASH ON HOVER */
-.rail-save:hover::after {
-  background: transparent;
-
-  color: #FFC400;
-
-  text-shadow:
-    0 0 8px rgba(255,196,0,.26);
+/* KEEP SAVE YELLOW ON HOVER WHEN SAVED */
+.rail-save.saved:hover::after {
+  background: rgba(255,196,0,.82);
+  box-shadow:
+    0 0 7px rgba(255,196,0,.30);
 }
 
 .card.board-color-none .rail-color::after {
