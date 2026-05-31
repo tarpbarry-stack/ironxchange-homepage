@@ -575,6 +575,9 @@ return (
 }
 
 .board-command-rail {
+  position: relative;
+  top: 2px;
+
   height: 13px;
   min-height: 13px;
   max-height: 13px;
