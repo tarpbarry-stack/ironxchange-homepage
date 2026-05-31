@@ -67,6 +67,11 @@ export default function Home() {
   const [category, setCategory] = useState("ALL CATEGORIES");
    const [liveListings, setLiveListings] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  
+  const [draggingListingId, setDraggingListingId] = useState("");
+const [ghostListingId, setGhostListingId] = useState("");
+
+const [ixiCardState, setIxiCardState] = useState({});
 
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
@@ -156,7 +161,121 @@ export default function Home() {
   return [...selected, ...remaining].slice(0, 20);
 }, [liveListings]);
 
-function handleSearch() {
+function updateIxiCardState(listingId, patch) {
+  setIxiCardState(current => ({
+    ...current,
+    [String(listingId)]: {
+      color: "none",
+      outline: 1,
+      ...(current[String(listingId)] || {}),
+      ...patch
+    }
+  }));
+}
+
+function moveListingToSlot(dragId, targetId) {
+  if (!dragId || !targetId || dragId === targetId) return;
+
+  setLiveListings(current => {
+    const fromIndex = current.findIndex(
+      item => String(getListingId(item)) === String(dragId)
+    );
+
+    const toIndex = current.findIndex(
+      item => String(getListingId(item)) === String(targetId)
+    );
+
+    if (fromIndex === -1 || toIndex === -1) return current;
+
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+
+    next.splice(toIndex, 0, moved);
+
+    return next;
+  });
+}
+
+function handleBoardDragStart(listing) {
+  setDraggingListingId(
+    String(getListingId(listing))
+  );
+}
+
+function handleBoardDragOver(listing) {
+  const targetId = String(
+    getListingId(listing)
+  );
+
+  if (
+    !draggingListingId ||
+    draggingListingId === targetId
+  ) {
+    return;
+  }
+
+  setGhostListingId(targetId);
+}
+
+function handleBoardDragEnd() {
+  const dragId = draggingListingId;
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+}
+
+function sendListingToFront(listing) {
+  const listingId = getListingId(listing);
+
+  setLiveListings(current => {
+    const target = current.find(
+      item =>
+        String(getListingId(item)) ===
+        String(listingId)
+    );
+
+    const rest = current.filter(
+      item =>
+        String(getListingId(item)) !==
+        String(listingId)
+    );
+
+    return target
+      ? [target, ...rest]
+      : current;
+  });
+}
+
+function sendListingToBack(listing) {
+  const listingId = getListingId(listing);
+
+  setLiveListings(current => {
+    const target = current.find(
+      item =>
+        String(getListingId(item)) ===
+        String(listingId)
+    );
+
+    const rest = current.filter(
+      item =>
+        String(getListingId(item)) !==
+        String(listingId)
+    );
+
+    return target
+      ? [...rest, target]
+      : current;
+  });
+}
+  
+  
+  
+  function handleSearch() {
   const params = new URLSearchParams();
 
   const q = searchQuery.trim();
@@ -275,12 +394,53 @@ window.location.href = queryString
       const id = String(getListingId(item));
 
       return (
-        <ListingCard
-          key={id}
-          listing={item}
-          showSave={false}
-          from="browser"
-        />
+       <ListingCard
+  key={id}
+  listing={item}
+  showSave={false}
+  from="browser"
+
+  ixiState={
+    ixiCardState[String(id)] || {
+      color: "none",
+      outline: 1
+    }
+  }
+
+  onIxiStateChange={
+    updateIxiCardState
+  }
+
+  onSendFront={
+    sendListingToFront
+  }
+
+  onSendBack={
+    sendListingToBack
+  }
+
+  isBoardDraggingCard={
+    String(id) ===
+    String(draggingListingId)
+  }
+
+  isGhostTarget={
+    String(id) ===
+    String(ghostListingId)
+  }
+
+  onBoardDragStart={
+    handleBoardDragStart
+  }
+
+  onBoardDragOver={
+    handleBoardDragOver
+  }
+
+  onBoardDragEnd={
+    handleBoardDragEnd
+  }
+/>
       );
     })}
   </div>
