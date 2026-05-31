@@ -671,11 +671,50 @@ return (
 }
 
 /* WIDTH DASH */
-.rail-width::after {
-  height: 2px;
-  background: rgba(255,255,255,.18);
+/* WIDTH DASH — same size, state shown by edge markers */
+.rail-width::before {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 13px;
+  height: 4px;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 999px;
+
+  background: transparent;
+
+  pointer-events: none;
 }
 
+/* outline 1 = faint edge */
+/* WIDTH DASH — dash only, no objects */
+.rail-width::after {
+  width: 13px;
+  height: 4px;
+  border-radius: 999px;
+}
+
+.card.board-outline-1 .rail-width::after {
+  background: rgba(255,255,255,.14);
+  box-shadow: none;
+}
+
+.card.board-outline-3 .rail-width::after {
+  background: rgba(255,255,255,.22);
+  box-shadow:
+    0 0 5px rgba(255,255,255,.08);
+}
+
+.card.board-outline-5 .rail-width::after {
+  background: rgba(255,255,255,.34);
+  box-shadow:
+    0 0 7px rgba(255,255,255,.12);
+}
 /* PIN PLACEHOLDER */
 .rail-pin::after {
   width: 5px;
