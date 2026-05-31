@@ -186,20 +186,23 @@ function updateIxiCardState(listingId, patch) {
 function moveListingToSlot(dragId, targetId) {
   if (!dragId || !targetId || dragId === targetId) return;
 
-  setLiveListings(current => {
-    const fromIndex = current.findIndex(
+  setIndexBoardMode("custom");
+
+  setIndexBoardListings(current => {
+    const source = current.length ? current : featuredListings;
+
+    const fromIndex = source.findIndex(
       item => String(getListingId(item)) === String(dragId)
     );
 
-    const toIndex = current.findIndex(
+    const toIndex = source.findIndex(
       item => String(getListingId(item)) === String(targetId)
     );
 
-    if (fromIndex === -1 || toIndex === -1) return current;
+    if (fromIndex === -1 || toIndex === -1) return source;
 
-    const next = [...current];
+    const next = [...source];
     const [moved] = next.splice(fromIndex, 1);
-
     next.splice(toIndex, 0, moved);
 
     return next;
@@ -242,22 +245,40 @@ function handleBoardDragEnd() {
 function sendListingToFront(listing) {
   const listingId = getListingId(listing);
 
-  setLiveListings(current => {
-    const target = current.find(
-      item =>
-        String(getListingId(item)) ===
-        String(listingId)
+  setIndexBoardMode("custom");
+
+  setIndexBoardListings(current => {
+    const source = current.length ? current : featuredListings;
+
+    const target = source.find(
+      item => String(getListingId(item)) === String(listingId)
     );
 
-    const rest = current.filter(
-      item =>
-        String(getListingId(item)) !==
-        String(listingId)
+    const rest = source.filter(
+      item => String(getListingId(item)) !== String(listingId)
     );
 
-    return target
-      ? [target, ...rest]
-      : current;
+    return target ? [target, ...rest] : source;
+  });
+}
+
+function sendListingToBack(listing) {
+  const listingId = getListingId(listing);
+
+  setIndexBoardMode("custom");
+
+  setIndexBoardListings(current => {
+    const source = current.length ? current : featuredListings;
+
+    const target = source.find(
+      item => String(getListingId(item)) === String(listingId)
+    );
+
+    const rest = source.filter(
+      item => String(getListingId(item)) !== String(listingId)
+    );
+
+    return target ? [...rest, target] : source;
   });
 }
 
@@ -310,6 +331,11 @@ window.location.href = queryString
   ? `/browse?${queryString}`
   : "/browse";
 }
+
+  const visibleListings =
+  indexBoardMode === "custom"
+    ? indexBoardListings
+    : featuredListings;
   
   return (
     <>
@@ -397,10 +423,10 @@ window.location.href = queryString
 <section className="featured">
   <div
     className={`cards ${
-      featuredListings.length === 1 ? "single-card" : ""
+      visibleListings.length === 1 ? "single-card" : ""
     }`}
   >
-    {featuredListings.map((item) => {
+    {visibleListings.map((item) => {
       const id = String(getListingId(item));
 
       return (
