@@ -11,10 +11,6 @@ import {
   cleanMachineTitle as formatCleanMachineTitle
 } from "../../lib/listingFormatters";
 
-const [ixiCardState, setIxiCardState] = useState({});
-const [ixiColorFilter, setIxiColorFilter] = useState("all");
-const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
-
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -124,6 +120,10 @@ export default function MyListingsPage() {
   const [savingPriceId, setSavingPriceId] = useState("");
   const [draggingListingId, setDraggingListingId] = useState("");
   const [ghostListingId, setGhostListingId] = useState("");
+  const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiColorFilter, setIxiColorFilter] = useState("all");
+  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
+
 
   const [workflowFilter, setWorkflowFilter] = useState("all");
   
