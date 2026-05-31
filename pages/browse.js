@@ -159,7 +159,9 @@ export default function Browse() {
   const [draggingListingId, setDraggingListingId] = useState("");
   const [ghostListingId, setGhostListingId] = useState("");
 
-const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiColorFilter, setIxiColorFilter] = useState("all");
+  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [filters, setFilters] = useState({
   yearMin: "",
@@ -286,16 +288,31 @@ const isArchived = listingStatus === "archived";
       String(item.model || "")
         .toUpperCase() === String(model).toUpperCase();
 
-   return (
+    const ixState = ixiCardState[String(getListingId(item))] || {
+  color: "none",
+  outline: 1
+};
+
+const matchesIxiColor =
+  ixiColorFilter === "all" ||
+  ixState.color === ixiColorFilter;
+
+const matchesIxiOutline =
+  ixiOutlineFilter === "all" ||
+  String(ixState.outline) === String(ixiOutlineFilter);
+
+return (
   !isArchived &&
   matchesSearch &&
   matchesCategory &&
   matchesMake &&
   matchesModel &&
-      matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
-      matchesRange(item.price, filters.priceMin, filters.priceMax) &&
-      matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
-    );
+  matchesIxiColor &&
+  matchesIxiOutline &&
+  matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
+  matchesRange(item.price, filters.priceMin, filters.priceMax) &&
+  matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
+);
   });
 
   if (sortMode === "custom") {
@@ -310,7 +327,11 @@ return sortListings(filtered, sortMode);
   model,
   liveListings,
   filters,
-  sortMode
+  sortMode,
+
+  ixiCardState,
+  ixiColorFilter,
+  ixiOutlineFilter 
 ]);
 
 function updateIxiCardState(listingId, patch) {
@@ -628,9 +649,80 @@ function sendListingToBack(listing) {
     </button>
   </div>
 </div>
+
+<div className="browse-board-toolbar">
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-none ${ixiColorFilter === "none" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("none")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-green ${ixiColorFilter === "green" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("green")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-yellow ${ixiColorFilter === "yellow" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("yellow")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-red ${ixiColorFilter === "red" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("red")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-cyan ${ixiColorFilter === "cyan" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("cyan")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-white ${ixiColorFilter === "white" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("white")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-blue ${ixiColorFilter === "blue" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("blue")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-color-filter color-orange ${ixiColorFilter === "orange" ? "active" : ""}`}
+    onClick={() => toggleColorFilter("orange")}
+  />
+
+  <button
+    type="button"
+    className={`ixi-thickness-filter thin ${String(ixiOutlineFilter) === "1" ? "active" : ""}`}
+    onClick={() => toggleOutlineFilter(1)}
+  />
+
+  <button
+    type="button"
+    className={`ixi-thickness-filter medium ${String(ixiOutlineFilter) === "3" ? "active" : ""}`}
+    onClick={() => toggleOutlineFilter(3)}
+  />
+
+  <button
+    type="button"
+    className={`ixi-thickness-filter thick ${String(ixiOutlineFilter) === "5" ? "active" : ""}`}
+    onClick={() => toggleOutlineFilter(5)}
+  />
+
+</div>
+
 </section>
 
-      <section className="featured">
+<section className="featured">
         <div className="section-head">
           <h2>AVAILABLE EQUIPMENT</h2>
 
@@ -984,6 +1076,90 @@ grid-template-columns:
   border-color: rgba(255,196,0,.38);
   color: #FFC400;
 }
+
+.browse-board-toolbar {
+  max-width: 690px;
+  margin: 7px auto 0;
+  padding: 0 7px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(8, 1fr)
+    repeat(3, 1fr);
+
+  align-items: center;
+  gap: 6px;
+}
+
+.browse-board-toolbar button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.browse-board-toolbar button:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 0 8px rgba(255,196,0,.10);
+}
+
+.ixi-color-filter.active,
+.ixi-thickness-filter.active {
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.08),
+    0 0 12px rgba(255,196,0,.18);
+
+  border-color: rgba(255,196,0,.24) !important;
+}
+
+.ixi-color-filter {
+  width: 20px !important;
+  height: 8px !important;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 1px !important;
+  padding: 0 !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 -1px 0 rgba(0,0,0,.32);
+}
+
+.ixi-color-filter.color-none { background: rgba(255,255,255,.035) !important; }
+.ixi-color-filter.color-green { background: rgba(56,161,105,.42) !important; }
+.ixi-color-filter.color-yellow { background: rgba(255,196,0,.42) !important; }
+.ixi-color-filter.color-red { background: rgba(229,62,62,.42) !important; }
+.ixi-color-filter.color-cyan { background: rgba(0,194,255,.42) !important; }
+.ixi-color-filter.color-white { background: rgba(255,255,255,.34) !important; }
+.ixi-color-filter.color-blue { background: rgba(49,130,206,.42) !important; }
+.ixi-color-filter.color-orange { background: rgba(249,133,18,.42) !important; }
+
+.ixi-thickness-filter {
+  width: 24px;
+  height: 14px;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 3px;
+  background: rgba(255,255,255,.018) !important;
+  position: relative;
+}
+
+.ixi-thickness-filter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 15px;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.28);
+}
+
+.ixi-thickness-filter.thin::after { height: 1px; }
+.ixi-thickness-filter.medium::after { height: 3px; }
+.ixi-thickness-filter.thick::after { height: 5px; }
+
+
 
 .featured {
   padding: 34px 5% 54px;
