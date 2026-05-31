@@ -156,8 +156,12 @@ export default function Browse() {
   const [sdk, setSdk] = useState(null);
   const [savedIds, setSavedIds] = useState([]);
   const [sortMode, setSortMode] = useState("newest");
+  const [draggingListingId, setDraggingListingId] = useState("");
+  const [ghostListingId, setGhostListingId] = useState("");
 
-const [filters, setFilters] = useState({
+const [ixiCardState, setIxiCardState] = useState({});
+
+  const [filters, setFilters] = useState({
   yearMin: "",
   yearMax: "",
   priceMin: "",
@@ -304,6 +308,65 @@ const isArchived = listingStatus === "archived";
   filters,
   sortMode
 ]);
+
+function updateIxiCardState(listingId, patch) {
+  setIxiCardState(current => ({
+    ...current,
+    [String(listingId)]: {
+      color: "none",
+      outline: 1,
+      ...(current[String(listingId)] || {}),
+      ...patch
+    }
+  }));
+}
+
+function moveListingToSlot(dragId, targetId) {
+  if (!dragId || !targetId || dragId === targetId) return;
+
+  setLiveListings(current => {
+    const fromIndex = current.findIndex(
+      item => String(getListingId(item)) === String(dragId)
+    );
+
+    const toIndex = current.findIndex(
+      item => String(getListingId(item)) === String(targetId)
+    );
+
+    if (fromIndex === -1 || toIndex === -1) return current;
+
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+
+    return next;
+  });
+}
+
+function handleBoardDragStart(listing) {
+  setDraggingListingId(String(getListingId(listing)));
+}
+
+function handleBoardDragOver(listing) {
+  const targetId = String(getListingId(listing) || listing.id);
+
+  if (!draggingListingId || draggingListingId === targetId) return;
+
+  setGhostListingId(targetId);
+}
+
+function handleBoardDragEnd() {
+  const dragId = draggingListingId;
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+}
+
   
  async function toggleSave(listing) {
   if (!sdk) {
@@ -542,12 +605,46 @@ const isArchived = listingStatus === "archived";
     const id = String(getListingId(item));
 
     return (
-      <ListingCard
-        key={id}
-        listing={item}
-        saved={savedIds.includes(id)}
-        onToggleSaved={() => toggleSave(item)}
-      />
+  <ListingCard
+    key={id}
+    listing={item}
+    saved={savedIds.includes(id)}
+    onToggleSaved={() => toggleSave(item)}
+
+    ixiState={
+      ixiCardState[String(id)] || {
+        color: "none",
+        outline: 1
+      }
+    }
+
+    onIxiStateChange={
+      updateIxiCardState
+    }
+
+    isBoardDraggingCard={
+      String(id) ===
+      String(draggingListingId)
+    }
+
+    isGhostTarget={
+      String(id) ===
+      String(ghostListingId)
+    }
+
+    onBoardDragStart={
+      handleBoardDragStart
+    }
+
+    onBoardDragOver={
+      handleBoardDragOver
+    }
+
+    onBoardDragEnd={
+      handleBoardDragEnd
+    }
+  />
+);
     );
   })}
 
