@@ -406,27 +406,33 @@ export default function IXITheater() {
     color: rgba(255,196,0,.62);
   }
 
-  .theater-stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
+ .theater-stage {
+  display: grid;
+  grid-template-columns: 190px 330px 190px;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
 
-    min-height: 470px;
-    overflow: hidden;
-  }
+  min-height: 455px;
+  overflow: hidden;
+}
 
+.played-card,
+.next-card,
+.main-card {
+  height: 430px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
   .main-card {
-    width: 330px;
-    min-width: 330px;
-    max-width: 330px;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
+  justify-content: center;
+  z-index: 5;
+}
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    z-index: 5;
-  }
 
   .main-card :global(.card) {
     width: 300px !important;
@@ -444,20 +450,14 @@ export default function IXITheater() {
     filter: none;
   }
 
-  .played-card {
-    width: 140px;
-    min-width: 140px;
-    max-width: 140px;
+ .played-card {
+  width: 190px;
+  min-width: 190px;
+  max-width: 190px;
+  justify-content: flex-end;
+  opacity: .40;
+}
 
-    height: 430px;
-    overflow: hidden;
-
-    opacity: .40;
-
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
 
   .played-card :global(.card) {
     width: 300px !important;
@@ -470,20 +470,12 @@ export default function IXITheater() {
   }
 
   .next-card {
-    width: 140px;
-    min-width: 140px;
-    max-width: 140px;
-
-    height: 430px;
-    overflow: hidden;
-
-    opacity: .60;
-
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
+  width: 190px;
+  min-width: 190px;
+  max-width: 190px;
+  justify-content: flex-start;
+  opacity: .60;
+}
   .next-card :global(.card) {
     width: 300px !important;
     min-width: 300px !important;
@@ -502,13 +494,29 @@ export default function IXITheater() {
     transform-origin: center;
   }
 
-  .theater-card-frame :global(.card) {
-    width: 300px !important;
-    min-width: 300px !important;
-    max-width: 300px !important;
-  }
+  .theater-card-frame,
+.theater-card-frame :global(.card) {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  flex: 0 0 300px !important;
+}
 
-  .right .main-card {
+
+.theater-card-frame.current {
+  transform: scale(1.08);
+  transform-origin: center;
+}
+
+.played-card .theater-card-frame {
+  transform: translateX(70px) scale(.82);
+  transform-origin: center;
+}
+
+.next-card .theater-card-frame {
+  transform: translateX(-70px) scale(.82);
+  transform-origin: center;
+}  .right .main-card {
     animation: slideRight .55s ease both;
   }
 
@@ -554,31 +562,7 @@ export default function IXITheater() {
     color: rgba(255,255,255,.36);
   }
 
-  @media (max-width: 950px) {
-    .theater-stage {
-      gap: 10px;
-      min-height: 430px;
-    }
-
-    .played-card,
-    .next-card {
-      width: 84px;
-      min-width: 84px;
-      max-width: 84px;
-    }
-
-    .played-card :global(.card) {
-      transform: translateX(108px) scale(.74);
-    }
-
-    .next-card :global(.card) {
-      transform: translateX(-108px) scale(.74);
-    }
-
-    .theater-card-frame.current {
-      transform: scale(1);
-    }
-  }
+    
   .theater-card-frame {
   width: 300px !important;
   min-width: 300px !important;
