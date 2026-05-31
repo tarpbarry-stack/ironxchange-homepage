@@ -346,6 +346,21 @@ function updateIxiCardState(listingId, patch) {
   }));
 }
 
+function toggleColorFilter(color) {
+  setIxiColorFilter(current =>
+    current === color ? "all" : color
+  );
+}
+
+function toggleOutlineFilter(outline) {
+  setIxiOutlineFilter(current =>
+    String(current) === String(outline)
+      ? "all"
+      : String(outline)
+  );
+}
+
+
 function moveListingToSlot(dragId, targetId) {
   if (!dragId || !targetId || dragId === targetId) return;
 
