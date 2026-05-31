@@ -168,7 +168,6 @@ export default function ListingPage() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [copied, setCopied] = useState("");
   const [slugIxiState, setSlugIxiState] = useState({
-  const [slugIxiState, setSlugIxiState] = useState({
   color: "none",
   outline: 1
 });
