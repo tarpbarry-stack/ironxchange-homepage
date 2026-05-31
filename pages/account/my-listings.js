@@ -170,77 +170,78 @@ useEffect(() => {
 
   loadCurrentUserAndListings();
 }, []);
-  const filteredListings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+const filteredListings = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
 
-    const filtered = myListings.filter(item => {
-      const searchableText = [
-        item.title,
-        item.type,
-        item.category,
-        item.make,
-        item.model,
-        item.location,
-        item.hours,
-        item.price,
-        item.year,
-        ...(getListingKeywords(item) || [])
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+  const filtered = myListings.filter(item => {
+    const searchableText = [
+      item.title,
+      item.type,
+      item.category,
+      item.make,
+      item.model,
+      item.location,
+      item.hours,
+      item.price,
+      item.year,
+      ...(getListingKeywords(item) || [])
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-      const matchesSearch = !q || searchableText.includes(q);
+    const matchesSearch = !q || searchableText.includes(q);
 
-      const ixState = ixiCardState[String(getListingId(item))] || {
-  color: "none",
-  outline: 1
-};
+    const ixState = ixiCardState[String(getListingId(item))] || {
+      color: "none",
+      outline: 1
+    };
 
-const matchesIxiColor =
-  ixiColorFilter === "all" ||
-  ixState.color === ixiColorFilter;
+    const matchesIxiColor =
+      ixiColorFilter === "all" ||
+      ixState.color === ixiColorFilter;
 
-const matchesIxiOutline =
-  ixiOutlineFilter === "all" ||
-  String(ixState.outline) === String(ixiOutlineFilter);
+    const matchesIxiOutline =
+      ixiOutlineFilter === "all" ||
+      String(ixState.outline) === String(ixiOutlineFilter);
 
-      const matchesCategory =
-        category === "ALL CATEGORIES" ||
-        String(item.type || item.category || "").toUpperCase() === category;
+    const matchesCategory =
+      category === "ALL CATEGORIES" ||
+      String(item.type || item.category || "").toUpperCase() === category;
 
-      const listingStatus =
-  item.listingStatus ||
-  item.publicData?.listingStatus ||
-  item.attributes?.publicData?.listingStatus ||
-  "live";
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus ||
+      "live";
 
-const isPaused = listingStatus === "paused";
-      
-const workflowStatus = getWorkflowStatus(item);
+    const isPaused = listingStatus === "paused";
+    const workflowStatus = getWorkflowStatus(item);
 
-const matchesWorkflow =
-  workflowFilter === "all" ||
-  (workflowFilter === "active" && !isPaused) ||
-  (workflowFilter === "paused" && isPaused) ||
-  (workflowFilter === "good-listing" && workflowStatus === "good-listing") ||
-  (workflowFilter === "reprice" && workflowStatus === "reprice") ||
-  (workflowFilter === "refresh-photos" && workflowStatus === "refresh-photos") ||
-  (workflowFilter === "social-blast" && workflowStatus === "social-blast") ||
-  (workflowFilter === "review" && workflowStatus === "review");
-      
-return (
-  matchesSearch &&
-  matchesCategory &&
-  matchesWorkflow &&
-  matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
-  matchesRange(item.price, filters.priceMin, filters.priceMax) &&
-  matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
-);
-    });
+    const matchesWorkflow =
+      workflowFilter === "all" ||
+      (workflowFilter === "active" && !isPaused) ||
+      (workflowFilter === "paused" && isPaused) ||
+      (workflowFilter === "good-listing" && workflowStatus === "good-listing") ||
+      (workflowFilter === "reprice" && workflowStatus === "reprice") ||
+      (workflowFilter === "refresh-photos" && workflowStatus === "refresh-photos") ||
+      (workflowFilter === "social-blast" && workflowStatus === "social-blast") ||
+      (workflowFilter === "review" && workflowStatus === "review");
 
-    return sortListings(filtered, sortMode);
-  }, [
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesWorkflow &&
+      matchesIxiColor &&
+      matchesIxiOutline &&
+      matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
+      matchesRange(item.price, filters.priceMin, filters.priceMax) &&
+      matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
+    );
+  });
+
+  return sortListings(filtered, sortMode);
+}, [
   searchQuery,
   category,
   myListings,
@@ -248,8 +249,8 @@ return (
   sortMode,
   workflowFilter,
   ixiCardState,
-ixiColorFilter,
-ixiOutlineFilter
+  ixiColorFilter,
+  ixiOutlineFilter
 ]);
 
  function changeCardPhoto(e, item, direction) {
