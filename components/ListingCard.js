@@ -448,7 +448,7 @@ return (
 <div className="board-command-rail">
   <button
     type="button"
-    className="rail-zone"
+    className="rail-zone rail-half"
     onClick={e => {
       e.preventDefault();
       e.stopPropagation();
@@ -458,19 +458,19 @@ return (
 
   <button
     type="button"
-    className="rail-zone"
+    className="rail-zone rail-color"
     onClick={cycleBoardColor}
   />
 
   <button
     type="button"
-    className="rail-zone"
+    className="rail-zone rail-width"
     onClick={cycleBoardOutline}
   />
 
   <button
     type="button"
-    className="rail-zone"
+    className="rail-zone rail-pin"
     onClick={e => {
       e.preventDefault();
       e.stopPropagation();
@@ -479,7 +479,15 @@ return (
 
   <button
     type="button"
-    className="rail-zone"
+    className={`rail-zone rail-save ${saved ? "saved" : ""}`}
+    onClick={toggleSave}
+    aria-label={saved ? "Unsave listing" : "Save listing"}
+    title={saved ? "Saved" : "Save"}
+  />
+
+  <button
+    type="button"
+    className="rail-zone rail-half"
     onClick={e => {
       e.preventDefault();
       e.stopPropagation();
@@ -578,35 +586,60 @@ return (
   position: absolute;
   left: 13px;
   right: 13px;
-  bottom: 2;
+  bottom: 2px;
 
   height: 13px;
   min-height: 13px;
   max-height: 13px;
 
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns:
+    .55fr
+    1fr
+    1fr
+    1fr
+    1fr
+    .55fr;
 
   border-top: 1px solid rgba(0,194,255,.12);
-  background: rgba(20,20,20,.92);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    rgba(20,20,20,.92);
 
   z-index: 30;
 }
+
+/* BASE ZONE */
 .rail-zone {
   position: relative;
+
   border: none;
   border-right: 1px solid rgba(255,255,255,.022);
+
   background: transparent;
+
   cursor: pointer;
   padding: 0;
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease;
 }
 
 .rail-zone:last-child {
   border-right: none;
 }
 
+/* BASE DASH */
 .rail-zone::after {
   content: "";
+
   position: absolute;
   left: 50%;
   top: 50%;
@@ -614,17 +647,133 @@ return (
   width: 13px;
   height: 4px;
 
-  transform: translate(-50%-35%);
+  transform: translate(-50%, -50%);
+
+  border-radius: 999px;
+
   background: rgba(255,255,255,.12);
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease,
+    color .14s ease,
+    transform .14s ease;
 }
 
+/* LEFT / RIGHT HALF DASHES */
+.rail-half::after {
+  width: 7px;
+}
+
+/* COLOR DASH */
+.rail-color::after {
+  background: rgba(255,196,0,.24);
+}
+
+/* WIDTH DASH */
+.rail-width::after {
+  height: 2px;
+  background: rgba(255,255,255,.18);
+}
+
+/* PIN PLACEHOLDER */
+.rail-pin::after {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.16);
+}
+
+/* SAVE STAR */
+.rail-save::after {
+  content: "★";
+
+  width: auto;
+  height: auto;
+
+  background: transparent;
+
+  color: rgba(255,255,255,.22);
+
+  font-size: 8px;
+  line-height: 1;
+}
+
+.rail-save.saved::after {
+  color: #FFC400;
+
+  text-shadow:
+    0 0 7px rgba(255,196,0,.22);
+}
+
+/* HOVER STATE */
 .rail-zone:hover {
-  background: rgba(255,255,255,.028);
+  transform: translateY(-1px);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.06),
+      rgba(0,194,255,.015)
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,194,255,.12),
+    0 0 10px rgba(0,194,255,.06);
 }
 
 .rail-zone:hover::after {
-  background: rgba(255,196,0,.30);
+  background: rgba(0,194,255,.55);
+
+  box-shadow:
+    0 0 6px rgba(0,194,255,.45),
+    0 0 12px rgba(0,194,255,.20);
 }
+
+/* KEEP SAVE STAR FROM TURNING INTO A DASH ON HOVER */
+.rail-save:hover::after {
+  background: transparent;
+
+  color: #FFC400;
+
+  text-shadow:
+    0 0 8px rgba(255,196,0,.26);
+}
+
+.card.board-color-none .rail-color::after {
+  background: rgba(255,255,255,.14);
+}
+
+.card.board-color-green .rail-color::after {
+  background: rgba(56,161,105,.66);
+}
+
+.card.board-color-yellow .rail-color::after {
+  background: rgba(255,196,0,.70);
+}
+
+.card.board-color-red .rail-color::after {
+  background: rgba(229,62,62,.70);
+}
+
+.card.board-color-cyan .rail-color::after {
+  background: rgba(0,194,255,.68);
+}
+
+.card.board-color-white .rail-color::after {
+  background: rgba(255,255,255,.58);
+}
+
+.card.board-color-blue .rail-color::after {
+  background: rgba(49,130,206,.70);
+}
+
+.card.board-color-orange .rail-color::after {
+  background: rgba(249,133,18,.72);
+}
+
 
 .card.board-outline-1 {
   outline-width: 1px;
