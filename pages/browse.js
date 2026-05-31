@@ -687,53 +687,69 @@ function sendListingToBack(listing) {
 
 <div className="browse-board-toolbar">
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-none ${activeColorStacks.length === 0 ? "active" : ""}`}
-onClick={() => toggleColorStack("none")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-none ${
+    activeColorStacks.length === 0 ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("none")}
+/>
 
-  <button
-    type="button"
-   className={`ixi-color-filter color-green ${activeColorStacks.includes("green") ? "active" : ""}`}
-onClick={() => toggleColorStack("green")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-green ${
+    activeColorStacks.includes("green") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("green")}
+/>
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("yellow")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-yellow ${
+    activeColorStacks.includes("yellow") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("yellow")}
+/>
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("red")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-red ${
+    activeColorStacks.includes("red") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("red")}
+/>
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("cyan")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-cyan ${
+    activeColorStacks.includes("cyan") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("cyan")}
+/>
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("white")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-white ${
+    activeColorStacks.includes("white") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("white")}
+/>
 
-  <button
-    type="button"
-    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("blue")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-blue ${
+    activeColorStacks.includes("blue") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("blue")}
+/>
 
-  <button
-    type="button"
-   className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
-onClick={() => toggleColorStack("orange")}
-  />
+<button
+  type="button"
+  className={`ixi-color-filter color-orange ${
+    activeColorStacks.includes("orange") ? "active" : ""
+  }`}
+  onClick={() => toggleColorStack("orange")}
+/>
 
   <button
     type="button"
