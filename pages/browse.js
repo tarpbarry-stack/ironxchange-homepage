@@ -1193,58 +1193,90 @@ grid-template-columns:
     0 0 8px rgba(255,196,0,.10);
 }
 
-.ixi-color-filter.active,
+.ixi-color-filter.active {
+  transform: translateY(-1px) scale(1.18);
+  border-color: rgba(255,255,255,.18) !important;
+  filter: saturate(1.9) brightness(1.65);
+}
+
+.ixi-color-filter.color-green.active {
+  background: rgba(56,255,145,.92) !important;
+  box-shadow:
+    0 0 5px rgba(56,255,145,.85),
+    0 0 14px rgba(56,255,145,.62),
+    0 0 26px rgba(56,255,145,.28),
+    inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+
+.ixi-color-filter.color-yellow.active {
+  background: rgba(255,220,40,.95) !important;
+  box-shadow:
+    0 0 5px rgba(255,220,40,.9),
+    0 0 14px rgba(255,220,40,.68),
+    0 0 26px rgba(255,220,40,.32),
+    inset 0 1px 0 rgba(255,255,255,.38) !important;
+}
+
+.ixi-color-filter.color-red.active {
+  background: rgba(255,72,72,.94) !important;
+  box-shadow:
+    0 0 5px rgba(255,72,72,.88),
+    0 0 14px rgba(255,72,72,.62),
+    0 0 26px rgba(255,72,72,.30),
+    inset 0 1px 0 rgba(255,255,255,.32) !important;
+}
+
+.ixi-color-filter.color-cyan.active {
+  background: rgba(0,220,255,.95) !important;
+  box-shadow:
+    0 0 5px rgba(0,220,255,.88),
+    0 0 14px rgba(0,220,255,.64),
+    0 0 26px rgba(0,220,255,.30),
+    inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+
+.ixi-color-filter.color-blue.active {
+  background: rgba(70,155,255,.95) !important;
+  box-shadow:
+    0 0 5px rgba(70,155,255,.88),
+    0 0 14px rgba(70,155,255,.62),
+    0 0 26px rgba(70,155,255,.30),
+    inset 0 1px 0 rgba(255,255,255,.34) !important;
+}
+
+.ixi-color-filter.color-orange.active {
+  background: rgba(255,145,30,.95) !important;
+  box-shadow:
+    0 0 5px rgba(255,145,30,.88),
+    0 0 14px rgba(255,145,30,.62),
+    0 0 26px rgba(255,145,30,.30),
+    inset 0 1px 0 rgba(255,255,255,.34) !important;
+}
+
+.ixi-color-filter.color-white.active {
+  background: rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 0 5px rgba(255,255,255,.80),
+    0 0 14px rgba(255,255,255,.52),
+    0 0 26px rgba(255,255,255,.24),
+    inset 0 1px 0 rgba(255,255,255,.45) !important;
+}
+
+.ixi-color-filter.color-none.active {
+  background: rgba(255,255,255,.20) !important;
+  box-shadow:
+    0 0 4px rgba(255,255,255,.22),
+    0 0 10px rgba(255,255,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+
 .ixi-thickness-filter.active {
   transform: translateY(-1px) scale(1.08);
-
   border-color: rgba(255,196,0,.34) !important;
-
   box-shadow:
     0 0 0 1px rgba(255,196,0,.22),
     0 0 14px rgba(255,196,0,.24),
     inset 0 1px 0 rgba(255,255,255,.12) !important;
-}
-
-.ixi-color-filter.color-green.active {
-  box-shadow:
-    0 0 0 1px rgba(56,161,105,.78),
-    0 0 14px rgba(56,161,105,.48) !important;
-}
-
-.ixi-color-filter.color-yellow.active {
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.85),
-    0 0 14px rgba(255,196,0,.52) !important;
-}
-
-.ixi-color-filter.color-red.active {
-  box-shadow:
-    0 0 0 1px rgba(229,62,62,.82),
-    0 0 14px rgba(229,62,62,.50) !important;
-}
-
-.ixi-color-filter.color-cyan.active {
-  box-shadow:
-    0 0 0 1px rgba(0,194,255,.82),
-    0 0 14px rgba(0,194,255,.50) !important;
-}
-
-.ixi-color-filter.color-blue.active {
-  box-shadow:
-    0 0 0 1px rgba(49,130,206,.82),
-    0 0 14px rgba(49,130,206,.50) !important;
-}
-
-.ixi-color-filter.color-orange.active {
-  box-shadow:
-    0 0 0 1px rgba(249,133,18,.82),
-    0 0 14px rgba(249,133,18,.50) !important;
-}
-
-.ixi-color-filter.color-white.active {
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.82),
-    0 0 14px rgba(255,255,255,.36) !important;
 }
 .ixi-color-filter {
   width: 20px !important;
