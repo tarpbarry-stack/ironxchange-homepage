@@ -1221,9 +1221,10 @@ grid-template-columns:
 
 .browse-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
   gap: 22px;
   align-items: start;
+  justify-content: center;
 }
 
 .browse-grid.single-card {
