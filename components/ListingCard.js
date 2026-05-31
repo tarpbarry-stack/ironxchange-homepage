@@ -611,7 +611,7 @@ return (
   width: 13px;
   height: 4px;
 
-  transform: translate(-50%, -50%);
+  transform: translate(-50%-35%);
   background: rgba(255,255,255,.12);
 }
 
