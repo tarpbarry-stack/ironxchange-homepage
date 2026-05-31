@@ -192,19 +192,7 @@ useEffect(() => {
 
       const matchesSearch = !q || searchableText.includes(q);
 
-      const matchesCategory =
-        category === "ALL CATEGORIES" ||
-        String(item.type || item.category || "").toUpperCase() === category;
-
-      const listingStatus =
-  item.listingStatus ||
-  item.publicData?.listingStatus ||
-  item.attributes?.publicData?.listingStatus ||
-  "live";
-
-const isPaused = listingStatus === "paused";
-
-const ixState = ixiCardState[String(getListingId(item))] || {
+      const ixState = ixiCardState[String(getListingId(item))] || {
   color: "none",
   outline: 1
 };
@@ -216,6 +204,18 @@ const matchesIxiColor =
 const matchesIxiOutline =
   ixiOutlineFilter === "all" ||
   String(ixState.outline) === String(ixiOutlineFilter);
+
+      const matchesCategory =
+        category === "ALL CATEGORIES" ||
+        String(item.type || item.category || "").toUpperCase() === category;
+
+      const listingStatus =
+  item.listingStatus ||
+  item.publicData?.listingStatus ||
+  item.attributes?.publicData?.listingStatus ||
+  "live";
+
+const isPaused = listingStatus === "paused";
       
 const workflowStatus = getWorkflowStatus(item);
 
