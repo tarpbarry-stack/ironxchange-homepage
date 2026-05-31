@@ -73,6 +73,8 @@ const [ghostListingId, setGhostListingId] = useState("");
 
 const [ixiCardState, setIxiCardState] = useState({});
 
+  const [indexBoardMode, setIndexBoardMode] = useState("featured");
+
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
     page: "home"
@@ -150,16 +152,24 @@ const [ixiCardState, setIxiCardState] = useState({});
     }
   });
 
+   if (indexBoardMode === "custom") {
+  return active.slice(0, 20);
+}
+
   const selectedIds = new Set(
-    selected.map(item => String(getListingId(item)))
-  );
+  selected.map(item => String(getListingId(item)))
+);
 
-  const remaining = active.filter(
-    item => !selectedIds.has(String(getListingId(item)))
-  );
+const remaining = active.filter(
+  item => !selectedIds.has(String(getListingId(item)))
+);
 
-  return [...selected, ...remaining].slice(0, 20);
-}, [liveListings]);
+return [...selected, ...remaining].slice(0, 20);
+
+}, [
+  liveListings,
+  indexBoardMode
+]);
 
 function updateIxiCardState(listingId, patch) {
   setIxiCardState(current => ({
