@@ -75,8 +75,11 @@ onBoardDragEnd,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
-  const boardColor = ixiState?.color || "none";
-const boardOutline = ixiState?.outline || 1;
+  const [localBoardColor, setLocalBoardColor] = useState("none");
+const [localBoardOutline, setLocalBoardOutline] = useState(1);
+
+ const boardColor = ixiState?.color || localBoardColor;
+const boardOutline = ixiState?.outline || localBoardOutline;
 
 const boardColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
 
@@ -87,9 +90,11 @@ function cycleBoardColor(e) {
   const currentIndex = boardColors.indexOf(boardColor);
   const nextColor = boardColors[(currentIndex + 1) % boardColors.length];
 
-  onIxiStateChange?.(id, {
-    color: nextColor
-  });
+  if (onIxiStateChange) {
+    onIxiStateChange(id, { color: nextColor });
+  } else {
+    setLocalBoardColor(nextColor);
+  }
 }
 
   function cycleBoardOutline(e) {
@@ -101,11 +106,12 @@ function cycleBoardColor(e) {
     boardOutline === 3 ? 5 :
     1;
 
-  onIxiStateChange?.(id, {
-    outline: nextOutline
-  });
+  if (onIxiStateChange) {
+    onIxiStateChange(id, { outline: nextOutline });
+  } else {
+    setLocalBoardOutline(nextOutline);
+  }
 }
-
  const boardDragStart = useRef(null);
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 const [isBoardDragging, setIsBoardDragging] = useState(false);
