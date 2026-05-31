@@ -272,6 +272,11 @@ export default function IXITheater() {
           font-family: Arial, sans-serif;
           overflow-x: hidden;
         }
+        .theater-card-frame :global(.card) {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+}
 
         .theater-page {
           min-height: 100vh;
