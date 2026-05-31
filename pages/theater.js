@@ -399,8 +399,8 @@ export default function IXITheater() {
         }
 
         .theater-stage {
-          display: grid;
-          grid-template-columns: 235px minmax(300px, 360px) 235px;
+           display: grid;
+  grid-template-columns: 235px 330px 235px;
           justify-content: center;
           align-items: center;
           gap: 24px;
@@ -409,10 +409,20 @@ export default function IXITheater() {
           overflow: hidden;
         }
 
-        .theater-card-frame {
-          width: 300px;
-          transform-origin: center;
-        }
+       .theater-card-frame {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+
+  flex: 0 0 300px;
+  transform-origin: center;
+}
+
+.theater-card-frame :global(.card) {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+}
 
         .theater-card-frame.current {
           transform: scale(1.08);
