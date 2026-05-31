@@ -684,9 +684,9 @@ return (
 }
 
 .card.seller-mode .card-body {
-  height: 274px;
-  min-height: 274px;
-  max-height: 274px;
+  height: 268px;
+  min-height: 268px;
+  max-height: 268px;
 }
         .card.paused-card {
           opacity: .58;
