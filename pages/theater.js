@@ -118,24 +118,32 @@ export default function IXITheater() {
   }
 
   function renderTheaterCard(item, variant = "current") {
-    if (!item) return null;
+  if (!item) return null;
 
-    const id = String(getListingId(item));
+  const id = String(getListingId(item));
 
-    return (
-      <div className={`theater-card-frame ${variant}`}>
-        <ListingCard
-          key={`${variant}-${id}`}
-          listing={item}
-          from="theater"
-          saved={false}
-          showSave={true}
-          ixiState={getCardState(item)}
-          onIxiStateChange={updateIxiCardState}
-        />
-      </div>
-    );
-  }
+  return (
+    <div
+      className={`theater-card-frame ${variant}`}
+      style={{
+        width: "300px",
+        minWidth: "300px",
+        maxWidth: "300px",
+        flex: "0 0 300px"
+      }}
+    >
+      <ListingCard
+        key={`${variant}-${id}`}
+        listing={item}
+        from="theater"
+        saved={false}
+        showSave={true}
+        ixiState={getCardState(item)}
+        onIxiStateChange={updateIxiCardState}
+      />
+    </div>
+  );
+}
 
   function renderRing({
     label,
@@ -571,6 +579,19 @@ export default function IXITheater() {
       transform: scale(1);
     }
   }
+  .theater-card-frame {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  flex: 0 0 300px !important;
+}
+
+.theater-card-frame :global(.card) {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  flex: 0 0 300px !important;
+}
       `}</style>
     </>
   );
