@@ -578,7 +578,7 @@ return (
   height: 13px;
   min-height: 13px;
   max-height: 13px;
-  margin: 0px -13px -14px;
+  margin: 4px -13px -14px;
 
   display: grid;
   grid-template-columns: repeat(5, 1fr);
