@@ -578,7 +578,7 @@ return (
   height: 13px;
   min-height: 13px;
   max-height: 13px;
-  margin: 4px -13px -18px;
+  margin: 9px -13px -18px;
   
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1146,7 +1146,7 @@ overflow: hidden;
           flex-wrap: wrap;
           gap: 10px;
           margin-top: 2px;
-          padding-top: 6px;
+          padding-top: 10px;
           border-top: 1px solid rgba(255,255,255,.045);
           color: rgba(255,255,255,.38);
           font-size: 10px;
