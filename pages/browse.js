@@ -298,7 +298,11 @@ const isArchived = listingStatus === "archived";
     );
   });
 
-  return sortListings(filtered, sortMode);
+  if (sortMode === "custom") {
+  return filtered;
+}
+
+return sortListings(filtered, sortMode);
 }, [
   searchQuery,
   category,
@@ -323,6 +327,8 @@ function updateIxiCardState(listingId, patch) {
 
 function moveListingToSlot(dragId, targetId) {
   if (!dragId || !targetId || dragId === targetId) return;
+
+  setSortMode("custom");
 
   setLiveListings(current => {
     const fromIndex = current.findIndex(
