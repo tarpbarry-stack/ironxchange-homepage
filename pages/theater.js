@@ -264,297 +264,311 @@ export default function IXITheater() {
         })}
       </main>
 
-      <style jsx>{`
-        :global(body) {
-          margin: 0;
-          background: #070707;
-          color: #d6d6d6;
-          font-family: Arial, sans-serif;
-          overflow-x: hidden;
-        }
-        .theater-card-frame :global(.card) {
-  width: 300px !important;
-  min-width: 300px !important;
-  max-width: 300px !important;
-}
+  <style jsx>{`
+  :global(body) {
+    margin: 0;
+    background: #070707;
+    color: #d6d6d6;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+  }
 
-        .theater-page {
-          min-height: 100vh;
-          padding: 20px 4% 40px;
-          background:
-            radial-gradient(circle at 50% 0%, rgba(0,194,255,.055), transparent 34%),
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #070707;
-        }
+  .theater-page {
+    min-height: 100vh;
+    padding: 20px 4% 40px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(0,194,255,.055), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+      #070707;
+  }
 
-        .theater-hero {
-          max-width: 1240px;
-          margin: 0 auto 16px;
+  .theater-hero {
+    max-width: 1240px;
+    margin: 0 auto 16px;
 
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
 
-          padding: 12px 2px 16px;
-          border-bottom: 1px solid rgba(255,255,255,.05);
-        }
+    padding: 12px 2px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
 
-        .theater-hero h1 {
-          margin: 0;
-          color: rgba(255,255,255,.88);
-          font-size: 18px;
-          font-weight: 950;
-          letter-spacing: .8px;
-        }
+  .theater-hero h1 {
+    margin: 0;
+    color: rgba(255,255,255,.88);
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: .8px;
+  }
 
-        .theater-hero p {
-          margin: 5px 0 0;
-          color: rgba(0,194,255,.72);
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: .65px;
-          text-transform: uppercase;
-        }
+  .theater-hero p {
+    margin: 5px 0 0;
+    color: rgba(0,194,255,.72);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .65px;
+    text-transform: uppercase;
+  }
 
-        .theater-hero span {
-          color: rgba(255,255,255,.36);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .7px;
-        }
+  .theater-hero span {
+    color: rgba(255,255,255,.36);
+    font-size: 9px;
+    font-weight: 950;
+    letter-spacing: .7px;
+  }
 
-        .theater-ring {
-          max-width: 1240px;
-          margin: 0 auto 22px;
-          padding: 12px;
+  .theater-ring {
+    max-width: 1240px;
+    margin: 0 auto 22px;
+    padding: 12px;
 
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 18px;
 
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            rgba(10,10,10,.72);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+      rgba(10,10,10,.72);
 
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.025) inset,
-            0 22px 54px rgba(0,0,0,.28);
-        }
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.025) inset,
+      0 22px 54px rgba(0,0,0,.28);
+  }
 
-        .ring-head {
-          height: 30px;
+  .ring-head {
+    height: 30px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-          margin-bottom: 10px;
-        }
+    margin-bottom: 10px;
+  }
 
-        .ring-head span {
-          display: block;
-          color: #FFC400;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .7px;
-        }
+  .ring-head span {
+    display: block;
+    color: #FFC400;
+    font-size: 9px;
+    font-weight: 950;
+    letter-spacing: .7px;
+  }
 
-        .ring-head strong {
-          display: block;
-          margin-top: 2px;
-          color: rgba(255,255,255,.34);
-          font-size: 7.5px;
-          font-weight: 950;
-          letter-spacing: .7px;
-        }
+  .ring-head strong {
+    display: block;
+    margin-top: 2px;
+    color: rgba(255,255,255,.34);
+    font-size: 7.5px;
+    font-weight: 950;
+    letter-spacing: .7px;
+  }
 
-        .ring-controls {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
+  .ring-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
 
-        .ring-controls button {
-          height: 20px;
-          min-width: 24px;
+  .ring-controls button {
+    height: 20px;
+    min-width: 24px;
 
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 999px;
 
-          background: rgba(255,255,255,.018);
-          color: rgba(255,255,255,.32);
+    background: rgba(255,255,255,.018);
+    color: rgba(255,255,255,.32);
 
-          font-size: 8px;
-          font-weight: 950;
-          cursor: pointer;
-        }
+    font-size: 8px;
+    font-weight: 950;
+    cursor: pointer;
+  }
 
-        .ring-controls button:hover,
-        .ring-controls button.active {
-          color: rgba(0,194,255,.92);
-          border-color: rgba(0,194,255,.32);
-          box-shadow:
-            0 0 0 1px rgba(0,194,255,.04),
-            0 0 12px rgba(0,194,255,.10);
-        }
+  .ring-controls button:hover,
+  .ring-controls button.active {
+    color: rgba(0,194,255,.92);
+    border-color: rgba(0,194,255,.32);
+    box-shadow:
+      0 0 0 1px rgba(0,194,255,.04),
+      0 0 12px rgba(0,194,255,.10);
+  }
 
-        .ring-controls .pause {
-          padding: 0 9px;
-          min-width: 48px;
-          color: rgba(255,196,0,.62);
-        }
+  .ring-controls .pause {
+    padding: 0 9px;
+    min-width: 48px;
+    color: rgba(255,196,0,.62);
+  }
 
-        .theater-stage {
-           display: grid;
-  grid-template-columns: 235px 330px 235px;
-          justify-content: center;
-          align-items: center;
-          gap: 24px;
+  .theater-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
 
-          min-height: 500px;
-          overflow: hidden;
-        }
+    min-height: 470px;
+    overflow: hidden;
+  }
 
-       .theater-card-frame {
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
+  .main-card {
+    width: 330px;
+    min-width: 330px;
+    max-width: 330px;
 
-  flex: 0 0 300px;
-  transform-origin: center;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-.theater-card-frame :global(.card) {
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
-}
+    z-index: 5;
+  }
 
-        .theater-card-frame.current {
-          transform: scale(1.08);
-          filter: none;
-          z-index: 5;
-        }
+  .main-card :global(.card) {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+  }
 
-        .theater-card-frame.side {
-          transform: scale(.74);
-          opacity: .62;
-        }
+  .theater-card-frame.current {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
 
-        .played-card .theater-card-frame {
-          filter: grayscale(.45) brightness(.64);
-        }
+    transform: scale(1.08);
+    transform-origin: center;
+    filter: none;
+  }
 
-        .next-card .theater-card-frame {
-          filter: brightness(.82);
-        }
+  .played-card {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
 
-        .side-card {
-          position: relative;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+    height: 430px;
+    overflow: hidden;
 
-          min-height: 430px;
-          overflow: hidden;
+    opacity: .40;
 
-          border: 1px solid rgba(255,255,255,.035);
-          border-radius: 15px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
 
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
-            rgba(0,0,0,.18);
-        }
+  .played-card :global(.card) {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
 
-        .side-card::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background:
-            linear-gradient(90deg, rgba(0,0,0,.32), transparent, rgba(0,0,0,.32));
-          z-index: 9;
-        }
+    transform: translateX(78px) scale(.82);
+    transform-origin: center;
+    pointer-events: none;
+  }
 
-        .side-label {
-          position: absolute;
-          top: 10px;
-          left: 12px;
-          z-index: 12;
+  .next-card {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
 
-          color: rgba(255,255,255,.28);
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: .65px;
-        }
+    height: 430px;
+    overflow: hidden;
 
-        .main-card {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 500px;
-        }
+    opacity: .60;
 
-        .right .main-card {
-          animation: slideRight .55s ease both;
-        }
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
 
-        .left .main-card {
-          animation: slideLeft .55s ease both;
-        }
+  .next-card :global(.card) {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
 
-        @keyframes slideRight {
-          from {
-            transform: translateX(-24px);
-            opacity: .6;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
+    transform: translateX(-78px) scale(.82);
+    transform-origin: center;
+  }
 
-        @keyframes slideLeft {
-          from {
-            transform: translateX(24px);
-            opacity: .6;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
+  .theater-card-frame {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
 
-        .empty-ring {
-          min-height: 180px;
-          display: grid;
-          place-items: center;
-          text-align: center;
-        }
+    flex: 0 0 300px;
+    transform-origin: center;
+  }
 
-        .empty-ring h2 {
-          margin: 0;
-          color: rgba(255,255,255,.72);
-        }
+  .theater-card-frame :global(.card) {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+  }
 
-        .empty-ring p {
-          color: rgba(255,255,255,.36);
-        }
+  .right .main-card {
+    animation: slideRight .55s ease both;
+  }
 
-        @media (max-width: 950px) {
-          .theater-stage {
-            grid-template-columns: 1fr;
-            gap: 10px;
-          }
+  .left .main-card {
+    animation: slideLeft .55s ease both;
+  }
 
-          .side-card {
-            display: none;
-          }
+  @keyframes slideRight {
+    from {
+      transform: translateX(-24px);
+      opacity: .6;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 
-          .theater-card-frame.current {
-            transform: scale(1);
-          }
-        }
-      `}</style>
-    </>
-  );
-}
+  @keyframes slideLeft {
+    from {
+      transform: translateX(24px);
+      opacity: .6;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .empty-ring {
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+
+  .empty-ring h2 {
+    margin: 0;
+    color: rgba(255,255,255,.72);
+  }
+
+  .empty-ring p {
+    color: rgba(255,255,255,.36);
+  }
+
+  @media (max-width: 950px) {
+    .theater-stage {
+      gap: 10px;
+      min-height: 430px;
+    }
+
+    .played-card,
+    .next-card {
+      width: 84px;
+      min-width: 84px;
+      max-width: 84px;
+    }
+
+    .played-card :global(.card) {
+      transform: translateX(108px) scale(.74);
+    }
+
+    .next-card :global(.card) {
+      transform: translateX(-108px) scale(.74);
+    }
+
+    .theater-card-frame.current {
+      transform: scale(1);
+    }
+  }
+`}</style>
