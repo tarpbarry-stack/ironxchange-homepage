@@ -160,7 +160,7 @@ export default function Browse() {
   const [ghostListingId, setGhostListingId] = useState("");
 
   const [ixiCardState, setIxiCardState] = useState({});
-  const [ixiColorFilter, setIxiColorFilter] = useState("all");
+ const [activeColorStacks, setActiveColorStacks] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [filters, setFilters] = useState({
@@ -293,10 +293,6 @@ const isArchived = listingStatus === "archived";
   outline: 1
 };
 
-const matchesIxiColor =
-  ixiColorFilter === "all" ||
-  ixState.color === ixiColorFilter;
-
 const matchesIxiOutline =
   ixiOutlineFilter === "all" ||
   String(ixState.outline) === String(ixiOutlineFilter);
@@ -307,7 +303,6 @@ return (
   matchesCategory &&
   matchesMake &&
   matchesModel &&
-  matchesIxiColor &&
   matchesIxiOutline &&
   matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
   matchesRange(item.price, filters.priceMin, filters.priceMax) &&
@@ -330,7 +325,6 @@ return sortListings(filtered, sortMode);
   sortMode,
 
   ixiCardState,
-  ixiColorFilter,
   ixiOutlineFilter 
 ]);
 
@@ -346,9 +340,35 @@ function updateIxiCardState(listingId, patch) {
   }));
 }
 
-function toggleColorFilter(color) {
-  setIxiColorFilter(current =>
-    current === color ? "all" : color
+  const raisedStackListings = useMemo(() => {
+  if (activeColorStacks.length === 0) return [];
+
+  return filteredListings.filter(item => {
+    const id = String(getListingId(item));
+
+    const ixState = ixiCardState[id] || {
+      color: "none",
+      outline: 1
+    };
+
+    return activeColorStacks.includes(ixState.color);
+  });
+}, [
+  activeColorStacks,
+  filteredListings,
+  ixiCardState
+]);
+
+function toggleColorStack(color) {
+  if (color === "none") {
+    setActiveColorStacks([]);
+    return;
+  }
+
+  setActiveColorStacks(current =>
+    current.includes(color)
+      ? current.filter(item => item !== color)
+      : [...current, color]
   );
 }
 
@@ -669,50 +689,50 @@ function sendListingToBack(listing) {
 
   <button
     type="button"
-    className={`ixi-color-filter color-none ${ixiColorFilter === "none" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("none")}
+    className={`ixi-color-filter color-none ${activeColorStacks.length === 0 ? "active" : ""}`}
+onClick={() => toggleColorStack("none")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-green ${ixiColorFilter === "green" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("green")}
+   className={`ixi-color-filter color-green ${activeColorStacks.includes("green") ? "active" : ""}`}
+onClick={() => toggleColorStack("green")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-yellow ${ixiColorFilter === "yellow" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("yellow")}
+    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("yellow")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-red ${ixiColorFilter === "red" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("red")}
+    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("red")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-cyan ${ixiColorFilter === "cyan" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("cyan")}
+    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("cyan")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-white ${ixiColorFilter === "white" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("white")}
+    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("white")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-blue ${ixiColorFilter === "blue" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("blue")}
+    className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("blue")}
   />
 
   <button
     type="button"
-    className={`ixi-color-filter color-orange ${ixiColorFilter === "orange" ? "active" : ""}`}
-    onClick={() => toggleColorFilter("orange")}
+   className={`ixi-color-filter color-yellow ${activeColorStacks.includes("yellow") ? "active" : ""}`}
+onClick={() => toggleColorStack("orange")}
   />
 
   <button
@@ -746,6 +766,58 @@ function sendListingToBack(listing) {
           </span>
         </div>
 
+{activeColorStacks.length > 0 && (
+  <div className="raised-stack-section">
+    <div className="raised-stack-head">
+      <h3>
+        ACTIVE STACK
+      </h3>
+
+      <span>
+        {raisedStackListings.length} MACHINES
+      </span>
+    </div>
+
+    <div className="raised-stack-grid">
+      {raisedStackListings.map((item) => {
+        const id = String(getListingId(item));
+
+        return (
+          <ListingCard
+            key={`stack-${id}`}
+            listing={item}
+            saved={savedIds.includes(id)}
+            onToggleSaved={() => toggleSave(item)}
+
+            ixiState={
+              ixiCardState[id] || {
+                color: "none",
+                outline: 1
+              }
+            }
+
+            onIxiStateChange={updateIxiCardState}
+            onSendFront={sendListingToFront}
+            onSendBack={sendListingToBack}
+
+            isBoardDraggingCard={
+              String(id) === String(draggingListingId)
+            }
+
+            isGhostTarget={
+              String(id) === String(ghostListingId)
+            }
+
+            onBoardDragStart={handleBoardDragStart}
+            onBoardDragOver={handleBoardDragOver}
+            onBoardDragEnd={handleBoardDragEnd}
+          />
+        );
+      })}
+    </div>
+  </div>
+)}
+    
 <div
   className={`browse-grid ${
     filteredListings.length === 1 ? "single-card" : ""
@@ -1123,13 +1195,57 @@ grid-template-columns:
 
 .ixi-color-filter.active,
 .ixi-thickness-filter.active {
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.08),
-    0 0 12px rgba(255,196,0,.18);
+  transform: translateY(-1px) scale(1.08);
 
-  border-color: rgba(255,196,0,.24) !important;
+  border-color: rgba(255,196,0,.34) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.22),
+    0 0 14px rgba(255,196,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
 }
 
+.ixi-color-filter.color-green.active {
+  box-shadow:
+    0 0 0 1px rgba(56,161,105,.78),
+    0 0 14px rgba(56,161,105,.48) !important;
+}
+
+.ixi-color-filter.color-yellow.active {
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.85),
+    0 0 14px rgba(255,196,0,.52) !important;
+}
+
+.ixi-color-filter.color-red.active {
+  box-shadow:
+    0 0 0 1px rgba(229,62,62,.82),
+    0 0 14px rgba(229,62,62,.50) !important;
+}
+
+.ixi-color-filter.color-cyan.active {
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.82),
+    0 0 14px rgba(0,194,255,.50) !important;
+}
+
+.ixi-color-filter.color-blue.active {
+  box-shadow:
+    0 0 0 1px rgba(49,130,206,.82),
+    0 0 14px rgba(49,130,206,.50) !important;
+}
+
+.ixi-color-filter.color-orange.active {
+  box-shadow:
+    0 0 0 1px rgba(249,133,18,.82),
+    0 0 14px rgba(249,133,18,.50) !important;
+}
+
+.ixi-color-filter.color-white.active {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.82),
+    0 0 14px rgba(255,255,255,.36) !important;
+}
 .ixi-color-filter {
   width: 20px !important;
   height: 8px !important;
@@ -1229,6 +1345,58 @@ grid-template-columns:
 
 .browse-grid.single-card {
   grid-template-columns: minmax(250px, 300px);
+  justify-content: center;
+}
+
+.raised-stack-section {
+  margin: 0 0 34px;
+  padding: 18px;
+
+  border: 1px solid rgba(255,196,0,.10);
+  border-radius: 16px;
+
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.035), rgba(255,196,0,0)),
+    rgba(10,10,10,.82);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.24);
+}
+
+.raised-stack-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+.raised-stack-head h3 {
+  margin: 0;
+
+  color: rgba(255,196,0,.76);
+
+  font-size: 10px;
+  font-weight: 950;
+
+  letter-spacing: .75px;
+  text-transform: uppercase;
+}
+
+.raised-stack-head span {
+  color: rgba(255,255,255,.42);
+
+  font-size: 10px;
+  font-weight: 950;
+
+  letter-spacing: .55px;
+}
+
+.raised-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
+  gap: 22px;
+  align-items: start;
   justify-content: center;
 }
 
