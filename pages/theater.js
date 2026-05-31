@@ -571,4 +571,7 @@ export default function IXITheater() {
       transform: scale(1);
     }
   }
-`}</style>
+      `}</style>
+    </>
+  );
+}
