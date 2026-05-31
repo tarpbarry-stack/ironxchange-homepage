@@ -563,20 +563,9 @@ function updateIxiCardState(listingId, patch) {
 }
 
 return (
-  matchesSearch &&
-  matchesCategory &&
-  matchesWorkflow &&
-  matchesIxiColor &&
-  matchesIxiOutline &&
-  matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
-  matchesRange(item.price, filters.priceMin, filters.priceMax) &&
-  matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
-);  
-  return (
-    <>
-      <Head>
-  <title>My Listings | IronXchange</title>
-
+  <>
+    <Head>
+      <title>My Listings | IronXchange</title>
   <link
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     rel="stylesheet"
