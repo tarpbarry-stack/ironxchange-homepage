@@ -1146,7 +1146,7 @@ overflow: hidden;
           flex-wrap: wrap;
           gap: 10px;
           margin-top: 2px;
-          padding-top: 11px;
+          padding-top: 6px;
           border-top: 1px solid rgba(255,255,255,.045);
           color: rgba(255,255,255,.38);
           font-size: 10px;
