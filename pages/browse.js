@@ -373,6 +373,43 @@ function handleBoardDragEnd() {
   setGhostListingId("");
 }
 
+
+function sendListingToFront(listing) {
+  const listingId = getListingId(listing);
+
+  setLiveListings(current => {
+    const target = current.find(
+      item => String(getListingId(item)) === String(listingId)
+    );
+
+    const rest = current.filter(
+      item => String(getListingId(item)) !== String(listingId)
+    );
+
+    return target ? [target, ...rest] : current;
+  });
+
+  setSortMode("custom");
+}
+
+function sendListingToBack(listing) {
+  const listingId = getListingId(listing);
+
+  setLiveListings(current => {
+    const target = current.find(
+      item => String(getListingId(item)) === String(listingId)
+    );
+
+    const rest = current.filter(
+      item => String(getListingId(item)) !== String(listingId)
+    );
+
+    return target ? [...rest, target] : current;
+  });
+
+  setSortMode("custom");
+}
+
   
  async function toggleSave(listing) {
   if (!sdk) {
@@ -626,6 +663,14 @@ function handleBoardDragEnd() {
 
     onIxiStateChange={
       updateIxiCardState
+    }
+
+    onSendFront={
+      sendListingToFront
+    }
+
+    onSendBack={
+      sendListingToBack
     }
 
     isBoardDraggingCard={
