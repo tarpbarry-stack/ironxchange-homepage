@@ -263,22 +263,49 @@ return (
   className="photo-click-zone"
   onClick={handleCardClick}
 >
- <div className="card-photo">
-  <img
-    src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-    alt={listing.title || "Machine"}
-    draggable={false}
-    className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
-    style={getFrameStyle(currentImageObject, "card")}
-    loading="lazy"
-  />
+ <img
+  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+  alt={listing.title || "Machine"}
+  draggable={false}
+  className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
+  style={getFrameStyle(currentImageObject, "card")}
+  loading="lazy"
+/>
 
        {sellerMode ? (
-  <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
-    {isPaused ? "PAUSED" : "LIVE"}
-  </div>
-) : null}
-       </div>
+    <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
+      {isPaused ? "PAUSED" : "LIVE"}
+    </div>
+  ) : null}
+
+  {images.length > 1 ? (
+    <>
+      <button
+        type="button"
+        className="card-photo-nav left"
+        onClick={e => changePhoto(e, -1)}
+        aria-label="Previous photo"
+      >
+        ‹
+      </button>
+
+      <button
+        type="button"
+        className="card-photo-nav right"
+        onClick={e => changePhoto(e, 1)}
+        aria-label="Next photo"
+      >
+        ›
+      </button>
+
+      <span className="photo-count">
+        {photoIndex + 1}/{images.length}
+      </span>
+    </>
+  ) : null}
+</div>
+
+That restores the glo
 </a>
 
 <div className="card-body">
