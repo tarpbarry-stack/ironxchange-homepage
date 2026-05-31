@@ -167,7 +167,10 @@ export default function ListingPage() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [loggedIn, setLoggedIn] = useState(false);
   const [copied, setCopied] = useState("");
-
+  const [slugIxiState, setSlugIxiState] = useState({
+  color: "none",
+  outline: 1
+});
   useEffect(() => {
   initPostHog();
 }, []);
@@ -506,6 +509,37 @@ const externalLinks = Array.isArray(rawExternalLinks)
   ? rawExternalLinks.filter(link => link?.url && link?.label)
   : [];
 
+const slugColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
+
+function cycleSlugColor(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const currentIndex = slugColors.indexOf(slugIxiState.color || "none");
+  const nextColor = slugColors[(currentIndex + 1) % slugColors.length];
+
+  setSlugIxiState(current => ({
+    ...current,
+    color: nextColor
+  }));
+}
+
+function cycleSlugOutline(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const nextOutline =
+    Number(slugIxiState.outline || 1) === 1 ? 3 :
+    Number(slugIxiState.outline || 1) === 3 ? 5 :
+    1;
+
+  setSlugIxiState(current => ({
+    ...current,
+    outline: nextOutline
+  }));
+}
+
+
 
   return (
 
@@ -552,7 +586,7 @@ const externalLinks = Array.isArray(rawExternalLinks)
           </div>
 
           <div className="photo-grid">
-            <div className="hero-wrap">
+           <div className={`hero-wrap slug-color-${slugIxiState.color || "none"} slug-outline-${slugIxiState.outline || 1}`}>
               <img
   src={heroImage}
   alt={title}
@@ -677,44 +711,61 @@ const externalLinks = Array.isArray(rawExternalLinks)
             </div>
 
             <div className="right-stack">
-              <div className="mini-tool-tab">
-                <button
-                  type="button"
-                  onClick={nativeShare}
-                  title="Share this listing"
-                >
-                  <i className="fa-solid fa-arrow-up-from-bracket"></i>
-                </button>
+            <div className="mini-tool-tab slug-ixi-rail">
 
-                <button
-                  type="button"
-                  className={isSaved ? "saved-star" : ""}
-                  onClick={handleToggleSaved}
-                  disabled={saveBusy}
-                  aria-label={isSaved ? "Unsave listing" : "Save listing"}
-                >
-                  <i className={isSaved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-                </button>
+  <a
+    href="/browse"
+    className="slug-rail-zone rail-half"
+  />
 
-                <a href="/browse">← Results</a>
+  <button
+    type="button"
+    className="slug-rail-zone rail-color"
+    onClick={cycleSlugColor}
+  />
 
-                {prevListing ? (
-                  <a href={`/listing/${slugify(prevListing.title)}?from=browser`}>
-                    ← Prev
-                  </a>
-                ) : (
-                  <button disabled>← Prev</button>
-                )}
+  <button
+    type="button"
+    className="slug-rail-zone rail-width"
+    onClick={cycleSlugOutline}
+  />
 
-                {nextListing ? (
-                  <a href={`/listing/${slugify(nextListing.title)}?from=browser`}>
-                    Next →
-                  </a>
-                ) : (
-                  <button disabled>Next →</button>
-                )}
-              </div>
+  <button
+    type="button"
+    className={`slug-rail-zone rail-save ${
+      isSaved ? "saved" : ""
+    }`}
+    onClick={handleToggleSaved}
+    disabled={saveBusy}
+  />
 
+  {prevListing ? (
+    <a
+      href={`/listing/${slugify(prevListing.title)}?from=browser`}
+      className="slug-rail-zone"
+    />
+  ) : (
+    <button
+      type="button"
+      className="slug-rail-zone"
+      disabled
+    />
+  )}
+
+  {nextListing ? (
+    <a
+      href={`/listing/${slugify(nextListing.title)}?from=browser`}
+      className="slug-rail-zone rail-half"
+    />
+  ) : (
+    <button
+      type="button"
+      className="slug-rail-zone rail-half"
+      disabled
+    />
+  )}
+
+</div>
               <div className="media-tools-row">
                 <div className="panel buyer-launch-panel">
                   <h2>Send This Machine</h2>
@@ -1124,6 +1175,69 @@ video {
     0 1px 0 rgba(255,255,255,.04) inset,
     0 28px 70px rgba(0,0,0,.30);
 }
+
+.hero-wrap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 0;
+
+  z-index: 6;
+  pointer-events: none;
+
+  background: transparent;
+
+  box-shadow:
+    0 0 14px rgba(0,0,0,.18);
+}
+
+.hero-wrap.slug-outline-1::before {
+  width: 4px;
+}
+
+.hero-wrap.slug-outline-3::before {
+  width: 8px;
+}
+
+.hero-wrap.slug-outline-5::before {
+  width: 12px;
+}
+
+.hero-wrap.slug-color-none::before {
+  background: transparent;
+  width: 0;
+}
+
+.hero-wrap.slug-color-green::before {
+  background: rgba(56,161,105,.92);
+}
+
+.hero-wrap.slug-color-yellow::before {
+  background: rgba(255,196,0,.92);
+}
+
+.hero-wrap.slug-color-red::before {
+  background: rgba(229,62,62,.92);
+}
+
+.hero-wrap.slug-color-cyan::before {
+  background: rgba(0,194,255,.92);
+}
+
+.hero-wrap.slug-color-white::before {
+  background: rgba(255,255,255,.78);
+}
+
+.hero-wrap.slug-color-blue::before {
+  background: rgba(49,130,206,.92);
+}
+
+.hero-wrap.slug-color-orange::before {
+  background: rgba(249,133,18,.92);
+}
       .hero-wrap::after {
   content: "";
 
@@ -1336,6 +1450,63 @@ video {
   overflow-y: hidden;
 }
 
+.slug-ixi-rail {
+  display: grid;
+
+  grid-template-columns:
+    .55fr
+    1fr
+    1fr
+    1fr
+    1fr
+    .55fr;
+
+  gap: 0;
+
+  padding: 0 10px;
+}
+
+.slug-rail-zone {
+  position: relative;
+
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.022);
+
+  background: transparent;
+
+  cursor: pointer;
+  padding: 0;
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease;
+}
+
+.slug-rail-zone:last-child {
+  border-right: none;
+}
+
+.slug-rail-zone::after {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 13px;
+  height: 4px;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.12);
+}
+
+.slug-rail-zone.rail-half::after {
+  width: 7px;
+}
        .mini-tool-tab a,
 .mini-tool-tab button {
   -webkit-appearance: none;
