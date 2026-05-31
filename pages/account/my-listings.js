@@ -562,8 +562,21 @@ function updateIxiCardState(listingId, patch) {
   }));
 }
 
+function toggleColorFilter(color) {
+  setIxiColorFilter(current =>
+    current === color ? "all" : color
+  );
+}
+
+function toggleOutlineFilter(outline) {
+  setIxiOutlineFilter(current =>
+    String(current) === String(outline) ? "all" : String(outline)
+  );
+}
+
 return (
   <>
+
     <Head>
       <title>My Listings | IronXchange</title>
   <link
@@ -811,10 +824,19 @@ return (
 
     onPause={pauseListing}
 
-    onReactivate={reactivateListing}
+onReactivate={reactivateListing}
 
-     onSendFront={sendListingToFront}
-  onSendBack={sendListingToBack}
+ixiState={
+  ixiCardState[String(listingId)] || {
+    color: "none",
+    outline: 1
+  }
+}
+
+onIxiStateChange={updateIxiCardState}
+
+onSendFront={sendListingToFront}
+onSendBack={sendListingToBack}
 
 isBoardDraggingCard={
   String(listingId) ===
