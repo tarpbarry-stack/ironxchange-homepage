@@ -203,6 +203,19 @@ useEffect(() => {
   "live";
 
 const isPaused = listingStatus === "paused";
+
+const ixState = ixiCardState[String(getListingId(item))] || {
+  color: "none",
+  outline: 1
+};
+
+const matchesIxiColor =
+  ixiColorFilter === "all" ||
+  ixState.color === ixiColorFilter;
+
+const matchesIxiOutline =
+  ixiOutlineFilter === "all" ||
+  String(ixState.outline) === String(ixiOutlineFilter);
       
 const workflowStatus = getWorkflowStatus(item);
 
@@ -233,7 +246,10 @@ return (
   myListings,
   filters,
   sortMode,
-  workflowFilter
+  workflowFilter,
+  ixiCardState,
+ixiColorFilter,
+ixiOutlineFilter
 ]);
 
  function changeCardPhoto(e, item, direction) {
@@ -544,7 +560,17 @@ function updateIxiCardState(listingId, patch) {
     }
   }));
 }
-  
+
+return (
+  matchesSearch &&
+  matchesCategory &&
+  matchesWorkflow &&
+  matchesIxiColor &&
+  matchesIxiOutline &&
+  matchesRange(getListingYear(item), filters.yearMin, filters.yearMax) &&
+  matchesRange(item.price, filters.priceMin, filters.priceMax) &&
+  matchesRange(item.hours, filters.hoursMin, filters.hoursMax)
+);  
   return (
     <>
       <Head>
