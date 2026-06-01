@@ -49,7 +49,7 @@ const [activeStacks, setActiveStacks] = useState({
   top: [],
   bottom: []
 });
-  
+  const [activeStackHover, setActiveStackHover] = useState("");  
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
@@ -306,8 +306,20 @@ return (
 
     setDraggingListingId("");
     setGhostListingId("");
+    setActiveStackHover("");
     return;
   }
+
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+}
 
   const targetId = ghostListingId;
 
@@ -571,7 +583,9 @@ function addListingToActiveStack(stackKey, listingId) {
 
       {activeStacksOpen[stackKey] && (
         <div
-          className="active-stack-tray"
+          className={`active-stack-tray ${
+  activeStackHover === stackKey ? "stack-armed" : ""
+}`}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
@@ -918,7 +932,7 @@ function addListingToActiveStack(stackKey, listingId) {
 
 .active-stack-tray {
   width: 600px;
-  min-height: 82px;
+  min-height: 170px;
 
   margin: 8px 0 8px 0;
   padding: 10px 38px 10px 10px;
@@ -934,7 +948,17 @@ function addListingToActiveStack(stackKey, listingId) {
 }
 
 .active-stack-dropzone {
-  min-height: 60px;
+  min-height: 145px;
+}
+
+.active-stack-tray.stack-armed {
+  border-color: rgba(0,194,255,.42);
+  background:
+    linear-gradient(180deg, rgba(0,194,255,.045), rgba(0,194,255,.01)),
+    rgba(8,8,8,.82);
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.08),
+    0 0 18px rgba(0,194,255,.08);
 }
 
 .active-stack-save {
