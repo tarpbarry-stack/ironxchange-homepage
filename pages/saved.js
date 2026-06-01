@@ -702,14 +702,14 @@ return (
         }
 
         .ixi-thickness-filter::after {
-          content: "";
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          width: 15px;
-          transform: translate(-50%, -50%);
-          background: rgba(255,255,255,.28);
-        }
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.28);
+}
 
         .ixi-thickness-filter.thin::after {
           height: 1px;
