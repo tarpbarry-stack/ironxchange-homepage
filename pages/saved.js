@@ -395,7 +395,7 @@ return (
           <div className="ixi-toolbar">
             <button
               type="button"
-              className={`ixi-color-filter color-none ${ixiColorFilter === "none" ? "active" : ""}`}
+              className={`ixi-color-filter color-none ${ixiColorFilters.includes("none") ? "active" : ""}`}
               onClick={() => toggleColorFilter("none")}
             />
 
