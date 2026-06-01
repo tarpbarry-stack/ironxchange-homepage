@@ -200,28 +200,21 @@ export default function IXSearchSurface({
     </div>
 
 <style jsx>{`
-  .ix-search-surface {
-    width: 600px;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-
-  .ix-search-primary-row,
-.ix-search-secondary-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  align-items: end;
+.ix-search-surface {
+  width: 600px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .ix-search-primary-row {
   width: 100%;
   display: grid;
-  grid-template-columns: 2fr 4fr 3fr 2fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   align-items: end;
   margin-bottom: 8px;
 }
+
 .ix-search-secondary-row {
   width: 100%;
   display: grid;
@@ -231,185 +224,127 @@ export default function IXSearchSurface({
   margin-bottom: 0;
 }
 
-  .ix-search-line {
-    grid-column: span 2;
-    height: 22px;
-    display: flex;
-    align-items: end;
-  }
+.ix-search-line {
+  height: 22px;
+  display: flex;
+  align-items: end;
+}
 
-  .dash-category {
-    grid-column: span 4;
-  }
+.ix-search-line input,
+.dash-control,
+.dash-clear {
+  width: 100%;
+  height: 22px;
 
-  .dash-make {
-    grid-column: span 3;
-  }
+  margin: 0;
+  padding: 0;
 
-  .dash-model {
-    grid-column: span 2;
-  }
+  border: 0;
+  border-radius: 0;
+  border-bottom: 4px solid rgba(255,255,255,.18);
+
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+
+  outline: none;
+  box-shadow: none;
+}
+
+.ix-search-line input {
+  display: block;
+
+  color: rgba(255,255,255,.84);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dash-control {
+  line-height: 22px;
+
+  color: transparent;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+}
+
+.dash-control::-ms-expand {
+  display: none;
+}
+
+.dash-control option {
+  color: #111;
+  background: #fff;
+}
+.ix-search-line input:focus,
+.dash-control:hover,
+.dash-control:focus,
+.dash-control:active {
+  border-bottom-color: rgba(255,196,0,.58);
+  color: rgba(255,255,255,.78);
+  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+}
+
+.dash-category {
+  border-bottom-color: rgba(255,255,255,.22);
+}
+
+.dash-make {
+  border-bottom-color: rgba(255,255,255,.19);
+}
+
+.dash-model {
+  border-bottom-color: rgba(255,255,255,.16);
+}
 
 .dash-secondary {
-  grid-column: span 1;
+  border-bottom-color: rgba(255,255,255,.13);
 }
 
 .dash-sort {
-  grid-column: span 1;
+  border-bottom-color: rgba(255,196,0,.24);
 }
 
 .dash-clear {
-  grid-column: span 1;
+  cursor: pointer;
+  border-bottom-color: rgba(229,62,62,.72);
 }
 
-  .ix-search-line input {
+.dash-clear:hover,
+.dash-clear:focus {
+  border-bottom-color: rgba(229,62,62,.96);
+  box-shadow: 0 3px 8px rgba(229,62,62,.14);
+}
+
+@media (max-width: 760px) {
+  .ix-search-surface {
     width: 100%;
-    height: 22px;
-    display: block;
-
-    margin: 0;
-    padding: 0;
-
-    border: 0;
-    border-radius: 0;
-    border-bottom: 4px solid rgba(255,255,255,.18);
-
-    background: transparent;
-    color: rgba(255,255,255,.84);
-
-    outline: none;
-    box-shadow: none;
-
-    font-size: 12px;
-    font-weight: 800;
   }
 
-  .ix-search-line input:focus {
-    border-bottom-color: rgba(255,196,0,.62);
-    box-shadow: 0 3px 8px rgba(255,196,0,.10);
+  .ix-search-primary-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
   }
 
-  .dash-control {
-    width: 100%;
-    height: 22px;
-    line-height: 22px;
-
-    margin: 0;
-    padding: 0;
-
-    border: 0;
-    border-radius: 0;
-    border-bottom: 4px solid rgba(255,255,255,.18);
-
-    background: transparent;
-    background-color: transparent;
-    background-image: none;
-
-    color: transparent;
-
-    outline: none;
-    box-shadow: none;
-
-    cursor: pointer;
-
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    font-size: 8px;
-    font-weight: 950;
-    letter-spacing: .35px;
-    text-transform: uppercase;
+  .ix-search-secondary-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
   }
-
-  .dash-control::-ms-expand {
-    display: none;
-  }
-
-  .dash-control option {
-    color: #111;
-    background: #fff;
-  }
-
-  .dash-control:hover,
-  .dash-control:focus,
-  .dash-control:active {
-    border: 0;
-    border-bottom: 4px solid rgba(255,196,0,.58);
-
-    background: transparent;
-    background-color: transparent;
-    background-image: none;
-
-    color: rgba(255,255,255,.78);
-
-    outline: none;
-    box-shadow: 0 3px 8px rgba(255,196,0,.10);
-  }
-
-  .dash-category {
-    border-bottom-color: rgba(255,255,255,.22);
-  }
-
-  .dash-make {
-    border-bottom-color: rgba(255,255,255,.19);
-  }
-
-  .dash-model {
-    border-bottom-color: rgba(255,255,255,.16);
-  }
-
-  .dash-secondary {
-    border-bottom-color: rgba(255,255,255,.13);
-  }
-
-  .dash-sort {
-    border-bottom-color: rgba(255,196,0,.24);
-  }
-
-  .dash-clear {
-    width: 100%;
-    height: 22px;
-
-    margin: 0;
-    padding: 0;
-
-    border: 0;
-    border-radius: 0;
-    border-bottom: 4px solid rgba(229,62,62,.72);
-
-    background: transparent;
-    outline: none;
-    box-shadow: none;
-
-    cursor: pointer;
-  }
-
-  .dash-clear:hover,
-  .dash-clear:focus {
-    border-bottom-color: rgba(229,62,62,.96);
-    box-shadow: 0 3px 8px rgba(229,62,62,.14);
-  }
-
-  @media (max-width: 760px) {
-    .ix-search-surface {
-      width: 100%;
-    }
-
-    .ix-search-primary-row,
-    .ix-search-secondary-row {
-      grid-template-columns: repeat(11, 1fr);
-      gap: 3px;
-    }
-  }
+}
 `}</style>
   </div>
-          
 );
 
 }
-
-
 
 
 
