@@ -605,18 +605,23 @@ return (
             0 12px 30px rgba(0,0,0,.24);
         }
 
-        .ixi-toolbar {
-          margin: 7px auto 0;
-          padding: 0 3px;
+       .ixi-toolbar {
+  width: 560px;
+  max-width: 100%;
 
-          display: grid;
-          grid-template-columns:
-            repeat(8, 1fr)
-            repeat(3, 1fr);
+  margin: 9px auto 0;
+  padding: 0;
 
-          align-items: center;
-          gap: 6px;
-        }
+  display: grid;
+  grid-template-columns:
+    repeat(8, 20px)
+    repeat(3, 24px);
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+}
 
         .ixi-toolbar button {
           border: none;
