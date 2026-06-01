@@ -43,7 +43,7 @@ export default function SavedListings() {
 
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
-  const [ixiColorFilter, setIxiColorFilter] = useState("all");
+  const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   useEffect(() => {
@@ -164,9 +164,9 @@ setIxiCardState(remoteIxiState);
       const matchesSearch =
         !q || searchableText.includes(q);
 
-      const matchesIxiColor =
-        ixiColorFilter === "all" ||
-        ixState.color === ixiColorFilter;
+     const matchesIxiColor =
+  ixiColorFilters.length === 0 ||
+  ixiColorFilters.includes(ixState.color);
 
      const yearValue = Number(item.year || item.publicData?.year || 0);
 const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
@@ -200,7 +200,7 @@ return (
   workspaceFilters,
 
   ixiCardState,
-  ixiColorFilter,
+  ixiColorFilters,
   ixiOutlineFilter
   ]);
 
@@ -216,11 +216,15 @@ return (
     }));
   }
 
-  function toggleColorFilter(color) {
-    setIxiColorFilter(current =>
-      current === color ? "all" : color
-    );
-  }
+ function toggleColorFilter(color) {
+  setIxiColorFilters(current => {
+    if (current.includes(color)) {
+      return current.filter(item => item !== color);
+    }
+
+    return [...current, color];
+  });
+}
 
   function toggleOutlineFilter(outline) {
     setIxiOutlineFilter(current =>
@@ -397,43 +401,43 @@ return (
 
             <button
               type="button"
-              className={`ixi-color-filter color-green ${ixiColorFilter === "green" ? "active" : ""}`}
+              className={`ixi-color-filter color-green ${ixiColorFilters.includes("green") ? "active" : ""}`}
               onClick={() => toggleColorFilter("green")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-yellow ${ixiColorFilter === "yellow" ? "active" : ""}`}
+             className={`ixi-color-filter color-yellow ${ixiColorFilters.includes("yellow") ? "active" : ""}`}
               onClick={() => toggleColorFilter("yellow")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-red ${ixiColorFilter === "red" ? "active" : ""}`}
+              className={`ixi-color-filter color-red ${ixiColorFilters.includes("red") ? "active" : ""}`}
               onClick={() => toggleColorFilter("red")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-cyan ${ixiColorFilter === "cyan" ? "active" : ""}`}
+              className={`ixi-color-filter color-cyan ${ixiColorFilters.includes("cyan") ? "active" : ""}`}
               onClick={() => toggleColorFilter("cyan")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-white ${ixiColorFilter === "white" ? "active" : ""}`}
+              className={`ixi-color-filter color-white ${ixiColorFilters.includes("white") ? "active" : ""}`}
               onClick={() => toggleColorFilter("white")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-blue ${ixiColorFilter === "blue" ? "active" : ""}`}
+              className={`ixi-color-filter color-blue ${ixiColorFilters.includes("blue") ? "active" : ""}`}
               onClick={() => toggleColorFilter("blue")}
             />
 
             <button
               type="button"
-              className={`ixi-color-filter color-orange ${ixiColorFilter === "orange" ? "active" : ""}`}
+              className={`ixi-color-filter color-orange ${ixiColorFilters.includes("orange") ? "active" : ""}`}
               onClick={() => toggleColorFilter("orange")}
             />
 
