@@ -215,22 +215,19 @@ export default function IXSearchSurface({
 }
 
 .ix-search-primary-row {
-  gap: 4px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  align-items: end;
   margin-bottom: 8px;
 }
 
 .ix-search-secondary-row {
-  gap: 6px;
-  margin-bottom: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  align-items: end;
 }
-
-  .ix-search-primary-row {
-    margin-bottom: 8px;
-  }
-
-  .ix-search-secondary-row {
-    margin-bottom: 0;
-  }
 
   .ix-search-line {
     grid-column: span 2;
@@ -256,7 +253,7 @@ export default function IXSearchSurface({
 }
 
 .dash-sort {
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 .dash-clear {
