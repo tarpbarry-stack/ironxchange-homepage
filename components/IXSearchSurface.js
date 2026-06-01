@@ -217,16 +217,18 @@ export default function IXSearchSurface({
 .ix-search-primary-row {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
+  grid-template-columns: 2fr 4fr 3fr 2fr;
+  gap: 10px;
   align-items: end;
   margin-bottom: 8px;
 }
-
 .ix-search-secondary-row {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
   align-items: end;
+  margin-bottom: 0;
 }
 
   .ix-search-line {
