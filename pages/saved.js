@@ -271,9 +271,15 @@ return (
     });
   }
 
-  function handleBoardDragStart(listing) {
-    setDraggingListingId(String(getListingId(listing)));
+ function handleBoardDragStart(listing, event) {
+  const id = String(getListingId(listing));
+
+  setDraggingListingId(id);
+
+  if (event?.dataTransfer) {
+    event.dataTransfer.setData("text/plain", id);
   }
+}
 
   function handleBoardDragOver(listing) {
     const targetId = String(getListingId(listing));
@@ -384,6 +390,28 @@ function saveActiveStack(stackKey) {
   }));
 }
 
+function addListingToActiveStack(stackKey, listingId) {
+  if (!listingId) return;
+
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: true
+  }));
+
+  setActiveStacks(current => {
+    const existing = current[stackKey] || [];
+
+    if (existing.includes(String(listingId))) {
+      return current;
+    }
+
+    return {
+      ...current,
+      [stackKey]: [...existing, String(listingId)]
+    };
+  });
+}
+  
   
   return (
     <>
@@ -503,25 +531,43 @@ function saveActiveStack(stackKey) {
       />
 
       {activeStacksOpen[stackKey] && (
-        <div className="active-stack-tray">
-          <div className="active-stack-dropzone" />
+        <div
+  className="active-stack-tray"
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
 
-          <button
-            type="button"
-            className="active-stack-save"
-            onClick={() => saveActiveStack(stackKey)}
-          >
-            +
-          </button>
+    const droppedId =
+      e.dataTransfer.getData("text/plain") ||
+      draggingListingId;
+
+    addListingToActiveStack(stackKey, droppedId);
+  }}
+>
+  <div className="active-stack-dropzone">
+    {(activeStacks[stackKey] || []).map(machineId => {
+      const machine = workspaceListings.find(
+        item => String(getListingId(item)) === String(machineId)
+      );
+
+      return (
+        <div key={machineId} className="active-stack-chip">
+          {machine?.title || machineId}
         </div>
+      );
+    })}
+  </div>
+
+  <button
+    type="button"
+    className="active-stack-save"
+    onClick={() => saveActiveStack(stackKey)}
+  />
+</div>
       )}
     </div>
   ))}
 </section>
-
-
-
-
               
         <section
           className={`cards ${
