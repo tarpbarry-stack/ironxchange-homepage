@@ -605,7 +605,7 @@ return (
             0 12px 30px rgba(0,0,0,.24);
         }
 
-       .ixi-toolbar {
+    .ixi-toolbar {
   width: 600px;
   max-width: 100%;
 
@@ -613,14 +613,15 @@ return (
   padding: 0;
 
   display: grid;
+
   grid-template-columns:
-    repeat(8, 20px)
-    repeat(3, 24px);
+    repeat(8, 1fr)
+    repeat(3, 1fr);
 
   justify-content: center;
   align-items: center;
 
-  gap: 8px;
+  gap: 4px;
 }
 
         .ixi-toolbar button {
