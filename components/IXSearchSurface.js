@@ -271,15 +271,43 @@ export default function IXSearchSurface({
         font-weight: 950;
         letter-spacing: .35px;
         text-transform: uppercase;
-      }
+        border: none;
+border-radius: 0;
+box-shadow: none;
 
-      .dash-control:hover,
-      .dash-control:focus {
-        color: rgba(255,255,255,.78);
-        border-bottom-color: rgba(255,196,0,.58);
-        background: rgba(17,17,17,.96);
-        box-shadow: 0 0 8px rgba(255,196,0,.14);
+background-image: none;
+
+outline: none !important;
       }
+.dash-control:focus,
+.dash-control:hover,
+.dash-control:active {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+
+  outline: none !important;
+
+  background: transparent;
+
+  box-shadow:
+    0 3px 8px rgba(255,196,0,.10);
+}      
+      .dash-control option {
+  color: #111;
+  background: #fff;
+}
+
+     .dash-control:hover,
+.dash-control:focus {
+  color: rgba(255,255,255,.78);
+  border-bottom-color: rgba(255,196,0,.58);
+  background: transparent;
+  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+}
+.dash-control::-ms-expand {
+  display: none;
+}
 
       .dash-category {
         border-bottom-color: rgba(255,255,255,.22);
