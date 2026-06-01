@@ -195,10 +195,10 @@ export default function IXSearchSurface({
   onClick={clearAll}
   aria-label="Clear"
 />
-
+    </div>
       <style jsx>{`
         .ix-search-surface {
-          width: 620px;
+          width:560px;
           max-width: 100%;
           margin: 0 auto;
         }
@@ -329,10 +329,6 @@ export default function IXSearchSurface({
   box-shadow:
     0 0 8px rgba(229,62,62,.18);
 }
-
-        .dash-clear:hover {
-          color: #FFC400;
-        }
 
         @media (max-width: 760px) {
           .ix-search-surface {
