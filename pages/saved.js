@@ -706,7 +706,7 @@ return (
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 9px;
+  width: 15px;
   transform: translate(-50%, -50%);
   background: rgba(255,255,255,.28);
 }
