@@ -795,37 +795,61 @@ function saveActiveStack(stackKey) {
         }
 
 .active-stack-zone {
-  max-width: 600px;
-  margin: 0 auto 22px;
+  max-width: 1320px;
+  margin: -10px auto 22px;
   display: grid;
   gap: 6px;
+  align-items: start;
+}
+
+.active-stack {
+  width: 100%;
 }
 
 .active-stack-dash {
-  width: 100%;
-  height: 10px;
+  width: 10px;
+  height: 8px;
+
+  display: block;
+
   border: 0;
-  border-bottom: 3px solid rgba(255,255,255,.10);
+  border-bottom: 3px solid rgba(255,255,255,.12);
+
   background: transparent;
+
   cursor: pointer;
   padding: 0;
+  margin: 0;
 }
 
 .active-stack-dash:hover {
   border-bottom-color: rgba(255,196,0,.38);
+  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+}
+
+.active-stack.open .active-stack-dash {
+  border-bottom-color: rgba(255,196,0,.26);
 }
 
 .active-stack-tray {
-  min-height: 74px;
-  margin-top: 8px;
-  border: 1px dashed rgba(255,255,255,.08);
+  width: 600px;
+  min-height: 82px;
+
+  margin: 8px 0 8px 0;
+  padding: 10px 38px 10px 10px;
+
+  border: 1px dashed rgba(255,255,255,.075);
   border-radius: 10px;
-  background: rgba(255,255,255,.015);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    rgba(8,8,8,.72);
+
   position: relative;
 }
 
 .active-stack-dropzone {
-  min-height: 74px;
+  min-height: 60px;
 }
 
 .active-stack-save {
@@ -833,22 +857,22 @@ function saveActiveStack(stackKey) {
   right: 8px;
   top: 8px;
 
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 
-  border: 1px solid rgba(255,196,0,.28);
+  border: 1px solid rgba(255,196,0,.26);
   border-radius: 50%;
 
-  background: rgba(255,196,0,.06);
-  color: #FFC400;
+  background: rgba(255,196,0,.045);
+  color: rgba(255,196,0,.86);
 
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 18px;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 14px;
 
   cursor: pointer;
+  padding: 0;
 }
-
 
         .cards {
           max-width: 1320px;
