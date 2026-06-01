@@ -237,8 +237,8 @@ return (
 
     setSavedBoardListings(current => {
       const source = current.length
-        ? current
-        : savedListings;
+  ? current
+  : workspaceListings;
 
       const fromIndex = source.findIndex(
         item => String(getListingId(item)) === String(dragId)
@@ -289,8 +289,8 @@ return (
 
     setSavedBoardListings(current => {
       const source = current.length
-        ? current
-        : savedListings;
+  ? current
+  : workspaceListings;
 
       const target = source.find(
         item => String(getListingId(item)) === String(listingId)
@@ -310,10 +310,10 @@ return (
     setSavedBoardMode("custom");
 
     setSavedBoardListings(current => {
-      const source = current.length
-        ? current
-        : savedListings;
-
+     const source = current.length
+  ? current
+  : workspaceListings;
+      
       const target = source.find(
         item => String(getListingId(item)) === String(listingId)
       );
