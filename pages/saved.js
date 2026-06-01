@@ -321,16 +321,6 @@ return (
   setActiveStackHover("");
 }
 
-  const targetId = ghostListingId;
-
-  if (dragId && targetId) {
-    moveListingToSlot(dragId, targetId);
-  }
-
-  setDraggingListingId("");
-  setGhostListingId("");
-}
-
   function sendListingToFront(listing) {
     const listingId = getListingId(listing);
 
