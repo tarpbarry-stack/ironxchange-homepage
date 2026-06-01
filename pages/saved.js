@@ -190,7 +190,6 @@ return (
   matchesIxiColor &&
   matchesIxiOutline
 );
-      );
     });
   }, [
    searchQuery,
