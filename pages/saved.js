@@ -526,8 +526,8 @@ return (
         }
 
         main {
-          min-height: 72vh;
-          padding: 38px 5% 58px;
+           min-height: 72vh;
+  padding: 14px 5% 58px;
           background:
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
@@ -590,7 +590,7 @@ return (
         }
 
         .workspace-controls {
-          max-width: 690px;
+          max-width: 640px;
           margin: 0 auto 30px;
           padding: 7px;
 
