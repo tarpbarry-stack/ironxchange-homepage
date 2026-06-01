@@ -289,17 +289,35 @@ return (
     setGhostListingId(targetId);
   }
 
-  function handleBoardDragEnd() {
-    const dragId = draggingListingId;
-    const targetId = ghostListingId;
+  function handleBoardDragEnd(event) {
+  const dragId = draggingListingId;
 
-    if (dragId && targetId) {
-      moveListingToSlot(dragId, targetId);
-    }
+  const dropTarget = event
+    ? document.elementFromPoint(event.clientX, event.clientY)
+    : null;
+
+  const stackEl = dropTarget?.closest?.("[data-active-stack]");
+
+  if (dragId && stackEl) {
+    addListingToActiveStack(
+      stackEl.getAttribute("data-active-stack"),
+      dragId
+    );
 
     setDraggingListingId("");
     setGhostListingId("");
+    return;
   }
+
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+}
 
   function sendListingToFront(listing) {
     const listingId = getListingId(listing);
@@ -521,8 +539,9 @@ function addListingToActiveStack(stackKey, listingId) {
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
     <div
-      key={stackKey}
-      className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
+  key={stackKey}
+  data-active-stack={stackKey}
+  className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
