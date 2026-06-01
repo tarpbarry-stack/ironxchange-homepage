@@ -251,11 +251,17 @@ export default function IXSearchSurface({
     grid-column: span 2;
   }
 
-  .dash-secondary,
-  .dash-sort,
-  .dash-clear {
-    grid-column: span 1;
-  }
+.dash-secondary {
+  grid-column: span 1;
+}
+
+.dash-sort {
+  grid-column: span 2;
+}
+
+.dash-clear {
+  grid-column: span 1;
+}
 
   .ix-search-line input {
     width: 100%;
