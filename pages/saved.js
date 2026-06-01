@@ -62,6 +62,7 @@ const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
+const [stackInsertAfter, setStackInsertAfter] = useState(false);
 
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
@@ -298,7 +299,7 @@ function moveMachineToContainer(machineId, targetContainer) {
   });
 }
 
-  function moveMachineWithinContainer(containerKey, dragId, targetId) {
+  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
   if (!containerKey || !dragId || !targetId || dragId === targetId) return;
 
   setMachineContainers(current => {
@@ -318,7 +319,16 @@ function moveMachineToContainer(machineId, targetContainer) {
 
     const nextContainer = [...source];
     const [moved] = nextContainer.splice(fromIndex, 1);
-    nextContainer.splice(toIndex, 0, moved);
+
+    const adjustedTargetIndex = nextContainer.findIndex(
+      item => String(item) === String(targetId)
+    );
+
+    const insertIndex = insertAfter
+      ? adjustedTargetIndex + 1
+      : adjustedTargetIndex;
+
+    nextContainer.splice(insertIndex, 0, moved);
 
     return {
       ...current,
@@ -326,6 +336,7 @@ function moveMachineToContainer(machineId, targetContainer) {
     };
   });
 }
+  
 function moveMachineBackToBoard(machineId) {
   moveMachineToContainer(machineId, "board");
 }
@@ -564,14 +575,18 @@ function handleStackDragStart(machineId, event) {
   }
 }
 
-function handleStackDragOver(machineId) {
+function handleStackDragOver(machineId, event) {
   const targetId = String(machineId);
 
   if (!stackDraggingId || stackDraggingId === targetId) return;
 
-  setStackGhostId(targetId);
-}
+  const rect = event.currentTarget.getBoundingClientRect();
+  const midpoint = rect.left + rect.width / 2;
 
+  setStackGhostId(targetId);
+  setStackInsertAfter(event.clientX > midpoint);
+}
+  
 function handleStackDragEnd(stackKey) {
   const dragId = stackDraggingId;
   const targetId = stackGhostId;
@@ -582,15 +597,17 @@ function handleStackDragEnd(stackKey) {
       : "stackBottom";
 
   if (dragId && targetId) {
-    moveMachineWithinContainer(
-      containerKey,
-      dragId,
-      targetId
-    );
-  }
+  moveMachineWithinContainer(
+    containerKey,
+    dragId,
+    targetId,
+    stackInsertAfter
+  );
+}
 
   setStackDraggingId("");
-  setStackGhostId("");
+setStackGhostId("");
+setStackInsertAfter(false);
 }
   
 function addListingToLeftPocket(listingId) {
@@ -855,9 +872,10 @@ function addListingToLeftPocket(listingId) {
   draggable
   onDragStart={(e) => handleStackDragStart(id, e)}
   onDragOver={(e) => {
-    e.preventDefault();
-    handleStackDragOver(id);
-  }}
+    onDragOver={(e) => {
+  e.preventDefault();
+  handleStackDragOver(id, e);
+}}
   onDragEnd={() => handleStackDragEnd(stackKey)}
 >
       <ListingCard
