@@ -11,6 +11,8 @@ import {
 } from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
+import IXSearchSurface from "../components/IXSearchSurface";
+
 import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
@@ -24,6 +26,14 @@ export default function SavedListings() {
   const [sdk, setSdk] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [workspaceFilters, setWorkspaceFilters] = useState({
+  yearMin: "",
+  yearMax: "",
+  priceMin: "",
+  priceMax: "",
+  hoursMin: "",
+  hoursMax: ""
+});
 
   const [savedBoardMode, setSavedBoardMode] = useState("saved");
   const [savedBoardListings, setSavedBoardListings] = useState([]);
@@ -158,24 +168,41 @@ setIxiCardState(remoteIxiState);
         ixiColorFilter === "all" ||
         ixState.color === ixiColorFilter;
 
-      const matchesIxiOutline =
-        ixiOutlineFilter === "all" ||
-        String(ixState.outline) === String(ixiOutlineFilter);
+     const yearValue = Number(item.year || item.publicData?.year || 0);
+const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
+const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
 
-      return (
-        matchesSearch &&
-        matchesIxiColor &&
-        matchesIxiOutline
+const matchesWorkspaceRanges =
+  (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
+  (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
+  (!workspaceFilters.priceMin || priceValue >= Number(workspaceFilters.priceMin)) &&
+  (!workspaceFilters.priceMax || priceValue <= Number(workspaceFilters.priceMax)) &&
+  (!workspaceFilters.hoursMin || hoursValue >= Number(workspaceFilters.hoursMin)) &&
+  (!workspaceFilters.hoursMax || hoursValue <= Number(workspaceFilters.hoursMax));
+
+const matchesIxiOutline =
+  ixiOutlineFilter === "all" ||
+  String(ixState.outline) === String(ixiOutlineFilter);
+
+return (
+  matchesSearch &&
+  matchesWorkspaceRanges &&
+  matchesIxiColor &&
+  matchesIxiOutline
+);
       );
     });
   }, [
-    searchQuery,
-    savedListings,
-    savedBoardMode,
-    savedBoardListings,
-    ixiCardState,
-    ixiColorFilter,
-    ixiOutlineFilter
+   searchQuery,
+  savedListings,
+  savedBoardMode,
+  savedBoardListings,
+
+  workspaceFilters,
+
+  ixiCardState,
+  ixiColorFilter,
+  ixiOutlineFilter
   ]);
 
   function updateIxiCardState(listingId, patch) {
@@ -344,11 +371,7 @@ setIxiCardState(remoteIxiState);
           <div>
             <span className="eyebrow">IXI WORKSPACE</span>
 
-            <h1>Saved Machines</h1>
-
-            <p>
-              Search, sort, color, move, and work your saved equipment board.
-            </p>
+           <h1>IXI Workspace</h1>
           </div>
 
           <div className="count-pill">
@@ -357,13 +380,14 @@ setIxiCardState(remoteIxiState);
         </section>
 
         <section className="workspace-controls">
-          <input
-            type="text"
-            className="workspace-search"
-            placeholder="Search saved machines..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <IXSearchSurface
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  filters={workspaceFilters}
+  setFilters={setWorkspaceFilters}
+  sortMode={savedBoardMode}
+  setSortMode={setSavedBoardMode}
+/>
 
           <div className="ixi-toolbar">
             <button
@@ -580,33 +604,6 @@ setIxiCardState(remoteIxiState);
 
           box-shadow:
             0 12px 30px rgba(0,0,0,.24);
-        }
-
-        .workspace-search {
-          width: 100%;
-          height: 36px;
-
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 10px;
-
-          background: #111;
-          color: rgba(255,255,255,.76);
-
-          padding: 0 12px;
-
-          font-size: 11px;
-          font-weight: 800;
-
-          outline: none;
-        }
-
-        .workspace-search::placeholder {
-          color: rgba(255,255,255,.32);
-          font-weight: 700;
-        }
-
-        .workspace-search:focus {
-          box-shadow: inset 0 0 0 1px rgba(255,196,0,.16);
         }
 
         .ixi-toolbar {
