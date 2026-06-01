@@ -693,14 +693,16 @@ return (
         }
 
         .ixi-thickness-filter {
-          width: 24px;
-          height: 14px;
-          border: 1px solid rgba(255,255,255,.055) !important;
-          border-radius: 3px;
-          background: rgba(255,255,255,.018) !important;
-          position: relative;
-        }
+  width: 24px;
+  height: 14px;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 3px;
+  background: rgba(255,255,255,.018) !important;
+  position: relative;
 
+  margin-left: -2px;
+  margin-right: -2px;
+}
         .ixi-thickness-filter::after {
   content: "";
   position: absolute;
