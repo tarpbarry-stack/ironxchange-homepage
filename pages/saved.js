@@ -50,7 +50,8 @@ const [machineContainers, setMachineContainers] = useState({
   board: [],
   stackTop: [],
   stackBottom: [],
-  pocketLeft: []
+  pocketLeft: [],
+  pocketRight: []
 });
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
@@ -535,16 +536,33 @@ function saveActiveStack(stackKey) {
       ? "stackTop"
       : "stackBottom";
 
-  setMachineContainers(current => ({
-    ...current,
-    [sourceContainer]: []
-  }));
+  const targetPocket =
+    stackKey === "top"
+      ? "pocketLeft"
+      : "pocketRight";
+
+  setMachineContainers(current => {
+    const stackIds = current[sourceContainer] || [];
+    const existingPocketIds = current[targetPocket] || [];
+
+    const mergedPocketIds = [
+      ...existingPocketIds,
+      ...stackIds.filter(id => !existingPocketIds.includes(id))
+    ];
+
+    return {
+      ...current,
+      [sourceContainer]: [],
+      [targetPocket]: mergedPocketIds
+    };
+  });
 
   setActiveStacksOpen(current => ({
     ...current,
     [stackKey]: false
   }));
 }
+  
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
 
@@ -726,6 +744,16 @@ function addListingToLeftPocket(listingId) {
           </div>
         </section>
 
+<section className="pocket-dev-panel">
+  <div>
+    LEFT POCKET: {(machineContainers.pocketLeft || []).length}
+  </div>
+
+  <div>
+    RIGHT POCKET: {(machineContainers.pocketRight || []).length}
+  </div>
+</section>
+              
 <section
  className={`ixi-pocket-left ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
@@ -1190,6 +1218,26 @@ onBoardDragEnd={() => {}}
         .ixi-thickness-filter.thick::after {
           height: 5px;
         }
+
+.pocket-dev-panel {
+  max-width: 1320px;
+  margin: 0 auto 10px;
+  padding: 10px 12px;
+
+  display: flex;
+  gap: 12px;
+
+  border: 1px solid rgba(255,196,0,.28);
+  border-radius: 10px;
+
+  background: rgba(255,196,0,.06);
+
+  color: rgba(255,196,0,.9);
+
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .45px;
+}
 
 .ixi-pocket-left {
   max-width: 1320px;
