@@ -39,25 +39,29 @@ export default function SavedListings() {
   const [savedBoardListings, setSavedBoardListings] = useState([]);
 
   const [draggingListingId, setDraggingListingId] = useState("");
-  const [ghostListingId, setGhostListingId] = useState("");
-  const [activeStacksOpen, setActiveStacksOpen] = useState({
+const [ghostListingId, setGhostListingId] = useState("");
+
+const [activeStacksOpen, setActiveStacksOpen] = useState({
   top: false,
   bottom: false
 });
 
-const [activeStacks, setActiveStacks] = useState({
-  top: [],
-  bottom: []
+const [machineContainers, setMachineContainers] = useState({
+  board: [],
+  stackTop: [],
+  stackBottom: [],
+  pocketLeft: []
 });
-  const [activeStackLayouts, setActiveStackLayouts] = useState({
+
+const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
   bottom: "horizontal"
 });
-  const [leftPocket, setLeftPocket] = useState([]);
-  const [leftPocketOpen, setLeftPocketOpen] = useState(false);
-  
-  const [activeStackHover, setActiveStackHover] = useState("");  
-  const [ixiCardState, setIxiCardState] = useState({});
+
+const [leftPocketOpen, setLeftPocketOpen] = useState(false);
+
+const [activeStackHover, setActiveStackHover] = useState("");
+const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
@@ -151,10 +155,14 @@ setIxiCardState(remoteIxiState);
         ? savedBoardListings
         : workspaceListings;
 
-    return source.filter(item => {
-      const id = String(getListingId(item));
+   return source.filter(item => {
+  const id = String(getListingId(item));
 
-      const searchableText = [
+  if (getMachineContainer(id) !== "board") {
+    return false;
+  }
+
+  const searchableText = [
         item.title,
         item.type,
         item.category,
@@ -213,7 +221,9 @@ return (
   savedBoardMode,
   savedBoardListings,
 
-  workspaceFilters,
+    workspaceFilters,
+
+  machineContainers,
 
   ixiCardState,
   ixiColorFilters,
@@ -241,14 +251,59 @@ return (
     return [...current, color];
   });
 }
-
+  
   function toggleOutlineFilter(outline) {
-    setIxiOutlineFilter(current =>
-      String(current) === String(outline)
-        ? "all"
-        : String(outline)
-    );
+  setIxiOutlineFilter(current =>
+    String(current) === String(outline)
+      ? "all"
+      : String(outline)
+  );
+}
+
+ function getMachineContainer(machineId) {
+  const id = String(machineId);
+
+  for (const [containerKey, ids] of Object.entries(machineContainers)) {
+    if ((ids || []).includes(id)) {
+      return containerKey;
+    }
   }
+
+  return "board";
+}
+
+function moveMachineToContainer(machineId, targetContainer) {
+  if (!machineId || !targetContainer) return;
+
+  const id = String(machineId);
+
+  setMachineContainers(current => {
+    const next = {};
+
+    Object.keys(current).forEach(containerKey => {
+      next[containerKey] = (current[containerKey] || []).filter(
+        item => String(item) !== id
+      );
+    });
+
+    next[targetContainer] = [
+      ...(next[targetContainer] || []),
+      id
+    ];
+
+    return next;
+  });
+}
+
+function moveMachineBackToBoard(machineId) {
+  moveMachineToContainer(machineId, "board");
+}
+
+function getListingById(machineId) {
+  return listings.find(
+    item => String(getListingId(item)) === String(machineId)
+  );
+}
 
   function moveListingToSlot(dragId, targetId) {
     if (!dragId || !targetId || dragId === targetId) return;
@@ -433,9 +488,14 @@ function toggleActiveStack(stackKey) {
 }
 
 function saveActiveStack(stackKey) {
-  setActiveStacks(current => ({
+  const sourceContainer =
+    stackKey === "top"
+      ? "stackTop"
+      : "stackBottom";
+
+  setMachineContainers(current => ({
     ...current,
-    [stackKey]: []
+    [sourceContainer]: []
   }));
 
   setActiveStacksOpen(current => ({
@@ -443,36 +503,32 @@ function saveActiveStack(stackKey) {
     [stackKey]: false
   }));
 }
-
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
+
+  const targetContainer =
+    stackKey === "top"
+      ? "stackTop"
+      : "stackBottom";
 
   setActiveStacksOpen(current => ({
     ...current,
     [stackKey]: true
   }));
 
-  setActiveStacks(current => {
-    const existing = current[stackKey] || [];
-
-    if (existing.includes(String(listingId))) {
-      return current;
-    }
-
-    return {
-      ...current,
-      [stackKey]: [...existing, String(listingId)]
-    };
-  });
+  moveMachineToContainer(
+    listingId,
+    targetContainer
+  );
 }
 
 function addListingToLeftPocket(listingId) {
   if (!listingId) return;
 
-  setLeftPocket(current => {
-    if (current.includes(String(listingId))) return current;
-    return [...current, String(listingId)];
-  });
+  moveMachineToContainer(
+    listingId,
+    "pocketLeft"
+  );
 }
 
   
@@ -583,9 +639,11 @@ function addListingToLeftPocket(listingId) {
         </section>
 
 <section
-  className={`ixi-pocket-left ${leftPocket.length ? "occupied" : ""} ${
-    leftPocketOpen ? "open" : ""
-  }`}
+ className={`ixi-pocket-left ${
+  (machineContainers.pocketLeft || []).length ? "occupied" : ""
+} ${
+  leftPocketOpen ? "open" : ""
+}`}
   onClick={() => setLeftPocketOpen(current => !current)}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
@@ -600,12 +658,10 @@ function addListingToLeftPocket(listingId) {
 >
   <div className="ixi-pocket-line" />
 
-  {leftPocket.length > 0 && (
+ {(machineContainers.pocketLeft || []).length > 0 && (
     <div className="ixi-pocket-thumbs">
-     {leftPocket.slice(0, 7).map((machineId, index) => {
-  const machine = listings.find(
-    item => String(getListingId(item)) === String(machineId)
-  );
+     {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
+  const machine = getListingById(machineId);
 
   if (!machine) return null;
 
@@ -706,10 +762,12 @@ function addListingToLeftPocket(listingId) {
       : "stack-horizontal"
   }`}
 >
-           {(activeStacks[stackKey] || []).map(machineId => {
-  const machine = workspaceListings.find(
-    item => String(getListingId(item)) === String(machineId)
-  );
+          {(
+  machineContainers[
+    stackKey === "top" ? "stackTop" : "stackBottom"
+  ] || []
+).map(machineId => {
+  const machine = getListingById(machineId);
 
   if (!machine) return null;
 
