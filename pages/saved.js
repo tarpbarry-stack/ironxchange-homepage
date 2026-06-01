@@ -40,7 +40,16 @@ export default function SavedListings() {
 
   const [draggingListingId, setDraggingListingId] = useState("");
   const [ghostListingId, setGhostListingId] = useState("");
+  const [activeStacksOpen, setActiveStacksOpen] = useState({
+  top: false,
+  bottom: false
+});
 
+const [activeStacks, setActiveStacks] = useState({
+  top: [],
+  bottom: []
+});
+  
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
@@ -356,6 +365,26 @@ return (
     }
   }
 
+function toggleActiveStack(stackKey) {
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: !current[stackKey]
+  }));
+}
+
+function saveActiveStack(stackKey) {
+  setActiveStacks(current => ({
+    ...current,
+    [stackKey]: []
+  }));
+
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: false
+  }));
+}
+
+  
   return (
     <>
       <Head>
@@ -461,6 +490,39 @@ return (
           </div>
         </section>
 
+<section className="active-stack-zone">
+  {["top", "bottom"].map(stackKey => (
+    <div
+      key={stackKey}
+      className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
+    >
+      <button
+        type="button"
+        className="active-stack-dash"
+        onClick={() => toggleActiveStack(stackKey)}
+      />
+
+      {activeStacksOpen[stackKey] && (
+        <div className="active-stack-tray">
+          <div className="active-stack-dropzone" />
+
+          <button
+            type="button"
+            className="active-stack-save"
+            onClick={() => saveActiveStack(stackKey)}
+          >
+            +
+          </button>
+        </div>
+      )}
+    </div>
+  ))}
+</section>
+
+
+
+
+              
         <section
           className={`cards ${
             visibleSavedListings.length === 1 ? "single-card" : ""
@@ -728,6 +790,62 @@ return (
         .ixi-thickness-filter.thick::after {
           height: 5px;
         }
+
+.active-stack-zone {
+  max-width: 600px;
+  margin: 0 auto 22px;
+  display: grid;
+  gap: 6px;
+}
+
+.active-stack-dash {
+  width: 100%;
+  height: 10px;
+  border: 0;
+  border-bottom: 3px solid rgba(255,255,255,.10);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.active-stack-dash:hover {
+  border-bottom-color: rgba(255,196,0,.38);
+}
+
+.active-stack-tray {
+  min-height: 74px;
+  margin-top: 8px;
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.015);
+  position: relative;
+}
+
+.active-stack-dropzone {
+  min-height: 74px;
+}
+
+.active-stack-save {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+
+  width: 22px;
+  height: 22px;
+
+  border: 1px solid rgba(255,196,0,.28);
+  border-radius: 50%;
+
+  background: rgba(255,196,0,.06);
+  color: #FFC400;
+
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 18px;
+
+  cursor: pointer;
+}
+
 
         .cards {
           max-width: 1320px;
