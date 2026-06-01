@@ -370,7 +370,7 @@ return (
           <div>
             <span className="eyebrow">IXI WORKSPACE</span>
 
-           <h1>IXI Workspace</h1>
+           <h1></h1>
           </div>
 
           <div className="count-pill">
