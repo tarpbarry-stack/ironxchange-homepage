@@ -853,6 +853,30 @@ function addListingToLeftPocket(listingId) {
   )}
 </section>
 
+ <section
+  className={`ixi-pocket-right ${
+    (machineContainers.pocketRight || []).length ? "occupied" : ""
+  }`}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+
+    const droppedId =
+      e.dataTransfer.getData("text/plain") ||
+      draggingListingId;
+
+    moveMachineToContainer(
+      droppedId,
+      "pocketRight"
+    );
+  }}
+>
+ <div className="ixi-pocket-debug-label">
+  DROP TO LEFT POCKET
+</div>
+
+<div className="ixi-pocket-line" />
+</section> 
               
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
@@ -1295,22 +1319,53 @@ onBoardDragEnd={() => {}}
 
 .ixi-pocket-left {
   max-width: 1320px;
-  height: 46px;
+  height: 120px;
 
-  margin: -6px auto 14px;
+  margin: 0 auto 14px;
+  padding: 18px;
 
   position: relative;
 
   cursor: pointer;
+
+  border: 2px dashed rgba(255,196,0,.45);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.10),
+      rgba(255,196,0,.025)
+    ),
+    rgba(8,8,8,.82);
+
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.08),
+    0 14px 34px rgba(0,0,0,.24);
 }
+
+.ixi-pocket-debug-label {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+
+  color: rgba(255,196,0,.84);
+
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+}
+
+
 
 .ixi-pocket-line {
   width: 128px;
   height: 5px;
 
   position: absolute;
-  left: 0;
-  top: 24px;
+  left: 18px;
+top: 54px;
 
   background:
     linear-gradient(
