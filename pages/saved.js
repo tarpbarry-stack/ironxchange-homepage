@@ -637,7 +637,25 @@ function addListingToLeftPocket(listingId) {
   );
 }
 
-  
+ function recallPocketToBoard(pocketKey) {
+  if (!pocketKey) return;
+
+  setMachineContainers(current => {
+    const pocketIds = current[pocketKey] || [];
+    const boardIds = current.board || [];
+
+    const mergedBoardIds = [
+      ...boardIds,
+      ...pocketIds.filter(id => !boardIds.includes(id))
+    ];
+
+    return {
+      ...current,
+      board: mergedBoardIds,
+      [pocketKey]: []
+    };
+  });
+} 
   
   return (
     <>
@@ -749,9 +767,23 @@ function addListingToLeftPocket(listingId) {
     LEFT POCKET: {(machineContainers.pocketLeft || []).length}
   </div>
 
+  <button
+    type="button"
+    onClick={() => recallPocketToBoard("pocketLeft")}
+  >
+    RECALL LEFT
+  </button>
+
   <div>
     RIGHT POCKET: {(machineContainers.pocketRight || []).length}
   </div>
+
+  <button
+    type="button"
+    onClick={() => recallPocketToBoard("pocketRight")}
+  >
+    RECALL RIGHT
+  </button>
 </section>
               
 <section
@@ -1237,6 +1269,28 @@ onBoardDragEnd={() => {}}
   font-size: 11px;
   font-weight: 950;
   letter-spacing: .45px;
+}
+
+.pocket-dev-panel button {
+  height: 24px;
+  padding: 0 10px;
+
+  border: 1px solid rgba(255,196,0,.28);
+  border-radius: 7px;
+
+  background: rgba(0,0,0,.42);
+  color: rgba(255,196,0,.9);
+
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .45px;
+
+  cursor: pointer;
+}
+
+.pocket-dev-panel button:hover {
+  border-color: rgba(255,196,0,.62);
+  background: rgba(255,196,0,.08);
 }
 
 .ixi-pocket-left {
