@@ -189,15 +189,12 @@ export default function IXSearchSurface({
           ))}
         </select>
 
-        <button
-          type="button"
-          className="dash-clear"
-          onClick={clearAll}
-          aria-label="Clear"
-        >
-          ×
-        </button>
-      </div>
+       <button
+  type="button"
+  className="dash-clear"
+  onClick={clearAll}
+  aria-label="Clear"
+/>
 
       <style jsx>{`
         .ix-search-surface {
@@ -238,17 +235,21 @@ export default function IXSearchSurface({
           display: grid;
 
           grid-template-columns:
-            120px
-            94px
-            74px
-            52px
-            52px
-            52px
-            52px
-            52px
-            52px
-            38px
-            18px;
+  140px
+  110px
+  82px
+
+  68px
+  68px
+
+  68px
+  68px
+
+  68px
+  68px
+
+  44px
+  44px;
 
           gap: 5px;
 
@@ -256,10 +257,11 @@ export default function IXSearchSurface({
         }
 
         .dash-control {
-          height: 18px;
+         height: 22px;
+
 
           border: none;
-          border-bottom: 2px solid rgba(255,255,255,.18);
+          border-bottom: 4px solid rgba(255,255,255,.18);
 
           background: transparent;
           color: transparent;
@@ -284,6 +286,8 @@ export default function IXSearchSurface({
           color: rgba(255,255,255,.78);
           border-bottom-color: rgba(255,196,0,.58);
           background: rgba(17,17,17,.96);
+          box-shadow:
+  0 0 8px rgba(255,196,0,.14);
         }
 
         .dash-category {
@@ -306,23 +310,25 @@ export default function IXSearchSurface({
           border-bottom-color: rgba(255,196,0,.24);
         }
 
-        .dash-clear {
-          height: 18px;
+       .dash-clear {
+  height: 22px;
 
-          border: none;
-          background: transparent;
+  border: none;
+  background: transparent;
 
-          color: rgba(255,255,255,.32);
+  border-bottom: 4px solid rgba(229,62,62,.72);
 
-          font-size: 17px;
-          font-weight: 300;
-          line-height: 1;
+  cursor: pointer;
 
-          cursor: pointer;
-          padding: 0;
+  padding: 0;
+}
 
-          transform: translateY(1px);
-        }
+.dash-clear:hover {
+  border-bottom-color: rgba(229,62,62,.96);
+
+  box-shadow:
+    0 0 8px rgba(229,62,62,.18);
+}
 
         .dash-clear:hover {
           color: #FFC400;
