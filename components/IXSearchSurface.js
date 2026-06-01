@@ -199,169 +199,185 @@ export default function IXSearchSurface({
       />
     </div>
 
-    <style jsx>{`
-      .ix-search-surface {
-        width: 560px;
-        max-width: 100%;
-        margin: 0 auto;
-      }
+<style jsx>{`
+  .ix-search-surface {
+    width: 560px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
 
-      .ix-search-primary-row {
-        display: grid;
-        grid-template-columns: 112px 150px 118px 86px;
-        gap: 12px;
-        align-items: end;
-        margin-bottom: 9px;
-        align-items: flex-end;
-      }
+  .ix-search-primary-row {
+    display: grid;
+    grid-template-columns: 112px 150px 118px 86px;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 8px;
+  }
 
-     .ix-search-line {
-  height: 22px;
+  .ix-search-line {
+    height: 22px;
+    display: flex;
+    align-items: end;
+  }
 
-  display: flex;
-  align-items: flex-end;
-  
-}
+  .ix-search-line input {
+    width: 100%;
+    height: 22px;
+    display: block;
 
-      .ix-search-line input {
-  width: 100%;
-  height: 22px;
+    margin: 0;
+    padding: 0;
 
-  display: block;
-  margin: 0;
-        border: none;
-        border-bottom: 4px solid rgba(255,255,255,.18);
-        background: transparent;
-        color: rgba(255,255,255,.84);
-        padding: 0;
-        font-size: 12px;
-        font-weight: 800;
-        outline: none;
-      }
+    border: 0;
+    border-radius: 0;
+    border-bottom: 4px solid rgba(255,255,255,.18);
 
-      .ix-search-line input:focus {
-        border-bottom-color: rgba(255,196,0,.62);
-        box-shadow: 0 0 8px rgba(255,196,0,.14);
-      }
+    background: transparent;
+    color: rgba(255,255,255,.84);
 
-      .ix-search-secondary-row {
-        display: grid;
-        grid-template-columns:
-          66px 66px
-          66px 66px
-          66px 66px
-          42px 42px;
-        gap: 7px;
-        align-items: end;
-      }
+    outline: none;
+    box-shadow: none;
 
-    .dash-control {
-  height: 22px;
-  line-height: 22px;
-        border-bottom: 4px solid rgba(255,255,255,.18);
-        background: transparent;
-        color: transparent;
-        outline: none;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding: 0;
-        font-size: 8px;
-        font-weight: 950;
-        letter-spacing: .35px;
-        text-transform: uppercase;
-        border: none;
-border-radius: 0;
-box-shadow: none;
+    font-size: 12px;
+    font-weight: 800;
+  }
 
-background-image: none;
+  .ix-search-line input:focus {
+    border-bottom-color: rgba(255,196,0,.62);
+    box-shadow: 0 3px 8px rgba(255,196,0,.10);
+  }
 
-outline: none !important;
-      }
-.dash-control:focus,
-.dash-control:hover,
-.dash-control:active {
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  .ix-search-secondary-row {
+    display: grid;
+    grid-template-columns:
+      66px 66px
+      66px 66px
+      66px 66px
+      42px 42px;
+    gap: 7px;
+    align-items: end;
+  }
 
-  outline: none !important;
+  .dash-control {
+    width: 100%;
+    height: 22px;
+    line-height: 22px;
 
-  background: transparent;
+    margin: 0;
+    padding: 0;
 
-  box-shadow:
-    0 3px 8px rgba(255,196,0,.10);
-}      
-      .dash-control option {
-  color: #111;
-  background: #fff;
-}
+    border: 0;
+    border-radius: 0;
+    border-bottom: 4px solid rgba(255,255,255,.18);
 
-     .dash-control:hover,
-.dash-control:focus {
-  color: rgba(255,255,255,.78);
-  border-bottom-color: rgba(255,196,0,.58);
-  background: transparent;
-  box-shadow: 0 3px 8px rgba(255,196,0,.10);
-}
-.dash-control::-ms-expand {
-  display: none;
-}
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
 
-      .dash-category {
-        border-bottom-color: rgba(255,255,255,.22);
-      }
+    color: transparent;
 
-      .dash-make {
-        border-bottom-color: rgba(255,255,255,.19);
-      }
+    outline: none;
+    box-shadow: none;
 
-      .dash-model {
-        border-bottom-color: rgba(255,255,255,.16);
-      }
+    cursor: pointer;
 
-      .dash-secondary {
-        border-bottom-color: rgba(255,255,255,.13);
-      }
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 
-      .dash-sort {
-        border-bottom-color: rgba(255,196,0,.24);
-      }
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: .35px;
+    text-transform: uppercase;
+  }
 
-      .dash-clear {
-        height: 22px;
-        border: none;
-        background: transparent;
-        border-bottom: 4px solid rgba(229,62,62,.72);
-        cursor: pointer;
-        padding: 0;
-      }
+  .dash-control::-ms-expand {
+    display: none;
+  }
 
-      .dash-clear:hover {
-        border-bottom-color: rgba(229,62,62,.96);
-        box-shadow: 0 0 8px rgba(229,62,62,.18);
-      }
+  .dash-control option {
+    color: #111;
+    background: #fff;
+  }
 
-      @media (max-width: 760px) {
-        .ix-search-surface {
-          width: 100%;
-        }
+  .dash-control:hover,
+  .dash-control:focus,
+  .dash-control:active {
+    border: 0;
+    border-bottom: 4px solid rgba(255,196,0,.58);
 
-        .ix-search-primary-row {
-          grid-template-columns: .8fr 1.2fr 1fr .8fr;
-          gap: 7px;
-        }
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
 
-        .ix-search-secondary-row {
-          grid-template-columns:
-            repeat(4, 1fr)
-            repeat(4, 1fr);
-          gap: 5px;
-        }
-      }
-    `}</style>
+    color: rgba(255,255,255,.78);
+
+    outline: none;
+    box-shadow: 0 3px 8px rgba(255,196,0,.10);
+  }
+
+  .dash-category {
+    border-bottom-color: rgba(255,255,255,.22);
+  }
+
+  .dash-make {
+    border-bottom-color: rgba(255,255,255,.19);
+  }
+
+  .dash-model {
+    border-bottom-color: rgba(255,255,255,.16);
+  }
+
+  .dash-secondary {
+    border-bottom-color: rgba(255,255,255,.13);
+  }
+
+  .dash-sort {
+    border-bottom-color: rgba(255,196,0,.24);
+  }
+
+  .dash-clear {
+    width: 100%;
+    height: 22px;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 0;
+    border-bottom: 4px solid rgba(229,62,62,.72);
+
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+
+    cursor: pointer;
+  }
+
+  .dash-clear:hover,
+  .dash-clear:focus {
+    border-bottom-color: rgba(229,62,62,.96);
+    box-shadow: 0 3px 8px rgba(229,62,62,.14);
+  }
+
+  @media (max-width: 760px) {
+    .ix-search-surface {
+      width: 100%;
+    }
+
+    .ix-search-primary-row {
+      grid-template-columns: .8fr 1.2fr 1fr .8fr;
+      gap: 7px;
+    }
+
+    .ix-search-secondary-row {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+    }
+  }
+`}</style>
   </div>
+          
 );
 
 }
