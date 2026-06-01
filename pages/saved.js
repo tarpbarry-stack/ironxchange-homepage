@@ -606,17 +606,40 @@ function addListingToActiveStack(stackKey, listingId) {
           }}
         >
           <div className="active-stack-dropzone">
-            {(activeStacks[stackKey] || []).map(machineId => {
-              const machine = workspaceListings.find(
-                item => String(getListingId(item)) === String(machineId)
-              );
+           {(activeStacks[stackKey] || []).map(machineId => {
+  const machine = workspaceListings.find(
+    item => String(getListingId(item)) === String(machineId)
+  );
 
-              return (
-                <div key={machineId} className="active-stack-chip">
-                  {machine?.title || machineId}
-                </div>
-              );
-            })}
+  if (!machine) return null;
+
+  const id = String(getListingId(machine));
+
+  return (
+    <div key={`stack-card-${id}`} className="active-stack-card">
+      <ListingCard
+        listing={machine}
+        saved={savedIds.includes(id)}
+        onToggleSaved={() => toggleSave(machine)}
+        from="saved"
+        ixiState={
+          ixiCardState[id] || {
+            color: "none",
+            outline: 1
+          }
+        }
+        onIxiStateChange={updateIxiCardState}
+        onSendFront={sendListingToFront}
+        onSendBack={sendListingToBack}
+        isBoardDraggingCard={String(id) === String(draggingListingId)}
+        isGhostTarget={String(id) === String(ghostListingId)}
+        onBoardDragStart={handleBoardDragStart}
+        onBoardDragOver={handleBoardDragOver}
+        onBoardDragEnd={handleBoardDragEnd}
+      />
+    </div>
+  );
+})}
           </div>
 
           <button
@@ -957,6 +980,16 @@ function addListingToActiveStack(stackKey, listingId) {
 
 .active-stack-dropzone {
   min-height: 145px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
+  gap: 18px;
+  align-items: start;
+  justify-content: start;
+}
+
+.active-stack-card {
+  width: 100%;
 }
 
 .active-stack-tray.stack-armed {
