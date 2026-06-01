@@ -328,7 +328,7 @@ export default function IXSearchSurface({
   </div>
 );
 
-
+}
 
 
 
