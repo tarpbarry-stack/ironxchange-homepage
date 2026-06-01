@@ -53,6 +53,8 @@ const [activeStacks, setActiveStacks] = useState({
   top: "horizontal",
   bottom: "horizontal"
 });
+  const [leftPocket, setLeftPocket] = useState([]);
+  const [leftPocketOpen, setLeftPocketOpen] = useState(false);
   
   const [activeStackHover, setActiveStackHover] = useState("");  
   const [ixiCardState, setIxiCardState] = useState({});
@@ -463,6 +465,16 @@ function addListingToActiveStack(stackKey, listingId) {
     };
   });
 }
+
+function addListingToLeftPocket(listingId) {
+  if (!listingId) return;
+
+  setLeftPocket(current => {
+    if (current.includes(String(listingId))) return current;
+    return [...current, String(listingId)];
+  });
+}
+
   
   
   return (
@@ -570,6 +582,65 @@ function addListingToActiveStack(stackKey, listingId) {
           </div>
         </section>
 
+<section
+  className={`ixi-pocket-left ${leftPocket.length ? "occupied" : ""} ${
+    leftPocketOpen ? "open" : ""
+  }`}
+  onClick={() => setLeftPocketOpen(current => !current)}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+
+    const droppedId =
+      e.dataTransfer.getData("text/plain") ||
+      draggingListingId;
+
+    addListingToLeftPocket(droppedId);
+  }}
+>
+  <div className="ixi-pocket-line" />
+
+  {leftPocket.length > 0 && (
+    <div className="ixi-pocket-thumbs">
+      {leftPocket.slice(0, 7).map((machineId, index) => {
+        const machine = workspaceListings.find(
+          item => String(getListingId(item)) === String(machineId)
+        );
+
+        if (!machine) return null;
+
+        const image =
+          machine.image ||
+          machine.images?.[0] ||
+          machine.publicData?.image ||
+          machine.publicData?.images?.[0];
+
+        return (
+          <div
+            key={`left-pocket-thumb-${machineId}`}
+            className="ixi-pocket-thumb"
+            style={{
+              left: `${index * 16}px`,
+              zIndex: index + 1
+            }}
+          >
+            {image ? (
+              <img src={image} alt="" />
+            ) : (
+              <span>
+                {machine.year || machine.publicData?.year || ""}
+                {" "}
+                {machine.make || machine.publicData?.make || ""}
+              </span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  )}
+</section>
+
+              
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
     <div
@@ -950,6 +1021,137 @@ function addListingToActiveStack(stackKey, listingId) {
         .ixi-thickness-filter.thick::after {
           height: 5px;
         }
+
+.ixi-pocket-left {
+  max-width: 1320px;
+  height: 46px;
+
+  margin: -6px auto 14px;
+
+  position: relative;
+
+  cursor: pointer;
+}
+
+.ixi-pocket-line {
+  width: 128px;
+  height: 5px;
+
+  position: absolute;
+  left: 0;
+  top: 24px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,0),
+      rgba(255,196,0,.38) 18%,
+      rgba(255,196,0,.06) 48%,
+      rgba(255,196,0,.32) 74%,
+      rgba(255,196,0,0)
+    );
+
+  border-radius: 999px;
+
+  opacity: .42;
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.035);
+}
+
+.ixi-pocket-left:hover .ixi-pocket-line {
+  opacity: .72;
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-line {
+  opacity: .9;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,0),
+      rgba(255,196,0,.7) 18%,
+      rgba(255,196,0,.14) 48%,
+      rgba(255,196,0,.58) 74%,
+      rgba(255,196,0,0)
+    );
+
+  box-shadow:
+    0 0 14px rgba(255,196,0,.16);
+}
+
+.ixi-pocket-thumbs {
+  position: absolute;
+  left: 10px;
+  top: 0;
+
+  width: 210px;
+  height: 42px;
+
+  pointer-events: none;
+}
+
+.ixi-pocket-thumb {
+  width: 54px;
+  height: 38px;
+
+  position: absolute;
+  top: 7px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,196,0,.22);
+  border-radius: 6px 6px 3px 3px;
+
+  background: #111;
+
+  transform:
+    translateY(20px)
+    rotate(-4deg);
+
+  opacity: .52;
+
+  transition:
+    transform .18s ease,
+    opacity .18s ease;
+}
+
+.ixi-pocket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ixi-pocket-thumb span {
+  display: block;
+  padding: 5px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-thumb {
+  transform:
+    translateY(12px)
+    rotate(-4deg);
+
+  opacity: .72;
+}
+
+.ixi-pocket-left.open {
+  height: 82px;
+}
+
+.ixi-pocket-left.open .ixi-pocket-thumb {
+  transform:
+    translateY(-2px)
+    rotate(-4deg);
+
+  opacity: .96;
+}        
 
 .active-stack-zone {
 max-width: 1320px;
