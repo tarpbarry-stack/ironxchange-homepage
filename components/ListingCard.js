@@ -170,7 +170,7 @@ function endBoardDrag(e) {
 
   boardDragStart.current = null;
 
-  onBoardDragEnd?.();
+ onBoardDragEnd?.(e);
 
  
   setTimeout(() => {
