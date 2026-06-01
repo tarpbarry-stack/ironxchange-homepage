@@ -378,7 +378,7 @@ return (
           </div>
 
           <div className="count-pill">
-            {visibleSavedListings.length} / {savedListings.length} SAVED
+            {visibleSavedListings.length} / {workspaceListings.length}
           </div>
         </section>
 
