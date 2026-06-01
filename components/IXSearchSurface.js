@@ -212,17 +212,25 @@ export default function IXSearchSurface({
         gap: 12px;
         align-items: end;
         margin-bottom: 9px;
+        align-items: flex-end;
       }
 
-      .ix-search-line {
-        height: 22px;
-      }
+     .ix-search-line {
+  height: 22px;
+
+  display: flex;
+  align-items: flex-end;
+  
+}
 
       .ix-search-line input {
-        width: 100%;
-        height: 22px;
+  width: 100%;
+  height: 22px;
+
+  display: block;
+  margin: 0;
         border: none;
-        border-bottom: 4px solid rgba(255,255,255,.16);
+        border-bottom: 4px solid rgba(255,255,255,.18);
         background: transparent;
         color: rgba(255,255,255,.84);
         padding: 0;
@@ -247,9 +255,9 @@ export default function IXSearchSurface({
         align-items: end;
       }
 
-      .dash-control {
-        height: 22px;
-        border: none;
+    .dash-control {
+  height: 22px;
+  line-height: 22px;
         border-bottom: 4px solid rgba(255,255,255,.18);
         background: transparent;
         color: transparent;
