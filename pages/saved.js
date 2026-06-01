@@ -49,6 +49,11 @@ const [activeStacks, setActiveStacks] = useState({
   top: [],
   bottom: []
 });
+  const [activeStackLayouts, setActiveStackLayouts] = useState({
+  top: "horizontal",
+  bottom: "horizontal"
+});
+  
   const [activeStackHover, setActiveStackHover] = useState("");  
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
@@ -415,6 +420,15 @@ function toggleActiveStack(stackKey) {
     [stackKey]: !current[stackKey]
   }));
 }
+  function toggleActiveStackLayout(stackKey) {
+  setActiveStackLayouts(current => ({
+    ...current,
+    [stackKey]:
+      current[stackKey] === "horizontal"
+        ? "vertical"
+        : "horizontal"
+  }));
+}
 
 function saveActiveStack(stackKey) {
   setActiveStacks(current => ({
@@ -605,7 +619,13 @@ function addListingToActiveStack(stackKey, listingId) {
             addListingToActiveStack(stackKey, droppedId);
           }}
         >
-          <div className="active-stack-dropzone">
+          <div
+  className={`active-stack-dropzone ${
+    activeStackLayouts[stackKey] === "vertical"
+      ? "stack-vertical"
+      : "stack-horizontal"
+  }`}
+>
            {(activeStacks[stackKey] || []).map(machineId => {
   const machine = workspaceListings.find(
     item => String(getListingId(item)) === String(machineId)
@@ -642,6 +662,13 @@ function addListingToActiveStack(stackKey, listingId) {
 })}
           </div>
 
+<button
+  type="button"
+  className="active-stack-layout-toggle"
+  onClick={() => toggleActiveStackLayout(stackKey)}
+  title="Toggle stack layout"
+/>
+            
           <button
             type="button"
             className="active-stack-save"
@@ -925,103 +952,198 @@ function addListingToActiveStack(stackKey, listingId) {
         }
 
 .active-stack-zone {
-  max-width: 1320px;
-  margin: -10px auto 22px;
-  display: grid;
-  gap: 6px;
-  align-items: start;
+max-width: 1320px;
+margin: -10px auto 22px;
+display: grid;
+gap: 10px;
+align-items: start;
 }
 
 .active-stack {
-  width: 100%;
+width: 100%;
 }
 
 .active-stack-dash {
-  width: 10px;
-  height: 8px;
+width: 10px;
+height: 8px;
 
-  display: block;
+display: block;
 
-  border: 0;
-  border-bottom: 3px solid rgba(255,255,255,.12);
+border: 0;
+border-bottom: 3px solid rgba(255,255,255,.12);
 
-  background: transparent;
+background: transparent;
 
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
+cursor: pointer;
+padding: 0;
+margin: 0;
 }
 
 .active-stack-dash:hover {
-  border-bottom-color: rgba(255,196,0,.38);
-  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+border-bottom-color: rgba(255,196,0,.38);
+box-shadow: 0 3px 8px rgba(255,196,0,.10);
 }
 
 .active-stack.open .active-stack-dash {
-  border-bottom-color: rgba(255,196,0,.26);
+border-bottom-color: rgba(255,196,0,.26);
 }
 
 .active-stack-tray {
-  width: 600px;
-  min-height: 170px;
+width: 100%;
+min-height: 170px;
 
-  margin: 8px 0 8px 0;
-  padding: 10px 38px 10px 10px;
+margin: 8px 0;
+padding: 12px 44px 12px 12px;
 
-  border: 1px dashed rgba(255,255,255,.075);
-  border-radius: 10px;
+border: 1px dashed rgba(255,255,255,.075);
+border-radius: 10px;
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    rgba(8,8,8,.72);
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.018),
+rgba(255,255,255,0)
+),
+rgba(8,8,8,.72);
 
-  position: relative;
+position: relative;
 }
 
 .active-stack-dropzone {
-  min-height: 145px;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-  gap: 18px;
-  align-items: start;
-  justify-content: start;
+min-height: 145px;
+align-items: start;
 }
+
+/* ========================= */
+/* HORIZONTAL STACK MODE     */
+/* ========================= */
+
+.active-stack-dropzone.stack-horizontal {
+display: flex;
+flex-wrap: nowrap;
+
+gap: 18px;
+
+overflow-x: auto;
+overflow-y: hidden;
+
+padding-bottom: 8px;
+
+scrollbar-width: thin;
+}
+
+.active-stack-dropzone.stack-horizontal .active-stack-card {
+flex: 0 0 285px;
+width: 285px;
+min-width: 285px;
+}
+
+/* ========================= */
+/* VERTICAL STACK MODE       */
+/* ========================= */
+
+.active-stack-dropzone.stack-vertical {
+display: grid;
+
+grid-template-columns:
+repeat(auto-fill, minmax(250px, 300px));
+
+gap: 18px;
+
+justify-content: start;
+}
+
+.active-stack-dropzone.stack-vertical .active-stack-card {
+width: 100%;
+}
+
+/* ========================= */
+/* STACK CARD                */
+/* ========================= */
 
 .active-stack-card {
-  width: 100%;
+transition: transform .15s ease;
 }
+
+.active-stack-card:hover {
+transform: translateY(-2px);
+}
+
+/* ========================= */
+/* STACK ARMED STATE         */
+/* ========================= */
 
 .active-stack-tray.stack-armed {
-  border-color: rgba(0,194,255,.42);
-  background:
-    linear-gradient(180deg, rgba(0,194,255,.045), rgba(0,194,255,.01)),
-    rgba(8,8,8,.82);
-  box-shadow:
-    0 0 0 1px rgba(0,194,255,.08),
-    0 0 18px rgba(0,194,255,.08);
+border-color: rgba(0,194,255,.42);
+
+background:
+linear-gradient(
+180deg,
+rgba(0,194,255,.045),
+rgba(0,194,255,.01)
+),
+rgba(8,8,8,.82);
+
+box-shadow:
+0 0 0 1px rgba(0,194,255,.08),
+0 0 18px rgba(0,194,255,.08);
 }
 
+/* ========================= */
+/* SAVE DASH                 */
+/* ========================= */
+
 .active-stack-save {
-  position: absolute;
-  right: 8px;
-  top: 8px;
+position: absolute;
+right: 8px;
+top: 8px;
 
-  width: 18px;
-  height: 18px;
+width: 18px;
+height: 18px;
 
-  border: 1px solid rgba(255,196,0,.26);
-  border-radius: 50%;
+border: 1px solid rgba(255,196,0,.26);
+border-radius: 50%;
 
-  background: rgba(255,196,0,.045);
-  color: rgba(255,196,0,.86);
+background: rgba(255,196,0,.045);
 
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 14px;
+cursor: pointer;
+padding: 0;
+}
 
-  cursor: pointer;
-  padding: 0;
+.active-stack-save:hover {
+border-color: rgba(255,196,0,.65);
+
+box-shadow:
+0 0 10px rgba(255,196,0,.16);
+}
+
+/* ========================= */
+/* LAYOUT TOGGLE DASH        */
+/* ========================= */
+
+.active-stack-layout-toggle {
+position: absolute;
+
+right: 8px;
+top: 36px;
+
+width: 18px;
+height: 8px;
+
+border: 0;
+border-bottom: 3px solid rgba(0,194,255,.45);
+
+background: transparent;
+
+cursor: pointer;
+padding: 0;
+}
+
+.active-stack-layout-toggle:hover {
+border-bottom-color: rgba(0,194,255,.9);
+
+box-shadow:
+0 4px 10px rgba(0,194,255,.14);
 }
 
         .cards {
