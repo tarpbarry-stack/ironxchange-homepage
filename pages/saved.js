@@ -606,7 +606,7 @@ return (
         }
 
        .ixi-toolbar {
-  width: 560px;
+  width: 600px;
   max-width: 100%;
 
   margin: 9px auto 0;
