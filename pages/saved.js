@@ -60,6 +60,9 @@ const [activeStackLayouts, setActiveStackLayouts] = useState({
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 
+const [stackDraggingId, setStackDraggingId] = useState("");
+const [stackGhostId, setStackGhostId] = useState("");
+
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
@@ -295,6 +298,34 @@ function moveMachineToContainer(machineId, targetContainer) {
   });
 }
 
+  function moveMachineWithinContainer(containerKey, dragId, targetId) {
+  if (!containerKey || !dragId || !targetId || dragId === targetId) return;
+
+  setMachineContainers(current => {
+    const source = current[containerKey] || [];
+
+    const fromIndex = source.findIndex(
+      item => String(item) === String(dragId)
+    );
+
+    const toIndex = source.findIndex(
+      item => String(item) === String(targetId)
+    );
+
+    if (fromIndex === -1 || toIndex === -1) {
+      return current;
+    }
+
+    const nextContainer = [...source];
+    const [moved] = nextContainer.splice(fromIndex, 1);
+    nextContainer.splice(toIndex, 0, moved);
+
+    return {
+      ...current,
+      [containerKey]: nextContainer
+    };
+  });
+}
 function moveMachineBackToBoard(machineId) {
   moveMachineToContainer(machineId, "board");
 }
@@ -522,6 +553,46 @@ function addListingToActiveStack(stackKey, listingId) {
   );
 }
 
+function handleStackDragStart(machineId, event) {
+  const id = String(machineId);
+
+  setStackDraggingId(id);
+
+  if (event?.dataTransfer) {
+    event.dataTransfer.setData("text/plain", id);
+    event.dataTransfer.effectAllowed = "move";
+  }
+}
+
+function handleStackDragOver(machineId) {
+  const targetId = String(machineId);
+
+  if (!stackDraggingId || stackDraggingId === targetId) return;
+
+  setStackGhostId(targetId);
+}
+
+function handleStackDragEnd(stackKey) {
+  const dragId = stackDraggingId;
+  const targetId = stackGhostId;
+
+  const containerKey =
+    stackKey === "top"
+      ? "stackTop"
+      : "stackBottom";
+
+  if (dragId && targetId) {
+    moveMachineWithinContainer(
+      containerKey,
+      dragId,
+      targetId
+    );
+  }
+
+  setStackDraggingId("");
+  setStackGhostId("");
+}
+  
 function addListingToLeftPocket(listingId) {
   if (!listingId) return;
 
@@ -774,7 +845,21 @@ function addListingToLeftPocket(listingId) {
   const id = String(getListingId(machine));
 
   return (
-    <div key={`stack-card-${id}`} className="active-stack-card">
+    <div
+  key={`stack-card-${id}`}
+  className={`active-stack-card ${
+    String(id) === String(stackDraggingId) ? "stack-dragging" : ""
+  } ${
+    String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
+  }`}
+  draggable
+  onDragStart={(e) => handleStackDragStart(id, e)}
+  onDragOver={(e) => {
+    e.preventDefault();
+    handleStackDragOver(id);
+  }}
+  onDragEnd={() => handleStackDragEnd(stackKey)}
+>
       <ListingCard
         listing={machine}
         saved={savedIds.includes(id)}
@@ -789,11 +874,11 @@ function addListingToLeftPocket(listingId) {
         onIxiStateChange={updateIxiCardState}
         onSendFront={sendListingToFront}
         onSendBack={sendListingToBack}
-        isBoardDraggingCard={String(id) === String(draggingListingId)}
-        isGhostTarget={String(id) === String(ghostListingId)}
-        onBoardDragStart={handleBoardDragStart}
-        onBoardDragOver={handleBoardDragOver}
-        onBoardDragEnd={handleBoardDragEnd}
+        isBoardDraggingCard={false}
+isGhostTarget={false}
+onBoardDragStart={() => {}}
+onBoardDragOver={() => {}}
+onBoardDragEnd={() => {}}
       />
     </div>
   );
@@ -1327,11 +1412,31 @@ width: 100%;
 /* ========================= */
 
 .active-stack-card {
-transition: transform .15s ease;
+  position: relative;
+  z-index: 1;
+
+  transition:
+    transform .15s ease,
+    opacity .15s ease,
+    box-shadow .15s ease;
 }
 
 .active-stack-card:hover {
-transform: translateY(-2px);
+  transform: translateY(-2px);
+}
+
+.active-stack-card.stack-dragging {
+  z-index: 9999;
+  opacity: .96;
+  transform: translateY(-4px) scale(1.015);
+
+  box-shadow:
+    0 18px 36px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,196,0,.18);
+}
+
+.active-stack-card.stack-ghost-target {
+  transform: translateX(8px);
 }
 
 /* ========================= */
