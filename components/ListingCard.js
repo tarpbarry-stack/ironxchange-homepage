@@ -127,7 +127,7 @@ function startBoardDrag(e) {
   setIsBoardDragging(true);
   setDragOffset({ x: 0, y: 0 });
 
-  onBoardDragStart?.(listing);
+  onBoardDragStart?.(listing, e);
 
   e.currentTarget.setPointerCapture?.(e.pointerId);
 }
