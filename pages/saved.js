@@ -871,8 +871,7 @@ function addListingToLeftPocket(listingId) {
   }`}
   draggable
   onDragStart={(e) => handleStackDragStart(id, e)}
-  onDragOver={(e) => {
-    onDragOver={(e) => {
+ onDragOver={(e) => {
   e.preventDefault();
   handleStackDragOver(id, e);
 }}
