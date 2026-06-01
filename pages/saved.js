@@ -676,6 +676,9 @@ function saveActiveStack(stackKey) {
   max-width: 100%;
 
   margin: 18px auto 0;
+  position: relative;
+  left: 10px;
+  
   padding: 0;
 
   display: grid;
