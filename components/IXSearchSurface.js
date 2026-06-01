@@ -201,23 +201,51 @@ export default function IXSearchSurface({
 
 <style jsx>{`
   .ix-search-surface {
-    width: 560px;
+    width: 600px;
     max-width: 100%;
     margin: 0 auto;
   }
 
-  .ix-search-primary-row {
+  .ix-search-primary-row,
+  .ix-search-secondary-row {
+    width: 100%;
     display: grid;
-    grid-template-columns: 112px 150px 118px 86px;
-    gap: 12px;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 4px;
     align-items: end;
+  }
+
+  .ix-search-primary-row {
     margin-bottom: 8px;
   }
 
+  .ix-search-secondary-row {
+    margin-bottom: 0;
+  }
+
   .ix-search-line {
+    grid-column: span 2;
     height: 22px;
     display: flex;
     align-items: end;
+  }
+
+  .dash-category {
+    grid-column: span 4;
+  }
+
+  .dash-make {
+    grid-column: span 3;
+  }
+
+  .dash-model {
+    grid-column: span 2;
+  }
+
+  .dash-secondary,
+  .dash-sort,
+  .dash-clear {
+    grid-column: span 1;
   }
 
   .ix-search-line input {
@@ -245,17 +273,6 @@ export default function IXSearchSurface({
   .ix-search-line input:focus {
     border-bottom-color: rgba(255,196,0,.62);
     box-shadow: 0 3px 8px rgba(255,196,0,.10);
-  }
-
-  .ix-search-secondary-row {
-    display: grid;
-    grid-template-columns:
-      66px 66px
-      66px 66px
-      66px 66px
-      42px 42px;
-    gap: 7px;
-    align-items: end;
   }
 
   .dash-control {
@@ -365,14 +382,10 @@ export default function IXSearchSurface({
       width: 100%;
     }
 
-    .ix-search-primary-row {
-      grid-template-columns: .8fr 1.2fr 1fr .8fr;
-      gap: 7px;
-    }
-
+    .ix-search-primary-row,
     .ix-search-secondary-row {
-      grid-template-columns: repeat(8, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(11, 1fr);
+      gap: 3px;
     }
   }
 `}</style>
