@@ -609,7 +609,7 @@ return (
   width: 600px;
   max-width: 100%;
 
-  margin: 9px auto 0;
+  margin: 18px auto 0;
   padding: 0;
 
   display: grid;
