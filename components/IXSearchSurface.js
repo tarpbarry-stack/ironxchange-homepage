@@ -207,13 +207,22 @@ export default function IXSearchSurface({
   }
 
   .ix-search-primary-row,
-  .ix-search-secondary-row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    gap: 4px;
-    align-items: end;
-  }
+.ix-search-secondary-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  align-items: end;
+}
+
+.ix-search-primary-row {
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.ix-search-secondary-row {
+  gap: 6px;
+  margin-bottom: 0;
+}
 
   .ix-search-primary-row {
     margin-bottom: 8px;
