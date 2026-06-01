@@ -289,12 +289,29 @@ return (
     setGhostListingId(targetId);
   }
 
-  function handleBoardDragEnd(event) {
+ function handleBoardDragEnd(event) {
   const dragId = draggingListingId;
 
-  const dropTarget = event
-    ? document.elementFromPoint(event.clientX, event.clientY)
-    : null;
+  let dropTarget = null;
+
+  if (event) {
+    const draggedCard = document.querySelector(
+      `[data-listing-card-id="${dragId}"]`
+    );
+
+    if (draggedCard) {
+      draggedCard.style.pointerEvents = "none";
+    }
+
+    dropTarget = document.elementFromPoint(
+      event.clientX,
+      event.clientY
+    );
+
+    if (draggedCard) {
+      draggedCard.style.pointerEvents = "";
+    }
+  }
 
   const stackEl = dropTarget?.closest?.("[data-active-stack]");
 
@@ -309,6 +326,17 @@ return (
     setActiveStackHover("");
     return;
   }
+
+  const targetId = ghostListingId;
+
+  if (dragId && targetId) {
+    moveListingToSlot(dragId, targetId);
+  }
+
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+}
 
   const targetId = ghostListingId;
 
