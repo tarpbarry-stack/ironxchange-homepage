@@ -602,40 +602,49 @@ function addListingToLeftPocket(listingId) {
 
   {leftPocket.length > 0 && (
     <div className="ixi-pocket-thumbs">
-      {leftPocket.slice(0, 7).map((machineId, index) => {
-        const machine = workspaceListings.find(
-          item => String(getListingId(item)) === String(machineId)
-        );
+     {leftPocket.slice(0, 7).map((machineId, index) => {
+  const machine = listings.find(
+    item => String(getListingId(item)) === String(machineId)
+  );
 
-        if (!machine) return null;
+  if (!machine) return null;
 
-        const image =
-          machine.image ||
-          machine.images?.[0] ||
-          machine.publicData?.image ||
-          machine.publicData?.images?.[0];
+  const image =
+    machine.image ||
+    machine.imageUrl ||
+    machine.images?.[0] ||
+    machine.images?.[0]?.url ||
+    machine.publicData?.image ||
+    machine.publicData?.imageUrl ||
+    machine.publicData?.images?.[0] ||
+    machine.attributes?.publicData?.image ||
+    machine.attributes?.publicData?.imageUrl ||
+    machine.attributes?.publicData?.images?.[0];
 
-        return (
-          <div
-            key={`left-pocket-thumb-${machineId}`}
-            className="ixi-pocket-thumb"
-            style={{
-              left: `${index * 16}px`,
-              zIndex: index + 1
-            }}
-          >
-            {image ? (
-              <img src={image} alt="" />
-            ) : (
-              <span>
-                {machine.year || machine.publicData?.year || ""}
-                {" "}
-                {machine.make || machine.publicData?.make || ""}
-              </span>
-            )}
-          </div>
-        );
-      })}
+  return (
+    <div
+      key={`left-pocket-thumb-${machineId}`}
+      className="ixi-pocket-thumb"
+      style={{
+        left: `${index * 16}px`,
+        zIndex: index + 1
+      }}
+    >
+      {image ? (
+        <img
+          src={typeof image === "string" ? image : image?.url}
+          alt=""
+        />
+      ) : (
+        <span>
+          {machine.year || machine.publicData?.year || ""}
+          {" "}
+          {machine.make || machine.publicData?.make || ""}
+        </span>
+      )}
+    </div>
+  );
+})}
     </div>
   )}
 </section>
@@ -1082,40 +1091,36 @@ function addListingToLeftPocket(listingId) {
 
 .ixi-pocket-thumbs {
   position: absolute;
-  left: 10px;
-  top: 0;
 
-  width: 210px;
-  height: 42px;
+  left: 0;
+  top: -20px;
 
-  pointer-events: none;
+  width: 500px;
+  height: 100px;
+
+  overflow: visible;
+
+  pointer-events: auto;
+
+  z-index: 9999;
 }
 
 .ixi-pocket-thumb {
-  width: 54px;
-  height: 38px;
+  width: 120px;
+  height: 80px;
 
   position: absolute;
-  top: 7px;
+
+  top: 0;
 
   overflow: hidden;
 
-  border: 1px solid rgba(255,196,0,.22);
-  border-radius: 6px 6px 3px 3px;
+  border: 2px solid red;
 
   background: #111;
 
-  transform:
-    translateY(20px)
-    rotate(-4deg);
-
-  opacity: .52;
-
-  transition:
-    transform .18s ease,
-    opacity .18s ease;
+  z-index: 9999;
 }
-
 .ixi-pocket-thumb img {
   width: 100%;
   height: 100%;
