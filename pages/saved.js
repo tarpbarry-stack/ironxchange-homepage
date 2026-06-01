@@ -523,47 +523,67 @@ function addListingToActiveStack(stackKey, listingId) {
     <div
       key={stackKey}
       className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+
+        const droppedId =
+          e.dataTransfer.getData("text/plain") ||
+          draggingListingId;
+
+        addListingToActiveStack(stackKey, droppedId);
+      }}
     >
       <button
         type="button"
         className="active-stack-dash"
         onClick={() => toggleActiveStack(stackKey)}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+
+          const droppedId =
+            e.dataTransfer.getData("text/plain") ||
+            draggingListingId;
+
+          addListingToActiveStack(stackKey, droppedId);
+        }}
       />
 
       {activeStacksOpen[stackKey] && (
         <div
-  className="active-stack-tray"
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
+          className="active-stack-tray"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
 
-    const droppedId =
-      e.dataTransfer.getData("text/plain") ||
-      draggingListingId;
+            const droppedId =
+              e.dataTransfer.getData("text/plain") ||
+              draggingListingId;
 
-    addListingToActiveStack(stackKey, droppedId);
-  }}
->
-  <div className="active-stack-dropzone">
-    {(activeStacks[stackKey] || []).map(machineId => {
-      const machine = workspaceListings.find(
-        item => String(getListingId(item)) === String(machineId)
-      );
+            addListingToActiveStack(stackKey, droppedId);
+          }}
+        >
+          <div className="active-stack-dropzone">
+            {(activeStacks[stackKey] || []).map(machineId => {
+              const machine = workspaceListings.find(
+                item => String(getListingId(item)) === String(machineId)
+              );
 
-      return (
-        <div key={machineId} className="active-stack-chip">
-          {machine?.title || machineId}
+              return (
+                <div key={machineId} className="active-stack-chip">
+                  {machine?.title || machineId}
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="active-stack-save"
+            onClick={() => saveActiveStack(stackKey)}
+          />
         </div>
-      );
-    })}
-  </div>
-
-  <button
-    type="button"
-    className="active-stack-save"
-    onClick={() => saveActiveStack(stackKey)}
-  />
-</div>
       )}
     </div>
   ))}
