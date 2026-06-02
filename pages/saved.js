@@ -1317,7 +1317,7 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-pocket-row {
-  max-width: 1320px;
+ max-width: 1500px;
   margin: -132px auto 18px;
 
   display: flex;
