@@ -1358,8 +1358,8 @@ max-width: 360px;
 
  border: none;
 
-background: transparent;
-
+background: rgba(255, 0, 0, .12);
+outline: 1px solid rgba(255, 0, 0, .75);
 box-shadow: none;
 }
 
@@ -1379,7 +1379,8 @@ margin-left: auto;
 
   border: none;
 
-background: transparent;
+background: rgba(255, 0, 0, .12);
+outline: 1px solid rgba(255, 0, 0, .75);
 
 box-shadow: none;
 }
@@ -1413,6 +1414,9 @@ width: 128px;
   display: flex;
   align-items: center;
   gap: 3px;
+
+background: rgba(0, 194, 255, .20);
+outline: 1px solid rgba(0, 194, 255, .8);
 
   z-index: 20;
 }
@@ -1494,6 +1498,9 @@ width: 128px;
   pointer-events: auto;
 
   z-index: 9999;
+
+  background: rgba(0, 255, 0, .12);
+outline: 1px solid rgba(0, 255, 0, .75);
 }
 
 .ixi-pocket-thumb {
