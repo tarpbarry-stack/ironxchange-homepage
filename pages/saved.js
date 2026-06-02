@@ -1418,28 +1418,14 @@ width: 128px;
 }
 
 .ixi-pocket-line {
- flex: 1;
+  width: 96px;
   height: 5px;
 
- position: relative;
-left: auto;
-top: auto;
+  background: #44494D;
 
-  background:
-    linear-gradient(
-      90deg,
-      rgba(68,73,77,0),
-      rgba(68,73,77,.58) 18%,
-      rgba(68,73,77,.12) 48%,
-      rgba(68,73,77,.46) 74%,
-      rgba(68,73,77,0)
-    );
+  border-radius: 2px;
 
-  border-radius: 999px;
-
- opacity: .82;
-
-  box-shadow: none;
+  opacity: 1;
 }
 
 .ixi-pocket-master-dash {
@@ -1535,6 +1521,13 @@ border-bottom-right-radius: 0;}
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  filter: grayscale(1) brightness(.72) contrast(1.05);
+  transition: filter .16s ease;
+}
+
+.ixi-pocket-left.open .ixi-pocket-thumb img {
+  filter: grayscale(0) brightness(1) contrast(1);
 }
 
 .ixi-pocket-thumb span {
