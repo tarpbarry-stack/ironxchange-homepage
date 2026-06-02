@@ -2040,7 +2040,7 @@ box-shadow:
   justify-content: center;
   align-items: center;
 
-  gap: 6px;
+  gap: 12px;
 }
 
 .ixi-color-filter {
