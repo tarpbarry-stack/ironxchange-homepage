@@ -873,16 +873,15 @@ onDrop={(e) => {
   }`}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
-  e.preventDefault();
-}}
+    e.preventDefault();
+  }}
+>
+  <div className="ixi-pocket-debug-label right">
+    DROP TO RIGHT POCKET
+  </div>
 
-
- <div className="ixi-pocket-debug-label right">
-  DROP TO RIGHT POCKET
-</div>
-
-<div className="ixi-pocket-line" />
-</section> 
+  <div className="ixi-pocket-line" />
+</section>
               
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
