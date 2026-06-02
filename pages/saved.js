@@ -1491,9 +1491,16 @@ width: 128px;
   overflow-x: auto;
   overflow-y: hidden;
 
+  scrollbar-width: none;
+-ms-overflow-style: none;
+
   pointer-events: auto;
 
   z-index: 9999;
+}
+
+.ixi-pocket-thumbs::-webkit-scrollbar {
+  display: none;
 }
 
 .ixi-pocket-thumb {
@@ -1521,13 +1528,6 @@ border-bottom-right-radius: 0;}
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  filter: grayscale(1) brightness(.72) contrast(1.05);
-  transition: filter .16s ease;
-}
-
-.ixi-pocket-left.open .ixi-pocket-thumb img {
-  filter: grayscale(0) brightness(1) contrast(1);
 }
 
 .ixi-pocket-thumb span {
@@ -1554,20 +1554,12 @@ border-bottom-right-radius: 0;}
   box-shadow:
     0 12px 20px rgba(0,0,0,.28);
 }
-
 .ixi-pocket-left.open {
-  height: 170px;
-
-  overflow-x: auto;
-  overflow-y: hidden;
+overflow: visible;
 }
 
-.ixi-pocket-left.open .ixi-pocket-thumb {
-  transform: translateY(-2px);
-
-  opacity: 1;
-
-  border-color: rgba(255,255,255,.12);
+.ixi-pocket-left.open .ixi-pocket-thumbs {
+  overflow: visible;
 }
 
 .ixi-pocket-left.open .ixi-pocket-thumbs {
