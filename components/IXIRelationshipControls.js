@@ -45,6 +45,12 @@ export default function IXIRelationshipControls({
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
+  const hasAnyRelationship =
+  Object.values(ixiCardState || {}).some(state =>
+    state?.color ||
+    state?.outline
+  );
+
   function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
     if (existingColors.has(color)) return "exists";
@@ -67,6 +73,12 @@ function handleOutlineClick(outline) {
   
   return (
     <div className={`ixi-relationship-controls ${className}`}>
+    <a
+  href="/saved"
+  className={`ixi-rail-link ${hasAnyRelationship ? "awake" : ""}`}
+>
+  IXI WORKSPACE
+</a>
       {COLOR_CONTROLS.map(color => (
         <button
           key={color}
@@ -86,6 +98,24 @@ function handleOutlineClick(outline) {
           aria-label={`Filter outline ${outline}`}
         />
       ))}
+
+        {hasAnyRelationship && (
+  <div className="ixi-mobile-nav-row">
+    <a
+      href="/saved"
+      className="ixi-mobile-nav-link"
+    >
+      IXI WORKSPACE
+    </a>
+
+    <a
+      href="/theater"
+      className="ixi-mobile-nav-link"
+    >
+      IXI THEATER
+    </a>
+  </div>
+)}
 
       <style jsx>{`
         .ixi-relationship-controls {
@@ -262,11 +292,71 @@ function handleOutlineClick(outline) {
           background: rgba(249,133,18,.82);
         }
 
+        .ixi-rail-link {
+  color: rgba(0,0,0,0);
+
+  text-decoration: none;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .55px;
+
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  transition:
+    color .14s ease,
+    opacity .14s ease,
+    text-shadow .14s ease;
+}
+
+.ixi-rail-link.awake {
+  color: rgba(0,194,255,.72);
+
+  pointer-events: auto;
+}
+
+.ixi-rail-link.awake:hover {
+  color: rgba(0,194,255,.95);
+
+  text-shadow:
+    0 0 8px rgba(0,194,255,.22);
+}
+        .ixi-mobile-nav-row {
+  display: none;
+}
+
+.ixi-mobile-nav-link {
+  color: rgba(0,194,255,.72);
+  text-decoration: none;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .55px;
+
+  white-space: nowrap;
+}
+
+.ixi-mobile-nav-link:hover {
+  color: rgba(0,194,255,.95);
+  text-shadow: 0 0 8px rgba(0,194,255,.22);
+}
         @media (max-width: 850px) {
           .ixi-relationship-controls {
             margin: 14px auto 0;
             gap: 14px;
           }
+
+          .ixi-mobile-nav-row {
+  width: 100%;
+  margin-top: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+          
         }
       `}</style>
     </div>
