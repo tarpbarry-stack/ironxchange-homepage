@@ -1335,11 +1335,12 @@ onBoardDragEnd={() => {}}
   max-width: 1320px;
   height: 120px;
 
-  margin: 0 auto 14px;
+ margin: 18px auto 18px;
   padding: 18px;
 
   position: relative;
-
+  z-index: 2;
+  
   cursor: pointer;
 
   border: 2px dashed rgba(255,196,0,.45);
