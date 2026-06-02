@@ -53,3 +53,34 @@ body {
 *::-webkit-scrollbar-thumb:hover {
   background: rgba(255,196,0,.24);
 }
+/* ================================
+   IRONXCHANGE V12 MOBILE PHYSICS
+   ================================ */
+
+html,
+body,
+#__next {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 850px) {
+  main {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .ix-horizontal-rail {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ix-horizontal-rail::-webkit-scrollbar {
+    display: none;
+  }
+}
