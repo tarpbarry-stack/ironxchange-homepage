@@ -155,98 +155,59 @@ const availableModels =
 
 </div>
     <div className="ix-search-secondary-row">
-      <select
-        className="dash-control dash-secondary"
-        value={filters.yearMin || ""}
-        onChange={(e) => updateFilter("yearMin", e.target.value)}
-        aria-label="Year min"
-      >
-        <option value="">YEAR MIN</option>
-        {yearOptions.filter(Boolean).map(value => (
-          <option key={`year-min-${value}`} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
+     <input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.yearMin || ""}
+  onChange={(e) => updateFilter("yearMin", e.target.value)}
+  placeholder="YEAR MIN"
+  aria-label="Year min"
+/>
 
-      <select
-        className="dash-control dash-secondary"
-        value={filters.yearMax || ""}
-        onChange={(e) => updateFilter("yearMax", e.target.value)}
-        aria-label="Year max"
-      >
-        <option value="">YEAR MAX</option>
-        {yearOptions.filter(Boolean).map(value => (
-          <option key={`year-max-${value}`} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
+<input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.yearMax || ""}
+  onChange={(e) => updateFilter("yearMax", e.target.value)}
+  placeholder="YEAR MAX"
+  aria-label="Year max"
+/>
 
-      <select
-        className="dash-control dash-secondary"
-        value={filters.priceMin || ""}
-        onChange={(e) => updateFilter("priceMin", e.target.value)}
-        aria-label="Price min"
-      >
-        <option value="">PRICE MIN</option>
-        {priceOptions.filter(Boolean).map(value => (
-          <option key={`price-min-${value}`} value={value}>
-            {value === "350000"
-              ? "$350,000+"
-              : `$${Number(value).toLocaleString()}`}
-          </option>
-        ))}
-      </select>
+<input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.priceMin || ""}
+  onChange={(e) => updateFilter("priceMin", e.target.value)}
+  placeholder="PRICE MIN"
+  aria-label="Price min"
+/>
 
-      <select
-        className="dash-control dash-secondary"
-        value={filters.priceMax || ""}
-        onChange={(e) => updateFilter("priceMax", e.target.value)}
-        aria-label="Price max"
-      >
-        <option value="">PRICE MAX</option>
-        {priceOptions.filter(Boolean).map(value => (
-          <option key={`price-max-${value}`} value={value}>
-            {value === "350000"
-              ? "$350,000+"
-              : `$${Number(value).toLocaleString()}`}
-          </option>
-        ))}
-      </select>
+<input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.priceMax || ""}
+  onChange={(e) => updateFilter("priceMax", e.target.value)}
+  placeholder="PRICE MAX"
+  aria-label="Price max"
+/>
 
-      <select
-        className="dash-control dash-secondary"
-        value={filters.hoursMin || ""}
-        onChange={(e) => updateFilter("hoursMin", e.target.value)}
-        aria-label="Hours min"
-      >
-        <option value="">HOURS MIN</option>
-        {hoursOptions.filter(Boolean).map(value => (
-          <option key={`hours-min-${value}`} value={value}>
-            {value === "15000"
-              ? "15,000+"
-              : `${Number(value).toLocaleString()} hrs`}
-          </option>
-        ))}
-      </select>
+<input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.hoursMin || ""}
+  onChange={(e) => updateFilter("hoursMin", e.target.value)}
+  placeholder="HOURS MIN"
+  aria-label="Hours min"
+/>
 
-      <select
-        className="dash-control dash-secondary"
-        value={filters.hoursMax || ""}
-        onChange={(e) => updateFilter("hoursMax", e.target.value)}
-        aria-label="Hours max"
-      >
-        <option value="">HOURS MAX</option>
-        {hoursOptions.filter(Boolean).map(value => (
-          <option key={`hours-max-${value}`} value={value}>
-            {value === "15000"
-              ? "15,000+"
-              : `${Number(value).toLocaleString()} hrs`}
-          </option>
-        ))}
-      </select>
-
+<input
+  type="text"
+  className="dash-control dash-secondary"
+  value={filters.hoursMax || ""}
+  onChange={(e) => updateFilter("hoursMax", e.target.value)}
+  placeholder="HOURS MAX"
+  aria-label="Hours max"
+/>
       <select
         className="dash-control dash-sort"
         value={sortMode}
