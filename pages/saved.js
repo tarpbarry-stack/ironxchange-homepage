@@ -1406,7 +1406,7 @@ box-shadow: none;
   position: absolute;
   left: 18px;
 width: 128px;
-  top: 54px;
+  top: 92px;
 
   height: 8px;
 
