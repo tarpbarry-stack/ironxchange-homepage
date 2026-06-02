@@ -1405,7 +1405,7 @@ box-shadow: none;
 .ixi-pocket-rail {
   position: absolute;
   left: 18px;
-  right: 18px;
+width: 128px;
   top: 54px;
 
   height: 8px;
