@@ -7,10 +7,6 @@ import {
 export default function IXSearchSurface({
   searchQuery = "",
   setSearchQuery = () => {},
-
-export default function IXSearchSurface({
-  searchQuery = "",
-  setSearchQuery = () => {},
   filters = {},
   setFilters = () => {},
   sortMode = "custom",
