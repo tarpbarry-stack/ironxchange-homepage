@@ -805,29 +805,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
           </div>
         </section>
 
-<section className="pocket-dev-panel">
-  <div>
-    LEFT POCKET: {(machineContainers.pocketLeft || []).length}
-  </div>
 
-  <button
-    type="button"
-    onClick={() => recallPocketToBoard("pocketLeft")}
-  >
-    RECALL LEFT
-  </button>
-
-  <div>
-    RIGHT POCKET: {(machineContainers.pocketRight || []).length}
-  </div>
-
-  <button
-    type="button"
-    onClick={() => recallPocketToBoard("pocketRight")}
-  >
-    RECALL RIGHT
-  </button>
-</section>
               
 <section
   data-pocket-target="pocketLeft"
@@ -1359,7 +1337,7 @@ onBoardDragEnd={() => {}}
   max-width: 1320px;
   height: 120px;
 
- margin: 18px auto 18px;
+ margin: -132px auto 18px;
   padding: 18px;
 
   position: relative;
@@ -1378,7 +1356,7 @@ box-shadow: none;
   max-width: 1320px;
   height: 120px;
 
-  margin: 18px auto 18px;
+ margin: -132px auto 18px;
   padding: 18px;
 
   position: relative;
