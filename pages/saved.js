@@ -806,7 +806,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
         </section>
 
 
-              
+  <section className="ixi-pocket-row">            
 <section
   data-pocket-target="pocketLeft"
   className={`ixi-pocket-left ${
@@ -820,9 +820,6 @@ onDrop={(e) => {
   e.preventDefault();
 }}
 >
-  <div className="ixi-pocket-debug-label">
-  DROP TO LEFT POCKET
-</div>
   
   <div className="ixi-pocket-line" />
 
@@ -876,7 +873,9 @@ onDrop={(e) => {
     </div>
   )}
 </section>
-
+  
+</section>
+  
 <section
   data-pocket-target="pocketRight"
   className={`ixi-pocket-left ixi-pocket-right ${
@@ -887,9 +886,7 @@ onDrop={(e) => {
     e.preventDefault();
   }}
 >
-  <div className="ixi-pocket-debug-label right">
-    DROP TO RIGHT POCKET
-  </div>
+  
 
   <div className="ixi-pocket-line" />
 </section>
@@ -1333,11 +1330,23 @@ onBoardDragEnd={() => {}}
   background: rgba(255,196,0,.08);
 }
 
+.ixi-pocket-row {
+  max-width: 1320px;
+  margin: -132px auto 18px;
+  
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+
+  position: relative;
+  z-index: 2;
+}
+
 .ixi-pocket-left {
   max-width: 1320px;
   height: 120px;
 
- margin: -132px auto 18px;
+ margin: 0;
   padding: 18px;
 
   position: relative;
@@ -1356,7 +1365,7 @@ box-shadow: none;
   max-width: 1320px;
   height: 120px;
 
- margin: -132px auto 18px;
+ margin: 0;
   padding: 18px;
 
   position: relative;
