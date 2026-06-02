@@ -1989,17 +1989,16 @@ box-shadow:
 }
 
   .workspace-head {
-    align-items: flex-start;
-    flex-direction: column;
-    margin-bottom: 14px;
-  }
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 14px;
+}
 
   .workspace-head h1 {
     font-size: 25px;
-  }
-
-  .count-pill {
-    align-self: flex-start;
   }
 
   .ixi-command-chassis {
@@ -2040,7 +2039,7 @@ box-shadow:
   justify-content: center;
   align-items: center;
 
-  gap: 14px;
+  gap: 16px;
 }
 
 .ixi-color-filter {
