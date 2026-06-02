@@ -1865,7 +1865,7 @@ box-shadow:
 }
 
         .cards {
-          max-width: 1320px;
+          max-width: 1920px;
           margin: 0 auto;
 
           display: grid;
