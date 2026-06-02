@@ -742,6 +742,10 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
           e.preventDefault();
         }}
       >
+<div className="ixi-pocket-catch-pad" />
+
+<div className="ixi-pocket-rail">
+  <div className="ixi-pocket-line" />
         <div className="ixi-pocket-rail">
           <div className="ixi-pocket-line" />
 
@@ -897,7 +901,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
     onDrop={(e) => {
       e.preventDefault();
     }}
-  >
+  > 
     <div className="ixi-pocket-rail">
   <div className="ixi-pocket-line" />
 
@@ -1490,6 +1494,22 @@ box-shadow: none;
   font-weight: 950;
   letter-spacing: .65px;
   text-transform: uppercase;
+}
+
+.ixi-pocket-catch-pad {
+  position: absolute;
+  left: 0;
+  top: 92px;
+
+  width: 360px;
+  height: 140px;
+
+  pointer-events: auto;
+
+  background: rgba(255,0,0,.12);
+  outline: 1px solid rgba(255,0,0,.6);
+
+  z-index: 1;
 }
 
 .ixi-pocket-rail {
