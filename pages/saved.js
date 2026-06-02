@@ -1417,36 +1417,13 @@ box-shadow: none;
   z-index: 20;
 }
 
-.ixi-pocket-dot {
-  width: 8px;
-  height: 8px;
-
-  border: 0;
-  border-radius: 50%;
-
-  background: rgba(68,73,77,.92);
-
-  cursor: pointer;
-  padding: 0;
-
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.05);
-}
-
-.ixi-pocket-dot:hover {
-  background: rgba(118,123,127,.95);
-
-  box-shadow:
-    0 0 8px rgba(118,123,127,.22);
-}
-
 .ixi-pocket-line {
  flex: 1;
   height: 5px;
 
-  position: absolute;
-  left: 18px;
-  top: 54px;
+ position: relative;
+left: auto;
+top: auto;
 
   background:
     linear-gradient(
