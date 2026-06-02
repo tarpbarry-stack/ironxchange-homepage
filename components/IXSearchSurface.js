@@ -340,6 +340,15 @@ const availableModels =
   border-bottom-color: rgba(255,255,255,.13);
 }
 
+.dash-secondary::placeholder {
+  color: transparent;
+}
+
+.dash-secondary:hover::placeholder,
+.dash-secondary:focus::placeholder {
+  color: rgba(255,255,255,.42);
+}
+
 .dash-sort {
   border-bottom-color: rgba(255,196,0,.24);
 }
