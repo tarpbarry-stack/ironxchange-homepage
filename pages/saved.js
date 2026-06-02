@@ -1319,9 +1319,10 @@ onBoardDragEnd={() => {}}
 .ixi-pocket-row {
   max-width: 1320px;
   margin: -132px auto 18px;
-  
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 18px;
 
   position: relative;
@@ -1329,7 +1330,8 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-pocket-left {
-  max-width: 1320px;
+  width: 360px;
+max-width: 360px;
   height: 120px;
 
  margin: 0;
@@ -1348,7 +1350,8 @@ box-shadow: none;
 }
 
 .ixi-pocket-right {
-  max-width: 1320px;
+ max-width: 1320px;
+
   height: 120px;
 
  margin: 0;
