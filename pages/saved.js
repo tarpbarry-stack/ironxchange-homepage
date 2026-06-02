@@ -1473,7 +1473,7 @@ top: 54px;
   position: absolute;
 
   left: 0;
-  top: -20px;
+  top: 8px;
 
   width: 100%;
   height: 120px;
