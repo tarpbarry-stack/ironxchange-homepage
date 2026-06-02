@@ -474,6 +474,24 @@ export default function IXSearchSurfaceMobile({
           border-bottom-color: rgba(229,62,62,.72);
         }
 
+        .mobile-range,
+.mobile-sort,
+.mobile-clear {
+  height: 24px;
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+  border-bottom: 4px solid rgba(255,255,255,.18);
+
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+
+  align-self: flex-end;
+}
+
         .mobile-clear:hover,
         .mobile-clear:focus {
           border-bottom-color: rgba(229,62,62,.96);
