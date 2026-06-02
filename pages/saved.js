@@ -819,18 +819,8 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
       e.preventDefault();
     }}
   >
-   <div className="ixi-pocket-rail">
-  <div className="ixi-pocket-line" />
 
-  <button
-    type="button"
-    className="ixi-pocket-dot"
-    onClick={(e) => {
-      e.stopPropagation();
-      setLeftPocketOpen(current => !current);
-    }}
-  />
-</div>
+<div className="ixi-pocket-line" />
 
     {(machineContainers.pocketLeft || []).length > 0 && (
       <div className="ixi-pocket-thumbs">
@@ -1440,29 +1430,29 @@ box-shadow: none;
 }
 
 .ixi-pocket-line {
-  flex: 1;
+  width: 128px;
   height: 5px;
 
-  position: relative;
-left: auto;
-top: auto;
+  position: absolute;
+  left: 18px;
+  top: 54px;
 
   background:
     linear-gradient(
       90deg,
-      rgba(255,196,0,0),
-      rgba(255,196,0,.38) 18%,
-      rgba(255,196,0,.06) 48%,
-      rgba(255,196,0,.32) 74%,
-      rgba(255,196,0,0)
+      rgba(68,73,77,0),
+      rgba(68,73,77,.58) 18%,
+      rgba(68,73,77,.12) 48%,
+      rgba(68,73,77,.46) 74%,
+      rgba(68,73,77,0)
     );
 
   border-radius: 999px;
 
-  opacity: .42;
+  opacity: .48;
 
   box-shadow:
-    0 0 8px rgba(255,196,0,.035);
+    0 0 8px rgba(68,73,77,.08);
 }
 
 .ixi-pocket-left:hover .ixi-pocket-line {
