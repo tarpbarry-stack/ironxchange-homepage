@@ -805,8 +805,8 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
           </div>
         </section>
 
-
-  <section className="ixi-pocket-row">            
+<section className="ixi-pocket-row">            
+              
 <section
   data-pocket-target="pocketLeft"
   className={`ixi-pocket-left ${
@@ -872,8 +872,6 @@ onDrop={(e) => {
 })}
     </div>
   )}
-</section>
-  
 </section>
   
 <section
