@@ -840,7 +840,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
   activeOutline={ixiOutlineFilter}
   onToggleOutline={toggleOutlineFilter}
 />
-          </div>
+    
         </section>
 
                 </div>
