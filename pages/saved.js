@@ -1497,8 +1497,8 @@ top: auto;
 .ixi-pocket-thumbs {
   position: absolute;
 
-  left: 0;
-  top: 2px;
+  left: 24px;
+  top: 12px;
 
   width: 100%;
   height: 80px;
