@@ -1556,7 +1556,7 @@ border-bottom-right-radius: 0;}
 }
 
 .ixi-pocket-left.open {
-  height: 170px;
+  height: 90px;
 
   overflow-x: auto;
   overflow-y: hidden;
