@@ -1999,18 +1999,29 @@ box-shadow:
     display: none !important;
   }
 
-  .ixi-toolbar {
-    width: 100%;
-    max-width: 100%;
+ .ixi-toolbar {
+  width: max-content;
+  max-width: 100%;
 
-    margin: 14px auto 0;
-    left: 0;
+  margin: 12px auto 0;
+  left: 0;
 
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-  }
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
 
+  gap: 6px;
+}
+
+.ixi-color-filter {
+  flex: 0 0 20px;
+}
+
+.ixi-thickness-filter {
+  flex: 0 0 24px;
+  margin-top: 0;
+}
   .ixi-thickness-filter {
     margin-top: 6px;
   }
