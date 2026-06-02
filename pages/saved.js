@@ -1385,6 +1385,11 @@ outline: 1px solid rgba(255, 0, 0, .75);
 box-shadow: none;
 }
 
+.ixi-pocket-left,
+.ixi-pocket-right {
+  background: rgba(255,0,0,.15);
+}
+
 .ixi-pocket-debug-label.right {
   left: auto;
   right: 18px;
