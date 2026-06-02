@@ -149,13 +149,13 @@ export default function IXIRelationshipControls({
         }
 
         .stage-dead {
-          opacity: .18;
+          opacity: .34;
           filter: grayscale(.65);
           box-shadow: none;
         }
 
         .stage-exists {
-          opacity: .52;
+          opacity: .62;
           filter: grayscale(.18);
           box-shadow:
             0 0 8px rgba(255,255,255,.045);
