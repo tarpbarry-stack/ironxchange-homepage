@@ -1367,20 +1367,11 @@ onBoardDragEnd={() => {}}
   
   cursor: pointer;
 
-  border: 2px dashed rgba(255,196,0,.45);
-  border-radius: 14px;
+ border: none;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.10),
-      rgba(255,196,0,.025)
-    ),
-    rgba(8,8,8,.82);
+background: transparent;
 
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.08),
-    0 14px 34px rgba(0,0,0,.24);
+box-shadow: none;
 }
 
 .ixi-pocket-right {
