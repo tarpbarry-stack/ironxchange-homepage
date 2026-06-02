@@ -418,6 +418,20 @@ function getListingById(machineId) {
     }
   }
 
+  const pocketEl = dropTarget?.closest?.("[data-pocket-target]");
+
+  if (dragId && pocketEl) {
+    moveMachineToContainer(
+      dragId,
+      pocketEl.getAttribute("data-pocket-target")
+    );
+
+    setDraggingListingId("");
+    setGhostListingId("");
+    setActiveStackHover("");
+    return;
+  }
+   
   const stackEl = dropTarget?.closest?.("[data-active-stack]");
 
   if (dragId && stackEl) {
@@ -787,35 +801,16 @@ function addListingToLeftPocket(listingId) {
 </section>
               
 <section
- className={`ixi-pocket-left ${
+  data-pocket-target="pocketLeft"
+  className={`ixi-pocket-left ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
 } ${
   leftPocketOpen ? "open" : ""
 }`}
   onClick={() => setLeftPocketOpen(current => !current)}
   onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
+onDrop={(e) => {
   e.preventDefault();
-  e.stopPropagation();
-
-  const transferId = e.dataTransfer.getData("text/plain");
-  const fallbackId = draggingListingId;
-
-  const droppedId = transferId || fallbackId;
-
-  alert(
-    `LEFT POCKET DROP\ntransferId: ${transferId || "EMPTY"}\nfallbackId: ${fallbackId || "EMPTY"}\ndroppedId: ${droppedId || "EMPTY"}`
-  );
-
-  if (!droppedId) return;
-
-  moveMachineToContainer(
-    droppedId,
-    "pocketLeft"
-  );
-
-  setDraggingListingId("");
-  setGhostListingId("");
 }}
 >
   <div className="ixi-pocket-debug-label">
@@ -871,24 +866,17 @@ function addListingToLeftPocket(listingId) {
   )}
 </section>
 
- <section
+<section
+  data-pocket-target="pocketRight"
   className={`ixi-pocket-right ${
     (machineContainers.pocketRight || []).length ? "occupied" : ""
   }`}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
-    e.preventDefault();
+  e.preventDefault();
+}}
 
-    const droppedId =
-      e.dataTransfer.getData("text/plain") ||
-      draggingListingId;
 
-    moveMachineToContainer(
-      droppedId,
-      "pocketRight"
-    );
-  }}
->
  <div className="ixi-pocket-debug-label right">
   DROP TO RIGHT POCKET
 </div>
@@ -1361,6 +1349,39 @@ onBoardDragEnd={() => {}}
   box-shadow:
     0 0 0 1px rgba(255,196,0,.08),
     0 14px 34px rgba(0,0,0,.24);
+}
+
+.ixi-pocket-right {
+  max-width: 1320px;
+  height: 120px;
+
+  margin: 18px auto 18px;
+  padding: 18px;
+
+  position: relative;
+  z-index: 2;
+
+  cursor: pointer;
+
+  border: 2px dashed rgba(0,194,255,.45);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.09),
+      rgba(0,194,255,.025)
+    ),
+    rgba(8,8,8,.82);
+
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.08),
+    0 14px 34px rgba(0,0,0,.24);
+}
+
+.ixi-pocket-debug-label.right {
+  left: auto;
+  right: 18px;
 }
 
 .ixi-pocket-debug-label {
