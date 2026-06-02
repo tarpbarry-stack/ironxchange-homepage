@@ -148,11 +148,23 @@ export default function IXIRelationshipControls({
           height: 5px;
         }
 
-        .stage-dead {
-          opacity: .34;
-          filter: grayscale(.65);
-          box-shadow: none;
-        }
+       .stage-dead {
+  opacity: .34;
+
+  background: transparent !important;
+
+  border-color: rgba(255,255,255,.055);
+
+  box-shadow: none;
+
+  filter: none;
+}
+
+.ixi-relationship-color.stage-dead {
+  background: transparent !important;
+
+  border: 1px solid rgba(255,255,255,.055);
+}
 
         .stage-exists {
           opacity: .62;
