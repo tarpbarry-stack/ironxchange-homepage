@@ -1330,6 +1330,8 @@ max-width: 1500px;
 }
 
 .ixi-pocket-left {
+transform: translateX(90px);
+
   width: 360px;
 max-width: 360px;
   height: 120px;
