@@ -1364,20 +1364,11 @@ box-shadow: none;
 
   cursor: pointer;
 
-  border: 2px dashed rgba(0,194,255,.45);
-  border-radius: 14px;
+  border: none;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,194,255,.09),
-      rgba(0,194,255,.025)
-    ),
-    rgba(8,8,8,.82);
+background: transparent;
 
-  box-shadow:
-    0 0 0 1px rgba(0,194,255,.08),
-    0 14px 34px rgba(0,0,0,.24);
+box-shadow: none;
 }
 
 .ixi-pocket-debug-label.right {
