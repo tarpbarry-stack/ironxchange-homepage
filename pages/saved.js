@@ -874,7 +874,7 @@ onDrop={(e) => {
       style={{
   left: `${
     leftPocketOpen
-      ? index * 64
+      ? index * 80
       : index * 16
   }px`,
   zIndex: index + 1
