@@ -336,6 +336,16 @@ export default function IXSearchSurfaceMobile({
           font-weight: 850;
         }
 
+        .ix-mobile-search-row input::placeholder,
+.mobile-dash-control::placeholder {
+  color: transparent;
+}
+
+.ix-mobile-search-surface.lit .ix-mobile-search-row input::placeholder,
+.ix-mobile-search-surface.lit .mobile-dash-control::placeholder {
+  color: rgba(255,255,255,.42);
+}
+
           .ix-mobile-taxonomy-row {
   width: 100%;
   display: grid;
@@ -361,6 +371,14 @@ export default function IXSearchSurfaceMobile({
           letter-spacing: .35px;
           text-transform: uppercase;
         }
+
+        .ix-mobile-search-surface.lit .mobile-dash-control {
+  color: rgba(255,255,255,.66);
+}
+
+.ix-mobile-search-surface.lit .ix-mobile-search-row input {
+  color: rgba(255,255,255,.86);
+}
 
         .mobile-dash-control::-ms-expand {
           display: none;
