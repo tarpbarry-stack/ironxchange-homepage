@@ -1,3 +1,13 @@
+import {
+  getV12CategoryNames,
+  getV12Makes,
+  getV12Models
+} from "../lib/v12TaxonomyAdapter";
+
+export default function IXSearchSurface({
+  searchQuery = "",
+  setSearchQuery = () => {},
+
 export default function IXSearchSurface({
   searchQuery = "",
   setSearchQuery = () => {},
@@ -7,22 +17,6 @@ export default function IXSearchSurface({
   setSortMode = () => {},
   onClear = null
 }) {
-  const yearOptions = [
-    "",
-    ...Array.from({ length: 38 }, (_, i) => String(1990 + i))
-  ];
-
-  const hoursOptions = [
-    "",
-    ...Array.from({ length: 30 }, (_, i) => String(250 + i * 500)),
-    "15000"
-  ];
-
-  const priceOptions = [
-    "",
-    ...Array.from({ length: 70 }, (_, i) => String(2500 + i * 5000)),
-    "350000"
-  ];
 
   const sortOptions = [
     { value: "custom", label: "SORT" },
@@ -35,6 +29,39 @@ export default function IXSearchSurface({
     { value: "year-old", label: "YEAR ↑" }
   ];
 
+const categories = [
+  "ALL CATEGORIES",
+  ...getV12CategoryNames()
+];
+
+const selectedCategory =
+  filters.category || "ALL CATEGORIES";
+
+const selectedMake =
+  filters.make || "ALL MAKES";
+
+const selectedModel =
+  filters.model || "ALL MODELS";
+
+const availableMakes =
+  selectedCategory === "ALL CATEGORIES"
+    ? ["ALL MAKES"]
+    : [
+        "ALL MAKES",
+        ...getV12Makes(selectedCategory)
+      ];
+
+const availableModels =
+  selectedMake === "ALL MAKES"
+    ? ["ALL MODELS"]
+    : [
+        "ALL MODELS",
+        ...getV12Models(
+          selectedCategory,
+          selectedMake
+        )
+      ];
+  
   function updateFilter(key, value) {
     setFilters({
       ...filters,
@@ -72,18 +99,62 @@ export default function IXSearchSurface({
         />
       </div>
 
-      <select className="dash-control dash-category" aria-label="Category">
-        <option>CATEGORY</option>
-      </select>
+      <select
+  className="dash-control dash-category"
+  value={selectedCategory}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      category: e.target.value,
+      make: "ALL MAKES",
+      model: "ALL MODELS"
+    })
+  }
+  aria-label="Category"
+>
+  {categories.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL CATEGORIES" ? "CATEGORY" : value}
+    </option>
+  ))}
+</select>
 
-      <select className="dash-control dash-make" aria-label="Make">
-        <option>MAKE</option>
-      </select>
+     <select
+  className="dash-control dash-make"
+  value={selectedMake}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      make: e.target.value,
+      model: "ALL MODELS"
+    })
+  }
+  aria-label="Make"
+>
+  {availableMakes.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL MAKES" ? "MAKE" : value}
+    </option>
+  ))}
+</select>
 
-      <select className="dash-control dash-model" aria-label="Model">
-        <option>MODEL</option>
-      </select>
-    </div>
+     <select
+  className="dash-control dash-model"
+  value={selectedModel}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      model: e.target.value
+    })
+  }
+  aria-label="Model"
+>
+  {availableModels.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL MODELS" ? "MODEL" : value}
+    </option>
+  ))}
+</select>
 
     <div className="ix-search-secondary-row">
       <select
