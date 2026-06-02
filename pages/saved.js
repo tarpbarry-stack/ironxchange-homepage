@@ -1235,7 +1235,7 @@ onBoardDragEnd={() => {}}
   min-height: 120px;
   position: relative;
   pointer-events: auto;
-  padding-top: 36px;
+  padding-top: 50px;
 }
 
 .ixi-command-center {
