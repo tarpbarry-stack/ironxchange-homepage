@@ -91,7 +91,7 @@ export default function IXSearchSurfaceMobile({
   return (
     <div className={`ix-mobile-search-surface ${panelLit ? "lit" : ""}`}>
   <div className="mobile-panel-head">
-  <span>IXI SEARCH</span>
+  <span>IXSearchSurface™</span>
 
   <button
     type="button"
@@ -285,11 +285,11 @@ export default function IXSearchSurfaceMobile({
 }
 
 .mobile-panel-power {
-  width: 3px;
-  height: 3px;
+  width: 18px;
+  height: 4px;
 
   border: 0;
-  border-radius: 1px;
+  border-radius: 2px;
 
   background: rgba(255,255,255,.18);
 
@@ -299,7 +299,9 @@ export default function IXSearchSurfaceMobile({
 
 .ix-mobile-search-surface.lit .mobile-panel-power {
   background: rgba(255,196,0,.95);
-  box-shadow: 0 0 8px rgba(255,196,0,.42);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.42);
 }
 
         .ix-mobile-search-row {
