@@ -57,6 +57,14 @@ export default function IXIRelationshipControls({
     return "dead";
   }
 
+function handleOutlineClick(outline) {
+  if (!activeColors.includes("none")) {
+    onToggleColor("none");
+  }
+
+  onToggleOutline(outline);
+}
+  
   return (
     <div className={`ixi-relationship-controls ${className}`}>
       {COLOR_CONTROLS.map(color => (
@@ -74,7 +82,7 @@ export default function IXIRelationshipControls({
           key={outline}
           type="button"
           className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
-          onClick={() => onToggleOutline(outline)}
+          onClick={() => handleOutlineClick(outline)}
           aria-label={`Filter outline ${outline}`}
         />
       ))}
@@ -125,6 +133,39 @@ export default function IXIRelationshipControls({
           margin-left: -2px;
           margin-right: -2px;
         }
+
+        .ixi-relationship-outline.stage-dead {
+  opacity: .38;
+  background: transparent;
+  border-color: rgba(255,255,255,.055);
+  box-shadow: none;
+}
+
+.ixi-relationship-outline.stage-dead::after {
+  background: rgba(255,255,255,.16);
+}
+
+.ixi-relationship-outline.stage-exists {
+  opacity: .72;
+  border-color: rgba(255,255,255,.10);
+}
+
+.ixi-relationship-outline.stage-exists::after {
+  background: rgba(255,255,255,.42);
+}
+
+.ixi-relationship-outline.stage-selected {
+  opacity: 1;
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06),
+    0 0 10px rgba(255,255,255,.10);
+}
+
+.ixi-relationship-outline.stage-selected::after {
+  background: rgba(255,255,255,.76);
+}
+        
 
         .ixi-relationship-outline::after {
           content: "";
