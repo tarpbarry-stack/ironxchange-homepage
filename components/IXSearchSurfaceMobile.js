@@ -375,7 +375,16 @@ export default function IXSearchSurfaceMobile({
         .mobile-clear:focus {
           border-bottom-color: rgba(229,62,62,.96);
           box-shadow: 0 3px 8px rgba(229,62,62,.14);
+        }  
+        
+        .mobile-range::placeholder {
+        color: transparent;
         }
+
+        .mobile-range:hover::placeholder,
+        .mobile-range:focus::placeholder {
+        color: rgba(255,255,255,.42);
+        }        
       `}</style>
     </div>
   );
