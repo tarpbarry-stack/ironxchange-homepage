@@ -1459,26 +1459,15 @@ box-shadow: none;
 }
 
 .ixi-pocket-right {
-top: 48px;
-transform: translateX(80px);width: 360px;
-max-width: 360px;
-
+  width: 360px;
+  max-width: 360px;
   height: 120px;
 
- margin: 0;
+  margin: 0;
   padding: 18px;
 
   position: relative;
   z-index: 2;
-
-  cursor: pointer;
-
-  border: none;
-
-background: rgba(255, 0, 0, .12);
-outline: 1px solid rgba(255, 0, 0, .75);
-
-box-shadow: none;
 }
 
 .ixi-pocket-left,
