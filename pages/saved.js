@@ -797,18 +797,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
         )}
       </section>
 
-      <section
-        data-pocket-target="pocketRight"
-        className={`ixi-pocket-left ixi-pocket-right ${
-          (machineContainers.pocketRight || []).length ? "occupied" : ""
-        }`}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-        }}
-      >
-        <div className="ixi-pocket-line" />
-      </section>
+
     </section>
   </aside>
 
