@@ -872,14 +872,13 @@ onDrop={(e) => {
       key={`left-pocket-thumb-${machineId}`}
       className="ixi-pocket-thumb"
       style={{
-        left: `${
   left: `${
-  leftPocketOpen
-    ? index * 148
-    : index * 16
-}px`,
-        zIndex: index + 1
-      }}
+    leftPocketOpen
+      ? index * 148
+      : index * 16
+  }px`,
+  zIndex: index + 1
+}}
     >
       {image ? (
         <img
