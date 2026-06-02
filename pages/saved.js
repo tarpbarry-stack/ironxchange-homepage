@@ -868,7 +868,7 @@ onDrop={(e) => {
 
 <section
   data-pocket-target="pocketRight"
-  className={`ixi-pocket-right ${
+  className={`ixi-pocket-left ixi-pocket-right ${
     (machineContainers.pocketRight || []).length ? "occupied" : ""
   }`}
   onDragOver={(e) => e.preventDefault()}
