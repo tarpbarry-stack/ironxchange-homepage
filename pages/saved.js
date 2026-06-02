@@ -1076,8 +1076,6 @@ onBoardDragEnd={() => {}}
   box-sizing: border-box;
 }
 
-/* rest of CSS */
-`}</style>
 :global(body) {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -1728,9 +1726,9 @@ main {
 
   box-shadow:
     0 4px 10px rgba(0,194,255,.14);
-}
-)</style>
-  
+   }
+        }
+      `}</style>
     </>
   );
 }
