@@ -898,7 +898,64 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
       e.preventDefault();
     }}
   >
-    <div className="ixi-pocket-line" />
+    <div className="ixi-pocket-rail">
+  <div className="ixi-pocket-line" />
+
+  <button
+    type="button"
+    className="ixi-pocket-master-dash"
+    onClick={(e) => {
+      e.stopPropagation();
+      setRightPocketOpen(current => !current);
+    }}
+  />
+</div>
+
+    {(machineContainers.pocketRight || []).length > 0 && (
+  <div className="ixi-pocket-thumbs">
+    {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
+      const machine = getListingById(machineId);
+
+      if (!machine) return null;
+
+      const image =
+        machine.image ||
+        machine.imageUrl ||
+        machine.images?.[0] ||
+        machine.images?.[0]?.url ||
+        machine.publicData?.image ||
+        machine.publicData?.imageUrl ||
+        machine.publicData?.images?.[0] ||
+        machine.attributes?.publicData?.image ||
+        machine.attributes?.publicData?.imageUrl ||
+        machine.attributes?.publicData?.images?.[0];
+
+      return (
+        <div
+          key={`right-pocket-thumb-${machineId}`}
+          className="ixi-pocket-thumb"
+          style={{
+            left: `${rightPocketOpen ? index * 80 : index * 16}px`,
+            zIndex: index + 1
+          }}
+        >
+          {image ? (
+            <img
+              src={typeof image === "string" ? image : image?.url}
+              alt=""
+            />
+          ) : (
+            <span>
+              {machine.year || machine.publicData?.year || ""}
+              {" "}
+              {machine.make || machine.publicData?.make || ""}
+            </span>
+          )}
+        </div>
+      );
+    })}
+  </div>
+)}  
   </section>
 </aside>
 </section>
