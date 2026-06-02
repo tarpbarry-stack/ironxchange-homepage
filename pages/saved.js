@@ -1158,9 +1158,33 @@ onBoardDragEnd={() => {}}
           letter-spacing: .45px;
         }
 
+        .ixi-command-chassis {
+  max-width: 1320px;
+  margin: 0 auto 30px;
+
+  display: grid;
+  grid-template-columns: 320px 640px 320px;
+  gap: 18px;
+
+  align-items: start;
+}
+
+.ixi-command-left,
+.ixi-command-right {
+  min-height: 120px;
+
+  position: relative;
+
+  pointer-events: auto;
+}
+
+.ixi-command-center {
+  position: relative;
+  z-index: 5;
+}
         .workspace-controls {
           max-width: 640px;
-          margin: 0 auto 30px;
+         margin: 0;
           padding: 7px;
 
           border: 1px solid rgba(255,255,255,.045);
@@ -1340,21 +1364,19 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-pocket-row {
-max-width: 1500px;
-  margin: -132px auto 18px;
+  width: 100%;
+  height: 120px;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
+  margin: 0;
+
+  display: grid;
+  gap: 12px;
 
   position: relative;
   z-index: 2;
 }
 
 .ixi-pocket-left {
-transform: translateX(90px);
-
   width: 360px;
 max-width: 360px;
   height: 120px;
@@ -1375,8 +1397,8 @@ box-shadow: none;
 }
 
 .ixi-pocket-right {
-margin-left: auto;
- max-width: 1320px;
+width: 360px;
+max-width: 360px;
 
   height: 120px;
 
