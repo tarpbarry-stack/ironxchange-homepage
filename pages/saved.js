@@ -1457,8 +1457,6 @@ max-width: 360px;
 
  border: none;
 
-background: rgba(255, 0, 0, .12);
-outline: 1px solid rgba(255, 0, 0, .75);
 box-shadow: none;
 }
 
@@ -1472,11 +1470,6 @@ box-shadow: none;
 
   position: relative;
   z-index: 2;
-}
-
-.ixi-pocket-left,
-.ixi-pocket-right {
-  background: rgba(255,0,0,.15);
 }
 
 .ixi-pocket-debug-label.right {
@@ -1529,6 +1522,11 @@ background: rgba(0, 194, 255, .20);
 outline: 1px solid rgba(0, 194, 255, .8);
 
   z-index: 20;
+}
+
+.ixi-pocket-right .ixi-pocket-rail {
+  left: auto;
+  right: 18px;
 }
 
 .ixi-pocket-line {
