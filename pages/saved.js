@@ -60,7 +60,10 @@ const [activeStackLayouts, setActiveStackLayouts] = useState({
 });
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
+const [rightPocketOpen, setRightPocketOpen] = useState(false);
 
+const [armedDestination, setArmedDestination] = useState("");
+  
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
 const [stackInsertAfter, setStackInsertAfter] = useState(false);
@@ -346,6 +349,12 @@ function getListingById(machineId) {
   return listings.find(
     item => String(getListingId(item)) === String(machineId)
   );
+}
+
+  function getPocketContainerKey(side) {
+  return side === "right"
+    ? "pocketRight"
+    : "pocketLeft";
 }
 
   function moveListingToSlot(dragId, targetId) {
@@ -670,6 +679,26 @@ function addListingToLeftPocket(listingId) {
     };
   });
 } 
+function recallPocketMachineToBoard(machineId, pocketKey) {
+  if (!machineId || !pocketKey) return;
+
+  setMachineContainers(current => {
+    const id = String(machineId);
+
+    const pocketIds = current[pocketKey] || [];
+    const boardIds = current.board || [];
+
+    return {
+      ...current,
+      [pocketKey]: pocketIds.filter(
+        item => String(item) !== id
+      ),
+      board: boardIds.includes(id)
+        ? boardIds
+        : [...boardIds, id]
+    };
+  });
+}  
   
   return (
     <>
@@ -843,7 +872,12 @@ onDrop={(e) => {
       key={`left-pocket-thumb-${machineId}`}
       className="ixi-pocket-thumb"
       style={{
-        left: `${index * 16}px`,
+        left: `${
+  left: `${
+  leftPocketOpen
+    ? index * 148
+    : index * 16
+}px`,
         zIndex: index + 1
       }}
     >
@@ -1451,10 +1485,11 @@ top: 54px;
   left: 0;
   top: -20px;
 
-  width: 500px;
-  height: 100px;
+  width: 100%;
+  height: 120px;
 
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
 
   pointer-events: auto;
 
@@ -1502,17 +1537,32 @@ top: 54px;
   opacity: .72;
 }
 
+.ixi-pocket-left.open .ixi-pocket-thumb:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 12px 20px rgba(0,0,0,.28);
+}
+
 .ixi-pocket-left.open {
-  height: 82px;
+  height: 138px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .ixi-pocket-left.open .ixi-pocket-thumb {
-  transform:
-    translateY(-2px)
-    rotate(-4deg);
+  transform: translateY(-2px);
 
-  opacity: .96;
-}        
+  opacity: 1;
+
+  border-color: rgba(255,255,255,.12);
+}
+
+.ixi-pocket-left.open .ixi-pocket-thumbs {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
 .active-stack-zone {
 max-width: 1320px;
