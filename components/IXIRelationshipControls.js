@@ -92,7 +92,7 @@ export default function IXIRelationshipControls({
           justify-content: center;
           align-items: center;
 
-          gap: 8px;
+          gap: 14px;
         }
 
         .ixi-relationship-color,
