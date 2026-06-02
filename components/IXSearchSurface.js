@@ -372,7 +372,7 @@ const availableModels =
   .ix-search-primary-row {
     grid-template-columns: 1fr;
     gap: 7px;
-    margin-bottom: 10px;
+    overflow: hidden;
   }
 
   .ix-search-line,
@@ -385,12 +385,14 @@ const availableModels =
   .ix-search-secondary-row {
     display: flex;
     flex-wrap: nowrap;
+    justify-content: flex-start;
+
     gap: 8px;
 
     overflow-x: auto;
     overflow-y: hidden;
 
-    padding-bottom: 4px;
+    padding-bottom: 6px;
 
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -403,7 +405,8 @@ const availableModels =
   .dash-secondary,
   .dash-sort,
   .dash-clear {
-    flex: 0 0 92px;
+    flex: 0 0 auto;
+    min-width: 92px;
   }
 }
 `}</style>
