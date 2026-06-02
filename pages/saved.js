@@ -726,6 +726,13 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
           </div>
         </section>
 
+<section className="ixi-command-chassis">
+  <aside className="ixi-command-left">
+  </aside>
+
+  <div className="ixi-command-center">
+
+  
         <section className="workspace-controls">
           <IXSearchSurface
   searchQuery={searchQuery}
@@ -804,6 +811,12 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
             />
           </div>
         </section>
+
+                </div>
+
+  <aside className="ixi-command-right">
+  </aside>
+</section>
 
 <section className="ixi-pocket-row">
   <section
