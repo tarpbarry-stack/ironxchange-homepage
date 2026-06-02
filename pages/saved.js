@@ -818,6 +818,10 @@ function addListingToLeftPocket(listingId) {
   setGhostListingId("");
 }}
 >
+  <div className="ixi-pocket-debug-label">
+  DROP TO LEFT POCKET
+</div>
+  
   <div className="ixi-pocket-line" />
 
  {(machineContainers.pocketLeft || []).length > 0 && (
@@ -885,8 +889,8 @@ function addListingToLeftPocket(listingId) {
     );
   }}
 >
- <div className="ixi-pocket-debug-label">
-  DROP TO LEFT POCKET
+ <div className="ixi-pocket-debug-label right">
+  DROP TO RIGHT POCKET
 </div>
 
 <div className="ixi-pocket-line" />
