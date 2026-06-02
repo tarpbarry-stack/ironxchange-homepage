@@ -1535,7 +1535,7 @@ top: 54px;
 }
 
 .ixi-pocket-left.open {
-  height: 138px;
+  height: 170px;
 
   overflow-x: auto;
   overflow-y: hidden;
