@@ -1437,10 +1437,9 @@ top: auto;
 
   border-radius: 999px;
 
-  opacity: .48;
+ opacity: .82;
 
-  box-shadow:
-    0 0 8px rgba(68,73,77,.08);
+  box-shadow: none;
 }
 
 .ixi-pocket-master-dash {
@@ -1526,7 +1525,12 @@ top: auto;
   background: #111;
 
   z-index: 9999;
-}
+
+  border-top-left-radius: 8px;
+border-top-right-radius: 8px;
+
+border-bottom-left-radius: 0;
+border-bottom-right-radius: 0;}
 .ixi-pocket-thumb img {
   width: 100%;
   height: 100%;
