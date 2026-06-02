@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   getV12CategoryNames,
   getV12Makes,
@@ -57,6 +59,8 @@ export default function IXSearchSurfaceMobile({
           )
         ];
 
+  const [panelLit, setPanelLit] = useState(false);
+
   function updateFilter(key, value) {
     setFilters({
       ...filters,
@@ -85,7 +89,17 @@ export default function IXSearchSurfaceMobile({
   }
 
   return (
-    <div className="ix-mobile-search-surface">
+    <div className={`ix-mobile-search-surface ${panelLit ? "lit" : ""}`}>
+  <div className="mobile-panel-head">
+  <span>IXI SEARCH</span>
+
+  <button
+    type="button"
+    className="mobile-panel-power"
+    onClick={() => setPanelLit(current => !current)}
+    aria-label="Toggle search labels"
+  />
+</div>
       <div className="ix-mobile-search-row">
         <input
           type="text"
@@ -244,6 +258,50 @@ export default function IXSearchSurfaceMobile({
           margin: 0 auto;
         }
 
+        .mobile-panel-head {
+  height: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 3px;
+}
+
+.mobile-panel-head span {
+  opacity: 0;
+
+  color: rgba(255,196,0,.82);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .65px;
+
+  transition: opacity .14s ease;
+}
+
+.ix-mobile-search-surface.lit .mobile-panel-head span {
+  opacity: 1;
+}
+
+.mobile-panel-power {
+  width: 3px;
+  height: 3px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ix-mobile-search-surface.lit .mobile-panel-power {
+  background: rgba(255,196,0,.95);
+  box-shadow: 0 0 8px rgba(255,196,0,.42);
+}
+
         .ix-mobile-search-row {
           width: 100%;
           margin-bottom: 9px;
@@ -280,7 +338,8 @@ export default function IXSearchSurfaceMobile({
           width: 100%;
 
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr 18px;
+          .ix-mobile-taxonomy-row {
+  grid-template-columns: 1.45fr 1fr .72fr 18px;
           gap: 7px;
 
           align-items: end;
@@ -387,11 +446,28 @@ export default function IXSearchSurfaceMobile({
           display: none;
         }
 
-        .mobile-range,
-        .mobile-sort {
-          flex: 0 0 92px;
-        }
+       .mobile-range {
+  flex: 0 0 58px;
+}
 
+.mobile-range[aria-label="Year min"],
+.mobile-range[aria-label="Year max"] {
+  flex-basis: 46px;
+}
+
+.mobile-range[aria-label="Hours min"],
+.mobile-range[aria-label="Hours max"] {
+  flex-basis: 54px;
+}
+
+.mobile-range[aria-label="Price min"],
+.mobile-range[aria-label="Price max"] {
+  flex-basis: 68px;
+}
+
+.mobile-sort {
+  flex: 0 0 64px;
+}
         .mobile-clear {
           flex: 0 0 18px;
 
