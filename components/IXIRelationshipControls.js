@@ -212,7 +212,7 @@ export default function IXIRelationshipControls({
         @media (max-width: 850px) {
           .ixi-relationship-controls {
             margin: 14px auto 0;
-            gap: 10px;
+            gap: 14px;
           }
         }
       `}</style>
