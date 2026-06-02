@@ -334,18 +334,14 @@ export default function IXSearchSurfaceMobile({
           font-weight: 850;
         }
 
-        .ix-mobile-taxonomy-row {
-          width: 100%;
-
-          display: grid;
           .ix-mobile-taxonomy-row {
+  width: 100%;
+  display: grid;
   grid-template-columns: 1.45fr 1fr .72fr 18px;
-          gap: 7px;
-
-          align-items: end;
-
-          margin-bottom: 9px;
-        }
+  gap: 7px;
+  align-items: end;
+  margin-bottom: 9px;
+}
 
         .mobile-dash-control {
           width: 100%;
