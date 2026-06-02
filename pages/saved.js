@@ -903,6 +903,8 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
       e.preventDefault();
     }}
   > 
+<div className="ixi-pocket-catch-pad" />
+    
     <div className="ixi-pocket-rail">
   <div className="ixi-pocket-line" />
 
@@ -1504,6 +1506,11 @@ box-shadow: none;
   outline: 1px solid rgba(255,0,0,.6);
 
   z-index: 1;
+}
+
+.ixi-pocket-right .ixi-pocket-catch-pad {
+  left: auto;
+  right: 0;
 }
 
 .ixi-pocket-rail {
