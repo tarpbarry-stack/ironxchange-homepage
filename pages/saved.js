@@ -728,10 +728,91 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
 
 <section className="ixi-command-chassis">
   <aside className="ixi-command-left">
+    <section className="ixi-pocket-row">
+      <section
+        data-pocket-target="pocketLeft"
+        className={`ixi-pocket-left ${
+          (machineContainers.pocketLeft || []).length ? "occupied" : ""
+        } ${
+          leftPocketOpen ? "open" : ""
+        }`}
+        onClick={() => setLeftPocketOpen(current => !current)}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <div className="ixi-pocket-rail">
+          <div className="ixi-pocket-line" />
+
+          <button
+            type="button"
+            className="ixi-pocket-master-dash"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLeftPocketOpen(current => !current);
+            }}
+          />
+        </div>
+
+        {(machineContainers.pocketLeft || []).length > 0 && (
+          <div className="ixi-pocket-thumbs">
+            {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
+              const machine = getListingById(machineId);
+              if (!machine) return null;
+
+              const image =
+                machine.image ||
+                machine.imageUrl ||
+                machine.images?.[0] ||
+                machine.images?.[0]?.url ||
+                machine.publicData?.image ||
+                machine.publicData?.imageUrl ||
+                machine.publicData?.images?.[0] ||
+                machine.attributes?.publicData?.image ||
+                machine.attributes?.publicData?.imageUrl ||
+                machine.attributes?.publicData?.images?.[0];
+
+              return (
+                <div
+                  key={`left-pocket-thumb-${machineId}`}
+                  className="ixi-pocket-thumb"
+                  style={{
+                    left: `${leftPocketOpen ? index * 80 : index * 16}px`,
+                    zIndex: index + 1
+                  }}
+                >
+                  {image ? (
+                    <img src={typeof image === "string" ? image : image?.url} alt="" />
+                  ) : (
+                    <span>
+                      {machine.year || machine.publicData?.year || ""}{" "}
+                      {machine.make || machine.publicData?.make || ""}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section
+        data-pocket-target="pocketRight"
+        className={`ixi-pocket-left ixi-pocket-right ${
+          (machineContainers.pocketRight || []).length ? "occupied" : ""
+        }`}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <div className="ixi-pocket-line" />
+      </section>
+    </section>
   </aside>
 
   <div className="ixi-command-center">
-
   
         <section className="workspace-controls">
           <IXSearchSurface
@@ -818,89 +899,6 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
   </aside>
 </section>
 
-<section className="ixi-pocket-row">
-  <section
-    data-pocket-target="pocketLeft"
-    className={`ixi-pocket-left ${
-      (machineContainers.pocketLeft || []).length ? "occupied" : ""
-    } ${
-      leftPocketOpen ? "open" : ""
-    }`}
-    onClick={() => setLeftPocketOpen(current => !current)}
-    onDragOver={(e) => e.preventDefault()}
-    onDrop={(e) => {
-      e.preventDefault();
-    }}
-  >
-
-<div className="ixi-pocket-rail">
-  <div className="ixi-pocket-line" />
-
-  <button
-    type="button"
-    className="ixi-pocket-master-dash"
-    onClick={(e) => {
-      e.stopPropagation();
-      setLeftPocketOpen(current => !current);
-    }}
-  />
-</div>
-
-    {(machineContainers.pocketLeft || []).length > 0 && (
-      <div className="ixi-pocket-thumbs">
-        {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
-          const machine = getListingById(machineId);
-          if (!machine) return null;
-
-          const image =
-            machine.image ||
-            machine.imageUrl ||
-            machine.images?.[0] ||
-            machine.images?.[0]?.url ||
-            machine.publicData?.image ||
-            machine.publicData?.imageUrl ||
-            machine.publicData?.images?.[0] ||
-            machine.attributes?.publicData?.image ||
-            machine.attributes?.publicData?.imageUrl ||
-            machine.attributes?.publicData?.images?.[0];
-
-          return (
-            <div
-              key={`left-pocket-thumb-${machineId}`}
-              className="ixi-pocket-thumb"
-              style={{
-                left: `${leftPocketOpen ? index * 80 : index * 16}px`,
-                zIndex: index + 1
-              }}
-            >
-              {image ? (
-                <img src={typeof image === "string" ? image : image?.url} alt="" />
-              ) : (
-                <span>
-                  {machine.year || machine.publicData?.year || ""}{" "}
-                  {machine.make || machine.publicData?.make || ""}
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    )}
-  </section>
-
-  <section
-    data-pocket-target="pocketRight"
-    className={`ixi-pocket-left ixi-pocket-right ${
-      (machineContainers.pocketRight || []).length ? "occupied" : ""
-    }`}
-    onDragOver={(e) => e.preventDefault()}
-    onDrop={(e) => {
-      e.preventDefault();
-    }}
-  >
-    <div className="ixi-pocket-line" />
-  </section>
-</section>
               
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
@@ -1884,14 +1882,7 @@ box-shadow:
             grid-template-columns: 1fr;
           }
         }
-        .ixi-pocket-row,
-.ixi-pocket-left,
-.ixi-pocket-right,
-.ixi-pocket-rail,
-.ixi-pocket-thumbs,
-.ixi-pocket-thumb {
-  pointer-events: none !important;
-}
+       
       `}</style>
     </>
   );
