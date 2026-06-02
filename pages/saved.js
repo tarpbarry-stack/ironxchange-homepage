@@ -1884,6 +1884,14 @@ box-shadow:
             grid-template-columns: 1fr;
           }
         }
+        .ixi-pocket-row,
+.ixi-pocket-left,
+.ixi-pocket-right,
+.ixi-pocket-rail,
+.ixi-pocket-thumbs,
+.ixi-pocket-thumb {
+  pointer-events: none !important;
+}
       `}</style>
     </>
   );
