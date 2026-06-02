@@ -1473,10 +1473,10 @@ top: 54px;
   position: absolute;
 
   left: 0;
-  top: 8px;
+  top: 2px;
 
   width: 100%;
-  height: 120px;
+  height: 72px;
 
   overflow-x: auto;
   overflow-y: hidden;
