@@ -1476,7 +1476,7 @@ top: 54px;
   top: 2px;
 
   width: 100%;
-  height: 72px;
+  height: 80px;
 
   overflow-x: auto;
   overflow-y: hidden;
