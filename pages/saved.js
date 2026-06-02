@@ -1483,22 +1483,22 @@ top: auto;
   background:
     linear-gradient(
       90deg,
-      rgba(255,196,0,0),
-      rgba(255,196,0,.7) 18%,
-      rgba(255,196,0,.14) 48%,
-      rgba(255,196,0,.58) 74%,
-      rgba(255,196,0,0)
+      rgba(68,73,77,0),
+      rgba(68,73,77,.88) 18%,
+      rgba(68,73,77,.22) 48%,
+      rgba(68,73,77,.74) 74%,
+      rgba(68,73,77,0)
     );
 
   box-shadow:
-    0 0 14px rgba(255,196,0,.16);
+    0 0 10px rgba(68,73,77,.16);
 }
 
 .ixi-pocket-thumbs {
   position: absolute;
 
   left: 24px;
-  top: 12px;
+  top: 15px;
 
   width: 100%;
   height: 80px;
