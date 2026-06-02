@@ -370,13 +370,40 @@ const availableModels =
   }
 
   .ix-search-primary-row {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  .ix-search-line,
+  .dash-category,
+  .dash-make,
+  .dash-model {
+    width: 100%;
   }
 
   .ix-search-secondary-row {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding-bottom: 4px;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ix-search-secondary-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-secondary,
+  .dash-sort,
+  .dash-clear {
+    flex: 0 0 92px;
   }
 }
 `}</style>
