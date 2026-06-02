@@ -1496,7 +1496,7 @@ top: 54px;
 
   overflow: hidden;
 
-  border: 2px solid red;
+  border: 1px solid rgba(0,0,0,.55);
 
   background: #111;
 
@@ -1519,14 +1519,13 @@ top: 54px;
   line-height: 1.1;
 }
 
-.ixi-pocket-left.occupied .ixi-pocket-thumb {
+.ixi-pocket-left.occupied:not(.open) .ixi-pocket-thumb {
   transform:
-    translateY(12px)
+    translateY(54px)
     rotate(-4deg);
 
   opacity: .72;
 }
-
 .ixi-pocket-left.open .ixi-pocket-thumb:hover {
   transform: translateY(-6px);
 
