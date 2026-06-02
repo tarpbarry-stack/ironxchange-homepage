@@ -1954,8 +1954,7 @@ box-shadow:
           color: rgba(255,255,255,.42);
           font-size: 12px;
         }
-
-     @media (max-width: 850px) {
+@media (max-width: 850px) {
   main {
     padding: 18px 4% 48px;
   }
@@ -1963,6 +1962,7 @@ box-shadow:
   .workspace-head {
     align-items: flex-start;
     flex-direction: column;
+    margin-bottom: 14px;
   }
 
   .workspace-head h1 {
@@ -1974,233 +1974,53 @@ box-shadow:
   }
 
   .ixi-command-chassis {
+    display: block;
     max-width: 100%;
     margin: 0 auto 18px;
-
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-
-    position: relative;
   }
 
   .ixi-command-center {
-    order: 1;
     width: 100%;
-    position: relative;
-    z-index: 10;
+    max-width: 100%;
   }
 
   .workspace-controls {
     width: 100%;
     max-width: 100%;
-    margin: 0;
+    margin: 0 auto 18px;
   }
 
   .ixi-command-left,
-  .ixi-command-right {
-    order: 2;
-
-    width: 32px;
-    min-height: 148px;
-
-    padding-top: 0;
-
-    position: sticky;
-    top: 84px;
-
-    z-index: 9;
-
-    pointer-events: auto;
-  }
-
-  .ixi-command-left {
-    justify-self: start;
-    margin-top: 4px;
-  }
-
-  .ixi-command-right {
-    justify-self: end;
-    margin-top: -160px;
-  }
-
-  .ixi-pocket-row {
-    width: 32px;
-    height: 148px;
-
-    margin: 0;
-
-    display: block;
-
-    position: relative;
-  }
-
+  .ixi-command-right,
+  .ixi-pocket-row,
   .ixi-pocket-left,
-  .ixi-pocket-right {
-    width: 32px;
-    max-width: 32px;
-    height: 148px;
-
-    margin: 0;
-    padding: 0;
-
-    transform: none;
-
-    position: relative;
-
-    background: transparent;
-    outline: none;
-    box-shadow: none;
-
-    overflow: visible;
-  }
-
-  .ixi-pocket-catch-pad {
-    position: absolute;
-
-    left: -8px;
-    top: 0;
-
-    width: 56px;
-    height: 148px;
-
-    pointer-events: auto;
-
-    background: transparent;
-    outline: none;
-
-    z-index: 1;
-  }
-
-  .ixi-pocket-right .ixi-pocket-catch-pad {
-    left: auto;
-    right: -8px;
-  }
-
-  .ixi-pocket-rail {
-    position: absolute;
-
-    left: 8px;
-    top: 0;
-
-    width: 8px;
-    height: 132px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-
-    z-index: 30;
-  }
-
-  .ixi-pocket-right .ixi-pocket-rail {
-    left: auto;
-    right: 8px;
-  }
-
-  .ixi-pocket-line {
-    width: 5px;
-    height: 104px;
-
-    background: #44494D;
-    border-radius: 2px;
-
-    opacity: 1;
-    box-shadow: none;
-  }
-
-  .ixi-pocket-master-dash {
-    width: 5px;
-    height: 18px;
-
-    border: 0;
-    border-radius: 2px;
-
-    background: #44494D;
-
-    padding: 0;
-    cursor: pointer;
-
-    opacity: 1;
-    box-shadow: none;
-  }
-
-  .ixi-pocket-thumbs {
-    position: absolute;
-
-    left: 22px;
-    top: 0;
-
-    width: 260px;
-    height: 92px;
-
-    overflow: visible;
-
-    pointer-events: auto;
-
-    z-index: 20;
-  }
-
-  .ixi-pocket-right .ixi-pocket-thumbs {
-    left: auto;
-    right: 22px;
-  }
-
-  .ixi-pocket-thumb {
-    width: 112px;
-    height: 76px;
-
-    position: absolute;
-    top: 0;
-
-    overflow: hidden;
-
-    border: 1px solid rgba(0,0,0,.55);
-
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
-    background: #111;
-
-    z-index: 20;
-  }
-
-  .ixi-pocket-left.occupied:not(.open) .ixi-pocket-thumb {
-    transform:
-      translateX(-92px)
-      rotate(-4deg);
-
-    opacity: .82;
-  }
-
-  .ixi-pocket-right.occupied:not(.open) .ixi-pocket-thumb {
-    transform:
-      translateX(92px)
-      rotate(4deg);
-
-    opacity: .82;
-  }
-
-  .ixi-pocket-left.open,
-  .ixi-pocket-right.open {
-    height: 148px;
-    overflow: visible;
-  }
-
-  .ixi-pocket-left.open .ixi-pocket-thumb,
-  .ixi-pocket-right.open .ixi-pocket-thumb {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
+  .ixi-pocket-right,
   .active-stack-zone {
-    margin: 8px auto 18px;
+    display: none !important;
+  }
+
+  .ixi-toolbar {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 14px auto 0;
+    left: 0;
+
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+  }
+
+  .ixi-thickness-filter {
+    margin-top: 6px;
   }
 
   .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .cards.single-card {
     grid-template-columns: 1fr;
   }
 }
