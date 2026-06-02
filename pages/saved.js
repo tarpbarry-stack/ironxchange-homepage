@@ -12,6 +12,7 @@ import {
 import { captureIXEvent } from "../lib/posthog";
 
 import IXSearchSurface from "../components/IXSearchSurface";
+import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -809,14 +810,27 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
   <div className="ixi-command-center">
   
         <section className="workspace-controls">
-          <IXSearchSurface
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-  filters={workspaceFilters}
-  setFilters={setWorkspaceFilters}
-  sortMode={savedBoardMode}
-  setSortMode={setSavedBoardMode}
-/>
+         <div className="desktop-search-surface">
+  <IXSearchSurface
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={workspaceFilters}
+    setFilters={setWorkspaceFilters}
+    sortMode={savedBoardMode}
+    setSortMode={setSavedBoardMode}
+  />
+</div>
+
+<div className="mobile-search-surface">
+  <IXSearchSurfaceMobile
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={workspaceFilters}
+    setFilters={setWorkspaceFilters}
+    sortMode={savedBoardMode}
+    setSortMode={setSavedBoardMode}
+  />
+</div>
 
           <div className="ixi-toolbar">
             <button
@@ -1954,10 +1968,25 @@ box-shadow:
           color: rgba(255,255,255,.42);
           font-size: 12px;
         }
+.mobile-search-surface {
+  display: none;
+}
+
+.desktop-search-surface {
+  display: block;
+}
 @media (max-width: 850px) {
   main {
     padding: 18px 4% 48px;
   }
+
+  .desktop-search-surface {
+  display: none;
+}
+
+.mobile-search-surface {
+  display: block;
+}
 
   .workspace-head {
     align-items: flex-start;
