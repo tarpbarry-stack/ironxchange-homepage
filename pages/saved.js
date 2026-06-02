@@ -896,7 +896,22 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
                 </div>
 
   <aside className="ixi-command-right">
-  </aside>
+  <section
+    data-pocket-target="pocketRight"
+    className={`ixi-pocket-left ixi-pocket-right ${
+      (machineContainers.pocketRight || []).length ? "occupied" : ""
+    } ${
+      rightPocketOpen ? "open" : ""
+    }`}
+    onClick={() => setRightPocketOpen(current => !current)}
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={(e) => {
+      e.preventDefault();
+    }}
+  >
+    <div className="ixi-pocket-line" />
+  </section>
+</aside>
 </section>
 
               
