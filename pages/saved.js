@@ -805,88 +805,76 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
           </div>
         </section>
 
-<section className="ixi-pocket-row">            
-              
-<section
-  data-pocket-target="pocketLeft"
-  className={`ixi-pocket-left ${
-  (machineContainers.pocketLeft || []).length ? "occupied" : ""
-} ${
-  leftPocketOpen ? "open" : ""
-}`}
-  onClick={() => setLeftPocketOpen(current => !current)}
-  onDragOver={(e) => e.preventDefault()}
-onDrop={(e) => {
-  e.preventDefault();
-}}
->
-  
-  <div className="ixi-pocket-line" />
+<section className="ixi-pocket-row">
+  <section
+    data-pocket-target="pocketLeft"
+    className={`ixi-pocket-left ${
+      (machineContainers.pocketLeft || []).length ? "occupied" : ""
+    } ${
+      leftPocketOpen ? "open" : ""
+    }`}
+    onClick={() => setLeftPocketOpen(current => !current)}
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={(e) => {
+      e.preventDefault();
+    }}
+  >
+    <div className="ixi-pocket-line" />
 
- {(machineContainers.pocketLeft || []).length > 0 && (
-    <div className="ixi-pocket-thumbs">
-     {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
-  const machine = getListingById(machineId);
+    {(machineContainers.pocketLeft || []).length > 0 && (
+      <div className="ixi-pocket-thumbs">
+        {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
+          const machine = getListingById(machineId);
+          if (!machine) return null;
 
-  if (!machine) return null;
+          const image =
+            machine.image ||
+            machine.imageUrl ||
+            machine.images?.[0] ||
+            machine.images?.[0]?.url ||
+            machine.publicData?.image ||
+            machine.publicData?.imageUrl ||
+            machine.publicData?.images?.[0] ||
+            machine.attributes?.publicData?.image ||
+            machine.attributes?.publicData?.imageUrl ||
+            machine.attributes?.publicData?.images?.[0];
 
-  const image =
-    machine.image ||
-    machine.imageUrl ||
-    machine.images?.[0] ||
-    machine.images?.[0]?.url ||
-    machine.publicData?.image ||
-    machine.publicData?.imageUrl ||
-    machine.publicData?.images?.[0] ||
-    machine.attributes?.publicData?.image ||
-    machine.attributes?.publicData?.imageUrl ||
-    machine.attributes?.publicData?.images?.[0];
+          return (
+            <div
+              key={`left-pocket-thumb-${machineId}`}
+              className="ixi-pocket-thumb"
+              style={{
+                left: `${leftPocketOpen ? index * 80 : index * 16}px`,
+                zIndex: index + 1
+              }}
+            >
+              {image ? (
+                <img src={typeof image === "string" ? image : image?.url} alt="" />
+              ) : (
+                <span>
+                  {machine.year || machine.publicData?.year || ""}{" "}
+                  {machine.make || machine.publicData?.make || ""}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </section>
 
-  return (
-    <div
-      key={`left-pocket-thumb-${machineId}`}
-      className="ixi-pocket-thumb"
-      style={{
-  left: `${
-    leftPocketOpen
-      ? index * 80
-      : index * 16
-  }px`,
-  zIndex: index + 1
-}}
-    >
-      {image ? (
-        <img
-          src={typeof image === "string" ? image : image?.url}
-          alt=""
-        />
-      ) : (
-        <span>
-          {machine.year || machine.publicData?.year || ""}
-          {" "}
-          {machine.make || machine.publicData?.make || ""}
-        </span>
-      )}
-    </div>
-  );
-})}
-    </div>
-  )}
-</section>
-  
-<section
-  data-pocket-target="pocketRight"
-  className={`ixi-pocket-left ixi-pocket-right ${
-    (machineContainers.pocketRight || []).length ? "occupied" : ""
-  }`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-  }}
->
-  
-
-  <div className="ixi-pocket-line" />
+  <section
+    data-pocket-target="pocketRight"
+    className={`ixi-pocket-left ixi-pocket-right ${
+      (machineContainers.pocketRight || []).length ? "occupied" : ""
+    }`}
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={(e) => {
+      e.preventDefault();
+    }}
+  >
+    <div className="ixi-pocket-line" />
+  </section>
 </section>
               
 <section className="active-stack-zone">
