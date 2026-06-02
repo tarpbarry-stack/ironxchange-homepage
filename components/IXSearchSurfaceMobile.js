@@ -154,11 +154,11 @@ export default function IXSearchSurfaceMobile({
           ))}
         </select>
 
-        <button
-          type="button"
-          className="mobile-search-submit"
-          aria-label="Search"
-        />
+       <button
+  type="button"
+  className="mobile-search-dash"
+  aria-label="Go"
+/>
       </div>
 
       <div className="ix-mobile-range-row">
@@ -323,14 +323,43 @@ export default function IXSearchSurfaceMobile({
           box-shadow: 0 3px 8px rgba(255,196,0,.10);
         }
 
-        .mobile-search-submit {
-          width: 18px;
+      .mobile-search-dash {
+  width: 18px;
+  height: 24px;
 
-          border-bottom: 0;
-          background: rgba(255,196,0,.72);
+  border: 0;
+  border-bottom: 4px solid rgba(255,196,0,.82);
 
-          cursor: pointer;
-        }
+  background: transparent;
+
+  cursor: pointer;
+  padding: 0;
+
+  position: relative;
+}
+
+.mobile-search-dash:hover,
+.mobile-search-dash:focus {
+  border-bottom-color: rgba(255,196,0,1);
+  box-shadow: 0 3px 8px rgba(255,196,0,.16);
+}
+
+.mobile-search-dash:hover::after,
+.mobile-search-dash:focus::after {
+  content: "GO";
+
+  position: absolute;
+  left: 50%;
+  top: -12px;
+
+  transform: translateX(-50%);
+
+  color: rgba(255,196,0,.92);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .4px;
+}
 
         .mobile-search-submit:hover,
         .mobile-search-submit:focus {
