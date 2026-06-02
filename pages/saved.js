@@ -13,6 +13,7 @@ import { captureIXEvent } from "../lib/posthog";
 
 import IXSearchSurface from "../components/IXSearchSurface";
 import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
+import IXIRelationshipControls from "../components/IXIRelationshipControls";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -832,72 +833,13 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
   />
 </div>
 
-          <div className="ixi-toolbar">
-            <button
-              type="button"
-              className={`ixi-color-filter color-none ${ixiColorFilters.includes("none") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("none")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-green ${ixiColorFilters.includes("green") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("green")}
-            />
-
-            <button
-              type="button"
-             className={`ixi-color-filter color-yellow ${ixiColorFilters.includes("yellow") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("yellow")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-red ${ixiColorFilters.includes("red") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("red")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-cyan ${ixiColorFilters.includes("cyan") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("cyan")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-white ${ixiColorFilters.includes("white") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("white")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-blue ${ixiColorFilters.includes("blue") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("blue")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-color-filter color-orange ${ixiColorFilters.includes("orange") ? "active" : ""}`}
-              onClick={() => toggleColorFilter("orange")}
-            />
-
-            <button
-              type="button"
-              className={`ixi-thickness-filter thin ${String(ixiOutlineFilter) === "1" ? "active" : ""}`}
-              onClick={() => toggleOutlineFilter(1)}
-            />
-
-            <button
-              type="button"
-              className={`ixi-thickness-filter medium ${String(ixiOutlineFilter) === "3" ? "active" : ""}`}
-              onClick={() => toggleOutlineFilter(3)}
-            />
-
-            <button
-              type="button"
-              className={`ixi-thickness-filter thick ${String(ixiOutlineFilter) === "5" ? "active" : ""}`}
-              onClick={() => toggleOutlineFilter(5)}
-            />
+          <IXIRelationshipControls
+  ixiCardState={ixiCardState}
+  activeColors={ixiColorFilters}
+  onToggleColor={toggleColorFilter}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+/>
           </div>
         </section>
 
