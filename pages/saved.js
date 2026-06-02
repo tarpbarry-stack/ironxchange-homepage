@@ -795,14 +795,28 @@ function addListingToLeftPocket(listingId) {
   onClick={() => setLeftPocketOpen(current => !current)}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
-    e.preventDefault();
+  e.preventDefault();
+  e.stopPropagation();
 
-    const droppedId =
-      e.dataTransfer.getData("text/plain") ||
-      draggingListingId;
+  const transferId = e.dataTransfer.getData("text/plain");
+  const fallbackId = draggingListingId;
 
-    addListingToLeftPocket(droppedId);
-  }}
+  const droppedId = transferId || fallbackId;
+
+  alert(
+    `LEFT POCKET DROP\ntransferId: ${transferId || "EMPTY"}\nfallbackId: ${fallbackId || "EMPTY"}\ndroppedId: ${droppedId || "EMPTY"}`
+  );
+
+  if (!droppedId) return;
+
+  moveMachineToContainer(
+    droppedId,
+    "pocketLeft"
+  );
+
+  setDraggingListingId("");
+  setGhostListingId("");
+}}
 >
   <div className="ixi-pocket-line" />
 
