@@ -118,19 +118,17 @@ function renderRailLabel(item) {
     }
   }}
 >
-            {RAIL_ITEMS.map(item => (
-              <a
-  key={item.label}
-  href={item.href}
-  className={`ixi-page-indicator-link ${
-    item.active ? "active" : ""
-  } ${item.postFree ? "post-free" : ""}`}
->
-  {renderRailLabel(item)}
-</a>
-                {item.label}
-              </a>
-            ))}
+         {RAIL_ITEMS.map(item => (
+  <a
+    key={item.label}
+    href={item.href}
+    className={`ixi-page-indicator-link ${
+      item.active ? "active" : ""
+    } ${item.postFree ? "post-free" : ""}`}
+  >
+    {renderRailLabel(item)}
+  </a>
+))}
 
             <button
               type="button"
