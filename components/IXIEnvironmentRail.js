@@ -30,10 +30,8 @@ export default function IXIEnvironmentRail({
   className = ""
 }) {
   const [railMode, setRailMode] = useState("dead");
-  const [hovering, setHovering] = useState(false);
 
-  const effectiveMode =
-    railMode === "dead" && hovering ? "med" : railMode;
+  const effectiveMode = railMode;
 
   function cycleRailMode() {
     setRailMode(current => {
@@ -84,8 +82,6 @@ export default function IXIEnvironmentRail({
   return (
     <section
       className={`ixi-environment-rail mode-${effectiveMode} raw-mode-${railMode} ${className}`}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
     >
       {RAIL_ITEMS.map(item => (
         <a
