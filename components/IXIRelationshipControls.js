@@ -27,7 +27,11 @@ function getExistingOutlines(ixiCardState = {}) {
   const outlines = new Set();
 
   Object.values(ixiCardState || {}).forEach(state => {
-    if (state?.outline) outlines.add(String(state.outline));
+    const outlineValue = Number(state?.outline);
+
+    if (outlineValue > 1) {
+      outlines.add(String(outlineValue));
+    }
   });
 
   return outlines;
