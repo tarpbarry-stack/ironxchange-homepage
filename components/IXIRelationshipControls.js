@@ -72,7 +72,8 @@ function handleOutlineClick(outline) {
 }
   
   return (
-    <div className={`ixi-relationship-controls ${className}`}>
+   <div className={`ixi-relationship-shell ${className}`}>
+  <div className="ixi-relationship-controls">
       {COLOR_CONTROLS.map(color => (
         <button
           key={color}
@@ -92,6 +93,7 @@ function handleOutlineClick(outline) {
           aria-label={`Filter outline ${outline}`}
         />
       ))}
+</div>
 
         {hasAnyRelationship && (
   <div className="ixi-mobile-nav-row">
