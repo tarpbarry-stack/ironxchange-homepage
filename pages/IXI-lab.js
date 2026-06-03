@@ -5,11 +5,11 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 const RAIL_ITEMS = [
+  { label: "IXI MKTPLACE", href: "/browse" },
+  { label: "IXI WORKSPACE", href: "/saved", active: true },
+  { label: "IXI THEATER", href: "/theater" },
   { label: "DASHBOARD", href: "/account" },
-  { label: "LISTINGS", href: "/account/my-listings" },
-  { label: "MKTPLACE", href: "/browse" },
-  { label: "WORKSPACE", href: "/saved", active: true },
-  { label: "THEATER", href: "/theater" },
+  { label: "INVENTORY", href: "/account/my-listings" },
   { label: "LAUNCH", href: "/launch" }
 ];
 
@@ -157,19 +157,28 @@ export default function IXILab() {
           letter-spacing: .45px;
         }
 
-        .ixi-top-rail {
-          width: 100%;
-          min-height: 18px;
+       .ixi-top-rail {
+  width: 100%;
+  min-height: 18px;
 
-          display: flex;
-          align-items: center;
-          gap: 18px;
+  display: grid;
+  grid-template-columns:
+    auto
+    auto
+    auto
+    auto
+    auto
+    auto
+    1fr
+    auto;
 
-          margin: 0 auto 26px;
+  align-items: center;
+  column-gap: clamp(18px, 3.25vw, 58px);
 
-          opacity: 1;
-        }
+  margin: 0 auto 26px;
 
+  opacity: 1;
+}
         .ixi-rail-power {
           width: 24px;
           height: 5px;
@@ -259,6 +268,7 @@ export default function IXILab() {
 
         .ixi-post-free {
           margin-left: auto;
+          color: rgba(255,196,0,.42);
         }
 
         .ixi-top-rail.mode-off .ixi-post-free {
