@@ -35,6 +35,16 @@ const categories = [
   ...getV12CategoryNames()
 ];
 
+function taxonomyKey(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/&/g, "AND")
+    .replace(/\//g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ");
+}
+
 function formatKeywordLabel(keyword = "") {
   return String(keyword)
     .trim()
@@ -336,9 +346,9 @@ const listingModel =
 
 const matchesCategory =
   category === "ALL CATEGORIES" ||
-  String(listingCategory).trim().toUpperCase() ===
-    String(category).trim().toUpperCase();
-
+  taxonomyKey(listingCategory) ===
+    (ixSearchFilters.categoryKey || taxonomyKey(category));
+    
 const matchesMake =
   make === "ALL MAKES" ||
   String(listingMake).trim().toUpperCase() ===
