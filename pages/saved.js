@@ -155,12 +155,19 @@ setIxiCardState(remoteIxiState);
     return listingStatus !== "archived";
   });
 
-  const touchedIds = Object.keys(ixiCardState || {});
+  const touchedIds = Object.entries(ixiCardState || {})
+  .filter(([id, state]) =>
+    (state?.color && state.color !== "none") ||
+    Number(state?.outline) > 1 ||
+    state?.saved === true ||
+    state?.pinned === true ||
+    state?.noted === true
+  )
+  .map(([id]) => String(id));
 
-  return activeListings.filter(item =>
-    touchedIds.includes(String(getListingId(item)))
-  );
-}, [listings, ixiCardState]);
+return activeListings.filter(item =>
+  touchedIds.includes(String(getListingId(item)))
+);
 
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
