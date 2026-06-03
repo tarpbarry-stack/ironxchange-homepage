@@ -45,6 +45,16 @@ function taxonomyKey(value) {
     .replace(/\s+/g, " ");
 }
 
+function hasActiveIxiRelationship(state = {}) {
+  return (
+    (state?.color && state.color !== "none") ||
+    Number(state?.outline) > 1 ||
+    state?.saved === true ||
+    state?.pinned === true ||
+    state?.noted === true
+  );
+}
+
 function formatKeywordLabel(keyword = "") {
   return String(keyword)
     .trim()
@@ -425,7 +435,9 @@ function unlockIxiRelationship() {
 }
   
 function updateIxiCardState(listingId, patch) {
+  if (hasActiveIxiRelationship(patch)) {
   unlockIxiRelationship();
+}
 
   const id = String(listingId);
 
