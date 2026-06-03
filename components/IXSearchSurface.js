@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   getV12CategoryNames,
   getV12Makes,
@@ -57,6 +59,9 @@ const availableModels =
           selectedMake
         )
       ];
+
+const [panelLit, setPanelLit] = useState(false);
+
   
   function updateFilter(key, value) {
     setFilters({
@@ -83,7 +88,21 @@ const availableModels =
   }
 
   return (
-  <div className="ix-search-surface">
+ <div className={`ix-search-surface ${panelLit ? "lit" : ""}`}>
+
+<div className="desktop-panel-head">
+
+  <span>IXSearchSurface™</span>
+
+  <button
+    type="button"
+    className="desktop-panel-power"
+    onClick={() => setPanelLit(current => !current)}
+    aria-label="Toggle search surface"
+  />
+
+</div>
+      
     <div className="ix-search-primary-row">
 
   <div className="ix-search-line">
