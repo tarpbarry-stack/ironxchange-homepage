@@ -629,7 +629,7 @@ function sendListingToBack(listing) {
     Number(state?.outline) > 1
   )
 }
-  hasInventory={false}
+  hasInventory={loggedIn}
 />
 
  <div className="browse-search-shell">
