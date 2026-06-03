@@ -6,6 +6,16 @@ import {
   getV12Models
 } from "../lib/v12TaxonomyAdapter";
 
+function taxonomyKey(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/&/g, "AND")
+    .replace(/\//g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ");
+}
+
 export default function IXSearchSurface({
   searchQuery = "",
   setSearchQuery = () => {},
@@ -83,13 +93,19 @@ const [panelLit, setPanelLit] = useState(false);
     setSearchQuery("");
 
     setFilters({
-      yearMin: "",
-      yearMax: "",
-      priceMin: "",
-      priceMax: "",
-      hoursMin: "",
-      hoursMax: ""
-    });
+  category: "ALL CATEGORIES",
+  categoryKey: "ALL CATEGORIES",
+  make: "ALL MAKES",
+  makeKey: "ALL MAKES",
+  model: "ALL MODELS",
+  modelKey: "ALL MODELS",
+  yearMin: "",
+  yearMax: "",
+  priceMin: "",
+  priceMax: "",
+  hoursMin: "",
+  hoursMax: ""
+});
 
     setSortMode("custom");
 
@@ -127,14 +143,17 @@ const [panelLit, setPanelLit] = useState(false);
  <select
   className="dash-control dash-category"
   value={selectedCategory}
-  onChange={(e) =>
-    setFilters({
-      ...filters,
-      category: e.target.value,
-      make: "ALL MAKES",
-      model: "ALL MODELS"
-    })
-  }
+ onChange={(e) =>
+  setFilters({
+    ...filters,
+    category: e.target.value,
+    categoryKey: taxonomyKey(e.target.value),
+    make: "ALL MAKES",
+    makeKey: "ALL MAKES",
+    model: "ALL MODELS",
+    modelKey: "ALL MODELS"
+  })
+}
   aria-label="Category"
 >
   {categories.map(value => (
@@ -147,13 +166,15 @@ const [panelLit, setPanelLit] = useState(false);
   <select
   className="dash-control dash-make"
   value={selectedMake}
-  onChange={(e) =>
-    setFilters({
-      ...filters,
-      make: e.target.value,
-      model: "ALL MODELS"
-    })
-  }
+ onChange={(e) =>
+  setFilters({
+    ...filters,
+    make: e.target.value,
+    makeKey: taxonomyKey(e.target.value),
+    model: "ALL MODELS",
+    modelKey: "ALL MODELS"
+  })
+}
   aria-label="Make"
 >
   {availableMakes.map(value => (
@@ -167,11 +188,12 @@ const [panelLit, setPanelLit] = useState(false);
   className="dash-control dash-model"
   value={selectedModel}
   onChange={(e) =>
-    setFilters({
-      ...filters,
-      model: e.target.value
-    })
-  }
+  setFilters({
+    ...filters,
+    model: e.target.value,
+    modelKey: taxonomyKey(e.target.value)
+  })
+}
   aria-label="Model"
 >
   {availableModels.map(value => (
