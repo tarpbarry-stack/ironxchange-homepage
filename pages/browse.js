@@ -180,7 +180,7 @@ export default function Browse() {
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
  const [activeColorStacks, setActiveColorStacks] = useState([]);
-  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");+
+  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
   const [relationshipUnlocked, setRelationshipUnlocked] = useState(false);
   
   const [filters, setFilters] = useState({
