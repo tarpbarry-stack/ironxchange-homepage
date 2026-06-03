@@ -161,23 +161,15 @@ export default function IXILab() {
   width: 100%;
   min-height: 18px;
 
-  display: grid;
-  grid-template-columns:
-    auto
-    auto
-    auto
-    auto
-    auto
-    auto
-    1fr
-    auto;
+.ixi-top-rail {
+  width: 100%;
+  min-height: 18px;
 
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  column-gap: clamp(18px, 3.25vw, 58px);
 
   margin: 0 auto 26px;
-
-  opacity: 1;
 }
         .ixi-rail-power {
           width: 24px;
