@@ -91,7 +91,7 @@ function handleOutlineClick(outline) {
 
     <div className="ixi-relationship-head">
 
-      <span>IXIRelationshipControls™</span>
+      <span>IXI Machine Controls™</span>
 
       <button
         type="button"
@@ -144,13 +144,15 @@ function handleOutlineClick(outline) {
 <style jsx>{`
 
       .ixi-relationship-head {
-  height: 10px;
+ font-size: 8px;
+font-weight: 950;
+letter-spacing: .65px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 4px;
+  margin: 0 auto 4px;
 }
 
 .ixi-relationship-head span {
@@ -204,12 +206,11 @@ function handleOutlineClick(outline) {
       }
 
 .ixi-relationship-shell {
-  width: max-content;
+  width: 600px;
   max-width: 100%;
 
-  margin: 18px auto 0;
+  margin: 14px auto 0;
 }
-
 .ixi-relationship-controls {
   margin: 0 auto;
 }
