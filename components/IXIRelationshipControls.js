@@ -258,12 +258,15 @@ letter-spacing: .65px;
 }
 
 .ixi-relationship-outline.stage-exists {
-  opacity: .72;
-  border-color: rgba(255,255,255,.10);
+  opacity: .82;
+  border-color: rgba(255,255,255,.14);
+
+  box-shadow:
+    0 0 10px rgba(255,255,255,.06);
 }
 
 .ixi-relationship-outline.stage-exists::after {
-  background: rgba(255,255,255,.42);
+  background: rgba(255,255,255,.58);
 }
 
 .ixi-relationship-outline.stage-selected {
@@ -301,22 +304,22 @@ letter-spacing: .65px;
           height: 5px;
         }
 
-       .stage-dead {
-  opacity: .34;
+       ..stage-dead {
+  opacity: .16;
 
   background: transparent !important;
 
-  border-color: rgba(255,255,255,.055);
+  border-color: rgba(255,255,255,.04);
 
   box-shadow: none;
 
-  filter: none;
+  filter: grayscale(1);
 }
 
 .ixi-relationship-color.stage-dead {
   background: transparent !important;
 
-  border: 1px solid rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.04);
 }
 
        .stage-exists {
