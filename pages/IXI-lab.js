@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Head from "next/head";
 
+import IXSearchSurface from "../components/IXSearchSurface";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -95,6 +97,20 @@ function renderRailLabel(item) {
   return item.label;
 }
 
+
+const [searchQuery, setSearchQuery] = useState("");
+
+const [filters, setFilters] = useState({
+  yearMin: "",
+  yearMax: "",
+  priceMin: "",
+  priceMax: "",
+  hoursMin: "",
+  hoursMax: ""
+});
+
+const [sortMode, setSortMode] = useState("custom");
+  
   return (
     <>
       <Head>
@@ -147,10 +163,18 @@ onMouseLeave={() => {
             />
           </section>
 
-          <section className="lab-panel">
-            <p>Header replacement test.</p>
-            <p>GHOST = dashes. DISCOVER = cursor wake. LOCKED = panel held open. POST FREE stays special.</p>
-          </section>
+         <section className="lab-panel">
+
+  <IXSearchSurface
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={filters}
+    setFilters={setFilters}
+    sortMode={sortMode}
+    setSortMode={setSortMode}
+  />
+
+</section>
         </section>
       </main>
 
@@ -273,17 +297,24 @@ onMouseLeave={() => {
   box-shadow: none;
 }
 
-.lab-panel {
-          margin: 0 0 10px;
-          color: rgba(255,255,255,.48);
-          font-size: 12px;
-          font-weight: 800;
-        }
+   .lab-panel {
+  max-width: 700px;
 
-        .lab-panel p:last-child {
-          margin-bottom: 0;
-        }
+  margin: 24px auto 0;
+  padding: 18px;
 
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #111;
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18);
+}
+
+        
         @media (max-width: 850px) {
           main {
             padding: 18px 4% 48px;
