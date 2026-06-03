@@ -672,7 +672,7 @@ function sendListingToBack(listing) {
 
 <section className="featured">
         <div className="section-head">
-          <h2>AVAILABLE EQUIPMENT</h2>
+          <h2></h2>
 
           <span>
             {filteredListings.length} LISTINGS
@@ -1094,10 +1094,8 @@ grid-template-columns:
 
 .section-head {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-
-  margin-bottom: 22px;
 }
 
 .section-head h2 {
