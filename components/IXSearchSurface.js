@@ -115,62 +115,62 @@ const [panelLit, setPanelLit] = useState(false);
     />
   </div>
 
-  <select
-    className="dash-control dash-category"
-    value={selectedCategory}
-    onChange={(e) =>
-      setFilters({
-        ...filters,
-        category: e.target.value,
-        make: "ALL MAKES",
-        model: "ALL MODELS"
-      })
-    }
-    aria-label="Category"
-  >
-    {categories.map(value => (
-      <option key={value} value={value}>
-        {value === "ALL CATEGORIES" ? "CATEGORY" : value}
-      </option>
-    ))}
-  </select>
+ <select
+  className="dash-control dash-category"
+  value={selectedCategory}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      category: e.target.value,
+      make: "ALL MAKES",
+      model: "ALL MODELS"
+    })
+  }
+  aria-label="Category"
+>
+  {categories.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL CATEGORIES" ? "CATEGORY" : value}
+    </option>
+  ))}
+</select>
 
   <select
-    className="dash-control dash-make"
-    value={selectedMake}
-    onChange={(e) =>
-      setFilters({
-        ...filters,
-        make: e.target.value,
-        model: "ALL MODELS"
-      })
-    }
-    aria-label="Make"
-  >
-    {availableMakes.map(value => (
-      <option key={value} value={value}>
-        {value === "ALL MAKES" ? "MAKE" : value}
-      </option>
-    ))}
-  </select>
+  className="dash-control dash-make"
+  value={selectedMake}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      make: e.target.value,
+      model: "ALL MODELS"
+    })
+  }
+  aria-label="Make"
+>
+  {availableMakes.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL MAKES" ? "MAKE" : value}
+    </option>
+  ))}
+</select>
 
   <select
-    className="dash-control dash-model"
-    value={selectedModel}
-    onChange={(e) =>
-      setFilters({
-        ...filters,
-        model: e.target.value
-      })
-    }
-    aria-label="Model"
-  >
-    {availableModels.map(value => (
-      <option key={value} value={value}>
-        {value === "ALL MODELS" ? "MODEL" : value}
-      </option>
-    ))}
-  </select>
+  className="dash-control dash-model"
+  value={selectedModel}
+  onChange={(e) =>
+    setFilters({
+      ...filters,
+      model: e.target.value
+    })
+  }
+  aria-label="Model"
+>
+  {availableModels.map(value => (
+    <option key={value} value={value}>
+      {value === "ALL MODELS" ? "MODEL" : value}
+    </option>
+  ))}
+</select>
 
 </div>
     <div className="ix-search-secondary-row">
