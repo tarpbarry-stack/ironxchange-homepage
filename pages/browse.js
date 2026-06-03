@@ -180,8 +180,9 @@ export default function Browse() {
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
  const [activeColorStacks, setActiveColorStacks] = useState([]);
-  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
-
+  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");+
+  const [relationshipUnlocked, setRelationshipUnlocked] = useState(false);
+  
   const [filters, setFilters] = useState({
   yearMin: "",
   yearMax: "",
@@ -218,6 +219,19 @@ function setIxSearchFilters(next) {
     page: "browse"
   });
 }, []);
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const unlockUntil = Number(
+    localStorage.getItem("ixiRelationshipUnlockUntil") || 0
+  );
+
+  if (unlockUntil > Date.now()) {
+    setRelationshipUnlocked(true);
+  }
+}, []);  
+  
 
   useEffect(() => {
     fetch("/api/listings")
@@ -399,7 +413,20 @@ return sortListings(filtered, sortMode);
   ixiOutlineFilter 
 ]);
 
+function unlockIxiRelationship() {
+  setRelationshipUnlocked(true);
+
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      "ixiRelationshipUnlockUntil",
+      String(Date.now() + 5 * 60 * 1000)
+    );
+  }
+}
+  
 function updateIxiCardState(listingId, patch) {
+  unlockIxiRelationship();
+
   const id = String(listingId);
 
   setIxiCardState(current => {
@@ -595,18 +622,19 @@ function sendListingToBack(listing) {
   <IXIEnvironmentRail
   activeEnvironment="IXI MARKETPLACE"
   hasAccount={loggedIn}
-  hasRelationship={
-    Object.values(ixiCardState || {}).some(state =>
-      (state?.color && state.color !== "none") ||
-      Number(state?.outline) > 1
-    )
-  }
+ hasRelationship={
+  relationshipUnlocked ||
+  Object.values(ixiCardState || {}).some(state =>
+    (state?.color && state.color !== "none") ||
+    Number(state?.outline) > 1
+  )
+}
   hasInventory={false}
 />
 
  <div className="browse-search-shell">
 
- <IXSearchSurface
+<IXSearchSurface
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
   filters={ixSearchFilters}
@@ -614,6 +642,7 @@ function sendListingToBack(listing) {
   sortMode={sortMode}
   setSortMode={setSortMode}
   listings={liveListings}
+  hasRelationship={relationshipUnlocked}
 />
 
 <IXIRelationshipControls
