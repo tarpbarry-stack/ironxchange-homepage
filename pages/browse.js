@@ -2,6 +2,8 @@ import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 import { captureIXEvent } from "../lib/posthog";
 
+import IXSearchSurface from "../components/IXSearchSurface";
+
 import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
@@ -178,6 +180,28 @@ export default function Browse() {
   hoursMax: ""
 });
 
+const ixSearchFilters = {
+  category,
+  make,
+  model,
+  ...filters
+};
+
+function setIxSearchFilters(next) {
+  setCategory(next.category || "ALL CATEGORIES");
+  setMake(next.make || "ALL MAKES");
+  setModel(next.model || "ALL MODELS");
+
+  setFilters({
+    yearMin: next.yearMin || "",
+    yearMax: next.yearMax || "",
+    priceMin: next.priceMin || "",
+    priceMax: next.priceMax || "",
+    hoursMin: next.hoursMin || "",
+    hoursMax: next.hoursMax || ""
+  });
+}
+  
   useEffect(() => {
   captureIXEvent("browse_viewed", {
     page: "browse"
@@ -550,178 +574,17 @@ function sendListingToBack(listing) {
   hasInventory={false}
 />
 
-    <div className="browse-search-shell">  
-  <div className="search-top-row">
-    <input
-      type="text"
-      className="browse-search"
-      placeholder="Search equipment..."
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-    />
+ <div className="browse-search-shell">
 
-    <select
-      value={category}
-      onChange={(e) => {
-        setCategory(e.target.value);
-        setMake("ALL MAKES");
-        setModel("ALL MODELS");
-      }}
-    >
-      {categories.map((c) => (
-        <option key={c}>{c}</option>
-      ))}
-    </select>
+  <IXSearchSurface
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={ixSearchFilters}
+    setFilters={setIxSearchFilters}
+    sortMode={sortMode}
+    setSortMode={setSortMode}
+  />
 
-    <select
-      value={make}
-      onChange={(e) => {
-        setMake(e.target.value);
-        setModel("ALL MODELS");
-      }}
-    >
-      {availableMakes.map((m) => (
-        <option key={m}>{m}</option>
-      ))}
-    </select>
-
-    <select
-      value={model}
-      onChange={(e) => setModel(e.target.value)}
-    >
-      {availableModels.map((m) => (
-        <option key={m}>{m}</option>
-      ))}
-    </select>
-
-    <button
-  type="button"
-  className="search-btn"
-  onClick={() => {
-    captureIXEvent("search_performed", {
-      query: searchQuery,
-      category,
-      make,
-      model,
-      results: filteredListings.length
-    });
-  }}
->
-  SEARCH
-</button>
-
-    </div>
-
-  <div className="filter-strip">
-    <div className="range-group">
-      <input
-        placeholder="Year Min"
-        value={filters.yearMin}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            yearMin: e.target.value
-          })
-        }
-      />
-
-      <span></span>
-
-      <input
-        placeholder="Year Max"
-        value={filters.yearMax}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            yearMax: e.target.value
-          })
-        }
-      />
-    </div>
-
-    <div className="range-group">
-      <input
-        placeholder="Price Min"
-        value={filters.priceMin}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            priceMin: e.target.value
-          })
-        }
-      />
-
-      <span></span>
-
-      <input
-        placeholder="Price Max"
-        value={filters.priceMax}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            priceMax: e.target.value
-          })
-        }
-      />
-    </div>
-
-    <div className="range-group">
-      <input
-        placeholder="Hours Min"
-        value={filters.hoursMin}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            hoursMin: e.target.value
-          })
-        }
-      />
-
-      <span></span>
-
-      <input
-        placeholder="Hours Max"
-        value={filters.hoursMax}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            hoursMax: e.target.value
-          })
-        }
-      />
-    </div>
-
-    <select
-      className="sort-select"
-      value={sortMode}
-      onChange={(e) => setSortMode(e.target.value)}
-    >
-      <option value="newest">Sort</option>
-      <option value="price-low">Price Low → High</option>
-      <option value="price-high">Price High → Low</option>
-      <option value="hours-low">Hours Low → High</option>
-      <option value="hours-high">Hours High → Low</option>
-      <option value="year-new">Year Newest</option>
-      <option value="year-old">Year Oldest</option>
-    </select>
-
-    <button
-      type="button"
-      className="clear-btn"
-      onClick={() =>
-        setFilters({
-          yearMin: "",
-          yearMax: "",
-          priceMin: "",
-          priceMax: "",
-          hoursMin: "",
-          hoursMax: ""
-        })
-      }
-    >
-      CLEAR
-    </button>
-  </div>
 </div>
 
 <div className="browse-board-toolbar">
