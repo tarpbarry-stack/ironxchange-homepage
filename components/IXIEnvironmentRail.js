@@ -68,4 +68,215 @@ export default function IXIEnvironmentRail({
       return null;
     }
 
-    if (!available && railMode !== "
+    if (!available) {
+      return null;
+    }
+
+    return item.label;
+  }
+
+  return (
+    <section
+      className={`ixi-environment-rail mode-${railMode} ${className}`}
+      onMouseEnter={() => {
+        if (railMode === "ghost") {
+          setTimeout(() => {
+            setRailMode(current =>
+              current === "ghost" ? "discover" : current
+            );
+          }, 120);
+        }
+      }}
+      onMouseLeave={() => {
+        if (railMode === "discover") {
+          setTimeout(() => {
+            setRailMode(current =>
+              current === "discover" ? "ghost" : current
+            );
+          }, 220);
+        }
+      }}
+    >
+      {RAIL_ITEMS.map(item => (
+        <a
+          key={item.label}
+          href={item.href}
+          className={`ixi-environment-link state-${getRailItemState(item)} ${
+            item.postFree ? "post-free" : ""
+          }`}
+        >
+          {renderRailLabel(item) ? (
+            renderRailLabel(item)
+          ) : (
+            <span
+              className="ixi-env-dash"
+              style={{ width: `${getDashWidth(item.label)}px` }}
+            />
+          )}
+        </a>
+      ))}
+
+      <button
+        type="button"
+        className={`ixi-power-switch ${railMode !== "ghost" ? "active" : ""}`}
+        onClick={cycleRailMode}
+        aria-label="Toggle environment rail"
+        title="IXI Environment Rail"
+      />
+
+      <style jsx>{`
+        .ixi-environment-rail {
+          width: 100%;
+          min-height: 22px;
+          margin: 0 auto 22px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+
+          position: relative;
+        }
+
+        .ixi-environment-link {
+          color: rgba(255,255,255,.075);
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .9px;
+          text-transform: uppercase;
+
+          white-space: nowrap;
+
+          transition:
+            color .28s ease,
+            opacity .28s ease,
+            text-shadow .28s ease,
+            filter .28s ease;
+        }
+
+        .ixi-environment-link:hover {
+          color: rgba(255,255,255,.32);
+          text-shadow: none;
+        }
+
+        .ixi-environment-link.state-available {
+          color: rgba(255,255,255,.20);
+        }
+
+        .ixi-environment-link.state-unlocked {
+          color: rgba(0,194,255,.62);
+        }
+
+        .ixi-environment-link.state-active {
+          color: rgba(255,196,0,.86);
+        }
+
+        .ixi-environment-link.state-locked {
+          color: rgba(255,255,255,.08);
+        }
+
+        .ixi-environment-rail.mode-discover .ixi-environment-link {
+          color: rgba(255,255,255,.22);
+        }
+
+        .ixi-environment-rail.mode-locked .ixi-environment-link {
+          color: rgba(255,255,255,.42);
+        }
+
+        .ixi-environment-link.post-free {
+          color: rgba(255,196,0,.36);
+        }
+
+        .ixi-environment-rail.mode-discover .ixi-environment-link.post-free {
+          color: rgba(255,196,0,.54);
+        }
+
+        .ixi-environment-rail.mode-locked .ixi-environment-link.post-free,
+        .ixi-environment-link.post-free:hover {
+          color: rgba(255,196,0,.72);
+          text-shadow: none;
+        }
+
+        .ixi-env-dash {
+          display: block;
+          height: 4px;
+          border-radius: 2px;
+          background: rgba(255,255,255,.10);
+        }
+
+        .ixi-power-switch {
+          width: 18px;
+          height: 4px;
+
+          border: 0;
+          border-radius: 2px;
+
+          background: rgba(255,255,255,.18);
+
+          padding: 0;
+          cursor: pointer;
+
+          position: absolute;
+          right: 0;
+          bottom: -10px;
+
+          z-index: 10;
+        }
+
+        .ixi-power-switch::before {
+          content: "";
+          position: absolute;
+
+          left: -10px;
+          right: -10px;
+          top: -8px;
+          bottom: -8px;
+        }
+
+        .ixi-power-switch.active {
+          background: rgba(255,196,0,.95);
+          box-shadow: 0 0 8px rgba(255,196,0,.42);
+        }
+
+        @media (max-width: 850px) {
+          .ixi-environment-rail {
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            justify-content: flex-start;
+            gap: 22px;
+
+            padding-bottom: 6px;
+
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          .ixi-environment-rail::-webkit-scrollbar {
+            display: none;
+          }
+
+          .ixi-power-switch {
+            position: sticky;
+            right: 0;
+            bottom: auto;
+            flex: 0 0 18px;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+          
