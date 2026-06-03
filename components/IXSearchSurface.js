@@ -352,12 +352,23 @@ const [panelLit, setPanelLit] = useState(false);
 
   font-size: 12px;
   font-weight: 800;
+
+  opacity: .35;
+transition: opacity .18s ease;
+}
+
+.ix-search-surface.lit .ix-search-line input {
+  opacity: 1;
 }
 
 .dash-control {
   line-height: 22px;
 
   color: transparent;
+transition:
+  color .18s ease,
+  border-color .18s ease,
+  opacity .18s ease;
 
   cursor: pointer;
 
@@ -369,6 +380,10 @@ const [panelLit, setPanelLit] = useState(false);
   font-weight: 950;
   letter-spacing: .35px;
   text-transform: uppercase;
+}
+
+.ix-search-surface.lit .dash-control {
+  color: rgba(255,255,255,.66);
 }
 
 .dash-control::-ms-expand {
@@ -406,6 +421,10 @@ const [panelLit, setPanelLit] = useState(false);
 
 .dash-secondary::placeholder {
   color: transparent;
+}
+
+.ix-search-surface.lit .dash-secondary::placeholder {
+  color: rgba(255,255,255,.42);
 }
 
 .dash-secondary:hover::placeholder,
