@@ -203,6 +203,32 @@ setIxiCardState(remoteIxiState);
       const matchesSearch =
         !q || searchableText.includes(q);
 
+    const itemCategory =
+  String(item.type || item.category || "")
+    .toUpperCase();
+
+const itemMake =
+  String(item.make || "")
+    .toUpperCase();
+
+const itemModel =
+  String(item.model || "")
+    .toUpperCase();
+
+const matchesCategory =
+  workspaceFilters.category === "ALL CATEGORIES" ||
+  itemCategory === String(workspaceFilters.category).toUpperCase();
+
+const matchesMake =
+  workspaceFilters.make === "ALL MAKES" ||
+  itemMake === String(workspaceFilters.make).toUpperCase();
+
+const matchesModel =
+  workspaceFilters.model === "ALL MODELS" ||
+  itemModel === String(workspaceFilters.model).toUpperCase();
+     
+const matchesModel =
+  workspaceFilters.model
      const matchesIxiColor =
   ixiColorFilters.length === 0 ||
   ixiColorFilters.includes(ixState.color);
@@ -225,6 +251,9 @@ const matchesIxiOutline =
 
 return (
   matchesSearch &&
+  matchesCategory &&
+  matchesMake &&
+  matchesModel &&
   matchesWorkspaceRanges &&
   matchesIxiColor &&
   matchesIxiOutline
