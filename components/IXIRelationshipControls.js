@@ -13,11 +13,21 @@ const COLOR_CONTROLS = [
 
 const OUTLINE_CONTROLS = [1, 3, 5];
 
+function isRealColor(color) {
+  return color && color !== "none";
+}
+
+function isRealOutline(outline) {
+  return Number(outline) > 1;
+}
+
 function getExistingColors(ixiCardState = {}) {
   const colors = new Set();
 
   Object.values(ixiCardState || {}).forEach(state => {
-    if (state?.color) colors.add(state.color);
+    if (isRealColor(state?.color)) {
+      colors.add(state.color);
+    }
   });
 
   return colors;
@@ -27,10 +37,8 @@ function getExistingOutlines(ixiCardState = {}) {
   const outlines = new Set();
 
   Object.values(ixiCardState || {}).forEach(state => {
-    const outlineValue = Number(state?.outline);
-
-    if (outlineValue > 1) {
-      outlines.add(String(outlineValue));
+    if (isRealOutline(state?.outline)) {
+      outlines.add(String(state.outline));
     }
   });
 
@@ -39,31 +47,24 @@ function getExistingOutlines(ixiCardState = {}) {
 
 export default function IXIRelationshipControls({
   ixiCardState = {},
-
   activeColors = [],
   onToggleColor = () => {},
-
   activeOutline = "all",
   onToggleOutline = () => {},
-
   className = ""
 }) {
+  const [railRevealed, setRailRevealed] = useState(false);
 
-  const [railRevealed, setRailRevealed] =
-  useState(false);
-
-  function toggleRailReveal() {
-  setRailRevealed(current => !current);
-}
-  
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
-  const hasAnyRelationship =
-  Object.values(ixiCardState || {}).some(state =>
-    state?.color ||
-    state?.outline
+  const hasAnyRelationship = Object.values(ixiCardState || {}).some(state =>
+    isRealColor(state?.color) || isRealOutline(state?.outline)
   );
+
+  function toggleRailReveal() {
+    setRailRevealed(current => !current);
+  }
 
   function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
@@ -77,127 +78,123 @@ export default function IXIRelationshipControls({
     return "dead";
   }
 
-function handleOutlineClick(outline) {
-  if (!activeColors.includes("none")) {
-    onToggleColor("none");
+  function handleOutlineClick(outline) {
+    if (!activeColors.includes("none")) {
+      onToggleColor("none");
+    }
+
+    onToggleOutline(outline);
   }
 
-  onToggleOutline(outline);
-}
-  
   return (
-
-  <div
-    className={`ixi-relationship-shell ${
-      railRevealed ? "revealed" : ""
-    } ${className}`}
-  >
-
-    <div className="ixi-relationship-head">
-
-      <span>IXI Machine Controls™</span>
-
-      <button
-        type="button"
-        className="ixi-relationship-power"
-        onClick={toggleRailReveal}
-        aria-label="Toggle relationship controls"
-      />
-
-    </div>
-  <div className="ixi-relationship-controls">
-      {COLOR_CONTROLS.map(color => (
-        <button
-          key={color}
-          type="button"
-          className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-          onClick={() => onToggleColor(color)}
-          aria-label={`Filter ${color}`}
-        />
-      ))}
-
-      {OUTLINE_CONTROLS.map(outline => (
-        <button
-          key={outline}
-          type="button"
-          className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
-          onClick={() => handleOutlineClick(outline)}
-          aria-label={`Filter outline ${outline}`}
-        />
-      ))}
-</div>
-
-        {hasAnyRelationship && (
-  <div className="ixi-mobile-nav-row">
-    <a
-      href="/browse"
-      className="ixi-mobile-nav-link"
+    <div
+      className={`ixi-relationship-shell ${
+        railRevealed ? "revealed" : ""
+      } ${className}`}
     >
-      IXI MARKETPLACE
-    </a>
+      <div className="ixi-relationship-head">
+        <span>IXI Machine Controls™</span>
 
-    <a
-      href="/theater"
-      className="ixi-mobile-nav-link"
-    >
-      IXI THEATER
-    </a>
- </div>
-)}
+        <button
+          type="button"
+          className="ixi-relationship-power"
+          onClick={toggleRailReveal}
+          aria-label="Toggle machine controls"
+        />
+      </div>
 
-<style jsx>{`
+      <div className="ixi-relationship-controls">
+        {COLOR_CONTROLS.map(color => (
+          <button
+            key={color}
+            type="button"
+            className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
+            onClick={() => onToggleColor(color)}
+            aria-label={`Filter ${color}`}
+          />
+        ))}
 
-      .ixi-relationship-head {
- font-size: 8px;
-font-weight: 950;
-letter-spacing: .65px;
+        {OUTLINE_CONTROLS.map(outline => (
+          <button
+            key={outline}
+            type="button"
+            className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
+            onClick={() => handleOutlineClick(outline)}
+            aria-label={`Filter outline ${outline}`}
+          />
+        ))}
+      </div>
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+      {hasAnyRelationship && (
+        <div className="ixi-mobile-nav-row">
+          <a href="/browse" className="ixi-mobile-nav-link">
+            IXI MARKETPLACE
+          </a>
 
-  margin: 0 auto 4px;
-}
+          <a href="/theater" className="ixi-mobile-nav-link">
+            IXI THEATER
+          </a>
+        </div>
+      )}
 
-.ixi-relationship-head span {
-  opacity: 0;
+      <style jsx>{`
+        .ixi-relationship-shell {
+          width: 600px;
+          max-width: 100%;
+          margin: 14px auto 0;
+        }
 
-  color: rgba(255,196,0,.82);
+        .ixi-relationship-head {
+          height: 10px;
 
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .65px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-  transition: opacity .18s ease;
-}
+          margin: 0 auto 4px;
+        }
 
-.ixi-relationship-shell.revealed .ixi-relationship-head span {
-  opacity: 1;
-}
+        .ixi-relationship-head span {
+          opacity: 0;
 
-.ixi-relationship-power {
-  width: 18px;
-  height: 4px;
+          color: rgba(255,196,0,.82);
 
-  border: 0;
-  border-radius: 2px;
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .65px;
 
-  background: rgba(255,255,255,.18);
+          transition: opacity .18s ease;
+        }
 
-  padding: 0;
-  cursor: pointer;
-}
+        .ixi-relationship-shell.revealed .ixi-relationship-head span {
+          opacity: 1;
+        }
 
-.ixi-relationship-shell.revealed .ixi-relationship-power {
-  background: rgba(255,196,0,.95);
+        .ixi-relationship-power {
+          width: 18px;
+          height: 4px;
 
-  box-shadow:
-    0 0 8px rgba(255,196,0,.42);
-}
+          border: 0;
+          border-radius: 2px;
+
+          background: rgba(255,255,255,.18);
+
+          padding: 0;
+          cursor: pointer;
+        }
+
+        .ixi-relationship-shell.revealed .ixi-relationship-power {
+          background: rgba(255,196,0,.95);
+
+          box-shadow:
+            0 0 8px rgba(255,196,0,.42);
+        }
+
         .ixi-relationship-controls {
           width: max-content;
           max-width: 100%;
 
+          margin: 0 auto;
           padding: 0;
 
           display: flex;
@@ -206,33 +203,30 @@ letter-spacing: .65px;
           align-items: center;
 
           gap: 14px;
-        
-      }
-
-.ixi-relationship-shell {
-  width: 600px;
-  max-width: 100%;
-
-  margin: 14px auto 0;
-}
-.ixi-relationship-controls {
-  margin: 0 auto;
-}
+        }
 
         .ixi-relationship-color,
         .ixi-relationship-outline {
-          border: 1px solid rgba(255,255,255,.045);
+          border: 1px solid rgba(255,255,255,.04);
           background: transparent;
           padding: 0;
           cursor: pointer;
 
-          opacity: .22;
+          opacity: .12;
+          filter: grayscale(1);
 
           transition:
-            opacity .14s ease,
-            box-shadow .14s ease,
-            border-color .14s ease,
-            transform .14s ease;
+            opacity .16s ease,
+            box-shadow .16s ease,
+            border-color .16s ease,
+            transform .16s ease,
+            filter .16s ease;
+        }
+
+        .ixi-relationship-shell.revealed .stage-dead {
+          opacity: .34;
+          filter: grayscale(1);
+          border-color: rgba(255,255,255,.075);
         }
 
         .ixi-relationship-color {
@@ -250,50 +244,17 @@ letter-spacing: .65px;
           margin-right: -2px;
         }
 
-        .ixi-relationship-outline.stage-dead {
-  opacity: .38;
-  background: transparent;
-  border-color: rgba(255,255,255,.055);
-  box-shadow: none;
-}
-
-.ixi-relationship-outline.stage-dead::after {
-  background: rgba(255,255,255,.16);
-}
-
-.ixi-relationship-outline.stage-exists {
-  opacity: .82;
-  border-color: rgba(255,255,255,.14);
-
-  box-shadow:
-    0 0 10px rgba(255,255,255,.06);
-}
-
-.ixi-relationship-outline.stage-exists::after {
-  background: rgba(255,255,255,.58);
-}
-
-.ixi-relationship-outline.stage-selected {
-  opacity: 1;
-  border-color: rgba(255,255,255,.18);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.06),
-    0 0 10px rgba(255,255,255,.10);
-}
-
-.ixi-relationship-outline.stage-selected::after {
-  background: rgba(255,255,255,.76);
-}
-        
-
         .ixi-relationship-outline::after {
           content: "";
           position: absolute;
           left: 50%;
           top: 50%;
+
           width: 15px;
+
           transform: translate(-50%, -50%);
-          background: rgba(255,255,255,.22);
+
+          background: rgba(255,255,255,.18);
         }
 
         .outline-1::after {
@@ -308,44 +269,78 @@ letter-spacing: .65px;
           height: 5px;
         }
 
-       ..stage-dead {
-  opacity: .16;
+        .stage-dead {
+          background: transparent !important;
+          box-shadow: none;
+        }
 
-  background: transparent !important;
+        .ixi-relationship-color.stage-dead {
+          background: transparent !important;
+        }
 
-  border-color: rgba(255,255,255,.04);
+        .stage-exists {
+          opacity: .82;
+          filter: grayscale(.05);
 
-  box-shadow: none;
-
-  filter: grayscale(1);
-}
-
-.ixi-relationship-color.stage-dead {
-  background: transparent !important;
-
-  border: 1px solid rgba(255,255,255,.04);
-}
-
-       .stage-exists {
-  opacity: .82;
-  filter: grayscale(.05);
-
-  box-shadow:
-    0 0 10px rgba(255,255,255,.06);
-}
+          box-shadow:
+            0 0 10px rgba(255,255,255,.06);
+        }
 
         .stage-selected {
-  opacity: 1;
-  filter: grayscale(0);
+          opacity: 1;
+          filter: grayscale(0);
 
-  transform: translateY(-1px);
+          transform: translateY(-1px);
 
-  border-color: rgba(255,196,0,.46);
+          border-color: rgba(255,196,0,.46);
 
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.22),
-    0 0 18px rgba(255,196,0,.28);
-}
+          box-shadow:
+            0 0 0 1px rgba(255,196,0,.22),
+            0 0 18px rgba(255,196,0,.28);
+        }
+
+        .ixi-relationship-outline.stage-dead {
+          opacity: .16;
+          background: transparent;
+          border-color: rgba(255,255,255,.04);
+          box-shadow: none;
+        }
+
+        .ixi-relationship-shell.revealed
+        .ixi-relationship-outline.stage-dead {
+          opacity: .34;
+          border-color: rgba(255,255,255,.075);
+        }
+
+        .ixi-relationship-outline.stage-dead::after {
+          background: rgba(255,255,255,.14);
+        }
+
+        .ixi-relationship-outline.stage-exists {
+          opacity: .82;
+          border-color: rgba(255,255,255,.14);
+
+          box-shadow:
+            0 0 10px rgba(255,255,255,.06);
+        }
+
+        .ixi-relationship-outline.stage-exists::after {
+          background: rgba(255,255,255,.58);
+        }
+
+        .ixi-relationship-outline.stage-selected {
+          opacity: 1;
+
+          border-color: rgba(255,196,0,.46);
+
+          box-shadow:
+            0 0 0 1px rgba(255,196,0,.22),
+            0 0 18px rgba(255,196,0,.28);
+        }
+
+        .ixi-relationship-outline.stage-selected::after {
+          background: rgba(255,255,255,.82);
+        }
 
         .ixi-relationship-color:hover,
         .ixi-relationship-outline:hover {
@@ -384,74 +379,47 @@ letter-spacing: .65px;
           background: rgba(249,133,18,.82);
         }
 
-        .ixi-rail-link {
-  color: rgba(0,0,0,0);
-
-  text-decoration: none;
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .55px;
-
-  white-space: nowrap;
-
-  pointer-events: none;
-
-  transition:
-    color .14s ease,
-    opacity .14s ease,
-    text-shadow .14s ease;
-}
-
-.ixi-rail-link.awake {
-  color: rgba(0,194,255,.72);
-
-  pointer-events: auto;
-}
-
-.ixi-rail-link.awake:hover {
-  color: rgba(0,194,255,.95);
-
-  text-shadow:
-    0 0 8px rgba(0,194,255,.22);
-}
         .ixi-mobile-nav-row {
-  display: none;
-}
+          display: none;
+        }
 
-.ixi-mobile-nav-link {
-  color: rgba(0,194,255,.72);
-  text-decoration: none;
+        .ixi-mobile-nav-link {
+          color: rgba(0,194,255,.72);
+          text-decoration: none;
 
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .55px;
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .55px;
 
-  white-space: nowrap;
-}
+          white-space: nowrap;
+        }
 
-.ixi-mobile-nav-link:hover {
-  color: rgba(0,194,255,.95);
-  text-shadow: 0 0 8px rgba(0,194,255,.22);
-}
+        .ixi-mobile-nav-link:hover {
+          color: rgba(0,194,255,.95);
+          text-shadow: 0 0 8px rgba(0,194,255,.22);
+        }
+
         @media (max-width: 850px) {
+          .ixi-relationship-shell {
+            width: 100%;
+            margin: 14px auto 0;
+          }
+
           .ixi-relationship-controls {
             margin: 14px auto 0;
             gap: 14px;
           }
 
           .ixi-mobile-nav-row {
-  width: 100%;
-  margin-top: 10px;
+            width: 100%;
+            margin-top: 10px;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-gap: 28px;
-  
-}
-          
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            gap: 28px;
+          }
         }
       `}</style>
     </div>
