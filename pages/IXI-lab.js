@@ -2,6 +2,7 @@ import { useState } from "react";
 import Head from "next/head";
 
 import IXSearchSurface from "../components/IXSearchSurface";
+import IXIRelationshipControls from "../components/IXIRelationshipControls";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -110,7 +111,32 @@ const [filters, setFilters] = useState({
 });
 
 const [sortMode, setSortMode] = useState("custom");
-  
+
+const [ixiColorFilters, setIxiColorFilters] = useState([]);
+const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
+
+const demoIxiCardState = {
+  demo1: { color: "green", outline: 1 },
+  demo2: { color: "yellow", outline: 3 },
+  demo3: { color: "red", outline: 5 },
+  demo4: { color: "cyan", outline: 1 }
+};
+
+function toggleColorFilter(color) {
+  setIxiColorFilters(current =>
+    current.includes(color)
+      ? current.filter(item => item !== color)
+      : [...current, color]
+  );
+}
+
+function toggleOutlineFilter(outline) {
+  setIxiOutlineFilter(current =>
+    String(current) === String(outline)
+      ? "all"
+      : String(outline)
+  );
+}  
   return (
     <>
       <Head>
@@ -173,6 +199,14 @@ onMouseLeave={() => {
     sortMode={sortMode}
     setSortMode={setSortMode}
   />
+
+      <IXIRelationshipControls
+  ixiCardState={demoIxiCardState}
+  activeColors={ixiColorFilters}
+  onToggleColor={toggleColorFilter}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+/>
 
 </section>
         </section>
