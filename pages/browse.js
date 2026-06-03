@@ -803,13 +803,11 @@ function sendListingToBack(listing) {
 }
 
 .browse-search-shell {
-  max-width: 690px;
-
-  margin: 18px auto 0;
-
-  padding: 7px;
-
+  max-width: 700px;
+  margin: 24px auto 0;
+  padding: 18px;
   background:
+  
     linear-gradient(
       180deg,
       rgba(255,196,0,.035),
