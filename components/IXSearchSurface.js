@@ -294,12 +294,30 @@ const [panelLit, setPanelLit] = useState(false);
   cursor: pointer;
 }
 
+.desktop-panel-power,
+.ixi-relationship-power {
+  position: relative;
+}
+
+.desktop-panel-power::before,
+.ixi-relationship-power::before {
+  content: "";
+
+  position: absolute;
+  
+  left: -10px;
+  right: -10px;
+  top: -8px;
+  bottom: -8px;
+}
+
 .ix-search-surface.lit .desktop-panel-power {
   background: rgba(255,196,0,.95);
 
   box-shadow:
     0 0 8px rgba(255,196,0,.42);
 }
+
 .ix-search-primary-row {
   width: 100%;
   display: grid;
