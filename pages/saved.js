@@ -228,15 +228,16 @@ const matchesModel =
   itemModel === String(workspaceFilters.model).toUpperCase();
      
 const matchesModel =
-  workspaceFilters.model
-     const matchesIxiColor =
+  workspaceFilters.model === "ALL MODELS" ||
+  itemModel === String(workspaceFilters.model).toUpperCase();
+
+const matchesIxiColor =
   ixiColorFilters.length === 0 ||
   ixiColorFilters.includes(ixState.color);
 
-     const yearValue = Number(item.year || item.publicData?.year || 0);
+const yearValue = Number(item.year || item.publicData?.year || 0);
 const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
 const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
-
 const matchesWorkspaceRanges =
   (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
   (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
