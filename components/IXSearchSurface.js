@@ -16,6 +16,33 @@ function taxonomyKey(value) {
     .replace(/\s+/g, " ");
 }
 
+function getListingCategory(item = {}) {
+  return (
+    item.category ||
+    item.type ||
+    item.publicData?.category ||
+    item.attributes?.publicData?.category ||
+    ""
+  );
+}
+
+function getListingMake(item = {}) {
+  return (
+    item.make ||
+    item.publicData?.make ||
+    item.attributes?.publicData?.make ||
+    ""
+  );
+}
+
+function getListingModel(item = {}) {
+  return (
+    item.model ||
+    item.publicData?.model ||
+    item.attributes?.publicData?.model ||
+    ""
+  );
+}
 export default function IXSearchSurface({
   searchQuery = "",
   setSearchQuery = () => {},
@@ -23,7 +50,8 @@ export default function IXSearchSurface({
   setFilters = () => {},
   sortMode = "custom",
   setSortMode = () => {},
-  onClear = null
+  onClear = null,
+  listings = []
 }) {
 
   const sortOptions = [
@@ -37,9 +65,16 @@ export default function IXSearchSurface({
     { value: "year-old", label: "YEAR ↑" }
   ];
 
+const listingCategoryKeys = new Set(
+  listings.map(item => taxonomyKey(getListingCategory(item))).filter(Boolean)
+);
+
 const categories = [
   "ALL CATEGORIES",
-  ...getV12CategoryNames()
+  ...getV12CategoryNames().filter(category =>
+    listingCategoryKeys.size === 0 ||
+    listingCategoryKeys.has(taxonomyKey(category))
+  )
 ];
 
 const selectedCategory =
@@ -60,25 +95,49 @@ if (typeof window !== "undefined") {
   console.log("IX SEARCH MODELS:", getV12Models(selectedCategory, selectedMake));
 }
   
+const makeKeysInSelectedCategory = new Set(
+  listings
+    .filter(item =>
+      selectedCategory === "ALL CATEGORIES" ||
+      taxonomyKey(getListingCategory(item)) === taxonomyKey(selectedCategory)
+    )
+    .map(item => taxonomyKey(getListingMake(item)))
+    .filter(Boolean)
+);
+
 const availableMakes =
   selectedCategory === "ALL CATEGORIES"
     ? ["ALL MAKES"]
     : [
         "ALL MAKES",
-        ...getV12Makes(selectedCategory)
+        ...getV12Makes(selectedCategory).filter(make =>
+          makeKeysInSelectedCategory.size === 0 ||
+          makeKeysInSelectedCategory.has(taxonomyKey(make))
+        )
       ];
+
+const modelKeysInSelectedMake = new Set(
+  listings
+    .filter(item =>
+      (selectedCategory === "ALL CATEGORIES" ||
+        taxonomyKey(getListingCategory(item)) === taxonomyKey(selectedCategory)) &&
+      (selectedMake === "ALL MAKES" ||
+        taxonomyKey(getListingMake(item)) === taxonomyKey(selectedMake))
+    )
+    .map(item => taxonomyKey(getListingModel(item)))
+    .filter(Boolean)
+);
 
 const availableModels =
   selectedMake === "ALL MAKES"
     ? ["ALL MODELS"]
     : [
         "ALL MODELS",
-        ...getV12Models(
-          selectedCategory,
-          selectedMake
+        ...getV12Models(selectedCategory, selectedMake).filter(model =>
+          modelKeysInSelectedMake.size === 0 ||
+          modelKeysInSelectedMake.has(taxonomyKey(model))
         )
       ];
-
 const [panelLit, setPanelLit] = useState(false);
 
   
