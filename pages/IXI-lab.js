@@ -10,7 +10,8 @@ const RAIL_ITEMS = [
   { label: "IXI THEATER", href: "/theater" },
   { label: "DASHBOARD", href: "/account" },
   { label: "INVENTORY", href: "/account/my-listings" },
-  { label: "LAUNCH", href: "/launch" }
+  { label: "LAUNCH", href: "/launch" },
+  { label: "POST FREE", href: "/post", postFree: true }
 ];
 
 export default function IXILab() {
@@ -27,60 +28,38 @@ export default function IXILab() {
   return (
     <>
       <Head>
-        <title>IXI Rail Lab | IronXchange</title>
+        <title>IXI Lab | IronXchange</title>
       </Head>
 
       <Navbar />
 
       <main>
         <section className="lab-shell">
-          <section className="workspace-head">
-            <div>
-              <span className="eyebrow">IXI WORKSPACE</span>
-              <h1>IXI Rail Lab</h1>
-            </div>
-
-            <div className="count-pill">
-              7 / 7
-            </div>
-          </section>
-
-          <section className={`ixi-top-rail mode-${railMode}`}>
-            <button
-              type="button"
-              className="ixi-rail-power"
-              onClick={cycleRailMode}
-              aria-label="Toggle rail lights"
-              title={`Rail mode: ${railMode}`}
-            />
-
+          <section className={`ixi-page-indicator mode-${railMode}`}>
             {RAIL_ITEMS.map(item => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`ixi-rail-item ${item.active ? "active" : ""}`}
-                aria-label={item.label}
+                className={`ixi-page-indicator-link ${
+                  item.active ? "active" : ""
+                } ${item.postFree ? "post-free" : ""}`}
               >
-                <span>{item.label}</span>
+                {item.label}
               </a>
             ))}
 
-            <a
-              href="/post"
-              className="ixi-post-free"
-            >
-              <span>POST FREE</span>
-            </a>
+            <button
+              type="button"
+              className="ixi-indicator-power"
+              onClick={cycleRailMode}
+              aria-label="Toggle indicator lights"
+              title={`Indicator mode: ${railMode}`}
+            />
           </section>
 
           <section className="lab-panel">
-            <p>
-              Click the yellow dash to cycle OFF → DIM → BRIGHT.
-            </p>
-
-            <p>
-              OFF shows word-length dashes. DIM/BRIGHT reveals labels and removes the dash under each label.
-            </p>
+            <p>Header replacement test.</p>
+            <p>OFF = ghost indicators. DIM/BRIGHT = panel lights. POST FREE stays special.</p>
           </section>
         </section>
       </main>
@@ -99,8 +78,8 @@ export default function IXILab() {
           min-height: 72vh;
           padding: 14px 5% 58px;
           background:
-            radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
-            linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+            radial-gradient(circle at 50% 0%, rgba(255,196,0,.045), transparent 34%),
+            linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
             #0b0b0b;
         }
 
@@ -109,177 +88,104 @@ export default function IXILab() {
           margin: 0 auto;
         }
 
-        .workspace-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 18px;
-          margin: 0 auto 14px;
-        }
+        .ixi-page-indicator {
+          width: 100%;
+          min-height: 22px;
 
-        .eyebrow {
-          display: inline-block;
-          margin-bottom: 8px;
-          color: rgba(255,196,0,.72);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .9px;
-        }
-
-        h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 30px;
-          font-weight: 950;
-          letter-spacing: -.55px;
-        }
-
-        .count-pill {
-          min-width: 112px;
-          height: 30px;
-          padding: 0 12px;
+          margin: 0 auto 22px;
 
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
+          gap: 18px;
 
-          border: 1px solid rgba(255,196,0,.14);
-          border-radius: 999px;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.045), rgba(255,196,0,0)),
-            rgba(10,10,10,.86);
-
-          color: rgba(255,255,255,.52);
-
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .45px;
+          position: relative;
         }
 
-       .ixi-top-rail {
-  width: 100%;
-  min-height: 18px;
-
-.ixi-top-rail {
-  width: 100%;
-  min-height: 18px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin: 0 auto 26px;
-}
-        .ixi-rail-power {
-          width: 24px;
-          height: 5px;
-
-          border: 0;
-          border-radius: 2px;
-
-          background: rgba(255,196,0,.28);
-
-          padding: 0;
-          cursor: pointer;
-
-          flex: 0 0 auto;
-        }
-
-        .ixi-top-rail.mode-dim .ixi-rail-power,
-        .ixi-top-rail.mode-bright .ixi-rail-power {
-          background: rgba(255,196,0,.88);
-          box-shadow: 0 0 10px rgba(255,196,0,.24);
-        }
-
-        .ixi-rail-item,
-        .ixi-post-free {
-          height: 13px;
-
-          display: inline-flex;
-          align-items: flex-start;
-
-          color: transparent;
+        .ixi-page-indicator-link {
+          color: rgba(255,255,255,.075);
           text-decoration: none;
 
-          font-size: 7.5px;
+          font-size: 9px;
           font-weight: 950;
-          letter-spacing: .72px;
+          letter-spacing: .9px;
           text-transform: uppercase;
 
           white-space: nowrap;
 
-          border-bottom: 5px solid rgba(255,255,255,.075);
-
           transition:
             color .14s ease,
-            border-bottom-color .14s ease,
             text-shadow .14s ease,
             opacity .14s ease;
         }
 
-        .ixi-rail-item span,
-        .ixi-post-free span {
-          line-height: 8px;
+        .ixi-page-indicator-link:hover {
+          color: rgba(0,194,255,.48);
+          text-shadow: 0 0 8px rgba(0,194,255,.10);
         }
 
-        .ixi-top-rail.mode-off .ixi-rail-item,
-        .ixi-top-rail.mode-off .ixi-post-free {
-          color: transparent;
-          border-bottom-color: rgba(255,255,255,.075);
-        }
-
-        .ixi-top-rail.mode-dim .ixi-rail-item,
-        .ixi-top-rail.mode-dim .ixi-post-free {
-          color: rgba(0,194,255,.34);
-          border-bottom-color: transparent;
-        }
-
-        .ixi-top-rail.mode-bright .ixi-rail-item,
-        .ixi-top-rail.mode-bright .ixi-post-free {
-          color: rgba(0,194,255,.84);
-          border-bottom-color: transparent;
-          text-shadow: 0 0 8px rgba(0,194,255,.18);
-        }
-
-        .ixi-top-rail.mode-dim .ixi-rail-item.active {
-          color: rgba(255,196,0,.52);
-        }
-
-        .ixi-top-rail.mode-bright .ixi-rail-item.active {
-          color: rgba(255,196,0,.82);
-          text-shadow: 0 0 8px rgba(255,196,0,.18);
-        }
-
-        .ixi-rail-item:hover,
-        .ixi-post-free:hover {
-          color: rgba(0,194,255,.95);
-          border-bottom-color: transparent;
-          text-shadow: 0 0 8px rgba(0,194,255,.22);
-        }
-
-        .ixi-post-free {
-          margin-left: auto;
+        .ixi-page-indicator-link.active {
           color: rgba(255,196,0,.42);
+          text-shadow: 0 0 8px rgba(255,196,0,.08);
         }
 
-        .ixi-top-rail.mode-off .ixi-post-free {
-          color: rgba(255,255,255,.12);
-          border-bottom-color: transparent;
+        .ixi-page-indicator.mode-dim .ixi-page-indicator-link {
+          color: rgba(255,255,255,.22);
         }
 
-        .ixi-top-rail.mode-dim .ixi-post-free {
-          color: rgba(255,196,0,.38);
+        .ixi-page-indicator.mode-dim .ixi-page-indicator-link.active {
+          color: rgba(255,196,0,.62);
         }
 
-        .ixi-top-rail.mode-bright .ixi-post-free,
-        .ixi-post-free:hover {
-          color: rgba(255,196,0,.82);
-          text-shadow: 0 0 8px rgba(255,196,0,.18);
+        .ixi-page-indicator.mode-bright .ixi-page-indicator-link {
+          color: rgba(0,194,255,.64);
+          text-shadow: 0 0 8px rgba(0,194,255,.12);
+        }
+
+        .ixi-page-indicator.mode-bright .ixi-page-indicator-link.active {
+          color: rgba(255,196,0,.86);
+          text-shadow: 0 0 10px rgba(255,196,0,.20);
+        }
+
+        .ixi-page-indicator-link.post-free {
+          color: rgba(255,196,0,.36);
+        }
+
+        .ixi-page-indicator.mode-dim .ixi-page-indicator-link.post-free {
+          color: rgba(255,196,0,.54);
+        }
+
+        .ixi-page-indicator.mode-bright .ixi-page-indicator-link.post-free,
+        .ixi-page-indicator-link.post-free:hover {
+          color: rgba(255,196,0,.90);
+          text-shadow: 0 0 10px rgba(255,196,0,.22);
+        }
+
+        .ixi-indicator-power {
+          width: 24px;
+          height: 5px;
+
+          position: absolute;
+          right: 0;
+          bottom: -10px;
+
+          border: 0;
+          border-radius: 2px;
+
+          background: rgba(255,196,0,.20);
+
+          padding: 0;
+          cursor: pointer;
+        }
+
+        .ixi-page-indicator.mode-dim .ixi-indicator-power,
+        .ixi-page-indicator.mode-bright .ixi-indicator-power {
+          background: rgba(255,196,0,.86);
+          box-shadow: 0 0 10px rgba(255,196,0,.24);
         }
 
         .lab-panel {
-          margin: 26px auto 0;
+          margin: 34px auto 0;
           padding: 28px;
 
           border: 1px solid rgba(255,255,255,.06);
@@ -309,30 +215,28 @@ export default function IXILab() {
             padding: 18px 4% 48px;
           }
 
-          .workspace-head {
-            align-items: center;
-          }
-
-          h1 {
-            font-size: 24px;
-          }
-
-          .ixi-top-rail {
-            gap: 12px;
+          .ixi-page-indicator {
             overflow-x: auto;
             overflow-y: hidden;
-            padding-bottom: 4px;
+
+            justify-content: flex-start;
+            gap: 22px;
+
+            padding-bottom: 6px;
 
             scrollbar-width: none;
             -ms-overflow-style: none;
           }
 
-          .ixi-top-rail::-webkit-scrollbar {
+          .ixi-page-indicator::-webkit-scrollbar {
             display: none;
           }
 
-          .ixi-post-free {
-            margin-left: 0;
+          .ixi-indicator-power {
+            position: sticky;
+            right: 0;
+            bottom: auto;
+            flex: 0 0 24px;
           }
         }
       `}</style>
