@@ -606,14 +606,15 @@ function sendListingToBack(listing) {
 
  <div className="browse-search-shell">
 
-  <IXSearchSurface
-    searchQuery={searchQuery}
-    setSearchQuery={setSearchQuery}
-    filters={ixSearchFilters}
-    setFilters={setIxSearchFilters}
-    sortMode={sortMode}
-    setSortMode={setSortMode}
-  />
+ <IXSearchSurface
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  filters={ixSearchFilters}
+  setFilters={setIxSearchFilters}
+  sortMode={sortMode}
+  setSortMode={setSortMode}
+  listings={liveListings}
+/>
 
 <IXIRelationshipControls
   ixiCardState={ixiCardState}
