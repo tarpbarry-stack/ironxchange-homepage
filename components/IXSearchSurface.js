@@ -41,6 +41,15 @@ const selectedMake =
 const selectedModel =
   filters.model || "ALL MODELS";
 
+if (typeof window !== "undefined") {
+  console.log("IX SEARCH CATEGORY:", selectedCategory);
+  console.log("IX SEARCH MAKE:", selectedMake);
+  console.log("IX SEARCH MODEL:", selectedModel);
+  console.log("IX SEARCH ALL CATEGORIES:", getV12CategoryNames());
+  console.log("IX SEARCH MAKES:", getV12Makes(selectedCategory));
+  console.log("IX SEARCH MODELS:", getV12Models(selectedCategory, selectedMake));
+}
+  
 const availableMakes =
   selectedCategory === "ALL CATEGORIES"
     ? ["ALL MAKES"]
