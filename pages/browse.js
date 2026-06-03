@@ -3,6 +3,7 @@ import { getListingId } from "../lib/listingFormatters";
 import { captureIXEvent } from "../lib/posthog";
 
 import IXSearchSurface from "../components/IXSearchSurface";
+import IXIRelationshipControls from "../components/IXIRelationshipControls";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -584,6 +585,14 @@ function sendListingToBack(listing) {
     sortMode={sortMode}
     setSortMode={setSortMode}
   />
+
+<IXIRelationshipControls
+  ixiCardState={ixiCardState}
+  activeColors={activeColorStacks}
+  onToggleColor={toggleColorStack}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+/>
 
 </div>
 
