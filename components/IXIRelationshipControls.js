@@ -138,10 +138,10 @@ function handleOutlineClick(outline) {
     >
       IXI THEATER
     </a>
-  </div>
+ </div>
 )}
-</div>
-      <style jsx>{`
+
+<style jsx>{`
 
       .ixi-relationship-head {
   height: 10px;
