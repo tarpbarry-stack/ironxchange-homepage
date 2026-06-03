@@ -1,52 +1,314 @@
-<section
-  className={`ixi-page-indicator mode-${railMode}`}
-  onMouseEnter={() => {
-  if (railMode === "ghost") {
-    setTimeout(() => {
-      setRailMode(current =>
-        current === "ghost" ? "discover" : current
-      );
-    }, 120);
-  }
-}}
-onMouseLeave={() => {
-  if (railMode === "discover") {
-    setTimeout(() => {
-      setRailMode(current =>
-        current === "discover" ? "ghost" : current
-      );
-    }, 220);
-  }
-}}
->
-         {RAIL_ITEMS.map(item => (
-<a
-  key={item.label}
-  href={item.href}
-  className={`ixi-page-indicator-link state-${getRailItemState(item)} ${
-    item.postFree ? "post-free" : ""
-  }`}
->
-    {renderRailLabel(item) ? (
-  renderRailLabel(item)
-) : (
-  <span
-    className="ixi-env-dash"
-    style={{
-      width: `${getDashWidth(item.label)}px`
-    }}
-  />
-)}
-  </a>
-))}
+import { useState } from "react";
 
-          <button
-  type="button"
-  className={`ixi-power-switch ${
-    railMode !== "ghost" ? "active" : ""
-  }`}
-  onClick={cycleRailMode}
-  aria-label="Toggle environment rail"
-  title="IXI Environment Rail"
-/>
-          </section>
+const RAIL_ITEMS = [
+  {
+    label: "IXI MARKETPLACE",
+    href: "/browse",
+    access: "always"
+  },
+  {
+    label: "IXI WORKSPACE",
+    href: "/saved",
+    access: "relationship"
+  },
+  {
+    label: "IXI THEATER",
+    href: "/theater",
+    access: "relationship"
+  },
+  {
+    label: "DASHBOARD",
+    href: "/account",
+    access: "account"
+  },
+  {
+    label: "INVENTORY",
+    href: "/account/my-listings",
+    access: "seller"
+  },
+  {
+    label: "LAUNCH",
+    href: "/launch",
+    access: "seller"
+  },
+  {
+    label: "POST FREE",
+    href: "/post",
+    access: "always",
+    postFree: true
+  }
+];
+
+function getDashWidth(label) {
+  const widths = {
+    "IXI WORKSPACE": 78,
+    "IXI THEATER": 68,
+    DASHBOARD: 58,
+    INVENTORY: 58,
+    LAUNCH: 42
+  };
+
+  return widths[label] || 60;
+}
+
+export default function IXIEnvironmentRail({
+  activeEnvironment = "IXI MARKETPLACE",
+  hasAccount = false,
+  hasRelationship = false,
+  hasInventory = false,
+  className = ""
+}) {
+  const [railMode, setRailMode] = useState("ghost");
+
+  function cycleRailMode() {
+    setRailMode(current => {
+      if (current === "ghost") return "discover";
+      if (current === "discover") return "locked";
+      return "ghost";
+    });
+  }
+
+  function canAccess(item) {
+    if (item.access === "always") return true;
+    if (item.access === "account") return hasAccount;
+    if (item.access === "relationship") return hasRelationship;
+    if (item.access === "seller") return hasInventory;
+
+    return false;
+  }
+
+  function isUnlockedEnvironment(item) {
+    return (
+      hasRelationship &&
+      (
+        item.label === "IXI WORKSPACE" ||
+        item.label === "IXI THEATER"
+      )
+    );
+  }
+
+  function getRailItemState(item) {
+    if (item.label === activeEnvironment) return "active";
+    if (isUnlockedEnvironment(item)) return "unlocked";
+    if (canAccess(item)) return "available";
+
+    return "locked";
+  }
+
+  function shouldRenderDash(item) {
+    const available = canAccess(item);
+
+    if (item.access === "always") return false;
+
+    if (railMode === "ghost") return true;
+
+    if (!available) return true;
+
+    return false;
+  }
+
+  function renderRailContent(item) {
+    if (shouldRenderDash(item)) {
+      return (
+        <span
+          className="ixi-env-dash"
+          style={{
+            width: `${getDashWidth(item.label)}px`
+          }}
+        />
+      );
+    }
+
+    return item.label;
+  }
+
+  return (
+    <section
+      className={`ixi-environment-rail mode-${railMode} ${className}`}
+      onMouseEnter={() => {
+        if (railMode === "ghost") {
+          setTimeout(() => {
+            setRailMode(current =>
+              current === "ghost" ? "discover" : current
+            );
+          }, 120);
+        }
+      }}
+      onMouseLeave={() => {
+        if (railMode === "discover") {
+          setTimeout(() => {
+            setRailMode(current =>
+              current === "discover" ? "ghost" : current
+            );
+          }, 220);
+        }
+      }}
+    >
+      {RAIL_ITEMS.map(item => (
+        <a
+          key={item.label}
+          href={item.href}
+          className={`ixi-environment-link state-${getRailItemState(item)} ${
+            item.postFree ? "post-free" : ""
+          }`}
+        >
+          {renderRailContent(item)}
+        </a>
+      ))}
+
+      <button
+        type="button"
+        className={`ixi-power-switch ${
+          railMode !== "ghost" ? "active" : ""
+        }`}
+        onClick={cycleRailMode}
+        aria-label="Toggle environment rail"
+        title="IXI Environment Rail"
+      />
+
+      <style jsx>{`
+        .ixi-environment-rail {
+          width: 100%;
+          min-height: 22px;
+
+          margin: 0 auto 22px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+
+          position: relative;
+        }
+
+        .ixi-environment-link {
+          color: rgba(255,255,255,.075);
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .9px;
+          text-transform: uppercase;
+
+          white-space: nowrap;
+
+          transition:
+            color .28s ease,
+            opacity .28s ease,
+            text-shadow .28s ease,
+            filter .28s ease;
+        }
+
+        .ixi-environment-link:hover {
+          color: rgba(255,255,255,.32);
+          text-shadow: none;
+        }
+
+        .ixi-environment-link.state-available {
+          color: rgba(255,255,255,.20);
+        }
+
+        .ixi-environment-link.state-unlocked {
+          color: rgba(0,194,255,.62);
+        }
+
+        .ixi-environment-link.state-active {
+          color: rgba(255,196,0,.86);
+        }
+
+        .ixi-environment-link.state-locked {
+          color: rgba(255,255,255,.08);
+        }
+
+        .ixi-environment-link.post-free {
+          color: rgba(255,196,0,.36);
+        }
+
+        .ixi-environment-rail.mode-discover
+        .ixi-environment-link.post-free {
+          color: rgba(255,196,0,.54);
+        }
+
+        .ixi-environment-rail.mode-locked
+        .ixi-environment-link.post-free,
+        .ixi-environment-link.post-free:hover {
+          color: rgba(255,196,0,.72);
+          text-shadow: none;
+        }
+
+        .ixi-env-dash {
+          display: block;
+
+          height: 4px;
+
+          border-radius: 2px;
+
+          background: rgba(255,255,255,.10);
+        }
+
+        .ixi-power-switch {
+          width: 18px;
+          height: 4px;
+
+          border: 0;
+          border-radius: 2px;
+
+          background: rgba(255,255,255,.18);
+
+          padding: 0;
+          cursor: pointer;
+
+          position: absolute;
+          right: 0;
+          bottom: -10px;
+
+          z-index: 10;
+        }
+
+        .ixi-power-switch::before {
+          content: "";
+
+          position: absolute;
+
+          left: -10px;
+          right: -10px;
+          top: -8px;
+          bottom: -8px;
+        }
+
+        .ixi-power-switch.active {
+          background: rgba(255,196,0,.95);
+
+          box-shadow:
+            0 0 8px rgba(255,196,0,.42);
+        }
+
+        @media (max-width: 850px) {
+          .ixi-environment-rail {
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            justify-content: flex-start;
+            gap: 22px;
+
+            padding-bottom: 6px;
+
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          .ixi-environment-rail::-webkit-scrollbar {
+            display: none;
+          }
+
+          .ixi-power-switch {
+            position: sticky;
+            right: 0;
+            bottom: auto;
+            flex: 0 0 18px;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
