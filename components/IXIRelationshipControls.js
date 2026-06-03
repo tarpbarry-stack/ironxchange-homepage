@@ -118,7 +118,6 @@ function handleOutlineClick(outline) {
           width: max-content;
           max-width: 100%;
 
-          margin: 18px auto 0;
           padding: 0;
 
           display: flex;
@@ -127,7 +126,19 @@ function handleOutlineClick(outline) {
           align-items: center;
 
           gap: 14px;
-        }
+        
+      }
+
+.ixi-relationship-shell {
+  width: max-content;
+  max-width: 100%;
+
+  margin: 18px auto 0;
+}
+
+.ixi-relationship-controls {
+  margin: 0 auto;
+}
 
         .ixi-relationship-color,
         .ixi-relationship-outline {
