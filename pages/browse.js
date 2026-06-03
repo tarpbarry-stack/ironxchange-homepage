@@ -538,7 +538,17 @@ function sendListingToBack(listing) {
     <Navbar />
       
    <section className="search-section">
-    <IXIEnvironmentRail />
+  <IXIEnvironmentRail
+  activeEnvironment="IXI MARKETPLACE"
+  hasAccount={loggedIn}
+  hasRelationship={
+    Object.values(ixiCardState || {}).some(state =>
+      (state?.color && state.color !== "none") ||
+      Number(state?.outline) > 1
+    )
+  }
+  hasInventory={false}
+/>
 
     <div className="browse-search-shell">  
   <div className="search-top-row">
