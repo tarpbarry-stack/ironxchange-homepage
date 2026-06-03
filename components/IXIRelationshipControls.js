@@ -73,12 +73,6 @@ function handleOutlineClick(outline) {
   
   return (
     <div className={`ixi-relationship-controls ${className}`}>
-    <a
-  href="/saved"
-  className={`ixi-rail-link ${hasAnyRelationship ? "awake" : ""}`}
->
-  IXI WORKSPACE
-</a>
       {COLOR_CONTROLS.map(color => (
         <button
           key={color}
@@ -102,10 +96,10 @@ function handleOutlineClick(outline) {
         {hasAnyRelationship && (
   <div className="ixi-mobile-nav-row">
     <a
-      href="/saved"
+      href="/browse"
       className="ixi-mobile-nav-link"
     >
-      IXI WORKSPACE
+      IXI MARKETPLACE
     </a>
 
     <a
@@ -353,8 +347,11 @@ function handleOutlineClick(outline) {
   margin-top: 10px;
 
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  
+gap: 28px;
+  
 }
           
         }
