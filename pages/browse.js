@@ -14,6 +14,7 @@ import {
   getV12Models
 } from "../lib/v12TaxonomyAdapter";
 
+import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Head from "next/head";
@@ -537,12 +538,7 @@ function sendListingToBack(listing) {
     <Navbar />
       
    <section className="search-section">
-  <h1>IronXchange Equipment Marketplace</h1>
-
-  <p>
-    Search heavy equipment for sale from owners,
-    dealers, and fleet operators.
-  </p>
+    <IXIEnvironmentRail />
 
     <div className="browse-search-shell">  
   <div className="search-top-row">
