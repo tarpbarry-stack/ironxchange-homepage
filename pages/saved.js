@@ -63,6 +63,7 @@ const [activeStackLayouts, setActiveStackLayouts] = useState({
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
+const [topRailMode, setTopRailMode] = useState("off");
 
 const [armedDestination, setArmedDestination] = useState("");
   
@@ -700,7 +701,15 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
         : [...boardIds, id]
     };
   });
-}  
+} 
+
+function cycleTopRailMode() {
+  setTopRailMode(current => {
+    if (current === "off") return "dim";
+    if (current === "dim") return "bright";
+    return "off";
+  });
+}
   
   return (
     <>
@@ -716,6 +725,25 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
       <Navbar />
 
       <main>
+<section className={`ixi-top-function-rail mode-${topRailMode}`}>
+  <button
+    type="button"
+    className="ixi-top-power-dash"
+    onClick={cycleTopRailMode}
+    aria-label="Toggle top rail lights"
+  />
+
+  <a href="/account" className="ixi-top-function-dash" aria-label="Dashboard" />
+  <a href="/account/my-listings" className="ixi-top-function-dash" aria-label="Listings" />
+  <a href="/browse" className="ixi-top-function-dash" aria-label="Marketplace" />
+  <a href="/saved" className="ixi-top-function-dash active" aria-label="IXI Workspace" />
+  <a href="/theater" className="ixi-top-function-dash" aria-label="Theater" />
+  <a href="/launch" className="ixi-top-function-dash" aria-label="Launch" />
+
+  <a href="/post" className="ixi-top-post-free">
+    POST FREE
+  </a>
+</section>            
         <section className="workspace-head">
           <div>
             <span className="eyebrow">IXI WORKSPACE</span>
@@ -1126,6 +1154,88 @@ onBoardDragEnd={() => {}}
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
         }
+
+.ixi-top-function-rail {
+  max-width: 1320px;
+  height: 14px;
+
+  margin: 0 auto 8px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  opacity: .08;
+
+  transition:
+    opacity .16s ease,
+    filter .16s ease;
+}
+
+.ixi-top-function-rail:hover,
+.ixi-top-function-rail.mode-dim {
+  opacity: .36;
+}
+
+.ixi-top-function-rail.mode-bright {
+  opacity: .82;
+}
+
+.ixi-top-power-dash,
+.ixi-top-function-dash {
+  width: 24px;
+  height: 5px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.12);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-top-power-dash {
+  background: rgba(255,196,0,.22);
+}
+
+.ixi-top-function-rail.mode-dim .ixi-top-power-dash,
+.ixi-top-function-rail.mode-bright .ixi-top-power-dash {
+  background: rgba(255,196,0,.86);
+  box-shadow: 0 0 8px rgba(255,196,0,.24);
+}
+
+.ixi-top-function-dash.active {
+  background: rgba(255,196,0,.42);
+}
+
+.ixi-top-function-dash:hover {
+  background: rgba(0,194,255,.72);
+  box-shadow: 0 0 8px rgba(0,194,255,.18);
+}
+
+.ixi-top-post-free {
+  margin-left: auto;
+
+  color: rgba(255,255,255,.10);
+  text-decoration: none;
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+
+  white-space: nowrap;
+}
+
+.ixi-top-function-rail.mode-dim .ixi-top-post-free {
+  color: rgba(255,255,255,.28);
+}
+
+.ixi-top-function-rail.mode-bright .ixi-top-post-free,
+.ixi-top-post-free:hover {
+  color: rgba(255,196,0,.72);
+  text-shadow: 0 0 8px rgba(255,196,0,.14);
+}
 
         .workspace-head {
           display: flex;
