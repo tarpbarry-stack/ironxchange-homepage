@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const COLOR_CONTROLS = [
   "none",
   "green",
@@ -42,6 +44,14 @@ export default function IXIRelationshipControls({
 
   className = ""
 }) {
+
+  const [railRevealed, setRailRevealed] =
+  useState(false);
+
+  function toggleRailReveal() {
+  setRailRevealed(current => !current);
+}
+  
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
@@ -72,7 +82,13 @@ function handleOutlineClick(outline) {
 }
   
   return (
-   <div className={`ixi-relationship-shell ${className}`}>
+    
+  return (
+  <div
+    className={`ixi-relationship-shell ${
+      railRevealed ? "revealed" : ""
+    } ${className}`}
+  >
   <div className="ixi-relationship-controls">
       {COLOR_CONTROLS.map(color => (
         <button
