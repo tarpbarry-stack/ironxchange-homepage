@@ -80,6 +80,33 @@ const hasInventory = false;
   return false;
 }
 
+  function isUnlockedEnvironment(item) {
+  return (
+    hasRelationship &&
+    (
+      item.label === "IXI WORKSPACE" ||
+      item.label === "IXI THEATER"
+    )
+  );
+}
+
+function getRailItemState(item) {
+
+  if (item.active) {
+    return "active";
+  }
+
+  if (isUnlockedEnvironment(item)) {
+    return "unlocked";
+  }
+
+  if (canAccess(item)) {
+    return "available";
+  }
+
+  return "locked";
+}
+
 function getDashWidth(label) {
   const widths = {
     "IXI WORKSPACE": 78,
@@ -172,13 +199,13 @@ onMouseLeave={() => {
 }}
 >
          {RAIL_ITEMS.map(item => (
-  <a
-    key={item.label}
-    href={item.href}
-    className={`ixi-page-indicator-link ${
-      item.active ? "active" : ""
-    } ${item.postFree ? "post-free" : ""}`}
-  >
+<a
+  key={item.label}
+  href={item.href}
+  className={`ixi-page-indicator-link state-${getRailItemState(item)} ${
+    item.postFree ? "post-free" : ""
+  }`}
+>
     {renderRailLabel(item) ? (
   renderRailLabel(item)
 ) : (
@@ -192,13 +219,15 @@ onMouseLeave={() => {
   </a>
 ))}
 
-            <button
-              type="button"
-              className="ixi-indicator-power"
-              onClick={cycleRailMode}
-              aria-label="Toggle indicator lights"
-              title="IXI Environment Rail"
-            />
+          <button
+  type="button"
+  className={`ixi-power-switch ${
+    railMode !== "ghost" ? "active" : ""
+  }`}
+  onClick={cycleRailMode}
+  aria-label="Toggle environment rail"
+  title="IXI Environment Rail"
+/>
           </section>
 
          <section className="lab-panel">
@@ -294,9 +323,20 @@ onMouseLeave={() => {
   text-shadow: none;
 }
 
-.ixi-page-indicator-link.active {
-  color: rgba(255,196,0,.42);
-  text-shadow: none;
+.ixi-page-indicator-link.state-available {
+  color: rgba(255,255,255,.20);
+}
+
+.ixi-page-indicator-link.state-unlocked {
+  color: rgba(0,194,255,.62);
+}
+
+.ixi-page-indicator-link.state-active {
+  color: rgba(255,196,0,.86);
+}
+
+.ixi-page-indicator-link.state-locked {
+  color: rgba(255,255,255,.08);
 }
 
 .ixi-page-indicator.mode-discover .ixi-page-indicator-link {
@@ -329,27 +369,41 @@ onMouseLeave={() => {
   text-shadow: none;
 }
 
-.ixi-indicator-power {
-  width: 24px;
-  height: 5px;
+.ixi-power-switch {
+  width: 18px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
 
   position: absolute;
   right: 0;
   bottom: -10px;
 
-  border: 0;
-  border-radius: 2px;
-
-  background: rgba(255,196,0,.20);
-
-  padding: 0;
-  cursor: pointer;
+  z-index: 10;
 }
 
-.ixi-page-indicator.mode-discover .ixi-indicator-power,
-.ixi-page-indicator.mode-locked .ixi-indicator-power {
-  background: rgba(255,196,0,.72);
-  box-shadow: none;
+.ixi-power-switch::before {
+  content: "";
+
+  position: absolute;
+
+  left: -10px;
+  right: -10px;
+  top: -8px;
+  bottom: -8px;
+}
+
+.ixi-power-switch.active {
+  background: rgba(255,196,0,.95);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.42);
 }
 
    .lab-panel {
@@ -392,12 +446,12 @@ onMouseLeave={() => {
             display: none;
           }
 
-          .ixi-indicator-power {
-            position: sticky;
-            right: 0;
-            bottom: auto;
-            flex: 0 0 24px;
-          }
+         .ixi-power-switch {
+  position: sticky;
+  right: 0;
+  bottom: auto;
+  flex: 0 0 18px;
+}
         }
       `}</style>
     </>
