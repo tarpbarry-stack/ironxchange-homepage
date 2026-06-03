@@ -51,7 +51,8 @@ export default function IXSearchSurface({
   sortMode = "custom",
   setSortMode = () => {},
   onClear = null,
-  listings = []
+  listings = [],
+  hasRelationship = false
 }) {
 
   const sortOptions = [
