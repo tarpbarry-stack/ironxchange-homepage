@@ -315,20 +315,39 @@ const isArchived = listingStatus === "archived";
     const matchesSearch =
       !q || searchableText.includes(q);
 
-    const matchesCategory =
-      category === "ALL CATEGORIES" ||
-      String(item.type || item.category || "")
-        .toUpperCase() === category;
+  const listingCategory =
+  item.category ||
+  item.type ||
+  item.publicData?.category ||
+  item.attributes?.publicData?.category ||
+  "";
 
-    const matchesMake =
-      make === "ALL MAKES" ||
-      String(item.make || "")
-        .toUpperCase() === String(make).toUpperCase();
+const listingMake =
+  item.make ||
+  item.publicData?.make ||
+  item.attributes?.publicData?.make ||
+  "";
 
-    const matchesModel =
-      model === "ALL MODELS" ||
-      String(item.model || "")
-        .toUpperCase() === String(model).toUpperCase();
+const listingModel =
+  item.model ||
+  item.publicData?.model ||
+  item.attributes?.publicData?.model ||
+  "";
+
+const matchesCategory =
+  category === "ALL CATEGORIES" ||
+  String(listingCategory).trim().toUpperCase() ===
+    String(category).trim().toUpperCase();
+
+const matchesMake =
+  make === "ALL MAKES" ||
+  String(listingMake).trim().toUpperCase() ===
+    String(make).trim().toUpperCase();
+
+const matchesModel =
+  model === "ALL MODELS" ||
+  String(listingModel).trim().toUpperCase() ===
+    String(model).trim().toUpperCase();
 
     const ixState = ixiCardState[String(getListingId(item))] || {
   color: "none",
