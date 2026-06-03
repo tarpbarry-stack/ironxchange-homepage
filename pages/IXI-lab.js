@@ -108,15 +108,23 @@ function renderRailLabel(item) {
          <section
   className={`ixi-page-indicator mode-${railMode}`}
   onMouseEnter={() => {
-    if (railMode === "ghost") {
-      setRailMode("discover");
-    }
-  }}
-  onMouseLeave={() => {
-    if (railMode === "discover") {
-      setRailMode("ghost");
-    }
-  }}
+  if (railMode === "ghost") {
+    setTimeout(() => {
+      setRailMode(current =>
+        current === "ghost" ? "discover" : current
+      );
+    }, 120);
+  }
+}}
+onMouseLeave={() => {
+  if (railMode === "discover") {
+    setTimeout(() => {
+      setRailMode(current =>
+        current === "discover" ? "ghost" : current
+      );
+    }, 220);
+  }
+}}
 >
          {RAIL_ITEMS.map(item => (
   <a
@@ -195,10 +203,11 @@ function renderRailLabel(item) {
 
           white-space: nowrap;
 
-          transition:
-            color .14s ease,
-            text-shadow .14s ease,
-            opacity .14s ease;
+         transition:
+  color .28s ease,
+  opacity .28s ease,
+  text-shadow .28s ease,
+  filter .28s ease;
         }
 
       .ixi-page-indicator-link:hover {
