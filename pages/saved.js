@@ -1354,9 +1354,9 @@ onBoardDragEnd={() => {}}
   z-index: 5;
 }
         .workspace-controls {
-          max-width: 640px;
-         margin: 0;
-          padding: 7px;
+          max-width: 700px;
+         margin: 24px auto;
+          padding: 18px;
 
           border: 1px solid rgba(255,255,255,.045);
           border-radius: 14px;
