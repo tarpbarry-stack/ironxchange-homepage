@@ -115,12 +115,7 @@ const [sortMode, setSortMode] = useState("custom");
 const [ixiColorFilters, setIxiColorFilters] = useState([]);
 const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
-const demoIxiCardState = {
-  demo1: { color: "green", outline: 1 },
-  demo2: { color: "yellow", outline: 3 },
-  demo3: { color: "red", outline: 5 },
-  demo4: { color: "cyan", outline: 1 }
-};
+const demoIxiCardState = {};
 
 function toggleColorFilter(color) {
   setIxiColorFilters(current =>
