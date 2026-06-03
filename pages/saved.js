@@ -156,18 +156,19 @@ setIxiCardState(remoteIxiState);
   });
 
   const touchedIds = Object.entries(ixiCardState || {})
-  .filter(([id, state]) =>
-    (state?.color && state.color !== "none") ||
-    Number(state?.outline) > 1 ||
-    state?.saved === true ||
-    state?.pinned === true ||
-    state?.noted === true
-  )
-  .map(([id]) => String(id));
+    .filter(([id, state]) =>
+      (state?.color && state.color !== "none") ||
+      Number(state?.outline) > 1 ||
+      state?.saved === true ||
+      state?.pinned === true ||
+      state?.noted === true
+    )
+    .map(([id]) => String(id));
 
-return activeListings.filter(item =>
-  touchedIds.includes(String(getListingId(item)))
-);
+  return activeListings.filter(item =>
+    touchedIds.includes(String(getListingId(item)))
+  );
+}, [listings, ixiCardState]);
 
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
