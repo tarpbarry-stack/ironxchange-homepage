@@ -350,11 +350,10 @@ const [panelLit, setPanelLit] = useState(false);
 
   color: rgba(255,255,255,.84);
 
-  font-size: 12px;
-  font-weight: 800;
+  opacity: .18;
 
-  opacity: .35;
-transition: opacity .18s ease;
+  transition:
+    opacity .18s ease;
 }
 
 .ix-search-surface.lit .ix-search-line input {
@@ -372,6 +371,9 @@ transition:
 
   cursor: pointer;
 
+  .ix-search-surface.lit .dash-control {
+  color: rgba(255,255,255,.68);
+}  
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
