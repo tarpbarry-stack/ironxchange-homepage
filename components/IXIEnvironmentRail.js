@@ -1,13 +1,42 @@
 import { useState } from "react";
 
 const RAIL_ITEMS = [
-  { label: "IXI MARKETPLACE", href: "/browse", access: "always" },
-  { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
-  { label: "IXI THEATER", href: "/theater", access: "relationship" },
-  { label: "DASHBOARD", href: "/account", access: "account" },
-  { label: "INVENTORY", href: "/account/my-listings", access: "seller" },
-  { label: "LAUNCH", href: "/launch", access: "seller" },
-  { label: "POST FREE", href: "/post", access: "always", postFree: true }
+  {
+    label: "IXI MARKETPLACE",
+    href: "/browse",
+    access: "always"
+  },
+  {
+    label: "IXI WORKSPACE",
+    href: "/saved",
+    access: "relationship"
+  },
+  {
+    label: "IXI THEATER",
+    href: "/theater",
+    access: "relationship"
+  },
+  {
+    label: "DASHBOARD",
+    href: "/account",
+    access: "account"
+  },
+  {
+    label: "INVENTORY",
+    href: "/account/my-listings",
+    access: "seller"
+  },
+  {
+    label: "LAUNCH",
+    href: "/launch",
+    access: "seller"
+  },
+  {
+    label: "POST FREE",
+    href: "/post",
+    access: "always",
+    postFree: true
+  }
 ];
 
 function getDashWidth(label) {
@@ -41,23 +70,45 @@ export default function IXIEnvironmentRail({
 
   function canAccess(item) {
     if (item.access === "always") return true;
-    if (item.access === "account") return hasAccount;
-    if (item.access === "relationship") return hasRelationship;
-    if (item.access === "seller") return hasInventory;
+
+    if (item.access === "account") {
+      return hasAccount;
+    }
+
+    if (item.access === "relationship") {
+      return hasRelationship;
+    }
+
+    if (item.access === "seller") {
+      return hasInventory;
+    }
+
     return false;
   }
 
   function isUnlockedEnvironment(item) {
     return (
       hasRelationship &&
-      (item.label === "IXI WORKSPACE" || item.label === "IXI THEATER")
+      (
+        item.label === "IXI WORKSPACE" ||
+        item.label === "IXI THEATER"
+      )
     );
   }
 
   function getRailItemState(item) {
-    if (item.label === activeEnvironment) return "active";
-    if (isUnlockedEnvironment(item)) return "unlocked";
-    if (canAccess(item)) return "available";
+    if (item.label === activeEnvironment) {
+      return "active";
+    }
+
+    if (isUnlockedEnvironment(item)) {
+      return "unlocked";
+    }
+
+    if (canAccess(item)) {
+      return "available";
+    }
+
     return "locked";
   }
 
@@ -110,7 +161,9 @@ export default function IXIEnvironmentRail({
           ) : (
             <span
               className="ixi-env-dash"
-              style={{ width: `${getDashWidth(item.label)}px` }}
+              style={{
+                width: `${getDashWidth(item.label)}px`
+              }}
             />
           )}
         </a>
@@ -118,7 +171,9 @@ export default function IXIEnvironmentRail({
 
       <button
         type="button"
-        className={`ixi-power-switch ${railMode !== "ghost" ? "active" : ""}`}
+        className={`ixi-power-switch ${
+          railMode !== "ghost" ? "active" : ""
+        }`}
         onClick={cycleRailMode}
         aria-label="Toggle environment rail"
         title="IXI Environment Rail"
@@ -128,6 +183,7 @@ export default function IXIEnvironmentRail({
         .ixi-environment-rail {
           width: 100%;
           min-height: 22px;
+
           margin: 0 auto 22px;
 
           display: flex;
@@ -181,19 +237,41 @@ export default function IXIEnvironmentRail({
           color: rgba(255,255,255,.22);
         }
 
+        .ixi-environment-rail.mode-discover
+        .ixi-environment-link.state-active {
+          color: rgba(255,196,0,.62);
+        }
+
+        .ixi-environment-rail.mode-discover
+        .ixi-environment-link.state-unlocked {
+          color: rgba(0,194,255,.62);
+        }
+
         .ixi-environment-rail.mode-locked .ixi-environment-link {
           color: rgba(255,255,255,.42);
+        }
+
+        .ixi-environment-rail.mode-locked
+        .ixi-environment-link.state-active {
+          color: rgba(255,196,0,.86);
+        }
+
+        .ixi-environment-rail.mode-locked
+        .ixi-environment-link.state-unlocked {
+          color: rgba(0,194,255,.62);
         }
 
         .ixi-environment-link.post-free {
           color: rgba(255,196,0,.36);
         }
 
-        .ixi-environment-rail.mode-discover .ixi-environment-link.post-free {
+        .ixi-environment-rail.mode-discover
+        .ixi-environment-link.post-free {
           color: rgba(255,196,0,.54);
         }
 
-        .ixi-environment-rail.mode-locked .ixi-environment-link.post-free,
+        .ixi-environment-rail.mode-locked
+        .ixi-environment-link.post-free,
         .ixi-environment-link.post-free:hover {
           color: rgba(255,196,0,.72);
           text-shadow: none;
@@ -201,8 +279,11 @@ export default function IXIEnvironmentRail({
 
         .ixi-env-dash {
           display: block;
+
           height: 4px;
+
           border-radius: 2px;
+
           background: rgba(255,255,255,.10);
         }
 
@@ -227,6 +308,7 @@ export default function IXIEnvironmentRail({
 
         .ixi-power-switch::before {
           content: "";
+
           position: absolute;
 
           left: -10px;
@@ -237,7 +319,9 @@ export default function IXIEnvironmentRail({
 
         .ixi-power-switch.active {
           background: rgba(255,196,0,.95);
-          box-shadow: 0 0 8px rgba(255,196,0,.42);
+
+          box-shadow:
+            0 0 8px rgba(255,196,0,.42);
         }
 
         @media (max-width: 850px) {
@@ -269,14 +353,3 @@ export default function IXIEnvironmentRail({
     </section>
   );
 }
-
-
-
-
-
-
-
-
-
-
-          
