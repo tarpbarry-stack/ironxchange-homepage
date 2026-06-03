@@ -82,7 +82,25 @@ function handleOutlineClick(outline) {
 }
   
   return (
-    
+
+  <div
+    className={`ixi-relationship-shell ${
+      railRevealed ? "revealed" : ""
+    } ${className}`}
+  >
+
+    <div className="ixi-relationship-head">
+
+      <span>IXIRelationshipControls™</span>
+
+      <button
+        type="button"
+        className="ixi-relationship-power"
+        onClick={toggleRailReveal}
+        aria-label="Toggle relationship controls"
+      />
+
+    </div>
   <div className="ixi-relationship-controls">
       {COLOR_CONTROLS.map(color => (
         <button
@@ -122,8 +140,54 @@ function handleOutlineClick(outline) {
     </a>
   </div>
 )}
-
+</div>
       <style jsx>{`
+
+      .ixi-relationship-head {
+  height: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 4px;
+}
+
+.ixi-relationship-head span {
+  opacity: 0;
+
+  color: rgba(255,196,0,.82);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .65px;
+
+  transition: opacity .18s ease;
+}
+
+.ixi-relationship-shell.revealed .ixi-relationship-head span {
+  opacity: 1;
+}
+
+.ixi-relationship-power {
+  width: 18px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-relationship-shell.revealed .ixi-relationship-power {
+  background: rgba(255,196,0,.95);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.42);
+}
         .ixi-relationship-controls {
           width: max-content;
           max-width: 100%;
