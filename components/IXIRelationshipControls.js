@@ -83,12 +83,6 @@ function handleOutlineClick(outline) {
   
   return (
     
-  return (
-  <div
-    className={`ixi-relationship-shell ${
-      railRevealed ? "revealed" : ""
-    } ${className}`}
-  >
   <div className="ixi-relationship-controls">
       {COLOR_CONTROLS.map(color => (
         <button
