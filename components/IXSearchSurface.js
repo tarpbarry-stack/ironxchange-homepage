@@ -255,6 +255,51 @@ const [panelLit, setPanelLit] = useState(false);
   margin: 0 auto;
 }
 
+.desktop-panel-head {
+  height: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 4px;
+}
+
+.desktop-panel-head span {
+  opacity: 0;
+
+  color: rgba(255,196,0,.82);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .65px;
+
+  transition: opacity .18s ease;
+}
+
+.ix-search-surface.lit .desktop-panel-head span {
+  opacity: 1;
+}
+
+.desktop-panel-power {
+  width: 18px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ix-search-surface.lit .desktop-panel-power {
+  background: rgba(255,196,0,.95);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.42);
+}
 .ix-search-primary-row {
   width: 100%;
   display: grid;
