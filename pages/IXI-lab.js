@@ -80,19 +80,27 @@ const hasInventory = false;
   return false;
 }
 
-function getDashLabel(label) {
-  return "─".repeat(label.length);
+function getDashWidth(label) {
+  const widths = {
+    "IXI WORKSPACE": 78,
+    "IXI THEATER": 68,
+    "DASHBOARD": 58,
+    "INVENTORY": 58,
+    "LAUNCH": 42
+  };
+
+  return widths[label] || 60;
 }
 
 function renderRailLabel(item) {
   const available = canAccess(item);
 
   if (railMode === "ghost" && item.access !== "always") {
-    return getDashLabel(item.label);
+    return null;
   }
 
   if (!available) {
-    return getDashLabel(item.label);
+    return null;
   }
 
   return item.label;
@@ -171,7 +179,16 @@ onMouseLeave={() => {
       item.active ? "active" : ""
     } ${item.postFree ? "post-free" : ""}`}
   >
-    {renderRailLabel(item)}
+    {renderRailLabel(item) ? (
+  renderRailLabel(item)
+) : (
+  <span
+    className="ixi-env-dash"
+    style={{
+      width: `${getDashWidth(item.label)}px`
+    }}
+  />
+)}
   </a>
 ))}
 
@@ -226,6 +243,15 @@ onMouseLeave={() => {
             #0b0b0b;
         }
 
+        .ixi-env-dash {
+  display: block;
+
+  height: 4px;
+
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.10);
+}
         .lab-shell {
           max-width: 1320px;
           margin: 0 auto;
