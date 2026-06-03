@@ -181,13 +181,13 @@ export default function IXIEnvironmentRail({
         }
 
         .ixi-environment-link.post-free {
-          color: rgba(255,196,0,.42);
-        }
-
-        .ixi-environment-rail.mode-high .ixi-environment-link.post-free,
-        .ixi-environment-link.post-free:hover {
-          color: rgba(255,196,0,.78);
-        }
+  color: rgba(255,196,0,.86);
+}
+        .ixi-environment-rail.mode-med .ixi-environment-link.post-free,
+.ixi-environment-rail.mode-high .ixi-environment-link.post-free,
+.ixi-environment-link.post-free:hover {
+  color: rgba(255,196,0,.86);
+}
 
         .ixi-env-dash {
           display: block;
