@@ -28,7 +28,11 @@ export default function SavedListings() {
   const [sdk, setSdk] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [workspaceFilters, setWorkspaceFilters] = useState({
+const [workspaceFilters, setWorkspaceFilters] = useState({
+  category: "ALL CATEGORIES",
+  make: "ALL MAKES",
+  model: "ALL MODELS",
+
   yearMin: "",
   yearMax: "",
   priceMin: "",
