@@ -226,10 +226,6 @@ const matchesMake =
 const matchesModel =
   workspaceFilters.model === "ALL MODELS" ||
   itemModel === String(workspaceFilters.model).toUpperCase();
-     
-const matchesModel =
-  workspaceFilters.model === "ALL MODELS" ||
-  itemModel === String(workspaceFilters.model).toUpperCase();
 
 const matchesIxiColor =
   ixiColorFilters.length === 0 ||
