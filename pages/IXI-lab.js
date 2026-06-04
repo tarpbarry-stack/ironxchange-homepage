@@ -14,6 +14,11 @@ const RAIL_ITEMS = [
     access: "always"
   },
   {
+    label: "AUCTION",
+    href: "#",
+    access: "always"
+  },
+  {
     label: "IXI WORKSPACE",
     href: "/saved",
     access: "relationship",
@@ -46,7 +51,6 @@ const RAIL_ITEMS = [
     postFree: true
   }
 ];
-
 export default function IXILab() {
  const [railMode, setRailMode] = useState("ghost");
 
