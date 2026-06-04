@@ -1331,11 +1331,11 @@ onBoardDragEnd={() => {}}
         }
 
         .ixi-command-chassis {
-  max-width: 1920px;
+  max-width: 1320px;
   margin: 0 auto 30px;
 
   display: grid;
-  grid-template-columns: 320px 640px 320px;
+  grid-template-columns: 1fr 700px 1fr;
   gap: 18px;
 
   align-items: start;
