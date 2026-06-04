@@ -792,17 +792,7 @@ function cycleTopRailMode() {
     POST FREE
   </a>
 </section>            
-        <section className="workspace-head">
-          <div>
-            <span className="eyebrow">IXI WORKSPACE</span>
-
-           <h1></h1>
-          </div>
-
-          <div className="count-pill">
-            {visibleSavedListings.length} / {workspaceListings.length}
-          </div>
-        </section>
+      
 
 <section className="ixi-command-chassis">
   <aside className="ixi-command-left">
