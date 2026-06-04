@@ -848,7 +848,7 @@ function cycleTopRailMode() {
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
             style={{
-              left: `${leftPocketOpen ? index * 70 : index * 16}px`,
+              left: `${leftPocketOpen ? index * 60 : index * 16}px`,
               zIndex: index + 1
             }}
           >
