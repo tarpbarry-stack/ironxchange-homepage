@@ -772,26 +772,6 @@ function cycleTopRailMode() {
       hasInventory={!!sdk}
     />
   </section>
-
-<section className={`ixi-top-function-rail mode-${topRailMode}`}>
-  <button
-    type="button"
-    className="ixi-top-power-dash"
-    onClick={cycleTopRailMode}
-    aria-label="Toggle top rail lights"
-  />
-
-  <a href="/account" className="ixi-top-function-dash" aria-label="Dashboard" />
-  <a href="/account/my-listings" className="ixi-top-function-dash" aria-label="Listings" />
-  <a href="/browse" className="ixi-top-function-dash" aria-label="Marketplace" />
-  <a href="/saved" className="ixi-top-function-dash active" aria-label="IXI Workspace" />
-  <a href="/theater" className="ixi-top-function-dash" aria-label="Theater" />
-  <a href="/launch" className="ixi-top-function-dash" aria-label="Launch" />
-
-  <a href="/post" className="ixi-top-post-free">
-    POST FREE
-  </a>
-</section>            
       
 
 <section className="ixi-command-chassis">
