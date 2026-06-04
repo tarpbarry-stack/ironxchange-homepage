@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const RAIL_ITEMS = [
   { label: "IXI MARKETPLACE", href: "/browse", access: "always" },
- { label: "IXI AUCTION MKT", href: "#", access: "future" },
+ { label: "IXI AUCTION MKT", href: "#", access: "demo" },
   { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
   { label: "DASHBOARD", href: "/account", access: "account" },
@@ -43,8 +43,8 @@ export default function IXIEnvironmentRail({
     });
   }
 
- function canAccess(item) {
-  if (item.access === "future") return false;
+function canAccess(item) {
+  if (item.access === "demo") return effectiveMode !== "dead";
 
   if (item.access === "always") return true;
   if (item.access === "account") return hasAccount;
@@ -89,13 +89,18 @@ export default function IXIEnvironmentRail({
       className={`ixi-environment-rail mode-${effectiveMode} raw-mode-${railMode} ${className}`}
     >
       {RAIL_ITEMS.map(item => (
-        <a
-          key={item.label}
-          href={item.href}
-          className={`ixi-environment-link state-${getRailItemState(item)} ${
-            item.postFree ? "post-free" : ""
-          }`}
-        >
+       <a
+  key={item.label}
+  href={item.access === "demo" ? "#" : item.href}
+  onClick={
+    item.access === "demo"
+      ? (e) => e.preventDefault()
+      : undefined
+  }
+  className={`ixi-environment-link state-${getRailItemState(item)} ${
+    item.postFree ? "post-free" : ""
+  }`}
+>
           {shouldShowLabel(item) ? (
             item.label
           ) : (
