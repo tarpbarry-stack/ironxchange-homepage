@@ -291,22 +291,25 @@ onMouseLeave={() => {
         }
 
         .ixi-page-indicator {
-          width: 100%;
-          min-height: 22px;
+  width: 100%;
+  min-height: 22px;
 
-          margin: 0 auto 22px;
+  margin: 0 auto 22px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
+  display: flex;
+  align-items: center;
 
-          position: relative;
-        }
+  gap: 0;
+
+  position: relative;
+}
 
         .ixi-page-indicator-link {
           color: rgba(255,255,255,.075);
           text-decoration: none;
+
+           flex: 1;
+  text-align: center;
 
           font-size: 9px;
           font-weight: 950;
