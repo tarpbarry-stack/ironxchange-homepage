@@ -289,8 +289,8 @@ onMouseLeave={() => {
           max-width: 1320px;
           margin: 0 auto;
         }
-
-        .ixi-page-indicator {
+        
+.ixi-page-indicator {
   width: 100%;
   min-height: 22px;
 
@@ -298,8 +298,8 @@ onMouseLeave={() => {
 
   display: flex;
   align-items: center;
-
-  gap: 0;
+  justify-content: space-between;
+  gap: 18px;
 
   position: relative;
 }
@@ -307,9 +307,6 @@ onMouseLeave={() => {
         .ixi-page-indicator-link {
           color: rgba(255,255,255,.075);
           text-decoration: none;
-
-           flex: 1;
-  text-align: center;
 
           font-size: 9px;
           font-weight: 950;
