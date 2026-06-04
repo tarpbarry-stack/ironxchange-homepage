@@ -304,6 +304,24 @@ onMouseLeave={() => {
   position: relative;
 }
 
+.lab-panel {
+  width: clamp(620px, calc(700px * min(1, 100vw / 1756)), 700px);
+  max-width: 100%;
+
+  margin: 24px auto 0;
+  padding: 18px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #111;
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18);
+}
+
         .ixi-page-indicator-link {
           color: rgba(255,255,255,.075);
           text-decoration: none;
