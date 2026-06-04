@@ -1703,10 +1703,10 @@ outline: 1px solid rgba(0, 194, 255, .8);
   position: absolute;
 
   left: 24px;
-  top: 15px;
+  top: 38px;
 
   width: 100%;
-  height: 80px;
+  height: 104px;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -1715,8 +1715,10 @@ outline: 1px solid rgba(0, 194, 255, .8);
 
   z-index: 9999;
 
+  padding-bottom: 18px;
+
   background: rgba(0, 255, 0, .12);
-outline: 1px solid rgba(0, 255, 0, .75);
+  outline: 1px solid rgba(0, 255, 0, .75);
 }
 
 .ixi-pocket-thumb {
@@ -1786,7 +1788,7 @@ border-bottom-right-radius: 0;}
 }
 
 .ixi-pocket-left.open .ixi-pocket-thumb {
-  transform: translateY(18px);
+  transform: translateY(0);
 
   opacity: 1;
 
