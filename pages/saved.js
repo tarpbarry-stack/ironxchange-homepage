@@ -1336,27 +1336,41 @@ onBoardDragEnd={() => {}}
         }
 
         .ixi-command-chassis {
-  max-width: 1320px;
+  width: 100%;
   margin: 0 auto 30px;
 
-  display: grid;
-  grid-template-columns: 1fr 700px 1fr;
-  gap: 18px;
+  position: relative;
 
-  align-items: start;
+  display: block;
 }
 
 .ixi-command-left,
 .ixi-command-right {
-  min-height: 120px;
-  position: relative;
+  position: absolute;
+  top: 0;
+
+  width: 360px;
+  min-height: 160px;
+
   pointer-events: auto;
-  padding-top: 50px;
+  z-index: 3;
+}
+
+.ixi-command-left {
+  left: 5%;
+}
+
+.ixi-command-right {
+  right: 5%;
 }
 
 .ixi-command-center {
   position: relative;
   z-index: 5;
+
+  width: 700px;
+  max-width: 100%;
+  margin: 0 auto;
 }
         .workspace-controls {
           max-width: 700px;
