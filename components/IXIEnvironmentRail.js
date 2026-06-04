@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const RAIL_ITEMS = [
   { label: "IXI MARKETPLACE", href: "/browse", access: "always" },
-  { label: "AUCTION MARKET", href: "#", access: "always" },
+  { label: "IXI AUCTION MKT", href: "#", access: "always" },
   { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
   { label: "DASHBOARD", href: "/account", access: "account" },
@@ -13,8 +13,9 @@ const RAIL_ITEMS = [
 
 function getDashWidth(label) {
   const widths = {
-    "IXI WORKSPACE": 78,
-    "IXI THEATER": 68,
+  "IXI AUCTION MKT": 82,
+  "IXI WORKSPACE": 78,
+  "IXI THEATER": 68,
     DASHBOARD: 58,
     INVENTORY: 58,
     LAUNCH: 42
@@ -42,13 +43,16 @@ export default function IXIEnvironmentRail({
     });
   }
 
-  function canAccess(item) {
-    if (item.access === "always") return true;
-    if (item.access === "account") return hasAccount;
-    if (item.access === "relationship") return hasRelationship;
-    if (item.access === "seller") return hasInventory;
-    return false;
-  }
+ function canAccess(item) {
+  if (item.access === "future") return false;
+
+  if (item.access === "always") return true;
+  if (item.access === "account") return hasAccount;
+  if (item.access === "relationship") return hasRelationship;
+  if (item.access === "seller") return hasInventory;
+
+  return false;
+}
 
   function getRailItemState(item) {
     if (item.label === activeEnvironment) return "active";
