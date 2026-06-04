@@ -14,6 +14,7 @@ import { captureIXEvent } from "../lib/posthog";
 import IXSearchSurface from "../components/IXSearchSurface";
 import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
 import IXIRelationshipControls from "../components/IXIRelationshipControls";
+import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -763,6 +764,15 @@ function cycleTopRailMode() {
       <Navbar />
 
       <main>
+  <section className="saved-environment-shell">
+    <IXIEnvironmentRail
+      activeEnvironment="IXI WORKSPACE"
+      hasAccount={!!sdk}
+      hasRelationship={true}
+      hasInventory={!!sdk}
+    />
+  </section>
+
 <section className={`ixi-top-function-rail mode-${topRailMode}`}>
   <button
     type="button"
@@ -1192,6 +1202,12 @@ onBoardDragEnd={() => {}}
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
         }
+
+        .saved-environment-shell {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+}
 
 .ixi-top-function-rail {
   max-width: 1320px;
