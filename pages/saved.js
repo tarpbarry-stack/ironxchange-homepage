@@ -1648,6 +1648,10 @@ outline: 1px solid rgba(0, 194, 255, .8);
   opacity: 1;
 }
 
+.ixi-pocket-left.open .ixi-pocket-rail {
+  top: 132px;
+}
+
 .ixi-pocket-master-dash {
   width: 18px;
   height: 5px;
@@ -1711,6 +1715,9 @@ outline: 1px solid rgba(0, 194, 255, .8);
   overflow-x: auto;
   overflow-y: hidden;
 
+    scrollbar-width: none;
+-ms-overflow-style: none;
+
   pointer-events: auto;
 
   z-index: 9999;
@@ -1720,12 +1727,13 @@ outline: 1px solid rgba(0, 194, 255, .8);
 }
 
 .ixi-pocket-left.open .ixi-pocket-thumbs {
-  top: 62px;
-  height: 112px;
-  padding-bottom: 18px;
+  top: 25px;
+  height: 80px;
+  padding-bottom: 0;
 }
-
-
+.ixi-pocket-left.open .ixi-pocket-rail {
+  top: 132px;
+}
 .ixi-pocket-thumb {
   width: 120px;
   height: 80px;
