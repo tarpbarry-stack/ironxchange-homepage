@@ -1623,7 +1623,7 @@ box-shadow: none;
   position: absolute;
 
   left: 24px;
-  top: 25px;
+  top: 65px;
 
   width: 320px;
   height: 92px;
