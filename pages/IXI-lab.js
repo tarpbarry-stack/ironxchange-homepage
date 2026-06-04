@@ -410,23 +410,9 @@ onMouseLeave={() => {
     0 0 8px rgba(255,196,0,.42);
 }
 
-   .lab-panel {
-  max-width: 700px;
-
-  margin: 24px auto 0;
-  padding: 18px;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #111;
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.18);
+.lab-panel {
+  margin: 0 auto;
 }
-
         
         @media (max-width: 850px) {
           main {
