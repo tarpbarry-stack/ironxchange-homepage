@@ -1203,9 +1203,8 @@ onBoardDragEnd={() => {}}
             #0b0b0b;
         }
 
-        .saved-environment-shell {
+       .saved-environment-shell {
   width: 100%;
-  max-width: 1320px;
   margin: 0 auto;
 }
 
