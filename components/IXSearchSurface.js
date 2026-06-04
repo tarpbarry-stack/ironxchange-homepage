@@ -341,20 +341,9 @@ const [panelLit, setPanelLit] = useState(false);
 
 <style jsx>{`
 .ix-search-surface {
-  width: clamp(500px, calc(600px * min(1, 100vw / 1756)), 600px);
+  width: 600px;
   max-width: 100%;
-  margin: 24px auto 0;
-  padding: 18px;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #111;
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.18);
+  margin: 0 auto;
 }
 
 .desktop-panel-head {
