@@ -1372,6 +1372,26 @@ onBoardDragEnd={() => {}}
   max-width: 100%;
   margin: 0 auto;
 }
+
+.ixi-command-left {
+  outline: 2px solid red;
+  background: rgba(255,0,0,.08);
+}
+
+.ixi-command-right {
+  outline: 2px solid lime;
+  background: rgba(0,255,0,.08);
+}
+
+.ixi-pocket-left {
+  outline: 2px solid cyan;
+  background: rgba(0,194,255,.10);
+}
+
+.ixi-pocket-catch-pad {
+  outline: 2px dashed yellow;
+  background: rgba(255,196,0,.08);
+}
         .workspace-controls {
           max-width: 700px;
          margin: 24px auto;
