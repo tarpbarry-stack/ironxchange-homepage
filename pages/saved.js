@@ -1614,6 +1614,100 @@ box-shadow: none;
   right: 0;
 }
 
+/* ========================= */
+/* IXI POCKET RAW VISUAL V1  */
+/* Keeps drag catch intact   */
+/* ========================= */
+
+.ixi-pocket-thumbs {
+  position: absolute;
+
+  left: 24px;
+  top: 15px;
+
+  width: 320px;
+  height: 92px;
+
+  overflow: visible;
+
+  pointer-events: auto;
+
+  z-index: 30;
+}
+
+.ixi-pocket-right .ixi-pocket-thumbs {
+  left: auto;
+  right: 24px;
+}
+
+.ixi-pocket-thumb {
+  width: 120px;
+  height: 80px;
+
+  position: absolute;
+  top: 0;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(0,0,0,.62);
+  border-radius: 8px 8px 0 0;
+
+  background: #111;
+
+  transition:
+    transform .18s ease,
+    opacity .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+}
+
+.ixi-pocket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ixi-pocket-thumb span {
+  display: block;
+  padding: 5px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+/* PEEK STATE — preserve the good look */
+.ixi-pocket-left.occupied:not(.open) .ixi-pocket-thumb {
+  transform:
+    translateY(54px)
+    rotate(-4deg);
+
+  opacity: .72;
+}
+
+/* OPEN STATE — flat, visible, no pocket cover yet */
+.ixi-pocket-left.open .ixi-pocket-thumb {
+  transform: translateY(0) rotate(0deg);
+
+  opacity: 1;
+
+  border-color: rgba(255,255,255,.14);
+}
+
+.ixi-pocket-left.open .ixi-pocket-thumb:hover {
+  transform: translateY(-6px) rotate(0deg);
+
+  box-shadow:
+    0 12px 20px rgba(0,0,0,.28);
+}
+
+.ixi-pocket-rail {
+  display: none;
+}
+
+
 
 .active-stack-zone {
 max-width: 1320px;
