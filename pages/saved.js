@@ -1079,7 +1079,7 @@ onDragEnd={handleBoardDragEnd}            style={{
   onDragEnd={handleBoardDragEnd}
   style={{
      
-        style={{
+
   right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
