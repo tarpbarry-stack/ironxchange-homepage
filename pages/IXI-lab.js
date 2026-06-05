@@ -3,6 +3,7 @@ import Head from "next/head";
 
 import IXSearchSurface from "../components/IXSearchSurface";
 import IXIRelationshipControls from "../components/IXIRelationshipControls";
+import IXIControlSurface from "../components/IXIControlSurface";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -234,23 +235,11 @@ onMouseLeave={() => {
 />
           </section>
 
-         <section className="lab-panel">
+      <IXIControlSurface>
+  <IXSearchSurface ... />
 
-  <IXSearchSurface
-    searchQuery={searchQuery}
-    setSearchQuery={setSearchQuery}
-    filters={filters}
-    setFilters={setFilters}
-    sortMode={sortMode}
-    setSortMode={setSortMode}
-  />
-
-      <IXIRelationshipControls
-  ixiCardState={demoIxiCardState}
-  activeColors={ixiColorFilters}
-  onToggleColor={toggleColorFilter}
-  activeOutline={ixiOutlineFilter}
-  onToggleOutline={toggleOutlineFilter}
+  <IXIRelationshipControls ... />
+</IXIControlSurface>
 />
 
 </section>
@@ -286,7 +275,7 @@ onMouseLeave={() => {
   background: rgba(255,255,255,.10);
 }
         .lab-shell {
-          max-width: 1320px;
+          max-width: 1920px;
           margin: 0 auto;
         }
         
@@ -304,27 +293,6 @@ onMouseLeave={() => {
   position: relative;
 }
 
-.lab-panel {
-  width: clamp(620px, calc(700px * min(1, 100vw / 1756)), 700px);
-  max-width: 600px;
-
-  margin: 24px auto 0;
-  padding: 18px;
-
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 10px;
-
-  background:
-  linear-gradient(
-    180deg,
-    rgba(255,196,0,.03),
-    rgba(255,196,0,0)
-  ),
-  rgba(6,6,6,.82);
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.18);
-}
 
         .ixi-page-indicator-link {
           color: rgba(255,255,255,.075);
