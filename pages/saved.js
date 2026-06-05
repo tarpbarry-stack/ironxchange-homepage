@@ -69,6 +69,9 @@ const [activeStackLayouts, setActiveStackLayouts] = useState({
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
+const [leftPocketMode, setLeftPocketMode] = useState("peek");
+const [rightPocketMode, setRightPocketMode] = useState("peek");
+  
 const [topRailMode, setTopRailMode] = useState("off");
 
 const [armedDestination, setArmedDestination] = useState("");
@@ -780,11 +783,9 @@ function cycleTopRailMode() {
     <section className="ixi-pocket-row">
      <section
   data-pocket-target="pocketLeft"
-  className={`ixi-pocket-left ${
-    (machineContainers.pocketLeft || []).length ? "occupied" : ""
-  } ${
-    leftPocketOpen ? "open" : ""
-  }`}
+className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
+  (machineContainers.pocketLeft || []).length ? "occupied" : ""
+}`}
   onClick={() => setLeftPocketOpen(current => !current)}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
@@ -792,6 +793,30 @@ function cycleTopRailMode() {
   }}
 >
   <div className="ixi-pocket-catch-pad" />
+
+  <div className="ixi-pocket-mode-buttons">
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setLeftPocketMode("closed");
+    }}
+  />
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setLeftPocketMode("peek");
+    }}
+  />
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setLeftPocketMode("open");
+    }}
+  />
+</div>
 
   <div className="ixi-pocket-rail">
     <div className="ixi-pocket-line" />
@@ -829,7 +854,13 @@ function cycleTopRailMode() {
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
             style={{
-              left: `${leftPocketOpen ? index * 60 : index * 16}px`,
+              left: `${
+  leftPocketMode === "open"
+    ? index * 60
+    : leftPocketMode === "peek"
+      ? index * 16
+      : index * 8
+}px`,
               zIndex: index + 1
             }}
           >
@@ -896,11 +927,9 @@ function cycleTopRailMode() {
   <aside className="ixi-command-right">
   <section
     data-pocket-target="pocketRight"
-    className={`ixi-pocket-left ixi-pocket-right ${
-      (machineContainers.pocketRight || []).length ? "occupied" : ""
-    } ${
-      rightPocketOpen ? "open" : ""
-    }`}
+    className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
+  (machineContainers.pocketRight || []).length ? "occupied" : ""
+}`}
     onClick={() => setRightPocketOpen(current => !current)}
     onDragOver={(e) => e.preventDefault()}
     onDrop={(e) => {
@@ -908,6 +937,30 @@ function cycleTopRailMode() {
     }}
   > 
 <div className="ixi-pocket-catch-pad" />
+
+    <div className="ixi-pocket-mode-buttons right">
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setRightPocketMode("closed");
+    }}
+  />
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setRightPocketMode("peek");
+    }}
+  />
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setRightPocketMode("open");
+    }}
+  />
+</div>
     
     <div className="ixi-pocket-rail">
   <div className="ixi-pocket-line" />
@@ -946,7 +999,13 @@ function cycleTopRailMode() {
           key={`right-pocket-thumb-${machineId}`}
           className="ixi-pocket-thumb"
           style={{
-  right: `${rightPocketOpen ? index * 60 : index * 16}px`,
+ right: `${
+  rightPocketMode === "open"
+    ? index * 60
+    : rightPocketMode === "peek"
+      ? index * 16
+      : index * 8
+}px`,
   zIndex: index + 1
 }}
         >
@@ -1576,6 +1635,87 @@ box-shadow: none;
   z-index: 2;
 }
 
+.ixi-pocket-mode-buttons {
+  position: absolute;
+  left: 18px;
+  bottom: 6px;
+
+  display: flex;
+  gap: 6px;
+
+  z-index: 80;
+}
+
+.ixi-pocket-mode-buttons.right {
+  left: auto;
+  right: 18px;
+}
+
+.ixi-pocket-mode-buttons button {
+  width: 18px;
+  height: 5px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-pocket-mode-buttons button:hover {
+  background: rgba(255,196,0,.78);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+/* Roll-top cover: fixed dash/lip, cover moves behind it */
+.ixi-pocket-left::after {
+  content: "";
+  position: absolute;
+
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+
+  height: 46px;
+
+  border-radius: 8px 8px 0 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8,8,8,.94),
+      rgba(5,5,5,.98)
+    );
+
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,.055) inset,
+    0 -10px 22px rgba(0,0,0,.22);
+
+  z-index: 50;
+
+  transition:
+    height .22s ease,
+    opacity .22s ease;
+  pointer-events: none;
+}
+
+.ixi-pocket-left.pocket-mode-closed::after {
+  height: 82px;
+  opacity: .98;
+}
+
+.ixi-pocket-left.pocket-mode-peek::after {
+  height: 46px;
+  opacity: .94;
+}
+
+.ixi-pocket-left.pocket-mode-open::after {
+  height: 12px;
+  opacity: .72;
+}
+
 .ixi-pocket-debug-label.right {
   left: auto;
   right: 18px;
@@ -1677,20 +1817,34 @@ box-shadow: none;
 }
 
 /* PEEK STATE — preserve the good look */
-.ixi-pocket-left.occupied:not(.open) .ixi-pocket-thumb {
-  transform:
-    translateY(0)
-    rotate(-7deg);
+/* CLOSED — cards mostly hidden, dash/cover present */
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumb {
+  transform: translateY(0) rotate(-9deg);
+  opacity: .18;
+}
 
+.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumb {
+  transform: translateY(0) rotate(9deg);
+  opacity: .18;
+}
+
+/* PEEK — same plane, tight accordion */
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
+  transform: translateY(0) rotate(-7deg);
   opacity: .72;
 }
 
-.ixi-pocket-right.occupied:not(.open) .ixi-pocket-thumb {
-  transform:
-    translateY(0)
-    rotate(7deg);
-
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
+  transform: translateY(0) rotate(7deg);
   opacity: .72;
+}
+
+/* OPEN — same plane, flat accordion */
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumb,
+.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumb {
+  transform: translateY(0) rotate(0deg);
+  opacity: 1;
+  border-color: rgba(255,255,255,.14);
 }
 
 /* OPEN STATE — flat, visible, no pocket cover yet */
