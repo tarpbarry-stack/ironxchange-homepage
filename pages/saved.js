@@ -1068,9 +1068,16 @@ onDragEnd={handleBoardDragEnd}            style={{
         machine.attributes?.publicData?.images?.[0];
 
       return (
-        <div
-          key={`right-pocket-thumb-${machineId}`}
-          className="ixi-pocket-thumb"
+       <div
+  key={`right-pocket-thumb-${machineId}`}
+  className="ixi-pocket-thumb"
+  draggable
+  onDragStart={(e) => {
+    e.stopPropagation();
+    handleBoardDragStart(machine, e);
+  }}
+  onDragEnd={handleBoardDragEnd}
+  style={{
      
         style={{
   right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
