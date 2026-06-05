@@ -1658,7 +1658,7 @@ box-shadow: none;
   height: 80px;
 
   position: absolute;
-  top: 0;
+  top: -10;
 
   overflow: hidden;
 
