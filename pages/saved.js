@@ -489,19 +489,30 @@ function getListingById(machineId) {
    
   const stackEl = dropTarget?.closest?.("[data-active-stack]");
 
-  if (dragId && stackEl) {
-    addListingToActiveStack(
-      stackEl.getAttribute("data-active-stack"),
-      dragId
-    );
+if (dragId && stackEl) {
+  addListingToActiveStack(
+    stackEl.getAttribute("data-active-stack"),
+    dragId
+  );
 
-    setDraggingListingId("");
-    setGhostListingId("");
-    setActiveStackHover("");
-    return;
-  }
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+  return;
+}
 
-   const boardEl = dropTarget?.closest?.("[data-board-target]");
+const targetId = ghostListingId;
+
+if (dragId && targetId) {
+  moveListingToSlot(dragId, targetId);
+
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+  return;
+}
+
+const boardEl = dropTarget?.closest?.("[data-board-target]");
 
 if (dragId && boardEl) {
   moveMachineToContainer(dragId, "board");
@@ -509,15 +520,8 @@ if (dragId && boardEl) {
   setDraggingListingId("");
   setGhostListingId("");
   setActiveStackHover("");
-
   return;
 }
-
-  const targetId = ghostListingId;
-
-  if (dragId && targetId) {
-    moveListingToSlot(dragId, targetId);
-  }
 
   setDraggingListingId("");
   setGhostListingId("");
