@@ -501,6 +501,18 @@ function getListingById(machineId) {
     return;
   }
 
+   const boardEl = dropTarget?.closest?.("[data-board-target]");
+
+if (dragId && boardEl) {
+  moveMachineToContainer(dragId, "board");
+
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+
+  return;
+}
+
   const targetId = ghostListingId;
 
   if (dragId && targetId) {
@@ -1249,7 +1261,8 @@ onBoardDragEnd={() => {}}
   ))}
 </section>
               
-       <section
+      <section
+  data-board-target="board"
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
