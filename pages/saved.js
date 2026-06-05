@@ -1422,8 +1422,14 @@ onBoardDragEnd={() => {}}
   position: relative;
   z-index: 5;
 
-  width: fit-content;
+  width: 100%;
+  max-width: 680px;
+  min-width: 0;
+
   margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
 }
 
 
