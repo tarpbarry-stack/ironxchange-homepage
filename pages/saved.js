@@ -1561,10 +1561,10 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-pocket-left {
-top: 0;
+top: 15px;
   width: 360px;
 max-width: 360px;
-  height: 120px;
+  height: 105px;
 
  margin: 0;
   padding: 18px;
@@ -1582,7 +1582,7 @@ box-shadow: none;
 .ixi-pocket-right {
   width: 360px;
   max-width: 360px;
-  height: 120px;
+  height: 105px;
 
   margin: 0;
   padding: 18px;
