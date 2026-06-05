@@ -235,15 +235,26 @@ onMouseLeave={() => {
 />
           </section>
 
-      <IXIControlSurface>
-  <IXSearchSurface ... />
+     <IXIControlSurface>
+  <IXSearchSurface
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={filters}
+    setFilters={setFilters}
+    sortMode={sortMode}
+    setSortMode={setSortMode}
+  />
 
-  <IXIRelationshipControls ... />
+  <IXIRelationshipControls
+    ixiCardState={demoIxiCardState}
+    activeColors={ixiColorFilters}
+    onToggleColor={toggleColorFilter}
+    activeOutline={ixiOutlineFilter}
+    onToggleOutline={toggleOutlineFilter}
+  />
 </IXIControlSurface>
-/>
-
 </section>
-        </section>
+        
       </main>
 
       <Footer />
