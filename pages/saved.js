@@ -1657,7 +1657,7 @@ box-shadow: none;
 
   height: 46px;
 
-  background: #0b0b0b;
+background: #080808;
 
   z-index: 55;
   pointer-events: none;
