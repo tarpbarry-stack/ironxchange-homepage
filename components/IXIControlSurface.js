@@ -3,29 +3,38 @@ export default function IXIControlSurface({ children, className = "" }) {
     <section className={`ixi-control-surface ${className}`}>
       {children}
 
-      <style jsx>{`
-        .ixi-control-surface {
-          width: 600px;
-          max-width: calc(100vw - 40px);
+<style jsx>{`
+  .ixi-control-surface {
+    width: clamp(
+      420px,
+      calc(600px * (100vw / 1756)),
+      600px
+    );
 
-          margin: 24px auto 0;
-          padding: 18px;
+    max-width: calc(100vw - 40px);
 
-          border: 1px solid rgba(255,255,255,.045);
-          border-radius: 10px;
+    margin: 24px auto 0;
+    padding: clamp(
+      12px,
+      calc(18px * (100vw / 1756)),
+      18px
+    );
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,196,0,.035),
-              rgba(255,196,0,0)
-            ),
-            rgba(8,8,8,.72);
+    border: 1px solid rgba(255,255,255,.045);
+    border-radius: 10px;
 
-          box-shadow:
-            0 12px 30px rgba(0,0,0,.24);
-        }
-      `}</style>
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,196,0,.035),
+        rgba(255,196,0,0)
+      ),
+      rgba(8,8,8,.72);
+
+    box-shadow:
+      0 12px 30px rgba(0,0,0,.24);
+  }
+`}</style>
     </section>
   );
 }
