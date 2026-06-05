@@ -1,233 +1,86 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
-import ListingCard from "../components/ListingCard";
+import Footer from "../components/Footer";
 import { getListingId } from "../lib/listingFormatters";
 
-const LARGE_TYPES = [
-  "DOZERS",
-  "EXCAVATORS",
-  "WHEEL LOADERS",
-  "MOTOR GRADERS",
-  "SCRAPERS",
-  "ARTICULATED TRUCKS",
-  "OFF HIGHWAY TRUCKS"
-];
+function getImage(machine = {}) {
+  const image =
+    machine.image ||
+    machine.imageUrl ||
+    machine.images?.[0] ||
+    machine.images?.[0]?.url ||
+    machine.publicData?.image ||
+    machine.publicData?.imageUrl ||
+    machine.publicData?.images?.[0] ||
+    machine.attributes?.publicData?.image ||
+    machine.attributes?.publicData?.imageUrl ||
+    machine.attributes?.publicData?.images?.[0];
 
-function normalizeCategory(item = {}) {
-  return String(item.type || item.category || "").trim().toUpperCase();
+  return typeof image === "string" ? image : image?.url || "";
 }
 
-function splitRings(listings = []) {
-  const large = [];
-  const small = [];
-
-  listings.forEach(item => {
-    const category = normalizeCategory(item);
-
-    if (LARGE_TYPES.includes(category)) {
-      large.push(item);
-    } else {
-      small.push(item);
-    }
-  });
-
-  return {
-    ringOne: large.length ? large : listings,
-    ringTwo: small.length ? small : listings
-  };
-}
-
-function getSafeIndex(index, length) {
-  if (!length) return 0;
-  return ((index % length) + length) % length;
+function getTitle(machine = {}) {
+  return (
+    machine.title ||
+    `${machine.year || machine.publicData?.year || ""} ${
+      machine.make || machine.publicData?.make || ""
+    } ${machine.model || machine.publicData?.model || ""}`
+  ).trim();
 }
 
 export default function IXITheater() {
   const [listings, setListings] = useState([]);
-  const [ringOneIndex, setRingOneIndex] = useState(0);
-  const [ringTwoIndex, setRingTwoIndex] = useState(0);
-
-  const [ringOnePaused, setRingOnePaused] = useState(false);
-  const [ringTwoPaused, setRingTwoPaused] = useState(false);
-
-  const [speed, setSpeed] = useState(5000);
-  const [ixiCardState, setIxiCardState] = useState({});
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [viewMode, setViewMode] = useState("single");
+  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
-    fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
+    async function loadTheater() {
+      try {
+        const res = await fetch("/api/listings");
+        const data = await res.json();
+
         if (Array.isArray(data)) {
-          setListings(data);
+          const active = data
+            .filter(item => {
+              const status =
+                item.listingStatus ||
+                item.publicData?.listingStatus ||
+                item.attributes?.publicData?.listingStatus;
+
+              return status !== "archived";
+            })
+            .slice(0, 8);
+
+          setListings(active);
         }
-      })
-      .catch(() => setListings([]));
+      } catch (err) {
+        console.error("IXI Theater load failed", err);
+      }
+    }
+
+    loadTheater();
   }, []);
 
-  const { ringOne, ringTwo } = useMemo(
-    () => splitRings(listings),
-    [listings]
-  );
+  const activeMachine = listings[activeIndex] || {};
+  const activeImage = getImage(activeMachine);
 
-  useEffect(() => {
-    if (!ringOne.length || ringOnePaused) return;
+  const compareMachines = useMemo(() => {
+    if (viewMode === "two") return listings.slice(activeIndex, activeIndex + 2);
+    if (viewMode === "four") return listings.slice(activeIndex, activeIndex + 4);
+    return [activeMachine];
+  }, [viewMode, listings, activeIndex, activeMachine]);
 
-    const timer = setInterval(() => {
-      setRingOneIndex(current =>
-        getSafeIndex(current + 1, ringOne.length)
-      );
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [ringOne.length, ringOnePaused, speed]);
-
-  useEffect(() => {
-    if (!ringTwo.length || ringTwoPaused) return;
-
-    const timer = setInterval(() => {
-      setRingTwoIndex(current =>
-        getSafeIndex(current - 1, ringTwo.length)
-      );
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [ringTwo.length, ringTwoPaused, speed]);
-
-  function updateIxiCardState(listingId, patch) {
-    setIxiCardState(current => ({
-      ...current,
-      [String(listingId)]: {
-        color: "none",
-        outline: 1,
-        ...(current[String(listingId)] || {}),
-        ...patch
-      }
-    }));
-  }
-
-  function getCardState(item) {
-    const id = String(getListingId(item));
-
-    return (
-      ixiCardState[id] || {
-        color: "none",
-        outline: 1
-      }
+  function nextMachine() {
+    setActiveIndex(current =>
+      listings.length ? (current + 1) % listings.length : 0
     );
   }
 
-  function renderTheaterCard(item, variant = "current") {
-  if (!item) return null;
-
-  const id = String(getListingId(item));
-
-  return (
-    <div
-      className={`theater-card-frame ${variant}`}
-      style={{
-        width: "300px",
-        minWidth: "300px",
-        maxWidth: "300px",
-        flex: "0 0 300px"
-      }}
-    >
-      <ListingCard
-        key={`${variant}-${id}`}
-        listing={item}
-        from="theater"
-        saved={false}
-        showSave={true}
-        ixiState={getCardState(item)}
-        onIxiStateChange={updateIxiCardState}
-      />
-    </div>
-  );
-}
-
-  function renderRing({
-    label,
-    direction,
-    machines,
-    index,
-    paused,
-    setPaused
-  }) {
-    if (!machines.length) {
-      return (
-        <section className="theater-ring empty-ring">
-          <h2>{label}</h2>
-          <p>No machines loaded.</p>
-        </section>
-      );
-    }
-
-    const prev = machines[getSafeIndex(index - 1, machines.length)];
-    const current = machines[getSafeIndex(index, machines.length)];
-    const next = machines[getSafeIndex(index + 1, machines.length)];
-
-    return (
-      <section className={`theater-ring ${direction}`}>
-        <div className="ring-head">
-          <div>
-            <span>{label}</span>
-            <strong>{direction === "right" ? "MOVING RIGHT" : "MOVING LEFT"}</strong>
-          </div>
-
-          <div className="ring-controls">
-            <button
-              type="button"
-              className={speed === 3000 ? "active" : ""}
-              onClick={() => setSpeed(3000)}
-              aria-label="Fast"
-            >
-              —
-            </button>
-
-            <button
-              type="button"
-              className={speed === 5000 ? "active" : ""}
-              onClick={() => setSpeed(5000)}
-              aria-label="Medium"
-            >
-              ––
-            </button>
-
-            <button
-              type="button"
-              className={speed === 7000 ? "active" : ""}
-              onClick={() => setSpeed(7000)}
-              aria-label="Slow"
-            >
-              –––
-            </button>
-
-            <button
-              type="button"
-              className={paused ? "pause active" : "pause"}
-              onClick={() => setPaused(current => !current)}
-            >
-              {paused ? "PLAY" : "PAUSE"}
-            </button>
-          </div>
-        </div>
-
-        <div className="theater-stage">
-          <div className="side-card played-card">
-            <div className="side-label">JUST PLAYED</div>
-            {renderTheaterCard(prev, "side played")}
-          </div>
-
-          <div className="main-card">
-            {renderTheaterCard(current, "current")}
-          </div>
-
-          <div className="side-card next-card">
-            <div className="side-label">NEXT</div>
-            {renderTheaterCard(next, "side next")}
-          </div>
-        </div>
-      </section>
+  function prevMachine() {
+    setActiveIndex(current =>
+      listings.length ? (current - 1 + listings.length) % listings.length : 0
     );
   }
 
@@ -235,423 +88,450 @@ export default function IXITheater() {
     <>
       <Head>
         <title>IXI Theater | IronXchange</title>
-        <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          rel="stylesheet"
-        />
       </Head>
 
       <Navbar />
 
-      <main className="theater-page">
-        <section className="theater-hero">
-          <div>
-            <h1>IXI THEATER</h1>
-            <p>Iron is always moving.</p>
-          </div>
+      <main className={entered ? "lights-out" : ""}>
+        {!entered && (
+          <section className="theater-lobby">
+            <div className="lobby-card">
+              <span className="eyebrow">IXI THEATER</span>
+              <h1>Current Showing</h1>
 
-          <span>{listings.length} MACHINES LIVE</span>
-        </section>
+              <p>
+                {listings.length
+                  ? `${listings.length} machines loaded for inspection.`
+                  : "Loading machines..."}
+              </p>
 
-        {renderRing({
-          label: "RING 1",
-          direction: "right",
-          machines: ringOne,
-          index: ringOneIndex,
-          paused: ringOnePaused,
-          setPaused: setRingOnePaused
-        })}
+              <button type="button" onClick={() => setEntered(true)}>
+                ENTER THEATER
+              </button>
+            </div>
+          </section>
+        )}
 
-        {renderRing({
-          label: "RING 2",
-          direction: "left",
-          machines: ringTwo,
-          index: ringTwoIndex,
-          paused: ringTwoPaused,
-          setPaused: setRingTwoPaused
-        })}
+        {entered && (
+          <section className={`theater-room mode-${viewMode}`}>
+            <div className="theater-top">
+              <span>ironxchange</span>
+
+              <div className="view-controls">
+                <button onClick={() => setViewMode("single")}>1</button>
+                <button onClick={() => setViewMode("two")}>2</button>
+                <button onClick={() => setViewMode("four")}>4</button>
+              </div>
+            </div>
+
+            {viewMode === "single" && (
+              <div className="single-stage">
+                {activeImage ? (
+                  <img src={activeImage} alt={getTitle(activeMachine)} />
+                ) : (
+                  <div className="no-photo">NO PHOTO</div>
+                )}
+              </div>
+            )}
+
+            {viewMode !== "single" && (
+              <div className="compare-stage">
+                {compareMachines.map(machine => {
+                  const id = getListingId(machine);
+                  const image = getImage(machine);
+
+                  return (
+                    <div key={id} className="compare-panel">
+                      {image ? (
+                        <img src={image} alt={getTitle(machine)} />
+                      ) : (
+                        <div className="no-photo">NO PHOTO</div>
+                      )}
+
+                      <div className="compare-meta">
+                        <strong>{getTitle(machine)}</strong>
+                        <span>
+                          {machine.hours || machine.publicData?.hours || "—"} hrs
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="theater-bottom">
+              <button type="button" onClick={prevMachine}>
+                PREV
+              </button>
+
+              <div className="machine-meta">
+                <h2>{getTitle(activeMachine)}</h2>
+                <p>
+                  {activeMachine.year || activeMachine.publicData?.year || "—"} ·{" "}
+                  {activeMachine.hours || activeMachine.publicData?.hours || "—"} HRS ·{" "}
+                  {activeMachine.location || activeMachine.publicData?.location || "—"}
+                </p>
+                <span>
+                  MACHINE {activeIndex + 1} OF {listings.length}
+                </span>
+              </div>
+
+              <button type="button" onClick={nextMachine}>
+                NEXT
+              </button>
+            </div>
+
+            <div className="filmstrip">
+              {listings.map((machine, index) => {
+                const image = getImage(machine);
+
+                return (
+                  <button
+                    key={getListingId(machine)}
+                    className={index === activeIndex ? "active" : ""}
+                    onClick={() => setActiveIndex(index)}
+                  >
+                    {image ? <img src={image} alt="" /> : <span />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
-  <style jsx>{`
-  :global(body) {
-    margin: 0;
-    background: #070707;
-    color: #d6d6d6;
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
-  }
+      <Footer />
 
-  .theater-page {
-    min-height: 100vh;
-    padding: 20px 4% 40px;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(0,194,255,.055), transparent 34%),
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      #070707;
-  }
+      <style jsx>{`
+        :global(body) {
+          margin: 0;
+          background: #050505;
+          color: #d8d8d8;
+          font-family: Arial, sans-serif;
+        }
 
-  .theater-hero {
-    max-width: 1240px;
-    margin: 0 auto 16px;
+        main {
+          min-height: 82vh;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255,255,255,.035), transparent 30%),
+            #050505;
+          padding: 24px 4% 48px;
+        }
 
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+        .theater-lobby {
+          min-height: 70vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-    padding: 12px 2px 16px;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-  }
+        .lobby-card {
+          width: min(520px, 92vw);
+          padding: 42px 34px;
+          text-align: center;
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
+            rgba(10,10,10,.88);
+          box-shadow: 0 24px 70px rgba(0,0,0,.42);
+        }
 
-  .theater-hero h1 {
-    margin: 0;
-    color: rgba(255,255,255,.88);
-    font-size: 18px;
-    font-weight: 950;
-    letter-spacing: .8px;
-  }
+        .eyebrow {
+          color: rgba(180,180,180,.62);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: 1.2px;
+        }
 
-  .theater-hero p {
-    margin: 5px 0 0;
-    color: rgba(0,194,255,.72);
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: .65px;
-    text-transform: uppercase;
-  }
+        .lobby-card h1 {
+          margin: 14px 0 8px;
+          color: rgba(245,245,245,.92);
+          font-size: 34px;
+          font-weight: 950;
+          letter-spacing: -.8px;
+        }
 
-  .theater-hero span {
-    color: rgba(255,255,255,.36);
-    font-size: 9px;
-    font-weight: 950;
-    letter-spacing: .7px;
-  }
+        .lobby-card p {
+          margin: 0 0 24px;
+          color: rgba(255,255,255,.42);
+          font-size: 13px;
+        }
 
-  .theater-ring {
-    max-width: 1240px;
-    margin: 0 auto 22px;
-    padding: 12px;
+        button {
+          cursor: pointer;
+        }
 
-    border: 1px solid rgba(255,255,255,.055);
-    border-radius: 18px;
+        .lobby-card button,
+        .theater-bottom button,
+        .view-controls button {
+          border: 1px solid rgba(255,255,255,.10);
+          background: rgba(255,255,255,.035);
+          color: rgba(230,230,230,.72);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .8px;
+        }
 
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      rgba(10,10,10,.72);
+        .lobby-card button {
+          height: 34px;
+          padding: 0 22px;
+          border-radius: 999px;
+        }
 
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.025) inset,
-      0 22px 54px rgba(0,0,0,.28);
-  }
+        .theater-room {
+          min-height: 76vh;
+          display: grid;
+          grid-template-rows: 28px 1fr auto 54px;
+          gap: 14px;
+        }
 
-  .ring-head {
-    height: 30px;
+        .theater-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+        .theater-top span {
+          color: rgba(190,190,190,.18);
+          font-size: 16px;
+          font-weight: 950;
+          letter-spacing: -.5px;
+          text-shadow: 0 0 18px rgba(180,180,180,.08);
+        }
 
-    margin-bottom: 10px;
-  }
+        .view-controls {
+          display: flex;
+          gap: 8px;
+        }
 
-  .ring-head span {
-    display: block;
-    color: #FFC400;
-    font-size: 9px;
-    font-weight: 950;
-    letter-spacing: .7px;
-  }
+        .view-controls button {
+          width: 28px;
+          height: 18px;
+          border-radius: 999px;
+        }
 
-  .ring-head strong {
-    display: block;
-    margin-top: 2px;
-    color: rgba(255,255,255,.34);
-    font-size: 7.5px;
-    font-weight: 950;
-    letter-spacing: .7px;
-  }
+        .single-stage,
+        .compare-stage {
+          min-height: 0;
+        }
 
-  .ring-controls {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
+        .single-stage {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-  .ring-controls button {
-    height: 20px;
-    min-width: 24px;
+        .single-stage img {
+          max-width: 100%;
+          max-height: 62vh;
+          object-fit: contain;
+          border-radius: 10px;
+          box-shadow: 0 28px 90px rgba(0,0,0,.54);
+        }
 
-    border: 1px solid rgba(255,255,255,.055);
-    border-radius: 999px;
+        .compare-stage {
+          display: grid;
+          gap: 14px;
+        }
 
-    background: rgba(255,255,255,.018);
-    color: rgba(255,255,255,.32);
+        .mode-two .compare-stage {
+          grid-template-columns: repeat(2, 1fr);
+        }
 
-    font-size: 8px;
-    font-weight: 950;
-    cursor: pointer;
-  }
+        .mode-four .compare-stage {
+          grid-template-columns: repeat(4, 1fr);
+        }
 
-  .ring-controls button:hover,
-  .ring-controls button.active {
-    color: rgba(0,194,255,.92);
-    border-color: rgba(0,194,255,.32);
-    box-shadow:
-      0 0 0 1px rgba(0,194,255,.04),
-      0 0 12px rgba(0,194,255,.10);
-  }
+        .compare-panel {
+          min-width: 0;
+          display: grid;
+          grid-template-rows: 1fr auto;
+          border: 1px solid rgba(255,255,255,.055);
+          border-radius: 12px;
+          overflow: hidden;
+          background: rgba(255,255,255,.025);
+        }
 
-  .ring-controls .pause {
-    padding: 0 9px;
-    min-width: 48px;
-    color: rgba(255,196,0,.62);
-  }
+        .compare-panel img {
+          width: 100%;
+          height: 54vh;
+          object-fit: cover;
+        }
 
- .theater-stage {
-  display: grid;
-  grid-template-columns: 190px 330px 190px;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
+        .compare-meta {
+          padding: 10px;
+          display: grid;
+          gap: 4px;
+          background: rgba(0,0,0,.62);
+        }
 
-  min-height: 455px;
-  overflow: hidden;
-}
+        .compare-meta strong {
+          color: rgba(245,245,245,.82);
+          font-size: 11px;
+          font-weight: 950;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
-.played-card,
-.next-card,
-.main-card {
-  height: 430px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-  .main-card {
-  width: 330px;
-  min-width: 330px;
-  max-width: 330px;
-  justify-content: center;
-  z-index: 5;
-}
+        .compare-meta span {
+          color: rgba(255,255,255,.42);
+          font-size: 9px;
+          font-weight: 900;
+        }
 
+        .no-photo {
+          min-height: 48vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,.22);
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 1px;
+          background: #111;
+        }
 
-  .main-card :global(.card) {
-    width: 300px !important;
-    min-width: 300px !important;
-    max-width: 300px !important;
-  }
+        .theater-bottom {
+          display: grid;
+          grid-template-columns: 80px 1fr 80px;
+          align-items: center;
+          gap: 16px;
+        }
 
-  .theater-card-frame.current {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
+        .theater-bottom button {
+          height: 28px;
+          border-radius: 999px;
+        }
 
-    transform: scale(1.08);
-    transform-origin: center;
-    filter: none;
-  }
+        .machine-meta {
+          text-align: center;
+        }
 
- .played-card {
-  width: 190px;
-  min-width: 190px;
-  max-width: 190px;
-  justify-content: flex-end;
-  opacity: .40;
-}
+        .machine-meta h2 {
+          margin: 0;
+          color: rgba(245,245,245,.88);
+          font-size: 18px;
+          font-weight: 950;
+        }
 
+        .machine-meta p {
+          margin: 5px 0 3px;
+          color: rgba(255,255,255,.44);
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .4px;
+        }
 
-  .played-card :global(.card) {
-    width: 300px !important;
-    min-width: 300px !important;
-    max-width: 300px !important;
+        .machine-meta span {
+          color: rgba(255,255,255,.25);
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .8px;
+        }
 
-    transform: translateX(78px) scale(.82);
-    transform-origin: center;
-    pointer-events: none;
-  }
+        .filmstrip {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          overflow-x: auto;
+          padding-bottom: 4px;
+        }
 
-  .next-card {
-  width: 190px;
-  min-width: 190px;
-  max-width: 190px;
-  justify-content: flex-start;
-  opacity: .60;
-}
-  .next-card :global(.card) {
-    width: 300px !important;
-    min-width: 300px !important;
-    max-width: 300px !important;
+        .filmstrip button {
+          flex: 0 0 62px;
+          height: 42px;
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 7px;
+          overflow: hidden;
+          padding: 0;
+          background: rgba(255,255,255,.035);
+          opacity: .44;
+        }
 
-    transform: translateX(-78px) scale(.82);
-    transform-origin: center;
-  }
+        .filmstrip button.active {
+          opacity: 1;
+          border-color: rgba(180,180,180,.52);
+          box-shadow: 0 0 16px rgba(255,255,255,.08);
+        }
 
-  .theater-card-frame {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
+        .filmstrip img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
 
-    flex: 0 0 300px;
-    transform-origin: center;
-  }
+        @media (max-width: 850px) {
+          main {
+            padding: 10px 0 28px;
+          }
 
-  .theater-card-frame,
-.theater-card-frame :global(.card) {
-  width: 300px !important;
-  min-width: 300px !important;
-  max-width: 300px !important;
-  flex: 0 0 300px !important;
-}
+          .theater-room {
+            min-height: 86vh;
+            grid-template-rows: 18px 1fr auto 46px;
+            gap: 8px;
+          }
 
+          .theater-top {
+            padding: 0 12px;
+          }
 
-.theater-card-frame.current {
-  transform: scale(1.08);
-  transform-origin: center;
-}
+          .theater-top span {
+            font-size: 12px;
+            opacity: .5;
+          }
 
-.played-card .theater-card-frame {
-  transform: translateX(70px) scale(.82);
-  transform-origin: center;
-}
+          .view-controls {
+            display: none;
+          }
 
-.next-card .theater-card-frame {
-  transform: translateX(-70px) scale(.82);
-  transform-origin: center;
-}  .right .main-card {
-    animation: slideRight .55s ease both;
-  }
+          .single-stage img {
+            width: 100vw;
+            max-height: 68vh;
+            border-radius: 0;
+          }
 
-  .left .main-card {
-    animation: slideLeft .55s ease both;
-  }
+          .compare-stage {
+            grid-template-columns: 1fr !important;
+            overflow-y: auto;
+            padding: 0 10px;
+          }
 
-  @keyframes slideRight {
-    from {
-      transform: translateX(-24px);
-      opacity: .6;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
+          .compare-panel img {
+            height: 54vh;
+          }
 
-  @keyframes slideLeft {
-    from {
-      transform: translateX(24px);
-      opacity: .6;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
+          .theater-bottom {
+            grid-template-columns: 62px 1fr 62px;
+            gap: 8px;
+            padding: 0 10px;
+          }
 
-  .empty-ring {
-    min-height: 180px;
-    display: grid;
-    place-items: center;
-    text-align: center;
-  }
+          .theater-bottom button {
+            height: 25px;
+            font-size: 8px;
+          }
 
-  .empty-ring h2 {
-    margin: 0;
-    color: rgba(255,255,255,.72);
-  }
+          .machine-meta h2 {
+            font-size: 14px;
+          }
 
-  .empty-ring p {
-    color: rgba(255,255,255,.36);
-  }
+          .machine-meta p {
+            font-size: 9px;
+          }
 
-    
-  .theater-card-frame {
-  width: 300px !important;
-  min-width: 300px !important;
-  max-width: 300px !important;
-  flex: 0 0 300px !important;
-}
+          .filmstrip {
+            justify-content: flex-start;
+            padding: 0 10px 4px;
+          }
 
-.theater-card-frame :global(.card) {
-  width: 300px !important;
-  min-width: 300px !important;
-  max-width: 300px !important;
-  flex: 0 0 300px !important;
-}
-
-.theater-stage {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 18px !important;
-  min-height: 455px !important;
-  overflow: hidden !important;
-}
-
-.played-card,
-.main-card,
-.next-card {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  height: 430px !important;
-  overflow: hidden !important;
-}
-
-.played-card {
-  width: 190px !important;
-  min-width: 190px !important;
-  max-width: 190px !important;
-  justify-content: flex-end !important;
-  opacity: .40 !important;
-}
-
-.main-card {
-  width: 330px !important;
-  min-width: 330px !important;
-  max-width: 330px !important;
-  justify-content: center !important;
-}
-
-.next-card {
-  width: 190px !important;
-  min-width: 190px !important;
-  max-width: 190px !important;
-  justify-content: flex-start !important;
-  opacity: .60 !important;
-}
-
-.theater-card-frame,
-.theater-card-frame :global(.card) {
-  width: 300px !important;
-  min-width: 300px !important;
-  max-width: 300px !important;
-  flex: 0 0 300px !important;
-}
-
-.theater-card-frame.current {
-  transform: scale(1.08) !important;
-}
-
-.played-card .theater-card-frame {
-  transform: translateX(70px) scale(.82) !important;
-}
-
-.next-card .theater-card-frame {
-  transform: translateX(-70px) scale(.82) !important;
-}
-
-@media (max-width: 950px) {
-  .theater-stage {
-    display: flex !important;
-    flex-direction: row !important;
-    grid-template-columns: unset !important;
-  }
-
-  .played-card,
-  .next-card {
-    display: flex !important;
-  }
-}
+          .filmstrip button {
+            flex-basis: 54px;
+            height: 36px;
+          }
+        }
       `}</style>
     </>
   );
