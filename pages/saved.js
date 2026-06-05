@@ -1751,7 +1751,7 @@ box-shadow: none;
   width: 320px;
   height: 92px;
 
-  overflow: visible;
+  overflow: hidden;
 
   pointer-events: auto;
 
@@ -1763,17 +1763,15 @@ box-shadow: none;
   right: 24px;
 }
 
-.ixi-pocket-thumbs {
+.ixi-pocket-thumb {
+  width: 120px !important;
+  height: 80px !important;
+
   position: absolute;
-
-  left: 24px;
-  top: 30px;
-
-  width: 320px;
-  height: 92px;
+  top: 0;
 
   overflow: hidden;
-  
+
   border: 2px solid rgba(255,255,255,.12);
   border-radius: 8px 8px 0 0;
 
