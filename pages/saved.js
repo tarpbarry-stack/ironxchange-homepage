@@ -1751,7 +1751,7 @@ box-shadow: none;
   width: 320px;
   height: 92px;
 
-  overflow: hidden;
+  overflow: visible;
 
   pointer-events: auto;
 
