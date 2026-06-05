@@ -28,8 +28,8 @@ export default function IXITheater() {
   const [entered, setEntered] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
 
-  const [photoIndex, setPhotoIndex] = useState(0);
-
+  const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+  
   useEffect(() => {
     async function loadTheater() {
       try {
@@ -95,20 +95,28 @@ function getMachineImages(machine = {}) {
   return images.length ? images : hero ? [hero] : [];
 }
 
-function nextPhoto(machine) {
+function nextPhotoForMachine(machine) {
+  const id = String(getListingId(machine));
   const images = getMachineImages(machine);
 
-  setPhotoIndex(current =>
-    images.length ? (current + 1) % images.length : 0
-  );
+  setSlotPhotoIndexes(current => ({
+    ...current,
+    [id]: images.length
+      ? ((current[id] || 0) + 1) % images.length
+      : 0
+  }));
 }
 
-function prevPhoto(machine) {
+function prevPhotoForMachine(machine) {
+  const id = String(getListingId(machine));
   const images = getMachineImages(machine);
 
-  setPhotoIndex(current =>
-    images.length ? (current - 1 + images.length) % images.length : 0
-  );
+  setSlotPhotoIndexes(current => ({
+    ...current,
+    [id]: images.length
+      ? ((current[id] || 0) - 1 + images.length) % images.length
+      : 0
+  }));
 }
   
   return (
@@ -142,22 +150,24 @@ function prevPhoto(machine) {
 
             <section className="theater-screen">
              {screenMachines.map(machine => {
-  const images = getMachineImages(machine);
-  const image = images[photoIndex] || getImage(machine);
+  const id = String(getListingId(machine));
+const images = getMachineImages(machine);
+const currentPhotoIndex = slotPhotoIndexes[id] || 0;
+const image = images[currentPhotoIndex] || getImage(machine);
 
   return (
     <div key={getListingId(machine)} className="screen-slot">
-                    <button
+               <button
   type="button"
   className="photo-hit-zone photo-hit-left"
-  onClick={() => prevPhoto(machine)}
+  onClick={() => prevPhotoForMachine(machine)}
   aria-label="Previous photo"
 />
 
 <button
   type="button"
   className="photo-hit-zone photo-hit-right"
-  onClick={() => nextPhoto(machine)}
+  onClick={() => nextPhotoForMachine(machine)}
   aria-label="Next photo"
 />
 
@@ -329,11 +339,14 @@ function prevPhoto(machine) {
           text-shadow: 0 0 18px rgba(180,180,180,.06);
         }
 
-        .theater-screen {
-          min-height: 0;
-          display: grid;
-          gap: 10px;
-        }
+       .theater-screen {
+  height: 68vh;
+
+  display: grid;
+  gap: 10px;
+
+  margin: 0 auto;
+}
 
         .view-1 .theater-screen {
           grid-template-columns: 1fr;
