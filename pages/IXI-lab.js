@@ -317,10 +317,10 @@ onMouseLeave={() => {
   background:
   linear-gradient(
     180deg,
-    rgba(255,196,0,.035),
+    rgba(255,196,0,.03),
     rgba(255,196,0,0)
   ),
-  rgba(8,8,8,.72);
+  rgba(6,6,6,.82);
 
   box-shadow:
     0 14px 34px rgba(0,0,0,.18);
