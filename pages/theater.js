@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
+const THEATER_SESSION_KEY = "ixiTheaterSessionIds";
+
 function getImage(machine = {}) {
   const image =
     machine.image ||
@@ -20,70 +22,6 @@ function getImage(machine = {}) {
 
   return typeof image === "string" ? image : image?.url || "";
 }
-
-export default function IXITheater() {
-  const [listings, setListings] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [viewCount, setViewCount] = useState(1);
-  const [entered, setEntered] = useState(false);
-  const [dragIndex, setDragIndex] = useState(null);
-
-  const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
-  const [screenSlotIds, setScreenSlotIds] = useState([]);
-  
-  useEffect(() => {
-    async function loadTheater() {
-      try {
-        const res = await fetch("/api/listings");
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          const theaterListings = data
-  .filter(item => {
-    const status =
-      item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus;
-
-    return status !== "archived";
-  })
-  .slice(0, 8);
-
-setListings(theaterListings);
-
-setScreenSlotIds(
-  theaterListings
-    .slice(0, 4)
-    .map(item => String(getListingId(item)))
-);
-        }
-      } catch (err) {
-        console.error("IXI Theater load failed", err);
-      }
-    }
-
-    loadTheater();
-  }, []);
-
- const screenMachines = useMemo(() => {
-  return screenSlotIds
-    .slice(0, viewCount)
-    .map(id => getMachineById(id))
-    .filter(Boolean);
-}, [screenSlotIds, listings, viewCount]);
-
-  function moveCard(from, to) {
-    if (from === null || to === null || from === to) return;
-
-    setListings(current => {
-      const next = [...current];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      return next;
-    });
-
-    setActiveIndex(to);
-  }
 
 function getMachineImages(machine = {}) {
   const rawImages =
@@ -105,47 +43,142 @@ function getMachineImages(machine = {}) {
   return images.length ? images : hero ? [hero] : [];
 }
 
-function nextPhotoForMachine(machine) {
-  const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
+export default function IXITheater() {
+  const [listings, setListings] = useState([]);
+  const [viewCount, setViewCount] = useState(1);
+  const [entered, setEntered] = useState(false);
 
-  setSlotPhotoIndexes(current => ({
-    ...current,
-    [id]: images.length
-      ? ((current[id] || 0) + 1) % images.length
-      : 0
-  }));
-}
+  const [dragMachineId, setDragMachineId] = useState("");
+  const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+  const [screenSlotIds, setScreenSlotIds] = useState([]);
 
-function prevPhotoForMachine(machine) {
-  const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
+  useEffect(() => {
+    async function loadTheater() {
+      try {
+        const res = await fetch("/api/listings");
+        const data = await res.json();
 
-  setSlotPhotoIndexes(current => ({
-    ...current,
-    [id]: images.length
-      ? ((current[id] || 0) - 1 + images.length) % images.length
-      : 0
-  }));
-}
+        if (!Array.isArray(data)) return;
 
-function getMachineById(id) {
-  return listings.find(
-    item => String(getListingId(item)) === String(id)
+        const activeListings = data.filter(item => {
+          const status =
+            item.listingStatus ||
+            item.publicData?.listingStatus ||
+            item.attributes?.publicData?.listingStatus;
+
+          return status !== "archived";
+        });
+
+        let sessionIds = [];
+
+        if (typeof window !== "undefined") {
+          try {
+            sessionIds = JSON.parse(
+              window.localStorage.getItem(THEATER_SESSION_KEY) || "[]"
+            );
+          } catch {
+            sessionIds = [];
+          }
+        }
+
+        const sessionListings = sessionIds
+          .map(id =>
+            activeListings.find(item => String(getListingId(item)) === String(id))
+          )
+          .filter(Boolean);
+
+        const fallbackListings = activeListings.slice(0, 8);
+
+        const theaterListings = sessionListings.length
+          ? sessionListings
+          : fallbackListings;
+
+        setListings(theaterListings);
+
+        setScreenSlotIds(
+          theaterListings.slice(0, 4).map(item => String(getListingId(item)))
+        );
+      } catch (err) {
+        console.error("IXI Theater load failed", err);
+      }
+    }
+
+    loadTheater();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!listings.length) return;
+
+    window.localStorage.setItem(
+      THEATER_SESSION_KEY,
+      JSON.stringify(listings.map(item => String(getListingId(item))))
+    );
+  }, [listings]);
+
+  const visibleSlotIds = useMemo(
+    () => screenSlotIds.slice(0, viewCount),
+    [screenSlotIds, viewCount]
   );
-}
 
-function assignMachineToScreen(machineId, slotIndex) {
-  setScreenSlotIds(current => {
-    const next = [...current];
+  function getMachineById(id) {
+    return listings.find(item => String(getListingId(item)) === String(id));
+  }
 
-    next[slotIndex] = String(machineId);
+  function assignMachineToScreen(machineId, slotIndex) {
+    if (!machineId && machineId !== 0) return;
 
-    return next;
-  });
-}
+    setScreenSlotIds(current => {
+      const next = [...current];
+      next[slotIndex] = String(machineId);
+      return next;
+    });
+  }
 
-  
+  function reorderLoadedCards(sourceId, targetId) {
+    if (!sourceId || !targetId || String(sourceId) === String(targetId)) return;
+
+    setListings(current => {
+      const fromIndex = current.findIndex(
+        item => String(getListingId(item)) === String(sourceId)
+      );
+
+      const toIndex = current.findIndex(
+        item => String(getListingId(item)) === String(targetId)
+      );
+
+      if (fromIndex === -1 || toIndex === -1) return current;
+
+      const next = [...current];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+
+      return next;
+    });
+  }
+
+  function nextPhotoForMachine(machine) {
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+
+    setSlotPhotoIndexes(current => ({
+      ...current,
+      [id]: images.length ? ((current[id] || 0) + 1) % images.length : 0
+    }));
+  }
+
+  function prevPhotoForMachine(machine) {
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+
+    setSlotPhotoIndexes(current => ({
+      ...current,
+      [id]: images.length
+        ? ((current[id] || 0) - 1 + images.length) % images.length
+        : 0
+    }));
+  }
+
   return (
     <>
       <Head>
@@ -160,9 +193,7 @@ function assignMachineToScreen(machineId, slotIndex) {
             <div className="lobby-card">
               <span>IXI THEATER</span>
 
-              <p>
-                {listings.length || 8} machines loaded for inspection.
-              </p>
+              <p>{listings.length || 8} machines loaded for inspection.</p>
 
               <button type="button" onClick={() => setEntered(true)}>
                 ENTER THEATER
@@ -176,162 +207,66 @@ function assignMachineToScreen(machineId, slotIndex) {
             <div className="theater-brand">ironxchange</div>
 
             <section className="theater-screen">
-  {Array.from({ length: viewCount }).map((_, slotIndex) => {
-    const machineId = screenSlotIds[slotIndex];
-    const machine = getMachineById(machineId);
+              {Array.from({ length: viewCount }).map((_, slotIndex) => {
+                const machineId = screenSlotIds[slotIndex];
+                const machine = getMachineById(machineId);
 
-    if (!machine) {
-      return (
-        <div
-          key={`empty-screen-${slotIndex}`}
-          className="screen-slot empty-screen-slot"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            if (dragIndex === null) return;
+                if (!machine) {
+                  return (
+                    <div
+                      key={`empty-screen-${slotIndex}`}
+                      className="screen-slot empty-screen-slot"
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => {
+                        assignMachineToScreen(dragMachineId, slotIndex);
+                        setDragMachineId("");
+                      }}
+                    >
+                      <span>SCREEN {slotIndex + 1}</span>
+                    </div>
+                  );
+                }
 
-            const draggedMachine = listings[dragIndex];
-            if (!draggedMachine) return;
+                const id = String(getListingId(machine));
+                const images = getMachineImages(machine);
+                const currentPhotoIndex = slotPhotoIndexes[id] || 0;
+                const image = images[currentPhotoIndex] || getImage(machine);
 
-            assignMachineToScreen(
-              String(getListingId(draggedMachine)),
-              slotIndex
-            );
+                return (
+                  <div
+                    key={`screen-${slotIndex}-${id}`}
+                    className="screen-slot"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={() => {
+                      assignMachineToScreen(dragMachineId, slotIndex);
+                      setDragMachineId("");
+                    }}
+                  >
+                    <div className="screen-number">SCREEN {slotIndex + 1}</div>
 
-            setDragIndex(null);
-          }}
-        >
-          <span>SCREEN {slotIndex + 1}</span>
-        </div>
-      );
-    }
+                    <button
+                      type="button"
+                      className="photo-hit-zone photo-hit-left"
+                      onClick={() => prevPhotoForMachine(machine)}
+                      aria-label="Previous photo"
+                    />
 
-    const id = String(getListingId(machine));
-    const images = getMachineImages(machine);
-    const currentPhotoIndex = slotPhotoIndexes[id] || 0;
-    const image = images[currentPhotoIndex] || getImage(machine);
+                    <button
+                      type="button"
+                      className="photo-hit-zone photo-hit-right"
+                      onClick={() => nextPhotoForMachine(machine)}
+                      aria-label="Next photo"
+                    />
 
-    return (
-      <div
-        key={`screen-${slotIndex}-${id}`}
-        className="screen-slot"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => {
-          if (dragIndex === null) return;
-
-          const draggedMachine = listings[dragIndex];
-          if (!draggedMachine) return;
-
-          assignMachineToScreen(
-            String(getListingId(draggedMachine)),
-            slotIndex
-          );
-
-          setDragIndex(null);
-        }}
-      >
-        <div className="screen-number">SCREEN {slotIndex + 1}</div>
-
-        <button
-          type="button"
-          className="photo-hit-zone photo-hit-left"
-          onClick={() => prevPhotoForMachine(machine)}
-          aria-label="Previous photo"
-        />
-
-        <button
-          type="button"
-          className="photo-hit-zone photo-hit-right"
-          onClick={() => nextPhotoForMachine(machine)}
-          aria-label="Next photo"
-        />
-
-        {image ? (
-          <img src={image} alt="" />
-        ) : (
-          <div className="no-photo">NO PHOTO</div>
-        )}
-      </div>
-    );
-  })}
-<section className="theater-screen">
-  {Array.from({ length: viewCount }).map((_, slotIndex) => {
-    const machineId = screenSlotIds[slotIndex];
-    const machine = getMachineById(machineId);
-
-    if (!machine) {
-      return (
-        <div
-          key={`empty-screen-${slotIndex}`}
-          className="screen-slot empty-screen-slot"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            if (dragIndex === null) return;
-
-            const draggedMachine = listings[dragIndex];
-            if (!draggedMachine) return;
-
-            assignMachineToScreen(
-              String(getListingId(draggedMachine)),
-              slotIndex
-            );
-
-            setDragIndex(null);
-          }}
-        >
-          <span>SCREEN {slotIndex + 1}</span>
-        </div>
-      );
-    }
-
-    const id = String(getListingId(machine));
-    const images = getMachineImages(machine);
-    const currentPhotoIndex = slotPhotoIndexes[id] || 0;
-    const image = images[currentPhotoIndex] || getImage(machine);
-
-    return (
-      <div
-        key={`screen-${slotIndex}-${id}`}
-        className="screen-slot"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={() => {
-          if (dragIndex === null) return;
-
-          const draggedMachine = listings[dragIndex];
-          if (!draggedMachine) return;
-
-          assignMachineToScreen(
-            String(getListingId(draggedMachine)),
-            slotIndex
-          );
-
-          setDragIndex(null);
-        }}
-      >
-        <div className="screen-number">SCREEN {slotIndex + 1}</div>
-
-        <button
-          type="button"
-          className="photo-hit-zone photo-hit-left"
-          onClick={() => prevPhotoForMachine(machine)}
-          aria-label="Previous photo"
-        />
-
-        <button
-          type="button"
-          className="photo-hit-zone photo-hit-right"
-          onClick={() => nextPhotoForMachine(machine)}
-          aria-label="Next photo"
-        />
-
-        {image ? (
-          <img src={image} alt="" />
-        ) : (
-          <div className="no-photo">NO PHOTO</div>
-        )}
-      </div>
-    );
-  })}
-</section>
+                    {image ? (
+                      <img src={image} alt="" />
+                    ) : (
+                      <div className="no-photo">NO PHOTO</div>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
 
             <section className="theater-card-rail">
               <div className="theater-mode-dashes">
@@ -341,48 +276,39 @@ function assignMachineToScreen(machineId, slotIndex) {
                     type="button"
                     className={viewCount === count ? "active" : ""}
                     onClick={() => setViewCount(count)}
-                  >
-                    {count}
-                  </button>
+                    aria-label={`${count} screen view`}
+                  />
                 ))}
               </div>
 
               <div className="loaded-cards">
-                {listings.map((machine, index) => {
+                {listings.map(machine => {
                   const id = String(getListingId(machine));
+                  const assignedSlotIndex = screenSlotIds.findIndex(
+                    slotId => String(slotId) === id
+                  );
+
+                  const isVisible =
+                    assignedSlotIndex >= 0 && assignedSlotIndex < viewCount;
 
                   return (
                     <div
                       key={id}
-                      className={`loaded-card ${
-  index >= activeIndex && index < activeIndex + viewCount
-    ? "on-screen"
-    : ""
-} ${
-  index === activeIndex
-    ? "screen-slot-1"
-    : index === activeIndex + 1
-    ? "screen-slot-2"
-    : index === activeIndex + 2
-    ? "screen-slot-3"
-    : index === activeIndex + 3
-    ? "screen-slot-4"
-    : ""
-}`}
+                      className={`loaded-card ${isVisible ? "on-screen" : ""}`}
                       draggable
-                      onDragStart={() => setDragIndex(index)}
-                      onDragOver={(e) => e.preventDefault()}
+                      onDragStart={() => setDragMachineId(id)}
+                      onDragOver={e => e.preventDefault()}
                       onDrop={() => {
-                        moveCard(dragIndex, index);
-                        setDragIndex(null);
+                        reorderLoadedCards(dragMachineId, id);
+                        setDragMachineId("");
                       }}
                       onClick={() => assignMachineToScreen(id, 0)}
-                                       >
-                      {screenSlotIds.includes(id) && (
-  <div className="loaded-card-screen-label">
-    SCREEN {screenSlotIds.indexOf(id) + 1}
-  </div>
-)}
+                    >
+                      {assignedSlotIndex >= 0 && (
+                        <div className="loaded-card-screen-label">
+                          SCREEN {assignedSlotIndex + 1}
+                        </div>
+                      )}
 
                       <ListingCard
                         listing={machine}
@@ -429,6 +355,7 @@ function assignMachineToScreen(machineId, slotIndex) {
 
         .theater-lobby {
           min-height: 78vh;
+
           display: flex;
           align-items: center;
           justify-content: center;
@@ -437,6 +364,7 @@ function assignMachineToScreen(machineId, slotIndex) {
         .lobby-card {
           width: min(520px, 92vw);
           padding: 46px 34px;
+
           text-align: center;
 
           border: 1px solid rgba(255,255,255,.045);
@@ -490,10 +418,11 @@ function assignMachineToScreen(machineId, slotIndex) {
         .theater-room {
           min-height: 84vh;
           position: relative;
+
           padding: 18px 20px 0;
 
           display: grid;
-          grid-template-rows: 18px 1fr auto;
+          grid-template-rows: 18px 68vh auto;
           gap: 12px;
         }
 
@@ -507,84 +436,80 @@ function assignMachineToScreen(machineId, slotIndex) {
           text-shadow: 0 0 18px rgba(180,180,180,.06);
         }
 
-       .theater-screen {
-  height: 68vh;
+        .theater-screen {
+          height: 68vh;
+          width: 100%;
 
-  display: grid;
-  gap: 10px;
+          display: grid;
+          gap: 10px;
 
-  margin: 0 auto;
-}
+          margin: 0 auto;
+        }
 
         .view-1 .theater-screen {
           grid-template-columns: 1fr;
         }
 
         .view-2 .theater-screen {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .view-4 .theater-screen {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           grid-template-rows: repeat(2, minmax(0, 1fr));
         }
 
-     .screen-slot {
-  min-width: 0;
-  min-height: 0;
+        .screen-slot {
+          min-width: 0;
+          min-height: 0;
 
-  position: relative;
+          position: relative;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-  background: #050505;
-  overflow: hidden;
-}
+          background: #050505;
+          overflow: hidden;
+        }
 
-.screen-slot img {
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: cover;
-  object-position: center;
-}
+        .screen-slot img {
+          width: 100%;
+          height: 100%;
 
-.photo-hit-zone {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+          object-fit: cover;
+          object-position: center;
+        }
 
-  width: 24%;
+        .photo-hit-zone {
+          position: absolute;
+          top: 0;
+          bottom: 0;
 
-  border: 0;
-  background: transparent;
+          width: 24%;
 
-  z-index: 5;
-  cursor: pointer;
-}
+          border: 0;
+          background: transparent;
 
-.photo-hit-left {
-  left: 0;
-}
+          z-index: 5;
+          cursor: pointer;
+        }
 
-.photo-hit-right {
-  right: 0;
-}
+        .photo-hit-left {
+          left: 0;
+        }
 
-.photo-hit-zone:hover {
-  background: rgba(255,255,255,.025);
-}
+        .photo-hit-right {
+          right: 0;
+        }
 
-        .view-4 .screen-slot img {
-          max-height: 31vh;
+        .photo-hit-zone:hover {
+          background: rgba(255,255,255,.025);
         }
 
         .no-photo {
           width: 100%;
           height: 100%;
-          min-height: 240px;
 
           display: flex;
           align-items: center;
@@ -598,10 +523,39 @@ function assignMachineToScreen(machineId, slotIndex) {
           background: #111;
         }
 
+        .empty-screen-slot {
+          border: 1px dashed rgba(255,255,255,.12);
+          background: rgba(255,255,255,.018);
+        }
+
+        .empty-screen-slot span,
+        .screen-number {
+          position: absolute;
+          left: 10px;
+          top: 8px;
+
+          z-index: 6;
+
+          color: rgba(255,255,255,.26);
+
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .8px;
+        }
+
+        .screen-number {
+          opacity: 0;
+          transition: opacity .14s ease;
+        }
+
+        .screen-slot:hover .screen-number {
+          opacity: 1;
+        }
+
         .theater-card-rail {
           padding: 10px 0 14px;
 
-          opacity: .12;
+          opacity: .14;
           transition: opacity .18s ease;
         }
 
@@ -652,7 +606,7 @@ function assignMachineToScreen(machineId, slotIndex) {
           width: 245px;
 
           position: relative;
-          
+
           transform: scale(.82);
           transform-origin: bottom center;
 
@@ -667,40 +621,40 @@ function assignMachineToScreen(machineId, slotIndex) {
         }
 
         .loaded-card-screen-label {
-  height: 16px;
+          height: 16px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-  margin-bottom: 5px;
+          margin-bottom: 5px;
 
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 6px;
+          border: 1px solid rgba(180,180,180,.22);
+          border-radius: 6px;
 
-  background: rgba(255,255,255,.035);
-  color: rgba(235,235,235,.72);
+          background: rgba(255,255,255,.035);
+          color: rgba(235,235,235,.72);
 
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .9px;
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .9px;
 
-  box-shadow: 0 0 14px rgba(255,255,255,.045);
-}
-
-.loaded-card.on-screen {
-  padding: 6px;
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 10px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
-    rgba(10,10,10,.82);
-}
+          box-shadow: 0 0 14px rgba(255,255,255,.045);
+        }
 
         .loaded-card.on-screen {
+          padding: 6px;
+
+          border: 1px solid rgba(180,180,180,.22);
+          border-radius: 10px;
+
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
+            rgba(10,10,10,.82);
+
           opacity: 1;
           transform: scale(.88);
+
           box-shadow: 0 0 0 1px rgba(180,180,180,.22);
         }
 
@@ -709,39 +663,12 @@ function assignMachineToScreen(machineId, slotIndex) {
           transform: scale(.9) translateY(-2px);
         }
 
-.empty-screen-slot {
-  border: 1px dashed rgba(255,255,255,.12);
-  background: rgba(255,255,255,.018);
-}
-
-.empty-screen-slot span,
-.screen-number {
-  position: absolute;
-  left: 10px;
-  top: 8px;
-
-  z-index: 6;
-
-  color: rgba(255,255,255,.26);
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .8px;
-}
-
-.screen-number {
-  opacity: 0;
-  transition: opacity .14s ease;
-}
-
-.screen-slot:hover .screen-number {
-  opacity: 1;
-}
         @media (max-width: 850px) {
           .theater-room {
             min-height: 88vh;
             padding: 10px 0 0;
-            grid-template-rows: 14px 1fr auto;
+
+            grid-template-rows: 14px 68vh auto;
             gap: 8px;
           }
 
@@ -757,14 +684,14 @@ function assignMachineToScreen(machineId, slotIndex) {
             grid-template-rows: none;
           }
 
-          .screen-slot img {
-            width: 100vw;
-            max-height: 68vh;
-          }
-
           .view-2 .screen-slot:not(:first-child),
           .view-4 .screen-slot:not(:first-child) {
             display: none;
+          }
+
+          .screen-slot img {
+            width: 100vw;
+            height: 100%;
           }
 
           .loaded-card {
