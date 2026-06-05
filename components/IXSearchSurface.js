@@ -341,7 +341,7 @@ const [panelLit, setPanelLit] = useState(false);
 
 <style jsx>{`
 .ix-search-surface {
-  width: 600px;
+  width: 540px;
   max-width: 100%;
   margin: 0 auto;
 }
