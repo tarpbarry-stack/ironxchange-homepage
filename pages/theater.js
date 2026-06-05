@@ -203,10 +203,20 @@ const image = images[currentPhotoIndex] || getImage(machine);
                     <div
                       key={id}
                       className={`loaded-card ${
-                        index >= activeIndex && index < activeIndex + viewCount
-                          ? "on-screen"
-                          : ""
-                      }`}
+  index >= activeIndex && index < activeIndex + viewCount
+    ? "on-screen"
+    : ""
+} ${
+  index === activeIndex
+    ? "screen-slot-1"
+    : index === activeIndex + 1
+    ? "screen-slot-2"
+    : index === activeIndex + 2
+    ? "screen-slot-3"
+    : index === activeIndex + 3
+    ? "screen-slot-4"
+    : ""
+}`}
                       draggable
                       onDragStart={() => setDragIndex(index)}
                       onDragOver={(e) => e.preventDefault()}
@@ -215,7 +225,13 @@ const image = images[currentPhotoIndex] || getImage(machine);
                         setDragIndex(null);
                       }}
                       onClick={() => setActiveIndex(index)}
-                    >
+                                       >
+                      {index >= activeIndex && index < activeIndex + viewCount && (
+                        <div className="loaded-card-screen-label">
+                          SCREEN {index - activeIndex + 1}
+                        </div>
+                      )}
+
                       <ListingCard
                         listing={machine}
                         saved={false}
