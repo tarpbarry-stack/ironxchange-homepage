@@ -27,7 +27,7 @@ export default function IXIControlSurface({ children, className = "" }) {
 
 @media (max-width: 1200px) {
   .ixi-control-surface {
-    width: min(92vw, 520px);
+    width: clamp(360px, 34vw, 420px);
     min-width: 0;
   }
 }
