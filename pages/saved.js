@@ -1350,8 +1350,7 @@ onBoardDragEnd={() => {}}
   position: relative;
   z-index: 5;
 
-  width: 700px;
-  max-width: 100%;
+  width: fit-content;
   margin: 0 auto;
 }
 
