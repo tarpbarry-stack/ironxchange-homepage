@@ -753,6 +753,23 @@ function cycleTopRailMode() {
     return "off";
   });
 }
+
+
+function getIxiColorValue(color) {
+  const colors = {
+    green: "rgba(56,161,105,.82)",
+    yellow: "rgba(255,196,0,.86)",
+    red: "rgba(229,62,62,.86)",
+    cyan: "rgba(0,194,255,.82)",
+    white: "rgba(255,255,255,.74)",
+    blue: "rgba(49,130,206,.82)",
+    orange: "rgba(249,133,18,.82)"
+  };
+
+  return colors[color] || "rgba(255,255,255,.12)";
+}
+
+
   
   return (
     <>
@@ -854,15 +871,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
             style={{
-              left: `${
-  leftPocketMode === "open"
-    ? index * 60
-    : leftPocketMode === "peek"
-      ? index * 16
-      : index * 8
-}px`,
-              zIndex: index + 1
-            }}
+  left: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+  zIndex: index + 1,
+  borderColor: getIxiColorValue(
+    ixiCardState[String(machineId)]?.color
+  )
+}}
           >
             {image ? (
               <img
@@ -998,15 +1012,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
         <div
           key={`right-pocket-thumb-${machineId}`}
           className="ixi-pocket-thumb"
-          style={{
- right: `${
-  rightPocketMode === "open"
-    ? index * 60
-    : rightPocketMode === "peek"
-      ? index * 16
-      : index * 8
-}px`,
-  zIndex: index + 1
+        style={{
+  right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+  zIndex: index + 1,
+  borderColor: getIxiColorValue(
+    ixiCardState[String(machineId)]?.color
+  )
 }}
         >
           {image ? (
@@ -1787,7 +1798,7 @@ box-shadow: none;
 
   overflow: hidden;
 
-  border: 1px solid rgba(0,0,0,.62);
+  border: 2px solid rgba(255,255,255,.12);
   border-radius: 8px 8px 0 0;
 
   background: #111;
