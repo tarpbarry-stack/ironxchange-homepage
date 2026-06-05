@@ -312,7 +312,7 @@ onMouseLeave={() => {
   padding: 18px;
 
   border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
+  border-radius: 10px;
 
   background:
   linear-gradient(
