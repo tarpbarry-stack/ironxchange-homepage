@@ -5,8 +5,9 @@ export default function IXIControlSurface({ children, className = "" }) {
 
 <style jsx>{`
 .ixi-control-surface {
-  width: 600px;
-  max-width: calc(100vw - 40px);
+  width: 50vw;
+  max-width: 600px;
+  min-width: 420px;
 
   margin: 24px auto 0;
   padding: 18px;
@@ -24,8 +25,6 @@ export default function IXIControlSurface({ children, className = "" }) {
 
   box-shadow:
     0 12px 30px rgba(0,0,0,.24);
-
-  zoom: clamp(.72, calc(100vw / 1756), 1);
 }
 `}</style>
     </section>
