@@ -253,37 +253,85 @@ function assignMachineToScreen(machineId, slotIndex) {
       </div>
     );
   })}
+<section className="theater-screen">
+  {Array.from({ length: viewCount }).map((_, slotIndex) => {
+    const machineId = screenSlotIds[slotIndex];
+    const machine = getMachineById(machineId);
+
+    if (!machine) {
+      return (
+        <div
+          key={`empty-screen-${slotIndex}`}
+          className="screen-slot empty-screen-slot"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
+            if (dragIndex === null) return;
+
+            const draggedMachine = listings[dragIndex];
+            if (!draggedMachine) return;
+
+            assignMachineToScreen(
+              String(getListingId(draggedMachine)),
+              slotIndex
+            );
+
+            setDragIndex(null);
+          }}
+        >
+          <span>SCREEN {slotIndex + 1}</span>
+        </div>
+      );
+    }
+
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+    const currentPhotoIndex = slotPhotoIndexes[id] || 0;
+    const image = images[currentPhotoIndex] || getImage(machine);
+
+    return (
+      <div
+        key={`screen-${slotIndex}-${id}`}
+        className="screen-slot"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={() => {
+          if (dragIndex === null) return;
+
+          const draggedMachine = listings[dragIndex];
+          if (!draggedMachine) return;
+
+          assignMachineToScreen(
+            String(getListingId(draggedMachine)),
+            slotIndex
+          );
+
+          setDragIndex(null);
+        }}
+      >
+        <div className="screen-number">SCREEN {slotIndex + 1}</div>
+
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-left"
+          onClick={() => prevPhotoForMachine(machine)}
+          aria-label="Previous photo"
+        />
+
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-right"
+          onClick={() => nextPhotoForMachine(machine)}
+          aria-label="Next photo"
+        />
+
+        {image ? (
+          <img src={image} alt="" />
+        ) : (
+          <div className="no-photo">NO PHOTO</div>
+        )}
+      </div>
+    );
+  })}
 </section>
-  const id = String(getListingId(machine));
-const images = getMachineImages(machine);
-const currentPhotoIndex = slotPhotoIndexes[id] || 0;
-const image = images[currentPhotoIndex] || getImage(machine);
-
-  return (
-    <div key={getListingId(machine)} className="screen-slot">
-               <button
-  type="button"
-  className="photo-hit-zone photo-hit-left"
-  onClick={() => prevPhotoForMachine(machine)}
-  aria-label="Previous photo"
-/>
-
-<button
-  type="button"
-  className="photo-hit-zone photo-hit-right"
-  onClick={() => nextPhotoForMachine(machine)}
-  aria-label="Next photo"
-/>
-
-{image ? (
-  <img src={image} alt="" />
-) : (
-  <div className="no-photo">NO PHOTO</div>
-)}
-                  </div>
-                );
-              })}
-            </section>
 
             <section className="theater-card-rail">
               <div className="theater-mode-dashes">
