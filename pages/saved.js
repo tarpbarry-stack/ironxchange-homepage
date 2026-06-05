@@ -1055,6 +1055,7 @@ onDragEnd={handleBoardDragEnd}            style={{
         <div
           key={`right-pocket-thumb-${machineId}`}
           className="ixi-pocket-thumb"
+     
         style={{
   right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
@@ -1248,11 +1249,27 @@ onBoardDragEnd={() => {}}
   ))}
 </section>
               
-        <section
-          className={`cards ${
-            visibleSavedListings.length === 1 ? "single-card" : ""
-          }`}
-        >
+       <section
+  className={`cards ${
+    visibleSavedListings.length === 1 ? "single-card" : ""
+  }`}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+
+    const droppedId =
+      e.dataTransfer.getData("text/plain") ||
+      draggingListingId;
+
+    if (droppedId) {
+      moveMachineToContainer(droppedId, "board");
+    }
+
+    setDraggingListingId("");
+    setGhostListingId("");
+    setActiveStackHover("");
+  }}
+>
           {visibleSavedListings.map(item => {
             const id = String(getListingId(item));
 
