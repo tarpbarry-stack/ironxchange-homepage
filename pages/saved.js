@@ -1657,7 +1657,18 @@ box-shadow: none;
 
   height: 46px;
 
-  background: #0b0b0b;
+ background:
+  radial-gradient(
+    circle at 50% 0%,
+    rgba(255,196,0,.05),
+    transparent 34%
+  ),
+  linear-gradient(
+    180deg,
+    rgba(255,255,255,.014),
+    rgba(255,255,255,0)
+  ),
+  #0b0b0b;
 
   z-index: 55;
   pointer-events: none;
