@@ -946,9 +946,9 @@ function cycleTopRailMode() {
           key={`right-pocket-thumb-${machineId}`}
           className="ixi-pocket-thumb"
           style={{
-            left: `${rightPocketOpen ? index * 80 : index * 16}px`,
-            zIndex: index + 1
-          }}
+  right: `${rightPocketOpen ? index * 80 : index * 16}px`,
+  zIndex: index + 1
+}}
         >
           {image ? (
             <img
