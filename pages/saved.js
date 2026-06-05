@@ -1649,24 +1649,9 @@ box-shadow: none;
 }
 
 .ixi-pocket-window {
-  position: absolute;
-
-  left: 18px;
-  right: 18px;
-  bottom: 0;
-
-  height: 46px;
-
- background: rgba(8,8,8,.42) !important;
-  background-image: none !important;
-  
-  z-index: 55;
-  pointer-events: none;
-
-  transition:
-    height .22s ease,
-    transform .22s ease;
+  display: none;
 }
+
 .ixi-pocket-left.pocket-mode-closed .ixi-pocket-window {
   height: 86px;
 }
@@ -1778,15 +1763,17 @@ box-shadow: none;
   right: 24px;
 }
 
-.ixi-pocket-thumb {
-  width: 120px;
-  height: 80px;
-
+.ixi-pocket-thumbs {
   position: absolute;
-  top: 0;
+
+  left: 24px;
+  top: 30px;
+
+  width: 320px;
+  height: 92px;
 
   overflow: hidden;
-
+  
   border: 2px solid rgba(255,255,255,.12);
   border-radius: 8px 8px 0 0;
 
@@ -1797,6 +1784,18 @@ box-shadow: none;
     opacity .18s ease,
     box-shadow .18s ease,
     border-color .18s ease;
+}
+
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
+  height: 8px;
+}
+
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs {
+  height: 42px;
+}
+
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs {
+  height: 92px;
 }
 
 .ixi-pocket-thumb img {
