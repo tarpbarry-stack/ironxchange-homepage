@@ -871,7 +871,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
           <div
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
-            style={{
+   draggable
+onDragStart={(e) => {
+  e.stopPropagation();
+  handleBoardDragStart(machine, e);
+}}
+onDragEnd={handleBoardDragEnd}            style={{
   left: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
