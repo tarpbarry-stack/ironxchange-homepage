@@ -1657,7 +1657,7 @@ box-shadow: none;
 
   height: 46px;
 
-  background-color: #0b0b0b !important;
+ background: rgba(8,8,8,.42) !important;
   background-image: none !important;
   
   z-index: 55;
