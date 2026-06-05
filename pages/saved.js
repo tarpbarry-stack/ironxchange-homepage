@@ -1657,8 +1657,9 @@ box-shadow: none;
 
   height: 46px;
 
-  background: inherit;
-
+  background-color: #0b0b0b !important;
+  background-image: none !important;
+  
   z-index: 55;
   pointer-events: none;
 
