@@ -138,11 +138,11 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-        .ixi-relationship-shell {
-          width: 540px;
-          max-width: 100%;
-          margin: 14px auto 0;
-        }
+       .ixi-relationship-shell {
+  width: 100%;
+  max-width: 100%;
+  margin: 14px auto 0;
+}
 
         .ixi-relationship-head {
           height: 10px;
