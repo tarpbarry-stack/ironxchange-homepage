@@ -15,6 +15,7 @@ import IXSearchSurface from "../components/IXSearchSurface";
 import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
 import IXIRelationshipControls from "../components/IXIRelationshipControls";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+import IXIControlSurface from "../components/IXIControlSurface";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -856,38 +857,39 @@ function cycleTopRailMode() {
 
   <div className="ixi-command-center">
   
-        <section className="workspace-controls">
-         <div className="desktop-search-surface">
-  <IXSearchSurface
-    searchQuery={searchQuery}
-    setSearchQuery={setSearchQuery}
-    filters={workspaceFilters}
-    setFilters={setWorkspaceFilters}
-    sortMode={savedBoardMode}
-    setSortMode={setSavedBoardMode}
-  />
-</div>
+       <section className="workspace-controls">
+  <IXIControlSurface>
+    <div className="desktop-search-surface">
+      <IXSearchSurface
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filters={workspaceFilters}
+        setFilters={setWorkspaceFilters}
+        sortMode={savedBoardMode}
+        setSortMode={setSavedBoardMode}
+      />
+    </div>
 
-<div className="mobile-search-surface">
-  <IXSearchSurfaceMobile
-    searchQuery={searchQuery}
-    setSearchQuery={setSearchQuery}
-    filters={workspaceFilters}
-    setFilters={setWorkspaceFilters}
-    sortMode={savedBoardMode}
-    setSortMode={setSavedBoardMode}
-  />
-</div>
+    <div className="mobile-search-surface">
+      <IXSearchSurfaceMobile
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filters={workspaceFilters}
+        setFilters={setWorkspaceFilters}
+        sortMode={savedBoardMode}
+        setSortMode={setSavedBoardMode}
+      />
+    </div>
 
-          <IXIRelationshipControls
-  ixiCardState={ixiCardState}
-  activeColors={ixiColorFilters}
-  onToggleColor={toggleColorFilter}
-  activeOutline={ixiOutlineFilter}
-  onToggleOutline={toggleOutlineFilter}
-/>
-    
-        </section>
+    <IXIRelationshipControls
+      ixiCardState={ixiCardState}
+      activeColors={ixiColorFilters}
+      onToggleColor={toggleColorFilter}
+      activeOutline={ixiOutlineFilter}
+      onToggleOutline={toggleOutlineFilter}
+    />
+  </IXIControlSurface>
+</section>
 
                 </div>
 
@@ -1372,21 +1374,14 @@ onBoardDragEnd={() => {}}
   outline: 2px dashed yellow;
   background: rgba(255,196,0,.08);
 }
-        .workspace-controls {
-          max-width: 700px;
-         margin: 24px auto;
-          padding: 18px;
-
-          border: 1px solid rgba(255,255,255,.045);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.035), rgba(255,196,0,0)),
-            rgba(8,8,8,.72);
-
-          box-shadow:
-            0 12px 30px rgba(0,0,0,.24);
-        }
+       .workspace-controls {
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 
     .ixi-toolbar {
   width: 600px;
