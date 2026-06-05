@@ -28,6 +28,8 @@ export default function IXITheater() {
   const [entered, setEntered] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
 
+  const [photoIndex, setPhotoIndex] = useState(0);
+
   useEffect(() => {
     async function loadTheater() {
       try {
@@ -73,6 +75,42 @@ export default function IXITheater() {
     setActiveIndex(to);
   }
 
+function getMachineImages(machine = {}) {
+  const rawImages =
+    machine.images ||
+    machine.publicData?.images ||
+    machine.attributes?.publicData?.images ||
+    [];
+
+  const images = rawImages
+    .map(img => (typeof img === "string" ? img : img?.url))
+    .filter(Boolean);
+
+  const hero = getImage(machine);
+
+  if (hero && !images.includes(hero)) {
+    return [hero, ...images];
+  }
+
+  return images.length ? images : hero ? [hero] : [];
+}
+
+function nextPhoto(machine) {
+  const images = getMachineImages(machine);
+
+  setPhotoIndex(current =>
+    images.length ? (current + 1) % images.length : 0
+  );
+}
+
+function prevPhoto(machine) {
+  const images = getMachineImages(machine);
+
+  setPhotoIndex(current =>
+    images.length ? (current - 1 + images.length) % images.length : 0
+  );
+}
+  
   return (
     <>
       <Head>
@@ -103,16 +141,31 @@ export default function IXITheater() {
             <div className="theater-brand">ironxchange</div>
 
             <section className="theater-screen">
-              {screenMachines.map(machine => {
-                const image = getImage(machine);
+             {screenMachines.map(machine => {
+  const images = getMachineImages(machine);
+  const image = images[photoIndex] || getImage(machine);
 
-                return (
-                  <div key={getListingId(machine)} className="screen-slot">
-                    {image ? (
-                      <img src={image} alt="" />
-                    ) : (
-                      <div className="no-photo">NO PHOTO</div>
-                    )}
+  return (
+    <div key={getListingId(machine)} className="screen-slot">
+                    <button
+  type="button"
+  className="photo-hit-zone photo-hit-left"
+  onClick={() => prevPhoto(machine)}
+  aria-label="Previous photo"
+/>
+
+<button
+  type="button"
+  className="photo-hit-zone photo-hit-right"
+  onClick={() => nextPhoto(machine)}
+  aria-label="Next photo"
+/>
+
+{image ? (
+  <img src={image} alt="" />
+) : (
+  <div className="no-photo">NO PHOTO</div>
+)}
                   </div>
                 );
               })}
@@ -295,24 +348,53 @@ export default function IXITheater() {
           grid-template-rows: repeat(2, minmax(0, 1fr));
         }
 
-        .screen-slot {
-          min-width: 0;
-          min-height: 0;
+     .screen-slot {
+  min-width: 0;
+  min-height: 0;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+  position: relative;
 
-          background: #050505;
-          overflow: hidden;
-        }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-        .screen-slot img {
-          width: 100%;
-          height: 100%;
-          max-height: 64vh;
-          object-fit: contain;
-        }
+  background: #050505;
+  overflow: hidden;
+}
+
+.screen-slot img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+.photo-hit-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  width: 24%;
+
+  border: 0;
+  background: transparent;
+
+  z-index: 5;
+  cursor: pointer;
+}
+
+.photo-hit-left {
+  left: 0;
+}
+
+.photo-hit-right {
+  right: 0;
+}
+
+.photo-hit-zone:hover {
+  background: rgba(255,255,255,.025);
+}
 
         .view-4 .screen-slot img {
           max-height: 31vh;
