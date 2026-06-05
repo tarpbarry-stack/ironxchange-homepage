@@ -1657,18 +1657,7 @@ box-shadow: none;
 
   height: 46px;
 
- background:
-  radial-gradient(
-    circle at 50% 0%,
-    rgba(255,196,0,.05),
-    transparent 34%
-  ),
-  linear-gradient(
-    180deg,
-    rgba(255,255,255,.014),
-    rgba(255,255,255,0)
-  ),
-  #0b0b0b;
+  background: transparent;
 
   z-index: 55;
   pointer-events: none;
@@ -1724,51 +1713,7 @@ box-shadow: none;
 }
 
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
-.ixi-pocket-left::after {
-  content: "";
-  position: absolute;
 
-  left: 18px;
-  right: 18px;
-  bottom: 0;
-
-  height: 46px;
-
-  border-radius: 8px 8px 0 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(8,8,8,.94),
-      rgba(5,5,5,.98)
-    );
-
-  box-shadow:
-    0 -1px 0 rgba(255,255,255,.055) inset,
-    0 -10px 22px rgba(0,0,0,.22);
-
-  z-index: 50;
-
-  transition:
-    height .22s ease,
-    opacity .22s ease;
-  pointer-events: none;
-}
-
-.ixi-pocket-left.pocket-mode-closed::after {
-  height: 82px;
-  opacity: .98;
-}
-
-.ixi-pocket-left.pocket-mode-peek::after {
-  height: 46px;
-  opacity: .94;
-}
-
-.ixi-pocket-left.pocket-mode-open::after {
-  height: 12px;
-  opacity: .72;
-}
 
 .ixi-pocket-debug-label.right {
   left: auto;
@@ -1837,7 +1782,7 @@ box-shadow: none;
   height: 80px;
 
   position: absolute;
-  top: -20px;
+  top: 0;
 
   overflow: hidden;
 
