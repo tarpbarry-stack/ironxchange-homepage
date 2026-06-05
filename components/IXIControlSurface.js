@@ -25,10 +25,7 @@ export default function IXIControlSurface({ children, className = "" }) {
   box-shadow:
     0 12px 30px rgba(0,0,0,.24);
 
-  transform: scale(
-    clamp(.72, calc(100vw / 1756), 1)
-  );
-  transform-origin: top center;
+  zoom: clamp(.72, calc(100vw / 1756), 1);
 }
 `}</style>
     </section>
