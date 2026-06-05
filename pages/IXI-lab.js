@@ -306,7 +306,7 @@ onMouseLeave={() => {
 
 .lab-panel {
   width: clamp(620px, calc(700px * min(1, 100vw / 1756)), 700px);
-  max-width: 700px;
+  max-width: 600px;
 
   margin: 24px auto 0;
   padding: 18px;
