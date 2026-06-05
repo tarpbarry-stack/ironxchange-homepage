@@ -28,7 +28,9 @@ export default function IXITheater() {
   const [entered, setEntered] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
 
-  const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
+const [selectedSlot, setSelectedSlot] = useState(0);
   
   useEffect(() => {
     async function loadTheater() {
@@ -58,9 +60,12 @@ export default function IXITheater() {
     loadTheater();
   }, []);
 
-  const screenMachines = useMemo(() => {
-    return listings.slice(activeIndex, activeIndex + viewCount);
-  }, [listings, activeIndex, viewCount]);
+ const screenMachines = useMemo(() => {
+  return screenSlots
+    .slice(0, viewCount)
+    .map(slotIndex => listings[slotIndex])
+    .filter(Boolean);
+}, [screenSlots, listings, viewCount]);
 
   function moveCard(from, to) {
     if (from === null || to === null || from === to) return;
@@ -157,6 +162,9 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
   return (
     <div key={getListingId(machine)} className="screen-slot">
+  <div className="screen-number">
+    SCREEN {screenMachines.indexOf(machine) + 1}
+  </div>
                <button
   type="button"
   className="photo-hit-zone photo-hit-left"
@@ -195,6 +203,21 @@ const image = images[currentPhotoIndex] || getImage(machine);
                 ))}
               </div>
 
+<div className="screen-slot-loader">
+  {[0, 1, 2, 3].map(slotIndex => (
+    <button
+      key={slotIndex}
+      type="button"
+      className={`${slotIndex < viewCount ? "active" : ""} ${
+        selectedSlot === slotIndex ? "selected" : ""
+      }`}
+      onClick={() => setSelectedSlot(slotIndex)}
+    >
+      SCREEN {slotIndex + 1}
+    </button>
+  ))}
+</div>
+                
               <div className="loaded-cards">
                 {listings.map((machine, index) => {
                   const id = String(getListingId(machine));
@@ -224,13 +247,19 @@ const image = images[currentPhotoIndex] || getImage(machine);
                         moveCard(dragIndex, index);
                         setDragIndex(null);
                       }}
-                      onClick={() => setActiveIndex(index)}
+                   onClick={() => {
+  setScreenSlots(current => {
+    const next = [...current];
+    next[selectedSlot] = index;
+    return next;
+  });
+}}
                                        >
-                      {index >= activeIndex && index < activeIndex + viewCount && (
-                        <div className="loaded-card-screen-label">
-                          SCREEN {index - activeIndex + 1}
-                        </div>
-                      )}
+                     {screenSlots.includes(index) && (
+  <div className="loaded-card-screen-label">
+    SCREEN {screenSlots.indexOf(index) + 1}
+  </div>
+)}
 
                       <ListingCard
                         listing={machine}
@@ -482,6 +511,45 @@ const image = images[currentPhotoIndex] || getImage(machine);
           background: rgba(180,180,180,.72);
           box-shadow: 0 0 12px rgba(255,255,255,.08);
         }
+
+.screen-slot-loader {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  margin: 0 0 10px;
+}
+
+.screen-slot-loader button {
+  height: 18px;
+  padding: 0 10px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.025);
+  color: rgba(255,255,255,.38);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .65px;
+
+  cursor: pointer;
+}
+
+.screen-slot-loader button.active {
+  color: rgba(255,255,255,.62);
+  border-color: rgba(255,255,255,.16);
+}
+
+.screen-slot-loader button.selected {
+  color: rgba(235,235,235,.92);
+  border-color: rgba(180,180,180,.42);
+  background: rgba(255,255,255,.075);
+  box-shadow: 0 0 12px rgba(255,255,255,.08);
+}
+
+
 
         .loaded-cards {
           display: flex;
