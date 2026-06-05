@@ -1694,8 +1694,8 @@ box-shadow: none;
 /* PEEK STATE — preserve the good look */
 .ixi-pocket-left.occupied:not(.open) .ixi-pocket-thumb {
   transform:
-    translateY(54px)
-    rotate(-4deg);
+    translateY(0)
+    rotate(-7deg);
 
   opacity: .72;
 }
