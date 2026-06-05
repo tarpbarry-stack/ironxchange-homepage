@@ -1700,6 +1700,14 @@ box-shadow: none;
   opacity: .72;
 }
 
+.ixi-pocket-right.occupied:not(.open) .ixi-pocket-thumb {
+  transform:
+    translateY(0)
+    rotate(7deg);
+
+  opacity: .72;
+}
+
 /* OPEN STATE — flat, visible, no pocket cover yet */
 .ixi-pocket-left.open .ixi-pocket-thumb {
   transform: translateY(0) rotate(0deg);
