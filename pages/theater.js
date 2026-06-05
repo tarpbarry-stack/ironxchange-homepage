@@ -29,6 +29,7 @@ export default function IXITheater() {
   const [dragIndex, setDragIndex] = useState(null);
 
   const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+  const [screenSlotIds, setScreenSlotIds] = useState([]);
   
   useEffect(() => {
     async function loadTheater() {
@@ -37,18 +38,24 @@ export default function IXITheater() {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-          setListings(
-            data
-              .filter(item => {
-                const status =
-                  item.listingStatus ||
-                  item.publicData?.listingStatus ||
-                  item.attributes?.publicData?.listingStatus;
+          const theaterListings = data
+  .filter(item => {
+    const status =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus;
 
-                return status !== "archived";
-              })
-              .slice(0, 8)
-          );
+    return status !== "archived";
+  })
+  .slice(0, 8);
+
+setListings(theaterListings);
+
+setScreenSlotIds(
+  theaterListings
+    .slice(0, 4)
+    .map(item => String(getListingId(item)))
+);
         }
       } catch (err) {
         console.error("IXI Theater load failed", err);
@@ -58,9 +65,12 @@ export default function IXITheater() {
     loadTheater();
   }, []);
 
-  const screenMachines = useMemo(() => {
-    return listings.slice(activeIndex, activeIndex + viewCount);
-  }, [listings, activeIndex, viewCount]);
+ const screenMachines = useMemo(() => {
+  return screenSlotIds
+    .slice(0, viewCount)
+    .map(id => getMachineById(id))
+    .filter(Boolean);
+}, [screenSlotIds, listings, viewCount]);
 
   function moveCard(from, to) {
     if (from === null || to === null || from === to) return;
@@ -118,6 +128,23 @@ function prevPhotoForMachine(machine) {
       : 0
   }));
 }
+
+function getMachineById(id) {
+  return listings.find(
+    item => String(getListingId(item)) === String(id)
+  );
+}
+
+function assignMachineToScreen(machineId, slotIndex) {
+  setScreenSlotIds(current => {
+    const next = [...current];
+
+    next[slotIndex] = String(machineId);
+
+    return next;
+  });
+}
+
   
   return (
     <>
@@ -149,7 +176,84 @@ function prevPhotoForMachine(machine) {
             <div className="theater-brand">ironxchange</div>
 
             <section className="theater-screen">
-             {screenMachines.map(machine => {
+  {Array.from({ length: viewCount }).map((_, slotIndex) => {
+    const machineId = screenSlotIds[slotIndex];
+    const machine = getMachineById(machineId);
+
+    if (!machine) {
+      return (
+        <div
+          key={`empty-screen-${slotIndex}`}
+          className="screen-slot empty-screen-slot"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
+            if (dragIndex === null) return;
+
+            const draggedMachine = listings[dragIndex];
+            if (!draggedMachine) return;
+
+            assignMachineToScreen(
+              String(getListingId(draggedMachine)),
+              slotIndex
+            );
+
+            setDragIndex(null);
+          }}
+        >
+          <span>SCREEN {slotIndex + 1}</span>
+        </div>
+      );
+    }
+
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+    const currentPhotoIndex = slotPhotoIndexes[id] || 0;
+    const image = images[currentPhotoIndex] || getImage(machine);
+
+    return (
+      <div
+        key={`screen-${slotIndex}-${id}`}
+        className="screen-slot"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={() => {
+          if (dragIndex === null) return;
+
+          const draggedMachine = listings[dragIndex];
+          if (!draggedMachine) return;
+
+          assignMachineToScreen(
+            String(getListingId(draggedMachine)),
+            slotIndex
+          );
+
+          setDragIndex(null);
+        }}
+      >
+        <div className="screen-number">SCREEN {slotIndex + 1}</div>
+
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-left"
+          onClick={() => prevPhotoForMachine(machine)}
+          aria-label="Previous photo"
+        />
+
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-right"
+          onClick={() => nextPhotoForMachine(machine)}
+          aria-label="Next photo"
+        />
+
+        {image ? (
+          <img src={image} alt="" />
+        ) : (
+          <div className="no-photo">NO PHOTO</div>
+        )}
+      </div>
+    );
+  })}
+</section>
   const id = String(getListingId(machine));
 const images = getMachineImages(machine);
 const currentPhotoIndex = slotPhotoIndexes[id] || 0;
@@ -224,13 +328,13 @@ const image = images[currentPhotoIndex] || getImage(machine);
                         moveCard(dragIndex, index);
                         setDragIndex(null);
                       }}
-                      onClick={() => setActiveIndex(index)}
+                      onClick={() => assignMachineToScreen(id, 0)}
                                        >
-                      {index >= activeIndex && index < activeIndex + viewCount && (
-                        <div className="loaded-card-screen-label">
-                          SCREEN {index - activeIndex + 1}
-                        </div>
-                      )}
+                      {screenSlotIds.includes(id) && (
+  <div className="loaded-card-screen-label">
+    SCREEN {screenSlotIds.indexOf(id) + 1}
+  </div>
+)}
 
                       <ListingCard
                         listing={machine}
@@ -557,6 +661,34 @@ const image = images[currentPhotoIndex] || getImage(machine);
           transform: scale(.9) translateY(-2px);
         }
 
+.empty-screen-slot {
+  border: 1px dashed rgba(255,255,255,.12);
+  background: rgba(255,255,255,.018);
+}
+
+.empty-screen-slot span,
+.screen-number {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+
+  z-index: 6;
+
+  color: rgba(255,255,255,.26);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .8px;
+}
+
+.screen-number {
+  opacity: 0;
+  transition: opacity .14s ease;
+}
+
+.screen-slot:hover .screen-number {
+  opacity: 1;
+}
         @media (max-width: 850px) {
           .theater-room {
             min-height: 88vh;
