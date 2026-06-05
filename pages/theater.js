@@ -499,6 +499,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
           flex: 0 0 245px;
           width: 245px;
 
+          position: relative;
+          
           transform: scale(.82);
           transform-origin: bottom center;
 
@@ -511,6 +513,38 @@ const image = images[currentPhotoIndex] || getImage(machine);
             transform .16s ease,
             box-shadow .16s ease;
         }
+
+        .loaded-card-screen-label {
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 5px;
+
+  border: 1px solid rgba(180,180,180,.22);
+  border-radius: 6px;
+
+  background: rgba(255,255,255,.035);
+  color: rgba(235,235,235,.72);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .9px;
+
+  box-shadow: 0 0 14px rgba(255,255,255,.045);
+}
+
+.loaded-card.on-screen {
+  padding: 6px;
+  border: 1px solid rgba(180,180,180,.22);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
+    rgba(10,10,10,.82);
+}
 
         .loaded-card.on-screen {
           opacity: 1;
