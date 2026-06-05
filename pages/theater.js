@@ -162,9 +162,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
   return (
     <div key={getListingId(machine)} className="screen-slot">
-  <div className="screen-number">
-    SCREEN {screenMachines.indexOf(machine) + 1}
-  </div>
+
                <button
   type="button"
   className="photo-hit-zone photo-hit-left"
@@ -257,8 +255,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
                                        >
                      {screenSlots.includes(index) && (
   <div className="loaded-card-screen-label">
-    SCREEN {screenSlots.indexOf(index) + 1}
-  </div>
+  {screenSlots.indexOf(index) + 1}
+</div>
 )}
 
                       <ListingCard
@@ -582,26 +580,31 @@ const image = images[currentPhotoIndex] || getImage(machine);
             box-shadow .16s ease;
         }
 
-        .loaded-card-screen-label {
+       .loaded-card-screen-label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+
+  width: 16px;
   height: 16px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  margin-bottom: 5px;
+  z-index: 20;
 
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 6px;
+  border: 1px solid rgba(180,180,180,.38);
+  border-radius: 50%;
 
-  background: rgba(255,255,255,.035);
-  color: rgba(235,235,235,.72);
+  background: rgba(0,0,0,.72);
+  color: rgba(235,235,235,.86);
 
   font-size: 8px;
   font-weight: 950;
-  letter-spacing: .9px;
+  letter-spacing: 0;
 
-  box-shadow: 0 0 14px rgba(255,255,255,.045);
+  box-shadow: 0 0 10px rgba(255,255,255,.08);
 }
 
 .loaded-card.on-screen {
