@@ -879,6 +879,42 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   )
 }}
           >
+<div className="ixi-pocket-thumb-actions">
+  <button
+    type="button"
+    title="Back to board"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "board");
+    }}
+  />
+
+  <button
+    type="button"
+    title="Send to top stack"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "stackTop");
+      setActiveStacksOpen(current => ({
+        ...current,
+        top: true
+      }));
+    }}
+  />
+
+  <button
+    type="button"
+    title="Send to bottom stack"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "stackBottom");
+      setActiveStacksOpen(current => ({
+        ...current,
+        bottom: true
+      }));
+    }}
+  />
+</div>
             {image ? (
               <img
                 src={typeof image === "string" ? image : image?.url}
@@ -1022,6 +1058,43 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   )
 }}
         >
+
+<div className="ixi-pocket-thumb-actions">
+  <button
+    type="button"
+    title="Back to board"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "board");
+    }}
+  />
+
+  <button
+    type="button"
+    title="Send to top stack"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "stackTop");
+      setActiveStacksOpen(current => ({
+        ...current,
+        top: true
+      }));
+    }}
+  />
+
+  <button
+    type="button"
+    title="Send to bottom stack"
+    onClick={(e) => {
+      e.stopPropagation();
+      moveMachineToContainer(machineId, "stackBottom");
+      setActiveStacksOpen(current => ({
+        ...current,
+        bottom: true
+      }));
+    }}
+  />
+</div>
           {image ? (
             <img
               src={typeof image === "string" ? image : image?.url}
@@ -1790,6 +1863,52 @@ box-shadow: none;
     border-color .18s ease;
 }
 
+.ixi-pocket-thumb-actions {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+
+  display: flex;
+  gap: 4px;
+
+  z-index: 90;
+
+  opacity: 0;
+  transition: opacity .14s ease;
+}
+
+.ixi-pocket-thumb:hover .ixi-pocket-thumb-actions {
+  opacity: 1;
+}
+
+.ixi-pocket-thumb-actions button {
+  width: 14px;
+  height: 6px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.32);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-pocket-thumb-actions button:first-child {
+  background: rgba(255,196,0,.72);
+}
+
+.ixi-pocket-thumb-actions button:nth-child(2) {
+  background: rgba(56,161,105,.72);
+}
+
+.ixi-pocket-thumb-actions button:nth-child(3) {
+  background: rgba(0,194,255,.72);
+}
+
+.ixi-pocket-thumb-actions button:hover {
+  box-shadow: 0 0 8px rgba(255,255,255,.18);
+}
 .ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
   height: 8px;
 }
