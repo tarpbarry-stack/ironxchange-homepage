@@ -1809,7 +1809,7 @@ box-shadow: none;
   width: 320px;
   height: 92px;
 
-  overflow: visible;
+  overflow: hidden;
 
   pointer-events: auto;
 
