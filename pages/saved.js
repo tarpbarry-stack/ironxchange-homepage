@@ -1873,11 +1873,14 @@ box-shadow: none;
 
 
 .active-stack-zone {
-max-width: 1320px;
-margin: -10px auto 22px;
-display: grid;
-gap: 10px;
-align-items: start;
+  width: 100%;
+  max-width: none;
+
+  margin: -10px 0 22px;
+
+  display: grid;
+  gap: 10px;
+  align-items: start;
 }
 
 .active-stack {
