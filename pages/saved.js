@@ -810,6 +810,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   }}
 >
   <div className="ixi-pocket-catch-pad" />
+  <div className="ixi-pocket-window" />
 
   <div className="ixi-pocket-mode-buttons">
   <button
@@ -951,6 +952,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     }}
   > 
 <div className="ixi-pocket-catch-pad" />
+    <div className="ixi-pocket-window" />
 
     <div className="ixi-pocket-mode-buttons right">
   <button
@@ -1644,6 +1646,43 @@ box-shadow: none;
 
   position: relative;
   z-index: 2;
+}
+
+.ixi-pocket-window {
+  position: absolute;
+
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+
+  height: 46px;
+
+  border-radius: 8px 8px 0 0;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+    #0b0b0b;
+
+  z-index: 55;
+
+  pointer-events: none;
+
+  transition:
+    height .22s ease,
+    transform .22s ease;
+}
+
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-window {
+  height: 86px;
+}
+
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-window {
+  height: 46px;
+}
+
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-window {
+  height: 10px;
 }
 
 .ixi-pocket-mode-buttons {
