@@ -362,15 +362,23 @@ const image = images[currentPhotoIndex] || getImage(machine);
           cursor: pointer;
         }
 
-        .theater-room {
-          min-height: 84vh;
-          position: relative;
-          padding: 18px 20px 0;
+      .theater-room {
+  height: calc(100vh - 72px);
+  min-height: 620px;
 
-          display: grid;
-          grid-template-rows: 18px 1fr auto;
-          gap: 12px;
-        }
+  position: relative;
+  padding: clamp(10px, 1.4vw, 18px) clamp(10px, 1.6vw, 20px) 0;
+
+  display: grid;
+  grid-template-rows:
+    18px
+    minmax(320px, 1fr)
+    clamp(150px, 24vh, 230px);
+
+  gap: clamp(8px, 1vw, 12px);
+
+  overflow: hidden;
+}
 
         .theater-brand {
           color: rgba(180,180,180,.13);
@@ -383,12 +391,16 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
        .theater-screen {
-  height: 68vh;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 
   display: grid;
-  gap: 10px;
+  gap: clamp(6px, .8vw, 10px);
 
   margin: 0 auto;
+
+  overflow: hidden;
 }
 
         .view-1 .theater-screen {
@@ -404,15 +416,15 @@ const image = images[currentPhotoIndex] || getImage(machine);
           grid-template-rows: repeat(2, minmax(0, 1fr));
         }
 
-     .screen-slot {
+   .screen-slot {
   min-width: 0;
   min-height: 0;
 
   position: relative;
 
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
 
   background: #050505;
   overflow: hidden;
@@ -421,7 +433,9 @@ const image = images[currentPhotoIndex] || getImage(machine);
 .screen-slot img {
   width: 100%;
   height: 100%;
-  max-height: none;
+
+  display: block;
+
   object-fit: cover;
   object-position: center;
 }
@@ -474,11 +488,15 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
         .theater-card-rail {
-          padding: 10px 0 14px;
+  min-height: 0;
 
-          opacity: .12;
-          transition: opacity .18s ease;
-        }
+  padding: 8px 0 10px;
+
+  opacity: .12;
+  transition: opacity .18s ease;
+
+  overflow: hidden;
+}
 
         .theater-card-rail:hover {
           opacity: 1;
@@ -549,17 +567,20 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
 
 
-        .loaded-cards {
-          display: flex;
-          gap: 14px;
+.loaded-cards {
+  height: 100%;
 
-          overflow-x: auto;
-          overflow-y: hidden;
+  display: flex;
+  align-items: end;
+  gap: clamp(8px, 1vw, 14px);
 
-          padding: 0 4px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
 
-          scrollbar-width: thin;
-        }
+  padding: 0 4px 8px;
+
+  scrollbar-width: thin;
+}
 
         .loaded-card {
           flex: 0 0 245px;
@@ -629,12 +650,21 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
         @media (max-width: 850px) {
-          .theater-room {
-            min-height: 88vh;
-            padding: 10px 0 0;
-            grid-template-rows: 14px 1fr auto;
-            gap: 8px;
-          }
+         .theater-room {
+  height: calc(100vh - 58px);
+  min-height: 600px;
+
+  padding: 8px 0 0;
+
+  grid-template-rows:
+    14px
+    minmax(340px, 1fr)
+    170px;
+
+  gap: 8px;
+
+  overflow: hidden;
+}
 
           .theater-brand {
             padding-left: 12px;
@@ -648,10 +678,10 @@ const image = images[currentPhotoIndex] || getImage(machine);
             grid-template-rows: none;
           }
 
-          .screen-slot img {
-            width: 100vw;
-            max-height: 68vh;
-          }
+       .screen-slot img {
+  width: 100%;
+  height: 100%;
+}
 
           .view-2 .screen-slot:not(:first-child),
           .view-4 .screen-slot:not(:first-child) {
