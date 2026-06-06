@@ -478,7 +478,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
   max-width: 100%;
   min-width: 0;
 
-  padding: 10px 0 14px;
+  padding: 0 0 10px;
+margin-top: -12px;
 
   opacity: .12;
   transition: opacity .18s ease;
@@ -495,7 +496,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
           justify-content: center;
           gap: 8px;
 
-          margin-bottom: 10px;
+          margin-bottom: 4px;
         }
 
         .theater-mode-dashes button {
@@ -521,7 +522,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
   justify-content: center;
   gap: 8px;
 
-  margin: 0 0 10px;
+  margin: 0 0 4px;
 }
 
 .screen-slot-loader button {
