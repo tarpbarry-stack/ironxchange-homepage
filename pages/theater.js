@@ -394,6 +394,9 @@ const image = images[currentPhotoIndex] || getImage(machine);
         .theater-env-shell {
   width: 100%;
   height: 22px;
+
+  margin-top: -10px;
+  
   opacity: 0;
   transition: opacity .18s ease;
 }
