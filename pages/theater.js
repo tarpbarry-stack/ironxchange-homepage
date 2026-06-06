@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
@@ -295,8 +294,6 @@ const image = images[currentPhotoIndex] || getImage(machine);
         )}
       </main>
 
-      <Footer />
-
       <style jsx>{`
         :global(body) {
           margin: 0;
@@ -505,7 +502,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 position: relative;
 
   padding: 0 0 10px;
-margin-top: -80px;
+margin-top: -95px;
 
   opacity: .12;
   transition: opacity .18s ease;
