@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
+import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+
 function getImage(machine = {}) {
   const image =
     machine.image ||
@@ -151,7 +153,14 @@ function prevPhotoForMachine(machine) {
 
         {entered && (
           <section className={`theater-room view-${viewCount}`}>
-            <div className="theater-brand">ironxchange</div>
+            <div className="theater-env-shell">
+  <IXIEnvironmentRail
+    activeEnvironment="IXI THEATER"
+    hasAccount
+    hasRelationship
+    hasInventory
+  />
+</div>
 
             <section className="theater-screen">
              {screenMachines.map(machine => {
@@ -381,6 +390,18 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
           text-shadow: 0 0 18px rgba(180,180,180,.06);
         }
+
+        .theater-env-shell {
+  width: 100%;
+  height: 22px;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.theater-env-shell:hover,
+.theater-env-shell:focus-within {
+  opacity: 1;
+}
 
        .theater-screen {
   height: 54vh;
