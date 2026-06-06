@@ -496,7 +496,7 @@ margin-top: -70px;
           justify-content: center;
           gap: 8px;
 
-          margin-bottom: 8px;
+          margin-top: 75px;
         }
 
         .theater-mode-dashes button {
