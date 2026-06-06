@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
-import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
 function getImage(machine = {}) {
@@ -20,65 +19,6 @@ function getImage(machine = {}) {
   return typeof image === "string" ? image : image?.url || "";
 }
 
-export default function IXITheater() {
-  const [listings, setListings] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [viewCount, setViewCount] = useState(1);
-  const [entered, setEntered] = useState(false);
-  const [dragIndex, setDragIndex] = useState(null);
-
-const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
-const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
-const [selectedSlot, setSelectedSlot] = useState(0);
-  
-  useEffect(() => {
-    async function loadTheater() {
-      try {
-        const res = await fetch("/api/listings");
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setListings(
-            data
-              .filter(item => {
-                const status =
-                  item.listingStatus ||
-                  item.publicData?.listingStatus ||
-                  item.attributes?.publicData?.listingStatus;
-
-                return status !== "archived";
-              })
-              .slice(0, 8)
-          );
-        }
-      } catch (err) {
-        console.error("IXI Theater load failed", err);
-      }
-    }
-
-    loadTheater();
-  }, []);
-
- const screenMachines = useMemo(() => {
-  return screenSlots
-    .slice(0, viewCount)
-    .map(slotIndex => listings[slotIndex])
-    .filter(Boolean);
-}, [screenSlots, listings, viewCount]);
-
-  function moveCard(from, to) {
-    if (from === null || to === null || from === to) return;
-
-    setListings(current => {
-      const next = [...current];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      return next;
-    });
-
-    setActiveIndex(to);
-  }
-
 function getMachineImages(machine = {}) {
   const rawImages =
     machine.images ||
@@ -92,37 +32,190 @@ function getMachineImages(machine = {}) {
 
   const hero = getImage(machine);
 
-  if (hero && !images.includes(hero)) {
-    return [hero, ...images];
-  }
+  if (hero && !images.includes(hero)) return [hero, ...images];
 
   return images.length ? images : hero ? [hero] : [];
 }
 
-function nextPhotoForMachine(machine) {
-  const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
-
-  setSlotPhotoIndexes(current => ({
-    ...current,
-    [id]: images.length
-      ? ((current[id] || 0) + 1) % images.length
-      : 0
-  }));
+function getYear(machine = {}) {
+  return machine.year || machine.publicData?.year || machine.attributes?.publicData?.year || "";
 }
 
-function prevPhotoForMachine(machine) {
-  const id = String(getListingId(machine));
-  const images = getMachineImages(machine);
-
-  setSlotPhotoIndexes(current => ({
-    ...current,
-    [id]: images.length
-      ? ((current[id] || 0) - 1 + images.length) % images.length
-      : 0
-  }));
+function getMake(machine = {}) {
+  return machine.make || machine.publicData?.make || machine.attributes?.publicData?.make || "";
 }
-  
+
+function getModel(machine = {}) {
+  return machine.model || machine.publicData?.model || machine.attributes?.publicData?.model || "";
+}
+
+function getPrice(machine = {}) {
+  return machine.price || machine.publicData?.price || machine.attributes?.publicData?.price || "";
+}
+
+function TheaterMiniCard({ machine, badge, active, selected, onClick, onDragStart, onDragOver, onDrop }) {
+  const image = getImage(machine);
+
+  return (
+    <div
+      className={`theater-mini-card ${active ? "active" : ""} ${selected ? "selected" : ""}`}
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onClick={onClick}
+    >
+      {badge && <div className="mini-screen-badge">{badge}</div>}
+
+      <div className="mini-photo">
+        {image ? <img src={image} alt="" /> : <span>NO PHOTO</span>}
+      </div>
+
+      <div className="mini-meta">
+        <strong>
+          {getYear(machine)} {getMake(machine)} {getModel(machine)}
+        </strong>
+        <span>{getPrice(machine) || "PRICE ON REQUEST"}</span>
+      </div>
+    </div>
+  );
+}
+
+function FactStrip({ machine, side = "left", visible }) {
+  if (!machine || !visible) return <div className={`fact-strip ${side} off`} />;
+
+  return (
+    <aside className={`fact-strip ${side}`}>
+      <span>{getYear(machine) || "—"}</span>
+      <span>{getMake(machine) || "—"}</span>
+      <span>{getModel(machine) || "—"}</span>
+      <strong>{getPrice(machine) || "—"}</strong>
+    </aside>
+  );
+}
+
+export default function IXITheater() {
+  const [listings, setListings] = useState([]);
+  const [entered, setEntered] = useState(false);
+
+  const [viewCount, setViewCount] = useState(2);
+  const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
+  const [selectedSlot, setSelectedSlot] = useState(0);
+  const [dragIndex, setDragIndex] = useState(null);
+
+  const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
+  const [factsOn, setFactsOn] = useState(false);
+
+  useEffect(() => {
+    async function loadTheater() {
+      try {
+        const res = await fetch("/api/listings");
+        const data = await res.json();
+
+        if (!Array.isArray(data)) return;
+
+        const active = data
+          .filter(item => {
+            const status =
+              item.listingStatus ||
+              item.publicData?.listingStatus ||
+              item.attributes?.publicData?.listingStatus;
+
+            return status !== "archived";
+          })
+          .slice(0, 8);
+
+        setListings(active);
+      } catch (err) {
+        console.error("IXI Theater load failed", err);
+      }
+    }
+
+    loadTheater();
+  }, []);
+
+  const screenMachines = useMemo(() => {
+    return screenSlots
+      .slice(0, viewCount)
+      .map(slotIndex => listings[slotIndex])
+      .filter(Boolean);
+  }, [screenSlots, listings, viewCount]);
+
+  function assignCardToSelectedSlot(index) {
+    setScreenSlots(current => {
+      const next = [...current];
+      next[selectedSlot] = index;
+      return next;
+    });
+  }
+
+  function moveCard(from, to) {
+    if (from === null || to === null || from === to) return;
+
+    setListings(current => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+
+    setScreenSlots(current =>
+      current.map(slotIndex => {
+        if (slotIndex === from) return to;
+        if (from < to && slotIndex > from && slotIndex <= to) return slotIndex - 1;
+        if (from > to && slotIndex >= to && slotIndex < from) return slotIndex + 1;
+        return slotIndex;
+      })
+    );
+  }
+
+  function nextPhotoForMachine(machine) {
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+
+    setSlotPhotoIndexes(current => ({
+      ...current,
+      [id]: images.length ? ((current[id] || 0) + 1) % images.length : 0
+    }));
+  }
+
+  function prevPhotoForMachine(machine) {
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+
+    setSlotPhotoIndexes(current => ({
+      ...current,
+      [id]: images.length ? ((current[id] || 0) - 1 + images.length) % images.length : 0
+    }));
+  }
+
+  function renderScreen(machine, slotPosition) {
+    const id = String(getListingId(machine));
+    const images = getMachineImages(machine);
+    const currentPhotoIndex = slotPhotoIndexes[id] || 0;
+    const image = images[currentPhotoIndex] || getImage(machine);
+
+    return (
+      <div key={`${id}-${slotPosition}`} className="screen-slot">
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-left"
+          onClick={() => prevPhotoForMachine(machine)}
+          aria-label="Previous photo"
+        />
+
+        <button
+          type="button"
+          className="photo-hit-zone photo-hit-right"
+          onClick={() => nextPhotoForMachine(machine)}
+          aria-label="Next photo"
+        />
+
+        {image ? <img src={image} alt="" /> : <div className="no-photo">NO PHOTO</div>}
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -136,11 +229,7 @@ function prevPhotoForMachine(machine) {
           <section className="theater-lobby">
             <div className="lobby-card">
               <span>IXI THEATER</span>
-
-              <p>
-                {listings.length || 8} machines loaded for inspection.
-              </p>
-
+              <p>{listings.length || 8} machines loaded for inspection.</p>
               <button type="button" onClick={() => setEntered(true)}>
                 ENTER THEATER
               </button>
@@ -153,130 +242,102 @@ function prevPhotoForMachine(machine) {
             <div className="theater-brand">ironxchange</div>
 
             <section className="theater-screen">
-             {screenMachines.map(machine => {
-  const id = String(getListingId(machine));
-const images = getMachineImages(machine);
-const currentPhotoIndex = slotPhotoIndexes[id] || 0;
-const image = images[currentPhotoIndex] || getImage(machine);
+              {viewCount === 1 && (
+                <div className="one-up-stage">
+                  <FactStrip machine={screenMachines[0]} side="left" visible={factsOn} />
+                  {screenMachines[0] && renderScreen(screenMachines[0], 0)}
+                </div>
+              )}
 
-  return (
-    <div key={getListingId(machine)} className="screen-slot">
+              {viewCount === 2 && (
+                <div className="two-up-stage">
+                  <FactStrip machine={screenMachines[0]} side="left" visible={factsOn} />
+                  {screenMachines[0] && renderScreen(screenMachines[0], 0)}
+                  {screenMachines[1] ? (
+                    renderScreen(screenMachines[1], 1)
+                  ) : (
+                    <div className="screen-slot empty-slot">DROP MACHINE</div>
+                  )}
+                  <FactStrip machine={screenMachines[1]} side="right" visible={factsOn} />
+                </div>
+              )}
 
-               <button
-  type="button"
-  className="photo-hit-zone photo-hit-left"
-  onClick={() => prevPhotoForMachine(machine)}
-  aria-label="Previous photo"
-/>
-
-<button
-  type="button"
-  className="photo-hit-zone photo-hit-right"
-  onClick={() => nextPhotoForMachine(machine)}
-  aria-label="Next photo"
-/>
-
-{image ? (
-  <img src={image} alt="" />
-) : (
-  <div className="no-photo">NO PHOTO</div>
-)}
-                  </div>
-                );
-              })}
+              {viewCount === 4 && (
+                <div className="four-up-stage">
+                  {[0, 1, 2, 3].map(position =>
+                    screenMachines[position] ? (
+                      renderScreen(screenMachines[position], position)
+                    ) : (
+                      <div key={`empty-${position}`} className="screen-slot empty-slot">
+                        DROP MACHINE
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </section>
 
             <section className="theater-card-rail">
-              <div className="theater-mode-dashes">
-                {[1, 2, 4].map(count => (
+              <div className="theater-controls">
+                <div className="theater-mode-dashes">
+                  {[1, 2, 4].map(count => (
+                    <button
+                      key={count}
+                      type="button"
+                      className={viewCount === count ? "active" : ""}
+                      onClick={() => {
+                        setViewCount(count);
+                        if (selectedSlot >= count) setSelectedSlot(0);
+                      }}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className={`facts-dash ${factsOn ? "active" : ""}`}
+                  onClick={() => setFactsOn(current => !current)}
+                  aria-label="Toggle quick facts"
+                />
+              </div>
+
+              <div className="screen-slot-loader">
+                {[0, 1, 2, 3].map(slotIndex => (
                   <button
-                    key={count}
+                    key={slotIndex}
                     type="button"
-                    className={viewCount === count ? "active" : ""}
-                    onClick={() => setViewCount(count)}
+                    className={`${slotIndex < viewCount ? "active" : ""} ${
+                      selectedSlot === slotIndex ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedSlot(slotIndex)}
                   >
-                    {count}
+                    {slotIndex + 1}
                   </button>
                 ))}
               </div>
 
-<div className="screen-slot-loader">
-  {[0, 1, 2, 3].map(slotIndex => (
-    <button
-      key={slotIndex}
-      type="button"
-      className={`${slotIndex < viewCount ? "active" : ""} ${
-        selectedSlot === slotIndex ? "selected" : ""
-      }`}
-      onClick={() => setSelectedSlot(slotIndex)}
-    >
-      SCREEN {slotIndex + 1}
-    </button>
-  ))}
-</div>
-                
               <div className="loaded-cards">
                 {listings.map((machine, index) => {
-                  const id = String(getListingId(machine));
+                  const slotBadge =
+                    screenSlots.includes(index) ? screenSlots.indexOf(index) + 1 : "";
 
                   return (
-                    <div
-                      key={id}
-                      className={`loaded-card ${
-  index >= activeIndex && index < activeIndex + viewCount
-    ? "on-screen"
-    : ""
-} ${
-  index === activeIndex
-    ? "screen-slot-1"
-    : index === activeIndex + 1
-    ? "screen-slot-2"
-    : index === activeIndex + 2
-    ? "screen-slot-3"
-    : index === activeIndex + 3
-    ? "screen-slot-4"
-    : ""
-}`}
-                      draggable
+                    <TheaterMiniCard
+                      key={String(getListingId(machine))}
+                      machine={machine}
+                      badge={slotBadge}
+                      active={Boolean(slotBadge)}
+                      selected={screenSlots[selectedSlot] === index}
                       onDragStart={() => setDragIndex(index)}
-                      onDragOver={(e) => e.preventDefault()}
+                      onDragOver={e => e.preventDefault()}
                       onDrop={() => {
                         moveCard(dragIndex, index);
                         setDragIndex(null);
                       }}
-                   onClick={() => {
-  setScreenSlots(current => {
-    const next = [...current];
-    next[selectedSlot] = index;
-    return next;
-  });
-}}
-                                       >
-                     {screenSlots.includes(index) && (
-  <div className="loaded-card-screen-label">
-  {screenSlots.indexOf(index) + 1}
-</div>
-)}
-
-                      <ListingCard
-                        listing={machine}
-                        saved={false}
-                        onToggleSaved={() => {}}
-                        from="saved"
-                        ixiState={{
-                          color: "none",
-                          outline: 1
-                        }}
-                        onIxiStateChange={() => {}}
-                        onSendFront={() => {}}
-                        onSendBack={() => {}}
-                        isBoardDraggingCard={false}
-                        isGhostTarget={false}
-                        onBoardDragStart={() => {}}
-                        onBoardDragOver={() => {}}
-                        onBoardDragEnd={() => {}}
-                      />
-                    </div>
+                      onClick={() => assignCardToSelectedSlot(index)}
+                    />
                   );
                 })}
               </div>
@@ -284,8 +345,6 @@ const image = images[currentPhotoIndex] || getImage(machine);
           </section>
         )}
       </main>
-
-
 
       <style jsx>{`
         :global(body) {
@@ -312,23 +371,18 @@ const image = images[currentPhotoIndex] || getImage(machine);
           width: min(520px, 92vw);
           padding: 46px 34px;
           text-align: center;
-
           border: 1px solid rgba(255,255,255,.045);
           border-radius: 18px;
-
           background:
             radial-gradient(circle at 50% 0%, rgba(255,255,255,.035), transparent 42%),
             rgba(6,6,6,.92);
-
           box-shadow: 0 30px 90px rgba(0,0,0,.55);
         }
 
         .lobby-card span {
           display: block;
           margin-bottom: 14px;
-
           color: rgba(190,190,190,.48);
-
           font-size: 9px;
           font-weight: 950;
           letter-spacing: 1.2px;
@@ -336,9 +390,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
         .lobby-card p {
           margin: 0 0 26px;
-
           color: rgba(255,255,255,.56);
-
           font-size: 13px;
           font-weight: 800;
           letter-spacing: .25px;
@@ -347,322 +399,367 @@ const image = images[currentPhotoIndex] || getImage(machine);
         .lobby-card button {
           height: 34px;
           padding: 0 24px;
-
           border: 1px solid rgba(255,255,255,.10);
           border-radius: 999px;
-
           background: rgba(255,255,255,.035);
           color: rgba(235,235,235,.72);
-
           font-size: 9px;
           font-weight: 950;
           letter-spacing: .9px;
-
           cursor: pointer;
         }
 
-      .theater-room {
-  min-height: calc(100vh - 72px);
-
-  position: relative;
-  padding: 14px 20px 24px;
-
-  display: grid;
-  grid-template-rows:
-    18px
-    clamp(280px, 44vh, 500px)
-    auto;
-
-  gap: 14px;
-
-  overflow: visible;
-}
+        .theater-room {
+          min-height: calc(100vh - 72px);
+          padding: 14px 20px 20px;
+          display: grid;
+          grid-template-rows:
+            18px
+            clamp(300px, 44vh, 500px)
+            auto;
+          gap: 14px;
+        }
 
         .theater-brand {
           color: rgba(180,180,180,.13);
-
           font-size: 15px;
           font-weight: 950;
           letter-spacing: -.45px;
-
           text-shadow: 0 0 18px rgba(180,180,180,.06);
         }
 
-       .theater-screen {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-
-  display: grid;
-  gap: clamp(6px, .8vw, 10px);
-
-  margin: 0 auto;
-
-  overflow: hidden;
-}
-
-        .view-1 .theater-screen {
-          grid-template-columns: 1fr;
+        .theater-screen {
+          width: 100%;
+          min-height: 0;
         }
 
-        .view-2 .theater-screen {
-          grid-template-columns: repeat(2, 1fr);
+        .one-up-stage,
+        .two-up-stage,
+        .four-up-stage {
+          width: 100%;
+          height: 100%;
+          display: grid;
+          gap: 10px;
         }
 
-        .view-4 .theater-screen {
-          grid-template-columns: repeat(2, 1fr);
+        .one-up-stage {
+          grid-template-columns: 70px minmax(0, 1fr);
+        }
+
+        .two-up-stage {
+          grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr) 64px;
+        }
+
+        .four-up-stage {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           grid-template-rows: repeat(2, minmax(0, 1fr));
         }
 
-   .screen-slot {
-  min-width: 0;
-  min-height: 0;
-
-  position: relative;
-
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-
-  background: #050505;
-  overflow: hidden;
-}
-
-.screen-slot img {
-  width: 100%;
-  height: 100%;
-
-  display: block;
-
-  object-fit: cover;
-  object-position: center;
-}
-
-.photo-hit-zone {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-
-  width: 24%;
-
-  border: 0;
-  background: transparent;
-
-  z-index: 5;
-  cursor: pointer;
-}
-
-.photo-hit-left {
-  left: 0;
-}
-
-.photo-hit-right {
-  right: 0;
-}
-
-.photo-hit-zone:hover {
-  background: rgba(255,255,255,.025);
-}
-
-        .view-4 .screen-slot img {
-          max-height: 31vh;
+        .screen-slot {
+          min-width: 0;
+          min-height: 0;
+          position: relative;
+          display: flex;
+          align-items: stretch;
+          justify-content: stretch;
+          background: #050505;
+          overflow: hidden;
         }
 
-        .no-photo {
+        .screen-slot img {
           width: 100%;
           height: 100%;
-          min-height: 240px;
+          display: block;
+          object-fit: cover;
+          object-position: center;
+        }
 
+        .empty-slot,
+        .no-photo {
           display: flex;
           align-items: center;
           justify-content: center;
-
           color: rgba(255,255,255,.18);
           font-size: 10px;
           font-weight: 950;
           letter-spacing: 1px;
-
           background: #111;
         }
 
-       .theater-card-rail {
-  padding: 8px 0 24px;
+        .photo-hit-zone {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 24%;
+          border: 0;
+          background: transparent;
+          z-index: 5;
+          cursor: pointer;
+        }
 
-  opacity: .18;
-  transition: opacity .18s ease;
+        .photo-hit-left {
+          left: 0;
+        }
 
-  overflow: visible;
-}
+        .photo-hit-right {
+          right: 0;
+        }
+
+        .photo-hit-zone:hover {
+          background: rgba(255,255,255,.025);
+        }
+
+        .fact-strip {
+          min-width: 0;
+          height: 100%;
+          padding: 12px 7px;
+          display: grid;
+          align-content: center;
+          gap: 10px;
+          border: 1px solid rgba(255,255,255,.055);
+          background: rgba(255,255,255,.018);
+          color: rgba(235,235,235,.72);
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .45px;
+          text-transform: uppercase;
+          overflow: hidden;
+        }
+
+        .fact-strip.right {
+          text-align: right;
+        }
+
+        .fact-strip strong {
+          color: rgba(255,255,255,.88);
+          font-size: 10px;
+        }
+
+        .fact-strip.off {
+          border-color: transparent;
+          background: transparent;
+        }
+
+        .theater-card-rail {
+          padding: 6px 0 18px;
+          opacity: .22;
+          transition: opacity .18s ease;
+        }
 
         .theater-card-rail:hover {
           opacity: 1;
+        }
+
+        .theater-controls {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 8px;
         }
 
         .theater-mode-dashes {
           display: flex;
           justify-content: center;
           gap: 8px;
-
-          margin-bottom: 10px;
         }
 
-        .theater-mode-dashes button {
+        .theater-mode-dashes button,
+        .facts-dash {
           width: 28px;
           height: 8px;
-
           border: 0;
           border-radius: 2px;
-
           background: rgba(255,255,255,.18);
           color: transparent;
-
           cursor: pointer;
         }
 
-        .theater-mode-dashes button.active {
+        .theater-mode-dashes button.active,
+        .facts-dash.active {
           background: rgba(180,180,180,.72);
           box-shadow: 0 0 12px rgba(255,255,255,.08);
         }
 
-.screen-slot-loader {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+        .screen-slot-loader {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          margin: 0 0 8px;
+        }
 
-  margin: 0 0 10px;
-}
+        .screen-slot-loader button {
+          width: 22px;
+          height: 18px;
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 999px;
+          background: rgba(255,255,255,.025);
+          color: rgba(255,255,255,.38);
+          font-size: 8px;
+          font-weight: 950;
+          cursor: pointer;
+        }
 
-.screen-slot-loader button {
-  height: 18px;
-  padding: 0 10px;
+        .screen-slot-loader button.active {
+          color: rgba(255,255,255,.62);
+          border-color: rgba(255,255,255,.16);
+        }
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 999px;
+        .screen-slot-loader button.selected {
+          color: rgba(235,235,235,.92);
+          border-color: rgba(180,180,180,.42);
+          background: rgba(255,255,255,.075);
+          box-shadow: 0 0 12px rgba(255,255,255,.08);
+        }
 
-  background: rgba(255,255,255,.025);
-  color: rgba(255,255,255,.38);
+        .loaded-cards {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0 8px 16px;
+          scrollbar-width: thin;
+        }
 
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .65px;
+        .theater-mini-card {
+          flex: 0 0 210px;
+          width: 210px;
+          height: 142px;
+          position: relative;
+          display: grid;
+          grid-template-rows: 92px 1fr;
+          border: 1px solid rgba(255,255,255,.06);
+          border-radius: 10px;
+          background: rgba(10,10,10,.88);
+          overflow: hidden;
+          opacity: .74;
+          cursor: grab;
+          transition:
+            opacity .16s ease,
+            transform .16s ease,
+            border-color .16s ease,
+            box-shadow .16s ease;
+        }
 
-  cursor: pointer;
-}
+        .theater-mini-card:hover,
+        .theater-mini-card.active {
+          opacity: 1;
+          transform: translateY(-2px);
+          border-color: rgba(180,180,180,.22);
+          box-shadow: 0 0 18px rgba(255,255,255,.055);
+        }
 
-.screen-slot-loader button.active {
-  color: rgba(255,255,255,.62);
-  border-color: rgba(255,255,255,.16);
-}
+        .theater-mini-card.selected {
+          border-color: rgba(255,255,255,.34);
+        }
 
-.screen-slot-loader button.selected {
-  color: rgba(235,235,235,.92);
-  border-color: rgba(180,180,180,.42);
-  background: rgba(255,255,255,.075);
-  box-shadow: 0 0 12px rgba(255,255,255,.08);
-}
+        .mini-screen-badge {
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          z-index: 5;
+          width: 17px;
+          height: 17px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(180,180,180,.38);
+          border-radius: 50%;
+          background: rgba(0,0,0,.72);
+          color: rgba(235,235,235,.88);
+          font-size: 8px;
+          font-weight: 950;
+        }
 
+        .mini-photo {
+          min-width: 0;
+          min-height: 0;
+          background: #111;
+          overflow: hidden;
+        }
 
+        .mini-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
 
-.loaded-cards {
-  height: 220px;
+        .mini-photo span {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,.22);
+          font-size: 8px;
+          font-weight: 950;
+        }
 
-  display: flex;
-  align-items: flex-start;
-  gap: clamp(8px, 1vw, 14px);
+        .mini-meta {
+          min-width: 0;
+          padding: 7px 8px;
+          display: grid;
+          gap: 3px;
+          background: rgba(0,0,0,.62);
+        }
 
-  overflow-x: auto;
-  overflow-y: hidden;
+        .mini-meta strong {
+          color: rgba(245,245,245,.86);
+          font-size: 10px;
+          font-weight: 950;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
-  padding: 0 4px 10px;
-
-  scrollbar-width: thin;
-}
-
-      .loaded-card {
-  flex: 0 0 260px;
-  width: 260px;
-
-  position: relative;
-
-  transform: scale(.82);
-  transform-origin: top center;
-
-  opacity: .72;
-  cursor: grab;
-
-  transition:
-    opacity .16s ease,
-    transform .16s ease,
-    box-shadow .16s ease;
-}
-      .loaded-card.on-screen {
-  padding: 6px;
-
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 10px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
-    rgba(10,10,10,.82);
-
-  opacity: 1;
-  transform: scale(.86);
-
-  box-shadow: 0 0 0 1px rgba(180,180,180,.22);
-}
-
-     .loaded-card:hover {
-  opacity: 1;
-  transform: scale(.88) translateY(-2px);
-}
+        .mini-meta span {
+          color: rgba(255,255,255,.48);
+          font-size: 9px;
+          font-weight: 950;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
         @media (max-width: 850px) {
-         .theater-room {
-  height: calc(100vh - 58px);
-  min-height: 600px;
-
-  padding: 8px 0 0;
-
-  grid-template-rows:
-    14px
-    minmax(340px, 1fr)
-    170px;
-
-  gap: 8px;
-
-  overflow: hidden;
-}
+          .theater-room {
+            min-height: calc(100vh - 58px);
+            padding: 10px 0 16px;
+            grid-template-rows:
+              14px
+              clamp(360px, 58vh, 520px)
+              auto;
+            gap: 10px;
+          }
 
           .theater-brand {
             padding-left: 12px;
             font-size: 12px;
           }
 
-          .view-1 .theater-screen,
-          .view-2 .theater-screen,
-          .view-4 .theater-screen {
+          .one-up-stage,
+          .two-up-stage,
+          .four-up-stage {
             grid-template-columns: 1fr;
-            grid-template-rows: none;
+            grid-template-rows: 1fr;
           }
 
-       .screen-slot img {
-  width: 100%;
-  height: 100%;
-}
-
-          .view-2 .screen-slot:not(:first-child),
-          .view-4 .screen-slot:not(:first-child) {
+          .fact-strip,
+          .view-2 .screen-slot:not(:first-of-type),
+          .view-4 .screen-slot:not(:first-of-type) {
             display: none;
           }
 
-          .loaded-card {
-            flex-basis: 220px;
-            width: 220px;
-            transform: scale(.78);
+          .loaded-cards {
+            padding: 0 10px 16px;
           }
 
-          .loaded-card.on-screen {
-            transform: scale(.84);
+          .theater-mini-card {
+            flex-basis: 196px;
+            width: 196px;
+            height: 134px;
+            grid-template-rows: 86px 1fr;
           }
         }
       `}</style>
