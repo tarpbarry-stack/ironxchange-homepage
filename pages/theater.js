@@ -624,7 +624,7 @@ margin-top: -95px;
         }
 
 .loaded-card-scale {
-  width: 255px;
+  width: 285px;
 
   transform: scale(.70);
   transform-origin: top left;
