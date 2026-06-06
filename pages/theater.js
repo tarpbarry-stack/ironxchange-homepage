@@ -668,15 +668,13 @@ margin-top: -95px;
 }
 
         .loaded-card.on-screen {
-          opacity: 1;
-          transform: scale(.68);
-          box-shadow: 0 0 0 1px rgba(180,180,180,.22);
-        }
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(180,180,180,.22);
+}
 
         .loaded-card:hover {
-          opacity: 1;
-          transform: scale(.70) translateY(-2px);
-        }
+  opacity: 1;
+}
 
     .loaded-cards {
   scrollbar-width: thin;
