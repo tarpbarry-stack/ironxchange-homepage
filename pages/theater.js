@@ -24,7 +24,6 @@ function getImage(machine = {}) {
 
 export default function IXITheater() {
   const [listings, setListings] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
@@ -78,7 +77,6 @@ const [selectedSlot, setSelectedSlot] = useState(0);
       return next;
     });
 
-    setActiveIndex(to);
   }
 
 function getMachineImages(machine = {}) {
@@ -231,20 +229,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
                   return (
                     <div
                       key={id}
-                      className={`loaded-card ${
-  index >= activeIndex && index < activeIndex + viewCount
-    ? "on-screen"
-    : ""
-} ${
-  index === activeIndex
-    ? "screen-slot-1"
-    : index === activeIndex + 1
-    ? "screen-slot-2"
-    : index === activeIndex + 2
-    ? "screen-slot-3"
-    : index === activeIndex + 3
-    ? "screen-slot-4"
-    : ""
+                     className={`loaded-card ${
+  screenSlots.includes(index) ? "on-screen" : ""
 }`}
                       draggable
                       onDragStart={() => setDragIndex(index)}
