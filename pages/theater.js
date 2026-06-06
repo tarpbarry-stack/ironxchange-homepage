@@ -670,6 +670,29 @@ margin-top: -92px;
           transform: scale(.70) translateY(-2px);
         }
 
+    .loaded-cards {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.18) rgba(0,0,0,.72);
+}
+
+.loaded-cards::-webkit-scrollbar {
+  height: 6px;
+}
+
+.loaded-cards::-webkit-scrollbar-track {
+  background: rgba(0,0,0,.72);
+  border-radius: 999px;
+}
+
+.loaded-cards::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.16);
+  border-radius: 999px;
+}
+
+.loaded-cards::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.28);
+}
+
         .theater-room,
 .theater-screen {
   max-width: 100%;
