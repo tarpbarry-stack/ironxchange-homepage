@@ -592,9 +592,9 @@ margin-top: -95px;
   min-width: 0;
 
   display: flex;
-  gap: 4px;
+  gap: 28px;
 
-  margin-top: -18px;
+  margin-top: 0px;
 
   overflow-x: auto;
   overflow-y: hidden;
