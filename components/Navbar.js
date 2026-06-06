@@ -38,7 +38,11 @@ useEffect(() => {
           />
         </a>
 
-        <div className="social-mini">
+        
+      </div>
+
+      <div className="nav-links">
+       <div className="social-mini">
           <a
             href="https://www.facebook.com/profile.php?id=61589249515383"
             aria-label="Facebook"
@@ -84,14 +88,6 @@ useEffect(() => {
             <i className="fa-brands fa-tiktok"></i>
           </a>
         </div>
-      </div>
-
-      <div className="nav-links">
-        <a href="/browse">SEARCH</a>
-
-        <a href="/post-free" className="yellow-link">
-          POST FREE
-        </a>
 
        <a
   href={loggedIn ? "/account" : "/login"}
@@ -131,7 +127,7 @@ useEffect(() => {
 }
 
 .logo-img {
-  height: 36px;
+  height: 30px;
   display: block;
 }
 
@@ -227,21 +223,21 @@ useEffect(() => {
 }
 
 .login-icon {
-  width: 27px;
-  height: 27px;
+  width: 22px;
+  height: 22px;
 
   display: grid;
   place-items: center;
 
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.20);
+  border-radius: 4px;
 
-  color: rgba(255,255,255,.68) !important;
+  color: rgba(255,255,255,.62) !important;
 
-  font-size: 13px !important;
+  font-size: 11px !important;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)),
     #080808;
 
   box-shadow:
@@ -306,7 +302,7 @@ useEffect(() => {
   }
 
   .logo-img {
-    height: 36px;
+    height: 30px;
   }
 
   .social-mini {
