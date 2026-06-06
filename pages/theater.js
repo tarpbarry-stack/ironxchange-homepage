@@ -364,7 +364,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
       .theater-room {
   height: calc(100vh - 72px);
-  min-height: 620px;
+  min-height: 660px;
 
   position: relative;
   padding: clamp(10px, 1.4vw, 18px) clamp(10px, 1.6vw, 20px) 0;
@@ -372,8 +372,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
   display: grid;
   grid-template-rows:
     18px
-    minmax(320px, 1fr)
-    clamp(150px, 24vh, 230px);
+    minmax(300px, 1fr)
+    260px;
 
   gap: clamp(8px, 1vw, 12px);
 
@@ -488,11 +488,12 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
         .theater-card-rail {
-  min-height: 0;
+  height: 260px;
+  min-height: 260px;
 
   padding: 8px 0 10px;
 
-  opacity: .12;
+  opacity: .18;
   transition: opacity .18s ease;
 
   overflow: hidden;
@@ -568,64 +569,53 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
 
 .loaded-cards {
-  height: 100%;
+  height: 220px;
 
   display: flex;
-  align-items: end;
+  align-items: flex-start;
   gap: clamp(8px, 1vw, 14px);
 
   overflow-x: auto;
   overflow-y: hidden;
 
-  padding: 0 4px 8px;
+  padding: 0 4px 10px;
 
   scrollbar-width: thin;
 }
 
-        .loaded-card {
-          flex: 0 0 245px;
-          width: 245px;
+       .loaded-card {
+  flex: 0 0 245px;
+  width: 245px;
+  height: 205px;
 
-          position: relative;
-          
-          transform: scale(.82);
-          transform-origin: bottom center;
+  position: relative;
 
-          opacity: .72;
+  transform: scale(.72);
+  transform-origin: top center;
 
-          cursor: grab;
+  opacity: .72;
 
-          transition:
-            opacity .16s ease,
-            transform .16s ease,
-            box-shadow .16s ease;
-        }
+  cursor: grab;
 
-       .loaded-card-screen-label {
-  position: absolute;
-  top: 4px;
-  left: 4px;
+  transition:
+    opacity .16s ease,
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+       .loaded-card.on-screen {
+  padding: 6px;
 
-  width: 16px;
-  height: 16px;
+  border: 1px solid rgba(180,180,180,.22);
+  border-radius: 10px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
+    rgba(10,10,10,.82);
 
-  z-index: 20;
+  opacity: 1;
+  transform: scale(.76);
 
-  border: 1px solid rgba(180,180,180,.38);
-  border-radius: 50%;
-
-  background: rgba(0,0,0,.72);
-  color: rgba(235,235,235,.86);
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: 0;
-
-  box-shadow: 0 0 10px rgba(255,255,255,.08);
+  box-shadow: 0 0 0 1px rgba(180,180,180,.22);
 }
 
 .loaded-card.on-screen {
@@ -644,11 +634,10 @@ const image = images[currentPhotoIndex] || getImage(machine);
           box-shadow: 0 0 0 1px rgba(180,180,180,.22);
         }
 
-        .loaded-card:hover {
-          opacity: 1;
-          transform: scale(.9) translateY(-2px);
-        }
-
+       .loaded-card:hover {
+  opacity: 1;
+  transform: scale(.78) translateY(-2px);
+}
         @media (max-width: 850px) {
          .theater-room {
   height: calc(100vh - 58px);
