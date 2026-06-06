@@ -612,7 +612,7 @@ margin-top: -80px;
 
           position: relative;
           
-          transform: scale(.70);
+          transform: scale(.64);
           transform-origin: bottom center;
 
           opacity: .72;
@@ -664,13 +664,13 @@ margin-top: -80px;
 
         .loaded-card.on-screen {
           opacity: 1;
-          transform: scale(.74);
+          transform: scale(.68);
           box-shadow: 0 0 0 1px rgba(180,180,180,.22);
         }
 
         .loaded-card:hover {
           opacity: 1;
-          transform: scale(.76) translateY(-2px);
+          transform: scale(.70) translateY(-2px);
         }
 
         .theater-room,
