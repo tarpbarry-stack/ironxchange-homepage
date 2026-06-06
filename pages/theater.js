@@ -577,7 +577,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
           position: relative;
           
-          transform: scale(.82);
+          transform: scale(.70);
           transform-origin: bottom center;
 
           opacity: .72;
@@ -629,13 +629,13 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
         .loaded-card.on-screen {
           opacity: 1;
-          transform: scale(.88);
+          transform: scale(.74);
           box-shadow: 0 0 0 1px rgba(180,180,180,.22);
         }
 
         .loaded-card:hover {
           opacity: 1;
-          transform: scale(.9) translateY(-2px);
+          transform: scale(.76) translateY(-2px);
         }
 
         .theater-room,
