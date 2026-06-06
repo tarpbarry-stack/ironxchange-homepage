@@ -126,8 +126,13 @@ function prevPhotoForMachine(machine) {
   return (
     <>
       <Head>
-        <title>IXI Theater | IronXchange</title>
-      </Head>
+  <title>IXI Theater | IronXchange</title>
+
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+</Head>
 
       <Navbar />
 
