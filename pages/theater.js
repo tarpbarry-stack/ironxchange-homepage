@@ -603,9 +603,9 @@ margin-top: -95px;
   scrollbar-width: thin;
 }
 
-     .loaded-card {
-  flex: 0 0 170px;
-  width: 170px;
+    .loaded-card {
+  flex: 0 0 255px;
+  width: 255px;
 
           position: relative;
           
