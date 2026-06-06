@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
@@ -286,7 +285,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
         )}
       </main>
 
-      <Footer />
+
 
       <style jsx>{`
         :global(body) {
