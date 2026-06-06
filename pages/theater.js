@@ -412,7 +412,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
   display: grid;
   gap: 10px;
 
- margin: -8px auto 0;
+ margin: -10px auto 0;
 }
 
         .view-1 .theater-screen {
