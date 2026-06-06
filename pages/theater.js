@@ -496,7 +496,7 @@ margin-top: -12px;
           justify-content: center;
           gap: 8px;
 
-          margin-bottom: 4px;
+          margin-bottom: 8px;
         }
 
         .theater-mode-dashes button {
@@ -518,7 +518,7 @@ margin-top: -12px;
         }
 
 .screen-slot-loader {
-  display: flex;
+  display: none;
   justify-content: center;
   gap: 8px;
 
@@ -564,10 +564,13 @@ margin-top: -12px;
   display: flex;
   gap: 14px;
 
+  margin-top: -14px;
+
   overflow-x: auto;
   overflow-y: hidden;
 
   padding: 0 4px 8px;
+
 
   scrollbar-width: thin;
 }
