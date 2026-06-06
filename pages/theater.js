@@ -287,6 +287,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
   onBoardDragEnd={() => {}}
 />
 </div>
+</div>
                   );
                 })}
               </div>
