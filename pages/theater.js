@@ -594,7 +594,7 @@ margin-top: -95px;
   display: flex;
   gap: 60px;
 
-  margin-top: 28px;
+  margin-top: 58px;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -626,7 +626,7 @@ margin-top: -95px;
 .loaded-card-scale {
   width: 285px;
 
-  transform: scale(.70);
+  transform: scale(.60);
   transform-origin: top left;
 }
 
@@ -658,7 +658,6 @@ margin-top: -95px;
 }
 
 .loaded-card.on-screen {
-  padding: 6px;
   border: 1px solid rgba(180,180,180,.22);
   border-radius: 10px;
 
