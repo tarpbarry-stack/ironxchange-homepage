@@ -657,18 +657,8 @@ margin-top: -55px;
   box-shadow: 0 0 10px rgba(255,255,255,.08);
 }
 
-.loaded-card.on-screen {
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 10px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
-    rgba(10,10,10,.82);
-}
-
         .loaded-card.on-screen {
   opacity: 1;
-  box-shadow: 0 0 0 1px rgba(180,180,180,.22);
 }
 
         .loaded-card:hover {
