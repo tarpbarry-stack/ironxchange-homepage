@@ -332,21 +332,25 @@ const image = images[currentPhotoIndex] || getImage(machine);
           box-shadow: 0 30px 90px rgba(0,0,0,.55);
         }
 
-        .lobby-card span {
-          display: block;
-          margin-bottom: 14px;
+   .lobby-card span {
+  display: block;
+  margin-bottom: 14px;
 
-          color: rgba(190,190,190,.48);
+  color: rgba(0,194,255,.92);
 
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: 1.2px;
-        }
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 1.35px;
+
+  text-shadow:
+    0 0 10px rgba(0,194,255,.22),
+    0 0 22px rgba(0,194,255,.12);
+}
 
         .lobby-card p {
           margin: 0 0 26px;
 
-          color: rgba(255,255,255,.56);
+          color: rgba(225,225,225,.48);
 
           font-size: 13px;
           font-weight: 800;
