@@ -296,12 +296,12 @@ const image = images[currentPhotoIndex] || getImage(machine);
           font-family: Arial, sans-serif;
         }
 
-        main {
-          min-height: 84vh;
-          padding: 0;
-          background: #030303;
-        }
-
+       main {
+  min-height: 84vh;
+  padding: 0;
+  background: #030303;
+  overflow-x: hidden;
+}
         .theater-lobby {
           min-height: 78vh;
           display: flex;
@@ -474,11 +474,17 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
         .theater-card-rail {
-          padding: 10px 0 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 
-          opacity: .12;
-          transition: opacity .18s ease;
-        }
+  padding: 10px 0 14px;
+
+  opacity: .12;
+  transition: opacity .18s ease;
+
+  overflow: hidden;
+}
 
         .theater-card-rail:hover {
           opacity: 1;
@@ -549,17 +555,21 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
 
 
-        .loaded-cards {
-          display: flex;
-          gap: 14px;
+      .loaded-cards {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 
-          overflow-x: auto;
-          overflow-y: hidden;
+  display: flex;
+  gap: 14px;
 
-          padding: 0 4px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
 
-          scrollbar-width: thin;
-        }
+  padding: 0 4px 8px;
+
+  scrollbar-width: thin;
+}
 
         .loaded-card {
           flex: 0 0 245px;
@@ -628,6 +638,11 @@ const image = images[currentPhotoIndex] || getImage(machine);
           transform: scale(.9) translateY(-2px);
         }
 
+        .theater-room,
+.theater-screen {
+  max-width: 100%;
+  min-width: 0;
+}
         @media (max-width: 850px) {
           .theater-room {
             min-height: 88vh;
