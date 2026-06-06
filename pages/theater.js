@@ -362,21 +362,20 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
       .theater-room {
-  height: calc(100vh - 72px);
-  min-height: 660px;
+  min-height: calc(100vh - 72px);
 
   position: relative;
-  padding: clamp(10px, 1.4vw, 18px) clamp(10px, 1.6vw, 20px) 0;
+  padding: 14px 20px 24px;
 
   display: grid;
   grid-template-rows:
     18px
-    minmax(300px, 1fr)
-    260px;
+    clamp(280px, 44vh, 500px)
+    auto;
 
-  gap: clamp(8px, 1vw, 12px);
+  gap: 14px;
 
-  overflow: hidden;
+  overflow: visible;
 }
 
         .theater-brand {
@@ -486,16 +485,13 @@ const image = images[currentPhotoIndex] || getImage(machine);
           background: #111;
         }
 
-        .theater-card-rail {
-  height: 260px;
-  min-height: 260px;
-
-  padding: 8px 0 10px;
+       .theater-card-rail {
+  padding: 8px 0 24px;
 
   opacity: .18;
   transition: opacity .18s ease;
 
-  overflow: hidden;
+  overflow: visible;
 }
 
         .theater-card-rail:hover {
@@ -582,18 +578,16 @@ const image = images[currentPhotoIndex] || getImage(machine);
   scrollbar-width: thin;
 }
 
-       .loaded-card {
-  flex: 0 0 245px;
-  width: 245px;
-  height: 205px;
+      .loaded-card {
+  flex: 0 0 260px;
+  width: 260px;
 
   position: relative;
 
-  transform: scale(.72);
+  transform: scale(.82);
   transform-origin: top center;
 
   opacity: .72;
-
   cursor: grab;
 
   transition:
@@ -601,7 +595,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
     transform .16s ease,
     box-shadow .16s ease;
 }
-       .loaded-card.on-screen {
+      .loaded-card.on-screen {
   padding: 6px;
 
   border: 1px solid rgba(180,180,180,.22);
@@ -612,31 +606,16 @@ const image = images[currentPhotoIndex] || getImage(machine);
     rgba(10,10,10,.82);
 
   opacity: 1;
-  transform: scale(.76);
+  transform: scale(.86);
 
   box-shadow: 0 0 0 1px rgba(180,180,180,.22);
 }
 
-.loaded-card.on-screen {
-  padding: 6px;
-  border: 1px solid rgba(180,180,180,.22);
-  border-radius: 10px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0)),
-    rgba(10,10,10,.82);
-}
-
-        .loaded-card.on-screen {
-          opacity: 1;
-          transform: scale(.88);
-          box-shadow: 0 0 0 1px rgba(180,180,180,.22);
-        }
-
-       .loaded-card:hover {
+     .loaded-card:hover {
   opacity: 1;
-  transform: scale(.78) translateY(-2px);
+  transform: scale(.88) translateY(-2px);
 }
+
         @media (max-width: 850px) {
          .theater-room {
   height: calc(100vh - 58px);
