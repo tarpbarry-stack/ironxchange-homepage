@@ -603,14 +603,14 @@ margin-top: -95px;
   scrollbar-width: thin;
 }
 
-        .loaded-card {
-          flex: 0 0 255px;
-          width: 255px;
+     .loaded-card {
+  flex: 0 0 170px;
+  width: 170px;
 
           position: relative;
           
           transform: scale(.64);
-          transform-origin: bottom center;
+         transform-origin: bottom left;
 
           opacity: .72;
 
