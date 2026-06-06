@@ -478,6 +478,8 @@ const image = images[currentPhotoIndex] || getImage(machine);
   max-width: 100%;
   min-width: 0;
 
+position: relative;
+
   padding: 0 0 10px;
 margin-top: -80px;
 
@@ -491,13 +493,18 @@ margin-top: -80px;
           opacity: 1;
         }
 
-        .theater-mode-dashes {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
+     .theater-mode-dashes {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
 
-          margin-top: 75px;
-        }
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  z-index: 20;
+}
 
         .theater-mode-dashes button {
           width: 28px;
