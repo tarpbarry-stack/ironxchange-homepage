@@ -632,11 +632,11 @@ margin-top: -55px;
 
        .loaded-card-screen-label {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 3px;
+  left: 3px;
 
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 
   display: flex;
   align-items: center;
@@ -645,7 +645,7 @@ margin-top: -55px;
   z-index: 20;
 
   border: 1px solid rgba(180,180,180,.38);
-  border-radius: 50%;
+  border-radius: 2;
 
   background: rgba(0,0,0,.72);
   color: rgba(235,235,235,.86);
