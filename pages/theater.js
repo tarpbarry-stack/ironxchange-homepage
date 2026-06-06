@@ -24,7 +24,7 @@ function getImage(machine = {}) {
 export default function IXITheater() {
   const [listings, setListings] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [viewCount, setViewCount] = useState(1);
+  const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
 
