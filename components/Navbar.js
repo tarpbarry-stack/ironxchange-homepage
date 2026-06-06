@@ -94,7 +94,7 @@ useEffect(() => {
   className={`login-icon ${loggedIn ? "logged-in" : ""}`}
   aria-label="Account"
 >
-          <i className="fa-regular fa-user"></i>
+          <i className="fa-solid fa-helmet-safety"></i>
         </a>
       </div>
 
@@ -223,8 +223,8 @@ useEffect(() => {
 }
 
 .login-icon {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 
   display: grid;
   place-items: center;
