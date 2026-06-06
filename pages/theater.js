@@ -502,7 +502,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
 position: relative;
 
   padding: 0 0 10px;
-margin-top: -90px;
+margin-top: -92px;
 
   opacity: .12;
   transition: opacity .18s ease;
