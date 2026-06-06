@@ -263,12 +263,13 @@ const image = images[currentPhotoIndex] || getImage(machine);
                                        >
                      {screenSlots.includes(index) && (
   <div className="loaded-card-screen-label">
-  {screenSlots.indexOf(index) + 1}
-</div>
+    {screenSlots.indexOf(index) + 1}
+  </div>
 )}
 
-                      <ListingCard
-                        listing={machine}
+<div className="loaded-card-scale">
+  <ListingCard
+    listing={machine}
                         saved={false}
                         onToggleSaved={() => {}}
                         from="saved"
@@ -282,10 +283,10 @@ const image = images[currentPhotoIndex] || getImage(machine);
                         isBoardDraggingCard={false}
                         isGhostTarget={false}
                         onBoardDragStart={() => {}}
-                        onBoardDragOver={() => {}}
-                        onBoardDragEnd={() => {}}
-                      />
-                    </div>
+  onBoardDragOver={() => {}}
+  onBoardDragEnd={() => {}}
+/>
+</div>
                   );
                 })}
               </div>
@@ -604,15 +605,14 @@ margin-top: -95px;
 }
 
     .loaded-card {
-  flex: 0 0 255px;
-  width: 255px;
+  flex: 0 0 165px;
+  width: 165px;
+  height: 255px;
 
-          position: relative;
-          
-          transform: scale(.64);
-         transform-origin: bottom left;
+  position: relative;
 
-          opacity: .72;
+  opacity: .72;
+  cursor: grab;
 
           cursor: grab;
 
@@ -621,6 +621,13 @@ margin-top: -95px;
             transform .16s ease,
             box-shadow .16s ease;
         }
+
+.loaded-card-scale {
+  width: 255px;
+
+  transform: scale(.64);
+  transform-origin: top left;
+}
 
        .loaded-card-screen-label {
   position: absolute;
