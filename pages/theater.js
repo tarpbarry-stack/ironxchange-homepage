@@ -626,7 +626,7 @@ margin-top: -95px;
 .loaded-card-scale {
   width: 255px;
 
-  transform: scale(.64);
+  transform: scale(.70);
   transform-origin: top left;
 }
 
