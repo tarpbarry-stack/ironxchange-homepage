@@ -383,7 +383,7 @@ const image = images[currentPhotoIndex] || getImage(machine);
         }
 
        .theater-screen {
-  height: 58vh;
+  height: 54vh;
 
   display: grid;
   gap: 10px;
