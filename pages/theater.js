@@ -590,7 +590,7 @@ margin-top: -95px;
   min-width: 0;
 
   display: flex;
-  gap: 8px;
+  gap: 4px;
 
   margin-top: -18px;
 
