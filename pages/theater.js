@@ -593,7 +593,7 @@ margin-top: -80px;
   min-width: 0;
 
   display: flex;
-  gap: 10px;
+  gap: 8px;
 
   margin-top: -36px;
 
@@ -607,8 +607,8 @@ margin-top: -80px;
 }
 
         .loaded-card {
-          flex: 0 0 220px;
-          width: 220px;
+          flex: 0 0 255px;
+          width: 255px;
 
           position: relative;
           
