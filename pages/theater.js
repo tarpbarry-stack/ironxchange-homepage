@@ -328,7 +328,6 @@ return (
     updateZoomState(screenPosition, { dragging: false });
   }}
 >
-  >
 
  <div className={`screen-fact-control mode-${factMode}`}>
   <button
