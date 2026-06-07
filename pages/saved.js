@@ -893,7 +893,7 @@ onDragStart={(e) => {
   handleBoardDragStart(machine, e);
 }}
 onDragEnd={handleBoardDragEnd}            style={{
-right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+  left: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1080,7 +1080,7 @@ right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? i
   style={{
      
 
- left: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+  right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1870,22 +1870,22 @@ box-shadow: none;
 .ixi-pocket-thumbs {
   position: absolute;
 
-  left: 18px;
-  top: 18px;
+  left: 24px;
+  top: 30px;
 
-  width: 260px;
-  height: 86px;
+  width: 320px;
+  height: 92px;
 
   overflow: visible;
 
   pointer-events: auto;
 
-  z-index: 79;
+  z-index: 30;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs {
   left: auto;
-  right: 18px;
+  right: 24px;
 }
 
 .ixi-pocket-thumb {
@@ -1955,14 +1955,11 @@ box-shadow: none;
 .ixi-pocket-thumb-actions button:hover {
   box-shadow: 0 0 8px rgba(255,255,255,.18);
 }
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs
-  transform: translateY(0) rotate(7deg);
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
   height: 8px;
 }
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs {
-transform: translateY(0) rotate(7deg);
-
   height: 42px;
 }
 
@@ -1995,7 +1992,7 @@ transform: translateY(0) rotate(7deg);
 }
 
 .ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumb {
-  transform: translateY(0) rotate(-9deg);
+  transform: translateY(0) rotate(9deg);
   opacity: .18;
 }
 
@@ -2006,7 +2003,7 @@ transform: translateY(0) rotate(7deg);
 }
 
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
-  transform: translateY(0) rotate(-7deg);
+  transform: translateY(0) rotate(7deg);
   opacity: .72;
 }
 
@@ -2035,69 +2032,9 @@ transform: translateY(0) rotate(7deg);
 }
 
 .ixi-pocket-rail {
-  display: block;
-
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  top: 52px;
-
-  height: 10px;
-
-  z-index: 70;
-  pointer-events: auto;
+  display: none;
 }
 
-.ixi-pocket-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 4px;
-
-  height: 2px;
-
-  border-radius: 999px;
-
-  background: rgba(255,255,255,.16);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 0 8px rgba(0,0,0,.22);
-}
-
-.ixi-pocket-left.occupied .ixi-pocket-line {
-  background: rgba(255,196,0,.30);
-}
-
-.ixi-pocket-master-dash {
-  position: absolute;
-  left: 50%;
-  top: 1px;
-
-  width: 30px;
-  height: 7px;
-
-  transform: translateX(-50%);
-
-  border: 0;
-  border-radius: 3px;
-
-  background: rgba(255,196,0,.44);
-
-  padding: 0;
-  cursor: pointer;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.10),
-    0 0 10px rgba(255,196,0,.12);
-}
-
-.ixi-pocket-master-dash:hover {
-  background: rgba(255,196,0,.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.16),
-    0 0 12px rgba(255,196,0,.22);
-}
 
 
 .active-stack-zone {
