@@ -1814,7 +1814,7 @@ box-shadow: none;
 .ixi-pocket-rail {
   display: block;
   position: absolute;
-  top: 48px;
+  top: 68px;
   width: 38px;
   height: 10px;
   z-index: 120;
@@ -1822,13 +1822,13 @@ box-shadow: none;
 }
 
 .ixi-pocket-left .ixi-pocket-rail {
-  right: 0;
+  right: -10px;
   left: auto;
   transform: none;
 }
 
 .ixi-pocket-right .ixi-pocket-rail {
-  left: 0;
+  left: -10px;
   right: auto;
   transform: none;
 }
