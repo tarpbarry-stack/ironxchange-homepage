@@ -1870,23 +1870,22 @@ box-shadow: none;
 .ixi-pocket-thumbs {
   position: absolute;
 
-  right: 24px;
-  left: auto;
-  top: 30px;
+  left: 18px;
+  bottom: 18px;
 
-  width: 320px;
-  height: 92px;
+  width: 156px;
+  height: 54px;
 
-  overflow: visible;
+  overflow: hidden;
 
   pointer-events: auto;
 
-  z-index: 30;
+  z-index: 79;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs {
-left: 24px;
-  right: auto;
+  left: auto;
+  right: 18px;
 }
 
 .ixi-pocket-thumb {
