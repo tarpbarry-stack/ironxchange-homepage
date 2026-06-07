@@ -2115,10 +2115,6 @@ box-shadow: none;
     0 12px 20px rgba(0,0,0,.28);
 }
 
-.ixi-pocket-rail {
-  display: none;
-}
-
 
 
 
