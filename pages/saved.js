@@ -1816,10 +1816,11 @@ box-shadow: none;
 
   position: absolute;
   left: 50%;
-  top: 14px;
 
-  width: 104px;
-  height: 18px;
+  top: 58px;
+
+  width: 42px;
+  height: 8px;
 
   transform: translateX(-50%);
 
@@ -1850,22 +1851,29 @@ box-shadow: none;
   left: 50%;
   top: 5px;
 
-  width: 34px;
-  height: 6px;
+  width: 18px;
+  height: 4px;
 
   transform: translateX(-50%);
 
   border: 0;
-  border-radius: 3px;
+  border-radius: 2px;
 
   background: rgba(255,255,255,.18);
 
   padding: 0;
   cursor: pointer;
+}
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 0 0 1px rgba(255,255,255,.025);
+.ixi-pocket-power-dash::before {
+  content: "";
+
+  position: absolute;
+
+  left: -10px;
+  right: -10px;
+  top: -8px;
+  bottom: -8px;
 }
 
 .ixi-pocket-power-dash:hover {
@@ -1876,35 +1884,12 @@ box-shadow: none;
 }
 
 .ixi-pocket-power-dash.active {
-  background: rgba(0,194,255,.78);
+  background: rgba(255,196,0,.95);
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.16),
-    0 0 8px rgba(0,194,255,.34),
-    0 0 18px rgba(0,194,255,.12);
+    0 0 8px rgba(255,196,0,.42);
 }
 
-.ixi-pocket-power-dash.active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -5px;
-
-  width: 4px;
-  height: 4px;
-
-  transform: translateX(-50%);
-
-  border-radius: 50%;
-
-  background: rgba(0,194,255,.95);
-
-  box-shadow:
-    0 0 7px rgba(0,194,255,.52),
-    0 0 14px rgba(0,194,255,.22);
-
-  animation: ixiPocketPulse 1.25s ease-in-out infinite;
-}
 
 @keyframes ixiPocketPulse {
   0%, 100% {
@@ -1924,9 +1909,9 @@ box-shadow: none;
   left: 50%;
   top: 0;
 
-  width: 11px;
-  height: 11px;
-
+  width: 7px;
+  height: 7px;
+  
   transform: translate(-50%, -16px);
 
   border: 1px solid rgba(255,255,255,.16);
