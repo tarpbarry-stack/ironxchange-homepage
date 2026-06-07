@@ -792,7 +792,9 @@ return (
           font-size: 15.5px;
           font-weight: 900;
           line-height: 1.12;
-          max-width: 92%;
+           max-width: none;
+          min-width: 0;
+          flex: 1 1 auto;
           letter-spacing: -0.28px;
           text-rendering: geometricPrecision;
           display: -webkit-box;
@@ -808,6 +810,7 @@ overflow: hidden;
           letter-spacing: .18px;
           line-height: 1;
           white-space: nowrap;
+          flex: 0 0 auto;
         }
 
        .keyword-row {
