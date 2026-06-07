@@ -1543,12 +1543,12 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-command-left {
-  right: calc(50% + min(50vw, 340px) + 18px);
+  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
   left: auto;
 }
 
 .ixi-command-right {
-  left: calc(50% + min(50vw, 340px) + 18px);
+  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
   right: auto;
 }
 
