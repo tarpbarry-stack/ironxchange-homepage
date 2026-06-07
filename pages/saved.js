@@ -1962,11 +1962,6 @@ box-shadow: none;
   transform: translateY(0) rotate(9deg);
 }
 
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
-  transform: translateY(0) rotate(-7deg);
-  opacity: .72;
-}
-
 .ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs {
   height: 92px;
 }
@@ -2039,13 +2034,8 @@ box-shadow: none;
   display: none;
 }
 
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
-  transform-origin: right bottom;
-}
 
-.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
-  transform-origin: left bottom;
-}
+
 
 .active-stack-zone {
   width: 100%;
