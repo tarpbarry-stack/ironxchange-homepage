@@ -1871,12 +1871,12 @@ box-shadow: none;
   position: absolute;
 
   left: 18px;
-  bottom: 18px;
+  top: 18px;
 
-  width: 156px;
-  height: 54px;
+  width: 260px;
+  height: 86px;
 
-  overflow: hidden;
+  overflow: visible;
 
   pointer-events: auto;
 
