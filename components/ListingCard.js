@@ -1368,7 +1368,7 @@ overflow: hidden;
             width: 100%;
           }
 
-          .location-input {
+                   .location-input {
             width: 100%;
             text-align: left;
           }
