@@ -17,7 +17,70 @@ export default function IXIMachineRail({
 }) {
   return (
     <div className="board-command-rail">
-      {/* rail JSX moves here next */}
-    </div>
+  <button
+    type="button"
+    className="rail-zone rail-half"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+      onSendFront?.(listing);
+    }}
+  />
+
+  <button
+    type="button"
+    className="rail-zone rail-color"
+    onClick={onCycleColor}
+  />
+
+  <div className="rail-zone rail-width rail-width-split">
+  <button
+    type="button"
+    className="rail-width-half rail-width-strength"
+     onClick={cycleBoardOutline}
+    aria-label="Change relationship strength"
+  />
+
+  <button
+    type="button"
+    className="rail-width-half rail-width-end"
+    onClick={onEndRelationship}
+    aria-label="End relationship"
+  />
+</div>
+
+  <button
+    type="button"
+    className="rail-zone rail-pin"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+  />
+
+  <button
+    type="button"
+    className={`rail-zone rail-save ${saved ? "saved" : ""}`}
+    onClick={onToggleSaved}
+    aria-label={saved ? "Unsave listing" : "Save listing"}
+    title={saved ? "Saved" : "Save"}
+  />
+
+  <button
+    type="button"
+    className="rail-zone rail-half"
+    onClick={e => {
+      e.preventDefault();
+      e.stopPropagation();
+      onSendBack?.(listing);
+    }}
+  />
+</div>
+         
+      </div>
+
+      </div>
+
+      <style jsx>{
   );
 }
