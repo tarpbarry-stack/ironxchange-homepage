@@ -367,17 +367,7 @@ return (
 
 
           <div className="meta">
-            {showSave ? (
-              <button
-                type="button"
-                className={`save-star ${saved ? "saved" : ""}`}
-                onClick={toggleSave}
-                aria-label={saved ? "Unsave listing" : "Save listing"}
-                title={saved ? "Saved" : "Save"}
-              >
-                <i className={saved ? "fa-solid fa-star" : "fa-regular fa-star"}></i>
-              </button>
-            ) : null}
+            
 
             {sellerMode ? (
               <input
