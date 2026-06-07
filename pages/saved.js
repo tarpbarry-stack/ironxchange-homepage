@@ -1774,22 +1774,6 @@ box-shadow: none;
   z-index: 2;
 }
 
-.ixi-pocket-window {
-  display: none;
-}
-
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-window {
-  height: 86px;
-}
-
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-window {
-  height: 46px;
-}
-
-.ixi-pocket-left.pocket-mode-open .ixi-pocket-window {
-  height: 10px;
-}
-
 .ixi-pocket-mode-buttons {
   position: absolute;
   left: 18px;
