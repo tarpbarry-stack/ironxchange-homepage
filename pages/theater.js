@@ -31,6 +31,8 @@ export default function IXITheater() {
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
+
+  const [factsMode, setFactsMode] = useState("off");
   
   useEffect(() => {
     async function loadTheater() {
@@ -99,6 +101,44 @@ function getMachineImages(machine = {}) {
   return images.length ? images : hero ? [hero] : [];
 }
 
+  function getFactValue(machine = {}, key) {
+  return (
+    machine[key] ||
+    machine.publicData?.[key] ||
+    machine.attributes?.publicData?.[key] ||
+    machine.quickFacts?.[key] ||
+    machine.facts?.[key] ||
+    ""
+  );
+}
+
+function formatFactPrice(value) {
+  if (!value) return "—";
+
+  const raw = String(value).replace(/[^0-9]/g, "");
+  if (!raw) return String(value);
+
+  return `$${Number(raw).toLocaleString()}`;
+}
+
+  function FactStrip({ machine, side = "left", mode = "off" }) {
+  if (!machine || mode === "off") return null;
+
+  const year = getFactValue(machine, "year") || "—";
+  const make = getFactValue(machine, "make") || "—";
+  const model = getFactValue(machine, "model") || "—";
+  const price = formatFactPrice(getFactValue(machine, "price"));
+
+  return (
+    <aside className={`theater-fact-strip ${side} mode-${mode}`}>
+      <span>{year}</span>
+      <span>{make}</span>
+      <span>{model}</span>
+      <strong>{price}</strong>
+    </aside>
+  );
+}
+
 function nextPhotoForMachine(machine) {
   const id = String(getListingId(machine));
   const images = getMachineImages(machine);
@@ -164,8 +204,16 @@ function prevPhotoForMachine(machine) {
   />
 </div>
 
-            <section className="theater-screen">
-             {screenMachines.map(machine => {
+           <section className={`theater-screen facts-${factsMode}`}>
+             {viewCount === 2 && (
+  <FactStrip
+    machine={screenMachines[0]}
+    side="left"
+    mode={factsMode}
+  />
+)}
+
+{screenMachines.map(machine => {
   const id = String(getListingId(machine));
 const images = getMachineImages(machine);
 const currentPhotoIndex = slotPhotoIndexes[id] || 0;
@@ -195,8 +243,16 @@ const image = images[currentPhotoIndex] || getImage(machine);
 )}
                   </div>
                 );
-              })}
-            </section>
+             })}
+
+{viewCount === 2 && (
+  <FactStrip
+    machine={screenMachines[1]}
+    side="right"
+    mode={factsMode}
+  />
+)}
+</section>
 
             <section className="theater-card-rail">
               <div className="theater-mode-dashes">
@@ -211,6 +267,19 @@ const image = images[currentPhotoIndex] || getImage(machine);
                   </button>
                 ))}
               </div>
+
+                <button
+  type="button"
+  className={`facts-power-dash mode-${factsMode}`}
+  onClick={() => {
+    setFactsMode(current => {
+      if (current === "off") return "med";
+      if (current === "med") return "high";
+      return "off";
+    });
+  }}
+  aria-label="Toggle theater facts"
+/>
 
 <div className="screen-slot-loader">
   {[0, 1, 2, 3].map(slotIndex => (
@@ -488,6 +557,59 @@ const image = images[currentPhotoIndex] || getImage(machine);
 
           background: #111;
         }
+
+        .theater-fact-strip {
+  width: 58px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 10px 6px;
+
+  background: rgba(255,255,255,.02);
+
+  border: 1px solid rgba(255,255,255,.06);
+
+  overflow: hidden;
+}
+
+.theater-fact-strip.right {
+  text-align: right;
+}
+
+.theater-fact-strip span {
+  color: rgba(255,255,255,.46);
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.theater-fact-strip strong {
+  color: rgba(255,255,255,.82);
+
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.theater-fact-strip.mode-med {
+  opacity: .72;
+}
+
+.theater-fact-strip.mode-high {
+  opacity: 1;
+
+  border-color: rgba(0,194,255,.22);
+
+  box-shadow:
+    0 0 10px rgba(0,194,255,.08);
+}
+
+        
 
         .theater-card-rail {
   width: 100%;
