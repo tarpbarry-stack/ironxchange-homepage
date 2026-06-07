@@ -1890,9 +1890,9 @@ box-shadow: none;
 }
 
 .ixi-pocket-thumb {
-  width: 120px !important;
-  height: 80px !important;
-
+  width: 90px !important;
+  height: 60px !important;
+  
   position: absolute;
   top: 0;
 
