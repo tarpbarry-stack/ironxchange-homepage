@@ -1959,10 +1959,17 @@ box-shadow: none;
 }
 .ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
   height: 8px;
+  transform: translateY(0) rotate(9deg);
+}
+
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
+  transform: translateY(0) rotate(-7deg);
+}
 }
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs {
   height: 42px;
+  transform: translateY(0) rotate(7deg);
 }
 
 .ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs {
