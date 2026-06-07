@@ -545,8 +545,26 @@ function rotatePocket(pocketKey) {
     };
   });
 }
-  
-  function sendListingToFront(listing) {
+
+function cyclePocketMode(side) {
+  if (side === "left") {
+    setLeftPocketMode(current => {
+      if (current === "closed") return "peek";
+      if (current === "peek") return "open";
+      return "closed";
+    });
+
+    return;
+  }
+
+  setRightPocketMode(current => {
+    if (current === "closed") return "peek";
+    if (current === "peek") return "open";
+    return "closed";
+  });
+}
+
+function sendListingToFront(listing) {
     const listingId = getListingId(listing);
 
     setSavedBoardMode("custom");
@@ -845,41 +863,23 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-catch-pad" />
   <div className="ixi-pocket-window" />
 
-  <div className="ixi-pocket-mode-buttons">
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setLeftPocketMode("closed");
-    }}
-  />
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setLeftPocketMode("peek");
-    }}
-  />
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setLeftPocketMode("open");
-    }}
-  />
-</div>
+
 
   <div className="ixi-pocket-rail">
     <div className="ixi-pocket-line" />
 
-    <button
-      type="button"
-      className="ixi-pocket-master-dash"
-      onClick={(e) => {
-        e.stopPropagation();
-        setLeftPocketOpen(current => !current);
-      }}
-    />
+  <button
+  type="button"
+  className={`ixi-pocket-power-dash ${
+    leftPocketMode !== "closed" ? "active" : ""
+  }`}
+  title="Power pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("left");
+  }}
+/>
   </div>
 
 {leftPocketMode === "open" && (
@@ -1045,41 +1045,23 @@ onDragEnd={handleBoardDragEnd}            style={{
 <div className="ixi-pocket-catch-pad" />
     <div className="ixi-pocket-window" />
 
-    <div className="ixi-pocket-mode-buttons right">
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setRightPocketMode("closed");
-    }}
-  />
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setRightPocketMode("peek");
-    }}
-  />
-  <button
-    type="button"
-    onClick={(e) => {
-      e.stopPropagation();
-      setRightPocketMode("open");
-    }}
-  />
-</div>
+  
     
     <div className="ixi-pocket-rail">
   <div className="ixi-pocket-line" />
 
-  <button
-    type="button"
-    className="ixi-pocket-master-dash"
-    onClick={(e) => {
-      e.stopPropagation();
-      setRightPocketOpen(current => !current);
-    }}
-  />
+ <button
+  type="button"
+  className={`ixi-pocket-power-dash right ${
+    rightPocketMode !== "closed" ? "active" : ""
+  }`}
+  title="Power pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("right");
+  }}
+/>
 </div>
 
 {rightPocketMode === "open" && (
@@ -1825,39 +1807,73 @@ box-shadow: none;
   z-index: 2;
 }
 
-.ixi-pocket-mode-buttons {
+.ixi-pocket-rail {
+  display: block;
   position: absolute;
   left: 18px;
-  bottom: 6px;
-
-  display: flex;
-  gap: 6px;
-
-  z-index: 80;
-}
-
-.ixi-pocket-mode-buttons.right {
-  left: auto;
   right: 18px;
+  top: 82px;
+  height: 10px;
+  z-index: 90;
+  pointer-events: auto;
 }
 
-.ixi-pocket-mode-buttons button {
-  width: 18px;
-  height: 5px;
+.ixi-pocket-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+}
+
+.ixi-pocket-power-dash {
+  position: absolute;
+  left: 50%;
+  top: 1px;
+
+  width: 34px;
+  height: 7px;
+
+  transform: translateX(-50%);
 
   border: 0;
-  border-radius: 2px;
+  border-radius: 4px;
 
-  background: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.20);
 
   padding: 0;
   cursor: pointer;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-.ixi-pocket-mode-buttons button:hover {
-  background: rgba(255,196,0,.78);
-  box-shadow: 0 0 8px rgba(255,196,0,.22);
+.ixi-pocket-power-dash.active {
+  background: rgba(0,194,255,.74);
+  box-shadow:
+    0 0 8px rgba(0,194,255,.28),
+    0 0 18px rgba(0,194,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.16);
+  animation: ixiPocketPulse 1.25s ease-in-out infinite;
 }
+
+.ixi-pocket-power-dash:hover {
+  background: rgba(255,196,0,.72);
+  box-shadow:
+    0 0 10px rgba(255,196,0,.20);
+}
+
+@keyframes ixiPocketPulse {
+  0%, 100% {
+    filter: brightness(.92);
+  }
+  50% {
+    filter: brightness(1.28);
+  }
+}
+
 
 
 .ixi-pocket-loop-button {
