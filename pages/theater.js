@@ -101,7 +101,8 @@ function getMachineImages(machine = {}) {
   return images.length ? images : hero ? [hero] : [];
 }
 
-  function getFactValue(machine = {}, key) {
+
+function getFactValue(machine = {}, key) {
   return (
     machine[key] ||
     machine.publicData?.[key] ||
@@ -121,22 +122,13 @@ function formatFactPrice(value) {
   return `$${Number(raw).toLocaleString()}`;
 }
 
-  function FactStrip({ machine, side = "left", mode = "off" }) {
-  if (!machine || mode === "off") return null;
+function formatFactHours(value) {
+  if (!value) return "—";
 
-  const year = getFactValue(machine, "year") || "—";
-  const make = getFactValue(machine, "make") || "—";
-  const model = getFactValue(machine, "model") || "—";
-  const price = formatFactPrice(getFactValue(machine, "price"));
+  const raw = String(value).replace(/[^0-9]/g, "");
+  if (!raw) return String(value);
 
-  return (
-    <aside className={`theater-fact-strip ${side} mode-${mode}`}>
-      <span>{year}</span>
-      <span>{make}</span>
-      <span>{model}</span>
-      <strong>{price}</strong>
-    </aside>
-  );
+  return `${Number(raw).toLocaleString()} HRS`;
 }
 
 function nextPhotoForMachine(machine) {
@@ -205,13 +197,6 @@ function prevPhotoForMachine(machine) {
 </div>
 
            <section className={`theater-screen facts-${factsMode}`}>
-             {viewCount === 2 && (
-  <FactStrip
-    machine={screenMachines[0]}
-    side="left"
-    mode={factsMode}
-  />
-)}
 
 {screenMachines.map(machine => {
   const id = String(getListingId(machine));
@@ -219,8 +204,22 @@ const images = getMachineImages(machine);
 const currentPhotoIndex = slotPhotoIndexes[id] || 0;
 const image = images[currentPhotoIndex] || getImage(machine);
 
-  return (
-    <div key={getListingId(machine)} className="screen-slot">
+  const screenPosition = screenMachines.indexOf(machine);
+
+return (
+  <div
+    key={getListingId(machine)}
+    className={`screen-slot screen-position-${screenPosition + 1}`}
+  >
+                    
+{factsMode !== "off" && (
+  <div className={`screen-fact-hud mode-${factsMode}`}>
+    <span>{getFactValue(machine, "year") || "—"}</span>
+    <span>{getFactValue(machine, "model") || "—"}</span>
+    <span>{formatFactHours(getFactValue(machine, "hours"))}</span>
+    <strong>{formatFactPrice(getFactValue(machine, "price"))}</strong>
+  </div>
+)}                    
 
                <button
   type="button"
@@ -244,14 +243,6 @@ const image = images[currentPhotoIndex] || getImage(machine);
                   </div>
                 );
              })}
-
-{viewCount === 2 && (
-  <FactStrip
-    machine={screenMachines[1]}
-    side="right"
-    mode={factsMode}
-  />
-)}
 </section>
 
             <section className="theater-card-rail">
@@ -558,55 +549,47 @@ const image = images[currentPhotoIndex] || getImage(machine);
           background: #111;
         }
 
-        .theater-fact-strip {
-  width: 58px;
+.screen-fact-hud {
+  position: absolute;
+  top: 10px;
+
+  z-index: 12;
 
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
+  gap: 7px;
+  align-items: center;
 
-  padding: 10px 6px;
+  padding: 6px 8px;
 
-  background: rgba(255,255,255,.02);
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 6px;
 
-  border: 1px solid rgba(255,255,255,.06);
-
-  overflow: hidden;
-}
-
-.theater-fact-strip.right {
-  text-align: right;
-}
-
-.theater-fact-strip span {
-  color: rgba(255,255,255,.46);
+  color: rgba(235,235,235,.68);
 
   font-size: 8px;
   font-weight: 950;
-
-  letter-spacing: .4px;
+  letter-spacing: .45px;
   text-transform: uppercase;
+
+  pointer-events: none;
 }
 
-.theater-fact-strip strong {
+.screen-position-1 .screen-fact-hud {
+  left: 10px;
+}
+
+.screen-position-2 .screen-fact-hud {
+  right: 10px;
+}
+
+.screen-fact-hud strong {
+  color: rgba(255,255,255,.86);
+}
+
+.screen-fact-hud.mode-high {
   color: rgba(255,255,255,.82);
-
-  font-size: 9px;
-  font-weight: 950;
-}
-
-.theater-fact-strip.mode-med {
-  opacity: .72;
-}
-
-.theater-fact-strip.mode-high {
-  opacity: 1;
-
-  border-color: rgba(0,194,255,.22);
-
-  box-shadow:
-    0 0 10px rgba(0,194,255,.08);
+  border-color: rgba(0,194,255,.28);
 }
 
         
@@ -760,7 +743,7 @@ margin-top: -55px;
   z-index: 20;
 
   border: 1px solid rgba(180,180,180,.38);
-  border-radius: 2;
+  border-radius: 2px;
 
   background: rgba(0,0,0,.72);
   color: rgba(235,235,235,.86);
