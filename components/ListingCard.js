@@ -13,6 +13,8 @@ import {
 
 import MachineBadges from "./MachineBadges";
 
+import IXIMachineRail from "./IXIMachineRail";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -450,66 +452,18 @@ return (
             <span>Saves: {listing.saves || "—"}</span>
           </div>
                ) : null}
-<div className="board-command-rail">
-  <button
-    type="button"
-    className="rail-zone rail-half"
-    onClick={e => {
-      e.preventDefault();
-      e.stopPropagation();
-      onSendFront?.(listing);
-    }}
-  />
-
-  <button
-    type="button"
-    className="rail-zone rail-color"
-    onClick={cycleBoardColor}
-  />
-
-  <div className="rail-zone rail-width rail-width-split">
-  <button
-    type="button"
-    className="rail-width-half rail-width-strength"
-    onClick={cycleBoardOutline}
-    aria-label="Change relationship strength"
-  />
-
-  <button
-    type="button"
-    className="rail-width-half rail-width-end"
-    onClick={endIxiRelationship}
-    aria-label="End relationship"
-  />
-</div>
-
-  <button
-    type="button"
-    className="rail-zone rail-pin"
-    onClick={e => {
-      e.preventDefault();
-      e.stopPropagation();
-    }}
-  />
-
-  <button
-    type="button"
-    className={`rail-zone rail-save ${saved ? "saved" : ""}`}
-    onClick={toggleSave}
-    aria-label={saved ? "Unsave listing" : "Save listing"}
-    title={saved ? "Saved" : "Save"}
-  />
-
-  <button
-    type="button"
-    className="rail-zone rail-half"
-    onClick={e => {
-      e.preventDefault();
-      e.stopPropagation();
-      onSendBack?.(listing);
-    }}
-  />
-</div>
+<IXIMachineRail
+  listing={listing}
+  saved={saved}
+  boardColor={boardColor}
+  boardOutline={boardOutline}
+  onSendFront={onSendFront}
+  onSendBack={onSendBack}
+  onCycleColor={cycleBoardColor}
+  onCycleOutline={cycleBoardOutline}
+  onEndRelationship={endIxiRelationship}
+  onToggleSaved={toggleSave}
+/>
          
       </div>
 
