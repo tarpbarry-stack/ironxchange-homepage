@@ -409,8 +409,10 @@ return (
   ))}
 </div>
                 
-              <div className="loaded-cards">
-                {listings.map((machine, index) => {
+            <div className="theater-bottom-dock">
+  <div className="theater-loaded-zone">
+    <div className="loaded-cards">
+      {listings.map((machine, index) => {
                   const id = String(getListingId(machine));
 
                   return (
@@ -463,8 +465,16 @@ return (
 </div>
                   );
                 })}
-              </div>
-            </section>
+                          </div>
+          </div>
+
+          <div className="theater-import-zone">
+            <div className="theater-import-placeholder">
+              STACKS / POCKETS / DECKS
+            </div>
+          </div>
+        </div>
+      </section>
           </section>
         )}
       </main>
@@ -962,6 +972,50 @@ margin-top: -55px;
 
 .loaded-cards::-webkit-scrollbar-thumb:hover {
   background: rgba(255,255,255,.28);
+}
+
+.theater-bottom-dock {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: 70% 30%;
+  align-items: end;
+}
+
+.theater-loaded-zone {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.theater-import-zone {
+  min-width: 0;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.theater-import-placeholder {
+  width: calc(100% - 14px);
+  height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed rgba(255,255,255,.10);
+  border-radius: 10px;
+
+  color: rgba(255,255,255,.20);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .75px;
 }
 
         .theater-room,
