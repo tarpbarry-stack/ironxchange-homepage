@@ -1351,7 +1351,7 @@ overflow: hidden;
           font-weight: 800;
         }
 
-        @media (max-width: 850px) {
+               @media (max-width: 850px) {
           .card.seller-mode {
             min-height: 450px;
           }
@@ -1372,9 +1372,8 @@ overflow: hidden;
             width: 100%;
             text-align: left;
           }
-          
-            `}</style>
+        }
+      `}</style>
     </div>
   );
 }
-      
