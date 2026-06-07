@@ -865,39 +865,39 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
 
 
-  <div className="ixi-pocket-rail">
-    <div className="ixi-pocket-line" />
+<div className="ixi-pocket-rail">
+  <div className="ixi-pocket-line" />
 
-  <button
-  type="button"
-  className={`ixi-pocket-power-dash ${
-    leftPocketMode !== "closed" ? "active" : ""
-  }`}
-  title="Power pocket"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("left");
-  }}
-/>
-  </div>
+  {leftPocketMode === "open" && (
+    <button
+      type="button"
+      className="ixi-pocket-loop-button"
+      title="Loop pocket"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        rotatePocket("pocketLeft");
+      }}
+    />
+  )}
 
-{leftPocketMode === "open" && (
   <button
     type="button"
-    className="ixi-pocket-loop-button"
-    title="Loop pocket"
-    onMouseDown={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }}
+    className={`ixi-pocket-power-dash ${
+      leftPocketMode !== "closed" ? "active" : ""
+    }`}
+    title="Power pocket"
     onClick={(e) => {
       e.preventDefault();
       e.stopPropagation();
-      rotatePocket("pocketLeft");
+      cyclePocketMode("left");
     }}
   />
-)}
+</div>
 
 {(machineContainers.pocketLeft || []).length > 0 && (
   <div className="ixi-pocket-thumbs">
@@ -1047,39 +1047,39 @@ onDragEnd={handleBoardDragEnd}            style={{
 
   
     
-    <div className="ixi-pocket-rail">
+   <div className="ixi-pocket-rail">
   <div className="ixi-pocket-line" />
 
- <button
-  type="button"
-  className={`ixi-pocket-power-dash right ${
-    rightPocketMode !== "closed" ? "active" : ""
-  }`}
-  title="Power pocket"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("right");
-  }}
-/>
-</div>
+  {rightPocketMode === "open" && (
+    <button
+      type="button"
+      className="ixi-pocket-loop-button right"
+      title="Loop pocket"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        rotatePocket("pocketRight");
+      }}
+    />
+  )}
 
-{rightPocketMode === "open" && (
   <button
     type="button"
-    className="ixi-pocket-loop-button right"
-    title="Loop pocket"
-    onMouseDown={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }}
+    className={`ixi-pocket-power-dash right ${
+      rightPocketMode !== "closed" ? "active" : ""
+    }`}
+    title="Power pocket"
     onClick={(e) => {
       e.preventDefault();
       e.stopPropagation();
-      rotatePocket("pocketRight");
+      cyclePocketMode("right");
     }}
   />
-)}
+</div>
 
 {(machineContainers.pocketRight || []).length > 0 && (
   <div className="ixi-pocket-thumbs">
@@ -1807,14 +1807,23 @@ box-shadow: none;
   z-index: 2;
 }
 
+/* =============================== */
+/* IXI POCKET MACHINE CONTROL PLANE */
+/* =============================== */
+
 .ixi-pocket-rail {
   display: block;
+
   position: absolute;
-  left: 18px;
-  right: 18px;
-  top: 82px;
-  height: 10px;
-  z-index: 90;
+  left: 50%;
+  top: 14px;
+
+  width: 104px;
+  height: 18px;
+
+  transform: translateX(-50%);
+
+  z-index: 96;
   pointer-events: auto;
 }
 
@@ -1822,90 +1831,135 @@ box-shadow: none;
   position: absolute;
   left: 0;
   right: 0;
-  top: 5px;
-  height: 2px;
+  top: 8px;
+
+  height: 1px;
+
   border-radius: 999px;
-  background: rgba(255,255,255,.10);
+
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0),
+    rgba(255,255,255,.18),
+    rgba(255,255,255,0)
+  );
 }
 
 .ixi-pocket-power-dash {
   position: absolute;
   left: 50%;
-  top: 1px;
+  top: 5px;
 
   width: 34px;
-  height: 7px;
+  height: 6px;
 
   transform: translateX(-50%);
 
   border: 0;
-  border-radius: 4px;
+  border-radius: 3px;
 
-  background: rgba(255,255,255,.20);
+  background: rgba(255,255,255,.18);
 
   padding: 0;
   cursor: pointer;
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08);
-}
-
-.ixi-pocket-power-dash.active {
-  background: rgba(0,194,255,.74);
-  box-shadow:
-    0 0 8px rgba(0,194,255,.28),
-    0 0 18px rgba(0,194,255,.12),
-    inset 0 1px 0 rgba(255,255,255,.16);
-  animation: ixiPocketPulse 1.25s ease-in-out infinite;
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 0 1px rgba(255,255,255,.025);
 }
 
 .ixi-pocket-power-dash:hover {
   background: rgba(255,196,0,.72);
   box-shadow:
-    0 0 10px rgba(255,196,0,.20);
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 10px rgba(255,196,0,.18);
+}
+
+.ixi-pocket-power-dash.active {
+  background: rgba(0,194,255,.78);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 0 8px rgba(0,194,255,.34),
+    0 0 18px rgba(0,194,255,.12);
+}
+
+.ixi-pocket-power-dash.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+
+  width: 4px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background: rgba(0,194,255,.95);
+
+  box-shadow:
+    0 0 7px rgba(0,194,255,.52),
+    0 0 14px rgba(0,194,255,.22);
+
+  animation: ixiPocketPulse 1.25s ease-in-out infinite;
 }
 
 @keyframes ixiPocketPulse {
   0%, 100% {
-    filter: brightness(.92);
+    opacity: .48;
+    transform: translateX(-50%) scale(.82);
   }
+
   50% {
-    filter: brightness(1.28);
+    opacity: 1;
+    transform: translateX(-50%) scale(1.08);
   }
 }
 
-
-
+/* square thumb-loop actuator, rides above the power dash */
 .ixi-pocket-loop-button {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
+  left: 50%;
+  top: 0;
 
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
+
+  transform: translate(-50%, -16px);
 
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 3px;
 
-  background: rgba(255,196,0,.34);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0)),
+    rgba(255,196,0,.32);
 
   padding: 0;
   cursor: pointer;
 
-  z-index: 95;
+  z-index: 98;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 0 1px rgba(0,0,0,.35);
 }
 
 .ixi-pocket-loop-button.right {
-  left: auto;
-  right: 18px;
+  left: 50%;
+  right: auto;
 }
 
 .ixi-pocket-loop-button:hover {
-  border-color: rgba(255,196,0,.65);
-  background: rgba(255,196,0,.72);
+  border-color: rgba(255,196,0,.72);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0)),
+    rgba(255,196,0,.74);
 
   box-shadow:
-    0 0 8px rgba(255,196,0,.18);
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 8px rgba(255,196,0,.20);
 }
 
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
