@@ -411,7 +411,7 @@ window.location.href = queryString
   key={id}
   listing={item}
   showSave={false}
-  from="browser"
+ from="browse"
 
   ixiState={
     ixiCardState[String(id)] || {
@@ -1112,11 +1112,11 @@ footer p {
   color: #FFC400;
 }
 
-        @media (max-width: 1100px) {
-          .cards {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
+      @media (max-width: 1100px) {
+  .cards {
+    grid-template-columns: repeat(auto-fit, minmax(292px, 1fr));
+  }
+}
 
   @media (max-width: 850px) {
   .nav {
