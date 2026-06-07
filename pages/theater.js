@@ -33,6 +33,14 @@ const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
 
   const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
+  const [screenZoomStates, setScreenZoomStates] = useState([
+  { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 },
+  { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 },
+  { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 },
+  { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 }
+]);
+
+const [zoomSyncOn, setZoomSyncOn] = useState(false);
 
 function cycleScreenFactMode(screenIndex) {
   setScreenFactModes(current => {
@@ -48,6 +56,40 @@ function cycleScreenFactMode(screenIndex) {
     return next;
   });
 }
+
+function clampZoom(value) {
+  return Math.max(1, Math.min(4, value));
+}
+
+function updateZoomState(screenIndex, patch) {
+  setScreenZoomStates(current => {
+    const next = [...current];
+
+    const updated = {
+      ...next[screenIndex],
+      ...patch
+    };
+
+    if (zoomSyncOn && screenIndex === 0) {
+      return next.map(() => ({ ...updated }));
+    }
+
+    next[screenIndex] = updated;
+    return next;
+  });
+}
+
+function resetZoomState(screenIndex) {
+  updateZoomState(screenIndex, {
+    zoom: 1,
+    x: 0,
+    y: 0,
+    dragging: false,
+    lastX: 0,
+    lastY: 0
+  });
+}
+
   
   useEffect(() => {
     async function loadTheater() {
@@ -221,10 +263,71 @@ const image = images[currentPhotoIndex] || getImage(machine);
   const screenPosition = screenMachines.indexOf(machine);
   const factMode = screenFactModes[screenPosition] || "off";
 
+  const zoomState = screenZoomStates[screenPosition] || {
+  zoom: 1,
+  x: 0,
+  y: 0,
+  dragging: false,
+  lastX: 0,
+  lastY: 0
+};
+
 return (
   <div
-    key={getListingId(machine)}
-    className={`screen-slot screen-position-${screenPosition + 1}`}
+  key={getListingId(machine)}
+  className={`screen-slot screen-position-${screenPosition + 1} ${
+    zoomState.zoom > 1 ? "zoom-active" : ""
+  }`}
+  onWheel={(e) => {
+    e.preventDefault();
+
+    const nextZoom = clampZoom(
+      zoomState.zoom + (e.deltaY < 0 ? 0.25 : -0.25)
+    );
+
+    updateZoomState(screenPosition, {
+      zoom: nextZoom,
+      x: nextZoom === 1 ? 0 : zoomState.x,
+      y: nextZoom === 1 ? 0 : zoomState.y
+    });
+  }}
+  onDoubleClick={() => {
+    if (zoomState.zoom > 1) {
+      resetZoomState(screenPosition);
+    } else {
+      updateZoomState(screenPosition, {
+        zoom: 2,
+        x: 0,
+        y: 0
+      });
+    }
+  }}
+  onMouseDown={(e) => {
+    if (zoomState.zoom <= 1) return;
+
+    updateZoomState(screenPosition, {
+      dragging: true,
+      lastX: e.clientX,
+      lastY: e.clientY
+    });
+  }}
+  onMouseMove={(e) => {
+    if (!zoomState.dragging || zoomState.zoom <= 1) return;
+
+    updateZoomState(screenPosition, {
+      x: zoomState.x + (e.clientX - zoomState.lastX),
+      y: zoomState.y + (e.clientY - zoomState.lastY),
+      lastX: e.clientX,
+      lastY: e.clientY
+    });
+  }}
+  onMouseUp={() => {
+    updateZoomState(screenPosition, { dragging: false });
+  }}
+  onMouseLeave={() => {
+    updateZoomState(screenPosition, { dragging: false });
+  }}
+>
   >
 
  <div className={`screen-fact-control mode-${factMode}`}>
@@ -260,7 +363,14 @@ return (
 />
 
 {image ? (
-  <img src={image} alt="" />
+  <img
+    src={image}
+    alt=""
+    style={{
+      transform: `translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.zoom})`
+    }}
+    draggable={false}
+  />
 ) : (
   <div className="no-photo">NO PHOTO</div>
 )}
@@ -513,6 +623,24 @@ return (
   max-height: none;
   object-fit: cover;
   object-position: center;
+
+  transition: transform .08s linear;
+transform-origin: center center;
+user-select: none;
+}
+
+.screen-slot.zoom-active {
+  cursor: grab;
+}
+
+.screen-slot.zoom-active:active {
+  cursor: grabbing;
+}
+
+.screen-slot img {
+  transition: transform .08s linear;
+  transform-origin: center center;
+  user-select: none;
 }
 
 .photo-hit-zone {
