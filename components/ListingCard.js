@@ -1192,37 +1192,7 @@ overflow: hidden;
           text-transform: uppercase;
         }
 
-        .save-star {
-          width: 18px;
-          height: 18px;
-          display: grid;
-          place-items: center;
-          background: transparent;
-          border: none;
-          color: rgba(255,255,255,.28);
-          cursor: pointer;
-          padding: 0;
-          margin-right: -2px;
-
-          transition:
-            color .14s ease,
-            transform .14s ease;
-        }
-
-        .save-star i {
-          font-size: 12px;
-        }
-
-        .save-star.saved {
-          color: #ffc400;
-          text-shadow: 0 0 8px rgba(255,196,0,.12);
-        }
-
-        .save-star:hover {
-          color: rgba(255,196,0,.82);
-          transform: scale(1.06);
-        }
-
+        
 
 .status-photo-pill {
   position: absolute;
