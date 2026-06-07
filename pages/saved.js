@@ -894,7 +894,7 @@ onDragStart={(e) => {
 }}
 onDragEnd={handleBoardDragEnd}            style={{
   right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
-  zIndex: index + 1,
+  zIndex: 20 - index,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
   )
