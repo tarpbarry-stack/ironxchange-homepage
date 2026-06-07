@@ -926,8 +926,8 @@ onDragStart={(e) => {
   handleBoardDragStart(machine, e);
 }}
 onDragEnd={handleBoardDragEnd}            style={{
-  right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
-  zIndex: 20 - index,
+ right: `${leftPocketMode === "open" ? index * 48 : leftPocketMode === "peek" ? index * 12 : index * 6}px`,
+ zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
   )
@@ -1111,7 +1111,7 @@ onDragEnd={handleBoardDragEnd}            style={{
   style={{
      
 
-  left: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+  left: `${rightPocketMode === "open" ? index * 48 : rightPocketMode === "peek" ? index * 12 : index * 6}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
