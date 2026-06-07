@@ -2039,7 +2039,13 @@ box-shadow: none;
   display: none;
 }
 
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
+  transform-origin: right bottom;
+}
 
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
+  transform-origin: left bottom;
+}
 
 .active-stack-zone {
   width: 100%;
