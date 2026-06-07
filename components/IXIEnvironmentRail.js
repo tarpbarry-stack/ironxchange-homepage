@@ -124,8 +124,8 @@ function canAccess(item) {
         .ixi-environment-rail {
           width: 100%;
           min-height: 22px;
-          margin: 0 auto 22px;
-
+          margin: -14px auto 22px;
+          
           display: flex;
           align-items: center;
           justify-content: space-between;
