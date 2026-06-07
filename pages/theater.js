@@ -636,12 +636,6 @@ user-select: none;
   cursor: grabbing;
 }
 
-.screen-slot img {
-  transition: transform .08s linear;
-  transform-origin: center center;
-  user-select: none;
-}
-
 .photo-hit-zone {
   position: absolute;
   top: 0;
@@ -1006,14 +1000,10 @@ margin-top: -55px;
           }
 
           .loaded-card {
-            flex-basis: 220px;
-            width: 220px;
-            transform: scale(.78);
-          }
+}
 
-          .loaded-card.on-screen {
-            transform: scale(.84);
-          }
+.loaded-card.on-screen {
+}
         }
       `}</style>
     </>
