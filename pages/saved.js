@@ -2036,9 +2036,69 @@ transform: translateY(0) rotate(7deg);
 }
 
 .ixi-pocket-rail {
-  display: none;
+  display: block;
+
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 52px;
+
+  height: 10px;
+
+  z-index: 70;
+  pointer-events: auto;
 }
 
+.ixi-pocket-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4px;
+
+  height: 2px;
+
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.16);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 8px rgba(0,0,0,.22);
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-line {
+  background: rgba(255,196,0,.30);
+}
+
+.ixi-pocket-master-dash {
+  position: absolute;
+  left: 50%;
+  top: 1px;
+
+  width: 30px;
+  height: 7px;
+
+  transform: translateX(-50%);
+
+  border: 0;
+  border-radius: 3px;
+
+  background: rgba(255,196,0,.44);
+
+  padding: 0;
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 10px rgba(255,196,0,.12);
+}
+
+.ixi-pocket-master-dash:hover {
+  background: rgba(255,196,0,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 0 12px rgba(255,196,0,.22);
+}
 
 
 .active-stack-zone {
