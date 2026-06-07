@@ -786,7 +786,8 @@ min-height: 365px;
   box-shadow: 0 20px 55px rgba(0,0,0,.48);
   border: 1px solid rgba(255,255,255,.09);
 }
-       input, select {
+       .search-container input,
+.search-container select {
   height: 38px;
 
   padding: 0 13px;
@@ -804,7 +805,7 @@ min-height: 365px;
   outline: none;
 }
 
-       input::placeholder {
+      .search-container input::placeholder {
   color: rgba(255,255,255,.36);
   font-weight: 600;
 }
@@ -1175,8 +1176,8 @@ footer p {
     grid-template-columns: 1fr;
   }
 
-  input,
-  select {
+  .search-container input,
+.search-container select {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
