@@ -564,11 +564,15 @@ return (
 
 .screen-fact-hud {
   position: relative;
-z-index: 12;
+  z-index: 12;
 
   display: flex;
   gap: 7px;
   align-items: center;
+
+  white-space: nowrap;
+  width: max-content;
+  max-width: none;
 
   padding: 6px 8px;
 
