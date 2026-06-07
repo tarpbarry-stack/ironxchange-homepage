@@ -888,15 +888,15 @@ min-height: 365px;
   font-weight: 400;
   letter-spacing: 1px;
 }
-       .cards {
+      .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(292px, 1fr));
   gap: 22px;
   min-height: 560px;
 }
 
 .cards.single-card {
-  grid-template-columns: minmax(250px, 300px);
+  grid-template-columns: minmax(292px, 320px);
   justify-content: center;
 }
 
