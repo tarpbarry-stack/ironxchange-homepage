@@ -893,7 +893,7 @@ onDragStart={(e) => {
   handleBoardDragStart(machine, e);
 }}
 onDragEnd={handleBoardDragEnd}            style={{
-  left: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+  right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1080,7 +1080,7 @@ onDragEnd={handleBoardDragEnd}            style={{
   style={{
      
 
-  right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+  left: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1869,14 +1869,15 @@ box-shadow: none;
 /* ========================= */
 
 .ixi-pocket-thumbs {
-  position: absolute;
+ position: absolute;
 
-  left: 24px;
+  left: 50%;
   top: 30px;
 
   width: 320px;
   height: 92px;
 
+  transform: translateX(-50%);
   overflow: visible;
 
   pointer-events: auto;
@@ -1885,8 +1886,8 @@ box-shadow: none;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs {
-  left: auto;
-  right: 24px;
+  left: 50%;
+  right: auto;
 }
 
 .ixi-pocket-thumb {
