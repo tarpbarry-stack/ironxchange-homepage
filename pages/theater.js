@@ -32,7 +32,22 @@ const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
 
-  const [factsMode, setFactsMode] = useState("off");
+  const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
+
+function cycleScreenFactMode(screenIndex) {
+  setScreenFactModes(current => {
+    const next = [...current];
+
+    next[screenIndex] =
+      next[screenIndex] === "off"
+        ? "med"
+        : next[screenIndex] === "med"
+        ? "high"
+        : "off";
+
+    return next;
+  });
+}
   
   useEffect(() => {
     async function loadTheater() {
@@ -196,8 +211,7 @@ function prevPhotoForMachine(machine) {
   />
 </div>
 
-           <section className={`theater-screen facts-${factsMode}`}>
-
+          <section className="theater-screen">
 {screenMachines.map(machine => {
   const id = String(getListingId(machine));
 const images = getMachineImages(machine);
@@ -205,6 +219,7 @@ const currentPhotoIndex = slotPhotoIndexes[id] || 0;
 const image = images[currentPhotoIndex] || getImage(machine);
 
   const screenPosition = screenMachines.indexOf(machine);
+  const factMode = screenFactModes[screenPosition] || "off";
 
 return (
   <div
@@ -212,15 +227,32 @@ return (
     className={`screen-slot screen-position-${screenPosition + 1}`}
   >
                     
-{factsMode !== "off" && (
-  <div className={`screen-fact-hud mode-${factsMode}`}>
-    <span>{getFactValue(machine, "year") || "—"}</span>
-    <span>{getFactValue(machine, "model") || "—"}</span>
-    <span>{formatFactHours(getFactValue(machine, "hours"))}</span>
-    <strong>{formatFactPrice(getFactValue(machine, "price"))}</strong>
-  </div>
-)}                    
+<div className={`screen-fact-control mode-${factMode}`}>
+  <button
+    type="button"
+    className="screen-fact-dash"
+    onClick={() => cycleScreenFactMode(screenPosition)}
+    aria-label="Toggle screen facts"
+  />
 
+ <div className={`screen-fact-control mode-${factMode}`}>
+  <button
+    type="button"
+    className="screen-fact-dash"
+    onClick={() => cycleScreenFactMode(screenPosition)}
+    aria-label="Toggle screen facts"
+  />
+
+  {factMode !== "off" && (
+    <div className={`screen-fact-hud mode-${factMode}`}>
+      <span>{getFactValue(machine, "year") || "—"}</span>
+      <span>{getFactValue(machine, "model") || "—"}</span>
+      <span>{formatFactHours(getFactValue(machine, "hours"))}</span>
+      <strong>{formatFactPrice(getFactValue(machine, "price"))}</strong>
+    </div>
+  )}
+</div>
+</div>
                <button
   type="button"
   className="photo-hit-zone photo-hit-left"
@@ -259,18 +291,7 @@ return (
                 ))}
               </div>
 
-                <button
-  type="button"
-  className={`facts-power-dash mode-${factsMode}`}
-  onClick={() => {
-    setFactsMode(current => {
-      if (current === "off") return "med";
-      if (current === "med") return "high";
-      return "off";
-    });
-  }}
-  aria-label="Toggle theater facts"
-/>
+        
 
 <div className="screen-slot-loader">
   {[0, 1, 2, 3].map(slotIndex => (
@@ -550,10 +571,8 @@ return (
         }
 
 .screen-fact-hud {
-  position: absolute;
-  top: 10px;
-
-  z-index: 12;
+  position: relative;
+z-index: 12;
 
   display: flex;
   gap: 7px;
@@ -592,6 +611,48 @@ return (
   border-color: rgba(0,194,255,.28);
 }
 
+.screen-fact-control {
+  position: absolute;
+  top: 10px;
+  z-index: 14;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.screen-position-1 .screen-fact-control,
+.screen-position-3 .screen-fact-control {
+  left: 10px;
+}
+
+.screen-position-2 .screen-fact-control,
+.screen-position-4 .screen-fact-control {
+  right: 10px;
+  flex-direction: row-reverse;
+}
+
+.screen-fact-dash {
+  width: 22px;
+  height: 6px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.screen-fact-control.mode-med .screen-fact-dash {
+  background: rgba(255,255,255,.42);
+}
+
+.screen-fact-control.mode-high .screen-fact-dash {
+  background: rgba(0,194,255,.86);
+  box-shadow: 0 0 10px rgba(0,194,255,.16);
+}
         
 
         .theater-card-rail {
