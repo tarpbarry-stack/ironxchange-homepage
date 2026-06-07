@@ -527,8 +527,25 @@ if (dragId && boardEl) {
   setGhostListingId("");
   setActiveStackHover("");
 }
+  
+function rotatePocket(pocketKey) {
+  if (!pocketKey) return;
 
+  setMachineContainers(current => {
+    const ids = current[pocketKey] || [];
 
+    if (ids.length <= 1) return current;
+
+    return {
+      ...current,
+      [pocketKey]: [
+        ...ids.slice(1),
+        ids[0]
+      ]
+    };
+  });
+}
+  
   function sendListingToFront(listing) {
     const listingId = getListingId(listing);
 
@@ -865,8 +882,25 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     />
   </div>
 
-  {(machineContainers.pocketLeft || []).length > 0 && (
-    <div className="ixi-pocket-thumbs">
+{leftPocketMode === "open" && (
+  <button
+    type="button"
+    className="ixi-pocket-loop-button"
+    title="Loop pocket"
+    onMouseDown={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      rotatePocket("pocketLeft");
+    }}
+  />
+)}
+
+{(machineContainers.pocketLeft || []).length > 0 && (
+  <div className="ixi-pocket-thumbs">
       {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
         const machine = getListingById(machineId);
         if (!machine) return null;
@@ -1048,7 +1082,24 @@ onDragEnd={handleBoardDragEnd}            style={{
   />
 </div>
 
-    {(machineContainers.pocketRight || []).length > 0 && (
+{rightPocketMode === "open" && (
+  <button
+    type="button"
+    className="ixi-pocket-loop-button right"
+    title="Loop pocket"
+    onMouseDown={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      rotatePocket("pocketRight");
+    }}
+  />
+)}
+
+{(machineContainers.pocketRight || []).length > 0 && (
   <div className="ixi-pocket-thumbs">
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
       const machine = getListingById(machineId);
@@ -1806,6 +1857,39 @@ box-shadow: none;
 .ixi-pocket-mode-buttons button:hover {
   background: rgba(255,196,0,.78);
   box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+
+.ixi-pocket-loop-button {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+
+  width: 12px;
+  height: 12px;
+
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 3px;
+
+  background: rgba(255,196,0,.34);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 95;
+}
+
+.ixi-pocket-loop-button.right {
+  left: auto;
+  right: 18px;
+}
+
+.ixi-pocket-loop-button:hover {
+  border-color: rgba(255,196,0,.65);
+  background: rgba(255,196,0,.72);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.18);
 }
 
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
