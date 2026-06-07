@@ -1963,7 +1963,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
-  transform: translateY(0) rotate(7deg);
+  transform: translateY(0) rotate(-7deg);
   opacity: .72;
 }
 
