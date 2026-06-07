@@ -16,7 +16,8 @@ export default function IXIMachineRail({
   onToggleSaved
 }) {
  return (
-  <div className="board-command-rail">
+  <>
+    <div className="board-command-rail">
     <button
       type="button"
       className="rail-zone rail-half"
@@ -347,8 +348,6 @@ export default function IXIMachineRail({
     0 0 7px rgba(255,196,0,.30);
 }
 
-          }
-        }
                 `}</style>
   </>
 );
