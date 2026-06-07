@@ -1832,6 +1832,48 @@ box-shadow: none;
   right: auto;
   transform: none;
 }
+
+.ixi-pocket-power-dash {
+  position: absolute;
+  left: 50%;
+  top: 3px;
+
+  width: 18px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 130;
+  pointer-events: auto;
+}
+
+.ixi-pocket-power-dash::before {
+  content: "";
+  position: absolute;
+
+  left: -10px;
+  right: -10px;
+  top: -8px;
+  bottom: -8px;
+}
+
+.ixi-pocket-power-dash:hover {
+  background: rgba(255,196,0,.72);
+}
+
+.ixi-pocket-power-dash.active {
+  background: rgba(255,196,0,.95);
+  box-shadow: 0 0 8px rgba(255,196,0,.42);
+}
+
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
