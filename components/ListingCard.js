@@ -766,10 +766,22 @@ return (
   width: 5px;
   height: 5px;
 
-  background: rgba(229,62,62,.72);
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.18);
+
+  box-shadow: none;
+
+  transition:
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.rail-width-end:hover::after {
+  background: rgba(229,62,62,.55);
 
   box-shadow:
-    0 0 5px rgba(229,62,62,.18);
+    0 0 5px rgba(229,62,62,.12);
 }
 
 
