@@ -477,6 +477,11 @@ return (
           text-decoration: none;
           color: inherit;
 
+          font-family: 'Inter', sans-serif;
+          font-size: initial;
+          line-height: normal;
+          isolation: isolate;
+
           height: 391px;
           min-height: 391px;
           max-height: 391px;
@@ -786,7 +791,7 @@ return (
   position: relative;
 }
 
-        .card h3 {
+       .card .title-row h3 {
           margin: 0;
           color: #f2f2f2;
 
@@ -804,6 +809,7 @@ overflow: hidden;
 
         .hours-inline {
           color: rgba(255,255,255,.54) !important;
+          font-family: 'Inter', sans-serif !important;
           font-size: 12.75px !important;
           font-weight: 500 !important;
           letter-spacing: .18px;
