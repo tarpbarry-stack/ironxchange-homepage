@@ -244,7 +244,7 @@ return (
     </div>
   )}
 </div>
-</div>
+
                <button
   type="button"
   className="photo-hit-zone photo-hit-left"
