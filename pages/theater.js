@@ -226,14 +226,6 @@ return (
     key={getListingId(machine)}
     className={`screen-slot screen-position-${screenPosition + 1}`}
   >
-                    
-<div className={`screen-fact-control mode-${factMode}`}>
-  <button
-    type="button"
-    className="screen-fact-dash"
-    onClick={() => cycleScreenFactMode(screenPosition)}
-    aria-label="Toggle screen facts"
-  />
 
  <div className={`screen-fact-control mode-${factMode}`}>
   <button
