@@ -893,7 +893,7 @@ onDragStart={(e) => {
   handleBoardDragStart(machine, e);
 }}
 onDragEnd={handleBoardDragEnd}            style={{
-  left: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+right: `${leftPocketMode === "open" ? index * 60 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1080,7 +1080,7 @@ onDragEnd={handleBoardDragEnd}            style={{
   style={{
      
 
-  right: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+ left: `${rightPocketMode === "open" ? index * 60 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1870,7 +1870,8 @@ box-shadow: none;
 .ixi-pocket-thumbs {
   position: absolute;
 
-  left: 24px;
+  right: 24px;
+  left: auto;
   top: 30px;
 
   width: 320px;
@@ -1884,8 +1885,8 @@ box-shadow: none;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs {
-  left: auto;
-  right: 24px;
+left: 24px;
+  right: auto;
 }
 
 .ixi-pocket-thumb {
@@ -1955,11 +1956,14 @@ box-shadow: none;
 .ixi-pocket-thumb-actions button:hover {
   box-shadow: 0 0 8px rgba(255,255,255,.18);
 }
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs
+  transform: translateY(0) rotate(7deg);
   height: 8px;
 }
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs {
+transform: translateY(0) rotate(7deg);
+
   height: 42px;
 }
 
@@ -1992,7 +1996,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumb {
-  transform: translateY(0) rotate(9deg);
+  transform: translateY(0) rotate(-9deg);
   opacity: .18;
 }
 
@@ -2003,7 +2007,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
-  transform: translateY(0) rotate(7deg);
+  transform: translateY(0) rotate(-7deg);
   opacity: .72;
 }
 
