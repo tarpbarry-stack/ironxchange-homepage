@@ -464,8 +464,6 @@ return (
   onEndRelationship={endIxiRelationship}
   onToggleSaved={toggleSave}
 />
-         
-      </div>
 
       </div>
 
