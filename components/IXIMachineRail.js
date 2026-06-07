@@ -76,8 +76,6 @@ export default function IXIMachineRail({
     }}
   />
 </div>
-         
-      </div>
 
       </div>
 
