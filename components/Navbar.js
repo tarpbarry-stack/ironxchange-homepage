@@ -256,8 +256,8 @@ useEffect(() => {
 .login-icon:hover {
   transform: translateY(-1px);
 
-  border-color: rgba(255,196,0,.36);
-  color: #FFC400 !important;
+ color: #38d4ff;
+border-color: rgba(0,194,255,.95);
 
   background:
     linear-gradient(180deg, rgba(255,196,0,.07), rgba(255,196,0,0)),
@@ -271,28 +271,28 @@ useEffect(() => {
 }
 
 .login-icon.logged-in {
-  border-color: rgba(56,161,105,.72);
-  color: #38A169 !important;
+  border-color: rgba(0,194,255,.72);
+  color: #00C2FF !important;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.045) inset,
-    0 0 0 1px rgba(56,161,105,.10),
-    0 0 14px rgba(56,161,105,.10),
+    0 0 0 1px rgba(0,194,255,.10),
+    0 0 14px rgba(0,194,255,.10),
     0 7px 18px rgba(0,0,0,.22);
 }
 
 .login-icon.logged-in:hover {
-  border-color: rgba(56,161,105,.95);
-  color: #48c57d !important;
+  border-color: rgba(0,194,255,.95);
+  color: #38d4ff !important;
 
   background:
-    linear-gradient(180deg, rgba(56,161,105,.10), rgba(56,161,105,0)),
+    linear-gradient(180deg, rgba(0,194,255,.10), rgba(0,194,255,0)),
     #0d0d0d;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.05) inset,
-    0 0 0 1px rgba(56,161,105,.14),
-    0 0 18px rgba(56,161,105,.16),
+    0 0 0 1px rgba(0,194,255,.14),
+    0 0 18px rgba(0,194,255,.16),
     0 8px 20px rgba(0,0,0,.24);
 }
 
