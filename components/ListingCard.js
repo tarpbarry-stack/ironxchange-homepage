@@ -112,6 +112,21 @@ function cycleBoardColor(e) {
     setLocalBoardOutline(nextOutline);
   }
 }
+
+function endIxiRelationship(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (onIxiStateChange) {
+    onIxiStateChange(id, {
+      color: "none",
+      outline: 1
+    });
+  } else {
+    setLocalBoardColor("none");
+    setLocalBoardOutline(1);
+  }
+}  
  const boardDragStart = useRef(null);
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 const [isBoardDragging, setIsBoardDragging] = useState(false);
@@ -462,11 +477,21 @@ return (
     onClick={cycleBoardColor}
   />
 
+  <div className="rail-zone rail-width rail-width-split">
   <button
     type="button"
-    className="rail-zone rail-width"
+    className="rail-width-half rail-width-strength"
     onClick={cycleBoardOutline}
+    aria-label="Change relationship strength"
   />
+
+  <button
+    type="button"
+    className="rail-width-half rail-width-end"
+    onClick={endIxiRelationship}
+    aria-label="End relationship"
+  />
+</div>
 
   <button
     type="button"
@@ -699,54 +724,103 @@ return (
   box-shadow: 0 0 6px rgba(249,133,18,.18);
 }
 
+
+.rail-width-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0;
+}
+
+.rail-width-split::after {
+  display: none;
+}
+
+.rail-width-half {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.rail-width-strength {
+  border-right: 1px solid rgba(255,255,255,.035);
+}
+
+.rail-width-half::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 7px;
+  height: 4px;
+
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.18);
+}
+
+.rail-width-end::after {
+  width: 5px;
+  height: 5px;
+
+  background: rgba(229,62,62,.72);
+
+  box-shadow:
+    0 0 5px rgba(229,62,62,.18);
+}
+
+
 /* WIDTH DASH — follows selected color, 3 strength states */
-.card.board-outline-1 .rail-width::after {
+.card.board-outline-1 .rail-width-strength::after {
   width: 9px;
   opacity: .46;
   box-shadow: none;
 }
 
-.card.board-outline-3 .rail-width::after {
+.card.board-outline-3 .rail-width-strength::after {
   width: 12px;
   opacity: .68;
   box-shadow: 0 0 5px rgba(255,255,255,.08);
 }
 
-.card.board-outline-5 .rail-width::after {
+.card.board-outline-5 .rail-width-strength::after {
   width: 15px;
   opacity: .92;
   box-shadow: 0 0 7px rgba(255,255,255,.12);
 }
 
-.card.board-color-none .rail-width::after {
+.card.board-color-none .rail-width-strength::after {
   background: rgba(255,255,255,.18);
 }
 
-.card.board-color-green .rail-width::after {
+.card.board-color-green .rail-width-strength::after {
   background: rgba(56,161,105,.78);
 }
 
-.card.board-color-yellow .rail-width::after {
+.card.board-color-yellow .rail-width-strength::after {
   background: rgba(255,196,0,.82);
 }
 
-.card.board-color-red .rail-width::after {
+.card.board-color-red .rail-width-strength::after {
   background: rgba(229,62,62,.82);
 }
 
-.card.board-color-cyan .rail-width::after {
+.card.board-color-cyan .rail-width-strength::after {
   background: rgba(0,194,255,.82);
 }
 
-.card.board-color-white .rail-width::after {
+.card.board-color-white .rail-width-strength::after {
   background: rgba(255,255,255,.70);
 }
 
-.card.board-color-blue .rail-width::after {
+.card.board-color-blue .rail-width-strength::after {
   background: rgba(49,130,206,.82);
 }
 
-.card.board-color-orange .rail-width::after {
+.card.board-color-orange .rail-width-strength::after {
   background: rgba(249,133,18,.82);
 }
 
