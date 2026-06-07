@@ -1983,12 +1983,12 @@ box-shadow: none;
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
   transform-origin: right bottom;
   transform: rotate(7deg);
-  opacity: .72;
+  opacity: .58;
 }
 
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
   transform: translateY(0) rotate(-7deg);
-  opacity: .72;
+  opacity: .58;
 }
 
 /* OPEN — same plane, flat accordion */
