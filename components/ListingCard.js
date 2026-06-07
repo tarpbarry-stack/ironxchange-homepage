@@ -465,8 +465,6 @@ return (
   onToggleSaved={toggleSave}
 />
 
-      </div>
-
       <style jsx>{`
 
         .card {
@@ -1374,7 +1372,7 @@ overflow: hidden;
             width: 100%;
             text-align: left;
           }
-        }
+          
             `}</style>
     </div>
   );
