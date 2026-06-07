@@ -2374,7 +2374,6 @@ box-shadow:
 
   gap: 16px;
 }
-
 .ixi-color-filter {
   flex: 0 0 20px;
 }
