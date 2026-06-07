@@ -783,6 +783,7 @@ return (
   max-height: 36px;
 
   overflow: hidden;
+  position: relative;
 }
 
         .card h3 {
@@ -792,9 +793,7 @@ return (
           font-size: 15.5px;
           font-weight: 900;
           line-height: 1.12;
-           max-width: none;
-          min-width: 0;
-          flex: 1 1 auto;
+          max-width: calc(100% - 58px);
           letter-spacing: -0.28px;
           text-rendering: geometricPrecision;
           display: -webkit-box;
@@ -810,7 +809,11 @@ overflow: hidden;
           letter-spacing: .18px;
           line-height: 1;
           white-space: nowrap;
-          flex: 0 0 auto;
+          position: absolute;
+top: 1px;
+right: 0;
+width: 54px;
+text-align: right;
         }
 
        .keyword-row {
