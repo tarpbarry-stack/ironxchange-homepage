@@ -1508,13 +1508,26 @@ onBoardDragEnd={() => {}}
           letter-spacing: .45px;
         }
 
-        .ixi-command-chassis {
+       .ixi-command-chassis {
   width: 100%;
   margin: 0 auto 30px;
 
   position: relative;
 
   display: block;
+}
+
+.ixi-command-center {
+  position: relative;
+  z-index: 5;
+
+  width: min(100%, 680px);
+  min-width: 0;
+
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
 }
 
 .ixi-command-left,
@@ -1530,25 +1543,13 @@ onBoardDragEnd={() => {}}
 }
 
 .ixi-command-left {
-  left: 5%;
+  right: calc(50% + 340px + 18px);
+  left: auto;
 }
 
 .ixi-command-right {
-  right: 5%;
-}
-
-.ixi-command-center {
-  position: relative;
-  z-index: 5;
-
-  width: 100%;
-  max-width: 680px;
-  min-width: 0;
-
-  margin: 0 auto;
-
-  display: flex;
-  justify-content: center;
+  left: calc(50% + 340px + 18px);
+  right: auto;
 }
 
 
