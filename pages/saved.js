@@ -854,7 +854,6 @@ function getIxiColorValue(color) {
 className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
 }`}
-  onClick={() => setLeftPocketOpen(current => !current)}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
     e.preventDefault();
@@ -1036,7 +1035,6 @@ onDragEnd={handleBoardDragEnd}            style={{
     className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
   (machineContainers.pocketRight || []).length ? "occupied" : ""
 }`}
-    onClick={() => setRightPocketOpen(current => !current)}
     onDragOver={(e) => e.preventDefault()}
     onDrop={(e) => {
       e.preventDefault();
