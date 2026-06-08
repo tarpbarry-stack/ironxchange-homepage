@@ -938,7 +938,10 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   clearMachineDragState();
 }}
 >
-  <div className="ixi-pocket-catch-pad catch-l1" />
+ <WorkspaceDropPad
+  id="pocketLeft"
+  className="ixi-pocket-catch-pad catch-l1"
+/>
   <div className="ixi-pocket-window" />
 
 
