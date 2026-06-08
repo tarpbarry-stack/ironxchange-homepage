@@ -1270,17 +1270,13 @@ onBoardDragEnd={() => {}}
   onDrop={(e) => {
     e.preventDefault();
 
-    const droppedId =
-      e.dataTransfer.getData("text/plain") ||
-      draggingListingId;
+    const droppedId = getDroppedMachineId(e);
 
     if (droppedId) {
       moveMachineToContainer(droppedId, "board");
     }
 
-    setDraggingListingId("");
-    setGhostListingId("");
-    setActiveStackHover("");
+    clearMachineDragState();
   }}
 >
           {visibleSavedListings.map(item => {
