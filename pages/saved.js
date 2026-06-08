@@ -1950,7 +1950,7 @@ box-shadow: none;
 /* VISUAL RAIL — painted only */
 .ixi-pocket-visual-rail {
   position: absolute;
-  top: 83px;
+  top: 98px;
 
   width: 54px;
   height: 6px;
@@ -1975,17 +1975,17 @@ box-shadow: none;
 }
 
 .ixi-pocket-visual-rail.left {
-  right: -32px;
+  right: 12px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: -32px;
+  left: 12px;
 }
 
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
   position: absolute;
-  top: 80px;
+  top: 95px;
 
   width: 18px;
   height: 6px;
