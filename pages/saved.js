@@ -911,8 +911,21 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-window" />
 
 
+<div className="ixi-pocket-visual-rail left" />
 
-<div className="ixi-pocket-rail">
+<button
+  type="button"
+  className={`ixi-pocket-direct-button left ${
+    leftPocketMode !== "closed" ? "is-live" : ""
+  }`}
+  title="Left pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("left");
+  }}
+/>
+    
   <div className="ixi-pocket-line" />
 
   {leftPocketMode === "open" && (
@@ -1070,7 +1083,21 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
   
     
-   <div className="ixi-pocket-rail">
+   <div className="ixi-pocket-visual-rail right" />
+
+<button
+  type="button"
+  className={`ixi-pocket-direct-button right ${
+    rightPocketMode !== "closed" ? "is-live" : ""
+  }`}
+  title="Right pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("right");
+  }}
+/>
+    
   <div className="ixi-pocket-line" />
 
   {rightPocketMode === "open" && (
@@ -2022,8 +2049,72 @@ box-shadow: none;
   border-color: rgba(255,255,255,.14);
 }
 
+/* =============================== */
+/* IXI POCKET DIRECT CONTROL V1    */
+/* =============================== */
 
+.ixi-pocket-left,
+.ixi-pocket-right {
+  cursor: default !important;
+}
 
+.ixi-pocket-visual-rail {
+  position: absolute;
+  top: 68px;
+
+  width: 38px;
+  height: 2px;
+
+  background: rgba(255,255,255,.16);
+
+  z-index: 40;
+  pointer-events: none;
+}
+
+.ixi-pocket-visual-rail.left {
+  right: -10px;
+}
+
+.ixi-pocket-visual-rail.right {
+  left: -10px;
+}
+
+.ixi-pocket-direct-button {
+  position: absolute;
+  top: 62px;
+
+  width: 22px;
+  height: 14px;
+
+  border: 1px solid rgba(255,196,0,.44);
+  border-radius: 5px;
+
+  background: rgba(255,196,0,.24);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 99999;
+  pointer-events: auto;
+}
+
+.ixi-pocket-direct-button.left {
+  right: -2px;
+}
+
+.ixi-pocket-direct-button.right {
+  left: -2px;
+}
+
+.ixi-pocket-direct-button:hover {
+  background: rgba(255,196,0,.85);
+  box-shadow: 0 0 10px rgba(255,196,0,.30);
+}
+
+.ixi-pocket-direct-button.is-live {
+  background: rgba(255,196,0,.96);
+  box-shadow: 0 0 9px rgba(255,196,0,.44);
+}
 
 
 .active-stack-zone {
