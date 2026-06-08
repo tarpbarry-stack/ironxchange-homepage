@@ -917,7 +917,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
 }`}
   onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
+ onDrop={(e) => {
   e.preventDefault();
   e.stopPropagation();
 
@@ -925,7 +925,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
   if (droppedGroup?.machineIds?.length) {
     droppedGroup.machineIds.forEach(machineId => {
-      moveMachineToContainer(machineId, "board");
+      moveMachineToContainer(machineId, "pocketLeft");
     });
 
     clearMachineDragState();
@@ -935,7 +935,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   const droppedId = getDroppedMachineId(e);
 
   if (droppedId) {
-    moveMachineToContainer(droppedId, "board");
+    moveMachineToContainer(droppedId, "pocketLeft");
   }
 
   clearMachineDragState();
@@ -1226,24 +1226,29 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   data-active-stack={stackKey}
   className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
       onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
+     onDrop={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-       const droppedGroup = getDroppedGroup(e);
+  const droppedGroup = getDroppedGroup(e);
 
-if (droppedGroup?.machineIds?.length) {
-  droppedGroup.machineIds.forEach(machineId => {
-    addListingToActiveStack(stackKey, machineId);
-  });
+  if (droppedGroup?.machineIds?.length) {
+    droppedGroup.machineIds.forEach(machineId => {
+      moveMachineToContainer(machineId, "pocketRight");
+    });
+
+    clearMachineDragState();
+    return;
+  }
+
+  const droppedId = getDroppedMachineId(e);
+
+  if (droppedId) {
+    moveMachineToContainer(droppedId, "pocketRight");
+  }
 
   clearMachineDragState();
-  return;
-}
-
-const droppedId = getDroppedMachineId(e);
-
-addListingToActiveStack(stackKey, droppedId);
-      }}
+}}
     >
       <button
         type="button"
