@@ -78,6 +78,8 @@ const [armedDestination, setArmedDestination] = useState("");
   
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
+const [activeDragMachineId, setActiveDragMachineId] = useState("");
+  
 const [stackInsertAfter, setStackInsertAfter] = useState(false);
 
 const [activeStackHover, setActiveStackHover] = useState("");
@@ -433,6 +435,41 @@ function getListingById(machineId) {
     });
   }
 
+function beginMachineDrag(machineId, event) {
+  if (!machineId) return;
+
+  const id = String(machineId);
+
+  setActiveDragMachineId(id);
+  setDraggingListingId(id);
+  setStackDraggingId(id);
+
+  if (event?.dataTransfer) {
+    event.dataTransfer.setData("text/plain", id);
+    event.dataTransfer.effectAllowed = "move";
+  }
+}
+
+function getDroppedMachineId(event) {
+  return (
+    event?.dataTransfer?.getData("text/plain") ||
+    activeDragMachineId ||
+    draggingListingId ||
+    stackDraggingId ||
+    ""
+  );
+}
+
+  function clearMachineDragState() {
+  setActiveDragMachineId("");
+  setDraggingListingId("");
+  setGhostListingId("");
+  setStackDraggingId("");
+  setStackGhostId("");
+  setStackInsertAfter(false);
+  setActiveStackHover("");
+}
+  
  function handleBoardDragStart(listing, event) {
   const id = String(getListingId(listing));
 
