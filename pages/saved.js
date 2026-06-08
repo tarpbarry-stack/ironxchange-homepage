@@ -483,6 +483,18 @@ function getDroppedMachineId(event) {
   );
 }
 
+
+function getDroppedGroup(event) {
+  const transferValue =
+    event?.dataTransfer?.getData("text/plain") || "";
+
+  if (transferValue.startsWith("group:")) {
+    return activeDragGroup;
+  }
+
+  return activeDragGroup;
+}
+  
   function clearMachineDragState() {
   setActiveDragMachineId("");
   setDraggingListingId("");
