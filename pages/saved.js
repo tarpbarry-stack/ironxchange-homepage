@@ -1746,13 +1746,13 @@ box-shadow: none;
 }
 
 .ixi-pocket-left .ixi-pocket-rail {
-  right: -10px;
+  right: -22px;
   left: auto;
   transform: none;
 }
 
 .ixi-pocket-right .ixi-pocket-rail {
-  left: -10px;
+  left: -22px;
   right: auto;
   transform: none;
 }
