@@ -51,8 +51,6 @@ function WorkspaceDropZone({
 }
 
 export default function SavedListings() {
-
-export default function SavedListings() {
   const [listings, setListings] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
