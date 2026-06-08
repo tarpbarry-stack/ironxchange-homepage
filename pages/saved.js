@@ -1964,11 +1964,11 @@ background: rgba(255,255,255,.18);
 }
 
 .ixi-pocket-visual-rail.left {
-  right: 22px;
+  right: 20px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: 22px;
+  left: 20px;
 }
 
 /* ACTUAL BUTTON — real click target */
