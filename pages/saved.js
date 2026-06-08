@@ -933,7 +933,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   />
 </div>
 
-{leftPocketMode === "open" &&
+{leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
   <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
       {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
@@ -1091,7 +1091,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   />
 </div>
 
-{rightPocketMode === "open" &&
+{rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
   <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
