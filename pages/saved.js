@@ -472,12 +472,7 @@ function getDroppedMachineId(event) {
   
  function handleBoardDragStart(listing, event) {
   const id = String(getListingId(listing));
-
-  setDraggingListingId(id);
-
-  if (event?.dataTransfer) {
-    event.dataTransfer.setData("text/plain", id);
-  }
+  beginMachineDrag(id, event);
 }
 
   function handleBoardDragOver(listing) {
