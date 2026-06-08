@@ -1952,7 +1952,7 @@ box-shadow: none;
   position: absolute;
   top: 95px;
 
-  width: 120px;
+  width: 150px;
  height: 4px;
 border-radius: 0;
 
