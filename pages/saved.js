@@ -1099,7 +1099,10 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   }}
 >
   
- <div className="ixi-pocket-catch-pad out-left" />
+ <div
+  data-pocket-pad-target="pocketLeft2"
+  className="ixi-pocket-catch-pad out-left"
+/>
   
   <div className="ixi-pocket-window" />
 
