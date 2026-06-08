@@ -911,7 +911,21 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-window" />
 
 
-<div className="ixi-pocket-visual-rail left" />
+<div className="ixi-pocket-action-rail left">
+  <button type="button" className="ixi-pocket-rail-action" title="Theater" />
+  <button type="button" className="ixi-pocket-rail-action" title="Active Stack" />
+  <button
+    type="button"
+    className="ixi-pocket-rail-action"
+    title="Send to Board"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      recallPocketToBoard("pocketLeft");
+    }}
+  />
+  <button type="button" className="ixi-pocket-rail-action" title="Send" />
+</div>
 
 <button
   type="button"
@@ -1051,7 +1065,21 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
   
     
-   <div className="ixi-pocket-visual-rail right" />
+   <div className="ixi-pocket-action-rail right">
+  <button type="button" className="ixi-pocket-rail-action" title="Theater" />
+  <button type="button" className="ixi-pocket-rail-action" title="Active Stack" />
+  <button
+    type="button"
+    className="ixi-pocket-rail-action"
+    title="Send to Board"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      recallPocketToBoard("pocketRight");
+    }}
+  />
+  <button type="button" className="ixi-pocket-rail-action" title="Send" />
+</div>
 
 <button
   type="button"
@@ -1948,29 +1976,48 @@ box-shadow: none;
 }
 
 /* VISUAL RAIL — painted only */
-.ixi-pocket-visual-rail {
+.ixi-pocket-action-rail {
   position: absolute;
   top: 95px;
 
   width: 150px;
- height: 4px;
-border-radius: 0;
+  height: 4px;
 
-background: rgba(255,255,255,.18);
- box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  z-index: 40;
-  pointer-events: none;
+  z-index: 60;
+  pointer-events: auto;
 }
 
-.ixi-pocket-visual-rail.left {
+.ixi-pocket-action-rail.left {
   right: 20px;
 }
 
-.ixi-pocket-visual-rail.right {
+.ixi-pocket-action-rail.right {
   left: 20px;
 }
 
+.ixi-pocket-rail-action {
+  width: 28px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 0;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+
+  box-shadow: none;
+}
+
+.ixi-pocket-rail-action:hover {
+  background: rgba(255,196,0,.86);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
   position: absolute;
