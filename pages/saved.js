@@ -2176,48 +2176,39 @@ box-shadow: none;
 }
 
 /* upper pockets keep normal catch */
-.ixi-pocket-left:not(.ixi-pocket-l2) .ixi-pocket-catch-pad {
-  left: 0;
-  right: auto;
-  top: 92px;
-  width: 360px;
-  height: 140px;
-}
-
-.ixi-pocket-right:not(.ixi-pocket-r2) .ixi-pocket-catch-pad {
-  right: 0;
-  left: auto;
-  top: 92px;
-  width: 360px;
-  height: 140px;
-}
-
-/* L2 catch reaches outward to screen-left */
+/* L2 = left lower edge catch only */
 .ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
   position: fixed;
 
   left: 0;
-  top: 0;
+  top: 420px;
 
-  width: 140px;
-  height: 100vh;
+  width: 150px;
+  height: calc(100vh - 420px);
 
-  z-index: 1;
+  z-index: 999;
+  pointer-events: auto;
+
+  background: rgba(0,194,255,.05);
+  outline: 1px dashed rgba(0,194,255,.22);
 }
 
-/* R2 catch reaches outward to screen-right */
+/* R2 = right lower edge catch only */
 .ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
   position: fixed;
 
   right: 0;
-  top: 0;
+  top: 300px;
 
-  width: 140px;
-  height: 100vh;
+  width: 150px;
+  height: calc(100vh - 300px);
 
-  z-index: 1;
+  z-index: 999;
+  pointer-events: auto;
+
+  background: rgba(255,196,0,.045);
+  outline: 1px dashed rgba(255,196,0,.20);
 }
-
 
 .ixi-pocket-catch-pad {
   position: absolute;
