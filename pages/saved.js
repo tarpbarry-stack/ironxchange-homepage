@@ -919,19 +919,36 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     />
   )}
 
-  <button
-    type="button"
-    className={`ixi-pocket-power-dash ${
-      leftPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("left");
-    }}
-  />
-</div>
+ <button
+  type="button"
+  className={`ixi-pocket-power-dash ${
+    leftPocketMode !== "closed" ? "active" : ""
+  }`}
+  title={`Power pocket: ${leftPocketMode}`}
+  onMouseDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("LEFT POCKET MOUSEDOWN");
+  }}
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log("LEFT POCKET CLICK BEFORE:", leftPocketMode);
+
+    setLeftPocketMode(current => {
+      const next =
+        current === "closed"
+          ? "peek"
+          : current === "peek"
+            ? "open"
+            : "closed";
+
+      console.log("LEFT POCKET MODE NEXT:", next);
+      return next;
+    });
+  }}
+/>
 
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
@@ -1078,18 +1095,35 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   )}
 
   <button
-    type="button"
-    className={`ixi-pocket-power-dash right ${
-      rightPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("right");
-    }}
-  />
-</div>
+  type="button"
+  className={`ixi-pocket-power-dash right ${
+    rightPocketMode !== "closed" ? "active" : ""
+  }`}
+  title={`Power pocket: ${rightPocketMode}`}
+  onMouseDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("RIGHT POCKET MOUSEDOWN");
+  }}
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log("RIGHT POCKET CLICK BEFORE:", rightPocketMode);
+
+    setRightPocketMode(current => {
+      const next =
+        current === "closed"
+          ? "peek"
+          : current === "peek"
+            ? "open"
+            : "closed";
+
+      console.log("RIGHT POCKET MODE NEXT:", next);
+      return next;
+    });
+  }}
+/>
 
 {rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
