@@ -59,7 +59,9 @@ const [machineContainers, setMachineContainers] = useState({
   stackTop: [],
   stackBottom: [],
   pocketLeft: [],
-  pocketRight: []
+  pocketRight: [],
+  pocketLeft2: [],
+  pocketRight2: []
 });
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
@@ -71,6 +73,8 @@ const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
 const [leftPocketMode, setLeftPocketMode] = useState("peek");
 const [rightPocketMode, setRightPocketMode] = useState("peek");
+const [leftPocket2Mode, setLeftPocket2Mode] = useState("closed");
+const [rightPocket2Mode, setRightPocket2Mode] = useState("closed");
   
 const [topRailMode, setTopRailMode] = useState("off");
 
@@ -580,34 +584,18 @@ function rotatePocket(pocketKey) {
 }
 
 function cyclePocketMode(side) {
-  if (side === "left") {
-    setLeftPocketMode(current => {
+  const cycle = setter => {
+    setter(current => {
       if (current === "closed") return "peek";
       if (current === "peek") return "open";
       return "closed";
     });
+  };
 
-    return;
-  }
-
-  setRightPocketMode(current => {
-    if (current === "closed") return "peek";
-    if (current === "peek") return "open";
-    return "closed";
-  });
-}
-
-  function setPocketMode(side) {
-  if (side === "left") {
-    setLeftPocketMode(current =>
-      current === "closed" ? "peek" : current === "peek" ? "open" : "closed"
-    );
-    return;
-  }
-
-  setRightPocketMode(current =>
-    current === "closed" ? "peek" : current === "peek" ? "open" : "closed"
-  );
+  if (side === "left") return cycle(setLeftPocketMode);
+  if (side === "right") return cycle(setRightPocketMode);
+  if (side === "left2") return cycle(setLeftPocket2Mode);
+  if (side === "right2") return cycle(setRightPocket2Mode);
 }
 
 function sendListingToFront(listing) {
@@ -1028,7 +1016,144 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   )}
 </section>
 
+<section
+  data-pocket-target="pocketLeft2"
+  className={`ixi-pocket-left ixi-pocket-l2 pocket-mode-${leftPocket2Mode} ${
+    (machineContainers.pocketLeft2 || []).length ? "occupied" : ""
+  }`}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
+    const droppedId = getDroppedMachineId(e);
+
+    if (droppedId) {
+      moveMachineToContainer(droppedId, "pocketLeft2");
+    }
+
+    clearMachineDragState();
+  }}
+>
+  <div className="ixi-pocket-catch-pad out-left" />
+  <div className="ixi-pocket-window" />
+
+  <div
+    className={`ixi-pocket-action-rail left ${
+      (machineContainers.pocketLeft2 || []).length === 0
+        ? "is-empty"
+        : "has-machines"
+    } pocket-mode-${leftPocket2Mode}`}
+  >
+    <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
+
+    <button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
+
+    <button
+      type="button"
+      className="ixi-pocket-rail-action board"
+      data-label="BOARD"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        recallPocketToBoard("pocketLeft2");
+      }}
+    />
+
+    <button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
+  </div>
+
+  <button
+    type="button"
+    className={`ixi-pocket-loop-square left ${
+      (machineContainers.pocketLeft2 || []).length > 0 &&
+      leftPocket2Mode !== "closed"
+        ? "is-visible"
+        : ""
+    }`}
+    title="Loop Pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      rotatePocket("pocketLeft2");
+    }}
+  />
+
+  <button
+    type="button"
+    className={`ixi-pocket-direct-button left ${
+      (machineContainers.pocketLeft2 || []).length > 0 &&
+      leftPocket2Mode === "closed"
+        ? "has-load"
+        : ""
+    } ${
+      (machineContainers.pocketLeft2 || []).length > 0 &&
+      leftPocket2Mode !== "closed"
+        ? "is-live"
+        : ""
+    }`}
+    title="Left lower pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cyclePocketMode("left2");
+    }}
+  />
+
+  {leftPocket2Mode !== "closed" &&
+    (machineContainers.pocketLeft2 || []).length > 0 && (
+      <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
+        {(machineContainers.pocketLeft2 || []).slice(0, 7).map((machineId, index) => {
+          const machine = getListingById(machineId);
+          if (!machine) return null;
+
+          const image =
+            machine.image ||
+            machine.imageUrl ||
+            machine.images?.[0] ||
+            machine.images?.[0]?.url ||
+            machine.publicData?.image ||
+            machine.publicData?.imageUrl ||
+            machine.publicData?.images?.[0] ||
+            machine.attributes?.publicData?.image ||
+            machine.attributes?.publicData?.imageUrl ||
+            machine.attributes?.publicData?.images?.[0];
+
+          return (
+            <div
+              key={`left-pocket-2-thumb-${machineId}`}
+              className="ixi-pocket-thumb"
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                handleBoardDragStart(machine, e);
+              }}
+              onDragEnd={handleBoardDragEnd}
+              style={{
+                right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
+                zIndex: index + 1,
+                borderColor: getIxiColorValue(
+                  ixiCardState[String(machineId)]?.color
+                )
+              }}
+            >
+              {image ? (
+                <img
+                  src={typeof image === "string" ? image : image?.url}
+                  alt=""
+                />
+              ) : (
+                <span>
+                  {machine.year || machine.publicData?.year || ""}{" "}
+                  {machine.make || machine.publicData?.make || ""}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+</section>  
     </section>
   </aside>
 
@@ -1217,6 +1342,164 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   </div>
 )}  
   </section>
+
+<section
+  data-pocket-target="pocketRight2"
+  className={`ixi-pocket-left ixi-pocket-right ixi-pocket-r2 pocket-mode-${rightPocket2Mode} ${
+    (machineContainers.pocketRight2 || []).length ? "occupied" : ""
+  }`}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const droppedId = getDroppedMachineId(e);
+
+    if (droppedId) {
+      moveMachineToContainer(droppedId, "pocketRight2");
+    }
+
+    clearMachineDragState();
+  }}
+>
+  <div className="ixi-pocket-catch-pad out-right" />
+  <div className="ixi-pocket-window" />
+
+  <div
+    className={`ixi-pocket-action-rail right ${
+      (machineContainers.pocketRight2 || []).length === 0
+        ? "is-empty"
+        : "has-machines"
+    } pocket-mode-${rightPocket2Mode}`}
+  >
+    <button
+      type="button"
+      className="ixi-pocket-rail-action send"
+      data-label="SEND"
+    />
+
+    <button
+      type="button"
+      className="ixi-pocket-rail-action board"
+      data-label="BOARD"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        recallPocketToBoard("pocketRight2");
+      }}
+    />
+
+    <button
+      type="button"
+      className="ixi-pocket-rail-action stack"
+      data-label="ACTIVE STACK"
+    />
+
+    <button
+      type="button"
+      className="ixi-pocket-rail-action theater"
+      data-label="IXI THEATER"
+    />
+  </div>
+
+  <button
+    type="button"
+    className={`ixi-pocket-loop-square right ${
+      (machineContainers.pocketRight2 || []).length > 0 &&
+      rightPocket2Mode !== "closed"
+        ? "is-visible"
+        : ""
+    }`}
+    title="Loop Pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      rotatePocket("pocketRight2");
+    }}
+  />
+
+  <button
+    type="button"
+    className={`ixi-pocket-direct-button right ${
+      (machineContainers.pocketRight2 || []).length > 0 &&
+      rightPocket2Mode === "closed"
+        ? "has-load"
+        : ""
+    } ${
+      (machineContainers.pocketRight2 || []).length > 0 &&
+      rightPocket2Mode !== "closed"
+        ? "is-live"
+        : ""
+    }`}
+    title="Right lower pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cyclePocketMode("right2");
+    }}
+  />
+
+  {rightPocket2Mode !== "closed" &&
+    (machineContainers.pocketRight2 || []).length > 0 && (
+      <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
+        {(machineContainers.pocketRight2 || []).slice(0, 7).map((machineId, index) => {
+          const machine = getListingById(machineId);
+
+          if (!machine) return null;
+
+          const image =
+            machine.image ||
+            machine.imageUrl ||
+            machine.images?.[0] ||
+            machine.images?.[0]?.url ||
+            machine.publicData?.image ||
+            machine.publicData?.imageUrl ||
+            machine.publicData?.images?.[0] ||
+            machine.attributes?.publicData?.image ||
+            machine.attributes?.publicData?.imageUrl ||
+            machine.attributes?.publicData?.images?.[0];
+
+          return (
+            <div
+              key={`right-pocket-2-thumb-${machineId}`}
+              className="ixi-pocket-thumb"
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                handleBoardDragStart(machine, e);
+              }}
+              onDragEnd={handleBoardDragEnd}
+              style={{
+                left: `${rightPocket2Mode === "open"
+                  ? index * 44
+                  : rightPocket2Mode === "peek"
+                    ? index * 16
+                    : index * 8}px`,
+                zIndex: index + 1,
+                borderColor: getIxiColorValue(
+                  ixiCardState[String(machineId)]?.color
+                )
+              }}
+            >
+              {image ? (
+                <img
+                  src={typeof image === "string" ? image : image?.url}
+                  alt=""
+                />
+              ) : (
+                <span>
+                  {machine.year || machine.publicData?.year || ""}
+                  {" "}
+                  {machine.make || machine.publicData?.make || ""}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+</section>
+    
 </aside>
 </section>
 
