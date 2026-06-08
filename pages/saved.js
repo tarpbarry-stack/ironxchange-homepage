@@ -2198,10 +2198,10 @@ box-shadow: none;
   position: fixed;
 
   right: 0;
-  top: 300px;
+  top: 430px;
 
   width: 150px;
-  height: calc(100vh - 300px);
+  height: calc(100vh - 430px);
 
   z-index: 999;
   pointer-events: auto;
