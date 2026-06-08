@@ -79,7 +79,6 @@ const [armedDestination, setArmedDestination] = useState("");
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
 const [activeDragMachineId, setActiveDragMachineId] = useState("");
-const [activeDragGroup, setActiveDragGroup] = useState(null);
   
 const [stackInsertAfter, setStackInsertAfter] = useState(false);
 
@@ -451,28 +450,6 @@ function beginMachineDrag(machineId, event) {
   }
 }
 
-  function beginPocketGroupDrag(sourceContainer, event) {
-  if (!sourceContainer) return;
-
-  const machineIds = machineContainers[sourceContainer] || [];
-
-  if (!machineIds.length) return;
-
-  setActiveDragGroup({
-    sourceContainer,
-    machineIds: [...machineIds]
-  });
-
-  setActiveDragMachineId("");
-  setDraggingListingId("");
-  setStackDraggingId("");
-
-  if (event?.dataTransfer) {
-    event.dataTransfer.setData("text/plain", `group:${sourceContainer}`);
-    event.dataTransfer.effectAllowed = "move";
-  }
-}
-
 function getDroppedMachineId(event) {
   return (
     event?.dataTransfer?.getData("text/plain") ||
@@ -483,20 +460,7 @@ function getDroppedMachineId(event) {
   );
 }
 
-
-function getDroppedGroup(event) {
-  const transferValue =
-    event?.dataTransfer?.getData("text/plain") || "";
-
-  if (transferValue.startsWith("group:")) {
-    return activeDragGroup;
-  }
-
-  return activeDragGroup;
-}
-  
- function clearMachineDragState() {
-  setActiveDragGroup(null);
+  function clearMachineDragState() {
   setActiveDragMachineId("");
   setDraggingListingId("");
   setGhostListingId("");
@@ -917,20 +881,9 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
 }`}
   onDragOver={(e) => e.preventDefault()}
- onDrop={(e) => {
+  onDrop={(e) => {
   e.preventDefault();
   e.stopPropagation();
-
-  const droppedGroup = getDroppedGroup(e);
-
-  if (droppedGroup?.machineIds?.length) {
-    droppedGroup.machineIds.forEach(machineId => {
-      moveMachineToContainer(machineId, "pocketLeft");
-    });
-
-    clearMachineDragState();
-    return;
-  }
 
   const droppedId = getDroppedMachineId(e);
 
@@ -967,35 +920,22 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   )}
 
   <button
-  type="button"
-  className={`ixi-pocket-power-dash ${
-    leftPocketMode !== "closed" ? "active" : ""
-  }`}
-  title="Power pocket"
-  onMouseDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("left");
-  }}
-/>
+    type="button"
+    className={`ixi-pocket-power-dash ${
+      leftPocketMode !== "closed" ? "active" : ""
+    }`}
+    title="Power pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cyclePocketMode("left");
+    }}
+  />
 </div>
 
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
-  <div
-  className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}
-  draggable={leftPocketMode === "peek"}
-  onDragStart={(e) => {
-    if (leftPocketMode !== "peek") return;
-
-    e.stopPropagation();
-    beginPocketGroupDrag("pocketLeft", e);
-  }}
->
+  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
       {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
         const machine = getListingById(machineId);
         if (!machine) return null;
@@ -1016,13 +956,8 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
           <div
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
-draggable={leftPocketMode === "open"}
+   draggable
 onDragStart={(e) => {
-  if (leftPocketMode !== "open") {
-    e.preventDefault();
-    return;
-  }
-
   e.stopPropagation();
   handleBoardDragStart(machine, e);
 }}
@@ -1142,36 +1077,23 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     />
   )}
 
- <button
-  type="button"
-  className={`ixi-pocket-power-dash ${
-    leftPocketMode !== "closed" ? "active" : ""
-  }`}
-  title="Power pocket"
-  onMouseDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("left");
-  }}
-/>
+  <button
+    type="button"
+    className={`ixi-pocket-power-dash right ${
+      rightPocketMode !== "closed" ? "active" : ""
+    }`}
+    title="Power pocket"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cyclePocketMode("right");
+    }}
+  />
 </div>
 
 {rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
-  <div
-  className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}
-  draggable={rightPocketMode === "peek"}
-  onDragStart={(e) => {
-    if (rightPocketMode !== "peek") return;
-
-    e.stopPropagation();
-    beginPocketGroupDrag("pocketRight", e);
-  }}
->
+  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
       const machine = getListingById(machineId);
 
@@ -1239,29 +1161,13 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   data-active-stack={stackKey}
   className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
       onDragOver={(e) => e.preventDefault()}
-     onDrop={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
+      onDrop={(e) => {
+        e.preventDefault();
 
-  const droppedGroup = getDroppedGroup(e);
+       const droppedId = getDroppedMachineId(e);
 
-  if (droppedGroup?.machineIds?.length) {
-    droppedGroup.machineIds.forEach(machineId => {
-      moveMachineToContainer(machineId, "pocketRight");
-    });
-
-    clearMachineDragState();
-    return;
-  }
-
-  const droppedId = getDroppedMachineId(e);
-
-  if (droppedId) {
-    moveMachineToContainer(droppedId, "pocketRight");
-  }
-
-  clearMachineDragState();
-}}
+        addListingToActiveStack(stackKey, droppedId);
+      }}
     >
       <button
         type="button"
@@ -1271,20 +1177,9 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         onDrop={(e) => {
           e.preventDefault();
 
-        const droppedGroup = getDroppedGroup(e);
+         const droppedId = getDroppedMachineId(e);
 
-if (droppedGroup?.machineIds?.length) {
-  droppedGroup.machineIds.forEach(machineId => {
-    addListingToActiveStack(stackKey, machineId);
-  });
-
-  clearMachineDragState();
-  return;
-}
-
-const droppedId = getDroppedMachineId(e);
-
-addListingToActiveStack(stackKey, droppedId);
+          addListingToActiveStack(stackKey, droppedId);
         }}
       />
 
@@ -1297,20 +1192,8 @@ addListingToActiveStack(stackKey, droppedId);
           onDrop={(e) => {
             e.preventDefault();
 
-            const droppedGroup = getDroppedGroup(e);
-
-if (droppedGroup?.machineIds?.length) {
-  droppedGroup.machineIds.forEach(machineId => {
-    addListingToActiveStack(stackKey, machineId);
-  });
-
-  clearMachineDragState();
-  return;
-}
-
-const droppedId = getDroppedMachineId(e);
-
-addListingToActiveStack(stackKey, droppedId);
+            const droppedId = getDroppedMachineId(e);
+            addListingToActiveStack(stackKey, droppedId);
           }}
         >
           <div
@@ -1900,10 +1783,10 @@ box-shadow: none;
   content: "";
   position: absolute;
 
-  left: -22px;
-  right: -22px;
-  top: -14px;
-  bottom: -14px;
+ left: -14px;
+  right: -14px;
+  top: -10px;
+  bottom: -10px;
 }
 
 .ixi-pocket-power-dash:hover {
