@@ -2046,11 +2046,8 @@ onBoardDragEnd={() => {}}
 
   display: grid;
 
-  grid-template-rows:
-    120px
-    120px;
-
-  gap: 34px;
+  grid-template-rows: 95px 95px;
+  gap: 50px;
 
   position: relative;
   z-index: 2;
@@ -2089,8 +2086,8 @@ box-shadow: none;
 
 .ixi-pocket-l2,
 .ixi-pocket-r2 {
-  position: relative;
-  top: 92px;
+  top: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* =============================== */
