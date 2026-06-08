@@ -1045,8 +1045,8 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   const droppedId = getDroppedMachineId(e);
 
   if (droppedId) {
-    moveMachineToContainer(droppedId, "pocketLeft");
-  }
+  moveMachineToContainer(droppedId, "pocketRight");
+}
 
   clearMachineDragState();
 }}
