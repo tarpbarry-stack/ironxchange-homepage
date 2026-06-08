@@ -1956,11 +1956,6 @@ box-shadow: none;
   overflow: visible;
 }
 
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
-  display: none;
-}
-
   .ixi-pocket-thumb {
   width: var(--pocket-thumb-w) !important;
   height: var(--pocket-thumb-h) !important;
@@ -2027,10 +2022,6 @@ box-shadow: none;
 
 .ixi-pocket-thumb-actions button:hover {
   box-shadow: 0 0 8px rgba(255,255,255,.18);
-}
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs {
-  height: 8px;
-  transform: translateY(0) rotate(9deg);
 }
 
 .ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs {
