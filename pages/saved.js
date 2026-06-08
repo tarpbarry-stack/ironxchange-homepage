@@ -556,6 +556,20 @@ function getDroppedMachineId(event) {
     }
   }
 
+    const pocketPadEl = dropTarget?.closest?.("[data-pocket-pad-target]");
+
+  if (dragId && pocketPadEl) {
+    moveMachineToContainer(
+      dragId,
+      pocketPadEl.getAttribute("data-pocket-pad-target")
+    );
+
+    setDraggingListingId("");
+    setGhostListingId("");
+    setActiveStackHover("");
+    return;
+  }
+
   const pocketEl = dropTarget?.closest?.("[data-pocket-target]");
 
   if (dragId && pocketEl) {
