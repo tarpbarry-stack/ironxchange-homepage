@@ -2055,7 +2055,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-action-rail.is-empty {
-  background: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.18);
 }
 
 .ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
@@ -2064,7 +2064,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-action-rail.has-machines {
-  background: transparent;
+  background: rgba(255,255,255,.04);
 }
 
 .ixi-pocket-action-rail.has-machines .ixi-pocket-rail-action {
