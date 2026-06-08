@@ -1978,6 +1978,33 @@ box-shadow: none;
   z-index: 30;
 }
 
+.ixi-pocket-right .ixi-pocket-thumbs {
+  left: 50%;
+  right: auto;
+}
+
+/* PEEK POCKET COVER */
+
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs::after,
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs::after {
+  content: "";
+
+  position: absolute;
+
+  left: -12px;
+  right: -12px;
+
+  top: 22px;
+
+  height: 80px;
+
+  background: #0b0b0b;
+
+  pointer-events: none;
+
+  z-index: 999;
+}
+
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs {
   height: 30px;
@@ -1993,11 +2020,6 @@ box-shadow: none;
 .ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
 .ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
   display: none;
-}
-
-.ixi-pocket-right .ixi-pocket-thumbs {
-  left: 50%;
-  right: auto;
 }
 
   .ixi-pocket-thumb {
