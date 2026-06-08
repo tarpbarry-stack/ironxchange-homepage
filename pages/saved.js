@@ -1938,76 +1938,92 @@ box-shadow: none;
 /* IXI POCKET DIRECT CONTROL V1    */
 /* =============================== */
 
+/* =============================== */
+/* IXI POCKET RAIL — WORKING V2    */
+/* =============================== */
+
 .ixi-pocket-left,
 .ixi-pocket-right {
   cursor: default !important;
 }
 
+/* VISUAL RAIL — painted only */
 .ixi-pocket-visual-rail {
- top: 68px;
+  position: absolute;
+  top: 68px;
 
-  width: 44px;
-  height: 2px;
+  width: 54px;
+  height: 6px;
 
-  border-radius: 999px;
+  border-radius: 3px;
 
   background:
     linear-gradient(
-      90deg,
-      rgba(255,255,255,.04),
-      rgba(255,196,0,.45),
-      rgba(255,255,255,.08)
-    );
+      180deg,
+      rgba(255,255,255,.16),
+      rgba(255,255,255,.035)
+    ),
+    rgba(255,196,0,.28);
 
   box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.38),
     0 0 8px rgba(255,196,0,.10);
+
   z-index: 40;
   pointer-events: none;
 }
 
 .ixi-pocket-visual-rail.left {
-  right: -2px;
+  right: -14px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: -2px;
+  left: -14px;
 }
 
+/* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
-  top: 62px;
+  position: absolute;
+  top: 65px;
 
   width: 18px;
-  height: 12px;
+  height: 6px;
 
-  border-radius: 3px;
+  border: 0;
+  border-radius: 2px;
 
-  background:
-    linear-gradient(180deg, rgba(255,196,0,.34), rgba(255,196,0,.16));
+  background: rgba(255,196,0,.72);
 
-  border: 1px solid rgba(255,196,0,.42);
   padding: 0;
   cursor: pointer;
 
   z-index: 99999;
   pointer-events: auto;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 0 6px rgba(255,196,0,.20);
 }
 
+/* actuator sits toward SearchSurface */
 .ixi-pocket-direct-button.left {
-  right: 6px;
+  right: 0;
 }
 
 .ixi-pocket-direct-button.right {
-  left: 6px;
+  left: 0;
 }
 
 .ixi-pocket-direct-button:hover {
-  background: rgba(255,196,0,.85);
-  box-shadow: 0 0 10px rgba(255,196,0,.30);
+  background: rgba(255,196,0,.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 0 10px rgba(255,196,0,.32);
 }
 
 .ixi-pocket-direct-button.is-live {
   background: rgba(255,196,0,.96);
-  box-shadow: 0 0 9px rgba(255,196,0,.44);
 }
 
 
