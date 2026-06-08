@@ -2241,25 +2241,9 @@ box-shadow: none;
 
   background: rgba(255,196,0,.045);
   outline: 1px dashed rgba(255,196,0,.20);
-}}
-
-.ixi-pocket-catch-pad {
-  position: absolute;
-  left: 0;
-  top: 92px;
-
-  width: 360px;
-  height: 140px;
-
-  pointer-events: auto;
-
-  z-index: 1;
 }
 
-.ixi-pocket-right .ixi-pocket-catch-pad {
-  left: auto;
-  right: 0;
-}
+
 
 /* ========================= */
 /* IXI POCKET RAW VISUAL V1  */
