@@ -2099,16 +2099,15 @@ box-shadow: none;
   position: absolute;
   top: 95px;
 
-  width: 9px;
+  width: 18px;
   height: 4px;
 
   border: 0;
-  border-radius: 0;
+  border-radius: 2px;
 
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.18);
 
   padding: 0;
-
   cursor: pointer;
 
   z-index: 99999;
@@ -2119,13 +2118,12 @@ box-shadow: none;
 
 /* actuator sits toward SearchSurface */
 .ixi-pocket-direct-button.left {
-  right: 0;
+  right: -9px;
 }
 
 .ixi-pocket-direct-button.right {
-  left: 0;
+  left: -9px;
 }
-
 .ixi-pocket-direct-button:hover {
   background: rgba(255,196,0,.95);
   box-shadow:
