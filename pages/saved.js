@@ -1950,7 +1950,7 @@ box-shadow: none;
 /* VISUAL RAIL — painted only */
 .ixi-pocket-visual-rail {
   position: absolute;
-  top: 98px;
+  top: 95px;
 
   width: 54px;
   height: 6px;
