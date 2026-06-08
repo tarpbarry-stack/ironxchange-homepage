@@ -597,6 +597,19 @@ function cyclePocketMode(side) {
   });
 }
 
+  function setPocketMode(side) {
+  if (side === "left") {
+    setLeftPocketMode(current =>
+      current === "closed" ? "peek" : current === "peek" ? "open" : "closed"
+    );
+    return;
+  }
+
+  setRightPocketMode(current =>
+    current === "closed" ? "peek" : current === "peek" ? "open" : "closed"
+  );
+}
+
 function sendListingToFront(listing) {
     const listingId = getListingId(listing);
 
@@ -919,18 +932,18 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     />
   )}
 
-  <button
-    type="button"
-    className={`ixi-pocket-power-dash ${
-      leftPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("left");
-    }}
-  />
+<button
+  type="button"
+  className={`ixi-pocket-core-switch left ${
+    leftPocketMode !== "closed" ? "is-live" : ""
+  }`}
+  title="Left pocket switch"
+  onPointerDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPocketMode("left");
+  }}
+/>
 </div>
 
 {leftPocketMode !== "closed" &&
@@ -1077,18 +1090,18 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     />
   )}
 
-  <button
-    type="button"
-    className={`ixi-pocket-power-dash right ${
-      rightPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("right");
-    }}
-  />
+<button
+  type="button"
+  className={`ixi-pocket-core-switch right ${
+    rightPocketMode !== "closed" ? "is-live" : ""
+  }`}
+  title="Right pocket switch"
+  onPointerDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPocketMode("right");
+  }}
+/>
 </div>
 
 {rightPocketMode !== "closed" &&
@@ -1745,59 +1758,54 @@ box-shadow: none;
   pointer-events: auto;
 }
 
-.ixi-pocket-left .ixi-pocket-rail {
-  right: -10px;
-  left: auto;
-  transform: none;
+.ixi-pocket-left,
+.ixi-pocket-right {
+  cursor: default !important;
 }
 
-.ixi-pocket-right .ixi-pocket-rail {
-  left: -10px;
-  right: auto;
-  transform: none;
+.ixi-pocket-rail {
+  width: 38px;
+  height: 18px;
+  z-index: 99999 !important;
+  pointer-events: none !important;
 }
 
-.ixi-pocket-power-dash {
+.ixi-pocket-core-switch {
   position: absolute;
-  left: 50%;
-  top: 3px;
+  top: 1px;
 
-  width: 9px;
-  height: 4px;
+  width: 22px;
+  height: 14px;
 
-  transform: translateX(-50%);
+  border: 1px solid rgba(255,196,0,.44);
+  border-radius: 5px;
 
-  border: 0;
-  border-radius: 2px;
+  background: rgba(255,196,0,.24);
 
-  background: rgba(255,255,255,.12);
-  
   padding: 0;
   cursor: pointer;
 
-  z-index: 130;
-  pointer-events: auto;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
 }
 
-.ixi-pocket-power-dash::before {
-  content: "";
-  position: absolute;
-
- left: -14px;
-  right: -14px;
-  top: -10px;
-  bottom: -10px;
+.ixi-pocket-core-switch.left {
+  left: 8px;
 }
 
-.ixi-pocket-power-dash:hover {
-  background: rgba(255,196,0,.72);
+.ixi-pocket-core-switch.right {
+  right: 8px;
 }
 
-.ixi-pocket-power-dash.active {
-  background: rgba(255,196,0,.95);
-  box-shadow: 0 0 8px rgba(255,196,0,.42);
+.ixi-pocket-core-switch:hover {
+  background: rgba(255,196,0,.85);
+  box-shadow: 0 0 10px rgba(255,196,0,.30);
 }
 
+.ixi-pocket-core-switch.is-live {
+  background: rgba(255,196,0,.96);
+  box-shadow: 0 0 9px rgba(255,196,0,.44);
+}
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
