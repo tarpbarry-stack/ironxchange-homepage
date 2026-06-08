@@ -1229,9 +1229,20 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       onDrop={(e) => {
         e.preventDefault();
 
-       const droppedId = getDroppedMachineId(e);
+       const droppedGroup = getDroppedGroup(e);
 
-        addListingToActiveStack(stackKey, droppedId);
+if (droppedGroup?.machineIds?.length) {
+  droppedGroup.machineIds.forEach(machineId => {
+    addListingToActiveStack(stackKey, machineId);
+  });
+
+  clearMachineDragState();
+  return;
+}
+
+const droppedId = getDroppedMachineId(e);
+
+addListingToActiveStack(stackKey, droppedId);
       }}
     >
       <button
@@ -1242,9 +1253,20 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         onDrop={(e) => {
           e.preventDefault();
 
-         const droppedId = getDroppedMachineId(e);
+        const droppedGroup = getDroppedGroup(e);
 
-          addListingToActiveStack(stackKey, droppedId);
+if (droppedGroup?.machineIds?.length) {
+  droppedGroup.machineIds.forEach(machineId => {
+    addListingToActiveStack(stackKey, machineId);
+  });
+
+  clearMachineDragState();
+  return;
+}
+
+const droppedId = getDroppedMachineId(e);
+
+addListingToActiveStack(stackKey, droppedId);
         }}
       />
 
@@ -1257,8 +1279,20 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
           onDrop={(e) => {
             e.preventDefault();
 
-            const droppedId = getDroppedMachineId(e);
-            addListingToActiveStack(stackKey, droppedId);
+            const droppedGroup = getDroppedGroup(e);
+
+if (droppedGroup?.machineIds?.length) {
+  droppedGroup.machineIds.forEach(machineId => {
+    addListingToActiveStack(stackKey, machineId);
+  });
+
+  clearMachineDragState();
+  return;
+}
+
+const droppedId = getDroppedMachineId(e);
+
+addListingToActiveStack(stackKey, droppedId);
           }}
         >
           <div
