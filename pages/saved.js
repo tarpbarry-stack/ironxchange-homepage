@@ -1907,23 +1907,26 @@ box-shadow: none;
 .ixi-pocket-thumbs.thumb-size-small {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
+  --pocket-thumbs-top: 42px;
 }
 
 .ixi-pocket-thumbs.thumb-size-medium {
   --pocket-thumb-w: 90px;
   --pocket-thumb-h: 60px;
+  --pocket-thumbs-top: 30px;
 }
 
 .ixi-pocket-thumbs.thumb-size-large {
   --pocket-thumb-w: 108px;
   --pocket-thumb-h: 72px;
+  --pocket-thumbs-top: 18px;
 }
 
 .ixi-pocket-thumbs {
  position: absolute;
 
-  left: 50%;
-  top: 30px;
+   left: 50%;
+  top: var(--pocket-thumbs-top, 30px);
 
   width: 320px;
   height: 92px;
