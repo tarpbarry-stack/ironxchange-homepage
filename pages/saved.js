@@ -1065,20 +1065,23 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
   
     
-   <div className="ixi-pocket-action-rail right">
-  <button type="button" className="ixi-pocket-rail-action" title="Theater" />
-  <button type="button" className="ixi-pocket-rail-action" title="Active Stack" />
+   <div className="ixi-pocket-action-rail left">
+  <button type="button" className="ixi-pocket-rail-action theater" title="Theater" />
+
+  <button type="button" className="ixi-pocket-rail-action stack" title="Active Stack" />
+
   <button
     type="button"
-    className="ixi-pocket-rail-action"
-    title="Send to Board"
+    className="ixi-pocket-rail-action board"
+    title="Send To Board"
     onClick={(e) => {
       e.preventDefault();
       e.stopPropagation();
-      recallPocketToBoard("pocketRight");
+      recallPocketToBoard("pocketLeft");
     }}
   />
-  <button type="button" className="ixi-pocket-rail-action" title="Send" />
+
+  <button type="button" className="ixi-pocket-rail-action send" title="Send" />
 </div>
 
 <button
