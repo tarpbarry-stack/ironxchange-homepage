@@ -1953,7 +1953,7 @@ box-shadow: none;
   top: 95px;
 
   width: 120px;
- height: 5px;
+ height: 4px;
 border-radius: 0;
 
 background: rgba(255,255,255,.18);
@@ -1964,11 +1964,11 @@ background: rgba(255,255,255,.18);
 }
 
 .ixi-pocket-visual-rail.left {
-  right: 25px;
+  right: 22px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: 25px;
+  left: 22px;
 }
 
 /* ACTUAL BUTTON — real click target */
