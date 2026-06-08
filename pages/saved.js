@@ -921,10 +921,21 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   e.preventDefault();
   e.stopPropagation();
 
+  const droppedGroup = getDroppedGroup(e);
+
+  if (droppedGroup?.machineIds?.length) {
+    droppedGroup.machineIds.forEach(machineId => {
+      moveMachineToContainer(machineId, "board");
+    });
+
+    clearMachineDragState();
+    return;
+  }
+
   const droppedId = getDroppedMachineId(e);
 
   if (droppedId) {
-    moveMachineToContainer(droppedId, "pocketLeft");
+    moveMachineToContainer(droppedId, "board");
   }
 
   clearMachineDragState();
