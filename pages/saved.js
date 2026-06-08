@@ -912,19 +912,22 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
 
 <div className="ixi-pocket-action-rail left">
-  <button type="button" className="ixi-pocket-rail-action" title="Theater" />
-  <button type="button" className="ixi-pocket-rail-action" title="Active Stack" />
-  <button
-    type="button"
-    className="ixi-pocket-rail-action"
-    title="Send to Board"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      recallPocketToBoard("pocketLeft");
-    }}
-  />
-  <button type="button" className="ixi-pocket-rail-action" title="Send" />
+ <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
+
+<button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
+
+<button
+  type="button"
+  className="ixi-pocket-rail-action board"
+  data-label="BOARD"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    recallPocketToBoard("pocketLeft");
+  }}
+/>
+
+<button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
 </div>
 
 <button
@@ -1066,22 +1069,22 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   
     
   <div className="ixi-pocket-action-rail right">
-  <button type="button" className="ixi-pocket-rail-action send" title="Send" />
+<button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
 
-  <button
-    type="button"
-    className="ixi-pocket-rail-action board"
-    title="Send To Board"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      recallPocketToBoard("pocketRight");
-    }}
-  />
+<button
+  type="button"
+  className="ixi-pocket-rail-action board"
+  data-label="BOARD"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    recallPocketToBoard("pocketRight");
+  }}
+/>
 
-  <button type="button" className="ixi-pocket-rail-action stack" title="Active Stack" />
+<button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
 
-  <button type="button" className="ixi-pocket-rail-action theater" title="Theater" />
+<button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 </div>
 
 <button
@@ -1990,6 +1993,8 @@ box-shadow: none;
   align-items: center;
   justify-content: space-between;
 
+  background: rgba(255,255,255,.10);
+
   z-index: 60;
   pointer-events: auto;
 }
@@ -2003,6 +2008,8 @@ box-shadow: none;
 }
 
 .ixi-pocket-rail-action {
+  position: relative;
+
   width: 28px;
   height: 4px;
 
@@ -2013,13 +2020,30 @@ box-shadow: none;
 
   padding: 0;
   cursor: pointer;
-
-  box-shadow: none;
 }
 
 .ixi-pocket-rail-action:hover {
   background: rgba(255,196,0,.86);
   box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+.ixi-pocket-rail-action:hover::after {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.72);
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+
+  pointer-events: none;
 }
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
