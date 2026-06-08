@@ -451,6 +451,28 @@ function beginMachineDrag(machineId, event) {
   }
 }
 
+  function beginPocketGroupDrag(sourceContainer, event) {
+  if (!sourceContainer) return;
+
+  const machineIds = machineContainers[sourceContainer] || [];
+
+  if (!machineIds.length) return;
+
+  setActiveDragGroup({
+    sourceContainer,
+    machineIds: [...machineIds]
+  });
+
+  setActiveDragMachineId("");
+  setDraggingListingId("");
+  setStackDraggingId("");
+
+  if (event?.dataTransfer) {
+    event.dataTransfer.setData("text/plain", `group:${sourceContainer}`);
+    event.dataTransfer.effectAllowed = "move";
+  }
+}
+
 function getDroppedMachineId(event) {
   return (
     event?.dataTransfer?.getData("text/plain") ||
