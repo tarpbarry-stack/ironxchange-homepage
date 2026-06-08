@@ -1757,29 +1757,6 @@ box-shadow: none;
   cursor: default !important;
 }
 
-.ixi-pocket-rail {
-  position: absolute;
-  display: block;
-
-  top: 68px;
-
-  width: 38px;
-  height: 18px;
-
-  z-index: 99999 !important;
-
-  pointer-events: none !important;
-}
-
-.ixi-pocket-left .ixi-pocket-rail {
-  right: -10px;
-  left: auto;
-}
-
-.ixi-pocket-right .ixi-pocket-rail {
-  left: -10px;
-  right: auto;
-}
 
 /* Pocket Actuator */
 
