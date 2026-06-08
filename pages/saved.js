@@ -1138,7 +1138,16 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
 {rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
-  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
+  <div
+  className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}
+  draggable={rightPocketMode === "peek"}
+  onDragStart={(e) => {
+    if (rightPocketMode !== "peek") return;
+
+    e.stopPropagation();
+    beginPocketGroupDrag("pocketRight", e);
+  }}
+>
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
       const machine = getListingById(machineId);
 
