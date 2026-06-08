@@ -1721,58 +1721,7 @@ box-shadow: none;
 }
 
 
-/* Pocket Actuator */
 
-.ixi-pocket-core-switch {
-  position: absolute;
-  top: 1px;
-
-  width: 22px;
-  height: 14px;
-
-  padding: 0;
-
-  border: 1px solid rgba(255,196,0,.44);
-  border-radius: 5px;
-
-  background: rgba(255,196,0,.24);
-
-  cursor: pointer;
-
-  z-index: 100000 !important;
-  pointer-events: auto !important;
-
-  transition:
-    background .15s ease,
-    box-shadow .15s ease,
-    border-color .15s ease;
-}
-
-/* Move actuator toward Search Surface */
-
-.ixi-pocket-core-switch.left {
-  right: 2px;
-  left: auto;
-}
-
-.ixi-pocket-core-switch.right {
-  left: 2px;
-  right: auto;
-}
-
-.ixi-pocket-core-switch:hover {
-  background: rgba(255,196,0,.85);
-
-  box-shadow:
-    0 0 10px rgba(255,196,0,.30);
-}
-
-.ixi-pocket-core-switch.is-live {
-  background: rgba(255,196,0,.96);
-
-  box-shadow:
-    0 0 9px rgba(255,196,0,.44);
-}
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
@@ -1995,38 +1944,47 @@ box-shadow: none;
 }
 
 .ixi-pocket-visual-rail {
-  position: absolute;
-  top: 68px;
+ top: 68px;
 
-  width: 38px;
+  width: 44px;
   height: 2px;
 
-  background: rgba(255,255,255,.16);
+  border-radius: 999px;
 
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.04),
+      rgba(255,196,0,.45),
+      rgba(255,255,255,.08)
+    );
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.10);
   z-index: 40;
   pointer-events: none;
 }
 
 .ixi-pocket-visual-rail.left {
-  right: -10px;
+  right: -2px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: -10px;
+  left: -2px;
 }
 
 .ixi-pocket-direct-button {
-  position: absolute;
   top: 62px;
 
-  width: 22px;
-  height: 14px;
+  width: 18px;
+  height: 12px;
 
-  border: 1px solid rgba(255,196,0,.44);
-  border-radius: 5px;
+  border-radius: 3px;
 
-  background: rgba(255,196,0,.24);
+  background:
+    linear-gradient(180deg, rgba(255,196,0,.34), rgba(255,196,0,.16));
 
+  border: 1px solid rgba(255,196,0,.42);
   padding: 0;
   cursor: pointer;
 
@@ -2035,11 +1993,11 @@ box-shadow: none;
 }
 
 .ixi-pocket-direct-button.left {
-  right: -2px;
+  right: 6px;
 }
 
 .ixi-pocket-direct-button.right {
-  left: -2px;
+  left: 6px;
 }
 
 .ixi-pocket-direct-button:hover {
