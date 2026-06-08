@@ -2032,7 +2032,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-rail-action:hover {
-  background: rgba(255,196,0,.86);
+  background: rgba(255,196,0,.86) !important;
   box-shadow: 0 0 8px rgba(255,196,0,.22);
 }
 
