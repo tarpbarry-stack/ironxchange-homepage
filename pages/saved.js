@@ -1004,10 +1004,8 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     </div>
   )}
 </section>
-
-
-    </section>
   </aside>
+  
 
   <div className="ixi-command-center">
   
