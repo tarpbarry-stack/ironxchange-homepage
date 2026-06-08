@@ -1952,23 +1952,12 @@ box-shadow: none;
   position: absolute;
   top: 95px;
 
-  width: 54px;
-  height: 6px;
+  width: 90px;
+ height: 5px;
+border-radius: 0;
 
-  border-radius: 3px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.16),
-      rgba(255,255,255,.035)
-    ),
-    rgba(255,196,0,.28);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    inset 0 -1px 0 rgba(0,0,0,.38),
-    0 0 8px rgba(255,196,0,.10);
+background: rgba(255,255,255,.18);
+ box-shadow: none;
 
   z-index: 40;
   pointer-events: none;
