@@ -926,37 +926,6 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   }}
 />
     
-  <div className="ixi-pocket-line" />
-
-  {leftPocketMode === "open" && (
-    <button
-      type="button"
-      className="ixi-pocket-loop-button"
-      title="Loop pocket"
-      onMouseDown={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        rotatePocket("pocketLeft");
-      }}
-    />
-  )}
-
-<button
-  type="button"
-  className={`ixi-pocket-core-switch left ${
-    leftPocketMode !== "closed" ? "is-live" : ""
-  }`}
-  title="Left pocket switch"
-  onPointerDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPocketMode("left");
-  }}
-/>
 
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
@@ -1096,39 +1065,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     cyclePocketMode("right");
   }}
 />
-    
-  <div className="ixi-pocket-line" />
-
-  {rightPocketMode === "open" && (
-    <button
-      type="button"
-      className="ixi-pocket-loop-button right"
-      title="Loop pocket"
-      onMouseDown={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        rotatePocket("pocketRight");
-      }}
-    />
-  )}
-
-<button
-  type="button"
-  className={`ixi-pocket-core-switch right ${
-    rightPocketMode !== "closed" ? "is-live" : ""
-  }`}
-  title="Right pocket switch"
-  onPointerDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPocketMode("right");
-  }}
-/>
-</div>
+  
 
 {rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
