@@ -1748,15 +1748,9 @@ box-shadow: none;
 /* IXI POCKET MACHINE CONTROL PLANE */
 /* =============================== */
 
-.ixi-pocket-rail {
-  display: block;
-  position: absolute;
-  top: 68px;
-  width: 38px;
-  height: 10px;
-  z-index: 220;
-  pointer-events: auto;
-}
+/* =============================== */
+/* IXI POCKET CONTROL RAIL V2      */
+/* =============================== */
 
 .ixi-pocket-left,
 .ixi-pocket-right {
@@ -1764,11 +1758,30 @@ box-shadow: none;
 }
 
 .ixi-pocket-rail {
+  position: absolute;
+  display: block;
+
+  top: 68px;
+
   width: 38px;
   height: 18px;
+
   z-index: 99999 !important;
+
   pointer-events: none !important;
 }
+
+.ixi-pocket-left .ixi-pocket-rail {
+  right: -10px;
+  left: auto;
+}
+
+.ixi-pocket-right .ixi-pocket-rail {
+  left: -10px;
+  right: auto;
+}
+
+/* Pocket Actuator */
 
 .ixi-pocket-core-switch {
   position: absolute;
@@ -1777,34 +1790,48 @@ box-shadow: none;
   width: 22px;
   height: 14px;
 
+  padding: 0;
+
   border: 1px solid rgba(255,196,0,.44);
   border-radius: 5px;
 
   background: rgba(255,196,0,.24);
 
-  padding: 0;
   cursor: pointer;
 
   z-index: 100000 !important;
   pointer-events: auto !important;
+
+  transition:
+    background .15s ease,
+    box-shadow .15s ease,
+    border-color .15s ease;
 }
 
+/* Move actuator toward Search Surface */
+
 .ixi-pocket-core-switch.left {
-  left: 8px;
+  right: 2px;
+  left: auto;
 }
 
 .ixi-pocket-core-switch.right {
-  right: 8px;
+  left: 2px;
+  right: auto;
 }
 
 .ixi-pocket-core-switch:hover {
   background: rgba(255,196,0,.85);
-  box-shadow: 0 0 10px rgba(255,196,0,.30);
+
+  box-shadow:
+    0 0 10px rgba(255,196,0,.30);
 }
 
 .ixi-pocket-core-switch.is-live {
   background: rgba(255,196,0,.96);
-  box-shadow: 0 0 9px rgba(255,196,0,.44);
+
+  box-shadow:
+    0 0 9px rgba(255,196,0,.44);
 }
 @keyframes ixiPocketPulse {
   0%, 100% {
