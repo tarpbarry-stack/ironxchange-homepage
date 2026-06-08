@@ -1739,9 +1739,11 @@ box-shadow: none;
   display: block;
   position: absolute;
   top: 68px;
-  width: 38px;
-  height: 10px;
-  z-index: 220;
+
+  width: 9px;
+  height: 4px;
+
+  z-index: 500;
   pointer-events: auto;
 }
 
@@ -1758,15 +1760,15 @@ box-shadow: none;
 }
 
 .ixi-pocket-power-dash {
-  position: absolute;
-  left: 50%;
-  top: 3px;
+position: absolute;
+  left: 0;
+  top: 0;
 
   width: 9px;
   height: 4px;
 
-  transform: translateX(-50%);
-
+  transform: none;
+  
   border: 0;
   border-radius: 2px;
 
@@ -1783,10 +1785,10 @@ box-shadow: none;
   content: "";
   position: absolute;
 
- left: -14px;
-  right: -14px;
-  top: -10px;
-  bottom: -10px;
+  left: -8px;
+  right: -8px;
+  top: -7px;
+  bottom: -7px;
 }
 
 .ixi-pocket-power-dash:hover {
