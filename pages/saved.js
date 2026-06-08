@@ -753,7 +753,7 @@ function handleStackDragOver(machineId, event) {
 }
   
 function handleStackDragEnd(stackKey) {
-  const dragId = stackDraggingId;
+  const dragId = activeDragMachineId || stackDraggingId;
   const targetId = stackGhostId;
 
   const containerKey =
