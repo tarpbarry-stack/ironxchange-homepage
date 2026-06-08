@@ -864,9 +864,10 @@ function getIxiColorValue(color) {
         />
       </Head>
 
-      <Navbar />
+            <Navbar />
 
-      <main>
+      <DndContext>
+        <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="IXI WORKSPACE"
@@ -1693,10 +1694,11 @@ onBoardDragEnd={() => {}}
             </p>
           </div>
         )}
-      </main>
+              </main>
+      </DndContext>
 
       <Footer />
-
+                
       <style jsx>{`
         * {
           box-sizing: border-box;
