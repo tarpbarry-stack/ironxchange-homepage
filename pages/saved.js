@@ -464,7 +464,6 @@ function getDroppedMachineId(event) {
   setActiveDragMachineId("");
   setDraggingListingId("");
   setGhostListingId("");
-  setStackDraggingId("");
   setStackGhostId("");
   setStackInsertAfter(false);
   setActiveStackHover("");
