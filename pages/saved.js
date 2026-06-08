@@ -911,10 +911,9 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-window" />
 
 
-<div
-  className={`ixi-pocket-action-rail left ${
-    (machineContainers.pocketLeft || []).length === 0 ? "is-empty" : "has-machines"
-  }`}
+className={`ixi-pocket-action-rail left ${
+  (machineContainers.pocketLeft || []).length === 0 ? "is-empty" : "has-machines"
+} pocket-mode-${leftPocketMode}`}
 >
  <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 
@@ -1074,8 +1073,8 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     
   <div
   className={`ixi-pocket-action-rail right ${
-    (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
-  }`}
+  (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
+} pocket-mode-${rightPocketMode}`}
 >
 <button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
 
@@ -2001,7 +2000,7 @@ box-shadow: none;
   align-items: center;
   justify-content: space-between;
 
-  background: rgba(255,255,255,.18);
+  background: transparent; 
   
   z-index: 60;
   pointer-events: auto;
@@ -2024,7 +2023,7 @@ box-shadow: none;
   border: 0;
   border-radius: 0;
 
-  background: rgba(255,255,255,.18);
+  background:  background: transparent;
 
   padding: 0;
   cursor: pointer;
@@ -2054,8 +2053,9 @@ box-shadow: none;
   pointer-events: none;
 }
 
+/* EMPTY = one solid dormant line */
 .ixi-pocket-action-rail.is-empty {
-   background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.04);
 }
 
 .ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
@@ -2063,13 +2063,27 @@ box-shadow: none;
   pointer-events: none;
 }
 
-.ixi-pocket-action-rail.has-machines {
-  background: rgba(255,255,255,.13);
+/* LOADED + CLOSED = one solid dormant line */
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed {
+  background: rgba(255,255,255,.04);
 }
 
-.ixi-pocket-action-rail.has-machines .ixi-pocket-rail-action {
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed .ixi-pocket-rail-action {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* LOADED + STAGED/OPEN = four row-2 search-surface dashes */
+.ixi-pocket-action-rail.has-machines.pocket-mode-peek,
+.ixi-pocket-action-rail.has-machines.pocket-mode-open {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-peek .ixi-pocket-rail-action,
+.ixi-pocket-action-rail.has-machines.pocket-mode-open .ixi-pocket-rail-action {
   opacity: 1;
   pointer-events: auto;
+  background: rgba(255,255,255,.13);
 }
 
 /* ACTUAL BUTTON — real click target */
