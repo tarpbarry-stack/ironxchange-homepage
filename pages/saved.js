@@ -86,6 +86,8 @@ const [ixiCardState, setIxiCardState] = useState({});
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
+  const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+
   useEffect(() => {
     captureIXEvent("saved_workspace_viewed", {
       page: "saved"
@@ -899,7 +901,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 </div>
 
 {(machineContainers.pocketLeft || []).length > 0 && (
-  <div className="ixi-pocket-thumbs">
+  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
       {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
         const machine = getListingById(machineId);
         if (!machine) return null;
@@ -962,13 +964,15 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   <IXIControlSurface>
     <div className="desktop-search-surface">
       <IXSearchSurface
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filters={workspaceFilters}
-        setFilters={setWorkspaceFilters}
-        sortMode={savedBoardMode}
-        setSortMode={setSavedBoardMode}
-      />
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  filters={workspaceFilters}
+  setFilters={setWorkspaceFilters}
+  sortMode={savedBoardMode}
+  setSortMode={setSavedBoardMode}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+/>
     </div>
 
     <div className="mobile-search-surface">
@@ -1045,7 +1049,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 </div>
 
 {(machineContainers.pocketRight || []).length > 0 && (
-  <div className="ixi-pocket-thumbs">
+  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
       const machine = getListingById(machineId);
 
@@ -1901,6 +1905,21 @@ box-shadow: none;
 /* Keeps drag catch intact   */
 /* ========================= */
 
+.ixi-pocket-thumbs.thumb-size-small {
+  --pocket-thumb-w: 72px;
+  --pocket-thumb-h: 48px;
+}
+
+.ixi-pocket-thumbs.thumb-size-medium {
+  --pocket-thumb-w: 90px;
+  --pocket-thumb-h: 60px;
+}
+
+.ixi-pocket-thumbs.thumb-size-large {
+  --pocket-thumb-w: 108px;
+  --pocket-thumb-h: 72px;
+}
+
 .ixi-pocket-thumbs {
  position: absolute;
 
@@ -1923,9 +1942,9 @@ box-shadow: none;
   right: auto;
 }
 
-.ixi-pocket-thumb {
-  width: 90px !important;
-  height: 60px !important;
+  .ixi-pocket-thumb {
+  width: var(--pocket-thumb-w) !important;
+  height: var(--pocket-thumb-h) !important;
   
   position: absolute;
   top: 0;
