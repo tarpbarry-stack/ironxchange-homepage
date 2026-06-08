@@ -1012,8 +1012,13 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
           <div
             key={`left-pocket-thumb-${machineId}`}
             className="ixi-pocket-thumb"
-   draggable
+draggable={leftPocketMode === "open"}
 onDragStart={(e) => {
+  if (leftPocketMode !== "open") {
+    e.preventDefault();
+    return;
+  }
+
   e.stopPropagation();
   handleBoardDragStart(machine, e);
 }}
