@@ -1993,12 +1993,13 @@ box-shadow: none;
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
   transform-origin: right bottom;
   transform: rotate(7deg);
-  opacity: .58;
+  opacity: .72;
 }
 
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
-  transform: translateY(0) rotate(-7deg);
-  opacity: .58;
+  transform-origin: left bottom;
+  transform: rotate(-7deg);
+  opacity: .72;
 }
 
 /* OPEN — same plane, flat accordion */
