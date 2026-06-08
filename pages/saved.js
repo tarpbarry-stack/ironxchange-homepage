@@ -1,6 +1,10 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  DndContext
+} from "@dnd-kit/core";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
