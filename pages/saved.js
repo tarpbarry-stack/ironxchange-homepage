@@ -940,6 +940,11 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   type="button"
   className={`ixi-pocket-direct-button left ${
   (machineContainers.pocketLeft || []).length > 0 &&
+  leftPocketMode === "closed"
+    ? "has-load"
+    : ""
+} ${
+  (machineContainers.pocketLeft || []).length > 0 &&
   leftPocketMode !== "closed"
     ? "is-live"
     : ""
@@ -1102,6 +1107,11 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 <button
   type="button"
 className={`ixi-pocket-direct-button right ${
+  (machineContainers.pocketRight || []).length > 0 &&
+  rightPocketMode === "closed"
+    ? "has-load"
+    : ""
+} ${
   (machineContainers.pocketRight || []).length > 0 &&
   rightPocketMode !== "closed"
     ? "is-live"
@@ -2129,6 +2139,11 @@ box-shadow: none;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.22),
     0 0 10px rgba(255,196,0,.32);
+}
+
+.ixi-pocket-direct-button.has-load {
+  background: rgba(255,196,0,.32);
+  box-shadow: none;
 }
 
 .ixi-pocket-direct-button.is-live {
