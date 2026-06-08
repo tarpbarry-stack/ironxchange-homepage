@@ -1998,11 +1998,11 @@ background: rgba(255,255,255,.18);
 
 /* actuator sits toward SearchSurface */
 .ixi-pocket-direct-button.left {
-  right: -7;
+  right: 0;
 }
 
 .ixi-pocket-direct-button.right {
-  left: -7;
+  left: 0;
 }
 
 .ixi-pocket-direct-button:hover {
