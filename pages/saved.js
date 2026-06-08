@@ -967,17 +967,21 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   )}
 
   <button
-    type="button"
-    className={`ixi-pocket-power-dash ${
-      leftPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("left");
-    }}
-  />
+  type="button"
+  className={`ixi-pocket-power-dash ${
+    leftPocketMode !== "closed" ? "active" : ""
+  }`}
+  title="Power pocket"
+  onMouseDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("left");
+  }}
+/>
 </div>
 
 {leftPocketMode !== "closed" &&
@@ -1138,18 +1142,22 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     />
   )}
 
-  <button
-    type="button"
-    className={`ixi-pocket-power-dash right ${
-      rightPocketMode !== "closed" ? "active" : ""
-    }`}
-    title="Power pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("right");
-    }}
-  />
+ <button
+  type="button"
+  className={`ixi-pocket-power-dash ${
+    leftPocketMode !== "closed" ? "active" : ""
+  }`}
+  title="Power pocket"
+  onMouseDown={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    cyclePocketMode("left");
+  }}
+/>
 </div>
 
 {rightPocketMode !== "closed" &&
@@ -1892,10 +1900,10 @@ box-shadow: none;
   content: "";
   position: absolute;
 
- left: -14px;
-  right: -14px;
-  top: -10px;
-  bottom: -10px;
+  left: -22px;
+  right: -22px;
+  top: -14px;
+  bottom: -14px;
 }
 
 .ixi-pocket-power-dash:hover {
