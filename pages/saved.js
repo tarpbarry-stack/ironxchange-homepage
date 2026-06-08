@@ -911,9 +911,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-window" />
 
 
-className={`ixi-pocket-action-rail left ${
-  (machineContainers.pocketLeft || []).length === 0 ? "is-empty" : "has-machines"
-} pocket-mode-${leftPocketMode}`}
+<div
+  className={`ixi-pocket-action-rail left ${
+    (machineContainers.pocketLeft || []).length === 0
+      ? "is-empty"
+      : "has-machines"
+  } pocket-mode-${leftPocketMode}`}
 >
  <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 
@@ -946,7 +949,6 @@ className={`ixi-pocket-action-rail left ${
   }}
 />
     
-
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
   <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
