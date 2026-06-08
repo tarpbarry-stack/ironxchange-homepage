@@ -495,7 +495,8 @@ function getDroppedGroup(event) {
   return activeDragGroup;
 }
   
-  function clearMachineDragState() {
+ function clearMachineDragState() {
+  setActiveDragGroup(null);
   setActiveDragMachineId("");
   setDraggingListingId("");
   setGhostListingId("");
