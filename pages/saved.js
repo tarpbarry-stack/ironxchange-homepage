@@ -1975,11 +1975,11 @@ box-shadow: none;
 }
 
 .ixi-pocket-visual-rail.left {
-  right: 12px;
+  right: 32px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: 12px;
+  left: 32px;
 }
 
 /* ACTUAL BUTTON — real click target */
