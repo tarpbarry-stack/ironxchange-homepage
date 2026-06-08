@@ -2089,7 +2089,8 @@ box-shadow: none;
 
 .ixi-pocket-l2,
 .ixi-pocket-r2 {
-  margin-top: 34px;
+  position: relative;
+  top: 92px;
 }
 
 /* =============================== */
