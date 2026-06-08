@@ -72,6 +72,15 @@ function WorkspaceDropPad({
 
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
+  
+  function handleWorkspaceDragEnd(event) {
+  console.log(
+    "DND",
+    event?.active?.id,
+    event?.over?.id
+  );
+}
+  
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
 
@@ -922,7 +931,9 @@ function getIxiColorValue(color) {
 
             <Navbar />
 
-      <DndContext>
+     <DndContext
+  onDragEnd={handleWorkspaceDragEnd}
+>
         <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
