@@ -926,49 +926,14 @@ onDragStart={(e) => {
   handleBoardDragStart(machine, e);
 }}
 onDragEnd={handleBoardDragEnd}            style={{
- right: `${leftPocketMode === "open" ? index * 48 : leftPocketMode === "peek" ? index * 12 : index * 6}px`,
+right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
  zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
   )
 }}
           >
-<div className="ixi-pocket-thumb-actions">
-  <button
-    type="button"
-    title="Back to board"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "board");
-    }}
-  />
 
-  <button
-    type="button"
-    title="Send to top stack"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "stackTop");
-      setActiveStacksOpen(current => ({
-        ...current,
-        top: true
-      }));
-    }}
-  />
-
-  <button
-    type="button"
-    title="Send to bottom stack"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "stackBottom");
-      setActiveStacksOpen(current => ({
-        ...current,
-        bottom: true
-      }));
-    }}
-  />
-</div>
             {image ? (
               <img
                 src={typeof image === "string" ? image : image?.url}
@@ -1111,7 +1076,7 @@ onDragEnd={handleBoardDragEnd}            style={{
   style={{
      
 
-  left: `${rightPocketMode === "open" ? index * 48 : rightPocketMode === "peek" ? index * 12 : index * 6}px`,
+left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -1119,42 +1084,6 @@ onDragEnd={handleBoardDragEnd}            style={{
 }}
         >
 
-<div className="ixi-pocket-thumb-actions">
-  <button
-    type="button"
-    title="Back to board"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "board");
-    }}
-  />
-
-  <button
-    type="button"
-    title="Send to top stack"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "stackTop");
-      setActiveStacksOpen(current => ({
-        ...current,
-        top: true
-      }));
-    }}
-  />
-
-  <button
-    type="button"
-    title="Send to bottom stack"
-    onClick={(e) => {
-      e.stopPropagation();
-      moveMachineToContainer(machineId, "stackBottom");
-      setActiveStacksOpen(current => ({
-        ...current,
-        bottom: true
-      }));
-    }}
-  />
-</div>
           {image ? (
             <img
               src={typeof image === "string" ? image : image?.url}
@@ -1815,7 +1744,7 @@ box-shadow: none;
   top: 68px;
   width: 38px;
   height: 10px;
-  z-index: 120;
+  z-index: 220;
   pointer-events: auto;
 }
 
@@ -1857,10 +1786,10 @@ box-shadow: none;
   content: "";
   position: absolute;
 
-  left: -10px;
-  right: -10px;
-  top: -8px;
-  bottom: -8px;
+ left: -14px;
+  right: -14px;
+  top: -10px;
+  bottom: -10px;
 }
 
 .ixi-pocket-power-dash:hover {
