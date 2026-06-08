@@ -79,6 +79,7 @@ const [armedDestination, setArmedDestination] = useState("");
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
 const [activeDragMachineId, setActiveDragMachineId] = useState("");
+const [activeDragGroup, setActiveDragGroup] = useState(null);
   
 const [stackInsertAfter, setStackInsertAfter] = useState(false);
 
