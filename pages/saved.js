@@ -971,7 +971,16 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
-  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
+  <div
+  className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}
+  draggable={leftPocketMode === "peek"}
+  onDragStart={(e) => {
+    if (leftPocketMode !== "peek") return;
+
+    e.stopPropagation();
+    beginPocketGroupDrag("pocketLeft", e);
+  }}
+>
       {(machineContainers.pocketLeft || []).slice(0, 7).map((machineId, index) => {
         const machine = getListingById(machineId);
         if (!machine) return null;
