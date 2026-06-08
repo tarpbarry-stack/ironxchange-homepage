@@ -882,8 +882,17 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 }`}
   onDragOver={(e) => e.preventDefault()}
   onDrop={(e) => {
-    e.preventDefault();
-  }}
+  e.preventDefault();
+  e.stopPropagation();
+
+  const droppedId = getDroppedMachineId(e);
+
+  if (droppedId) {
+    moveMachineToContainer(droppedId, "pocketLeft");
+  }
+
+  clearMachineDragState();
+}}
 >
   <div className="ixi-pocket-catch-pad" />
   <div className="ixi-pocket-window" />
