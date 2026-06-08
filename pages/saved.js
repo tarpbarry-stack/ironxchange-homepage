@@ -1769,7 +1769,7 @@ box-shadow: none;
   left: 50%;
   top: 3px;
 
-  width: 18px;
+  width: 9px;
   height: 4px;
 
   transform: translateX(-50%);
@@ -1777,8 +1777,8 @@ box-shadow: none;
   border: 0;
   border-radius: 2px;
 
-  background: rgba(255,255,255,.18);
-
+  background: rgba(255,255,255,.12);
+  
   padding: 0;
   cursor: pointer;
 
@@ -1825,15 +1825,19 @@ box-shadow: none;
 
   width: 7px;
   height: 7px;
-  
+
   transform: translate(-50%, -16px);
 
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 2px;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0)),
-    rgba(255,196,0,.32);
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.06),
+      rgba(255,255,255,0)
+    ),
+    rgba(255,255,255,.08);
 
   padding: 0;
   cursor: pointer;
@@ -1841,24 +1845,28 @@ box-shadow: none;
   z-index: 98;
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 0 0 1px rgba(0,0,0,.35);
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 0 0 1px rgba(0,0,0,.28);
 }
-
 .ixi-pocket-loop-button.right {
   left: 50%;
   right: auto;
 }
 
 .ixi-pocket-loop-button:hover {
-  border-color: rgba(255,196,0,.72);
+  border-color: rgba(255,255,255,.24);
+
   background:
-    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0)),
-    rgba(255,196,0,.74);
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,0)
+    ),
+    rgba(255,255,255,.14);
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    0 0 8px rgba(255,196,0,.20);
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 6px rgba(255,255,255,.08);
 }
 
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
