@@ -1145,9 +1145,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       onDrop={(e) => {
         e.preventDefault();
 
-        const droppedId =
-          e.dataTransfer.getData("text/plain") ||
-          draggingListingId;
+       const droppedId = getDroppedMachineId(e);
 
         addListingToActiveStack(stackKey, droppedId);
       }}
@@ -1160,9 +1158,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         onDrop={(e) => {
           e.preventDefault();
 
-          const droppedId =
-            e.dataTransfer.getData("text/plain") ||
-            draggingListingId;
+         const droppedId = getDroppedMachineId(e);
 
           addListingToActiveStack(stackKey, droppedId);
         }}
@@ -1177,10 +1173,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
           onDrop={(e) => {
             e.preventDefault();
 
-            const droppedId =
-              e.dataTransfer.getData("text/plain") ||
-              draggingListingId;
-
+            const droppedId = getDroppedMachineId(e);
             addListingToActiveStack(stackKey, droppedId);
           }}
         >
