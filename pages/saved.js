@@ -957,7 +957,6 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     setPocketMode("left");
   }}
 />
-</div>
 
 {leftPocketMode !== "closed" &&
  (machineContainers.pocketLeft || []).length > 0 && (
