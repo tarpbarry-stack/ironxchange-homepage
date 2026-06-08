@@ -1985,24 +1985,20 @@ box-shadow: none;
 
 /* PEEK POCKET COVER */
 
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs::after,
-.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs::after {
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb::after,
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb::after {
   content: "";
-
   position: absolute;
 
-  left: -12px;
-  right: -12px;
-
+  left: 0;
+  right: 0;
   top: 22px;
-
-  height: 80px;
+  bottom: 0;
 
   background: #0b0b0b;
 
   pointer-events: none;
-
-  z-index: 999;
+  z-index: 5;
 }
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
