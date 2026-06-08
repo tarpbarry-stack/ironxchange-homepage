@@ -53,7 +53,8 @@ function WorkspaceDropZone({
 function WorkspaceDropPad({
   id,
   className,
-  style
+  style,
+  ...props
 }) {
   const { setNodeRef } = useDroppable({
     id
@@ -64,6 +65,7 @@ function WorkspaceDropPad({
       ref={setNodeRef}
       className={className}
       style={style}
+      {...props}
     />
   );
 }
