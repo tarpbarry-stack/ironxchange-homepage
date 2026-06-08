@@ -2194,20 +2194,28 @@ box-shadow: none;
 
 /* L2 catch reaches outward to screen-left */
 .ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
-  left: -260px;
-  right: auto;
-  top: 92px;
-  width: 620px;
-  height: 150px;
+  position: fixed;
+
+  left: 0;
+  top: 0;
+
+  width: 140px;
+  height: 100vh;
+
+  z-index: 1;
 }
 
 /* R2 catch reaches outward to screen-right */
 .ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
-  right: -260px;
-  left: auto;
-  top: 92px;
-  width: 620px;
-  height: 150px;
+  position: fixed;
+
+  right: 0;
+  top: 0;
+
+  width: 140px;
+  height: 100vh;
+
+  z-index: 1;
 }
 
 
