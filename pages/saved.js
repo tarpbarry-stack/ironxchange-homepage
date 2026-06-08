@@ -1198,8 +1198,9 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
                 </div>
 
   <aside className="ixi-command-right">
-  <section
-    data-pocket-target="pocketRight"
+  <section className="ixi-pocket-row">
+    <section
+      data-pocket-target="pocketRight"
     className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
   (machineContainers.pocketRight || []).length ? "occupied" : ""
 }`}
@@ -1499,7 +1500,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       </div>
     )}
 </section>
-    
+  </section>
 </aside>
 </section>
 
@@ -2039,15 +2040,12 @@ onBoardDragEnd={() => {}}
 
 .ixi-pocket-row {
   width: 100%;
-
-  height: 260px;
+  height: 120px;
 
   margin: 0;
 
   display: grid;
-
-  grid-template-rows: 95px 95px;
-  gap: 50px;
+  gap: 12px;
 
   position: relative;
   z-index: 2;
@@ -2084,11 +2082,7 @@ box-shadow: none;
   z-index: 2;
 }
 
-.ixi-pocket-l2,
-.ixi-pocket-r2 {
-  top: 0 !important;
-  margin-top: 0 !important;
-}
+
 
 /* =============================== */
 /* IXI POCKET MACHINE CONTROL PLANE */
