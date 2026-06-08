@@ -1944,12 +1944,6 @@ box-shadow: none;
   z-index: 5;
 }
 
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs {
-  height: 30px;
-  overflow: hidden;
-}
-
 .ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
 .ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
   height: 92px;
