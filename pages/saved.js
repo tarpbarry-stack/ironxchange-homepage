@@ -2103,7 +2103,7 @@ box-shadow: none;
   height: 4px;
 
   border: 0;
-  border-radius: 2px;
+  border-radius: 0;
 
   background: rgba(255,255,255,.12);
 
@@ -2114,9 +2114,7 @@ box-shadow: none;
   z-index: 99999;
   pointer-events: auto;
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.18),
-    0 0 6px rgba(255,196,0,.20);
+  box-shadow: none;
 }
 
 /* actuator sits toward SearchSurface */
