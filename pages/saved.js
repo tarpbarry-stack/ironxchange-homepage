@@ -938,6 +938,17 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
 <button
   type="button"
+  className="ixi-pocket-loop-square left"
+  title="Loop Pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    rotatePocket("pocketLeft");
+  }}
+/>
+    
+<button
+  type="button"
   className={`ixi-pocket-direct-button left ${
   (machineContainers.pocketLeft || []).length > 0 &&
   leftPocketMode === "closed"
@@ -1104,6 +1115,17 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 </div>
 
+<button
+  type="button"
+  className="ixi-pocket-loop-square right"
+  title="Loop Pocket"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    rotatePocket("pocketRight");
+  }}
+/>
+    
 <button
   type="button"
 className={`ixi-pocket-direct-button right ${
@@ -2151,6 +2173,38 @@ box-shadow: none;
 
   box-shadow:
     0 0 8px rgba(255,196,0,.42);
+}
+
+.ixi-pocket-loop-square {
+  position: absolute;
+
+  width: 4px;
+  height: 4px;
+
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.12);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 99999;
+}
+
+.ixi-pocket-loop-square.left {
+  top: 78px;
+  right: 4px;
+}
+
+.ixi-pocket-loop-square.right {
+  top: 78px;
+  left: 4px;
+}
+
+.ixi-pocket-loop-square:hover {
+  border-color: rgba(255,196,0,.62);
+  background: rgba(255,196,0,.72);
 }
 
 
