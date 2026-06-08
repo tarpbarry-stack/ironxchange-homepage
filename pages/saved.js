@@ -903,7 +903,8 @@ function getIxiColorValue(color) {
 <section className="ixi-command-chassis">
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
-     <section
+          <WorkspaceDropZone
+  id="pocketLeft"
   data-pocket-target="pocketLeft"
 className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   (machineContainers.pocketLeft || []).length ? "occupied" : ""
@@ -1041,7 +1042,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
       })}
     </div>
   )}
-</section>
+</WorkspaceDropZone>
 
 <section
   data-pocket-target="pocketLeft2"
