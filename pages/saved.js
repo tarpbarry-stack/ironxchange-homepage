@@ -1978,6 +1978,23 @@ box-shadow: none;
   z-index: 30;
 }
 
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs {
+  height: 26px;
+  overflow: hidden;
+}
+
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
+  height: 92px;
+  overflow: visible;
+}
+
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
+  display: none;
+}
+
 .ixi-pocket-right .ixi-pocket-thumbs {
   left: 50%;
   right: auto;
