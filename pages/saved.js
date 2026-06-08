@@ -2282,6 +2282,32 @@ box-shadow:
           color: rgba(255,255,255,.42);
           font-size: 12px;
         }
+
+
+
+/* IXI POCKET HIT TEST DEBUG */
+.ixi-pocket-catch-pad {
+  outline: 2px solid red !important;
+  background: rgba(255, 0, 0, .08) !important;
+}
+
+.ixi-pocket-rail {
+  outline: 2px solid #00b7ff !important;
+  background: rgba(0, 183, 255, .18) !important;
+}
+
+.ixi-pocket-power-dash {
+  outline: 2px solid yellow !important;
+  background: yellow !important;
+}
+
+.ixi-pocket-power-dash::before {
+  outline: 1px dashed lime !important;
+  background: rgba(0, 255, 0, .12) !important;
+}
+
+
+        
 .mobile-search-surface {
   display: none;
 }
