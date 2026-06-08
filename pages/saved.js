@@ -1173,7 +1173,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   </section>
 </aside>
 
-
+  </section>
               
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
