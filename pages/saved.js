@@ -895,7 +895,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   clearMachineDragState();
 }}
 >
-  <div className="ixi-pocket-catch-pad" />
+  <div className="ixi-pocket-catch-pad catch-l1" />
   <div className="ixi-pocket-window" />
 
 
@@ -1218,7 +1218,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   clearMachineDragState();
 }}
   > 
-<div className="ixi-pocket-catch-pad" />
+<div className="ixi-pocket-catch-pad catch-r1" />
     <div className="ixi-pocket-window" />
 
   
@@ -2170,45 +2170,78 @@ box-shadow: none;
 /* IXI POCKET CATCH ZONE DEBUG     */
 /* =============================== */
 
+/* Base catch pad is inert unless explicitly assigned */
 .ixi-pocket-catch-pad {
-  background: rgba(0,194,255,.045);
-  outline: 1px dashed rgba(0,194,255,.28);
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* upper pockets keep normal catch */
-/* L2 = left lower edge catch only */
+/* L1 local catch only */
+.ixi-pocket-catch-pad.catch-l1 {
+  left: 0;
+  right: auto;
+  top: 92px;
+
+  width: 360px;
+  height: 140px;
+
+  pointer-events: auto;
+
+  background: rgba(0,194,255,.035);
+  outline: 1px dashed rgba(0,194,255,.16);
+}
+
+/* R1 local catch only */
+.ixi-pocket-catch-pad.catch-r1 {
+  right: 0;
+  left: auto;
+  top: 92px;
+
+  width: 360px;
+  height: 140px;
+
+  pointer-events: auto;
+
+  background: rgba(255,196,0,.035);
+  outline: 1px dashed rgba(255,196,0,.16);
+}
+
+/* L2 screen-left lower catch lane only */
 .ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
   position: fixed;
 
   left: 0;
+  right: auto;
   top: 420px;
 
   width: 150px;
   height: calc(100vh - 420px);
 
-  z-index: 999;
   pointer-events: auto;
+  z-index: 999;
 
   background: rgba(0,194,255,.05);
   outline: 1px dashed rgba(0,194,255,.22);
 }
 
-/* R2 = right lower edge catch only */
+/* R2 screen-right lower catch lane only */
 .ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
   position: fixed;
 
   right: 0;
+  left: auto;
   top: 430px;
 
   width: 150px;
   height: calc(100vh - 430px);
 
-  z-index: 999;
   pointer-events: auto;
+  z-index: 999;
 
   background: rgba(255,196,0,.045);
   outline: 1px dashed rgba(255,196,0,.20);
-}
+}}
 
 .ixi-pocket-catch-pad {
   position: absolute;
