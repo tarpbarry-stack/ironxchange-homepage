@@ -1103,6 +1103,15 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     e.preventDefault();
     e.stopPropagation();
 
+    const padTarget = e.target
+      ?.closest?.("[data-pocket-pad-target]")
+      ?.getAttribute("data-pocket-pad-target");
+
+    if (padTarget !== "pocketLeft2") {
+      clearMachineDragState();
+      return;
+    }
+
     const droppedId = getDroppedMachineId(e);
 
     if (droppedId) {
