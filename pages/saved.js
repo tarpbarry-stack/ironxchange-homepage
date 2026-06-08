@@ -1952,7 +1952,7 @@ box-shadow: none;
   position: absolute;
   top: 95px;
 
-  width: 90px;
+  width: 120px;
  height: 5px;
 border-radius: 0;
 
@@ -1964,11 +1964,11 @@ background: rgba(255,255,255,.18);
 }
 
 .ixi-pocket-visual-rail.left {
-  right: 32px;
+  right: 25px;
 }
 
 .ixi-pocket-visual-rail.right {
-  left: 32px;
+  left: 25px;
 }
 
 /* ACTUAL BUTTON — real click target */
@@ -1976,15 +1976,16 @@ background: rgba(255,255,255,.18);
   position: absolute;
   top: 95px;
 
-  width: 18px;
-  height: 6px;
+  width: 9px;
+  height: 4px;
 
   border: 0;
   border-radius: 2px;
 
-  background: rgba(255,196,0,.72);
+  background: rgba(255,255,255,.12);
 
   padding: 0;
+
   cursor: pointer;
 
   z-index: 99999;
@@ -1997,11 +1998,11 @@ background: rgba(255,255,255,.18);
 
 /* actuator sits toward SearchSurface */
 .ixi-pocket-direct-button.left {
-  right: 0;
+  right: -7;
 }
 
 .ixi-pocket-direct-button.right {
-  left: 0;
+  left: -7;
 }
 
 .ixi-pocket-direct-button:hover {
@@ -2012,7 +2013,10 @@ background: rgba(255,255,255,.18);
 }
 
 .ixi-pocket-direct-button.is-live {
-  background: rgba(255,196,0,.96);
+  background: rgba(255,196,0,.95);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.42);
 }
 
 
