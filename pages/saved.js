@@ -1038,9 +1038,18 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   (machineContainers.pocketRight || []).length ? "occupied" : ""
 }`}
     onDragOver={(e) => e.preventDefault()}
-    onDrop={(e) => {
-      e.preventDefault();
-    }}
+   onDrop={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const droppedId = getDroppedMachineId(e);
+
+  if (droppedId) {
+    moveMachineToContainer(droppedId, "pocketLeft");
+  }
+
+  clearMachineDragState();
+}}
   > 
 <div className="ixi-pocket-catch-pad" />
     <div className="ixi-pocket-window" />
