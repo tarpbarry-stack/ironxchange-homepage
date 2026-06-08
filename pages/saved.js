@@ -2001,8 +2001,8 @@ box-shadow: none;
   align-items: center;
   justify-content: space-between;
 
-  background: rgba(255,255,255,.10);
-
+  background: rgba(255,255,255,.18);
+  
   z-index: 60;
   pointer-events: auto;
 }
