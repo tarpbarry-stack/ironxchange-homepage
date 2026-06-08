@@ -2,7 +2,8 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
 import {
-  DndContext
+  DndContext,
+  useDroppable
 } from "@dnd-kit/core";
 
 import Navbar from "../components/Navbar";
@@ -27,6 +28,29 @@ import {
   filterSavedListings,
   toggleSavedListing
 } from "../lib/savedListings";
+
+function WorkspaceDropZone({
+  id,
+  className,
+  children,
+  ...props
+}) {
+  const { setNodeRef } = useDroppable({
+    id
+  });
+
+  return (
+    <section
+      ref={setNodeRef}
+      className={className}
+      {...props}
+    >
+      {children}
+    </section>
+  );
+}
+
+export default function SavedListings() {
 
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
