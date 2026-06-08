@@ -938,7 +938,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
 <button
   type="button"
-  className="ixi-pocket-loop-square left"
+  className={`ixi-pocket-loop-square left ${
+  (machineContainers.pocketLeft || []).length > 0 &&
+  leftPocketMode !== "closed"
+    ? "is-visible"
+    : ""
+}`}
   title="Loop Pocket"
   onClick={(e) => {
     e.preventDefault();
@@ -1117,7 +1122,12 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
 <button
   type="button"
-  className="ixi-pocket-loop-square right"
+  className={`ixi-pocket-loop-square right ${
+  (machineContainers.pocketRight || []).length > 0 &&
+  rightPocketMode !== "closed"
+    ? "is-visible"
+    : ""
+}`}
   title="Loop Pocket"
   onClick={(e) => {
     e.preventDefault();
@@ -2190,16 +2200,23 @@ box-shadow: none;
   cursor: pointer;
 
   z-index: 99999;
+  pointer-events: auto;
+
+  opacity: 0;
+}
+
+.ixi-pocket-loop-square.is-visible {
+  opacity: 1;
 }
 
 .ixi-pocket-loop-square.left {
-  top: 78px;
-  right: 4px;
+  top: 68px;
+  right: -2px;
 }
 
 .ixi-pocket-loop-square.right {
-  top: 78px;
-  left: 4px;
+  top: 68px;
+  left: -2px;
 }
 
 .ixi-pocket-loop-square:hover {
