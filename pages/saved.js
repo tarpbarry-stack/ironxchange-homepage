@@ -737,14 +737,7 @@ function addListingToActiveStack(stackKey, listingId) {
 }
 
 function handleStackDragStart(machineId, event) {
-  const id = String(machineId);
-
-  setStackDraggingId(id);
-
-  if (event?.dataTransfer) {
-    event.dataTransfer.setData("text/plain", id);
-    event.dataTransfer.effectAllowed = "move";
-  }
+  beginMachineDrag(machineId, event);
 }
 
 function handleStackDragOver(machineId, event) {
