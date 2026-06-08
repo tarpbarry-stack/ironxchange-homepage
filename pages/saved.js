@@ -939,14 +939,17 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 <button
   type="button"
   className={`ixi-pocket-direct-button left ${
-    leftPocketMode !== "closed" ? "is-live" : ""
-  }`}
-  title="Left pocket"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("left");
-  }}
+  (machineContainers.pocketLeft || []).length > 0 &&
+  leftPocketMode !== "closed"
+    ? "is-live"
+    : ""
+}`}
+title="Left pocket"
+onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  cyclePocketMode("left");
+}}
 />
     
 {leftPocketMode !== "closed" &&
@@ -1098,15 +1101,18 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
 <button
   type="button"
-  className={`ixi-pocket-direct-button right ${
-    rightPocketMode !== "closed" ? "is-live" : ""
-  }`}
-  title="Right pocket"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    cyclePocketMode("right");
-  }}
+className={`ixi-pocket-direct-button right ${
+  (machineContainers.pocketRight || []).length > 0 &&
+  rightPocketMode !== "closed"
+    ? "is-live"
+    : ""
+}`}
+title="Right pocket"
+onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  cyclePocketMode("right");
+}}
 />
   
 
