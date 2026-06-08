@@ -50,6 +50,22 @@ function WorkspaceDropZone({
   );
 }
 
+function WorkspaceDropPad({
+  id,
+  className
+}) {
+  const { setNodeRef } = useDroppable({
+    id
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={className}
+    />
+  );
+}
+
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
