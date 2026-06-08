@@ -911,7 +911,11 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
   <div className="ixi-pocket-window" />
 
 
-<div className="ixi-pocket-action-rail left">
+<div
+  className={`ixi-pocket-action-rail left ${
+    (machineContainers.pocketLeft || []).length === 0 ? "is-empty" : "has-machines"
+  }`}
+>
  <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 
 <button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
@@ -1068,7 +1072,11 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
   
     
-  <div className="ixi-pocket-action-rail right">
+  <div
+  className={`ixi-pocket-action-rail right ${
+    (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
+  }`}
+>
 <button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
 
 <button
@@ -2045,6 +2053,25 @@ box-shadow: none;
 
   pointer-events: none;
 }
+
+.ixi-pocket-action-rail.is-empty {
+  background: rgba(255,255,255,.10);
+}
+
+.ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ixi-pocket-action-rail.has-machines {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.has-machines .ixi-pocket-rail-action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
   position: absolute;
