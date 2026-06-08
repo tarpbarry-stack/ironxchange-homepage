@@ -1980,7 +1980,7 @@ box-shadow: none;
 
 .ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
 .ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs {
-  height: 26px;
+  height: 18px;
   overflow: hidden;
 }
 
