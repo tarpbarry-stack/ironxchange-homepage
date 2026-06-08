@@ -2166,6 +2166,50 @@ box-shadow: none;
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
 
 
+/* =============================== */
+/* IXI POCKET CATCH ZONE DEBUG     */
+/* =============================== */
+
+.ixi-pocket-catch-pad {
+  background: rgba(0,194,255,.045);
+  outline: 1px dashed rgba(0,194,255,.28);
+}
+
+/* upper pockets keep normal catch */
+.ixi-pocket-left:not(.ixi-pocket-l2) .ixi-pocket-catch-pad {
+  left: 0;
+  right: auto;
+  top: 92px;
+  width: 360px;
+  height: 140px;
+}
+
+.ixi-pocket-right:not(.ixi-pocket-r2) .ixi-pocket-catch-pad {
+  right: 0;
+  left: auto;
+  top: 92px;
+  width: 360px;
+  height: 140px;
+}
+
+/* L2 catch reaches outward to screen-left */
+.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
+  left: -260px;
+  right: auto;
+  top: 92px;
+  width: 620px;
+  height: 150px;
+}
+
+/* R2 catch reaches outward to screen-right */
+.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
+  right: -260px;
+  left: auto;
+  top: 92px;
+  width: 620px;
+  height: 150px;
+}
+
 
 .ixi-pocket-catch-pad {
   position: absolute;
