@@ -1685,47 +1685,7 @@ onBoardDragEnd={() => {}}
           height: 5px;
         }
 
-.pocket-dev-panel {
-  max-width: 1320px;
-  margin: 0 auto 10px;
-  padding: 10px 12px;
 
-  display: flex;
-  gap: 12px;
-
-  border: 1px solid rgba(255,196,0,.28);
-  border-radius: 10px;
-
-  background: rgba(255,196,0,.06);
-
-  color: rgba(255,196,0,.9);
-
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: .45px;
-}
-
-.pocket-dev-panel button {
-  height: 24px;
-  padding: 0 10px;
-
-  border: 1px solid rgba(255,196,0,.28);
-  border-radius: 7px;
-
-  background: rgba(0,0,0,.42);
-  color: rgba(255,196,0,.9);
-
-  font-size: 9px;
-  font-weight: 950;
-  letter-spacing: .45px;
-
-  cursor: pointer;
-}
-
-.pocket-dev-panel button:hover {
-  border-color: rgba(255,196,0,.62);
-  background: rgba(255,196,0,.08);
-}
 
 .ixi-pocket-row {
   width: 100%;
@@ -1905,23 +1865,6 @@ box-shadow: none;
 /* Roll-top cover: fixed dash/lip, cover moves behind it */
 
 
-.ixi-pocket-debug-label.right {
-  left: auto;
-  right: 18px;
-}
-
-.ixi-pocket-debug-label {
-  position: absolute;
-  left: 18px;
-  top: 18px;
-
-  color: rgba(255,196,0,.84);
-
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
 
 .ixi-pocket-catch-pad {
   position: absolute;
