@@ -52,7 +52,8 @@ function WorkspaceDropZone({
 
 function WorkspaceDropPad({
   id,
-  className
+  className,
+  style
 }) {
   const { setNodeRef } = useDroppable({
     id
@@ -62,6 +63,7 @@ function WorkspaceDropPad({
     <div
       ref={setNodeRef}
       className={className}
+      style={style}
     />
   );
 }
@@ -941,6 +943,18 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
  <WorkspaceDropPad
   id="pocketLeft"
   className="ixi-pocket-catch-pad catch-l1"
+  style={{
+    position: "absolute",
+    left: 0,
+    right: "auto",
+    top: "92px",
+    width: "360px",
+    height: "140px",
+    pointerEvents: "auto",
+    zIndex: 1,
+    background: "rgba(0,194,255,.035)",
+    outline: "1px dashed rgba(0,194,255,.16)"
+  }}
 />
   <div className="ixi-pocket-window" />
 
