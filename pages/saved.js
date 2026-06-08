@@ -2009,21 +2009,6 @@ box-shadow: none;
   border-color: rgba(255,255,255,.14);
 }
 
-/* OPEN STATE — flat, visible, no pocket cover yet */
-.ixi-pocket-left.open .ixi-pocket-thumb {
-  transform: translateY(0) rotate(0deg);
-
-  opacity: 1;
-
-  border-color: rgba(255,255,255,.14);
-}
-
-.ixi-pocket-left.open .ixi-pocket-thumb:hover {
-  transform: translateY(-6px) rotate(0deg);
-
-  box-shadow:
-    0 12px 20px rgba(0,0,0,.28);
-}
 
 
 
