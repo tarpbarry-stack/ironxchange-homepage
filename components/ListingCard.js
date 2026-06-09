@@ -351,12 +351,10 @@ return (
   </div>
 </a>
 
-        <div
+               <div
   className="card-board-zone"
-  onPointerDown={startBoardDrag}
-  onPointerMove={moveBoardDrag}
-  onPointerUp={endBoardDrag}
-  onPointerCancel={endBoardDrag}
+  {...attributes}
+  {...listeners}
 >
 
         <div className="keyword-row">
