@@ -110,20 +110,21 @@ return (
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
       {color === "none" && setPocketThumbSize && (
-        <div className="ixi-thumb-size-cluster">
-          {["small", "medium", "large"].map(size => (
-            <button
-              key={size}
-              type="button"
-              className={`ixi-thumb-size-button size-${size} ${
-                pocketThumbSize === size ? "active" : ""
-              }`}
-              onClick={() => setPocketThumbSize(size)}
-              aria-label={`Pocket thumbs ${size}`}
-              title={`Pocket thumbs ${size}`}
-            />
-          ))}
-        </div>
+        <button
+  type="button"
+  className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
+  onClick={() => {
+    if (pocketThumbSize === "small") return setPocketThumbSize("medium");
+    if (pocketThumbSize === "medium") return setPocketThumbSize("large");
+    return setPocketThumbSize("small");
+  }}
+  aria-label={`Pocket thumb size ${pocketThumbSize}`}
+  title={`Pocket thumbs ${pocketThumbSize}`}
+>
+  <span />
+  <span />
+  <span />
+</button>
       )}
 
       <button
@@ -420,46 +421,47 @@ return (
           text-shadow: 0 0 8px rgba(0,194,255,.22);
         }
 
-        ..ixi-thumb-size-cluster {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-
+       .ixi-thumb-size-toggle {
+  width: 20px;
   height: 8px;
 
-  margin-right: 7px;
-  margin-left: 0;
-}
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-.ixi-thumb-size-button {
-  width: 3px;
+  margin-right: 6px;
 
   border: 0;
-  border-radius: 1px;
-
-  background: rgba(0,194,255,.36);
+  background: transparent;
 
   padding: 0;
   cursor: pointer;
+
+  position: relative;
+  top: 1px;
 }
 
-.ixi-thumb-size-button.size-small {
-  height: 2px;
-}
-
-.ixi-thumb-size-button.size-medium {
-  height: 4px;
-}
-
-.ixi-thumb-size-button.size-large {
+.ixi-thumb-size-toggle span {
+  width: 3px;
   height: 8px;
+
+  display: block;
+
+  border-radius: 1px;
+
+  background: rgba(0,194,255,.16);
 }
 
-.ixi-thumb-size-button.active {
-  background: rgba(0,194,255,.95);
+.ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
+  background: rgba(0,194,255,.92);
 
   box-shadow:
-    0 0 6px rgba(0,194,255,.26);
+    0 0 5px rgba(0,194,255,.20);
 }
 
         @media (max-width: 850px) {
