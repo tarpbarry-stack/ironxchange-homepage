@@ -115,7 +115,7 @@ function handleWorkspaceDragEnd(event) {
   }
 
   if (targetPocket === "pocketLeft2") {
-    setLeftPocket2Mode("open");
+    setLeftPocket2Mode("peek");
   }
 
   if (targetPocket === "pocketRight") {
