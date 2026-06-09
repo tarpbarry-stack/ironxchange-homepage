@@ -1226,7 +1226,6 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   }}
 />
   
-  <div className="ixi-pocket-window" />
 
   <div
     className={`ixi-pocket-action-rail left ${
@@ -1311,22 +1310,22 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
           return (
             <div
-              key={`left-pocket-2-thumb-${machineId}`}
-              className="ixi-pocket-thumb"
-              draggable
-              onDragStart={(e) => {
-                e.stopPropagation();
-                handleBoardDragStart(machine, e);
-              }}
-              onDragEnd={handleBoardDragEnd}
-              style={{
-                right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
-                zIndex: index + 1,
-                borderColor: getIxiColorValue(
-                  ixiCardState[String(machineId)]?.color
-                )
-              }}
-            >
+             key={`left-pocket-2-thumb-${machineId}`}
+className="ixi-pocket-thumb edge-stage-thumb"
+draggable
+onDragStart={(e) => {
+  e.stopPropagation();
+  handleBoardDragStart(machine, e);
+}}
+onDragEnd={handleBoardDragEnd}
+style={{
+  right: `${index * 14}px`,
+  zIndex: index + 1,
+  borderColor: getIxiColorValue(
+    ixiCardState[String(machineId)]?.color
+  )
+}}
+>
               {image ? (
                 <img
                   src={typeof image === "string" ? image : image?.url}
@@ -2313,7 +2312,11 @@ box-shadow: none;
   cursor: default !important;
 }
 
-
+.ixi-pocket-thumb.edge-stage-thumb {
+  transform: rotate(-78deg) translateY(18px);
+  transform-origin: right bottom;
+  opacity: .76;
+}
 
 @keyframes ixiPocketPulse {
   0%, 100% {
