@@ -57,8 +57,9 @@ setPocketThumbSize = null,
 isMachineDragging = false
 }) {
   
-  const [railRevealed, setRailRevealed] = useState(false);
-  const [armedPocket, setArmedPocket] = useState(null);
+ const [railRevealed, setRailRevealed] = useState(false);
+const [armedPocket, setArmedPocket] = useState(null);
+const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
@@ -163,10 +164,22 @@ return (
       aria-label="Arm right bottom pocket"
       title="Right Bottom Pocket"
     />
-  </div>
+   </div>
+
+  <button
+  type="button"
+  className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+  onClick={() => setParkBrakeOn(current => !current)}
+  aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+  title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+  >
+    <span className="park-left">(</span>
+    <span className="park-core">P</span>
+    <span className="park-right">)</span>
+  </button>
 </div>
           
-   <div className="ixi-relationship-controls">
+<div className="ixi-relationship-controls">
          
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
@@ -282,6 +295,54 @@ return (
 
   position: relative;
   top: 13px;
+}
+
+
+.ixi-park-brake {
+  position: relative;
+  top: 13px;
+
+  border: 0;
+  background: transparent;
+
+  padding: 0;
+  margin-right: 2px;
+
+  cursor: pointer;
+
+  color: rgba(255,255,255,.10);
+
+  font-size: 11px;
+  font-weight: 950;
+
+  display: flex;
+  align-items: center;
+  gap: 1px;
+
+  transition:
+    color .18s ease,
+    text-shadow .18s ease,
+    transform .18s ease;
+}
+
+.ixi-park-brake.engaged {
+  color: rgba(220,38,38,.92);
+
+  text-shadow:
+    0 0 6px rgba(220,38,38,.28);
+}
+
+.ixi-park-brake:hover {
+  transform: translateY(-1px);
+}
+
+.park-left,
+.park-right {
+  opacity: .75;
+}
+
+.park-core {
+  font-weight: 950;
 }
 
 .ixi-pocket-indicator {
