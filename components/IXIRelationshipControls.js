@@ -756,15 +756,12 @@ export default function IXIRelationshipControls({
     opacity .16s ease;
 }
 
-        .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
-        .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
-        .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
-        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
-        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
-        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
-          background: rgba(255,255,255,.085);
-          box-shadow: none;
-        }
+       .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(3),
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(3),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
 
         .ixi-relationship-shell.revealed .ixi-thumb-size-toggle span {
           background: rgba(255,255,255,.10);
@@ -772,13 +769,13 @@ export default function IXIRelationshipControls({
 
         .ixi-relationship-shell.revealed
           .ixi-thumb-size-toggle.thumb-setting-small
-          span:nth-child(1),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-medium
-          span:nth-child(1),
+          span:nth-child(3),
         .ixi-relationship-shell.revealed
           .ixi-thumb-size-toggle.thumb-setting-medium
           span:nth-child(2),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-medium
+          span:nth-child(3),
         .ixi-relationship-shell.revealed
           .ixi-thumb-size-toggle.thumb-setting-large
           span:nth-child(1),
