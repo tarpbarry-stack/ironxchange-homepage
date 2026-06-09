@@ -1374,13 +1374,15 @@ style={{
       />
     </div>
 
-    <IXIRelationshipControls
-      ixiCardState={ixiCardState}
-      activeColors={ixiColorFilters}
-      onToggleColor={toggleColorFilter}
-      activeOutline={ixiOutlineFilter}
-      onToggleOutline={toggleOutlineFilter}
-    />
+   <IXIRelationshipControls
+  ixiCardState={ixiCardState}
+  activeColors={ixiColorFilters}
+  onToggleColor={toggleColorFilter}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+/>
   </IXIControlSurface>
 </section>
 
