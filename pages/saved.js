@@ -1056,8 +1056,8 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     height: "140px",
     pointerEvents: "auto",
     zIndex: 1,
-    background: "rgba(0,194,255,.035)",
-    outline: "1px dashed rgba(0,194,255,.16)"
+    background: "transparent",
+    outline: "none"
   }}
 />
 
@@ -1221,8 +1221,8 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     height: "calc(100vh - 420px)",
     pointerEvents: "auto",
     zIndex: 999,
-    background: "rgba(0,194,255,.05)",
-    outline: "1px dashed rgba(0,194,255,.22)"
+    background: "transparent",
+    outline: "none"
   }}
 />
   
@@ -1422,8 +1422,8 @@ style={{
     height: "140px",
     pointerEvents: "auto",
     zIndex: 1,
-    background: "rgba(255,196,0,.035)",
-    outline: "1px dashed rgba(255,196,0,.16)"
+     background: "transparent",
+    outline: "none"
   }}
 />
    
@@ -1580,8 +1580,8 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     height: "calc(100vh - 405px)",
     pointerEvents: "auto",
     zIndex: 999,
-    background: "rgba(255,196,0,.045)",
-    outline: "1px dashed rgba(255,196,0,.20)"
+    background: "transparent",
+    outline: "none"
   }}
 />
 
@@ -2410,8 +2410,8 @@ box-shadow: none;
 
   pointer-events: auto;
 
-  background: rgba(0,194,255,.035);
-  outline: 1px dashed rgba(0,194,255,.16);
+  background: transparent;
+outline: none;
 }
 
 /* R1 local catch only */
@@ -2425,8 +2425,8 @@ box-shadow: none;
 
   pointer-events: auto;
 
-  background: rgba(255,196,0,.035);
-  outline: 1px dashed rgba(255,196,0,.16);
+  background: transparent;
+outline: none;
 }
 
 /* L2 screen-left lower catch lane only */
@@ -2443,8 +2443,8 @@ box-shadow: none;
   pointer-events: auto;
   z-index: 999;
 
-  background: rgba(0,194,255,.05);
-  outline: 1px dashed rgba(0,194,255,.22);
+ background: transparent;
+outline: none;
 }
 
 /* R2 screen-right lower catch lane only */
@@ -2461,8 +2461,8 @@ box-shadow: none;
   pointer-events: auto;
   z-index: 999;
 
-  background: rgba(255,196,0,.045);
-  outline: 1px dashed rgba(255,196,0,.20);
+  background: transparent;
+outline: none;
 }
 
 
