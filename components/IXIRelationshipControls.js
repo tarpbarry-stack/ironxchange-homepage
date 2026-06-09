@@ -220,8 +220,10 @@ return (
 .ixi-pocket-indicator-stack {
   display: grid;
   gap: 20px;
-}
 
+  position: relative;
+  top: 15px;
+}
 .ixi-pocket-indicator {
   width: 9px;
   height: 2px;
