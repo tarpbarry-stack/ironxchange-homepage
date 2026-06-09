@@ -207,15 +207,13 @@ return (
 
       .ixi-pocket-indicator-row {
   width: 100%;
-  height: 0;
+  height: 22px;
 
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
 
-  margin: 0 auto;
-  position: relative;
-  top: 40px;
+  margin: 8px auto -6px;
 
   pointer-events: none;
 }
