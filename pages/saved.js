@@ -2451,10 +2451,10 @@ box-shadow: none;
 
   right: 0;
   left: auto;
-  top: 405px;
+  top: 420px;
 
   width: 150px;
-  height: calc(100vh - 405px);
+  height: calc(100vh - 420px);
 
   pointer-events: auto;
   z-index: 999;
@@ -2462,7 +2462,6 @@ box-shadow: none;
   background: rgba(255,196,0,.045);
   outline: 1px dashed rgba(255,196,0,.20);
 }
-
 
 
 /* ========================= */
