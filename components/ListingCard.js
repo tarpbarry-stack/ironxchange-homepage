@@ -203,15 +203,29 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
-    const {
+      const {
     attributes,
     listeners,
-    setNodeRef,
+    setNodeRef: setDraggableNodeRef,
     transform,
     isDragging
   } = useDraggable({
     id
   });
+
+  const {
+    setNodeRef: setDroppableNodeRef
+  } = useDroppable({
+    id
+  });
+
+  function setCardNodeRef(node) {
+    setDraggableNodeRef(node);
+
+    if (useDndDrag) {
+      setDroppableNodeRef(node);
+    }
+  }
 
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
@@ -276,7 +290,7 @@ function handleCardClick() {
 
 return (
   <div
-    ref={setNodeRef}
+    ref={setCardNodeRef}
     data-listing-card-id={id}
     className={`card board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
