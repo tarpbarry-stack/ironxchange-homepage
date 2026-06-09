@@ -1036,7 +1036,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     left: 0,
     right: "auto",
     top: "12px",
-    width: "360px",
+    width: "340px",
     height: "140px",
     pointerEvents: "auto",
     zIndex: 1,
