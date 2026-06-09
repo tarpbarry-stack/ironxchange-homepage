@@ -119,23 +119,7 @@ return (
 </div>
           
    <div className="ixi-relationship-controls">
-          {setPocketThumbSize && (
-  <button
-    type="button"
-    className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
-    onClick={() => {
-      if (pocketThumbSize === "small") return setPocketThumbSize("medium");
-      if (pocketThumbSize === "medium") return setPocketThumbSize("large");
-      return setPocketThumbSize("small");
-    }}
-    aria-label={`Pocket thumb size ${pocketThumbSize}`}
-    title={`Pocket thumbs ${pocketThumbSize}`}
-  >
-    <span />
-    <span />
-    <span />
-  </button>
-)}
+         
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
       <button
@@ -156,6 +140,24 @@ return (
       aria-label={`Filter outline ${outline}`}
     />
   ))}
+{setPocketThumbSize && (
+  <button
+    type="button"
+    className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
+    onClick={() => {
+      if (pocketThumbSize === "small") return setPocketThumbSize("medium");
+      if (pocketThumbSize === "medium") return setPocketThumbSize("large");
+      return setPocketThumbSize("small");
+    }}
+    aria-label={`Pocket thumb size ${pocketThumbSize}`}
+    title={`Pocket thumbs ${pocketThumbSize}`}
+  >
+    <span />
+    <span />
+    <span />
+  </button>
+)}
+
 </div>
 
       {hasAnyRelationship && (
