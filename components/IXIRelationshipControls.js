@@ -456,7 +456,7 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-pocket-indicator {
-          width: 14px;
+          width: 10px;
           height: 4px;
           border: 0;
           border-radius: 1px;
