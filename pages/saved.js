@@ -2855,9 +2855,19 @@ rgba(8,8,8,.72);
 position: relative;
 }
 
-.active-stack-dropzone {
-min-height: 145px;
-align-items: start;
+.active-stack-dropzone.stack-horizontal {
+display: flex;
+flex-wrap: nowrap;
+justify-content: center;
+
+gap: 18px;
+
+overflow-x: auto;
+overflow-y: hidden;
+
+padding-bottom: 8px;
+
+scrollbar-width: thin;
 }
 
 /* ========================= */
@@ -2961,9 +2971,9 @@ box-shadow:
 
 .active-stack-save {
 position: absolute;
-right: 8px;
+left: 50%;
 top: 8px;
-
+transform: translateX(-50%);
 width: 18px;
 height: 18px;
 
@@ -2990,9 +3000,9 @@ box-shadow:
 .active-stack-layout-toggle {
 position: absolute;
 
-right: 8px;
+left: 50%;
 top: 36px;
-
+transform: translateX(-50%);
 width: 18px;
 height: 8px;
 
