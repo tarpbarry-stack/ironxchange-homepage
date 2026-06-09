@@ -2318,7 +2318,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-l2 {
-  top: -28px;
+  top: -27px;
 }
 
 @keyframes ixiPocketPulse {
