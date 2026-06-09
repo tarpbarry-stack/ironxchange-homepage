@@ -67,6 +67,8 @@ isMachineDragging = false
     isRealColor(state?.color) || isRealOutline(state?.outline)
   );
 
+  const machineControlsHinted = hasAnyRelationship || isMachineDragging;
+
  function toggleRailReveal() {
   setRailRevealed(current => !current);
 }
@@ -101,10 +103,12 @@ function getColorStage(color) {
 
 return (
   <div
-    className={`ixi-relationship-shell ${
-  railRevealed || hasAnyRelationship || isMachineDragging ? "revealed" : ""
-} ${className}`}
-  >
+  className={`ixi-relationship-shell ${
+    railRevealed ? "revealed" : ""
+  } ${
+    machineControlsHinted ? "machine-hinted" : ""
+  } ${className}`}
+>
     <div className="ixi-relationship-head">
       <span>IXI Machine Controls™</span>
 
@@ -243,6 +247,10 @@ return (
           letter-spacing: .65px;
 
           transition: opacity .18s ease;
+        }
+
+        .ixi-relationship-shell.machine-hinted .ixi-relationship-head span {
+        opacity: .42;
         }
 
         .ixi-relationship-shell.revealed .ixi-relationship-head span {
