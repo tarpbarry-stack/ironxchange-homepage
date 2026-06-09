@@ -1021,7 +1021,6 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     outline: "1px dashed rgba(0,194,255,.16)"
   }}
 />
-  <div className="ixi-pocket-window" />
 
 
 <div
