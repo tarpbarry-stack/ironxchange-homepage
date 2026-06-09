@@ -449,7 +449,9 @@ return (
 
   border-radius: 1px;
 
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.10);
+
+  border: 1px solid rgba(255,255,255,.22);
 }
 
 .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
@@ -458,7 +460,9 @@ return (
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
-  background: rgba(255,255,255,.28);
+  background: rgba(255,255,255,.30);
+
+  border: 1px solid rgba(255,255,255,.42);
 
   box-shadow: none;
 }
