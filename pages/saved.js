@@ -25,7 +25,7 @@ import IXIControlSurface from "../components/IXIControlSurface";
 
 import {
   fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
+  getSavedListingIdsFromUser,{visibleSavedListings.map(item => {
   filterSavedListings,
   toggleSavedListing
 } from "../lib/savedListings";
@@ -1779,6 +1779,8 @@ onBoardDragEnd={() => {}}
                 onBoardDragStart={handleBoardDragStart}
                 onBoardDragOver={handleBoardDragOver}
                 onBoardDragEnd={handleBoardDragEnd}
+
+                useDndDrag={true}
               />
             );
           })}
