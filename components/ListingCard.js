@@ -280,11 +280,17 @@ return (
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
     } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
-    style={{
-    transform: isBoardDragging
-      ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
-      : undefined,
-    zIndex: isBoardDragging ? 50 : undefined
+   style={{
+    transform: useDndDrag && transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0) scale(1.015)`
+      : isBoardDragging
+        ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+        : undefined,
+    zIndex: useDndDrag && isDragging
+      ? 9999
+      : isBoardDragging
+        ? 50
+        : undefined
   }}
 >
     
