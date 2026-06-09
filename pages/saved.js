@@ -88,22 +88,24 @@ function handleWorkspaceDragEnd(event) {
     return;
   }
 
-    const pocketTargets = [
-    "pocketLeft",
-    "pocketLeft2",
-    "pocketRight",
-    "pocketRight2"
-  ];
+     const pocketTargetMap = {
+    pocketLeft: "pocketLeft",
+    pocketLeft2: "pocketLeft2",
+    pocketLeft2Top: "pocketLeft2",
+    pocketRight: "pocketRight",
+    pocketRight2: "pocketRight2",
+    pocketRight2Top: "pocketRight2"
+  };
 
   const stackTargets = [
     "stackTop",
     "stackBottom"
   ];
 
-   if (pocketTargets.includes(String(overId))) {
+    if (pocketTargetMap[String(overId)]) {
     moveMachineToContainer(
       String(dragId),
-      String(overId)
+      pocketTargetMap[String(overId)]
     );
 
     clearMachineDragState();
