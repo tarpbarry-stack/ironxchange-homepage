@@ -2414,7 +2414,7 @@ box-shadow: none;
 
 /* R1 local catch only */
 .ixi-pocket-catch-pad.catch-r1 {
-  right: 0;
+  right: 20;
   left: auto;
   top: 92px;
 
