@@ -1707,8 +1707,9 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
               
 <section className="active-stack-zone">
   {["top", "bottom"].map(stackKey => (
-    <div
+      <WorkspaceDropZone
   key={stackKey}
+  id={stackKey === "top" ? "stackTop" : "stackBottom"}
   data-active-stack={stackKey}
   className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
       onDragOver={(e) => e.preventDefault()}
@@ -1735,17 +1736,11 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       />
 
       {activeStacksOpen[stackKey] && (
-        <div
+               <WorkspaceDropZone
+          id={stackKey === "top" ? "stackTop" : "stackBottom"}
           className={`active-stack-tray ${
   activeStackHover === stackKey ? "stack-armed" : ""
 }`}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-
-            const droppedId = getDroppedMachineId(e);
-            addListingToActiveStack(stackKey, droppedId);
-          }}
         >
           <div
   className={`active-stack-dropzone ${
@@ -1818,9 +1813,9 @@ onBoardDragEnd={() => {}}
             className="active-stack-save"
             onClick={() => saveActiveStack(stackKey)}
           />
-        </div>
+               </WorkspaceDropZone>
       )}
-    </div>
+      </WorkspaceDropZone>
   ))}
 </section>
               
