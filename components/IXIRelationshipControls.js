@@ -251,14 +251,18 @@ export default function IXIRelationshipControls({
           margin: 14px auto 0;
         }
 
-        .ixi-relationship-head {
-          height: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin: -3 auto 4px;
-        }
+      .ixi-relationship-head {
+  height: 10px;
 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  position: relative;
+  top: -3px;
+
+  margin: 0 auto 4px;
+}
         .ixi-relationship-head span {
           opacity: 0;
           color: rgba(255,196,0,.82);
