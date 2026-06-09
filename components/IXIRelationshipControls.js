@@ -245,11 +245,20 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-        .ixi-relationship-shell {
-          width: 100%;
-          max-width: 100%;
-          margin: 14px auto 0;
-        }
+       .ixi-relationship-shell {
+  width: 100%;
+  max-width: 100%;
+  margin: 14px auto 0;
+
+  overflow: hidden;
+
+  --ixi-control-gap: clamp(6px, 1vw, 12px);
+  --ixi-square-size: clamp(9px, 1vw, 12px);
+  --ixi-square-font: clamp(6px, .72vw, 8px);
+  --ixi-pocket-width: clamp(10px, 1.15vw, 14px);
+  --ixi-pocket-height: clamp(2px, .32vw, 4px);
+  --ixi-thumb-width: clamp(14px, 1.6vw, 18px);
+}
 
     .ixi-relationship-head {
   height: 10px;
@@ -300,13 +309,13 @@ export default function IXIRelationshipControls({
   pointer-events: none;
 }
 
-        .ixi-pocket-left-cluster,
-        .ixi-pocket-right-cluster {
-          display: flex;
-          align-items: flex-end;
-          gap: 12px;
-          position: relative;
-        }
+     .ixi-pocket-left-cluster,
+.ixi-pocket-right-cluster {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ixi-control-gap);
+  position: relative;
+}
 
         .ixi-pocket-indicator-stack {
           display: grid;
@@ -319,8 +328,8 @@ export default function IXIRelationshipControls({
           position: relative;
           top: 13px;
           left: 10px;
-          width: 12px;
-          height: 12px;
+          width: var(--ixi-square-size);
+          height: var(--ixi-square-size);
           border: 1px solid rgba(255,255,255,0);
           background: transparent;
           color: rgba(255,255,255,0);
@@ -331,7 +340,7 @@ export default function IXIRelationshipControls({
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 8px;
+          font-size: var(--ixi-square-font);
           font-weight: 950;
           line-height: 1;
           transition:
@@ -456,8 +465,8 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-pocket-indicator {
-          width: 10px;
-          height: 4px;
+          width: var(--ixi-pocket-width);
+          height: var(--ixi-pocket-height);
           border: 0;
           border-radius: 1px;
           background: rgba(255,255,255,.045);
@@ -741,7 +750,7 @@ export default function IXIRelationshipControls({
 }
 
 .ixi-thumb-size-toggle span {
-  width: 18px;
+   width: var(--ixi-thumb-width);
   height: 2px;
 
   display: block;
