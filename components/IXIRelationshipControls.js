@@ -122,61 +122,73 @@ return (
     </div>
 
 <div className="ixi-pocket-indicator-row">
-  <div className="ixi-pocket-indicator-stack left">
+  <div className="ixi-pocket-left-cluster">
     <button
       type="button"
-      className={`ixi-pocket-indicator pocket-left-top ${
-        armedPocket === "LT" ? "armed" : ""
-      }`}
-      onClick={() => togglePocketArm("LT")}
-      aria-label="Arm left top pocket"
-      title="Left Top Pocket"
-    />
+      className="ixi-theater-button"
+      aria-label="IXI Theater"
+      title="IXI Theater"
+    >
+      T
+    </button>
 
-    <button
-      type="button"
-      className={`ixi-pocket-indicator pocket-left-bottom ${
-        armedPocket === "LB" ? "armed" : ""
-      }`}
-      onClick={() => togglePocketArm("LB")}
-      aria-label="Arm left bottom pocket"
-      title="Left Bottom Pocket"
-    />
+    <div className="ixi-pocket-indicator-stack left">
+      <button
+        type="button"
+        className={`ixi-pocket-indicator pocket-left-top ${
+          armedPocket === "LT" ? "armed" : ""
+        }`}
+        onClick={() => togglePocketArm("LT")}
+        aria-label="Arm left top pocket"
+        title="Left Top Pocket"
+      />
+
+      <button
+        type="button"
+        className={`ixi-pocket-indicator pocket-left-bottom ${
+          armedPocket === "LB" ? "armed" : ""
+        }`}
+        onClick={() => togglePocketArm("LB")}
+        aria-label="Arm left bottom pocket"
+        title="Left Bottom Pocket"
+      />
+    </div>
   </div>
 
   <div className="ixi-pocket-right-cluster">
-  <button
-    type="button"
-    className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-    onClick={() => setParkBrakeOn(current => !current)}
-    aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
-    title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
-  >
-    <span className="park-left">(</span>
-    <span className="park-core">P</span>
-    <span className="park-right">)</span>
-  </button>
-
-  <div className="ixi-pocket-indicator-stack right">
     <button
       type="button"
-      className={`ixi-pocket-indicator pocket-right-top ${
-        armedPocket === "RT" ? "armed" : ""
-      }`}
-      onClick={() => togglePocketArm("RT")}
-      aria-label="Arm right top pocket"
-      title="Right Top Pocket"
-    />
+      className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+      onClick={() => setParkBrakeOn(current => !current)}
+      aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+      title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+    >
+      <span className="park-left">(</span>
+      <span className="park-core">P</span>
+      <span className="park-right">)</span>
+    </button>
 
-    <button
-      type="button"
-      className={`ixi-pocket-indicator pocket-right-bottom ${
-        armedPocket === "RB" ? "armed" : ""
-      }`}
-      onClick={() => togglePocketArm("RB")}
-      aria-label="Arm right bottom pocket"
-      title="Right Bottom Pocket"
-    />
+    <div className="ixi-pocket-indicator-stack right">
+      <button
+        type="button"
+        className={`ixi-pocket-indicator pocket-right-top ${
+          armedPocket === "RT" ? "armed" : ""
+        }`}
+        onClick={() => togglePocketArm("RT")}
+        aria-label="Arm right top pocket"
+        title="Right Top Pocket"
+      />
+
+      <button
+        type="button"
+        className={`ixi-pocket-indicator pocket-right-bottom ${
+          armedPocket === "RB" ? "armed" : ""
+        }`}
+        onClick={() => togglePocketArm("RB")}
+        aria-label="Arm right bottom pocket"
+        title="Right Bottom Pocket"
+      />
+    </div>
   </div>
 </div>
           
@@ -298,6 +310,15 @@ return (
   top: 13px;
 }
 
+.ixi-pocket-right-cluster {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+
+  position: relative;
+}
+
+.ixi-pocket-left-cluster,
 .ixi-pocket-right-cluster {
   display: flex;
   align-items: flex-end;
