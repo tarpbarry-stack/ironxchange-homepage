@@ -139,7 +139,6 @@ export default function IXIRelationshipControls({
           >
             <span>T</span>
           </button>
-        </div>
 
 <button
   type="button"
@@ -149,7 +148,8 @@ export default function IXIRelationshipControls({
 >
   <span>A</span>
 </button>
-
+  </div>
+    
         <div className="ixi-pocket-right-cluster">
           <button
             type="button"
@@ -341,8 +341,7 @@ export default function IXIRelationshipControls({
         .ixi-active-stack-button {
   position: relative;
   top: 18px;
-  margin-left: 12px;
-
+ 
   width: 12px;
   height: 12px;
 
