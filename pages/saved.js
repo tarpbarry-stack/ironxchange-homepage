@@ -2418,7 +2418,7 @@ box-shadow: none;
   left: auto;
   top: 92px;
 
-  width: 360px;
+  width: 340px;
   height: 140px;
 
   pointer-events: auto;
