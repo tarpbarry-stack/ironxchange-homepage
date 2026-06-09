@@ -88,11 +88,16 @@ function handleWorkspaceDragEnd(event) {
     return;
   }
 
-  const pocketTargets = [
+    const pocketTargets = [
     "pocketLeft",
     "pocketLeft2",
     "pocketRight",
     "pocketRight2"
+  ];
+
+  const stackTargets = [
+    "stackTop",
+    "stackBottom"
   ];
 
    if (pocketTargets.includes(String(overId))) {
@@ -100,6 +105,22 @@ function handleWorkspaceDragEnd(event) {
       String(dragId),
       String(overId)
     );
+
+    clearMachineDragState();
+    return;
+  }
+
+    if (stackTargets.includes(String(overId))) {
+    moveMachineToContainer(
+      String(dragId),
+      String(overId)
+    );
+
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: String(overId) === "stackTop" ? true : current.top,
+      bottom: String(overId) === "stackBottom" ? true : current.bottom
+    }));
 
     clearMachineDragState();
     return;
