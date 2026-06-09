@@ -352,12 +352,18 @@ return (
   </div>
 </a>
 
-                      <div
+                             <div
   className="card-board-zone"
-  onPointerDown={startBoardDrag}
-  onPointerMove={moveBoardDrag}
-  onPointerUp={endBoardDrag}
-  onPointerCancel={endBoardDrag}
+  {...(useDndDrag ? attributes : {})}
+  {...(useDndDrag ? listeners : {})}
+  {...(!useDndDrag
+    ? {
+        onPointerDown: startBoardDrag,
+        onPointerMove: moveBoardDrag,
+        onPointerUp: endBoardDrag,
+        onPointerCancel: endBoardDrag
+      }
+    : {})}
 >
 
         <div className="keyword-row">
