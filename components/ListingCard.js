@@ -1,5 +1,8 @@
 import { useState, useRef } from "react";
-import { useDraggable } from "@dnd-kit/core";
+import {
+  useDraggable,
+  useDroppable
+} from "@dnd-kit/core";
 
 import { captureIXEvent } from "../lib/posthog";
 
