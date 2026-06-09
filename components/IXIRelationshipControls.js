@@ -251,15 +251,12 @@ export default function IXIRelationshipControls({
           margin: 14px auto 0;
         }
 
-      .ixi-relationship-head {
+    .ixi-relationship-head {
   height: 10px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  position: relative;
-  top: -3px;
 
   margin: 0 auto 4px;
 }
