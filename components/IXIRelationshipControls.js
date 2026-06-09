@@ -305,6 +305,7 @@ export default function IXIRelationshipControls({
         .ixi-theater-button {
           position: relative;
           top: 13px;
+          left: 10px;
           width: 12px;
           height: 12px;
           border: 1px solid rgba(255,255,255,0);
@@ -344,6 +345,7 @@ export default function IXIRelationshipControls({
         .ixi-park-brake {
           position: relative;
           top: 13px;
+          right: 10px;          
           border: 0;
           background: transparent;
           padding: 0;
