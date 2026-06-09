@@ -2312,12 +2312,6 @@ box-shadow: none;
   cursor: default !important;
 }
 
-.ixi-pocket-thumb.edge-stage-thumb {
-  transform: rotate(-78deg) translateY(18px);
-  transform-origin: right bottom;
-  opacity: .76;
-}
-
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
@@ -2547,13 +2541,6 @@ box-shadow: none;
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.ixi-pocket-l2 .ixi-pocket-thumbs {
-  top: 42px;
-  height: 130px;
-  overflow: visible;
-  z-index: 90;
 }
 
 .ixi-pocket-thumb span {
