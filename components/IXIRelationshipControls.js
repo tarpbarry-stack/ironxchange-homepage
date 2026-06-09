@@ -455,11 +455,11 @@ return (
 
   transform: translateY(-1px);
 
-  border-color: rgba(255,196,0,.62);
+  border-color: rgba(255,255,255,.18);
 
   box-shadow:
-    0 0 0 1px rgba(255,196,0,.34),
-    0 0 12px rgba(255,196,0,.26);
+    0 0 0 1px rgba(255,255,255,.08),
+    0 0 10px rgba(255,255,255,.08);
 }
 
         .ixi-relationship-outline.stage-dead {
@@ -500,15 +500,14 @@ return (
 }
 
         .ixi-relationship-outline.stage-selected {
-          opacity: 1;
+  opacity: 1;
 
-          border-color: rgba(255,196,0,.46);
+  border-color: rgba(255,255,255,.18);
 
-          box-shadow:
-            0 0 0 1px rgba(255,196,0,.22),
-            0 0 18px rgba(255,196,0,.28);
-        }
-
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08),
+    0 0 10px rgba(255,255,255,.08);
+}
         .ixi-relationship-outline.stage-selected::after {
           background: rgba(255,255,255,.82);
         }
