@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 const COLOR_CONTROLS = [
   "none",
@@ -51,8 +51,11 @@ export default function IXIRelationshipControls({
   onToggleColor = () => {},
   activeOutline = "all",
   onToggleOutline = () => {},
-  className = ""
+  className = "",
+  pocketThumbSize = "medium",
+  setPocketThumbSize = null
 }) {
+  
   const [railRevealed, setRailRevealed] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
@@ -103,16 +106,33 @@ export default function IXIRelationshipControls({
         />
       </div>
 
-      <div className="ixi-relationship-controls">
-        {COLOR_CONTROLS.map(color => (
+    {COLOR_CONTROLS.map(color => (
+  <React.Fragment key={color}>
+    <button
+      type="button"
+      className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
+      onClick={() => onToggleColor(color)}
+      aria-label={`Filter ${color}`}
+    />
+
+    {color === "none" && setPocketThumbSize && (
+      <div className="ixi-thumb-size-cluster">
+        {["small", "medium", "large"].map(size => (
           <button
-            key={color}
+            key={size}
             type="button"
-            className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-            onClick={() => onToggleColor(color)}
-            aria-label={`Filter ${color}`}
+            className={`ixi-thumb-size-button size-${size} ${
+              pocketThumbSize === size ? "active" : ""
+            }`}
+            onClick={() => setPocketThumbSize(size)}
+            aria-label={`Pocket thumbs ${size}`}
+            title={`Pocket thumbs ${size}`}
           />
         ))}
+      </div>
+    )}
+  </React.Fragment>
+))}
 
         {OUTLINE_CONTROLS.map(outline => (
           <button
@@ -398,6 +418,45 @@ export default function IXIRelationshipControls({
           color: rgba(0,194,255,.95);
           text-shadow: 0 0 8px rgba(0,194,255,.22);
         }
+
+        .ixi-thumb-size-cluster {
+  display: grid;
+  grid-template-columns: repeat(3, 8px);
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  margin-left: -6px;
+  margin-right: -2px;
+}
+
+.ixi-thumb-size-button {
+  border: 1px solid rgba(255,196,0,.30);
+  border-radius: 2px;
+  background: rgba(255,196,0,.18);
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-thumb-size-button.size-small {
+  width: 6px;
+  height: 6px;
+}
+
+.ixi-thumb-size-button.size-medium {
+  width: 8px;
+  height: 8px;
+}
+
+.ixi-thumb-size-button.size-large {
+  width: 10px;
+  height: 10px;
+}
+
+.ixi-thumb-size-button.active {
+  background: rgba(255,196,0,.95);
+  border-color: rgba(255,196,0,.98);
+  box-shadow: 0 0 7px rgba(255,196,0,.30);
+}
 
         @media (max-width: 850px) {
           .ixi-relationship-shell {
