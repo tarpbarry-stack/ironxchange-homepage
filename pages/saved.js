@@ -2549,6 +2549,20 @@ box-shadow: none;
   object-fit: cover;
 }
 
+.ixi-pocket-l2 .ixi-pocket-thumb.edge-stage-thumb {
+  transform: rotate(-78deg) translateY(18px) !important;
+  transform-origin: right bottom !important;
+  opacity: .86 !important;
+  z-index: 80;
+}
+
+.ixi-pocket-l2 .ixi-pocket-thumbs {
+  top: 42px;
+  height: 130px;
+  overflow: visible;
+  z-index: 90;
+}
+
 .ixi-pocket-thumb span {
   display: block;
   padding: 5px;
