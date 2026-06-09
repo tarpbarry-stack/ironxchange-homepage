@@ -106,16 +106,9 @@ return (
       />
     </div>
 
-    <div className="ixi-relationship-controls">
+   <div className="ixi-relationship-controls">
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
-      <button
-        type="button"
-        className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-        onClick={() => onToggleColor(color)}
-        aria-label={`Filter ${color}`}
-      />
-
       {color === "none" && setPocketThumbSize && (
         <div className="ixi-thumb-size-cluster">
           {["small", "medium", "large"].map(size => (
@@ -132,6 +125,13 @@ return (
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
+        onClick={() => onToggleColor(color)}
+        aria-label={`Filter ${color}`}
+      />
     </div>
   ))}
 
@@ -439,20 +439,19 @@ return (
 }
 
 .ixi-thumb-size-button.size-small {
-  width: 6px;
-  height: 6px;
+  width: 2px;
+  height: 2px;
 }
 
 .ixi-thumb-size-button.size-medium {
-  width: 8px;
-  height: 8px;
+  width: 3px;
+  height: 2px;
 }
 
 .ixi-thumb-size-button.size-large {
-  width: 10px;
-  height: 10px;
+  width: 4px;
+  height: 2px;
 }
-
 .ixi-thumb-size-button.active {
   background: rgba(255,196,0,.95);
   border-color: rgba(255,196,0,.98);
