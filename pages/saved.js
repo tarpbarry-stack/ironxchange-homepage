@@ -2798,124 +2798,127 @@ box-shadow: none;
 }
 
 .active-stack {
-width: 100%;
+  width: 100%;
 }
 
 .active-stack-dash {
-width: 10px;
-height: 8px;
+  width: 10px;
+  height: 8px;
 
-display: block;
+  display: block;
 
-border: 0;
-border-bottom: 3px solid rgba(255,255,255,.12);
+  border: 0;
+  border-bottom: 3px solid rgba(255,255,255,.12);
 
-background: transparent;
+  background: transparent;
 
-cursor: pointer;
-padding: 0;
-margin: 0;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
 }
 
 .active-stack-dash:hover {
-border-bottom-color: rgba(255,196,0,.38);
-box-shadow: 0 3px 8px rgba(255,196,0,.10);
+  border-bottom-color: rgba(255,196,0,.38);
+  box-shadow: 0 3px 8px rgba(255,196,0,.10);
 }
 
 .active-stack.open .active-stack-dash {
-border-bottom-color: rgba(255,196,0,.26);
-}
-
-.active-stack.open .active-stack-tray {
-  border-color: rgba(255,255,255,.14);
-
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.035),
-    0 0 14px rgba(255,255,255,.045);
+  border-bottom-color: rgba(255,196,0,.42);
 }
 
 .active-stack-tray {
-width: 100%;
-min-height: 170px;
+  width: 100%;
+  min-height: 170px;
 
-margin: 8px 0;
-padding: 12px 44px 12px 12px;
+  margin: 8px 0;
+  padding: 12px 44px 12px 12px;
 
-border: 1px dashed rgba(255,255,255,.075);
-border-radius: 10px;
+  position: relative;
 
-background:
-linear-gradient(
-180deg,
-rgba(255,255,255,.018),
-rgba(255,255,255,0)
-),
-rgba(8,8,8,.72);
+  border: 1px dashed rgba(255,255,255,.075);
+  border-radius: 10px;
 
-position: relative;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    rgba(8,8,8,.72);
+}
+
+.active-stack.open .active-stack-tray {
+  border-color: rgba(0,194,255,.38);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.035),
+      rgba(0,194,255,.01)
+    ),
+    rgba(8,8,8,.78);
+
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.10),
+    0 0 18px rgba(0,194,255,.10);
+}
+
+.active-stack-tray.stack-armed {
+  border-color: rgba(0,194,255,.62);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.06),
+      rgba(0,194,255,.015)
+    ),
+    rgba(8,8,8,.84);
+
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.16),
+    0 0 24px rgba(0,194,255,.14);
+}
+
+.active-stack-dropzone {
+  min-height: 145px;
+  align-items: start;
 }
 
 .active-stack-dropzone.stack-horizontal {
-display: flex;
-flex-wrap: nowrap;
-justify-content: center;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
 
-gap: 18px;
+  gap: 18px;
 
-overflow-x: auto;
-overflow-y: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 
-padding-bottom: 8px;
+  padding-bottom: 8px;
 
-scrollbar-width: thin;
-}
-
-/* ========================= */
-/* HORIZONTAL STACK MODE     */
-/* ========================= */
-
-.active-stack-dropzone.stack-horizontal {
-display: flex;
-flex-wrap: nowrap;
-
-gap: 18px;
-
-overflow-x: auto;
-overflow-y: hidden;
-
-padding-bottom: 8px;
-
-scrollbar-width: thin;
+  scrollbar-width: thin;
 }
 
 .active-stack-dropzone.stack-horizontal .active-stack-card {
-flex: 0 0 285px;
-width: 285px;
-min-width: 285px;
+  flex: 0 0 285px;
+  width: 285px;
+  min-width: 285px;
 }
 
-/* ========================= */
-/* VERTICAL STACK MODE       */
-/* ========================= */
-
 .active-stack-dropzone.stack-vertical {
-display: grid;
+  display: grid;
 
-grid-template-columns:
-repeat(auto-fill, minmax(250px, 300px));
+  grid-template-columns:
+    repeat(auto-fill, minmax(250px, 300px));
 
-gap: 18px;
+  gap: 18px;
 
-justify-content: start;
+  justify-content: center;
 }
 
 .active-stack-dropzone.stack-vertical .active-stack-card {
-width: 100%;
+  width: 100%;
 }
-
-/* ========================= */
-/* STACK CARD                */
-/* ========================= */
 
 .active-stack-card {
   position: relative;
@@ -2945,81 +2948,56 @@ width: 100%;
   transform: translateX(8px);
 }
 
-/* ========================= */
-/* STACK ARMED STATE         */
-/* ========================= */
-
-.active-stack-tray.stack-armed {
-border-color: rgba(0,194,255,.42);
-
-background:
-linear-gradient(
-180deg,
-rgba(0,194,255,.045),
-rgba(0,194,255,.01)
-),
-rgba(8,8,8,.82);
-
-box-shadow:
-0 0 0 1px rgba(0,194,255,.08),
-0 0 18px rgba(0,194,255,.08);
-}
-
-/* ========================= */
-/* SAVE DASH                 */
-/* ========================= */
-
 .active-stack-save {
-position: absolute;
-left: 50%;
-top: 8px;
-transform: translateX(-50%);
-width: 18px;
-height: 18px;
+  position: absolute;
+  left: 50%;
+  top: 8px;
 
-border: 1px solid rgba(255,196,0,.26);
-border-radius: 50%;
+  width: 18px;
+  height: 18px;
 
-background: rgba(255,196,0,.045);
+  transform: translateX(-50%);
 
-cursor: pointer;
-padding: 0;
+  border: 1px solid rgba(255,196,0,.26);
+  border-radius: 50%;
+
+  background: rgba(255,196,0,.045);
+
+  cursor: pointer;
+  padding: 0;
 }
 
 .active-stack-save:hover {
-border-color: rgba(255,196,0,.65);
+  border-color: rgba(255,196,0,.65);
 
-box-shadow:
-0 0 10px rgba(255,196,0,.16);
+  box-shadow:
+    0 0 10px rgba(255,196,0,.16);
 }
 
-/* ========================= */
-/* LAYOUT TOGGLE DASH        */
-/* ========================= */
-
 .active-stack-layout-toggle {
-position: absolute;
+  position: absolute;
+  left: 50%;
+  top: 36px;
 
-left: 50%;
-top: 36px;
-transform: translateX(-50%);
-width: 18px;
-height: 8px;
+  width: 18px;
+  height: 8px;
 
-border: 0;
-border-bottom: 3px solid rgba(0,194,255,.45);
+  transform: translateX(-50%);
 
-background: transparent;
+  border: 0;
+  border-bottom: 3px solid rgba(0,194,255,.45);
 
-cursor: pointer;
-padding: 0;
+  background: transparent;
+
+  cursor: pointer;
+  padding: 0;
 }
 
 .active-stack-layout-toggle:hover {
-border-bottom-color: rgba(0,194,255,.9);
+  border-bottom-color: rgba(0,194,255,.9);
 
-box-shadow:
-0 4px 10px rgba(0,194,255,.14);
+  box-shadow:
+    0 4px 10px rgba(0,194,255,.14);
 }
 
         .cards {
