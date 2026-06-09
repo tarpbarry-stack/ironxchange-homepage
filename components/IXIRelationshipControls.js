@@ -107,26 +107,25 @@ return (
     </div>
 
    <div className="ixi-relationship-controls">
+          {setPocketThumbSize && (
+  <button
+    type="button"
+    className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
+    onClick={() => {
+      if (pocketThumbSize === "small") return setPocketThumbSize("medium");
+      if (pocketThumbSize === "medium") return setPocketThumbSize("large");
+      return setPocketThumbSize("small");
+    }}
+    aria-label={`Pocket thumb size ${pocketThumbSize}`}
+    title={`Pocket thumbs ${pocketThumbSize}`}
+  >
+    <span />
+    <span />
+    <span />
+  </button>
+)}
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
-      {color === "none" && setPocketThumbSize && (
-        <button
-  type="button"
-  className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
-  onClick={() => {
-    if (pocketThumbSize === "small") return setPocketThumbSize("medium");
-    if (pocketThumbSize === "medium") return setPocketThumbSize("large");
-    return setPocketThumbSize("small");
-  }}
-  aria-label={`Pocket thumb size ${pocketThumbSize}`}
-  title={`Pocket thumbs ${pocketThumbSize}`}
->
-  <span />
-  <span />
-  <span />
-</button>
-      )}
-
       <button
         type="button"
         className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
@@ -464,6 +463,13 @@ return (
     0 0 5px rgba(0,194,255,.20);
 }
 
+.ixi-color-with-thumb {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 8px;
+}
         @media (max-width: 850px) {
           .ixi-relationship-shell {
             width: 100%;
