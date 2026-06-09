@@ -1413,7 +1413,7 @@ style={{
   className="ixi-pocket-catch-pad catch-r1"
   style={{
     position: "absolute",
-    right: 0,
+    right: -20,
     left: "auto",
     top: "12px",
     width: "360px",
