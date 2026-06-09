@@ -281,12 +281,28 @@ return (
   pointer-events: auto;
   cursor: pointer;
 
+  position: relative;
+  overflow: visible;
+
   opacity: .62;
 
   transition:
     background .16s ease,
     box-shadow .16s ease,
     opacity .16s ease;
+}
+
+.ixi-pocket-indicator::before {
+  content: "";
+
+  position: absolute;
+
+  left: -14px;
+  right: -14px;
+  top: -10px;
+  bottom: -10px;
+
+  pointer-events: auto;
 }
 
 .ixi-relationship-shell.revealed .ixi-pocket-indicator {
@@ -569,7 +585,12 @@ return (
   border: 0;
   border-radius: 1px;
 
-  background: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.035);
+
+  transition:
+    background .16s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
 }
 
 .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
@@ -577,6 +598,27 @@ return (
 .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
+  background: rgba(255,255,255,.085);
+  box-shadow: none;
+}
+
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle span {
+  background: rgba(255,255,255,.10);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
+.ixi-relationship-shell.revealed
+.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
+.ixi-relationship-shell.revealed
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
   background: rgba(255,255,255,.32);
   box-shadow: none;
