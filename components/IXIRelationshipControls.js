@@ -438,7 +438,7 @@ return (
 
   position: relative;
   top: 0px;
-  left: 3px;
+  left: 5px;
 }
 
 .ixi-thumb-size-toggle span {
