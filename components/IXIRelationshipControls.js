@@ -89,8 +89,24 @@ export default function IXIRelationshipControls({
     onToggleOutline(outline);
   }
 
-  return (
-<div className="ixi-relationship-controls">
+return (
+  <div
+    className={`ixi-relationship-shell ${
+      railRevealed ? "revealed" : ""
+    } ${className}`}
+  >
+    <div className="ixi-relationship-head">
+      <span>IXI Machine Controls™</span>
+
+      <button
+        type="button"
+        className="ixi-relationship-power"
+        onClick={toggleRailReveal}
+        aria-label="Toggle machine controls"
+      />
+    </div>
+
+    <div className="ixi-relationship-controls">
   {COLOR_CONTROLS.map(color => (
     <div key={color} className="ixi-color-with-thumb">
       <button
