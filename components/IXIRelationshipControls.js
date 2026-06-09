@@ -25,9 +25,7 @@ function getExistingColors(ixiCardState = {}) {
   const colors = new Set();
 
   Object.values(ixiCardState || {}).forEach(state => {
-    if (isRealColor(state?.color)) {
-      colors.add(state.color);
-    }
+    if (isRealColor(state?.color)) colors.add(state.color);
   });
 
   return colors;
@@ -37,9 +35,7 @@ function getExistingOutlines(ixiCardState = {}) {
   const outlines = new Set();
 
   Object.values(ixiCardState || {}).forEach(state => {
-    if (isRealOutline(state?.outline)) {
-      outlines.add(String(state.outline));
-    }
+    if (isRealOutline(state?.outline)) outlines.add(String(state.outline));
   });
 
   return outlines;
@@ -53,36 +49,31 @@ export default function IXIRelationshipControls({
   onToggleOutline = () => {},
   className = "",
   pocketThumbSize = "medium",
-setPocketThumbSize = null,
-isMachineDragging = false
+  setPocketThumbSize = null,
+  isMachineDragging = false
 }) {
-  
- const [railRevealed, setRailRevealed] = useState(false);
-const [armedPocket, setArmedPocket] = useState(null);
-const [parkBrakeOn, setParkBrakeOn] = useState(false);
+  const [railRevealed, setRailRevealed] = useState(false);
+  const [armedPocket, setArmedPocket] = useState(null);
+  const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
-  const hasAnyRelationship = Object.values(ixiCardState || {}).some(state =>
-    isRealColor(state?.color) || isRealOutline(state?.outline)
+  const hasAnyRelationship = Object.values(ixiCardState || {}).some(
+    state => isRealColor(state?.color) || isRealOutline(state?.outline)
   );
 
   const machineControlsHinted = hasAnyRelationship || isMachineDragging;
 
- function toggleRailReveal() {
-  setRailRevealed(current => !current);
-}
+  function toggleRailReveal() {
+    setRailRevealed(current => !current);
+  }
 
-function togglePocketArm(pocketId) {
-  setArmedPocket(current =>
-    current === pocketId
-      ? null
-      : pocketId
-  );
-}
+  function togglePocketArm(pocketId) {
+    setArmedPocket(current => (current === pocketId ? null : pocketId));
+  }
 
-function getColorStage(color) {
+  function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
     if (existingColors.has(color)) return "exists";
     return "dead";
@@ -95,144 +86,142 @@ function getColorStage(color) {
   }
 
   function handleOutlineClick(outline) {
-    if (!activeColors.includes("none")) {
-      onToggleColor("none");
-    }
-
+    if (!activeColors.includes("none")) onToggleColor("none");
     onToggleOutline(outline);
   }
 
-return (
-  <div
-  className={`ixi-relationship-shell ${
-    railRevealed ? "revealed" : ""
-  } ${
-    machineControlsHinted ? "machine-hinted" : ""
-  } ${className}`}
->
-    <div className="ixi-relationship-head">
-      <span>IXI Machine Controls™</span>
-
-      <button
-        type="button"
-        className="ixi-relationship-power"
-        onClick={toggleRailReveal}
-        aria-label="Toggle machine controls"
-      />
-    </div>
-
-<div className="ixi-pocket-indicator-row">
-  <div className="ixi-pocket-left-cluster">
-    <button
-      type="button"
-      className="ixi-theater-button"
-      aria-label="IXI Theater"
-      title="IXI Theater"
+  return (
+    <div
+      className={`ixi-relationship-shell ${
+        railRevealed ? "revealed" : ""
+      } ${machineControlsHinted ? "machine-hinted" : ""} ${className}`}
     >
-      T
-    </button>
+      <div className="ixi-relationship-head">
+        <span>IXI Machine Controls™</span>
 
-    <div className="ixi-pocket-indicator-stack left">
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-left-top ${
-          armedPocket === "LT" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("LT")}
-        aria-label="Arm left top pocket"
-        title="Left Top Pocket"
-      />
+        <button
+          type="button"
+          className="ixi-relationship-power"
+          onClick={toggleRailReveal}
+          aria-label="Toggle machine controls"
+        />
+      </div>
 
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-left-bottom ${
-          armedPocket === "LB" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("LB")}
-        aria-label="Arm left bottom pocket"
-        title="Left Bottom Pocket"
-      />
-    </div>
-  </div>
+      <div className="ixi-pocket-indicator-row">
+        <div className="ixi-pocket-left-cluster">
+          <div className="ixi-pocket-indicator-stack left">
+            <button
+              type="button"
+              className={`ixi-pocket-indicator pocket-left-top ${
+                armedPocket === "LT" ? "armed" : ""
+              }`}
+              onClick={() => togglePocketArm("LT")}
+              aria-label="Arm left top pocket"
+              title="Left Top Pocket"
+            />
 
-  <div className="ixi-pocket-right-cluster">
-    <button
-      type="button"
-      className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-      onClick={() => setParkBrakeOn(current => !current)}
-      aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
-      title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
-    >
-      <span className="park-left">(</span>
-      <span className="park-core">P</span>
-      <span className="park-right">)</span>
-    </button>
+            <button
+              type="button"
+              className={`ixi-pocket-indicator pocket-left-bottom ${
+                armedPocket === "LB" ? "armed" : ""
+              }`}
+              onClick={() => togglePocketArm("LB")}
+              aria-label="Arm left bottom pocket"
+              title="Left Bottom Pocket"
+            />
+          </div>
 
-    <div className="ixi-pocket-indicator-stack right">
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-right-top ${
-          armedPocket === "RT" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("RT")}
-        aria-label="Arm right top pocket"
-        title="Right Top Pocket"
-      />
+          <button
+            type="button"
+            className="ixi-theater-button"
+            aria-label="IXI Theater"
+            title="IXI Theater"
+          >
+            <span>T</span>
+          </button>
+        </div>
 
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-right-bottom ${
-          armedPocket === "RB" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("RB")}
-        aria-label="Arm right bottom pocket"
-        title="Right Bottom Pocket"
-      />
-    </div>
-  </div>
-</div>
-          
-<div className="ixi-relationship-controls">
-         
-  {COLOR_CONTROLS.map(color => (
-    <div key={color} className="ixi-color-with-thumb">
-      <button
-        type="button"
-        className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-        onClick={() => onToggleColor(color)}
-        aria-label={`Filter ${color}`}
-      />
-    </div>
-  ))}
+        <div className="ixi-pocket-right-cluster">
+          <button
+            type="button"
+            className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+            onClick={() => setParkBrakeOn(current => !current)}
+            aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+            title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+          >
+            <span className="park-left">(</span>
+            <span className="park-core">P</span>
+            <span className="park-right">)</span>
+          </button>
 
-  {OUTLINE_CONTROLS.map(outline => (
-    <button
-      key={outline}
-      type="button"
-      className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
-      onClick={() => handleOutlineClick(outline)}
-      aria-label={`Filter outline ${outline}`}
-    />
-  ))}
-{setPocketThumbSize && (
-  <button
-    type="button"
-    className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
-    onClick={() => {
-      if (pocketThumbSize === "small") return setPocketThumbSize("medium");
-      if (pocketThumbSize === "medium") return setPocketThumbSize("large");
-      return setPocketThumbSize("small");
-    }}
-    aria-label={`Pocket thumb size ${pocketThumbSize}`}
-    title={`Pocket thumbs ${pocketThumbSize}`}
-  >
-    <span />
-    <span />
-    <span />
-  </button>
-)}
+          <div className="ixi-pocket-indicator-stack right">
+            <button
+              type="button"
+              className={`ixi-pocket-indicator pocket-right-top ${
+                armedPocket === "RT" ? "armed" : ""
+              }`}
+              onClick={() => togglePocketArm("RT")}
+              aria-label="Arm right top pocket"
+              title="Right Top Pocket"
+            />
 
-</div>
+            <button
+              type="button"
+              className={`ixi-pocket-indicator pocket-right-bottom ${
+                armedPocket === "RB" ? "armed" : ""
+              }`}
+              onClick={() => togglePocketArm("RB")}
+              aria-label="Arm right bottom pocket"
+              title="Right Bottom Pocket"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="ixi-relationship-controls">
+        {COLOR_CONTROLS.map(color => (
+          <div key={color} className="ixi-color-with-thumb">
+            <button
+              type="button"
+              className={`ixi-relationship-color color-${color} stage-${getColorStage(
+                color
+              )}`}
+              onClick={() => onToggleColor(color)}
+              aria-label={`Filter ${color}`}
+            />
+          </div>
+        ))}
+
+        {OUTLINE_CONTROLS.map(outline => (
+          <button
+            key={outline}
+            type="button"
+            className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(
+              outline
+            )}`}
+            onClick={() => handleOutlineClick(outline)}
+            aria-label={`Filter outline ${outline}`}
+          />
+        ))}
+
+        {setPocketThumbSize && (
+          <button
+            type="button"
+            className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
+            onClick={() => {
+              if (pocketThumbSize === "small") return setPocketThumbSize("medium");
+              if (pocketThumbSize === "medium") return setPocketThumbSize("large");
+              return setPocketThumbSize("small");
+            }}
+            aria-label={`Pocket thumb size ${pocketThumbSize}`}
+            title={`Pocket thumbs ${pocketThumbSize}`}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        )}
+      </div>
 
       {hasAnyRelationship && (
         <div className="ixi-mobile-nav-row">
@@ -247,239 +236,228 @@ return (
       )}
 
       <style jsx>{`
-       .ixi-relationship-shell {
-  width: 100%;
-  max-width: 100%;
-  margin: 14px auto 0;
-}
+        .ixi-relationship-shell {
+          width: 100%;
+          max-width: 100%;
+          margin: 14px auto 0;
+        }
 
         .ixi-relationship-head {
           height: 10px;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
-
           margin: 0 auto 4px;
         }
 
-       .ixi-relationship-head span {
-  opacity: 0;
-
-  color: rgba(255,196,0,.82);
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .65px;
-
-  transition:
-    opacity .42s ease,
-    color .42s ease,
-    text-shadow .42s ease;
-}
+        .ixi-relationship-head span {
+          opacity: 0;
+          color: rgba(255,196,0,.82);
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .65px;
+          transition:
+            opacity .42s ease,
+            color .42s ease,
+            text-shadow .42s ease;
+        }
 
         .ixi-relationship-shell.machine-hinted .ixi-relationship-head span {
-  opacity: .38;
-  color: rgba(255,196,0,.48);
-  text-shadow: none;
-}
+          opacity: .38;
+          color: rgba(255,196,0,.48);
+          text-shadow: none;
+        }
 
         .ixi-relationship-shell.revealed .ixi-relationship-head span {
-  opacity: 1;
-  color: rgba(255,196,0,.82);
-  text-shadow: 0 0 8px rgba(255,196,0,.16);
-}
+          opacity: 1;
+          color: rgba(255,196,0,.82);
+          text-shadow: 0 0 8px rgba(255,196,0,.16);
+        }
 
-      .ixi-pocket-indicator-row {
-  width: 100%;
-  height: 22px;
+        .ixi-pocket-indicator-row {
+          width: 100%;
+          height: 22px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          margin: 8px auto -6px;
+          pointer-events: none;
+        }
 
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+        .ixi-pocket-left-cluster,
+        .ixi-pocket-right-cluster {
+          display: flex;
+          align-items: flex-end;
+          gap: 12px;
+          position: relative;
+        }
 
-  margin: 8px auto -6px;
+        .ixi-pocket-indicator-stack {
+          display: grid;
+          gap: 20px;
+          position: relative;
+          top: 13px;
+        }
 
-  pointer-events: none;
-}
-.ixi-pocket-indicator-stack {
-  display: grid;
-  gap: 20px;
+        .ixi-theater-button {
+          position: relative;
+          top: 13px;
+          width: 12px;
+          height: 12px;
+          border: 1px solid rgba(255,255,255,0);
+          background: transparent;
+          color: rgba(255,255,255,0);
+          padding: 0;
+          cursor: pointer;
+          pointer-events: auto;
+          opacity: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 8px;
+          font-weight: 950;
+          line-height: 1;
+          transition:
+            opacity .18s ease,
+            color .18s ease,
+            border-color .18s ease,
+            text-shadow .18s ease,
+            transform .18s ease;
+        }
 
-  position: relative;
-  top: 13px;
-}
+        .ixi-relationship-shell.revealed .ixi-theater-button {
+          opacity: 1;
+          color: rgba(255,255,255,.12);
+          border-color: rgba(255,255,255,.10);
+        }
 
-.ixi-pocket-right-cluster {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+        .ixi-relationship-shell.revealed .ixi-theater-button:hover {
+          color: rgba(0,194,255,.55);
+          border-color: rgba(0,194,255,.42);
+          transform: translateY(-1px);
+          text-shadow: 0 0 5px rgba(0,194,255,.18);
+        }
 
-  position: relative;
-}
+        .ixi-park-brake {
+          position: relative;
+          top: 13px;
+          border: 0;
+          background: transparent;
+          padding: 0;
+          margin-right: 2px;
+          cursor: pointer;
+          pointer-events: auto;
+          color: rgba(255,255,255,0);
+          font-size: 11px;
+          font-weight: 950;
+          display: flex;
+          align-items: center;
+          gap: 1px;
+          opacity: 0;
+          transition:
+            color .18s ease,
+            text-shadow .18s ease,
+            transform .18s ease,
+            opacity .18s ease;
+        }
 
-.ixi-pocket-left-cluster,
-.ixi-pocket-right-cluster {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+        .ixi-relationship-shell.revealed .ixi-park-brake {
+          color: rgba(255,255,255,.10);
+          opacity: 1;
+        }
 
-  position: relative;
-}
+        .ixi-relationship-shell.revealed .ixi-park-brake:hover {
+          color: rgba(220,38,38,.58);
+          transform: translateY(-1px);
+          text-shadow: 0 0 5px rgba(220,38,38,.18);
+        }
 
-.ixi-park-brake {
-  position: relative;
-  top: 13px;
+        .ixi-park-brake.engaged {
+          color: rgba(220,38,38,.92);
+          opacity: 1;
+          text-shadow: 0 0 6px rgba(220,38,38,.28);
+        }
 
-  border: 0;
-  background: transparent;
+        .park-left,
+        .park-right {
+          opacity: .75;
+        }
 
-  padding: 0;
-  margin-right: 2px;
+        .park-core {
+          font-weight: 950;
+        }
 
-  cursor: pointer;
+        .ixi-pocket-indicator {
+          width: 9px;
+          height: 2px;
+          border: 0;
+          border-radius: 1px;
+          background: rgba(255,255,255,.045);
+          padding: 0;
+          pointer-events: auto;
+          cursor: pointer;
+          position: relative;
+          overflow: visible;
+          opacity: .62;
+          transition:
+            background .16s ease,
+            box-shadow .16s ease,
+            opacity .16s ease;
+        }
 
-  pointer-events: auto;
+        .ixi-pocket-indicator::before {
+          content: "";
+          position: absolute;
+          left: -14px;
+          right: -14px;
+          top: -10px;
+          bottom: -10px;
+          pointer-events: auto;
+        }
 
-  color: rgba(255,255,255,0);
+        .ixi-relationship-shell.revealed .ixi-pocket-indicator {
+          background: rgba(255,255,255,.16);
+          opacity: 1;
+        }
 
-  font-size: 11px;
-  font-weight: 950;
+        .ixi-pocket-indicator.armed {
+          background: rgba(0,194,255,.38);
+          opacity: .82;
+          box-shadow: 0 0 4px rgba(0,194,255,.16);
+        }
 
-  display: flex;
-  align-items: center;
-  gap: 1px;
+        .ixi-relationship-shell.revealed .ixi-pocket-indicator.armed {
+          background: rgba(0,194,255,.95);
+          opacity: 1;
+          box-shadow:
+            0 0 5px rgba(0,194,255,.45),
+            0 0 12px rgba(0,194,255,.24);
+        }
 
-  opacity: 0;
-
-  transition:
-    color .18s ease,
-    text-shadow .18s ease,
-    transform .18s ease,
-    opacity .18s ease;
-}
-
-.ixi-relationship-shell.revealed .ixi-park-brake {
-  color: rgba(255,255,255,.10);
-  opacity: 1;
-}
-
-.ixi-park-brake:hover {
-  color: rgba(220,38,38,.58);
-  opacity: 1;
-  transform: translateY(-1px);
-
-  text-shadow:
-    0 0 5px rgba(220,38,38,.18);
-}
-
-.ixi-park-brake.engaged {
-  color: rgba(220,38,38,.92);
-  opacity: 1;
-
-  text-shadow:
-    0 0 6px rgba(220,38,38,.28);
-}
-
-.park-left,
-.park-right {
-  opacity: .75;
-}
-
-.park-core {
-  font-weight: 950;
-}
-
-.ixi-pocket-indicator {
-  width: 9px;
-  height: 2px;
-
-  border: 0;
-  border-radius: 1px;
-
-  background: rgba(255,255,255,.045);
-
-  padding: 0;
-  pointer-events: auto;
-  cursor: pointer;
-
-  position: relative;
-  overflow: visible;
-
-  opacity: .62;
-
-  transition:
-    background .16s ease,
-    box-shadow .16s ease,
-    opacity .16s ease;
-}
-
-.ixi-pocket-indicator::before {
-  content: "";
-
-  position: absolute;
-
-  left: -14px;
-  right: -14px;
-  top: -10px;
-  bottom: -10px;
-
-  pointer-events: auto;
-}
-
-.ixi-relationship-shell.revealed .ixi-pocket-indicator {
-  background: rgba(255,255,255,.16);
-  opacity: 1;
-}
-
-.ixi-pocket-indicator.armed {
-  background: rgba(0,194,255,.38);
-  opacity: .82;
-
-  box-shadow:
-    0 0 4px rgba(0,194,255,.16);
-}
-
-.ixi-relationship-shell.revealed .ixi-pocket-indicator.armed {
-  background: rgba(0,194,255,.95);
-  opacity: 1;
-
-  box-shadow:
-    0 0 5px rgba(0,194,255,.45),
-    0 0 12px rgba(0,194,255,.24);
-}
         .ixi-relationship-power {
           width: 18px;
           height: 4px;
-
           border: 0;
           border-radius: 2px;
-
           background: rgba(255,255,255,.18);
-
           padding: 0;
           cursor: pointer;
         }
 
         .ixi-relationship-shell.revealed .ixi-relationship-power {
           background: rgba(255,196,0,.95);
-
-          box-shadow:
-            0 0 8px rgba(255,196,0,.42);
+          box-shadow: 0 0 8px rgba(255,196,0,.42);
         }
 
         .ixi-relationship-controls {
           width: max-content;
           max-width: 100%;
-
           margin: 0 auto;
           padding: 0;
-
           display: flex;
           flex-wrap: nowrap;
           justify-content: center;
           align-items: center;
-
           gap: 14px;
         }
 
@@ -489,10 +467,8 @@ return (
           background: transparent;
           padding: 0;
           cursor: pointer;
-
           opacity: .12;
           filter: grayscale(1);
-
           transition:
             opacity .16s ease,
             box-shadow .16s ease,
@@ -527,11 +503,8 @@ return (
           position: absolute;
           left: 50%;
           top: 50%;
-
           width: 15px;
-
           transform: translate(-50%, -50%);
-
           background: rgba(255,255,255,.18);
         }
 
@@ -557,32 +530,26 @@ return (
         }
 
         .stage-exists {
-  opacity: .46;
-  filter: grayscale(.35);
+          opacity: .46;
+          filter: grayscale(.35);
+          box-shadow: none;
+        }
 
-  box-shadow: none;
-}
+        .ixi-relationship-shell.revealed .stage-exists {
+          opacity: .58;
+          filter: grayscale(.22);
+          box-shadow: 0 0 6px rgba(255,255,255,.035);
+        }
 
-.ixi-relationship-shell.revealed .stage-exists {
-  opacity: .58;
-  filter: grayscale(.22);
-
-  box-shadow:
-    0 0 6px rgba(255,255,255,.035);
-}
-
-.stage-selected {
-  opacity: 1;
-  filter: grayscale(0);
-
-  transform: translateY(-1px);
-
-  border-color: rgba(255,255,255,.18);
-
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.08),
-    0 0 10px rgba(255,255,255,.08);
-}
+        .stage-selected {
+          opacity: 1;
+          filter: grayscale(0);
+          transform: translateY(-1px);
+          border-color: rgba(255,255,255,.18);
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,.08),
+            0 0 10px rgba(255,255,255,.08);
+        }
 
         .ixi-relationship-outline.stage-dead {
           opacity: .16;
@@ -591,8 +558,7 @@ return (
           box-shadow: none;
         }
 
-        .ixi-relationship-shell.revealed
-        .ixi-relationship-outline.stage-dead {
+        .ixi-relationship-shell.revealed .ixi-relationship-outline.stage-dead {
           opacity: .34;
           border-color: rgba(255,255,255,.075);
         }
@@ -601,35 +567,30 @@ return (
           background: rgba(255,255,255,.14);
         }
 
-       .ixi-relationship-outline.stage-exists {
-  opacity: .52;
-  border-color: rgba(255,255,255,.095);
+        .ixi-relationship-outline.stage-exists {
+          opacity: .52;
+          border-color: rgba(255,255,255,.095);
+          box-shadow: none;
+        }
 
-  box-shadow: none;
-}
+        .ixi-relationship-shell.revealed .ixi-relationship-outline.stage-exists {
+          opacity: .62;
+          border-color: rgba(255,255,255,.12);
+          box-shadow: 0 0 6px rgba(255,255,255,.035);
+        }
 
-.ixi-relationship-shell.revealed
-.ixi-relationship-outline.stage-exists {
-  opacity: .62;
-  border-color: rgba(255,255,255,.12);
-
-  box-shadow:
-    0 0 6px rgba(255,255,255,.035);
-}
-
-.ixi-relationship-outline.stage-exists::after {
-  background: rgba(255,255,255,.38);
-}
+        .ixi-relationship-outline.stage-exists::after {
+          background: rgba(255,255,255,.38);
+        }
 
         .ixi-relationship-outline.stage-selected {
-  opacity: 1;
+          opacity: 1;
+          border-color: rgba(255,255,255,.18);
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,.08),
+            0 0 10px rgba(255,255,255,.08);
+        }
 
-  border-color: rgba(255,255,255,.18);
-
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.08),
-    0 0 10px rgba(255,255,255,.08);
-}
         .ixi-relationship-outline.stage-selected::after {
           background: rgba(255,255,255,.82);
         }
@@ -678,11 +639,9 @@ return (
         .ixi-mobile-nav-link {
           color: rgba(0,194,255,.72);
           text-decoration: none;
-
           font-size: 8px;
           font-weight: 950;
           letter-spacing: .55px;
-
           white-space: nowrap;
         }
 
@@ -691,82 +650,78 @@ return (
           text-shadow: 0 0 8px rgba(0,194,255,.22);
         }
 
-       .ixi-thumb-size-toggle {
-  width: 20px;
-  height: 8px;
+        .ixi-thumb-size-toggle {
+          width: 20px;
+          height: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-right: 6px;
+          border: 0;
+          background: transparent;
+          padding: 0;
+          cursor: pointer;
+          position: relative;
+          top: -1px;
+          left: 6px;
+        }
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+        .ixi-thumb-size-toggle span {
+          width: 3px;
+          height: 8px;
+          display: block;
+          border: 0;
+          border-radius: 1px;
+          background: rgba(255,255,255,.035);
+          transition:
+            background .16s ease,
+            box-shadow .16s ease,
+            opacity .16s ease;
+        }
 
-  margin-right: 6px;
+        .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
+        .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
+        .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
+        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
+        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
+        .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
+          background: rgba(255,255,255,.085);
+          box-shadow: none;
+        }
 
-  border: 0;
-  background: transparent;
+        .ixi-relationship-shell.revealed .ixi-thumb-size-toggle span {
+          background: rgba(255,255,255,.10);
+        }
 
-  padding: 0;
-  cursor: pointer;
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-small
+          span:nth-child(1),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-medium
+          span:nth-child(1),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-medium
+          span:nth-child(2),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-large
+          span:nth-child(1),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-large
+          span:nth-child(2),
+        .ixi-relationship-shell.revealed
+          .ixi-thumb-size-toggle.thumb-setting-large
+          span:nth-child(3) {
+          background: rgba(255,255,255,.32);
+          box-shadow: none;
+        }
 
-  position: relative;
-  top: -1px;
-  left: 6px;
-}
+        .ixi-color-with-thumb {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+        }
 
-.ixi-thumb-size-toggle span {
-  width: 3px;
-  height: 8px;
-
-  display: block;
-
-  border: 0;
-  border-radius: 1px;
-
-  background: rgba(255,255,255,.035);
-
-  transition:
-    background .16s ease,
-    box-shadow .16s ease,
-    opacity .16s ease;
-}
-
-.ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
-.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
-.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
-  background: rgba(255,255,255,.085);
-  box-shadow: none;
-}
-
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle span {
-  background: rgba(255,255,255,.10);
-}
-
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
-.ixi-relationship-shell.revealed
-.ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
-  background: rgba(255,255,255,.32);
-  box-shadow: none;
-}
-
-.ixi-color-with-thumb {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  gap: 8px;
-}
         @media (max-width: 850px) {
           .ixi-relationship-shell {
             width: 100%;
@@ -781,11 +736,9 @@ return (
           .ixi-mobile-nav-row {
             width: 100%;
             margin-top: 10px;
-
             display: flex;
             justify-content: center;
             align-items: center;
-
             gap: 28px;
           }
         }
