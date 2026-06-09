@@ -145,39 +145,38 @@ return (
   </div>
 
   <div className="ixi-pocket-right-cluster">
-    <div className="ixi-pocket-indicator-stack right">
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-right-top ${
-          armedPocket === "RT" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("RT")}
-        aria-label="Arm right top pocket"
-        title="Right Top Pocket"
-      />
+  <button
+    type="button"
+    className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+    onClick={() => setParkBrakeOn(current => !current)}
+    aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+    title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+  >
+    <span className="park-left">(</span>
+    <span className="park-core">P</span>
+    <span className="park-right">)</span>
+  </button>
 
-      <button
-        type="button"
-        className={`ixi-pocket-indicator pocket-right-bottom ${
-          armedPocket === "RB" ? "armed" : ""
-        }`}
-        onClick={() => togglePocketArm("RB")}
-        aria-label="Arm right bottom pocket"
-        title="Right Bottom Pocket"
-      />
-    </div>
+  <div className="ixi-pocket-indicator-stack right">
+    <button
+      type="button"
+      className={`ixi-pocket-indicator pocket-right-top ${
+        armedPocket === "RT" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("RT")}
+      aria-label="Arm right top pocket"
+      title="Right Top Pocket"
+    />
 
     <button
       type="button"
-      className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-      onClick={() => setParkBrakeOn(current => !current)}
-      aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
-      title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
-    >
-      <span className="park-left">(</span>
-      <span className="park-core">P</span>
-      <span className="park-right">)</span>
-    </button>
+      className={`ixi-pocket-indicator pocket-right-bottom ${
+        armedPocket === "RB" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("RB")}
+      aria-label="Arm right bottom pocket"
+      title="Right Bottom Pocket"
+    />
   </div>
 </div>
           
