@@ -199,6 +199,16 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
+    const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id
+  });
+
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
 
