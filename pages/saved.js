@@ -2428,7 +2428,7 @@ box-shadow: none;
   top: 405px;
 
   width: 150px;
-  height: calc(100vh - 420px);
+  height: calc(100vh - 405px);
 
   pointer-events: auto;
   z-index: 999;
@@ -2443,10 +2443,10 @@ box-shadow: none;
 
   right: 0;
   left: auto;
-  top: 430px;
+  top: 405px;
 
   width: 150px;
-  height: calc(100vh - 430px);
+  height: calc(100vh - 405px);
 
   pointer-events: auto;
   z-index: 999;
