@@ -258,6 +258,9 @@ export default function IXIRelationshipControls({
   align-items: center;
   justify-content: space-between;
 
+  position: relative;
+  top: -4px;
+
   margin: 0 auto 4px;
 }
         .ixi-relationship-head span {
