@@ -267,6 +267,7 @@ return (
   position: relative;
   top: 13px;
 }
+
 .ixi-pocket-indicator {
   width: 9px;
   height: 2px;
@@ -274,11 +275,13 @@ return (
   border: 0;
   border-radius: 1px;
 
-  background: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.045);
 
   padding: 0;
   pointer-events: auto;
   cursor: pointer;
+
+  opacity: .62;
 
   transition:
     background .16s ease,
@@ -287,25 +290,26 @@ return (
 }
 
 .ixi-relationship-shell.revealed .ixi-pocket-indicator {
-  background: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.16);
+  opacity: 1;
 }
 
 .ixi-pocket-indicator.armed {
-  background: rgba(0,194,255,.85);
+  background: rgba(0,194,255,.38);
+  opacity: .82;
 
   box-shadow:
-    0 0 4px rgba(0,194,255,.35),
-    0 0 10px rgba(0,194,255,.18);
+    0 0 4px rgba(0,194,255,.16);
 }
 
 .ixi-relationship-shell.revealed .ixi-pocket-indicator.armed {
   background: rgba(0,194,255,.95);
+  opacity: 1;
 
   box-shadow:
     0 0 5px rgba(0,194,255,.45),
     0 0 12px rgba(0,194,255,.24);
 }
-
         .ixi-relationship-power {
           width: 18px;
           height: 4px;
