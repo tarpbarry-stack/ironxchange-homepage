@@ -53,7 +53,8 @@ export default function IXIRelationshipControls({
   onToggleOutline = () => {},
   className = "",
   pocketThumbSize = "medium",
-  setPocketThumbSize = null
+setPocketThumbSize = null,
+isMachineDragging = false
 }) {
   
   const [railRevealed, setRailRevealed] = useState(false);
@@ -101,8 +102,8 @@ function getColorStage(color) {
 return (
   <div
     className={`ixi-relationship-shell ${
-      railRevealed ? "revealed" : ""
-    } ${className}`}
+  railRevealed || hasAnyRelationship || isMachineDragging ? "revealed" : ""
+} ${className}`}
   >
     <div className="ixi-relationship-head">
       <span>IXI Machine Controls™</span>
