@@ -310,6 +310,8 @@ return (
 
   cursor: pointer;
 
+  pointer-events: auto;
+
   color: rgba(255,255,255,0);
 
   font-size: 11px;
