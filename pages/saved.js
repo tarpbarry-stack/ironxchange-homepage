@@ -2845,6 +2845,14 @@ box-shadow: 0 3px 8px rgba(255,196,0,.10);
 border-bottom-color: rgba(255,196,0,.26);
 }
 
+.active-stack.open .active-stack-tray {
+  border-color: rgba(255,255,255,.14);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.035),
+    0 0 14px rgba(255,255,255,.045);
+}
+
 .active-stack-tray {
 width: 100%;
 min-height: 170px;
