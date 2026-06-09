@@ -212,12 +212,12 @@ return (
   align-items: flex-start;
   justify-content: space-between;
 
-  margin: 20px auto 2px;
+  margin: 40px auto 2px;
 }
 
 .ixi-pocket-indicator-stack {
   display: grid;
-  gap: 10px;
+  gap: 20px;
 }
 
 .ixi-pocket-indicator {
