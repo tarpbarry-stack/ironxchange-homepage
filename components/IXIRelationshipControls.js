@@ -275,14 +275,17 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-pocket-indicator-row {
-          width: 100%;
-          height: 22px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          margin: 8px auto -6px;
-          pointer-events: none;
-        }
+  width: 100%;
+  height: 12px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  margin: 2px auto -2px;
+
+  pointer-events: none;
+}
 
         .ixi-pocket-left-cluster,
         .ixi-pocket-right-cluster {
