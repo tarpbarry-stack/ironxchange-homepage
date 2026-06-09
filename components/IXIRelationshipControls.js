@@ -298,6 +298,13 @@ return (
   top: 13px;
 }
 
+.ixi-pocket-right-cluster {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+
+  position: relative;
+}
 
 .ixi-park-brake {
   position: relative;
