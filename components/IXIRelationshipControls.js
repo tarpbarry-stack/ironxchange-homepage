@@ -310,7 +310,7 @@ return (
 
   cursor: pointer;
 
-  color: rgba(255,255,255,.10);
+  color: rgba(255,255,255,0);
 
   font-size: 11px;
   font-weight: 950;
@@ -319,21 +319,35 @@ return (
   align-items: center;
   gap: 1px;
 
+  opacity: 0;
+
   transition:
     color .18s ease,
     text-shadow .18s ease,
-    transform .18s ease;
+    transform .18s ease,
+    opacity .18s ease;
+}
+
+.ixi-relationship-shell.revealed .ixi-park-brake {
+  color: rgba(255,255,255,.10);
+  opacity: 1;
+}
+
+.ixi-park-brake:hover {
+  color: rgba(220,38,38,.58);
+  opacity: 1;
+  transform: translateY(-1px);
+
+  text-shadow:
+    0 0 5px rgba(220,38,38,.18);
 }
 
 .ixi-park-brake.engaged {
   color: rgba(220,38,38,.92);
+  opacity: 1;
 
   text-shadow:
     0 0 6px rgba(220,38,38,.28);
-}
-
-.ixi-park-brake:hover {
-  transform: translateY(-1px);
 }
 
 .park-left,
