@@ -716,33 +716,42 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-thumb-size-toggle {
-          width: 20px;
-          height: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-right: 6px;
-          border: 0;
-          background: transparent;
-          padding: 0;
-          cursor: pointer;
-          position: relative;
-          top: -1px;
-          left: 6px;
-        }
+  width: 24px;
+  height: 12px;
 
-        .ixi-thumb-size-toggle span {
-          width: 3px;
-          height: 8px;
-          display: block;
-          border: 0;
-          border-radius: 1px;
-          background: rgba(255,255,255,.035);
-          transition:
-            background .16s ease,
-            box-shadow .16s ease,
-            opacity .16s ease;
-        }
+  display: grid;
+  grid-template-rows: repeat(3, 2px);
+  gap: 2px;
+
+  margin-right: 6px;
+
+  border: 0;
+  background: transparent;
+
+  padding: 0;
+  cursor: pointer;
+
+  position: relative;
+  top: -1px;
+  left: 6px;
+}
+
+.ixi-thumb-size-toggle span {
+  width: 18px;
+  height: 2px;
+
+  display: block;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.035);
+
+  transition:
+    background .16s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
+}
 
         .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
         .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(1),
