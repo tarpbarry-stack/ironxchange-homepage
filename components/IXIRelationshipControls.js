@@ -719,7 +719,7 @@ export default function IXIRelationshipControls({
           text-shadow: 0 0 8px rgba(0,194,255,.22);
         }
 
-        .ixi-thumb-size-toggle {
+    .ixi-thumb-size-toggle {
   width: 24px;
   height: 12px;
 
@@ -757,46 +757,41 @@ export default function IXIRelationshipControls({
     opacity .16s ease;
 }
 
-       .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(3),
+.ixi-thumb-size-toggle.thumb-setting-small span:nth-child(3),
 .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(2),
 .ixi-thumb-size-toggle.thumb-setting-medium span:nth-child(3),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
+  background: rgba(255,255,255,.085);
+  box-shadow: none;
+}
 
-        .ixi-relationship-shell.revealed .ixi-thumb-size-toggle span {
-          background: rgba(255,255,255,.10);
-        }
+.ixi-relationship-shell.revealed .ixi-thumb-size-toggle span {
+  background: rgba(255,255,255,.10);
+}
 
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-small
-          span:nth-child(3),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-medium
-          span:nth-child(2),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-medium
-          span:nth-child(3),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-large
-          span:nth-child(1),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-large
-          span:nth-child(2),
-        .ixi-relationship-shell.revealed
-          .ixi-thumb-size-toggle.thumb-setting-large
-          span:nth-child(3) {
-          background: rgba(255,255,255,.32);
-          box-shadow: none;
-        }
-
-        .ixi-color-with-thumb {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 8px;
-        }
-
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-small
+  span:nth-child(3),
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-medium
+  span:nth-child(2),
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-medium
+  span:nth-child(3),
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-large
+  span:nth-child(1),
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-large
+  span:nth-child(2),
+.ixi-relationship-shell.revealed
+  .ixi-thumb-size-toggle.thumb-setting-large
+  span:nth-child(3) {
+  background: rgba(255,255,255,.32);
+  box-shadow: none;
+}
         @media (max-width: 850px) {
           .ixi-relationship-shell {
             width: 100%;
