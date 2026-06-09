@@ -90,61 +90,45 @@ export default function IXIRelationshipControls({
   }
 
   return (
-    <div
-      className={`ixi-relationship-shell ${
-        railRevealed ? "revealed" : ""
-      } ${className}`}
-    >
-      <div className="ixi-relationship-head">
-        <span>IXI Machine Controls™</span>
+<div className="ixi-relationship-controls">
+  {COLOR_CONTROLS.map(color => (
+    <div key={color} className="ixi-color-with-thumb">
+      <button
+        type="button"
+        className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
+        onClick={() => onToggleColor(color)}
+        aria-label={`Filter ${color}`}
+      />
 
-        <button
-          type="button"
-          className="ixi-relationship-power"
-          onClick={toggleRailReveal}
-          aria-label="Toggle machine controls"
-        />
-      </div>
+      {color === "none" && setPocketThumbSize && (
+        <div className="ixi-thumb-size-cluster">
+          {["small", "medium", "large"].map(size => (
+            <button
+              key={size}
+              type="button"
+              className={`ixi-thumb-size-button size-${size} ${
+                pocketThumbSize === size ? "active" : ""
+              }`}
+              onClick={() => setPocketThumbSize(size)}
+              aria-label={`Pocket thumbs ${size}`}
+              title={`Pocket thumbs ${size}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  ))}
 
-   {COLOR_CONTROLS.map(color => (
-  <>
+  {OUTLINE_CONTROLS.map(outline => (
     <button
-      key={`color-${color}`}
+      key={outline}
       type="button"
-      className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-      onClick={() => onToggleColor(color)}
-      aria-label={`Filter ${color}`}
+      className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
+      onClick={() => handleOutlineClick(outline)}
+      aria-label={`Filter outline ${outline}`}
     />
-
-    {color === "none" && setPocketThumbSize && (
-      <div className="ixi-thumb-size-cluster" key="thumb-size-cluster">
-        {["small", "medium", "large"].map(size => (
-          <button
-            key={size}
-            type="button"
-            className={`ixi-thumb-size-button size-${size} ${
-              pocketThumbSize === size ? "active" : ""
-            }`}
-            onClick={() => setPocketThumbSize(size)}
-            aria-label={`Pocket thumbs ${size}`}
-            title={`Pocket thumbs ${size}`}
-          />
-        ))}
-      </div>
-    )}
-  </>
-))}
-
-        {OUTLINE_CONTROLS.map(outline => (
-          <button
-            key={outline}
-            type="button"
-            className={`ixi-relationship-outline outline-${outline} stage-${getOutlineStage(outline)}`}
-            onClick={() => handleOutlineClick(outline)}
-            aria-label={`Filter outline ${outline}`}
-          />
-        ))}
-      </div>
+  ))}
+</div>
 
       {hasAnyRelationship && (
         <div className="ixi-mobile-nav-row">
