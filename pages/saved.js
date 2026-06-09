@@ -1370,11 +1370,24 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   clearMachineDragState();
 }}
   > 
-<div className="ixi-pocket-catch-pad catch-r1" />
-    <div className="ixi-pocket-window" />
-
-  
-    
+<WorkspaceDropPad
+  id="pocketRight"
+  data-pocket-pad-target="pocketRight"
+  className="ixi-pocket-catch-pad catch-r1"
+  style={{
+    position: "absolute",
+    right: 0,
+    left: "auto",
+    top: "92px",
+    width: "360px",
+    height: "140px",
+    pointerEvents: "auto",
+    zIndex: 1,
+    background: "rgba(255,196,0,.035)",
+    outline: "1px dashed rgba(255,196,0,.16)"
+  }}
+/>
+   
   <div
   className={`ixi-pocket-action-rail right ${
   (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
