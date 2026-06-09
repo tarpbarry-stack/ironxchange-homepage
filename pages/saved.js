@@ -1573,7 +1573,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     position: "fixed",
     right: 0,
     left: "auto",
-    top: "430px",
+    top: "420px",
     width: "150px",
     height: "calc(100vh - 430px)",
     pointerEvents: "auto",
