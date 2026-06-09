@@ -106,9 +106,10 @@ export default function IXIRelationshipControls({
         />
       </div>
 
-    {COLOR_CONTROLS.map(color => (
-  <React.Fragment key={color}>
+   {COLOR_CONTROLS.map(color => (
+  <>
     <button
+      key={`color-${color}`}
       type="button"
       className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
       onClick={() => onToggleColor(color)}
@@ -116,7 +117,7 @@ export default function IXIRelationshipControls({
     />
 
     {color === "none" && setPocketThumbSize && (
-      <div className="ixi-thumb-size-cluster">
+      <div className="ixi-thumb-size-cluster" key="thumb-size-cluster">
         {["small", "medium", "large"].map(size => (
           <button
             key={size}
@@ -131,7 +132,7 @@ export default function IXIRelationshipControls({
         ))}
       </div>
     )}
-  </React.Fragment>
+  </>
 ))}
 
         {OUTLINE_CONTROLS.map(outline => (
