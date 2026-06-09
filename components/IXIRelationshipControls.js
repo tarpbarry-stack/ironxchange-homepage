@@ -449,7 +449,7 @@ return (
 
   border-radius: 1px;
 
- background: rgba(255,196,0,.14);
+  background: rgba(255,255,255,.12);
 }
 
 .ixi-thumb-size-toggle.thumb-setting-small span:nth-child(1),
@@ -458,10 +458,9 @@ return (
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(1),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(2),
 .ixi-thumb-size-toggle.thumb-setting-large span:nth-child(3) {
- background: rgba(255,196,0,.58);
+  background: rgba(255,255,255,.28);
 
-  box-shadow:
-  0 0 4px rgba(255,196,0,.12);
+  box-shadow: none;
 }
 
 .ixi-color-with-thumb {
