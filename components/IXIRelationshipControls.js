@@ -435,25 +435,32 @@ return (
         }
 
         .stage-exists {
-          opacity: .82;
-          filter: grayscale(.05);
+  opacity: .46;
+  filter: grayscale(.35);
 
-          box-shadow:
-            0 0 10px rgba(255,255,255,.06);
-        }
+  box-shadow: none;
+}
 
-        .stage-selected {
-          opacity: 1;
-          filter: grayscale(0);
+.ixi-relationship-shell.revealed .stage-exists {
+  opacity: .58;
+  filter: grayscale(.22);
 
-          transform: translateY(-1px);
+  box-shadow:
+    0 0 6px rgba(255,255,255,.035);
+}
 
-          border-color: rgba(255,196,0,.46);
+.stage-selected {
+  opacity: 1;
+  filter: grayscale(0);
 
-          box-shadow:
-            0 0 0 1px rgba(255,196,0,.22),
-            0 0 18px rgba(255,196,0,.28);
-        }
+  transform: translateY(-1px);
+
+  border-color: rgba(255,196,0,.62);
+
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.34),
+    0 0 12px rgba(255,196,0,.26);
+}
 
         .ixi-relationship-outline.stage-dead {
           opacity: .16;
