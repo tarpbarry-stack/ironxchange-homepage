@@ -91,10 +91,8 @@ function handleWorkspaceDragEnd(event) {
      const pocketTargetMap = {
     pocketLeft: "pocketLeft",
     pocketLeft2: "pocketLeft2",
-    pocketLeft2Top: "pocketLeft2",
     pocketRight: "pocketRight",
     pocketRight2: "pocketRight2",
-    pocketRight2Top: "pocketRight2"
   };
 
   const stackTargets = [
@@ -1227,22 +1225,6 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     outline: "1px dashed rgba(0,194,255,.22)"
   }}
 />
-
-  <WorkspaceDropPad
-  id="pocketLeft2Top"
-  className="ixi-pocket-catch-pad"
-  style={{
-    position: "absolute",
-    left: 0,
-    top: "50px",
-    width: "340px",
-    height: "140px",
-    pointerEvents: "auto",
-    zIndex: 2,
-    background: "rgba(0,194,255,.025)",
-    outline: "1px dashed rgba(0,194,255,.12)"
-  }}
-/>
   
 
   <div
@@ -2313,11 +2295,6 @@ box-shadow: none;
 
   position: relative;
   z-index: 2;
-}
-
-.ixi-pocket-l2,
-.ixi-pocket-r2 {
-  top: -35px;
 }
 
 
