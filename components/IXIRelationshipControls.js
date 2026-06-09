@@ -437,7 +437,7 @@ return (
   cursor: pointer;
 
   position: relative;
-  top: -1px;
+  top: 0px;
   left: 3px;
 }
 
