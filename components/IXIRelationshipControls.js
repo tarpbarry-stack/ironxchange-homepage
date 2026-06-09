@@ -518,15 +518,16 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-relationship-controls {
-          width: max-content;
+          width: 100%;
           max-width: 100%;
+
           margin: 0 auto;
           padding: 0;
           display: flex;
           flex-wrap: nowrap;
           justify-content: center;
           align-items: center;
-          gap: 14px;
+          gap: clamp(5px, 1.15vw, 14px);
         }
 
         .ixi-relationship-color,
