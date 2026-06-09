@@ -56,7 +56,10 @@ export default function IXIRelationshipControls({
   setPocketThumbSize = null
 }) {
   
+ }) {
+  
   const [railRevealed, setRailRevealed] = useState(false);
+  const [armedPocket, setArmedPocket] = useState(null);
 
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
@@ -65,11 +68,19 @@ export default function IXIRelationshipControls({
     isRealColor(state?.color) || isRealOutline(state?.outline)
   );
 
-  function toggleRailReveal() {
-    setRailRevealed(current => !current);
-  }
+ function toggleRailReveal() {
+  setRailRevealed(current => !current);
+}
 
-  function getColorStage(color) {
+function togglePocketArm(pocketId) {
+  setArmedPocket(current =>
+    current === pocketId
+      ? null
+      : pocketId
+  );
+}
+
+function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
     if (existingColors.has(color)) return "exists";
     return "dead";
@@ -108,13 +119,47 @@ return (
 
 <div className="ixi-pocket-indicator-row">
   <div className="ixi-pocket-indicator-stack left">
-    <button type="button" className="ixi-pocket-indicator pocket-left-top" />
-    <button type="button" className="ixi-pocket-indicator pocket-left-bottom" />
+    <button
+      type="button"
+      className={`ixi-pocket-indicator pocket-left-top ${
+        armedPocket === "LT" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("LT")}
+      aria-label="Arm left top pocket"
+      title="Left Top Pocket"
+    />
+
+    <button
+      type="button"
+      className={`ixi-pocket-indicator pocket-left-bottom ${
+        armedPocket === "LB" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("LB")}
+      aria-label="Arm left bottom pocket"
+      title="Left Bottom Pocket"
+    />
   </div>
 
   <div className="ixi-pocket-indicator-stack right">
-    <button type="button" className="ixi-pocket-indicator pocket-right-top" />
-    <button type="button" className="ixi-pocket-indicator pocket-right-bottom" />
+    <button
+      type="button"
+      className={`ixi-pocket-indicator pocket-right-top ${
+        armedPocket === "RT" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("RT")}
+      aria-label="Arm right top pocket"
+      title="Right Top Pocket"
+    />
+
+    <button
+      type="button"
+      className={`ixi-pocket-indicator pocket-right-bottom ${
+        armedPocket === "RB" ? "armed" : ""
+      }`}
+      onClick={() => togglePocketArm("RB")}
+      aria-label="Arm right bottom pocket"
+      title="Right Bottom Pocket"
+    />
   </div>
 </div>
           
@@ -236,10 +281,31 @@ return (
   padding: 0;
   pointer-events: auto;
   cursor: pointer;
+
+  transition:
+    background .16s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
 }
 
 .ixi-relationship-shell.revealed .ixi-pocket-indicator {
   background: rgba(255,255,255,.18);
+}
+
+.ixi-pocket-indicator.armed {
+  background: rgba(0,194,255,.85);
+
+  box-shadow:
+    0 0 4px rgba(0,194,255,.35),
+    0 0 10px rgba(0,194,255,.18);
+}
+
+.ixi-relationship-shell.revealed .ixi-pocket-indicator.armed {
+  background: rgba(0,194,255,.95);
+
+  box-shadow:
+    0 0 5px rgba(0,194,255,.45),
+    0 0 12px rgba(0,194,255,.24);
 }
 
         .ixi-relationship-power {
