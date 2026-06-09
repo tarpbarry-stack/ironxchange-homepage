@@ -53,8 +53,6 @@ export default function IXSearchSurface({
    onClear = null,
   listings = [],
   hasRelationship = false,
-  pocketThumbSize = "medium",
-  setPocketThumbSize = null
 }) {
 
   const sortOptions = [
@@ -181,20 +179,6 @@ const [panelLit, setPanelLit] = useState(false);
   <span>IXSearchSurface™</span>
 
   <div className="desktop-panel-actions">
-    {setPocketThumbSize && (
-      <div className="pocket-thumb-size-control">
-        {["small", "medium", "large"].map(size => (
-          <button
-            key={size}
-            type="button"
-            className={pocketThumbSize === size ? "active" : ""}
-            onClick={() => setPocketThumbSize(size)}
-            aria-label={`Pocket thumbs ${size}`}
-            title={`Pocket thumbs ${size}`}
-          />
-        ))}
-      </div>
-    )}
 
     <button
       type="button"
@@ -389,36 +373,6 @@ const [panelLit, setPanelLit] = useState(false);
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.pocket-thumb-size-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pocket-thumb-size-control button {
-  width: 12px;
-  height: 4px;
-
-  border: 0;
-  border-radius: 2px;
-
-  background: rgba(255,255,255,.12);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-.pocket-thumb-size-control button.active {
-  background: rgba(255,196,0,.86);
-
-  box-shadow:
-    0 0 7px rgba(255,196,0,.22);
-}
-
-.pocket-thumb-size-control button:hover {
-  background: rgba(255,255,255,.28);
 }
 
 .ix-search-surface.lit .desktop-panel-head span {
