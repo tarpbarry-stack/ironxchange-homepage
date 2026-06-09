@@ -340,8 +340,8 @@ export default function IXIRelationshipControls({
 
         .ixi-active-stack-button {
   position: relative;
-  top: 15px;
-  left: 13px;
+  top: 12px;
+  left: 21px;
  
   width: 12px;
   height: 12px;
