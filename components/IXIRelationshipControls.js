@@ -238,6 +238,10 @@ return (
   cursor: pointer;
 }
 
+.ixi-relationship-shell.revealed .ixi-pocket-indicator {
+  background: rgba(255,255,255,.18);
+}
+
         .ixi-relationship-power {
           width: 18px;
           height: 4px;
