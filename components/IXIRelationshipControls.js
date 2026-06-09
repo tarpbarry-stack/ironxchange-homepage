@@ -237,25 +237,32 @@ return (
           margin: 0 auto 4px;
         }
 
-        .ixi-relationship-head span {
-          opacity: 0;
+       .ixi-relationship-head span {
+  opacity: 0;
 
-          color: rgba(255,196,0,.82);
+  color: rgba(255,196,0,.82);
 
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .65px;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .65px;
 
-          transition: opacity .18s ease;
-        }
+  transition:
+    opacity .42s ease,
+    color .42s ease,
+    text-shadow .42s ease;
+}
 
         .ixi-relationship-shell.machine-hinted .ixi-relationship-head span {
-        opacity: .42;
-        }
+  opacity: .38;
+  color: rgba(255,196,0,.48);
+  text-shadow: none;
+}
 
         .ixi-relationship-shell.revealed .ixi-relationship-head span {
-          opacity: 1;
-        }
+  opacity: 1;
+  color: rgba(255,196,0,.82);
+  text-shadow: 0 0 8px rgba(255,196,0,.16);
+}
 
       .ixi-pocket-indicator-row {
   width: 100%;
