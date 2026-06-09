@@ -56,8 +56,6 @@ export default function IXIRelationshipControls({
   setPocketThumbSize = null
 }) {
   
- }) {
-  
   const [railRevealed, setRailRevealed] = useState(false);
   const [armedPocket, setArmedPocket] = useState(null);
 
