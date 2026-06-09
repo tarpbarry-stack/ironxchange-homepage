@@ -74,12 +74,33 @@ function WorkspaceDropPad({
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
   
-  function handleWorkspaceDragEnd(event) {
-  console.log(
-    "DND",
-    event?.active?.id,
-    event?.over?.id
-  );
+ function handleWorkspaceDragEnd(event) {
+  const dragId = event?.active?.id;
+  const overId = event?.over?.id;
+
+  if (!dragId || !overId) {
+    clearMachineDragState();
+    return;
+  }
+
+  const pocketTargets = [
+    "pocketLeft",
+    "pocketLeft2",
+    "pocketRight",
+    "pocketRight2"
+  ];
+
+  if (pocketTargets.includes(String(overId))) {
+    moveMachineToContainer(
+      String(dragId),
+      String(overId)
+    );
+
+    clearMachineDragState();
+    return;
+  }
+
+  clearMachineDragState();
 }
   
   const [savedIds, setSavedIds] = useState([]);
