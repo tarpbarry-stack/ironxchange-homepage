@@ -1914,13 +1914,13 @@ onBoardDragEnd={() => {}}
         </section>
 
         {visibleSavedListings.length === 0 && (
-          <div className="empty">
-            <h3>No saved machines found.</h3>
-            <p>
-              Save machines from Browse, then work them here inside the IXI Workspace.
-            </p>
-          </div>
-        )}
+  <div className="empty">
+    <h3>HELP US BUILD OUR MARKETPLACE</h3>
+    <p>
+      Touch a machine. Create a relationship. Machines will appear here.
+    </p>
+  </div>
+)}
               </main>
       </DndContext>
 
