@@ -299,7 +299,7 @@ export default function IXIRelationshipControls({
           display: grid;
           gap: 20px;
           position: relative;
-          top: 13px;
+          top: 18px;
         }
 
         .ixi-theater-button {
