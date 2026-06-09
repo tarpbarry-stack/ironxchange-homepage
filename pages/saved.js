@@ -74,9 +74,14 @@ function WorkspaceDropPad({
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
   
- function handleWorkspaceDragEnd(event) {
+function handleWorkspaceDragEnd(event) {
   const dragId = event?.active?.id;
   const overId = event?.over?.id;
+
+  console.log("IXI DND DROP", {
+    dragId,
+    overId
+  });
 
   if (!dragId || !overId) {
     clearMachineDragState();
