@@ -123,15 +123,6 @@ return (
 
 <div className="ixi-pocket-indicator-row">
   <div className="ixi-pocket-left-cluster">
-    <button
-      type="button"
-      className="ixi-theater-button"
-      aria-label="IXI Theater"
-      title="IXI Theater"
-    >
-      T
-    </button>
-
     <div className="ixi-pocket-indicator-stack left">
       <button
         type="button"
@@ -153,6 +144,15 @@ return (
         title="Left Bottom Pocket"
       />
     </div>
+
+    <button
+      type="button"
+      className="ixi-theater-button"
+      aria-label="IXI Theater"
+      title="IXI Theater"
+    >
+      <span>T</span>
+    </button>
   </div>
 
   <div className="ixi-pocket-right-cluster">
@@ -191,20 +191,6 @@ return (
     </div>
   </div>
 </div>
-          
-<div className="ixi-relationship-controls">
-         
-  {COLOR_CONTROLS.map(color => (
-    <div key={color} className="ixi-color-with-thumb">
-      <button
-        type="button"
-        className={`ixi-relationship-color color-${color} stage-${getColorStage(color)}`}
-        onClick={() => onToggleColor(color)}
-        aria-label={`Filter ${color}`}
-      />
-    </div>
-  ))}
-
   {OUTLINE_CONTROLS.map(outline => (
     <button
       key={outline}
