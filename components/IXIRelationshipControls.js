@@ -106,6 +106,18 @@ return (
       />
     </div>
 
+<div className="ixi-pocket-indicator-row">
+  <div className="ixi-pocket-indicator-stack left">
+    <button type="button" className="ixi-pocket-indicator pocket-left-top" />
+    <button type="button" className="ixi-pocket-indicator pocket-left-bottom" />
+  </div>
+
+  <div className="ixi-pocket-indicator-stack right">
+    <button type="button" className="ixi-pocket-indicator pocket-right-top" />
+    <button type="button" className="ixi-pocket-indicator pocket-right-bottom" />
+  </div>
+</div>
+          
    <div className="ixi-relationship-controls">
           {setPocketThumbSize && (
   <button
@@ -190,6 +202,37 @@ return (
         .ixi-relationship-shell.revealed .ixi-relationship-head span {
           opacity: 1;
         }
+
+        .ixi-pocket-indicator-row {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin: 0 auto 2px;
+
+  pointer-events: none;
+}
+
+.ixi-pocket-indicator-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.ixi-pocket-indicator {
+  width: 9px;
+  height: 2px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.16);
+
+  padding: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
 
         .ixi-relationship-power {
           width: 18px;
