@@ -25,7 +25,7 @@ import IXIControlSurface from "../components/IXIControlSurface";
 
 import {
   fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,{visibleSavedListings.map(item => {
+  getSavedListingIdsFromUser,
   filterSavedListings,
   toggleSavedListing
 } from "../lib/savedListings";
