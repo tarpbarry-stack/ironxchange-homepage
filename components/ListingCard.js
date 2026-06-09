@@ -75,6 +75,7 @@ isGhostTarget = false,
 onBoardDragStart,
 onBoardDragOver,
 onBoardDragEnd,
+useDndDrag = false,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
