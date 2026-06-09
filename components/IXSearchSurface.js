@@ -344,6 +344,10 @@ const [panelLit, setPanelLit] = useState(false);
 .ix-search-surface {
   width: 100%;
   max-width: 100%;
+
+  position: relative;
+  top: -3px;
+
   margin: 0 auto;
 }
 
