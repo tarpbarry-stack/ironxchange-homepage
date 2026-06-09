@@ -420,42 +420,46 @@ return (
           text-shadow: 0 0 8px rgba(0,194,255,.22);
         }
 
-        .ixi-thumb-size-cluster {
-  display: grid;
-  grid-template-columns: repeat(3, 8px);
+        ..ixi-thumb-size-cluster {
+  display: flex;
+  align-items: flex-end;
   gap: 4px;
-  align-items: center;
-  justify-content: center;
-  margin-left: -6px;
-  margin-right: -2px;
+
+  height: 8px;
+
+  margin-right: 7px;
+  margin-left: 0;
 }
 
 .ixi-thumb-size-button {
-  border: 1px solid rgba(255,196,0,.30);
-  border-radius: 2px;
-  background: rgba(255,196,0,.18);
+  width: 3px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(0,194,255,.36);
+
   padding: 0;
   cursor: pointer;
 }
 
 .ixi-thumb-size-button.size-small {
-  width: 2px;
   height: 2px;
 }
 
 .ixi-thumb-size-button.size-medium {
-  width: 3px;
-  height: 2px;
+  height: 4px;
 }
 
 .ixi-thumb-size-button.size-large {
-  width: 4px;
-  height: 2px;
+  height: 8px;
 }
+
 .ixi-thumb-size-button.active {
-  background: rgba(255,196,0,.95);
-  border-color: rgba(255,196,0,.98);
-  box-shadow: 0 0 7px rgba(255,196,0,.30);
+  background: rgba(0,194,255,.95);
+
+  box-shadow:
+    0 0 6px rgba(0,194,255,.26);
 }
 
         @media (max-width: 850px) {
