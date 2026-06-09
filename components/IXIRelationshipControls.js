@@ -263,7 +263,7 @@ export default function IXIRelationshipControls({
         .ixi-relationship-head span {
           opacity: 0;
           color: rgba(255,196,0,.82);
-          font-size: 8px;
+          font-size: 7px;
           font-weight: 950;
           letter-spacing: .65px;
           transition:
