@@ -272,6 +272,7 @@ function handleCardClick() {
 
 return (
   <div
+    ref={setNodeRef}
     data-listing-card-id={id}
     className={`card board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
