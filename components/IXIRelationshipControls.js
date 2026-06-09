@@ -203,21 +203,19 @@ return (
           opacity: 1;
         }
 
-        .ixi-pocket-indicator-row {
+      .ixi-pocket-indicator-row {
   width: 100%;
 
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
-  margin: 0 auto 2px;
-
-  pointer-events: none;
+  margin: 20px auto 2px;
 }
 
 .ixi-pocket-indicator-stack {
   display: grid;
-  gap: 4px;
+  gap: 10px;
 }
 
 .ixi-pocket-indicator {
