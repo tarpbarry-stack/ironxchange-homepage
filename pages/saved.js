@@ -2444,7 +2444,7 @@ box-shadow: none;
 
   left: 0;
   right: auto;
-  top: 420px;
+  top: 405px;
 
   width: 150px;
   height: calc(100vh - 420px);
