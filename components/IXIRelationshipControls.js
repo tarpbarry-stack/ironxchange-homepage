@@ -222,7 +222,7 @@ return (
   gap: 20px;
 
   position: relative;
-  top: 15px;
+  top: 13px;
 }
 .ixi-pocket-indicator {
   width: 9px;
