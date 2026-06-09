@@ -1311,7 +1311,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
           return (
             <div
              key={`left-pocket-2-thumb-${machineId}`}
-className="ixi-pocket-thumb edge-stage-thumb"
+className="ixi-pocket-thumb"
 draggable
 onDragStart={(e) => {
   e.stopPropagation();
@@ -1319,7 +1319,7 @@ onDragStart={(e) => {
 }}
 onDragEnd={handleBoardDragEnd}
 style={{
-  right: `${index * 14}px`,
+  right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
     ixiCardState[String(machineId)]?.color
@@ -2547,13 +2547,6 @@ box-shadow: none;
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.ixi-pocket-l2 .ixi-pocket-thumb.edge-stage-thumb {
-  transform: rotate(-78deg) translateY(18px) !important;
-  transform-origin: right bottom !important;
-  opacity: .86 !important;
-  z-index: 80;
 }
 
 .ixi-pocket-l2 .ixi-pocket-thumbs {
