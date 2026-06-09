@@ -90,8 +90,18 @@ export default function SavedListings() {
     "pocketRight2"
   ];
 
-  if (pocketTargets.includes(String(overId))) {
+   if (pocketTargets.includes(String(overId))) {
     moveMachineToContainer(
+      String(dragId),
+      String(overId)
+    );
+
+    clearMachineDragState();
+    return;
+  }
+
+  if (String(dragId) !== String(overId)) {
+    moveListingToSlot(
       String(dragId),
       String(overId)
     );
