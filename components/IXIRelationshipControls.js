@@ -479,17 +479,25 @@ return (
           background: rgba(255,255,255,.14);
         }
 
-        .ixi-relationship-outline.stage-exists {
-          opacity: .82;
-          border-color: rgba(255,255,255,.14);
+       .ixi-relationship-outline.stage-exists {
+  opacity: .52;
+  border-color: rgba(255,255,255,.095);
 
-          box-shadow:
-            0 0 10px rgba(255,255,255,.06);
-        }
+  box-shadow: none;
+}
 
-        .ixi-relationship-outline.stage-exists::after {
-          background: rgba(255,255,255,.58);
-        }
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-exists {
+  opacity: .62;
+  border-color: rgba(255,255,255,.12);
+
+  box-shadow:
+    0 0 6px rgba(255,255,255,.035);
+}
+
+.ixi-relationship-outline.stage-exists::after {
+  background: rgba(255,255,255,.38);
+}
 
         .ixi-relationship-outline.stage-selected {
           opacity: 1;
