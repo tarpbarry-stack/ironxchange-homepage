@@ -2312,7 +2312,7 @@ box-shadow: none;
 }
 
 .ixi-pocket-r2 {
-  transform: translateY(-15px);
+  top: -25px;
 }
 
 .ixi-pocket-l2 {
