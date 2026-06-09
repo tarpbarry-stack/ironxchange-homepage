@@ -141,6 +141,15 @@ export default function IXIRelationshipControls({
           </button>
         </div>
 
+<button
+  type="button"
+  className="ixi-active-stack-button"
+  aria-label="Active stack"
+  title="Active Stack"
+>
+  <span>A</span>
+</button>
+
         <div className="ixi-pocket-right-cluster">
           <button
             type="button"
@@ -328,6 +337,56 @@ export default function IXIRelationshipControls({
             text-shadow .18s ease,
             transform .18s ease;
         }
+
+        .ixi-active-stack-button {
+  position: relative;
+  top: 18px;
+  left: 22px;
+
+  width: 12px;
+  height: 12px;
+
+  border: 1px solid rgba(255,255,255,0);
+  background: transparent;
+
+  color: rgba(255,255,255,0);
+
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+
+  opacity: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 8px;
+  font-weight: 950;
+  line-height: 1;
+
+  transition:
+    opacity .18s ease,
+    color .18s ease,
+    border-color .18s ease,
+    text-shadow .18s ease,
+    transform .18s ease;
+}
+
+.ixi-relationship-shell.revealed .ixi-active-stack-button {
+  opacity: 1;
+  color: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.10);
+}
+
+.ixi-relationship-shell.revealed .ixi-active-stack-button:hover {
+  color: rgba(0,194,255,.55);
+  border-color: rgba(0,194,255,.42);
+  transform: translateY(-1px);
+  text-shadow: 0 0 5px rgba(0,194,255,.18);
+}
+
+        
 
         .ixi-relationship-shell.revealed .ixi-theater-button {
           opacity: 1;
