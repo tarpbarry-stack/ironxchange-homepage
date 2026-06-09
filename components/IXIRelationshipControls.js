@@ -245,19 +245,12 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-       .ixi-relationship-shell {
+      .ixi-relationship-shell {
   width: 100%;
   max-width: 100%;
   margin: 14px auto 0;
 
   overflow: hidden;
-
-  --ixi-control-gap: clamp(6px, 1vw, 12px);
-  --ixi-square-size: clamp(9px, 1vw, 12px);
-  --ixi-square-font: clamp(6px, .72vw, 8px);
-  --ixi-pocket-width: clamp(10px, 1.15vw, 14px);
-  --ixi-pocket-height: clamp(2px, .32vw, 4px);
-  --ixi-thumb-width: clamp(14px, 1.6vw, 18px);
 }
 
     .ixi-relationship-head {
@@ -297,8 +290,8 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-pocket-indicator-row {
-  width: 100%;
-  height: 12px;
+ width: 14px;
+height: 4px;
 
   display: flex;
   align-items: flex-end;
@@ -313,7 +306,7 @@ export default function IXIRelationshipControls({
 .ixi-pocket-right-cluster {
   display: flex;
   align-items: flex-end;
-  gap: var(--ixi-control-gap);
+  gap: 12px;
   position: relative;
 }
 
@@ -526,18 +519,20 @@ export default function IXIRelationshipControls({
           box-shadow: 0 0 8px rgba(255,196,0,.42);
         }
 
-        .ixi-relationship-controls {
-          width: 100%;
-          max-width: 100%;
+       .ixi-relationship-controls {
+  width: 100%;
+  max-width: 100%;
 
-          margin: 0 auto;
-          padding: 0;
-          display: flex;
-          flex-wrap: nowrap;
-          justify-content: center;
-          align-items: center;
-          gap: clamp(5px, 1.15vw, 14px);
-        }
+  margin: 0 auto;
+  padding: 0;
+
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  gap: 14px;
+}
 
         .ixi-relationship-color,
         .ixi-relationship-outline {
@@ -750,7 +745,7 @@ export default function IXIRelationshipControls({
 }
 
 .ixi-thumb-size-toggle span {
-   width: var(--ixi-thumb-width);
+  width: 18px;
   height: 2px;
 
   display: block;
@@ -801,6 +796,25 @@ export default function IXIRelationshipControls({
   background: rgba(255,255,255,.32);
   box-shadow: none;
 }
+         
+       @media (max-width: 900px) {
+  .ixi-relationship-controls {
+    gap: 9px;
+  }
+
+  .ixi-relationship-color {
+    width: 16px;
+  }
+
+  .ixi-relationship-outline {
+    width: 20px;
+  }
+
+  .ixi-pocket-left-cluster,
+  .ixi-pocket-right-cluster {
+    gap: 8px;
+  }
+         
         @media (max-width: 850px) {
           .ixi-relationship-shell {
             width: 100%;
