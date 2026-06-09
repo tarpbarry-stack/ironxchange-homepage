@@ -2315,6 +2315,10 @@ box-shadow: none;
   transform: translateY(-15px);
 }
 
+.ixi-pocket-l2 {
+  top: -25px;
+}
+
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
