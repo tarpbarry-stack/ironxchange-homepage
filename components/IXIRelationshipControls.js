@@ -437,7 +437,7 @@ return (
   cursor: pointer;
 
   position: relative;
-  top: 1px;
+  top: -2px;
 }
 
 .ixi-thumb-size-toggle span {
