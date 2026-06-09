@@ -1209,6 +1209,22 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     outline: "1px dashed rgba(0,194,255,.22)"
   }}
 />
+
+  <WorkspaceDropPad
+  id="pocketLeft2Top"
+  className="ixi-pocket-catch-pad"
+  style={{
+    position: "absolute",
+    left: 0,
+    top: "180px",
+    width: "180px",
+    height: "120px",
+    pointerEvents: "auto",
+    zIndex: 2,
+    background: "rgba(0,194,255,.025)",
+    outline: "1px dashed rgba(0,194,255,.12)"
+  }}
+/>
   
   <div className="ixi-pocket-window" />
 
