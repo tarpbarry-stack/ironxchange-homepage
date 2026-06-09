@@ -736,7 +736,7 @@ export default function IXIRelationshipControls({
   cursor: pointer;
 
   position: relative;
-  top: 4px;
+  top: 1px;
   left: 6px;
 }
 
