@@ -245,13 +245,11 @@ export default function IXIRelationshipControls({
       )}
 
       <style jsx>{`
-      .ixi-relationship-shell {
-  width: 100%;
-  max-width: 100%;
-  margin: 14px auto 0;
-
-  overflow: hidden;
-}
+        .ixi-relationship-shell {
+          width: 100%;
+          max-width: 100%;
+          margin: 14px auto 0;
+        }
 
     .ixi-relationship-head {
   height: 10px;
@@ -290,8 +288,8 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-pocket-indicator-row {
- width: 14px;
-height: 4px;
+  width: 100%;
+  height: 12px;
 
   display: flex;
   align-items: flex-end;
@@ -302,13 +300,13 @@ height: 4px;
   pointer-events: none;
 }
 
-     .ixi-pocket-left-cluster,
-.ixi-pocket-right-cluster {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  position: relative;
-}
+        .ixi-pocket-left-cluster,
+        .ixi-pocket-right-cluster {
+          display: flex;
+          align-items: flex-end;
+          gap: 12px;
+          position: relative;
+        }
 
         .ixi-pocket-indicator-stack {
           display: grid;
@@ -321,8 +319,8 @@ height: 4px;
           position: relative;
           top: 13px;
           left: 10px;
-          width: var(--ixi-square-size);
-          height: var(--ixi-square-size);
+          width: 12px;
+          height: 12px;
           border: 1px solid rgba(255,255,255,0);
           background: transparent;
           color: rgba(255,255,255,0);
@@ -333,7 +331,7 @@ height: 4px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: var(--ixi-square-font);
+          font-size: 8px;
           font-weight: 950;
           line-height: 1;
           transition:
@@ -458,8 +456,8 @@ height: 4px;
         }
 
         .ixi-pocket-indicator {
-          width: var(--ixi-pocket-width);
-          height: var(--ixi-pocket-height);
+          width: 10px;
+          height: 4px;
           border: 0;
           border-radius: 1px;
           background: rgba(255,255,255,.045);
@@ -519,20 +517,18 @@ height: 4px;
           box-shadow: 0 0 8px rgba(255,196,0,.42);
         }
 
-       .ixi-relationship-controls {
-  width: 100%;
-  max-width: 100%;
+        .ixi-relationship-controls {
+          width: 100%;
+          max-width: 100%;
 
-  margin: 0 auto;
-  padding: 0;
-
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-
-  gap: 14px;
-}
+          margin: 0 auto;
+          padding: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: center;
+          align-items: center;
+          gap: clamp(5px, 1.15vw, 14px);
+        }
 
         .ixi-relationship-color,
         .ixi-relationship-outline {
@@ -796,25 +792,6 @@ height: 4px;
   background: rgba(255,255,255,.32);
   box-shadow: none;
 }
-         
-       @media (max-width: 900px) {
-  .ixi-relationship-controls {
-    gap: 9px;
-  }
-
-  .ixi-relationship-color {
-    width: 16px;
-  }
-
-  .ixi-relationship-outline {
-    width: 20px;
-  }
-
-  .ixi-pocket-left-cluster,
-  .ixi-pocket-right-cluster {
-    gap: 8px;
-  }
-         
         @media (max-width: 850px) {
           .ixi-relationship-shell {
             width: 100%;
