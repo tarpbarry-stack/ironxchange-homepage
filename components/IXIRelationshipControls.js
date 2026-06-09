@@ -144,6 +144,7 @@ return (
     />
   </div>
 
+<div className="ixi-pocket-right-cluster">
   <div className="ixi-pocket-indicator-stack right">
     <button
       type="button"
@@ -164,14 +165,14 @@ return (
       aria-label="Arm right bottom pocket"
       title="Right Bottom Pocket"
     />
-   </div>
+  </div>
 
   <button
-  type="button"
-  className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-  onClick={() => setParkBrakeOn(current => !current)}
-  aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
-  title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+    type="button"
+    className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+    onClick={() => setParkBrakeOn(current => !current)}
+    aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+    title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
   >
     <span className="park-left">(</span>
     <span className="park-core">P</span>
