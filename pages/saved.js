@@ -2315,6 +2315,10 @@ box-shadow: none;
   z-index: 2;
 }
 
+.ixi-pocket-l2,
+.ixi-pocket-r2 {
+  top: -35px;
+}
 
 
 /* =============================== */
