@@ -2311,6 +2311,10 @@ box-shadow: none;
   cursor: default !important;
 }
 
+.ixi-pocket-r2 {
+  top: -15px;
+}
+
 @keyframes ixiPocketPulse {
   0%, 100% {
     opacity: .48;
