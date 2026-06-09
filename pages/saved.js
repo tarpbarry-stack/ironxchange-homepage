@@ -1217,7 +1217,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     position: "absolute",
     left: 0,
     top: "50px",
-    width: "180px",
+    width: "320px",
     height: "80px",
     pointerEvents: "auto",
     zIndex: 2,
