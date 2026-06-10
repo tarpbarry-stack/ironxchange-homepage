@@ -1152,7 +1152,20 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 >
  <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 
-<button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
+<button
+  type="button"
+  className="ixi-pocket-rail-action stack"
+  data-label="ACTIVE STACK"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    movePocketToStack(
+      "pocketLeft",
+      "top"
+    );
+  }}
+/>
 
 <button
   type="button"
@@ -1317,8 +1330,20 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   >
     <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 
-    <button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
+    <button
+  type="button"
+  className="ixi-pocket-rail-action stack"
+  data-label="ACTIVE STACK"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
+    movePocketToStack(
+      "pocketLeft2",
+      "bottom"
+    );
+  }}
+/>
     <button
       type="button"
       className="ixi-pocket-rail-action board"
@@ -1526,7 +1551,20 @@ style={{
   }}
 />
 
-<button type="button" className="ixi-pocket-rail-action stack" data-label="ACTIVE STACK" />
+<button
+  type="button"
+  className="ixi-pocket-rail-action stack"
+  data-label="ACTIVE STACK"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    movePocketToStack(
+      "pocketRight",
+      "top"
+    );
+  }}
+/>
 
 <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
 </div>
@@ -1690,11 +1728,20 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       }}
     />
 
-    <button
-      type="button"
-      className="ixi-pocket-rail-action stack"
-      data-label="ACTIVE STACK"
-    />
+   <button
+  type="button"
+  className="ixi-pocket-rail-action stack"
+  data-label="ACTIVE STACK"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    movePocketToStack(
+      "pocketRight2",
+      "bottom"
+    );
+  }}
+/>
 
     <button
       type="button"
