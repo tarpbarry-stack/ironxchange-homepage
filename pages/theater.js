@@ -1039,7 +1039,7 @@ margin-top: -55px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 
-  column-gap: 10px;
+  column-gap: 8px;
   row-gap: 0px;
 }
 
@@ -1051,8 +1051,11 @@ margin-top: -55px;
 }
 
 .theater-stack-shell {
-  height: 117px;
+  width: calc(100% - 5px);
+  justify-self: center;
 
+  height: 117px;
+  
   position: relative;
 
   border: 1px solid rgba(255,255,255,.055);
