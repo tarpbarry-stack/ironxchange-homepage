@@ -3163,6 +3163,55 @@ outline: none;
   transform: translateX(8px);
 }
 
+:global(.active-stack-pocket-corners) {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+  z-index: 42;
+}
+
+:global(.stack-pocket-cmd) {
+  position: absolute;
+
+  width: 30px;
+  height: 5px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,196,0,.42);
+
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+:global(.stack-pocket-cmd:hover) {
+  background: rgba(255,196,0,.92);
+  box-shadow: 0 0 8px rgba(255,196,0,.24);
+}
+
+:global(.stack-pocket-cmd.top-left) {
+  top: 12px;
+  left: 14px;
+}
+
+:global(.stack-pocket-cmd.top-right) {
+  top: 12px;
+  right: 14px;
+}
+
+:global(.stack-pocket-cmd.bottom-left) {
+  bottom: 12px;
+  left: 14px;
+}
+
+:global(.stack-pocket-cmd.bottom-right) {
+  bottom: 12px;
+  right: 14px;
+}
+
         .cards {
           max-width: 1920px;
           margin: 0 auto;
