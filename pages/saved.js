@@ -991,7 +991,7 @@ function addListingToLeftPocket(listingId) {
   );
 }
 
- function movePocketToContainer(pocketKey, targetContainer) {
+function movePocketToContainer(pocketKey, targetContainer) {
   if (!pocketKey || !targetContainer) return;
 
   const pocketIds = machineContainers[pocketKey] || [];
@@ -1002,6 +1002,23 @@ function addListingToLeftPocket(listingId) {
       targetContainer
     );
   });
+}
+
+function movePocketToStack(pocketKey, stackKey) {
+  const targetContainer =
+    stackKey === "top"
+      ? "stackTop"
+      : "stackBottom";
+
+  movePocketToContainer(
+    pocketKey,
+    targetContainer
+  );
+
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: true
+  }));
 }
 
 function recallPocketToBoard(pocketKey) {
