@@ -1040,7 +1040,7 @@ margin-top: -55px;
   grid-template-columns: repeat(3, 1fr);
 
   column-gap: 10px;
-  row-gap: 3px;
+  row-gap: 0px;
 }
 
 .theater-stack-shell:nth-child(-n+3) {
