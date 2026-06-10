@@ -469,10 +469,34 @@ return (
           </div>
 
           <div className="theater-import-zone">
-            <div className="theater-import-placeholder">
-              STACKS / POCKETS / DECKS
-            </div>
-          </div>
+  <div className="theater-stack-grid">
+
+    <div className="theater-stack-slot">
+      <span>STACK 1</span>
+    </div>
+
+    <div className="theater-stack-slot">
+      <span>STACK 2</span>
+    </div>
+
+    <div className="theater-stack-slot">
+      <span>STACK 3</span>
+    </div>
+
+    <div className="theater-stack-slot">
+      <span>STACK 4</span>
+    </div>
+
+    <div className="theater-stack-slot">
+      <span>STACK 5</span>
+    </div>
+
+    <div className="theater-stack-slot">
+      <span>STACK 6</span>
+    </div>
+
+  </div>
+</div>
         </div>
       </section>
           </section>
@@ -1000,9 +1024,19 @@ margin-top: -55px;
   overflow: hidden;
 }
 
-.theater-import-placeholder {
+.theater-stack-grid {
   width: calc(100% - 14px);
-  height: 54px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+}
+
+.theater-stack-slot {
+  height: 82px;
 
   display: flex;
   align-items: center;
@@ -1011,11 +1045,23 @@ margin-top: -55px;
   border: 1px dashed rgba(255,255,255,.10);
   border-radius: 10px;
 
-  color: rgba(255,255,255,.20);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.018),
+      rgba(255,196,0,0)
+    ),
+    rgba(8,8,8,.42);
+
+  color: rgba(255,255,255,.22);
 
   font-size: 8px;
   font-weight: 950;
   letter-spacing: .75px;
+}
+
+.theater-stack-slot span {
+  pointer-events: none;
 }
 
         .theater-room,
