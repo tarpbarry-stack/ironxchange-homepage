@@ -820,7 +820,7 @@ user-select: none;
 position: relative;
 
   padding: 0 0 10px;
-margin-top: -55px;
+margin-top: -75px;
 
   opacity: .12;
   transition: opacity .18s ease;
@@ -910,7 +910,7 @@ margin-top: -55px;
   display: flex;
   gap: 30px;
 
-  margin-top: 93px;
+  margin-top: 75px;
 
   overflow-x: auto;
   overflow-y: hidden;
