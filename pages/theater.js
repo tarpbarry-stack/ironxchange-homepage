@@ -820,7 +820,7 @@ user-select: none;
 position: relative;
 
   padding: 0 0 10px;
-margin-top: -100px;
+margin-top: -25px;
 
   opacity: .12;
   transition: opacity .18s ease;
