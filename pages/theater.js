@@ -1044,7 +1044,7 @@ margin-top: -55px;
 }
 
 .theater-stack-shell {
-  height: 82px;
+  height: 97px;
 
   position: relative;
 
@@ -1130,7 +1130,7 @@ margin-top: -55px;
 .theater-stack-thumb-zone {
   position: absolute;
   left: 50%;
-  bottom: 8px;
+  bottom: 14px;
 
   width: 96px;
   height: 62px;
