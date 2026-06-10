@@ -1048,7 +1048,7 @@ margin-top: -55px;
 }
 
 .theater-stack-grid .theater-stack-shell:nth-child(n+4) {
-  transform: translateY(75px);
+  transform: translateY(60px);
 }
 
 .theater-stack-shell {
