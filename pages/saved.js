@@ -2857,25 +2857,33 @@ outline: none;
 /* =============================== */
 
 .active-stack-zone {
-  width: 100%;
-  max-width: none;
+  width: min(100%, 1320px);
+  max-width: 1320px;
 
-  margin: -10px 0 22px;
+  margin: 10px auto 24px;
 
   display: grid;
-  gap: 12px;
-  align-items: start;
+  grid-template-columns: 1fr;
+  gap: 14px;
+
+  align-items: center;
+  justify-items: center;
+
+  position: relative;
+  z-index: 20;
 }
 
-/* each stack lane */
 .active-stack {
   width: 100%;
   position: relative;
+
+  display: grid;
+  justify-items: center;
 }
 
 /* closed/open dash actuator */
 .active-stack-dash {
-  width: 26px;
+  width: 34px;
   height: 8px;
 
   display: block;
@@ -2927,7 +2935,7 @@ outline: none;
 
 /* visible tray / catch zone */
 .active-stack-tray {
-  width: 100%;
+  width: min(100%, 1180px);
   min-height: 190px;
 
   margin: 8px 0 0;
