@@ -211,6 +211,8 @@ const [rightPocket2Mode, setRightPocket2Mode] = useState("closed");
 const [topRailMode, setTopRailMode] = useState("off");
 
 const [armedDestination, setArmedDestination] = useState("");
+const [activeStackSendMenu, setActiveStackSendMenu] =
+  useState("");
   
 const [stackDraggingId, setStackDraggingId] = useState("");
 const [stackGhostId, setStackGhostId] = useState("");
