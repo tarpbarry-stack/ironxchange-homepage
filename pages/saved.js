@@ -1893,11 +1893,17 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   />
 
   <button
-    type="button"
-    className="stack-rail-action board"
-    data-label="BOARD"
-    title="Send stack to board"
-  />
+  type="button"
+  className="stack-rail-action board"
+  data-label="BOARD"
+  title="Send stack to board"
+  onClick={() =>
+    moveActiveStackToContainer(
+      stackKey,
+      "board"
+    )
+  }
+/>
 
   <button
     type="button"
