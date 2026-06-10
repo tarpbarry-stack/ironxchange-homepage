@@ -472,28 +472,52 @@ return (
   <div className="theater-stack-grid">
 
     <div className="theater-stack-slot">
-      <span>STACK 1</span>
-    </div>
+  <span>STACK 1</span>
+
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
 
     <div className="theater-stack-slot">
-      <span>STACK 2</span>
-    </div>
+  <span>STACK 2</span>
+
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
 
     <div className="theater-stack-slot">
-      <span>STACK 3</span>
-    </div>
+  <span>STACK 3</span>
+
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
 
     <div className="theater-stack-slot">
-      <span>STACK 4</span>
-    </div>
+  <span>STACK 4</span>
+
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
+
+   <div className="theater-stack-slot">
+  <span>STACK 5</span>
+
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
 
     <div className="theater-stack-slot">
-      <span>STACK 5</span>
-    </div>
+  <span>STACK 6</span>
 
-    <div className="theater-stack-slot">
-      <span>STACK 6</span>
-    </div>
+  <div className="theater-stack-thumb">
+    <div className="theater-stack-thumb-head" />
+  </div>
+</div>
 
   </div>
 </div>
@@ -1078,6 +1102,34 @@ margin-top: -55px;
 
 .theater-stack-slot span {
   pointer-events: none;
+}
+.theater-stack-slot {
+  position: relative;
+}
+
+.theater-stack-thumb {
+  position: absolute;
+
+  left: 50%;
+  bottom: 8px;
+
+  transform: translateX(-50%);
+}
+
+.theater-stack-thumb-head {
+ width: 90px;
+  height: 60px;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px 6px 0 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.04),
+      rgba(255,255,255,0)
+    ),
+    rgba(18,18,18,.92);
 }
 
         .theater-room,
