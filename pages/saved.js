@@ -1986,12 +1986,17 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     }
   />
 
-  <button
-    type="button"
-    className="stack-rail-action send"
-    data-label="SEND"
-    title="Send stack"
-  />
+ <button
+  type="button"
+  className="stack-rail-action send"
+  data-label="SEND"
+  title="Send stack"
+  onClick={() =>
+    setActiveStackSendMenu(current =>
+      current === stackKey ? "" : stackKey
+    )
+  }
+/>
 </div>
 
 <div
