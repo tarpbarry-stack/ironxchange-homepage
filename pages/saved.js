@@ -470,6 +470,10 @@ function moveMachineToContainer(machineId, targetContainer) {
 
   const id = String(machineId);
 
+  updateIxiCardState(id, {
+    container: targetContainer
+  });
+
   setMachineContainers(current => {
     const next = {};
 
