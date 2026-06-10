@@ -1490,7 +1490,7 @@ onClick={(e) => {
 
 {rightPocketMode !== "closed" &&
  (machineContainers.pocketRight || []).length > 0 && (
-  <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
+  <div className={`ixi-pocket-thumbs r1-thumbs thumb-size-${pocketThumbSize}`}>
     {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
       const machine = getListingById(machineId);
 
@@ -2511,6 +2511,11 @@ outline: none;
   right: auto;
 }
 
+.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
+  left: auto;
+  right: 20px;
+  transform: none;
+}
 /* PEEK POCKET COVER */
 
 .ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
