@@ -1999,6 +1999,74 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 />
 </div>
 
+
+{activeStackSendMenu === stackKey && (
+  <div className="active-stack-send-menu">
+    <button
+      type="button"
+      className="stack-send-option"
+      data-label="L1"
+      onClick={() =>
+        moveActiveStackToContainer(
+          stackKey,
+          "pocketLeft"
+        )
+      }
+    />
+
+    <button
+      type="button"
+      className="stack-send-option"
+      data-label="L2"
+      onClick={() =>
+        moveActiveStackToContainer(
+          stackKey,
+          "pocketLeft2"
+        )
+      }
+    />
+
+    <button
+      type="button"
+      className="stack-send-option"
+      data-label="BOARD"
+      onClick={() =>
+        moveActiveStackToContainer(
+          stackKey,
+          "board"
+        )
+      }
+    />
+
+    <button
+      type="button"
+      className="stack-send-option"
+      data-label="R1"
+      onClick={() =>
+        moveActiveStackToContainer(
+          stackKey,
+          "pocketRight"
+        )
+      }
+    />
+
+    <button
+      type="button"
+      className="stack-send-option"
+      data-label="R2"
+      onClick={() =>
+        moveActiveStackToContainer(
+          stackKey,
+          "pocketRight2"
+        )
+      }
+    />
+  </div>
+)}
+
+<div
+  className={`active-stack-dropzone ${    
+    
 <div
   className={`active-stack-dropzone ${
         activeStackLayouts[stackKey] === "vertical"
