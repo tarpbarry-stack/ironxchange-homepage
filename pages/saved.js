@@ -3349,6 +3349,65 @@ outline: none;
   pointer-events: none;
 }
 
+:global(.active-stack-send-menu) {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+
+  width: 190px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  z-index: 47;
+  pointer-events: auto;
+}
+
+:global(.stack-send-option) {
+  position: relative;
+
+  width: 28px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 0;
+
+  background: rgba(255,255,255,.13);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+:global(.stack-send-option:hover) {
+  background: rgba(0,194,255,.86);
+  box-shadow: 0 0 8px rgba(0,194,255,.22);
+}
+
+:global(.stack-send-option:hover::after) {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
 /* card field */
 :global(.active-stack-dropzone) {
   min-height: 175px;
