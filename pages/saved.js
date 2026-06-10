@@ -2994,22 +2994,16 @@ outline: none;
   overflow: visible;
   isolation: isolate;
 
-  border: 1px dashed rgba(0,194,255,.46);
-  border-radius: 10px;
+ border: 1px dashed rgba(255,196,0,.14);
 
   background:
     linear-gradient(
       180deg,
-      rgba(0,194,255,.06),
-      rgba(0,194,255,.018) 48%,
-      rgba(255,255,255,.012)
+      rgba(255,196,0,.035),
+      rgba(255,196,0,.008) 48%,
+      rgba(255,255,255,.010)
     ),
     rgba(8,8,8,.86);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.035),
-    0 0 0 1px rgba(0,194,255,.08),
-    0 0 22px rgba(0,194,255,.12);
 }
 
 :global(.active-stack-tray.stack-armed) {
@@ -3209,12 +3203,12 @@ outline: none;
 }
 
 :global(.stack-pocket-power.top-left) {
-  top: 12px;
+  top: 27px;
   left: 14px;
 }
 
 :global(.stack-pocket-power.top-right) {
-  top: 12px;
+  top: 27px;
   right: 14px;
 }
 
