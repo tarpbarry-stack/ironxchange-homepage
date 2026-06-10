@@ -1808,20 +1808,30 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         }}
       />
 
-      {activeStacksOpen[stackKey] && (
-               <WorkspaceDropZone
-          id={stackKey === "top" ? "stackTop" : "stackBottom"}
-          className={`active-stack-tray ${
-  activeStackHover === stackKey ? "stack-armed" : ""
-}`}
-        >
-          <div
-  className={`active-stack-dropzone ${
-    activeStackLayouts[stackKey] === "vertical"
-      ? "stack-vertical"
-      : "stack-horizontal"
-  }`}
->
+     {activeStacksOpen[stackKey] && (
+  <WorkspaceDropZone
+    id={stackKey === "top" ? "stackTop" : "stackBottom"}
+    className={`active-stack-tray ${
+      activeStackHover === stackKey ? "stack-armed" : ""
+    }`}
+  >
+    <div className="active-stack-command-pad">
+      <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
+      <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
+      <button type="button" className="stack-cmd theater" title="Send to theater" />
+      <button type="button" className="stack-cmd board" title="Send to board" />
+      <button type="button" className="stack-cmd clear" title="Clear stack" />
+      <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
+      <button type="button" className="stack-cmd pocket-r1" title="Send to R1" />
+    </div>
+
+    <div
+      className={`active-stack-dropzone ${
+        activeStackLayouts[stackKey] === "vertical"
+          ? "stack-vertical"
+          : "stack-horizontal"
+      }`}
+    >
           {(
   machineContainers[
     stackKey === "top" ? "stackTop" : "stackBottom"
@@ -1874,15 +1884,6 @@ onBoardDragEnd={() => {}}
 })}
           </div>
 
-<div className="active-stack-command-pad">
-  <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
-  <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
-  <button type="button" className="stack-cmd theater" title="Send to theater" />
-  <button type="button" className="stack-cmd board" title="Send to board" />
-  <button type="button" className="stack-cmd clear" title="Clear stack" />
-  <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
-  <button type="button" className="stack-cmd pocket-r1" title="Send to R1" />
-</div>
                </WorkspaceDropZone>
       )}
       </WorkspaceDropZone>
@@ -3137,6 +3138,33 @@ outline: none;
 
 .active-stack-card.stack-ghost-target {
   transform: translateX(8px);
+}
+
+.active-stack .active-stack-tray {
+  position: relative !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+.active-stack .active-stack-tray .active-stack-command-pad {
+  position: absolute !important;
+  top: 12px !important;
+  right: 14px !important;
+  left: auto !important;
+  transform: none !important;
+
+  width: auto !important;
+  height: 12px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+
+  z-index: 40 !important;
+}
+.active-stack .active-stack-tray {
+  outline: 2px solid red !important;
 }
         .cards {
           max-width: 1920px;
