@@ -1888,7 +1888,8 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   />
 </div>
 
-<button
+<div className="active-stack-command-pad">
+  <button
     type="button"
     className="stack-rail-action theater"
     data-label="IXI THEATER"
