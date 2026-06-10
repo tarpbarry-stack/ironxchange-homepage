@@ -879,33 +879,6 @@ function toggleActiveStack(stackKey) {
   }));
 }
 
-function saveActiveStack(stackKey) {
-  const sourceContainer =
-    stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
-
-  const targetPocket =
-    stackKey === "top"
-      ? "pocketLeft"
-      : "pocketRight";
-
-  const stackIds =
-    machineContainers[sourceContainer] || [];
-
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(
-      machineId,
-      targetPocket
-    );
-  });
-
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: false
-  }));
-}
-
 function getStackContainerKey(stackKey) {
   return stackKey === "top"
     ? "stackTop"
@@ -928,35 +901,17 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     [stackKey]: false
   }));
 }
-  
-function addListingToActiveStack(stackKey, listingId) {
-  if (!listingId) return;
-  
-function saveActiveStack(stackKey) {
-  const sourceContainer =
-    stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
 
+function saveActiveStack(stackKey) {
   const targetPocket =
     stackKey === "top"
       ? "pocketLeft"
       : "pocketRight";
 
-  const stackIds =
-    machineContainers[sourceContainer] || [];
-
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(
-      machineId,
-      targetPocket
-    );
-  });
-
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: false
-  }));
+  moveActiveStackToContainer(
+    stackKey,
+    targetPocket
+  );
 }
   
 function addListingToActiveStack(stackKey, listingId) {
