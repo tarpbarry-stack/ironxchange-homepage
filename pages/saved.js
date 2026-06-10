@@ -3212,6 +3212,16 @@ outline: none;
   min-height: 210px !important;
 }
 
+.active-stack.open .active-stack-tray,
+.active-stack.open .active-stack-dropzone {
+  background: rgba(0,194,255,.06) !important;
+  border: 1px dashed rgba(0,194,255,.55) !important;
+}
+
+.active-stack.open .active-stack-dropzone {
+  min-height: 190px !important;
+  border-radius: 10px !important;
+}
 
         .cards {
           max-width: 1920px;
