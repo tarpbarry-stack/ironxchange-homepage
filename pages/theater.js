@@ -1032,7 +1032,8 @@ margin-top: -55px;
   grid-template-columns:
     repeat(3, 1fr);
 
-  gap: 10px;
+  column-gap: 10px;
+  row-gap: 35px;
 }
 
 .theater-stack-slot {
