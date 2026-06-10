@@ -504,18 +504,26 @@ return (
       </main>
 
       <style jsx>{`
-        :global(body) {
-          margin: 0;
-          background: #030303;
-          color: #d8d8d8;
-          font-family: Arial, sans-serif;
-        }
+       :global(html),
+:global(body) {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 
-       main {
-  min-height: 84vh;
-  padding: 0;
   background: #030303;
-  overflow-x: hidden;
+  color: #d8d8d8;
+  font-family: Arial, sans-serif;
+}
+     main {
+  width: 100vw;
+  height: calc(100vh - 72px);
+
+  padding: 0;
+
+  background: #030303;
+
+  overflow: hidden;
 }
         .theater-lobby {
           min-height: 78vh;
