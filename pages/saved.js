@@ -890,20 +890,14 @@ function saveActiveStack(stackKey) {
       ? "pocketLeft"
       : "pocketRight";
 
-  setMachineContainers(current => {
-    const stackIds = current[sourceContainer] || [];
-    const existingPocketIds = current[targetPocket] || [];
+  const stackIds =
+    machineContainers[sourceContainer] || [];
 
-    const mergedPocketIds = [
-      ...existingPocketIds,
-      ...stackIds.filter(id => !existingPocketIds.includes(id))
-    ];
-
-    return {
-      ...current,
-      [sourceContainer]: [],
-      [targetPocket]: mergedPocketIds
-    };
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(
+      machineId,
+      targetPocket
+    );
   });
 
   setActiveStacksOpen(current => ({
