@@ -2851,6 +2851,10 @@ outline: none;
 }
 
 
+/* =============================== */
+/* IXI ACTIVE STACK COMMAND PAD    */
+/* =============================== */
+
 .active-stack-zone {
   width: 100%;
   max-width: none;
@@ -2858,97 +2862,218 @@ outline: none;
   margin: -10px 0 22px;
 
   display: grid;
-  gap: 10px;
+  gap: 12px;
   align-items: start;
 }
 
+/* each stack lane */
 .active-stack {
   width: 100%;
+  position: relative;
 }
 
+/* closed/open dash actuator */
 .active-stack-dash {
-  width: 10px;
+  width: 26px;
   height: 8px;
 
   display: block;
 
   border: 0;
-  border-bottom: 3px solid rgba(255,255,255,.12);
+  border-bottom: 3px solid rgba(255,255,255,.14);
 
   background: transparent;
 
   cursor: pointer;
   padding: 0;
   margin: 0;
+
+  position: relative;
+  z-index: 8;
 }
 
 .active-stack-dash:hover {
-  border-bottom-color: rgba(255,196,0,.38);
-  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+  border-bottom-color: rgba(255,196,0,.48);
+  box-shadow: 0 3px 8px rgba(255,196,0,.12);
 }
 
 .active-stack.open .active-stack-dash {
-  border-bottom-color: rgba(255,196,0,.42);
+  border-bottom-color: rgba(0,194,255,.62);
+  box-shadow: 0 3px 10px rgba(0,194,255,.16);
 }
 
+/* loaded indicator when tray is closed or open */
+.active-stack.has-machines .active-stack-dash {
+  border-bottom-color: rgba(255,196,0,.78);
+  box-shadow: 0 3px 12px rgba(255,196,0,.24);
+}
+
+.active-stack.has-machines .active-stack-dash::after {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  top: 8px;
+
+  width: 5px;
+  height: 5px;
+
+  transform: translateX(-50%);
+
+  background: rgba(255,196,0,.92);
+  box-shadow: 0 0 8px rgba(255,196,0,.38);
+}
+
+/* visible tray / catch zone */
 .active-stack-tray {
   width: 100%;
-  min-height: 170px;
+  min-height: 190px;
 
-  margin: 8px 0;
-  padding: 12px 44px 12px 12px;
+  margin: 8px 0 0;
+  padding: 42px 46px 14px 46px;
 
   position: relative;
+  isolation: isolate;
 
-  border: 1px dashed rgba(255,255,255,.075);
+  border: 1px dashed rgba(0,194,255,.28);
   border-radius: 10px;
 
   background:
     linear-gradient(
       180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
+      rgba(0,194,255,.055),
+      rgba(0,194,255,.012) 45%,
+      rgba(255,255,255,.012)
     ),
-    rgba(8,8,8,.72);
+    rgba(8,8,8,.82);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.025),
+    0 0 18px rgba(0,194,255,.075);
 }
 
 .active-stack.open .active-stack-tray {
-  border-color: rgba(0,194,255,.38);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,194,255,.035),
-      rgba(0,194,255,.01)
-    ),
-    rgba(8,8,8,.78);
+  border-color: rgba(0,194,255,.46);
 
   box-shadow:
-    0 0 0 1px rgba(0,194,255,.10),
-    0 0 18px rgba(0,194,255,.10);
+    inset 0 0 0 1px rgba(255,255,255,.035),
+    0 0 0 1px rgba(0,194,255,.08),
+    0 0 22px rgba(0,194,255,.12);
 }
 
 .active-stack-tray.stack-armed {
-  border-color: rgba(0,194,255,.62);
+  border-color: rgba(255,196,0,.58);
 
   background:
     linear-gradient(
       180deg,
-      rgba(0,194,255,.06),
-      rgba(0,194,255,.015)
+      rgba(255,196,0,.06),
+      rgba(0,194,255,.018)
     ),
-    rgba(8,8,8,.84);
+    rgba(8,8,8,.88);
 
   box-shadow:
-    0 0 0 1px rgba(0,194,255,.16),
-    0 0 24px rgba(0,194,255,.14);
+    inset 0 0 0 1px rgba(255,196,0,.10),
+    0 0 24px rgba(255,196,0,.16);
 }
 
+/* subtle visible drop plane */
+.active-stack-tray::before {
+  content: "ACTIVE STACK DROP ZONE";
+
+  position: absolute;
+  left: 14px;
+  top: 12px;
+
+  color: rgba(255,255,255,.26);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
+/* command pad only exists because JSX only renders tray when open */
+.active-stack-command-pad {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+
+  height: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+
+  z-index: 40;
+  pointer-events: auto;
+}
+
+.stack-cmd {
+  width: 26px;
+  height: 5px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.14);
+
+  padding: 0;
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 0 1px rgba(0,0,0,.22);
+}
+
+.stack-cmd:hover {
+  background: rgba(255,196,0,.86);
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.12),
+    0 0 8px rgba(255,196,0,.24);
+}
+
+.stack-cmd.save {
+  background: rgba(255,196,0,.42);
+}
+
+.stack-cmd.board {
+  background: rgba(255,255,255,.20);
+}
+
+.stack-cmd.theater {
+  background: rgba(0,194,255,.36);
+}
+
+.stack-cmd.layout {
+  background: rgba(0,194,255,.50);
+}
+
+.stack-cmd.clear {
+  background: rgba(229,62,62,.50);
+}
+
+.stack-cmd.clear:hover {
+  background: rgba(229,62,62,.94);
+  box-shadow:
+    0 0 0 1px rgba(229,62,62,.14),
+    0 0 8px rgba(229,62,62,.26);
+}
+
+/* card field inside tray */
 .active-stack-dropzone {
   min-height: 145px;
+
+  position: relative;
+  z-index: 2;
+
   align-items: start;
 }
 
+/* horizontal stack cards */
 .active-stack-dropzone.stack-horizontal {
   display: flex;
   flex-wrap: nowrap;
@@ -2964,12 +3089,7 @@ outline: none;
   scrollbar-width: thin;
 }
 
-.active-stack-dropzone.stack-horizontal .active-stack-card {
-  flex: 0 0 285px;
-  width: 285px;
-  min-width: 285px;
-}
-
+/* vertical/grid stack cards */
 .active-stack-dropzone.stack-vertical {
   display: grid;
 
@@ -2981,13 +3101,19 @@ outline: none;
   justify-content: center;
 }
 
+.active-stack-dropzone.stack-horizontal .active-stack-card {
+  flex: 0 0 285px;
+  width: 285px;
+  min-width: 285px;
+}
+
 .active-stack-dropzone.stack-vertical .active-stack-card {
   width: 100%;
 }
 
 .active-stack-card {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 
   transition:
     transform .15s ease,
@@ -3012,131 +3138,6 @@ outline: none;
 .active-stack-card.stack-ghost-target {
   transform: translateX(8px);
 }
-
-.active-stack-save {
-  position: absolute;
-  left: 50%;
-  top: 8px;
-
-  width: 18px;
-  height: 18px;
-
-  transform: translateX(-50%);
-
-  border: 1px solid rgba(255,196,0,.26);
-  border-radius: 50%;
-
-  background: rgba(255,196,0,.045);
-
-  cursor: pointer;
-  padding: 0;
-}
-
-.active-stack-save:hover {
-  border-color: rgba(255,196,0,.65);
-
-  box-shadow:
-    0 0 10px rgba(255,196,0,.16);
-}
-
-.active-stack-layout-toggle {
-  position: absolute;
-  left: 50%;
-  top: 36px;
-
-  width: 18px;
-  height: 8px;
-
-  transform: translateX(-50%);
-
-  border: 0;
-  border-bottom: 3px solid rgba(0,194,255,.45);
-
-  background: transparent;
-
-  cursor: pointer;
-  padding: 0;
-}
-
-.active-stack-layout-toggle:hover {
-  border-bottom-color: rgba(0,194,255,.9);
-
-  box-shadow:
-    0 4px 10px rgba(0,194,255,.14);
-}
-
-.active-stack.has-machines .active-stack-dash {
-  border-bottom-color: rgba(255,196,0,.72);
-  box-shadow: 0 3px 10px rgba(255,196,0,.22);
-}
-
-.active-stack.has-machines .active-stack-dash::after {
-  content: "";
-  display: block;
-
-  width: 4px;
-  height: 4px;
-
-  margin: 3px auto 0;
-
-  background: rgba(255,196,0,.86);
-  box-shadow: 0 0 8px rgba(255,196,0,.35);
-}
-
-.active-stack-command-pad {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  width: 260px;
-  height: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-
-  z-index: 30;
-  pointer-events: auto;
-}
-
-.stack-cmd {
-  width: 24px;
-  height: 5px;
-
-  border: 0;
-  border-radius: 1px;
-
-  background: rgba(255,255,255,.14);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-.stack-cmd:hover {
-  background: rgba(255,196,0,.86);
-  box-shadow: 0 0 8px rgba(255,196,0,.22);
-}
-
-.stack-cmd.clear {
-  background: rgba(229,62,62,.42);
-}
-
-.stack-cmd.clear:hover {
-  background: rgba(229,62,62,.92);
-  box-shadow: 0 0 8px rgba(229,62,62,.24);
-}
-
-.stack-cmd.save {
-  background: rgba(255,196,0,.42);
-}
-
-.stack-cmd.layout {
-  background: rgba(0,194,255,.42);
-}
-
         .cards {
           max-width: 1920px;
           margin: 0 auto;
