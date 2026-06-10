@@ -913,6 +913,16 @@ function saveActiveStack(stackKey) {
     targetPocket
   );
 }
+
+ function sendActiveStackToTheater(stackKey) {
+  const sourceContainer = getStackContainerKey(stackKey);
+  const stackIds = machineContainers[sourceContainer] || [];
+
+  console.log("IXI THEATER STACK", {
+    stackKey,
+    machineIds: stackIds
+  });
+} 
   
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
@@ -1876,13 +1886,15 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   />
 </div>
 
-<div className="active-stack-command-pad">
-  <button
-    type="button"
-    className="stack-rail-action theater"
-    data-label="IXI THEATER"
-    title="IXI Theater"
-  />
+<button
+  type="button"
+  className="stack-rail-action theater"
+  data-label="IXI THEATER"
+  title="IXI Theater"
+  onClick={() =>
+    sendActiveStackToTheater(stackKey)
+  }
+/>
 
   <button
     type="button"
