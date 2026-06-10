@@ -13,7 +13,8 @@ import ListingCard from "../components/ListingCard";
 
 import { getListingId } from "../lib/listingFormatters";
 import {
-  fetchIxiMachineState
+  fetchIxiMachineState,
+  saveIxiMachinePatch
 } from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
@@ -452,16 +453,33 @@ return (
   ]);
 
   function updateIxiCardState(listingId, patch) {
-    setIxiCardState(current => ({
+  const id = String(listingId);
+
+  setIxiCardState(current => {
+    const nextRecord = {
+      color: "none",
+      outline: 1,
+
+      ...(current[id] || {}),
+
+      ...patch,
+
+      touched: true,
+      updatedAt: Date.now()
+    };
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: id,
+      patch: nextRecord
+    });
+
+    return {
       ...current,
-      [String(listingId)]: {
-        color: "none",
-        outline: 1,
-        ...(current[String(listingId)] || {}),
-        ...patch
-      }
-    }));
-  }
+      [id]: nextRecord
+    };
+  });
+}
 
  function toggleColorFilter(color) {
   setIxiColorFilters(current => {
