@@ -1034,7 +1034,10 @@ margin-top: -100px;
 }
 
 .theater-stack-grid {
-  width: calc(100% - 14px);
+  width: 92%;
+  max-width: 430px;
+
+  margin: 0 auto;
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
