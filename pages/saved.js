@@ -1815,7 +1815,35 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       activeStackHover === stackKey ? "stack-armed" : ""
     }`}
   >
-    <div className="active-stack-command-pad">
+    <div className="active-stack-pocket-corners">
+
+  <button
+    type="button"
+    className="stack-pocket-cmd top-left"
+    title="Send to L1"
+  />
+
+  <button
+    type="button"
+    className="stack-pocket-cmd top-right"
+    title="Send to R1"
+  />
+
+  <button
+    type="button"
+    className="stack-pocket-cmd bottom-left"
+    title="Send to L2"
+  />
+
+  <button
+    type="button"
+    className="stack-pocket-cmd bottom-right"
+    title="Send to R2"
+  />
+
+</div>
+
+<div className="active-stack-command-pad">
   <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
   <button type="button" className="stack-cmd pocket-l2" title="Send to L2" />
 
