@@ -1816,14 +1816,19 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     }`}
   >
     <div className="active-stack-command-pad">
-      <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
-      <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
-      <button type="button" className="stack-cmd theater" title="Send to theater" />
-      <button type="button" className="stack-cmd board" title="Send to board" />
-      <button type="button" className="stack-cmd clear" title="Clear stack" />
-      <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
-      <button type="button" className="stack-cmd pocket-r1" title="Send to R1" />
-    </div>
+  <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
+  <button type="button" className="stack-cmd pocket-l2" title="Send to L2" />
+
+  <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
+  <button type="button" className="stack-cmd board" title="Send to board" />
+  <button type="button" className="stack-cmd clear" title="Clear stack" />
+
+  <button type="button" className="stack-cmd theater" title="Theater" />
+  <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
+
+  <button type="button" className="stack-cmd pocket-r1" title="Send to R1" />
+  <button type="button" className="stack-cmd pocket-r2" title="Send to R2" />
+</div>
 
     <div
       className={`active-stack-dropzone ${
@@ -3008,61 +3013,50 @@ outline: none;
 .active-stack-command-pad {
   position: absolute;
   top: 12px;
-  right: 14px;
+  left: 50%;
+  right: auto;
 
-  height: 12px;
+  transform: translateX(-50%);
+
+  height: 14px;
 
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 7px;
+  justify-content: center;
+  gap: 6px;
 
   z-index: 40;
-  pointer-events: auto;
 }
 
 .stack-cmd {
-  width: 26px;
-  height: 5px;
+  width: 22px;
+  height: 4px;
 
   border: 0;
   border-radius: 1px;
 
-  background: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.13);
 
   padding: 0;
   cursor: pointer;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 0 0 1px rgba(0,0,0,.22);
 }
 
 .stack-cmd:hover {
   background: rgba(255,196,0,.86);
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.12),
-    0 0 8px rgba(255,196,0,.24);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
 }
 
 .stack-cmd.save {
-  background: rgba(255,196,0,.42);
-}
-
-.stack-cmd.board {
-  background: rgba(255,255,255,.20);
-}
-
-.stack-cmd.theater {
-  background: rgba(0,194,255,.36);
-}
-
-.stack-cmd.layout {
-  background: rgba(0,194,255,.50);
+  background: rgba(255,196,0,.46);
 }
 
 .stack-cmd.clear {
-  background: rgba(229,62,62,.50);
+  background: rgba(229,62,62,.58);
+}
+
+.stack-cmd.layout,
+.stack-cmd.theater {
+  background: rgba(0,194,255,.42);
 }
 
 .stack-cmd.clear:hover {
