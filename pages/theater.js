@@ -915,7 +915,7 @@ margin-top: -100px;
   overflow-x: auto;
   overflow-y: hidden;
 
-  padding: 10px 4px 0;
+  padding: 0px 4px 0;
 
   direction: rtl;
 }
@@ -927,7 +927,7 @@ margin-top: -100px;
     .loaded-card {
   flex: 0 0 165px;
   width: 165px;
-  height: 255px;
+  height: 235px;
 
   position: relative;
 
@@ -947,6 +947,8 @@ margin-top: -100px;
 
   transform: scale(.60);
   transform-origin: top left;
+
+  margin-bottom: -18px;
 }
 
        .loaded-card-screen-label {
