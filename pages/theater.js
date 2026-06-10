@@ -1052,7 +1052,7 @@ margin-top: -55px;
 }
 
 .theater-stack-shell {
-  height: 97px;
+  height: 107px;
 
   position: relative;
 
