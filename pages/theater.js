@@ -910,7 +910,7 @@ margin-top: -75px;
   display: flex;
   gap: 30px;
 
-  margin-top: 75px;
+  margin-top: 85px;
 
   overflow-x: auto;
   overflow-y: hidden;
