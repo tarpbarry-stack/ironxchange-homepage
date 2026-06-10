@@ -1072,11 +1072,11 @@ margin-top: -55px;
 }
 
 .theater-stack-grid .theater-stack-slot:nth-child(-n+3) {
-  transform: translateY(20px);
+  transform: translateY(23px);
 }
 
 .theater-stack-grid .theater-stack-slot:nth-child(n+4) {
-  transform: translateY(50px);
+  transform: translateY(55px);
 }
 
 .theater-stack-slot {
