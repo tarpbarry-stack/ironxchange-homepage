@@ -1043,12 +1043,12 @@ margin-top: -55px;
   row-gap: 35px;
 }
 
-.theater-stack-grid .theater-stack-shell:nth-child(-n+3) {
-  transform: translateY(25px);
+.theater-stack-shell:nth-child(-n+3) {
+  transform: translateY(25px) !important;
 }
 
-.theater-stack-grid .theater-stack-shell:nth-child(n+4) {
-  transform: translateY(35px);
+.theater-stack-shell:nth-child(n+4) {
+  transform: translateY(35px) !important;
 }
 
 .theater-stack-shell {
