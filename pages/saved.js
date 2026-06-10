@@ -991,25 +991,27 @@ function addListingToLeftPocket(listingId) {
   );
 }
 
- function recallPocketToBoard(pocketKey) {
-  if (!pocketKey) return;
+ function movePocketToContainer(pocketKey, targetContainer) {
+  if (!pocketKey || !targetContainer) return;
 
-  setMachineContainers(current => {
-    const pocketIds = current[pocketKey] || [];
-    const boardIds = current.board || [];
+  const pocketIds = machineContainers[pocketKey] || [];
 
-    const mergedBoardIds = [
-      ...boardIds,
-      ...pocketIds.filter(id => !boardIds.includes(id))
-    ];
-
-    return {
-      ...current,
-      board: mergedBoardIds,
-      [pocketKey]: []
-    };
+  pocketIds.forEach(machineId => {
+    moveMachineToContainer(
+      machineId,
+      targetContainer
+    );
   });
-} 
+}
+
+function recallPocketToBoard(pocketKey) {
+  movePocketToContainer(
+    pocketKey,
+    "board"
+  );
+}
+
+  
 function recallPocketMachineToBoard(machineId, pocketKey) {
   if (!machineId || !pocketKey) return;
 
