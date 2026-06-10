@@ -1774,7 +1774,17 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   key={stackKey}
   id={stackKey === "top" ? "stackTop" : "stackBottom"}
   data-active-stack={stackKey}
-  className={`active-stack ${activeStacksOpen[stackKey] ? "open" : ""}`}
+  className={`active-stack ${
+  activeStacksOpen[stackKey] ? "open" : ""
+} ${
+  (
+    machineContainers[
+      stackKey === "top" ? "stackTop" : "stackBottom"
+    ] || []
+  ).length > 0
+    ? "has-machines"
+    : ""
+}`}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -1864,18 +1874,15 @@ onBoardDragEnd={() => {}}
 })}
           </div>
 
-<button
-  type="button"
-  className="active-stack-layout-toggle"
-  onClick={() => toggleActiveStackLayout(stackKey)}
-  title="Toggle stack layout"
-/>
-            
-          <button
-            type="button"
-            className="active-stack-save"
-            onClick={() => saveActiveStack(stackKey)}
-          />
+<div className="active-stack-command-pad">
+  <button type="button" className="stack-cmd pocket-l1" title="Send to L1" />
+  <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
+  <button type="button" className="stack-cmd theater" title="Send to theater" />
+  <button type="button" className="stack-cmd board" title="Send to board" />
+  <button type="button" className="stack-cmd clear" title="Clear stack" />
+  <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
+  <button type="button" className="stack-cmd pocket-r1" title="Send to R1" />
+</div>
                </WorkspaceDropZone>
       )}
       </WorkspaceDropZone>
@@ -3056,6 +3063,78 @@ outline: none;
 
   box-shadow:
     0 4px 10px rgba(0,194,255,.14);
+}
+
+.active-stack.has-machines .active-stack-dash {
+  border-bottom-color: rgba(255,196,0,.72);
+  box-shadow: 0 3px 10px rgba(255,196,0,.22);
+}
+
+.active-stack.has-machines .active-stack-dash::after {
+  content: "";
+  display: block;
+
+  width: 4px;
+  height: 4px;
+
+  margin: 3px auto 0;
+
+  background: rgba(255,196,0,.86);
+  box-shadow: 0 0 8px rgba(255,196,0,.35);
+}
+
+.active-stack-command-pad {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 260px;
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.stack-cmd {
+  width: 24px;
+  height: 5px;
+
+  border: 0;
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.14);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.stack-cmd:hover {
+  background: rgba(255,196,0,.86);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+.stack-cmd.clear {
+  background: rgba(229,62,62,.42);
+}
+
+.stack-cmd.clear:hover {
+  background: rgba(229,62,62,.92);
+  box-shadow: 0 0 8px rgba(229,62,62,.24);
+}
+
+.stack-cmd.save {
+  background: rgba(255,196,0,.42);
+}
+
+.stack-cmd.layout {
+  background: rgba(0,194,255,.42);
 }
 
         .cards {
