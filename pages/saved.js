@@ -1818,37 +1818,63 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     <div className="active-stack-pocket-corners">
   <button
     type="button"
-    className="stack-pocket-cmd top-left"
-    title="Send to L1"
+    className="stack-pocket-power top-left"
+    data-label="L1"
+    title="Send stack to L1"
   />
 
   <button
     type="button"
-    className="stack-pocket-cmd top-right"
-    title="Send to R1"
+    className="stack-pocket-power top-right"
+    data-label="R1"
+    title="Send stack to R1"
   />
 
   <button
     type="button"
-    className="stack-pocket-cmd bottom-left"
-    title="Send to L2"
+    className="stack-pocket-power bottom-left"
+    data-label="L2"
+    title="Send stack to L2"
   />
 
   <button
     type="button"
-    className="stack-pocket-cmd bottom-right"
-    title="Send to R2"
+    className="stack-pocket-power bottom-right"
+    data-label="R2"
+    title="Send stack to R2"
   />
 </div>
 
 <div className="active-stack-command-pad">
-  <button type="button" className="stack-cmd save" title="Save stack" onClick={() => saveActiveStack(stackKey)} />
-  <button type="button" className="stack-cmd board" title="Send to board" />
-  <button type="button" className="stack-cmd clear" title="Clear stack" />
-  <button type="button" className="stack-cmd theater" title="Theater" />
-  <button type="button" className="stack-cmd layout" title="Toggle layout" onClick={() => toggleActiveStackLayout(stackKey)} />
-</div>
+  <button
+    type="button"
+    className="stack-rail-action theater"
+    data-label="IXI THEATER"
+    title="IXI Theater"
+  />
 
+  <button
+    type="button"
+    className="stack-rail-action layout"
+    data-label="LAYOUT"
+    title="Toggle layout"
+    onClick={() => toggleActiveStackLayout(stackKey)}
+  />
+
+  <button
+    type="button"
+    className="stack-rail-action board"
+    data-label="BOARD"
+    title="Send stack to board"
+  />
+
+  <button
+    type="button"
+    className="stack-rail-action send"
+    data-label="SEND"
+    title="Send stack"
+  />
+</div>
     <div
       className={`active-stack-dropzone ${
         activeStackLayouts[stackKey] === "vertical"
