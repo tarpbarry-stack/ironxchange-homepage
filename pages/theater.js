@@ -1036,6 +1036,10 @@ margin-top: -55px;
   row-gap: 35px;
 }
 
+.theater-stack-grid .theater-stack-slot:nth-child(-n+3) {
+  transform: translateY(15px);
+}
+
 .theater-stack-slot {
   height: 82px;
 
