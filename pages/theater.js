@@ -1035,14 +1035,14 @@ margin-top: -100px;
 
 .theater-stack-grid {
   width: 92%;
-  max-width: 430px;
+  max-width: 470px;
 
   margin: 0 auto;
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 
-  column-gap: 6px;
+  column-gap: 0px;
   row-gap: 0px;
 }
 
