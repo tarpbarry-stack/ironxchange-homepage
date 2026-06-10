@@ -2063,9 +2063,6 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     />
   </div>
 )}
-
-<div
-  className={`active-stack-dropzone ${    
     
 <div
   className={`active-stack-dropzone ${
