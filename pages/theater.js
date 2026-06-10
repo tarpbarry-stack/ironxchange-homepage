@@ -909,10 +909,13 @@ margin-top: -55px;
   overflow-x: auto;
   overflow-y: hidden;
 
-  padding: 0 4px 8px;
+  padding: 10px 4px 0;
 
+  direction: rtl;
+}
 
-  scrollbar-width: thin;
+.loaded-cards > * {
+  direction: ltr;
 }
 
     .loaded-card {
