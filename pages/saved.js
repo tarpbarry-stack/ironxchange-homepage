@@ -314,6 +314,34 @@ setIxiCardState(remoteIxiState);
   );
 }, [listings, ixiCardState]);
 
+  useEffect(() => {
+  if (!workspaceListings.length) return;
+
+  const nextContainers = {
+    board: [],
+    stackTop: [],
+    stackBottom: [],
+    pocketLeft: [],
+    pocketRight: [],
+    pocketLeft2: [],
+    pocketRight2: []
+  };
+
+  workspaceListings.forEach(item => {
+    const id = String(getListingId(item));
+    const savedContainer = ixiCardState[id]?.container;
+
+    const targetContainer =
+      nextContainers[savedContainer]
+        ? savedContainer
+        : "board";
+
+    nextContainers[targetContainer].push(id);
+  });
+
+  setMachineContainers(nextContainers);
+}, [workspaceListings, ixiCardState]);
+
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
