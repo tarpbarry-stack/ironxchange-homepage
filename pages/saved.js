@@ -1889,14 +1889,14 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 </div>
 
 <button
-  type="button"
-  className="stack-rail-action theater"
-  data-label="IXI THEATER"
-  title="IXI Theater"
-  onClick={() =>
-    sendActiveStackToTheater(stackKey)
-  }
-/>
+    type="button"
+    className="stack-rail-action theater"
+    data-label="IXI THEATER"
+    title="IXI Theater"
+    onClick={() =>
+      sendActiveStackToTheater(stackKey)
+    }
+  />
 
   <button
     type="button"
@@ -1907,17 +1907,17 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   />
 
   <button
-  type="button"
-  className="stack-rail-action board"
-  data-label="BOARD"
-  title="Send stack to board"
-  onClick={() =>
-    moveActiveStackToContainer(
-      stackKey,
-      "board"
-    )
-  }
-/>
+    type="button"
+    className="stack-rail-action board"
+    data-label="BOARD"
+    title="Send stack to board"
+    onClick={() =>
+      moveActiveStackToContainer(
+        stackKey,
+        "board"
+      )
+    }
+  />
 
   <button
     type="button"
@@ -1926,8 +1926,9 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     title="Send stack"
   />
 </div>
-    <div
-      className={`active-stack-dropzone ${
+
+<div
+  className={`active-stack-dropzone ${
         activeStackLayouts[stackKey] === "vertical"
           ? "stack-vertical"
           : "stack-horizontal"
