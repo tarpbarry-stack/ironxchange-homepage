@@ -905,6 +905,59 @@ function saveActiveStack(stackKey) {
     [stackKey]: false
   }));
 }
+
+function getStackContainerKey(stackKey) {
+  return stackKey === "top"
+    ? "stackTop"
+    : "stackBottom";
+}
+
+function moveActiveStackToContainer(stackKey, targetContainer) {
+  const sourceContainer = getStackContainerKey(stackKey);
+  const stackIds = machineContainers[sourceContainer] || [];
+
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(
+      machineId,
+      targetContainer
+    );
+  });
+
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: false
+  }));
+}
+  
+function addListingToActiveStack(stackKey, listingId) {
+  if (!listingId) return;
+  
+function saveActiveStack(stackKey) {
+  const sourceContainer =
+    stackKey === "top"
+      ? "stackTop"
+      : "stackBottom";
+
+  const targetPocket =
+    stackKey === "top"
+      ? "pocketLeft"
+      : "pocketRight";
+
+  const stackIds =
+    machineContainers[sourceContainer] || [];
+
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(
+      machineId,
+      targetPocket
+    );
+  });
+
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: false
+  }));
+}
   
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
