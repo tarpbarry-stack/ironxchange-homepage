@@ -3168,6 +3168,51 @@ outline: none;
 .active-stack .active-stack-tray {
   outline: 2px solid red !important;
 }
+
+.active-stack.open .active-stack-tray {
+  min-height: 260px !important;
+
+  border: 2px dashed rgba(255,196,0,.85) !important;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,196,0,.055),
+      rgba(255,196,0,.055) 8px,
+      rgba(0,194,255,.035) 8px,
+      rgba(0,194,255,.035) 16px
+    ),
+    rgba(8,8,8,.92) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,196,0,.18),
+    0 0 28px rgba(255,196,0,.18) !important;
+}
+
+.active-stack.open .active-stack-tray::before {
+  content: "DROP ACTIVE STACK HERE" !important;
+
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+
+  transform: translate(-50%, -50%) !important;
+
+  color: rgba(255,196,0,.72) !important;
+
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.active-stack-dropzone {
+  min-height: 210px !important;
+}
+
+
         .cards {
           max-width: 1920px;
           margin: 0 auto;
