@@ -1039,7 +1039,7 @@ margin-top: -55px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 
-  column-gap: 8px;
+  column-gap: 6px;
   row-gap: 0px;
 }
 
@@ -1051,7 +1051,7 @@ margin-top: -55px;
 }
 
 .theater-stack-shell {
-  width: calc(100% - 5px);
+  width: calc(100% - 10px);
   justify-self: center;
 
   height: 117px;
