@@ -1044,11 +1044,11 @@ margin-top: -55px;
 }
 
 .theater-stack-grid .theater-stack-shell:nth-child(-n+3) {
-  transform: translateY(43px);
+  transform: translateY(35px);
 }
 
 .theater-stack-grid .theater-stack-shell:nth-child(n+4) {
-  transform: translateY(40px);
+  transform: translateY(35px);
 }
 
 .theater-stack-shell {
