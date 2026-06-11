@@ -235,6 +235,39 @@ onMouseLeave={() => {
 />
           </section>
 
+<section className="ixi-lab-pocket-chassis">
+  {[
+    { key: "l1", label: "L1", side: "left", row: "top" },
+    { key: "l2", label: "L2", side: "left", row: "bottom" },
+    { key: "r1", label: "R1", side: "right", row: "top" },
+    { key: "r2", label: "R2", side: "right", row: "bottom" }
+  ].map(pocket => (
+    <section
+      key={pocket.key}
+      className={`ixi-lab-pocket-shell ${pocket.side} ${pocket.row}`}
+    >
+      <div className="ixi-lab-pocket-topline">
+        <span>{pocket.label}</span>
+        <strong>IXI POCKET</strong>
+      </div>
+
+      <div className="ixi-lab-pocket-cavity">
+        <div className="ixi-lab-thumb ghost-one" />
+        <div className="ixi-lab-thumb ghost-two" />
+        <div className="ixi-lab-thumb ghost-three" />
+      </div>
+
+      <div className="ixi-lab-pocket-rail">
+        <button type="button" data-label="THEATER" />
+        <button type="button" data-label="STACK" />
+        <button type="button" data-label="BOARD" />
+        <button type="button" data-label="SEND" />
+      </div>
+    </section>
+  ))}
+</section>
+    
+
      <IXIControlSurface>
   <IXSearchSurface
     searchQuery={searchQuery}
@@ -413,6 +446,182 @@ onMouseLeave={() => {
 
 .lab-panel {
   margin: 0 auto;
+}
+.ixi-lab-pocket-chassis {
+  position: relative;
+  width: 100%;
+  height: 118px;
+  margin: -6px auto 0;
+  pointer-events: none;
+}
+
+.ixi-lab-pocket-shell {
+  position: absolute;
+  width: 238px;
+  height: 82px;
+
+  padding: 9px 10px 8px;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 12px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
+    radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+    rgba(15,15,15,.86);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 14px 28px rgba(0,0,0,.22);
+
+  pointer-events: auto;
+}
+
+.ixi-lab-pocket-shell.left {
+  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+}
+
+.ixi-lab-pocket-shell.right {
+  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+}
+
+.ixi-lab-pocket-shell.top {
+  top: 0;
+}
+
+.ixi-lab-pocket-shell.bottom {
+  top: 74px;
+}
+
+.ixi-lab-pocket-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+.ixi-lab-pocket-topline span {
+  color: rgba(255,196,0,.78);
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .72px;
+}
+
+.ixi-lab-pocket-topline strong {
+  color: rgba(255,255,255,.28);
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+}
+
+.ixi-lab-pocket-cavity {
+  position: relative;
+  height: 38px;
+  margin-top: 6px;
+
+  border: 1px dashed rgba(255,255,255,.052);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
+    rgba(8,8,8,.62);
+
+  overflow: hidden;
+}
+
+.ixi-lab-thumb {
+  position: absolute;
+  top: 8px;
+
+  width: 54px;
+  height: 31px;
+
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 6px 6px 0 0;
+
+  background:
+    linear-gradient(135deg, rgba(255,196,0,.18), rgba(255,255,255,.035)),
+    #121212;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset;
+}
+
+.ixi-lab-pocket-shell.left .ghost-one {
+  right: 26px;
+}
+
+.ixi-lab-pocket-shell.left .ghost-two {
+  right: 48px;
+  opacity: .68;
+}
+
+.ixi-lab-pocket-shell.left .ghost-three {
+  right: 70px;
+  opacity: .42;
+}
+
+.ixi-lab-pocket-shell.right .ghost-one {
+  left: 26px;
+}
+
+.ixi-lab-pocket-shell.right .ghost-two {
+  left: 48px;
+  opacity: .68;
+}
+
+.ixi-lab-pocket-shell.right .ghost-three {
+  left: 70px;
+  opacity: .42;
+}
+
+.ixi-lab-pocket-rail {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 7px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ixi-lab-pocket-rail button {
+  position: relative;
+
+  width: 38px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.12);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-lab-pocket-rail button:hover {
+  background: rgba(255,196,0,.78);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+.ixi-lab-pocket-rail button:hover::after {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  color: rgba(255,255,255,.68);
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: .55px;
+  white-space: nowrap;
 }
         
         @media (max-width: 850px) {
