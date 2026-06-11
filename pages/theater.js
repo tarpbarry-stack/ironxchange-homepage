@@ -1060,8 +1060,10 @@ margin-top: -25px;
   justify-self: center;
   align-self: center;
 
-  width: 3px;
-  height: 30px;
+  width: 5px;
+  height: 32px;
+
+  margin-top: 20px;
 
   border: 0;
   border-radius: 2px;
