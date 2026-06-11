@@ -1122,7 +1122,7 @@ margin-top: -25px;
   overflow: hidden;
 
   position: relative;
-  top: 24px;
+  top: 50px;
 }
 
 .theater-import-zone {
