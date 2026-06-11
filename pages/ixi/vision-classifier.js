@@ -4,6 +4,8 @@ import Navbar from "../../components/Navbar";
 
 import { classifyIXPhoto } from "../../lib/ixvision/classifier/classifyIXPhoto";
 import { IX_VISION_PIPELINES } from "../../lib/ixvision/classifier/ixVisionPipelines";
+import { runIXAutoRecipe } from "../../lib/ixvision/auto/runIXAutoRecipe";
+
 
 function loadImage(file) {
   return new Promise((resolve, reject) => {
@@ -196,8 +198,15 @@ export default function IXVisionClassifier() {
   const [busy, setBusy] = useState(false);
   const [savedCases, setSavedCases] = useState([]);
 
+  const [sourceFile, setSourceFile] = useState(null);
+  const [autoResult, setAutoResult] = useState(null);
+  const [autoBusy, setAutoBusy] = useState(false);
+
   async function handleFile(file) {
     if (!file || !file.type?.startsWith("image/")) return;
+
+    setSourceFile(file);
+    setAutoResult(null);
 
     setBusy(true);
     setAnalysis(null);
@@ -298,16 +307,41 @@ function saveCurrentCase() {
 >
   SAVE CASE
 </button>
+
+    <button
+  type="button"
+  className="save-case-btn"
+  onClick={runAuto}
+  disabled={!analysis || !sourceFile || autoBusy}
+>
+  {autoBusy ? "RUNNING..." : "RUN IX AUTO"}
+</button>
           </header>
 
           <section className="classifier-grid">
-            <section className="photo-stage">
-              {previewUrl ? (
-                <img src={previewUrl} alt="Classified machine" />
-              ) : (
-                <div className="empty-stage">UPLOAD MACHINE PHOTO</div>
-              )}
-            </section>
+           <section className="photo-stage">
+  <div className="photo-compare-stack">
+    <div className="photo-compare-panel">
+      <span>ORIGINAL</span>
+
+      {previewUrl ? (
+        <img src={previewUrl} alt="Classified machine" />
+      ) : (
+        <div className="empty-stage">UPLOAD MACHINE PHOTO</div>
+      )}
+    </div>
+
+    <div className="photo-compare-panel">
+      <span>IX AUTO OUTPUT</span>
+
+      {autoResult?.outputUrl ? (
+        <img src={autoResult.outputUrl} alt="IX Auto output" />
+      ) : (
+        <div className="empty-stage">RUN IX AUTO</div>
+      )}
+    </div>
+  </div>
+</section>
 
             <aside className="analysis-panel">
               <div className="panel-head">
@@ -591,6 +625,54 @@ function saveCurrentCase() {
           line-height: 1.5;
           padding: 24px;
         }
+
+        .photo-compare-stack {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.photo-compare-panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.06);
+
+  background: #050505;
+  overflow: hidden;
+}
+
+.photo-compare-panel > span {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.72);
+  color: #FFC400;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .7px;
+}
+
+.photo-compare-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 
         .analysis-panel {
           min-height: calc(100vh - 168px);
