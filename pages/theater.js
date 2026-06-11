@@ -1,5 +1,12 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
+
+import {
+  DndContext,
+  useDraggable,
+  useDroppable
+} from "@dnd-kit/core";
+
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
@@ -20,6 +27,64 @@ function getImage(machine = {}) {
     machine.attributes?.publicData?.images?.[0];
 
   return typeof image === "string" ? image : image?.url || "";
+}
+
+
+function TheaterDraggableCard({
+  id,
+  children,
+  className,
+  onClick
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className || ""} ${isDragging ? "is-dragging" : ""}`}
+      onClick={onClick}
+      style={{
+        transform: transform
+          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+          : undefined
+      }}
+      {...listeners}
+      {...attributes}
+    >
+      {children}
+    </div>
+  );
+}
+
+function TheaterDropCard({
+  id,
+  children,
+  className,
+  onClick
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id
+  });
+
+  return (
+    <TheaterDraggableCard
+      id={id}
+      className={`${className || ""} ${isOver ? "is-over" : ""}`}
+      onClick={onClick}
+    >
+      <div ref={setNodeRef}>
+        {children}
+      </div>
+    </TheaterDraggableCard>
+  );
 }
 
 export default function IXITheater() {
@@ -137,6 +202,22 @@ const screenMachines = useMemo(() => {
 
   }
 
+function handleTheaterDragEnd(event) {
+  const from = Number(event?.active?.id);
+  const to = Number(event?.over?.id);
+
+  if (
+    Number.isNaN(from) ||
+    Number.isNaN(to) ||
+    from === to
+  ) {
+    return;
+  }
+
+  moveCard(from, to);
+}
+  
+
 function getMachineImages(machine = {}) {
   const rawImages =
     machine.images ||
@@ -224,8 +305,9 @@ function prevPhotoForMachine(machine) {
 
       <Navbar />
 
-      <main>
-        {!entered && (
+<DndContext onDragEnd={handleTheaterDragEnd}>
+  <main>
+    {!entered && (
           <section className="theater-lobby">
             <div className="lobby-card">
               <span>IXI THEATER</span>
@@ -415,26 +497,20 @@ return (
                   const id = String(getListingId(machine));
 
                   return (
-                    <div
-                      key={id}
-                     className={`loaded-card ${
-  screenSlots.includes(index) ? "on-screen" : ""
-}`}
-                      draggable
-                      onDragStart={() => setDragIndex(index)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={() => {
-                        moveCard(dragIndex, index);
-                        setDragIndex(null);
-                      }}
-                 onClick={() => {
-  setScreenSlots(current => {
-    const next = [...current];
-    next[selectedSlot] = index;
-    return next;
-  });
-}}
-                                       >
+                   <TheaterDropCard
+  key={id}
+  id={String(index)}
+  className={`loaded-card ${
+    screenSlots.includes(index) ? "on-screen" : ""
+  }`}
+  onClick={() => {
+    setScreenSlots(current => {
+      const next = [...current];
+      next[selectedSlot] = index;
+      return next;
+    });
+  }}
+>
                   {screenSlots.includes(index) && (
   <div className="loaded-card-screen-label">
     {screenSlots.indexOf(index) + 1}
@@ -461,7 +537,7 @@ return (
   onBoardDragEnd={() => {}}
 />
 </div>
-</div>
+</TheaterDropCard>
                   );
                 })}
                           </div>
@@ -505,7 +581,8 @@ return (
           </section>
           </section>
         )}
-      </main>
+           </main>
+</DndContext>
 
       <style jsx>{`
        :global(html),
