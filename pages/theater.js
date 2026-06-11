@@ -469,7 +469,13 @@ return (
           </div>
 
           <div className="theater-import-zone">
- <div className="theater-stack-grid">
+<div className="theater-stack-grid">
+  <button
+    type="button"
+    className="theater-unload-dash"
+    title="Unload loaded rail to stack"
+  />
+
   {[1, 2, 3, 4, 5, 6].map(stackNumber => (
     <div
       key={`theater-stack-${stackNumber}`}
@@ -1046,6 +1052,33 @@ margin-top: -25px;
 
   column-gap: 0px;
   row-gap: 0px;
+}
+
+.theater-unload-dash {
+  position: absolute;
+
+  left: -16px;
+  top: 50%;
+
+  width: 4px;
+  height: 30px;
+
+  transform: translateY(-50%);
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.14);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 50;
+}
+
+.theater-unload-dash:hover {
+  background: rgba(229,62,62,.88);
+  box-shadow: 0 0 8px rgba(229,62,62,.24);
 }
 
 .theater-stack-shell:nth-child(-n+3) {
