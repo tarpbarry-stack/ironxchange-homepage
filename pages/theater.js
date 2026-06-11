@@ -30,8 +30,9 @@ export default function IXITheater() {
 
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
+const [selectedSlot, setSelectedSlot] = useState(0);
 
-  const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
+const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
   const [screenZoomStates, setScreenZoomStates] = useState([
   { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 },
   { zoom: 1, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0 },
