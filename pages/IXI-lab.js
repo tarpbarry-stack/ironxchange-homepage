@@ -292,515 +292,421 @@ onMouseLeave={() => {
 
       <Footer />
 
-      <style jsx>{`
-        :global(body) {
-          margin: 0;
-          background: #0b0b0b;
-          color: #d6d6d6;
-          font-family: Arial, sans-serif;
-        }
-
-        main {
-          min-height: 72vh;
-          padding: 14px 5% 58px;
-          background:
-            radial-gradient(circle at 50% 0%, rgba(255,196,0,.045), transparent 34%),
-            linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
-            #0b0b0b;
-        }
-
-        .ixi-env-dash {
-  display: block;
-
-  height: 4px;
-
-  border-radius: 2px;
-
-  background: rgba(255,255,255,.10);
-}
-    .lab-shell {
-  max-width: 1920px;
-  margin: 0 auto;
-  position: relative;
-}
-        
-.ixi-page-indicator {
-  width: 100%;
-  min-height: 22px;
-
-  margin: 0 auto 22px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-
-  position: relative;
-}
-
-
-        .ixi-page-indicator-link {
-          color: rgba(255,255,255,.075);
-          text-decoration: none;
-
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .9px;
-          text-transform: uppercase;
-
-          white-space: nowrap;
-
-         transition:
-  color .28s ease,
-  opacity .28s ease,
-  text-shadow .28s ease,
-  filter .28s ease;
-        }
-
-      .ixi-page-indicator-link:hover {
-  color: rgba(255,255,255,.32);
-  text-shadow: none;
-}
-
-.ixi-page-indicator-link.state-available {
-  color: rgba(255,255,255,.20);
-}
-
-.ixi-page-indicator-link.state-unlocked {
-  color: rgba(0,194,255,.62);
-}
-
-.ixi-page-indicator-link.state-active {
-  color: rgba(255,196,0,.86);
-}
-
-.ixi-page-indicator-link.state-locked {
-  color: rgba(255,255,255,.08);
-}
-
-.ixi-page-indicator.mode-discover .ixi-page-indicator-link {
-  color: rgba(255,255,255,.22);
-}
-
-.ixi-page-indicator.mode-discover .ixi-page-indicator-link.active {
-  color: rgba(255,196,0,.62);
-}
-
-.ixi-page-indicator.mode-locked .ixi-page-indicator-link {
-  color: rgba(255,255,255,.42);
-}
-
-.ixi-page-indicator.mode-locked .ixi-page-indicator-link.active {
-  color: rgba(255,196,0,.86);
-}
+<style jsx>{`
+  :global(body) {
+    margin: 0;
+    background: #0b0b0b;
+    color: #d6d6d6;
+    font-family: Arial, sans-serif;
+  }
+
+  main {
+    min-height: 72vh;
+    padding: 14px 5% 58px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255,196,0,.045), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
+      #0b0b0b;
+  }
+
+  .lab-shell {
+    max-width: 1920px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ========================= */
+  /* IXI ENVIRONMENT RAIL      */
+  /* ========================= */
+
+  .ixi-page-indicator {
+    width: 100%;
+    min-height: 22px;
+
+    margin: 0 auto 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+
+    position: relative;
+  }
+
+  .ixi-page-indicator-link {
+    color: rgba(255,255,255,.075);
+    text-decoration: none;
+
+    font-size: 9px;
+    font-weight: 950;
+    letter-spacing: .9px;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+
+    transition:
+      color .28s ease,
+      opacity .28s ease,
+      text-shadow .28s ease,
+      filter .28s ease;
+  }
+
+  .ixi-page-indicator-link:hover {
+    color: rgba(255,255,255,.32);
+    text-shadow: none;
+  }
+
+  .ixi-page-indicator-link.state-available {
+    color: rgba(255,255,255,.20);
+  }
+
+  .ixi-page-indicator-link.state-unlocked {
+    color: rgba(0,194,255,.62);
+  }
+
+  .ixi-page-indicator-link.state-active {
+    color: rgba(255,196,0,.86);
+  }
+
+  .ixi-page-indicator-link.state-locked {
+    color: rgba(255,255,255,.08);
+  }
+
+  .ixi-page-indicator.mode-discover .ixi-page-indicator-link {
+    color: rgba(255,255,255,.22);
+  }
+
+  .ixi-page-indicator.mode-discover .ixi-page-indicator-link.active {
+    color: rgba(255,196,0,.62);
+  }
+
+  .ixi-page-indicator.mode-locked .ixi-page-indicator-link {
+    color: rgba(255,255,255,.42);
+  }
+
+  .ixi-page-indicator.mode-locked .ixi-page-indicator-link.active {
+    color: rgba(255,196,0,.86);
+  }
+
+  .ixi-page-indicator-link.post-free {
+    color: rgba(255,196,0,.36);
+  }
+
+  .ixi-page-indicator.mode-discover .ixi-page-indicator-link.post-free {
+    color: rgba(255,196,0,.54);
+  }
 
-.ixi-page-indicator-link.post-free {
-  color: rgba(255,196,0,.36);
-}
+  .ixi-page-indicator.mode-locked .ixi-page-indicator-link.post-free,
+  .ixi-page-indicator-link.post-free:hover {
+    color: rgba(255,196,0,.72);
+    text-shadow: none;
+  }
 
-.ixi-page-indicator.mode-discover .ixi-page-indicator-link.post-free {
-  color: rgba(255,196,0,.54);
-}
+  .ixi-env-dash {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,.10);
+  }
 
-.ixi-page-indicator.mode-locked .ixi-page-indicator-link.post-free,
-.ixi-page-indicator-link.post-free:hover {
-  color: rgba(255,196,0,.72);
-  text-shadow: none;
-}
+  .ixi-power-switch {
+    width: 18px;
+    height: 4px;
 
-.ixi-power-switch {
-  width: 18px;
-  height: 4px;
+    border: 0;
+    border-radius: 2px;
 
-  border: 0;
-  border-radius: 2px;
+    background: rgba(255,255,255,.18);
 
-  background: rgba(255,255,255,.18);
+    padding: 0;
+    cursor: pointer;
 
-  padding: 0;
-  cursor: pointer;
+    position: absolute;
+    right: 0;
+    bottom: -10px;
 
-  position: absolute;
-  right: 0;
-  bottom: -10px;
+    z-index: 20;
+  }
 
-  z-index: 10;
-}
+  .ixi-power-switch::before {
+    content: "";
 
-.ixi-power-switch::before {
-  content: "";
+    position: absolute;
 
-  position: absolute;
+    left: -10px;
+    right: -10px;
+    top: -8px;
+    bottom: -8px;
+  }
 
-  left: -10px;
-  right: -10px;
-  top: -8px;
-  bottom: -8px;
-}
+  .ixi-power-switch.active {
+    background: rgba(255,196,0,.95);
+    box-shadow: 0 0 8px rgba(255,196,0,.42);
+  }
 
-.ixi-power-switch.active {
-  background: rgba(255,196,0,.95);
+  /* ========================= */
+  /* IXI LAB POCKET STATIONS   */
+  /* ========================= */
 
-  box-shadow:
-    0 0 8px rgba(255,196,0,.42);
-}
+  .ixi-lab-pocket-chassis {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 46px;
 
-.lab-panel {
-  margin: 0 auto;
-}
-.ixi-lab-pocket-chassis {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 52px;
+    width: 100%;
+    height: 0;
 
-  width: 100%;
-  height: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
 
-  pointer-events: none;
-  z-index: 2;
-}
+  .ixi-lab-pocket-shell {
+    position: absolute;
 
-.ixi-lab-pocket-shell {
-  position: absolute;
+    width: 210px;
+    height: 92px;
 
-  width: 250px;
-  height: 118px;
+    padding: 8px;
 
-  padding: 10px;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 16px 10px 16px 10px;
 
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 10px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
+      radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
+      rgba(7,7,7,.76);
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    rgba(7,7,7,.72);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.028),
+      0 8px 18px rgba(0,0,0,.20);
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.025),
-    0 10px 22px rgba(0,0,0,.20);
+    overflow: visible;
 
-  overflow: visible;
+    pointer-events: auto;
+    z-index: 8;
+  }
 
-  pointer-events: auto;
-  z-index: 8;
-}
+  .ixi-lab-pocket-shell.left {
+    right: calc(50% + clamp(210px, 18vw, 310px) + 8px);
+  }
 
-.ixi-lab-pocket-shell.left {
-  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
-}
+  .ixi-lab-pocket-shell.right {
+    left: calc(50% + clamp(210px, 18vw, 310px) + 8px);
+  }
 
-.ixi-lab-pocket-shell.right {
-  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
-}
+  .ixi-lab-pocket-shell.top {
+    top: -4px;
+  }
 
-.ixi-lab-pocket-shell.top {
-  top: -8px;
-}
+  .ixi-lab-pocket-shell.bottom {
+    top: 96px;
+  }
 
-.ixi-lab-pocket-shell.bottom {
-  top: 116px;
-}
+  .ixi-lab-pocket-shell::before {
+    content: "";
 
-.ixi-lab-pocket-shell::before {
-  content: "";
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    top: 8px;
 
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 9px;
+    height: 1px;
 
-  height: 1px;
+    background: rgba(255,196,0,.10);
+  }
 
-  background: rgba(255,196,0,.10);
-}
+  .ixi-lab-pocket-topline {
+    position: absolute;
+    left: 9px;
+    top: 10px;
 
-.ixi-lab-pocket-topline {
-  position: absolute;
-  left: 10px;
-  top: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    pointer-events: none;
+  }
 
-  pointer-events: none;
-}
-.ixi-lab-pocket-topline span {
-  color: rgba(255,196,0,.78);
+  .ixi-lab-pocket-topline span {
+    color: rgba(255,196,0,.78);
 
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+    font-size: 6.5px;
+    font-weight: 950;
+    letter-spacing: .62px;
+    text-transform: uppercase;
+  }
 
-.ixi-lab-pocket-topline strong {
-  color: rgba(255,255,255,.18);
+  .ixi-lab-pocket-topline strong {
+    color: rgba(255,255,255,.18);
 
-  font-size: 6.5px;
-  font-weight: 950;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+    font-size: 5.8px;
+    font-weight: 950;
+    letter-spacing: .58px;
+    text-transform: uppercase;
+  }
 
+  .ixi-lab-pocket-rail {
+    position: absolute;
+    right: 9px;
+    top: 11px;
 
-.lab-shell {
-  max-width: 1920px;
-  margin: 0 auto;
-  position: relative;
-}
+    width: 82px;
+    height: 4px;
 
-.ixi-lab-pocket-chassis {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  width: 100%;
-  height: 0;
+    z-index: 4;
+  }
 
-  pointer-events: none;
-  z-index: 2;
-}
+  .ixi-lab-pocket-rail button {
+    position: relative;
 
-.ixi-lab-pocket-shell {
-  position: absolute;
+    width: 15px;
+    height: 4px;
 
-  width: 300px;
-  height: 118px;
+    border: 0;
+    border-radius: 2px;
 
-  padding: 10px;
+    background: rgba(255,255,255,.12);
 
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 10px;
+    padding: 0;
+    cursor: pointer;
+  }
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    rgba(7,7,7,.72);
+  .ixi-lab-pocket-rail button:hover {
+    background: rgba(255,196,0,.78);
+    box-shadow: 0 0 8px rgba(255,196,0,.20);
+  }
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.025),
-    0 10px 22px rgba(0,0,0,.20);
+  .ixi-lab-pocket-rail button:hover::after {
+    content: attr(data-label);
 
-  overflow: visible;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
 
-  pointer-events: auto;
-  z-index: 8;
-}
+    transform: translateX(-50%);
 
-.ixi-lab-pocket-shell.left {
-  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
-}
+    white-space: nowrap;
 
-.ixi-lab-pocket-shell.right {
-  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
-}
+    color: rgba(255,255,255,.68);
 
-.ixi-lab-pocket-shell.top {
-  top: -8px;
-}
+    font-size: 6px;
+    font-weight: 950;
+    letter-spacing: .5px;
+    text-transform: uppercase;
 
-.ixi-lab-pocket-shell.bottom {
-  top: 116px;
-}
+    pointer-events: none;
+  }
 
-.ixi-lab-pocket-shell::before {
-  content: "";
+  .ixi-lab-pocket-cavity {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 25px;
 
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 9px;
+    border: 1px dashed rgba(255,255,255,.05);
+    border-radius: 11px 7px 11px 7px;
 
-  height: 1px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+      rgba(10,10,10,.44);
 
-  background: rgba(255,196,0,.10);
-}
+    overflow: hidden;
+  }
 
-.ixi-lab-pocket-topline {
-  position: absolute;
-  left: 10px;
-  top: 13px;
+  .ixi-lab-pocket-cavity::after {
+    content: "3 MACHINES";
 
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
 
-  pointer-events: none;
-}
+    color: rgba(255,255,255,.22);
 
-.ixi-lab-pocket-topline span {
-  color: rgba(255,196,0,.78);
+    font-size: 5.8px;
+    font-weight: 950;
+    letter-spacing: .55px;
+    text-transform: uppercase;
+  }
 
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+  .ixi-lab-thumb {
+    position: absolute;
+    left: 50%;
+    bottom: 13px;
 
-.ixi-lab-pocket-topline strong {
-  color: rgba(255,255,255,.18);
+    width: 68px;
+    height: 43px;
 
-  font-size: 6.5px;
-  font-weight: 950;
-  letter-spacing: .65px;
-  text-transform: uppercase;
-}
+    transform: translateX(-50%);
 
-.ixi-lab-pocket-rail {
-  position: absolute;
-  right: 10px;
-  top: 13px;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 8px 8px 0 0;
 
-  width: 112px;
-  height: 4px;
+    background:
+      linear-gradient(135deg, rgba(255,196,0,.18), rgba(0,194,255,.06)),
+      #121212;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.032),
+      0 6px 12px rgba(0,0,0,.26);
+  }
 
-  z-index: 4;
-}
+  .ixi-lab-thumb.ghost-two,
+  .ixi-lab-thumb.ghost-three {
+    display: none;
+  }
 
-.ixi-lab-pocket-rail button {
-  position: relative;
+  .ixi-lab-pocket-shell.left .ixi-lab-thumb {
+    transform: translateX(-50%) rotate(-1deg);
+  }
 
-  width: 18px;
-  height: 4px;
+  .ixi-lab-pocket-shell.right .ixi-lab-thumb {
+    transform: translateX(-50%) rotate(1deg);
+  }
 
-  border: 0;
-  border-radius: 1px;
+  /* ========================= */
+  /* MOBILE                    */
+  /* ========================= */
 
-  background: rgba(255,255,255,.12);
+  @media (max-width: 850px) {
+    main {
+      padding: 18px 4% 48px;
+    }
 
-  padding: 0;
-  cursor: pointer;
-}
+    .ixi-page-indicator {
+      overflow-x: auto;
+      overflow-y: hidden;
 
-.ixi-lab-pocket-rail button:hover {
-  background: rgba(255,196,0,.78);
-  box-shadow: 0 0 8px rgba(255,196,0,.20);
-}
+      justify-content: flex-start;
+      gap: 22px;
 
-.ixi-lab-pocket-rail button:hover::after {
-  content: attr(data-label);
+      padding-bottom: 6px;
 
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-  transform: translateX(-50%);
+    .ixi-page-indicator::-webkit-scrollbar {
+      display: none;
+    }
 
-  white-space: nowrap;
+    .ixi-power-switch {
+      position: sticky;
+      right: 0;
+      bottom: auto;
+      flex: 0 0 18px;
+    }
 
-  color: rgba(255,255,255,.68);
-
-  font-size: 6.25px;
-  font-weight: 950;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-
-  pointer-events: none;
-}
-
-.ixi-lab-pocket-cavity {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  top: 29px;
-
-  border: 1px dashed rgba(255,255,255,.055);
-  border-radius: 8px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    rgba(10,10,10,.42);
-
-  overflow: hidden;
-}
-
-.ixi-lab-pocket-cavity::after {
-  content: "3 MACHINES";
-
-  position: absolute;
-  left: 9px;
-  bottom: 7px;
-
-  color: rgba(255,255,255,.24);
-
-  font-size: 6.5px;
-  font-weight: 950;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-}
-
-.ixi-lab-thumb {
-  position: absolute;
-  left: 50%;
-  bottom: 16px;
-
-  width: 92px;
-  height: 60px;
-
-  transform: translateX(-50%);
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 7px 7px 0 0;
-
-  background:
-    linear-gradient(135deg, rgba(255,196,0,.20), rgba(0,194,255,.08)),
-    #121212;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 8px 16px rgba(0,0,0,.30);
-}
-
-.ixi-lab-thumb.ghost-two,
-.ixi-lab-thumb.ghost-three {
-  display: none;
-}
-
-.ixi-lab-pocket-shell.left .ixi-lab-thumb {
-  transform: translateX(-50%) rotate(-1deg);
-}
-
-.ixi-lab-pocket-shell.right .ixi-lab-thumb {
-  transform: translateX(-50%) rotate(1deg);
-}
-        
-        @media (max-width: 850px) {
-          main {
-            padding: 18px 4% 48px;
-          }
-
-          .ixi-page-indicator {
-            overflow-x: auto;
-            overflow-y: hidden;
-
-            justify-content: flex-start;
-            gap: 22px;
-
-            padding-bottom: 6px;
-
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-
-          .ixi-page-indicator::-webkit-scrollbar {
-            display: none;
-          }
-
-         .ixi-power-switch {
-  position: sticky;
-  right: 0;
-  bottom: auto;
-  flex: 0 0 18px;
-}
-        }
-      `}</style>
+    .ixi-lab-pocket-chassis {
+      display: none;
+    }
+  }
+`}</style>
     </>
   );
 }
