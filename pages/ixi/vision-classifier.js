@@ -459,11 +459,10 @@ function saveCurrentCase() {
                       <strong>{analysis.avgLum}</strong>
                     </div>
                   </section>
-                    <section className="decision-card">
+                   <section className="decision-card">
   <span>IX Decision</span>
-   <p>{analysis.classification.decision}</p>
+  <p>{analysis.classification.decision}</p>
 </section>
-
 
 <section className="case-memory-card">
   <span>Case Memory</span>
