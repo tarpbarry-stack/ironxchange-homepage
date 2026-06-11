@@ -1116,10 +1116,13 @@ margin-top: -25px;
   align-items: end;
 }
 
-.theater-loaded-zone {
+:global(.theater-loaded-zone) {
   min-width: 0;
   height: 270px;
   overflow: hidden;
+
+  position: relative;
+  top: 24px;
 }
 
 .theater-import-zone {
