@@ -1033,7 +1033,7 @@ margin-top: -25px;
   align-items: center;
   justify-content: center;
 
-  overflow: hidden;
+  overflow: visible;
 }
 
 .theater-stack-grid {
@@ -1046,7 +1046,7 @@ margin-top: -25px;
 
   align-items: center;
 
-   transform: translateY(0);
+   transform: translateY(44px);
 }
 
 .theater-stack-matrix {
