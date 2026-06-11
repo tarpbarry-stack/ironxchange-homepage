@@ -5,7 +5,8 @@ import {
   DndContext,
   useDraggable,
   useDroppable,
-  DragOverlay
+  DragOverlay,
+  pointerWithin
 } from "@dnd-kit/core";
 
 import Navbar from "../components/Navbar";
@@ -407,6 +408,7 @@ function prevPhotoForMachine(machine) {
 
 <DndContext
   autoScroll={false}
+  collisionDetection={pointerWithin}
   onDragStart={(event) => {
     setActiveDragId(String(event?.active?.id || ""));
   }}
