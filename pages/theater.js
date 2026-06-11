@@ -29,7 +29,7 @@ export default function IXITheater() {
   const [dragIndex, setDragIndex] = useState(null);
 
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
-const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
+const [screenSlots, setScreenSlots] = useState([null, null, null, null]);
 const [selectedSlot, setSelectedSlot] = useState(0);
 
   const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
@@ -119,10 +119,24 @@ function resetZoomState(screenIndex) {
     loadTheater();
   }, []);
 
+  useEffect(() => {
+  if (!listings.length) return;
+
+  setScreenSlots(current => {
+    if (current.some(Boolean)) return current;
+
+    return [0, 1, 2, 3].map(index =>
+      listings[index] ? String(getListingId(listings[index])) : null
+    );
+  });
+}, [listings]);
+
  const screenMachines = useMemo(() => {
   return screenSlots
     .slice(0, viewCount)
-    .map(slotIndex => listings[slotIndex])
+    .map(slotId =>
+      listings.find(machine => String(getListingId(machine)) === String(slotId))
+    )
     .filter(Boolean);
 }, [screenSlots, listings, viewCount]);
 
@@ -428,17 +442,19 @@ return (
                         moveCard(dragIndex, index);
                         setDragIndex(null);
                       }}
-                   onClick={() => {
+                  onClick={() => {
+  const machineId = String(getListingId(machine));
+
   setScreenSlots(current => {
     const next = [...current];
-    next[selectedSlot] = index;
+    next[selectedSlot] = machineId;
     return next;
   });
 }}
                                        >
-                     {screenSlots.includes(index) && (
+                    {screenSlots.includes(id) && (
   <div className="loaded-card-screen-label">
-    {screenSlots.indexOf(index) + 1}
+    {screenSlots.indexOf(id) + 1}
   </div>
 )}
 
