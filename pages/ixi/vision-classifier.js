@@ -324,10 +324,7 @@ export default function IXVisionClassifier() {
                   </section>
                     <section className="decision-card">
   <span>IX Decision</span>
-  <p>
-    This photo has usable exposure, contrast, and color, but the resolution is too low
-    for buyer inspection. IX Vision should recover size first, then restore web-photo
-    damage, refine the edges, and finish with Julio for presentation.
+   <p>{analysis.classification.decision}</p>
   </p>
 </section>
                 </>
