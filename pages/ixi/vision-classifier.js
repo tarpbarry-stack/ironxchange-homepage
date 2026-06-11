@@ -326,6 +326,59 @@ export default function IXVisionClassifier() {
   <span>IX Decision</span>
    <p>{analysis.classification.decision}</p>
 </section>
+
+
+    <section className="damage-card">
+  <span>Photo Damage Profile</span>
+
+  <div className="damage-row">
+    <strong>Resolution</strong>
+    <em>
+      {analysis.resolutionScore < 35
+        ? "EXTREME"
+        : analysis.resolutionScore < 55
+        ? "HIGH"
+        : analysis.resolutionScore < 75
+        ? "MEDIUM"
+        : "LOW"}
+    </em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Compression</strong>
+    <em>
+      {analysis.compressionScore < 45
+        ? "HIGH"
+        : analysis.compressionScore < 70
+        ? "MEDIUM"
+        : "LOW"}
+    </em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Sharpness</strong>
+    <em>
+      {analysis.sharpnessScore < 45
+        ? "HIGH"
+        : analysis.sharpnessScore < 70
+        ? "MEDIUM"
+        : "LOW"}
+    </em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Exposure</strong>
+    <em>
+      {analysis.exposureScore < 45
+        ? "HIGH"
+        : analysis.exposureScore < 70
+        ? "MEDIUM"
+        : "LOW"}
+    </em>
+  </div>
+</section>
+
+                    
                 </>
               ) : (
                 <div className="empty-analysis">
@@ -665,6 +718,56 @@ export default function IXVisionClassifier() {
   color: rgba(255,255,255,.50);
   font-size: 11px;
   line-height: 1.48;
+}
+
+.damage-card {
+  padding: 13px;
+  margin-bottom: 12px;
+
+  border-radius: 13px;
+  border: 1px solid rgba(229,62,62,.18);
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(229,62,62,.08),
+      transparent 70%),
+    #101010;
+}
+
+.damage-card span {
+  display: block;
+  margin-bottom: 10px;
+
+  color: #ffb4b4;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .78px;
+  text-transform: uppercase;
+}
+
+.damage-row {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 8px 0;
+
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+.damage-row:last-child {
+  border-bottom: 0;
+}
+
+.damage-row strong {
+  color: rgba(255,255,255,.75);
+  font-size: 10px;
+}
+
+.damage-row em {
+  color: #FFC400;
+  font-style: normal;
+  font-weight: 950;
 }
 
         @media (max-width: 980px) {
