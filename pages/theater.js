@@ -106,6 +106,24 @@ function TheaterDropCard({
   );
 }
 
+function TheaterStackDropZone({
+  id,
+  children,
+  className,
+  ...props
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className || ""} ${isOver ? "is-over" : ""}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
 export default function IXITheater() {
   const [listings, setListings] = useState([]);
   const [viewCount, setViewCount] = useState(2);
