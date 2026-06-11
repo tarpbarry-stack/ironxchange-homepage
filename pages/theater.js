@@ -694,7 +694,34 @@ return (
           </section>
           </section>
         )}
-           </main>
+           <DragOverlay>
+  {activeDragMachine ? (
+    <div className="theater-drag-overlay-card">
+      <div className="loaded-card-scale">
+        <ListingCard
+          listing={activeDragMachine}
+          saved={false}
+          onToggleSaved={() => {}}
+          from="saved"
+          ixiState={{
+            color: "none",
+            outline: 1
+          }}
+          onIxiStateChange={() => {}}
+          onSendFront={() => {}}
+          onSendBack={() => {}}
+          isBoardDraggingCard={false}
+          isGhostTarget={false}
+          onBoardDragStart={() => {}}
+          onBoardDragOver={() => {}}
+          onBoardDragEnd={() => {}}
+        />
+      </div>
+    </div>
+  ) : null}
+</DragOverlay>
+
+</main>
 </DndContext>
 
       <style jsx>{`
@@ -1140,6 +1167,15 @@ margin-top: -25px;
   transform-origin: top left;
 
   margin-bottom: -18px;
+}
+
+:global(.theater-drag-overlay-card) {
+  width: 171px;
+  height: 235px;
+  pointer-events: none;
+  overflow: visible;
+  opacity: .98;
+  z-index: 999999;
 }
 
        .loaded-card-screen-label {
