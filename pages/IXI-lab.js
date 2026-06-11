@@ -500,6 +500,7 @@ onMouseLeave={() => {
 
 .ixi-lab-pocket-shell.bottom {
   top: 116px;
+}
 
 .ixi-lab-pocket-shell::before {
   content: "";
