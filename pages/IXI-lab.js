@@ -487,13 +487,13 @@ onMouseLeave={() => {
     z-index: 8;
   }
 
-  .ixi-lab-pocket-shell.left {
-    right: calc(50% + clamp(210px, 18vw, 310px) + 8px);
-  }
+ .ixi-lab-pocket-shell.left {
+  right: calc(50% + clamp(210px, 18vw, 310px) + 28px);
+}
 
-  .ixi-lab-pocket-shell.right {
-    left: calc(50% + clamp(210px, 18vw, 310px) + 8px);
-  }
+.ixi-lab-pocket-shell.right {
+  left: calc(50% + clamp(210px, 18vw, 310px) + 28px);
+}
 
   .ixi-lab-pocket-shell.top {
     top: -4px;
