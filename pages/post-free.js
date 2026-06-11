@@ -40,7 +40,13 @@ import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
 import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
-import { processIXPhoto } from "../lib/ixvision/pipeline/processIXPhoto";
+import {
+  processIXPhoto,
+  buildIXPhotoVariants,
+  getIXActivePhotoFile,
+  getIXActivePhotoUrl
+} from "../lib/ixvision/pipeline/processIXPhoto";
+
 import { captureIXEvent } from "../lib/posthog";
 
 const BRAND_YELLOW = "#FFC400";
@@ -374,9 +380,9 @@ const availableModels = useMemo(() => {
   const locationLabel = [city, stateCode].filter(Boolean).join(", ");
 
   const heroPhoto =
-    photoItems[activePhotoIndex]?.url ||
-    photoItems[0]?.url ||
-    "/images/hero-equipment-yard.jpg";
+  getIXActivePhotoUrl(photoItems[activePhotoIndex]) ||
+  getIXActivePhotoUrl(photoItems[0]) ||
+  "/images/hero-equipment-yard.jpg";
 
   const availableKeywords = useMemo(() => {
   return categoryDnaKeywords[category] || [];
@@ -441,17 +447,20 @@ const availableModels = useMemo(() => {
     });
   }
 
-  function handlePhotos(e) {
+  async function handlePhotos(e) {
     const files = Array.from(e.target.files || []).filter(file =>
       file.type.startsWith("image/")
     );
 
-    const mapped = files.slice(0, 24).map(file => ({
-      id: `${Date.now()}-${file.name}-${Math.random()}`,
-      file,
-      url: URL.createObjectURL(file),
-      existing: false
-    }));
+    const mapped = await Promise.all(
+  files.slice(0, 24).map(file =>
+    buildIXPhotoVariants(file, {
+      make,
+      companyName: "IronXchange",
+      userEmail: "tarpbarry@gmail.com"
+    })
+  )
+);
 
     setPhotoItems(current => [...current, ...mapped]);
 
@@ -546,12 +555,14 @@ const availableModels = useMemo(() => {
         photoItems.map(async photo => {
           if (!photo.file) return null;
 
-          const imageFile = await processIXPhoto(photo.file, {
-  mode: photoPolishMode,
-  make,
-  outputQuality: 0.9,
-  maxWidth: 2200
-});
+          const imageFile =
+  getIXActivePhotoFile(photo) ||
+  await processIXPhoto(photo.file, {
+    mode: photoPolishMode,
+    make,
+    outputQuality: 0.9,
+    maxWidth: 2200
+  });
 
           return sdk.images.upload(
             { image: imageFile },
@@ -785,14 +796,14 @@ const availableModels = useMemo(() => {
 
   <div className="workbench-actions">
     <div className="photo-polish-toggle">
-      {["original", "clean", "dealer-pop"].map(mode => (
+     {["original", "clean", "dealerPop"].map(mode => (
         <button
           key={mode}
           type="button"
           className={photoPolishMode === mode ? "active" : ""}
           onClick={() => setPhotoPolishMode(mode)}
         >
-          {mode === "dealer-pop" ? "POP" : mode}
+          {mode === "dealerPop" ? "POP" : mode}
         </button>
       ))}
     </div>
