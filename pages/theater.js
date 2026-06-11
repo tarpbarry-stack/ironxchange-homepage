@@ -1004,7 +1004,7 @@ margin-top: -25px;
 
 
 
-     .loaded-cards {
+     :global(.loaded-cards) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -1012,7 +1012,7 @@ margin-top: -25px;
   display: flex;
   gap: 12px;
 
-  margin-top: 0px;
+  margin-top: 0;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -1020,9 +1020,9 @@ margin-top: -25px;
   padding: 0 4px 0;
 }
 
-    .loaded-card {
-  flex: 0 0 165px;
-  width: 165px;
+    :global(.loaded-card) {
+  flex: 0 0 171px;
+  width: 171px;
   height: 235px;
 
   position: relative;
@@ -1030,16 +1030,17 @@ margin-top: -25px;
   opacity: .72;
   cursor: grab;
 
-          cursor: grab;
+  overflow: visible;
 
-          transition:
-            opacity .16s ease,
-            transform .16s ease,
-            box-shadow .16s ease;
-        }
+  transition:
+    opacity .16s ease,
+    transform .16s ease,
+    box-shadow .16s ease;
+}
 
-.loaded-card-scale {
+:global(.loaded-card-scale) {
   width: 285px;
+  height: 391px;
 
   transform: scale(.60);
   transform-origin: top left;
@@ -1074,13 +1075,13 @@ margin-top: -25px;
   box-shadow: 0 0 10px rgba(255,255,255,.08);
 }
 
-        .loaded-card.on-screen {
+      :global(.loaded-card.on-screen) {
+  opacity: 1;
+}
+       :global(.loaded-card:hover) {
   opacity: 1;
 }
 
-        .loaded-card:hover {
-  opacity: 1;
-}
 
     .loaded-cards {
   scrollbar-width: thin;
