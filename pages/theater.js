@@ -927,7 +927,7 @@ margin-top: -25px;
   opacity: .12;
   transition: opacity .18s ease;
 
-  overflow: hidden;
+  overflow: visible;
 }
 
         .theater-card-rail:hover {
