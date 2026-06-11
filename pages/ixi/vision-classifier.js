@@ -267,7 +267,28 @@ function saveCurrentCase() {
 
   console.log("IX Vision Case Saved", savedCase);
 }
-  
+
+  async function runAuto() {
+  if (!sourceFile || !analysis) return;
+
+  setAutoBusy(true);
+
+  try {
+    const result = await runIXAutoRecipe(sourceFile, analysis, {
+      make: "CATERPILLAR",
+      companyName: "IronXchange",
+      userEmail: "tarpbarry@gmail.com"
+    });
+
+    setAutoResult(result);
+    console.log("IX Auto Result", result);
+  } catch (err) {
+    console.error("IX Auto failed:", err);
+    alert(`IX Auto failed: ${err.message || err}`);
+  } finally {
+    setAutoBusy(false);
+  }
+}
 
   return (
     <>
