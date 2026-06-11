@@ -663,13 +663,15 @@ return (
     />
 
     <div className="theater-stack-matrix">
-      {[1, 2, 3, 4, 5, 6].map(stackNumber => (
-        <TheaterStackDropZone
-  key={`theater-stack-${stackNumber}`}
-  id={`stack${stackNumber}`}
-  className="theater-stack-shell"
-  data-theater-stack={`stack${stackNumber}`}
->
+     {[1, 2, 3, 4, 5, 6].map(stackNumber => {
+  const stackKey = `stack${stackNumber}`;
+  const stackIds = theaterContainers[stackKey] || [];
+  const topMachine = stackIds.length
+    ? listings.find(item => String(getListingId(item)) === String(stackIds[stackIds.length - 1]))
+    : null;
+  const topImage = topMachine ? getImage(topMachine) : "";
+
+  return (
   
           <div className="theater-stack-control-rail">
             <button type="button" className="theater-stack-dash load" />
@@ -681,13 +683,26 @@ return (
             STACK {stackNumber}
           </div>
 
-          <div className="theater-stack-thumb-zone">
-            <div className="theater-stack-thumb-head" />
-          </div>
+         <div className="theater-stack-thumb-zone">
+  {topMachine ? (
+    <div className="theater-stack-thumb-head has-machine">
+      {topImage ? (
+        <img src={topImage} alt="" />
+      ) : (
+        <span>
+          {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
+        </span>
+      )}
+    </div>
+  ) : (
+    <div className="theater-stack-thumb-head" />
+  )}
+</div>
 
           <div className="theater-stack-drop-surface" />
-        </TheaterStackDropZone>
-      ))}
+      </TheaterStackDropZone>
+  );
+})}
     </div>
   </div>
 </div>
@@ -1447,6 +1462,23 @@ margin-top: -25px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.035),
     0 8px 16px rgba(0,0,0,.30);
+}
+
+.theater-stack-thumb-head img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.theater-stack-thumb-head span {
+  display: block;
+  padding: 6px;
+
+  color: rgba(255,255,255,.62);
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
 }
 
 .theater-stack-drop-surface {
