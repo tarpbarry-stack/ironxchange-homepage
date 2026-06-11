@@ -397,6 +397,46 @@ function saveCurrentCase() {
                   <ScoreBar label="Contrast" score={analysis.contrastScore} />
                   <ScoreBar label="Color" score={analysis.colorScore} />
 
+<ScoreBar label="Color" score={analysis.colorScore} />
+
+{autoResult?.recipe && (
+  <section className="recipe-card">
+    <span>IX Auto Recipe</span>
+
+    <div className="damage-row">
+      <strong>Recipe</strong>
+      <em>{autoResult.recipe.name}</em>
+    </div>
+
+    <div className="damage-row">
+      <strong>Deblock</strong>
+      <em>{autoResult.recipe.toolRecipe?.deblock}</em>
+    </div>
+
+    <div className="damage-row">
+      <strong>Denoise</strong>
+      <em>{autoResult.recipe.toolRecipe?.denoise}</em>
+    </div>
+
+    <div className="damage-row">
+      <strong>Halo Repair</strong>
+      <em>{autoResult.recipe.toolRecipe?.haloRepair}</em>
+    </div>
+
+    <div className="damage-row">
+      <strong>Clarity</strong>
+      <em>{autoResult.recipe.settings?.clarityLift}</em>
+    </div>
+
+    <div className="damage-row">
+      <strong>Julio</strong>
+      <em>{autoResult.recipe.settings?.paintPopLift}</em>
+    </div>
+  </section>
+)}
+
+<section className="raw-data">
+                    
                   <section className="raw-data">
                     <div>
                       <span>Size</span>
