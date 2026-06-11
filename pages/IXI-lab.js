@@ -248,20 +248,20 @@ onMouseLeave={() => {
     >
       <div className="ixi-lab-pocket-topline">
         <span>{pocket.label}</span>
-        <strong>IXI POCKET</strong>
+        <strong>POCKET</strong>
+      </div>
+
+      <div className="ixi-lab-pocket-rail">
+        <button type="button" data-label="LOAD" />
+        <button type="button" data-label="LOOP" />
+        <button type="button" data-label="BOARD" />
+        <button type="button" data-label="SEND" />
       </div>
 
       <div className="ixi-lab-pocket-cavity">
         <div className="ixi-lab-thumb ghost-one" />
         <div className="ixi-lab-thumb ghost-two" />
         <div className="ixi-lab-thumb ghost-three" />
-      </div>
-
-      <div className="ixi-lab-pocket-rail">
-        <button type="button" data-label="THEATER" />
-        <button type="button" data-label="STACK" />
-        <button type="button" data-label="BOARD" />
-        <button type="button" data-label="SEND" />
       </div>
     </section>
   ))}
@@ -318,10 +318,11 @@ onMouseLeave={() => {
 
   background: rgba(255,255,255,.10);
 }
-        .lab-shell {
-          max-width: 1920px;
-          margin: 0 auto;
-        }
+    .lab-shell {
+  max-width: 1920px;
+  margin: 0 auto;
+  position: relative;
+}
         
 .ixi-page-indicator {
   width: 100%;
@@ -448,33 +449,41 @@ onMouseLeave={() => {
   margin: 0 auto;
 }
 .ixi-lab-pocket-chassis {
-  position: relative;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52px;
+
   width: 100%;
-  height: 118px;
-  margin: -6px auto 0;
+  height: 0;
+
   pointer-events: none;
+  z-index: 2;
 }
 
 .ixi-lab-pocket-shell {
   position: absolute;
-  width: 238px;
-  height: 82px;
 
-  padding: 9px 10px 8px;
+  width: 300px;
+  height: 118px;
+
+  padding: 10px;
 
   border: 1px solid rgba(255,255,255,.055);
-  border-radius: 12px;
+  border-radius: 10px;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
-    radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
-    rgba(15,15,15,.86);
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    rgba(7,7,7,.72);
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 14px 28px rgba(0,0,0,.22);
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 10px 22px rgba(0,0,0,.20);
+
+  overflow: visible;
 
   pointer-events: auto;
+  z-index: 8;
 }
 
 .ixi-lab-pocket-shell.left {
@@ -486,116 +495,181 @@ onMouseLeave={() => {
 }
 
 .ixi-lab-pocket-shell.top {
-  top: 0;
+  top: -8px;
 }
 
 .ixi-lab-pocket-shell.bottom {
-  top: 74px;
+  top: 116px;
+
+.ixi-lab-pocket-shell::before {
+  content: "";
+
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 9px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.10);
 }
 
 .ixi-lab-pocket-topline {
+  position: absolute;
+  left: 10px;
+  top: 13px;
+
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
 
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,.045);
+  pointer-events: none;
+}
+.ixi-lab-pocket-topline span {
+  color: rgba(255,196,0,.78);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+}
+
+.ixi-lab-pocket-topline strong {
+  color: rgba(255,255,255,.18);
+
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+}
+
+
+.lab-shell {
+  max-width: 1920px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.ixi-lab-pocket-chassis {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52px;
+
+  width: 100%;
+  height: 0;
+
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ixi-lab-pocket-shell {
+  position: absolute;
+
+  width: 300px;
+  height: 118px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    rgba(7,7,7,.72);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 10px 22px rgba(0,0,0,.20);
+
+  overflow: visible;
+
+  pointer-events: auto;
+  z-index: 8;
+}
+
+.ixi-lab-pocket-shell.left {
+  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+}
+
+.ixi-lab-pocket-shell.right {
+  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+}
+
+.ixi-lab-pocket-shell.top {
+  top: -8px;
+}
+
+.ixi-lab-pocket-shell.bottom {
+  top: 116px;
+}
+
+.ixi-lab-pocket-shell::before {
+  content: "";
+
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 9px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.10);
+}
+
+.ixi-lab-pocket-topline {
+  position: absolute;
+  left: 10px;
+  top: 13px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  pointer-events: none;
 }
 
 .ixi-lab-pocket-topline span {
   color: rgba(255,196,0,.78);
-  font-size: 8px;
+
+  font-size: 7px;
   font-weight: 950;
-  letter-spacing: .72px;
+  letter-spacing: .65px;
+  text-transform: uppercase;
 }
 
 .ixi-lab-pocket-topline strong {
-  color: rgba(255,255,255,.28);
+  color: rgba(255,255,255,.18);
+
   font-size: 6.5px;
   font-weight: 950;
-  letter-spacing: .72px;
-}
-
-.ixi-lab-pocket-cavity {
-  position: relative;
-  height: 38px;
-  margin-top: 6px;
-
-  border: 1px dashed rgba(255,255,255,.052);
-  border-radius: 9px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0)),
-    rgba(8,8,8,.62);
-
-  overflow: hidden;
-}
-
-.ixi-lab-thumb {
-  position: absolute;
-  top: 8px;
-
-  width: 54px;
-  height: 31px;
-
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 6px 6px 0 0;
-
-  background:
-    linear-gradient(135deg, rgba(255,196,0,.18), rgba(255,255,255,.035)),
-    #121212;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset;
-}
-
-.ixi-lab-pocket-shell.left .ghost-one {
-  right: 26px;
-}
-
-.ixi-lab-pocket-shell.left .ghost-two {
-  right: 48px;
-  opacity: .68;
-}
-
-.ixi-lab-pocket-shell.left .ghost-three {
-  right: 70px;
-  opacity: .42;
-}
-
-.ixi-lab-pocket-shell.right .ghost-one {
-  left: 26px;
-}
-
-.ixi-lab-pocket-shell.right .ghost-two {
-  left: 48px;
-  opacity: .68;
-}
-
-.ixi-lab-pocket-shell.right .ghost-three {
-  left: 70px;
-  opacity: .42;
+  letter-spacing: .65px;
+  text-transform: uppercase;
 }
 
 .ixi-lab-pocket-rail {
   position: absolute;
-  left: 10px;
   right: 10px;
-  bottom: 7px;
+  top: 13px;
+
+  width: 112px;
+  height: 4px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  z-index: 4;
 }
 
 .ixi-lab-pocket-rail button {
   position: relative;
 
-  width: 38px;
+  width: 18px;
   height: 4px;
 
   border: 0;
-  border-radius: 2px;
+  border-radius: 1px;
 
   background: rgba(255,255,255,.12);
 
@@ -605,7 +679,7 @@ onMouseLeave={() => {
 
 .ixi-lab-pocket-rail button:hover {
   background: rgba(255,196,0,.78);
-  box-shadow: 0 0 8px rgba(255,196,0,.22);
+  box-shadow: 0 0 8px rgba(255,196,0,.20);
 }
 
 .ixi-lab-pocket-rail button:hover::after {
@@ -617,11 +691,83 @@ onMouseLeave={() => {
 
   transform: translateX(-50%);
 
+  white-space: nowrap;
+
   color: rgba(255,255,255,.68);
+
+  font-size: 6.25px;
+  font-weight: 950;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
+.ixi-lab-pocket-cavity {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  top: 29px;
+
+  border: 1px dashed rgba(255,255,255,.055);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    rgba(10,10,10,.42);
+
+  overflow: hidden;
+}
+
+.ixi-lab-pocket-cavity::after {
+  content: "3 MACHINES";
+
+  position: absolute;
+  left: 9px;
+  bottom: 7px;
+
+  color: rgba(255,255,255,.24);
+
   font-size: 6.5px;
   font-weight: 950;
-  letter-spacing: .55px;
-  white-space: nowrap;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+.ixi-lab-thumb {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+
+  width: 92px;
+  height: 60px;
+
+  transform: translateX(-50%);
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
+
+  background:
+    linear-gradient(135deg, rgba(255,196,0,.20), rgba(0,194,255,.08)),
+    #121212;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 8px 16px rgba(0,0,0,.30);
+}
+
+.ixi-lab-thumb.ghost-two,
+.ixi-lab-thumb.ghost-three {
+  display: none;
+}
+
+.ixi-lab-pocket-shell.left .ixi-lab-thumb {
+  transform: translateX(-50%) rotate(-1deg);
+}
+
+.ixi-lab-pocket-shell.right .ixi-lab-thumb {
+  transform: translateX(-50%) rotate(1deg);
 }
         
         @media (max-width: 850px) {
