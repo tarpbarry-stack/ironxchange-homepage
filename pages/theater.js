@@ -659,11 +659,40 @@ return (
 <div className="theater-import-zone">
   <div className="theater-stack-grid">
     <button
-      type="button"
-      className="theater-unload-dash"
-      title="Unload loaded rail to stack"
-    />
+  type="button"
+  className="theater-unload-dash"
+  title="Unload loaded rail to stack"
+  onClick={() => {
+    setTheaterContainers(current => {
+      const railIds = current.rail || [];
 
+      if (!railIds.length) return current;
+
+      const stackTargets = [
+        "stack1",
+        "stack2",
+        "stack3",
+        "stack4",
+        "stack5",
+        "stack6"
+      ];
+
+      const emptyStack =
+        stackTargets.find(
+          key => !(current[key] || []).length
+        ) || "stack1";
+
+      return {
+        ...current,
+        [emptyStack]: [
+          ...(current[emptyStack] || []),
+          ...railIds
+        ],
+        rail: []
+      };
+    });
+  }}
+/>
     <div className="theater-stack-matrix">
      {[1, 2, 3, 4, 5, 6].map(stackNumber => {
   const stackKey = `stack${stackNumber}`;
