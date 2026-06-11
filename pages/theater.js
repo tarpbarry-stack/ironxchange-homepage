@@ -1010,7 +1010,7 @@ margin-top: -25px;
   min-width: 0;
 
   display: flex;
-  gap: 30px;
+  gap: 12px;
 
   margin-top: 0px;
 
@@ -1119,13 +1119,6 @@ margin-top: -25px;
   min-width: 0;
   height: 270px;
   overflow: hidden;
-}
-
-.theater-loaded-zone {
-  min-width: 0;
-  overflow: hidden;
-
-  transform: translateY(84px);
 }
 
 .theater-import-zone {
