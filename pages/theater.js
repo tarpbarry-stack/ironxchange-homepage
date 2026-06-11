@@ -908,7 +908,7 @@ margin-top: -25px;
 
 
 
-      .loaded-cards {
+     .loaded-cards {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -921,13 +921,7 @@ margin-top: -25px;
   overflow-x: auto;
   overflow-y: hidden;
 
-  padding: 0px 4px 0;
-
-  direction: rtl;
-}
-
-.loaded-cards > * {
-  direction: ltr;
+  padding: 0 4px 0;
 }
 
     .loaded-card {
