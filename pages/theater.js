@@ -1055,8 +1055,10 @@ margin-top: -25px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
-  column-gap: 8px;
+  column-gap: 10px;
   row-gap: 12px;
+
+  transform: translateY(-2px);
 }
 
 .theater-unload-dash {
