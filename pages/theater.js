@@ -1048,7 +1048,7 @@ margin-top: -25px;
   grid-template-columns: 8px repeat(3, 1fr);
 
   column-gap: 8px;
-  row-gap: 0px;
+  row-gap: 0;
 
   align-items: center;
 }
@@ -1074,15 +1074,15 @@ margin-top: -25px;
   z-index: 50;
 }
 
-.theater-stack-shell:nth-of-type(1),
-.theater-stack-shell:nth-of-type(2),
-.theater-stack-shell:nth-of-type(3) {
+.theater-stack-shell:nth-child(2),
+.theater-stack-shell:nth-child(3),
+.theater-stack-shell:nth-child(4) {
   grid-row: 1;
 }
 
-.theater-stack-shell:nth-of-type(4),
-.theater-stack-shell:nth-of-type(5),
-.theater-stack-shell:nth-of-type(6) {
+.theater-stack-shell:nth-child(5),
+.theater-stack-shell:nth-child(6),
+.theater-stack-shell:nth-child(7) {
   grid-row: 2;
 }
 
