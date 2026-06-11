@@ -1125,7 +1125,7 @@ margin-top: -25px;
   min-width: 0;
   overflow: hidden;
 
-  transform: translateY(24px);
+  transform: translateY(32px);
 }
 
 .theater-import-zone {
