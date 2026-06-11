@@ -325,7 +325,6 @@ export default function IXVisionClassifier() {
                     <section className="decision-card">
   <span>IX Decision</span>
    <p>{analysis.classification.decision}</p>
-  </p>
 </section>
                 </>
               ) : (
