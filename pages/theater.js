@@ -1050,6 +1050,16 @@ margin-top: -25px;
   transform: translateY(34px);
 }
 
+.theater-stack-matrix {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
 .theater-unload-dash {
   grid-column: 1;
   grid-row: 1 / span 2;
