@@ -604,11 +604,13 @@ return (
 
     <div className="theater-stack-matrix">
       {[1, 2, 3, 4, 5, 6].map(stackNumber => (
-        <div
-          key={`theater-stack-${stackNumber}`}
-          className="theater-stack-shell"
-          data-theater-stack={`stack${stackNumber}`}
-        >
+        <TheaterStackDropZone
+  key={`theater-stack-${stackNumber}`}
+  id={`stack${stackNumber}`}
+  className="theater-stack-shell"
+  data-theater-stack={`stack${stackNumber}`}
+>
+  
           <div className="theater-stack-control-rail">
             <button type="button" className="theater-stack-dash load" />
             <button type="button" className="theater-stack-dash loop" />
@@ -624,7 +626,7 @@ return (
           </div>
 
           <div className="theater-stack-drop-surface" />
-        </div>
+        </TheaterStackDropZone>
       ))}
     </div>
   </div>
