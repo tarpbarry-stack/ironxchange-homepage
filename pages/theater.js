@@ -70,20 +70,39 @@ function TheaterDropCard({
   className,
   onClick
 }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id
-  });
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({ id });
+
+  const {
+    setNodeRef: setDropNodeRef,
+    isOver
+  } = useDroppable({ id });
+
+  function setNodeRef(node) {
+    setDragNodeRef(node);
+    setDropNodeRef(node);
+  }
 
   return (
-    <TheaterDraggableCard
-      id={id}
-      className={`${className || ""} ${isOver ? "is-over" : ""}`}
+    <div
+      ref={setNodeRef}
+      className={`${className || ""} ${isDragging ? "is-dragging" : ""} ${isOver ? "is-over" : ""}`}
       onClick={onClick}
+      style={{
+        transform: transform
+          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+          : undefined
+      }}
+      {...listeners}
+      {...attributes}
     >
-      <div ref={setNodeRef}>
-        {children}
-      </div>
-    </TheaterDraggableCard>
+      {children}
+    </div>
   );
 }
 
