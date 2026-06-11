@@ -634,27 +634,32 @@ onMouseLeave={() => {
     text-transform: uppercase;
   }
 
-  .ixi-lab-thumb {
-    position: absolute;
-    left: 50%;
-    bottom: 13px;
+.ixi-lab-thumb {
+  position: absolute;
 
-    width: 108px;
-    height: 72px;
+  left: 50%;
+  bottom: 12px;
 
-    transform: translateX(-50%);
+  width: 90px;
+  height: 60px;
 
-    border: 1px solid rgba(255,255,255,.11);
-    border-radius: 8px 8px 0 0;
+  transform: translateX(-50%);
 
-    background:
-      linear-gradient(135deg, rgba(255,196,0,.18), rgba(0,194,255,.06)),
-      #121212;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
 
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.032),
-      0 6px 12px rgba(0,0,0,.26);
-  }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,0)
+    ),
+    rgba(18,18,18,.92);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 8px 16px rgba(0,0,0,.30);
+}
 
   .ixi-lab-thumb.ghost-two,
   .ixi-lab-thumb.ghost-three {
