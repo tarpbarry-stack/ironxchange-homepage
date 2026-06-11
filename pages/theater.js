@@ -1040,10 +1040,9 @@ margin-top: -25px;
   width: 100%;
 
   display: grid;
-  grid-template-columns: 8px repeat(3, 1fr);
+  grid-template-columns: 8px 1fr;
 
   column-gap: 8px;
-  row-gap: 0;
 
   align-items: center;
 
