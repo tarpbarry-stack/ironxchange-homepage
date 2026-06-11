@@ -11,6 +11,7 @@ const MODES = [
   { key: "original", label: "ORIGINAL" },
   { key: "clean", label: "CLEAN" },
   { key: "clarity", label: "CLARITY" },
+  { key: "repair", label: "REPAIR" },
   { key: "dealerPop", label: "POP" }
 ];
 
@@ -35,6 +36,7 @@ function getModeUrl(photo, mode) {
   if (mode === "original") return photo.originalUrl || photo.url || "";
   if (mode === "clarity") return photo.clarityUrl || photo.cleanUrl || photo.url || "";
   if (mode === "dealerPop") return photo.dealerPopUrl || photo.url || "";
+  if (mode === "repair") return photo.repairUrl || photo.clarityUrl || photo.cleanUrl || photo.url || "";
 
   return photo.cleanUrl || photo.url || "";
 }
@@ -775,9 +777,9 @@ export default function IXVisionLab() {
           text-transform: uppercase;
         }
 
-       .variant-strip {
+      .variant-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
