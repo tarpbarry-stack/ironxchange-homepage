@@ -10,6 +10,7 @@ import {
 const MODES = [
   { key: "original", label: "ORIGINAL" },
   { key: "clean", label: "CLEAN" },
+  { key: "clarity", label: "CLARITY" },
   { key: "dealerPop", label: "POP" }
 ];
 
@@ -32,6 +33,7 @@ function getModeUrl(photo, mode) {
   if (!photo) return "";
 
   if (mode === "original") return photo.originalUrl || photo.url || "";
+  if (mode === "clarity") return photo.clarityUrl || photo.cleanUrl || photo.url || "";
   if (mode === "dealerPop") return photo.dealerPopUrl || photo.url || "";
 
   return photo.cleanUrl || photo.url || "";
@@ -345,34 +347,24 @@ export default function IXVisionLab() {
                 </div>
 
                 <div className="variant-strip">
-                  <button
-                    type="button"
-                    className={activeMode === "original" ? "active" : ""}
-                    onClick={() => setActiveMode("original")}
-                  >
-                    <img src={originalUrl || "/images/hero-equipment-yard.jpg"} alt="" />
-                    <span>ORIGINAL</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={activeMode === "clean" ? "active" : ""}
-                    onClick={() => setActiveMode("clean")}
-                  >
-                    <img src={cleanUrl || "/images/hero-equipment-yard.jpg"} alt="" />
-                    <span>CLEAN</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={activeMode === "dealerPop" ? "active" : ""}
-                    onClick={() => setActiveMode("dealerPop")}
-                  >
-                    <img src={popUrl || "/images/hero-equipment-yard.jpg"} alt="" />
-                    <span>POP</span>
-                  </button>
-                </div>
-              </section>
+  {MODES.map(mode => (
+    <button
+      key={mode.key}
+      type="button"
+      className={activeMode === mode.key ? "active" : ""}
+      onClick={() => setActiveMode(mode.key)}
+    >
+      <img
+        src={
+          getModeUrl(activePhoto, mode.key) ||
+          "/images/hero-equipment-yard.jpg"
+        }
+        alt=""
+      />
+      <span>{mode.label}</span>
+    </button>
+  ))}
+</div>
 
               <aside className="tune-panel">
                 <div className="panel-head">
@@ -780,11 +772,11 @@ export default function IXVisionLab() {
           text-transform: uppercase;
         }
 
-        .variant-strip {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
-        }
+       .variant-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
 
         .variant-strip button {
           position: relative;
