@@ -12,7 +12,7 @@ const MODES = [
   { key: "clean", label: "CLEAN" },
   { key: "clarity", label: "CLARITY" },
   { key: "repair", label: "REPAIR" },
-  { key: "dealerPop", label: "POP" }
+  { key: "julio", label: "JULIO" }
 ];
 
 function clampZoom(value) {
@@ -34,9 +34,18 @@ function getModeUrl(photo, mode) {
   if (!photo) return "";
 
   if (mode === "original") return photo.originalUrl || photo.url || "";
-  if (mode === "clarity") return photo.clarityUrl || photo.cleanUrl || photo.url || "";
-  if (mode === "dealerPop") return photo.dealerPopUrl || photo.url || "";
-  if (mode === "repair") return photo.repairUrl || photo.clarityUrl || photo.cleanUrl || photo.url || "";
+
+  if (mode === "clarity")
+    return photo.clarityUrl || photo.cleanUrl || photo.url || "";
+
+  if (mode === "repair")
+    return photo.repairUrl || photo.clarityUrl || photo.cleanUrl || photo.url || "";
+
+  if (mode === "julio")
+    return photo.julioUrl || photo.repairUrl || photo.clarityUrl || photo.cleanUrl || photo.url || "";
+
+  if (mode === "dealerPop")
+    return photo.dealerPopUrl || photo.url || "";
 
   return photo.cleanUrl || photo.url || "";
 }
