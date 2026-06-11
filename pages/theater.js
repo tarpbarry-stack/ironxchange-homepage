@@ -1178,6 +1178,11 @@ margin-top: -25px;
   z-index: 999999;
 }
 
+:global(.loaded-card.is-dragging) {
+  opacity: 0;
+}
+
+
        .loaded-card-screen-label {
   position: absolute;
   top: 3px;
