@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Navbar from "../../components/Navbar";
 
+import { classifyIXPhoto } from "../../lib/ixvision/classifier/classifyIXPhoto";
+
 export default function IXVisionClassifier() {
   return (
     <>
