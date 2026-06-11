@@ -114,6 +114,15 @@ export default function IXITheater() {
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
+const [theaterContainers, setTheaterContainers] = useState({
+  rail: [],
+  stack1: [],
+  stack2: [],
+  stack3: [],
+  stack4: [],
+  stack5: [],
+  stack6: []
+});
 
 const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
   const [screenZoomStates, setScreenZoomStates] = useState([
@@ -202,12 +211,37 @@ function resetZoomState(screenIndex) {
     loadTheater();
   }, []);
 
+
+  useEffect(() => {
+  if (!listings.length) return;
+
+  setTheaterContainers(current => {
+    if ((current.rail || []).length) return current;
+
+    return {
+      ...current,
+      rail: listings.map(item => String(getListingId(item)))
+    };
+  });
+}, [listings]);
+
+
+  const railListings = useMemo(() => {
+  return (theaterContainers.rail || [])
+    .map(machineId =>
+      listings.find(
+        item => String(getListingId(item)) === String(machineId)
+      )
+    )
+    .filter(Boolean);
+}, [theaterContainers.rail, listings]);
+
 const screenMachines = useMemo(() => {
   return screenSlots
     .slice(0, viewCount)
-    .map(slotIndex => listings[slotIndex])
+    .map(slotIndex => railListings[slotIndex])
     .filter(Boolean);
-}, [screenSlots, listings, viewCount]);
+}, [screenSlots, railListings, viewCount]);
   
 
 function handleTheaterDragEnd(event) {
@@ -511,7 +545,7 @@ return (
             <div className="theater-bottom-dock">
   <div className="theater-loaded-zone">
     <div className="loaded-cards">
-      {listings.map((machine, index) => {
+      {railListings.map((machine, index) => {
                   const id = String(getListingId(machine));
 
                   return (
