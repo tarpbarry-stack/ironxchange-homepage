@@ -464,7 +464,7 @@ onMouseLeave={() => {
   .ixi-lab-pocket-shell {
     position: absolute;
 
-    width: 210px;
+    width: 170px;
     height: 92px;
 
     padding: 8px;
