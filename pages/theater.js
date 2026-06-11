@@ -1117,7 +1117,7 @@ margin-top: -25px;
 
 .theater-loaded-zone {
   min-width: 0;
-  height: 250px;
+  height: 270px;
   overflow: hidden;
 }
 
