@@ -110,8 +110,7 @@ export default function IXITheater() {
   const [listings, setListings] = useState([]);
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
-  const [dragIndex, setDragIndex] = useState(null);
-
+ 
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
@@ -209,17 +208,7 @@ const screenMachines = useMemo(() => {
     .map(slotIndex => listings[slotIndex])
     .filter(Boolean);
 }, [screenSlots, listings, viewCount]);
-  function moveCard(from, to) {
-    if (from === null || to === null || from === to) return;
-
-    setListings(current => {
-      const next = [...current];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      return next;
-    });
-
-  }
+  
 
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
