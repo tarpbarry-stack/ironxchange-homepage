@@ -682,9 +682,55 @@ return (
   >
   
   <div className="theater-stack-control-rail">
-            <button type="button" className="theater-stack-dash load" />
-            <button type="button" className="theater-stack-dash loop" />
-            <button type="button" className="theater-stack-dash orbit" />
+            <button
+  type="button"
+  className="theater-stack-dash load"
+  onClick={() => {
+    setTheaterContainers(current => {
+      const stackIds = current[stackKey] || [];
+
+      if (!stackIds.length) return current;
+
+      return {
+        ...current,
+        rail: [
+          ...(current.rail || []),
+          ...stackIds
+        ],
+        [stackKey]: []
+      };
+    });
+  }}
+/>
+           <button
+  type="button"
+  className="theater-stack-dash loop"
+  onClick={() => {
+    setTheaterContainers(current => {
+      const stackIds = current[stackKey] || [];
+
+      if (stackIds.length <= 1) return current;
+
+      return {
+        ...current,
+        [stackKey]: [
+          ...stackIds.slice(1),
+          stackIds[0]
+        ]
+      };
+    });
+  }}
+/>
+            <button
+  type="button"
+  className="theater-stack-dash orbit"
+  onClick={() => {
+    setTheaterContainers(current => ({
+      ...current,
+      [stackKey]: []
+    }));
+  }}
+/>
           </div>
 
           <div className="theater-stack-label">
