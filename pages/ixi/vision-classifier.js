@@ -194,6 +194,7 @@ export default function IXVisionClassifier() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [savedCases, setSavedCases] = useState([]);
 
   async function handleFile(file) {
     if (!file || !file.type?.startsWith("image/")) return;
@@ -222,6 +223,42 @@ export default function IXVisionClassifier() {
       setBusy(false);
     }
   }
+function saveCurrentCase() {
+  if (!analysis) return;
+
+  const savedCase = {
+    id: `case-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+
+    fileName: analysis.fileName,
+    width: analysis.width,
+    height: analysis.height,
+    megapixels: analysis.megapixels,
+    fileSizeKb: analysis.fileSizeKb,
+
+    photoType: analysis.classification.photoType,
+    confidence: analysis.classification.confidence,
+    pipeline: analysis.classification.pipeline,
+    damageProfile: analysis.classification.damageProfile,
+
+    scores: {
+      overall: analysis.overallScore,
+      resolution: analysis.resolutionScore,
+      sharpness: analysis.sharpnessScore,
+      compression: analysis.compressionScore,
+      exposure: analysis.exposureScore,
+      contrast: analysis.contrastScore,
+      color: analysis.colorScore
+    },
+
+    verdict: null
+  };
+
+  setSavedCases(current => [savedCase, ...current]);
+
+  console.log("IX Vision Case Saved", savedCase);
+}
+  
 
   return (
     <>
@@ -242,16 +279,25 @@ export default function IXVisionClassifier() {
             </div>
 
             <label className="upload-btn">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={e => {
-                  handleFile(e.target.files?.[0]);
-                  e.target.value = "";
-                }}
-              />
-              {busy ? "CLASSIFYING..." : "+ CLASSIFY PHOTO"}
-            </label>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={e => {
+      handleFile(e.target.files?.[0]);
+      e.target.value = "";
+    }}
+  />
+  {busy ? "CLASSIFYING..." : "+ CLASSIFY PHOTO"}
+</label>
+
+<button
+  type="button"
+  className="save-case-btn"
+  onClick={saveCurrentCase}
+  disabled={!analysis}
+>
+  SAVE CASE
+</button>
           </header>
 
           <section className="classifier-grid">
@@ -328,6 +374,18 @@ export default function IXVisionClassifier() {
 </section>
 
 
+<section className="case-memory-card">
+  <span>Case Memory</span>
+  <strong>{savedCases.length} saved this session</strong>
+
+  {savedCases.slice(0, 5).map(item => (
+    <div key={item.id} className="case-row">
+      <em>{item.photoType}</em>
+      <small>{item.pipeline.join(" → ")}</small>
+    </div>
+  ))}
+</section>
+                    
     <section className="damage-card">
   <span>Photo Damage Profile</span>
 
@@ -768,6 +826,88 @@ export default function IXVisionClassifier() {
   color: #FFC400;
   font-style: normal;
   font-weight: 950;
+}
+
+.save-case-btn {
+  min-width: 112px;
+  height: 34px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(125,235,255,.28);
+
+  background:
+    linear-gradient(180deg, rgba(125,235,255,.07), rgba(125,235,255,0)),
+    #101010;
+
+  color: #7DEBFF;
+
+  font-size: 8.5px;
+  font-weight: 950;
+  letter-spacing: .58px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.save-case-btn:disabled {
+  opacity: .25;
+  cursor: default;
+}
+
+.case-memory-card {
+  padding: 13px;
+  margin-top: 12px;
+
+  border-radius: 13px;
+  border: 1px solid rgba(125,235,255,.16);
+
+  background:
+    radial-gradient(circle at top left, rgba(125,235,255,.07), transparent 70%),
+    #101010;
+}
+
+.case-memory-card span {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #7DEBFF;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .78px;
+  text-transform: uppercase;
+}
+
+.case-memory-card > strong {
+  display: block;
+  margin-bottom: 10px;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.case-row {
+  display: grid;
+  gap: 3px;
+
+  padding: 8px 0;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+}
+
+.case-row em {
+  color: #FFC400;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.case-row small {
+  color: rgba(255,255,255,.46);
+  font-size: 9px;
+  line-height: 1.3;
 }
 
         @media (max-width: 980px) {
