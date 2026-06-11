@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   useDraggable,
-  useDroppable
+  useDroppable,
+  DragOverlay
 } from "@dnd-kit/core";
 
 import Navbar from "../components/Navbar";
@@ -128,6 +129,7 @@ export default function IXITheater() {
   const [listings, setListings] = useState([]);
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
+  const [activeDragId, setActiveDragId] = useState("");
  
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
@@ -254,6 +256,14 @@ function resetZoomState(screenIndex) {
     .filter(Boolean);
 }, [theaterContainers.rail, listings]);
 
+const activeDragMachine = useMemo(() => {
+  if (!activeDragId) return null;
+
+  return listings.find(
+    item => String(getListingId(item)) === String(activeDragId)
+  );
+}, [activeDragId, listings]);
+  
 const screenMachines = useMemo(() => {
   return screenSlots
     .slice(0, viewCount)
@@ -395,7 +405,18 @@ function prevPhotoForMachine(machine) {
 
       <Navbar />
 
-<DndContext onDragEnd={handleTheaterDragEnd}>
+<DndContext
+  onDragStart={(event) => {
+    setActiveDragId(String(event?.active?.id || ""));
+  }}
+  onDragEnd={(event) => {
+    handleTheaterDragEnd(event);
+    setActiveDragId("");
+  }}
+  onDragCancel={() => {
+    setActiveDragId("");
+  }}
+>
   <main>
     {!entered && (
           <section className="theater-lobby">
