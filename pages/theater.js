@@ -1370,6 +1370,9 @@ margin-top: -25px;
     0 10px 22px rgba(0,0,0,.20);
 
   overflow: visible;
+
+  pointer-events: auto;
+  z-index: 80;
 }
 
 .theater-stack-shell::before {
@@ -1497,7 +1500,7 @@ margin-top: -25px;
   border: 1px dashed rgba(255,255,255,.055);
   border-radius: 8px;
 
-  pointer-events: none;
+  pointer-events: auto;
 }
 
         .theater-room,
