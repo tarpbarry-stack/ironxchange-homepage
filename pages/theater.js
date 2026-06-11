@@ -250,22 +250,22 @@ function handleTheaterDragEnd(event) {
 
   if (!dragId || !overId || dragId === overId) return;
 
-  setListings(current => {
-    const fromIndex = current.findIndex(
-      item => String(getListingId(item)) === dragId
-    );
+  setTheaterContainers(current => {
+    const rail = current.rail || [];
 
-    const toIndex = current.findIndex(
-      item => String(getListingId(item)) === overId
-    );
+    const fromIndex = rail.findIndex(id => String(id) === dragId);
+    const toIndex = rail.findIndex(id => String(id) === overId);
 
     if (fromIndex === -1 || toIndex === -1) return current;
 
-    const next = [...current];
-    const [moved] = next.splice(fromIndex, 1);
-    next.splice(toIndex, 0, moved);
+    const nextRail = [...rail];
+    const [moved] = nextRail.splice(fromIndex, 1);
+    nextRail.splice(toIndex, 0, moved);
 
-    return next;
+    return {
+      ...current,
+      rail: nextRail
+    };
   });
 }
   
