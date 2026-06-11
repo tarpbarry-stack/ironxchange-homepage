@@ -1348,7 +1348,7 @@ margin-top: -25px;
   box-shadow: 0 0 8px rgba(229,62,62,.24);
 }
 
-.theater-stack-shell {
+:global(.theater-stack-shell) {
   width: calc(100% - 10px);
   justify-self: center;
 
@@ -1377,7 +1377,7 @@ margin-top: -25px;
   z-index: 80;
 }
 
-.theater-stack-shell::before {
+:global(.theater-stack-shell::before) {
   content: "";
 
   position: absolute;
