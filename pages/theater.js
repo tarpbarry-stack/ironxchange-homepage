@@ -1088,8 +1088,8 @@ margin-top: -25px;
   margin-top: 0;
 
   overflow-x: auto;
-  overflow-y: hidden;
-
+  overflow-y: visible;
+}
   padding: 0 4px 0;
 }
 
