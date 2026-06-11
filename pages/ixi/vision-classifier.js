@@ -397,8 +397,6 @@ function saveCurrentCase() {
                   <ScoreBar label="Contrast" score={analysis.contrastScore} />
                   <ScoreBar label="Color" score={analysis.colorScore} />
 
-<ScoreBar label="Color" score={analysis.colorScore} />
-
 {autoResult?.recipe && (
   <section className="recipe-card">
     <span>IX Auto Recipe</span>
@@ -434,9 +432,7 @@ function saveCurrentCase() {
     </div>
   </section>
 )}
-
-<section className="raw-data">
-                    
+              
                   <section className="raw-data">
                     <div>
                       <span>Size</span>
