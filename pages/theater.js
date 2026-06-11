@@ -1057,14 +1057,14 @@ margin-top: -25px;
   grid-column: 1;
   grid-row: 1 / span 2;
 
-  justify-self: center;
+  justify-self: end;
   align-self: center;
 
-  width: 5px;
+  width: 6px;
   height: 32px;
 
-  margin-top: 20px;
-
+  transform: translate(5px, 20px);
+  
   border: 0;
   border-radius: 2px;
 
