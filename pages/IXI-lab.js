@@ -639,8 +639,8 @@ onMouseLeave={() => {
     left: 50%;
     bottom: 13px;
 
-    width: 68px;
-    height: 43px;
+    width: 108px;
+    height: 72px;
 
     transform: translateX(-50%);
 
