@@ -467,41 +467,41 @@ return (
                 })}
                           </div>
           </div>
+<div className="theater-import-zone">
+  <div className="theater-stack-grid">
+    <button
+      type="button"
+      className="theater-unload-dash"
+      title="Unload loaded rail to stack"
+    />
 
-          <div className="theater-import-zone">
-<div className="theater-stack-grid">
-  <button
-    type="button"
-    className="theater-unload-dash"
-    title="Unload loaded rail to stack"
-  />
-
-  {[1, 2, 3, 4, 5, 6].map(stackNumber => (
-    <div
-      key={`theater-stack-${stackNumber}`}
-      className="theater-stack-shell"
-      data-theater-stack={`stack${stackNumber}`}
-    >
-      <div className="theater-stack-control-rail">
-        <button type="button" className="theater-stack-dash load" />
-        <button type="button" className="theater-stack-dash loop" />
-        <button type="button" className="theater-stack-dash orbit" />
-      </div>
-
-      <div className="theater-stack-label">
-        STACK {stackNumber}
-      </div>
-
-      <div className="theater-stack-thumb-zone">
-        <div className="theater-stack-thumb-head" />
-      </div>
-
-      <div className="theater-stack-drop-surface" />
-                </div>
-              ))}
-            </div>
+    <div className="theater-stack-matrix">
+      {[1, 2, 3, 4, 5, 6].map(stackNumber => (
+        <div
+          key={`theater-stack-${stackNumber}`}
+          className="theater-stack-shell"
+          data-theater-stack={`stack${stackNumber}`}
+        >
+          <div className="theater-stack-control-rail">
+            <button type="button" className="theater-stack-dash load" />
+            <button type="button" className="theater-stack-dash loop" />
+            <button type="button" className="theater-stack-dash orbit" />
           </div>
+
+          <div className="theater-stack-label">
+            STACK {stackNumber}
+          </div>
+
+          <div className="theater-stack-thumb-zone">
+            <div className="theater-stack-thumb-head" />
+          </div>
+
+          <div className="theater-stack-drop-surface" />
         </div>
+      ))}
+    </div>
+  </div>
+</div>
           </section>
           </section>
         )}
@@ -1042,7 +1042,7 @@ margin-top: -25px;
   grid-template-columns: 8px repeat(3, 1fr);
 
   column-gap: 8px;
-  row-gap: 20;
+  row-gap: 0;
 
   align-items: center;
 
