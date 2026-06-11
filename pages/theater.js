@@ -1089,7 +1089,7 @@ margin-top: -25px;
 
   overflow-x: auto;
   overflow-y: visible;
-}
+  
   padding: 0 4px 0;
 }
 
