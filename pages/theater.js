@@ -1042,27 +1042,48 @@ margin-top: -25px;
 }
 
 .theater-stack-grid {
-  width: 92%;
-  max-width: 470px;
-
-  margin: 0 auto;
+  width: 100%;
 
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 8px repeat(3, 1fr);
 
-  column-gap: 0px;
+  column-gap: 8px;
   row-gap: 0px;
+
+  align-items: center;
 }
 
 .theater-unload-dash {
-  left: -8px;
-  top: 50%;
+  grid-column: 1;
+  grid-row: 1 / span 2;
 
-  width: 4px;
+  justify-self: center;
+  align-self: center;
+
+  width: 3px;
   height: 30px;
 
-  background: rgba(229,62,62,.88);
-  box-shadow: 0 0 10px rgba(229,62,62,.35);
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.14);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 50;
+}
+
+.theater-stack-shell:nth-of-type(1),
+.theater-stack-shell:nth-of-type(2),
+.theater-stack-shell:nth-of-type(3) {
+  grid-row: 1;
+}
+
+.theater-stack-shell:nth-of-type(4),
+.theater-stack-shell:nth-of-type(5),
+.theater-stack-shell:nth-of-type(6) {
+  grid-row: 2;
 }
 
 .theater-unload-dash:hover {
