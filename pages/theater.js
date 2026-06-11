@@ -222,18 +222,28 @@ const screenMachines = useMemo(() => {
   }
 
 function handleTheaterDragEnd(event) {
-  const from = Number(event?.active?.id);
-  const to = Number(event?.over?.id);
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
 
-  if (
-    Number.isNaN(from) ||
-    Number.isNaN(to) ||
-    from === to
-  ) {
-    return;
-  }
+  if (!dragId || !overId || dragId === overId) return;
 
-  moveCard(from, to);
+  setListings(current => {
+    const fromIndex = current.findIndex(
+      item => String(getListingId(item)) === dragId
+    );
+
+    const toIndex = current.findIndex(
+      item => String(getListingId(item)) === overId
+    );
+
+    if (fromIndex === -1 || toIndex === -1) return current;
+
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+
+    return next;
+  });
 }
   
 
@@ -516,9 +526,9 @@ return (
                   const id = String(getListingId(machine));
 
                   return (
-                   <TheaterDropCard
+                  <TheaterDropCard
   key={id}
-  id={String(index)}
+  id={id}
   className={`loaded-card ${
     screenSlots.includes(index) ? "on-screen" : ""
   }`}
