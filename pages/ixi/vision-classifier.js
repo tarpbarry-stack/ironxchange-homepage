@@ -6,7 +6,6 @@ import { classifyIXPhoto } from "../../lib/ixvision/classifier/classifyIXPhoto";
 import { IX_VISION_PIPELINES } from "../../lib/ixvision/classifier/ixVisionPipelines";
 import { runIXAutoRecipe } from "../../lib/ixvision/auto/runIXAutoRecipe";
 
-
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -249,7 +248,8 @@ function saveCurrentCase() {
     confidence: analysis.classification.confidence,
     pipeline: analysis.classification.pipeline,
     damageProfile: analysis.classification.damageProfile,
-
+    inspectionProfile: analysis.classification.inspectionProfile,
+    
     scores: {
       overall: analysis.overallScore,
       resolution: analysis.resolutionScore,
@@ -440,57 +440,76 @@ function saveCurrentCase() {
     </div>
   ))}
 </section>
-                    
-    <section className="damage-card">
-  <span>Photo Damage Profile</span>
+
+<section className="inspection-card">
+  <span>Inspection Profile</span>
 
   <div className="damage-row">
-    <strong>Resolution</strong>
-    <em>
-      {analysis.resolutionScore < 35
-        ? "EXTREME"
-        : analysis.resolutionScore < 55
-        ? "HIGH"
-        : analysis.resolutionScore < 75
-        ? "MEDIUM"
-        : "LOW"}
-    </em>
+    <strong>Inspection Detail</strong>
+    <em>{analysis.classification.inspectionProfile?.inspectionDetail || "—"}</em>
   </div>
 
   <div className="damage-row">
-    <strong>Compression</strong>
-    <em>
-      {analysis.compressionScore < 45
-        ? "HIGH"
-        : analysis.compressionScore < 70
-        ? "MEDIUM"
-        : "LOW"}
-    </em>
-  </div>
-
-  <div className="damage-row">
-    <strong>Sharpness</strong>
-    <em>
-      {analysis.sharpnessScore < 45
-        ? "HIGH"
-        : analysis.sharpnessScore < 70
-        ? "MEDIUM"
-        : "LOW"}
-    </em>
+    <strong>Photo Resolution</strong>
+    <em>{analysis.classification.inspectionProfile?.photoResolution || "—"}</em>
   </div>
 
   <div className="damage-row">
     <strong>Exposure</strong>
-    <em>
-      {analysis.exposureScore < 45
-        ? "HIGH"
-        : analysis.exposureScore < 70
-        ? "MEDIUM"
-        : "LOW"}
-    </em>
+    <em>{analysis.classification.inspectionProfile?.exposure || "—"}</em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Compression Risk</strong>
+    <em>{analysis.classification.inspectionProfile?.compressionRisk || "—"}</em>
+  </div>
+
+    <div className="damage-row">
+  <strong>Field Status</strong>
+  <em>
+    {analysis.classification.inspectionProfile?.fieldReadiness || "—"}
+  </em>
+</div>
+
+<div className="damage-row">
+  <strong>Inspection Status</strong>
+  <em>
+    {analysis.classification.inspectionProfile?.inspectionReadiness || "—"}
+  </em>
+</div>
+
+<div className="damage-row">
+  <strong>Marketplace Status</strong>
+  <em>
+    {analysis.classification.inspectionProfile?.marketplaceReadiness || "—"}
+  </em>
+</div>
+
+</section>
+    
+   <section className="damage-card">
+  <span>Damage Profile</span>
+
+  <div className="damage-row">
+    <strong>Resolution</strong>
+    <em>{analysis.classification.damageProfile?.resolution || "—"}</em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Compression</strong>
+    <em>{analysis.classification.damageProfile?.compression || "—"}</em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Sharpness</strong>
+    <em>{analysis.classification.damageProfile?.sharpness || "—"}</em>
+  </div>
+
+  <div className="damage-row">
+    <strong>Exposure</strong>
+    <em>{analysis.classification.damageProfile?.exposure || "—"}</em>
   </div>
 </section>
-
                     
                 </>
               ) : (
@@ -1013,6 +1032,25 @@ function saveCurrentCase() {
   line-height: 1.3;
 }
 
+.inspection-card {
+  padding: 13px;
+  margin-bottom: 12px;
+  border-radius: 13px;
+  border: 1px solid rgba(125,235,255,.18);
+  background:
+    radial-gradient(circle at top left, rgba(125,235,255,.07), transparent 70%),
+    #101010;
+}
+
+.inspection-card span {
+  display: block;
+  margin-bottom: 10px;
+  color: #7DEBFF;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .78px;
+  text-transform: uppercase;
+}
         @media (max-width: 980px) {
           .classifier-grid {
             grid-template-columns: 1fr;
