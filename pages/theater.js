@@ -1042,7 +1042,7 @@ margin-top: -25px;
   grid-template-columns: 8px repeat(3, 1fr);
 
   column-gap: 8px;
-  row-gap: 8;
+  row-gap: 20;
 
   align-items: center;
 
