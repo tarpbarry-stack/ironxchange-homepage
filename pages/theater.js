@@ -1042,9 +1042,11 @@ margin-top: -25px;
   grid-template-columns: 8px repeat(3, 1fr);
 
   column-gap: 8px;
-  row-gap: 0;
+  row-gap: 8;
 
   align-items: center;
+
+  transform: translateY(34px);
 }
 
 .theater-unload-dash {
