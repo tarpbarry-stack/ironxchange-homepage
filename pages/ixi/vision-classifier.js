@@ -322,6 +322,14 @@ export default function IXVisionClassifier() {
                       <strong>{analysis.avgLum}</strong>
                     </div>
                   </section>
+                    <section className="decision-card">
+  <span>IX Decision</span>
+  <p>
+    This photo has usable exposure, contrast, and color, but the resolution is too low
+    for buyer inspection. IX Vision should recover size first, then restore web-photo
+    damage, refine the edges, and finish with Julio for presentation.
+  </p>
+</section>
                 </>
               ) : (
                 <div className="empty-analysis">
@@ -330,6 +338,7 @@ export default function IXVisionClassifier() {
               )}
             </aside>
           </section>
+              
         </section>
       </main>
 
@@ -634,6 +643,33 @@ export default function IXVisionClassifier() {
           font-size: 10px;
           font-weight: 950;
         }
+
+.decision-card {
+  padding: 13px;
+  margin-bottom: 12px;
+  border-radius: 13px;
+  border: 1px solid rgba(0,209,255,.16);
+  background:
+    radial-gradient(circle at top left, rgba(0,209,255,.07), transparent 70%),
+    #101010;
+}
+
+.decision-card span {
+  display: block;
+  margin-bottom: 6px;
+  color: #7DEBFF;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .78px;
+  text-transform: uppercase;
+}
+
+.decision-card p {
+  margin: 0;
+  color: rgba(255,255,255,.50);
+  font-size: 11px;
+  line-height: 1.48;
+}
 
         @media (max-width: 980px) {
           .classifier-grid {
