@@ -125,6 +125,7 @@ function VisionScreen({
 }
 
 export default function IXVisionLab() {
+  console.log("VISION LAB MODES LOADED:", MODES);
   const [photoItems, setPhotoItems] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [make, setMake] = useState("CATERPILLAR");
@@ -346,7 +347,7 @@ export default function IXVisionLab() {
                   </div>
                 </div>
 
-                <div className="variant-strip">
+               <div className="variant-strip">
   {MODES.map(mode => (
     <button
       key={mode.key}
@@ -366,7 +367,9 @@ export default function IXVisionLab() {
   ))}
 </div>
 
-              <aside className="tune-panel">
+</section>
+
+<aside className="tune-panel">
                 <div className="panel-head">
                   <span>Current Engine</span>
                   <strong>V1 Canvas Pipeline</strong>
