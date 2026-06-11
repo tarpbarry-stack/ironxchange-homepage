@@ -1056,7 +1056,7 @@ margin-top: -25px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
   column-gap: 8px;
-  row-gap: 8px;
+  row-gap: 12px;
 }
 
 .theater-unload-dash {
@@ -1069,7 +1069,7 @@ margin-top: -25px;
   width: 6px;
   height: 32px;
 
-  transform: translate(5px, 15px);
+  transform: translate(5px, 7px);
   
   border: 0;
   border-radius: 2px;
