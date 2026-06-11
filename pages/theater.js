@@ -1073,13 +1073,13 @@ margin-top: -25px;
 .theater-stack-shell:nth-child(2),
 .theater-stack-shell:nth-child(3),
 .theater-stack-shell:nth-child(4) {
-  grid-row: 1;
+  transform: translateY(34px) !important;
 }
 
 .theater-stack-shell:nth-child(5),
 .theater-stack-shell:nth-child(6),
 .theater-stack-shell:nth-child(7) {
-  grid-row: 2;
+  transform: translateY(40px) !important;
 }
 
 .theater-unload-dash:hover {
