@@ -1055,7 +1055,7 @@ margin-top: -25px;
 }
 
 .theater-unload-dash {
-  left: 4px;
+  left: -8px;
   top: 50%;
 
   width: 4px;
