@@ -1069,7 +1069,7 @@ margin-top: -25px;
   width: 6px;
   height: 32px;
 
-  transform: translate(5px, 40px);
+  transform: translate(5px, 20px);
   
   border: 0;
   border-radius: 2px;
@@ -1080,6 +1080,11 @@ margin-top: -25px;
   cursor: pointer;
 
   z-index: 50;
+}
+
+.theater-unload-dash:hover {
+  background: rgba(229,62,62,.88);
+  box-shadow: 0 0 8px rgba(229,62,62,.24);
 }
 
 .theater-stack-shell {
