@@ -1046,7 +1046,7 @@ margin-top: -25px;
 
   align-items: center;
 
-  transform: translateY(44px);
+   transform: translateY(0);
 }
 
 .theater-stack-matrix {
