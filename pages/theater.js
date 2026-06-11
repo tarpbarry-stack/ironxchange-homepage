@@ -1121,6 +1121,13 @@ margin-top: -25px;
   overflow: hidden;
 }
 
+.theater-loaded-zone {
+  min-width: 0;
+  overflow: hidden;
+
+  transform: translateY(24px);
+}
+
 .theater-import-zone {
   min-width: 0;
   height: 100%;
