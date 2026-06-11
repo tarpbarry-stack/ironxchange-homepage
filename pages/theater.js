@@ -406,6 +406,7 @@ function prevPhotoForMachine(machine) {
       <Navbar />
 
 <DndContext
+  autoScroll={false}
   onDragStart={(event) => {
     setActiveDragId(String(event?.active?.id || ""));
   }}
