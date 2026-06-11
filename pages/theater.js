@@ -1063,7 +1063,7 @@ margin-top: -25px;
   width: 6px;
   height: 32px;
 
-  transform: translate(5px, 20px);
+  transform: translate(5px, 40px);
   
   border: 0;
   border-radius: 2px;
