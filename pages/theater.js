@@ -672,8 +672,14 @@ return (
   const topImage = topMachine ? getImage(topMachine) : "";
 
   return (
+  <TheaterStackDropZone
+    key={`theater-stack-${stackNumber}`}
+    id={stackKey}
+    className="theater-stack-shell"
+    data-theater-stack={stackKey}
+  >
   
-          <div className="theater-stack-control-rail">
+  <div className="theater-stack-control-rail">
             <button type="button" className="theater-stack-dash load" />
             <button type="button" className="theater-stack-dash loop" />
             <button type="button" className="theater-stack-dash orbit" />
