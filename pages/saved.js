@@ -2288,10 +2288,6 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
                   String(id) === String(ghostListingId)
                 }
 
-                onBoardDragStart={handleBoardDragStart}
-                onBoardDragOver={handleBoardDragOver}
-                onBoardDragEnd={handleBoardDragEnd}
-
                         useDndDrag={false}
         dragHandleProps={dragHandleProps}
       />
