@@ -332,16 +332,13 @@ const sensors = useSensors(
 );
 
 function workspaceCollisionDetection(args) {
-  const filteredDroppables = args.droppableContainers.filter(container => {
-    const id = String(container.id);
+  const pointerHits = pointerWithin(args);
 
-    return id !== "stackTopShell" && id !== "stackBottomShell";
-  });
+  if (pointerHits.length) {
+    return pointerHits;
+  }
 
-  return closestCenter({
-    ...args,
-    droppableContainers: filteredDroppables
-  });
+  return closestCenter(args);
 }
   
   useEffect(() => {
@@ -1970,7 +1967,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   {["top", "bottom"].map(stackKey => (
       <WorkspaceDropZone
   key={stackKey}
-    id={stackKey === "top" ? "stackTopShell" : "stackBottomShell"}
+   id={stackKey === "top" ? "stackTop" : "stackBottom"}
   data-active-stack={stackKey}
   className={`active-stack ${
   activeStacksOpen[stackKey] ? "open" : ""
@@ -1983,27 +1980,11 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     ? "has-machines"
     : ""
 }`}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-
-       const droppedId = getDroppedMachineId(e);
-
-        addListingToActiveStack(stackKey, droppedId);
-      }}
     >
       <button
         type="button"
         className="active-stack-dash"
         onClick={() => toggleActiveStack(stackKey)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-
-         const droppedId = getDroppedMachineId(e);
-
-          addListingToActiveStack(stackKey, droppedId);
-        }}
       />
 
      {activeStacksOpen[stackKey] && (
