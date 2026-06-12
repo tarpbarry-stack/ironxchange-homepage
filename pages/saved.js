@@ -3057,57 +3057,45 @@ outline: none;
 }
 
 /* square thumb-loop actuator, rides above the power dash */
-.ixi-pocket-loop-button {
+.ixi-pocket-loop-square {
   position: absolute;
-  left: 50%;
-  top: 0;
 
-  width: 7px;
-  height: 7px;
+  width: 4px;
+  height: 4px;
 
-  transform: translate(-50%, -16px);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 1px;
 
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 2px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.06),
-      rgba(255,255,255,0)
-    ),
-    rgba(255,255,255,.08);
+  background: rgba(255,255,255,.12);
 
   padding: 0;
+
   cursor: pointer;
 
-  z-index: 98;
+  z-index: 99999;
+  pointer-events: auto;
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 0 0 1px rgba(0,0,0,.28);
-}
-.ixi-pocket-loop-button.right {
-  left: 50%;
-  right: auto;
+  opacity: 0;
 }
 
-.ixi-pocket-loop-button:hover {
-  border-color: rgba(255,255,255,.24);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.10),
-      rgba(255,255,255,0)
-    ),
-    rgba(255,255,255,.14);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 0 6px rgba(255,255,255,.08);
+.ixi-pocket-loop-square.is-visible {
+  opacity: 1;
 }
 
+.ixi-pocket-loop-square.left {
+  top: 68px;
+  right: -2px;
+}
+
+.ixi-pocket-loop-square.right {
+  top: 68px;
+  left: -2px;
+}
+
+.ixi-pocket-loop-square:hover {
+  border-color: rgba(255,196,0,.62);
+  background: rgba(255,196,0,.72);
+}
 /* Roll-top cover: fixed dash/lip, cover moves behind it *
 
 
