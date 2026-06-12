@@ -237,10 +237,10 @@ onMouseLeave={() => {
 
 <section className="ixi-lab-pocket-chassis">
   {[
-    { key: "l1", label: "L1", side: "left", row: "top" },
-    { key: "l2", label: "L2", side: "left", row: "bottom" },
-    { key: "r1", label: "R1", side: "right", row: "top" },
-    { key: "r2", label: "R2", side: "right", row: "bottom" }
+    { key: "l1", label: "I", side: "left", row: "top" },
+    { key: "l2", label: "III", side: "left", row: "bottom" },
+  { key: "r1", label: "II", side: "right", row: "top" },
+    { key: "r2", label: "IV", side: "right", row: "bottom" }
   ].map(pocket => (
     <section
       key={pocket.key}
@@ -248,7 +248,7 @@ onMouseLeave={() => {
     >
       <div className="ixi-lab-pocket-topline">
         <span>{pocket.label}</span>
-        <strong>POCKET</strong>
+        <strong></strong>
       </div>
 
       <div className="ixi-lab-pocket-rail">
