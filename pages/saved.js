@@ -2822,8 +2822,8 @@ outline: none;
 }
 
 .ixi-pocket-thumb {
-  width: 90px !important;
-  height: 60px !important;
+  width: var(--pocket-thumb-w, 90px) !important;
+  height: var(--pocket-thumb-h, 60px) !important;
 
   position: absolute;
   left: 50%;
@@ -2899,7 +2899,7 @@ outline: none;
 
 .ixi-pocket-action-rail {
   position: absolute;
-  top: 20px;
+  top: 13px;
   right: 9px;
   
   width: 82px;
