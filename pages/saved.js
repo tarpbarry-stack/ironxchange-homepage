@@ -151,7 +151,6 @@ function handleWorkspaceDragStart(event) {
   setActiveDndId(dragId);
   setActiveDragMachineId(dragId);
   setDraggingListingId(dragId);
-  setStackDraggingId(dragId);
 }
 
 function handleWorkspaceDragCancel() {
