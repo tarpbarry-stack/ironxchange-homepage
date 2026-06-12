@@ -82,8 +82,8 @@ export default function IXIMachineRail({
 
 .board-command-rail {
   position: absolute;
-  left: 1px;
-  right: 1px;
+  left: 0px;
+  right: 0px;
   bottom: -1px;
 
   height: 16px;
