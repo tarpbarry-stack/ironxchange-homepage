@@ -84,11 +84,11 @@ export default function IXIMachineRail({
   position: absolute;
   left: 2px;
   right: 2px;
-  bottom: 1px;
+  bottom: -1px;
 
-  height: 15px;
-  min-height: 15px;
-  max-height: 15px;
+  height: 16px;
+  min-height: 16px;
+  max-height: 16px;
 
   display: grid;
   grid-template-columns:
