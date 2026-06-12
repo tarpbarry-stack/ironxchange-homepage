@@ -2742,30 +2742,30 @@ outline: none;
 outline: none;
 }
 
-.ixi-pocket-thumbs.thumb-size-small {
+:global(ixi-pocket-thumbs.thumb-size-small) {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
   --pocket-thumbs-top: 30px;
 }
 
-.ixi-pocket-thumbs.thumb-size-medium {
+:global(.ixi-pocket-thumbs.thumb-size-medium) {
   --pocket-thumb-w: 90px;
   --pocket-thumb-h: 60px;
   --pocket-thumbs-top: 30px;
 }
 
-.ixi-pocket-thumbs.thumb-size-large {
+:global(.ixi-pocket-thumbs.thumb-size-large) {
   --pocket-thumb-w: 108px;
   --pocket-thumb-h: 72px;
   --pocket-thumbs-top: 23px;
 }
 
-.ixi-pocket-right .ixi-pocket-thumbs {
+:global(ixi-pocket-right .ixi-pocket-thumbs) {
   left: 50%;
   right: auto;
 }
 
-.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
+:global(ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs) {
   left: auto;
   right: 20px;
   transform: none;
@@ -2773,13 +2773,13 @@ outline: none;
 /* PEEK POCKET COVER */
 
 
-.ixi-pocket-thumb img {
+:global(.ixi-pocket-thumb img) {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.ixi-pocket-thumb span {
+:global(.ixi-pocket-thumb span) {
   display: block;
   padding: 5px;
 
@@ -2816,7 +2816,7 @@ outline: none;
 /* IXI POCKET STATION INNER GUTS   */
 /* =============================== */
 
-.ixi-pocket-thumb {
+:global(.ixi-pocket-thumbs) {
   width: var(--pocket-thumb-w, 90px) !important;
   height: var(--pocket-thumb-h, 60px) !important;
 
@@ -2845,7 +2845,7 @@ outline: none;
   z-index: 34;
 }
 
-.ixi-pocket-thumbs {
+:global(.ixi-pocket-thumb) {
   position: absolute;
   left: 50%;
   top: var(--pocket-thumbs-top, 30px);
@@ -2923,13 +2923,13 @@ outline: none;
 }
 
 
-.ixi-pocket-thumb img {
+:global(ixi-pocket-thumb img) {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.ixi-pocket-thumb span {
+:global(.ixi-pocket-thumb span) {
   display: block;
   padding: 5px;
 
@@ -3565,7 +3565,7 @@ outline: none;
   transform: translateX(8px);
 }
 
-        .cards {
+       :global(.cards) {
           max-width: 1920px;
           margin: 0 auto;
 
@@ -3596,7 +3596,7 @@ outline: none;
   width: 100%;
 }
 
-        .cards.single-card {
+        :global(.cards.single-card) {
           grid-template-columns: minmax(250px, 300px);
           justify-content: center;
         }
