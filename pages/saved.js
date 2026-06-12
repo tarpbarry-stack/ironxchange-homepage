@@ -3116,6 +3116,115 @@ outline: none;
   border-color: rgba(255,255,255,.14);
 }
 
+
+/* =============================== */
+/* IXI POCKET STATION INNER GUTS   */
+/* =============================== */
+
+.ixi-pocket-thumbs {
+  position: absolute;
+
+  left: 50%;
+  top: 25px;
+
+  width: calc(100% - 14px);
+  height: 60px;
+
+  transform: translateX(-50%);
+  overflow: hidden;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 11px 7px 11px 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0) 20%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,.02),
+      transparent 30%
+    ),
+    rgba(10,10,10,.44);
+
+  pointer-events: auto;
+  z-index: 30;
+}
+
+.ixi-pocket-thumb {
+  width: 90px !important;
+  height: 60px !important;
+
+  position: absolute;
+  left: 50%;
+  top: auto;
+  bottom: 0;
+
+  transform: translateX(-50%) !important;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.055),
+      rgba(255,255,255,0) 34%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.018),
+      transparent 45%
+    ),
+    rgba(18,18,18,.94);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 16px rgba(0,0,0,.30);
+
+  transition:
+    opacity .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+}
+
+.ixi-pocket-thumb::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  height: 1px;
+
+  background: rgba(255,255,255,.12);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ixi-pocket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ixi-pocket-thumb span {
+  display: block;
+  padding: 5px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+
 /* =============================== */
 /* IXI POCKET DIRECT CONTROL V1    */
 /* =============================== */
