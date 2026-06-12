@@ -2210,9 +2210,6 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         onSendBack={sendListingToBack}
         isBoardDraggingCard={false}
         isGhostTarget={false}
-        onBoardDragStart={() => {}}
-        onBoardDragOver={() => {}}
-        onBoardDragEnd={() => {}}
         useDndDrag={false}
         dragHandleProps={dragHandleProps}
       />
