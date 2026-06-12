@@ -3679,6 +3679,21 @@ outline: none;
   pointer-events: none;
   z-index: 999999;
 }
+
+:global(.ixi-board-sortable-card) {
+  width: 100%;
+  max-width: 300px;
+  min-width: 250px;
+
+  justify-self: center;
+  align-self: start;
+
+  touch-action: none;
+}
+
+:global(.ixi-board-sortable-card > *) {
+  width: 100%;
+}
         .empty {
           max-width: 520px;
           margin: 38px auto 0;
