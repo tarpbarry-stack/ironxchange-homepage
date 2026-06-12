@@ -1143,9 +1143,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     outline: "none"
   }}
 />
-
-
-<div
+    <div
   className={`ixi-pocket-action-rail left ${
     (machineContainers.pocketLeft || []).length === 0
       ? "is-empty"
@@ -3003,39 +3001,45 @@ outline: none;
 /* VISUAL RAIL — painted only */
 .ixi-pocket-action-rail {
   position: absolute;
-  top: 95px;
+  top: 11px;
+  right: 9px;
+  left: auto;
 
-  width: 150px;
+  width: 82px;
   height: 4px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: transparent; 
-  
+  background: transparent;
+
   z-index: 60;
   pointer-events: auto;
 }
 
-.ixi-pocket-action-rail.left {
-  right: 20px;
+.ixi-pocket-action-rail.left,
+.ixi-pocket-action-rail.right {
+  right: 9px;
+  left: auto;
 }
 
-.ixi-pocket-action-rail.right {
-  left: 20px;
+.ixi-pocket-action-rail,
+.ixi-pocket-direct-button,
+.ixi-pocket-loop-square {
+  display: none !important;
 }
 
 .ixi-pocket-rail-action {
   position: relative;
 
-  width: 28px;
+  width: 15px;
   height: 4px;
 
   border: 0;
-  border-radius: 0;
+  border-radius: 2px;
 
-  background:  background: transparent;
+  background: rgba(255,255,255,.12);
 
   padding: 0;
   cursor: pointer;
