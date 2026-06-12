@@ -2418,7 +2418,7 @@ onBoardDragEnd={() => {}}
   .ixi-pocket-row {
     grid-template-columns: var(--station-w);
     grid-template-rows: var(--station-h) var(--station-h);
-    gap: 34px;
+    gap: 20px;
   }
 
   .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
