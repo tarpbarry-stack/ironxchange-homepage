@@ -3250,28 +3250,37 @@ outline: none;
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
   position: absolute;
-  right: 9px;
-  top: 10px;
 
-  width: 30px;
+  left: 50%;
+  bottom: -1px;
+
+  width: 34px;
   height: 5px;
 
+  transform: translateX(-50%);
+
   border: 0;
-  border-radius: 3px;
+  border-radius: 3px 3px 1px 1px;
 
   background: rgba(255,255,255,.18);
 
   padding: 0;
   cursor: pointer;
 
-  z-index: 100;
+  z-index: 120;
   pointer-events: auto;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 1px 3px rgba(0,0,0,.32);
 }
 
 .ixi-pocket-direct-button.left,
 .ixi-pocket-direct-button.right {
-  right: 9px;
-  left: auto;
+  left: 50%;
+  right: auto;
+  bottom: -1px;
+  transform: translateX(-50%);
 }
 
 .ixi-pocket-direct-button:hover,
