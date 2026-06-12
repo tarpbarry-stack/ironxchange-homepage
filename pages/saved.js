@@ -173,10 +173,14 @@ function handleWorkspaceDragEnd(event) {
     event?.active?.data?.current?.containerId ||
     getMachineContainer(dragId);
 
-  const knownContainers = [
+   const knownContainers = [
     "board",
     "stackTop",
-    "stackBottom"
+    "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
   ];
 
   const targetContainer =
