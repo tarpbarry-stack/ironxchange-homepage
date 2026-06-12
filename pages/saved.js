@@ -2020,12 +2020,11 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
       />
 
      {activeStacksOpen[stackKey] && (
-  <WorkspaceDropZone
-    id={stackKey === "top" ? "stackTop" : "stackBottom"}
-    className={`active-stack-tray ${
-      activeStackHover === stackKey ? "stack-armed" : ""
-    }`}
-  >
+  <section
+  className={`active-stack-tray ${
+    activeStackHover === stackKey ? "stack-armed" : ""
+  }`}
+>
     <div className="active-stack-pocket-corners">
   <button
   type="button"
@@ -2262,7 +2261,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   </SortableContext>
 </div>
 
-</WorkspaceDropZone>
+</section>
 )}
 </WorkspaceDropZone>
 ))}
