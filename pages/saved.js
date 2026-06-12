@@ -199,12 +199,24 @@ function handleWorkspaceDragEnd(event) {
     sourceContainer === targetContainer &&
     dragId !== overId
   ) {
-    moveMachineWithinContainer(
-      sourceContainer,
-      dragId,
-      overId,
-      false
-    );
+    const ids = machineContainers[sourceContainer] || [];
+
+const fromIndex = ids.findIndex(
+  item => String(item) === String(dragId)
+);
+
+const toIndex = ids.findIndex(
+  item => String(item) === String(overId)
+);
+
+const insertAfter = fromIndex < toIndex;
+
+moveMachineWithinContainer(
+  sourceContainer,
+  dragId,
+  overId,
+  insertAfter
+);
 
     setActiveDndId("");
     clearMachineDragState();
@@ -458,15 +470,13 @@ setIxiCardState(remoteIxiState);
         : workspaceListings;
 
 const orderedSource =
-  savedBoardMode === "custom" && savedBoardListings.length
-    ? source
-    : (machineContainers.board || [])
-        .map(id =>
-          source.find(item =>
-            String(getListingId(item)) === String(id)
-          )
-        )
-        .filter(Boolean);
+  (machineContainers.board || [])
+    .map(id =>
+      source.find(item =>
+        String(getListingId(item)) === String(id)
+      )
+    )
+    .filter(Boolean);
     
    return orderedSource.filter(item => {
   const id = String(getListingId(item));
