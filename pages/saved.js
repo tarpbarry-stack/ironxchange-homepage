@@ -2912,6 +2912,36 @@ outline: none;
   line-height: 1.1;
 }
 
+.ixi-pocket-topline {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  pointer-events: none;
+}
+
+.ixi-pocket-topline span {
+  color: rgba(255,196,0,.86);
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.ixi-pocket-topline strong {
+  color: rgba(255,255,255,.12);
+
+  font-size: 5px;
+  font-weight: 950;
+  letter-spacing: .58px;
+  text-transform: uppercase;
+}
+
 /* =============================== */
 /* IXI POCKET STATION BUTTONS V12  */
 /* existing buttons, new shell home */
