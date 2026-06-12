@@ -1337,15 +1337,12 @@ onClick={(e) => {
           machine.attributes?.publicData?.images?.[0];
 
         return (
-          <div
-            key={`left-pocket-thumb-${machineId}`}
-            className="ixi-pocket-thumb"
-   draggable
-onDragStart={(e) => {
-  e.stopPropagation();
-  handleBoardDragStart(machine, e);
-}}
-onDragEnd={handleBoardDragEnd}            style={{
+          <WorkspaceDraggable
+  key={`left-pocket-thumb-${machineId}`}
+  id={machineId}
+  className="ixi-pocket-thumb"
+  sourceContainer="pocketLeft"
+  style={{
 right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
  zIndex: index + 1,
   borderColor: getIxiColorValue(
@@ -1365,7 +1362,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
                 {machine.make || machine.publicData?.make || ""}
               </span>
             )}
-          </div>
+         </WorkspaceDraggable>
         );
       })}
     </div>
