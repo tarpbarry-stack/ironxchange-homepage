@@ -40,6 +40,7 @@ box-shadow:
   content: "";
 
   position: absolute;
+
   left: 14px;
   right: 14px;
   top: 8px;
@@ -50,9 +51,11 @@ box-shadow:
     linear-gradient(
       90deg,
       transparent,
-      rgba(0,194,255,.28),
+      rgba(255,196,0,.48),
       transparent
     );
+
+  pointer-events: none;
 }
 .ixi-control-surface::after {
   content: "IXI™ 2026";
