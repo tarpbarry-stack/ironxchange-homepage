@@ -620,7 +620,7 @@ onMouseLeave={() => {
   }
 
   .ixi-lab-pocket-cavity::after {
-    content: "3 MACHINES";
+    content: "3";
 
     position: absolute;
     left: 8px;
