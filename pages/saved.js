@@ -2320,7 +2320,35 @@ onBoardDragEnd={() => {}}
     </p>
   </div>
 )}
-              </main>
+                            </main>
+
+      <DragOverlay>
+        {getActiveDndListing() ? (
+          <div className="ixi-drag-overlay-card">
+            <ListingCard
+              listing={getActiveDndListing()}
+              saved={savedIds.includes(String(activeDndId))}
+              onToggleSaved={() => {}}
+              from="saved"
+              ixiState={
+                ixiCardState[String(activeDndId)] || {
+                  color: "none",
+                  outline: 1
+                }
+              }
+              onIxiStateChange={() => {}}
+              onSendFront={() => {}}
+              onSendBack={() => {}}
+              isBoardDraggingCard={false}
+              isGhostTarget={false}
+              onBoardDragStart={() => {}}
+              onBoardDragOver={() => {}}
+              onBoardDragEnd={() => {}}
+              useDndDrag={false}
+            />
+          </div>
+        ) : null}
+      </DragOverlay>
       </DndContext>
 
       <Footer />
@@ -3628,6 +3656,12 @@ outline: none;
           justify-content: center;
         }
 
+        :global(.ixi-drag-overlay-card) {
+  width: 300px;
+  max-width: 300px;
+  pointer-events: none;
+  z-index: 999999;
+}
         .empty {
           max-width: 520px;
           margin: 38px auto 0;
