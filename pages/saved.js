@@ -3024,12 +3024,6 @@ outline: none;
   left: auto;
 }
 
-.ixi-pocket-action-rail,
-.ixi-pocket-direct-button,
-.ixi-pocket-loop-square {
-  display: none !important;
-}
-
 .ixi-pocket-rail-action {
   position: relative;
 
