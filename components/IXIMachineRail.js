@@ -116,10 +116,29 @@ export default function IXIMachineRail({
   z-index: 30;
 }
 
+.board-command-rail::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.06),
+      transparent
+    );
+}
+
 .rail-zone {
   position: relative;
   border: none;
-  border-right: 1px solid rgba(255,255,255,.022);
+  border-right: 1px solid rgba(255,255,255,.04);
   background: transparent;
   cursor: pointer;
   padding: 0;
@@ -163,7 +182,8 @@ export default function IXIMachineRail({
 
 /* END DASHES */
 .rail-half::after {
-  width: 7px;
+  width: 8px;
+  opacity: .72;
 }
 
 /* COLOR DASH — follows selected IXI color */
@@ -180,8 +200,11 @@ export default function IXIMachineRail({
 }
 
 .card.board-color-yellow .rail-color::after {
-  background: rgba(255,196,0,.78);
-  box-shadow: 0 0 6px rgba(255,196,0,.18);
+  background: rgba(255,196,0,.82);
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.24),
+    0 0 14px rgba(255,196,0,.08);
 }
 
 .card.board-color-red .rail-color::after {
@@ -229,7 +252,7 @@ export default function IXIMachineRail({
 }
 
 .rail-width-strength {
-  border-right: 1px solid rgba(255,255,255,.035);
+  border-right: 1px solid rgba(0,194,255,.075);
 }
 
 .rail-width-half::after {
@@ -253,9 +276,11 @@ export default function IXIMachineRail({
 
   border-radius: 1px;
 
-  background: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.22);
 
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.045);
 }
 
 .rail-width-end:hover::after {
@@ -350,10 +375,12 @@ export default function IXIMachineRail({
 }
 
 .rail-zone:hover::after {
-  background: rgba(0,194,255,.55);
+  background: rgba(0,194,255,.68);
+  transform: translate(-50%, -50%) scaleX(1.08);
+
   box-shadow:
-    0 0 6px rgba(0,194,255,.45),
-    0 0 12px rgba(0,194,255,.20);
+    0 0 6px rgba(0,194,255,.48),
+    0 0 14px rgba(0,194,255,.24);
 }
 
 /* KEEP SAVE YELLOW ON HOVER WHEN SAVED */
