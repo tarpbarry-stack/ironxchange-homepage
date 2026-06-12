@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   useDraggable,
-  useDroppable,
-  closestCenter
+  useDroppable
 } from "@dnd-kit/core";
 
 import Navbar from "../components/Navbar";
@@ -36,20 +35,16 @@ function WorkspaceDropZone({
   id,
   className,
   children,
-  disabled = false,
   ...props
 }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: String(id),
-    disabled
+  const { setNodeRef } = useDroppable({
+    id
   });
 
   return (
     <section
       ref={setNodeRef}
-      className={`${className || ""} ${
-        isOver ? "ixi-dnd-over" : ""
-      }`}
+      className={className}
       {...props}
     >
       {children}
@@ -61,112 +56,32 @@ function WorkspaceDropPad({
   id,
   className,
   style,
-  disabled = false,
   ...props
 }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: String(id),
-    disabled
+  const { setNodeRef } = useDroppable({
+    id
   });
 
   return (
     <div
       ref={setNodeRef}
-      className={`${className || ""} ${
-        isOver ? "ixi-dnd-over" : ""
-      }`}
+      className={className}
       style={style}
       {...props}
     />
   );
 }
 
-function WorkspaceDraggable({
-  id,
-  className,
-  style,
-  children,
-  disabled = false,
-  dragType = "machine",
-  sourceContainer = "",
-  ...props
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    isDragging
-  } = useDraggable({
-    id: String(id),
-    disabled,
-    data: {
-      dragType,
-      sourceContainer
-    }
-  });
-
-  const dragStyle = {
-    ...style,
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : style?.transform,
-    opacity: isDragging ? 0.82 : style?.opacity,
-    zIndex: isDragging ? 99999 : style?.zIndex
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`${className || ""} ${
-        isDragging ? "ixi-dnd-dragging" : ""
-      }`}
-      style={dragStyle}
-      data-ixi-draggable-id={String(id)}
-      {...listeners}
-      {...attributes}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
-
-    const IXI_CONTAINER_KEYS = [
-    "board",
-    "stackTop",
-    "stackBottom",
-    "pocketLeft",
-    "pocketRight",
-    "pocketLeft2",
-    "pocketRight2"
-  ];
-
-  const IXI_POCKET_KEYS = [
-    "pocketLeft",
-    "pocketRight",
-    "pocketLeft2",
-    "pocketRight2"
-  ];
-
-  const IXI_STACK_KEYS = [
-    "stackTop",
-    "stackBottom"
-  ];
   
 function handleWorkspaceDragEnd(event) {
-  const dragId = String(event?.active?.id || "");
-  const overId = String(event?.over?.id || "");
+  const dragId = event?.active?.id;
+  const overId = event?.over?.id;
 
   console.log("IXI DND DROP", {
     dragId,
-    overId,
-    activeData: event?.active?.data?.current,
-    overData: event?.over?.data?.current
+    overId
   });
 
   if (!dragId || !overId) {
@@ -174,77 +89,72 @@ function handleWorkspaceDragEnd(event) {
     return;
   }
 
-  const targetContainer =
-    IXI_CONTAINER_KEYS.includes(overId)
-      ? overId
-      : getMachineContainer(overId);
+     const pocketTargetMap = {
+    pocketLeft: "pocketLeft",
+    pocketLeft2: "pocketLeft2",
+    pocketRight: "pocketRight",
+    pocketRight2: "pocketRight2",
+  };
 
-  const sourceContainer =
-    getMachineContainer(dragId);
+  const stackTargets = [
+    "stackTop",
+    "stackBottom"
+  ];
 
-  if (!targetContainer) {
-    clearMachineDragState();
-    return;
+    if (pocketTargetMap[String(overId)]) {
+  const targetPocket = pocketTargetMap[String(overId)];
+
+  moveMachineToContainer(
+    String(dragId),
+    targetPocket
+  );
+
+  if (targetPocket === "pocketLeft") {
+    setLeftPocketMode("peek");
   }
 
-  if (IXI_POCKET_KEYS.includes(targetContainer)) {
-    moveMachineToContainer(dragId, targetContainer);
-
-    if (targetContainer === "pocketLeft") setLeftPocketMode("peek");
-    if (targetContainer === "pocketLeft2") setLeftPocket2Mode("peek");
-    if (targetContainer === "pocketRight") setRightPocketMode("peek");
-    if (targetContainer === "pocketRight2") setRightPocket2Mode("peek");
-
-    clearMachineDragState();
-    return;
+  if (targetPocket === "pocketLeft2") {
+    setLeftPocket2Mode("peek");
   }
 
-  if (IXI_STACK_KEYS.includes(targetContainer)) {
-    moveMachineToContainer(dragId, targetContainer);
+  if (targetPocket === "pocketRight") {
+    setRightPocketMode("peek");
+  }
+
+  if (targetPocket === "pocketRight2") {
+    setRightPocket2Mode("peek");
+  }
+
+  clearMachineDragState();
+  return;
+}
+
+if (stackTargets.includes(String(overId))) {
+    moveMachineToContainer(
+      String(dragId),
+      String(overId)
+    );
 
     setActiveStacksOpen(current => ({
       ...current,
-      top: targetContainer === "stackTop" ? true : current.top,
-      bottom: targetContainer === "stackBottom" ? true : current.bottom
+      top: String(overId) === "stackTop" ? true : current.top,
+      bottom: String(overId) === "stackBottom" ? true : current.bottom
     }));
 
     clearMachineDragState();
     return;
   }
 
-  if (targetContainer === "board") {
-    if (
-      overId !== "board" &&
-      sourceContainer === "board"
-    ) {
-      moveMachineWithinContainer(
-        "board",
-        dragId,
-        overId,
-        false
-      );
-    } else {
-      moveMachineToContainer(dragId, "board");
-    }
+  if (String(dragId) !== String(overId)) {
+    moveListingToSlot(
+      String(dragId),
+      String(overId)
+    );
 
     clearMachineDragState();
     return;
   }
 
-  clearMachineDragState();
-}
-
-  function handleWorkspaceDragStart(event) {
-  const dragId = String(event?.active?.id || "");
-
-  if (!dragId) return;
-
-  setActiveDragMachineId(dragId);
-  setDraggingListingId(dragId);
-  setStackDraggingId(dragId);
-}
-
-function handleWorkspaceDragCancel() {
   clearMachineDragState();
 }
   
@@ -1181,10 +1091,7 @@ function getIxiColorValue(color) {
             <Navbar />
 
      <DndContext
-  collisionDetection={closestCenter}
-  onDragStart={handleWorkspaceDragStart}
   onDragEnd={handleWorkspaceDragEnd}
-  onDragCancel={handleWorkspaceDragCancel}
 >
         <main>
   <section className="saved-environment-shell">
@@ -1221,7 +1128,6 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 >
 <WorkspaceDropPad
   id="pocketLeft"
-  disabled={true}
   data-pocket-pad-target="pocketLeft"
   className="ixi-pocket-catch-pad catch-l1"
   style={{
@@ -1338,12 +1244,15 @@ onClick={(e) => {
           machine.attributes?.publicData?.images?.[0];
 
         return (
-          <WorkspaceDraggable
-  key={`left-pocket-thumb-${machineId}`}
-  id={machineId}
-  className="ixi-pocket-thumb"
-  sourceContainer="pocketLeft"
-  style={{
+          <div
+            key={`left-pocket-thumb-${machineId}`}
+            className="ixi-pocket-thumb"
+   draggable
+onDragStart={(e) => {
+  e.stopPropagation();
+  handleBoardDragStart(machine, e);
+}}
+onDragEnd={handleBoardDragEnd}            style={{
 right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
  zIndex: index + 1,
   borderColor: getIxiColorValue(
@@ -1363,7 +1272,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
                 {machine.make || machine.publicData?.make || ""}
               </span>
             )}
-         </WorkspaceDraggable>
+          </div>
         );
       })}
     </div>
@@ -1401,7 +1310,6 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   
 <WorkspaceDropPad
   id="pocketLeft2"
-  disabled={true}
   data-pocket-pad-target="pocketLeft2"
   className="ixi-pocket-catch-pad out-left"
   style={{
@@ -1517,12 +1425,16 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
             machine.attributes?.publicData?.images?.[0];
 
           return (
-            <WorkspaceDraggable
-  key={`left-pocket-2-thumb-${machineId}`}
-  id={machineId}
-  className="ixi-pocket-thumb"
-  sourceContainer="pocketLeft2"
-  style={{
+            <div
+             key={`left-pocket-2-thumb-${machineId}`}
+className="ixi-pocket-thumb"
+draggable
+onDragStart={(e) => {
+  e.stopPropagation();
+  handleBoardDragStart(machine, e);
+}}
+onDragEnd={handleBoardDragEnd}
+style={{
   right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
   zIndex: index + 1,
   borderColor: getIxiColorValue(
@@ -1541,7 +1453,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
                   {machine.make || machine.publicData?.make || ""}
                 </span>
               )}
-            </WorkspaceDraggable>
+            </div>
           );
         })}
       </div>
@@ -1615,7 +1527,6 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   > 
 <WorkspaceDropPad
   id="pocketRight"
-  disabled={true}
   data-pocket-pad-target="pocketRight"
   className="ixi-pocket-catch-pad catch-r1"
   style={{
@@ -1732,11 +1643,15 @@ onClick={(e) => {
         machine.attributes?.publicData?.images?.[0];
 
       return (
-       <WorkspaceDraggable
+       <div
   key={`right-pocket-thumb-${machineId}`}
-  id={machineId}
   className="ixi-pocket-thumb"
-  sourceContainer="pocketRight"
+  draggable
+  onDragStart={(e) => {
+    e.stopPropagation();
+    handleBoardDragStart(machine, e);
+  }}
+  onDragEnd={handleBoardDragEnd}
   style={{
      
 
@@ -1760,7 +1675,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
               {machine.make || machine.publicData?.make || ""}
             </span>
           )}
-        </WorkspaceDraggable>
+        </div>
       );
     })}
   </div>
@@ -1788,7 +1703,6 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 >
  <WorkspaceDropPad
   id="pocketRight2"
-  disabled={true}
   data-pocket-pad-target="pocketRight2"
   className="ixi-pocket-catch-pad out-right"
   style={{
@@ -1914,12 +1828,16 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
             machine.attributes?.publicData?.images?.[0];
 
           return (
-            <WorkspaceDraggable
-  key={`right-pocket-2-thumb-${machineId}`}
-  id={machineId}
-  className="ixi-pocket-thumb"
-  sourceContainer="pocketRight2"
-  style={{
+            <div
+              key={`right-pocket-2-thumb-${machineId}`}
+              className="ixi-pocket-thumb"
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                handleBoardDragStart(machine, e);
+              }}
+              onDragEnd={handleBoardDragEnd}
+              style={{
                 left: `${rightPocket2Mode === "open"
                   ? index * 44
                   : rightPocket2Mode === "peek"
@@ -1943,7 +1861,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
                   {machine.make || machine.publicData?.make || ""}
                 </span>
               )}
-            </WorkspaceDraggable>
+            </div>
           );
         })}
       </div>
@@ -1971,11 +1889,27 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     ? "has-machines"
     : ""
 }`}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+
+       const droppedId = getDroppedMachineId(e);
+
+        addListingToActiveStack(stackKey, droppedId);
+      }}
     >
       <button
         type="button"
         className="active-stack-dash"
         onClick={() => toggleActiveStack(stackKey)}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+
+         const droppedId = getDroppedMachineId(e);
+
+          addListingToActiveStack(stackKey, droppedId);
+        }}
       />
 
      {activeStacksOpen[stackKey] && (
@@ -2166,21 +2100,22 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 
   const id = String(getListingId(machine));
 
- return (
-    <WorkspaceDraggable
-      key={`stack-card-${id}`}
-      id={id}
-      className={`active-stack-card ${
-        String(id) === String(stackDraggingId)
-          ? "stack-dragging"
-          : ""
-      }`}
-      sourceContainer={
-        stackKey === "top"
-          ? "stackTop"
-          : "stackBottom"
-      }
-    >
+  return (
+    <div
+  key={`stack-card-${id}`}
+  className={`active-stack-card ${
+    String(id) === String(stackDraggingId) ? "stack-dragging" : ""
+  } ${
+    String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
+  }`}
+  draggable
+  onDragStart={(e) => handleStackDragStart(id, e)}
+ onDragOver={(e) => {
+  e.preventDefault();
+  handleStackDragOver(id, e);
+}}
+  onDragEnd={() => handleStackDragEnd(stackKey)}
+>
       <ListingCard
         listing={machine}
         saved={savedIds.includes(id)}
@@ -2201,7 +2136,7 @@ onBoardDragStart={() => {}}
 onBoardDragOver={() => {}}
 onBoardDragEnd={() => {}}
       />
-        </WorkspaceDraggable>
+    </div>
   );
 })}
           </div>
@@ -2212,28 +2147,29 @@ onBoardDragEnd={() => {}}
   ))}
 </section>
               
-     <WorkspaceDropZone
-  id="board"
+      <section
   data-board-target="board"
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={(e) => {
+    e.preventDefault();
+
+    const droppedId = getDroppedMachineId(e);
+
+    if (droppedId) {
+      moveMachineToContainer(droppedId, "board");
+    }
+
+    clearMachineDragState();
+  }}
 >
           {visibleSavedListings.map(item => {
-  const id = String(getListingId(item));
+            const id = String(getListingId(item));
 
-  return (
-    <WorkspaceDraggable
-      key={id}
-      id={id}
-      className={`workspace-dnd-card ${
-        String(id) === String(draggingListingId)
-          ? "is-dragging"
-          : ""
-      }`}
-      sourceContainer="board"
-    >
-      <ListingCard
+            return (
+              <ListingCard
                 key={id}
                 listing={item}
                 saved={savedIds.includes(id)}
@@ -2260,16 +2196,15 @@ onBoardDragEnd={() => {}}
                   String(id) === String(ghostListingId)
                 }
 
-                onBoardDragStart={() => {}}
-                onBoardDragOver={() => {}}
-                onBoardDragEnd={() => {}}
+                onBoardDragStart={handleBoardDragStart}
+                onBoardDragOver={handleBoardDragOver}
+                onBoardDragEnd={handleBoardDragEnd}
 
-                                useDndDrag={false}
+                useDndDrag={true}
               />
-    </WorkspaceDraggable>
-  );
+            );
           })}
-        </WorkspaceDropZone>
+        </section>
 
         {visibleSavedListings.length === 0 && (
   <div className="empty">
@@ -2746,30 +2681,30 @@ outline: none;
 outline: none;
 }
 
-:global(.ixi-pocket-thumbs.thumb-size-small) {
+.ixi-pocket-thumbs.thumb-size-small {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
   --pocket-thumbs-top: 30px;
 }
 
-:global(.ixi-pocket-thumbs.thumb-size-medium) {
+.ixi-pocket-thumbs.thumb-size-medium {
   --pocket-thumb-w: 90px;
   --pocket-thumb-h: 60px;
   --pocket-thumbs-top: 30px;
 }
 
-:global(.ixi-pocket-thumbs.thumb-size-large) {
+.ixi-pocket-thumbs.thumb-size-large {
   --pocket-thumb-w: 108px;
   --pocket-thumb-h: 72px;
   --pocket-thumbs-top: 23px;
 }
 
-:global(.ixi-pocket-right .ixi-pocket-thumbs) {
+.ixi-pocket-right .ixi-pocket-thumbs {
   left: 50%;
   right: auto;
 }
 
-:global(.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs) {
+.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
   left: auto;
   right: 20px;
   transform: none;
@@ -2777,13 +2712,13 @@ outline: none;
 /* PEEK POCKET COVER */
 
 
-:global(.ixi-pocket-thumb img) {
+.ixi-pocket-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-:global(.ixi-pocket-thumb span) {
+.ixi-pocket-thumb span {
   display: block;
   padding: 5px;
 
@@ -2820,7 +2755,7 @@ outline: none;
 /* IXI POCKET STATION INNER GUTS   */
 /* =============================== */
 
-:global(.ixi-pocket-thumbs) {
+.ixi-pocket-thumb {
   width: var(--pocket-thumb-w, 90px) !important;
   height: var(--pocket-thumb-h, 60px) !important;
 
@@ -2849,7 +2784,7 @@ outline: none;
   z-index: 34;
 }
 
-:global(.ixi-pocket-thumb) {
+.ixi-pocket-thumbs {
   position: absolute;
   left: 50%;
   top: var(--pocket-thumbs-top, 30px);
@@ -2927,13 +2862,13 @@ outline: none;
 }
 
 
-:global(.ixi-pocket-thumb img) {
+.ixi-pocket-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-:global(.ixi-pocket-thumb span) {
+.ixi-pocket-thumb span {
   display: block;
   padding: 5px;
 
@@ -3161,7 +3096,7 @@ outline: none;
   border-color: rgba(255,196,0,.62);
   background: rgba(255,196,0,.72);
 }
-/* Roll-top cover: fixed dash/lip, cover moves behind it */
+/* Roll-top cover: fixed dash/lip, cover moves behind it *
 
 
 /* =============================== */
@@ -3569,7 +3504,7 @@ outline: none;
   transform: translateX(8px);
 }
 
-       :global(.cards) {
+        .cards {
           max-width: 1920px;
           margin: 0 auto;
 
@@ -3582,25 +3517,7 @@ outline: none;
           justify-content: center;
         }
 
-:global(.workspace-dnd-card) {
-  width: 100%;
-  max-width: 300px;
-  min-width: 250px;
-
-  justify-self: center;
-  align-self: start;
-
-  display: block;
-  position: relative;
-
-  touch-action: none;
-}
-
-:global(.workspace-dnd-card > *) {
-  width: 100%;
-}
-
-        :global(.cards.single-card) {
+        .cards.single-card {
           grid-template-columns: minmax(250px, 300px);
           justify-content: center;
         }
