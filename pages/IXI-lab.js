@@ -493,14 +493,12 @@ onMouseLeave={() => {
   right: calc(50% + clamp(420px, 25vw, 610px));
 }
 
-/* I - inside left */
 .ixi-lab-pocket-shell.left.top {
-  right: calc(50% + clamp(245px, 15vw, 390px));
+  right: calc(50% + clamp(370px, 15vw, 515px));
 }
 
-/* II - inside right */
 .ixi-lab-pocket-shell.right.top {
-  left: calc(50% + clamp(245px, 15vw, 390px));
+  left: calc(50% + clamp(370px, 15vw, 515px));
 }
 
 /* IV - outside right */
