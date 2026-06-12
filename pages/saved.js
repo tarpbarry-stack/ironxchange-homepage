@@ -2192,11 +2192,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     key={`stack-card-${id}`}
     id={id}
     containerId={stackKey === "top" ? "stackTop" : "stackBottom"}
-    className={`active-stack-card ${
-      String(id) === String(stackDraggingId) ? "stack-dragging" : ""
-    } ${
-      String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
-    }`}
+   className="active-stack-card"
   >
     {({ dragHandleProps }) => (
       <ListingCard
