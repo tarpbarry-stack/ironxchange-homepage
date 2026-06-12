@@ -226,7 +226,7 @@ moveMachineWithinContainer(
   if (
     targetContainer &&
     targetContainer !== sourceContainer &&
-    ["board", "stackTop", "stackBottom", "pocketLeft", "pocketLeft2", "pocketRight", "pocketRight2"].includes(targetContainer)
+        ["board", "stackTop", "stackBottom"].includes(targetContainer)
   ) {
     moveMachineToContainer(dragId, targetContainer);
 
