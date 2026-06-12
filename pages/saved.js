@@ -663,11 +663,22 @@ function moveMachineToContainer(machineId, targetContainer) {
       );
     });
 
-    next[targetContainer] = [
-      ...(next[targetContainer] || []),
-      id
-    ];
+      const isPocket = [
+      "pocketLeft",
+      "pocketRight",
+      "pocketLeft2",
+      "pocketRight2"
+    ].includes(targetContainer);
 
+    next[targetContainer] = isPocket
+      ? [
+          id,
+          ...(next[targetContainer] || [])
+        ]
+      : [
+          ...(next[targetContainer] || []),
+          id
+        ];
     return next;
   });
 }
