@@ -78,7 +78,6 @@ onBoardDragEnd,
 useDndDrag = false,
 dragHandleProps,
 }) {
-}) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const [localBoardColor, setLocalBoardColor] = useState("none");
