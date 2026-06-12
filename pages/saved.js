@@ -113,11 +113,11 @@ function IXISortableMachineCard({
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.55 : 1,
-    zIndex: isDragging ? 9999 : undefined
-  };
+  transform: CSS.Transform.toString(transform),
+  transition,
+  opacity: isDragging ? 0 : 1,
+  zIndex: isDragging ? 9999 : undefined
+};
 
   return (
    <div
