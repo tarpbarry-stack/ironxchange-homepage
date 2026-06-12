@@ -315,14 +315,9 @@ onMouseLeave={() => {
     position: relative;
   }
 
-  /* ========================= */
-  /* IXI ENVIRONMENT RAIL      */
-  /* ========================= */
-
   .ixi-page-indicator {
     width: 100%;
     min-height: 22px;
-
     margin: 0 auto 14px;
 
     display: flex;
@@ -452,7 +447,7 @@ onMouseLeave={() => {
     position: absolute;
     left: 0;
     right: 0;
-    top: 46px;
+    top: 70px;
 
     width: 100%;
     height: 0;
@@ -487,20 +482,30 @@ onMouseLeave={() => {
     z-index: 8;
   }
 
- .ixi-lab-pocket-shell.left {
-  right: calc(50% + clamp(210px, 18vw, 310px) + 38px);
-}
-
-.ixi-lab-pocket-shell.right {
-  left: calc(50% + clamp(210px, 18vw, 310px) + 38px);
-}
-
-  .ixi-lab-pocket-shell.top {
-    top: -14px;
+  /* WIDE DESKTOP — straight line */
+  .ixi-lab-pocket-shell.top,
+  .ixi-lab-pocket-shell.bottom {
+    top: 0;
   }
 
-  .ixi-lab-pocket-shell.bottom {
-    top: 112px;
+  /* III - outside left */
+  .ixi-lab-pocket-shell.left.bottom {
+    right: calc(50% + 465px);
+  }
+
+  /* I - inside left */
+  .ixi-lab-pocket-shell.left.top {
+    right: calc(50% + 295px);
+  }
+
+  /* II - inside right */
+  .ixi-lab-pocket-shell.right.top {
+    left: calc(50% + 295px);
+  }
+
+  /* IV - outside right */
+  .ixi-lab-pocket-shell.right.bottom {
+    left: calc(50% + 465px);
   }
 
   .ixi-lab-pocket-shell::before {
@@ -634,32 +639,32 @@ onMouseLeave={() => {
     text-transform: uppercase;
   }
 
-.ixi-lab-thumb {
-  position: absolute;
+  .ixi-lab-thumb {
+    position: absolute;
 
-  left: 50%;
-  bottom: 12px;
+    left: 50%;
+    bottom: 12px;
 
-  width: 90px;
-  height: 60px;
+    width: 90px;
+    height: 60px;
 
-  transform: translateX(-50%);
+    transform: translateX(-50%);
 
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 7px 7px 0 0;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 7px 7px 0 0;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.045),
-      rgba(255,255,255,0)
-    ),
-    rgba(18,18,18,.92);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,255,255,.045),
+        rgba(255,255,255,0)
+      ),
+      rgba(18,18,18,.92);
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 8px 16px rgba(0,0,0,.30);
-}
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.035),
+      0 8px 16px rgba(0,0,0,.30);
+  }
 
   .ixi-lab-thumb.ghost-two,
   .ixi-lab-thumb.ghost-three {
@@ -674,10 +679,32 @@ onMouseLeave={() => {
     transform: translateX(-50%) rotate(1deg);
   }
 
-  /* ========================= */
-  /* MOBILE                    */
-  /* ========================= */
+  /* 1250px → 851px — stacked exactly like current */
+  @media (max-width: 1250px) and (min-width: 851px) {
+    .ixi-lab-pocket-chassis {
+      top: 46px;
+    }
 
+    .ixi-lab-pocket-shell.left {
+      right: calc(50% + clamp(210px, 18vw, 310px) + 38px);
+      left: auto;
+    }
+
+    .ixi-lab-pocket-shell.right {
+      left: calc(50% + clamp(210px, 18vw, 310px) + 38px);
+      right: auto;
+    }
+
+    .ixi-lab-pocket-shell.top {
+      top: -14px;
+    }
+
+    .ixi-lab-pocket-shell.bottom {
+      top: 112px;
+    }
+  }
+
+  /* MOBILE — no pockets */
   @media (max-width: 850px) {
     main {
       padding: 18px 4% 48px;
