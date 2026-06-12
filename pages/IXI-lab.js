@@ -641,7 +641,7 @@ onMouseLeave={() => {
     position: absolute;
 
     left: 50%;
-    bottom: 9px;
+    bottom: 7px;
 
     width: 90px;
     height: 60px;
