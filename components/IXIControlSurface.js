@@ -8,21 +8,52 @@ export default function IXIControlSurface({ children, className = "" }) {
   width: clamp(420px, 34vw, 600px);
 
   margin: 24px auto 0;
-  padding: clamp(10px, 1vw, 18px);
+  padding: clamp(10px, 1vw, 16px);
 
-  border: 1px solid rgba(255,255,255,.045);
-  border-radius: 10px;
+  position: relative;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 16px 10px 16px 10px;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.035),
-      rgba(255,196,0,0)
-    ),
-    rgba(8,8,8,.72);
+    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
+    rgba(7,7,7,.76);
 
   box-shadow:
-    0 12px 30px rgba(0,0,0,.24);
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20);
+}
+
+.ixi-control-surface::before {
+  content: "";
+
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 8px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.10);
+  pointer-events: none;
+}
+
+.ixi-control-surface::after {
+  content: "IXI™ 2026";
+
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+
+  color: rgba(255,255,255,.16);
+
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+
+  pointer-events: none;
 }
 
 @media (max-width: 1200px) {
