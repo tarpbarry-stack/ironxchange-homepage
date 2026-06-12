@@ -140,6 +140,23 @@ function IXISortableMachineCard({
 
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
+
+
+function handleWorkspaceDragStart(event) {
+  const dragId = String(event?.active?.id || "");
+
+  if (!dragId) return;
+
+  setActiveDndId(dragId);
+  setActiveDragMachineId(dragId);
+  setDraggingListingId(dragId);
+  setStackDraggingId(dragId);
+}
+
+function handleWorkspaceDragCancel() {
+  setActiveDndId("");
+  clearMachineDragState();
+}
   
 function handleWorkspaceDragEnd(event) {
   const dragId = event?.active?.id;
@@ -293,6 +310,19 @@ const [ixiCardState, setIxiCardState] = useState({});
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+
+  const [activeDndId, setActiveDndId] = useState("");
+
+const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 6
+    }
+  }),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  })
+);
 
   useEffect(() => {
     captureIXEvent("saved_workspace_viewed", {
