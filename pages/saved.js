@@ -297,11 +297,7 @@ const [armedDestination, setArmedDestination] = useState("");
 const [activeStackSendMenu, setActiveStackSendMenu] =
   useState("");
   
-const [stackDraggingId, setStackDraggingId] = useState("");
-const [stackGhostId, setStackGhostId] = useState("");
 const [activeDragMachineId, setActiveDragMachineId] = useState("");
-  
-const [stackInsertAfter, setStackInsertAfter] = useState(false);
 
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
@@ -766,8 +762,6 @@ function getDroppedMachineId(event) {
   setActiveDragMachineId("");
   setDraggingListingId("");
   setGhostListingId("");
-  setStackGhostId("");
-  setStackInsertAfter(false);
   setActiveStackHover("");
 }
   
