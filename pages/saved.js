@@ -2813,7 +2813,7 @@ outline: none;
   position: absolute;
 
   left: 50%;
-  top: 25px;
+  top: 35px;
 
   width: calc(100% - 14px);
   height: 60px;
