@@ -3110,24 +3110,34 @@ outline: none;
   background: rgba(255,196,0,.34);
 }
 
-.ixi-pocket-loop-square {
+.ixi-pocket-loop-button {
   position: absolute;
+  left: 50%;
+  top: 0;
 
   width: 4px;
-  height: 4px;
+  height: 12px;
 
-  border: 1px solid rgba(255,255,255,.22);
+  transform: translate(-50%, -16px);
+
+  border: 1px solid rgba(0,194,255,.42);
   border-radius: 1px;
 
-  background: rgba(255,255,255,.12);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.18),
+      rgba(0,194,255,.04)
+    );
 
   padding: 0;
   cursor: pointer;
 
-  z-index: 99999;
-  pointer-events: auto;
+  z-index: 98;
 
-  opacity: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 4px rgba(0,194,255,.12);
 }
 
 .ixi-pocket-loop-square.is-visible {
@@ -3144,9 +3154,18 @@ outline: none;
   left: -2px;
 }
 
-.ixi-pocket-loop-square:hover {
-  border-color: rgba(255,196,0,.62);
-  background: rgba(255,196,0,.72);
+.ixi-pocket-loop-button:hover {
+  border-color: rgba(255,196,0,.72);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.42),
+      rgba(255,196,0,.12)
+    );
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.22);
 }
 
 
