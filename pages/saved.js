@@ -2193,22 +2193,21 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 
   const id = String(getListingId(machine));
 
-  return (
-    <div
-  key={`stack-card-${id}`}
-  className={`active-stack-card ${
-    String(id) === String(stackDraggingId) ? "stack-dragging" : ""
-  } ${
-    String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
-  }`}
-  draggable
-  onDragStart={(e) => handleStackDragStart(id, e)}
- onDragOver={(e) => {
-  e.preventDefault();
-  handleStackDragOver(id, e);
-}}
-  onDragEnd={() => handleStackDragEnd(stackKey)}
->
+ return (
+    <WorkspaceDraggable
+      key={`stack-card-${id}`}
+      id={id}
+      className={`active-stack-card ${
+        String(id) === String(stackDraggingId)
+          ? "stack-dragging"
+          : ""
+      }`}
+      sourceContainer={
+        stackKey === "top"
+          ? "stackTop"
+          : "stackBottom"
+      }
+    >
       <ListingCard
         listing={machine}
         saved={savedIds.includes(id)}
@@ -2229,7 +2228,7 @@ onBoardDragStart={() => {}}
 onBoardDragOver={() => {}}
 onBoardDragEnd={() => {}}
       />
-    </div>
+        </WorkspaceDraggable>
   );
 })}
           </div>
