@@ -1982,27 +1982,11 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     ? "has-machines"
     : ""
 }`}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-
-       const droppedId = getDroppedMachineId(e);
-
-        addListingToActiveStack(stackKey, droppedId);
-      }}
     >
       <button
         type="button"
         className="active-stack-dash"
         onClick={() => toggleActiveStack(stackKey)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-
-         const droppedId = getDroppedMachineId(e);
-
-          addListingToActiveStack(stackKey, droppedId);
-        }}
       />
 
      {activeStacksOpen[stackKey] && (
