@@ -129,7 +129,6 @@ function IXISortableMachineCard({
   {...attributes}
   {...listeners}
 >
-    >
       {children({
         dragHandleProps: {
           ref: setActivatorNodeRef,
