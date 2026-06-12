@@ -1729,15 +1729,11 @@ onClick={(e) => {
         machine.attributes?.publicData?.images?.[0];
 
       return (
-       <div
+       <WorkspaceDraggable
   key={`right-pocket-thumb-${machineId}`}
+  id={machineId}
   className="ixi-pocket-thumb"
-  draggable
-  onDragStart={(e) => {
-    e.stopPropagation();
-    handleBoardDragStart(machine, e);
-  }}
-  onDragEnd={handleBoardDragEnd}
+  sourceContainer="pocketRight"
   style={{
      
 
@@ -1761,7 +1757,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
               {machine.make || machine.publicData?.make || ""}
             </span>
           )}
-        </div>
+        </WorkspaceDraggable>
       );
     })}
   </div>
