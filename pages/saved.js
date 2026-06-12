@@ -1143,6 +1143,12 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     outline: "none"
   }}
 />
+
+  <div className="ixi-pocket-topline">
+  <span>I</span>
+  <strong>POCKET</strong>
+</div>
+  
     <div
   className={`ixi-pocket-action-rail left ${
     (machineContainers.pocketLeft || []).length === 0
@@ -1319,7 +1325,11 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
     outline: "none"
   }}
 />
-  
+
+  <div className="ixi-pocket-topline">
+  <span>III</span>
+  <strong>POCKET</strong>
+</div>
 
   <div
     className={`ixi-pocket-action-rail left ${
@@ -1532,7 +1542,12 @@ style={{
     outline: "none"
   }}
 />
-   
+
+<div className="ixi-pocket-topline">
+  <span>II</span>
+  <strong>POCKET</strong>
+</div>
+  
   <div
   className={`ixi-pocket-action-rail right ${
   (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
@@ -1704,6 +1719,11 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   }}
 />
 
+<div className="ixi-pocket-topline">
+  <span>IV</span>
+  <strong>POCKET</strong>
+</div>
+  
   <div
     className={`ixi-pocket-action-rail right ${
       (machineContainers.pocketRight2 || []).length === 0
