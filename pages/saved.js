@@ -3218,7 +3218,7 @@ outline: none;
   border-color: rgba(255,196,0,.62);
   background: rgba(255,196,0,.72);
 }
-/* Roll-top cover: fixed dash/lip, cover moves behind it *
+/* Roll-top cover: fixed dash/lip, cover moves behind it */
 
 
 /* =============================== */
