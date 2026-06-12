@@ -1146,7 +1146,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 
   <div className="ixi-pocket-topline">
   <span>I</span>
-  <strong>POCKET</strong>
+  <strong>IX-256</strong>
 </div>
   
     <div
@@ -1328,7 +1328,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
 
   <div className="ixi-pocket-topline">
   <span>III</span>
-  <strong>POCKET</strong>
+  <strong>IX-512</strong>
 </div>
 
   <div
@@ -1545,7 +1545,7 @@ style={{
 
 <div className="ixi-pocket-topline">
   <span>II</span>
-  <strong>POCKET</strong>
+  <strong>IX-128</strong>
 </div>
   
   <div
@@ -1721,7 +1721,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 
 <div className="ixi-pocket-topline">
   <span>IV</span>
-  <strong>POCKET</strong>
+  <strong>IX-384</strong>
 </div>
   
   <div
