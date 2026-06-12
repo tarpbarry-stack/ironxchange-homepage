@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   useDraggable,
-  useDroppable
+  useDroppable,
+  closestCenter
 } from "@dnd-kit/core";
 
 import Navbar from "../components/Navbar";
@@ -35,16 +36,20 @@ function WorkspaceDropZone({
   id,
   className,
   children,
+  disabled = false,
   ...props
 }) {
-  const { setNodeRef } = useDroppable({
-    id
+  const { setNodeRef, isOver } = useDroppable({
+    id: String(id),
+    disabled
   });
 
   return (
     <section
       ref={setNodeRef}
-      className={className}
+      className={`${className || ""} ${
+        isOver ? "ixi-dnd-over" : ""
+      }`}
       {...props}
     >
       {children}
@@ -56,24 +61,102 @@ function WorkspaceDropPad({
   id,
   className,
   style,
+  disabled = false,
   ...props
 }) {
-  const { setNodeRef } = useDroppable({
-    id
+  const { setNodeRef, isOver } = useDroppable({
+    id: String(id),
+    disabled
   });
 
   return (
     <div
       ref={setNodeRef}
-      className={className}
+      className={`${className || ""} ${
+        isOver ? "ixi-dnd-over" : ""
+      }`}
       style={style}
       {...props}
     />
   );
 }
 
+function WorkspaceDraggable({
+  id,
+  className,
+  style,
+  children,
+  disabled = false,
+  dragType = "machine",
+  sourceContainer = "",
+  ...props
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id: String(id),
+    disabled,
+    data: {
+      dragType,
+      sourceContainer
+    }
+  });
+
+  const dragStyle = {
+    ...style,
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : style?.transform,
+    opacity: isDragging ? 0.82 : style?.opacity,
+    zIndex: isDragging ? 99999 : style?.zIndex
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className || ""} ${
+        isDragging ? "ixi-dnd-dragging" : ""
+      }`}
+      style={dragStyle}
+      data-ixi-draggable-id={String(id)}
+      {...listeners}
+      {...attributes}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
+
+    const IXI_CONTAINER_KEYS = [
+    "board",
+    "stackTop",
+    "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ];
+
+  const IXI_POCKET_KEYS = [
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ];
+
+  const IXI_STACK_KEYS = [
+    "stackTop",
+    "stackBottom"
+  ];
   
 function handleWorkspaceDragEnd(event) {
   const dragId = event?.active?.id;
