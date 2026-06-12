@@ -126,8 +126,6 @@ function IXISortableMachineCard({
   style={style}
   data-ixi-sortable-card={String(id)}
   data-ixi-container={containerId}
-  {...attributes}
-  {...listeners}
 >
       {children({
         dragHandleProps: {
