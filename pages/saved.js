@@ -3060,8 +3060,8 @@ outline: none;
 .ixi-pocket-loop-square {
   position: absolute;
 
-  width: 8px;
-  height: 4px;
+  width: 4px;
+  height: 8px;
 
   border: 1px solid rgba(255,255,255,.22);
   border-radius: 1px;
