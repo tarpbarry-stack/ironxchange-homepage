@@ -638,31 +638,51 @@ onMouseLeave={() => {
   }
 
   .ixi-lab-thumb {
-    position: absolute;
+  position: absolute;
 
-    left: 50%;
-    bottom: 7px;
+  left: 50%;
+  bottom: 9px;
 
-    width: 90px;
-    height: 60px;
+  width: 90px;
+  height: 60px;
 
-    transform: translateX(-50%);
+  transform: translateX(-50%);
 
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 7px 7px 0 0;
+  overflow: hidden;
 
-    background:
-      linear-gradient(
-        180deg,
-        rgba(255,255,255,.045),
-        rgba(255,255,255,0)
-      ),
-      rgba(18,18,18,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
 
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.035),
-      0 8px 16px rgba(0,0,0,.30);
-  }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.055),
+      rgba(255,255,255,0) 34%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.018),
+      transparent 45%
+    ),
+    rgba(18,18,18,.94);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 16px rgba(0,0,0,.30);
+}
+
+.ixi-lab-thumb::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  height: 1px;
+
+  background: rgba(255,255,255,.12);
+}
 
   .ixi-lab-thumb.ghost-two,
   .ixi-lab-thumb.ghost-three {
