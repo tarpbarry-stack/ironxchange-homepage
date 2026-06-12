@@ -3034,11 +3034,7 @@ outline: none;
 }
 /* PEEK POCKET COVER */
 
-.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
-  height: 92px;
-  overflow: visible;
-}
+
 
   .ixi-pocket-thumb {
   width: var(--pocket-thumb-w) !important;
@@ -3062,9 +3058,7 @@ outline: none;
 }
 
 
-.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs {
-  height: 92px;
-}
+
 
 .ixi-pocket-thumb img {
   width: 100%;
@@ -3083,38 +3077,32 @@ outline: none;
   line-height: 1.1;
 }
 
-/* PEEK STATE — preserve the good look */
-/* CLOSED — cards mostly hidden, dash/cover present */
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumb {
-  transform: translateY(0) rotate(-9deg);
-  opacity: .18;
+/* Station states — no accordion fan */
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
+  opacity: .28;
 }
 
-.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumb {
-  transform: translateY(0) rotate(9deg);
-  opacity: .18;
-}
-
-/* PEEK — same plane, tight accordion */
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumb {
-  transform-origin: right bottom;
-  transform: rotate(7deg);
-  opacity: .72;
-}
-
-.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumb {
-  transform-origin: left bottom;
-  transform: rotate(-7deg);
-  opacity: .72;
-}
-
-/* OPEN — same plane, flat accordion */
-.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumb,
-.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumb {
-  transform: translateY(0) rotate(0deg);
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs,
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
   opacity: 1;
-  border-color: rgba(255,255,255,.14);
 }
+
+.ixi-pocket-left.occupied .ixi-pocket-thumb,
+.ixi-pocket-right.occupied .ixi-pocket-thumb {
+  border-color: rgba(255,196,0,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 8px 16px rgba(0,0,0,.30),
+    0 0 12px rgba(255,196,0,.055);
+}
+
+
+
+
+
 
 
 /* =============================== */
