@@ -1401,6 +1401,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   
 <WorkspaceDropPad
   id="pocketLeft2"
+  disabled={true}
   data-pocket-pad-target="pocketLeft2"
   className="ixi-pocket-catch-pad out-left"
   style={{
@@ -1614,6 +1615,7 @@ right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? i
   > 
 <WorkspaceDropPad
   id="pocketRight"
+  disabled={true}
   data-pocket-pad-target="pocketRight"
   className="ixi-pocket-catch-pad catch-r1"
   style={{
@@ -1786,6 +1788,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 >
  <WorkspaceDropPad
   id="pocketRight2"
+  disabled={true}
   data-pocket-pad-target="pocketRight2"
   className="ixi-pocket-catch-pad out-right"
   style={{
