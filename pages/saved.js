@@ -2841,35 +2841,25 @@ outline: none;
   z-index: 30;
 }
 
-.ixi-pocket-thumb {
-  width: var(--pocket-thumb-w, 90px) !important;
-  height: var(--pocket-thumb-h, 60px) !important;
-
+.ixi-pocket-thumbs {
   position: absolute;
+
   left: 50%;
-  top: auto;
-  bottom: 0;
+  top: 35px;
 
-  transform: translateX(-50%) !important;
+  width: calc(100% - 14px);
+  height: 60px;
 
-  overflow: hidden;
+  transform: translateX(-50%);
+  overflow: visible;
 
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 7px 7px 0 0;
+  border: 0;
+  border-radius: 0;
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 34%),
-    linear-gradient(135deg, rgba(255,255,255,.018), transparent 45%),
-    rgba(18,18,18,.94);
+  background: transparent;
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 16px rgba(0,0,0,.30);
-
-  transition:
-    opacity .18s ease,
-    box-shadow .18s ease,
-    border-color .18s ease;
+  pointer-events: auto;
+  z-index: 30;
 }
 
 .ixi-pocket-thumb::before {
@@ -2883,6 +2873,39 @@ outline: none;
   z-index: 2;
   pointer-events: none;
 }
+
+.ixi-pocket-left::after,
+.ixi-pocket-right::after {
+  content: "3";
+
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 25px;
+  bottom: 7px;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 11px 7px 11px 7px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0) 20%),
+    rgba(10,10,10,.38);
+
+  color: rgba(255,255,255,.22);
+  font-size: 5.8px;
+  font-weight: 950;
+  letter-spacing: .55px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  padding: 0 0 6px 8px;
+
+  pointer-events: none;
+  z-index: 12;
+}
+
 
 .ixi-pocket-thumb img {
   width: 100%;
