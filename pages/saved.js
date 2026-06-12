@@ -459,7 +459,18 @@ setIxiCardState(remoteIxiState);
         ? savedBoardListings
         : workspaceListings;
 
-   return source.filter(item => {
+const orderedSource =
+  savedBoardMode === "custom" && savedBoardListings.length
+    ? source
+    : (machineContainers.board || [])
+        .map(id =>
+          source.find(item =>
+            String(getListingId(item)) === String(id)
+          )
+        )
+        .filter(Boolean);
+    
+   return orderedSource.filter(item => {
   const id = String(getListingId(item));
 
   if (getMachineContainer(id) !== "board") {
