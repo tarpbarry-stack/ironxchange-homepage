@@ -247,35 +247,6 @@ function handleWorkspaceDragEnd(event) {
 function handleWorkspaceDragCancel() {
   clearMachineDragState();
 }
-
-if (stackTargets.includes(String(overId))) {
-    moveMachineToContainer(
-      String(dragId),
-      String(overId)
-    );
-
-    setActiveStacksOpen(current => ({
-      ...current,
-      top: String(overId) === "stackTop" ? true : current.top,
-      bottom: String(overId) === "stackBottom" ? true : current.bottom
-    }));
-
-    clearMachineDragState();
-    return;
-  }
-
-  if (String(dragId) !== String(overId)) {
-    moveListingToSlot(
-      String(dragId),
-      String(overId)
-    );
-
-    clearMachineDragState();
-    return;
-  }
-
-  clearMachineDragState();
-}
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
