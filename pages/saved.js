@@ -739,7 +739,7 @@ function beginMachineDrag(machineId, event) {
 
   setActiveDragMachineId(id);
   setDraggingListingId(id);
-  setStackDraggingId(id);
+  
 
   if (event?.dataTransfer) {
     event.dataTransfer.setData("text/plain", id);
