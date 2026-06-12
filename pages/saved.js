@@ -2195,6 +2195,20 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
           : "stack-horizontal"
       }`}
     >
+
+<SortableContext
+  items={
+    machineContainers[
+      stackKey === "top" ? "stackTop" : "stackBottom"
+    ] || []
+  }
+  strategy={
+    activeStackLayouts[stackKey] === "vertical"
+      ? rectSortingStrategy
+      : horizontalListSortingStrategy
+  }
+>
+
           {(
   machineContainers[
     stackKey === "top" ? "stackTop" : "stackBottom"
@@ -2207,21 +2221,17 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   const id = String(getListingId(machine));
 
   return (
-    <div
-  key={`stack-card-${id}`}
-  className={`active-stack-card ${
-    String(id) === String(stackDraggingId) ? "stack-dragging" : ""
-  } ${
-    String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
-  }`}
-  draggable
-  onDragStart={(e) => handleStackDragStart(id, e)}
- onDragOver={(e) => {
-  e.preventDefault();
-  handleStackDragOver(id, e);
-}}
-  onDragEnd={() => handleStackDragEnd(stackKey)}
->
+  <IXISortableMachineCard
+    key={`stack-card-${id}`}
+    id={id}
+    containerId={stackKey === "top" ? "stackTop" : "stackBottom"}
+    className={`active-stack-card ${
+      String(id) === String(stackDraggingId) ? "stack-dragging" : ""
+    } ${
+      String(id) === String(stackGhostId) ? "stack-ghost-target" : ""
+    }`}
+  >
+    {({ dragHandleProps }) => (
       <ListingCard
         listing={machine}
         saved={savedIds.includes(id)}
@@ -2237,21 +2247,21 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
         onSendFront={sendListingToFront}
         onSendBack={sendListingToBack}
         isBoardDraggingCard={false}
-isGhostTarget={false}
-onBoardDragStart={() => {}}
-onBoardDragOver={() => {}}
-onBoardDragEnd={() => {}}
+        isGhostTarget={false}
+        onBoardDragStart={() => {}}
+        onBoardDragOver={() => {}}
+        onBoardDragEnd={() => {}}
+        useDndDrag={false}
+        dragHandleProps={dragHandleProps}
       />
-    </div>
-  );
+    )}
+  </IXISortableMachineCard>
+);
 })}
-          </div>
+  </SortableContext>
+</div>
 
-               </WorkspaceDropZone>
-      )}
-      </WorkspaceDropZone>
-  ))}
-</section>
+</WorkspaceDropZone>
               
       <section
   data-board-target="board"
