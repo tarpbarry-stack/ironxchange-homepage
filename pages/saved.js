@@ -173,10 +173,19 @@ function handleWorkspaceDragEnd(event) {
     event?.active?.data?.current?.containerId ||
     getMachineContainer(dragId);
 
+   const knownContainers = [
+    "board",
+    "stackTop",
+    "stackBottom"
+  ];
+
   const targetContainer =
     overSortable?.containerId ||
     event?.over?.data?.current?.containerId ||
-    getMachineContainer(overId);
+    (knownContainers.includes(overId) ? overId : getMachineContainer(overId));
+
+  console.log("IXI DND DROP", {
+    dragId,
 
   console.log("IXI DND DROP", {
     dragId,
