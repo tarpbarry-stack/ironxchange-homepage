@@ -482,31 +482,31 @@ onMouseLeave={() => {
     z-index: 8;
   }
 
-  /* WIDE DESKTOP — straight line */
-  .ixi-lab-pocket-shell.top,
-  .ixi-lab-pocket-shell.bottom {
-    top: 0;
-  }
+ /* WIDE DESKTOP — straight line, fluid compression */
+.ixi-lab-pocket-shell.top,
+.ixi-lab-pocket-shell.bottom {
+  top: 0;
+}
 
-  /* III - outside left */
-  .ixi-lab-pocket-shell.left.bottom {
-    right: calc(50% + 465px);
-  }
+/* III - outside left */
+.ixi-lab-pocket-shell.left.bottom {
+  right: calc(50% + clamp(420px, 25vw, 610px));
+}
 
-  /* I - inside left */
-  .ixi-lab-pocket-shell.left.top {
-    right: calc(50% + 295px);
-  }
+/* I - inside left */
+.ixi-lab-pocket-shell.left.top {
+  right: calc(50% + clamp(245px, 15vw, 390px));
+}
 
-  /* II - inside right */
-  .ixi-lab-pocket-shell.right.top {
-    left: calc(50% + 295px);
-  }
+/* II - inside right */
+.ixi-lab-pocket-shell.right.top {
+  left: calc(50% + clamp(245px, 15vw, 390px));
+}
 
-  /* IV - outside right */
-  .ixi-lab-pocket-shell.right.bottom {
-    left: calc(50% + 465px);
-  }
+/* IV - outside right */
+.ixi-lab-pocket-shell.right.bottom {
+  left: calc(50% + clamp(420px, 25vw, 610px));
+}
 
   .ixi-lab-pocket-shell::before {
     content: "";
