@@ -2603,60 +2603,6 @@ onBoardDragEnd={() => {}}
   }
 }
 
-/* square thumb-loop actuator, rides above the power dash */
-.ixi-pocket-loop-button {
-  position: absolute;
-  left: 50%;
-  top: 0;
-
-  width: 7px;
-  height: 7px;
-
-  transform: translate(-50%, -16px);
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 2px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.06),
-      rgba(255,255,255,0)
-    ),
-    rgba(255,255,255,.08);
-
-  padding: 0;
-  cursor: pointer;
-
-  z-index: 98;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 0 0 1px rgba(0,0,0,.28);
-}
-.ixi-pocket-loop-button.right {
-  left: 50%;
-  right: auto;
-}
-
-.ixi-pocket-loop-button:hover {
-  border-color: rgba(255,255,255,.24);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.10),
-      rgba(255,255,255,0)
-    ),
-    rgba(255,255,255,.14);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 0 6px rgba(255,255,255,.08);
-}
-
-/* Roll-top cover: fixed dash/lip, cover moves behind it */
-
 
 /* =============================== */
 /* IXI POCKET CATCH ZONE DEBUG     */
