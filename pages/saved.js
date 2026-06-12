@@ -2999,6 +2999,12 @@ outline: none;
 }
 
 /* VISUAL RAIL — painted only */
+
+/* =============================== */
+/* IXI POCKET STATION BUTTONS V12  */
+/* existing buttons, new shell home */
+/* =============================== */
+
 .ixi-pocket-action-rail {
   position: absolute;
   top: 11px;
@@ -3014,7 +3020,7 @@ outline: none;
 
   background: transparent;
 
-  z-index: 60;
+  z-index: 80;
   pointer-events: auto;
 }
 
@@ -3039,6 +3045,32 @@ outline: none;
   cursor: pointer;
 }
 
+.ixi-pocket-action-rail.is-empty {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
+  opacity: .28;
+  pointer-events: auto;
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed .ixi-pocket-rail-action {
+  opacity: .48;
+  pointer-events: auto;
+  background: rgba(255,196,0,.20);
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-peek .ixi-pocket-rail-action,
+.ixi-pocket-action-rail.has-machines.pocket-mode-open .ixi-pocket-rail-action {
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(255,255,255,.14);
+}
+
 .ixi-pocket-rail-action:hover {
   background: rgba(255,196,0,.86) !important;
   box-shadow: 0 0 8px rgba(255,196,0,.22);
@@ -3050,38 +3082,32 @@ outline: none;
   position: absolute;
   bottom: 12px;
   left: 50%;
+
   transform: translateX(-50%);
 
   white-space: nowrap;
 
   color: rgba(255,255,255,.72);
-  font-size: 7px;
+  font-size: 6.5px;
   font-weight: 950;
-  letter-spacing: .6px;
+  letter-spacing: .55px;
   text-transform: uppercase;
 
   pointer-events: none;
 }
 
-/* EMPTY = one solid dormant line */
-.ixi-pocket-action-rail.is-empty {
-  background: rgba(255,255,255,.04);
-}
 
-.ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
-  opacity: 0;
-  pointer-events: none;
-}
 
-/* LOADED + CLOSED = one solid dormant line */
-.ixi-pocket-action-rail.has-machines.pocket-mode-closed {
-  background: rgba(255,255,255,.04);
-}
 
-.ixi-pocket-action-rail.has-machines.pocket-mode-closed .ixi-pocket-rail-action {
-  opacity: 0;
-  pointer-events: none;
-}
+
+
+
+
+
+
+
+
+
 
 /* LOADED + STAGED/OPEN = four row-2 search-surface dashes */
 .ixi-pocket-action-rail.has-machines.pocket-mode-peek,
@@ -3089,12 +3115,7 @@ outline: none;
   background: transparent;
 }
 
-.ixi-pocket-action-rail.has-machines.pocket-mode-peek .ixi-pocket-rail-action,
-.ixi-pocket-action-rail.has-machines.pocket-mode-open .ixi-pocket-rail-action {
-  opacity: 1;
-  pointer-events: auto;
-  background: rgba(255,255,255,.13);
-}
+
 
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
