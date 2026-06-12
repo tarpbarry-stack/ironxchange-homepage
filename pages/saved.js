@@ -2271,6 +2271,13 @@ onBoardDragEnd={() => {}}
     clearMachineDragState();
   }}
 >
+<SortableContext
+  items={visibleSavedListings.map(item =>
+    String(getListingId(item))
+  )}
+  strategy={rectSortingStrategy}
+>
+
           {visibleSavedListings.map(item => {
             const id = String(getListingId(item));
 
@@ -2310,6 +2317,7 @@ onBoardDragEnd={() => {}}
               />
             );
           })}
+</SortableContext>
         </section>
 
         {visibleSavedListings.length === 0 && (
