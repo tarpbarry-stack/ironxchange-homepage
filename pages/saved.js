@@ -2282,8 +2282,14 @@ onBoardDragEnd={() => {}}
             const id = String(getListingId(item));
 
             return (
-              <ListingCard
-                key={id}
+  <IXISortableMachineCard
+    key={id}
+    id={id}
+    containerId="board"
+    className="ixi-board-sortable-card"
+  >
+    {({ dragHandleProps }) => (
+      <ListingCard
                 listing={item}
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(item)}
@@ -2313,9 +2319,12 @@ onBoardDragEnd={() => {}}
                 onBoardDragOver={handleBoardDragOver}
                 onBoardDragEnd={handleBoardDragEnd}
 
-                useDndDrag={true}
-              />
-            );
+                        useDndDrag={false}
+        dragHandleProps={dragHandleProps}
+      />
+    )}
+  </IXISortableMachineCard>
+);
           })}
 </SortableContext>
         </section>
