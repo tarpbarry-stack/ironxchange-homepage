@@ -516,7 +516,7 @@ onMouseLeave={() => {
 
     height: 1px;
 
-    background: rgba(255,196,0,.10);
+    background: rgba(255,196,0,.16);
   }
 
   .ixi-lab-pocket-topline {
@@ -532,27 +532,26 @@ onMouseLeave={() => {
   }
 
   .ixi-lab-pocket-topline span {
-    color: rgba(255,196,0,.78);
+  color: rgba(255,196,0,.86);
 
-    font-size: 6.5px;
-    font-weight: 950;
-    letter-spacing: .62px;
-    text-transform: uppercase;
-  }
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
 
-  .ixi-lab-pocket-topline strong {
-    color: rgba(255,255,255,.18);
+.ixi-lab-pocket-topline strong {
+  color: rgba(255,255,255,.12);
 
-    font-size: 5.8px;
-    font-weight: 950;
-    letter-spacing: .58px;
-    text-transform: uppercase;
-  }
-
+  font-size: 5px;
+  font-weight: 950;
+  letter-spacing: .58px;
+  text-transform: uppercase;
+}
   .ixi-lab-pocket-rail {
     position: absolute;
     right: 9px;
-    top: 11px;
+    top: 13px;
 
     width: 82px;
     height: 4px;
@@ -612,22 +611,29 @@ onMouseLeave={() => {
     bottom: 7px;
     top: 25px;
 
-    border: 1px dashed rgba(255,255,255,.05);
+   border: 1px dashed rgba(255,255,255,.08);
     border-radius: 11px 7px 11px 7px;
 
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
-      rgba(10,10,10,.44);
-
-    overflow: hidden;
-  }
+   background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0) 20%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,.02),
+      transparent 30%
+    ),
+    rgba(10,10,10,.44);
+}
 
   .ixi-lab-pocket-cavity::after {
     content: "3";
 
     position: absolute;
     left: 8px;
-    bottom: 6px;
+    bottom: 8px;
 
     color: rgba(255,255,255,.22);
 
