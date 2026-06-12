@@ -2225,142 +2225,7 @@ onBoardDragEnd={() => {}}
   margin: 0 auto;
 }
 
-.ixi-top-function-rail {
-  max-width: 1320px;
-  height: 14px;
 
-  margin: 0 auto 8px;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  opacity: .08;
-
-  transition:
-    opacity .16s ease,
-    filter .16s ease;
-}
-
-.ixi-top-function-rail:hover,
-.ixi-top-function-rail.mode-dim {
-  opacity: .36;
-}
-
-.ixi-top-function-rail.mode-bright {
-  opacity: .82;
-}
-
-.ixi-top-power-dash,
-.ixi-top-function-dash {
-  width: 24px;
-  height: 5px;
-
-  border: 0;
-  border-radius: 2px;
-
-  background: rgba(255,255,255,.12);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-.ixi-top-power-dash {
-  background: rgba(255,196,0,.22);
-}
-
-.ixi-top-function-rail.mode-dim .ixi-top-power-dash,
-.ixi-top-function-rail.mode-bright .ixi-top-power-dash {
-  background: rgba(255,196,0,.86);
-  box-shadow: 0 0 8px rgba(255,196,0,.24);
-}
-
-.ixi-top-function-dash.active {
-  background: rgba(255,196,0,.42);
-}
-
-.ixi-top-function-dash:hover {
-  background: rgba(0,194,255,.72);
-  box-shadow: 0 0 8px rgba(0,194,255,.18);
-}
-
-.ixi-top-post-free {
-  margin-left: auto;
-
-  color: rgba(255,255,255,.10);
-  text-decoration: none;
-
-  font-size: 7.5px;
-  font-weight: 950;
-  letter-spacing: .72px;
-
-  white-space: nowrap;
-}
-
-.ixi-top-function-rail.mode-dim .ixi-top-post-free {
-  color: rgba(255,255,255,.28);
-}
-
-.ixi-top-function-rail.mode-bright .ixi-top-post-free,
-.ixi-top-post-free:hover {
-  color: rgba(255,196,0,.72);
-  text-shadow: 0 0 8px rgba(255,196,0,.14);
-}
-
-        .workspace-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 18px;
-          margin: 0 auto 18px;
-          max-width: 1320px;
-        }
-
-        .eyebrow {
-          display: inline-block;
-          margin-bottom: 8px;
-          color: rgba(255,196,0,.72);
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .9px;
-        }
-
-        .workspace-head h1 {
-          margin: 0;
-          color: #f2f2f2;
-          font-size: 30px;
-          font-weight: 950;
-          letter-spacing: -.55px;
-        }
-
-        .workspace-head p {
-          margin: 8px 0 0;
-          color: rgba(255,255,255,.42);
-          font-size: 13px;
-        }
-
-        .count-pill {
-          min-width: 112px;
-          height: 30px;
-          padding: 0 12px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border: 1px solid rgba(255,196,0,.14);
-          border-radius: 999px;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.045), rgba(255,196,0,0)),
-            rgba(10,10,10,.86);
-
-          color: rgba(255,255,255,.52);
-
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .45px;
-        }
 
        
 
@@ -2850,143 +2715,6 @@ outline: none;
 outline: none;
 }
 
-/* =============================== */
-/* IXI POCKET STATION SHELL V12    */
-/* =============================== */
-
-.ixi-pocket-left,
-.ixi-pocket-right {
-  width: var(--station-w);
-  max-width: var(--station-w);
-  height: var(--station-h);
-
-  margin: 0;
-  padding: 8px;
-
-  position: relative;
-  top: auto;
-
-  cursor: default !important;
-
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 16px 10px 16px 10px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
-    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
-    rgba(7,7,7,.76);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.028),
-    0 8px 18px rgba(0,0,0,.20);
-
-  overflow: visible;
-
-  pointer-events: auto;
-  z-index: 8;
-}
-
-.ixi-pocket-left::before,
-.ixi-pocket-right::before {
-  content: "";
-
-  position: absolute;
-  left: 9px;
-  right: 9px;
-  top: 8px;
-
-  height: 1px;
-
-  background: rgba(255,196,0,.16);
-  pointer-events: none;
-}
-
-/* Inner machine bay cavity */
-.ixi-pocket-thumbs {
-  position: absolute;
-
-  left: 50%;
-  top: 25px;
-
-  width: calc(100% - 14px);
-  height: 60px;
-
-  transform: translateX(-50%);
-  overflow: hidden;
-
-  border: 1px dashed rgba(255,255,255,.08);
-  border-radius: 11px 7px 11px 7px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0) 20%
-    ),
-    linear-gradient(
-      0deg,
-      rgba(255,255,255,.02),
-      transparent 30%
-    ),
-    rgba(10,10,10,.44);
-
-  pointer-events: auto;
-  z-index: 30;
-}
-
-/* Head thumb */
-.ixi-pocket-thumb {
-  width: 90px !important;
-  height: 60px !important;
-
-  position: absolute;
-  left: 50%;
-  top: auto;
-  bottom: 0;
-
-  transform: translateX(-50%) !important;
-
-  overflow: hidden;
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 7px 7px 0 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.055),
-      rgba(255,255,255,0) 34%
-    ),
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,.018),
-      transparent 45%
-    ),
-    rgba(18,18,18,.94);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 16px rgba(0,0,0,.30);
-}
-
-.ixi-pocket-thumb::before {
-  content: "";
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-
-  height: 1px;
-
-  background: rgba(255,255,255,.12);
-}
-
-/* ========================= */
-/* IXI POCKET RAW VISUAL V1  */
-/* Keeps drag catch intact   */
-/* ========================= */
-
 .ixi-pocket-thumbs.thumb-size-small {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
@@ -3005,23 +2733,6 @@ outline: none;
   --pocket-thumbs-top: 18px;
 }
 
-.ixi-pocket-thumbs {
- position: absolute;
-
-   left: 50%;
-  top: var(--pocket-thumbs-top, 30px);
-
-  width: 320px;
-  height: 92px;
-
-  transform: translateX(-50%);
-  overflow: visible;
-
-  pointer-events: auto;
-
-  z-index: 30;
-}
-
 .ixi-pocket-right .ixi-pocket-thumbs {
   left: 50%;
   right: auto;
@@ -3033,31 +2744,6 @@ outline: none;
   transform: none;
 }
 /* PEEK POCKET COVER */
-
-
-
-  .ixi-pocket-thumb {
-  width: var(--pocket-thumb-w) !important;
-  height: var(--pocket-thumb-h) !important;
-  
-  position: absolute;
-  top: 0;
-
-  overflow: hidden;
-
-  border: 2px solid rgba(255,255,255,.12);
-  border-radius: 8px 8px 0 0;
-
-  background: #111;
-
-  transition:
-    transform .18s ease,
-    opacity .18s ease,
-    box-shadow .18s ease,
-    border-color .18s ease;
-}
-
-
 
 
 .ixi-pocket-thumb img {
@@ -3098,12 +2784,6 @@ outline: none;
     0 8px 16px rgba(0,0,0,.30),
     0 0 12px rgba(255,196,0,.055);
 }
-
-
-
-
-
-
 
 /* =============================== */
 /* IXI POCKET STATION INNER GUTS   */
@@ -3212,22 +2892,6 @@ outline: none;
   line-height: 1.1;
 }
 
-
-/* =============================== */
-/* IXI POCKET DIRECT CONTROL V1    */
-/* =============================== */
-
-/* =============================== */
-/* IXI POCKET RAIL — WORKING V2    */
-/* =============================== */
-
-.ixi-pocket-left,
-.ixi-pocket-right {
-  cursor: default !important;
-}
-
-/* VISUAL RAIL — painted only */
-
 /* =============================== */
 /* IXI POCKET STATION BUTTONS V12  */
 /* existing buttons, new shell home */
@@ -3323,26 +2987,11 @@ outline: none;
   pointer-events: none;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* LOADED + STAGED/OPEN = four row-2 search-surface dashes */
 .ixi-pocket-action-rail.has-machines.pocket-mode-peek,
 .ixi-pocket-action-rail.has-machines.pocket-mode-open {
   background: transparent;
 }
-
-
 
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
