@@ -669,13 +669,10 @@ onMouseLeave={() => {
     display: none;
   }
 
-  .ixi-lab-pocket-shell.left .ixi-lab-thumb {
-    transform: translateX(-50%) rotate(-1deg);
-  }
-
-  .ixi-lab-pocket-shell.right .ixi-lab-thumb {
-    transform: translateX(-50%) rotate(1deg);
-  }
+.ixi-lab-pocket-shell.left .ixi-lab-thumb,
+.ixi-lab-pocket-shell.right .ixi-lab-thumb {
+  transform: translateX(-50%);
+}
 
   /* 1250px → 851px — stacked exactly like current */
   @media (max-width: 1250px) and (min-width: 851px) {
