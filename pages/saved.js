@@ -2850,6 +2850,137 @@ outline: none;
 outline: none;
 }
 
+/* =============================== */
+/* IXI POCKET STATION SHELL V12    */
+/* =============================== */
+
+.ixi-pocket-left,
+.ixi-pocket-right {
+  width: var(--station-w);
+  max-width: var(--station-w);
+  height: var(--station-h);
+
+  margin: 0;
+  padding: 8px;
+
+  position: relative;
+  top: auto;
+
+  cursor: default !important;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 16px 10px 16px 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
+    rgba(7,7,7,.76);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20);
+
+  overflow: visible;
+
+  pointer-events: auto;
+  z-index: 8;
+}
+
+.ixi-pocket-left::before,
+.ixi-pocket-right::before {
+  content: "";
+
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 8px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.16);
+  pointer-events: none;
+}
+
+/* Inner machine bay cavity */
+.ixi-pocket-thumbs {
+  position: absolute;
+
+  left: 50%;
+  top: 25px;
+
+  width: calc(100% - 14px);
+  height: 60px;
+
+  transform: translateX(-50%);
+  overflow: hidden;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 11px 7px 11px 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0) 20%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,.02),
+      transparent 30%
+    ),
+    rgba(10,10,10,.44);
+
+  pointer-events: auto;
+  z-index: 30;
+}
+
+/* Head thumb */
+.ixi-pocket-thumb {
+  width: 90px !important;
+  height: 60px !important;
+
+  position: absolute;
+  left: 50%;
+  top: auto;
+  bottom: 0;
+
+  transform: translateX(-50%) !important;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.055),
+      rgba(255,255,255,0) 34%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.018),
+      transparent 45%
+    ),
+    rgba(18,18,18,.94);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 16px rgba(0,0,0,.30);
+}
+
+.ixi-pocket-thumb::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  height: 1px;
+
+  background: rgba(255,255,255,.12);
+}
 
 /* ========================= */
 /* IXI POCKET RAW VISUAL V1  */
@@ -3007,10 +3138,9 @@ outline: none;
 
 .ixi-pocket-action-rail {
   position: absolute;
-  top: 11px;
+  top: 20px;
   right: 9px;
-  left: auto;
-
+  
   width: 82px;
   height: 4px;
 
@@ -3120,50 +3250,38 @@ outline: none;
 /* ACTUAL BUTTON — real click target */
 .ixi-pocket-direct-button {
   position: absolute;
-  top: 95px;
+  right: 9px;
+  top: 10px;
 
-  width: 18px;
-  height: 4px;
+  width: 30px;
+  height: 5px;
 
   border: 0;
-  border-radius: 2px;
+  border-radius: 3px;
 
   background: rgba(255,255,255,.18);
 
   padding: 0;
   cursor: pointer;
 
-  z-index: 99999;
+  z-index: 100;
   pointer-events: auto;
-
-  box-shadow: none;
 }
 
-/* actuator sits toward SearchSurface */
-.ixi-pocket-direct-button.left {
-  right: -9px;
-}
-
+.ixi-pocket-direct-button.left,
 .ixi-pocket-direct-button.right {
-  left: -9px;
+  right: 9px;
+  left: auto;
 }
-.ixi-pocket-direct-button:hover {
+
+.ixi-pocket-direct-button:hover,
+.ixi-pocket-direct-button.is-live {
   background: rgba(255,196,0,.95);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.22),
-    0 0 10px rgba(255,196,0,.32);
+  box-shadow: 0 0 8px rgba(255,196,0,.38);
 }
 
 .ixi-pocket-direct-button.has-load {
-  background: rgba(255,196,0,.32);
-  box-shadow: none;
-}
-
-.ixi-pocket-direct-button.is-live {
-  background: rgba(255,196,0,.95);
-
-  box-shadow:
-    0 0 8px rgba(255,196,0,.42);
+  background: rgba(255,196,0,.34);
 }
 
 .ixi-pocket-loop-square {
