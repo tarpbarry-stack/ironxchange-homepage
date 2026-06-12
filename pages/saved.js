@@ -2165,6 +2165,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
     >
 
 <SortableContext
+  id={stackKey === "top" ? "stackTop" : "stackBottom"}
   items={
     machineContainers[
       stackKey === "top" ? "stackTop" : "stackBottom"
@@ -2247,6 +2248,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   }}
 >
 <SortableContext
+  id="board"
   items={visibleSavedListings.map(item =>
     String(getListingId(item))
   )}
