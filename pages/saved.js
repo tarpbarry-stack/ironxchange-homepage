@@ -120,12 +120,15 @@ function IXISortableMachineCard({
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      className={className}
-      style={style}
-      data-ixi-sortable-card={String(id)}
-      data-ixi-container={containerId}
+   <div
+  ref={setNodeRef}
+  className={className}
+  style={style}
+  data-ixi-sortable-card={String(id)}
+  data-ixi-container={containerId}
+  {...attributes}
+  {...listeners}
+>
     >
       {children({
         dragHandleProps: {
