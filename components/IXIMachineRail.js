@@ -34,25 +34,42 @@ export default function IXIMachineRail({
       onClick={onCycleColor}
     />
 
-    <div className="rail-zone rail-width rail-width-split">
-      <button
-        type="button"
-        className="rail-width-half rail-width-strength"
-        onClick={onCycleOutline}
-        aria-label="Change relationship strength"
-      />
+   <button
+  type="button"
+  className="rail-zone rail-width rail-width-strength"
+  onClick={onCycleOutline}
+  aria-label="Change relationship strength"
+/>
 
-      <button
-        type="button"
-        className="rail-width-half rail-width-end"
-        onClick={onEndRelationship}
-        aria-label="End relationship"
-      />
-    </div>
+<button
+  type="button"
+  className="rail-zone rail-flip"
+  onClick={e => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  aria-label="Flip card"
+/>
 
-    <button
-      type="button"
-      className="rail-zone rail-pin"
+<button
+  type="button"
+  className="rail-zone rail-send"
+  onClick={e => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  aria-label="Send machine"
+/>
+
+<button
+  type="button"
+  className="rail-zone rail-sync"
+  onClick={e => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  aria-label="Sync machine"
+/>
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
@@ -90,14 +107,14 @@ export default function IXIMachineRail({
   min-height: 16px;
   max-height: 16px;
 
-  display: grid;
   grid-template-columns:
-    .55fr
-    1fr
-    1fr
-    1fr
-    1fr
-    .55fr;
+  .55fr
+  1.15fr
+  .65fr
+  1fr
+  1fr
+  1fr
+  .55fr;
 
   border-top: 1px solid rgba(0,194,255,.18);
   border-radius: 0 0 10px 10px;
