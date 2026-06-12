@@ -1,8 +1,5 @@
 import { useState, useRef } from "react";
-import {
-  useDraggable,
-  useDroppable
-} from "@dnd-kit/core";
+// DnD is owned by IXISortableMachineCard wrapper.
 
 import { captureIXEvent } from "../lib/posthog";
 
@@ -79,6 +76,8 @@ onBoardDragStart,
 onBoardDragOver,
 onBoardDragEnd,
 useDndDrag = false,
+dragHandleProps,
+}) {
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -203,30 +202,6 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
-      const {
-    attributes,
-    listeners,
-    setNodeRef: setDraggableNodeRef,
-    transform,
-    isDragging
-  } = useDraggable({
-    id
-  });
-
-  const {
-    setNodeRef: setDroppableNodeRef
-  } = useDroppable({
-    id
-  });
-
-  function setCardNodeRef(node) {
-    setDraggableNodeRef(node);
-
-    if (useDndDrag) {
-      setDroppableNodeRef(node);
-    }
-  }
-
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
 
@@ -290,7 +265,6 @@ function handleCardClick() {
 
 return (
   <div
-    ref={setCardNodeRef}
     data-listing-card-id={id}
     className={`card board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
@@ -298,16 +272,10 @@ return (
       isGhostTarget ? "grid-ghost-target" : ""
     } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
    style={{
-    transform: useDndDrag && transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0) scale(1.015)`
-      : isBoardDragging
-        ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
-        : undefined,
-    zIndex: useDndDrag && isDragging
-      ? 9999
-      : isBoardDragging
-        ? 50
-        : undefined
+   transform: isBoardDragging
+  ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+  : undefined,
+zIndex: isBoardDragging ? 50 : undefined
   }}
 >
     
@@ -377,9 +345,8 @@ return (
 
                              <div
   className="card-board-zone"
-  {...(useDndDrag ? attributes : {})}
-  {...(useDndDrag ? listeners : {})}
-  {...(!useDndDrag
+  {...(dragHandleProps || {})}
+  {...(!dragHandleProps
     ? {
         onPointerDown: startBoardDrag,
         onPointerMove: moveBoardDrag,
