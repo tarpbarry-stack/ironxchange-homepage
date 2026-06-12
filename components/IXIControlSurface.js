@@ -46,7 +46,7 @@ export default function IXIControlSurface({ children, className = "" }) {
   content: "IXI™ 2026";
 
   position: absolute;
-  right: 2px;
+  right: 22px;
   bottom: 6px;
 
   color: rgba(255,255,255,.16);
