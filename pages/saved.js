@@ -2255,7 +2255,7 @@ onBoardDragEnd={() => {}}
 
 .ixi-command-chassis {
   --station-w: 150px;
-  --station-h: 92px;
+  --station-h: 102px;
   --control-half: 300px;
   --station-gap: clamp(24px, 2.1vw, 40px);
 
