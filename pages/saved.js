@@ -1187,7 +1187,11 @@ function getIxiColorValue(color) {
             <Navbar />
 
      <DndContext
+  sensors={sensors}
+  collisionDetection={closestCenter}
+  onDragStart={handleWorkspaceDragStart}
   onDragEnd={handleWorkspaceDragEnd}
+  onDragCancel={handleWorkspaceDragCancel}
 >
         <main>
   <section className="saved-environment-shell">
