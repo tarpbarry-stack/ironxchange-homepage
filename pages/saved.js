@@ -3578,6 +3578,18 @@ outline: none;
           justify-content: center;
         }
 
+        :global(.workspace-dnd-card) {
+  width: 100%;
+  max-width: 300px;
+  min-width: 250px;
+
+  touch-action: none;
+}
+
+:global(.workspace-dnd-card > *) {
+  width: 100%;
+}
+
         .cards.single-card {
           grid-template-columns: minmax(250px, 300px);
           justify-content: center;
