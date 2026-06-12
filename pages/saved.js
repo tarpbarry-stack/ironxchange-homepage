@@ -2742,7 +2742,7 @@ outline: none;
 outline: none;
 }
 
-:global(ixi-pocket-thumbs.thumb-size-small) {
+:global(.ixi-pocket-thumbs.thumb-size-small) {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
   --pocket-thumbs-top: 30px;
@@ -2760,12 +2760,12 @@ outline: none;
   --pocket-thumbs-top: 23px;
 }
 
-:global(ixi-pocket-right .ixi-pocket-thumbs) {
+:global(.ixi-pocket-right .ixi-pocket-thumbs) {
   left: 50%;
   right: auto;
 }
 
-:global(ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs) {
+:global(.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs) {
   left: auto;
   right: 20px;
   transform: none;
@@ -2923,7 +2923,7 @@ outline: none;
 }
 
 
-:global(ixi-pocket-thumb img) {
+:global(.ixi-pocket-thumb img) {
   width: 100%;
   height: 100%;
   object-fit: cover;
