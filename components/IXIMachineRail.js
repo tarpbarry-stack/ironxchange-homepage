@@ -70,11 +70,6 @@ export default function IXIMachineRail({
   }}
   aria-label="Sync machine"
 />
-      onClick={e => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-    />
 
     <button
       type="button"
