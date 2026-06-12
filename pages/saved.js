@@ -684,6 +684,12 @@ function getListingById(machineId) {
   );
 }
 
+  function getActiveDndListing() {
+  if (!activeDndId) return null;
+
+  return getListingById(activeDndId);
+}
+
   function getPocketContainerKey(side) {
   return side === "right"
     ? "pocketRight"
