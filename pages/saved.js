@@ -3,9 +3,26 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   DndContext,
-  useDraggable,
-  useDroppable
+  DragOverlay,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  closestCenter
 } from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+  horizontalListSortingStrategy,
+  sortableKeyboardCoordinates
+} from "@dnd-kit/sortable";
+
+import {
+  CSS
+} from "@dnd-kit/utilities";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
