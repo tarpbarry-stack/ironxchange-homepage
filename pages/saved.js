@@ -159,12 +159,14 @@ export default function SavedListings() {
   ];
   
 function handleWorkspaceDragEnd(event) {
-  const dragId = event?.active?.id;
-  const overId = event?.over?.id;
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
 
   console.log("IXI DND DROP", {
     dragId,
-    overId
+    overId,
+    activeData: event?.active?.data?.current,
+    overData: event?.over?.data?.current
   });
 
   if (!dragId || !overId) {
@@ -172,44 +174,78 @@ function handleWorkspaceDragEnd(event) {
     return;
   }
 
-     const pocketTargetMap = {
-    pocketLeft: "pocketLeft",
-    pocketLeft2: "pocketLeft2",
-    pocketRight: "pocketRight",
-    pocketRight2: "pocketRight2",
-  };
+  const targetContainer =
+    IXI_CONTAINER_KEYS.includes(overId)
+      ? overId
+      : getMachineContainer(overId);
 
-  const stackTargets = [
-    "stackTop",
-    "stackBottom"
-  ];
+  const sourceContainer =
+    getMachineContainer(dragId);
 
-    if (pocketTargetMap[String(overId)]) {
-  const targetPocket = pocketTargetMap[String(overId)];
-
-  moveMachineToContainer(
-    String(dragId),
-    targetPocket
-  );
-
-  if (targetPocket === "pocketLeft") {
-    setLeftPocketMode("peek");
+  if (!targetContainer) {
+    clearMachineDragState();
+    return;
   }
 
-  if (targetPocket === "pocketLeft2") {
-    setLeftPocket2Mode("peek");
+  if (IXI_POCKET_KEYS.includes(targetContainer)) {
+    moveMachineToContainer(dragId, targetContainer);
+
+    if (targetContainer === "pocketLeft") setLeftPocketMode("peek");
+    if (targetContainer === "pocketLeft2") setLeftPocket2Mode("peek");
+    if (targetContainer === "pocketRight") setRightPocketMode("peek");
+    if (targetContainer === "pocketRight2") setRightPocket2Mode("peek");
+
+    clearMachineDragState();
+    return;
   }
 
-  if (targetPocket === "pocketRight") {
-    setRightPocketMode("peek");
+  if (IXI_STACK_KEYS.includes(targetContainer)) {
+    moveMachineToContainer(dragId, targetContainer);
+
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: targetContainer === "stackTop" ? true : current.top,
+      bottom: targetContainer === "stackBottom" ? true : current.bottom
+    }));
+
+    clearMachineDragState();
+    return;
   }
 
-  if (targetPocket === "pocketRight2") {
-    setRightPocket2Mode("peek");
+  if (targetContainer === "board") {
+    if (
+      overId !== "board" &&
+      sourceContainer === "board"
+    ) {
+      moveMachineWithinContainer(
+        "board",
+        dragId,
+        overId,
+        false
+      );
+    } else {
+      moveMachineToContainer(dragId, "board");
+    }
+
+    clearMachineDragState();
+    return;
   }
 
   clearMachineDragState();
-  return;
+}
+
+  function handleWorkspaceDragStart(event) {
+  const dragId = String(event?.active?.id || "");
+
+  if (!dragId) return;
+
+  setActiveDragMachineId(dragId);
+  setDraggingListingId(dragId);
+  setStackDraggingId(dragId);
+}
+
+function handleWorkspaceDragCancel() {
+  clearMachineDragState();
 }
 
 if (stackTargets.includes(String(overId))) {
@@ -1174,7 +1210,10 @@ function getIxiColorValue(color) {
             <Navbar />
 
      <DndContext
+  collisionDetection={closestCenter}
+  onDragStart={handleWorkspaceDragStart}
   onDragEnd={handleWorkspaceDragEnd}
+  onDragCancel={handleWorkspaceDragCancel}
 >
         <main>
   <section className="saved-environment-shell">
