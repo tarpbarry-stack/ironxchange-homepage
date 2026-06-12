@@ -2738,7 +2738,7 @@ outline: none;
 .ixi-pocket-thumbs.thumb-size-small {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
-  --pocket-thumbs-top: 28px;
+  --pocket-thumbs-top: 30px;
 }
 
 .ixi-pocket-thumbs.thumb-size-medium {
@@ -2750,7 +2750,7 @@ outline: none;
 .ixi-pocket-thumbs.thumb-size-large {
   --pocket-thumb-w: 108px;
   --pocket-thumb-h: 72px;
-  --pocket-thumbs-top: 21px;
+  --pocket-thumbs-top: 23px;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs {
