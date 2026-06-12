@@ -2260,7 +2260,7 @@ onBoardDragEnd={() => {}}
   --station-gap: clamp(24px, 2.1vw, 40px);
 
   width: 100%;
-  margin: 0 auto 30px;
+  margin: -14 auto 20px;
 
   position: relative;
 
@@ -2283,7 +2283,7 @@ onBoardDragEnd={() => {}}
 .ixi-command-left,
 .ixi-command-right {
   position: absolute;
-  top: 70px;
+  top: 56px;
 
   width: calc((var(--station-w) * 2) + var(--station-gap));
   height: var(--station-h);
@@ -2858,16 +2858,8 @@ outline: none;
   border-radius: 7px 7px 0 0;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.055),
-      rgba(255,255,255,0) 34%
-    ),
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,.018),
-      transparent 45%
-    ),
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 34%),
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent 45%),
     rgba(18,18,18,.94);
 
   box-shadow:
@@ -2882,14 +2874,11 @@ outline: none;
 
 .ixi-pocket-thumb::before {
   content: "";
-
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-
   height: 1px;
-
   background: rgba(255,255,255,.12);
   z-index: 2;
   pointer-events: none;
