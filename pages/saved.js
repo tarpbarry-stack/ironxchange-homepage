@@ -1059,45 +1059,6 @@ function addListingToActiveStack(stackKey, listingId) {
     targetContainer
   );
 }
-
-function handleStackDragStart(machineId, event) {
-  beginMachineDrag(machineId, event);
-}
-
-function handleStackDragOver(machineId, event) {
-  const targetId = String(machineId);
-
-  if (!stackDraggingId || stackDraggingId === targetId) return;
-
-  const rect = event.currentTarget.getBoundingClientRect();
-  const midpoint = rect.left + rect.width / 2;
-
-  setStackGhostId(targetId);
-  setStackInsertAfter(event.clientX > midpoint);
-}
-  
-function handleStackDragEnd(stackKey) {
-  const dragId = activeDragMachineId || stackDraggingId;
-  const targetId = stackGhostId;
-
-  const containerKey =
-    stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
-
-  if (dragId && targetId) {
-  moveMachineWithinContainer(
-    containerKey,
-    dragId,
-    targetId,
-    stackInsertAfter
-  );
-}
-
-  setStackDraggingId("");
-setStackGhostId("");
-setStackInsertAfter(false);
-}
   
 function addListingToLeftPocket(listingId) {
   if (!listingId) return;
