@@ -70,15 +70,7 @@ export default function IXIMachineRail({
   }}
   aria-label="Sync machine"
 />
-
-    <button
-      type="button"
-      className={`rail-zone rail-save ${saved ? "saved" : ""}`}
-      onClick={onToggleSaved}
-      aria-label={saved ? "Unsave listing" : "Save listing"}
-      title={saved ? "Saved" : "Save"}
-    />
-
+    
     <button
       type="button"
       className="rail-zone rail-half"
@@ -102,7 +94,9 @@ export default function IXIMachineRail({
   min-height: 16px;
   max-height: 16px;
 
-  grid-template-columns:
+ display: grid;
+
+grid-template-columns:
   .55fr
   1.15fr
   .65fr
