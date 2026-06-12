@@ -2364,7 +2364,18 @@ onBoardDragEnd={() => {}}
           letter-spacing: .45px;
         }
 
-       .ixi-command-chassis {
+       
+
+/* =============================== */
+/* IXI POCKET STATION CHASSIS V12  */
+/* =============================== */
+
+.ixi-command-chassis {
+  --station-w: 150px;
+  --station-h: 92px;
+  --control-half: 300px;
+  --station-gap: clamp(24px, 2.1vw, 40px);
+
   width: 100%;
   margin: 0 auto 30px;
 
@@ -2389,26 +2400,178 @@ onBoardDragEnd={() => {}}
 .ixi-command-left,
 .ixi-command-right {
   position: absolute;
-  top: 0;
+  top: 70px;
 
-  width: 360px;
-  min-height: 160px;
+  width: calc((var(--station-w) * 2) + var(--station-gap));
+  height: var(--station-h);
 
-  pointer-events: auto;
+  pointer-events: none;
   z-index: 3;
 }
 
 .ixi-command-left {
-  right: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+  right: calc(50% + var(--control-half) + var(--station-gap));
   left: auto;
 }
 
 .ixi-command-right {
-  left: calc(50% + clamp(230px, 20vw, 340px) + 12px);
+  left: calc(50% + var(--control-half) + var(--station-gap));
   right: auto;
 }
 
+.ixi-pocket-row {
+  width: 100%;
+  height: var(--station-h);
 
+  margin: 0;
+
+  display: grid;
+  grid-template-columns: var(--station-w) var(--station-w);
+  gap: var(--station-gap);
+
+  position: relative;
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+/* Base station shell */
+.ixi-pocket-left,
+.ixi-pocket-right {
+  width: var(--station-w);
+  max-width: var(--station-w);
+  height: var(--station-h);
+
+  margin: 0;
+  padding: 8px;
+
+  position: relative;
+  top: auto;
+
+  cursor: default !important;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 16px 10px 16px 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
+    rgba(7,7,7,.76);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20);
+
+  overflow: visible;
+
+  pointer-events: auto;
+  z-index: 8;
+}
+
+.ixi-pocket-left::before,
+.ixi-pocket-right::before {
+  content: "";
+
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 8px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.16);
+  pointer-events: none;
+}
+
+/* Wide order:
+   III | I | SEARCH | II | IV
+*/
+.ixi-pocket-l2 {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ixi-pocket-r2 {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* =============================== */
+/* 1250px → 851px STACKED MODE     */
+/* =============================== */
+
+@media (max-width: 1250px) and (min-width: 851px) {
+  .ixi-command-chassis {
+    --control-half: 210px;
+    --station-gap: 20px;
+  }
+
+  .ixi-command-left,
+  .ixi-command-right {
+    top: -5px;
+
+    width: var(--station-w);
+    height: calc((var(--station-h) * 2) + 34px);
+  }
+
+  .ixi-command-left {
+    right: calc(50% + var(--control-half) + 20px);
+  }
+
+  .ixi-command-right {
+    left: calc(50% + var(--control-half) + 20px);
+  }
+
+  .ixi-pocket-row {
+    grid-template-columns: var(--station-w);
+    grid-template-rows: var(--station-h) var(--station-h);
+    gap: 34px;
+  }
+
+  .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ixi-pocket-l2 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .ixi-pocket-r2 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+/* =============================== */
+/* MOBILE — NO VISIBLE STATIONS    */
+/* =============================== */
+
+@media (max-width: 850px) {
+  .ixi-command-left,
+  .ixi-command-right,
+  .ixi-pocket-row,
+  .ixi-pocket-left,
+  .ixi-pocket-right {
+    display: none !important;
+  }
+}
 
 
 
@@ -2544,73 +2707,6 @@ onBoardDragEnd={() => {}}
           height: 5px;
         }
 
-
-
-.ixi-pocket-row {
-  width: 100%;
-  height: 120px;
-
-  margin: 0;
-
-  display: grid;
-  gap: 12px;
-
-  position: relative;
-  z-index: 2;
-}
-
-.ixi-pocket-left {
-top: -20px;
-  width: 360px;
-max-width: 360px;
-  height: 95px;
-
- margin: 0;
-  padding: 18px;
-
-  position: relative;
-  z-index: 2;
-  
-  cursor: pointer;
-
- border: none;
-
-box-shadow: none;
-}
-
-.ixi-pocket-right {
-  width: 360px;
-  max-width: 360px;
-  height: 105px;
-
-  margin: 0;
-  padding: 18px;
-
-  position: relative;
-  z-index: 2;
-}
-
-
-/* =============================== */
-/* IXI POCKET MACHINE CONTROL PLANE */
-/* =============================== */
-
-/* =============================== */
-/* IXI POCKET CONTROL RAIL V2      */
-/* =============================== */
-
-.ixi-pocket-left,
-.ixi-pocket-right {
-  cursor: default !important;
-}
-
-.ixi-pocket-r2 {
-  top: -35px;
-}
-
-.ixi-pocket-l2 {
-  top: -25px;
-}
 
 @keyframes ixiPocketPulse {
   0%, 100% {
