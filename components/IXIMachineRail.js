@@ -82,13 +82,13 @@ export default function IXIMachineRail({
 
 .board-command-rail {
   position: absolute;
-  left: 13px;
-  right: 13px;
+  left: 8px;
+  right: 8px;
   bottom: 2px;
 
-  height: 13px;
-  min-height: 13px;
-  max-height: 13px;
+  height: 14px;
+  min-height: 14px;
+  max-height: 14px;
 
   display: grid;
   grid-template-columns:
@@ -99,16 +99,20 @@ export default function IXIMachineRail({
     1fr
     .55fr;
 
-  border-top: 1px solid rgba(0,194,255,.12);
+  border-top: 1px solid rgba(0,194,255,.18);
+  border-radius: 0 0 10px 10px;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
-    ),
-    rgba(20,20,20,.92);
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)),
+    linear-gradient(90deg, rgba(0,194,255,.045), transparent 18%, transparent 82%, rgba(255,196,0,.028)),
+    rgba(15,15,15,.96);
 
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    inset 0 -1px 0 rgba(0,0,0,.34),
+    0 -1px 0 rgba(0,0,0,.28);
+
+  overflow: hidden;
   z-index: 30;
 }
 
@@ -136,20 +140,25 @@ export default function IXIMachineRail({
   left: 50%;
   top: 50%;
 
-  width: 13px;
+  width: 14px;
   height: 4px;
 
   transform: translate(-50%, -50%);
 
   border-radius: 999px;
 
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.18);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.045);
 
   transition:
     background .14s ease,
     box-shadow .14s ease,
     opacity .14s ease,
-    width .14s ease;
+    width .14s ease,
+    transform .14s ease;
 }
 
 /* END DASHES */
@@ -159,7 +168,10 @@ export default function IXIMachineRail({
 
 /* COLOR DASH — follows selected IXI color */
 .card.board-color-none .rail-color::after {
-  background: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.055);
 }
 
 .card.board-color-green .rail-color::after {
@@ -271,7 +283,10 @@ export default function IXIMachineRail({
 }
 
 .card.board-color-none .rail-width-strength::after {
-  background: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.06);
 }
 
 .card.board-color-green .rail-width-strength::after {
