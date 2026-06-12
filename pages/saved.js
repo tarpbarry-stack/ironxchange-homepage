@@ -159,8 +159,8 @@ function handleWorkspaceDragCancel() {
 }
   
 function handleWorkspaceDragEnd(event) {
-  const dragId = event?.active?.id;
-  const overId = event?.over?.id;
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
 
   console.log("IXI DND DROP", {
     dragId,
@@ -168,76 +168,77 @@ function handleWorkspaceDragEnd(event) {
   });
 
   if (!dragId || !overId) {
+    setActiveDndId("");
     clearMachineDragState();
     return;
   }
 
-     const pocketTargetMap = {
+  const sourceContainer = getMachineContainer(dragId);
+  const targetContainer = getMachineContainer(overId);
+
+  if (
+    sourceContainer &&
+    targetContainer &&
+    sourceContainer === targetContainer &&
+    dragId !== overId
+  ) {
+    moveMachineWithinContainer(
+      sourceContainer,
+      dragId,
+      overId,
+      false
+    );
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  const pocketTargetMap = {
     pocketLeft: "pocketLeft",
     pocketLeft2: "pocketLeft2",
     pocketRight: "pocketRight",
-    pocketRight2: "pocketRight2",
+    pocketRight2: "pocketRight2"
   };
 
-  const stackTargets = [
-    "stackTop",
-    "stackBottom"
-  ];
+  if (pocketTargetMap[overId]) {
+    const targetPocket = pocketTargetMap[overId];
 
-    if (pocketTargetMap[String(overId)]) {
-  const targetPocket = pocketTargetMap[String(overId)];
+    moveMachineToContainer(dragId, targetPocket);
 
-  moveMachineToContainer(
-    String(dragId),
-    targetPocket
-  );
+    if (targetPocket === "pocketLeft") setLeftPocketMode("peek");
+    if (targetPocket === "pocketLeft2") setLeftPocket2Mode("peek");
+    if (targetPocket === "pocketRight") setRightPocketMode("peek");
+    if (targetPocket === "pocketRight2") setRightPocket2Mode("peek");
 
-  if (targetPocket === "pocketLeft") {
-    setLeftPocketMode("peek");
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
   }
 
-  if (targetPocket === "pocketLeft2") {
-    setLeftPocket2Mode("peek");
-  }
-
-  if (targetPocket === "pocketRight") {
-    setRightPocketMode("peek");
-  }
-
-  if (targetPocket === "pocketRight2") {
-    setRightPocket2Mode("peek");
-  }
-
-  clearMachineDragState();
-  return;
-}
-
-if (stackTargets.includes(String(overId))) {
-    moveMachineToContainer(
-      String(dragId),
-      String(overId)
-    );
+  if (overId === "stackTop" || overId === "stackBottom") {
+    moveMachineToContainer(dragId, overId);
 
     setActiveStacksOpen(current => ({
       ...current,
-      top: String(overId) === "stackTop" ? true : current.top,
-      bottom: String(overId) === "stackBottom" ? true : current.bottom
+      top: overId === "stackTop" ? true : current.top,
+      bottom: overId === "stackBottom" ? true : current.bottom
     }));
 
+    setActiveDndId("");
     clearMachineDragState();
     return;
   }
 
-  if (String(dragId) !== String(overId)) {
-    moveListingToSlot(
-      String(dragId),
-      String(overId)
-    );
+  if (overId === "board") {
+    moveMachineToContainer(dragId, "board");
 
+    setActiveDndId("");
     clearMachineDragState();
     return;
   }
 
+  setActiveDndId("");
   clearMachineDragState();
 }
   
