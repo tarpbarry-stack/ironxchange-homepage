@@ -2840,15 +2840,16 @@ outline: none;
 
 .ixi-pocket-thumbs {
   position: absolute;
-
   left: 50%;
-  top: 35px;
-
+  top: var(--pocket-thumbs-top, 30px);
   width: calc(100% - 14px);
-  height: 60px;
+  height: var(--pocket-thumb-h, 60px);
 
   transform: translateX(-50%);
-  overflow: hidden;
+  overflow: visible;
+
+  border: 0;
+  background: transparent;
 
   border: 1px dashed rgba(255,255,255,.08);
   border-radius: 11px 7px 11px 7px;
