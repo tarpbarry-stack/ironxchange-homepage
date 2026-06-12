@@ -1983,7 +1983,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
   {["top", "bottom"].map(stackKey => (
       <WorkspaceDropZone
   key={stackKey}
-  id={stackKey === "top" ? "stackTop" : "stackBottom"}
+    id={stackKey === "top" ? "stackTopShell" : "stackBottomShell"}
   data-active-stack={stackKey}
   className={`active-stack ${
   activeStacksOpen[stackKey] ? "open" : ""
