@@ -16,37 +16,49 @@ export default function IXIControlSurface({ children, className = "" }) {
   border-radius: 16px 10px 16px 10px;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
-   radial-gradient(
-  circle at top left,
-  rgba(0,194,255,.045),
-  transparent 60%),
-    rgba(7,7,7,.76);
+  linear-gradient(
+    180deg,
+    rgba(255,255,255,.028),
+    rgba(255,255,255,0)
+  ),
+  linear-gradient(
+    90deg,
+    rgba(255,255,255,.01),
+    transparent 20%,
+    transparent 80%,
+    rgba(255,255,255,.01)
+  ),
+  rgba(10,10,10,.82);
 
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.028),
-    0 8px 18px rgba(0,0,0,.20);
+box-shadow:
+  inset 0 1px 0 rgba(255,255,255,.04),
+  inset 0 -1px 0 rgba(0,0,0,.28),
+  0 10px 24px rgba(0,0,0,.22);
 }
 
 .ixi-control-surface::before {
   content: "";
 
   position: absolute;
-  left: 12px;
-  right: 12px;
+  left: 14px;
+  right: 14px;
   top: 8px;
 
   height: 1px;
 
-  background: rgba(255,196,0,.10);
-  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(0,194,255,.28),
+      transparent
+    );
 }
-
 .ixi-control-surface::after {
   content: "IXI™ 2026";
 
   position: absolute;
-  right: 22px;
+  right: 32px;
   bottom: 6px;
 
   color: rgba(255,255,255,.16);
