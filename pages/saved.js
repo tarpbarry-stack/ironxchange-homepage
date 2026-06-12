@@ -1221,6 +1221,7 @@ className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
 >
 <WorkspaceDropPad
   id="pocketLeft"
+  disabled={true}
   data-pocket-pad-target="pocketLeft"
   className="ixi-pocket-catch-pad catch-l1"
   style={{
