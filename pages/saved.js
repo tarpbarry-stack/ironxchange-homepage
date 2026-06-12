@@ -2262,6 +2262,10 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
 </div>
 
 </WorkspaceDropZone>
+)}
+</WorkspaceDropZone>
+))}
+</section>
               
       <section
   data-board-target="board"
