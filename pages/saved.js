@@ -2239,23 +2239,12 @@ onBoardDragEnd={() => {}}
   ))}
 </section>
               
-      <section
+     <WorkspaceDropZone
+  id="board"
   data-board-target="board"
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-
-    const droppedId = getDroppedMachineId(e);
-
-    if (droppedId) {
-      moveMachineToContainer(droppedId, "board");
-    }
-
-    clearMachineDragState();
-  }}
 >
           {visibleSavedListings.map(item => {
   const id = String(getListingId(item));
@@ -2307,7 +2296,7 @@ onBoardDragEnd={() => {}}
     </WorkspaceDraggable>
   );
           })}
-        </section>
+        </WorkspaceDropZone>
 
         {visibleSavedListings.length === 0 && (
   <div className="empty">
