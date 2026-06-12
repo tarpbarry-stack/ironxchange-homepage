@@ -1910,16 +1910,12 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
             machine.attributes?.publicData?.images?.[0];
 
           return (
-            <div
-              key={`right-pocket-2-thumb-${machineId}`}
-              className="ixi-pocket-thumb"
-              draggable
-              onDragStart={(e) => {
-                e.stopPropagation();
-                handleBoardDragStart(machine, e);
-              }}
-              onDragEnd={handleBoardDragEnd}
-              style={{
+            <WorkspaceDraggable
+  key={`right-pocket-2-thumb-${machineId}`}
+  id={machineId}
+  className="ixi-pocket-thumb"
+  sourceContainer="pocketRight2"
+  style={{
                 left: `${rightPocket2Mode === "open"
                   ? index * 44
                   : rightPocket2Mode === "peek"
@@ -1943,7 +1939,7 @@ left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? 
                   {machine.make || machine.publicData?.make || ""}
                 </span>
               )}
-            </div>
+            </WorkspaceDraggable>
           );
         })}
       </div>
