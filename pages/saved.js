@@ -2259,10 +2259,20 @@ onBoardDragEnd={() => {}}
   }}
 >
           {visibleSavedListings.map(item => {
-            const id = String(getListingId(item));
+  const id = String(getListingId(item));
 
-            return (
-              <ListingCard
+  return (
+    <WorkspaceDraggable
+      key={id}
+      id={id}
+      className={`workspace-dnd-card ${
+        String(id) === String(draggingListingId)
+          ? "is-dragging"
+          : ""
+      }`}
+      sourceContainer="board"
+    >
+      <ListingCard
                 key={id}
                 listing={item}
                 saved={savedIds.includes(id)}
@@ -2289,13 +2299,14 @@ onBoardDragEnd={() => {}}
                   String(id) === String(ghostListingId)
                 }
 
-                onBoardDragStart={handleBoardDragStart}
-                onBoardDragOver={handleBoardDragOver}
-                onBoardDragEnd={handleBoardDragEnd}
+                onBoardDragStart={() => {}}
+                onBoardDragOver={() => {}}
+                onBoardDragEnd={() => {}}
 
-                useDndDrag={true}
+                                useDndDrag={false}
               />
-            );
+    </WorkspaceDraggable>
+  );
           })}
         </section>
 
