@@ -20,7 +20,7 @@ export default function IXIControlSurface({ children, className = "" }) {
    radial-gradient(
   circle at top left,
   rgba(0,194,255,.045),
-  transparent 60%
+  transparent 60%),
     rgba(7,7,7,.76);
 
   box-shadow:
@@ -46,7 +46,7 @@ export default function IXIControlSurface({ children, className = "" }) {
   content: "IXI™ 2026";
 
   position: absolute;
-  right: 32px;
+  right: 2px;
   bottom: 6px;
 
   color: rgba(255,255,255,.16);
