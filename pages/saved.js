@@ -2809,6 +2809,35 @@ outline: none;
 /* IXI POCKET STATION INNER GUTS   */
 /* =============================== */
 
+.ixi-pocket-thumb {
+  width: var(--pocket-thumb-w, 90px) !important;
+  height: var(--pocket-thumb-h, 60px) !important;
+
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 0 !important;
+
+  transform: translateX(-50%) !important;
+
+  overflow: hidden !important;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 34%),
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent 45%),
+    rgba(18,18,18,.94);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 16px rgba(0,0,0,.30);
+
+  z-index: 34;
+}
+
 .ixi-pocket-thumbs {
   position: absolute;
 
@@ -2836,27 +2865,6 @@ outline: none;
       transparent 30%
     ),
     rgba(10,10,10,.44);
-
-  pointer-events: auto;
-  z-index: 30;
-}
-
-.ixi-pocket-thumbs {
-  position: absolute;
-
-  left: 50%;
-  top: 35px;
-
-  width: calc(100% - 14px);
-  height: 60px;
-
-  transform: translateX(-50%);
-  overflow: visible;
-
-  border: 0;
-  border-radius: 0;
-
-  background: transparent;
 
   pointer-events: auto;
   z-index: 30;
