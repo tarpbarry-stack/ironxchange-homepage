@@ -9,7 +9,8 @@ import {
   useSensor,
   useSensors,
   useDroppable,
-  closestCenter
+  closestCenter,
+  pointerWithin
 } from "@dnd-kit/core";
 
 import {
@@ -325,6 +326,19 @@ const sensors = useSensors(
   })
 );
 
+function workspaceCollisionDetection(args) {
+  const filteredDroppables = args.droppableContainers.filter(container => {
+    const id = String(container.id);
+
+    return id !== "stackTopShell" && id !== "stackBottomShell";
+  });
+
+  return closestCenter({
+    ...args,
+    droppableContainers: filteredDroppables
+  });
+}
+  
   useEffect(() => {
     captureIXEvent("saved_workspace_viewed", {
       page: "saved"
@@ -1195,7 +1209,7 @@ function getIxiColorValue(color) {
 
      <DndContext
   sensors={sensors}
-  collisionDetection={closestCenter}
+  collisionDetection={workspaceCollisionDetection}
   onDragStart={handleWorkspaceDragStart}
   onDragEnd={handleWorkspaceDragEnd}
   onDragCancel={handleWorkspaceDragCancel}
