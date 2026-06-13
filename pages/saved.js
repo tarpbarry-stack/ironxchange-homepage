@@ -45,6 +45,7 @@ import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
 import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../components/ixi-chassis/IXIPocketR2";
+import IXIChassis from "../components/ixi-chassis/IXIChassis";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -1115,7 +1116,7 @@ function getIxiColorValue(color) {
   </section>
       
 
-<section className="ixi-command-chassis">
+<IXIChassis>
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
  
@@ -1207,9 +1208,101 @@ function getIxiColorValue(color) {
   getIxiColorValue={getIxiColorValue}
   ixiCardState={ixiCardState}
 />
-  </section>
-</aside>
+  <IXIChassis>
+  <aside className="ixi-command-left">
+    <section className="ixi-pocket-row">
+ 
+ <IXIPocketL1
+  leftPocketMode={leftPocketMode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
+
+<IXIPocketL2
+  leftPocket2Mode={leftPocket2Mode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
 </section>
+  </aside>
+
+   <div className="ixi-command-center">
+  
+       <IXIChassisControls
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  workspaceFilters={workspaceFilters}
+  setWorkspaceFilters={setWorkspaceFilters}
+  savedBoardMode={savedBoardMode}
+  setSavedBoardMode={setSavedBoardMode}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+  ixiCardState={ixiCardState}
+  ixiColorFilters={ixiColorFilters}
+  toggleColorFilter={toggleColorFilter}
+  ixiOutlineFilter={ixiOutlineFilter}
+  toggleOutlineFilter={toggleOutlineFilter}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
+                </div>
+
+  <aside className="ixi-command-right">
+  <section className="ixi-pocket-row">
+    <IXIPocketR1
+  rightPocketMode={rightPocketMode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
+
+<IXIPocketR2
+  rightPocket2Mode={rightPocket2Mode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
+      </section>
+  </aside>
+</IXIChassis>
 
               
 <section className="active-stack-zone">
