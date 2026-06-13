@@ -780,11 +780,6 @@ function getListingById(machineId) {
   setGhostListingId("");
   setActiveStackHover("");
 }
-  
- function handleBoardDragStart(listing, event) {
-  const id = String(getListingId(listing));
-  beginMachineDrag(id, event);
-}
 
   function handleBoardDragOver(listing) {
     const targetId = String(getListingId(listing));
