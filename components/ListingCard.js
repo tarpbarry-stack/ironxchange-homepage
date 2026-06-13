@@ -112,6 +112,7 @@ function cycleBoardColor(e) {
   const nextOutline =
     boardOutline === 1 ? 3 :
     boardOutline === 3 ? 5 :
+    boardOutline === 5 ? 0 :
     1;
 
   if (onIxiStateChange) {
@@ -616,6 +617,10 @@ zIndex: isBoardDragging ? 50 : undefined
 
 .card.board-outline-5 {
   outline-width: 5px;
+}
+
+.card.board-outline-0 {
+  outline-width: 0;
 }
 
 .card.board-color-none {
