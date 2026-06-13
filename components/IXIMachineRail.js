@@ -13,7 +13,9 @@ export default function IXIMachineRail({
   onCycleColor,
   onCycleOutline,
   onEndRelationship,
-  onToggleSaved
+  onToggleSaved,
+  armedDestination,
+  onSendToArmedDestination
 }) {
  return (
   <>
