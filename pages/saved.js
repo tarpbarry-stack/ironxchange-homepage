@@ -2,8 +2,6 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
 import {
-  DndContext,
-  DragOverlay,
   PointerSensor,
   KeyboardSensor,
   useSensor,
@@ -14,10 +12,7 @@ import {
 } from "@dnd-kit/core";
 
 import {
-  SortableContext,
   useSortable,
-  rectSortingStrategy,
-  horizontalListSortingStrategy,
   sortableKeyboardCoordinates
 } from "@dnd-kit/sortable";
 
