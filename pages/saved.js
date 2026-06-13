@@ -1881,19 +1881,20 @@ onClick={(e) => {
     activeStackHover === stackKey ? "stack-armed" : ""
   }`}
 >
-    <div className="active-stack-pocket-corners">
+   <div className="active-stack-pocket-corners">
   <button
-  type="button"
-  className="stack-pocket-power top-left"
-  data-label="L1"
-  title="Send stack to L1"
- onClick={() =>
-  moveActiveStackToContainer(
-    stackKey,
-    "pocketLeft"
-  )
-}
-/>
+    type="button"
+    className="stack-pocket-power top-left"
+    data-label="L1"
+    title="Send stack to L1"
+    onClick={() =>
+      moveActiveStackToContainer(
+        stackKey,
+        "pocketLeft"
+      )
+    }
+  />
+
   <button
     type="button"
     className="stack-pocket-power top-right"
@@ -1908,22 +1909,19 @@ onClick={(e) => {
   />
 
   <button
-  type="button"
-  className={`stack-pocket-power bottom-left ${
-    armedDestination === "pocketLeft2"
-      ? "destination-armed"
-      : ""
-  }`}
-  data-label="L2"
-  title="Arm L2"
- onClick={() =>
-  moveActiveStackToContainer(
-    stackKey,
-    "pocketLeft2"
-  )
-}
-    
- <button
+    type="button"
+    className="stack-pocket-power bottom-left"
+    data-label="L2"
+    title="Send stack to L2"
+    onClick={() =>
+      moveActiveStackToContainer(
+        stackKey,
+        "pocketLeft2"
+      )
+    }
+  />
+
+  <button
     type="button"
     className="stack-pocket-power bottom-right"
     data-label="R2"
@@ -1936,7 +1934,6 @@ onClick={(e) => {
     }
   />
 </div>
-
 <div className="active-stack-command-pad">
   <button
     type="button"
