@@ -653,16 +653,6 @@ return (
   return "board";
 }
 
-
-function sendMachineToArmedDestination(listing) {
-  if (!armedDestination) return;
-
-  if (!POCKET_TARGETS.includes(armedDestination)) return;
-
-  const id = String(getListingId(listing));
-
-  moveMachineToContainer(id, armedDestination);
-}
   
 
 function moveMachineToContainer(machineId, targetContainer) {
@@ -1106,12 +1096,20 @@ function getIxiColorValue(color) {
     setLeftPocket2Mode,
     rightPocket2Mode,
     setRightPocket2Mode,
-
     armedDestination,
     setArmedDestination,
     toggleArmedDestination
-  }) => (
-    <main>
+  }) => {
+    function sendMachineToArmedDestination(listing) {
+      if (!armedDestination) return;
+      if (!POCKET_TARGETS.includes(armedDestination)) return;
+
+      const id = String(getListingId(listing));
+      moveMachineToContainer(id, armedDestination);
+    }
+
+    return (
+      <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="IXI WORKSPACE"
@@ -1483,7 +1481,9 @@ function getIxiColorValue(color) {
   </div>
 )}
                                     </main>
-  )}
+                    );
+
+            )}
 </IXIWorkspaceEngine>
 </IXIDragEngine>
 
