@@ -1457,25 +1457,49 @@ onClick={(e) => {
     </section>
   </aside>
 
-  <div className="ixi-command-center">
+   <div className="ixi-command-center">
   
-       <IXIChassisControls
+       <section className="workspace-controls">
+  <IXIControlSurface>
+    <div className="desktop-search-surface">
+      <IXSearchSurface
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
-  workspaceFilters={workspaceFilters}
-  setWorkspaceFilters={setWorkspaceFilters}
-  savedBoardMode={savedBoardMode}
-  setSavedBoardMode={setSavedBoardMode}
+  filters={workspaceFilters}
+  setFilters={setWorkspaceFilters}
+  sortMode={savedBoardMode}
+  setSortMode={setSavedBoardMode}
   pocketThumbSize={pocketThumbSize}
   setPocketThumbSize={setPocketThumbSize}
-  ixiCardState={ixiCardState}
-  ixiColorFilters={ixiColorFilters}
-  toggleColorFilter={toggleColorFilter}
-  ixiOutlineFilter={ixiOutlineFilter}
-  toggleOutlineFilter={toggleOutlineFilter}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
 />
+    </div>
+
+    <div className="mobile-search-surface">
+      <IXSearchSurfaceMobile
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filters={workspaceFilters}
+        setFilters={setWorkspaceFilters}
+        sortMode={savedBoardMode}
+        setSortMode={setSavedBoardMode}
+      />
+    </div>
+
+ <IXIRelationshipControls
+  ixiCardState={ixiCardState}
+  activeColors={ixiColorFilters}
+  onToggleColor={toggleColorFilter}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+
+  armedDestination={armedDestination}
+  onToggleArmedDestination={toggleArmedDestination}
+/>
+  </IXIControlSurface>
+</section>
+
 
                 </div>
 
