@@ -774,21 +774,6 @@ function getListingById(machineId) {
     });
   }
 
-function beginMachineDrag(machineId, event) {
-  if (!machineId) return;
-
-  const id = String(machineId);
-
-  setActiveDragMachineId(id);
-  setDraggingListingId(id);
-  
-
-  if (event?.dataTransfer) {
-    event.dataTransfer.setData("text/plain", id);
-    event.dataTransfer.effectAllowed = "move";
-  }
-}
-
 function getDroppedMachineId(event) {
   return (
     event?.dataTransfer?.getData("text/plain") ||
