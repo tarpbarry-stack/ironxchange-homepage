@@ -1480,10 +1480,9 @@ function getIxiColorValue(color) {
     </p>
   </div>
 )}
-                                    </main>
-                    );
-
-            )}
+                                   </main>
+    );
+  }}
 </IXIWorkspaceEngine>
 </IXIDragEngine>
 
