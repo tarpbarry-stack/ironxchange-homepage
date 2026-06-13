@@ -1360,22 +1360,22 @@ onClick={(e) => {
 
                return (
   <IXISortableMachineCard
-    key={`left-pocket-thumb-${machineId}`}
-    id={machineId}
-    containerId="pocketLeft"
-    className="ixi-pocket-thumb"
-  >
+  key={`left-pocket-thumb-${machineId}`}
+  id={machineId}
+  containerId="pocketLeft"
+  className="ixi-pocket-thumb"
+  style={{
+    right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+    zIndex: index + 1,
+    borderColor: getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    )
+  }}
+>
     {({ dragHandleProps }) => (
       <div
         className="ixi-pocket-thumb-inner"
         {...dragHandleProps}
-        style={{
-          right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
-          zIndex: index + 1,
-          borderColor: getIxiColorValue(
-            ixiCardState[String(machineId)]?.color
-          )
-        }}
       >
         {image ? (
           <img
