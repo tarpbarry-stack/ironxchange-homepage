@@ -36,14 +36,10 @@ import {
 } from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
-import IXSearchSurface from "../components/IXSearchSurface";
-import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
-import IXIRelationshipControls from "../components/IXIRelationshipControls";
+
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
-import IXIControlSurface from "../components/IXIControlSurface";
 import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
-import IXIPocket from "../components/ixi-chassis/IXIPocket";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
