@@ -154,18 +154,18 @@ onClick={(e) => {
             alt=""
           />
         ) : (
-          <span>
-            {machine.year || machine.publicData?.year || ""}{" "}
-            {machine.make || machine.publicData?.make || ""}
-          </span>
+         <span>
+                  {machine.year || machine.publicData?.year || ""}{" "}
+                  {machine.make || machine.publicData?.make || ""}
+                </span>
+              )}
+            </div>
+          )}
+        </IXISortableMachineCard>
+      );
+            })}
+          </div>
         )}
-      </div>
-    )}
-  </IXISortableMachineCard>
-);
-      })}
-    </div>
-  )}
-</section>
-);
+    </section>
+  );
 }
