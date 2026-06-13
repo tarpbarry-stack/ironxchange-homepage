@@ -46,6 +46,7 @@ import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
 import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../components/ixi-chassis/IXIChassis";
+import IXIWorkspaceEngine from "../components/ixi-chassis/IXIWorkspaceEngine";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -1105,7 +1106,8 @@ function getIxiColorValue(color) {
   savedIds={savedIds}
   ixiCardState={ixiCardState}
 >
-        <main>
+  <IXIWorkspaceEngine>
+    <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="IXI WORKSPACE"
@@ -1476,9 +1478,9 @@ function getIxiColorValue(color) {
     </p>
   </div>
 )}
-                            </main>
-
-    </IXIDragEngine>
+                                </main>
+  </IXIWorkspaceEngine>
+</IXIDragEngine>
 
       <Footer />
                 
