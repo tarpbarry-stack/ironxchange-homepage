@@ -1487,8 +1487,10 @@ onClick={(e) => {
     <section
   data-pocket-target="pocketRight"
   className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
-    (machineContainers.pocketRight || []).length ? "occupied" : ""
-  }`}
+  (machineContainers.pocketRight || []).length ? "occupied" : ""
+} ${
+  armedDestination === "pocketRight" ? "destination-armed" : ""
+}`}
 >
 <WorkspaceDropPad
   id="pocketRight"
@@ -1582,7 +1584,8 @@ title="Right pocket"
 onClick={(e) => {
   e.preventDefault();
   e.stopPropagation();
-  cyclePocketMode("right");
+
+  toggleArmedDestination("pocketRight");
 }}
 />
   
