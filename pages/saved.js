@@ -1148,7 +1148,7 @@ function getIxiColorValue(color) {
   getIxiColorValue={getIxiColorValue}
   ixiCardState={ixiCardState}
 />
-
+</section>
   </aside>
 
    <div className="ixi-command-center">
