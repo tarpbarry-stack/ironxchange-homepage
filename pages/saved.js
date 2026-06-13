@@ -42,6 +42,7 @@ import IXIRelationshipControls from "../components/IXIRelationshipControls";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXIControlSurface from "../components/IXIControlSurface";
 import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
+import IXIBoard from "../components/ixi-chassis/IXIBoard";
 
 import {
   fetchCurrentUserWithSavedListings,
