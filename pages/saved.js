@@ -1473,33 +1473,12 @@ function getIxiColorValue(color) {
 )}
                             </main>
 
-      <DragOverlay>
-        {getActiveDndListing() ? (
-          <div className="ixi-drag-overlay-card">
-            <ListingCard
-              listing={getActiveDndListing()}
-              saved={savedIds.includes(String(activeDndId))}
-              onToggleSaved={() => {}}
-              from="saved"
-              ixiState={
-                ixiCardState[String(activeDndId)] || {
-                  color: "none",
-                  outline: 1
-                }
-              }
-              onIxiStateChange={() => {}}
-              onSendFront={() => {}}
-              onSendBack={() => {}}
-              isBoardDraggingCard={false}
-              isGhostTarget={false}
-              onBoardDragStart={() => {}}
-              onBoardDragOver={() => {}}
-              onBoardDragEnd={() => {}}
-              useDndDrag={false}
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
+     <IXIDragOverlay
+  getActiveDndListing={getActiveDndListing}
+  activeDndId={activeDndId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
+/>
       </DndContext>
 
       <Footer />
