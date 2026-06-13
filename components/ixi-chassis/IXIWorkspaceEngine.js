@@ -7,6 +7,13 @@ export default function IXIWorkspaceEngine({
   const [rightPocketMode, setRightPocketMode] = useState("peek");
   const [leftPocket2Mode, setLeftPocket2Mode] = useState("peek");
   const [rightPocket2Mode, setRightPocket2Mode] = useState("peek");
+  const [armedDestination, setArmedDestination] = useState("");
+
+function toggleArmedDestination(target) {
+  setArmedDestination(current =>
+    current === target ? "" : target
+  );
+}
 
   return children({
     leftPocketMode,
@@ -16,6 +23,9 @@ export default function IXIWorkspaceEngine({
     leftPocket2Mode,
     setLeftPocket2Mode,
     rightPocket2Mode,
-    setRightPocket2Mode
+    setRightPocket2Mode,
+    armedDestination,
+    setArmedDestination,
+    toggleArmedDestination
   });
 }
