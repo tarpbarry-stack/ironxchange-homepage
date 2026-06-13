@@ -1362,7 +1362,8 @@ onClick={(e) => {
             containerId="pocketLeft"
             className="ixi-pocket-thumb"
           >
-            {({ dragHandleProps }) => (
+                  className="ixi-pocket-thumb-inner"
+      {...dragHandleProps}
               <div
                 {...dragHandleProps}
                 style={{
