@@ -41,6 +41,7 @@ import IXSearchSurfaceMobile from "../components/IXSearchSurfaceMobile";
 import IXIRelationshipControls from "../components/IXIRelationshipControls";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXIControlSurface from "../components/IXIControlSurface";
+import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -2058,65 +2059,26 @@ onClick={(e) => {
       }`}
     >
 
-<SortableContext
-  id={stackKey === "top" ? "stackTop" : "stackBottom"}
-  items={
+<IXIActiveStack
+  stackKey={stackKey}
+  machineIds={
     machineContainers[
       stackKey === "top" ? "stackTop" : "stackBottom"
     ] || []
   }
-  strategy={
-    activeStackLayouts[stackKey] === "vertical"
-      ? rectSortingStrategy
-      : horizontalListSortingStrategy
-  }
->
-
-          {(
-  machineContainers[
-    stackKey === "top" ? "stackTop" : "stackBottom"
-  ] || []
-).map(machineId => {
-  const machine = getListingById(machineId);
-
-  if (!machine) return null;
-
-  const id = String(getListingId(machine));
-
-  return (
-  <IXISortableMachineCard
-    key={`stack-card-${id}`}
-    id={id}
-    containerId={stackKey === "top" ? "stackTop" : "stackBottom"}
-   className="active-stack-card"
-  >
-    {({ dragHandleProps }) => (
-      <ListingCard
-        listing={machine}
-        saved={savedIds.includes(id)}
-        onToggleSaved={() => toggleSave(machine)}
-        from="saved"
-        ixiState={
-          ixiCardState[id] || {
-            color: "none",
-            outline: 1
-          }
-        }
-        onIxiStateChange={updateIxiCardState}
-        onSendFront={sendListingToFront}
-        onSendBack={sendListingToBack}
-        armedDestination={armedDestination}
-        onSendToArmedDestination={sendMachineToArmedDestination}
-        isBoardDraggingCard={false}
-        isGhostTarget={false}
-        useDndDrag={false}
-        dragHandleProps={dragHandleProps}
-      />
-    )}
-  </IXISortableMachineCard>
-);
-})}
-  </SortableContext>
+  getListingById={getListingById}
+  getListingId={getListingId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
+  activeStackLayouts={activeStackLayouts}
+  IXISortableMachineCard={IXISortableMachineCard}
+  toggleSave={toggleSave}
+  updateIxiCardState={updateIxiCardState}
+  sendListingToFront={sendListingToFront}
+  sendListingToBack={sendListingToBack}
+  armedDestination={armedDestination}
+  sendMachineToArmedDestination={sendMachineToArmedDestination}
+/>
 </div>
 
 </section>
