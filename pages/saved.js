@@ -47,6 +47,7 @@ import IXIPocket from "../components/ixi-chassis/IXIPocket";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
+import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -1174,176 +1175,21 @@ function getIxiColorValue(color) {
 
   <aside className="ixi-command-right">
   <section className="ixi-pocket-row">
-    <section
-  data-pocket-target="pocketRight"
-  className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
-  (machineContainers.pocketRight || []).length ? "occupied" : ""
-} ${
-  armedDestination === "pocketRight" ? "destination-armed" : ""
-}`}
->
-<WorkspaceDropPad
-  id="pocketRight"
-  data-pocket-pad-target="pocketRight"
-  className="ixi-pocket-catch-pad catch-r1"
-  style={{
-    position: "absolute",
-    right: -20,
-    left: "auto",
-    top: "12px",
-    width: "360px",
-    height: "140px",
-    pointerEvents: "auto",
-    zIndex: 1,
-     background: "transparent",
-    outline: "none"
-  }}
+    <IXIPocketR1
+  rightPocketMode={rightPocketMode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
 />
-
-<div className="ixi-pocket-topline">
-  <span>II</span>
-  <strong>IX-128</strong>
-</div>
-  
-  <div
-  className={`ixi-pocket-action-rail right ${
-  (machineContainers.pocketRight || []).length === 0 ? "is-empty" : "has-machines"
-} pocket-mode-${rightPocketMode}`}
->
-<button type="button" className="ixi-pocket-rail-action send" data-label="SEND" />
-
-<button
-  type="button"
-  className="ixi-pocket-rail-action board"
-  data-label="BOARD"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    recallPocketToBoard("pocketRight");
-  }}
-/>
-
-<button
-  type="button"
-  className="ixi-pocket-rail-action stack"
-  data-label="ACTIVE STACK"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    movePocketToStack(
-      "pocketRight",
-      "top"
-    );
-  }}
-/>
-
-<button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
-</div>
-
-<button
-  type="button"
-  className={`ixi-pocket-loop-square right ${
-  (machineContainers.pocketRight || []).length > 0 &&
-  rightPocketMode !== "closed"
-    ? "is-visible"
-    : ""
-}`}
-  title="Loop Pocket"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    rotatePocket("pocketRight");
-  }}
-/>
-    
-<button
-  type="button"
-className={`ixi-pocket-direct-button right ${
-  (machineContainers.pocketRight || []).length > 0 &&
-  rightPocketMode === "closed"
-    ? "has-load"
-    : ""
-} ${
-  (machineContainers.pocketRight || []).length > 0 &&
-  rightPocketMode !== "closed"
-    ? "is-live"
-    : ""
-}`}
-title="Right pocket"
-onClick={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  toggleArmedDestination("pocketRight");
-}}
-/>
-  
-
-{rightPocketMode !== "closed" &&
- (machineContainers.pocketRight || []).length > 0 && (
-  <div className={`ixi-pocket-thumbs r1-thumbs thumb-size-${pocketThumbSize}`}>
-    {(machineContainers.pocketRight || []).slice(0, 7).map((machineId, index) => {
-      const machine = getListingById(machineId);
-
-      if (!machine) return null;
-
-      const image =
-        machine.image ||
-        machine.imageUrl ||
-        machine.images?.[0] ||
-        machine.images?.[0]?.url ||
-        machine.publicData?.image ||
-        machine.publicData?.imageUrl ||
-        machine.publicData?.images?.[0] ||
-        machine.attributes?.publicData?.image ||
-        machine.attributes?.publicData?.imageUrl ||
-        machine.attributes?.publicData?.images?.[0];
-
-return (
-  <IXISortableMachineCard
-  key={`right-pocket-thumb-${machineId}`}
-  id={machineId}
-  containerId="pocketRight"
-  className="ixi-pocket-thumb-dnd"
-  style={{
-    left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
-    zIndex: index + 1
-  }}
->
-    {({ dragHandleProps }) => (
-      <div
-  className="ixi-pocket-thumb"
-  {...dragHandleProps}
-  style={{
-    borderColor: getIxiColorValue(
-      ixiCardState[String(machineId)]?.color
-    ),
-    boxShadow: `0 0 0 ${Number(ixiCardState[String(machineId)]?.outline || 1)}px ${getIxiColorValue(
-      ixiCardState[String(machineId)]?.color
-    )}`
-  }}
->
-        {image ? (
-          <img
-            src={typeof image === "string" ? image : image?.url}
-            alt=""
-          />
-        ) : (
-          <span>
-            {machine.year || machine.publicData?.year || ""}
-            {" "}
-            {machine.make || machine.publicData?.make || ""}
-          </span>
-        )}
-      </div>
-    )}
-  </IXISortableMachineCard>
-);
-    })}
-  </div>
-)}  
-  </section>
 
 <section
   data-pocket-target="pocketRight2"
