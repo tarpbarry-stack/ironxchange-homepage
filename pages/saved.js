@@ -1394,28 +1394,6 @@ onClick={(e) => {
   className={`ixi-pocket-left ixi-pocket-l2 pocket-mode-${leftPocket2Mode} ${
     (machineContainers.pocketLeft2 || []).length ? "occupied" : ""
   }`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const padTarget = e.target
-      ?.closest?.("[data-pocket-pad-target]")
-      ?.getAttribute("data-pocket-pad-target");
-
-    if (padTarget !== "pocketLeft2") {
-      clearMachineDragState();
-      return;
-    }
-
-    const droppedId = getDroppedMachineId(e);
-
-    if (droppedId) {
-      moveMachineToContainer(droppedId, "pocketLeft2");
-    }
-
-    clearMachineDragState();
-  }}
 >
   
 <WorkspaceDropPad
@@ -1625,24 +1603,11 @@ onClick={(e) => {
   <aside className="ixi-command-right">
   <section className="ixi-pocket-row">
     <section
-      data-pocket-target="pocketRight"
-    className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
-  (machineContainers.pocketRight || []).length ? "occupied" : ""
-}`}
-    onDragOver={(e) => e.preventDefault()}
-   onDrop={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const droppedId = getDroppedMachineId(e);
-
-  if (droppedId) {
-  moveMachineToContainer(droppedId, "pocketRight");
-}
-
-  clearMachineDragState();
-}}
-  > 
+  data-pocket-target="pocketRight"
+  className={`ixi-pocket-left ixi-pocket-right pocket-mode-${rightPocketMode} ${
+    (machineContainers.pocketRight || []).length ? "occupied" : ""
+  }`}
+>
 <WorkspaceDropPad
   id="pocketRight"
   data-pocket-pad-target="pocketRight"
@@ -1810,19 +1775,6 @@ return (
   className={`ixi-pocket-left ixi-pocket-right ixi-pocket-r2 pocket-mode-${rightPocket2Mode} ${
     (machineContainers.pocketRight2 || []).length ? "occupied" : ""
   }`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const droppedId = getDroppedMachineId(e);
-
-    if (droppedId) {
-      moveMachineToContainer(droppedId, "pocketRight2");
-    }
-
-    clearMachineDragState();
-  }}
 >
  <WorkspaceDropPad
   id="pocketRight2"
