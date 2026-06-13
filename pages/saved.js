@@ -168,12 +168,7 @@ function handleWorkspaceDragEnd(event) {
   const overSortable =
     event?.over?.data?.current?.sortable;
 
-  const sourceContainer =
-    activeSortable?.containerId ||
-    event?.active?.data?.current?.containerId ||
-    getMachineContainer(dragId);
-
-   const knownContainers = [
+    const knownContainers = [
     "board",
     "stackTop",
     "stackBottom",
@@ -182,6 +177,12 @@ function handleWorkspaceDragEnd(event) {
     "pocketLeft2",
     "pocketRight2"
   ];
+
+  const sourceContainer =
+    event?.active?.data?.current?.containerId ||
+    (knownContainers.includes(activeSortable?.containerId)
+      ? activeSortable.containerId
+      : getMachineContainer(dragId));
 
   const targetContainer =
     overSortable?.containerId ||
