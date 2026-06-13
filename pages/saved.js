@@ -1763,38 +1763,38 @@ onClick={(e) => {
         machine.attributes?.publicData?.imageUrl ||
         machine.attributes?.publicData?.images?.[0];
 
-   return (
+return (
   <IXISortableMachineCard
     key={`right-pocket-thumb-${machineId}`}
     id={machineId}
     containerId="pocketRight"
-    className="ixi-pocket-thumb"
+    className="ixi-pocket-thumb-dnd"
+    style={{
+      left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+      zIndex: index + 1,
+      borderColor: getIxiColorValue(
+        ixiCardState[String(machineId)]?.color
+      )
+    }}
   >
     {({ dragHandleProps }) => (
       <div
-        className="ixi-pocket-thumb-inner"
+        className="ixi-pocket-thumb"
         {...dragHandleProps}
-        style={{
-          left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
-          zIndex: index + 1,
-          borderColor: getIxiColorValue(
-            ixiCardState[String(machineId)]?.color
-          )
-        }}
       >
-          {image ? (
-            <img
-              src={typeof image === "string" ? image : image?.url}
-              alt=""
-            />
-          ) : (
-            <span>
-              {machine.year || machine.publicData?.year || ""}
-              {" "}
-              {machine.make || machine.publicData?.make || ""}
-            </span>
-          )}
-             </div>
+        {image ? (
+          <img
+            src={typeof image === "string" ? image : image?.url}
+            alt=""
+          />
+        ) : (
+          <span>
+            {machine.year || machine.publicData?.year || ""}
+            {" "}
+            {machine.make || machine.publicData?.make || ""}
+          </span>
+        )}
+      </div>
     )}
   </IXISortableMachineCard>
 );
