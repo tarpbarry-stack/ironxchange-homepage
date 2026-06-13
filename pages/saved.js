@@ -2369,6 +2369,37 @@ return (
 }
 
 /* =============================== */
+/* IXI DESTINATION STATES          */
+/* =============================== */
+
+.ixi-pocket-left.occupied,
+.ixi-pocket-right.occupied {
+  border-color: rgba(255,196,0,.24);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20),
+    0 0 12px rgba(255,196,0,.08);
+}
+
+.ixi-pocket-left.destination-armed,
+.ixi-pocket-right.destination-armed {
+  border-color: rgba(0,194,255,.72);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 18px rgba(0,0,0,.20),
+    0 0 18px rgba(0,194,255,.22);
+}
+
+.ixi-pocket-left.destination-armed::before,
+.ixi-pocket-right.destination-armed::before {
+  background: rgba(0,194,255,.82);
+}
+
+
+
+/* =============================== */
 /* 1250px → 851px STACKED MODE     */
 /* =============================== */
 
