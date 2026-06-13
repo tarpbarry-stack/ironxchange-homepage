@@ -4,6 +4,7 @@ import IXSearchSurfaceMobile from "../IXSearchSurfaceMobile";
 import IXIRelationshipControls from "../IXIRelationshipControls";
 
 export default function IXIChassisControls({
+  listings = [],
   searchQuery,
   setSearchQuery,
   workspaceFilters,
