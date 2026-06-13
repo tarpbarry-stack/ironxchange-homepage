@@ -2094,62 +2094,21 @@ onClick={(e) => {
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
 >
-<SortableContext
-  id="board"
-  items={visibleSavedListings.map(item =>
-    String(getListingId(item))
-  )}
-  strategy={rectSortingStrategy}
->
-
-          {visibleSavedListings.map(item => {
-            const id = String(getListingId(item));
-
-            return (
-  <IXISortableMachineCard
-    key={id}
-    id={id}
-    containerId="board"
-    className="ixi-board-sortable-card"
-  >
-    {({ dragHandleProps }) => (
-      <ListingCard
-                listing={item}
-                saved={savedIds.includes(id)}
-                onToggleSaved={() => toggleSave(item)}
-                from="saved"
-
-                ixiState={
-                  ixiCardState[id] || {
-                    color: "none",
-                    outline: 1
-                  }
-                }
-
-                onIxiStateChange={updateIxiCardState}
-
-                onSendFront={sendListingToFront}
-                onSendBack={sendListingToBack}
-
-                armedDestination={armedDestination}
-                onSendToArmedDestination={sendMachineToArmedDestination}
-
-                isBoardDraggingCard={
-                  String(id) === String(draggingListingId)
-                }
-
-                isGhostTarget={
-                  String(id) === String(ghostListingId)
-                }
-
-                        useDndDrag={false}
-        dragHandleProps={dragHandleProps}
-      />
-    )}
-  </IXISortableMachineCard>
-);
-          })}
-</SortableContext>
+<IXIBoard
+  items={visibleSavedListings}
+  getListingId={getListingId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
+  IXISortableMachineCard={IXISortableMachineCard}
+  toggleSave={toggleSave}
+  updateIxiCardState={updateIxiCardState}
+  sendListingToFront={sendListingToFront}
+  sendListingToBack={sendListingToBack}
+  armedDestination={armedDestination}
+  sendMachineToArmedDestination={sendMachineToArmedDestination}
+  draggingListingId={draggingListingId}
+  ghostListingId={ghostListingId}
+/>
         </section>
 
         {visibleSavedListings.length === 0 && (
