@@ -1224,22 +1224,9 @@ function getIxiColorValue(color) {
     <section className="ixi-pocket-row">
           <section
   data-pocket-target="pocketLeft"
-className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
-  (machineContainers.pocketLeft || []).length ? "occupied" : ""
-}`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const droppedId = getDroppedMachineId(e);
-
-  if (droppedId) {
-    moveMachineToContainer(droppedId, "pocketLeft");
-  }
-
-  clearMachineDragState();
-}}
+  className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
+    (machineContainers.pocketLeft || []).length ? "occupied" : ""
+  }`}
 >
 <WorkspaceDropPad
   id="pocketLeft"
