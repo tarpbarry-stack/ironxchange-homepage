@@ -1363,7 +1363,7 @@ onClick={(e) => {
   key={`left-pocket-thumb-${machineId}`}
   id={machineId}
   containerId="pocketLeft"
-  className="ixi-pocket-thumb"
+  className="ixi-pocket-thumb-dnd"
   style={{
     right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
     zIndex: index + 1,
@@ -1373,10 +1373,10 @@ onClick={(e) => {
   }}
 >
     {({ dragHandleProps }) => (
-      <div
-        className="ixi-pocket-thumb-inner"
-        {...dragHandleProps}
-      >
+     <div
+  className="ixi-pocket-thumb"
+  {...dragHandleProps}
+>
         {image ? (
           <img
             src={typeof image === "string" ? image : image?.url}
