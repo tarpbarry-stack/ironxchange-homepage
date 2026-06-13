@@ -2165,6 +2165,9 @@ onClick={(e) => {
                 onSendFront={sendListingToFront}
                 onSendBack={sendListingToBack}
 
+                armedDestination={armedDestination}
+                onSendToArmedDestination={sendMachineToArmedDestination}
+
                 isBoardDraggingCard={
                   String(id) === String(draggingListingId)
                 }
