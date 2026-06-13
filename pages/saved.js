@@ -316,8 +316,22 @@ const [rightPocket2Mode, setRightPocket2Mode] = useState("peek");
 const [topRailMode, setTopRailMode] = useState("off");
 
 const [armedDestination, setArmedDestination] = useState("");
+const [armedDestination, setArmedDestination] = useState("");
 const [activeStackSendMenu, setActiveStackSendMenu] =
   useState("");
+
+const POCKET_TARGETS = [
+  "pocketLeft",
+  "pocketLeft2",
+  "pocketRight",
+  "pocketRight2"
+];
+
+function toggleArmedDestination(target) {
+  setArmedDestination(current =>
+    current === target ? "" : target
+  );
+}
 
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
