@@ -1357,40 +1357,39 @@ onClick={(e) => {
           machine.attributes?.publicData?.images?.[0];
 
                return (
-          <IXISortableMachineCard
-            key={`left-pocket-thumb-${machineId}`}
-            id={machineId}
-            containerId="pocketLeft"
-            className="ixi-pocket-thumb"
-          >
-                  className="ixi-pocket-thumb-inner"
-      {...dragHandleProps}
-              <div
-                {...dragHandleProps}
-                style={{
-                  right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
-                  zIndex: index + 1,
-                  borderColor: getIxiColorValue(
-    ixiCardState[String(machineId)]?.color
-  )
-}}
->
-
-            {image ? (
-              <img
-                src={typeof image === "string" ? image : image?.url}
-                alt=""
-              />
-            ) : (
-              <span>
-                {machine.year || machine.publicData?.year || ""}{" "}
-                {machine.make || machine.publicData?.make || ""}
-              </span>
-            )}
-              </div>
-            )}
-          </IXISortableMachineCard>
-        );
+  <IXISortableMachineCard
+    key={`left-pocket-thumb-${machineId}`}
+    id={machineId}
+    containerId="pocketLeft"
+    className="ixi-pocket-thumb"
+  >
+    {({ dragHandleProps }) => (
+      <div
+        className="ixi-pocket-thumb-inner"
+        {...dragHandleProps}
+        style={{
+          right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
+          zIndex: index + 1,
+          borderColor: getIxiColorValue(
+            ixiCardState[String(machineId)]?.color
+          )
+        }}
+      >
+        {image ? (
+          <img
+            src={typeof image === "string" ? image : image?.url}
+            alt=""
+          />
+        ) : (
+          <span>
+            {machine.year || machine.publicData?.year || ""}{" "}
+            {machine.make || machine.publicData?.make || ""}
+          </span>
+        )}
+      </div>
+    )}
+  </IXISortableMachineCard>
+);
       })}
     </div>
   )}
