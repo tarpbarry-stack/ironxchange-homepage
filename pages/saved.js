@@ -1480,7 +1480,7 @@ onClick={(e) => {
       />
     </div>
 
-   <IXIRelationshipControls
+ <IXIRelationshipControls
   ixiCardState={ixiCardState}
   activeColors={ixiColorFilters}
   onToggleColor={toggleColorFilter}
@@ -1488,6 +1488,9 @@ onClick={(e) => {
   onToggleOutline={toggleOutlineFilter}
   pocketThumbSize={pocketThumbSize}
   setPocketThumbSize={setPocketThumbSize}
+
+  armedDestination={armedDestination}
+  onToggleArmedDestination={toggleArmedDestination}
 />
   </IXIControlSurface>
 </section>
