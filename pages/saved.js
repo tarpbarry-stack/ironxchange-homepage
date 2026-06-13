@@ -2878,9 +2878,9 @@ outline: none;
 }
 
 .ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
-  left: auto;
-  right: 20px;
-  transform: none;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
 }
 /* PEEK POCKET COVER */
 
