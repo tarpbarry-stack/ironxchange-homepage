@@ -316,7 +316,6 @@ const [rightPocket2Mode, setRightPocket2Mode] = useState("peek");
 const [topRailMode, setTopRailMode] = useState("off");
 
 const [armedDestination, setArmedDestination] = useState("");
-const [armedDestination, setArmedDestination] = useState("");
 const [activeStackSendMenu, setActiveStackSendMenu] =
   useState("");
 
