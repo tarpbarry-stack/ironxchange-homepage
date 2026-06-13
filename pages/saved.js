@@ -36,7 +36,7 @@ import {
 } from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
-
+import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
@@ -1093,12 +1093,16 @@ function getIxiColorValue(color) {
 
             <Navbar />
 
-     <DndContext
+    <IXIDragEngine
   sensors={sensors}
-  collisionDetection={workspaceCollisionDetection}
-  onDragStart={handleWorkspaceDragStart}
-  onDragEnd={handleWorkspaceDragEnd}
-  onDragCancel={handleWorkspaceDragCancel}
+  workspaceCollisionDetection={workspaceCollisionDetection}
+  handleWorkspaceDragStart={handleWorkspaceDragStart}
+  handleWorkspaceDragEnd={handleWorkspaceDragEnd}
+  handleWorkspaceDragCancel={handleWorkspaceDragCancel}
+  getActiveDndListing={getActiveDndListing}
+  activeDndId={activeDndId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
 >
         <main>
   <section className="saved-environment-shell">
@@ -1473,13 +1477,7 @@ function getIxiColorValue(color) {
 )}
                             </main>
 
-     <IXIDragOverlay
-  getActiveDndListing={getActiveDndListing}
-  activeDndId={activeDndId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-/>
-      </DndContext>
+    </IXIDragEngine>
 
       <Footer />
                 
