@@ -1983,7 +1983,7 @@ onClick={(e) => {
 
 {activeStackSendMenu === stackKey && (
   <div className="active-stack-send-menu">
-    <button
+   <button
   type="button"
   className={`stack-pocket-power top-left ${
     armedDestination === "pocketLeft"
@@ -1992,10 +1992,9 @@ onClick={(e) => {
   }`}
   data-label="L1"
   title="Arm L1"
-  onClick={() =>
-    toggleArmedDestination("pocketLeft")
-    )
-  }
+  onClick={() => {
+    toggleArmedDestination("pocketLeft");
+  }}
 />
 
     <button
