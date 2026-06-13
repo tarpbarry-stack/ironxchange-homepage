@@ -2217,23 +2217,11 @@ return (
 ))}
 </section>
               
-      <section
+     <section
   data-board-target="board"
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={(e) => {
-    e.preventDefault();
-
-    const droppedId = getDroppedMachineId(e);
-
-    if (droppedId) {
-      moveMachineToContainer(droppedId, "board");
-    }
-
-    clearMachineDragState();
-  }}
 >
 <SortableContext
   id="board"
