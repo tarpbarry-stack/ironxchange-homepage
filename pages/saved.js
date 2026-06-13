@@ -317,7 +317,6 @@ const [rightPocketOpen, setRightPocketOpen] = useState(false);
   
 const [topRailMode, setTopRailMode] = useState("off");
 
-const [armedDestination, setArmedDestination] = useState("");
 const [activeStackSendMenu, setActiveStackSendMenu] =
   useState("");
 
@@ -328,11 +327,6 @@ const POCKET_TARGETS = [
   "pocketRight2"
 ];
 
-function toggleArmedDestination(target) {
-  setArmedDestination(current =>
-    current === target ? "" : target
-  );
-}
 
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
@@ -1102,7 +1096,7 @@ function getIxiColorValue(color) {
   savedIds={savedIds}
   ixiCardState={ixiCardState}
 >
- <IXIWorkspaceEngine>
+<IXIWorkspaceEngine>
   {({
     leftPocketMode,
     setLeftPocketMode,
@@ -1111,7 +1105,11 @@ function getIxiColorValue(color) {
     leftPocket2Mode,
     setLeftPocket2Mode,
     rightPocket2Mode,
-    setRightPocket2Mode
+    setRightPocket2Mode,
+
+    armedDestination,
+    setArmedDestination,
+    toggleArmedDestination
   }) => (
     <main>
   <section className="saved-environment-shell">
