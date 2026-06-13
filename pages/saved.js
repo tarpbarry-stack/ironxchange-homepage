@@ -1459,45 +1459,23 @@ onClick={(e) => {
 
   <div className="ixi-command-center">
   
-       <section className="workspace-controls">
-  <IXIControlSurface>
-    <div className="desktop-search-surface">
-      <IXSearchSurface
+       <IXIChassisControls
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
-  filters={workspaceFilters}
-  setFilters={setWorkspaceFilters}
-  sortMode={savedBoardMode}
-  setSortMode={setSavedBoardMode}
+  workspaceFilters={workspaceFilters}
+  setWorkspaceFilters={setWorkspaceFilters}
+  savedBoardMode={savedBoardMode}
+  setSavedBoardMode={setSavedBoardMode}
   pocketThumbSize={pocketThumbSize}
   setPocketThumbSize={setPocketThumbSize}
-/>
-    </div>
-
-    <div className="mobile-search-surface">
-      <IXSearchSurfaceMobile
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filters={workspaceFilters}
-        setFilters={setWorkspaceFilters}
-        sortMode={savedBoardMode}
-        setSortMode={setSavedBoardMode}
-      />
-    </div>
-
- <IXIRelationshipControls
   ixiCardState={ixiCardState}
-  activeColors={ixiColorFilters}
-  onToggleColor={toggleColorFilter}
-  activeOutline={ixiOutlineFilter}
-  onToggleOutline={toggleOutlineFilter}
-  pocketThumbSize={pocketThumbSize}
-  setPocketThumbSize={setPocketThumbSize}
-
+  ixiColorFilters={ixiColorFilters}
+  toggleColorFilter={toggleColorFilter}
+  ixiOutlineFilter={ixiOutlineFilter}
+  toggleOutlineFilter={toggleOutlineFilter}
   armedDestination={armedDestination}
-  onToggleArmedDestination={toggleArmedDestination}
+  toggleArmedDestination={toggleArmedDestination}
 />
-  </IXIControlSurface>
 </section>
 
                 </div>
