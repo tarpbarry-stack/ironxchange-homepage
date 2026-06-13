@@ -1374,7 +1374,7 @@ onClick={(e) => {
     ixiCardState[String(machineId)]?.color
   )
 }}
-          >
+>
 
             {image ? (
               <img
@@ -1387,7 +1387,7 @@ onClick={(e) => {
                 {machine.make || machine.publicData?.make || ""}
               </span>
             )}
-                        </div>
+              </div>
             )}
           </IXISortableMachineCard>
         );
