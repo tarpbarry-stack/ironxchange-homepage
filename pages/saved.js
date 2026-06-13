@@ -1156,6 +1156,7 @@ function getIxiColorValue(color) {
    <div className="ixi-command-center">
   
        <IXIChassisControls
+  listings={workspaceListings}  
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
   workspaceFilters={workspaceFilters}
