@@ -1,5 +1,21 @@
- <section
-  data-pocket-target="pocketLeft"
+export default function IXIPocketL1({
+  leftPocketMode,
+  machineContainers,
+  armedDestination,
+  WorkspaceDropPad,
+  movePocketToStack,
+  recallPocketToBoard,
+  rotatePocket,
+  toggleArmedDestination,
+  pocketThumbSize,
+  getListingById,
+  IXISortableMachineCard,
+  getIxiColorValue,
+  ixiCardState
+}) {
+  return (
+    <section
+      data-pocket-target="pocketLeft"
   className={`ixi-pocket-left pocket-mode-${leftPocketMode} ${
     (machineContainers.pocketLeft || []).length ? "occupied" : ""
   } ${
