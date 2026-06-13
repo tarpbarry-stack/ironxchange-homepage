@@ -488,7 +488,7 @@ const orderedSource =
     )
     .filter(Boolean);
     
-   return orderedSource.filter(item => {
+   const filtered = orderedSource.filter(item => {
   const id = String(getListingId(item));
 
   if (getMachineContainer(id) !== "board") {
@@ -574,19 +574,36 @@ return (
   matchesIxiOutline
 );
     });
-  }, [
-   searchQuery,
-  savedListings,
-  savedBoardMode,
-  savedBoardListings,
 
+return [...filtered].sort((a, b) => {
+  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
+  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
+
+  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
+  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
+
+  const yearA = Number(a.year || a.publicData?.year || 0);
+  const yearB = Number(b.year || b.publicData?.year || 0);
+
+  if (savedBoardMode === "price-low") return priceA - priceB;
+  if (savedBoardMode === "price-high") return priceB - priceA;
+  if (savedBoardMode === "hours-low") return hoursA - hoursB;
+  if (savedBoardMode === "hours-high") return hoursB - hoursA;
+  if (savedBoardMode === "year-new") return yearB - yearA;
+  if (savedBoardMode === "year-old") return yearA - yearB;
+
+  return 0;
+});
+     }, [
+    searchQuery,
+    savedBoardMode,
+    savedBoardListings,
+    workspaceListings,
     workspaceFilters,
-
-  machineContainers,
-
-  ixiCardState,
-  ixiColorFilters,
-  ixiOutlineFilter
+    machineContainers,
+    ixiCardState,
+    ixiColorFilters,
+    ixiOutlineFilter
   ]);
 
   function updateIxiCardState(listingId, patch) {
