@@ -1200,7 +1200,8 @@ title="Left pocket"
 onClick={(e) => {
   e.preventDefault();
   e.stopPropagation();
-  cyclePocketMode("left");
+
+  toggleArmedDestination("pocketLeft");
 }}
 />
     
