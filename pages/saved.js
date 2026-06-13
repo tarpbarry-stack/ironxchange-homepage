@@ -1896,18 +1896,19 @@ onClick={(e) => {
   />
 
   <button
-    type="button"
-    className="stack-pocket-power bottom-left"
-    data-label="L2"
-    title="Send stack to L2"
-    onClick={() =>
-      moveActiveStackToContainer(
-        stackKey,
-        "pocketLeft2"
-      )
-    }
-  />
-
+  type="button"
+  className={`stack-pocket-power bottom-left ${
+    armedDestination === "pocketLeft2"
+      ? "destination-armed"
+      : ""
+  }`}
+  data-label="L2"
+  title="Arm L2"
+  onClick={() =>
+    toggleArmedDestination("pocketLeft2")
+  }
+/>
+    
  <button
     type="button"
     className="stack-pocket-power bottom-right"
