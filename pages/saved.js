@@ -1113,7 +1113,6 @@ function getIxiColorValue(color) {
 <section className="ixi-command-chassis">
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
-  <section
   <IXIPocket
   pocketId="pocketLeft"
   pocketMode={leftPocketMode}
