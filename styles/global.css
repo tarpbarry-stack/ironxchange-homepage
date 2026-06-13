@@ -386,7 +386,8 @@ body,
     0 0 12px rgba(255,196,0,.055);
 }
 
-.ixi-pocket-thumb {
+.ixi-pocket-left .ixi-pocket-thumb,
+.ixi-pocket-right .ixi-pocket-thumb {
   width: var(--pocket-thumb-w, 90px) !important;
   height: var(--pocket-thumb-h, 60px) !important;
   position: absolute !important;
@@ -426,7 +427,8 @@ body,
   z-index: 30;
 }
 
-.ixi-pocket-thumb::before {
+.ixi-pocket-left .ixi-pocket-thumb::before,
+.ixi-pocket-right .ixi-pocket-thumb::before {
   content: "";
   position: absolute;
   left: 0;
@@ -463,14 +465,16 @@ body,
   z-index: 12;
 }
 
-.ixi-pocket-thumb img {
+.ixi-pocket-left .ixi-pocket-thumb img,
+.ixi-pocket-right .ixi-pocket-thumb img { 
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   display: block !important;
 }
 
-.ixi-pocket-thumb span {
+.ixi-pocket-left .ixi-pocket-thumb span,
+.ixi-pocket-right .ixi-pocket-thumb span {
   display: block;
   padding: 5px;
   color: rgba(255,255,255,.62);
