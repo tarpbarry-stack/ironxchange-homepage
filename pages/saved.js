@@ -810,53 +810,48 @@ function cyclePocketMode(side) {
 }
 
 function sendListingToFront(listing) {
-  console.log("IXI SEND FRONT CLICKED", getListingId(listing));
+  const listingId = String(getListingId(listing));
 
-  const listingId = getListingId(listing);
+  console.log("IXI SEND FRONT CLICKED", listingId);
 
-    setSavedBoardMode("custom");
+  setMachineContainers(current => {
+    const boardIds = current.board || [];
 
-    setSavedBoardListings(current => {
-      const source = current.length
-  ? current
-  : workspaceListings;
+    if (!boardIds.includes(listingId)) {
+      return current;
+    }
 
-      const target = source.find(
-        item => String(getListingId(item)) === String(listingId)
-      );
+    return {
+      ...current,
+      board: [
+        listingId,
+        ...boardIds.filter(id => String(id) !== listingId)
+      ]
+    };
+  });
+}
 
-      const rest = source.filter(
-        item => String(getListingId(item)) !== String(listingId)
-      );
+function sendListingToBack(listing) {
+  const listingId = String(getListingId(listing));
 
-      return target ? [target, ...rest] : source;
-    });
-  }
+  console.log("IXI SEND BACK CLICKED", listingId);
 
-  function sendListingToBack(listing) {
-  console.log("IXI SEND BACK CLICKED", getListingId(listing));
+  setMachineContainers(current => {
+    const boardIds = current.board || [];
 
-  const listingId = getListingId(listing);
+    if (!boardIds.includes(listingId)) {
+      return current;
+    }
 
-  setSavedBoardMode("custom");
-
-    setSavedBoardListings(current => {
-     const source = current.length
-  ? current
-  : workspaceListings;
-      
-      const target = source.find(
-        item => String(getListingId(item)) === String(listingId)
-      );
-
-      const rest = source.filter(
-        item => String(getListingId(item)) !== String(listingId)
-      );
-
-      return target ? [...rest, target] : source;
-    });
-  }
-
+    return {
+      ...current,
+      board: [
+        ...boardIds.filter(id => String(id) !== listingId),
+        listingId
+      ]
+    };
+  });
+}
   async function toggleSave(listing) {
     if (!sdk) {
       window.location.href = "/login";
