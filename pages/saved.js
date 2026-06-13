@@ -94,6 +94,7 @@ function IXISortableMachineCard({
   id,
   containerId,
   className,
+  style: externalStyle,
   children
 }) {
   const {
@@ -113,10 +114,11 @@ function IXISortableMachineCard({
   });
 
   const style = {
+  ...(externalStyle || {}),
   transform: CSS.Transform.toString(transform),
   transition,
   opacity: isDragging ? 0 : 1,
-  zIndex: isDragging ? 9999 : undefined
+  zIndex: isDragging ? 9999 : externalStyle?.zIndex
 };
 
   return (
