@@ -1476,7 +1476,6 @@ onClick={(e) => {
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
 />
-</section>
 
                 </div>
 
