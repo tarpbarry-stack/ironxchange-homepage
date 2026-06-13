@@ -67,6 +67,9 @@ onDelete,
 onSendFront,
 onSendBack,
 
+armedDestination,
+onSendToArmedDestination,
+
 ixiState,
 onIxiStateChange,
 
@@ -476,6 +479,9 @@ zIndex: isBoardDragging ? 50 : undefined
   onCycleOutline={cycleBoardOutline}
   onEndRelationship={endIxiRelationship}
   onToggleSaved={toggleSave}
+
+  armedDestination={armedDestination}
+  onSendToArmedDestination={onSendToArmedDestination}
 />
 
       <style jsx>{`
