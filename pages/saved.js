@@ -1875,12 +1875,12 @@ onClick={(e) => {
   className="stack-pocket-power top-left"
   data-label="L1"
   title="Send stack to L1"
-  onClick={() =>
-    moveActiveStackToContainer(
-      stackKey,
-      "pocketLeft"
-    )
-  }
+ onClick={() =>
+  moveActiveStackToContainer(
+    stackKey,
+    "pocketLeft"
+  )
+}
 />
   <button
     type="button"
@@ -1904,10 +1904,12 @@ onClick={(e) => {
   }`}
   data-label="L2"
   title="Arm L2"
-  onClick={() =>
-    toggleArmedDestination("pocketLeft2")
-  }
-/>
+ onClick={() =>
+  moveActiveStackToContainer(
+    stackKey,
+    "pocketLeft2"
+  )
+}
     
  <button
     type="button"
