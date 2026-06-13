@@ -3057,6 +3057,25 @@ outline: none;
   text-transform: uppercase;
 }
 
+:global(.ixi-pocket-thumb) {
+  width: var(--pocket-thumb-w, 90px) !important;
+  height: var(--pocket-thumb-h, 60px) !important;
+  overflow: hidden !important;
+}
+
+:global(.ixi-pocket-thumb > div) {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+:global(.ixi-pocket-thumb img) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
 /* =============================== */
 /* IXI POCKET STATION BUTTONS V12  */
 /* existing buttons, new shell home */
