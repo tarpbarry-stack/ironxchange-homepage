@@ -312,8 +312,8 @@ const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
 const [leftPocketMode, setLeftPocketMode] = useState("peek");
 const [rightPocketMode, setRightPocketMode] = useState("peek");
-const [leftPocket2Mode, setLeftPocket2Mode] = useState("closed");
-const [rightPocket2Mode, setRightPocket2Mode] = useState("closed");
+const [leftPocket2Mode, setLeftPocket2Mode] = useState("peek");
+const [rightPocket2Mode, setRightPocket2Mode] = useState("peek");
   
 const [topRailMode, setTopRailMode] = useState("off");
 
