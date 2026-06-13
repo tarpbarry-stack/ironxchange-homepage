@@ -50,10 +50,11 @@ export default function IXIRelationshipControls({
   className = "",
   pocketThumbSize = "medium",
   setPocketThumbSize = null,
-  isMachineDragging = false
+  isMachineDragging = false,
+  armedDestination = "",
+  onToggleArmedDestination = () => {}
 }) {
   const [railRevealed, setRailRevealed] = useState(false);
-  const [armedPocket, setArmedPocket] = useState(null);
   const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
@@ -67,10 +68,6 @@ export default function IXIRelationshipControls({
 
   function toggleRailReveal() {
     setRailRevealed(current => !current);
-  }
-
-  function togglePocketArm(pocketId) {
-    setArmedPocket(current => (current === pocketId ? null : pocketId));
   }
 
   function getColorStage(color) {
@@ -112,10 +109,10 @@ export default function IXIRelationshipControls({
           <div className="ixi-pocket-indicator-stack left">
             <button
               type="button"
-              className={`ixi-pocket-indicator pocket-left-top ${
-                armedPocket === "LT" ? "armed" : ""
-              }`}
-              onClick={() => togglePocketArm("LT")}
+             className={`ixi-pocket-indicator pocket-left-top ${
+  armedDestination === "pocketLeft" ? "armed" : ""
+}`}
+onClick={() => onToggleArmedDestination("pocketLeft")}
               aria-label="Arm left top pocket"
               title="Left Top Pocket"
             />
