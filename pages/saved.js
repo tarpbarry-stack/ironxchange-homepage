@@ -810,7 +810,9 @@ function cyclePocketMode(side) {
 }
 
 function sendListingToFront(listing) {
-    const listingId = getListingId(listing);
+  console.log("IXI SEND FRONT CLICKED", getListingId(listing));
+
+  const listingId = getListingId(listing);
 
     setSavedBoardMode("custom");
 
@@ -832,7 +834,7 @@ function sendListingToFront(listing) {
   }
 
   function sendListingToBack(listing) {
-    const listingId = getListingId(listing);
+  console.log("IX
 
     setSavedBoardMode("custom");
 
