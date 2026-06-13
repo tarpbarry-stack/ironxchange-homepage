@@ -63,11 +63,14 @@ export default function IXIMachineRail({
 
 <button
   type="button"
-  className="rail-zone rail-sync"
-  onClick={e => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
+  className={`rail-zone rail-sync ${
+  armedDestination ? "destination-armed" : ""
+}`}
+  onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  onSendToArmedDestination?.(listing);
+}}
   aria-label="Sync machine"
 />
     
@@ -394,6 +397,11 @@ grid-template-columns:
   background: rgba(255,196,0,.82);
   box-shadow:
     0 0 7px rgba(255,196,0,.30);
+}
+
+.destination-armed {
+  background: rgba(0,194,255,.92) !important;
+  box-shadow: 0 0 10px rgba(0,194,255,.28);
 }
 
                 `}</style>
