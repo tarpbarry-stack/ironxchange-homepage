@@ -45,6 +45,7 @@ import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
 import IXIPocket from "../components/ixi-chassis/IXIPocket";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
+import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 
 import {
   fetchCurrentUserWithSavedListings,
