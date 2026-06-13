@@ -1366,16 +1366,21 @@ onClick={(e) => {
   className="ixi-pocket-thumb-dnd"
   style={{
     right: `${leftPocketMode === "open" ? index * 44 : leftPocketMode === "peek" ? index * 16 : index * 8}px`,
-    zIndex: index + 1,
-    borderColor: getIxiColorValue(
-      ixiCardState[String(machineId)]?.color
-    )
+    zIndex: index + 1
   }}
 >
     {({ dragHandleProps }) => (
-     <div
+    <div
   className="ixi-pocket-thumb"
   {...dragHandleProps}
+  style={{
+    borderColor: getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    ),
+    boxShadow: `0 0 0 ${Number(ixiCardState[String(machineId)]?.outline || 1)}px ${getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    )}`
+  }}
 >
         {image ? (
           <img
@@ -1543,24 +1548,29 @@ onClick={(e) => {
             machine.attributes?.publicData?.images?.[0];
 
           return (
-  <IXISortableMachineCard
-    key={`left-pocket-2-thumb-${machineId}`}
-    id={machineId}
-    containerId="pocketLeft2"
-    className="ixi-pocket-thumb-dnd"
-    style={{
-      right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
-      zIndex: index + 1,
-      borderColor: getIxiColorValue(
-        ixiCardState[String(machineId)]?.color
-      )
-    }}
-  >
+ <IXISortableMachineCard
+  key={`left-pocket-2-thumb-${machineId}`}
+  id={machineId}
+  containerId="pocketLeft2"
+  className="ixi-pocket-thumb-dnd"
+  style={{
+    right: `${leftPocket2Mode === "open" ? index * 44 : leftPocket2Mode === "peek" ? index * 16 : index * 8}px`,
+    zIndex: index + 1
+  }}
+>
     {({ dragHandleProps }) => (
-      <div
-        className="ixi-pocket-thumb"
-        {...dragHandleProps}
-      >
+     <div
+  className="ixi-pocket-thumb"
+  {...dragHandleProps}
+  style={{
+    borderColor: getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    ),
+    boxShadow: `0 0 0 ${Number(ixiCardState[String(machineId)]?.outline || 1)}px ${getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    )}`
+  }}
+>
         {image ? (
           <img
             src={typeof image === "string" ? image : image?.url}
@@ -1765,23 +1775,28 @@ onClick={(e) => {
 
 return (
   <IXISortableMachineCard
-    key={`right-pocket-thumb-${machineId}`}
-    id={machineId}
-    containerId="pocketRight"
-    className="ixi-pocket-thumb-dnd"
-    style={{
-      left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
-      zIndex: index + 1,
-      borderColor: getIxiColorValue(
-        ixiCardState[String(machineId)]?.color
-      )
-    }}
-  >
+  key={`right-pocket-thumb-${machineId}`}
+  id={machineId}
+  containerId="pocketRight"
+  className="ixi-pocket-thumb-dnd"
+  style={{
+    left: `${rightPocketMode === "open" ? index * 44 : rightPocketMode === "peek" ? index * 16 : index * 8}px`,
+    zIndex: index + 1
+  }}
+>
     {({ dragHandleProps }) => (
       <div
-        className="ixi-pocket-thumb"
-        {...dragHandleProps}
-      >
+  className="ixi-pocket-thumb"
+  {...dragHandleProps}
+  style={{
+    borderColor: getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    ),
+    boxShadow: `0 0 0 ${Number(ixiCardState[String(machineId)]?.outline || 1)}px ${getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    )}`
+  }}
+>
         {image ? (
           <img
             src={typeof image === "string" ? image : image?.url}
@@ -1950,27 +1965,28 @@ return (
 
         return (
   <IXISortableMachineCard
-    key={`right-pocket-2-thumb-${machineId}`}
-    id={machineId}
-    containerId="pocketRight2"
-    className="ixi-pocket-thumb-dnd"
-    style={{
-      left: `${rightPocket2Mode === "open"
-        ? index * 44
-        : rightPocket2Mode === "peek"
-          ? index * 16
-          : index * 8}px`,
-      zIndex: index + 1,
-      borderColor: getIxiColorValue(
-        ixiCardState[String(machineId)]?.color
-      )
-    }}
-  >
+  key={`right-pocket-2-thumb-${machineId}`}
+  id={machineId}
+  containerId="pocketRight2"
+  className="ixi-pocket-thumb-dnd"
+  style={{
+    left: `${rightPocket2Mode === "open" ? index * 44 : rightPocket2Mode === "peek" ? index * 16 : index * 8}px`,
+    zIndex: index + 1
+  }}
+>
     {({ dragHandleProps }) => (
       <div
-        className="ixi-pocket-thumb"
-        {...dragHandleProps}
-      >
+  className="ixi-pocket-thumb"
+  {...dragHandleProps}
+  style={{
+    borderColor: getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    ),
+    boxShadow: `0 0 0 ${Number(ixiCardState[String(machineId)]?.outline || 1)}px ${getIxiColorValue(
+      ixiCardState[String(machineId)]?.color
+    )}`
+  }}
+>
         {image ? (
           <img
             src={typeof image === "string" ? image : image?.url}
