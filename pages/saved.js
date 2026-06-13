@@ -2455,6 +2455,21 @@ onClick={(e) => {
     0 0 8px rgba(0,194,255,.28),
     0 0 16px rgba(0,194,255,.12);
 }
+/* Armed destination action rail */
+
+.ixi-pocket-left.destination-armed .ixi-pocket-rail-action,
+.ixi-pocket-right.destination-armed .ixi-pocket-rail-action {
+  background: rgba(0,194,255,.38) !important;
+
+  box-shadow:
+    0 0 6px rgba(0,194,255,.18),
+    0 0 12px rgba(0,194,255,.08);
+}
+
+.ixi-pocket-left.destination-armed .ixi-pocket-action-rail,
+.ixi-pocket-right.destination-armed .ixi-pocket-action-rail {
+  filter: drop-shadow(0 0 6px rgba(0,194,255,.22));
+}
 
 /* =============================== */
 /* 1250px → 851px STACKED MODE     */
