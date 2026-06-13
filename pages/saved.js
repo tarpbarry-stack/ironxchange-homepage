@@ -834,9 +834,11 @@ function sendListingToFront(listing) {
   }
 
   function sendListingToBack(listing) {
-  console.log("IX
+  console.log("IXI SEND BACK CLICKED", getListingId(listing));
 
-    setSavedBoardMode("custom");
+  const listingId = getListingId(listing);
+
+  setSavedBoardMode("custom");
 
     setSavedBoardListings(current => {
      const source = current.length
