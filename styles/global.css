@@ -85,18 +85,3 @@ body,
     display: none;
   }
 }
-
-.ixi-pocket-left .ixi-pocket-thumb::before,
-.ixi-pocket-right .ixi-pocket-thumb::before {
-
-
-
-@media (max-width: 850px) {
-  .ixi-command-left,
-  .ixi-command-right,
-  .ixi-pocket-row,
-  .ixi-pocket-left,
-  .ixi-pocket-right {
-    display: none !important;
-  }
-}
