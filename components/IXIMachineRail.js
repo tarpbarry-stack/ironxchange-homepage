@@ -406,6 +406,14 @@ grid-template-columns:
   box-shadow: 0 0 10px rgba(0,194,255,.28);
 }
 
+.rail-sync.destination-armed::after {
+  background: rgba(0,194,255,.92) !important;
+
+  box-shadow:
+    0 0 7px rgba(0,194,255,.42),
+    0 0 14px rgba(0,194,255,.20);
+}
+
                 `}</style>
   </>
 );
