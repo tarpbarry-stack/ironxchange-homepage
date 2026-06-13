@@ -24,20 +24,22 @@ export default function IXIChassisControls({
     <section className="workspace-controls">
       <IXIControlSurface>
         <div className="desktop-search-surface">
-          <IXSearchSurface
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filters={workspaceFilters}
-            setFilters={setWorkspaceFilters}
-            sortMode={savedBoardMode}
-            setSortMode={setSavedBoardMode}
-            pocketThumbSize={pocketThumbSize}
-            setPocketThumbSize={setPocketThumbSize}
-          />
-        </div>
+  <IXSearchSurface
+    listings={listings}
+    searchQuery={searchQuery}
+    setSearchQuery={setSearchQuery}
+    filters={workspaceFilters}
+    setFilters={setWorkspaceFilters}
+    sortMode={savedBoardMode}
+    setSortMode={setSavedBoardMode}
+    pocketThumbSize={pocketThumbSize}
+    setPocketThumbSize={setPocketThumbSize}
+  />
+</div>
 
         <div className="mobile-search-surface">
           <IXSearchSurfaceMobile
+            listings={listings}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             filters={workspaceFilters}
