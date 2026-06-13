@@ -1658,8 +1658,10 @@ return (
 <section
   data-pocket-target="pocketRight2"
   className={`ixi-pocket-left ixi-pocket-right ixi-pocket-r2 pocket-mode-${rightPocket2Mode} ${
-    (machineContainers.pocketRight2 || []).length ? "occupied" : ""
-  }`}
+  (machineContainers.pocketRight2 || []).length ? "occupied" : ""
+} ${
+  armedDestination === "pocketRight2" ? "destination-armed" : ""
+}`}
 >
  <WorkspaceDropPad
   id="pocketRight2"
@@ -1760,11 +1762,12 @@ return (
         : ""
     }`}
     title="Right lower pocket"
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cyclePocketMode("right2");
-    }}
+onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  toggleArmedDestination("pocketRight2");
+}}
   />
 
   {rightPocket2Mode !== "closed" &&
