@@ -110,9 +110,9 @@ export default function IXIRelationshipControls({
             <button
               type="button"
              className={`ixi-pocket-indicator pocket-left-top ${
-  armedDestination === "pocketLeft" ? "armed" : ""
-}`}
-onClick={() => onToggleArmedDestination("pocketLeft")}
+            armedDestination === "pocketLeft" ? "armed" : ""
+                    }`}
+              onClick={() => onToggleArmedDestination("pocketLeft")}
               aria-label="Arm left top pocket"
               title="Left Top Pocket"
             />
@@ -120,9 +120,9 @@ onClick={() => onToggleArmedDestination("pocketLeft")}
             <button
               type="button"
               className={`ixi-pocket-indicator pocket-left-bottom ${
-                armedPocket === "LB" ? "armed" : ""
-              }`}
-              onClick={() => togglePocketArm("LB")}
+              armedDestination === "pocketLeft2" ? "armed" : ""
+                    }`}
+              onClick={() => onToggleArmedDestination("pocketLeft2")}
               aria-label="Arm left bottom pocket"
               title="Left Bottom Pocket"
             />
@@ -163,10 +163,10 @@ onClick={() => onToggleArmedDestination("pocketLeft")}
           <div className="ixi-pocket-indicator-stack right">
             <button
               type="button"
-              className={`ixi-pocket-indicator pocket-right-top ${
-                armedPocket === "RT" ? "armed" : ""
-              }`}
-              onClick={() => togglePocketArm("RT")}
+             className={`ixi-pocket-indicator pocket-right-top ${
+            armedDestination === "pocketRight" ? "armed" : ""
+                  }`}
+              onClick={() => onToggleArmedDestination("pocketRight")}
               aria-label="Arm right top pocket"
               title="Right Top Pocket"
             />
@@ -174,9 +174,9 @@ onClick={() => onToggleArmedDestination("pocketLeft")}
             <button
               type="button"
               className={`ixi-pocket-indicator pocket-right-bottom ${
-                armedPocket === "RB" ? "armed" : ""
-              }`}
-              onClick={() => togglePocketArm("RB")}
+              armedDestination === "pocketRight2" ? "armed" : ""
+                  }`}
+              onClick={() => onToggleArmedDestination("pocketRight2")}
               aria-label="Arm right bottom pocket"
               title="Right Bottom Pocket"
             />
