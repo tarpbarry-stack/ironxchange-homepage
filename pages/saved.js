@@ -314,10 +314,6 @@ const [activeStackLayouts, setActiveStackLayouts] = useState({
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
-const [leftPocketMode, setLeftPocketMode] = useState("peek");
-const [rightPocketMode, setRightPocketMode] = useState("peek");
-const [leftPocket2Mode, setLeftPocket2Mode] = useState("peek");
-const [rightPocket2Mode, setRightPocket2Mode] = useState("peek");
   
 const [topRailMode, setTopRailMode] = useState("off");
 
@@ -1106,7 +1102,17 @@ function getIxiColorValue(color) {
   savedIds={savedIds}
   ixiCardState={ixiCardState}
 >
-  <IXIWorkspaceEngine>
+ <IXIWorkspaceEngine>
+  {({
+    leftPocketMode,
+    setLeftPocketMode,
+    rightPocketMode,
+    setRightPocketMode,
+    leftPocket2Mode,
+    setLeftPocket2Mode,
+    rightPocket2Mode,
+    setRightPocket2Mode
+  }) => (
     <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
@@ -1478,8 +1484,9 @@ function getIxiColorValue(color) {
     </p>
   </div>
 )}
-                                </main>
-  </IXIWorkspaceEngine>
+                                    </main>
+  )}
+</IXIWorkspaceEngine>
 </IXIDragEngine>
 
       <Footer />
