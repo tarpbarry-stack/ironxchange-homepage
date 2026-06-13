@@ -1,42 +1,81 @@
-import { SortableContext, horizontalListSortingStrategy, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  horizontalListSortingStrategy
+} from "@dnd-kit/sortable";
+
+import { rectSortingStrategy } from "@dnd-kit/sortable";
+
 import ListingCard from "../ListingCard";
 
 export default function IXIActiveStack({
-  id,
-  items = [],
+  stackKey,
+  machineIds = [],
+  getListingById,
+  getListingId,
   savedIds = [],
-  boardColors = {},
-  boardOutlines = {},
-  stackDirection = "horizontal",
-  onToggleSaved,
-  onCycleColor,
-  onCycleOutline,
-  onSendFront,
-  onSendBack
+  ixiCardState = {},
+  activeStackLayouts = {},
+  IXISortableMachineCard,
+  toggleSave,
+  updateIxiCardState,
+  sendListingToFront,
+  sendListingToBack,
+  armedDestination,
+  sendMachineToArmedDestination
 }) {
+  const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
+
   const strategy =
-    stackDirection === "vertical"
-      ? verticalListSortingStrategy
+    activeStackLayouts[stackKey] === "vertical"
+      ? rectSortingStrategy
       : horizontalListSortingStrategy;
 
   return (
-    <SortableContext items={items.map(item => item.id)} strategy={strategy}>
-      <div className={`ixi-active-stack ${id}`}>
-        {items.map(item => (
-          <ListingCard
-            key={item.id}
-            listing={item}
-            saved={savedIds.includes(item.id)}
-            boardColor={boardColors[item.id]}
-            boardOutline={boardOutlines[item.id]}
-            onToggleSaved={() => onToggleSaved?.(item)}
-            onCycleColor={() => onCycleColor?.(item.id)}
-            onCycleOutline={() => onCycleOutline?.(item.id)}
-            onSendFront={() => onSendFront?.(item)}
-            onSendBack={() => onSendBack?.(item)}
-          />
-        ))}
-      </div>
+    <SortableContext
+      id={containerId}
+      items={machineIds}
+      strategy={strategy}
+    >
+      {machineIds.map(machineId => {
+        const machine = getListingById(machineId);
+
+        if (!machine) return null;
+
+        const id = String(getListingId(machine));
+
+        return (
+          <IXISortableMachineCard
+            key={`stack-card-${id}`}
+            id={id}
+            containerId={containerId}
+            className="active-stack-card"
+          >
+            {({ dragHandleProps }) => (
+              <ListingCard
+                listing={machine}
+                saved={savedIds.includes(id)}
+                onToggleSaved={() => toggleSave(machine)}
+                from="saved"
+                ixiState={
+                  ixiCardState[id] || {
+                    color: "none",
+                    outline: 1
+                  }
+                }
+                onIxiStateChange={updateIxiCardState}
+                onSendFront={sendListingToFront}
+                onSendBack={sendListingToBack}
+                armedDestination={armedDestination}
+                onSendToArmedDestination={sendMachineToArmedDestination}
+                isBoardDraggingCard={false}
+                isGhostTarget={false}
+                useDndDrag={false}
+                dragHandleProps={dragHandleProps}
+              />
+            )}
+          </IXISortableMachineCard>
+        );
+      })}
     </SortableContext>
   );
 }
