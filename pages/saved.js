@@ -657,6 +657,18 @@ return (
   return "board";
 }
 
+
+function sendMachineToArmedDestination(listing) {
+  if (!armedDestination) return;
+
+  if (!POCKET_TARGETS.includes(armedDestination)) return;
+
+  const id = String(getListingId(listing));
+
+  moveMachineToContainer(id, armedDestination);
+}
+  
+
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
@@ -1984,6 +1996,7 @@ onClick={(e) => {
   title="Arm L1"
   onClick={() =>
     toggleArmedDestination("pocketLeft")
+    )
   }
 />
 
@@ -2092,6 +2105,8 @@ onClick={(e) => {
         onIxiStateChange={updateIxiCardState}
         onSendFront={sendListingToFront}
         onSendBack={sendListingToBack}
+        armedDestination={armedDestination}
+        onSendToArmedDestination={sendMachineToArmedDestination}
         isBoardDraggingCard={false}
         isGhostTarget={false}
         useDndDrag={false}
