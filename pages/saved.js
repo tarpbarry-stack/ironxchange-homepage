@@ -2397,7 +2397,55 @@ return (
   background: rgba(0,194,255,.82);
 }
 
+/* Roman numerals + loop actuator follow pocket state */
 
+/* empty / dormant */
+.ixi-pocket-left .ixi-pocket-topline span,
+.ixi-pocket-right .ixi-pocket-topline span {
+  color: rgba(255,255,255,.18);
+  text-shadow: none;
+}
+
+.ixi-pocket-left .ixi-pocket-loop-square,
+.ixi-pocket-right .ixi-pocket-loop-square {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.10);
+  box-shadow: none;
+}
+
+/* occupied = yellow */
+.ixi-pocket-left.occupied .ixi-pocket-topline span,
+.ixi-pocket-right.occupied .ixi-pocket-topline span {
+  color: rgba(255,196,0,.86);
+  text-shadow:
+    0 0 8px rgba(255,196,0,.18),
+    0 0 14px rgba(255,196,0,.08);
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-loop-square,
+.ixi-pocket-right.occupied .ixi-pocket-loop-square {
+  border-color: rgba(255,196,0,.42);
+  background: rgba(255,196,0,.34);
+  box-shadow: 0 0 8px rgba(255,196,0,.16);
+}
+
+/* armed = cyan, overrides occupied */
+.ixi-pocket-left.destination-armed .ixi-pocket-topline span,
+.ixi-pocket-right.destination-armed .ixi-pocket-topline span {
+  color: rgba(0,194,255,.92);
+  text-shadow:
+    0 0 8px rgba(0,194,255,.26),
+    0 0 16px rgba(0,194,255,.12);
+}
+
+.ixi-pocket-left.destination-armed .ixi-pocket-loop-square,
+.ixi-pocket-right.destination-armed .ixi-pocket-loop-square {
+  border-color: rgba(0,194,255,.72);
+  background: rgba(0,194,255,.76);
+  box-shadow:
+    0 0 8px rgba(0,194,255,.28),
+    0 0 16px rgba(0,194,255,.12);
+}
 
 /* =============================== */
 /* 1250px → 851px STACKED MODE     */
