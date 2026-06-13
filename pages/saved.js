@@ -780,14 +780,6 @@ function getListingById(machineId) {
   setGhostListingId("");
   setActiveStackHover("");
 }
-
-  function handleBoardDragOver(listing) {
-    const targetId = String(getListingId(listing));
-
-    if (!draggingListingId || draggingListingId === targetId) return;
-
-    setGhostListingId(targetId);
-  }
   
 function rotatePocket(pocketKey) {
   if (!pocketKey) return;
