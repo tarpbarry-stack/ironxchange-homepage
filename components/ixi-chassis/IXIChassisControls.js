@@ -23,7 +23,6 @@ export default function IXIChassisControls({
   return (
     <section className="workspace-controls">
       <IXIControlSurface>
-
         <div className="desktop-search-surface">
           <IXSearchSurface
             searchQuery={searchQuery}
@@ -59,8 +58,42 @@ export default function IXIChassisControls({
           armedDestination={armedDestination}
           onToggleArmedDestination={toggleArmedDestination}
         />
-
       </IXIControlSurface>
+
+      <style jsx>{`
+        .workspace-controls {
+          margin: 0 auto;
+          padding: 0;
+          background: transparent;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .mobile-search-surface {
+          display: none;
+        }
+
+        .desktop-search-surface {
+          display: block;
+        }
+
+        @media (max-width: 850px) {
+          .desktop-search-surface {
+            display: none;
+          }
+
+          .mobile-search-surface {
+            display: block;
+          }
+
+          .workspace-controls {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto 18px;
+          }
+        }
+      `}</style>
     </section>
   );
 }
