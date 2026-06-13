@@ -151,8 +151,6 @@ function handleWorkspaceDragStart(event) {
   if (!dragId) return;
 
   setActiveDndId(dragId);
-  setActiveDragMachineId(dragId);
-  setDraggingListingId(dragId);
 }
 
 function handleWorkspaceDragCancel() {
@@ -320,8 +318,6 @@ const [topRailMode, setTopRailMode] = useState("off");
 const [armedDestination, setArmedDestination] = useState("");
 const [activeStackSendMenu, setActiveStackSendMenu] =
   useState("");
-  
-const [activeDragMachineId, setActiveDragMachineId] = useState("");
 
 const [activeStackHover, setActiveStackHover] = useState("");
 const [ixiCardState, setIxiCardState] = useState({});
@@ -775,7 +771,6 @@ function getListingById(machineId) {
   }
 
   function clearMachineDragState() {
-  setActiveDragMachineId("");
   setDraggingListingId("");
   setGhostListingId("");
   setActiveStackHover("");
