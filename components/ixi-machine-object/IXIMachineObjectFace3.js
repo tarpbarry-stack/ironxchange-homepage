@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 export default function IXIMachineObjectFace3({ listing = {} }) {
   const publicData =
     listing.publicData ||
@@ -8,6 +10,41 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
     listing.price ||
     publicData.price ||
     "$148,000";
+  const askNumber = Number(String(ask).replace(/[^0-9.]/g, "")) || 0;
+
+const [offer, setOffer] = useState(askNumber || 140000);
+const [downDollar, setDownDollar] = useState(Math.round((askNumber || 140000) * 0.15));
+const [rate, setRate] = useState(7.5);
+
+const downPercent = offer ? (downDollar / offer) * 100 : 0;
+
+const financedAmount = Math.max(offer - downDollar, 0);
+
+function payment(months) {
+  const monthlyRate = rate / 100 / 12;
+
+  if (!monthlyRate) {
+    return financedAmount / months;
+  }
+
+  return (
+    financedAmount *
+    (monthlyRate * Math.pow(1 + monthlyRate, months)) /
+    (Math.pow(1 + monthlyRate, months) - 1)
+  );
+}
+
+const pay36 = payment(36);
+const pay48 = payment(48);
+const pay60 = payment(60);
+
+function money(value) {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0
+  });
+}
 
   return (
     <section className="mof3">
@@ -19,13 +56,31 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
       <div className="mof3-grid top-grid">
         <div className="mof3-panel">
           <Row label="ASK" value={ask} />
-          <Row label="OFFER" input defaultValue="140000" />
+          <Row
+  label="OFFER"
+  input
+  value={offer}
+  onChange={(v) => setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)}
+/>
           <Row label="DIFF" value="-$8,000  -5.4%" muted />
         </div>
 
         <div className="mof3-panel">
-          <Row label="DOWN $" input defaultValue="21000" />
-          <Row label="DOWN %" value="15%" />
+          <Row
+  label="DOWN $"
+  input
+  value={downDollar}
+  onChange={(v) => setDownDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)}
+/>
+          <Row
+  label="DOWN %"
+  input
+  value={downPercent.toFixed(1)}
+  onChange={(v) => {
+    const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+    setDownDollar(Math.round(offer * (pct / 100)));
+  }}
+/>
           <Row label="TRADE" input defaultValue="15000" />
           <Row label="EST TAX" input defaultValue="11500" />
         </div>
@@ -49,20 +104,28 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
         <strong>$127,256</strong>
       </section>
 
+      <section className="mof3-rate">
+  <span>RATE</span>
+  <input
+    value={rate}
+    onChange={(e) => setRate(Number(e.target.value.replace(/[^0-9.]/g, "")) || 0)}
+  />
+</section>
+    
       <section className="mof3-payments">
         <div>
           <span>36 MO</span>
-          <strong>$3,956</strong>
+          <strong>{money(pay36)}</strong>
         </div>
 
         <div>
           <span>48 MO</span>
-          <strong>$3,017</strong>
+          <strong>{money(pay48)}</strong>
         </div>
 
         <div>
           <span>60 MO</span>
-          <strong>$2,465</strong>
+          <strong>{money(pay60)}</strong>
         </div>
       </section>
 
@@ -320,7 +383,8 @@ function Row({
   value,
   input = false,
   defaultValue = "",
-  muted = false
+  muted = false,
+  onChange
 }) {
   return (
     <div className="mof3-row">
@@ -329,7 +393,8 @@ function Row({
       {input ? (
         <input
           className="mof3-input"
-          defaultValue={defaultValue}
+          value={value ?? defaultValue}
+          onChange={(e) => onChange?.(e.target.value)}
         />
       ) : (
         <strong className={`mof3-value ${muted ? "muted" : ""}`}>
