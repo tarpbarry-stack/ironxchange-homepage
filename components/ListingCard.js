@@ -280,17 +280,26 @@ function handleCardClick() {
 
 return (
   <div
-    data-listing-card-id={id}
-    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
-      isBoardDragging ? "board-dragging" : ""
-    } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
-      isGhostTarget ? "grid-ghost-target" : ""
-    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
-   style={{
-   transform: isBoardDragging
-  ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
-  : undefined,
-zIndex: isBoardDragging ? 50 : undefined
+  data-listing-card-id={id}
+  className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+    isBoardDragging ? "board-dragging" : ""
+  } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
+    isGhostTarget ? "grid-ghost-target" : ""
+  } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+  {...(dragHandleProps || {})}
+  {...(!dragHandleProps
+    ? {
+        onPointerDown: startBoardDrag,
+        onPointerMove: moveBoardDrag,
+        onPointerUp: endBoardDrag,
+        onPointerCancel: endBoardDrag
+      }
+    : {})}
+  style={{
+    transform: isBoardDragging
+      ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+      : undefined,
+    zIndex: isBoardDragging ? 50 : undefined
   }}
 >
 
