@@ -15,8 +15,10 @@ const year = listing.year || publicData.year || "";
 const make = listing.make || publicData.make || "";
 const model = listing.model || publicData.model || "";
 const hours = listing.hours || publicData.hours || "";
-const [offer, setOffer] = useState(askNumber || 140000);
-const [downDollar, setDownDollar] = useState(Math.round((askNumber || 140000) * 0.15));
+const [offer, setOffer] = useState(askNumber);
+const [downDollar, setDownDollar] = useState(
+  Math.round(askNumber * 0.15)
+);
 const [rate, setRate] = useState("7.50");
 
 const downPercent = offer ? (downDollar / offer) * 100 : 0;
