@@ -1487,6 +1487,7 @@ function getIxiColorValue(color) {
   IXISortableMachineCard={IXISortableMachineCard}
   toggleSave={toggleSave}
   updateIxiCardState={updateIxiCardState}
+  cycleMachineFace={cycleMachineFace}
   sendListingToFront={sendListingToFront}
   sendListingToBack={sendListingToBack}
   armedDestination={armedDestination}
