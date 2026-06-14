@@ -420,7 +420,7 @@ function money(value) {
   line-height: 1;
 
   position: relative;
-  top: -4px;
+  top: -2px;
 }
 
         .mof3-rate {
