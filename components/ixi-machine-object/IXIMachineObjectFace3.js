@@ -53,120 +53,118 @@ function money(value) {
 }
 
   return (
-    <section className="mof3">
-      <header className="mof3-head">
-        <span>CAT FINANCIAL™</span>
-        <strong>IXI DEAL SHEET™</strong>
-      </header>
+  <section className="mof3">
+    <header className="mof3-head">
+      <span>CAT FINANCIAL™</span>
+      <strong>IXI DEAL SHEET™</strong>
+    </header>
 
     <div className="mof3-machine-line">
-  {[year, make, model].filter(Boolean).join(" ")}
-  {hours ? ` • ${hours} HRS` : ""}
-</div>
+      {[year, make, model].filter(Boolean).join(" ")}
+      {hours ? ` • ${hours} HRS` : ""}
+    </div>
 
-      <div className="mof3-grid top-grid">
-       <div className="mof3-panel">
-  <Row label="ASK" value={ask} />
+    <div className="mof3-grid top-grid">
+      <div className="mof3-panel">
+        <Row label="ASK" value={ask} />
 
-  <Row
-    label="BID"
-    input
-    value={offer}
-    onChange={(v) =>
-      setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)
-    }
-  />
+        <Row
+          label="BID"
+          input
+          value={offer}
+          onChange={(v) =>
+            setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)
+          }
+        />
 
-  <Row
-    label="DIFF"
-    value={money(offer - askNumber)}
-    muted
-  />
+        <Row label="DIFF" value={money(offer - askNumber)} muted />
 
-  <Row
-    label=""
-    value={
-      `${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`
-    }
-    muted
-  />
-</div>
-
-        <div className="mof3-panel">
-          <Row
-  label="DOWN $"
-  input
-  value={downDollar}
-  onChange={(v) => setDownDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)}
-/>
-          <Row
-  label="DOWN %"
-  input
-  value={downPercent.toFixed(1)}
-  onChange={(v) => {
-    const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
-    setDownDollar(Math.round(offer * (pct / 100)));
-  }}
-/>
-          <Row label="TRADE" input defaultValue="15000" />
-          <Row label="EST TAX" input defaultValue="11500" />
-        </div>
-
-      <div className="mof3-grid mid-grid">
-        <div className="mof3-panel">
-          <Row label="MILES" input defaultValue="850" />
-          <Row label="$/MI" input defaultValue="4.50" />
-          <Row label="FREIGHT" value="$3,825" />
-        </div>
-
-        <div className="mof3-panel">
-          <Row label="REPAIRS" input defaultValue="5000" />
-          <Row label="SLIP 1.5%" value="$1,881" />
-        </div>
+        <Row
+          label=""
+          value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
+          muted
+        />
       </div>
 
-      <section className="mof3-total">
-        <span>TOTAL DEAL</span>
-        <strong>$127,256</strong>
-      </section>
+      <div className="mof3-panel">
+        <Row
+          label="DOWN $"
+          input
+          value={downDollar}
+          onChange={(v) =>
+            setDownDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+          }
+        />
 
-     <section className="mof3-rate">
-  <span>RATE</span>
+        <Row
+          label="DOWN %"
+          input
+          value={downPercent.toFixed(1)}
+          onChange={(v) => {
+            const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+            setDownDollar(Math.round(offer * (pct / 100)));
+          }}
+        />
 
-  <input
-    value={rate}
-    inputMode="decimal"
-    onChange={(e) => {
-      const cleaned = e.target.value.replace(/[^0-9.]/g, "");
-      setRate(cleaned);
-    }}
-  />
+        <Row label="TRADE" input defaultValue="15000" />
+        <Row label="EST TAX" input defaultValue="11500" />
+      </div>
+    </div>
 
-  <span>%</span>
-</section>
-    
-      <section className="mof3-payments">
-        <div>
-          <span>36 MO</span>
-          <strong>{money(pay36)}</strong>
-        </div>
+    <div className="mof3-grid mid-grid">
+      <div className="mof3-panel">
+        <Row label="MILES" input defaultValue="850" />
+        <Row label="$/MI" input defaultValue="4.50" />
+        <Row label="FREIGHT" value="$3,825" />
+      </div>
 
-        <div>
-          <span>48 MO</span>
-          <strong>{money(pay48)}</strong>
-        </div>
+      <div className="mof3-panel">
+        <Row label="REPAIRS" input defaultValue="5000" />
+        <Row label="SLIP 1.5%" value="$1,881" />
+      </div>
+    </div>
 
-        <div>
-          <span>60 MO</span>
-          <strong>{money(pay60)}</strong>
-        </div>
-      </section>
+    <section className="mof3-total">
+      <span>TOTAL DEAL</span>
+      <strong>$127,256</strong>
+    </section>
 
-      <footer className="mof3-actions">
-        <button type="button">EMAIL</button>
-        <button type="button">TEXT</button>
-        <button type="button">PDF</button>
-      </footer>
+    <section className="mof3-rate">
+      <span>RATE</span>
+      <input
+        value={rate}
+        inputMode="decimal"
+        onChange={(e) => {
+          const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+          setRate(cleaned);
+        }}
+      />
+      <span>%</span>
+    </section>
+
+    <section className="mof3-payments">
+      <div>
+        <span>36 MO</span>
+        <strong>{money(pay36)}</strong>
+      </div>
+
+      <div>
+        <span>48 MO</span>
+        <strong>{money(pay48)}</strong>
+      </div>
+
+      <div>
+        <span>60 MO</span>
+        <strong>{money(pay60)}</strong>
+      </div>
+    </section>
+
+    <footer className="mof3-actions">
+      <button type="button">EMAIL</button>
+      <button type="button">TEXT</button>
+      <button type="button">PDF</button>
+    </footer>
+
 
       <style jsx>{`
         .mof3 {
