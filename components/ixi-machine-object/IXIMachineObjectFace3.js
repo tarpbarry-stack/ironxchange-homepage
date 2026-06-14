@@ -25,12 +25,14 @@ const [miles, setMiles] = useState(850);
 const [loadedRate, setLoadedRate] = useState(4.5);
 const [permits, setPermits] = useState(0);
 const [taxRate, setTaxRate] = useState("0");
+const [taxDollar, setTaxDollar] = useState(0);
 const [slipDollar, setSlipDollar] = useState(Math.round(askNumber * 0.015));
 
 const downPercent = offer ? (downDollar / offer) * 100 : 0;
 const slipPercent = offer ? (slipDollar / offer) * 100 : 0;
 
-const taxAmount = Math.round(offer * ((Number(taxRate) || 0) / 100));
+const taxPercent = offer ? (taxDollar / offer) * 100 : 0;
+const taxAmount = taxDollar;
 
 const freightCost =
   Math.round((miles * loadedRate) + permits);
@@ -183,19 +185,24 @@ function money(value) {
 </div>
 
   <div className="mof3-panel">
-    <Row
-      label="TAX %"
-      input
-      value={taxRate}
-      onChange={(v) =>
-        setTaxRate(v.replace(/[^0-9.]/g, ""))
-      }
-    />
+   <Row
+  label="TAX %"
+  input
+  value={taxPercent.toFixed(2)}
+  onChange={(v) => {
+    const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+    setTaxDollar(Math.round(offer * (pct / 100)));
+  }}
+/>
 
-    <Row
-      label="TAX"
-      value={money(taxAmount)}
-    />
+<Row
+  label="TAX $"
+  input
+  value={taxDollar}
+  onChange={(v) =>
+    setTaxDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+  }
+/>
 
     <Row
       label="SLIP %"
