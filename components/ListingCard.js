@@ -336,28 +336,25 @@ zIndex: isBoardDragging ? 50 : undefined
 
 <div className="card-body">
 
-{Number(machineFace || 1) === 2 && (
-  <div className="machine-face-test">
-    FACE 2 ACTIVE
-  </div>
-)}
+  {Number(machineFace || 1) === 2 && (
+    <div className="machine-face-test">
+      FACE 2 ACTIVE
+    </div>
+  )}
 
-<a
-  href={getListingHref(listing, from)}
-        
-       <a
-  href={getListingHref(listing, from)}
-  className="title-click-zone"
-  onClick={handleCardClick}
->
-  <div className="title-row">
-    <h3>{cleanMachineTitle(listing.title)}</h3>
+  <a
+    href={getListingHref(listing, from)}
+    className="title-click-zone"
+    onClick={handleCardClick}
+  >
+    <div className="title-row">
+      <h3>{cleanMachineTitle(listing.title)}</h3>
 
-    <h3 className="hours-inline">
-      {formatHours(listing.hours)}
-    </h3>
-  </div>
-</a>
+      <h3 className="hours-inline">
+        {formatHours(listing.hours)}
+      </h3>
+    </div>
+  </a>
 
                              <div
   className="card-board-zone"
