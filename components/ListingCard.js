@@ -296,7 +296,9 @@ zIndex: isBoardDragging ? 50 : undefined
     
 <a
   href={getListingHref(listing, from)}
-  className="photo-click-zone"
+  className={`photo-click-zone ${
+  Number(machineFace || 1) === 1 ? "" : "mof-hidden"
+}`}
   onClick={handleCardClick}
 >
   <div className="card-photo">
@@ -577,6 +579,9 @@ zIndex: isBoardDragging ? 50 : undefined
   letter-spacing: .5px;
 }
 
+.mof-hidden {
+  display: none !important;
+}
 
         .title-click-zone {
         display: block;
