@@ -308,11 +308,11 @@ window.location.href = queryString
   ? `/browse-v2?${queryString}`
   : "/browse-v2";
 
-  const visibleListings =
+const visibleListings =
   indexBoardMode === "custom"
     ? indexBoardListings
     : featuredListings;
-  ]
+
   return (
     <>
       <Head>
@@ -1189,12 +1189,12 @@ footer p {
     padding-top: 86px;
   }
 
-  .cards,
-  .benefits,
-  .ready {
-    grid-template-columns: 1fr !important;
-  }
-
+  .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 300px) !important;
+  justify-content: center;
+  gap: 22px;
+}
   .section-head,
   footer {
     flex-direction: column;
