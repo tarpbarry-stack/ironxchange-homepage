@@ -279,7 +279,7 @@ function money(value) {
 
           position: relative;
 
-          padding: 10px 6px 20px;
+          padding: 10px 6px 30px;
 
           display: flex;
           flex-direction: column;
