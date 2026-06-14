@@ -335,6 +335,16 @@ zIndex: isBoardDragging ? 50 : undefined
 </a>
 
 <div className="card-body">
+
+{Number(machineFace || 1) === 2 && (
+  <div className="machine-face-test">
+    FACE 2 ACTIVE
+  </div>
+)}
+
+<a
+  href={getListingHref(listing, from)}
+        
        <a
   href={getListingHref(listing, from)}
   className="title-click-zone"
@@ -526,6 +536,26 @@ zIndex: isBoardDragging ? 50 : undefined
 
           contain: layout paint;
         }
+
+.machine-face-test {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  z-index: 999;
+
+  padding: 4px 8px;
+
+  background: rgba(0,194,255,.9);
+  color: #00141a;
+
+  border-radius: 4px;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+
 
         .title-click-zone {
         display: block;
