@@ -635,6 +635,17 @@ return [...filtered].sort((a, b) => {
   });
 }
 
+function cycleMachineFace(listingId) {
+  const id = String(listingId);
+
+  const currentFace =
+    Number(ixiCardState[id]?.face || 1);
+
+  updateIxiCardState(id, {
+    face: currentFace === 2 ? 1 : 2
+  });
+}
+  
  function toggleColorFilter(color) {
   setIxiColorFilters(current => {
     if (current.includes(color)) {
