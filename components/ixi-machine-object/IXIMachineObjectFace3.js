@@ -279,7 +279,7 @@ function money(value) {
           min-height: 378px;
           max-height: 378px;
 
-          padding: 10px 12px 30px;
+          padding: 10px 6px 30px;
 
           display: flex;
           flex-direction: column;
