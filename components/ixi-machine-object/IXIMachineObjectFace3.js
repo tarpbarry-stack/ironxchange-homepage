@@ -294,7 +294,7 @@ function money(value) {
           height: 16px;
 
           position: relative;
-          top: -5px;
+          top: 3px;
 
           display: flex;
           align-items: center;
