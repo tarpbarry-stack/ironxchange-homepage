@@ -22,6 +22,9 @@ from "./ixi-machine-object/IXIMachineObjectFace2";
 import IXIMachineObjectFace3
 from "./ixi-machine-object/IXIMachineObjectFace3";
 
+import IXIMachineObjectFace4
+from "./ixi-machine-object/IXIMachineObjectFace4";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -291,7 +294,13 @@ zIndex: isBoardDragging ? 50 : undefined
   }}
 >
 
-{Number(machineFace || 1) === 2 ? null : (
+{Number(machineFace || 1) === 2 ? (
+  <IXIMachineObjectFace2 listing={listing} />
+) : Number(machineFace || 1) === 3 ? (
+  <IXIMachineObjectFace3 listing={listing} />
+) : Number(machineFace || 1) === 4 ? (
+  <IXIMachineObjectFace4 listing={listing} />
+) : (
   <>
     
 <a
