@@ -13,6 +13,8 @@ export default function IXIMachineRail({
   onCycleColor,
   onCycleOutline,
   onEndRelationship,
+  machineFace = 1,
+  onCycleMachineFace,
   onToggleSaved,
   armedDestination,
   onSendToArmedDestination
@@ -47,9 +49,10 @@ export default function IXIMachineRail({
   type="button"
   className="rail-zone rail-flip"
   onClick={e => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
+  e.preventDefault();
+  e.stopPropagation();
+  onCycleMachineFace?.(listing);
+}}
   aria-label="Flip card"
 />
 
