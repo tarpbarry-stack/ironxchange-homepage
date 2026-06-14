@@ -285,13 +285,10 @@ function money(value) {
           flex-direction: column;
           gap: 7px;
 
-          background:
-            radial-gradient(circle at top, rgba(255,196,0,.055), transparent 42%),
-            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
-            #141414;
-
-          color: #f2f2f2;
-        }
+  
+  background: transparent;
+}
+        
 
         .mof3-head {
           height: 16px;
