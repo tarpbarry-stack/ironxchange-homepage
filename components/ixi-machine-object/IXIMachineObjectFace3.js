@@ -532,36 +532,6 @@ function money(value) {
           font-weight: 950;
         }
 
-        .mof-actions {
-  position: absolute;
-
-  left: 16px;
-  right: 16px;
-  bottom: 6px;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-}
-
-        .mof3-actions button {
-          height: 23px;
-
-          border: 1px solid rgba(255,196,0,.22);
-          border-radius: 6px;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
-            #101010;
-
-          color: #FFC400;
-
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .5px;
-
-          cursor: pointer;
-        }
       `}</style>
     </section>
   );
