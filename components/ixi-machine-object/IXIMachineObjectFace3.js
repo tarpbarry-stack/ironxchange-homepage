@@ -114,7 +114,6 @@ function money(value) {
           <Row label="TRADE" input defaultValue="15000" />
           <Row label="EST TAX" input defaultValue="11500" />
         </div>
-      </div>
 
       <div className="mof3-grid mid-grid">
         <div className="mof3-panel">
