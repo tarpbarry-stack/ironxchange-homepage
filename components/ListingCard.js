@@ -277,8 +277,7 @@ function handleCardClick() {
     from
   });
 }
-
-return (
+  
   return (
   <div
     data-listing-card-id={id}
