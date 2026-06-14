@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+import IXIMachineObjectActions from "./IXIMachineObjectActions";
+
 export default function IXIMachineObjectFace3({ listing = {} }) {
   const publicData =
     listing.publicData ||
@@ -263,11 +265,7 @@ function money(value) {
       </div>
     </section>
 
-    <footer className="mof3-actions">
-      <button type="button">EMAIL</button>
-      <button type="button">TEXT</button>
-      <button type="button">PDF</button>
-    </footer>
+    <IXIMachineObjectActions />
 
 
       <style jsx>{`
@@ -278,6 +276,8 @@ function money(value) {
           height: 378px;
           min-height: 378px;
           max-height: 378px;
+
+          position: relative;
 
           padding: 10px 6px 30px;
 
@@ -532,12 +532,17 @@ function money(value) {
           font-weight: 950;
         }
 
-        .mof3-actions {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 7px;
-          margin-top: auto;
-        }
+        .mof-actions {
+  position: absolute;
+
+  left: 16px;
+  right: 16px;
+  bottom: 6px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
 
         .mof3-actions button {
           height: 23px;
