@@ -55,7 +55,7 @@ export default function Footer() {
   }
 
   .footer img {
-    height: 30px;
+    height: 24px;
     width: auto;
     display: block;
 
