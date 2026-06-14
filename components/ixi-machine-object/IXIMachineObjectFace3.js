@@ -126,7 +126,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         .mof3-panel {
           min-width: 0;
-          padding: 7px 7px 6px;
+          padding: 8px 8px 7px;
 
           border: 1px solid rgba(255,255,255,.07);
           border-radius: 7px;
@@ -140,12 +140,12 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
         }
 
         :global(.mof3-row) {
-          min-height: 10px;
+          min-height: 17px;
 
           display: grid;
-          grid-template-columns: 52px minmax(0, 1fr);
+          grid-template-columns: 54px minmax(0, 1fr);
           align-items: center;
-          gap: 6px;
+          gap: 5px;
 
           border-bottom: 1px solid rgba(255,255,255,.035);
         }
@@ -156,7 +156,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         :global(.mof3-label) {
           color: rgba(255,255,255,.43);
-          font-size: 6px;
+          font-size: 7.4px;
           font-weight: 950;
           letter-spacing: .38px;
           text-transform: uppercase;
@@ -165,7 +165,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         :global(.mof3-value) {
           color: rgba(255,255,255,.86);
-          font-size: 6px;
+          font-size: 8px;
           font-weight: 950;
           text-align: right;
           white-space: nowrap;
@@ -175,32 +175,18 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         :global(.mof3-value.muted) {
           color: rgba(255,196,0,.86);
-          font-size: 6px;
+          font-size: 7.6px;
         }
 
-       :global(.mof3-input) {
-  width: 58px;
-  min-width: 58px;
-  max-width: 58px;
-
+      :global(.mof3-input) {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
   height: 13px;
-
-  background: #0b0b0b;
-
-  border: 1px solid rgba(255,255,255,.06);
-
-  color: rgba(255,255,255,.88);
-
+  background: #050505;
+  font-size: 7.6px;
   padding: 0 3px;
-
-  font-size: 7px;
-  font-weight: 900;
-
-  text-align: right;
-
   justify-self: end;
-
-  outline: none;
 }
 
         :global(.mof3-input:focus) {
