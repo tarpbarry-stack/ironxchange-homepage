@@ -307,13 +307,14 @@ captureIXEvent("homepage_search_performed", {
 window.location.href = queryString
   ? `/browse-v2?${queryString}`
   : "/browse-v2";
+}
 
 const visibleListings =
   indexBoardMode === "custom"
     ? indexBoardListings
     : featuredListings;
 
-  return (
+return (
     <>
       <Head>
         <title>IronXchange - Free Heavy Equipment Marketplace</title>
