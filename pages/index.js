@@ -312,7 +312,7 @@ window.location.href = queryString
   indexBoardMode === "custom"
     ? indexBoardListings
     : featuredListings;
-  
+  ]
   return (
     <>
       <Head>
