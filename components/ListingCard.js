@@ -64,6 +64,9 @@ onPause,
 onReactivate,
 onDelete,
 
+machineFace = 1,
+onCycleMachineFace,
+
 onSendFront,
 onSendBack,
 
@@ -474,12 +477,13 @@ zIndex: isBoardDragging ? 50 : undefined
   saved={saved}
   boardColor={boardColor}
   boardOutline={boardOutline}
+  machineFace={machineFace}
+  onCycleMachineFace={onCycleMachineFace}
   onSendFront={onSendFront}
   onSendBack={onSendBack}
-  onCycleColor={cycleBoardColor}
-  onCycleOutline={cycleBoardOutline}
-  onEndRelationship={endIxiRelationship}
-  onToggleSaved={toggleSave}
+  onCycleColor={...}
+  onCycleOutline={...}
+  onToggleSaved={onToggleSaved}
 
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
