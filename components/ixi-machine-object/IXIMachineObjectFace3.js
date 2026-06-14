@@ -14,14 +14,15 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
 const [offer, setOffer] = useState(askNumber || 140000);
 const [downDollar, setDownDollar] = useState(Math.round((askNumber || 140000) * 0.15));
-const [rate, setRate] = useState(7.5);
+const [rate, setRate] = useState("7.50");
 
 const downPercent = offer ? (downDollar / offer) * 100 : 0;
 
 const financedAmount = Math.max(offer - downDollar, 0);
-
+const rateNumber = Number(rate) || 0;
+  
 function payment(months) {
-  const monthlyRate = rate / 100 / 12;
+  const monthlyRate = rateNumber / 100 / 12;
 
   if (!monthlyRate) {
     return financedAmount / months;
@@ -104,12 +105,19 @@ function money(value) {
         <strong>$127,256</strong>
       </section>
 
-      <section className="mof3-rate">
+     <section className="mof3-rate">
   <span>RATE</span>
+
   <input
     value={rate}
-    onChange={(e) => setRate(Number(e.target.value.replace(/[^0-9.]/g, "")) || 0)}
+    inputMode="decimal"
+    onChange={(e) => {
+      const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+      setRate(cleaned);
+    }}
   />
+
+  <span>%</span>
 </section>
     
       <section className="mof3-payments">
@@ -313,6 +321,36 @@ function money(value) {
           font-weight: 950;
           letter-spacing: -.2px;
         }
+
+        .mof3-rate {
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: -2px;
+}
+
+.mof3-rate span {
+  color: rgba(255,255,255,.48);
+  font-size: 7.6px;
+  font-weight: 950;
+  letter-spacing: .4px;
+}
+
+.mof3-rate input {
+  width: 38px;
+  height: 13px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,196,0,.42);
+  background: transparent;
+  color: #FFC400;
+  padding: 0 2px;
+  font-size: 8px;
+  font-weight: 950;
+  text-align: center;
+  outline: none;
+}
 
         .mof3-payments {
           height: 25px;
