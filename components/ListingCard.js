@@ -286,7 +286,6 @@ function handleCardClick() {
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
     } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
-    {...(dragHandleProps || {})}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
