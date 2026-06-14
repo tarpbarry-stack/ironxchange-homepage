@@ -25,7 +25,7 @@ export default function IXIMachineObjectActions({
           grid-template-columns: repeat(3, 1fr);
           gap: 7px;
           margin-top: auto;
-          padding-bottom: 6px;
+          padding-bottom: 0px;
         }
 
         .mof-actions button {
