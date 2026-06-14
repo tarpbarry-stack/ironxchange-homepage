@@ -1,70 +1,210 @@
-export default function IXIMachineObjectFace2({
-  listing
-}) {
+export default function IXIMachineObjectFace2({ listing = {} }) {
+  const publicData = listing.publicData || listing.attributes?.publicData || {};
+
+  const sellerLogo =
+    listing.sellerLogo ||
+    listing.profileImage ||
+    publicData.sellerLogo ||
+    "";
+
+  const sellerName =
+    listing.sellerCompany ||
+    listing.companyName ||
+    listing.sellerName ||
+    listing.authorName ||
+    "IRONXCHANGE SELLER";
+
+  const serial =
+    listing.serialNumber ||
+    publicData.serialNumber ||
+    "—";
+
+  const stock =
+    listing.stockNumber ||
+    publicData.stockNumber ||
+    "—";
+
+  const year = listing.year || publicData.year || "";
+  const make = listing.make || publicData.make || "";
+  const model = listing.model || publicData.model || "";
+
+  const hours =
+    listing.hours ||
+    publicData.hours ||
+    "";
+
+  const price =
+    listing.price ||
+    publicData.price ||
+    "Call for price";
+
+  const description =
+    listing.description ||
+    publicData.description ||
+    publicData.details ||
+    "Machine bio not listed.";
+
   return (
-    <div className="ixi-machine-object-face2">
-
-      <div className="face2-header">
-        SELLER
+    <section className="mof2">
+      <div className="mof2-logo-wrap">
+        {sellerLogo ? (
+          <img src={sellerLogo} alt={sellerName} />
+        ) : (
+          <div className="mof2-logo-fallback">{sellerName}</div>
+        )}
       </div>
 
-      <div className="face2-seller">
-        {listing.sellerName ||
-         listing.authorName ||
-         "Seller"}
+      <div className="mof2-plate">
+        <span>SN {serial}</span>
+        <span>STK {stock}</span>
       </div>
 
-      <div className="face2-grid">
+      <h2>
+        {[year, make, model].filter(Boolean).join(" ")}
+      </h2>
 
-        <span>Serial #</span>
-        <strong>
-          {listing.serialNumber ||
-           listing.publicData?.serialNumber ||
-           "—"}
-        </strong>
-
-        <span>Stock #</span>
-        <strong>
-          {listing.stockNumber ||
-           listing.publicData?.stockNumber ||
-           "—"}
-        </strong>
-
-        <span>Year</span>
-        <strong>
-          {listing.year ||
-           listing.publicData?.year ||
-           "—"}
-        </strong>
-
-        <span>Make</span>
-        <strong>
-          {listing.make || "—"}
-        </strong>
-
-        <span>Model</span>
-        <strong>
-          {listing.model || "—"}
-        </strong>
-
-        <span>Hours</span>
-        <strong>
-          {listing.hours || "—"}
-        </strong>
-
-        <span>Price</span>
-        <strong>
-          {listing.price || "—"}
-        </strong>
-
+      <div className="mof2-hours">
+        {hours ? `${hours} HRS` : "HOURS NOT LISTED"}
       </div>
 
-      <div className="face2-description">
-        {listing.description ||
-         listing.publicData?.description ||
-         "No description available."}
+      <div className="mof2-price">{price}</div>
+
+      <p className="mof2-bio">{description}</p>
+
+      <div className="mof2-actions">
+        <button type="button">CALL</button>
+        <button type="button">MSG</button>
+        <button type="button">TEXT</button>
       </div>
 
-    </div>
+      <style jsx>{`
+        .mof2 {
+          height: 378px;
+          padding: 18px 16px 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          background:
+            radial-gradient(circle at top, rgba(255,196,0,.05), transparent 42%),
+            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+            #141414;
+          color: #f2f2f2;
+        }
+
+        .mof2-logo-wrap {
+          height: 54px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 10px;
+        }
+
+        .mof2-logo-wrap img {
+          max-height: 46px;
+          max-width: 150px;
+          object-fit: contain;
+        }
+
+        .mof2-logo-fallback {
+          color: rgba(255,255,255,.68);
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: .8px;
+          text-transform: uppercase;
+        }
+
+        .mof2-plate {
+          width: 100%;
+          min-height: 28px;
+          padding: 6px 9px;
+          margin-bottom: 13px;
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 5px;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,.10), rgba(255,255,255,.025)),
+            #1b1b1b;
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.12),
+            inset 0 -1px 0 rgba(0,0,0,.38);
+        }
+
+        .mof2-plate span {
+          color: rgba(255,255,255,.64);
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing: .62px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        h2 {
+          margin: 0;
+          max-width: 100%;
+          color: #f2f2f2;
+          font-size: 18px;
+          font-weight: 950;
+          line-height: 1.05;
+          letter-spacing: -.35px;
+          text-transform: uppercase;
+        }
+
+        .mof2-hours {
+          margin-top: 5px;
+          color: rgba(255,255,255,.52);
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: .38px;
+        }
+
+        .mof2-price {
+          margin-top: 9px;
+          color: #FFC400;
+          font-size: 20px;
+          font-weight: 950;
+          letter-spacing: -.25px;
+        }
+
+        .mof2-bio {
+          width: 100%;
+          flex: 1;
+          margin: 12px 0 12px;
+          padding: 12px 10px;
+          overflow: hidden;
+          color: rgba(255,255,255,.70);
+          font-size: 11px;
+          font-weight: 700;
+          line-height: 1.38;
+          text-align: left;
+          border-top: 1px solid rgba(255,255,255,.055);
+          border-bottom: 1px solid rgba(255,255,255,.055);
+        }
+
+        .mof2-actions {
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 7px;
+        }
+
+        .mof2-actions button {
+          height: 27px;
+          border: 1px solid rgba(255,196,0,.22);
+          border-radius: 7px;
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
+            #101010;
+          color: #FFC400;
+          font-size: 9px;
+          font-weight: 950;
+          letter-spacing: .5px;
+          cursor: pointer;
+        }
+      `}</style>
+    </section>
   );
 }
