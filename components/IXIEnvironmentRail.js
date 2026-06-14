@@ -7,7 +7,7 @@ const RAIL_ITEMS = [
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
   { label: "DASHBOARD", href: "/account", access: "account" },
   { label: "INVENTORY", href: "/account/my-listings-v2", access: "seller" },
-  { label: "LAUNCH", href: "/launch", access: "seller" },
+  { label: "LAUNCH", href: "/live", access: "seller" },
   { label: "POST FREE", href: "/post", access: "always", postFree: true }
 ];
 
