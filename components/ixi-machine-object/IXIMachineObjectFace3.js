@@ -407,7 +407,9 @@ function money(value) {
           font-size: 7.8px;
           font-weight: 950;
           letter-spacing: .55px;
-        }
+          position: relative;
+          top: -4px;
+}
 
        .mof3-total strong {
   margin-top: 0;
@@ -420,7 +422,7 @@ function money(value) {
   line-height: 1;
 
   position: relative;
-  top: 2px;
+  top: -2px;
 }
 
         .mof3-rate {
