@@ -408,7 +408,7 @@ function money(value) {
           font-weight: 950;
           letter-spacing: .55px;
           position: relative;
-          top: -6px;
+          top: -5px;
 }
 
        .mof3-total strong {
