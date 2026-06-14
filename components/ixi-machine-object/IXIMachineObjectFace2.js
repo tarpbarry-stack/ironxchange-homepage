@@ -1,3 +1,5 @@
+import IXIMachineObjectActions from "./IXIMachineObjectActions";
+
 export default function IXIMachineObjectFace2({ listing = {} }) {
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
@@ -71,11 +73,7 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
 
       <p className="mof2-bio">{description}</p>
 
-      <div className="mof2-actions">
-        <button type="button">CALL</button>
-        <button type="button">MSG</button>
-        <button type="button">TEXT</button>
-      </div>
+     <IXIMachineObjectActions />
 
       <style jsx>{`
         .mof2 {
