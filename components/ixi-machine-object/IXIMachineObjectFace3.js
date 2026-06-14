@@ -140,46 +140,47 @@ function money(value) {
       </div>
     </div>
 
-    <div className="mof3-grid mid-grid">
-      <div className="mof3-panel">
-        <Row label="MILES" input defaultValue="850" />
-        <Row label="$/MI" input defaultValue="4.50" />
-        <Row label="FREIGHT" value="$3,825" />
-      </div>
+   <div className="mof3-grid mid-grid">
+  <div className="mof3-panel">
+    <Row label="MILES" input defaultValue="850" />
+    <Row label="$/MI" input defaultValue="4.50" />
+    <Row label="FREIGHT" value="$3,825" />
+  </div>
 
-      <div className="mof3-panel">
-  <Row
-    label="TAX %"
-    input
-    value={taxRate}
-    onChange={(v) =>
-      setTaxRate(v.replace(/[^0-9.]/g, ""))
-    }
-  />
+  <div className="mof3-panel">
+    <Row
+      label="TAX %"
+      input
+      value={taxRate}
+      onChange={(v) =>
+        setTaxRate(v.replace(/[^0-9.]/g, ""))
+      }
+    />
 
-  <Row
-    label="TAX"
-    value={money(taxAmount)}
-  />
+    <Row
+      label="TAX"
+      value={money(taxAmount)}
+    />
 
-  <Row
-    label="SLIP %"
-    input
-    value={slipPercent.toFixed(1)}
-    onChange={(v) => {
-      const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
-      setSlipDollar(Math.round(offer * (pct / 100)));
-    }}
-  />
+    <Row
+      label="SLIP %"
+      input
+      value={slipPercent.toFixed(1)}
+      onChange={(v) => {
+        const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+        setSlipDollar(Math.round(offer * (pct / 100)));
+      }}
+    />
 
-  <Row
-    label="SLIP $"
-    input
-    value={slipDollar}
-    onChange={(v) =>
-      setSlipDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
-    }
-  />
+    <Row
+      label="SLIP $"
+      input
+      value={slipDollar}
+      onChange={(v) =>
+        setSlipDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+      }
+    />
+  </div>
 </div>
     <section className="mof3-total">
       <span>TOTAL DEAL</span>
