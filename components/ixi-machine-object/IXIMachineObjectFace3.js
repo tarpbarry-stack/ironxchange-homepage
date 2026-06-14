@@ -86,7 +86,7 @@ function money(value) {
 
     <div className="mof3-machine-line">
       {[year, make, model].filter(Boolean).join(" ")}
-      {hours ? ` • ${hours} HRS` : ""}
+      {hours ? ` • ${String(hours).replace(/hrs|hours/gi, "").trim()} HRS` : ""}
     </div>
 
     <div className="mof3-grid top-grid">
@@ -293,6 +293,9 @@ function money(value) {
         .mof3-head {
           height: 16px;
 
+          position: relative;
+          top: -5px;
+
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -428,6 +431,9 @@ function money(value) {
         .mof3-total {
           height: 25px;
 
+          position: relative;
+          top: 5px;
+
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -474,7 +480,7 @@ function money(value) {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  margin-top: -2px;
+  margin-top: 3px;
 }
 
 .mof3-rate span {
@@ -500,6 +506,9 @@ function money(value) {
 
         .mof3-payments {
           height: 25px;
+
+          position: relative;
+          top: 5px;
 
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
