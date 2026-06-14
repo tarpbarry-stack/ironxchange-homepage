@@ -389,7 +389,7 @@ function money(value) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-
+          
           border: 1px solid rgba(255,196,0,.18);
           border-radius: 8px;
 
@@ -409,13 +409,19 @@ function money(value) {
           letter-spacing: .55px;
         }
 
-        .mof3-total strong {
-          margin-top: 3px;
-          color: #FFC400;
-          font-size: 18px;
-          font-weight: 950;
-          letter-spacing: -.2px;
-        }
+       .mof3-total strong {
+  margin-top: 0;
+
+  color: #FFC400;
+
+  font-size: 15px;
+  font-weight: 950;
+
+  line-height: 1;
+
+  position: relative;
+  top: -4px;
+}
 
         .mof3-rate {
   height: 18px;
