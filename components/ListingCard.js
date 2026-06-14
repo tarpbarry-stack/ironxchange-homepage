@@ -344,8 +344,8 @@ zIndex: isBoardDragging ? 50 : undefined
     listing={listing}
   />
 ) : (
-
-  <a
+  <>
+    <a
     href={getListingHref(listing, from)}
     className="title-click-zone"
     onClick={handleCardClick}
@@ -478,11 +478,12 @@ zIndex: isBoardDragging ? 50 : undefined
            </div>
         ) : null}
 
-      </div>
+           </div>
 
+      </>
     )}
 
-    </div>
+</div>
 
          
 <IXIMachineRail
