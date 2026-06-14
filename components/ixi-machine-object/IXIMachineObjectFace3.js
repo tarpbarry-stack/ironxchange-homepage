@@ -189,19 +189,31 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
   justify-self: end;
 }
 
-        :global(.mof3-input:focus) {
-          border-color: rgba(255,196,0,.42);
-          box-shadow: 0 0 0 1px rgba(255,196,0,.10);
-        }
+       :global(.mof3-input:focus) {
+  border-bottom-color: rgba(255,196,0,.72);
+  box-shadow: 0 3px 8px rgba(255,196,0,.10);
+}
+
         :global(.mof3-input) {
-  width: 44px;
-  min-width: 44px;
-  max-width: 44px;
-  height: 10px;
-  background: #050505;
-  font-size: 7px;
-  padding: 0 2px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  height: 14px;
+
   justify-self: end;
+
+  border: 0;
+  border-bottom: 2px solid rgba(255,255,255,.16);
+  border-radius: 0;
+
+  background: transparent;
+  color: rgba(255,255,255,.86);
+
+  padding: 0 2px;
+  font-size: 7.8px;
+  font-weight: 950;
+  text-align: right;
+  outline: none;
 }
 
         .mof3-total {
