@@ -193,30 +193,7 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
           border-bottom: 1px solid rgba(255,255,255,.055);
         }
 
-        .mof-actions {
-  position: absolute;
 
-  left: 16px;
-  right: 16px;
-  bottom: 6px;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-}
-        .mof2-actions button {
-          height: 27px;
-          border: 1px solid rgba(255,196,0,.22);
-          border-radius: 7px;
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
-            #101010;
-          color: #FFC400;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .5px;
-          cursor: pointer;
-        }
       `}</style>
     </section>
   );
