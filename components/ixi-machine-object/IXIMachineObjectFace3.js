@@ -100,13 +100,17 @@ function money(value) {
           }
         />
 
-        <Row label="DIFF" value={money(offer - askNumber)} muted />
-
         <Row
-          label=""
-          value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
-          muted
-        />
+  label="DIFF"
+  value={money(offer - askNumber)}
+  muted
+/>
+
+<Row
+  label="DIFF %"
+  value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
+  muted
+/>
       </div>
 
       <div className="mof3-panel">
