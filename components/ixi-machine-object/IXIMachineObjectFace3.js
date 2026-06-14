@@ -140,7 +140,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
         }
 
         .mof3-row {
-          min-height: 19px;
+          min-height: 10px;
 
           display: grid;
           grid-template-columns: 52px minmax(0, 1fr);
@@ -156,7 +156,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         .mof3-label {
           color: rgba(255,255,255,.43);
-          font-size: 7.6px;
+          font-size: 6px;
           font-weight: 950;
           letter-spacing: .38px;
           text-transform: uppercase;
@@ -165,7 +165,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         .mof3-value {
           color: rgba(255,255,255,.86);
-          font-size: 8.6px;
+          font-size: 6px;
           font-weight: 950;
           text-align: right;
           white-space: nowrap;
@@ -175,14 +175,14 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
 
         .mof3-value.muted {
           color: rgba(255,196,0,.86);
-          font-size: 8px;
+          font-size: 6px;
         }
 
         .mof3-input {
           box-sizing: border-box;
 
-          width: 100%;
-          height: 15px;
+          width: 54px;
+          height: 8px;
 
           border: 1px solid rgba(255,255,255,.08);
           border-radius: 3px;
@@ -205,7 +205,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
         }
 
         .mof3-total {
-          height: 45px;
+          height: 25px;
 
           display: flex;
           flex-direction: column;
@@ -240,7 +240,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
         }
 
         .mof3-payments {
-          height: 43px;
+          height: 25px;
 
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
