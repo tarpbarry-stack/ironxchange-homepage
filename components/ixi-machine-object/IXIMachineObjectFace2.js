@@ -1,6 +1,9 @@
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 
-export default function IXIMachineObjectFace2({ listing = {} }) {
+export default function IXIMachineObjectFace2({
+  listing = {},
+  dragHandleProps
+}) {
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
   const sellerLogo =
@@ -47,7 +50,10 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
     "Machine bio not listed.";
 
   return (
-    <section className="mof2">
+    <section
+  className="mof2"
+  {...(dragHandleProps || {})}
+>
       <div className="mof2-logo-wrap">
         {sellerLogo ? (
           <img src={sellerLogo} alt={sellerName} />
