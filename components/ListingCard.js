@@ -481,8 +481,8 @@ zIndex: isBoardDragging ? 50 : undefined
   onCycleMachineFace={onCycleMachineFace}
   onSendFront={onSendFront}
   onSendBack={onSendBack}
-  onCycleColor={...}
-  onCycleOutline={...}
+  onCycleColor={onCycleColor}
+  onCycleOutline={onCycleOutline}
   onToggleSaved={onToggleSaved}
 
   armedDestination={armedDestination}
