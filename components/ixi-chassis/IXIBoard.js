@@ -16,7 +16,8 @@ export default function IXIBoard({
   armedDestination,
   sendMachineToArmedDestination,
   draggingListingId,
-  ghostListingId
+  ghostListingId,
+  getSellerListingCardProps
 }) {
   return (
     <SortableContext
@@ -26,6 +27,11 @@ export default function IXIBoard({
     >
       {items.map(item => {
         const id = String(getListingId(item));
+
+        const sellerCardProps =
+          typeof getSellerListingCardProps === "function"
+            ? getSellerListingCardProps(item)
+            : {};
 
         return (
           <IXISortableMachineCard
@@ -40,6 +46,7 @@ export default function IXIBoard({
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(item)}
                 from="saved"
+                {...sellerCardProps}
                 ixiState={
                   ixiCardState[id] || {
                     color: "none",
