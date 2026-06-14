@@ -183,9 +183,9 @@ function money(value) {
   </div>
 </div>
     <section className="mof3-total">
-      <span>TOTAL DEAL</span>
-      <strong>$127,256</strong>
-    </section>
+  <span>TOTAL DEAL</span>
+  <strong>{money(totalDeal)}</strong>
+</section>
 
     <section className="mof3-rate">
       <span>RATE</span>
