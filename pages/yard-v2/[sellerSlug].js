@@ -1309,6 +1309,16 @@ export default function SellerYardV2Page() {
 
             return (
               <main>
+
+ <section className="saved-environment-shell">
+                    <IXIEnvironmentRail
+                      activeEnvironment="IXI SELLER YARD"
+                      hasAccount={!!sdk}
+                      hasRelationship={true}
+                      hasInventory={false}
+                    />
+                  </section>
+              
                 <section className="yard-shell">
                   <section className="yard-head">
                     <div className="yard-identity">
@@ -1402,16 +1412,6 @@ export default function SellerYardV2Page() {
                       <strong>{sellerListings.length}</strong>
                       <span>Active Machines</span>
                     </div>
-                  </section>
-
-
-                  <section className="saved-environment-shell">
-                    <IXIEnvironmentRail
-                      activeEnvironment="IXI SELLER YARD"
-                      hasAccount={!!sdk}
-                      hasRelationship={true}
-                      hasInventory={false}
-                    />
                   </section>
 
                   <IXIChassis>
