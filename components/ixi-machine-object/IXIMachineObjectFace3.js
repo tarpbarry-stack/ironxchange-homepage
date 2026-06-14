@@ -85,15 +85,12 @@ function money(value) {
 
   <Row
     label=""
-    value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
+    value={
+      `${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`
+    }
     muted
   />
 </div>
-  label=""
-  value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
-  muted
-/>
-        </div>
 
         <div className="mof3-panel">
           <Row
