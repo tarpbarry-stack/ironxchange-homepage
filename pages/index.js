@@ -301,13 +301,12 @@ function sendListingToBack(listing) {
 captureIXEvent("homepage_search_performed", {
   query: q,
   category,
-  destination: queryString ? `/browse?${queryString}` : "/browse"
+  destination: queryString ? `/browse-v2?${queryString}` : "/browse-v2"
 });
 
 window.location.href = queryString
-  ? `/browse?${queryString}`
-  : "/browse";
-}
+  ? `/browse-v2?${queryString}`
+  : "/browse-v2";
 
   const visibleListings =
   indexBoardMode === "custom"
