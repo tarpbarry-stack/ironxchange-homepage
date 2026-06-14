@@ -508,11 +508,6 @@ zIndex: isBoardDragging ? 50 : undefined
 
   </>
 )}
-
-{Number(machineFace || 1) === 2 && (
-  <IXIMachineObjectFace2 listing={listing} />
-)}
-
          
 <IXIMachineRail
   listing={listing}
