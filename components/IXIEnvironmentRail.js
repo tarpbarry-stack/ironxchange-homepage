@@ -8,7 +8,7 @@ const RAIL_ITEMS = [
   { label: "DASHBOARD", href: "/account", access: "account" },
   { label: "INVENTORY", href: "/account/my-listings-v2", access: "seller" },
   { label: "LAUNCH", href: "/live", access: "seller" },
-  { label: "POST FREE", href: "/post", access: "always", postFree: true }
+  { label: "POST FREE", href: "/post-free", access: "always", postFree: true }
 ];
 
 function getDashWidth(label) {
