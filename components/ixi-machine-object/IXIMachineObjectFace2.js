@@ -86,6 +86,8 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
   min-height: 378px;
   max-height: 378px;
 
+  position: relative;
+
   padding: 14px 14px 30px;
 
   display: flex;
@@ -191,16 +193,16 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
           border-bottom: 1px solid rgba(255,255,255,.055);
         }
 
-        .mof2-actions {
-  box-sizing: border-box;
-  width: 100%;
+        .mof-actions {
+  position: absolute;
+
+  left: 16px;
+  right: 16px;
+  bottom: 6px;
 
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 7px;
-
-  margin-top: auto;
-  padding: 0 0 8px;
 }
         .mof2-actions button {
           height: 27px;
