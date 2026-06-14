@@ -11,7 +11,10 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
     publicData.price ||
     "$148,000";
   const askNumber = Number(String(ask).replace(/[^0-9.]/g, "")) || 0;
-
+const year = listing.year || publicData.year || "";
+const make = listing.make || publicData.make || "";
+const model = listing.model || publicData.model || "";
+const hours = listing.hours || publicData.hours || "";
 const [offer, setOffer] = useState(askNumber || 140000);
 const [downDollar, setDownDollar] = useState(Math.round((askNumber || 140000) * 0.15));
 const [rate, setRate] = useState("7.50");
@@ -54,16 +57,27 @@ function money(value) {
         <strong>IXI DEAL SHEET™</strong>
       </header>
 
+    <div className="mof3-machine-line">
+  {[year, make, model].filter(Boolean).join(" ")}
+  {hours ? ` • ${hours} HRS` : ""}
+</div>
+
       <div className="mof3-grid top-grid">
         <div className="mof3-panel">
           <Row label="ASK" value={ask} />
           <Row
-  label="OFFER"
+  <Row label="BID"
   input
   value={offer}
   onChange={(v) => setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)}
 />
-          <Row label="DIFF" value="-$8,000  -5.4%" muted />
+         <Row label="DIFF" value={money(askNumber - offer)} muted />
+
+<Row
+  label=""
+  value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
+  muted
+/>
         </div>
 
         <div className="mof3-panel">
@@ -188,6 +202,20 @@ function money(value) {
           font-weight: 950;
           letter-spacing: .55px;
         }
+
+        .mof3-machine-line {
+  margin-top: -3px;
+  margin-bottom: 2px;
+  color: rgba(255,255,255,.58);
+  font-size: 7.8px;
+  font-weight: 950;
+  letter-spacing: .45px;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
         .mof3-grid {
           display: grid;
