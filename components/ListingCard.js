@@ -349,7 +349,11 @@ zIndex: isBoardDragging ? 50 : undefined
   <IXIMachineObjectFace2
     listing={listing}
   />
-) : (
+ ) : Number(machineFace || 1) === 3 ? (
+  <IXIMachineObjectFace3
+    listing={listing}
+  />
+ ) : (
   <>
     <a
     href={getListingHref(listing, from)}
