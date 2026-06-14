@@ -287,6 +287,9 @@ return (
 zIndex: isBoardDragging ? 50 : undefined
   }}
 >
+
+{Number(machineFace || 1) === 2 ? null : (
+  <>
     
 <a
   href={getListingHref(listing, from)}
@@ -483,7 +486,14 @@ zIndex: isBoardDragging ? 50 : undefined
       </>
     )}
 
-</div>
+    </div>
+
+  </>
+)}
+
+{Number(machineFace || 1) === 2 && (
+  <IXIMachineObjectFace2 listing={listing} />
+)}
 
          
 <IXIMachineRail
