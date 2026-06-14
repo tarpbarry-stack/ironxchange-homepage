@@ -438,12 +438,21 @@ setIxiCardState(remoteIxiState);
     )
     .map(([id]) => String(id));
 
-  return activeListings.filter(item =>
+    return activeListings.filter(item =>
     touchedIds.includes(String(getListingId(item)))
   );
 }, [listings, ixiCardState]);
 
-  useEffect(() => {
+const containerStateKey = useMemo(() => {
+  return workspaceListings
+    .map(item => {
+      const id = String(getListingId(item));
+      return `${id}:${ixiCardState[id]?.container || "board"}`;
+    })
+    .join("|");
+}, [workspaceListings, ixiCardState]);
+
+useEffect(() => {
   if (!workspaceListings.length) return;
 
   const nextContainers = {
@@ -469,7 +478,7 @@ setIxiCardState(remoteIxiState);
   });
 
   setMachineContainers(nextContainers);
-}, [workspaceListings, ixiCardState]);
+}, [containerStateKey]);
 
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -635,8 +644,11 @@ return [...filtered].sort((a, b) => {
   });
 }
 
-function cycleMachineFace(listingId) {
-  const id = String(listingId);
+function cycleMachineFace(listingOrId) {
+  const id =
+    typeof listingOrId === "object"
+      ? String(getListingId(listingOrId))
+      : String(listingOrId);
 
   const currentFace =
     Number(ixiCardState[id]?.face || 1);
