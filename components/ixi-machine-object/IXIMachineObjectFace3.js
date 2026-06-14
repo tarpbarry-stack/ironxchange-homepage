@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 
-export default function IXIMachineObjectFace3({ listing = {} }) {
+export default function IXIMachineObjectFace3({
+  listing = {},
+  dragHandleProps
+}) {
   const publicData =
     listing.publicData ||
     listing.attributes?.publicData ||
@@ -78,7 +81,10 @@ function money(value) {
 }
 
   return (
-  <section className="mof3">
+  <section
+  className="mof3"
+  {...(dragHandleProps || {})}
+>
     <header className="mof3-head">
       <span>CAT FINANCIAL™</span>
       <strong>IXI DEAL SHEET™</strong>
