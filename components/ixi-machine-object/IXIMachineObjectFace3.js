@@ -148,11 +148,39 @@ function money(value) {
       </div>
 
       <div className="mof3-panel">
-        <Row label="REPAIRS" input defaultValue="5000" />
-        <Row label="SLIP 1.5%" value="$1,881" />
-      </div>
-    </div>
+  <Row
+    label="TAX %"
+    input
+    value={taxRate}
+    onChange={(v) =>
+      setTaxRate(v.replace(/[^0-9.]/g, ""))
+    }
+  />
 
+  <Row
+    label="TAX"
+    value={money(taxAmount)}
+  />
+
+  <Row
+    label="SLIP %"
+    input
+    value={slipPercent.toFixed(1)}
+    onChange={(v) => {
+      const pct = Number(v.replace(/[^0-9.]/g, "")) || 0;
+      setSlipDollar(Math.round(offer * (pct / 100)));
+    }}
+  />
+
+  <Row
+    label="SLIP $"
+    input
+    value={slipDollar}
+    onChange={(v) =>
+      setSlipDollar(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    }
+  />
+</div>
     <section className="mof3-total">
       <span>TOTAL DEAL</span>
       <strong>$127,256</strong>
