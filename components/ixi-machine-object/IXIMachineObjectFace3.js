@@ -120,8 +120,23 @@ function money(value) {
           }}
         />
 
-        <Row label="TRADE" input defaultValue="15000" />
-        <Row label="EST TAX" input defaultValue="11500" />
+        <Row
+  label="TRADE"
+  input
+  value={trade}
+  onChange={(v) =>
+    setTrade(Number(v.replace(/[^0-9.]/g, "")) || 0)
+  }
+/>
+
+<Row
+  label="REPAIRS"
+  input
+  value={repairs}
+  onChange={(v) =>
+    setRepairs(Number(v.replace(/[^0-9.]/g, "")) || 0)
+  }
+/>
       </div>
     </div>
 
