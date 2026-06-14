@@ -63,17 +63,30 @@ function money(value) {
 </div>
 
       <div className="mof3-grid top-grid">
-        <div className="mof3-panel">
-          <Row label="ASK" value={ask} />
-          <Row
-  <Row label="BID"
-  input
-  value={offer}
-  onChange={(v) => setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)}
-/>
-         <Row label="DIFF" value={money(askNumber - offer)} muted />
+       <div className="mof3-panel">
+  <Row label="ASK" value={ask} />
 
-<Row
+  <Row
+    label="BID"
+    input
+    value={offer}
+    onChange={(v) =>
+      setOffer(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    }
+  />
+
+  <Row
+    label="DIFF"
+    value={money(offer - askNumber)}
+    muted
+  />
+
+  <Row
+    label=""
+    value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
+    muted
+  />
+</div>
   label=""
   value={`${askNumber ? (((offer - askNumber) / askNumber) * 100).toFixed(1) : "0.0"}%`}
   muted
