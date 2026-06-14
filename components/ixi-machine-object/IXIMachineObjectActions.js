@@ -23,7 +23,7 @@ export default function IXIMachineObjectActions({
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 14px;
 
   margin-top: auto;
 
