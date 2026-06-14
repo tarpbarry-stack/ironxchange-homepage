@@ -1,8 +1,13 @@
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 
-export default function IXIMachineObjectFace4() {
+export default function IXIMachineObjectFace4({
+  dragHandleProps
+}) {
   return (
-    <section className="mof4">
+    <section
+  className="mof4"
+  {...(dragHandleProps || {})}
+>
       <div className="mof4-logo">IRONXCHANGE</div>
 
       <div className="mof4-kicker">HELP BUILD THE IRON NETWORK</div>
