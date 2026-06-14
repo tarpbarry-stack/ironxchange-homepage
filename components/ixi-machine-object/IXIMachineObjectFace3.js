@@ -508,7 +508,7 @@ function money(value) {
           height: 25px;
 
           position: relative;
-          top: 5px;
+          top: 0px;
 
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
