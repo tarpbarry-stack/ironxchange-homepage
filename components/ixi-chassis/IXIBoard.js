@@ -11,6 +11,7 @@ export default function IXIBoard({
   IXISortableMachineCard,
   toggleSave,
   updateIxiCardState,
+  cycleMachineFace,
   sendListingToFront,
   sendListingToBack,
   armedDestination,
@@ -42,31 +43,33 @@ export default function IXIBoard({
           >
             {({ dragHandleProps }) => (
               <ListingCard
-                listing={item}
-                saved={savedIds.includes(id)}
-                onToggleSaved={() => toggleSave(item)}
-                from="saved"
-                {...sellerCardProps}
-                ixiState={
-                  ixiCardState[id] || {
-                    color: "none",
-                    outline: 1
-                  }
-                }
-                onIxiStateChange={updateIxiCardState}
-                onSendFront={sendListingToFront}
-                onSendBack={sendListingToBack}
-                armedDestination={armedDestination}
-                onSendToArmedDestination={sendMachineToArmedDestination}
-                isBoardDraggingCard={
-                  String(id) === String(draggingListingId)
-                }
-                isGhostTarget={
-                  String(id) === String(ghostListingId)
-                }
-                useDndDrag={false}
-                dragHandleProps={dragHandleProps}
-              />
+  listing={item}
+  saved={savedIds.includes(id)}
+  onToggleSaved={() => toggleSave(item)}
+  from="saved"
+  {...sellerCardProps}
+  ixiState={
+    ixiCardState[id] || {
+      color: "none",
+      outline: 1
+    }
+  }
+  onIxiStateChange={updateIxiCardState}
+  machineFace={ixiCardState[id]?.face || 1}
+  onCycleMachineFace={() => cycleMachineFace?.(id)}
+  onSendFront={sendListingToFront}
+  onSendBack={sendListingToBack}
+  armedDestination={armedDestination}
+  onSendToArmedDestination={sendMachineToArmedDestination}
+  isBoardDraggingCard={
+    String(id) === String(draggingListingId)
+  }
+  isGhostTarget={
+    String(id) === String(ghostListingId)
+  }
+  useDndDrag={false}
+  dragHandleProps={dragHandleProps}
+/>
             )}
           </IXISortableMachineCard>
         );
