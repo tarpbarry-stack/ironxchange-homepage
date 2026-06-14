@@ -19,6 +19,9 @@ import IXIMachineRail from "./IXIMachineRail";
 import IXIMachineObjectFace2
 from "./ixi-machine-object/IXIMachineObjectFace2";
 
+import IXIMachineObjectFace3
+from "./ixi-machine-object/IXIMachineObjectFace3";
+
 import {
   getFrameClass,
   getFrameStyle
