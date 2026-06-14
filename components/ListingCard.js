@@ -294,11 +294,20 @@ function handleCardClick() {
     }}
   >
 {Number(machineFace || 1) === 2 ? (
-  <IXIMachineObjectFace2 listing={listing} />
+  <IXIMachineObjectFace2
+    listing={listing}
+    dragHandleProps={dragHandleProps}
+  />
 ) : Number(machineFace || 1) === 3 ? (
-  <IXIMachineObjectFace3 listing={listing} />
+  <IXIMachineObjectFace3
+    listing={listing}
+    dragHandleProps={dragHandleProps}
+  />
 ) : Number(machineFace || 1) === 4 ? (
-  <IXIMachineObjectFace4 listing={listing} />
+  <IXIMachineObjectFace4
+    listing={listing}
+    dragHandleProps={dragHandleProps}
+  />
 ) : (
   <>
     
