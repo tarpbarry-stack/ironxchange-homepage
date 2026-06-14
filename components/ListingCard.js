@@ -16,6 +16,9 @@ import MachineBadges from "./MachineBadges";
 
 import IXIMachineRail from "./IXIMachineRail";
 
+import IXIMachineObjectFace2
+from "./ixi-machine-object/IXIMachineObjectFace2";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -336,11 +339,11 @@ zIndex: isBoardDragging ? 50 : undefined
 
 <div className="card-body">
 
-  {Number(machineFace || 1) === 2 && (
-    <div className="machine-face-test">
-      FACE 2 ACTIVE
-    </div>
-  )}
+ {Number(machineFace || 1) === 2 ? (
+  <IXIMachineObjectFace2
+    listing={listing}
+  />
+) : (
 
   <a
     href={getListingHref(listing, from)}
@@ -472,10 +475,13 @@ zIndex: isBoardDragging ? 50 : undefined
             <span>Age: {listing.age ?? "—"}</span>
             <span>Views: {listing.views || "—"}</span>
             <span>Saves: {listing.saves || "—"}</span>
-          </div>
-               ) : null}
+           </div>
+        ) : null}
 
       </div>
+
+    )}
+
     </div>
 
          
