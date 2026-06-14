@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="foot-cols">
         <div>
           <h4>MARKETPLACE</h4>
-          <a href="/browse">Browse Equipment</a>
+          <a href="/browse-v2">Browse Equipment</a>
           <a href="/post-free">Post Equipment</a>
         </div>
 
