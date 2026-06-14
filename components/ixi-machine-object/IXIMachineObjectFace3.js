@@ -139,7 +139,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
             inset 0 1px 0 rgba(255,255,255,.035);
         }
 
-        .mof3-row {
+        :global(.mof3-row) {
           min-height: 10px;
 
           display: grid;
@@ -154,7 +154,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
           border-bottom: 0;
         }
 
-        .mof3-label {
+        :global(.mof3-label) {
           color: rgba(255,255,255,.43);
           font-size: 6px;
           font-weight: 950;
@@ -163,7 +163,7 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
           white-space: nowrap;
         }
 
-        .mof3-value {
+        :global(.mof3-value) {
           color: rgba(255,255,255,.86);
           font-size: 6px;
           font-weight: 950;
@@ -173,36 +173,50 @@ export default function IXIMachineObjectFace3({ listing = {} }) {
           text-overflow: ellipsis;
         }
 
-        .mof3-value.muted {
+        :global(.mof3-value.muted) {
           color: rgba(255,196,0,.86);
           font-size: 6px;
         }
 
-        .mof3-input {
-          box-sizing: border-box;
+       :global(.mof3-input) {
+  width: 58px;
+  min-width: 58px;
+  max-width: 58px;
 
-          width: 54px;
-          height: 8px;
+  height: 13px;
 
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 3px;
+  background: #0b0b0b;
 
-          background: rgba(0,0,0,.34);
-          color: rgba(255,255,255,.88);
+  border: 1px solid rgba(255,255,255,.06);
 
-          padding: 0 4px;
+  color: rgba(255,255,255,.88);
 
-          font-size: 8px;
-          font-weight: 900;
-          text-align: right;
+  padding: 0 3px;
 
-          outline: none;
-        }
+  font-size: 7px;
+  font-weight: 900;
 
-        .mof3-input:focus {
+  text-align: right;
+
+  justify-self: end;
+
+  outline: none;
+}
+
+        :global(.mof3-input:focus) {
           border-color: rgba(255,196,0,.42);
           box-shadow: 0 0 0 1px rgba(255,196,0,.10);
         }
+        :global(.mof3-input) {
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  height: 10px;
+  background: #050505;
+  font-size: 7px;
+  padding: 0 2px;
+  justify-self: end;
+}
 
         .mof3-total {
           height: 25px;
