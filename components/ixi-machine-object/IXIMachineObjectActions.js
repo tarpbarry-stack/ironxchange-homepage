@@ -28,7 +28,7 @@ export default function IXIMachineObjectActions({
   margin-top: auto;
 
   position: relative;
-  top: 8px;
+  top: 12px;
 }
         .mof-actions button {
           height: 27px;
