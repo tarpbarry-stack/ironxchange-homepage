@@ -79,13 +79,18 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
 
       <style jsx>{`
         .mof2 {
-  height: 360px;
-  min-height: 360px;
-  max-height: 360px;
-  width: 100%;
+  box-sizing: border-box;
 
-  padding: 14px 16px 44px;
-          display: flex;
+  width: 100%;
+  max-width: 100%;
+
+  height: 378px;
+  min-height: 378px;
+  max-height: 378px;
+
+  padding: 14px 14px 30px;
+
+  display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
@@ -189,14 +194,16 @@ export default function IXIMachineObjectFace2({ listing = {} }) {
         }
 
         .mof2-actions {
+  box-sizing: border-box;
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-  margin-top: auto;
-  padding-bottom: 6px;
-}
 
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+
+  margin-top: auto;
+  padding: 0 0 8px;
+}
         .mof2-actions button {
           height: 27px;
           border: 1px solid rgba(255,196,0,.22);
