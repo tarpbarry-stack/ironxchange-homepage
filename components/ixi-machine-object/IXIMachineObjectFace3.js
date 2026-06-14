@@ -21,6 +21,9 @@ const [rate, setRate] = useState("7.50");
 
 const [trade, setTrade] = useState(0);
 const [repairs, setRepairs] = useState(0);
+const [miles, setMiles] = useState(850);
+const [loadedRate, setLoadedRate] = useState(4.5);
+const [permits, setPermits] = useState(0);
 const [taxRate, setTaxRate] = useState("0");
 const [slipDollar, setSlipDollar] = useState(Math.round(askNumber * 0.015));
 
@@ -29,13 +32,17 @@ const slipPercent = offer ? (slipDollar / offer) * 100 : 0;
 
 const taxAmount = Math.round(offer * ((Number(taxRate) || 0) / 100));
 
+const freightCost =
+  Math.round((miles * loadedRate) + permits);
+  
 const totalDeal =
   offer -
   downDollar -
   trade +
   repairs +
   taxAmount +
-  slipDollar;
+  slipDollar +
+  freightCost;
 
   const financedAmount = Math.max(totalDeal, 0);
   const rateNumber = Number(rate) || 0;
@@ -141,11 +148,39 @@ function money(value) {
     </div>
 
    <div className="mof3-grid mid-grid">
-  <div className="mof3-panel">
-    <Row label="MILES" input defaultValue="850" />
-    <Row label="$/MI" input defaultValue="4.50" />
-    <Row label="FREIGHT" value="$3,825" />
-  </div>
+ <div className="mof3-panel">
+  <Row
+    label="MILES"
+    input
+    value={miles}
+    onChange={(v) =>
+      setMiles(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    }
+  />
+
+  <Row
+    label="$/MI"
+    input
+    value={loadedRate}
+    onChange={(v) =>
+      setLoadedRate(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    }
+  />
+
+  <Row
+    label="PERMITS"
+    input
+    value={permits}
+    onChange={(v) =>
+      setPermits(Number(v.replace(/[^0-9.]/g, "")) || 0)
+    }
+  />
+
+  <Row
+    label="FREIGHT"
+    value={money(freightCost)}
+  />
+</div>
 
   <div className="mof3-panel">
     <Row
