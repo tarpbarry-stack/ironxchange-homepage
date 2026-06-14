@@ -641,8 +641,13 @@ function cycleMachineFace(listingId) {
   const currentFace =
     Number(ixiCardState[id]?.face || 1);
 
+  const nextFace =
+    currentFace === 1 ? 2 :
+    currentFace === 2 ? 3 :
+    1;
+
   updateIxiCardState(id, {
-    face: currentFace === 2 ? 1 : 2
+    face: nextFace
   });
 }
   
