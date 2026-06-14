@@ -19,15 +19,17 @@ export default function IXIMachineObjectActions({
       </button>
 
       <style jsx>{`
-        .mof-actions {
-          width: 100%;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 7px;
-          margin-top: auto;
-          padding-bottom: -10px;
-        }
+       .mof-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
 
+  margin-top: auto;
+
+  position: relative;
+  top: 8px;
+}
         .mof-actions button {
           height: 27px;
           border: 1px solid rgba(255,196,0,.22);
