@@ -16,15 +16,29 @@ const make = listing.make || publicData.make || "";
 const model = listing.model || publicData.model || "";
 const hours = listing.hours || publicData.hours || "";
 const [offer, setOffer] = useState(askNumber);
-const [downDollar, setDownDollar] = useState(
-  Math.round(askNumber * 0.15)
-);
+const [downDollar, setDownDollar] = useState(Math.round(askNumber * 0.15));
 const [rate, setRate] = useState("7.50");
 
-const downPercent = offer ? (downDollar / offer) * 100 : 0;
+const [trade, setTrade] = useState(0);
+const [repairs, setRepairs] = useState(0);
+const [taxRate, setTaxRate] = useState("0");
+const [slipDollar, setSlipDollar] = useState(Math.round(askNumber * 0.015));
 
-const financedAmount = Math.max(offer - downDollar, 0);
-const rateNumber = Number(rate) || 0;
+const downPercent = offer ? (downDollar / offer) * 100 : 0;
+const slipPercent = offer ? (slipDollar / offer) * 100 : 0;
+
+const taxAmount = Math.round(offer * ((Number(taxRate) || 0) / 100));
+
+const totalDeal =
+  offer -
+  downDollar -
+  trade +
+  repairs +
+  taxAmount +
+  slipDollar;
+
+  const financedAmount = Math.max(totalDeal, 0);
+  const rateNumber = Number(rate) || 0;
   
 function payment(months) {
   const monthlyRate = rateNumber / 100 / 12;
