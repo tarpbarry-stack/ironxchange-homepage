@@ -2988,9 +2988,9 @@ outline: none;
 }
 
 :global(.ixi-board-sortable-card) {
-  width: auto;
-  max-width: none;
-  min-width: 0;
+  width: 100%;
+  max-width: 300px;
+  min-width: 250px;
 
   justify-self: center;
   align-self: start;
