@@ -1526,6 +1526,28 @@ function cycleCardScaleMode() {
     />
         </section>
 
+<button
+  type="button"
+  onClick={cycleCardScaleMode}
+  style={{
+    position: "fixed",
+    right: "24px",
+    bottom: "24px",
+    zIndex: 9999,
+    background: "#111",
+    color: "#FFC400",
+    border: "1px solid rgba(255,196,0,.55)",
+    borderRadius: "8px",
+    padding: "8px 10px",
+    fontSize: "11px",
+    fontWeight: 900,
+    letterSpacing: ".08em",
+    cursor: "pointer"
+  }}
+>
+  SCALE: {cardScaleMode.toUpperCase()}
+</button>
+
         {visibleSavedListings.length === 0 && (
   <div className="empty">
     <h3>HELP US BUILD OUR MARKETPLACE</h3>
