@@ -2,6 +2,8 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import ListingCard from "../ListingCard";
+import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
+import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
 
 export default function IXIBoard({
   items = [],
