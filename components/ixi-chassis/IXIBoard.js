@@ -22,6 +22,7 @@ export default function IXIBoard({
   ghostListingId,
   getSellerListingCardProps,
   enableCardScaling = false,
+  cardScaleMode = "xl
 }) {
   
   return (
