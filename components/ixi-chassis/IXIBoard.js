@@ -56,8 +56,9 @@ export default function IXIBoard({
             containerId="board"
             className="ixi-board-sortable-card"
           >
-            {({ dragHandleProps }) => (
-              <ListingCard
+           {({ dragHandleProps }) => (
+  <IXIScaledCardShell size={cardScaleMode}>
+    <ListingCard
   listing={item}
   saved={savedIds.includes(id)}
   onToggleSaved={() => toggleSave(item)}
@@ -83,9 +84,10 @@ export default function IXIBoard({
     String(id) === String(ghostListingId)
   }
   useDndDrag={false}
-  dragHandleProps={dragHandleProps}
+    dragHandleProps={dragHandleProps}
 />
-            )}
+  </IXIScaledCardShell>
+)}
           </IXISortableMachineCard>
         );
             })}
