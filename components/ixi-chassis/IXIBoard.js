@@ -23,6 +23,9 @@ export default function IXIBoard({
   getSellerListingCardProps,
   cardScaleMode = "xl"
 }) {
+
+  const cardMetrics = getIXICardScalePreset(cardScaleMode);
+  
   return (
     <SortableContext
       id="board"
