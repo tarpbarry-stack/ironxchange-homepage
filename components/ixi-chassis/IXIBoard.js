@@ -3,6 +3,8 @@ import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import ListingCard from "../ListingCard";
 
+import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
+
 export default function IXIBoard({
   items = [],
   getListingId,
@@ -19,7 +21,7 @@ export default function IXIBoard({
   draggingListingId,
   ghostListingId,
   getSellerListingCardProps,
-  cardScaleMode = "xl"
+  enableCardScaling = false,
 }) {
   
   return (
@@ -45,35 +47,68 @@ export default function IXIBoard({
           >
            {({ dragHandleProps }) => (
              
+  enableCardScaling ? (
+    <IXIScaledCardShell size={cardScaleMode}>
+      <ListingCard
+        listing={item}
+        saved={savedIds.includes(id)}
+        onToggleSaved={() => toggleSave(item)}
+        from="saved"
+        {...sellerCardProps}
+        ixiState={
+          ixiCardState[id] || {
+            color: "none",
+            outline: 1
+          }
+        }
+        onIxiStateChange={updateIxiCardState}
+        machineFace={ixiCardState[id]?.face || 1}
+        onCycleMachineFace={() => cycleMachineFace?.(id)}
+        onSendFront={sendListingToFront}
+        onSendBack={sendListingToBack}
+        armedDestination={armedDestination}
+        onSendToArmedDestination={sendMachineToArmedDestination}
+        isBoardDraggingCard={
+          String(id) === String(draggingListingId)
+        }
+        isGhostTarget={
+          String(id) === String(ghostListingId)
+        }
+        useDndDrag={false}
+        dragHandleProps={dragHandleProps}
+      />
+    </IXIScaledCardShell>
+  ) : (
     <ListingCard
-  listing={item}
-  saved={savedIds.includes(id)}
-  onToggleSaved={() => toggleSave(item)}
-  from="saved"
-  {...sellerCardProps}
-  ixiState={
-    ixiCardState[id] || {
-      color: "none",
-      outline: 1
-    }
-  }
-  onIxiStateChange={updateIxiCardState}
-  machineFace={ixiCardState[id]?.face || 1}
-  onCycleMachineFace={() => cycleMachineFace?.(id)}
-  onSendFront={sendListingToFront}
-  onSendBack={sendListingToBack}
-  armedDestination={armedDestination}
-  onSendToArmedDestination={sendMachineToArmedDestination}
-  isBoardDraggingCard={
-    String(id) === String(draggingListingId)
-  }
-  isGhostTarget={
-    String(id) === String(ghostListingId)
-  }
-  useDndDrag={false}
-    dragHandleProps={dragHandleProps}
-/>
-      )}
+      listing={item}
+      saved={savedIds.includes(id)}
+      onToggleSaved={() => toggleSave(item)}
+      from="saved"
+      {...sellerCardProps}
+      ixiState={
+        ixiCardState[id] || {
+          color: "none",
+          outline: 1
+        }
+      }
+      onIxiStateChange={updateIxiCardState}
+      machineFace={ixiCardState[id]?.face || 1}
+      onCycleMachineFace={() => cycleMachineFace?.(id)}
+      onSendFront={sendListingToFront}
+      onSendBack={sendListingToBack}
+      armedDestination={armedDestination}
+      onSendToArmedDestination={sendMachineToArmedDestination}
+      isBoardDraggingCard={
+        String(id) === String(draggingListingId)
+      }
+      isGhostTarget={
+        String(id) === String(ghostListingId)
+      }
+      useDndDrag={false}
+      dragHandleProps={dragHandleProps}
+    />
+  )
+)}
           </IXISortableMachineCard>
         );
             })}
