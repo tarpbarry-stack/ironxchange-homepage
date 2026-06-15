@@ -3,7 +3,6 @@ import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import ListingCard from "../ListingCard";
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
-import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
 
 export default function IXIBoard({
   items = [],
@@ -23,8 +22,6 @@ export default function IXIBoard({
   getSellerListingCardProps,
   cardScaleMode = "xl"
 }) {
-
-  const cardMetrics = getIXICardScalePreset(cardScaleMode);
   
   return (
 <SortableContext
@@ -32,15 +29,6 @@ export default function IXIBoard({
   items={items.map(item => String(getListingId(item)))}
   strategy={rectSortingStrategy}
 >
-  <div
-    className="ixi-board-scale-grid"
-    style={{
-      display: "grid",
-      gridTemplateColumns: `repeat(auto-fill, ${cardMetrics.width}px)`,
-      gap: `${cardMetrics.gap}px`,
-      alignItems: "start"
-    }}
-  >
     {items.map(item => {
         const id = String(getListingId(item));
 
@@ -91,7 +79,6 @@ export default function IXIBoard({
           </IXISortableMachineCard>
         );
             })}
-  </div>
 </SortableContext>
   );
 }
