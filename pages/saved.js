@@ -331,6 +331,8 @@ const [ixiCardState, setIxiCardState] = useState({});
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
+  const [cardScaleMode, setCardScaleMode] = useState("xl");
+
   const [activeDndId, setActiveDndId] = useState("");
 
 const sensors = useSensors(
@@ -1101,7 +1103,15 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
-
+function cycleCardScaleMode() {
+  setCardScaleMode(current => {
+    if (current === "xl") return "large";
+    if (current === "large") return "medium";
+    if (current === "medium") return "compact";
+    if (current === "compact") return "micro";
+    return "xl";
+  });
+}
   
   return (
     <>
@@ -1512,7 +1522,8 @@ function getIxiColorValue(color) {
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   draggingListingId={draggingListingId}
   ghostListingId={ghostListingId}
-/>
+  cardScaleMode={cardScaleMode}
+    />
         </section>
 
         {visibleSavedListings.length === 0 && (
