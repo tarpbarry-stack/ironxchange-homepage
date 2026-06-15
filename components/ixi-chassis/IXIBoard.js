@@ -73,6 +73,7 @@ export default function IXIBoard({
   useDndDrag={false}
     dragHandleProps={dragHandleProps}
 />
+      )}
           </IXISortableMachineCard>
         );
             })}
