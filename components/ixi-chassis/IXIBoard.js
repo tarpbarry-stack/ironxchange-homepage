@@ -2,7 +2,6 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import ListingCard from "../ListingCard";
-import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
 export default function IXIBoard({
   items = [],
@@ -45,7 +44,7 @@ export default function IXIBoard({
             className="ixi-board-sortable-card"
           >
            {({ dragHandleProps }) => (
-  <IXIScaledCardShell size={cardScaleMode}>
+             
     <ListingCard
   listing={item}
   saved={savedIds.includes(id)}
@@ -74,8 +73,6 @@ export default function IXIBoard({
   useDndDrag={false}
     dragHandleProps={dragHandleProps}
 />
-  </IXIScaledCardShell>
-)}
           </IXISortableMachineCard>
         );
             })}
