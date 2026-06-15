@@ -1522,6 +1522,7 @@ function cycleCardScaleMode() {
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   draggingListingId={draggingListingId}
   ghostListingId={ghostListingId}
+  enableCardScaling={true}
   cardScaleMode={cardScaleMode}
     />
         </section>
