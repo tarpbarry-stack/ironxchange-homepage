@@ -20,7 +20,8 @@ export default function IXIBoard({
   sendMachineToArmedDestination,
   draggingListingId,
   ghostListingId,
-  getSellerListingCardProps
+  getSellerListingCardProps,
+  cardScaleMode = "xl"
 }) {
   return (
     <SortableContext
