@@ -27,12 +27,21 @@ export default function IXIBoard({
   const cardMetrics = getIXICardScalePreset(cardScaleMode);
   
   return (
-    <SortableContext
-      id="board"
-      items={items.map(item => String(getListingId(item)))}
-      strategy={rectSortingStrategy}
-    >
-      {items.map(item => {
+<SortableContext
+  id="board"
+  items={items.map(item => String(getListingId(item)))}
+  strategy={rectSortingStrategy}
+>
+  <div
+    className="ixi-board-scale-grid"
+    style={{
+      display: "grid",
+      gridTemplateColumns: `repeat(auto-fill, ${cardMetrics.width}px)`,
+      gap: `${cardMetrics.gap}px`,
+      alignItems: "start"
+    }}
+  >
+    {items.map(item => {
         const id = String(getListingId(item));
 
         const sellerCardProps =
@@ -79,7 +88,8 @@ export default function IXIBoard({
             )}
           </IXISortableMachineCard>
         );
-      })}
-    </SortableContext>
+            })}
+  </div>
+</SortableContext>
   );
 }
