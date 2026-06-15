@@ -14,7 +14,7 @@ export default function IXIScaledCardShell({ size = "xl", children }) {
       <div
         className="ixi-scaled-card-inner"
         style={{
-          width: "320px",
+          width: "298px",
           height: "391px",
           transform: `scale(${metrics.scale})`,
           transformOrigin: "top left"
