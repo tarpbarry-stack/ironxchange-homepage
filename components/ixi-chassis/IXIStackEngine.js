@@ -4,6 +4,14 @@ function getStackContainerKey(stackKey) {
     : "stackBottom";
 }
 
+function toggleStackOpenState(currentState, stackKey) {
+  return {
+    ...currentState,
+    [stackKey]: !currentState[stackKey]
+  };
+}
+
 export {
-  getStackContainerKey
+  getStackContainerKey,
+  toggleStackOpenState
 };
