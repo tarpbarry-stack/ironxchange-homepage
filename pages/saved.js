@@ -428,6 +428,8 @@ const workspaceSettings =
 const workspaceLayout =
   remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
 
+console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
+
 setIxiCardState(remoteIxiState);
 
 if (workspaceSettings.cardScaleMode) {
