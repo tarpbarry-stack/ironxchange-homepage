@@ -65,7 +65,8 @@ import {
   toggleStackOpenState,
   openStackState,
   toggleStackLayoutState,
-  getMachineIdsForStack
+  getMachineIdsForStack,
+  moveStackToContainerState
 } from "../components/ixi-chassis/IXIStackEngine";
 
 import {
