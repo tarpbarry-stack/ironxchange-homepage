@@ -1245,7 +1245,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
     const pocketIds = current[pocketKey] || [];
     const boardIds = current.board || [];
 
-    return {
+        const finalContainers = {
       ...current,
       [pocketKey]: pocketIds.filter(
         item => String(item) !== id
@@ -1254,8 +1254,12 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
         ? boardIds
         : [...boardIds, id]
     };
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
   });
-} 
+}
 
 function cycleTopRailMode() {
   setTopRailMode(current => {
