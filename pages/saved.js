@@ -54,7 +54,8 @@ import {
 } from "../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
 import {
-  getMachineContainerFromContainers
+  getMachineContainerFromContainers,
+  reorderMachineWithinContainerState
 } from "../components/ixi-chassis/IXIMachineContainerEngine";
 
 import {
