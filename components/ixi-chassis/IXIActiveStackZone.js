@@ -27,5 +27,9 @@ export default function IXIActiveStackZone({
   sendMachineToArmedDestination,
   cardScaleMode = "xl"
 }) {
-  return null;
+  return (
+  <section className="active-stack-zone">
+    ACTIVE STACK ZONE
+  </section>
+);
 }
