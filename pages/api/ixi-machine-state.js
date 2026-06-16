@@ -1,6 +1,8 @@
 import {
   getUserIxiMachineState,
-  saveUserIxiMachinePatch
+  saveUserIxiMachinePatch,
+  getUserIxiWorkspaceLayout,
+  saveUserIxiWorkspaceLayout
 } from "../../lib/ixiMachineStateStore";
 
 export default function handler(req, res) {
