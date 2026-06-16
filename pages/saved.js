@@ -413,8 +413,14 @@ function workspaceCollisionDetection(args) {
 
 setIxiUserId(String(userId));
 
-const remoteIxiState =
+const remoteIxiResponse =
   await fetchIxiMachineState(String(userId));
+
+const remoteIxiState =
+  remoteIxiResponse?.state || remoteIxiResponse || {};
+
+const remoteWorkspaceLayout =
+  remoteIxiResponse?.workspaceLayout || null;
 
 setIxiCardState(remoteIxiState);
 
