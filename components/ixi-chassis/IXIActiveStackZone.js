@@ -228,7 +228,5 @@ export default function IXIActiveStackZone({
       </WorkspaceDropZone>
     ))}
   </section>
-    ))}
-  </section>
 );
 }
