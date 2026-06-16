@@ -431,6 +431,15 @@ const data = await res.json();
 if (Array.isArray(data)) {
   setListings(data);
 }
+
+      } catch (err) {
+        console.error("Saved page load failed:", err);
+        setSavedIds([]);
+      }
+    }
+
+    loadSavedPage();
+  }, []);
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
