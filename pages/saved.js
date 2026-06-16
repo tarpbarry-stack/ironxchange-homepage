@@ -1109,6 +1109,28 @@ function sendListingToBack(listing) {
     }
   }
 
+function toggleActiveStack(stackKey) {
+  setActiveStacksOpen(current => {
+    const nextOpen = {
+      ...current,
+      [stackKey]: !current[stackKey]
+    };
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      patch: {
+        machineContainers,
+        activeStackLayouts,
+        activeStacksOpen: nextOpen,
+        updatedAt: Date.now()
+      }
+    });
+
+    return nextOpen;
+  });
+}
+  
 function toggleActiveStackLayout(stackKey) {
   setActiveStackLayouts(current => {
     const nextLayouts = {
