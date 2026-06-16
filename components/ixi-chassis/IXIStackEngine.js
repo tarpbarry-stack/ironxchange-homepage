@@ -37,10 +37,40 @@ function getMachineIdsForStack(
   return machineContainers?.[sourceContainer] || [];
 }
 
+function moveStackToContainerState({
+  currentContainers,
+  stackKey,
+  targetContainer
+}) {
+  if (!stackKey || !targetContainer) {
+    return currentContainers;
+  }
+
+  const sourceContainer = getStackContainerKey(stackKey);
+  const stackIds = currentContainers?.[sourceContainer] || [];
+
+  if (!stackIds.length) {
+    return currentContainers;
+  }
+
+  const next = {
+    ...currentContainers,
+    [sourceContainer]: []
+  };
+
+  next[targetContainer] = [
+    ...(next[targetContainer] || []),
+    ...stackIds
+  ];
+
+  return next;
+}
+
 export {
   getStackContainerKey,
   toggleStackOpenState,
   openStackState,
   toggleStackLayoutState,
-  getMachineIdsForStack
+  getMachineIdsForStack,
+  moveStackToContainerState
 };
