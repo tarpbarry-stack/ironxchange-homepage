@@ -437,6 +437,24 @@ setIxiCardState(remoteIxiState);
     loadSavedPage();
   }, []);
 
+  useEffect(() => {
+    if (!ixiUserId) return;
+
+    saveIxiWorkspaceLayout({
+      userId: ixiUserId,
+      workspaceLayout: {
+        machineContainers,
+        activeStackLayouts,
+        activeStacksOpen
+      }
+    });
+  }, [
+    ixiUserId,
+    machineContainers,
+    activeStackLayouts,
+    activeStacksOpen
+  ]);
+  
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
       const listingStatus =
