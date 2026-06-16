@@ -449,23 +449,25 @@ setLoadedWorkspaceLayout(remoteWorkspaceLayout);
     loadSavedPage();
   }, []);
 
-  useEffect(() => {
-    if (!ixiUserId) return;
+ /*
+useEffect(() => {
+  if (!ixiUserId) return;
 
-    saveIxiWorkspaceLayout({
-      userId: ixiUserId,
-      workspaceLayout: {
-        machineContainers,
-        activeStackLayouts,
-        activeStacksOpen
-      }
-    });
-  }, [
-    ixiUserId,
-    machineContainers,
-    activeStackLayouts,
-    activeStacksOpen
-  ]);
+  saveIxiWorkspaceLayout({
+    userId: ixiUserId,
+    workspaceLayout: {
+      machineContainers,
+      activeStackLayouts,
+      activeStacksOpen
+    }
+  });
+}, [
+  ixiUserId,
+  machineContainers,
+  activeStackLayouts,
+  activeStacksOpen
+]);
+*/
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
