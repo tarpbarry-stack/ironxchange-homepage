@@ -509,17 +509,6 @@ const containerStateKey = useMemo(() => {
     .join("|");
 }, [workspaceListings, ixiCardState]);
    
-function createEmptyWorkspaceContainers() {
-  return {
-    board: [],
-    stackTop: [],
-    stackBottom: [],
-    pocketLeft: [],
-    pocketRight: [],
-    pocketLeft2: [],
-    pocketRight2: []
-  };
-}
 
 function sanitizeWorkspaceContainers(savedContainers, validMachineIds) {
   const valid = new Set(validMachineIds.map(id => String(id)));
