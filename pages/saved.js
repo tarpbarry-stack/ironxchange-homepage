@@ -570,6 +570,10 @@ useEffect(() => {
     return;
   }
 
+  if (hasAppliedRemoteLayoutRef.current) {
+  return;
+}
+
   const nextContainers = createEmptyWorkspaceContainers();
 
   workspaceListings.forEach(item => {
@@ -1261,6 +1265,19 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
+function saveWorkspaceLayout(nextContainers = machineContainers) {
+  saveIxiMachinePatch({
+    userId: ixiUserId,
+    listingId: IXI_WORKSPACE_LAYOUT_ID,
+    patch: {
+      machineContainers: nextContainers,
+      activeStackLayouts,
+      activeStacksOpen,
+      updatedAt: Date.now()
+    }
+  });
+}
+  
 function cycleCardScaleMode() {
   setCardScaleMode(current => {
     const next =
