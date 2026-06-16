@@ -1042,13 +1042,10 @@ function toggleActiveStack(stackKey) {
   
 function toggleActiveStackLayout(stackKey) {
   setActiveStackLayouts(current => {
-    const nextLayouts = {
-      ...current,
-      [stackKey]:
-        current[stackKey] === "horizontal"
-          ? "vertical"
-          : "horizontal"
-    };
+    const nextLayouts = toggleStackLayoutState(
+  current,
+  stackKey
+);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
