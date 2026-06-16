@@ -67,7 +67,8 @@ import {
 } from "../components/ixi-chassis/IXIStackEngine";
 
 import {
-  rotatePocketState
+  rotatePocketState,
+  movePocketToContainerState
 } from "../components/ixi-chassis/IXIPocketEngine";
 
 import {
