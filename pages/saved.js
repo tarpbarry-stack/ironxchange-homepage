@@ -181,6 +181,8 @@ function handleWorkspaceDragEnd(event) {
     "pocketRight2"
   ];
 
+  const [loadedWorkspaceLayout, setLoadedWorkspaceLayout] = useState(null);
+
   const sourceContainer =
     event?.active?.data?.current?.containerId ||
     (knownContainers.includes(activeSortable?.containerId)
