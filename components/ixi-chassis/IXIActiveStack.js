@@ -7,6 +7,8 @@ import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import ListingCard from "../ListingCard";
 
+import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
+
 export default function IXIActiveStack({
   stackKey,
   machineIds = [],
@@ -21,7 +23,9 @@ export default function IXIActiveStack({
   sendListingToFront,
   sendListingToBack,
   armedDestination,
-  sendMachineToArmedDestination
+  sendMachineToArmedDestination,
+  enableCardScaling = false,
+cardScaleMode = "xl"
 }) {
   const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
 
@@ -50,8 +54,10 @@ export default function IXIActiveStack({
             containerId={containerId}
             className="active-stack-card"
           >
-            {({ dragHandleProps }) => (
-              <ListingCard
+          {({ dragHandleProps }) => (
+  enableCardScaling ? (
+    <IXIScaledCardShell size={cardScaleMode}>
+      <ListingCard
                 listing={machine}
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(machine)}
@@ -71,8 +77,32 @@ export default function IXIActiveStack({
                 isGhostTarget={false}
                 useDndDrag={false}
                 dragHandleProps={dragHandleProps}
-              />
-            )}
+                   />
+    </IXIScaledCardShell>
+  ) : (
+    <ListingCard
+      listing={machine}
+      saved={savedIds.includes(id)}
+      onToggleSaved={() => toggleSave(machine)}
+      from="saved"
+      ixiState={
+        ixiCardState[id] || {
+          color: "none",
+          outline: 1
+        }
+      }
+      onIxiStateChange={updateIxiCardState}
+      onSendFront={sendListingToFront}
+      onSendBack={sendListingToBack}
+      armedDestination={armedDestination}
+      onSendToArmedDestination={sendMachineToArmedDestination}
+      isBoardDraggingCard={false}
+      isGhostTarget={false}
+      useDndDrag={false}
+      dragHandleProps={dragHandleProps}
+    />
+  )
+)}
           </IXISortableMachineCard>
         );
       })}
