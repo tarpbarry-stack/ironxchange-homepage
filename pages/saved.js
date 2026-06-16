@@ -418,8 +418,11 @@ setIxiUserId(String(userId));
 const remoteIxiResponse =
   await fetchIxiMachineState(String(userId));
 
-const remoteIxiState =
+const remoteIxiStateRaw =
   remoteIxiResponse?.state || remoteIxiResponse || {};
+
+const { __workspaceLayout, ...remoteIxiState } =
+  remoteIxiStateRaw || {};
 
 const remoteWorkspaceLayout =
   remoteIxiResponse?.workspaceLayout || null;
