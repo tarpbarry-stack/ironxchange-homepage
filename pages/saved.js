@@ -88,27 +88,6 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
-function WorkspaceDropZone({
-  id,
-  className,
-  children,
-  ...props
-}) {
-  const { setNodeRef } = useDroppable({
-    id
-  });
-
-  return (
-    <section
-      ref={setNodeRef}
-      className={className}
-      {...props}
-    >
-      {children}
-    </section>
-  );
-}
-
 function WorkspaceDropPad({
   id,
   className,
