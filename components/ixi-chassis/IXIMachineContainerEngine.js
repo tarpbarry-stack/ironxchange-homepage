@@ -57,7 +57,51 @@ function reorderMachineWithinContainerState({
   };
 }
 
+function moveMachineToContainerAtPositionState({
+  currentContainers,
+  machineId,
+  targetContainer,
+  targetId,
+  insertAfter = false
+}) {
+  if (!machineId || !targetContainer || !targetId) {
+    return currentContainers;
+  }
+
+  const id = String(machineId);
+  const target = String(targetId);
+  const next = {};
+
+  Object.keys(currentContainers || {}).forEach(containerKey => {
+    next[containerKey] = (currentContainers[containerKey] || []).filter(
+      item => String(item) !== id
+    );
+  });
+
+  const targetList = [...(next[targetContainer] || [])];
+
+  const targetIndex = targetList.findIndex(
+    item => String(item) === target
+  );
+
+  if (targetIndex === -1) {
+    targetList.push(id);
+  } else {
+    targetList.splice(
+      insertAfter ? targetIndex + 1 : targetIndex,
+      0,
+      id
+    );
+  }
+
+  return {
+    ...next,
+    [targetContainer]: targetList
+  };
+}
+
 export {
   getMachineContainerFromContainers,
-  reorderMachineWithinContainerState
+  reorderMachineWithinContainerState,
+  moveMachineToContainerAtPositionState
 };
