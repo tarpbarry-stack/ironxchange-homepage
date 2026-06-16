@@ -1157,10 +1157,7 @@ function movePocketToContainer(pocketKey, targetContainer) {
 }
 
 function movePocketToStack(pocketKey, stackKey) {
-  const targetContainer =
-    stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
+  const targetContainer = getStackContainerKey(stackKey);
 
   movePocketToContainer(
     pocketKey,
