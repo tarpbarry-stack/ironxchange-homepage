@@ -773,14 +773,19 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
-  const id = String(machineId);
-  const target = String(targetId);
+ const id = String(machineId);
+const target = String(targetId);
 
- // TEMP TEST — do not persist yet
-// updateIxiCardState(id, {
-//   container: targetContainer
-// });
-
+saveIxiMachinePatch({
+  userId: ixiUserId,
+  listingId: id,
+  patch: {
+    ...(ixiCardState[id] || {}),
+    container: targetContainer,
+    touched: true,
+    updatedAt: Date.now()
+  }
+});
   setMachineContainers(current => {
     const next = {};
 
