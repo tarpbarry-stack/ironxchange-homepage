@@ -771,7 +771,6 @@ function getMachineContainer(machineId) {
   );
 }
   
-
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
@@ -843,17 +842,6 @@ function moveMachineToContainerAtPosition(
         targetId,
         insertAfter
       });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
-}
-
-       const finalContainers = {
-      ...next,
-      [targetContainer]: targetList
-    };
 
     saveWorkspaceLayout(finalContainers);
 
