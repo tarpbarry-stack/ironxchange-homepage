@@ -100,8 +100,47 @@ function moveMachineToContainerAtPositionState({
   };
 }
 
+function moveMachineToContainerState({
+  currentContainers,
+  machineId,
+  targetContainer
+}) {
+  if (!machineId || !targetContainer) {
+    return currentContainers;
+  }
+
+  const id = String(machineId);
+  const next = {};
+
+  Object.keys(currentContainers || {}).forEach(containerKey => {
+    next[containerKey] = (currentContainers[containerKey] || []).filter(
+      item => String(item) !== id
+    );
+  });
+
+  const isPocket = [
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ].includes(targetContainer);
+
+  next[targetContainer] = isPocket
+    ? [
+        id,
+        ...(next[targetContainer] || [])
+      ]
+    : [
+        ...(next[targetContainer] || []),
+        id
+      ];
+
+  return next;
+}
+
 export {
   getMachineContainerFromContainers,
   reorderMachineWithinContainerState,
-  moveMachineToContainerAtPositionState
+  moveMachineToContainerAtPositionState,
+  moveMachineToContainerState
 };
