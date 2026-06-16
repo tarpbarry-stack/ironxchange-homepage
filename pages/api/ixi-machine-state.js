@@ -17,25 +17,42 @@ export default function handler(req, res) {
 }
 
     if (req.method === "POST") {
-      const { userId = "guest", listingId, patch = {} } = req.body || {};
+  const {
+    userId = "guest",
+    listingId,
+    patch = {},
+    workspaceLayout
+  } = req.body || {};
 
-      if (!listingId) {
-        return res.status(400).json({
-          error: "Missing listingId"
-        });
-      }
+  if (workspaceLayout) {
+    const layout = saveUserIxiWorkspaceLayout({
+      userId,
+      layout: workspaceLayout
+    });
 
-      const state = saveUserIxiMachinePatch({
-        userId,
-        listingId,
-        patch
-      });
+    return res.status(200).json({
+      ok: true,
+      workspaceLayout: layout
+    });
+  }
 
-      return res.status(200).json({
-        ok: true,
-        state
-      });
-    }
+  if (!listingId) {
+    return res.status(400).json({
+      error: "Missing listingId"
+    });
+  }
+
+  const state = saveUserIxiMachinePatch({
+    userId,
+    listingId,
+    patch
+  });
+
+  return res.status(200).json({
+    ok: true,
+    state
+  });
+}
 
     return res.status(405).json({
       error: "Method not allowed"
