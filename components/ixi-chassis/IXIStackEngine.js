@@ -21,8 +21,18 @@ function toggleStackLayoutState(currentLayouts, stackKey) {
   };
 }
 
+function getMachineIdsForStack(
+  machineContainers,
+  stackKey
+) {
+  const sourceContainer = getStackContainerKey(stackKey);
+
+  return machineContainers?.[sourceContainer] || [];
+}
+
 export {
   getStackContainerKey,
   toggleStackOpenState,
-  toggleStackLayoutState
+  toggleStackLayoutState,
+  getMachineIdsForStack
 };
