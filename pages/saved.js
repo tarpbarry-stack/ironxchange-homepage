@@ -236,13 +236,20 @@ moveMachineWithinContainer(
     return;
   }
 
-  if (
+ if (
   sourceContainer !== "board" &&
   targetContainer === "board" &&
   overId &&
   overId !== "board" &&
   dragId !== overId
 ) {
+  console.log("IXI INSERT TO BOARD", {
+    dragId,
+    overId,
+    sourceContainer,
+    targetContainer
+  });
+
   moveMachineToContainerAtPosition(
     dragId,
     "board",
