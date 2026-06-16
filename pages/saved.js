@@ -1253,11 +1253,20 @@ function getIxiColorValue(color) {
 
 function cycleCardScaleMode() {
   setCardScaleMode(current => {
-    if (current === "xl") return "large";
-    if (current === "large") return "medium";
-    if (current === "medium") return "compact";
-    if (current === "compact") return "micro";
-    return "xl";
+    const next =
+      current === "xl" ? "large" :
+      current === "large" ? "medium" :
+      current === "medium" ? "compact" :
+      current === "compact" ? "micro" :
+      "xl";
+
+    saveIxiPreference({
+      userId: ixiUserId,
+      key: "cardScaleMode",
+      value: next
+    });
+
+    return next;
   });
 }
   
