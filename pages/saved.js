@@ -56,7 +56,8 @@ import {
 import {
   getMachineContainerFromContainers,
   reorderMachineWithinContainerState,
-  moveMachineToContainerAtPositionState
+  moveMachineToContainerAtPositionState,
+  moveMachineToContainerState
 } from "../components/ixi-chassis/IXIMachineContainerEngine";
 
 import {
