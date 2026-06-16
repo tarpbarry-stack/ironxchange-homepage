@@ -47,9 +47,31 @@ function sanitizeWorkspaceContainers(
   return clean;
 }
 
+function saveWorkspaceLayoutRecord({
+  saveIxiMachinePatch,
+  userId,
+  machineContainers,
+  activeStackLayouts,
+  activeStacksOpen,
+  layoutId = IXI_WORKSPACE_LAYOUT_ID
+}) {
+  return saveIxiMachinePatch({
+    userId,
+    listingId: layoutId,
+    patch: {
+      machineContainers,
+      activeStackLayouts,
+      activeStacksOpen,
+      updatedAt: Date.now()
+    }
+  });
+}
+
 export {
   IXI_WORKSPACE_SETTINGS_ID,
   IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
-  sanitizeWorkspaceContainers
+  sanitizeWorkspaceContainers,
+  saveWorkspaceLayoutRecord
 };
+
