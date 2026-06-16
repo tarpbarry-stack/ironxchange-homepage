@@ -28,8 +28,6 @@ import { getListingId } from "../lib/listingFormatters";
 import {
   fetchIxiMachineState,
   saveIxiMachinePatch,
-  saveIxiWorkspaceLayout,
-  saveIxiPreference
 } from "../lib/ixiMachineStateClient";
 
 import { captureIXEvent } from "../lib/posthog";
@@ -332,8 +330,6 @@ const [machineContainers, setMachineContainers] = useState({
   pocketRight2: []
 });
 
-const [loadedWorkspaceLayout, setLoadedWorkspaceLayout] = useState(null); 
-
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
   bottom: "horizontal"
@@ -420,63 +416,21 @@ setIxiUserId(String(userId));
 const remoteIxiResponse =
   await fetchIxiMachineState(String(userId));
 
-const remoteIxiStateRaw =
+const remoteIxiState =
   remoteIxiResponse?.state || remoteIxiResponse || {};
 
-const { __workspaceLayout, ...remoteIxiState } =
-  remoteIxiStateRaw || {};
-
-const remoteWorkspaceLayout =
-  remoteIxiResponse?.workspaceLayout || null;
-
-const remotePreferences =
-  remoteIxiResponse?.preferences || {};
-
 setIxiCardState(remoteIxiState);
-setLoadedWorkspaceLayout(remoteWorkspaceLayout);
-
-if (remotePreferences.cardScaleMode) {
-  setCardScaleMode(remotePreferences.cardScaleMode);
-}
         
-        setSavedIds(
-          getSavedListingIdsFromUser(currentUser)
-        );
+setSavedIds(
+  getSavedListingIdsFromUser(currentUser)
+);
 
-        const res = await fetch("/api/listings");
-        const data = await res.json();
+const res = await fetch("/api/listings");
+const data = await res.json();
 
-        if (Array.isArray(data)) {
-          setListings(data);
-        }
-      } catch (err) {
-        console.error("Saved page load failed:", err);
-        setSavedIds([]);
-      }
-    }
-
-    loadSavedPage();
-  }, []);
-
- /*
-useEffect(() => {
-  if (!ixiUserId) return;
-
-  saveIxiWorkspaceLayout({
-    userId: ixiUserId,
-    workspaceLayout: {
-      machineContainers,
-      activeStackLayouts,
-      activeStacksOpen
-    }
-  });
-}, [
-  ixiUserId,
-  machineContainers,
-  activeStackLayouts,
-  activeStacksOpen
-]);
-*/
+if (Array.isArray(data)) {
+  setListings(data);
+}
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
