@@ -504,7 +504,19 @@ const containerStateKey = useMemo(() => {
     })
     .join("|");
 }, [workspaceListings, ixiCardState]);
-  
+   
+function createEmptyWorkspaceContainers() {
+  return {
+    board: [],
+    stackTop: [],
+    stackBottom: [],
+    pocketLeft: [],
+    pocketRight: [],
+    pocketLeft2: [],
+    pocketRight2: []
+  };
+}
+
 useEffect(() => {
   if (!workspaceListings.length) return;
 
