@@ -9,6 +9,8 @@ import ListingCard from "../ListingCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
+import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
+
 export default function IXIActiveStack({
   stackKey,
   machineIds = [],
@@ -28,6 +30,8 @@ export default function IXIActiveStack({
 cardScaleMode = "xl"
 }) {
   const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
+
+  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
 
   const strategy =
     activeStackLayouts[stackKey] === "vertical"
@@ -49,11 +53,20 @@ cardScaleMode = "xl"
 
         return (
           <IXISortableMachineCard
-            key={`stack-card-${id}`}
-            id={id}
-            containerId={containerId}
-            className="active-stack-card"
-          >
+  key={`stack-card-${id}`}
+  id={id}
+  containerId={containerId}
+  className="active-stack-card"
+  style={
+    enableCardScaling
+      ? {
+          width: `${cardScaleMetrics.width}px`,
+          maxWidth: `${cardScaleMetrics.width}px`,
+          minWidth: `${cardScaleMetrics.width}px`
+        }
+      : undefined
+  }
+>
           {({ dragHandleProps }) => (
   enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
