@@ -936,10 +936,14 @@ saveIxiMachinePatch({
 
     nextContainer.splice(insertIndex, 0, moved);
 
-    return {
+        const finalContainers = {
       ...current,
       [containerKey]: nextContainer
     };
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
   });
 }
   
