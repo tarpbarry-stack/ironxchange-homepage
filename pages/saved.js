@@ -1577,6 +1577,7 @@ function cycleCardScaleMode() {
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
+  cycleMachineFace={cycleMachineFace}
 />
 </div>
 
