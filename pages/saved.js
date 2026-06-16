@@ -1209,6 +1209,15 @@ function cycleCardScaleMode() {
       current === "compact" ? "micro" :
       "xl";
 
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_SETTINGS_ID,
+      patch: {
+        cardScaleMode: next,
+        updatedAt: Date.now()
+      }
+    });
+
     return next;
   });
 }
