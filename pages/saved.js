@@ -1281,15 +1281,12 @@ function getIxiColorValue(color) {
 }
 
 function saveWorkspaceLayout(nextContainers = machineContainers) {
-  saveIxiMachinePatch({
+  saveWorkspaceLayoutRecord({
+    saveIxiMachinePatch,
     userId: ixiUserId,
-    listingId: IXI_WORKSPACE_LAYOUT_ID,
-    patch: {
-      machineContainers: nextContainers,
-      activeStackLayouts,
-      activeStacksOpen,
-      updatedAt: Date.now()
-    }
+    machineContainers: nextContainers,
+    activeStackLayouts,
+    activeStacksOpen
   });
 }
   
