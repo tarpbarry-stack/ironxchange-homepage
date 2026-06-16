@@ -61,6 +61,10 @@ import {
 } from "../components/ixi-chassis/IXIMachineContainerEngine";
 
 import {
+  getStackContainerKey
+} from "../components/ixi-chassis/IXIStackEngine";
+
+import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
   filterSavedListings,
