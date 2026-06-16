@@ -1011,13 +1011,17 @@ function rotatePocket(pocketKey) {
 
     if (ids.length <= 1) return current;
 
-    return {
+        const finalContainers = {
       ...current,
       [pocketKey]: [
         ...ids.slice(1),
         ids[0]
       ]
     };
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
   });
 }
 
