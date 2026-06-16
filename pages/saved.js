@@ -1019,10 +1019,10 @@ function sendListingToBack(listing) {
 
 function toggleActiveStack(stackKey) {
   setActiveStacksOpen(current => {
-    const nextOpen = {
-      ...current,
-      [stackKey]: !current[stackKey]
-    };
+    const nextOpen = toggleStackOpenState(
+  current,
+  stackKey
+);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
