@@ -548,8 +548,12 @@ function sanitizeWorkspaceContainers(savedContainers, validMachineIds) {
 useEffect(() => {
   if (!workspaceListings.length) return;
 
- const nextContainers = createEmptyWorkspaceContainers();
-  
+  const validMachineIds = workspaceListings.map(item =>
+    String(getListingId(item))
+  );
+
+  const nextContainers = createEmptyWorkspaceContainers();
+
   workspaceListings.forEach(item => {
     const id = String(getListingId(item));
     const savedContainer = ixiCardState[id]?.container;
