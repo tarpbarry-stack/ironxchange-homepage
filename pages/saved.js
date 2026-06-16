@@ -27,7 +27,8 @@ import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 import {
   fetchIxiMachineState,
-  saveIxiMachinePatch
+  saveIxiMachinePatch,
+  saveIxiWorkspaceLayout
 } from "../lib/ixiMachineStateClient";
 import { captureIXEvent } from "../lib/posthog";
 
