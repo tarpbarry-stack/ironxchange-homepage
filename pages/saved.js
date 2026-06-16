@@ -181,8 +181,6 @@ function handleWorkspaceDragEnd(event) {
     "pocketRight2"
   ];
 
-  const [loadedWorkspaceLayout, setLoadedWorkspaceLayout] = useState(null);
-
   const sourceContainer =
     event?.active?.data?.current?.containerId ||
     (knownContainers.includes(activeSortable?.containerId)
@@ -331,6 +329,8 @@ const [machineContainers, setMachineContainers] = useState({
   pocketLeft2: [],
   pocketRight2: []
 });
+
+const [loadedWorkspaceLayout, setLoadedWorkspaceLayout] = useState(null); 
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
