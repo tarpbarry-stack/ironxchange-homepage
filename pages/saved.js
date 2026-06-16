@@ -55,7 +55,8 @@ import {
 
 import {
   getMachineContainerFromContainers,
-  reorderMachineWithinContainerState
+  reorderMachineWithinContainerState,
+  moveMachineToContainerAtPositionState
 } from "../components/ixi-chassis/IXIMachineContainerEngine";
 
 import {
@@ -820,43 +821,34 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
- const id = String(machineId);
-const target = String(targetId);
+  const id = String(machineId);
 
-saveIxiMachinePatch({
-  userId: ixiUserId,
-  listingId: id,
-  patch: {
-    ...(ixiCardState[id] || {}),
-    container: targetContainer,
-    touched: true,
-    updatedAt: Date.now()
-  }
-});
-  setMachineContainers(current => {
-    const next = {};
-
-    Object.keys(current).forEach(containerKey => {
-      next[containerKey] = (current[containerKey] || []).filter(
-        item => String(item) !== id
-      );
-    });
-
-    const targetList = [...(next[targetContainer] || [])];
-
-    const targetIndex = targetList.findIndex(
-      item => String(item) === target
-    );
-
-    if (targetIndex === -1) {
-      targetList.push(id);
-    } else {
-      targetList.splice(
-        insertAfter ? targetIndex + 1 : targetIndex,
-        0,
-        id
-      );
+  saveIxiMachinePatch({
+    userId: ixiUserId,
+    listingId: id,
+    patch: {
+      ...(ixiCardState[id] || {}),
+      container: targetContainer,
+      touched: true,
+      updatedAt: Date.now()
     }
+  });
+
+  setMachineContainers(current => {
+    const finalContainers =
+      moveMachineToContainerAtPositionState({
+        currentContainers: current,
+        machineId,
+        targetContainer,
+        targetId,
+        insertAfter
+      });
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
+  });
+}
 
        const finalContainers = {
       ...next,
