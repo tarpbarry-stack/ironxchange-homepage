@@ -739,6 +739,53 @@ function moveMachineToContainer(machineId, targetContainer) {
   });
 }
 
+function moveMachineToContainerAtPosition(
+  machineId,
+  targetContainer,
+  targetId,
+  insertAfter = false
+) {
+  if (!machineId || !targetContainer || !targetId) return;
+
+  const id = String(machineId);
+  const target = String(targetId);
+
+  updateIxiCardState(id, {
+    container: targetContainer
+  });
+
+  setMachineContainers(current => {
+    const next = {};
+
+    Object.keys(current).forEach(containerKey => {
+      next[containerKey] = (current[containerKey] || []).filter(
+        item => String(item) !== id
+      );
+    });
+
+    const targetList = [...(next[targetContainer] || [])];
+
+    const targetIndex = targetList.findIndex(
+      item => String(item) === target
+    );
+
+    if (targetIndex === -1) {
+      targetList.push(id);
+    } else {
+      targetList.splice(
+        insertAfter ? targetIndex + 1 : targetIndex,
+        0,
+        id
+      );
+    }
+
+    return {
+      ...next,
+      [targetContainer]: targetList
+    };
+  });
+}
+  
   function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
   if (!containerKey || !dragId || !targetId || dragId === targetId) return;
 
