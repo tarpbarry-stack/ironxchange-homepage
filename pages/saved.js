@@ -1199,12 +1199,6 @@ function cycleCardScaleMode() {
       current === "compact" ? "micro" :
       "xl";
 
-    saveIxiPreference({
-      userId: ixiUserId,
-      key: "cardScaleMode",
-      value: next
-    });
-
     return next;
   });
 }
