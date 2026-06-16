@@ -1133,15 +1133,6 @@ function toggleActiveStackLayout(stackKey) {
     return nextLayouts;
   });
 }
-  function toggleActiveStackLayout(stackKey) {
-  setActiveStackLayouts(current => ({
-    ...current,
-    [stackKey]:
-      current[stackKey] === "horizontal"
-        ? "vertical"
-        : "horizontal"
-  }));
-}
 
 function getStackContainerKey(stackKey) {
   return stackKey === "top"
