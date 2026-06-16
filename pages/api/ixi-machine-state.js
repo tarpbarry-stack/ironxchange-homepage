@@ -7,13 +7,14 @@ import {
 
 export default function handler(req, res) {
   try {
-    if (req.method === "GET") {
-      const userId = String(req.query.userId || "guest");
+   if (req.method === "GET") {
+  const userId = String(req.query.userId || "guest");
 
-      return res.status(200).json({
-        state: getUserIxiMachineState(userId)
-      });
-    }
+  return res.status(200).json({
+    state: getUserIxiMachineState(userId),
+    workspaceLayout: getUserIxiWorkspaceLayout(userId)
+  });
+}
 
     if (req.method === "POST") {
       const { userId = "guest", listingId, patch = {} } = req.body || {};
