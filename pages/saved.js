@@ -429,8 +429,15 @@ const { __workspaceLayout, ...remoteIxiState } =
 const remoteWorkspaceLayout =
   remoteIxiResponse?.workspaceLayout || null;
 
+const remotePreferences =
+  remoteIxiResponse?.preferences || {};
+
 setIxiCardState(remoteIxiState);
 setLoadedWorkspaceLayout(remoteWorkspaceLayout);
+
+if (remotePreferences.cardScaleMode) {
+  setCardScaleMode(remotePreferences.cardScaleMode);
+}
         
         setSavedIds(
           getSavedListingIdsFromUser(currentUser)
