@@ -1066,9 +1066,11 @@ function toggleActiveStackLayout(stackKey) {
 }
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
-  const sourceContainer = getStackContainerKey(stackKey);
-  const stackIds = machineContainers[sourceContainer] || [];
-
+  const stackIds = getMachineIdsForStack(
+  machineContainers,
+  stackKey
+);
+  
   stackIds.forEach(machineId => {
     moveMachineToContainer(
       machineId,
