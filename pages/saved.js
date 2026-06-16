@@ -1109,10 +1109,7 @@ function saveActiveStack(stackKey) {
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
 
-  const targetContainer =
-    stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
+ const targetContainer = getStackContainerKey(stackKey);
 
   setActiveStacksOpen(current => ({
     ...current,
