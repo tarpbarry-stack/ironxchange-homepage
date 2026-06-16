@@ -552,6 +552,24 @@ useEffect(() => {
     String(getListingId(item))
   );
 
+  const savedLayout =
+    ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
+
+  if (
+    savedLayout?.machineContainers &&
+    !hasAppliedRemoteLayoutRef.current
+  ) {
+    setMachineContainers(
+      sanitizeWorkspaceContainers(
+        savedLayout.machineContainers,
+        validMachineIds
+      )
+    );
+
+    hasAppliedRemoteLayoutRef.current = true;
+    return;
+  }
+
   const nextContainers = createEmptyWorkspaceContainers();
 
   workspaceListings.forEach(item => {
