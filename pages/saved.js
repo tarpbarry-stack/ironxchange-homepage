@@ -54,6 +54,10 @@ import {
 } from "../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
 import {
+  getMachineContainerFromContainers
+} from "../components/ixi-chassis/IXIMachineContainerEngine";
+
+import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
   filterSavedListings,
