@@ -762,18 +762,12 @@ function cycleMachineFace(listingOrId) {
   );
 }
 
- function getMachineContainer(machineId) {
-  const id = String(machineId);
-
-  for (const [containerKey, ids] of Object.entries(machineContainers)) {
-    if ((ids || []).includes(id)) {
-      return containerKey;
-    }
-  }
-
-  return "board";
+function getMachineContainer(machineId) {
+  return getMachineContainerFromContainers(
+    machineContainers,
+    machineId
+  );
 }
-
   
 
 function moveMachineToContainer(machineId, targetContainer) {
