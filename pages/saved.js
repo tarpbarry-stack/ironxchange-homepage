@@ -1109,11 +1109,29 @@ function sendListingToBack(listing) {
     }
   }
 
-function toggleActiveStack(stackKey) {
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: !current[stackKey]
-  }));
+function toggleActiveStackLayout(stackKey) {
+  setActiveStackLayouts(current => {
+    const nextLayouts = {
+      ...current,
+      [stackKey]:
+        current[stackKey] === "horizontal"
+          ? "vertical"
+          : "horizontal"
+    };
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      patch: {
+        machineContainers,
+        activeStackLayouts: nextLayouts,
+        activeStacksOpen,
+        updatedAt: Date.now()
+      }
+    });
+
+    return nextLayouts;
+  });
 }
   function toggleActiveStackLayout(stackKey) {
   setActiveStackLayouts(current => ({
