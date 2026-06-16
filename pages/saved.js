@@ -425,7 +425,8 @@ const remoteWorkspaceLayout =
   remoteIxiResponse?.workspaceLayout || null;
 
 setIxiCardState(remoteIxiState);
-
+setLoadedWorkspaceLayout(remoteWorkspaceLayout);
+        
         setSavedIds(
           getSavedListingIdsFromUser(currentUser)
         );
