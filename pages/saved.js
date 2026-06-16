@@ -28,8 +28,10 @@ import { getListingId } from "../lib/listingFormatters";
 import {
   fetchIxiMachineState,
   saveIxiMachinePatch,
-  saveIxiWorkspaceLayout
+  saveIxiWorkspaceLayout,
+  saveIxiPreference
 } from "../lib/ixiMachineStateClient";
+
 import { captureIXEvent } from "../lib/posthog";
 
 import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
