@@ -832,7 +832,7 @@ function moveMachineToContainer(machineId, targetContainer) {
       "pocketRight2"
     ].includes(targetContainer);
 
-    next[targetContainer] = isPocket
+        next[targetContainer] = isPocket
       ? [
           id,
           ...(next[targetContainer] || [])
@@ -841,6 +841,9 @@ function moveMachineToContainer(machineId, targetContainer) {
           ...(next[targetContainer] || []),
           id
         ];
+
+    saveWorkspaceLayout(next);
+
     return next;
   });
 }
