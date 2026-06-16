@@ -366,9 +366,6 @@ const POCKET_TARGETS = [
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
-  const IXI_WORKSPACE_SETTINGS_ID = "__workspaceSettings";
-  const IXI_WORKSPACE_LAYOUT_ID = "__workspaceLayout";
-
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
 
