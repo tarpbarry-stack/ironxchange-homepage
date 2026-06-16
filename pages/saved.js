@@ -487,30 +487,6 @@ const containerStateKey = useMemo(() => {
     })
     .join("|");
 }, [workspaceListings, ixiCardState]);
-
-/*
-useEffect(() => {
-  if (!loadedWorkspaceLayout) return;
-
-  if (loadedWorkspaceLayout.machineContainers) {
-    setMachineContainers(
-      loadedWorkspaceLayout.machineContainers
-    );
-  }
-
-  if (loadedWorkspaceLayout.activeStackLayouts) {
-    setActiveStackLayouts(
-      loadedWorkspaceLayout.activeStackLayouts
-    );
-  }
-
-  if (loadedWorkspaceLayout.activeStacksOpen) {
-    setActiveStacksOpen(
-      loadedWorkspaceLayout.activeStacksOpen
-    );
-  }
-}, [loadedWorkspaceLayout]);
-*/
   
 useEffect(() => {
   if (!workspaceListings.length) return;
