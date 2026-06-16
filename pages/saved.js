@@ -63,7 +63,8 @@ import {
 import {
   getStackContainerKey,
   toggleStackOpenState,
-  toggleStackLayoutState
+  toggleStackLayoutState,
+  getMachineIdsForStack
 } from "../components/ixi-chassis/IXIStackEngine";
 
 import {
