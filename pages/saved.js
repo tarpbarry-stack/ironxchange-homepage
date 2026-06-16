@@ -516,6 +516,7 @@ const containerStateKey = useMemo(() => {
     .join("|");
 }, [workspaceListings, ixiCardState]);
 
+/*
 useEffect(() => {
   if (!loadedWorkspaceLayout) return;
 
@@ -537,6 +538,7 @@ useEffect(() => {
     );
   }
 }, [loadedWorkspaceLayout]);
+*/
   
 useEffect(() => {
   if (!workspaceListings.length) return;
