@@ -42,6 +42,7 @@ import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../components/ixi-chassis/IXIWorkspaceEngine";
+import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 
 import {
   fetchCurrentUserWithSavedListings,
@@ -323,8 +324,8 @@ const POCKET_TARGETS = [
 ];
 
 
-const [activeStackHover, setActiveStackHover] = useState("");
-const [ixiCardState, setIxiCardState] = useState({});
+  const [activeStackHover, setActiveStackHover] = useState("");
+  const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
@@ -332,6 +333,8 @@ const [ixiCardState, setIxiCardState] = useState({});
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
+  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+  
 
   const [activeDndId, setActiveDndId] = useState("");
 
@@ -1506,6 +1509,13 @@ function cycleCardScaleMode() {
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
+  style={{
+    gridTemplateColumns:
+      visibleSavedListings.length === 1
+        ? `${cardScaleMetrics.width}px`
+        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
+    gap: `${cardScaleMetrics.gap}px`
+  }}
 >
 <IXIBoard
   items={visibleSavedListings}
