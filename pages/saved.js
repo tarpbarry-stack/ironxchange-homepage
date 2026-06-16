@@ -1161,10 +1161,9 @@ function movePocketToStack(pocketKey, stackKey) {
     targetContainer
   );
 
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: true
-  }));
+ setActiveStacksOpen(current =>
+  openStackState(current, stackKey)
+);
 }
 
 function recallPocketToBoard(pocketKey) {
