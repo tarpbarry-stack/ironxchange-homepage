@@ -1238,12 +1238,7 @@ function saveWorkspaceLayout(nextContainers = machineContainers) {
   
 function cycleCardScaleMode() {
   setCardScaleMode(current => {
-    const next =
-      current === "xl" ? "large" :
-      current === "large" ? "medium" :
-      current === "medium" ? "compact" :
-      current === "compact" ? "micro" :
-      "xl";
+    const next = getNextCardScaleMode(current);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
