@@ -520,16 +520,8 @@ function createEmptyWorkspaceContainers() {
 useEffect(() => {
   if (!workspaceListings.length) return;
 
-  const nextContainers = {
-    board: [],
-    stackTop: [],
-    stackBottom: [],
-    pocketLeft: [],
-    pocketRight: [],
-    pocketLeft2: [],
-    pocketRight2: []
-  };
-
+ const nextContainers = createEmptyWorkspaceContainers();
+  
   workspaceListings.forEach(item => {
     const id = String(getListingId(item));
     const savedContainer = ixiCardState[id]?.container;
