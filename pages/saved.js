@@ -894,10 +894,14 @@ saveIxiMachinePatch({
       );
     }
 
-    return {
+       const finalContainers = {
       ...next,
       [targetContainer]: targetList
     };
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
   });
 }
   
