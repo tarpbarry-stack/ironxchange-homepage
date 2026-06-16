@@ -421,7 +421,14 @@ const remoteIxiResponse =
 const remoteIxiState =
   remoteIxiResponse?.state || remoteIxiResponse || {};
 
+const workspaceSettings =
+  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
+
 setIxiCardState(remoteIxiState);
+
+if (workspaceSettings.cardScaleMode) {
+  setCardScaleMode(workspaceSettings.cardScaleMode);
+}
         
 setSavedIds(
   getSavedListingIdsFromUser(currentUser)
