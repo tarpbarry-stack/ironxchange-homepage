@@ -1,6 +1,8 @@
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import ListingCard from "../ListingCard";
 
+import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
+
 export default function IXIDragEngine({
   sensors,
   workspaceCollisionDetection,
@@ -11,7 +13,8 @@ export default function IXIDragEngine({
   getActiveDndListing,
   activeDndId,
   savedIds,
-  ixiCardState
+  ixiCardState,
+  cardScaleMode = "xl"
 }) {
   return (
     <DndContext
@@ -26,7 +29,8 @@ export default function IXIDragEngine({
       <DragOverlay>
         {getActiveDndListing() ? (
           <div className="ixi-drag-overlay-card">
-            <ListingCard
+  <IXIScaledCardShell size={cardScaleMode}>
+    <ListingCard
               listing={getActiveDndListing()}
               saved={savedIds.includes(String(activeDndId))}
               onToggleSaved={() => {}}
@@ -46,8 +50,9 @@ export default function IXIDragEngine({
               onBoardDragOver={() => {}}
               onBoardDragEnd={() => {}}
               useDndDrag={false}
-            />
-          </div>
+                />
+  </IXIScaledCardShell>
+</div>
         ) : null}
       </DragOverlay>
     </DndContext>
