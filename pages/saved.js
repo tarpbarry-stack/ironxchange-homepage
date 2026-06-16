@@ -1128,15 +1128,24 @@ function addListingToLeftPocket(listingId) {
 }
 
 function movePocketToContainer(pocketKey, targetContainer) {
-  if (!pocketKey || !targetContainer) return;
-
-  const pocketIds = machineContainers[pocketKey] || [];
-
-  pocketIds.forEach(machineId => {
-    moveMachineToContainer(
-      machineId,
+  setMachineContainers(current => {
+    const finalContainers = movePocketToContainerState(
+      current,
+      pocketKey,
       targetContainer
     );
+
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+
+      (current[pocketKey] || []).forEach(machineId => {
+        updateIxiCardState(machineId, {
+          container: targetContainer
+        });
+      });
+    }
+
+    return finalContainers;
   });
 }
 
