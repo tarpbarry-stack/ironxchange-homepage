@@ -1073,42 +1073,14 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     stackKey
   );
 
-  setMachineContainers(current => {
-    const finalContainers = moveStackToContainerState({
-      currentContainers: current,
-      stackKey,
-      targetContainer
-    });
-
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-
-      stackIds.forEach(machineId => {
-        updateIxiCardState(machineId, {
-          container: targetContainer
-        });
-      });
-    }
-
-    return finalContainers;
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(machineId, targetContainer);
   });
 
   setActiveStacksOpen(current => ({
     ...current,
     [stackKey]: false
   }));
-}
-
-function saveActiveStack(stackKey) {
-  const targetPocket =
-    stackKey === "top"
-      ? "pocketLeft"
-      : "pocketRight";
-
-  moveActiveStackToContainer(
-    stackKey,
-    targetPocket
-  );
 }
 
  function sendActiveStackToTheater(stackKey) {
