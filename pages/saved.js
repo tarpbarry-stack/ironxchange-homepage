@@ -46,6 +46,8 @@ import IXIWorkspaceEngine from "../components/ixi-chassis/IXIWorkspaceEngine";
 import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 import IXIActiveStackZone from "../components/ixi-chassis/IXIActiveStackZone";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+import WorkspaceDropZone from "../components/ixi-chassis/WorkspaceDropZone";
+import WorkspaceDropPad from "../components/ixi-chassis/WorkspaceDropPad";
 
 import {
   IXI_WORKSPACE_SETTINGS_ID,
