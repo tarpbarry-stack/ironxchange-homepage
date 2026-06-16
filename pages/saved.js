@@ -869,43 +869,19 @@ saveIxiMachinePatch({
   });
 }
   
-  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-  if (!containerKey || !dragId || !targetId || dragId === targetId) return;
-
+ function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
   setMachineContainers(current => {
-    const source = current[containerKey] || [];
+    const finalContainers = reorderMachineWithinContainerState({
+      currentContainers: current,
+      containerKey,
+      dragId,
+      targetId,
+      insertAfter
+    });
 
-    const fromIndex = source.findIndex(
-      item => String(item) === String(dragId)
-    );
-
-    const toIndex = source.findIndex(
-      item => String(item) === String(targetId)
-    );
-
-    if (fromIndex === -1 || toIndex === -1) {
-      return current;
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
     }
-
-    const nextContainer = [...source];
-    const [moved] = nextContainer.splice(fromIndex, 1);
-
-    const adjustedTargetIndex = nextContainer.findIndex(
-      item => String(item) === String(targetId)
-    );
-
-    const insertIndex = insertAfter
-      ? adjustedTargetIndex + 1
-      : adjustedTargetIndex;
-
-    nextContainer.splice(insertIndex, 0, moved);
-
-        const finalContainers = {
-      ...current,
-      [containerKey]: nextContainer
-    };
-
-    saveWorkspaceLayout(finalContainers);
 
     return finalContainers;
   });
