@@ -72,6 +72,10 @@ import {
 } from "../components/ixi-chassis/IXIPocketEngine";
 
 import {
+  getNextCardScaleMode
+} from "../components/ixi-chassis/IXIScaleEngine";
+
+import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
   filterSavedListings,
