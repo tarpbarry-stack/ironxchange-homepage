@@ -11,7 +11,18 @@ function toggleStackOpenState(currentState, stackKey) {
   };
 }
 
+function toggleStackLayoutState(currentLayouts, stackKey) {
+  return {
+    ...currentLayouts,
+    [stackKey]:
+      currentLayouts[stackKey] === "horizontal"
+        ? "vertical"
+        : "horizontal"
+  };
+}
+
 export {
   getStackContainerKey,
-  toggleStackOpenState
+  toggleStackOpenState,
+  toggleStackLayoutState
 };
