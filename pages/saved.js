@@ -776,9 +776,10 @@ function moveMachineToContainerAtPosition(
   const id = String(machineId);
   const target = String(targetId);
 
-  updateIxiCardState(id, {
-    container: targetContainer
-  });
+ // TEMP TEST — do not persist yet
+// updateIxiCardState(id, {
+//   container: targetContainer
+// });
 
   setMachineContainers(current => {
     const next = {};
