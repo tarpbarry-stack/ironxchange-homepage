@@ -1575,6 +1575,8 @@ function cycleCardScaleMode() {
   sendListingToBack={sendListingToBack}
   armedDestination={armedDestination}
   sendMachineToArmedDestination={sendMachineToArmedDestination}
+  enableCardScaling={true}
+  cardScaleMode={cardScaleMode}
 />
 </div>
 
