@@ -237,6 +237,25 @@ moveMachineWithinContainer(
   }
 
   if (
+  sourceContainer !== "board" &&
+  targetContainer === "board" &&
+  overId &&
+  overId !== "board" &&
+  dragId !== overId
+) {
+  moveMachineToContainerAtPosition(
+    dragId,
+    "board",
+    overId,
+    false
+  );
+
+  setActiveDndId("");
+  clearMachineDragState();
+  return;
+}
+
+  if (
     targetContainer &&
     targetContainer !== sourceContainer &&
             ["board", "stackTop", "stackBottom", "pocketLeft", "pocketRight", "pocketLeft2", "pocketRight2"].includes(targetContainer)
