@@ -88,26 +88,6 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
-function WorkspaceDropPad({
-  id,
-  className,
-  style,
-  ...props
-}) {
-  const { setNodeRef } = useDroppable({
-    id
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={className}
-      style={style}
-      {...props}
-    />
-  );
-}
-
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
 
