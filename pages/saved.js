@@ -1063,12 +1063,6 @@ function toggleActiveStackLayout(stackKey) {
   });
 }
 
-function getStackContainerKey(stackKey) {
-  return stackKey === "top"
-    ? "stackTop"
-    : "stackBottom";
-}
-
 function moveActiveStackToContainer(stackKey, targetContainer) {
   const sourceContainer = getStackContainerKey(stackKey);
   const stackIds = machineContainers[sourceContainer] || [];
