@@ -1112,10 +1112,9 @@ function addListingToActiveStack(stackKey, listingId) {
 
  const targetContainer = getStackContainerKey(stackKey);
 
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: true
-  }));
+ setActiveStacksOpen(current =>
+  openStackState(current, stackKey)
+);
 
   moveMachineToContainer(
     listingId,
