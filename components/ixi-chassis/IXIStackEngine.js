@@ -11,6 +11,13 @@ function toggleStackOpenState(currentState, stackKey) {
   };
 }
 
+function openStackState(currentState, stackKey) {
+  return {
+    ...currentState,
+    [stackKey]: true
+  };
+}
+
 function toggleStackLayoutState(currentLayouts, stackKey) {
   return {
     ...currentLayouts,
@@ -33,6 +40,7 @@ function getMachineIdsForStack(
 export {
   getStackContainerKey,
   toggleStackOpenState,
+  openStackState,
   toggleStackLayoutState,
   getMachineIdsForStack
 };
