@@ -782,34 +782,16 @@ function moveMachineToContainer(machineId, targetContainer) {
   });
 
   setMachineContainers(current => {
-    const next = {};
+    const finalContainers =
+      moveMachineToContainerState({
+        currentContainers: current,
+        machineId,
+        targetContainer
+      });
 
-    Object.keys(current).forEach(containerKey => {
-      next[containerKey] = (current[containerKey] || []).filter(
-        item => String(item) !== id
-      );
-    });
+    saveWorkspaceLayout(finalContainers);
 
-      const isPocket = [
-      "pocketLeft",
-      "pocketRight",
-      "pocketLeft2",
-      "pocketRight2"
-    ].includes(targetContainer);
-
-        next[targetContainer] = isPocket
-      ? [
-          id,
-          ...(next[targetContainer] || [])
-        ]
-      : [
-          ...(next[targetContainer] || []),
-          id
-        ];
-
-    saveWorkspaceLayout(next);
-
-    return next;
+    return finalContainers;
   });
 }
 
