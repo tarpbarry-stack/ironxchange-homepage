@@ -1139,6 +1139,7 @@ function cycleCardScaleMode() {
   activeDndId={activeDndId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
+  cardScaleMode={cardScaleMode}
 >
 <IXIWorkspaceEngine>
   {({
