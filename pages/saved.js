@@ -1069,15 +1069,28 @@ function toggleActiveStackLayout(stackKey) {
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
   const stackIds = getMachineIdsForStack(
-  machineContainers,
-  stackKey
-);
-  
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(
-      machineId,
+    machineContainers,
+    stackKey
+  );
+
+  setMachineContainers(current => {
+    const finalContainers = moveStackToContainerState({
+      currentContainers: current,
+      stackKey,
       targetContainer
-    );
+    });
+
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+
+      stackIds.forEach(machineId => {
+        updateIxiCardState(machineId, {
+          container: targetContainer
+        });
+      });
+    }
+
+    return finalContainers;
   });
 
   setActiveStacksOpen(current => ({
