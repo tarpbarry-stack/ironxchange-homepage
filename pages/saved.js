@@ -917,22 +917,15 @@ function getListingById(machineId) {
 }
   
 function rotatePocket(pocketKey) {
-  if (!pocketKey) return;
-
   setMachineContainers(current => {
-    const ids = current[pocketKey] || [];
+    const finalContainers = rotatePocketState(
+      current,
+      pocketKey
+    );
 
-    if (ids.length <= 1) return current;
-
-        const finalContainers = {
-      ...current,
-      [pocketKey]: [
-        ...ids.slice(1),
-        ids[0]
-      ]
-    };
-
-    saveWorkspaceLayout(finalContainers);
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+    }
 
     return finalContainers;
   });
