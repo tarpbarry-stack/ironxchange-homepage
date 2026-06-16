@@ -14,6 +14,36 @@ function rotatePocketState(currentContainers, pocketKey) {
   };
 }
 
+function movePocketToContainerState(
+  currentContainers,
+  pocketKey,
+  targetContainer
+) {
+  if (!pocketKey || !targetContainer) {
+    return currentContainers;
+  }
+
+  const pocketIds = currentContainers?.[pocketKey] || [];
+
+  if (!pocketIds.length) {
+    return currentContainers;
+  }
+
+  const next = {
+    ...currentContainers
+  };
+
+  next[pocketKey] = [];
+
+  next[targetContainer] = [
+    ...(next[targetContainer] || []),
+    ...pocketIds
+  ];
+
+  return next;
+}
+
 export {
-  rotatePocketState
+  rotatePocketState,
+  movePocketToContainerState
 };
