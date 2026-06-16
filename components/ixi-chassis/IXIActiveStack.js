@@ -22,12 +22,13 @@ export default function IXIActiveStack({
   IXISortableMachineCard,
   toggleSave,
   updateIxiCardState,
+  cycleMachineFace,
   sendListingToFront,
   sendListingToBack,
   armedDestination,
   sendMachineToArmedDestination,
   enableCardScaling = false,
-cardScaleMode = "xl"
+  cardScaleMode = "xl"
 }) {
   const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
 
@@ -82,6 +83,8 @@ cardScaleMode = "xl"
                   }
                 }
                 onIxiStateChange={updateIxiCardState}
+                machineFace={ixiCardState[id]?.face || 1}
+                onCycleMachineFace={() => cycleMachineFace?.(id)}
                 onSendFront={sendListingToFront}
                 onSendBack={sendListingToBack}
                 armedDestination={armedDestination}
