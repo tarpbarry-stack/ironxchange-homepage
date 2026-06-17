@@ -428,17 +428,33 @@ function handleCardClick() {
             
 
             {sellerMode ? (
-            <input
-  className="location-input"
-  defaultValue={
-    locationValue ||
-    listing.location ||
-    "Location not listed"
-  }
-  onClick={stopCardClick}
-  onKeyDown={e => onLocationKeyDown?.(e, listing)}
-  maxLength={18}
-/>
+          <div className="location-row">
+  <input
+    className="city-input location-input"
+    defaultValue={
+      String(locationValue || listing.location || "")
+        .split(",")[0]
+        .trim()
+    }
+    onClick={stopCardClick}
+    onKeyDown={e => onLocationKeyDown?.(e, listing)}
+    maxLength={18}
+  />
+
+  <input
+    className="state-input location-input"
+    defaultValue={
+      String(locationValue || listing.location || "")
+        .split(",")[1]
+        ?.trim()
+        ?.slice(0, 2)
+        ?.toUpperCase() || ""
+    }
+    onClick={stopCardClick}
+    onKeyDown={e => onLocationKeyDown?.(e, listing)}
+    maxLength={2}
+  />
+</div>
             ) : (
               <span>⌖ {listing.location || "Location not listed"}</span>
             )}
@@ -1087,6 +1103,20 @@ text-align: right;
           text-transform: uppercase;
           letter-spacing: .28px;
         }
+
+        .location-row {
+  display: flex;
+  gap: 6px;
+}
+
+.city-input {
+  width: 82px;
+}
+
+.state-input {
+  width: 30px;
+  text-transform: uppercase;
+}
 
         .price-input:focus,
         .location-input:focus {
