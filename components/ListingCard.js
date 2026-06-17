@@ -1077,7 +1077,7 @@ text-align: right;
         }
 
         .price-input {
-          width: 42px;
+          width: 62px;
         }
 
         .location-input {
