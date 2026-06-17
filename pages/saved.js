@@ -180,22 +180,6 @@ const handleWorkspaceDragCancel =
     setActiveDndId,
     clearMachineDragState
   });
-
-  const handleWorkspaceDragEnd =
-  createWorkspaceDragEndHandler({
-    getMachineContainer,
-    machineContainers,
-    moveMachineWithinContainer,
-    moveMachineToContainerAtPosition,
-    moveMachineToContainer,
-    setActiveStacksOpen,
-    setLeftPocketMode,
-    setLeftPocket2Mode,
-    setRightPocketMode,
-    setRightPocket2Mode,
-    setActiveDndId,
-    clearMachineDragState
-  });
   
 const sensors = useSensors(
   useSensor(PointerSensor, {
@@ -1062,6 +1046,21 @@ function cycleCardScaleMode() {
     setArmedDestination,
     toggleArmedDestination
   }) => {
+    const handleWorkspaceDragEnd =
+  createWorkspaceDragEndHandler({
+    getMachineContainer,
+    machineContainers,
+    moveMachineWithinContainer,
+    moveMachineToContainerAtPosition,
+    moveMachineToContainer,
+    setActiveStacksOpen,
+    setLeftPocketMode,
+    setLeftPocket2Mode,
+    setRightPocketMode,
+    setRightPocket2Mode,
+    setActiveDndId,
+    clearMachineDragState
+  });
     function sendMachineToArmedDestination(listing) {
       if (!armedDestination) return;
       if (!POCKET_TARGETS.includes(armedDestination)) return;
