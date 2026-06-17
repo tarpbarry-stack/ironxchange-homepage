@@ -10,6 +10,9 @@ export function workspaceCollisionDetection(args) {
     return pointerHits;
   }
 
+  return closestCenter(args);
+}
+
 export function createWorkspaceDragStartHandler({
   setActiveDndId
 }) {
@@ -30,6 +33,4 @@ export function createWorkspaceDragCancelHandler({
     setActiveDndId("");
     clearMachineDragState();
   };
-}  
-  return closestCenter(args);
 }
