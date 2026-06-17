@@ -64,9 +64,14 @@ export default function ListingCard({
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
-  onPriceKeyDown,
-  savingPrice = false,
-  isPaused = false,
+onPriceKeyDown,
+savingPrice = false,
+
+descriptionValue,
+onDescriptionKeyDown,
+savingDescription = false,
+
+isPaused = false,
 
   locationValue,
   onLocationKeyDown,
@@ -335,9 +340,13 @@ function handleCardClick() {
   >
 {Number(machineFace || 1) === 2 ? (
   sellerMode ? (
-    <IXISellerMachineObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
+   <IXISellerMachineObjectFace2
+  listing={listing}
+  dragHandleProps={dragHandleProps}
+  descriptionValue={descriptionValue}
+  onDescriptionKeyDown={onDescriptionKeyDown}
+  savingDescription={savingDescription}
+/>
     />
   ) : (
     <IXIMachineObjectFace2
