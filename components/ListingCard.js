@@ -217,6 +217,43 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
+  const publicData =
+  listing.publicData ||
+  listing.attributes?.publicData ||
+  {};
+
+const rawLocation =
+  locationValue ||
+  listing.location ||
+  publicData.location ||
+  publicData.loc?.address ||
+  publicData.loc ||
+  "";
+
+function getSellerCity() {
+  const loc = String(rawLocation || "").trim();
+  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[0].length === 2 ? parts[1] : parts[0];
+  }
+
+  return "";
+}
+
+function getSellerState() {
+  const loc = String(rawLocation || "").trim();
+  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[0].length === 2
+      ? parts[0].toUpperCase()
+      : parts[1].slice(0, 2).toUpperCase();
+  }
+
+  return loc.length === 2 ? loc.toUpperCase() : "";
+}
+
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
 
@@ -431,7 +468,7 @@ function handleCardClick() {
           <div className="location-row">
   <input
     className="city-input location-input"
-    defaultValue={
+    defaultValue={getSellerCity()}
       (() => {
         const loc = String(locationValue || listing.location || "").trim();
         const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
@@ -454,7 +491,7 @@ function handleCardClick() {
 
   <input
     className="state-input location-input"
-    defaultValue={
+    defaultValue={getSellerState()}
       (() => {
         const loc = String(locationValue || listing.location || "").trim();
         const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
