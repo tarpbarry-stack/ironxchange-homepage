@@ -555,8 +555,7 @@ function handleCardClick() {
 
            </div>
 
-      </>
-    )}
+           </>
 
     </div>
 
