@@ -177,7 +177,7 @@ export default function IXIMachineObjectFace2({
           .mof2-tag {
   flex: 1;
   min-width: 0;
-  text-align: left;
+  text-align: center;
 }
 
 .mof2-tag-label {
