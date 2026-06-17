@@ -196,7 +196,7 @@ export default function IXIMachineObjectFace2({
 
   text-transform: uppercase;
   text-align: center;
-  margin-bottom: 2px;
+  margin-bottom: 6px;
 }
 
 .mof2-tag-value {
