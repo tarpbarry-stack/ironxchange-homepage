@@ -46,6 +46,7 @@ import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone"
 import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
 import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
 import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
+import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
 
 import {
   IXI_WORKSPACE_SETTINGS_ID,
@@ -93,7 +94,7 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
-export default function SavedListings() {
+export default function MyListingsV2() {
   const [listings, setListings] = useState([]);
   
   const [savedIds, setSavedIds] = useState([]);
@@ -169,6 +170,11 @@ const POCKET_TARGETS = [
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
+  const {
+  getSellerListingCardProps
+} = useIXISellerMachineOps({
+  setSellerListings: setListings
+});
 
 const handleWorkspaceDragStart =
   createWorkspaceDragStartHandler({
@@ -1154,7 +1160,7 @@ function cycleCardScaleMode() {
   return (
     <>
       <Head>
-        <title>IXI Workspace | IronXchange</title>
+        <title>My Listings V2 | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
