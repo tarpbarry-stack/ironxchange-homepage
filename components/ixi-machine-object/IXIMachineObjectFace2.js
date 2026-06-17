@@ -234,8 +234,8 @@ export default function IXIMachineObjectFace2({
 
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-
+  align-items: center;
+  
   gap: 10px;
 }
 
@@ -252,7 +252,8 @@ export default function IXIMachineObjectFace2({
   font-size: 10px;
   font-weight: 800;
 
-  margin-top: 2px;
+  position: relative;
+  top: -2px;
 }
 
         .mof2-hours {
