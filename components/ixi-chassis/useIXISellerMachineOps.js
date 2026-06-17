@@ -158,6 +158,72 @@ export default function useIXISellerMachineOps({
   }
 }
 
+async function saveHours(e, listing) {
+  if (e.key !== "Enter") return;
+
+  e.preventDefault();
+
+  const input = e.currentTarget;
+  const newHours = input.value.replace(/[^0-9]/g, "").trim();
+
+  if (!listing?.id || !newHours) return;
+
+  input.classList.remove("saved", "error");
+
+  try {
+    const response = await fetch("/api/update-listing-details", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id,
+        hours: newHours,
+
+        description:
+          listing.description ||
+          listing.publicData?.description ||
+          listing.publicData?.details ||
+          "",
+
+        location:
+          listing.location ||
+          listing.publicData?.city ||
+          listing.publicData?.location ||
+          "",
+
+        keywords:
+          listing.keywords ||
+          listing.publicData?.keywords ||
+          []
+      })
+    });
+
+    if (!response.ok) throw new Error("Hours update failed");
+
+    input.value = Number(newHours).toLocaleString();
+    input.classList.add("saved");
+
+    setSellerListings(current =>
+      current.map(item =>
+        String(item.id) === String(listing.id)
+          ? {
+              ...item,
+              hours: newHours,
+              publicData: {
+                ...(item.publicData || {}),
+                hours: Number(newHours)
+              }
+            }
+          : item
+      )
+    );
+  } catch {
+    input.classList.add("error");
+    alert("Hours update failed.");
+  }
+}
+
   async function pauseListing(listing) {
     const ok = window.confirm(
       `Pause this listing?\n\n${formatCleanMachineTitle(listing.title)}`
