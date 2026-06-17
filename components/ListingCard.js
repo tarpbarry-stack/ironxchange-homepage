@@ -432,9 +432,20 @@ function handleCardClick() {
   <input
     className="city-input location-input"
     defaultValue={
-      String(locationValue || listing.location || "")
-        .split(",")[0]
-        .trim()
+      (() => {
+        const loc = String(locationValue || listing.location || "").trim();
+        const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
+
+        if (parts.length >= 2) {
+          const first = parts[0];
+          const second = parts[1];
+
+          if (first.length === 2) return second;
+          return first;
+        }
+
+        return loc;
+      })()
     }
     onClick={stopCardClick}
     onKeyDown={e => onLocationKeyDown?.(e, listing)}
@@ -444,11 +455,20 @@ function handleCardClick() {
   <input
     className="state-input location-input"
     defaultValue={
-      String(locationValue || listing.location || "")
-        .split(",")[1]
-        ?.trim()
-        ?.slice(0, 2)
-        ?.toUpperCase() || ""
+      (() => {
+        const loc = String(locationValue || listing.location || "").trim();
+        const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
+
+        if (parts.length >= 2) {
+          const first = parts[0];
+          const second = parts[1];
+
+          if (first.length === 2) return first.toUpperCase();
+          return second.slice(0, 2).toUpperCase();
+        }
+
+        return "";
+      })()
     }
     onClick={stopCardClick}
     onKeyDown={e => onLocationKeyDown?.(e, listing)}
@@ -1104,13 +1124,15 @@ text-align: right;
           letter-spacing: .28px;
         }
 
-        .location-row {
+       .location-row {
   display: flex;
+  flex-direction: row;
   gap: 6px;
+  order: 2;
 }
 
 .city-input {
-  width: 82px;
+  width: 72px;
 }
 
 .state-input {
