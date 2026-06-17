@@ -334,10 +334,17 @@ function handleCardClick() {
     }}
   >
 {Number(machineFace || 1) === 2 ? (
-  <IXIMachineObjectFace2
-    listing={listing}
-    dragHandleProps={dragHandleProps}
-  />
+  sellerMode ? (
+    <IXISellerMachineObjectFace2
+      listing={listing}
+      dragHandleProps={dragHandleProps}
+    />
+  ) : (
+    <IXIMachineObjectFace2
+      listing={listing}
+      dragHandleProps={dragHandleProps}
+    />
+  )
 ) : Number(machineFace || 1) === 3 ? (
   <IXIMachineObjectFace3
     listing={listing}
@@ -405,7 +412,7 @@ function handleCardClick() {
 <div className="card-body">
 
 {Number(machineFace || 1) === 2 ? (
-  sellerMode ? (
+  {sellerMode || getSellerListingCardProps ? (
     <IXISellerMachineObjectFace2
       listing={listing}
     />
