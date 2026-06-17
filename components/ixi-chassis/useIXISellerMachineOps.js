@@ -15,6 +15,7 @@ export default function useIXISellerMachineOps({
   setSellerListings
 }) {
   const [savingPriceId, setSavingPriceId] = useState("");
+  const [savingDescriptionId, setSavingDescriptionId] = useState("");
   const [listingWorkflows, setListingWorkflows] = useState({});
 
   async function savePrice(e, listing) {
