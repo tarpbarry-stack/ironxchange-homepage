@@ -431,7 +431,10 @@ function handleCardClick() {
      {sellerMode ? (
   <input
     className="hours-inline hours-input"
-    defaultValue={listing.hours || publicData.hours || ""}
+    defaultValue={
+  String(listing.hours || publicData.hours || "")
+    .replace(/[^0-9]/g, "")
+}
     onClick={stopCardClick}
     onKeyDown={e => onHoursKeyDown?.(e, listing)}
     inputMode="numeric"
@@ -976,6 +979,27 @@ right: 0;
 width: 54px;
 text-align: right;
         }
+
+  .hours-input {
+  border: 0 !important;
+  background: transparent !important;
+  outline: none !important;
+  appearance: none;
+
+  color: rgba(255,255,255,.54) !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  font-family: 'Inter', sans-serif !important;
+  font-size: 12.75px !important;
+  font-weight: 500 !important;
+  letter-spacing: .18px;
+
+  text-align: right;
+
+  height: 16px;
+}
 
        .keyword-row {
   height: 54px;
