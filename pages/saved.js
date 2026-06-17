@@ -80,7 +80,9 @@ import {
 } from "../components/ixi-chassis/IXIScaleEngine";
 
 import {
-  workspaceCollisionDetection
+  workspaceCollisionDetection,
+  createWorkspaceDragStartHandler,
+  createWorkspaceDragCancelHandler
 } from "../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
