@@ -104,15 +104,31 @@ export default function useIXISellerMachineOps({
   input.classList.remove("saved", "error");
 
   try {
-    const response = await fetch("/api/update-listing-description", {
+    const response = await fetch("/api/update-listing-details", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        listingId: listing.id,
-        description: newDescription
-      })
+  listingId: listing.id,
+  description: newDescription,
+
+  hours:
+    listing.hours ||
+    listing.publicData?.hours ||
+    "",
+
+  location:
+    listing.location ||
+    listing.publicData?.city ||
+    listing.publicData?.location ||
+    "",
+
+  keywords:
+    listing.keywords ||
+    listing.publicData?.keywords ||
+    []
+})
     });
 
     if (!response.ok) throw new Error("Description update failed");
