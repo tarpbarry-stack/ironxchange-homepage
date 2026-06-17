@@ -393,7 +393,10 @@ setSavedIds(
   getSavedListingIdsFromUser(currentUser)
 );
 
-const res = await fetch("/api/listings");
+const res = await fetch(
+  `/api/account-listings?authorId=${encodeURIComponent(String(userId))}`
+);
+
 const data = await res.json();
 
 if (Array.isArray(data)) {
