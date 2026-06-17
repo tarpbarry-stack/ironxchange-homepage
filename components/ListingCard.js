@@ -549,7 +549,7 @@ function handleCardClick() {
           <div className="seller-meta-row">
             <span>Age: {listing.age ?? "—"}</span>
             <span>Views: {listing.views || "—"}</span>
-            <span>States: {listing.saves || "—"}</span>
+            <span>States: {listing.states || listing.saves || "—"}</span>
            </div>
         ) : null}
 
