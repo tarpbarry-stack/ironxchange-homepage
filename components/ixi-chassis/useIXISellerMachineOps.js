@@ -91,7 +91,7 @@ export default function useIXISellerMachineOps({
   }
 
   async function saveDescription(e, listing) {
-  if (e.key !== "Enter" || !e.metaKey) return;
+  if (e.key !== "Enter") return;
 
   e.preventDefault();
 
