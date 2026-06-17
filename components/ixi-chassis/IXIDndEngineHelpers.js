@@ -10,5 +10,26 @@ export function workspaceCollisionDetection(args) {
     return pointerHits;
   }
 
+export function createWorkspaceDragStartHandler({
+  setActiveDndId
+}) {
+  return function handleWorkspaceDragStart(event) {
+    const dragId = String(event?.active?.id || "");
+
+    if (!dragId) return;
+
+    setActiveDndId(dragId);
+  };
+}
+
+export function createWorkspaceDragCancelHandler({
+  setActiveDndId,
+  clearMachineDragState
+}) {
+  return function handleWorkspaceDragCancel() {
+    setActiveDndId("");
+    clearMachineDragState();
+  };
+}  
   return closestCenter(args);
 }
