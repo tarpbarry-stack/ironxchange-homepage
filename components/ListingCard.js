@@ -19,6 +19,9 @@ import IXIMachineRail from "./IXIMachineRail";
 import IXIMachineObjectFace2
 from "./ixi-machine-object/IXIMachineObjectFace2";
 
+import IXISellerMachineObjectFace2 
+from "./ixi-machine-object/IXISellerMachineObjectFace2";
+
 import IXIMachineObjectFace3
 from "./ixi-machine-object/IXIMachineObjectFace3";
 
@@ -401,10 +404,16 @@ function handleCardClick() {
 
 <div className="card-body">
 
- {Number(machineFace || 1) === 2 ? (
-  <IXIMachineObjectFace2
-    listing={listing}
-  />
+{Number(machineFace || 1) === 2 ? (
+  sellerMode ? (
+    <IXISellerMachineObjectFace2
+      listing={listing}
+    />
+  ) : (
+    <IXIMachineObjectFace2
+      listing={listing}
+    />
+  )
  ) : Number(machineFace || 1) === 3 ? (
   <IXIMachineObjectFace3
     listing={listing}
