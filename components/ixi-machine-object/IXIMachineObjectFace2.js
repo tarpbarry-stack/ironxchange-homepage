@@ -181,24 +181,25 @@ export default function IXIMachineObjectFace2({
 }
 
 .mof2-tag-label {
-  color: rgba(255,255,255,.38);
+   font-size: 9px;
+  font-weight: 950;
 
-  font-size: 7px;
-  font-weight: 900;
+  letter-spacing: .22em;
 
-  letter-spacing: .18em;
+  color: rgba(255,255,255,.48);
+
   text-transform: uppercase;
 
   margin-bottom: 2px;
 }
 
 .mof2-tag-value {
-  color: rgba(255,255,255,.92);
+  font-size: 15px;
+  font-weight: 950;
 
-  font-size: 12px;
-  font-weight: 900;
+  letter-spacing: .16em;
 
-  letter-spacing: .08em;
+  color: rgba(255,255,255,.94);
 
   font-family:
     "Roboto Condensed",
