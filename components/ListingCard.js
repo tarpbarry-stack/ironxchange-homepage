@@ -347,7 +347,6 @@ function handleCardClick() {
   onDescriptionKeyDown={onDescriptionKeyDown}
   savingDescription={savingDescription}
 />
-    />
   ) : (
     <IXIMachineObjectFace2
       listing={listing}
