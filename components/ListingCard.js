@@ -411,12 +411,14 @@ function handleCardClick() {
         <div className="price-row">
           {sellerMode ? (
             <input
-              className="price-input"
-              defaultValue={priceValue || listing.price || ""}
-              onClick={stopCardClick}
-              onKeyDown={e => onPriceKeyDown?.(e, listing)}
-              disabled={savingPrice}
-            />
+  className="price-input"
+  defaultValue={priceValue || listing.price || ""}
+  onClick={stopCardClick}
+  onKeyDown={e => onPriceKeyDown?.(e, listing)}
+  disabled={savingPrice}
+  inputMode="numeric"
+  maxLength={9}
+/>
           ) : (
             <strong>{listing.price || "Call for price"}</strong>
           )}
@@ -426,16 +428,17 @@ function handleCardClick() {
             
 
             {sellerMode ? (
-              <input
-                className="location-input"
-                defaultValue={
-                  locationValue ||
-                  listing.location ||
-                  "Location not listed"
-                }
-                onClick={stopCardClick}
-                onKeyDown={e => onLocationKeyDown?.(e, listing)}
-              />
+            <input
+  className="location-input"
+  defaultValue={
+    locationValue ||
+    listing.location ||
+    "Location not listed"
+  }
+  onClick={stopCardClick}
+  onKeyDown={e => onLocationKeyDown?.(e, listing)}
+  maxLength={18}
+/>
             ) : (
               <span>⌖ {listing.location || "Location not listed"}</span>
             )}
@@ -1074,11 +1077,11 @@ text-align: right;
         }
 
         .price-input {
-          width: 104px;
+          width: 82px;
         }
 
         .location-input {
-          width: 128px;
+          width: 92px;
           text-align: right;
           color: rgba(255,255,255,.62);
           text-transform: uppercase;
