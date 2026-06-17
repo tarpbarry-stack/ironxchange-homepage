@@ -94,20 +94,6 @@ import {
 
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
-
-
-function handleWorkspaceDragStart(event) {
-  const dragId = String(event?.active?.id || "");
-
-  if (!dragId) return;
-
-  setActiveDndId(dragId);
-}
-
-function handleWorkspaceDragCancel() {
-  setActiveDndId("");
-  clearMachineDragState();
-}
   
 function handleWorkspaceDragEnd(event) {
   const dragId = String(event?.active?.id || "");
