@@ -5,7 +5,10 @@ import { formatHours } from "../../lib/listingFormatters";
 
 export default function IXISellerMachineObjectFace2({
   listing = {},
-  dragHandleProps
+  dragHandleProps,
+  descriptionValue,
+  onDescriptionKeyDown,
+  savingDescription = false
 }) {
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
