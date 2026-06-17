@@ -18,34 +18,34 @@ import {
   CSS
 } from "@dnd-kit/utilities";
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import ListingCard from "../../components/ListingCard";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import ListingCard from "../components/ListingCard";
 
-import { getListingId } from "../../lib/listingFormatters";
+import { getListingId } from "../lib/listingFormatters";
 import {
   fetchIxiMachineState,
   saveIxiMachinePatch,
-} from "../../lib/ixiMachineStateClient";
+} from "../lib/ixiMachineStateClient";
 
-import { captureIXEvent } from "../../lib/posthog";
+import { captureIXEvent } from "../lib/posthog";
 
-import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
-import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
-import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
-import IXIBoard from "../../components/ixi-chassis/IXIBoard";
-import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
-import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
-import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
-import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
-import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
-import IXIChassis from "../../components/ixi-chassis/IXIChassis";
-import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
-import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
-import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
-import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
-import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
-import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
+import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
+import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
+import IXIBoard from "../components/ixi-chassis/IXIBoard";
+import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
+import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
+import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
+import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
+import IXIPocketR2 from "../components/ixi-chassis/IXIPocketR2";
+import IXIChassis from "../components/ixi-chassis/IXIChassis";
+import IXIWorkspaceEngine from "../components/ixi-chassis/IXIWorkspaceEngine";
+import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
+import IXIActiveStackZone from "../components/ixi-chassis/IXIActiveStackZone";
+import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+import WorkspaceDropZone from "../components/ixi-chassis/WorkspaceDropZone";
+import WorkspaceDropPad from "../components/ixi-chassis/WorkspaceDropPad";
 
 import {
   IXI_WORKSPACE_SETTINGS_ID,
