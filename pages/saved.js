@@ -180,6 +180,150 @@ const handleWorkspaceDragCancel =
     setActiveDndId,
     clearMachineDragState
   });
+
+function handleWorkspaceDragEnd(event) {
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
+
+  const activeSortable =
+    event?.active?.data?.current?.sortable;
+
+  const overSortable =
+    event?.over?.data?.current?.sortable;
+
+  const knownContainers = [
+    "board",
+    "stackTop",
+    "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ];
+
+  const sourceContainer =
+    event?.active?.data?.current?.containerId ||
+    (knownContainers.includes(activeSortable?.containerId)
+      ? activeSortable.containerId
+      : getMachineContainer(dragId));
+
+  const targetContainer =
+    overSortable?.containerId ||
+    event?.over?.data?.current?.containerId ||
+    (knownContainers.includes(overId)
+      ? overId
+      : getMachineContainer(overId));
+
+  console.log("IXI DND DROP", {
+    dragId,
+    overId,
+    sourceContainer,
+    targetContainer,
+    activeData: event?.active?.data?.current,
+    overData: event?.over?.data?.current
+  });
+
+  if (!dragId || !overId) {
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  if (
+    sourceContainer &&
+    targetContainer &&
+    sourceContainer === targetContainer &&
+    dragId !== overId
+  ) {
+    const ids = machineContainers[sourceContainer] || [];
+
+    const fromIndex = ids.findIndex(
+      item => String(item) === String(dragId)
+    );
+
+    const toIndex = ids.findIndex(
+      item => String(item) === String(overId)
+    );
+
+    const insertAfter = fromIndex < toIndex;
+
+    moveMachineWithinContainer(
+      sourceContainer,
+      dragId,
+      overId,
+      insertAfter
+    );
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  if (
+    sourceContainer !== "board" &&
+    targetContainer === "board" &&
+    overId &&
+    overId !== "board" &&
+    dragId !== overId
+  ) {
+    console.log("IXI INSERT TO BOARD", {
+      dragId,
+      overId,
+      sourceContainer,
+      targetContainer
+    });
+
+    moveMachineToContainerAtPosition(
+      dragId,
+      "board",
+      overId,
+      false
+    );
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  if (
+    targetContainer &&
+    targetContainer !== sourceContainer &&
+    [
+      "board",
+      "stackTop",
+      "stackBottom",
+      "pocketLeft",
+      "pocketRight",
+      "pocketLeft2",
+      "pocketRight2"
+    ].includes(targetContainer)
+  ) {
+    moveMachineToContainer(dragId, targetContainer);
+
+    if (targetContainer === "stackTop") {
+      setActiveStacksOpen(current => ({
+        ...current,
+        top: true
+      }));
+    }
+
+    if (targetContainer === "stackBottom") {
+      setActiveStacksOpen(current => ({
+        ...current,
+        bottom: true
+      }));
+    }
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  setActiveDndId("");
+  clearMachineDragState();
+}
+
+
   
 const sensors = useSensors(
   useSensor(PointerSensor, {
@@ -1046,21 +1190,6 @@ function cycleCardScaleMode() {
     setArmedDestination,
     toggleArmedDestination
   }) => {
-    const handleWorkspaceDragEnd =
-  createWorkspaceDragEndHandler({
-    getMachineContainer,
-    machineContainers,
-    moveMachineWithinContainer,
-    moveMachineToContainerAtPosition,
-    moveMachineToContainer,
-    setActiveStacksOpen,
-    setLeftPocketMode,
-    setLeftPocket2Mode,
-    setRightPocketMode,
-    setRightPocket2Mode,
-    setActiveDndId,
-    clearMachineDragState
-  });
     function sendMachineToArmedDestination(listing) {
       if (!armedDestination) return;
       if (!POCKET_TARGETS.includes(armedDestination)) return;
