@@ -1,4 +1,5 @@
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
+import { formatHours } from "../../lib/listingFormatters";
 
 export default function IXIMachineObjectFace2({
   listing = {},
@@ -85,11 +86,14 @@ export default function IXIMachineObjectFace2({
 </div>
 
       <h2>
-        {[year, make, model].filter(Boolean).join(" ")}
-      </h2>
+  {[year, make, model].filter(Boolean).join(" ")}
+</h2>
 
-      <div className="mof2-price">{price}</div>
+<div className="mof2-hours">
+  {hours ? formatHours(hours) : ""}
+</div>
 
+<div className="mof2-price">{price}</div>
       <p className="mof2-bio">{description}</p>
 
      <IXIMachineObjectActions />
