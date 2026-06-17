@@ -57,7 +57,10 @@ export default function IXISellerMachineObjectFace2({
 
   const DESCRIPTION_LIMIT = 260;
   const [sellerDescription, setSellerDescription] =
-  useState(String(description || "").slice(0, DESCRIPTION_LIMIT));
+  useState(
+    String(descriptionValue || description || "")
+      .slice(0, DESCRIPTION_LIMIT)
+  );
 
   return (
     <section
@@ -107,15 +110,17 @@ export default function IXISellerMachineObjectFace2({
 <div className="mof2-price">{price}</div>
       <div className="mof2-bio seller-bio-editor">
   <textarea
-    value={sellerDescription}
-    onChange={e =>
-      setSellerDescription(
-        e.target.value.slice(0, DESCRIPTION_LIMIT)
-      )
-    }
-    maxLength={DESCRIPTION_LIMIT}
-    spellCheck={true}
-  />
+  value={sellerDescription}
+  onChange={e =>
+    setSellerDescription(
+      e.target.value.slice(0, DESCRIPTION_LIMIT)
+    )
+  }
+  onKeyDown={e => onDescriptionKeyDown?.(e, listing)}
+  maxLength={DESCRIPTION_LIMIT}
+  spellCheck={true}
+  disabled={savingDescription}
+/>
 
   <div className="seller-bio-count">
     {sellerDescription.length} / {DESCRIPTION_LIMIT}
