@@ -90,6 +90,58 @@ export default function useIXISellerMachineOps({
     }
   }
 
+  async function saveDescription(e, listing) {
+  if (e.key !== "Enter" || !e.metaKey) return;
+
+  e.preventDefault();
+
+  const input = e.currentTarget;
+  const newDescription = input.value.trim();
+
+  if (!listing?.id) return;
+
+  setSavingDescriptionId(String(listing.id));
+  input.classList.remove("saved", "error");
+
+  try {
+    const response = await fetch("/api/update-listing-description", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id,
+        description: newDescription
+      })
+    });
+
+    if (!response.ok) throw new Error("Description update failed");
+
+    input.classList.add("saved");
+
+    setSellerListings(current =>
+      current.map(item =>
+        String(item.id) === String(listing.id)
+          ? {
+              ...item,
+              description: newDescription,
+              publicData: {
+                ...(item.publicData || {}),
+                description: newDescription,
+                details: newDescription
+              }
+            }
+          : item
+      )
+    );
+  } catch {
+    input.classList.add("error");
+    alert("Description update failed.");
+  } finally {
+    setSavingDescriptionId("");
+  }
+}
+
   async function pauseListing(listing) {
     const ok = window.confirm(
       `Pause this listing?\n\n${formatCleanMachineTitle(listing.title)}`
