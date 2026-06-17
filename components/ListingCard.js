@@ -470,16 +470,11 @@ function handleCardClick() {
 
         <div className="price-row">
           {sellerMode ? (
-           <input
-  className="hours-input seller-inline-input"
-  defaultValue={
-    String(listing.hours || publicData.hours || "")
-      .replace(/[^0-9]/g, "")
-  }
+          <input
+  className="price-input seller-inline-input"
+  defaultValue={priceValue ?? listing.price ?? ""}
   onClick={stopCardClick}
-  onKeyDown={e => onHoursKeyDown?.(e, listing)}
-  inputMode="numeric"
-  maxLength={5}
+  onKeyDown={e => onPriceKeyDown?.(e, listing)}
 />
           ) : (
             <strong>{listing.price || "Call for price"}</strong>
