@@ -466,51 +466,21 @@ function handleCardClick() {
 
             {sellerMode ? (
           <div className="location-row">
-  <input
-    className="city-input location-input"
-    defaultValue={getSellerCity()}
-      (() => {
-        const loc = String(locationValue || listing.location || "").trim();
-        const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
-
-        if (parts.length >= 2) {
-          const first = parts[0];
-          const second = parts[1];
-
-          if (first.length === 2) return second;
-          return first;
-        }
-
-        return loc;
-      })()
-    }
-    onClick={stopCardClick}
-    onKeyDown={e => onLocationKeyDown?.(e, listing)}
-    maxLength={18}
-  />
+ <input
+  className="city-input location-input"
+  defaultValue={getSellerCity()}
+  onClick={stopCardClick}
+  onKeyDown={e => onLocationKeyDown?.(e, listing)}
+  maxLength={18}
+/>
 
   <input
-    className="state-input location-input"
-    defaultValue={getSellerState()}
-      (() => {
-        const loc = String(locationValue || listing.location || "").trim();
-        const parts = loc.split(",").map(part => part.trim()).filter(Boolean);
-
-        if (parts.length >= 2) {
-          const first = parts[0];
-          const second = parts[1];
-
-          if (first.length === 2) return first.toUpperCase();
-          return second.slice(0, 2).toUpperCase();
-        }
-
-        return "";
-      })()
-    }
-    onClick={stopCardClick}
-    onKeyDown={e => onLocationKeyDown?.(e, listing)}
-    maxLength={2}
-  />
+  className="state-input location-input"
+  defaultValue={getSellerState()}
+  onClick={stopCardClick}
+  onKeyDown={e => onLocationKeyDown?.(e, listing)}
+  maxLength={2}
+/>
 </div>
             ) : (
               <span>⌖ {listing.location || "Location not listed"}</span>
