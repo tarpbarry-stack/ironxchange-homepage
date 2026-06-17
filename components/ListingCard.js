@@ -410,22 +410,6 @@ function handleCardClick() {
 </a>
 
 <div className="card-body">
-
-{Number(machineFace || 1) === 2 ? (
-  {sellerMode || getSellerListingCardProps ? (
-    <IXISellerMachineObjectFace2
-      listing={listing}
-    />
-  ) : (
-    <IXIMachineObjectFace2
-      listing={listing}
-    />
-  )
- ) : Number(machineFace || 1) === 3 ? (
-  <IXIMachineObjectFace3
-    listing={listing}
-  />
- ) : (
   <>
     <a
     href={getListingHref(listing, from)}
