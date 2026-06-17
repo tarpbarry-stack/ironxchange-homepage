@@ -1077,11 +1077,11 @@ text-align: right;
         }
 
         .price-input {
-          width: 82px;
+          width: 62px;
         }
 
         .location-input {
-          width: 92px;
+          width: 72px;
           text-align: right;
           color: rgba(255,255,255,.62);
           text-transform: uppercase;
