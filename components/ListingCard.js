@@ -64,8 +64,9 @@ export default function ListingCard({
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
-onPriceKeyDown,
-savingPrice = false,
+  onPriceKeyDown,
+  savingPrice = false,
+  onHoursKeyDown,
 
 descriptionValue,
 onDescriptionKeyDown,
@@ -427,9 +428,20 @@ function handleCardClick() {
     <div className="title-row">
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
-      <h3 className="hours-inline">
-        {formatHours(listing.hours)}
-      </h3>
+     {sellerMode ? (
+  <input
+    className="hours-inline hours-input"
+    defaultValue={listing.hours || publicData.hours || ""}
+    onClick={stopCardClick}
+    onKeyDown={e => onHoursKeyDown?.(e, listing)}
+    inputMode="numeric"
+    maxLength={5}
+  />
+) : (
+  <h3 className="hours-inline">
+    {formatHours(listing.hours)}
+  </h3>
+)}
     </div>
   </a>
 
