@@ -470,14 +470,16 @@ function handleCardClick() {
 
         <div className="price-row">
           {sellerMode ? (
-            <input
-  className="price-input"
-  defaultValue={priceValue || listing.price || ""}
+           <input
+  className="hours-input seller-inline-input"
+  defaultValue={
+    String(listing.hours || publicData.hours || "")
+      .replace(/[^0-9]/g, "")
+  }
   onClick={stopCardClick}
-  onKeyDown={e => onPriceKeyDown?.(e, listing)}
-  disabled={savingPrice}
+  onKeyDown={e => onHoursKeyDown?.(e, listing)}
   inputMode="numeric"
-  maxLength={9}
+  maxLength={5}
 />
           ) : (
             <strong>{listing.price || "Call for price"}</strong>
@@ -980,25 +982,28 @@ width: 54px;
 text-align: right;
         }
 
-  .hours-input {
-  border: 0 !important;
-  background: transparent !important;
-  outline: none !important;
-  appearance: none;
+ .hours-input {
+  width: 54px;
+  height: 32px;
 
-  color: rgba(255,255,255,.54) !important;
+  border: 1px solid #343434;
+  border-radius: 8px;
 
-  padding: 0 !important;
-  margin: 0 !important;
+  background: #101010;
+  color: rgba(255,255,255,.62);
 
-  font-family: 'Inter', sans-serif !important;
-  font-size: 12.75px !important;
-  font-weight: 500 !important;
-  letter-spacing: .18px;
+  padding: 0 8px;
+
+  font-size: 11px;
+  font-weight: 900;
 
   text-align: right;
+  outline: none;
+}
 
-  height: 16px;
+.hours-input:focus {
+  border-color: rgba(255,196,0,.42);
+  box-shadow: 0 0 0 1px rgba(255,196,0,.10);
 }
 
        .keyword-row {
