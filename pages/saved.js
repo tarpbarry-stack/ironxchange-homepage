@@ -314,6 +314,17 @@ const POCKET_TARGETS = [
   
   const [activeDndId, setActiveDndId] = useState("");
 
+const handleWorkspaceDragStart =
+  createWorkspaceDragStartHandler({
+    setActiveDndId
+  });
+
+const handleWorkspaceDragCancel =
+  createWorkspaceDragCancelHandler({
+    setActiveDndId,
+    clearMachineDragState
+  });
+  
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
