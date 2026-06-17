@@ -88,10 +88,6 @@ export default function IXIMachineObjectFace2({
         {[year, make, model].filter(Boolean).join(" ")}
       </h2>
 
-      <div className="mof2-hours">
-        {hours ? `${hours} HRS` : "HOURS NOT LISTED"}
-      </div>
-
       <div className="mof2-price">{price}</div>
 
       <p className="mof2-bio">{description}</p>
@@ -216,10 +212,10 @@ export default function IXIMachineObjectFace2({
           margin: 0;
           max-width: 100%;
           color: #f2f2f2;
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 950;
-          line-height: 1.05;
-          letter-spacing: -.35px;
+          line-height: 1.02;
+          letter-spacing: -.15px;
           text-transform: uppercase;
         }
 
@@ -234,7 +230,7 @@ export default function IXIMachineObjectFace2({
         .mof2-price {
           margin-top: 9px;
           color: #FFC400;
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 950;
           letter-spacing: -.25px;
         }
