@@ -1348,6 +1348,7 @@ function cycleCardScaleMode() {
   sendListingToBack={sendListingToBack}
   sendMachineToArmedDestination={sendMachineToArmedDestination}
   cardScaleMode={cardScaleMode}
+  getSellerListingCardProps={getSellerListingCardProps}
 />
               
      <section
