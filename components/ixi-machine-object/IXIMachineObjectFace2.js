@@ -62,10 +62,27 @@ export default function IXIMachineObjectFace2({
         )}
       </div>
 
-      <div className="mof2-plate">
-        <span>SN {serial}</span>
-        <span>STK {stock}</span>
-      </div>
+    <div className="mof2-plate">
+  <div className="mof2-tag">
+    <div className="mof2-tag-label">
+      SERIAL NUMBER
+    </div>
+
+    <div className="mof2-tag-value">
+      {serial}
+    </div>
+  </div>
+
+  <div className="mof2-tag">
+    <div className="mof2-tag-label">
+      STOCK NUMBER
+    </div>
+
+    <div className="mof2-tag-value">
+      {stock}
+    </div>
+  </div>
+</div>
 
       <h2>
         {[year, make, model].filter(Boolean).join(" ")}
@@ -156,6 +173,43 @@ export default function IXIMachineObjectFace2({
           overflow: hidden;
           text-overflow: ellipsis;
         }
+
+          .mof2-tag {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.mof2-tag-label {
+  color: rgba(255,255,255,.38);
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: .18em;
+  text-transform: uppercase;
+
+  margin-bottom: 2px;
+}
+
+.mof2-tag-value {
+  color: rgba(255,255,255,.92);
+
+  font-size: 12px;
+  font-weight: 900;
+
+  letter-spacing: .08em;
+
+  font-family:
+    "Roboto Condensed",
+    "Arial Narrow",
+    sans-serif;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
         h2 {
           margin: 0;
