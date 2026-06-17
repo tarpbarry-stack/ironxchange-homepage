@@ -249,7 +249,7 @@ export default function IXIMachineObjectFace2({
 
   color: rgba(255,255,255,.48);
 
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 800;
 
   position: relative;
