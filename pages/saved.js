@@ -311,6 +311,22 @@ const handleWorkspaceDragCancel =
     setActiveDndId,
     clearMachineDragState
   });
+
+ const handleWorkspaceDragEnd =
+  createWorkspaceDragEndHandler({
+    getMachineContainer,
+    machineContainers,
+    moveMachineWithinContainer,
+    moveMachineToContainerAtPosition,
+    moveMachineToContainer,
+    setActiveStacksOpen,
+    setLeftPocketMode,
+    setLeftPocket2Mode,
+    setRightPocketMode,
+    setRightPocket2Mode,
+    setActiveDndId,
+    clearMachineDragState
+  }); 
   
 const sensors = useSensors(
   useSensor(PointerSensor, {
