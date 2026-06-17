@@ -308,6 +308,44 @@ export default function IXISellerMachineObjectFace2({
           border-bottom: 1px solid rgba(255,255,255,.055);
         }
 
+        .seller-bio-editor {
+  position: relative;
+  padding: 0;
+}
+
+.seller-bio-editor textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+
+  padding: 10px 10px 18px;
+
+  resize: none;
+  outline: none;
+
+  color: rgba(255,255,255,.72);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.38;
+  text-align: left;
+
+  border: 0;
+  background: transparent;
+
+  font-family: inherit;
+}
+
+.seller-bio-count {
+  position: absolute;
+  right: 8px;
+  bottom: 5px;
+
+  color: rgba(255,255,255,.32);
+
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
 
       `}</style>
     </section>
