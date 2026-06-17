@@ -1356,13 +1356,14 @@ function cycleCardScaleMode() {
   className={`cards ${
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
-  style={{
-    gridTemplateColumns:
-      visibleSavedListings.length === 1
-        ? `${cardScaleMetrics.width}px`
-        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-    gap: `${cardScaleMetrics.gap}px`
-  }}
+ style={{
+  gridTemplateColumns:
+    visibleSavedListings.length === 1
+      ? `${cardScaleMetrics.width}px`
+      : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
+  columnGap: `${cardScaleMetrics.gap}px`,
+  rowGap: `${cardScaleMetrics.gap + 90}px`
+}}
 >
 <IXIBoard
   items={visibleSavedListings}
@@ -1436,9 +1437,9 @@ function cycleCardScaleMode() {
           color: #d6d6d6;
         }
 
-        main {
-           min-height: 72vh;
-  padding: 14px 5% 58px;
+      main {
+  min-height: 72vh;
+  padding: 14px 5% 160px;
           background:
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
