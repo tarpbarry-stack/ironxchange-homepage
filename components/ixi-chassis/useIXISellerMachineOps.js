@@ -293,6 +293,17 @@ export default function useIXISellerMachineOps({
 
       savingPrice: savingPriceId === String(listingId),
 
+      descriptionValue:
+  listing.description ||
+  listing.publicData?.description ||
+  listing.publicData?.details ||
+  "",
+
+      onDescriptionKeyDown: saveDescription,
+
+      savingDescription:
+      savingDescriptionId === String(listingId),
+
       isPaused: listingStatus === "paused",
 
       onEdit: item => {
