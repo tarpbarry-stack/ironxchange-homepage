@@ -55,7 +55,7 @@ export default function IXISellerMachineObjectFace2({
     publicData.details ||
     "Machine bio not listed.";
 
-  const DESCRIPTION_LIMIT = 260;
+  const DESCRIPTION_LIMIT = 200;
   const [sellerDescription, setSellerDescription] =
   useState(
     String(descriptionValue || description || "")
