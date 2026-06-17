@@ -34,3 +34,24 @@ export function createWorkspaceDragCancelHandler({
     clearMachineDragState();
   };
 }
+export function createWorkspaceDragEndHandler({
+  getMachineContainer,
+  machineContainers,
+  moveMachineWithinContainer,
+  moveMachineToContainerAtPosition,
+  moveMachineToContainer,
+  setActiveStacksOpen,
+  setLeftPocketMode,
+  setLeftPocket2Mode,
+  setRightPocketMode,
+  setRightPocket2Mode,
+  setActiveDndId,
+  clearMachineDragState
+}) {
+  return function handleWorkspaceDragEnd(event) {
+    console.log("IXI DRAG END FACTORY CONNECTED", event);
+
+    setActiveDndId("");
+    clearMachineDragState();
+  };
+}
