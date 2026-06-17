@@ -6,9 +6,7 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  useDroppable,
-  closestCenter,
-  pointerWithin
+  useDroppable
 } from "@dnd-kit/core";
 
 import {
@@ -80,6 +78,10 @@ import {
 import {
   getNextCardScaleMode
 } from "../components/ixi-chassis/IXIScaleEngine";
+
+import {
+  workspaceCollisionDetection
+} from "../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
   fetchCurrentUserWithSavedListings,
