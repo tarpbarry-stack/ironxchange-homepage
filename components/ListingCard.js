@@ -344,7 +344,7 @@ function handleCardClick() {
       listing={listing}
       dragHandleProps={dragHandleProps}
     />
-  )
+        
 ) : Number(machineFace || 1) === 3 ? (
   <IXIMachineObjectFace3
     listing={listing}
