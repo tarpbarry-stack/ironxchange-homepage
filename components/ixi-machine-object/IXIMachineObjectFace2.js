@@ -85,12 +85,14 @@ export default function IXIMachineObjectFace2({
   </div>
 </div>
 
-      <h2>
-  {[year, make, model].filter(Boolean).join(" ")}
-</h2>
+     <div className="mof2-title-row">
+  <h2>
+    {[year, make, model].filter(Boolean).join(" ")}
+  </h2>
 
-<div className="mof2-hours">
-  {hours ? formatHours(hours) : ""}
+  <div className="mof2-hours">
+    {hours ? formatHours(hours) : ""}
+  </div>
 </div>
 
 <div className="mof2-price">{price}</div>
@@ -220,12 +222,38 @@ export default function IXIMachineObjectFace2({
           margin: 0;
           max-width: 100%;
           color: #f2f2f2;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 950;
-          line-height: 1.02;
+          line-height: 1.05;
           letter-spacing: -.15px;
           text-transform: uppercase;
         }
+
+        .mof2-title-row {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 10px;
+}
+
+.mof2-title-row h2 {
+  text-align: left;
+  flex: 1;
+}
+
+.mof2-hours {
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.48);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  margin-top: 2px;
+}
 
         .mof2-hours {
           margin-top: 5px;
