@@ -82,7 +82,8 @@ import {
 import {
   workspaceCollisionDetection,
   createWorkspaceDragStartHandler,
-  createWorkspaceDragCancelHandler
+  createWorkspaceDragCancelHandler,
+  createWorkspaceDragEndHandler
 } from "../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
