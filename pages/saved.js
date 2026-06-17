@@ -1164,18 +1164,7 @@ function cycleCardScaleMode() {
 
             <Navbar />
 
-    <IXIDragEngine
-  sensors={sensors}
-  workspaceCollisionDetection={workspaceCollisionDetection}
-  handleWorkspaceDragStart={handleWorkspaceDragStart}
-  handleWorkspaceDragEnd={handleWorkspaceDragEnd}
-  handleWorkspaceDragCancel={handleWorkspaceDragCancel}
-  getActiveDndListing={getActiveDndListing}
-  activeDndId={activeDndId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  cardScaleMode={cardScaleMode}
->
+   
 <IXIWorkspaceEngine>
   {({
     leftPocketMode,
@@ -1190,6 +1179,21 @@ function cycleCardScaleMode() {
     setArmedDestination,
     toggleArmedDestination
   }) => {
+          const handleWorkspaceDragEnd =
+  createWorkspaceDragEndHandler({
+    getMachineContainer,
+    machineContainers,
+    moveMachineWithinContainer,
+    moveMachineToContainerAtPosition,
+    moveMachineToContainer,
+    setActiveStacksOpen,
+    setLeftPocketMode,
+    setLeftPocket2Mode,
+    setRightPocketMode,
+    setRightPocket2Mode,
+    setActiveDndId,
+    clearMachineDragState
+  });  
     function sendMachineToArmedDestination(listing) {
       if (!armedDestination) return;
       if (!POCKET_TARGETS.includes(armedDestination)) return;
@@ -1199,7 +1203,19 @@ function cycleCardScaleMode() {
     }
 
     return (
-      <main>
+  <IXIDragEngine
+    sensors={sensors}
+    workspaceCollisionDetection={workspaceCollisionDetection}
+    handleWorkspaceDragStart={handleWorkspaceDragStart}
+    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
+    handleWorkspaceDragCancel={handleWorkspaceDragCancel}
+    getActiveDndListing={getActiveDndListing}
+    activeDndId={activeDndId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+    cardScaleMode={cardScaleMode}
+  >
+    <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="IXI WORKSPACE"
@@ -1399,11 +1415,12 @@ function cycleCardScaleMode() {
     </p>
   </div>
 )}
-                                   </main>
-    );
+</main>
+  </IXIDragEngine>
+);
   }}
 </IXIWorkspaceEngine>
-</IXIDragEngine>
+
 
       <Footer />
                 
