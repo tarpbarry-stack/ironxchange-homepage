@@ -323,16 +323,6 @@ const sensors = useSensors(
   })
 );
 
-function workspaceCollisionDetection(args) {
-  const pointerHits = pointerWithin(args);
-
-  if (pointerHits.length) {
-    return pointerHits;
-  }
-
-  return closestCenter(args);
-}
-  
   useEffect(() => {
     captureIXEvent("saved_workspace_viewed", {
       page: "saved"
