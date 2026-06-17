@@ -142,14 +142,18 @@ export default function IXIMachineObjectFace2({
           text-transform: uppercase;
         }
 
-        .mof2-plate {
-          width: 100%;
-          min-height: 28px;
-          padding: 6px 9px;
-          margin-bottom: 13px;
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
+     .mof2-plate {
+  width: 100%;
+  min-height: 52px;
+
+  padding: 8px 10px;
+  margin-bottom: 13px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 26px;
           border: 1px solid rgba(255,255,255,.12);
           border-radius: 5px;
           background:
@@ -185,7 +189,7 @@ export default function IXIMachineObjectFace2({
   color: rgba(255,255,255,.48);
 
   text-transform: uppercase;
-
+  text-align: center;
   margin-bottom: 2px;
 }
 
