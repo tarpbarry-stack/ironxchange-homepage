@@ -99,7 +99,7 @@ export default function IXISellerMachineObjectFace2({
 
      <div className="mof2-title-row">
 <h2>
-  SELLER MOF2 TEST
+  {[year, make, model].filter(Boolean).join(" ")}
 </h2>
 
   <div className="mof2-hours">
