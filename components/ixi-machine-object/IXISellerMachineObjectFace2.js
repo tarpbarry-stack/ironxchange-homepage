@@ -1,4 +1,6 @@
+import { useState } from "react";
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
+
 import { formatHours } from "../../lib/listingFormatters";
 
 export default function IXISellerMachineObjectFace2({
@@ -50,6 +52,10 @@ export default function IXISellerMachineObjectFace2({
     publicData.details ||
     "Machine bio not listed.";
 
+  const DESCRIPTION_LIMIT = 260;
+  const [sellerDescription, setSellerDescription] =
+  useState(String(description || "").slice(0, DESCRIPTION_LIMIT));
+
   return (
     <section
   className="mof2"
@@ -96,7 +102,22 @@ export default function IXISellerMachineObjectFace2({
 </div>
 
 <div className="mof2-price">{price}</div>
-      <p className="mof2-bio">{description}</p>
+      <div className="mof2-bio seller-bio-editor">
+  <textarea
+    value={sellerDescription}
+    onChange={e =>
+      setSellerDescription(
+        e.target.value.slice(0, DESCRIPTION_LIMIT)
+      )
+    }
+    maxLength={DESCRIPTION_LIMIT}
+    spellCheck={true}
+  />
+
+  <div className="seller-bio-count">
+    {sellerDescription.length} / {DESCRIPTION_LIMIT}
+  </div>
+</div>
 
      <IXIMachineObjectActions />
 
