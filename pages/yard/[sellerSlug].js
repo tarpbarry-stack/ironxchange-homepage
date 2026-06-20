@@ -658,7 +658,7 @@ return [...filtered].sort((a, b) => {
     searchQuery,
     savedBoardMode,
     savedBoardListings,
-    marketplaceListings,
+    sellerListings,
     workspaceFilters,
     machineContainers,
     ixiCardState,
