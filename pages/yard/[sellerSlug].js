@@ -1366,7 +1366,7 @@ function cycleCardScaleMode() {
    <div className="ixi-command-center">
   
        <IXIChassisControls
-  listings={marketplaceListings}
+  listings={sellerListings}
   searchQuery={searchQuery}
   setSearchQuery={setSearchQuery}
   workspaceFilters={workspaceFilters}
