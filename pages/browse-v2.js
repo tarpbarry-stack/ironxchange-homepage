@@ -1337,10 +1337,10 @@ function cycleCardScaleMode() {
   cardScaleMode={cardScaleMode}
 />
               
-     <section
+    <section
   data-board-target="board"
   className={`cards ${
-    visibleSavedListings.length === 1 ? "single-card" : ""
+    visibleBrowseListings.length === 1 ? "single-card" : ""
   }`}
   style={{
     gridTemplateColumns:
