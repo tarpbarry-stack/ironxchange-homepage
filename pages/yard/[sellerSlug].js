@@ -1342,7 +1342,32 @@ function cycleCardScaleMode() {
       hasInventory={!!sdk}
     />
   </section>
-      
+
+<section className="yard-head">
+  <div className="yard-identity">
+    <SellerLogoDecal
+      logo={sellerLogo}
+      name={yardTitle}
+      variant="slug"
+    />
+
+    <div className="yard-copy">
+      <span className="eyebrow">IronXchange Yard</span>
+
+      <h1>{yardTitle}</h1>
+
+      <p>
+        {sellerLocation}
+        {sellerName ? ` · ${sellerName}` : ""}
+      </p>
+    </div>
+  </div>
+
+  <div className="yard-count">
+    <strong>{sellerListings.length}</strong>
+    <span>Active Machines</span>
+  </div>
+</section>
 
 <IXIChassis>
   <aside className="ixi-command-left">
