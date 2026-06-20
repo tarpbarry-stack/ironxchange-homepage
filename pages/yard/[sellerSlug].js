@@ -431,6 +431,51 @@ if (Array.isArray(data)) {
   });
 }, [listings]);
 
+  const sellerSeedListing = useMemo(() => {
+  if (!sellerSlug || listings.length === 0) return null;
+
+  const targetSlug = String(sellerSlug).toLowerCase();
+
+  return listings.find(item => {
+    const display = getSellerDisplay(item);
+
+    const possibleValues = [
+      getAuthorId(item),
+      display.yardTitle,
+      display.sellerName,
+      display.sellerCompany,
+      display.companyName,
+      display.authorName
+    ]
+      .filter(Boolean)
+      .map(value => slugify(String(value)));
+
+    return possibleValues.includes(targetSlug);
+  });
+}, [sellerSlug, listings]);
+
+const sellerAuthorId = sellerSeedListing
+  ? getAuthorId(sellerSeedListing)
+  : "";
+
+const sellerListings = useMemo(() => {
+  if (!sellerAuthorId) return [];
+
+  return listings.filter(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus ||
+      "live";
+
+    return (
+      String(getAuthorId(item)) === String(sellerAuthorId) &&
+      listingStatus !== "archived" &&
+      listingStatus !== "deleted"
+    );
+  });
+}, [listings, sellerAuthorId]);
+
 const containerStateKey = useMemo(() => {
   return marketplaceListings
     .map(item => {
