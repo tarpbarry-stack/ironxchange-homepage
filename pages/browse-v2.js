@@ -416,7 +416,7 @@ if (Array.isArray(data)) {
     return filterSavedListings(activeListings, savedIds);
   }, [listings, savedIds]);
 
-  const workspaceListings = useMemo(() => {
+  const marketplaceListings = useMemo(() => {
   const activeListings = listings.filter(item => {
     const listingStatus =
       item.listingStatus ||
