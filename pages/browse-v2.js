@@ -93,7 +93,7 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
-export default function SavedListings() {
+export default function BrowseV2() {
   const [listings, setListings] = useState([]);
   
   const [savedIds, setSavedIds] = useState([]);
@@ -337,9 +337,9 @@ const sensors = useSensors(
 );
 
   useEffect(() => {
-    captureIXEvent("saved_workspace_viewed", {
-      page: "saved"
-    });
+    captureIXEvent("browse_v2_viewed", {
+  page: "browse-v2"
+});
   }, []);
 
   useEffect(() => {
