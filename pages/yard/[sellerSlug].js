@@ -476,6 +476,25 @@ const sellerListings = useMemo(() => {
   });
 }, [listings, sellerAuthorId]);
 
+const sellerDisplay = getSellerDisplay(sellerSeedListing || {});
+const yardTitle = sellerDisplay.yardTitle;
+
+const sellerName =
+  sellerDisplay.contactName &&
+  !isInitials(sellerDisplay.contactName)
+    ? sellerDisplay.contactName
+    : "";
+
+const sellerLocation =
+  clean(sellerSeedListing?.sellerLocation) ||
+  clean(sellerSeedListing?.location) ||
+  "Location not listed";
+
+const sellerLogo =
+  sellerSeedListing?.sellerLogo ||
+  sellerSeedListing?.profileImage ||
+  "";
+
 const containerStateKey = useMemo(() => {
   return sellerListings
     .map(item => {
