@@ -488,9 +488,9 @@ const containerStateKey = useMemo(() => {
 useEffect(() => {
   if (!sellerListings.length) return;
 
-  const validMachineIds = sellerListings.map(
-    String(getListingId(item))
-  );
+ const validMachineIds = sellerListings.map(item =>
+  String(getListingId(item))
+);
 
   const savedLayout =
     ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
