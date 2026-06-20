@@ -531,7 +531,7 @@ useEffect(() => {
   setMachineContainers(nextContainers);
 }, [containerStateKey]);
 
-  const visibleBrowseListings = useMemo(() => {
+  const visibleSellerListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
@@ -1454,11 +1454,11 @@ function cycleCardScaleMode() {
     <section
   data-board-target="board"
   className={`cards ${
-    visibleBrowseListings.length === 1 ? "single-card" : ""
+    visibleSellerListings.length === 1 ? "single-card" : ""
   }`}
   style={{
     gridTemplateColumns:
-      visibleBrowseListings.length === 1
+      visibleSellerListings.length === 1
         ? `${cardScaleMetrics.width}px`
         : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
     gap: `${cardScaleMetrics.gap}px`
@@ -1506,7 +1506,7 @@ function cycleCardScaleMode() {
   SCALE: {cardScaleMode.toUpperCase()}
 </button>
 
-        {visibleBrowseListings.length === 0 && (
+        {visibleSellerListings.length === 0 && (
   <div className="empty">
     <h3>HELP US BUILD OUR MARKETPLACE</h3>
     <p>
