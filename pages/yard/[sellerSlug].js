@@ -848,7 +848,7 @@ function getListingById(machineId) {
     setSavedBoardListings(current => {
       const source = current.length
   ? current
-  : marketplaceListings;
+  : sellerListings;
 
       const fromIndex = source.findIndex(
         item => String(getListingId(item)) === String(dragId)
