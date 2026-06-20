@@ -1588,6 +1588,116 @@ function cycleCardScaleMode() {
             #0b0b0b;
         }
 
+.yard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin: 10px auto 12px;
+  padding: 16px 18px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+    radial-gradient(circle at top, rgba(255,255,255,.014), transparent 72%),
+    #111111;
+
+  border: 1px solid rgba(255,255,255,.065);
+  outline: 1px solid rgba(255,255,255,.018);
+  border-radius: 14px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.032) inset,
+    0 16px 38px rgba(0,0,0,.22);
+}
+
+.yard-identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.yard-copy {
+  min-width: 0;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #FFC400;
+
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .72px;
+}
+
+.yard-copy h1 {
+  margin: 0;
+
+  color: #f2f2f2;
+
+  font-size: 26px;
+  font-weight: 950;
+  line-height: 1.02;
+  letter-spacing: -.55px;
+  text-transform: uppercase;
+}
+
+.yard-copy p {
+  margin: 6px 0 0;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18px;
+}
+
+.yard-count {
+  min-width: 118px;
+
+  padding: 13px 12px;
+
+  text-align: center;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #101010;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
+}
+
+.yard-count strong {
+  display: block;
+
+  color: #f2f2f2;
+
+  font-size: 26px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.yard-count span {
+  display: block;
+
+  margin-top: 6px;
+
+  color: rgba(255,255,255,.36);
+
+  font-size: 8.75px;
+  font-weight: 950;
+
+  text-transform: uppercase;
+  letter-spacing: .52px;
+}
+
        .saved-environment-shell {
   width: 100%;
   margin: 0 auto;
