@@ -443,7 +443,7 @@ const touchedIds = Object.entries(ixiCardState || {})
 }, [listings, ixiCardState]);
 
 const containerStateKey = useMemo(() => {
-  return workspaceListings
+  return marketplaceListings
     .map(item => {
       const id = String(getListingId(item));
       return `${id}:${ixiCardState[id]?.container || "board"}`;
