@@ -94,7 +94,9 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
-export default function BrowseV2() {
+export default function SellerYardPage() {
+  const router = useRouter();
+  const { sellerSlug } = router.query;
   const [listings, setListings] = useState([]);
   
   const [savedIds, setSavedIds] = useState([]);
