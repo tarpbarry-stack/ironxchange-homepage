@@ -1098,7 +1098,72 @@ function cycleTopRailMode() {
   });
 }
 
+function slugify(text = "") {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
+function clean(value) {
+  return value ? String(value).trim() : "";
+}
+
+function isInitials(value = "") {
+  const v = clean(value);
+  return /^[A-Z]{1,4}$/.test(v);
+}
+
+function normalizeUrl(url = "") {
+  const value = clean(url);
+  if (!value) return "";
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  return `https://${value}`;
+}
+
+function getAuthorId(item) {
+  const safeItem = item || {};
+
+  return (
+    safeItem.authorId ||
+    safeItem.sellerId ||
+    safeItem.author?.id?.uuid ||
+    safeItem.author?.id ||
+    ""
+  );
+}
+
+function getSellerDisplay(item = {}) {
+  const sellerName = clean(item.sellerName);
+  const sellerCompany = clean(item.sellerCompany);
+  const companyName = clean(item.companyName);
+  const authorName = clean(item.authorName);
+
+  const realCompany =
+    [sellerCompany, companyName, sellerName, authorName]
+      .find(value => value && !isInitials(value) && value !== "Seller Profile") ||
+    sellerName ||
+    sellerCompany ||
+    companyName ||
+    authorName ||
+    "IronXchange Yard";
+
+  const contactName =
+    [sellerName, authorName, sellerCompany, companyName]
+      .find(value => value && value !== realCompany) ||
+    "";
+
+  return {
+    yardTitle: realCompany,
+    contactName,
+    sellerName,
+    sellerCompany,
+    companyName,
+    authorName
+  };
+}
+
+  
 function getIxiColorValue(color) {
   const colors = {
     green: "rgba(56,161,105,.82)",
