@@ -449,12 +449,12 @@ const containerStateKey = useMemo(() => {
       return `${id}:${ixiCardState[id]?.container || "board"}`;
     })
     .join("|");
-}, [workspaceListings, ixiCardState]);
+}, [marketplaceListings, ixiCardState]);
    
 useEffect(() => {
-  if (!workspaceListings.length) return;
+  if (!marketplaceListings.length) return;
 
-  const validMachineIds = workspaceListings.map(item =>
+  const validMachineIds = marketplaceListings.map(item =>
     String(getListingId(item))
   );
 
@@ -482,7 +482,7 @@ useEffect(() => {
 
   const nextContainers = createEmptyWorkspaceContainers();
 
-  workspaceListings.forEach(item => {
+  marketplaceListings.forEach(item => {
     const id = String(getListingId(item));
     const savedContainer = ixiCardState[id]?.container;
 
@@ -503,7 +503,7 @@ useEffect(() => {
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-        : workspaceListings;
+        : marketplaceListings;
 
 const orderedSource =
   (machineContainers.board || [])
@@ -624,7 +624,7 @@ return [...filtered].sort((a, b) => {
     searchQuery,
     savedBoardMode,
     savedBoardListings,
-    workspaceListings,
+    marketplaceListings,
     workspaceFilters,
     machineContainers,
     ixiCardState,
