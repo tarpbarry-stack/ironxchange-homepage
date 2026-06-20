@@ -416,8 +416,8 @@ if (Array.isArray(data)) {
     return filterSavedListings(activeListings, savedIds);
   }, [listings, savedIds]);
 
-  const marketplaceListings = useMemo(() => {
-  const activeListings = listings.filter(item => {
+ const marketplaceListings = useMemo(() => {
+  return listings.filter(item => {
     const listingStatus =
       item.listingStatus ||
       item.publicData?.listingStatus ||
@@ -425,22 +425,7 @@ if (Array.isArray(data)) {
 
     return listingStatus !== "archived";
   });
-
-const touchedIds = Object.entries(ixiCardState || {})
-  .filter(([id]) => !String(id).startsWith("__"))
-  .filter(([id, state]) =>
-    (state?.color && state.color !== "none") ||
-    Number(state?.outline) > 1 ||
-    state?.saved === true ||
-    state?.pinned === true ||
-    state?.noted === true
-  )
-  .map(([id]) => String(id));
-
-    return activeListings.filter(item =>
-    touchedIds.includes(String(getListingId(item)))
-  );
-}, [listings, ixiCardState]);
+}, [listings]);
 
 const containerStateKey = useMemo(() => {
   return marketplaceListings
