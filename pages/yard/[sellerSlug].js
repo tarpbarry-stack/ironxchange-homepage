@@ -1465,7 +1465,7 @@ function cycleCardScaleMode() {
   }}
 >
 <IXIBoard
-  items={visibleBrowseListings}
+  items={visibleSellerListings}
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
