@@ -497,7 +497,7 @@ useEffect(() => {
   setMachineContainers(nextContainers);
 }, [containerStateKey]);
 
-  const visibleSavedListings = useMemo(() => {
+  const visibleBrowseListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
@@ -1359,14 +1359,14 @@ function cycleCardScaleMode() {
   }`}
   style={{
     gridTemplateColumns:
-      visibleSavedListings.length === 1
+      visibleBrowseListings.length === 1
         ? `${cardScaleMetrics.width}px`
         : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
     gap: `${cardScaleMetrics.gap}px`
   }}
 >
 <IXIBoard
-  items={visibleSavedListings}
+  items={visibleBrowseListings}
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
@@ -1407,7 +1407,7 @@ function cycleCardScaleMode() {
   SCALE: {cardScaleMode.toUpperCase()}
 </button>
 
-        {visibleSavedListings.length === 0 && (
+        {visibleBrowseListings.length === 0 && (
   <div className="empty">
     <h3>HELP US BUILD OUR MARKETPLACE</h3>
     <p>
