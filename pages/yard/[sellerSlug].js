@@ -537,7 +537,7 @@ useEffect(() => {
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-        : marketplaceListings;
+       : sellerListings;
 
 const orderedSource =
   (machineContainers.board || [])
