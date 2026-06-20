@@ -477,18 +477,18 @@ const sellerListings = useMemo(() => {
 }, [listings, sellerAuthorId]);
 
 const containerStateKey = useMemo(() => {
-  return marketplaceListings
+  return sellerListings
     .map(item => {
       const id = String(getListingId(item));
       return `${id}:${ixiCardState[id]?.container || "board"}`;
     })
     .join("|");
-}, [marketplaceListings, ixiCardState]);
+}, [sellerListings, ixiCardState]);
    
 useEffect(() => {
-  if (!marketplaceListings.length) return;
+  if (!sellerListings.length) return;
 
-  const validMachineIds = marketplaceListings.map(item =>
+  const validMachineIds = sellerListings.map(
     String(getListingId(item))
   );
 
@@ -516,7 +516,7 @@ useEffect(() => {
 
   const nextContainers = createEmptyWorkspaceContainers();
 
-  marketplaceListings.forEach(item => {
+  sellerListings.forEach(item => {
     const id = String(getListingId(item));
     const savedContainer = ixiCardState[id]?.container;
 
