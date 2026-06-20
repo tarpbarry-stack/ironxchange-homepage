@@ -1,15 +1,13 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import {
   PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
-  useDroppable,
-  closestCenter,
-  pointerWithin
+  useDroppable
 } from "@dnd-kit/core";
 
 import {
@@ -17,11 +15,21 @@ import {
   sortableKeyboardCoordinates
 } from "@dnd-kit/sortable";
 
-import { CSS } from "@dnd-kit/utilities";
+import {
+  CSS
+} from "@dnd-kit/utilities";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import SellerLogoDecal from "../../components/SellerLogoDecal";
+import ListingCard from "../../components/ListingCard";
+
+import { getListingId } from "../../lib/listingFormatters";
+import {
+  fetchIxiMachineState,
+  saveIxiMachinePatch,
+} from "../../lib/ixiMachineStateClient";
+
+import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
@@ -34,267 +42,254 @@ import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
+import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
+import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
+import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
+import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
+import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 
-import { getListingId } from "../../lib/listingFormatters";
 import {
-  fetchIxiMachineState,
-  saveIxiMachinePatch
-} from "../../lib/ixiMachineStateClient";
+  IXI_WORKSPACE_SETTINGS_ID,
+  IXI_WORKSPACE_LAYOUT_ID,
+  createEmptyWorkspaceContainers,
+  sanitizeWorkspaceContainers,
+  saveWorkspaceLayoutRecord
+} from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
+
+import {
+  getMachineContainerFromContainers,
+  reorderMachineWithinContainerState,
+  moveMachineToContainerAtPositionState,
+  moveMachineToContainerState
+} from "../../components/ixi-chassis/IXIMachineContainerEngine";
+
+import {
+  getStackContainerKey,
+  toggleStackOpenState,
+  openStackState,
+  toggleStackLayoutState,
+  getMachineIdsForStack
+} from "../../components/ixi-chassis/IXIStackEngine";
+
+import {
+  rotatePocketState,
+  movePocketToContainerState
+} from "../../components/ixi-chassis/IXIPocketEngine";
+
+import {
+  getNextCardScaleMode
+} from "../../components/ixi-chassis/IXIScaleEngine";
+
+import {
+  workspaceCollisionDetection,
+  createWorkspaceDragStartHandler,
+  createWorkspaceDragCancelHandler,
+  createWorkspaceDragEndHandler
+} from "../../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
   fetchCurrentUserWithSavedListings,
   getSavedListingIdsFromUser,
+  filterSavedListings,
   toggleSavedListing
 } from "../../lib/savedListings";
 
-function WorkspaceDropZone({ id, className, children, ...props }) {
-  const { setNodeRef } = useDroppable({ id });
-
-  return (
-    <section ref={setNodeRef} className={className} {...props}>
-      {children}
-    </section>
-  );
-}
-
-function WorkspaceDropPad({ id, className, style, ...props }) {
-  const { setNodeRef } = useDroppable({ id });
-
-  return (
-    <div ref={setNodeRef} className={className} style={style} {...props} />
-  );
-}
-
-function IXISortableMachineCard({
-  id,
-  containerId,
-  className,
-  style: externalStyle,
-  children
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    setActivatorNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
-    id: String(id),
-    data: {
-      type: "machine",
-      containerId
-    }
-  });
-
-  const style = {
-    ...(externalStyle || {}),
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0 : 1,
-    zIndex: isDragging ? 9999 : externalStyle?.zIndex
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={className}
-      style={style}
-      data-ixi-sortable-card={String(id)}
-      data-ixi-container={containerId}
-    >
-      {children({
-        dragHandleProps: {
-          ref: setActivatorNodeRef,
-          ...attributes,
-          ...listeners
-        },
-        isDragging
-      })}
-    </div>
-  );
-}
-
-function slugify(text = "") {
-  return String(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function clean(value) {
-  return value ? String(value).trim() : "";
-}
-
-function isInitials(value = "") {
-  const v = clean(value);
-  return /^[A-Z]{1,4}$/.test(v);
-}
-
-function normalizeUrl(url = "") {
-  const value = clean(url);
-  if (!value) return "";
-  if (value.startsWith("http://") || value.startsWith("https://")) return value;
-  return `https://${value}`;
-}
-
-function getAuthorId(item) {
-  const safeItem = item || {};
-
-  return (
-    safeItem.authorId ||
-    safeItem.sellerId ||
-    safeItem.author?.id?.uuid ||
-    safeItem.author?.id ||
-    ""
-  );
-}
-
-function getSellerDisplay(item = {}) {
-  const sellerName = clean(item.sellerName);
-  const sellerCompany = clean(item.sellerCompany);
-  const companyName = clean(item.companyName);
-  const authorName = clean(item.authorName);
-
-  const realCompany =
-    [sellerCompany, companyName, sellerName, authorName]
-      .find(value => value && !isInitials(value) && value !== "Seller Profile") ||
-    sellerName ||
-    sellerCompany ||
-    companyName ||
-    authorName ||
-    "IronXchange Yard";
-
-  const contactName =
-    [sellerName, authorName, sellerCompany, companyName]
-      .find(value => value && value !== realCompany) ||
-    "";
-
-  return {
-    yardTitle: realCompany,
-    contactName,
-    sellerName,
-    sellerCompany,
-    companyName,
-    authorName
-  };
-}
-
-export default function SellerYardV2Page() {
-  const router = useRouter();
-  const { sellerSlug } = router.query;
-
-  const [loading, setLoading] = useState(true);
+export default function BrowseV2() {
   const [listings, setListings] = useState([]);
-  const [loggedIn, setLoggedIn] = useState(false);
-
+  
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [workspaceFilters, setWorkspaceFilters] = useState({
-    category: "ALL CATEGORIES",
-    make: "ALL MAKES",
-    model: "ALL MODELS",
+const [workspaceFilters, setWorkspaceFilters] = useState({
+  category: "ALL CATEGORIES",
+  make: "ALL MAKES",
+  model: "ALL MODELS",
 
-    yearMin: "",
-    yearMax: "",
-    priceMin: "",
-    priceMax: "",
-    hoursMin: "",
-    hoursMax: ""
-  });
+  yearMin: "",
+  yearMax: "",
+  priceMin: "",
+  priceMax: "",
+  hoursMin: "",
+  hoursMax: ""
+});
 
   const [savedBoardMode, setSavedBoardMode] = useState("saved");
   const [savedBoardListings, setSavedBoardListings] = useState([]);
 
   const [draggingListingId, setDraggingListingId] = useState("");
-  const [ghostListingId, setGhostListingId] = useState("");
+const [ghostListingId, setGhostListingId] = useState("");
 
-  const [activeStacksOpen, setActiveStacksOpen] = useState({
-    top: false,
-    bottom: false
-  });
+const [activeStacksOpen, setActiveStacksOpen] = useState({
+  top: false,
+  bottom: false
+});
 
-  const [machineContainers, setMachineContainers] = useState({
-    board: [],
-    stackTop: [],
-    stackBottom: [],
-    pocketLeft: [],
-    pocketRight: [],
-    pocketLeft2: [],
-    pocketRight2: []
-  });
+const [machineContainers, setMachineContainers] = useState({
+  board: [],
+  stackTop: [],
+  stackBottom: [],
+  pocketLeft: [],
+  pocketRight: [],
+  pocketLeft2: [],
+  pocketRight2: []
+});
 
-  const [activeStackLayouts, setActiveStackLayouts] = useState({
-    top: "horizontal",
-    bottom: "horizontal"
-  });
+const [activeStackLayouts, setActiveStackLayouts] = useState({
+  top: "horizontal",
+  bottom: "horizontal"
+});
 
-  const [activeStackSendMenu, setActiveStackSendMenu] = useState("");
+const [leftPocketOpen, setLeftPocketOpen] = useState(false);
+const [rightPocketOpen, setRightPocketOpen] = useState(false);
+  
+const [topRailMode, setTopRailMode] = useState("off");
+
+const [activeStackSendMenu, setActiveStackSendMenu] =
+  useState("");
+
+const POCKET_TARGETS = [
+  "pocketLeft",
+  "pocketLeft2",
+  "pocketRight",
+  "pocketRight2"
+];
+
+
   const [activeStackHover, setActiveStackHover] = useState("");
-
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
+
+  const [cardScaleMode, setCardScaleMode] = useState("xl");
+  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+
+  const hasAppliedRemoteLayoutRef = useRef(false);
+  
   const [activeDndId, setActiveDndId] = useState("");
 
-  const POCKET_TARGETS = [
+const handleWorkspaceDragStart =
+  createWorkspaceDragStartHandler({
+    setActiveDndId
+  });
+
+const handleWorkspaceDragCancel =
+  createWorkspaceDragCancelHandler({
+    setActiveDndId,
+    clearMachineDragState
+  });
+
+function handleWorkspaceDragEnd(event) {
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
+
+  const activeSortable =
+    event?.active?.data?.current?.sortable;
+
+  const overSortable =
+    event?.over?.data?.current?.sortable;
+
+  const knownContainers = [
+    "board",
+    "stackTop",
+    "stackBottom",
     "pocketLeft",
-    "pocketLeft2",
     "pocketRight",
+    "pocketLeft2",
     "pocketRight2"
   ];
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6
-      }
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
+  const sourceContainer =
+    event?.active?.data?.current?.containerId ||
+    (knownContainers.includes(activeSortable?.containerId)
+      ? activeSortable.containerId
+      : getMachineContainer(dragId));
 
-  function workspaceCollisionDetection(args) {
-    const pointerHits = pointerWithin(args);
+  const targetContainer =
+    overSortable?.containerId ||
+    event?.over?.data?.current?.containerId ||
+    (knownContainers.includes(overId)
+      ? overId
+      : getMachineContainer(overId));
 
-    if (pointerHits.length) {
-      return pointerHits;
-    }
+  console.log("IXI DND DROP", {
+    dragId,
+    overId,
+    sourceContainer,
+    targetContainer,
+    activeData: event?.active?.data?.current,
+    overData: event?.over?.data?.current
+  });
 
-    return closestCenter(args);
-  }
-
-  function handleWorkspaceDragStart(event) {
-    const dragId = String(event?.active?.id || "");
-
-    if (!dragId) return;
-
-    setActiveDndId(dragId);
-  }
-
-  function handleWorkspaceDragCancel() {
+  if (!dragId || !overId) {
     setActiveDndId("");
     clearMachineDragState();
+    return;
   }
 
-  function handleWorkspaceDragEnd(event) {
-    const dragId = String(event?.active?.id || "");
-    const overId = String(event?.over?.id || "");
+  if (
+    sourceContainer &&
+    targetContainer &&
+    sourceContainer === targetContainer &&
+    dragId !== overId
+  ) {
+    const ids = machineContainers[sourceContainer] || [];
 
-    const activeSortable =
-      event?.active?.data?.current?.sortable;
+    const fromIndex = ids.findIndex(
+      item => String(item) === String(dragId)
+    );
 
-    const overSortable =
-      event?.over?.data?.current?.sortable;
+    const toIndex = ids.findIndex(
+      item => String(item) === String(overId)
+    );
 
-    const knownContainers = [
+    const insertAfter = fromIndex < toIndex;
+
+    moveMachineWithinContainer(
+      sourceContainer,
+      dragId,
+      overId,
+      insertAfter
+    );
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  if (
+    sourceContainer !== "board" &&
+    targetContainer === "board" &&
+    overId &&
+    overId !== "board" &&
+    dragId !== overId
+  ) {
+    console.log("IXI INSERT TO BOARD", {
+      dragId,
+      overId,
+      sourceContainer,
+      targetContainer
+    });
+
+    moveMachineToContainerAtPosition(
+      dragId,
+      "board",
+      overId,
+      false
+    );
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  if (
+    targetContainer &&
+    targetContainer !== sourceContainer &&
+    [
       "board",
       "stackTop",
       "stackBottom",
@@ -302,103 +297,55 @@ export default function SellerYardV2Page() {
       "pocketRight",
       "pocketLeft2",
       "pocketRight2"
-    ];
+    ].includes(targetContainer)
+  ) {
+    moveMachineToContainer(dragId, targetContainer);
 
-    const sourceContainer =
-      event?.active?.data?.current?.containerId ||
-      (knownContainers.includes(activeSortable?.containerId)
-        ? activeSortable.containerId
-        : getMachineContainer(dragId));
-
-    const targetContainer =
-      overSortable?.containerId ||
-      event?.over?.data?.current?.containerId ||
-      (knownContainers.includes(overId) ? overId : getMachineContainer(overId));
-
-    console.log("IXI SELLER YARD V2 DND DROP", {
-      dragId,
-      overId,
-      sourceContainer,
-      targetContainer,
-      activeData: event?.active?.data?.current,
-      overData: event?.over?.data?.current
-    });
-
-    if (!dragId || !overId) {
-      setActiveDndId("");
-      clearMachineDragState();
-      return;
+    if (targetContainer === "stackTop") {
+      setActiveStacksOpen(current => ({
+        ...current,
+        top: true
+      }));
     }
 
-    if (
-      sourceContainer &&
-      targetContainer &&
-      sourceContainer === targetContainer &&
-      dragId !== overId
-    ) {
-      const ids = machineContainers[sourceContainer] || [];
-
-      const fromIndex = ids.findIndex(
-        item => String(item) === String(dragId)
-      );
-
-      const toIndex = ids.findIndex(
-        item => String(item) === String(overId)
-      );
-
-      const insertAfter = fromIndex < toIndex;
-
-      moveMachineWithinContainer(
-        sourceContainer,
-        dragId,
-        overId,
-        insertAfter
-      );
-
-      setActiveDndId("");
-      clearMachineDragState();
-      return;
-    }
-
-    if (
-      targetContainer &&
-      targetContainer !== sourceContainer &&
-      ["board", "stackTop", "stackBottom", "pocketLeft", "pocketRight", "pocketLeft2", "pocketRight2"].includes(targetContainer)
-    ) {
-      moveMachineToContainer(dragId, targetContainer);
-
-      if (targetContainer === "stackTop") {
-        setActiveStacksOpen(current => ({ ...current, top: true }));
-      }
-
-      if (targetContainer === "stackBottom") {
-        setActiveStacksOpen(current => ({ ...current, bottom: true }));
-      }
-
-      if (targetContainer === "pocketLeft") setLeftPocketMode("peek");
-      if (targetContainer === "pocketLeft2") setLeftPocket2Mode("peek");
-      if (targetContainer === "pocketRight") setRightPocketMode("peek");
-      if (targetContainer === "pocketRight2") setRightPocket2Mode("peek");
-
-      setActiveDndId("");
-      clearMachineDragState();
-      return;
+    if (targetContainer === "stackBottom") {
+      setActiveStacksOpen(current => ({
+        ...current,
+        bottom: true
+      }));
     }
 
     setActiveDndId("");
     clearMachineDragState();
+    return;
   }
 
+  setActiveDndId("");
+  clearMachineDragState();
+}
+
+
+  
+const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 6
+    }
+  }),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  })
+);
+
   useEffect(() => {
-    async function loadSellerYardV2() {
+    captureIXEvent("browse_v2_viewed", {
+  page: "browse-v2"
+});
+  }, []);
+
+  useEffect(() => {
+    async function loadSavedPage() {
       try {
-        const listingsRes = await fetch("/api/listings");
-        const listingsData = await listingsRes.json();
-
-        if (Array.isArray(listingsData)) {
-          setListings(listingsData);
-        }
-
         const SharetribeSdk = await import("sharetribe-flex-sdk");
 
         const sdkInstance = SharetribeSdk.createInstance({
@@ -407,170 +354,160 @@ export default function SellerYardV2Page() {
 
         setSdk(sdkInstance);
 
-        try {
-          const currentUser =
-            await fetchCurrentUserWithSavedListings(sdkInstance);
+        const currentUser =
+          await fetchCurrentUserWithSavedListings(sdkInstance);
 
-          const userId =
-            currentUser?.id?.uuid ||
-            currentUser?.id ||
-            "guest";
+        const userId =
+  currentUser?.id?.uuid ||
+  currentUser?.id ||
+  "guest";
 
-          setIxiUserId(String(userId));
+setIxiUserId(String(userId));
 
-          const remoteIxiState =
-            await fetchIxiMachineState(String(userId));
+const remoteIxiResponse =
+  await fetchIxiMachineState(String(userId));
 
-          setIxiCardState(remoteIxiState);
+const remoteIxiState =
+  remoteIxiResponse?.state || remoteIxiResponse || {};
 
-          setSavedIds(
-            getSavedListingIdsFromUser(currentUser)
-          );
+const workspaceSettings =
+  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
 
-          setLoggedIn(true);
-        } catch {
-          setIxiUserId("guest");
-          setSavedIds([]);
-          setLoggedIn(false);
-        }
+const workspaceLayout =
+  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
+
+console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
+
+setIxiCardState(remoteIxiState);
+
+if (workspaceSettings.cardScaleMode) {
+  setCardScaleMode(workspaceSettings.cardScaleMode);
+}
+        
+setSavedIds(
+  getSavedListingIdsFromUser(currentUser)
+);
+
+const res = await fetch("/api/listings");
+const data = await res.json();
+
+if (Array.isArray(data)) {
+  setListings(data);
+}
+
       } catch (err) {
-        console.error("Seller Yard V2 load failed:", err);
-        setListings([]);
+        console.error("Saved page load failed:", err);
         setSavedIds([]);
-      } finally {
-        setLoading(false);
       }
     }
 
-    loadSellerYardV2();
+    loadSavedPage();
   }, []);
-
-  const sellerSeedListing = useMemo(() => {
-    if (!sellerSlug || listings.length === 0) return null;
-
-    const targetSlug = String(sellerSlug)
-      .replace(/-v2$/i, "")
-      .toLowerCase();
-
-    return listings.find(item => {
-      const display = getSellerDisplay(item);
-
-      const possibleValues = [
-        getAuthorId(item),
-        display.yardTitle,
-        display.sellerName,
-        display.sellerCompany,
-        display.companyName,
-        display.authorName
-      ]
-        .filter(Boolean)
-        .map(value => slugify(String(value)));
-
-      return possibleValues.includes(targetSlug);
-    });
-  }, [sellerSlug, listings]);
-
-  const sellerAuthorId = sellerSeedListing
-    ? getAuthorId(sellerSeedListing)
-    : "";
-
-  const sellerListings = useMemo(() => {
-    if (!sellerAuthorId) return [];
-
-    return listings.filter(item => {
+  
+  const savedListings = useMemo(() => {
+    const activeListings = listings.filter(item => {
       const listingStatus =
         item.listingStatus ||
         item.publicData?.listingStatus ||
-        item.attributes?.publicData?.listingStatus ||
-        "live";
+        item.attributes?.publicData?.listingStatus;
 
-      return (
-        String(getAuthorId(item)) === String(sellerAuthorId) &&
-        listingStatus !== "archived" &&
-        listingStatus !== "deleted"
-      );
+      return listingStatus !== "archived";
     });
-  }, [listings, sellerAuthorId]);
 
-  const sellerDisplay = getSellerDisplay(sellerSeedListing || {});
-  const yardTitle = sellerDisplay.yardTitle;
+    return filterSavedListings(activeListings, savedIds);
+  }, [listings, savedIds]);
 
-  const sellerName =
-    sellerDisplay.contactName &&
-    !isInitials(sellerDisplay.contactName)
-      ? sellerDisplay.contactName
-      : "";
+ const marketplaceListings = useMemo(() => {
+  return listings.filter(item => {
+    const listingStatus =
+      item.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus;
 
-  const sellerLocation =
-    clean(sellerSeedListing?.sellerLocation) ||
-    clean(sellerSeedListing?.location) ||
-    "Location not listed";
+    return listingStatus !== "archived";
+  });
+}, [listings]);
 
-  const sellerLogo =
-    sellerSeedListing?.sellerLogo ||
-    sellerSeedListing?.profileImage ||
-    "";
-
-  const website = normalizeUrl(sellerSeedListing?.sellerWebsite || "");
-  const facebook = normalizeUrl(sellerSeedListing?.sellerFacebook || "");
-  const instagram = normalizeUrl(sellerSeedListing?.sellerInstagram || "");
-  const linkedin = normalizeUrl(sellerSeedListing?.sellerLinkedin || "");
-  const youtube = normalizeUrl(sellerSeedListing?.sellerYoutube || "");
-  const tiktok = normalizeUrl(sellerSeedListing?.sellerTiktok || "");
-
-  useEffect(() => {
-    if (!sellerListings.length) return;
-
-    const nextContainers = {
-      board: [],
-      stackTop: [],
-      stackBottom: [],
-      pocketLeft: [],
-      pocketRight: [],
-      pocketLeft2: [],
-      pocketRight2: []
-    };
-
-    sellerListings.forEach(item => {
+const containerStateKey = useMemo(() => {
+  return marketplaceListings
+    .map(item => {
       const id = String(getListingId(item));
-      const savedContainer = ixiCardState[id]?.container;
+      return `${id}:${ixiCardState[id]?.container || "board"}`;
+    })
+    .join("|");
+}, [marketplaceListings, ixiCardState]);
+   
+useEffect(() => {
+  if (!marketplaceListings.length) return;
 
-      const targetContainer =
-        nextContainers[savedContainer]
-          ? savedContainer
-          : "board";
+  const validMachineIds = marketplaceListings.map(item =>
+    String(getListingId(item))
+  );
 
-      nextContainers[targetContainer].push(id);
-    });
+  const savedLayout =
+    ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
 
-    setMachineContainers(nextContainers);
-  }, [sellerListings, ixiCardState]);
+  if (
+    savedLayout?.machineContainers &&
+    !hasAppliedRemoteLayoutRef.current
+  ) {
+    setMachineContainers(
+      sanitizeWorkspaceContainers(
+        savedLayout.machineContainers,
+        validMachineIds
+      )
+    );
 
-  const visibleSellerYardListings = useMemo(() => {
+    hasAppliedRemoteLayoutRef.current = true;
+    return;
+  }
+
+  if (hasAppliedRemoteLayoutRef.current) {
+  return;
+}
+
+  const nextContainers = createEmptyWorkspaceContainers();
+
+  marketplaceListings.forEach(item => {
+    const id = String(getListingId(item));
+    const savedContainer = ixiCardState[id]?.container;
+
+    const targetContainer =
+      nextContainers[savedContainer]
+        ? savedContainer
+        : "board";
+
+    nextContainers[targetContainer].push(id);
+  });
+
+  setMachineContainers(nextContainers);
+}, [containerStateKey]);
+
+  const visibleBrowseListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-        : sellerListings;
+        : marketplaceListings;
 
-    const orderedSource =
-      (machineContainers.board || [])
-        .map(id =>
-          source.find(item =>
-            String(getListingId(item)) === String(id)
-          )
-        )
-        .filter(Boolean);
+const orderedSource =
+  (machineContainers.board || [])
+    .map(id =>
+      source.find(item =>
+        String(getListingId(item)) === String(id)
+      )
+    )
+    .filter(Boolean);
+    
+   const filtered = orderedSource.filter(item => {
+  const id = String(getListingId(item));
 
-    const filtered = orderedSource.filter(item => {
-      const id = String(getListingId(item));
+  if (getMachineContainer(id) !== "board") {
+    return false;
+  }
 
-      if (getMachineContainer(id) !== "board") {
-        return false;
-      }
-
-      const searchableText = [
+  const searchableText = [
         item.title,
         item.type,
         item.category,
@@ -596,86 +533,84 @@ export default function SellerYardV2Page() {
       const matchesSearch =
         !q || searchableText.includes(q);
 
-      const itemCategory =
-        String(item.type || item.category || "")
-          .toUpperCase();
+    const itemCategory =
+  String(item.type || item.category || "")
+    .toUpperCase();
 
-      const itemMake =
-        String(item.make || "")
-          .toUpperCase();
+const itemMake =
+  String(item.make || "")
+    .toUpperCase();
 
-      const itemModel =
-        String(item.model || "")
-          .toUpperCase();
+const itemModel =
+  String(item.model || "")
+    .toUpperCase();
 
-      const matchesCategory =
-        workspaceFilters.category === "ALL CATEGORIES" ||
-        itemCategory === String(workspaceFilters.category).toUpperCase();
+const matchesCategory =
+  workspaceFilters.category === "ALL CATEGORIES" ||
+  itemCategory === String(workspaceFilters.category).toUpperCase();
 
-      const matchesMake =
-        workspaceFilters.make === "ALL MAKES" ||
-        itemMake === String(workspaceFilters.make).toUpperCase();
+const matchesMake =
+  workspaceFilters.make === "ALL MAKES" ||
+  itemMake === String(workspaceFilters.make).toUpperCase();
 
-      const matchesModel =
-        workspaceFilters.model === "ALL MODELS" ||
-        itemModel === String(workspaceFilters.model).toUpperCase();
+const matchesModel =
+  workspaceFilters.model === "ALL MODELS" ||
+  itemModel === String(workspaceFilters.model).toUpperCase();
 
-        
-      const matchesIxiColor =
-        ixiColorFilters.length === 0 ||
-        ixiColorFilters.includes(ixState.color);
+const matchesIxiColor =
+  ixiColorFilters.length === 0 ||
+  ixiColorFilters.includes(ixState.color);
 
-      const yearValue = Number(item.year || item.publicData?.year || 0);
-      const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
-      const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
+const yearValue = Number(item.year || item.publicData?.year || 0);
+const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
+const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
+const matchesWorkspaceRanges =
+  (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
+  (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
+  (!workspaceFilters.priceMin || priceValue >= Number(workspaceFilters.priceMin)) &&
+  (!workspaceFilters.priceMax || priceValue <= Number(workspaceFilters.priceMax)) &&
+  (!workspaceFilters.hoursMin || hoursValue >= Number(workspaceFilters.hoursMin)) &&
+  (!workspaceFilters.hoursMax || hoursValue <= Number(workspaceFilters.hoursMax));
 
-      const matchesWorkspaceRanges =
-        (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
-        (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
-        (!workspaceFilters.priceMin || priceValue >= Number(workspaceFilters.priceMin)) &&
-        (!workspaceFilters.priceMax || priceValue <= Number(workspaceFilters.priceMax)) &&
-        (!workspaceFilters.hoursMin || hoursValue >= Number(workspaceFilters.hoursMin)) &&
-        (!workspaceFilters.hoursMax || hoursValue <= Number(workspaceFilters.hoursMax));
+const matchesIxiOutline =
+  ixiOutlineFilter === "all" ||
+  String(ixState.outline) === String(ixiOutlineFilter);
 
-      const matchesIxiOutline =
-        ixiOutlineFilter === "all" ||
-        String(ixState.outline) === String(ixiOutlineFilter);
-
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesMake &&
-        matchesModel &&
-        matchesWorkspaceRanges &&
-        matchesIxiColor &&
-        matchesIxiOutline
-      );
+return (
+  matchesSearch &&
+  matchesCategory &&
+  matchesMake &&
+  matchesModel &&
+  matchesWorkspaceRanges &&
+  matchesIxiColor &&
+  matchesIxiOutline
+);
     });
 
-    return [...filtered].sort((a, b) => {
-      const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
-      const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
+return [...filtered].sort((a, b) => {
+  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
+  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
 
-      const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
-      const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
+  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
+  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
 
-      const yearA = Number(a.year || a.publicData?.year || 0);
-      const yearB = Number(b.year || b.publicData?.year || 0);
+  const yearA = Number(a.year || a.publicData?.year || 0);
+  const yearB = Number(b.year || b.publicData?.year || 0);
 
-      if (savedBoardMode === "price-low") return priceA - priceB;
-      if (savedBoardMode === "price-high") return priceB - priceA;
-      if (savedBoardMode === "hours-low") return hoursA - hoursB;
-      if (savedBoardMode === "hours-high") return hoursB - hoursA;
-      if (savedBoardMode === "year-new") return yearB - yearA;
-      if (savedBoardMode === "year-old") return yearA - yearB;
+  if (savedBoardMode === "price-low") return priceA - priceB;
+  if (savedBoardMode === "price-high") return priceB - priceA;
+  if (savedBoardMode === "hours-low") return hoursA - hoursB;
+  if (savedBoardMode === "hours-high") return hoursB - hoursA;
+  if (savedBoardMode === "year-new") return yearB - yearA;
+  if (savedBoardMode === "year-old") return yearA - yearB;
 
-      return 0;
-    });
-  }, [
+  return 0;
+});
+     }, [
     searchQuery,
     savedBoardMode,
     savedBoardListings,
-    sellerListings,
+    marketplaceListings,
     workspaceFilters,
     machineContainers,
     ixiCardState,
@@ -684,156 +619,178 @@ export default function SellerYardV2Page() {
   ]);
 
   function updateIxiCardState(listingId, patch) {
-    const id = String(listingId);
+  const id = String(listingId);
 
-    setIxiCardState(current => {
-      const nextRecord = {
-        color: "none",
-        outline: 1,
+  setIxiCardState(current => {
+    const nextRecord = {
+      color: "none",
+      outline: 1,
 
-        ...(current[id] || {}),
+      ...(current[id] || {}),
 
-        ...patch,
+      ...patch,
 
-        touched: true,
-        updatedAt: Date.now()
-      };
+      touched: true,
+      updatedAt: Date.now()
+    };
 
-      saveIxiMachinePatch({
-        userId: ixiUserId,
-        listingId: id,
-        patch: nextRecord
-      });
-
-      return {
-        ...current,
-        [id]: nextRecord
-      };
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: id,
+      patch: nextRecord
     });
-  }
 
-  function toggleColorFilter(color) {
-    setIxiColorFilters(current => {
-      if (current.includes(color)) {
-        return current.filter(item => item !== color);
-      }
+    return {
+      ...current,
+      [id]: nextRecord
+    };
+  });
+}
 
-      return [...current, color];
-    });
-  }
+function cycleMachineFace(listingOrId) {
+  const id =
+    typeof listingOrId === "object"
+      ? String(getListingId(listingOrId))
+      : String(listingOrId);
 
-  function toggleOutlineFilter(outline) {
-    setIxiOutlineFilter(current =>
-      String(current) === String(outline)
-        ? "all"
-        : String(outline)
-    );
-  }
+  const currentFace =
+    Number(ixiCardState[id]?.face || 1);
 
-  function getMachineContainer(machineId) {
-    const id = String(machineId);
+  const nextFace =
+    currentFace === 1 ? 2 :
+    currentFace === 2 ? 3 :
+    currentFace === 3 ? 4 :
+    1;
 
-    for (const [containerKey, ids] of Object.entries(machineContainers)) {
-      if ((ids || []).includes(id)) {
-        return containerKey;
-      }
+  updateIxiCardState(id, {
+    face: nextFace
+  });
+}
+  
+ function toggleColorFilter(color) {
+  setIxiColorFilters(current => {
+    if (current.includes(color)) {
+      return current.filter(item => item !== color);
     }
 
-    return "board";
-  }
+    return [...current, color];
+  });
+}
+  
+  function toggleOutlineFilter(outline) {
+  setIxiOutlineFilter(current =>
+    String(current) === String(outline)
+      ? "all"
+      : String(outline)
+  );
+}
 
-  function moveMachineToContainer(machineId, targetContainer) {
-    if (!machineId || !targetContainer) return;
+function getMachineContainer(machineId) {
+  return getMachineContainerFromContainers(
+    machineContainers,
+    machineId
+  );
+}
+  
+function moveMachineToContainer(machineId, targetContainer) {
+  if (!machineId || !targetContainer) return;
 
-    const id = String(machineId);
+  const id = String(machineId);
 
-    updateIxiCardState(id, {
-      container: targetContainer
-    });
+  updateIxiCardState(id, {
+    container: targetContainer
+  });
 
-    setMachineContainers(current => {
-      const next = {};
-
-      Object.keys(current).forEach(containerKey => {
-        next[containerKey] = (current[containerKey] || []).filter(
-          item => String(item) !== id
-        );
+  setMachineContainers(current => {
+    const finalContainers =
+      moveMachineToContainerState({
+        currentContainers: current,
+        machineId,
+        targetContainer
       });
 
-      const isPocket = [
-        "pocketLeft",
-        "pocketRight",
-        "pocketLeft2",
-        "pocketRight2"
-      ].includes(targetContainer);
+    saveWorkspaceLayout(finalContainers);
 
-      next[targetContainer] = isPocket
-        ? [
-            id,
-            ...(next[targetContainer] || [])
-          ]
-        : [
-            ...(next[targetContainer] || []),
-            id
-          ];
+    return finalContainers;
+  });
+}
 
-      return next;
+function moveMachineToContainerAtPosition(
+  machineId,
+  targetContainer,
+  targetId,
+  insertAfter = false
+) {
+  if (!machineId || !targetContainer || !targetId) return;
+
+  const id = String(machineId);
+
+  saveIxiMachinePatch({
+    userId: ixiUserId,
+    listingId: id,
+    patch: {
+      ...(ixiCardState[id] || {}),
+      container: targetContainer,
+      touched: true,
+      updatedAt: Date.now()
+    }
+  });
+
+  setMachineContainers(current => {
+    const finalContainers =
+      moveMachineToContainerAtPositionState({
+        currentContainers: current,
+        machineId,
+        targetContainer,
+        targetId,
+        insertAfter
+      });
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
+  });
+}
+  
+ function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
+  setMachineContainers(current => {
+    const finalContainers = reorderMachineWithinContainerState({
+      currentContainers: current,
+      containerKey,
+      dragId,
+      targetId,
+      insertAfter
     });
-  }
 
-  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-    if (!containerKey || !dragId || !targetId || dragId === targetId) return;
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+    }
 
-    setMachineContainers(current => {
-      const source = current[containerKey] || [];
+    return finalContainers;
+  });
+}
+  
+function moveMachineBackToBoard(machineId) {
+  moveMachineToContainer(machineId, "board");
+}
 
-      const fromIndex = source.findIndex(
-        item => String(item) === String(dragId)
-      );
-
-      const toIndex = source.findIndex(
-        item => String(item) === String(targetId)
-      );
-
-      if (fromIndex === -1 || toIndex === -1) {
-        return current;
-      }
-
-      const nextContainer = [...source];
-      const [moved] = nextContainer.splice(fromIndex, 1);
-
-      const adjustedTargetIndex = nextContainer.findIndex(
-        item => String(item) === String(targetId)
-      );
-
-      const insertIndex = insertAfter
-        ? adjustedTargetIndex + 1
-        : adjustedTargetIndex;
-
-      nextContainer.splice(insertIndex, 0, moved);
-
-      return {
-        ...current,
-        [containerKey]: nextContainer
-      };
-    });
-  }
-
-  function moveMachineBackToBoard(machineId) {
-    moveMachineToContainer(machineId, "board");
-  }
-
-  function getListingById(machineId) {
-    return listings.find(
-      item => String(getListingId(item)) === String(machineId)
-    );
-  }
+function getListingById(machineId) {
+  return listings.find(
+    item => String(getListingId(item)) === String(machineId)
+  );
+}
 
   function getActiveDndListing() {
-    if (!activeDndId) return null;
+  if (!activeDndId) return null;
 
-    return getListingById(activeDndId);
-  }
+  return getListingById(activeDndId);
+}
+
+  function getPocketContainerKey(side) {
+  return side === "right"
+    ? "pocketRight"
+    : "pocketLeft";
+}
 
   function moveListingToSlot(dragId, targetId) {
     if (!dragId || !targetId || dragId === targetId) return;
@@ -842,8 +799,8 @@ export default function SellerYardV2Page() {
 
     setSavedBoardListings(current => {
       const source = current.length
-        ? current
-        : sellerListings;
+  ? current
+  : marketplaceListings;
 
       const fromIndex = source.findIndex(
         item => String(getListingId(item)) === String(dragId)
@@ -864,84 +821,84 @@ export default function SellerYardV2Page() {
   }
 
   function clearMachineDragState() {
-    setDraggingListingId("");
-    setGhostListingId("");
-    setActiveStackHover("");
-  }
+  setDraggingListingId("");
+  setGhostListingId("");
+  setActiveStackHover("");
+}
+  
+function rotatePocket(pocketKey) {
+  setMachineContainers(current => {
+    const finalContainers = rotatePocketState(
+      current,
+      pocketKey
+    );
 
-  function rotatePocket(pocketKey) {
-    if (!pocketKey) return;
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+    }
 
-    setMachineContainers(current => {
-      const ids = current[pocketKey] || [];
+    return finalContainers;
+  });
+}
 
-      if (ids.length <= 1) return current;
-
-      return {
-        ...current,
-        [pocketKey]: [
-          ...ids.slice(1),
-          ids[0]
-        ]
-      };
+function cyclePocketMode(side) {
+  const cycle = setter => {
+    setter(current => {
+      if (current === "closed") return "peek";
+      if (current === "peek") return "open";
+      return "closed";
     });
-  }
+  };
 
-  function cyclePocketMode(side) {
-    const cycle = setter => {
-      setter(current => {
-        if (current === "closed") return "peek";
-        if (current === "peek") return "open";
-        return "closed";
-      });
+  if (side === "left") return cycle(setLeftPocketMode);
+  if (side === "right") return cycle(setRightPocketMode);
+  if (side === "left2") return cycle(setLeftPocket2Mode);
+  if (side === "right2") return cycle(setRightPocket2Mode);
+}
+
+function sendListingToFront(listing) {
+  const listingId = String(getListingId(listing));
+
+  console.log("IXI SEND FRONT CLICKED", listingId);
+
+  setMachineContainers(current => {
+    const boardIds = current.board || [];
+
+    if (!boardIds.includes(listingId)) {
+      return current;
+    }
+
+    return {
+      ...current,
+      board: [
+        listingId,
+        ...boardIds.filter(id => String(id) !== listingId)
+      ]
     };
+  });
+}
 
-    if (side === "left") return cycle(setLeftPocketMode);
-    if (side === "right") return cycle(setRightPocketMode);
-    if (side === "left2") return cycle(setLeftPocket2Mode);
-    if (side === "right2") return cycle(setRightPocket2Mode);
-  }
+function sendListingToBack(listing) {
+  const listingId = String(getListingId(listing));
 
-  function sendListingToFront(listing) {
-    const listingId = String(getListingId(listing));
+  console.log("IXI SEND BACK CLICKED", listingId);
 
-    setMachineContainers(current => {
-      const boardIds = current.board || [];
+  setMachineContainers(current => {
+    const boardIds = current.board || [];
 
-      if (!boardIds.includes(listingId)) {
-        return current;
-      }
+    if (!boardIds.includes(listingId)) {
+      return current;
+    }
 
-      return {
-        ...current,
-        board: [
-          listingId,
-          ...boardIds.filter(id => String(id) !== listingId)
-        ]
-      };
-    });
-  }
-
-  function sendListingToBack(listing) {
-    const listingId = String(getListingId(listing));
-
-    setMachineContainers(current => {
-      const boardIds = current.board || [];
-
-      if (!boardIds.includes(listingId)) {
-        return current;
-      }
-
-      return {
-        ...current,
-        board: [
-          ...boardIds.filter(id => String(id) !== listingId),
-          listingId
-        ]
-      };
-    });
-  }
-
+    return {
+      ...current,
+      board: [
+        ...boardIds.filter(id => String(id) !== listingId),
+        listingId
+      ]
+    };
+  });
+}
   async function toggleSave(listing) {
     if (!sdk) {
       window.location.href = "/login";
@@ -968,303 +925,222 @@ export default function SellerYardV2Page() {
     }
   }
 
-  function toggleActiveStack(stackKey) {
-    setActiveStacksOpen(current => ({
-      ...current,
-      [stackKey]: !current[stackKey]
-    }));
-  }
+function toggleActiveStack(stackKey) {
+  setActiveStacksOpen(current => {
+    const nextOpen = toggleStackOpenState(
+  current,
+  stackKey
+);
 
-  function toggleActiveStackLayout(stackKey) {
-    setActiveStackLayouts(current => ({
-      ...current,
-      [stackKey]:
-        current[stackKey] === "horizontal"
-          ? "vertical"
-          : "horizontal"
-    }));
-  }
-
-  function getStackContainerKey(stackKey) {
-    return stackKey === "top"
-      ? "stackTop"
-      : "stackBottom";
-  }
-
-  function moveActiveStackToContainer(stackKey, targetContainer) {
-    const sourceContainer = getStackContainerKey(stackKey);
-    const stackIds = machineContainers[sourceContainer] || [];
-
-    stackIds.forEach(machineId => {
-      moveMachineToContainer(
-        machineId,
-        targetContainer
-      );
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      patch: {
+        machineContainers,
+        activeStackLayouts,
+        activeStacksOpen: nextOpen,
+        updatedAt: Date.now()
+      }
     });
 
-    setActiveStacksOpen(current => ({
-      ...current,
-      [stackKey]: false
-    }));
-  }            
+    return nextOpen;
+  });
+}
+  
+function toggleActiveStackLayout(stackKey) {
+  setActiveStackLayouts(current => {
+    const nextLayouts = toggleStackLayoutState(
+  current,
+  stackKey
+);
 
-
-  function saveActiveStack(stackKey) {
-    const targetPocket =
-      stackKey === "top"
-        ? "pocketLeft"
-        : "pocketRight";
-
-    moveActiveStackToContainer(
-      stackKey,
-      targetPocket
-    );
-  }
-
-  function sendActiveStackToTheater(stackKey) {
-    const sourceContainer = getStackContainerKey(stackKey);
-    const stackIds = machineContainers[sourceContainer] || [];
-
-    console.log("IXI THEATER STACK", {
-      stackKey,
-      machineIds: stackIds
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      patch: {
+        machineContainers,
+        activeStackLayouts: nextLayouts,
+        activeStacksOpen,
+        updatedAt: Date.now()
+      }
     });
-  }
 
-  function addListingToActiveStack(stackKey, listingId) {
-    if (!listingId) return;
+    return nextLayouts;
+  });
+}
 
-    const targetContainer =
-      stackKey === "top"
-        ? "stackTop"
-        : "stackBottom";
+function moveActiveStackToContainer(stackKey, targetContainer) {
+  const stackIds = getMachineIdsForStack(
+    machineContainers,
+    stackKey
+  );
 
-    setActiveStacksOpen(current => ({
-      ...current,
-      [stackKey]: true
-    }));
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(machineId, targetContainer);
+  });
 
-    moveMachineToContainer(
-      listingId,
-      targetContainer
-    );
-  }
+  setActiveStacksOpen(current => ({
+    ...current,
+    [stackKey]: false
+  }));
+}
 
-  function addListingToLeftPocket(listingId) {
-    if (!listingId) return;
+ function sendActiveStackToTheater(stackKey) {
+  const sourceContainer = getStackContainerKey(stackKey);
+  const stackIds = machineContainers[sourceContainer] || [];
 
-    moveMachineToContainer(
-      listingId,
-      "pocketLeft"
-    );
-  }
+  console.log("IXI THEATER STACK", {
+    stackKey,
+    machineIds: stackIds
+  });
+} 
+  
+function addListingToActiveStack(stackKey, listingId) {
+  if (!listingId) return;
 
-  function movePocketToContainer(pocketKey, targetContainer) {
-    if (!pocketKey || !targetContainer) return;
+ const targetContainer = getStackContainerKey(stackKey);
 
-    const pocketIds = machineContainers[pocketKey] || [];
+ setActiveStacksOpen(current =>
+  openStackState(current, stackKey)
+);
 
-    pocketIds.forEach(machineId => {
-      moveMachineToContainer(
-        machineId,
-        targetContainer
-      );
-    });
-  }
+  moveMachineToContainer(
+    listingId,
+    targetContainer
+  );
+}
+  
+function addListingToLeftPocket(listingId) {
+  if (!listingId) return;
 
-  function movePocketToStack(pocketKey, stackKey) {
-    const targetContainer =
-      stackKey === "top"
-        ? "stackTop"
-        : "stackBottom";
+  moveMachineToContainer(
+    listingId,
+    "pocketLeft"
+  );
+}
 
-    movePocketToContainer(
+function movePocketToContainer(pocketKey, targetContainer) {
+  setMachineContainers(current => {
+    const finalContainers = movePocketToContainerState(
+      current,
       pocketKey,
       targetContainer
     );
 
-    setActiveStacksOpen(current => ({
+    if (finalContainers !== current) {
+      saveWorkspaceLayout(finalContainers);
+
+      (current[pocketKey] || []).forEach(machineId => {
+        updateIxiCardState(machineId, {
+          container: targetContainer
+        });
+      });
+    }
+
+    return finalContainers;
+  });
+}
+
+function movePocketToStack(pocketKey, stackKey) {
+  const targetContainer = getStackContainerKey(stackKey);
+
+  movePocketToContainer(
+    pocketKey,
+    targetContainer
+  );
+
+ setActiveStacksOpen(current =>
+  openStackState(current, stackKey)
+);
+}
+
+function recallPocketToBoard(pocketKey) {
+  movePocketToContainer(
+    pocketKey,
+    "board"
+  );
+}
+
+  
+function recallPocketMachineToBoard(machineId, pocketKey) {
+  if (!machineId || !pocketKey) return;
+
+  setMachineContainers(current => {
+    const id = String(machineId);
+
+    const pocketIds = current[pocketKey] || [];
+    const boardIds = current.board || [];
+
+        const finalContainers = {
       ...current,
-      [stackKey]: true
-    }));
-  }
-
-  function recallPocketToBoard(pocketKey) {
-    movePocketToContainer(
-      pocketKey,
-      "board"
-    );
-  }
-
-  function recallPocketMachineToBoard(machineId, pocketKey) {
-    if (!machineId || !pocketKey) return;
-
-    setMachineContainers(current => {
-      const id = String(machineId);
-
-      const pocketIds = current[pocketKey] || [];
-      const boardIds = current.board || [];
-
-      return {
-        ...current,
-        [pocketKey]: pocketIds.filter(
-          item => String(item) !== id
-        ),
-        board: boardIds.includes(id)
-          ? boardIds
-          : [...boardIds, id]
-      };
-    });
-  }
-
-  function cycleTopRailMode() {
-    return null;
-  }
-
-  function getIxiColorValue(color) {
-    const colors = {
-      green: "rgba(56,161,105,.82)",
-      yellow: "rgba(255,196,0,.86)",
-      red: "rgba(229,62,62,.86)",
-      cyan: "rgba(0,194,255,.82)",
-      white: "rgba(255,255,255,.74)",
-      blue: "rgba(49,130,206,.82)",
-      orange: "rgba(249,133,18,.82)"
+      [pocketKey]: pocketIds.filter(
+        item => String(item) !== id
+      ),
+      board: boardIds.includes(id)
+        ? boardIds
+        : [...boardIds, id]
     };
 
-    return colors[color] || "rgba(255,255,255,.12)";
-  }
+    saveWorkspaceLayout(finalContainers);
 
-  if (loading) {
-    return (
-      <main className="loading">
-        Loading yard...
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-          }
-        `}</style>
-      </main>
-    );
-  }
+    return finalContainers;
+  });
+}
 
-  if (!sellerSeedListing) {
-    return (
-      <main className="loading">
-        <div className="not-found-card">
-          <img
-            src="/images/ironxchange-logo.png"
-            alt="IronXchange"
-            className="not-found-logo"
-          />
+function cycleTopRailMode() {
+  setTopRailMode(current => {
+    if (current === "off") return "dim";
+    if (current === "dim") return "bright";
+    return "off";
+  });
+}
 
-          <h1>Seller Yard Not Found</h1>
 
-          <p>
-            This seller yard may have moved, been removed, or does not have active listings.
-          </p>
+function getIxiColorValue(color) {
+  const colors = {
+    green: "rgba(56,161,105,.82)",
+    yellow: "rgba(255,196,0,.86)",
+    red: "rgba(229,62,62,.86)",
+    cyan: "rgba(0,194,255,.82)",
+    white: "rgba(255,255,255,.74)",
+    blue: "rgba(49,130,206,.82)",
+    orange: "rgba(249,133,18,.82)"
+  };
 
-          <div className="not-found-actions">
-            <a href="/browse">Browse Equipment</a>
-            <a href="/">Back to IronXchange</a>
-          </div>
-        </div>
+  return colors[color] || "rgba(255,255,255,.12)";
+}
 
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
+function saveWorkspaceLayout(nextContainers = machineContainers) {
+  saveWorkspaceLayoutRecord({
+    saveIxiMachinePatch,
+    userId: ixiUserId,
+    machineContainers: nextContainers,
+    activeStackLayouts,
+    activeStacksOpen
+  });
+}
+  
+function cycleCardScaleMode() {
+  setCardScaleMode(current => {
+    const next = getNextCardScaleMode(current);
 
-          .not-found-card {
-            width: 100%;
-            max-width: 520px;
-            background: #151515;
-            border: 1px solid #282828;
-            border-radius: 16px;
-            padding: 34px;
-            text-align: center;
-          }
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: IXI_WORKSPACE_SETTINGS_ID,
+      patch: {
+        cardScaleMode: next,
+        updatedAt: Date.now()
+      }
+    });
 
-          .not-found-logo {
-            height: 42px;
-            width: auto;
-            margin-bottom: 24px;
-          }
-
-          h1 {
-            margin: 0;
-            color: #f2f2f2;
-            font-size: 22px;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-          }
-
-          p {
-            margin: 12px 0 0;
-            color: #999;
-            font-size: 14px;
-            line-height: 1.55;
-          }
-
-          .not-found-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 24px;
-          }
-
-          .not-found-actions a {
-            height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 14px;
-            background: #101010;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            color: #eaeaea;
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: .45px;
-            text-transform: uppercase;
-          }
-
-          .not-found-actions a:first-child {
-            background: #1a1400;
-            border-color: #3a2d00;
-            color: #ffc400;
-          }
-
-          .not-found-actions a:hover {
-            border-color: #ffc400;
-            color: #ffc400;
-          }
-        `}</style>
-      </main>
-    );
-  }
-
+    return next;
+  });
+}
+  
   return (
     <>
       <Head>
-        <title>{yardTitle} Yard | IronXchange</title>
-        <meta
-          name="description"
-          content={`${yardTitle} equipment yard on IronXchange.`}
-        />
+        <title>IXI Marketplace | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -1272,769 +1148,1665 @@ export default function SellerYardV2Page() {
         />
       </Head>
 
-      <Navbar />
+            <Navbar />
 
-      <IXIDragEngine
-        sensors={sensors}
-        workspaceCollisionDetection={workspaceCollisionDetection}
-        handleWorkspaceDragStart={handleWorkspaceDragStart}
-        handleWorkspaceDragEnd={handleWorkspaceDragEnd}
-        handleWorkspaceDragCancel={handleWorkspaceDragCancel}
-        getActiveDndListing={getActiveDndListing}
-        activeDndId={activeDndId}
-        savedIds={savedIds}
-        ixiCardState={ixiCardState}
-      >
-        <IXIWorkspaceEngine>
-          {({
-            leftPocketMode,
-            setLeftPocketMode,
-            rightPocketMode,
-            setRightPocketMode,
-            leftPocket2Mode,
-            setLeftPocket2Mode,
-            rightPocket2Mode,
-            setRightPocket2Mode,
-            armedDestination,
-            setArmedDestination,
-            toggleArmedDestination
-          }) => {
-            function sendMachineToArmedDestination(listing) {
-              if (!armedDestination) return;
-              if (!POCKET_TARGETS.includes(armedDestination)) return;
+   
+<IXIWorkspaceEngine>
+  {({
+    leftPocketMode,
+    setLeftPocketMode,
+    rightPocketMode,
+    setRightPocketMode,
+    leftPocket2Mode,
+    setLeftPocket2Mode,
+    rightPocket2Mode,
+    setRightPocket2Mode,
+    armedDestination,
+    setArmedDestination,
+    toggleArmedDestination
+  }) => {
+          const handleWorkspaceDragEnd =
+  createWorkspaceDragEndHandler({
+    getMachineContainer,
+    machineContainers,
+    moveMachineWithinContainer,
+    moveMachineToContainerAtPosition,
+    moveMachineToContainer,
+    setActiveStacksOpen,
+    setLeftPocketMode,
+    setLeftPocket2Mode,
+    setRightPocketMode,
+    setRightPocket2Mode,
+    setActiveDndId,
+    clearMachineDragState
+  });  
+    function sendMachineToArmedDestination(listing) {
+      if (!armedDestination) return;
+      if (!POCKET_TARGETS.includes(armedDestination)) return;
 
-              const id = String(getListingId(listing));
-              moveMachineToContainer(id, armedDestination);
-            }
+      const id = String(getListingId(listing));
+      moveMachineToContainer(id, armedDestination);
+    }
 
-            return (
-              <main>
-                <section className="yard-shell">
-                  <section className="yard-head">
-                    <div className="yard-identity">
-                      <SellerLogoDecal
-                        logo={sellerLogo}
-                        name={yardTitle}
-                        variant="slug"
-                      />
+    return (
+  <IXIDragEngine
+    sensors={sensors}
+    workspaceCollisionDetection={workspaceCollisionDetection}
+    handleWorkspaceDragStart={handleWorkspaceDragStart}
+    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
+    handleWorkspaceDragCancel={handleWorkspaceDragCancel}
+    getActiveDndListing={getActiveDndListing}
+    activeDndId={activeDndId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+    cardScaleMode={cardScaleMode}
+  >
+    <main>
+  <section className="saved-environment-shell">
+    <IXIEnvironmentRail
+  activeEnvironment="IXI MARKETPLACE"
+      hasAccount={!!sdk}
+      hasRelationship={true}
+      hasInventory={!!sdk}
+    />
+  </section>
+      
 
-                      <div className="yard-copy">
-                        <span className="eyebrow">IronXchange Yard</span>
-                        <h1>{yardTitle}</h1>
+<IXIChassis>
+  <aside className="ixi-command-left">
+    <section className="ixi-pocket-row">
+ 
+ <IXIPocketL1
+  leftPocketMode={leftPocketMode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
 
-                        <p>
-                          {sellerLocation}
-                          {sellerName ? ` · ${sellerName}` : ""}
-                        </p>
+<IXIPocketL2
+  leftPocket2Mode={leftPocket2Mode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
+</section>
+  </aside>
 
-                        <div className="yard-actions">
-                          {website ? (
-                            <a href={website} target="_blank" rel="noreferrer" aria-label="Website">
-                              <i className="fa-solid fa-globe"></i>
-                            </a>
-                          ) : null}
+   <div className="ixi-command-center">
+  
+       <IXIChassisControls
+  listings={marketplaceListings}
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  workspaceFilters={workspaceFilters}
+  setWorkspaceFilters={setWorkspaceFilters}
+  savedBoardMode={savedBoardMode}
+  setSavedBoardMode={setSavedBoardMode}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+  ixiCardState={ixiCardState}
+  ixiColorFilters={ixiColorFilters}
+  toggleColorFilter={toggleColorFilter}
+  ixiOutlineFilter={ixiOutlineFilter}
+  toggleOutlineFilter={toggleOutlineFilter}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
+                </div>
 
-                          {facebook ? (
-                            <a href={facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
-                              <i className="fa-brands fa-facebook-f"></i>
-                            </a>
-                          ) : null}
+  <aside className="ixi-command-right">
+  <section className="ixi-pocket-row">
+    <IXIPocketR1
+  rightPocketMode={rightPocketMode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
 
-                          {instagram ? (
-                            <a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
-                              <i className="fa-brands fa-instagram"></i>
-                            </a>
-                          ) : null}
+<IXIPocketR2
+  rightPocket2Mode={rightPocket2Mode}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  WorkspaceDropPad={WorkspaceDropPad}
+  movePocketToStack={movePocketToStack}
+  recallPocketToBoard={recallPocketToBoard}
+  rotatePocket={rotatePocket}
+  toggleArmedDestination={toggleArmedDestination}
+  pocketThumbSize={pocketThumbSize}
+  getListingById={getListingById}
+  IXISortableMachineCard={IXISortableMachineCard}
+  getIxiColorValue={getIxiColorValue}
+  ixiCardState={ixiCardState}
+/>
+ </section>
+  </aside>
+    </IXIChassis>
 
-                          {linkedin ? (
-                            <a href={linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
-                              <i className="fa-brands fa-linkedin-in"></i>
-                            </a>
-                          ) : null}
+              
+<IXIActiveStackZone
+  WorkspaceDropZone={WorkspaceDropZone}
+  activeStacksOpen={activeStacksOpen}
+  activeStackHover={activeStackHover}
+  machineContainers={machineContainers}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+  toggleActiveStack={toggleActiveStack}
+  toggleActiveStackLayout={toggleActiveStackLayout}
+  moveActiveStackToContainer={moveActiveStackToContainer}
+  sendActiveStackToTheater={sendActiveStackToTheater}
+  activeStackSendMenu={activeStackSendMenu}
+  setActiveStackSendMenu={setActiveStackSendMenu}
+  activeStackLayouts={activeStackLayouts}
+  getListingById={getListingById}
+  getListingId={getListingId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
+  IXISortableMachineCard={IXISortableMachineCard}
+  toggleSave={toggleSave}
+  updateIxiCardState={updateIxiCardState}
+  cycleMachineFace={cycleMachineFace}
+  sendListingToFront={sendListingToFront}
+  sendListingToBack={sendListingToBack}
+  sendMachineToArmedDestination={sendMachineToArmedDestination}
+  cardScaleMode={cardScaleMode}
+/>
+              
+    <section
+  data-board-target="board"
+  className={`cards ${
+    visibleBrowseListings.length === 1 ? "single-card" : ""
+  }`}
+  style={{
+    gridTemplateColumns:
+      visibleBrowseListings.length === 1
+        ? `${cardScaleMetrics.width}px`
+        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
+    gap: `${cardScaleMetrics.gap}px`
+  }}
+>
+<IXIBoard
+  items={visibleBrowseListings}
+  getListingId={getListingId}
+  savedIds={savedIds}
+  ixiCardState={ixiCardState}
+  IXISortableMachineCard={IXISortableMachineCard}
+  toggleSave={toggleSave}
+  updateIxiCardState={updateIxiCardState}
+  cycleMachineFace={cycleMachineFace}
+  sendListingToFront={sendListingToFront}
+  sendListingToBack={sendListingToBack}
+  armedDestination={armedDestination}
+  sendMachineToArmedDestination={sendMachineToArmedDestination}
+  draggingListingId={draggingListingId}
+  ghostListingId={ghostListingId}
+  enableCardScaling={true}
+  cardScaleMode={cardScaleMode}
+    />
+        </section>
 
-                          {youtube ? (
-                            <a href={youtube} target="_blank" rel="noreferrer" aria-label="YouTube">
-                              <i className="fa-brands fa-youtube"></i>
-                            </a>
-                          ) : null}
+<button
+  type="button"
+  onClick={cycleCardScaleMode}
+  style={{
+    position: "fixed",
+    right: "24px",
+    bottom: "24px",
+    zIndex: 9999,
+    background: "#111",
+    color: "#FFC400",
+    border: "1px solid rgba(255,196,0,.55)",
+    borderRadius: "8px",
+    padding: "8px 10px",
+    fontSize: "11px",
+    fontWeight: 900,
+    letterSpacing: ".08em",
+    cursor: "pointer"
+  }}
+>
+  SCALE: {cardScaleMode.toUpperCase()}
+</button>
 
-                          {tiktok ? (
-                            <a href={tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
-                              <i className="fa-brands fa-tiktok"></i>
-                            </a>
-                          ) : null}
+        {visibleBrowseListings.length === 0 && (
+  <div className="empty">
+    <h3>HELP US BUILD OUR MARKETPLACE</h3>
+    <p>
+      Touch a machine. Create a relationship. Machines will appear here.
+    </p>
+  </div>
+)}
+</main>
+  </IXIDragEngine>
+);
+  }}
+</IXIWorkspaceEngine>
 
-                          <a
-                            href={
-                              loggedIn
-                                ? `/inquire?listingId=${sellerListings?.[0]?.id || ""}`
-                                : `/login`
-                            }
-                            className="contact-btn"
-                          >
-                            Message
-                          </a>
-
-                          {sellerSeedListing?.sellerPhone ? (
-                            <a
-                              href={`tel:${sellerSeedListing.sellerPhone}`}
-                              className="contact-btn"
-                            >
-                              Call
-                            </a>
-                          ) : null}
-
-                          <a
-                            href="#"
-                            onClick={e => {
-                              e.preventDefault();
-                              window.history.back();
-                            }}
-                            className="browse-all-link"
-                          >
-                            Back to Machine
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="yard-count">
-                      <strong>{sellerListings.length}</strong>
-                      <span>Active Machines</span>
-                    </div>
-                  </section>
-
-
-                  <section className="saved-environment-shell">
-                    <IXIEnvironmentRail
-                      activeEnvironment="IXI SELLER YARD"
-                      hasAccount={!!sdk}
-                      hasRelationship={true}
-                      hasInventory={false}
-                    />
-                  </section>
-
-                  <IXIChassis>
-                    <aside className="ixi-command-left">
-                      <section className="ixi-pocket-row">
-                        <IXIPocketL1
-                          leftPocketMode={leftPocketMode}
-                          machineContainers={machineContainers}
-                          armedDestination={armedDestination}
-                          WorkspaceDropPad={WorkspaceDropPad}
-                          movePocketToStack={movePocketToStack}
-                          recallPocketToBoard={recallPocketToBoard}
-                          rotatePocket={rotatePocket}
-                          toggleArmedDestination={toggleArmedDestination}
-                          pocketThumbSize={pocketThumbSize}
-                          getListingById={getListingById}
-                          IXISortableMachineCard={IXISortableMachineCard}
-                          getIxiColorValue={getIxiColorValue}
-                          ixiCardState={ixiCardState}
-                        />
-
-                        <IXIPocketL2
-                          leftPocket2Mode={leftPocket2Mode}
-                          machineContainers={machineContainers}
-                          armedDestination={armedDestination}
-                          WorkspaceDropPad={WorkspaceDropPad}
-                          movePocketToStack={movePocketToStack}
-                          recallPocketToBoard={recallPocketToBoard}
-                          rotatePocket={rotatePocket}
-                          toggleArmedDestination={toggleArmedDestination}
-                          pocketThumbSize={pocketThumbSize}
-                          getListingById={getListingById}
-                          IXISortableMachineCard={IXISortableMachineCard}
-                          getIxiColorValue={getIxiColorValue}
-                          ixiCardState={ixiCardState}
-                        />
-                      </section>
-                    </aside>
-
-                    <div className="ixi-command-center">
-                      <IXIChassisControls
-                        listings={sellerListings}
-                        searchQuery={searchQuery}
-                        setSearchQuery={setSearchQuery}
-                        workspaceFilters={workspaceFilters}
-                        setWorkspaceFilters={setWorkspaceFilters}
-                        savedBoardMode={savedBoardMode}
-                        setSavedBoardMode={setSavedBoardMode}
-                        pocketThumbSize={pocketThumbSize}
-                        setPocketThumbSize={setPocketThumbSize}
-                        ixiCardState={ixiCardState}
-                        ixiColorFilters={ixiColorFilters}
-                        toggleColorFilter={toggleColorFilter}
-                        ixiOutlineFilter={ixiOutlineFilter}
-                        toggleOutlineFilter={toggleOutlineFilter}
-                        armedDestination={armedDestination}
-                        toggleArmedDestination={toggleArmedDestination}
-                      />
-                    </div>
-
-                    <aside className="ixi-command-right">
-                      <section className="ixi-pocket-row">
-                        <IXIPocketR1
-                          rightPocketMode={rightPocketMode}
-                          machineContainers={machineContainers}
-                          armedDestination={armedDestination}
-                          WorkspaceDropPad={WorkspaceDropPad}
-                          movePocketToStack={movePocketToStack}
-                          recallPocketToBoard={recallPocketToBoard}
-                          rotatePocket={rotatePocket}
-                          toggleArmedDestination={toggleArmedDestination}
-                          pocketThumbSize={pocketThumbSize}
-                          getListingById={getListingById}
-                          IXISortableMachineCard={IXISortableMachineCard}
-                          getIxiColorValue={getIxiColorValue}
-                          ixiCardState={ixiCardState}
-                        />
-
-                        <IXIPocketR2
-                          rightPocket2Mode={rightPocket2Mode}
-                          machineContainers={machineContainers}
-                          armedDestination={armedDestination}
-                          WorkspaceDropPad={WorkspaceDropPad}
-                          movePocketToStack={movePocketToStack}
-                          recallPocketToBoard={recallPocketToBoard}
-                          rotatePocket={rotatePocket}
-                          toggleArmedDestination={toggleArmedDestination}
-                          pocketThumbSize={pocketThumbSize}
-                          getListingById={getListingById}
-                          IXISortableMachineCard={IXISortableMachineCard}
-                          getIxiColorValue={getIxiColorValue}
-                          ixiCardState={ixiCardState}
-                        />
-                      </section>
-                    </aside>
-                  </IXIChassis>
-
-                  <section className="active-stack-zone">
-                    {["top", "bottom"].map(stackKey => (
-                      <WorkspaceDropZone
-                        key={stackKey}
-                        id={stackKey === "top" ? "stackTop" : "stackBottom"}
-                        data-active-stack={stackKey}
-                        className={`active-stack ${
-                          activeStacksOpen[stackKey] ? "open" : ""
-                        } ${
-                          (
-                            machineContainers[
-                              stackKey === "top" ? "stackTop" : "stackBottom"
-                            ] || []
-                          ).length > 0
-                            ? "has-machines"
-                            : ""
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          className="active-stack-dash"
-                          onClick={() => toggleActiveStack(stackKey)}
-                        />
-
-                        {activeStacksOpen[stackKey] && (
-                          <section
-                            className={`active-stack-tray ${
-                              activeStackHover === stackKey ? "stack-armed" : ""
-                            }`}
-                          >
-                            <div className="active-stack-pocket-corners">
-                              <button
-                                type="button"
-                                className={`stack-pocket-power top-left ${
-                                  armedDestination === "pocketLeft"
-                                    ? "destination-armed"
-                                    : ""
-                                }`}
-                                data-label="L1"
-                                title="Arm L1"
-                                onClick={() =>
-                                  toggleArmedDestination("pocketLeft")
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-pocket-power top-right"
-                                data-label="R1"
-                                title="Send stack to R1"
-                                onClick={() =>
-                                  moveActiveStackToContainer(
-                                    stackKey,
-                                    "pocketRight"
-                                  )
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-pocket-power bottom-left"
-                                data-label="L2"
-                                title="Send stack to L2"
-                                onClick={() =>
-                                  moveActiveStackToContainer(
-                                    stackKey,
-                                    "pocketLeft2"
-                                  )
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-pocket-power bottom-right"
-                                data-label="R2"
-                                title="Send stack to R2"
-                                onClick={() =>
-                                  moveActiveStackToContainer(
-                                    stackKey,
-                                    "pocketRight2"
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className="active-stack-command-pad">
-                              <button
-                                type="button"
-                                className="stack-rail-action theater"
-                                data-label="IXI THEATER"
-                                title="IXI Theater"
-                                onClick={() =>
-                                  sendActiveStackToTheater(stackKey)
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-rail-action layout"
-                                data-label="LAYOUT"
-                                title="Toggle layout"
-                                onClick={() => toggleActiveStackLayout(stackKey)}
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-rail-action board"
-                                data-label="BOARD"
-                                title="Send stack to board"
-                                onClick={() =>
-                                  moveActiveStackToContainer(
-                                    stackKey,
-                                    "board"
-                                  )
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className="stack-rail-action send"
-                                data-label="SEND"
-                                title="Send stack"
-                                onClick={() =>
-                                  setActiveStackSendMenu(current =>
-                                    current === stackKey ? "" : stackKey
-                                  )
-                                }
-                              />
-                            </div>
-
-                            {activeStackSendMenu === stackKey && (
-                              <div className="active-stack-send-menu">
-                                <button
-                                  type="button"
-                                  className={`stack-pocket-power top-left ${
-                                    armedDestination === "pocketLeft"
-                                      ? "destination-armed"
-                                      : ""
-                                  }`}
-                                  data-label="L1"
-                                  title="Arm L1"
-                                  onClick={() => {
-                                    toggleArmedDestination("pocketLeft");
-                                  }}
-                                />
-
-                                <button
-                                  type="button"
-                                  className="stack-send-option"
-                                  data-label="L2"
-                                  onClick={() =>
-                                    moveActiveStackToContainer(
-                                      stackKey,
-                                      "pocketLeft2"
-                                    )
-                                  }
-                                />
-
-                                <button
-                                  type="button"
-                                  className="stack-send-option"
-                                  data-label="BOARD"
-                                  onClick={() =>
-                                    moveActiveStackToContainer(
-                                      stackKey,
-                                      "board"
-                                    )
-                                  }
-                                />
-
-                                <button
-                                  type="button"
-                                  className="stack-send-option"
-                                  data-label="R1"
-                                  onClick={() =>
-                                    moveActiveStackToContainer(
-                                      stackKey,
-                                      "pocketRight"
-                                    )
-                                  }
-                                />
-
-                                <button
-                                  type="button"
-                                  className="stack-send-option"
-                                  data-label="R2"
-                                  onClick={() =>
-                                    moveActiveStackToContainer(
-                                      stackKey,
-                                      "pocketRight2"
-                                    )
-                                  }
-                                />
-                              </div>
-                            )}
-
-                            <div
-                              className={`active-stack-dropzone ${
-                                activeStackLayouts[stackKey] === "vertical"
-                                  ? "stack-vertical"
-                                  : "stack-horizontal"
-                              }`}
-                            >
-                              <IXIActiveStack
-                                stackKey={stackKey}
-                                machineIds={
-                                  machineContainers[
-                                    stackKey === "top" ? "stackTop" : "stackBottom"
-                                  ] || []
-                                }
-                                getListingById={getListingById}
-                                getListingId={getListingId}
-                                savedIds={savedIds}
-                                ixiCardState={ixiCardState}
-                                activeStackLayouts={activeStackLayouts}
-                                IXISortableMachineCard={IXISortableMachineCard}
-                                toggleSave={toggleSave}
-                                updateIxiCardState={updateIxiCardState}
-                                sendListingToFront={sendListingToFront}
-                                sendListingToBack={sendListingToBack}
-                                armedDestination={armedDestination}
-                                sendMachineToArmedDestination={sendMachineToArmedDestination}
-                              />
-                            </div>
-                          </section>
-                        )}
-                      </WorkspaceDropZone>
-                    ))}
-                  </section>
-
-                  <section
-                    data-board-target="board"
-                    className={`cards ${
-                      visibleSellerYardListings.length === 1 ? "single-card" : ""
-                    }`}
-                  >
-                    <IXIBoard
-                      items={visibleSellerYardListings}
-                      getListingId={getListingId}
-                      savedIds={savedIds}
-                      ixiCardState={ixiCardState}
-                      IXISortableMachineCard={IXISortableMachineCard}
-                      toggleSave={toggleSave}
-                      updateIxiCardState={updateIxiCardState}
-                      sendListingToFront={sendListingToFront}
-                      sendListingToBack={sendListingToBack}
-                      armedDestination={armedDestination}
-                      sendMachineToArmedDestination={sendMachineToArmedDestination}
-                      draggingListingId={draggingListingId}
-                      ghostListingId={ghostListingId}
-                    />
-                  </section>
-
-                  {visibleSellerYardListings.length === 0 ? (
-                    <div className="empty">
-                      <h3>No machines found.</h3>
-                      <p>Try another search or filter inside this yard.</p>
-                    </div>
-                  ) : null}
-                </section>
-              </main>
-            );
-          }}
-        </IXIWorkspaceEngine>
-      </IXIDragEngine>
 
       <Footer />
-
+                
       <style jsx>{`
-        :global(html),
-        :global(body) {
-          margin: 0;
-          min-height: 100%;
-          overflow-x: hidden;
-          background: #0b0b0b;
-          color: #d6d6d6;
-          font-family: Arial, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          text-rendering: geometricPrecision;
-        }
-
         * {
           box-sizing: border-box;
         }
 
+        :global(body) {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background: #0b0b0b;
+          color: #d6d6d6;
+        }
+
         main {
-          min-height: 100vh;
+           min-height: 72vh;
+  padding: 14px 5% 58px;
           background:
-            radial-gradient(circle at top center, rgba(255,196,0,.035), transparent 30%),
-            radial-gradient(circle at 18% 12%, rgba(255,255,255,.018), transparent 22%),
+            radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
+            linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
         }
 
-        .yard-shell {
-          max-width: 1920px;
-          margin: 0 auto;
-          padding: 18px 3% 58px;
+       .saved-environment-shell {
+  width: 100%;
+  margin: 0 auto;
+}
+
+
+
+       
+
+/* =============================== */
+/* IXI POCKET STATION CHASSIS V12  */
+/* =============================== */
+
+.ixi-command-chassis {
+  --station-w: 150px;
+  --station-h: 102px;
+  --control-half: 320px;
+  --station-gap: clamp(24px, 2.1vw, 40px);
+
+  width: 100%;
+  margin: -14 auto 20px;
+
+  position: relative;
+
+  display: block;
+}
+
+.ixi-command-center {
+  position: relative;
+  z-index: 5;
+
+  width: min(100%, 680px);
+  min-width: 0;
+
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
+}
+
+.ixi-command-left,
+.ixi-command-right {
+  position: absolute;
+  top: 56px;
+
+  width: calc((var(--station-w) * 2) + var(--station-gap));
+  height: var(--station-h);
+
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ixi-command-left {
+  right: calc(50% + var(--control-half) + var(--station-gap));
+  left: auto;
+}
+
+.ixi-command-right {
+  left: calc(50% + var(--control-half) + var(--station-gap));
+  right: auto;
+}
+
+.ixi-pocket-row {
+  width: 100%;
+  height: var(--station-h);
+
+  margin: 0;
+
+  display: grid;
+  grid-template-columns: var(--station-w) var(--station-w);
+  gap: var(--station-gap);
+
+  position: relative;
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+/* Base station shell */
+.ixi-pocket-left,
+.ixi-pocket-right {
+  width: var(--station-w);
+  max-width: var(--station-w);
+  height: var(--station-h);
+
+  margin: 0;
+  padding: 8px;
+
+  position: relative;
+  top: auto;
+
+  cursor: default !important;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 16px 10px 16px 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
+    rgba(7,7,7,.76);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20);
+
+  overflow: visible;
+
+  pointer-events: auto;
+  z-index: 8;
+}
+
+.ixi-pocket-left::before,
+.ixi-pocket-right::before {
+  content: "";
+
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 8px;
+
+  height: 1px;
+
+  background: rgba(255,196,0,.16);
+  pointer-events: none;
+}
+
+/* Wide order:
+   III | I | SEARCH | II | IV
+*/
+.ixi-pocket-l2 {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ixi-pocket-r2 {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* =============================== */
+/* IXI DESTINATION STATES          */
+/* =============================== */
+
+.ixi-pocket-left.occupied,
+.ixi-pocket-right.occupied {
+  border-color: rgba(255,196,0,.24);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.028),
+    0 8px 18px rgba(0,0,0,.20),
+    0 0 12px rgba(255,196,0,.08);
+}
+
+.ixi-pocket-left.destination-armed,
+.ixi-pocket-right.destination-armed {
+  border-color: rgba(0,194,255,.72);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 18px rgba(0,0,0,.20),
+    0 0 18px rgba(0,194,255,.22);
+}
+
+.ixi-pocket-left.destination-armed::before,
+.ixi-pocket-right.destination-armed::before {
+  background: rgba(0,194,255,.82);
+}
+
+/* Roman numerals + loop actuator follow pocket state */
+
+/* empty / dormant */
+.ixi-pocket-left .ixi-pocket-topline span,
+.ixi-pocket-right .ixi-pocket-topline span {
+  color: rgba(255,255,255,.18);
+  text-shadow: none;
+}
+
+.ixi-pocket-left .ixi-pocket-loop-square,
+.ixi-pocket-right .ixi-pocket-loop-square {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.10);
+  box-shadow: none;
+}
+
+/* occupied = yellow */
+.ixi-pocket-left.occupied .ixi-pocket-topline span,
+.ixi-pocket-right.occupied .ixi-pocket-topline span {
+  color: rgba(255,196,0,.86);
+  text-shadow:
+    0 0 8px rgba(255,196,0,.18),
+    0 0 14px rgba(255,196,0,.08);
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-loop-square,
+.ixi-pocket-right.occupied .ixi-pocket-loop-square {
+  border-color: rgba(255,196,0,.42);
+  background: rgba(255,196,0,.34);
+  box-shadow: 0 0 8px rgba(255,196,0,.16);
+}
+
+/* armed = cyan, overrides occupied */
+.ixi-pocket-left.destination-armed .ixi-pocket-topline span,
+.ixi-pocket-right.destination-armed .ixi-pocket-topline span {
+  color: rgba(0,194,255,.92);
+  text-shadow:
+    0 0 8px rgba(0,194,255,.26),
+    0 0 16px rgba(0,194,255,.12);
+}
+
+.ixi-pocket-left.destination-armed .ixi-pocket-loop-square,
+.ixi-pocket-right.destination-armed .ixi-pocket-loop-square {
+  border-color: rgba(0,194,255,.72);
+  background: rgba(0,194,255,.76);
+  box-shadow:
+    0 0 8px rgba(0,194,255,.28),
+    0 0 16px rgba(0,194,255,.12);
+}
+/* Armed destination action rail */
+
+.ixi-pocket-left.destination-armed .ixi-pocket-rail-action,
+.ixi-pocket-right.destination-armed .ixi-pocket-rail-action {
+  background: rgba(0,194,255,.38) !important;
+
+  box-shadow:
+    0 0 6px rgba(0,194,255,.18),
+    0 0 12px rgba(0,194,255,.08);
+}
+
+.ixi-pocket-left.destination-armed .ixi-pocket-action-rail,
+.ixi-pocket-right.destination-armed .ixi-pocket-action-rail {
+  filter: drop-shadow(0 0 6px rgba(0,194,255,.22));
+}
+
+/* =============================== */
+/* 1250px → 851px STACKED MODE     */
+/* =============================== */
+
+@media (max-width: 1250px) and (min-width: 851px) {
+  .ixi-command-chassis {
+    --control-half: 210px;
+    --station-gap: 20px;
+  }
+
+  .ixi-command-left,
+  .ixi-command-right {
+    top: -5px;
+
+    width: var(--station-w);
+    height: calc((var(--station-h) * 2) + 34px);
+  }
+
+  .ixi-command-left {
+    right: calc(50% + var(--control-half) + 20px);
+  }
+
+  .ixi-command-right {
+    left: calc(50% + var(--control-half) + 20px);
+  }
+
+  .ixi-pocket-row {
+    grid-template-columns: var(--station-w);
+    grid-template-rows: var(--station-h) var(--station-h);
+    gap: 20px;
+  }
+
+  .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ixi-pocket-l2 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .ixi-pocket-r2 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+/* =============================== */
+/* MOBILE — NO VISIBLE STATIONS    */
+/* =============================== */
+
+@media (max-width: 850px) {
+  .ixi-command-left,
+  .ixi-command-right,
+  .ixi-pocket-row,
+  .ixi-pocket-left,
+  .ixi-pocket-right {
+    display: none !important;
+  }
+}
+
+
+
+       .workspace-controls {
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+    .ixi-toolbar {
+  width: 600px;
+  max-width: 100%;
+
+  margin: 18px auto 0;
+  position: relative;
+  left: 10px;
+  
+  padding: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(8, 1fr)
+    repeat(3, 1fr);
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 4px;
+}
+
+        .ixi-toolbar button {
+          border: none;
+          background: transparent;
+          padding: 0;
+          cursor: pointer;
         }
 
-        .yard-head {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-
-          margin-bottom: 10px;
-          padding: 16px 18px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
-            radial-gradient(circle at top, rgba(255,255,255,.014), transparent 72%),
-            #111111;
-
-          border: 1px solid rgba(255,255,255,.065);
-          outline: 1px solid rgba(255,255,255,.018);
-          border-radius: 14px;
-
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.032) inset,
-            0 16px 38px rgba(0,0,0,.22);
-        }
-
-        .yard-identity {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          min-width: 0;
-        }
-
-        .yard-copy {
-          min-width: 0;
-        }
-
-        .eyebrow {
-          display: block;
-          margin-bottom: 6px;
-
-          color: #FFC400;
-
-          font-size: 9px;
-          font-weight: 950;
-          text-transform: uppercase;
-          letter-spacing: .72px;
-        }
-
-        h1 {
-          margin: 0;
-
-          color: #f2f2f2;
-
-          font-size: 26px;
-          font-weight: 950;
-          line-height: 1.02;
-          letter-spacing: -.55px;
-          text-transform: uppercase;
-        }
-
-        .yard-head p {
-          margin: 6px 0 0;
-
-          color: rgba(255,255,255,.42);
-
-          font-size: 12px;
-          font-weight: 800;
-          letter-spacing: .18px;
-        }
-
-        .yard-actions {
-          margin-top: 11px;
-
-          display: flex;
-          gap: 7px;
-          flex-wrap: wrap;
-        }
-
-        .yard-actions a {
-          width: 31px;
-          height: 31px;
-
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
-            #101010;
-
-          border: 1px solid rgba(255,255,255,.075);
-          border-radius: 9px;
-
-          color: rgba(255,255,255,.44);
-          text-decoration: none;
-
-          font-size: 13px;
-
-          box-shadow:
-            0 1px 0 rgba(255,255,255,.022) inset;
-
-          transition:
-            color .14s ease,
-            border-color .14s ease,
-            background .14s ease,
-            transform .14s ease,
-            text-shadow .14s ease;
-        }
-
-        .yard-actions a:hover {
+        .ixi-toolbar button:hover {
           transform: translateY(-1px);
 
-          border-color: rgba(255,196,0,.32);
-          color: #FFC400;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.045), rgba(255,196,0,0)),
-            #151515;
-
-          text-shadow: 0 0 14px rgba(255,196,0,.16);
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,.03),
+            0 0 8px rgba(255,196,0,.10);
         }
 
-        .yard-actions a[aria-label="Facebook"]:hover {
-          color: #1877F2;
-          border-color: rgba(24,119,242,.42);
-          text-shadow: 0 0 14px rgba(24,119,242,.28);
+        .ixi-color-filter.active,
+        .ixi-thickness-filter.active {
+          box-shadow:
+            0 0 0 1px rgba(255,196,0,.08),
+            0 0 12px rgba(255,196,0,.18);
+
+          border-color: rgba(255,196,0,.24) !important;
         }
 
-        .yard-actions a[aria-label="Instagram"]:hover {
-          color: #ff4fd8;
-          border-color: rgba(255,79,216,.36);
-          text-shadow: 0 0 14px rgba(255,79,216,.24);
-        }
-
-        .yard-actions a[aria-label="LinkedIn"]:hover {
-          color: #f2f2f2;
-          border-color: rgba(255,255,255,.25);
-          text-shadow: 0 0 14px rgba(255,255,255,.18);
-        }
-
-        .yard-actions a[aria-label="YouTube"]:hover {
-          color: #FF0000;
-          border-color: rgba(255,0,0,.38);
-          text-shadow: 0 0 14px rgba(255,0,0,.24);
-        }
-
-        .yard-actions a[aria-label="TikTok"]:hover {
-          color: #b86cff;
-          border-color: rgba(184,108,255,.38);
-          text-shadow: 0 0 14px rgba(184,108,255,.26);
-        }
-
-        .yard-actions .browse-all-link,
-        .contact-btn {
-          width: auto !important;
-          height: 31px;
-
-          padding: 0 12px;
-
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.075), rgba(255,196,0,0)),
-            #151515 !important;
-
-          border: 1px solid rgba(255,196,0,.24) !important;
-          border-radius: 9px;
-
-          color: #FFC400 !important;
-
-          font-size: 9px !important;
-          font-weight: 950;
-          letter-spacing: .55px;
-          text-transform: uppercase;
-        }
-
-        .yard-actions .browse-all-link:hover,
-        .contact-btn:hover {
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.14), rgba(255,196,0,0)),
-            #1a1400 !important;
-
-          border-color: rgba(255,196,0,.58) !important;
-        }
-
-        .yard-count {
-          min-width: 118px;
-
-          padding: 13px 12px;
-
-          text-align: center;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #101010;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 12px;
+        .ixi-color-filter {
+          width: 20px !important;
+          height: 8px !important;
+          border: 1px solid rgba(255,255,255,.055) !important;
+          border-radius: 1px !important;
+          padding: 0 !important;
 
           box-shadow:
-            0 1px 0 rgba(255,255,255,.025) inset;
+            inset 0 1px 0 rgba(255,255,255,.025),
+            inset 0 -1px 0 rgba(0,0,0,.32);
         }
 
-        .yard-count strong {
-          display: block;
-
-          color: #f2f2f2;
-
-          font-size: 26px;
-          font-weight: 950;
-          line-height: 1;
+        .ixi-color-filter.color-none {
+          background: rgba(255,255,255,.035) !important;
         }
 
-        .yard-count span {
-          display: block;
-
-          margin-top: 6px;
-
-          color: rgba(255,255,255,.36);
-
-          font-size: 8.75px;
-          font-weight: 950;
-
-          text-transform: uppercase;
-          letter-spacing: .52px;
+        .ixi-color-filter.color-green {
+          background: rgba(56,161,105,.42) !important;
         }
 
-        .saved-environment-shell {
-          width: 100%;
-          margin: 0 auto;
+        .ixi-color-filter.color-yellow {
+          background: rgba(255,196,0,.42) !important;
         }
+
+        .ixi-color-filter.color-red {
+          background: rgba(229,62,62,.42) !important;
+        }
+
+        .ixi-color-filter.color-cyan {
+          background: rgba(0,194,255,.42) !important;
+        }
+
+        .ixi-color-filter.color-white {
+          background: rgba(255,255,255,.34) !important;
+        }
+
+        .ixi-color-filter.color-blue {
+          background: rgba(49,130,206,.42) !important;
+        }
+
+        .ixi-color-filter.color-orange {
+          background: rgba(249,133,18,.42) !important;
+        }
+
+        .ixi-thickness-filter {
+  width: 24px;
+  height: 14px;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 3px;
+  background: rgba(255,255,255,.018) !important;
+  position: relative;
+
+  margin-left: -2px;
+  margin-right: -2px;
+}
+        .ixi-thickness-filter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 15px;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.28);
+}
+
+        .ixi-thickness-filter.thin::after {
+          height: 1px;
+        }
+
+        .ixi-thickness-filter.medium::after {
+          height: 3px;
+        }
+
+        .ixi-thickness-filter.thick::after {
+          height: 5px;
+        }
+
+
+@keyframes ixiPocketPulse {
+  0%, 100% {
+    opacity: .48;
+    transform: translateX(-50%) scale(.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+
+
+/* =============================== */
+/* IXI POCKET CATCH ZONE DEBUG     */
+/* =============================== */
+
+/* Base catch pad is inert unless explicitly assigned */
+.ixi-pocket-catch-pad {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* L1 local catch only */
+.ixi-pocket-catch-pad.catch-l1 {
+  left: 0;
+  right: auto;
+  top: 92px;
+
+  width: 360px;
+  height: 140px;
+
+  pointer-events: auto;
+
+  background: transparent;
+outline: none;
+}
+
+/* R1 local catch only */
+.ixi-pocket-catch-pad.catch-r1 {
+  right: 20;
+  left: auto;
+  top: 92px;
+
+  width: 340px;
+  height: 140px;
+
+  pointer-events: auto;
+
+  background: transparent;
+outline: none;
+}
+
+/* L2 screen-left lower catch lane only */
+.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
+  position: fixed;
+
+  left: 0;
+  right: auto;
+  top: 405px;
+
+  width: 150px;
+  height: calc(100vh - 405px);
+
+  pointer-events: auto;
+  z-index: 999;
+
+ background: transparent;
+outline: none;
+}
+
+/* R2 screen-right lower catch lane only */
+.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
+  position: fixed;
+
+  right: 0;
+  left: auto;
+  top: 420px;
+
+  width: 150px;
+  height: calc(100vh - 420px);
+
+  pointer-events: auto;
+  z-index: 999;
+
+  background: transparent;
+outline: none;
+}
+
+.ixi-pocket-thumbs.thumb-size-small {
+  --pocket-thumb-w: 72px;
+  --pocket-thumb-h: 48px;
+  --pocket-thumbs-top: 30px;
+}
+
+.ixi-pocket-thumbs.thumb-size-medium {
+  --pocket-thumb-w: 90px;
+  --pocket-thumb-h: 60px;
+  --pocket-thumbs-top: 30px;
+}
+
+.ixi-pocket-thumbs.thumb-size-large {
+  --pocket-thumb-w: 108px;
+  --pocket-thumb-h: 72px;
+  --pocket-thumbs-top: 23px;
+}
+
+.ixi-pocket-right .ixi-pocket-thumbs {
+  left: 50%;
+  right: auto;
+}
+
+.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+/* PEEK POCKET COVER */
+
+
+.ixi-pocket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ixi-pocket-thumb span {
+  display: block;
+  padding: 5px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+/* Station states — no accordion fan */
+.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
+  opacity: .28;
+}
+
+.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs,
+.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
+.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
+  opacity: 1;
+}
+
+.ixi-pocket-left.occupied .ixi-pocket-thumb,
+.ixi-pocket-right.occupied .ixi-pocket-thumb {
+  border-color: rgba(255,196,0,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 8px 16px rgba(0,0,0,.30),
+    0 0 12px rgba(255,196,0,.055);
+}
+
+/* =============================== */
+/* IXI POCKET STATION INNER GUTS   */
+/* =============================== */
+
+.ixi-pocket-thumb {
+  width: var(--pocket-thumb-w, 90px) !important;
+  height: var(--pocket-thumb-h, 60px) !important;
+
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 0 !important;
+
+  transform: translateX(-50%) !important;
+
+  overflow: hidden !important;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px 7px 0 0;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 34%),
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent 45%),
+    rgba(18,18,18,.94);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 16px rgba(0,0,0,.30);
+
+  z-index: 34;
+}
+
+.ixi-pocket-thumbs {
+  position: absolute;
+  left: 50%;
+  top: var(--pocket-thumbs-top, 30px);
+  width: calc(100% - 14px);
+  height: var(--pocket-thumb-h, 60px);
+
+  transform: translateX(-50%);
+  overflow: visible;
+
+  border: 0;
+  background: transparent;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 11px 7px 11px 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0) 20%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,.02),
+      transparent 30%
+    ),
+    rgba(10,10,10,.44);
+
+  pointer-events: auto;
+  z-index: 30;
+}
+
+.ixi-pocket-thumb::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: rgba(255,255,255,.12);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ixi-pocket-left::after,
+.ixi-pocket-right::after {
+  content: "3";
+
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 25px;
+  bottom: 7px;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 11px 7px 11px 7px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0) 20%),
+    rgba(10,10,10,.38);
+
+  color: rgba(255,255,255,.22);
+  font-size: 5.8px;
+  font-weight: 950;
+  letter-spacing: .55px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  padding: 0 0 6px 8px;
+
+  pointer-events: none;
+  z-index: 12;
+}
+
+
+.ixi-pocket-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ixi-pocket-thumb span {
+  display: block;
+  padding: 5px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.ixi-pocket-topline {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  pointer-events: none;
+}
+
+.ixi-pocket-topline span {
+  color: rgba(255,196,0,.86);
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.ixi-pocket-topline strong {
+  color: rgba(255,255,255,.12);
+
+  font-size: 5px;
+  font-weight: 950;
+  letter-spacing: .58px;
+  text-transform: uppercase;
+}
+
+:global(.ixi-pocket-thumb) {
+  width: var(--pocket-thumb-w, 90px) !important;
+  height: var(--pocket-thumb-h, 60px) !important;
+  overflow: hidden !important;
+}
+
+:global(.ixi-pocket-thumb > div) {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+:global(.ixi-pocket-thumb img) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* =============================== */
+/* IXI POCKET STATION BUTTONS V12  */
+/* existing buttons, new shell home */
+/* =============================== */
+
+.ixi-pocket-action-rail {
+  position: absolute;
+  top: 13px;
+  right: 9px;
+  
+  width: 82px;
+  height: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: transparent;
+
+  z-index: 80;
+  pointer-events: auto;
+}
+
+.ixi-pocket-action-rail.left,
+.ixi-pocket-action-rail.right {
+  right: 9px;
+  left: auto;
+}
+
+.ixi-pocket-rail-action {
+  position: relative;
+
+  width: 15px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(255,255,255,.12);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ixi-pocket-action-rail.is-empty {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
+  opacity: .28;
+  pointer-events: auto;
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed {
+  background: transparent;
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-closed .ixi-pocket-rail-action {
+  opacity: .48;
+  pointer-events: auto;
+  background: rgba(255,196,0,.20);
+}
+
+.ixi-pocket-action-rail.has-machines.pocket-mode-peek .ixi-pocket-rail-action,
+.ixi-pocket-action-rail.has-machines.pocket-mode-open .ixi-pocket-rail-action {
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(255,255,255,.14);
+}
+
+.ixi-pocket-rail-action:hover {
+  background: rgba(255,196,0,.86) !important;
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+.ixi-pocket-rail-action:hover::after {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.72);
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
+/* LOADED + STAGED/OPEN = four row-2 search-surface dashes */
+.ixi-pocket-action-rail.has-machines.pocket-mode-peek,
+.ixi-pocket-action-rail.has-machines.pocket-mode-open {
+  background: transparent;
+}
+
+/* ACTUAL BUTTON — real click target */
+.ixi-pocket-direct-button {
+  position: absolute;
+
+  left: 50%;
+  bottom: -1px;
+
+  width: 34px;
+  height: 5px;
+
+  transform: translateX(-50%);
+
+  border: 0;
+  border-radius: 3px 3px 1px 1px;
+
+  background: rgba(255,255,255,.18);
+
+  padding: 0;
+  cursor: pointer;
+
+  z-index: 120;
+  pointer-events: auto;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 1px 3px rgba(0,0,0,.32);
+}
+
+.ixi-pocket-direct-button.left,
+.ixi-pocket-direct-button.right {
+  left: 50%;
+  right: auto;
+  bottom: -1px;
+  transform: translateX(-50%);
+}
+
+.ixi-pocket-direct-button:hover,
+.ixi-pocket-direct-button.is-live {
+  background: rgba(255,196,0,.95);
+  box-shadow: 0 0 8px rgba(255,196,0,.38);
+}
+
+.ixi-pocket-direct-button.has-load {
+  background: rgba(255,196,0,.34);
+}
+
+/* square thumb-loop actuator, rides above the power dash */
+.ixi-pocket-loop-square {
+  position: absolute;
+
+  width: 4px;
+  height: 14px;
+
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 1px;
+
+  background: rgba(255,255,255,.12);
+
+  padding: 0;
+
+  cursor: pointer;
+
+  z-index: 99999;
+  pointer-events: auto;
+
+  opacity: 0;
+}
+
+.ixi-pocket-loop-square.is-visible {
+  opacity: 1;
+}
+
+.ixi-pocket-loop-square.left {
+  top: 68px;
+  right: -2px;
+}
+
+.ixi-pocket-loop-square.right {
+  top: 68px;
+  left: -2px;
+}
+
+.ixi-pocket-loop-square:hover {
+  border-color: rgba(255,196,0,.62);
+  background: rgba(255,196,0,.72);
+}
+/* Roll-top cover: fixed dash/lip, cover moves behind it *
+
+
+/* =============================== */
+/* IXI ACTIVE STACK COMMAND PAD    */
+/* GLOBAL — SAVED MASTER CHASSIS   */
+/* =============================== */
+
+:global(.active-stack-zone) {
+  width: min(100%, 1320px);
+  max-width: 1320px;
+
+  margin: 10px auto 24px;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+
+  align-items: center;
+  justify-items: center;
+
+  position: relative;
+  z-index: 20;
+}
+
+:global(.active-stack) {
+  width: 100%;
+  position: relative;
+
+  display: grid;
+  justify-items: center;
+}
+
+:global(.active-stack-dash) {
+  width: 34px;
+  height: 8px;
+
+  display: block;
+
+  border: 0;
+  border-bottom: 3px solid rgba(255,255,255,.14);
+
+  background: transparent;
+
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+
+  position: relative;
+  z-index: 8;
+}
+
+:global(.active-stack-dash:hover) {
+  border-bottom-color: rgba(255,196,0,.48);
+  box-shadow: 0 3px 8px rgba(255,196,0,.12);
+}
+
+:global(.active-stack.open .active-stack-dash) {
+  border-bottom-color: rgba(255,196,0,.58);
+  box-shadow: 0 3px 10px rgba(255,196,0,.14);
+}
+
+:global(.active-stack.has-machines .active-stack-dash) {
+  border-bottom-color: rgba(255,196,0,.78);
+  box-shadow: 0 3px 12px rgba(255,196,0,.24);
+}
+
+:global(.active-stack.has-machines .active-stack-dash::after) {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  top: 8px;
+
+  width: 5px;
+  height: 5px;
+
+  transform: translateX(-50%);
+
+  background: rgba(255,196,0,.92);
+  box-shadow: 0 0 8px rgba(255,196,0,.38);
+}
+
+/* tray surface */
+:global(.active-stack-tray) {
+  width: min(100%, 1180px);
+  min-height: 230px;
+
+  margin: 8px auto 0;
+  padding: 42px 46px 18px;
+
+  position: relative;
+  display: block;
+  overflow: visible;
+  isolation: isolate;
+
+  border: 1px dashed rgba(255,196,0,.14);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.035),
+      rgba(255,196,0,.008) 48%,
+      rgba(255,255,255,.010)
+    ),
+    rgba(8,8,8,.86);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.025),
+    0 0 18px rgba(255,196,0,.045);
+}
+
+:global(.active-stack-tray.stack-armed) {
+  border-color: rgba(255,196,0,.58);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.065),
+      rgba(255,196,0,.014)
+    ),
+    rgba(8,8,8,.90);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,196,0,.10),
+    0 0 24px rgba(255,196,0,.16);
+}
+
+:global(.active-stack-tray::before) {
+  content: "ACTIVE STACK DROP ZONE";
+
+  position: absolute;
+  left: 14px;
+  top: 12px;
+
+  color: rgba(255,255,255,.30);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* corner destination dashes */
+:global(.active-stack-pocket-corners) {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+  z-index: 42;
+}
+
+:global(.stack-pocket-power) {
+  position: absolute;
+
+  width: 18px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: rgba(0,194,255,.42);
+
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+
+  box-shadow: none;
+}
+
+:global(.stack-pocket-power:hover) {
+  background: rgba(0,194,255,.92);
+  box-shadow: 0 0 8px rgba(0,194,255,.30);
+}
+
+:global(.stack-pocket-power.top-left) {
+  top: 27px;
+  left: 14px;
+}
+
+:global(.stack-pocket-power.top-right) {
+  top: 27px;
+  right: 14px;
+}
+
+:global(.stack-pocket-power.bottom-left) {
+  bottom: 12px;
+  left: 14px;
+}
+
+:global(.stack-pocket-power.bottom-right) {
+  bottom: 12px;
+  right: 14px;
+}
+
+/* center action rail */
+:global(.active-stack-command-pad) {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+
+  width: 150px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: transparent;
+
+  z-index: 46;
+  pointer-events: auto;
+}
+
+:global(.stack-rail-action) {
+  position: relative;
+
+  width: 28px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 0;
+
+  background: rgba(255,255,255,.13);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+:global(.stack-rail-action:hover) {
+  background: rgba(255,196,0,.86);
+  box-shadow: 0 0 8px rgba(255,196,0,.22);
+}
+
+:global(.stack-rail-action:hover::after) {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
+:global(.active-stack-send-menu) {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+
+  width: 190px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  z-index: 47;
+  pointer-events: auto;
+}
+
+:global(.stack-send-option) {
+  position: relative;
+
+  width: 28px;
+  height: 4px;
+
+  border: 0;
+  border-radius: 0;
+
+  background: rgba(255,255,255,.13);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+:global(.stack-send-option:hover) {
+  background: rgba(0,194,255,.86);
+  box-shadow: 0 0 8px rgba(0,194,255,.22);
+}
+
+:global(.stack-send-option:hover::after) {
+  content: attr(data-label);
+
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+
+  pointer-events: none;
+}
+
+/* card field */
+:global(.active-stack-dropzone) {
+  min-height: 175px;
+
+  position: relative;
+  z-index: 2;
+
+  align-items: start;
+
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    rgba(10,10,10,.42);
+}
+
+:global(.active-stack-dropzone.stack-horizontal) {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+
+  gap: 18px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 10px 8px 12px;
+
+  scrollbar-width: thin;
+}
+
+:global(.active-stack-dropzone.stack-vertical) {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(250px, 300px));
+
+  gap: 18px;
+
+  justify-content: center;
+
+  padding: 10px 8px 12px;
+}
+
+:global(.active-stack-dropzone.stack-horizontal .active-stack-card) {
+  flex: 0 0 285px;
+  width: 285px;
+  min-width: 285px;
+}
+
+:global(.active-stack-dropzone.stack-vertical .active-stack-card) {
+  width: 100%;
+}
+
+:global(.active-stack-card) {
+  position: relative;
+  z-index: 3;
+
+  transition:
+    transform .15s ease,
+    opacity .15s ease,
+    box-shadow .15s ease;
+}
+
+:global(.active-stack-card:hover) {
+  transform: translateY(-2px);
+}
+
+:global(.active-stack-card.stack-dragging) {
+  z-index: 9999;
+  opacity: .96;
+
+  transform: translateY(-4px) scale(1.015);
+
+  box-shadow:
+    0 18px 36px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,196,0,.18);
+}
+
+:global(.active-stack-card.stack-ghost-target) {
+  transform: translateX(8px);
+}
 
         .cards {
           max-width: 1920px;
@@ -2054,28 +2826,27 @@ export default function SellerYardV2Page() {
           justify-content: center;
         }
 
-        :global(.ixi-board-sortable-card) {
-          width: 100%;
-          max-width: 300px;
-          min-width: 250px;
-
-          justify-self: center;
-          align-self: start;
-
-          touch-action: none;
-        }
-
-        :global(.ixi-board-sortable-card > *) {
-          width: 100%;
-        }
-
         :global(.ixi-drag-overlay-card) {
-          width: 300px;
-          max-width: 300px;
-          pointer-events: none;
-          z-index: 999999;
-        }
+  width: 300px;
+  max-width: 300px;
+  pointer-events: none;
+  z-index: 999999;
+}
 
+:global(.ixi-board-sortable-card) {
+  width: 100%;
+  max-width: 300px;
+  min-width: 250px;
+
+  justify-self: center;
+  align-self: start;
+
+  touch-action: none;
+}
+
+:global(.ixi-board-sortable-card > *) {
+  width: 100%;
+}
         .empty {
           max-width: 520px;
           margin: 38px auto 0;
@@ -2106,62 +2877,102 @@ export default function SellerYardV2Page() {
           color: rgba(255,255,255,.42);
           font-size: 12px;
         }
+.mobile-search-surface {
+  display: none;
+}
 
-        @media (max-width: 850px) {
-          .yard-head {
-            display: grid;
-            align-items: stretch;
-          }
+.desktop-search-surface {
+  display: block;
+}
+@media (max-width: 850px) {
+  main {
+    padding: 18px 4% 48px;
+  }
 
-          .yard-identity {
-            align-items: flex-start;
-          }
+  .desktop-search-surface {
+  display: none;
+}
 
-          .yard-count {
-            width: 100%;
-          }
+.mobile-search-surface {
+  display: block;
+}
 
-          main {
-            padding: 18px 4% 48px;
-          }
+  .workspace-head {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 
-          .cards {
-            grid-template-columns: 1fr;
-            gap: 18px;
-          }
+  margin-bottom: 14px;
+}
 
-          .cards.single-card {
-            grid-template-columns: 1fr;
-          }
-        }
+  .workspace-head h1 {
+    font-size: 25px;
+  }
 
-        @media (max-width: 600px) {
-          .yard-shell {
-            padding: 16px 4% 50px;
-          }
+  .ixi-command-chassis {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto 18px;
+  }
 
-          .yard-head {
-            padding: 16px;
-          }
+  .ixi-command-center {
+    width: 100%;
+    max-width: 100%;
+  }
 
-          .yard-identity {
-            display: grid;
-            gap: 10px;
-          }
+  .workspace-controls {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 18px;
+  }
 
-          h1 {
-            font-size: 25px;
-          }
+  .ixi-command-left,
+  .ixi-command-right,
+  .ixi-pocket-row,
+  .ixi-pocket-left,
+  .ixi-pocket-right,
+  .active-stack-zone {
+    display: none !important;
+  }
 
-          .yard-actions {
-            gap: 6px;
-          }
-        }
+ .ixi-toolbar {
+  width: max-content;
+  max-width: 100%;
+
+  margin: 12px auto 0;
+  left: 0;
+
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+}
+.ixi-color-filter {
+  flex: 0 0 20px;
+}
+
+.ixi-thickness-filter {
+  flex: 0 0 24px;
+  margin-top: 0;
+}
+  .ixi-thickness-filter {
+    margin-top: 6px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .cards.single-card {
+    grid-template-columns: 1fr;
+  }
+}
+       
       `}</style>
     </>
   );
 }
-
-
-
-
