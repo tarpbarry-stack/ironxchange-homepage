@@ -588,65 +588,51 @@ return (
       </section>
 
 <section className="featured">
-  <div
-    className={`cards ${
-      visibleListings.length === 1 ? "single-card" : ""
-    }`}
+  <IXIDragEngine
+    sensors={sensors}
+    workspaceCollisionDetection={undefined}
+    handleWorkspaceDragStart={handleWorkspaceDragStart}
+    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
+    handleWorkspaceDragCancel={handleWorkspaceDragCancel}
+    getActiveDndListing={getActiveDndListing}
+    activeDndId={activeDndId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+    cardScaleMode={cardScaleMode}
   >
-    {visibleListings.map((item) => {
-      const id = String(getListingId(item));
-
-      return (
-       <ListingCard
-  key={id}
-  listing={item}
-  showSave={false}
- from="browse"
-
-  ixiState={
-    ixiCardState[String(id)] || {
-      color: "none",
-      outline: 1
-    }
-  }
-
-  onIxiStateChange={
-    updateIxiCardState
-  }
-
-  onSendFront={
-    sendListingToFront
-  }
-
-  onSendBack={
-    sendListingToBack
-  }
-
-  isBoardDraggingCard={
-    String(id) ===
-    String(draggingListingId)
-  }
-
-  isGhostTarget={
-    String(id) ===
-    String(ghostListingId)
-  }
-
-  onBoardDragStart={
-    handleBoardDragStart
-  }
-
-  onBoardDragOver={
-    handleBoardDragOver
-  }
-
-  onBoardDragEnd={
-    handleBoardDragEnd
-  }
-/>
-      );
-    })}
-  </div>
+    <div
+      data-board-target="board"
+      className={`cards ${
+        visibleListings.length === 1 ? "single-card" : ""
+      }`}
+      style={{
+        gridTemplateColumns:
+          visibleListings.length === 1
+            ? `${cardScaleMetrics.width}px`
+            : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
+        gap: `${cardScaleMetrics.gap}px`
+      }}
+    >
+      <IXIBoard
+        items={visibleListings}
+        getListingId={getListingId}
+        savedIds={savedIds}
+        ixiCardState={ixiCardState}
+        IXISortableMachineCard={IXISortableMachineCard}
+        toggleSave={toggleSave}
+        updateIxiCardState={updateIxiCardState}
+        cycleMachineFace={cycleMachineFace}
+        sendListingToFront={sendListingToFront}
+        sendListingToBack={sendListingToBack}
+        armedDestination=""
+        sendMachineToArmedDestination={() => {}}
+        draggingListingId={draggingListingId}
+        ghostListingId={ghostListingId}
+        enableCardScaling={true}
+        cardScaleMode={cardScaleMode}
+      />
+    </div>
+  </IXIDragEngine>
 </section>
 
       <section id="how" className="how">
