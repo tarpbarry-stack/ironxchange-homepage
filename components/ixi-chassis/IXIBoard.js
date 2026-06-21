@@ -21,9 +21,10 @@ export default function IXIBoard({
   draggingListingId,
   ghostListingId,
   getSellerListingCardProps,
-  SellerObjectCard,
+    SellerObjectCard,
   enableCardScaling = false,
-  cardScaleMode = "xl"
+  cardScaleMode = "xl",
+  cardScaleMetrics
 }) {
   
   return (
@@ -47,13 +48,25 @@ export default function IXIBoard({
             : {};
 
         return (
-          <IXISortableMachineCard
+                   <IXISortableMachineCard
   key={id}
   id={id}
   containerId="board"
   className={`ixi-board-sortable-card ${
     item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
   }`}
+  style={
+    cardScaleMetrics
+      ? {
+          width: `${cardScaleMetrics.width}px`,
+          minWidth: `${cardScaleMetrics.width}px`,
+          maxWidth: `${cardScaleMetrics.width}px`,
+          height: `${cardScaleMetrics.height}px`,
+          minHeight: `${cardScaleMetrics.height}px`,
+          maxHeight: `${cardScaleMetrics.height}px`
+        }
+      : undefined
+  }
 >
            {({ dragHandleProps }) => (
              
