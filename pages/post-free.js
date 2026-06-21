@@ -1317,10 +1317,6 @@ const availableModels = useMemo(() => {
               <div className="panel-head">
                 <h2>Badge Studio</h2>
 
-                <div style={{ color: "red", fontSize: "14px", fontWeight: 900 }}>
-  CATEGORY: {category}
-</div>
-
 <div className="badge-head-actions">
   <span>{selectedKeywords.length} selected</span>
 
