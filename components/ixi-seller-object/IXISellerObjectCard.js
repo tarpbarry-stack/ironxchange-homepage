@@ -252,7 +252,7 @@ export default function IXISellerObjectCard({
         }
 
         .seller-object-footer {
-          margin-top: auto;
+          margin-top: 18px;
           display: grid;
           grid-template-columns: 1fr;
           gap: 8px;
