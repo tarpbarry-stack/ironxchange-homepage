@@ -1360,7 +1360,15 @@ const previewListing = listing
 
       <main>
         <Navbar />
-<IXIEnvironmentRail active="launch" />            
+<div className="live-env-rail-shell">
+  <IXIEnvironmentRail
+    activeEnvironment="LAUNCH"
+    hasAccount={true}
+    hasInventory={true}
+    hasRelationship={true}
+    className="live-env-rail"
+  />
+</div>           
 
         <section className="launch-wrap">
           <section className="launch-header">
@@ -2017,6 +2025,20 @@ select {
   radial-gradient(circle at 18% 12%, rgba(255,255,255,.018), transparent 22%),
   #0b0b0b;
         }
+
+.live-env-rail-shell {
+  max-width: 1600px;
+  margin: 0 auto 8px;
+  padding: 0 2%;
+}
+
+.live-env-rail-shell :global(.live-env-rail) {
+  width: auto;
+  max-width: 980px;
+  margin: 0 auto 12px;
+  justify-content: center;
+  gap: 18px;
+}
 
         .launch-wrap {
           max-width: 1600px;
