@@ -132,8 +132,11 @@ const boardOutline =
     onCycleOutline?.(e);
   }
 
-  const isSellerIdentityFace =
-  Number(sellerObject?.face || 1) === 1;
+  const sellerFace =
+  Number(ixiState?.face || sellerObject?.face || 1);
+
+const isSellerIdentityFace =
+  sellerFace === 1;
 
   return (
       <section
