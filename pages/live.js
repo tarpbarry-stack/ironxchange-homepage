@@ -1648,77 +1648,48 @@ onClick={async () => {
                   
             </aside>
 
-            <section className="preview-zone">
-              <div className="card-nav-row">
-                <button
-                  type="button"
-                  onClick={() => goToListing(previousListing)}
-                  disabled={!previousListing}
-                >
-                  ← Previous
-                </button>
+      <section className="preview-zone">
+  <div className="card-nav-row">
+    <button
+      type="button"
+      onClick={() => goToListing(previousListing)}
+      disabled={!previousListing}
+    >
+      ← Previous
+    </button>
 
-                <div>
-                  <span>Live Buyer Card</span>
-                  <strong>True marketplace-card preview</strong>
-                </div>
+    <div>
+      <span>Live Seller Card</span>
+      <strong>Real IXI machine-object preview</strong>
+    </div>
 
-                <button
-                  type="button"
-                  onClick={() => goToListing(nextListing)}
-                  disabled={!nextListing}
-                >
-                  Next →
-                </button>
-              </div>
+    <button
+      type="button"
+      onClick={() => goToListing(nextListing)}
+      disabled={!nextListing}
+    >
+      Next →
+    </button>
+  </div>
 
-             <div className="live-card-shell">
-  <ListingCard
-    listing={previewListing}
-    sellerMode={true}
-    saved={false}
-    boardColor={previewColor}
-    boardOutline={previewOutline}
-    machineFace={previewFace}
-    onCycleMachineFace={cyclePreviewFace}
-    onCycleColor={cyclePreviewColor}
-    onCycleOutline={cyclePreviewOutline}
-    onToggleSaved={() => {}}
-    onSendFront={() => {}}
-    onSendBack={() => {}}
-    onSendToArmedDestination={() => {}}
-  />
-</div>
-
-               <div className="preview-keyword-row">
-  <MachineBadges
-    keywords={selectedKeywords.slice(0, 10)}
-    variant="studio"
-  />
-</div>
-
-                  <div className="preview-price-row">
-                    <input
-                      className="card-price-input"
-                      value={formatMoney(edit.price || listing.price)}
-                      onChange={e => setEdit({ ...edit, price: cleanNumber(e.target.value) })}
-                    />
-
-                    <div className="preview-meta">
-                      <button type="button" aria-label="Save preview star">
-                        <i className="fa-regular fa-star"></i>
-                      </button>
-
-                      <input
-                        className="card-location-input"
-                        value={edit.location || listing.location || ""}
-                        onChange={e => setEdit({ ...edit, location: e.target.value })}
-                        placeholder="Location"
-                      />
-                    </div>
-                  </div>
-                </div>
-            </section>
+  <div className="live-card-shell">
+    <ListingCard
+      listing={previewListing}
+      sellerMode={true}
+      saved={false}
+      boardColor={previewColor}
+      boardOutline={previewOutline}
+      machineFace={previewFace}
+      onCycleMachineFace={cyclePreviewFace}
+      onCycleColor={cyclePreviewColor}
+      onCycleOutline={cyclePreviewOutline}
+      onToggleSaved={() => {}}
+      onSendFront={() => {}}
+      onSendBack={() => {}}
+      onSendToArmedDestination={() => {}}
+    />
+  </div>
+</section>
             <aside className="distribution-center">
               <div className="distribution-head">
                 <span>Distribution Center</span>
