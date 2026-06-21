@@ -495,24 +495,6 @@ const sellerLogo =
   sellerSeedListing?.profileImage ||
   "";
 
-  const visibleYardValue = visibleSellerListings.reduce((sum, item) => {
-  const price = Number(
-    String(item.price || item.publicData?.price || "")
-      .replace(/[^0-9]/g, "")
-  );
-
-  return sum + (Number.isFinite(price) ? price : 0);
-}, 0);
-
-const formattedVisibleYardValue =
-  visibleYardValue > 0
-    ? visibleYardValue.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      })
-    : "CALL";
-
 const containerStateKey = useMemo(() => {
   return sellerListings
     .map(item => {
@@ -703,6 +685,25 @@ return [...filtered].sort((a, b) => {
     ixiOutlineFilter
   ]);
 
+ const visibleYardValue = visibleSellerListings.reduce((sum, item) => {
+  const price = Number(
+    String(item.price || item.publicData?.price || "")
+      .replace(/[^0-9]/g, "")
+  );
+
+  return sum + (Number.isFinite(price) ? price : 0);
+}, 0);
+
+const formattedVisibleYardValue =
+  visibleYardValue > 0
+    ? visibleYardValue.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      })
+    : "CALL";
+
+  
   function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
 
