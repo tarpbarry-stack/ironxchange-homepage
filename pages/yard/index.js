@@ -860,10 +860,19 @@ function getListingById(machineId) {
   );
 }
 
-  function getActiveDndListing() {
+  function getBoardObjectById(objectId) {
+  return sellerBoardObjects.find(
+    item => String(getBoardObjectId(item)) === String(objectId)
+  );
+}
+
+function getActiveDndObject() {
   if (!activeDndId) return null;
 
-  return getListingById(activeDndId);
+  return (
+    getBoardObjectById(activeDndId) ||
+    getListingById(activeDndId)
+  );
 }
 
   function getPocketContainerKey(side) {
@@ -1344,7 +1353,8 @@ function cycleCardScaleMode() {
     handleWorkspaceDragStart={handleWorkspaceDragStart}
     handleWorkspaceDragEnd={handleWorkspaceDragEnd}
     handleWorkspaceDragCancel={handleWorkspaceDragCancel}
-    getActiveDndListing={getActiveDndListing}
+    getActiveDndObject={getActiveDndObject}
+    SellerObjectCard={IXISellerObjectCard}
     activeDndId={activeDndId}
     savedIds={savedIds}
     ixiCardState={ixiCardState}
