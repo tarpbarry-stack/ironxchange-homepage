@@ -272,6 +272,7 @@ function getSellerState() {
       : sharetribeImages;
 
   const currentPhoto = images[photoIndex];
+  const [photoFitMap, setPhotoFitMap] = useState({});
 
   const currentImageObject =
   sharetribeImages[photoIndex] ||
@@ -322,6 +323,31 @@ function handleCardClick() {
     location: listing.location,
     from
   });
+}
+
+  function getSmartPhotoFit(photoUrl) {
+  return photoFitMap[photoUrl] || "soft-cover";
+}
+
+function handlePhotoLoad(e, photoUrl) {
+  const img = e.currentTarget;
+
+  const ratio = img.naturalWidth / img.naturalHeight;
+
+  let fit = "soft-cover";
+
+  if (ratio >= 1.65) {
+    fit = "contain-wide";
+  } else if (ratio <= 1.15) {
+    fit = "contain-tall";
+  } else if (ratio >= 1.35 && ratio < 1.65) {
+    fit = "soft-cover";
+  }
+
+  setPhotoFitMap(current => ({
+    ...current,
+    [photoUrl]: fit
+  }));
 }
   
   return (
@@ -376,13 +402,14 @@ function handleCardClick() {
 >
   <div className="card-photo">
     <img
-      src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-      alt={listing.title || "Machine"}
-      draggable={false}
-      className={`card-photo-img ${getFrameClass(currentImageObject, "card")}`}
-      style={getFrameStyle(currentImageObject, "card")}
-      loading="lazy"
-    />
+  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+  alt={listing.title || "Machine"}
+  draggable={false}
+  className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
+  style={getFrameStyle(currentImageObject, "card")}
+  onLoad={e => handlePhotoLoad(e, currentPhoto)}
+  loading="lazy"
+/>
 
     {sellerMode ? (
       <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
@@ -827,40 +854,54 @@ function handleCardClick() {
 
           border-bottom: 1px solid rgba(255,255,255,.065);
           background:
-  radial-gradient(circle at center, rgba(255,255,255,.035), transparent 62%),
-  #080808;
+    radial-gradient(circle at center, rgba(255,255,255,.045), transparent 58%),
+    linear-gradient(180deg, #101010, #070707);
 
           box-shadow:
             inset 0 -40px 70px rgba(0,0,0,.10);
         }
 
         .card-photo-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          object-position: center center;
-          display: block;
-           user-select: none;
-          -webkit-user-drag: none;
-          pointer-events: none;
-
-          transition:
-            filter .18s ease,
-            transform .28s ease;
-
-          image-rendering: auto;
-          backface-visibility: hidden;
-          transform-origin: center center;
-        }
-
-        .card:hover .card-photo-img {
-  filter:
-    contrast(1.04)
-    saturate(1.03)
-    brightness(1.01);
-
-  scale: 1.018;
+  width: 100%;
+  height: 100%;
+  object-position: center center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transition:
+    filter .18s ease,
+    transform .28s ease;
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform-origin: center center;
 }
+
+        .card-photo-img.photo-fit-contain-wide,
+.card-photo-img.photo-fit-contain-tall {
+  filter:
+    contrast(1.035)
+    saturate(1.035)
+    brightness(1.02);
+}
+
+.card-photo-img.photo-fit-soft-cover {
+  object-fit: cover;
+  transform: scale(.985);
+}
+
+.card-photo-img.photo-fit-contain-wide {
+  object-fit: contain;
+  transform: scale(.97);
+  background: #080808;
+}
+
+.card-photo-img.photo-fit-contain-tall {
+  object-fit: contain;
+  transform: scale(.94);
+  background: #080808;
+}
+
 
         .card-photo-nav {
           position: absolute;
