@@ -1535,7 +1535,6 @@ function cycleCardScaleMode() {
   visibleSellerListings[0]
 )}
   
-<IXIBoard
   <IXIBoard
   items={visibleSellerListings}
   getListingId={getListingId}
