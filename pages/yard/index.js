@@ -1528,6 +1528,12 @@ function cycleCardScaleMode() {
     gap: `${cardScaleMetrics.gap}px`
   }}
 >
+
+{console.log(
+  "VISIBLE SELLER OBJECT",
+  visibleSellerListings[0]
+)}
+  
 <IXIBoard
   items={visibleSellerListings}
   getListingId={getListingId}
