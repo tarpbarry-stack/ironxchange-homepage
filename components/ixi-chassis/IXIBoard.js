@@ -58,13 +58,24 @@ export default function IXIBoard({
 >
            {({ dragHandleProps }) => (
              
-     item?.type === "SELLER OBJECT" && SellerObjectCard ? (
-  <IXIScaledCardShell size={cardScaleMode}>
-    <SellerObjectCard
-      sellerObject={item}
-      dragHandleProps={dragHandleProps}
-    />
-  </IXIScaledCardShell>
+    item?.type === "SELLER OBJECT" && SellerObjectCard ? (
+  <SellerObjectCard
+    sellerObject={item}
+    dragHandleProps={dragHandleProps}
+    ixiState={
+      ixiCardState[id] || {
+        color: "none",
+        outline: 1
+      }
+    }
+    onIxiStateChange={updateIxiCardState}
+    saved={savedIds.includes(id)}
+    armedDestination={armedDestination}
+    onSendFront={sendListingToFront}
+    onSendBack={sendListingToBack}
+    onSendToArmedDestination={sendMachineToArmedDestination}
+    onCycleSellerFace={() => cycleMachineFace?.(id)}
+  />
 ) : enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
       <ListingCard
