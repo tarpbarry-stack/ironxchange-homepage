@@ -264,7 +264,19 @@ onRailSend={() => {
         });
       }
 }
-  onSendBack={onSendBack}
+ onSendBack={
+  isSellerIdentityFace
+    ? () => {
+        onIxiStateChange?.(id, {
+          face: endDeckFace
+        });
+      }
+    : () => {
+        onIxiStateChange?.(id, {
+          face: endDeckFace
+        });
+      }
+}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
