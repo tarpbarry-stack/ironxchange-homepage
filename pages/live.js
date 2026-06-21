@@ -389,18 +389,16 @@ const [externalLinks, setExternalLinks] = useState([
   }, []);
 
   useEffect(() => {
+  if (!router.isReady) return;
   if (id) return;
+  if (!Array.isArray(listings) || listings.length === 0) return;
 
-  if (!listings.length) return;
-
-  const firstListing = listings[0];
-
-  const firstListingId = getListingId(firstListing);
+  const firstListingId = getListingId(listings[0]);
 
   if (!firstListingId) return;
 
-  router.replace(`/live?id=${firstListingId}`);
-}, [id, listings, router]);
+  router.replace(`/live?id=${encodeURIComponent(String(firstListingId))}`);
+}, [router.isReady, id, listings]);
 
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
