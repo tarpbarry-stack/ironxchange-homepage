@@ -409,6 +409,35 @@ const availableModels = useMemo(() => {
     description
   };
 
+  const previewListing = {
+  id: "post-free-preview",
+  title: sharetribeTitle || cardTitle,
+  price: price ? formatMoney(price) : "",
+  hours,
+  location: locationLabel,
+  description,
+  keywords: selectedKeywords,
+  imageUrls: photoItems
+    .map(photo => getIXActivePhotoUrl(photo))
+    .filter(Boolean),
+  imageUrl: heroPhoto,
+  publicData: {
+    category,
+    year,
+    make,
+    model,
+    hours,
+    price,
+    city,
+    location: locationLabel,
+    loc: stateCode,
+    keywords: selectedKeywords,
+    serialNumber,
+    stockNumber,
+    description
+  }
+};
+
   const listingUrl = "";
 
   const marketplaceTitle = `${cardTitle} | ${formatHours(hours)} | ${
