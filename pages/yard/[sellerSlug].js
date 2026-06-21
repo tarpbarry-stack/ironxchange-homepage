@@ -1673,20 +1673,25 @@ function cycleCardScaleMode() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 24px;
 }
 
 .yard-count {
-  min-width: 108px;
-  padding: 9px 12px;
-  text-align: center;
-  background: #101010;
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  min-width: auto;
+
+  padding: 0;
+
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .yard-count strong {
-  display: block;
+  display: inline-block;
   color: #f2f2f2;
   font-size: 20px;
   font-weight: 950;
@@ -1694,7 +1699,7 @@ function cycleCardScaleMode() {
 }
 
 .yard-count span {
-  display: block;
+ display: inline-block;
   margin-top: 5px;
   color: rgba(255,255,255,.36);
   font-size: 7.5px;
