@@ -72,15 +72,15 @@ export default function IXISellerObjectCard({
 
     const id = String(objectId || sellerObject?.id || "");
 
-  const boardColor =
-    ixiState?.color ||
-    boardColorProp ||
-    "none";
+ const boardColor =
+  ixiState?.color !== undefined
+    ? ixiState.color
+    : boardColorProp || "none";
 
-  const boardOutline =
-    ixiState?.outline ||
-    boardOutlineProp ||
-    1;
+const boardOutline =
+  ixiState?.outline !== undefined
+    ? Number(ixiState.outline)
+    : Number(boardOutlineProp || 1);
 
   const boardColors = [
     "none",
@@ -101,9 +101,9 @@ export default function IXISellerObjectCard({
     const nextColor =
       boardColors[(currentIndex + 1) % boardColors.length];
 
-    if (onIxiStateChange) {
-      onIxiStateChange(id, { color: nextColor });
-    }
+   if (onIxiStateChange && id) {
+  onIxiStateChange(id, { color: nextColor });
+}
 
     onCycleColor?.(e);
   }
@@ -118,10 +118,9 @@ export default function IXISellerObjectCard({
       Number(boardOutline) === 5 ? 0 :
       1;
 
-    if (onIxiStateChange) {
-      onIxiStateChange(id, { outline: nextOutline });
-    }
-
+    if (onIxiStateChange && id) {
+  onIxiStateChange(id, { outline: nextOutline });
+}
     onCycleOutline?.(e);
   }
 
