@@ -1382,10 +1382,17 @@ function cycleCardScaleMode() {
     </div>
   </div>
 
+  <div className="yard-stats">
   <div className="yard-count">
-    <strong>{sellerListings.length}</strong>
+    <strong>{visibleSellerListings.length}</strong>
     <span>Active Machines</span>
   </div>
+
+  <div className="yard-count yard-value">
+    <strong>{formattedVisibleYardValue}</strong>
+    <span>Yard Value</span>
+  </div>
+</div>
 </section>
 
 <IXIChassis>
