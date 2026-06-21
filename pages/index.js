@@ -182,6 +182,24 @@ function handleWorkspaceDragCancel() {
 
   setActiveDndId("");
 }
+
+  async function toggleSave(listing) {
+  if (!sdk) {
+    window.location.href = "/login";
+    return;
+  }
+
+  try {
+    const result = await toggleSavedListing({
+      sdk,
+      listing
+    });
+
+    setSavedIds(result.savedIds);
+  } catch (err) {
+    console.error("Index save failed:", err);
+  }
+}
   
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
