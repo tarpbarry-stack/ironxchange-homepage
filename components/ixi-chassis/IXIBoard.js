@@ -48,18 +48,22 @@ export default function IXIBoard({
 
         return (
           <IXISortableMachineCard
-            key={id}
-            id={id}
-            containerId="board"
-            className="ixi-board-sortable-card"
-          >
+  key={id}
+  id={id}
+  containerId="board"
+  className={`ixi-board-sortable-card ${
+    item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
+  }`}
+>
            {({ dragHandleProps }) => (
              
-   item?.type === "SELLER OBJECT" && SellerObjectCard ? (
-    <SellerObjectCard
-      sellerObject={item}
-      dragHandleProps={dragHandleProps}
-    />
+     item?.type === "SELLER OBJECT" && SellerObjectCard ? (
+    <IXIScaledCardShell size={cardScaleMode}>
+      <SellerObjectCard
+        sellerObject={item}
+        dragHandleProps={dragHandleProps}
+      />
+    </IXIScaledCardShell>
   ) : enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
       <ListingCard
