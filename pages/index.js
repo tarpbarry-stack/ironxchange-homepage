@@ -92,13 +92,23 @@ function getFeatureLine(item) {
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("ALL CATEGORIES");
-   const [liveListings, setLiveListings] = useState([]);
+  const [liveListings, setLiveListings] = useState([]);
+  const [savedIds, setSavedIds] = useState([]);
+  const [sdk, setSdk] = useState(null);
+
+  const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiUserId, setIxiUserId] = useState("guest");
+
+  const [cardScaleMode, setCardScaleMode] = useState("xl");
+  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+
+  const [activeDndId, setActiveDndId] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   
   const [draggingListingId, setDraggingListingId] = useState("");
-const [ghostListingId, setGhostListingId] = useState("");
+  const [ghostListingId, setGhostListingId] = useState("");
 
-const [ixiCardState, setIxiCardState] = useState({});
+  const [ixiCardState, setIxiCardState] = useState({});
 
   const [indexBoardMode, setIndexBoardMode] = useState("featured");
   const [indexBoardListings, setIndexBoardListings] = useState([]);
