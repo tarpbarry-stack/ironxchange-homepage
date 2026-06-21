@@ -139,8 +139,13 @@ const boardOutline =
 const isSellerIdentityFace =
   sellerFace === 1;
 
+const endDeckFace = machines.length + 2;
+
+const isEndDeckFace =
+  sellerFace === endDeckFace;
+
 const activeMachineIndex =
-  sellerFace > 1
+  sellerFace > 1 && sellerFace < endDeckFace
     ? sellerFace - 2
     : -1;
 
@@ -209,19 +214,11 @@ const activeMachine =
       useDndDrag={false}
     />
   ) : (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "rgba(255,255,255,.45)",
-        fontWeight: 900,
-        fontSize: 12
-      }}
-    >
-      END OF DECK
-    </div>
+    <div className="seller-end-deck">
+  <span>END DECK</span>
+  <strong>{machines.length}</strong>
+  <p>MACHINES REVIEWED</p>
+</div>
   )}
 </div>
 
@@ -232,7 +229,14 @@ const activeMachine =
   boardOutline={boardOutline}
   machineFace={sellerFace}
   onCycleMachineFace={() => {
-  onCycleSellerFace?.(id);
+  const nextFace =
+    sellerFace >= endDeckFace
+      ? 1
+      : sellerFace + 1;
+
+  onIxiStateChange?.(id, {
+    face: nextFace
+  });
 }}
   onSendFront={onSendFront}
   onSendBack={onSendBack}
@@ -455,6 +459,44 @@ border-radius: 14px;
   inset: 0 0 16px 0;
   padding: 0;
   overflow: hidden;
+}
+
+.seller-end-deck {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background:
+    radial-gradient(circle at center, rgba(255,196,0,.08), transparent 55%),
+    #101010;
+
+  color: rgba(255,255,255,.72);
+  text-align: center;
+}
+
+.seller-end-deck span {
+  color: #ffc400;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.seller-end-deck strong {
+  color: #f4f4f4;
+  font-size: 44px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.seller-end-deck p {
+  margin: 0;
+  color: rgba(255,255,255,.38);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .08em;
 }
       `}</style>
     </section>
