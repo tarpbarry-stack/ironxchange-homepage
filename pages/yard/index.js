@@ -1536,11 +1536,13 @@ function cycleCardScaleMode() {
 )}
   
 <IXIBoard
+  <IXIBoard
   items={visibleSellerListings}
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
   IXISortableMachineCard={IXISortableMachineCard}
+  SellerObjectCard={IXISellerObjectCard}
   toggleSave={toggleSave}
   updateIxiCardState={updateIxiCardState}
   cycleMachineFace={cycleMachineFace}
