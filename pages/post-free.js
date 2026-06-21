@@ -803,6 +803,16 @@ const availableModels = useMemo(() => {
               </div>
             </div>
 
+            <div className="post-header-imports">
+  <button type="button" onClick={() => router.push("/bulk-import")}>
+    Bulk Import
+  </button>
+
+  <button type="button" onClick={() => router.push("/url-import")}>
+    URL Import
+  </button>
+</div>
+    
             <div className="launch-header-actions">
               <button type="button" className="status-command live">
                 <span></span>
@@ -1503,6 +1513,63 @@ select {
   justify-content: space-between;
   align-items: center;
   gap: 14px;
+}
+
+.post-header-imports {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.post-header-imports button {
+  height: 31px;
+  min-width: 112px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(0,209,255,.22);
+
+  background:
+    linear-gradient(180deg, rgba(0,209,255,.055), rgba(0,209,255,0)),
+    #101010;
+
+  color: rgba(210,250,255,.74);
+
+  font-size: 8.5px;
+  font-weight: 950;
+  letter-spacing: .58px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 0 12px rgba(0,209,255,.035);
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+.post-header-imports button:hover {
+  transform: translateY(-1px);
+
+  color: #7DEBFF;
+  border-color: rgba(0,209,255,.58);
+
+  background:
+    linear-gradient(180deg, rgba(0,209,255,.10), rgba(0,209,255,0)),
+    #071317;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 0 18px rgba(0,209,255,.10);
 }
 
         .launch-title {
