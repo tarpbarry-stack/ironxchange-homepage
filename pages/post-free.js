@@ -1069,35 +1069,36 @@ const availableModels = useMemo(() => {
             </aside>
 
             <section className="preview-zone">
-              <div className="card-nav-row">
-                <button type="button" disabled>
-                  ← Previous
-                </button>
+  <div className="card-nav-row">
+    <button type="button" disabled>
+      ← Previous
+    </button>
 
-                <div>
-                  <span>Live Buyer Card</span>
-                  <strong>True marketplace-card preview</strong>
-                </div>
+    <div>
+      <span>Machine Creation Card</span>
+      <strong>Real IXI machine-object preview</strong>
+    </div>
 
-                <button type="button" disabled>
-                  Next →
-                </button>
-              </div>
+    <button type="button" disabled>
+      Next →
+    </button>
+  </div>
 
-             <div className="live-card-shell">
-  <ListingCard
-    listing={previewListing}
-    sellerMode={true}
-    creationMode={true}
-    saved={false}
-    machineFace={previewFace}
-    onCycleMachineFace={cyclePreviewFace}
-    onToggleSaved={() => {}}
-    onSendFront={() => {}}
-    onSendBack={() => {}}
-    onSendToArmedDestination={() => {}}
-  />
-</div>
+  <div className="live-card-shell">
+    <ListingCard
+      listing={previewListing}
+      sellerMode={true}
+      creationMode={true}
+      saved={false}
+      machineFace={previewFace}
+      onCycleMachineFace={cyclePreviewFace}
+      onToggleSaved={() => {}}
+      onSendFront={() => {}}
+      onSendBack={() => {}}
+      onSendToArmedDestination={() => {}}
+    />
+  </div>
+</section>
 
             <aside className="distribution-center">
               <div className="distribution-head">
