@@ -3129,7 +3129,7 @@ outline: none;
 }
 
 :global(.ixi-board-sortable-card > *) {
-  width: 100%;
+  width: auto;
 }
         .empty {
           max-width: 520px;
