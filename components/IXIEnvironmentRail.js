@@ -5,7 +5,7 @@ const RAIL_ITEMS = [
   { label: "IXI AUCTION MKT", href: "#", access: "demo" },
   { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
-  { label: "SELLERS", href: "/yard", access: "always" },
+  { label: "IXI SELLERS", href: "/yard", access: "always" },
   { label: "DASHBOARD", href: "/account", access: "account" },
   { label: "INVENTORY", href: "/account/my-listings-v2", access: "seller" },
   { label: "LAUNCH", href: "/live", access: "seller" },
