@@ -1609,9 +1609,13 @@ function cycleCardScaleMode() {
         }
 
 :global(.ixi-seller-object-sortable-card) {
-  width: var(--ixi-card-width, 298px) !important;
-  max-width: var(--ixi-card-width, 298px) !important;
-  min-width: var(--ixi-card-width, 298px) !important;
+  width: 298px !important;
+  max-width: 298px !important;
+  min-width: 298px !important;
+
+  height: 391px !important;
+  max-height: 391px !important;
+  min-height: 391px !important;
 }
 
         main {
