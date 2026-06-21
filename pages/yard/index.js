@@ -1522,12 +1522,14 @@ function cycleCardScaleMode() {
     visibleSellerListings.length === 1 ? "single-card" : ""
   }`}
   style={{
-    gridTemplateColumns:
-      visibleSellerListings.length === 1
-        ? `${cardScaleMetrics.width}px`
-        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-    gap: `${cardScaleMetrics.gap}px`
-  }}
+  gridTemplateColumns:
+    visibleSellerListings.length === 1
+      ? `298px`
+      : `repeat(auto-fill, 298px)`,
+  gridAutoRows: `391px`,
+  rowGap: `22px`,
+  columnGap: `22px`
+}}
 >
 
 {console.log(
