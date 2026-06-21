@@ -1084,97 +1084,20 @@ const availableModels = useMemo(() => {
                 </button>
               </div>
 
-              <div className="listing-preview-card">
-                <div
-  className="preview-photo"
-  onClick={() => changeActivePhoto(1)}
->
- <img
-  src={heroPhoto || "/images/hero-equipment-yard.jpg"}
-  alt="Machine"
-  className="preview-photo-img"
-/>
-                  {photoItems.length > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="card-photo-nav left"
-                        onClick={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          changeActivePhoto(-1);
-                        }}
-                        aria-label="Previous photo"
-                      >
-                        ‹
-                      </button>
-
-                      <button
-                        type="button"
-                        className="card-photo-nav right"
-                        onClick={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          changeActivePhoto(1);
-                        }}
-                        aria-label="Next photo"
-                      >
-                        ›
-                      </button>
-
-                      <span className="photo-count">
-                        {activePhotoIndex + 1}/{photoItems.length}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-
-                <div className="preview-body">
-                  <div className="preview-title-row">
-                    <input
-                      className="card-title-input"
-                      value={cardTitle}
-                      readOnly
-                      title="Title is generated from year, make, and model."
-                    />
-
-                    <input
-                      className="card-hours-input"
-                      value={formatHours(hours)}
-                      onChange={e => setHours(cleanNumber(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="preview-keyword-row">
-                    <MachineBadges
-                      keywords={selectedKeywords.slice(0, 10)}
-                      variant="studio"
-                    />
-                  </div>
-
-                  <div className="preview-price-row">
-                    <input
-                      className="card-price-input"
-                      value={formatMoney(price)}
-                      onChange={e => setPrice(cleanNumber(e.target.value))}
-                    />
-
-                    <div className="preview-meta">
-                      <button type="button" aria-label="Save preview star">
-                        <i className="fa-regular fa-star"></i>
-                      </button>
-
-                      <input
-                        className="card-location-input"
-                        value={locationLabel}
-                        readOnly
-                        placeholder="Location"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
+             <div className="live-card-shell">
+  <ListingCard
+    listing={previewListing}
+    sellerMode={true}
+    creationMode={true}
+    saved={false}
+    machineFace={previewFace}
+    onCycleMachineFace={cyclePreviewFace}
+    onToggleSaved={() => {}}
+    onSendFront={() => {}}
+    onSendBack={() => {}}
+    onSendToArmedDestination={() => {}}
+  />
+</div>
 
             <aside className="distribution-center">
               <div className="distribution-head">
@@ -1535,6 +1458,11 @@ select {
   radial-gradient(circle at 18% 12%, rgba(255,255,255,.018), transparent 22%),
   #0b0b0b;
         }
+
+    .live-card-shell {
+  width: 430px;
+  margin: 24px auto 0;
+}
 
         .launch-wrap {
           max-width: 1600px;
