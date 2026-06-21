@@ -61,6 +61,7 @@ export default function ListingCard({
   from = "browse",
 
   sellerMode = false,
+  launchMode = false,
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
@@ -538,24 +539,28 @@ function handlePhotoLoad(e, photoUrl) {
         {sellerMode ? (
           <div className="seller-actions">
             <button
-              type="button"
-              onClick={e => {
-                stopCardClick(e);
-                onEdit?.(listing);
-              }}
-            >
-              LAUNCH
-            </button>
+  type="button"
+  onClick={e => {
+    stopCardClick(e);
+    window.open(getListingHref(listing, from), "_blank", "noopener,noreferrer");
+  }}
+>
+  {launchMode ? "PUBLIC" : "LAUNCH"}
+</button>
 
-            <button
-              type="button"
-              onClick={e => {
-                stopCardClick(e);
-                window.location.href = getListingHref(listing, "account");
-              }}
-            >
-              VIEW
-            </button>
+<button
+  type="button"
+  onClick={e => {
+    stopCardClick(e);
+    if (launchMode) {
+      window.location.href = "/yard";
+      return;
+    }
+    window.location.href = getListingHref(listing, "account");
+  }}
+>
+  {launchMode ? "YARD" : "VIEW"}
+</button>
 
             {isPaused ? (
               <button
