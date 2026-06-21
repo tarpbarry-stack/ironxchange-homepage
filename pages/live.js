@@ -2040,7 +2040,7 @@ select {
 
 .live-env-rail-shell {
   max-width: 1600px;
-  margin: -10px auto 0;
+  margin: 12px auto -12px;
   padding: 0 2%;
 }
 
