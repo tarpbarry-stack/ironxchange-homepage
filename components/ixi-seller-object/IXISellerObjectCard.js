@@ -22,6 +22,7 @@ function slugify(text = "") {
 
 export default function IXISellerObjectCard({
   sellerObject,
+  objectId,
   dragHandleProps,
 
   ixiState,
@@ -69,7 +70,7 @@ export default function IXISellerObjectCard({
 
   const yardSlug = slugify(yardTitle);
 
-    const id = String(sellerObject?.id || "");
+    const id = String(objectId || sellerObject?.id || "");
 
   const boardColor =
     ixiState?.color ||
