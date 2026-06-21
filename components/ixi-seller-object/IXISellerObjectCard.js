@@ -134,25 +134,33 @@ export default function IXISellerObjectCard({
 
       <style jsx>{`
         .seller-object-card {
-          position: relative;
-          width: 298px;
-          min-width: 298px;
-          max-width: 298px;
+  position: relative;
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
 
-          height: 391px;
-          min-height: 391px;
-          max-height: 391px;
+  height: 391px;
+  min-height: 391px;
+  max-height: 391px;
 
-          display: flex;
-          flex-direction: column;
-          padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 8px;
 
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 14px;
-          overflow: hidden;
-          cursor: grab;
-        }
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.006)),
+    radial-gradient(circle at top left, rgba(255,196,0,.055), transparent 55%),
+    #101010;
 
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 18px 34px rgba(0,0,0,.42);
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: grab;
+}
         .seller-object-card,
         .seller-object-card * {
           box-sizing: border-box;
