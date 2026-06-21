@@ -7,6 +7,9 @@ import { captureIXEvent } from "../lib/posthog";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+import ListingCard from "../components/ListingCard";
+import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+
 import MachineBadges from "../components/MachineBadges";
 
 import {
@@ -350,6 +353,10 @@ export default function ListingLivePage() {
 
   const [currentUserId, setCurrentUserId] = useState("");
 
+  const [previewFace, setPreviewFace] = useState(1);
+  const [previewColor, setPreviewColor] = useState("none");
+  const [previewOutline, setPreviewOutline] = useState(1);
+
   const [edit, setEdit] = useState({
   price: "",
   hours: "",
@@ -597,7 +604,38 @@ const filteredKeywords = useMemo(() => {
     ? buildSocialCopy("marketplace", listing, listingUrl, selectedKeywords, edit)
     : "";
 
-  function goToListing(targetListing) {
+  function cyclePreviewFace() {
+  setPreviewFace(current =>
+    current === 1 ? 2 :
+    current === 2 ? 3 :
+    current === 3 ? 4 :
+    1
+  );
+}
+
+function cyclePreviewColor() {
+  setPreviewColor(current =>
+    current === "none" ? "green" :
+    current === "green" ? "yellow" :
+    current === "yellow" ? "red" :
+    current === "red" ? "cyan" :
+    current === "cyan" ? "white" :
+    current === "white" ? "blue" :
+    current === "blue" ? "orange" :
+    "none"
+  );
+}
+
+function cyclePreviewOutline() {
+  setPreviewOutline(current =>
+    current === 1 ? 3 :
+    current === 3 ? 5 :
+    current === 5 ? 0 :
+    1
+  );
+}
+
+function goToListing(targetListing) {
     const targetId = getListingId(targetListing || {});
     if (!targetId) return;
     router.push(`/live?id=${targetId}`);
@@ -1290,6 +1328,23 @@ async function saveExternalLinks() {
     );
   }
 
+const previewListing = listing
+  ? {
+      ...listing,
+      price: edit.price || listing.price,
+      hours: edit.hours || listing.hours,
+      location: edit.location || listing.location,
+      description: edit.description || listing.description,
+      keywords: selectedKeywords,
+      imageObjects: photoItems.map(photo => ({
+        ...photo,
+        url: getIXActivePhotoUrl(photo)
+      })),
+      imageUrls: photoItems.map(photo => getIXActivePhotoUrl(photo)).filter(Boolean),
+      imageUrl: heroPhoto
+    }
+  : listing;
+
   return (
 
         <>
@@ -1305,6 +1360,7 @@ async function saveExternalLinks() {
 
       <main>
         <Navbar />
+<IXIEnvironmentRail active="launch" />            
 
         <section className="launch-wrap">
           <section className="launch-header">
@@ -1616,67 +1672,23 @@ onClick={async () => {
                 </button>
               </div>
 
-              <div className="listing-preview-card">
-              <div
-  className="preview-photo"
-  onClick={() => changeActivePhoto(1)}
->
- <img
-  src={heroPhoto || "/images/hero-equipment-yard.jpg"}
-  alt={title || "Machine"}
-  className={`preview-photo-img ${getFrameClass(activePreviewPhoto, "livePreview")}`}
-  style={getFrameStyle(activePreviewPhoto, "livePreview")}
-/>
-                  {photoItems.length > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="card-photo-nav left"
-                        onClick={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          changeActivePhoto(-1);
-                        }}
-                        aria-label="Previous photo"
-                      >
-                        ‹
-                      </button>
-
-                      <button
-                        type="button"
-                        className="card-photo-nav right"
-                        onClick={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          changeActivePhoto(1);
-                        }}
-                        aria-label="Next photo"
-                      >
-                        ›
-                      </button>
-
-                      <span className="photo-count">
-                        {activePhotoIndex + 1}/{photoItems.length}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-
-                <div className="preview-body">
-                  <div className="preview-title-row">
-                    <input
-                      className="card-title-input"
-                      value={title}
-                      readOnly
-                      title="Title is generated from listing year, make, model, and hours."
-                    />
-
-                    <input
-                      className="card-hours-input"
-                      value={formatHours(edit.hours || listing.hours)}
-                      onChange={e => setEdit({ ...edit, hours: cleanNumber(e.target.value) })}
-                    />
-                  </div>
+             <div className="live-card-shell">
+  <ListingCard
+    listing={previewListing}
+    sellerMode={true}
+    saved={false}
+    boardColor={previewColor}
+    boardOutline={previewOutline}
+    machineFace={previewFace}
+    onCycleMachineFace={cyclePreviewFace}
+    onCycleColor={cyclePreviewColor}
+    onCycleOutline={cyclePreviewOutline}
+    onToggleSaved={() => {}}
+    onSendFront={() => {}}
+    onSendBack={() => {}}
+    onSendToArmedDestination={() => {}}
+  />
+</div>
 
                <div className="preview-keyword-row">
   <MachineBadges
@@ -2279,6 +2291,8 @@ select {
   justify-content: space-between;
   align-items: center;
 
+  padding: 12px 14px 14px;
+  
   gap: 14px;
   margin-bottom: 8px;
 }
@@ -2348,7 +2362,7 @@ select {
 
        .photo-strip {
   display: flex;
-  gap: 9px;
+  gap: 12px;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -2362,8 +2376,8 @@ select {
        .photo-tile {
   position: relative;
 
-  flex: 0 0 150px;
-  height: 106px;
+ flex: 0 0 190px;
+  height: 134px;
 
   overflow: hidden;
 
