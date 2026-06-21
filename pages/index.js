@@ -143,6 +143,45 @@ function handleWorkspaceDragStart(event) {
 function handleWorkspaceDragCancel() {
   setActiveDndId("");
 }
+
+  function handleWorkspaceDragEnd(event) {
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
+
+  if (!dragId || !overId || dragId === overId) {
+    setActiveDndId("");
+    return;
+  }
+
+  setIndexBoardMode("custom");
+
+  setIndexBoardListings(current => {
+    const source =
+      current.length
+        ? current
+        : featuredListings;
+
+    const fromIndex = source.findIndex(
+      item => String(getListingId(item)) === dragId
+    );
+
+    const toIndex = source.findIndex(
+      item => String(getListingId(item)) === overId
+    );
+
+    if (fromIndex === -1 || toIndex === -1) {
+      return source;
+    }
+
+    const next = [...source];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+
+    return next;
+  });
+
+  setActiveDndId("");
+}
   
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
