@@ -132,6 +132,9 @@ const boardOutline =
     onCycleOutline?.(e);
   }
 
+  const isSellerIdentityFace =
+  Number(sellerObject?.face || 1) === 1;
+
   return (
       <section
   className={`seller-object-card card board-color-${boardColor || "none"} board-outline-${boardOutline || 1}`}
@@ -187,15 +190,21 @@ const boardOutline =
   saved={saved}
   boardColor={boardColor}
   boardOutline={boardOutline}
-  machineFace={sellerObject?.face || 1}
-  onCycleMachineFace={onCycleSellerFace}
+  machineFace={sellerFace}
+  onCycleMachineFace={() => {
+  onCycleSellerFace?.(id);
+}}
   onSendFront={onSendFront}
   onSendBack={onSendBack}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
   armedDestination={armedDestination}
-  onSendToArmedDestination={onSendToArmedDestination}
+  onSendToArmedDestination={
+  isSellerIdentityFace
+    ? undefined
+    : onSendToArmedDestination
+}
 />
 
       <style jsx>{`
