@@ -15,6 +15,7 @@ export default function IXIMachineRail({
   onEndRelationship,
   machineFace = 1,
   onCycleMachineFace,
+  onRailSend,
   onToggleSaved,
   armedDestination,
   onSendToArmedDestination
@@ -62,10 +63,11 @@ export default function IXIMachineRail({
   onClick={e => {
     e.preventDefault();
     e.stopPropagation();
+    onRailSend?.(listing);
   }}
   aria-label="Send machine"
 />
-
+    
 <button
   type="button"
   className={`rail-zone rail-sync ${
