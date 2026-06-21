@@ -5,6 +5,7 @@ const RAIL_ITEMS = [
   { label: "IXI AUCTION MKT", href: "#", access: "demo" },
   { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
+  { label: "SELLERS", href: "/yard", access: "always" },
   { label: "DASHBOARD", href: "/account", access: "account" },
   { label: "INVENTORY", href: "/account/my-listings-v2", access: "seller" },
   { label: "LAUNCH", href: "/live", access: "seller" },
@@ -44,7 +45,7 @@ export default function IXIEnvironmentRail({
   }
 
 function canAccess(item) {
-  if (item.access === "demo") return effectiveMode !== "dead";
+  if (item.access === "demo") return true;
 
   if (item.access === "always") return true;
   if (item.access === "account") return hasAccount;
@@ -57,32 +58,14 @@ function canAccess(item) {
   function getRailItemState(item) {
     if (item.label === activeEnvironment) return "active";
 
-    if (
-      hasRelationship &&
-      (item.label === "IXI WORKSPACE" || item.label === "IXI THEATER")
-    ) {
-      return "unlocked";
-    }
-
     if (canAccess(item)) return "available";
 
     return "locked";
   }
 
-  function shouldShowLabel(item) {
-    if (item.access === "always") return true;
-
-    if (
-      hasRelationship &&
-      (item.label === "IXI WORKSPACE" || item.label === "IXI THEATER")
-    ) {
-      return true;
-    }
-
-    if (effectiveMode === "dead") return false;
-
-    return canAccess(item);
-  }
+function shouldShowLabel(item) {
+  return true;
+}
 
   return (
     <section
