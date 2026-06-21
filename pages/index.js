@@ -289,6 +289,26 @@ function updateIxiCardState(listingId, patch) {
   });
 }
 
+  function cycleMachineFace(listingOrId) {
+  const id =
+    typeof listingOrId === "object"
+      ? String(getListingId(listingOrId))
+      : String(listingOrId);
+
+  const currentFace =
+    Number(ixiCardState[id]?.face || 1);
+
+  const nextFace =
+    currentFace === 1 ? 2 :
+    currentFace === 2 ? 3 :
+    currentFace === 3 ? 4 :
+    1;
+
+  updateIxiCardState(id, {
+    face: nextFace
+  });
+}
+
 function moveListingToSlot(dragId, targetId) {
   if (!dragId || !targetId || dragId === targetId) return;
 
