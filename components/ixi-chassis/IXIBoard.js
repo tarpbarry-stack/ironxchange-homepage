@@ -21,6 +21,7 @@ export default function IXIBoard({
   draggingListingId,
   ghostListingId,
   getSellerListingCardProps,
+  SellerObjectCard,
   enableCardScaling = false,
   cardScaleMode = "xl"
 }) {
@@ -28,12 +29,18 @@ export default function IXIBoard({
   return (
 <SortableContext
   id="board"
-  items={items.map(item => String(getListingId(item)))}
+  items={items.map(item =>
+    item?.type === "SELLER OBJECT"
+      ? String(item.id)
+      : String(getListingId(item))
+  )}
   strategy={rectSortingStrategy}
 >
     {items.map(item => {
-        const id = String(getListingId(item));
-
+        const id =
+          item?.type === "SELLER OBJECT"
+            ? String(item.id)
+            : String(getListingId(item));
         const sellerCardProps =
           typeof getSellerListingCardProps === "function"
             ? getSellerListingCardProps(item)
@@ -48,7 +55,16 @@ export default function IXIBoard({
           >
            {({ dragHandleProps }) => (
              
-  enableCardScaling ? (
+             {({ dragHandleProps }) => (
+             
+  item?.type === "SELLER OBJECT" && SellerObjectCard ? (
+    <IXIScaledCardShell size={cardScaleMode}>
+      <SellerObjectCard
+        sellerObject={item}
+        dragHandleProps={dragHandleProps}
+      />
+    </IXIScaledCardShell>
+  ) : enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
       <ListingCard
         listing={item}
