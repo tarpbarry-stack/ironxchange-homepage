@@ -135,6 +135,11 @@ export default function IXISellerObjectCard({
           cursor: grab;
         }
 
+        .seller-object-card,
+.seller-object-card * {
+  box-sizing: border-box;
+}
+
         .seller-object-top {
           display: flex;
           align-items: center;
