@@ -547,6 +547,21 @@ const rawListingCategory =
 function normalizeDnaCategory(value = "") {
   const raw = String(value || "").trim();
 
+  const aliases = {
+    "skid-steer-ctl": "SKID STEER/CTL",
+    "skid-steer": "SKID STEER/CTL",
+    "skidsteer": "SKID STEER/CTL",
+    "skid-steer-loaders": "SKID STEER/CTL",
+    "skid steer loaders": "SKID STEER/CTL",
+    "skid steer loader": "SKID STEER/CTL",
+    "compact-track-loader": "SKID STEER/CTL",
+    "compact track loader": "SKID STEER/CTL",
+    "ctl": "SKID STEER/CTL"
+  };
+
+  const alias = aliases[raw.toLowerCase()];
+  if (alias && categoryDnaKeywords[alias]) return alias;
+
   if (categoryDnaKeywords[raw]) return raw;
 
   const upper = raw.toUpperCase();
