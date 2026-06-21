@@ -2032,14 +2032,6 @@ select {
   padding: 0 2%;
 }
 
-.live-env-rail-shell :global(.live-env-rail) {
-  width: auto;
-  max-width: 980px;
-  margin: 0 auto 12px;
-  justify-content: center;
-  gap: 18px;
-}
-
         .launch-wrap {
           max-width: 1600px;
           margin: 0 auto;
