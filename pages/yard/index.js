@@ -670,7 +670,7 @@ return [...filtered].sort((a, b) => {
     searchQuery,
     savedBoardMode,
     savedBoardListings,
-    sellerListings,
+    sellerBoardObjects,
     workspaceFilters,
     machineContainers,
     ixiCardState,
