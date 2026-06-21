@@ -71,6 +71,7 @@ export default function ListingCard({
   onHoursKeyDown,
 
 descriptionValue,
+onDescriptionChange,
 onDescriptionKeyDown,
 savingDescription = false,
 
@@ -369,10 +370,11 @@ function handlePhotoLoad(e, photoUrl) {
   >
 {Number(machineFace || 1) === 2 ? (
   sellerMode ? (
-   <IXISellerMachineObjectFace2
+<IXISellerMachineObjectFace2
   listing={listing}
   dragHandleProps={dragHandleProps}
   descriptionValue={descriptionValue}
+  onDescriptionChange={onDescriptionChange}
   onDescriptionKeyDown={onDescriptionKeyDown}
   savingDescription={savingDescription}
 />
