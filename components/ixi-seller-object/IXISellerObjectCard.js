@@ -228,6 +228,11 @@ const activeMachine =
   boardColor={boardColor}
   boardOutline={boardOutline}
   machineFace={sellerFace}
+  railMode={
+  isSellerIdentityFace
+    ? "next-lit end-lit"
+    : "home-lit next-lit prev-lit"
+}
   onCycleMachineFace={() => {
   const nextFace =
     sellerFace >= endDeckFace
