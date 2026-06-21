@@ -61,9 +61,10 @@ export default function IXIBoard({
    item?.type === "SELLER OBJECT" && SellerObjectCard ? (
   <IXIScaledCardShell size={cardScaleMode}>
     <SellerObjectCard
-      sellerObject={item}
-      dragHandleProps={dragHandleProps}
-      ixiState={
+  sellerObject={item}
+  objectId={id}
+  dragHandleProps={dragHandleProps}
+  ixiState={
         ixiCardState[id] || {
           color: "none",
           outline: 1
