@@ -825,7 +825,7 @@ const availableModels = useMemo(() => {
                 onClick={createListing}
                 disabled={saving}
               >
-                {saving ? "Posting..." : "Post Free"}
+                {saving ? "Posting..." : "Post"}
               </button>
 
               <button
@@ -1370,7 +1370,7 @@ const availableModels = useMemo(() => {
                   onClick={createListing}
                   disabled={saving}
                 >
-                  {saving ? "Posting..." : "Post Free"}
+                  {saving ? "Posting..." : "Post"}
                 </button>
 
                 <button
