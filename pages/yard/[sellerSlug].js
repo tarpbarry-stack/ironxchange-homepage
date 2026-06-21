@@ -495,6 +495,24 @@ const sellerLogo =
   sellerSeedListing?.profileImage ||
   "";
 
+  const visibleYardValue = visibleSellerListings.reduce((sum, item) => {
+  const price = Number(
+    String(item.price || item.publicData?.price || "")
+      .replace(/[^0-9]/g, "")
+  );
+
+  return sum + (Number.isFinite(price) ? price : 0);
+}, 0);
+
+const formattedVisibleYardValue =
+  visibleYardValue > 0
+    ? visibleYardValue.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      })
+    : "CALL";
+
 const containerStateKey = useMemo(() => {
   return sellerListings
     .map(item => {
@@ -1587,115 +1605,87 @@ function cycleCardScaleMode() {
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
         }
-
 .yard-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto minmax(220px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
 
-  margin: 10px auto 12px;
-  padding: 16px 18px;
+  margin: 8px auto 12px;
+  padding: 10px 14px;
 
   background:
-    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
-    radial-gradient(circle at top, rgba(255,255,255,.014), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,0)),
     #111111;
-
-  border: 1px solid rgba(255,255,255,.065);
-  outline: 1px solid rgba(255,255,255,.018);
-  border-radius: 14px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.032) inset,
-    0 16px 38px rgba(0,0,0,.22);
-}
-
-.yard-identity {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  min-width: 0;
-}
-
-.yard-copy {
-  min-width: 0;
-}
-
-.eyebrow {
-  display: block;
-  margin-bottom: 6px;
-
-  color: #FFC400;
-
-  font-size: 9px;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: .72px;
-}
-
-.yard-copy h1 {
-  margin: 0;
-
-  color: #f2f2f2;
-
-  font-size: 26px;
-  font-weight: 950;
-  line-height: 1.02;
-  letter-spacing: -.55px;
-  text-transform: uppercase;
-}
-
-.yard-copy p {
-  margin: 6px 0 0;
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .18px;
-}
-
-.yard-count {
-  min-width: 118px;
-
-  padding: 13px 12px;
-
-  text-align: center;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-    #101010;
 
   border: 1px solid rgba(255,255,255,.06);
   border-radius: 12px;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 12px 28px rgba(0,0,0,.20);
+}
+
+.yard-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.yard-copy h1 {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -.35px;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: #FFC400;
+  font-size: 7.5px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .65px;
+}
+
+.yard-copy p {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,.42);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12px;
+}
+
+.yard-count {
+  min-width: 108px;
+  padding: 9px 12px;
+  text-align: center;
+  background: #101010;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
 }
 
 .yard-count strong {
   display: block;
-
   color: #f2f2f2;
-
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 950;
   line-height: 1;
 }
 
 .yard-count span {
   display: block;
-
-  margin-top: 6px;
-
+  margin-top: 5px;
   color: rgba(255,255,255,.36);
-
-  font-size: 8.75px;
+  font-size: 7.5px;
   font-weight: 950;
-
   text-transform: uppercase;
-  letter-spacing: .52px;
+  letter-spacing: .48px;
 }
 
        .saved-environment-shell {
