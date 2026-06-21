@@ -238,7 +238,27 @@ const activeMachine =
     face: nextFace
   });
 }}
-  onSendFront={onSendFront}
+onRailSend={() => {
+  if (isSellerIdentityFace) return;
+
+  const previousFace =
+    sellerFace <= 2
+      ? 1
+      : sellerFace - 1;
+
+  onIxiStateChange?.(id, {
+    face: previousFace
+  });
+}}
+  onSendFront={
+  isSellerIdentityFace
+    ? onSendFront
+    : () => {
+        onIxiStateChange?.(id, {
+          face: 1
+        });
+      }
+}
   onSendBack={onSendBack}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
