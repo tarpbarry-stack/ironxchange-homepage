@@ -399,6 +399,17 @@ const [externalLinks, setExternalLinks] = useState([
   const sellerInventory = useMemo(() => {
     if (!listing) return [];
 
+    useEffect(() => {
+  if (id) return;
+  if (!sellerInventory.length) return;
+
+  const firstListingId = getListingId(sellerInventory[0]);
+
+  if (!firstListingId) return;
+
+  router.replace(`/live?id=${firstListingId}`);
+}, [id, sellerInventory, router]);
+
     const authorId = getAuthorId(listing);
 
     return listings.filter(item => {
