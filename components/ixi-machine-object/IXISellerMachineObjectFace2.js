@@ -1,4 +1,3 @@
-import { useState } from "react";
 import IXIMachineObjectActions from "./IXIMachineObjectActions";
 
 import { formatHours } from "../../lib/listingFormatters";
@@ -7,6 +6,7 @@ export default function IXISellerMachineObjectFace2({
   listing = {},
   dragHandleProps,
   descriptionValue,
+  onDescriptionChange,
   onDescriptionKeyDown,
   savingDescription = false
 }) {
@@ -56,11 +56,8 @@ export default function IXISellerMachineObjectFace2({
     "Machine bio not listed.";
 
   const DESCRIPTION_LIMIT = 200;
-  const [sellerDescription, setSellerDescription] =
-  useState(
-    String(descriptionValue || description || "")
-      .slice(0, DESCRIPTION_LIMIT)
-  );
+  const sellerDescription = String(descriptionValue ?? description ?? "")
+  .slice(0, DESCRIPTION_LIMIT);
 
   return (
     <section
@@ -112,7 +109,7 @@ export default function IXISellerMachineObjectFace2({
   <textarea
   value={sellerDescription}
   onChange={e =>
-    setSellerDescription(
+    onDescriptionChange?.(
       e.target.value.slice(0, DESCRIPTION_LIMIT)
     )
   }
