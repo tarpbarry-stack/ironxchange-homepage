@@ -261,15 +261,32 @@ return [...selected, ...remaining].slice(0, 20);
 ]);
 
 function updateIxiCardState(listingId, patch) {
-  setIxiCardState(current => ({
-    ...current,
-    [String(listingId)]: {
+  const id = String(listingId);
+
+  setIxiCardState(current => {
+    const nextRecord = {
       color: "none",
       outline: 1,
-      ...(current[String(listingId)] || {}),
-      ...patch
-    }
-  }));
+
+      ...(current[id] || {}),
+
+      ...patch,
+
+      touched: true,
+      updatedAt: Date.now()
+    };
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: id,
+      patch: nextRecord
+    });
+
+    return {
+      ...current,
+      [id]: nextRecord
+    };
+  });
 }
 
 function moveListingToSlot(dragId, targetId) {
