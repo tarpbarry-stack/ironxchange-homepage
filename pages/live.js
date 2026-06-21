@@ -540,17 +540,29 @@ setPhotoItems(
 const rawListingCategory =
   listing?.publicData?.category ||
   listing?.category ||
-  listing?.categoryLevel1 ||
   listing?.publicData?.categoryLevel1 ||
+  listing?.categoryLevel1 ||
   "";
 
-const listingCategory =
-  categoryDnaKeywords[rawListingCategory]
-    ? rawListingCategory
-    : categoryDnaKeywords[String(rawListingCategory).toUpperCase()]
-      ? String(rawListingCategory).toUpperCase()
-      : "";
+function normalizeDnaCategory(value = "") {
+  const raw = String(value || "").trim();
 
+  if (categoryDnaKeywords[raw]) return raw;
+
+  const upper = raw.toUpperCase();
+  if (categoryDnaKeywords[upper]) return upper;
+
+  const slugMatch = Object.keys(categoryDnaKeywords).find(key =>
+    key
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") === raw.toLowerCase()
+  );
+
+  return slugMatch || "";
+}
+
+const listingCategory = normalizeDnaCategory(rawListingCategory);
   const selectedKeywordSet = useMemo(() => {
   return new Set(selectedKeywords);
 }, [selectedKeywords]);
