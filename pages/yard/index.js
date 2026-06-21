@@ -1524,11 +1524,9 @@ function cycleCardScaleMode() {
   style={{
   gridTemplateColumns:
     visibleSellerListings.length === 1
-      ? `298px`
-      : `repeat(auto-fill, 298px)`,
-  gridAutoRows: `391px`,
-  rowGap: `22px`,
-  columnGap: `22px`
+      ? `${cardScaleMetrics.width}px`
+      : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
+  gap: `${cardScaleMetrics.gap}px`
 }}
 >
 
