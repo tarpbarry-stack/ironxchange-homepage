@@ -231,7 +231,7 @@ const activeMachine =
   railMode={
   isSellerIdentityFace
     ? "next-lit end-lit"
-    : "home-lit next-lit prev-lit"
+    : "home-lit next-lit prev-lit end-lit"
 }
   onCycleMachineFace={() => {
   const nextFace =
