@@ -826,7 +826,9 @@ function handleCardClick() {
           overflow: hidden;
 
           border-bottom: 1px solid rgba(255,255,255,.065);
-          background: #0f0f0f;
+          background:
+  radial-gradient(circle at center, rgba(255,255,255,.035), transparent 62%),
+  #080808;
 
           box-shadow:
             inset 0 -40px 70px rgba(0,0,0,.10);
@@ -835,7 +837,7 @@ function handleCardClick() {
         .card-photo-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
           object-position: center center;
           display: block;
            user-select: none;
