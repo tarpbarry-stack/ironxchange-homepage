@@ -1553,6 +1553,7 @@ function cycleCardScaleMode() {
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
+  cardScaleMetrics={cardScaleMetrics}
     />
         </section>
 
