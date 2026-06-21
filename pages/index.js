@@ -108,8 +108,6 @@ export default function Home() {
   const [draggingListingId, setDraggingListingId] = useState("");
   const [ghostListingId, setGhostListingId] = useState("");
 
-  const [ixiCardState, setIxiCardState] = useState({});
-
   const [indexBoardMode, setIndexBoardMode] = useState("featured");
   const [indexBoardListings, setIndexBoardListings] = useState([]);
 
