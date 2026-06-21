@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
@@ -8,6 +8,33 @@ import { captureIXEvent } from "../lib/posthog";
 import { getV12CategoryNames } from "../lib/v12TaxonomyAdapter";
 import Footer from "../components/Footer";
 
+import {
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+
+import {
+  sortableKeyboardCoordinates
+} from "@dnd-kit/sortable";
+
+import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
+import IXIBoard from "../components/ixi-chassis/IXIBoard";
+import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+
+import {
+  fetchIxiMachineState,
+  saveIxiMachinePatch
+} from "../lib/ixiMachineStateClient";
+
+import {
+  fetchCurrentUserWithSavedListings,
+  getSavedListingIdsFromUser,
+  toggleSavedListing
+} from "../lib/savedListings";
+
+import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
