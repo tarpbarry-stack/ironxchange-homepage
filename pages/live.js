@@ -2028,14 +2028,14 @@ select {
 
 .live-env-rail-shell {
   max-width: 1600px;
-  margin: 0 auto 8px;
+  margin: -10px auto 0;
   padding: 0 2%;
 }
 
         .launch-wrap {
           max-width: 1600px;
           margin: 0 auto;
-          padding: 10px 2% 44px;
+          padding: 0 2% 44px;
         }
 
        .panel,
