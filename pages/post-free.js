@@ -1092,6 +1092,8 @@ const availableModels = useMemo(() => {
       saved={false}
       machineFace={previewFace}
       onCycleMachineFace={cyclePreviewFace}
+      descriptionValue={description}
+      onDescriptionChange={setDescription}
       onToggleSaved={() => {}}
       onSendFront={() => {}}
       onSendBack={() => {}}
