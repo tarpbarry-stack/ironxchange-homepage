@@ -434,20 +434,74 @@ const yardTitle = "IXI SELLERS";
 const sellerName = "";
 const sellerLocation = "Seller Object Board";
 const sellerLogo = "";
+
+const sellerObjects = useMemo(() => {
+  const sellerMap = new Map();
+
+  marketplaceListings.forEach(listing => {
+    const authorId = String(getAuthorId(listing) || "");
+
+    if (!authorId) return;
+
+    if (!sellerMap.has(authorId)) {
+      const display = getSellerDisplay(listing);
+
+      sellerMap.set(authorId, {
+        sellerId: authorId,
+        sellerDisplay: display,
+        sellerSeedListing: listing,
+        machines: []
+      });
+    }
+
+    sellerMap.get(authorId).machines.push(listing);
+  });
+
+  return Array.from(sellerMap.values());
+}, [marketplaceListings]);
+
+  console.log(
+  "SELLER OBJECTS",
+  sellerObjects.length,
+  sellerObjects
+);
+
+const sellerBoardObjects = useMemo(() => {
+  return sellerObjects.map(sellerObject => ({
+    ...sellerObject,
+    id: `seller-${sellerObject.sellerId}`,
+    title: sellerObject.sellerDisplay?.yardTitle || "IronXchange Seller",
+    type: "SELLER OBJECT",
+    category: "SELLER OBJECT",
+    make: "",
+    model: "",
+    year: "",
+    hours: sellerObject.machines.length,
+    price: sellerObject.machines.reduce((sum, machine) => {
+      const price = Number(
+        String(machine.price || machine.publicData?.price || "")
+          .replace(/[^0-9]/g, "")
+      );
+
+      return sum + (Number.isFinite(price) ? price : 0);
+    }, 0)
+  }));
+}, [sellerObjects]);
+  
 const containerStateKey = useMemo(() => {
-  return sellerListings
+  return sellerBoardObjects
     .map(item => {
-      const id = String(getListingId(item));
+      const id = String(getBoardObjectId(item));
       return `${id}:${ixiCardState[id]?.container || "board"}`;
     })
     .join("|");
-}, [sellerListings, ixiCardState]);
+}, [sellerBoardObjects, ixiCardState]);
    
 useEffect(() => {
-  if (!sellerListings.length) return;
+    if (!sellerBoardObjects.length) return;
 
- const validMachineIds = sellerListings.map(item =>
-  String(getListingId(item))
+ const validMachineIds = sellerBoardObjects.map(item =>
+  String(getBoardObjectId(item))
 );
 
   const savedLayout =
@@ -474,8 +528,8 @@ useEffect(() => {
 
   const nextContainers = createEmptyWorkspaceContainers();
 
-  sellerListings.forEach(item => {
-    const id = String(getListingId(item));
+    sellerBoardObjects.forEach(item => {
+    const id = String(getBoardObjectId(item));
     const savedContainer = ixiCardState[id]?.container;
 
     const targetContainer =
@@ -487,27 +541,27 @@ useEffect(() => {
   });
 
   setMachineContainers(nextContainers);
-}, [containerStateKey]);
+}, [containerStateKey, sellerBoardObjects]);
 
-  const visibleSellerListings = useMemo(() => {
+    const visibleSellerListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-       : sellerListings;
+        : sellerBoardObjects;
 
 const orderedSource =
   (machineContainers.board || [])
     .map(id =>
       source.find(item =>
-        String(getListingId(item)) === String(id)
+        String(getBoardObjectId(item)) === String(id)
       )
     )
     .filter(Boolean);
     
    const filtered = orderedSource.filter(item => {
-  const id = String(getListingId(item));
+    const id = String(getBoardObjectId(item));
 
   if (getMachineContainer(id) !== "board") {
     return false;
@@ -1143,6 +1197,11 @@ function normalizeUrl(url = "") {
   return `https://${value}`;
 }
 
+function getBoardObjectId(item) {
+  if (item?.id) return String(item.id);
+  return String(getListingId(item));
+}
+  
 function getAuthorId(item) {
   const safeItem = item || {};
 
