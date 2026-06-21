@@ -121,6 +121,28 @@ export default function Home() {
     coordinateGetter: sortableKeyboardCoordinates
   })
 );
+
+function getActiveDndListing() {
+  if (!activeDndId) return null;
+
+  return liveListings.find(
+    item =>
+      String(getListingId(item)) ===
+      String(activeDndId)
+  );
+}
+
+function handleWorkspaceDragStart(event) {
+  const dragId = String(event?.active?.id || "");
+
+  if (!dragId) return;
+
+  setActiveDndId(dragId);
+}
+
+function handleWorkspaceDragCancel() {
+  setActiveDndId("");
+}
   
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
