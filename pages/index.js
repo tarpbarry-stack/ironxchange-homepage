@@ -146,6 +146,48 @@ export default function Home() {
     checkAuth();
   }, []);
 
+useEffect(() => {
+  async function loadIxiState() {
+    try {
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdkInstance = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      setSdk(sdkInstance);
+
+      const currentUser =
+        await fetchCurrentUserWithSavedListings(sdkInstance);
+
+      const userId =
+        currentUser?.id?.uuid ||
+        currentUser?.id ||
+        "guest";
+
+      setIxiUserId(String(userId));
+
+      const remoteIxiResponse =
+        await fetchIxiMachineState(String(userId));
+
+      const remoteIxiState =
+        remoteIxiResponse?.state ||
+        remoteIxiResponse ||
+        {};
+
+      setIxiCardState(remoteIxiState);
+
+      setSavedIds(
+        getSavedListingIdsFromUser(currentUser)
+      );
+    } catch (err) {
+      console.error("Index IXI load failed:", err);
+    }
+  }
+
+  loadIxiState();
+}, []);
+  
  const featuredListings = useMemo(() => {
   const active = liveListings.filter(item => {
     const listingStatus =
