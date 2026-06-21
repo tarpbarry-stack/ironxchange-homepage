@@ -95,9 +95,7 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
-export default function SellerYardPage() {
-  const router = useRouter();
-  const { sellerSlug } = router.query;
+export default function SellerIndexPage() {
   const [listings, setListings] = useState([]);
   
   const [savedIds, setSavedIds] = useState([]);
@@ -431,70 +429,12 @@ if (Array.isArray(data)) {
   });
 }, [listings]);
 
-  const sellerSeedListing = useMemo(() => {
-  if (!sellerSlug || listings.length === 0) return null;
+  const sellerListings = marketplaceListings;
 
-  const targetSlug = String(sellerSlug).toLowerCase();
-
-  return listings.find(item => {
-    const display = getSellerDisplay(item);
-
-    const possibleValues = [
-      getAuthorId(item),
-      display.yardTitle,
-      display.sellerName,
-      display.sellerCompany,
-      display.companyName,
-      display.authorName
-    ]
-      .filter(Boolean)
-      .map(value => slugify(String(value)));
-
-    return possibleValues.includes(targetSlug);
-  });
-}, [sellerSlug, listings]);
-
-const sellerAuthorId = sellerSeedListing
-  ? getAuthorId(sellerSeedListing)
-  : "";
-
-const sellerListings = useMemo(() => {
-  if (!sellerAuthorId) return [];
-
-  return listings.filter(item => {
-    const listingStatus =
-      item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus ||
-      "live";
-
-    return (
-      String(getAuthorId(item)) === String(sellerAuthorId) &&
-      listingStatus !== "archived" &&
-      listingStatus !== "deleted"
-    );
-  });
-}, [listings, sellerAuthorId]);
-
-const sellerDisplay = getSellerDisplay(sellerSeedListing || {});
-const yardTitle = sellerDisplay.yardTitle;
-
-const sellerName =
-  sellerDisplay.contactName &&
-  !isInitials(sellerDisplay.contactName)
-    ? sellerDisplay.contactName
-    : "";
-
-const sellerLocation =
-  clean(sellerSeedListing?.sellerLocation) ||
-  clean(sellerSeedListing?.location) ||
-  "Location not listed";
-
-const sellerLogo =
-  sellerSeedListing?.sellerLogo ||
-  sellerSeedListing?.profileImage ||
-  "";
-
+const yardTitle = "IXI SELLERS";
+const sellerName = "";
+const sellerLocation = "Seller Object Board";
+const sellerLogo = "";
 const containerStateKey = useMemo(() => {
   return sellerListings
     .map(item => {
@@ -1290,12 +1230,11 @@ function cycleCardScaleMode() {
   
   return (
     <>
-      <Head>
-        <title>IXI Marketplace | IronXchange</title>
+            <Head>
+        <title>IXI Sellers | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          rel="stylesheet"
         />
       </Head>
 
@@ -1354,8 +1293,8 @@ function cycleCardScaleMode() {
   >
     <main>
   <section className="saved-environment-shell">
-    <IXIEnvironmentRail
-  activeEnvironment="IXI MARKETPLACE"
+        <IXIEnvironmentRail
+      activeEnvironment="IXI SELLERS"
       hasAccount={!!sdk}
       hasRelationship={true}
       hasInventory={!!sdk}
@@ -1371,28 +1310,25 @@ function cycleCardScaleMode() {
     />
 
     <div className="yard-copy">
-      <span className="eyebrow">IronXchange Yard</span>
+      <span className="eyebrow">IXI Seller Object Board</span>
 
       <h1>{yardTitle}</h1>
 
-      <p>
-        {sellerLocation}
-        {sellerName ? ` · ${sellerName}` : ""}
-      </p>
+      <p>{sellerLocation}</p>
     </div>
   </div>
 
   <div className="yard-stats">
-  <div className="yard-count">
-    <strong>{visibleSellerListings.length}</strong>
-    <span>Active Machines</span>
-  </div>
+    <div className="yard-count">
+      <strong>{visibleSellerListings.length}</strong>
+      <span>Active Machines</span>
+    </div>
 
-  <div className="yard-count yard-value">
-    <strong>{formattedVisibleYardValue}</strong>
-    <span>Yard Value</span>
+    <div className="yard-count yard-value">
+      <strong>{formattedVisibleYardValue}</strong>
+      <span>Total Inventory</span>
+    </div>
   </div>
-</div>
 </section>
 
 <IXIChassis>
