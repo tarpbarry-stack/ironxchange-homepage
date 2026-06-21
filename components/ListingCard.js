@@ -62,6 +62,7 @@ export default function ListingCard({
 
   sellerMode = false,
   launchMode = false,
+  creationMode = false,
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
@@ -536,8 +537,8 @@ function handlePhotoLoad(e, photoUrl) {
           </div>
         </div>
 
-        {sellerMode ? (
-          <div className="seller-actions">
+        {sellerMode && !creationMode ? (
+  <div className="seller-actions">
             <button
   type="button"
   onClick={e => {
