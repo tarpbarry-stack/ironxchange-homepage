@@ -345,6 +345,8 @@ export default function PostFreePage() {
   { label: "", url: "" }
 ]);
 
+  const [previewFace, setPreviewFace] = useState(1);
+
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -426,6 +428,15 @@ const availableModels = useMemo(() => {
     listingUrl,
     selectedKeywords
   );
+
+  function cyclePreviewFace() {
+  setPreviewFace(current =>
+    current === 1 ? 2 :
+    current === 2 ? 3 :
+    current === 3 ? 4 :
+    1
+  );
+}
 
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
