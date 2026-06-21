@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/router";
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import {
