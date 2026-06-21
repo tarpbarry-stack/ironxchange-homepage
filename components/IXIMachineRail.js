@@ -16,16 +16,19 @@ export default function IXIMachineRail({
   machineFace = 1,
   onCycleMachineFace,
   onRailSend,
+  railMode = "",
   onToggleSaved,
   armedDestination,
   onSendToArmedDestination
 }) {
  return (
   <>
-    <div className="board-command-rail">
+    <div className={`board-command-rail ${railMode}`}>
     <button
       type="button"
-      className="rail-zone rail-half"
+      className={`rail-zone rail-half ${
+  railMode.includes("home-lit") ? "rail-lit" : ""
+}`}
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
@@ -48,7 +51,9 @@ export default function IXIMachineRail({
 
 <button
   type="button"
-  className="rail-zone rail-flip"
+  className={`rail-zone rail-flip ${
+    railMode.includes("next-lit") ? "rail-lit" : ""
+  }`}
   onClick={e => {
   e.preventDefault();
   e.stopPropagation();
@@ -59,7 +64,9 @@ export default function IXIMachineRail({
 
 <button
   type="button"
-  className="rail-zone rail-send"
+  className={`rail-zone rail-send ${
+    railMode.includes("prev-lit") ? "rail-lit" : ""
+  }`}
   onClick={e => {
     e.preventDefault();
     e.stopPropagation();
@@ -83,7 +90,9 @@ export default function IXIMachineRail({
     
     <button
       type="button"
-      className="rail-zone rail-half"
+      className={`rail-zone rail-half ${
+  railMode.includes("end-lit") ? "rail-lit" : ""
+}`}
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
@@ -397,6 +406,14 @@ grid-template-columns:
   box-shadow:
     0 0 6px rgba(0,194,255,.48),
     0 0 14px rgba(0,194,255,.24);
+}
+
+.rail-zone.rail-lit::after {
+  background: rgba(255,196,0,.86);
+
+  box-shadow:
+    0 0 7px rgba(255,196,0,.30),
+    0 0 14px rgba(255,196,0,.12);
 }
 
 /* KEEP SAVE YELLOW ON HOVER WHEN SAVED */
