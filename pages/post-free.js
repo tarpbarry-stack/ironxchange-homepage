@@ -751,9 +751,9 @@ const availableModels = useMemo(() => {
         <section className="launch-wrap">
           <section className="launch-header">
             <div className="launch-title">
-              <button type="button" onClick={() => router.push("/account/my-listings")}>
-                ← Inventory
-              </button>
+             <button type="button" onClick={() => router.back()}>
+  ← Back
+</button>
 
               <div>
                 <span>IronXchange Post Free</span>
