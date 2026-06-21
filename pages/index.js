@@ -111,6 +111,17 @@ export default function Home() {
   const [indexBoardMode, setIndexBoardMode] = useState("featured");
   const [indexBoardListings, setIndexBoardListings] = useState([]);
 
+  const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 6
+    }
+  }),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  })
+);
+  
   useEffect(() => {
   captureIXEvent("homepage_viewed", {
     page: "home"
