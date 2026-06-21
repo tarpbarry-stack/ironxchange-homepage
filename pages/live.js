@@ -1711,6 +1711,7 @@ onClick={async () => {
     <ListingCard
       listing={previewListing}
       sellerMode={true}
+      launchMode={true}
       saved={false}
       boardColor={previewColor}
       boardOutline={previewOutline}
