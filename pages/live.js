@@ -3037,6 +3037,11 @@ select {
   cursor: default;
 }
 
+.live-card-shell {
+  width: 430px;
+  margin: 24px auto 0;
+}
+
        .listing-preview-card {
   width: min(100%, 430px);
   margin: 24px auto 0;
