@@ -11,11 +11,20 @@ export default function IXIDragEngine({
   handleWorkspaceDragCancel,
   children,
   getActiveDndListing,
+  getActiveDndObject,
+  SellerObjectCard,
   activeDndId,
   savedIds,
   ixiCardState,
   cardScaleMode = "xl"
 }) {
+  const activeDndObject =
+    typeof getActiveDndObject === "function"
+      ? getActiveDndObject()
+      : typeof getActiveDndListing === "function"
+        ? getActiveDndListing()
+        : null;
+
   return (
     <DndContext
       sensors={sensors}
@@ -26,35 +35,41 @@ export default function IXIDragEngine({
     >
       {children}
 
-      <DragOverlay>
-        {getActiveDndListing() ? (
-          <div className="ixi-drag-overlay-card">
-  <IXIScaledCardShell size={cardScaleMode}>
-    <ListingCard
-              listing={getActiveDndListing()}
-              saved={savedIds.includes(String(activeDndId))}
-              onToggleSaved={() => {}}
-              from="saved"
-              ixiState={
-                ixiCardState[String(activeDndId)] || {
-                  color: "none",
-                  outline: 1
-                }
+     <DragOverlay>
+  {activeDndObject ? (
+    <div className="ixi-drag-overlay-card">
+      {activeDndObject?.type === "SELLER OBJECT" && SellerObjectCard ? (
+        <SellerObjectCard
+          sellerObject={activeDndObject}
+        />
+      ) : (
+        <IXIScaledCardShell size={cardScaleMode}>
+          <ListingCard
+            listing={activeDndObject}
+            saved={savedIds.includes(String(activeDndId))}
+            onToggleSaved={() => {}}
+            from="saved"
+            ixiState={
+              ixiCardState[String(activeDndId)] || {
+                color: "none",
+                outline: 1
               }
-              onIxiStateChange={() => {}}
-              onSendFront={() => {}}
-              onSendBack={() => {}}
-              isBoardDraggingCard={false}
-              isGhostTarget={false}
-              onBoardDragStart={() => {}}
-              onBoardDragOver={() => {}}
-              onBoardDragEnd={() => {}}
-              useDndDrag={false}
-                />
-  </IXIScaledCardShell>
-</div>
-        ) : null}
-      </DragOverlay>
+            }
+            onIxiStateChange={() => {}}
+            onSendFront={() => {}}
+            onSendBack={() => {}}
+            isBoardDraggingCard={false}
+            isGhostTarget={false}
+            onBoardDragStart={() => {}}
+            onBoardDragOver={() => {}}
+            onBoardDragEnd={() => {}}
+            useDndDrag={false}
+          />
+        </IXIScaledCardShell>
+      )}
+    </div>
+  ) : null}
+</DragOverlay>
     </DndContext>
   );
 }
