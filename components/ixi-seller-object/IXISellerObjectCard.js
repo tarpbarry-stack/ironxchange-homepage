@@ -1,5 +1,6 @@
 import SellerLogoDecal from "../SellerLogoDecal";
 import IXIMachineRail from "../IXIMachineRail";
+import ListingCard from "../ListingCard";
 
 function formatMoney(value) {
   const amount = Number(value || 0);
@@ -138,12 +139,24 @@ const boardOutline =
 const isSellerIdentityFace =
   sellerFace === 1;
 
+const activeMachineIndex =
+  sellerFace > 1
+    ? sellerFace - 2
+    : -1;
+
+const activeMachine =
+  activeMachineIndex >= 0
+    ? machines[activeMachineIndex]
+    : null;
+  
   return (
       <section
   className={`seller-object-card card board-color-${boardColor || "none"} board-outline-${boardOutline || 1}`}
   {...(dragHandleProps || {})}
 >
-      <div className="seller-object-main">
+     <div className="seller-object-main">
+  {isSellerIdentityFace ? (
+    <>
         <div className="seller-object-top">
           <SellerLogoDecal
             logo={logo}
@@ -186,7 +199,33 @@ const isSellerIdentityFace =
             OPEN YARD
           </a>
         </div>
-      </div>
+          </>
+  ) : activeMachine ? (
+    <ListingCard
+      listing={activeMachine}
+      saved={false}
+      showSave={false}
+      machineFace={1}
+      useDndDrag={false}
+    />
+  ) : (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "rgba(255,255,255,.45)",
+        fontWeight: 900,
+        fontSize: 12
+      }}
+    >
+      END OF DECK
+    </div>
+  )}
+</div>
+
+<IXIMachineRail
 
      <IXIMachineRail
   listing={sellerObject}
