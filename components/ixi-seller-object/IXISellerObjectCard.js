@@ -234,8 +234,10 @@ const isSellerIdentityFace =
     inset 0 1px 0 rgba(255,255,255,.04),
     0 18px 34px rgba(0,0,0,.42);
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
+border: 1px solid rgba(255,255,255,.08);
+outline: 1px solid rgba(255,255,255,.018);
+outline-offset: 0;
+border-radius: 14px;
   overflow: hidden;
   cursor: grab;
 }
