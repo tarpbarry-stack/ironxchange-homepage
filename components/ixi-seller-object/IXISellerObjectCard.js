@@ -106,8 +106,13 @@ export default function IXISellerObjectCard({
 
       <style jsx>{`
         .seller-object-card {
-  width:100%;
-  height:100%;
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  height: 391px;
+  min-height: 391px;
+  max-height: 391px;
 
           display: flex;
           flex-direction: column;
