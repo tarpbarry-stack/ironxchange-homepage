@@ -229,7 +229,6 @@ const activeMachine =
   boardOutline={boardOutline}
   machineFace={sellerFace}
   railMode={
- railMode={
   isSellerIdentityFace
     ? "next-lit"
     : "home-lit next-lit prev-lit end-lit"
