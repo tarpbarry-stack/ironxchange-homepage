@@ -487,30 +487,16 @@ function sendListingToBack(listing) {
   });
 }
   
-  function handleSearch() {
-  const params = new URLSearchParams();
-
+ function handleSearch() {
   const q = searchQuery.trim();
 
-  if (q) {
-    params.set("keywords", q);
-  }
+  captureIXEvent("homepage_search_performed", {
+    query: q,
+    category,
+    destination: "/browse-v2"
+  });
 
-  if (category && category !== "ALL CATEGORIES") {
-    params.set("category", category);
-  }
-
-  const queryString = params.toString();
-
-captureIXEvent("homepage_search_performed", {
-  query: q,
-  category,
-  destination: queryString ? `/browse-v2?${queryString}` : "/browse-v2"
-});
-
-window.location.href = queryString
-  ? `/browse-v2?${queryString}`
-  : "/browse-v2";
+  window.location.href = "/browse-v2";
 }
 
 const visibleListings =
