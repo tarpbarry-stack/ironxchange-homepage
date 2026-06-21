@@ -154,7 +154,7 @@ const activeMachine =
   className={`seller-object-card card board-color-${boardColor || "none"} board-outline-${boardOutline || 1}`}
   {...(dragHandleProps || {})}
 >
-     <div className="seller-object-main">
+     <div className={isSellerIdentityFace ? "seller-object-main" : "seller-object-machine-face"}>
   {isSellerIdentityFace ? (
     <>
         <div className="seller-object-top">
@@ -448,6 +448,13 @@ border-radius: 14px;
 
 .seller-object-card.board-color-orange {
   outline-color: rgba(249,133,18,.95);
+}
+
+.seller-object-machine-face {
+  position: absolute;
+  inset: 0 0 16px 0;
+  padding: 0;
+  overflow: hidden;
 }
       `}</style>
     </section>
