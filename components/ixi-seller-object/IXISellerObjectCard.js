@@ -226,8 +226,6 @@ const activeMachine =
 </div>
 
 <IXIMachineRail
-
-     <IXIMachineRail
   listing={sellerObject}
   saved={saved}
   boardColor={boardColor}
