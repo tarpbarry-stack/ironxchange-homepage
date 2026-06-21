@@ -1608,16 +1608,6 @@ function cycleCardScaleMode() {
           color: #d6d6d6;
         }
 
-:global(.ixi-seller-object-sortable-card) {
-  width: 298px !important;
-  max-width: 298px !important;
-  min-width: 298px !important;
-
-  height: 391px !important;
-  max-height: 391px !important;
-  min-height: 391px !important;
-}
-
         main {
            min-height: 72vh;
   padding: 14px 5% 58px;
