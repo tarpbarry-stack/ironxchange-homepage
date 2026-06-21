@@ -102,7 +102,13 @@ const boardOutline =
       boardColors[(currentIndex + 1) % boardColors.length];
 
    if (onIxiStateChange && id) {
-  onIxiStateChange(id, { color: nextColor });
+  onIxiStateChange(id, {
+    color: nextColor,
+    outline:
+      Number(boardOutline) === 0
+        ? 1
+        : Number(boardOutline || 1)
+  });
 }
 
     onCycleColor?.(e);
@@ -118,8 +124,10 @@ const boardOutline =
       Number(boardOutline) === 5 ? 0 :
       1;
 
-    if (onIxiStateChange && id) {
-  onIxiStateChange(id, { outline: nextOutline });
+   if (onIxiStateChange && id) {
+  onIxiStateChange(id, {
+    outline: nextOutline
+  });
 }
     onCycleOutline?.(e);
   }
