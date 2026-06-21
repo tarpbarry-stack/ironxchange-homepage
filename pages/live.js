@@ -1718,7 +1718,6 @@ onClick={async () => {
                     </div>
                   </div>
                 </div>
-              </div>
             </section>
             <aside className="distribution-center">
               <div className="distribution-head">
