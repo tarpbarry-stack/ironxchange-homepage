@@ -59,10 +59,12 @@ export default function IXIBoard({
            {({ dragHandleProps }) => (
              
      item?.type === "SELLER OBJECT" && SellerObjectCard ? (
-  <SellerObjectCard
-    sellerObject={item}
-    dragHandleProps={dragHandleProps}
-  />
+  <IXIScaledCardShell size={cardScaleMode}>
+    <SellerObjectCard
+      sellerObject={item}
+      dragHandleProps={dragHandleProps}
+    />
+  </IXIScaledCardShell>
 ) : enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
       <ListingCard
