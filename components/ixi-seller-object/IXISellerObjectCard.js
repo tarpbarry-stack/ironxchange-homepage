@@ -24,8 +24,11 @@ export default function IXISellerObjectCard({
   sellerObject,
   dragHandleProps,
 
-  boardColor = "none",
-  boardOutline = 1,
+  ixiState,
+  onIxiStateChange,
+
+  boardColor: boardColorProp = "none",
+  boardOutline: boardOutlineProp = 1,
   saved = false,
   armedDestination,
 
@@ -66,11 +69,67 @@ export default function IXISellerObjectCard({
 
   const yardSlug = slugify(yardTitle);
 
+    const id = String(sellerObject?.id || "");
+
+  const boardColor =
+    ixiState?.color ||
+    boardColorProp ||
+    "none";
+
+  const boardOutline =
+    ixiState?.outline ||
+    boardOutlineProp ||
+    1;
+
+  const boardColors = [
+    "none",
+    "green",
+    "yellow",
+    "red",
+    "cyan",
+    "white",
+    "blue",
+    "orange"
+  ];
+
+  function cycleBoardColor(e) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    const currentIndex = boardColors.indexOf(boardColor);
+    const nextColor =
+      boardColors[(currentIndex + 1) % boardColors.length];
+
+    if (onIxiStateChange) {
+      onIxiStateChange(id, { color: nextColor });
+    }
+
+    onCycleColor?.(e);
+  }
+
+  function cycleBoardOutline(e) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    const nextOutline =
+      Number(boardOutline) === 1 ? 3 :
+      Number(boardOutline) === 3 ? 5 :
+      Number(boardOutline) === 5 ? 0 :
+      1;
+
+    if (onIxiStateChange) {
+      onIxiStateChange(id, { outline: nextOutline });
+    }
+
+    onCycleOutline?.(e);
+  }
+
   return (
     <section
-      className="seller-object-card"
-      {...(dragHandleProps || {})}
-    >
+      <section
+  className={`seller-object-card card board-color-${boardColor || "none"} board-outline-${boardOutline || 1}`}
+  {...(dragHandleProps || {})}
+>
       <div className="seller-object-main">
         <div className="seller-object-top">
           <SellerLogoDecal
@@ -116,21 +175,21 @@ export default function IXISellerObjectCard({
         </div>
       </div>
 
-      <IXIMachineRail
-        listing={sellerObject}
-        saved={saved}
-        boardColor={boardColor}
-        boardOutline={boardOutline}
-        machineFace={sellerObject?.face || 1}
-        onCycleMachineFace={onCycleSellerFace}
-        onSendFront={onSendFront}
-        onSendBack={onSendBack}
-        onCycleColor={onCycleColor}
-        onCycleOutline={onCycleOutline}
-        onToggleSaved={onToggleSaved}
-        armedDestination={armedDestination}
-        onSendToArmedDestination={onSendToArmedDestination}
-      />
+     <IXIMachineRail
+  listing={sellerObject}
+  saved={saved}
+  boardColor={boardColor}
+  boardOutline={boardOutline}
+  machineFace={sellerObject?.face || 1}
+  onCycleMachineFace={onCycleSellerFace}
+  onSendFront={onSendFront}
+  onSendBack={onSendBack}
+  onCycleColor={cycleBoardColor}
+  onCycleOutline={cycleBoardOutline}
+  onToggleSaved={onToggleSaved}
+  armedDestination={armedDestination}
+  onSendToArmedDestination={onSendToArmedDestination}
+/>
 
       <style jsx>{`
         .seller-object-card {
