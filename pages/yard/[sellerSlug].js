@@ -1669,6 +1669,13 @@ function cycleCardScaleMode() {
   letter-spacing: .12px;
 }
 
+.yard-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .yard-count {
   min-width: 108px;
   padding: 9px 12px;
@@ -1694,6 +1701,10 @@ function cycleCardScaleMode() {
   font-weight: 950;
   text-transform: uppercase;
   letter-spacing: .48px;
+}
+
+.yard-value {
+  min-width: 140px;
 }
 
        .saved-environment-shell {
