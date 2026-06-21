@@ -343,6 +343,53 @@ export default function IXISellerObjectCard({
         .seller-object-footer a:hover {
           background: rgba(255,196,0,.18);
         }
+        .seller-object-card.board-outline-1 {
+  outline: 1px solid rgba(255,255,255,.018);
+}
+
+.seller-object-card.board-outline-3 {
+  outline-width: 3px;
+}
+
+.seller-object-card.board-outline-5 {
+  outline-width: 5px;
+}
+
+.seller-object-card.board-outline-0 {
+  outline-width: 0;
+}
+
+.seller-object-card.board-color-none {
+  outline-color: rgba(255,255,255,.018);
+}
+
+.seller-object-card.board-color-green {
+  outline-color: rgba(56,161,105,.95);
+}
+
+.seller-object-card.board-color-yellow {
+  outline-color: rgba(255,196,0,.95);
+}
+
+.seller-object-card.board-color-red {
+  outline-color: rgba(229,62,62,.95);
+}
+
+.seller-object-card.board-color-cyan {
+  outline-color: rgba(0,194,255,.95);
+}
+
+.seller-object-card.board-color-white {
+  outline-color: rgba(255,255,255,.85);
+}
+
+.seller-object-card.board-color-blue {
+  outline-color: rgba(49,130,206,.95);
+}
+
+.seller-object-card.board-color-orange {
+  outline-color: rgba(249,133,18,.95);
+}
       `}</style>
     </section>
   );
