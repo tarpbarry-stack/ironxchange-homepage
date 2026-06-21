@@ -348,6 +348,8 @@ export default function ListingLivePage() {
   const [saving, setSaving] = useState(false);
   const [commandBusy, setCommandBusy] = useState("");
 
+  const [currentUserId, setCurrentUserId] = useState("");
+
   const [edit, setEdit] = useState({
   price: "",
   hours: "",
@@ -385,6 +387,20 @@ const [externalLinks, setExternalLinks] = useState([
       .catch(err => console.error("Launch Studio load failed:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+  if (id) return;
+
+  if (!listings.length) return;
+
+  const firstListing = listings[0];
+
+  const firstListingId = getListingId(firstListing);
+
+  if (!firstListingId) return;
+
+  router.replace(`/live?id=${firstListingId}`);
+}, [id, listings, router]);
 
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
