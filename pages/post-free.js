@@ -1556,7 +1556,7 @@ select {
 
    .live-card-shell {
   width: 430px;
-  margin: 18px auto 0;
+  margin: 4px auto 0;
 }
 
 .live-card-shell :global(.card.seller-mode) {
