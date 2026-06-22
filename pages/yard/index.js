@@ -488,20 +488,48 @@ const sellerBoardObjects = useMemo(() => {
     }, 0)
   }));
 }, [sellerObjects]);
+
+  const checkedOutMachineObjects = useMemo(() => {
+  const checkedOutIds = new Set();
+
+  sellerBoardObjects.forEach(sellerObject => {
+    const sellerId = String(getBoardObjectId(sellerObject));
+    const state = ixiCardState[sellerId] || {};
+
+    const ids = Array.isArray(state.checkedOutMachineIds)
+      ? state.checkedOutMachineIds
+      : [];
+
+    ids.forEach(id => checkedOutIds.add(String(id)));
+  });
+
+  return marketplaceListings.filter(machine => {
+    const machineId = String(getListingId(machine));
+
+    return checkedOutIds.has(machineId);
+  });
+}, [sellerBoardObjects, ixiCardState, marketplaceListings]);
+
+  const boardObjects = useMemo(() => {
+  return [
+    ...sellerBoardObjects,
+    ...checkedOutMachineObjects
+  ];
+}, [sellerBoardObjects, checkedOutMachineObjects]);
   
 const containerStateKey = useMemo(() => {
-  return sellerBoardObjects
+  return boardObjects
     .map(item => {
       const id = String(getBoardObjectId(item));
       return `${id}:${ixiCardState[id]?.container || "board"}`;
     })
     .join("|");
-}, [sellerBoardObjects, ixiCardState]);
+}, [boardObjects, ixiCardState]);
    
 useEffect(() => {
     if (!sellerBoardObjects.length) return;
 
- const validMachineIds = sellerBoardObjects.map(item =>
+const validMachineIds = boardObjects.map(item =>
   String(getBoardObjectId(item))
 );
 
@@ -529,7 +557,7 @@ useEffect(() => {
 
   const nextContainers = createEmptyWorkspaceContainers();
 
-    sellerBoardObjects.forEach(item => {
+    boardObjects.forEach(item => {
     const id = String(getBoardObjectId(item));
     const savedContainer = ixiCardState[id]?.container;
 
@@ -542,15 +570,15 @@ useEffect(() => {
   });
 
   setMachineContainers(nextContainers);
-}, [containerStateKey, sellerBoardObjects]);
-
+}, [containerStateKey, boardObjects]);
+  
     const visibleSellerListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const source =
       savedBoardMode === "custom" && savedBoardListings.length
         ? savedBoardListings
-        : sellerBoardObjects;
+        : boardObjects;
 
 const orderedSource =
   (machineContainers.board || [])
@@ -671,7 +699,7 @@ return [...filtered].sort((a, b) => {
     searchQuery,
     savedBoardMode,
     savedBoardListings,
-    sellerBoardObjects,
+    boardObjects,
     workspaceFilters,
     machineContainers,
     ixiCardState,
