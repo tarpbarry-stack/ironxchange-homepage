@@ -448,30 +448,28 @@ const availableModels = useMemo(() => {
   getIXActivePhotoUrl(photoItems[0]) ||
   "/images/hero-equipment-yard.jpg";
 
-  const availableKeywords = useMemo(() => {
+ const availableKeywords = useMemo(() => {
   const taxonomy = taxonomyMap[category];
 
-  if (Array.isArray(taxonomy)) {
-    return taxonomy;
-  }
+  const raw =
+    Array.isArray(taxonomy?.keywords) ? taxonomy.keywords :
+    Array.isArray(taxonomy?.features) ? taxonomy.features :
+    Array.isArray(taxonomy?.badges) ? taxonomy.badges :
+    Array.isArray(categoryDnaKeywords[category]) ? categoryDnaKeywords[category] :
+    [];
 
-  if (Array.isArray(taxonomy?.keywords)) {
-    return taxonomy.keywords;
-  }
+  return raw
+    .map(item => {
+      if (typeof item === "string") return item;
 
-  if (Array.isArray(taxonomy?.features)) {
-    return taxonomy.features;
-  }
+      if (item?.label) return item.label;
+      if (item?.name) return item.name;
+      if (item?.title) return item.title;
+      if (item?.keyword) return item.keyword;
 
-  if (Array.isArray(taxonomy?.badges)) {
-    return taxonomy.badges;
-  }
-
-  if (Array.isArray(categoryDnaKeywords[category])) {
-    return categoryDnaKeywords[category];
-  }
-
-  return [];
+      return "";
+    })
+    .filter(Boolean);
 }, [category]);
 
   const filteredKeywords = useMemo(() => {
