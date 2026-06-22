@@ -300,7 +300,7 @@ onRailSend={() => {
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
   armedDestination={armedDestination}
- onSendToArmedDestination={
+onSendToArmedDestination={
   isSellerIdentityFace
     ? undefined
     : () => {
@@ -313,9 +313,9 @@ onRailSend={() => {
 
         onIxiStateChange?.(id, {
           checkedOutMachineIds: [
-  ...checkedOutMachineIds,
-  machineId
-],
+            ...checkedOutMachineIds,
+            machineId
+          ],
           face:
             sellerFace >= endDeckFace - 1
               ? endDeckFace
