@@ -893,9 +893,10 @@ function handlePhotoLoad(e, photoUrl) {
     brightness(1.02);
 }
 
-.card-photo-img.photo-fit-soft-cover {
-  object-fit: cover;
-  transform: scale(.985);
+.photo-fit-soft-cover {
+  object-fit: contain;
+  transform: scale(.96);
+  background: #080808;
 }
 
 .card-photo-img.photo-fit-contain-wide {
