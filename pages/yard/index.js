@@ -959,9 +959,9 @@ function isTransientCheckedOutMachine(machineId) {
   const state = ixiCardState[id] || {};
 
   const container =
-    state.container ||
-    getMachineContainer(id) ||
-    "board";
+  getMachineContainer(id) ||
+  state.container ||
+  "board";
 
   const hasRelationship =
     state.color &&
