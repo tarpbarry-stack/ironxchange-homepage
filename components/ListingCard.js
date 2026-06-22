@@ -1079,17 +1079,23 @@ text-align: right;
   gap: 10px;
 }
         .price-row::before {
-          content: "";
-          position: absolute;
-          top: 0px;
-          left: 0;
+  content: "";
+  position: absolute;
 
-          width: 34%;
-          height: 1px;
+  top: 6px;
 
-          background:
-  linear-gradient(90deg, rgba(255,196,0,.22), transparent);
-        }
+  left: 0;
+
+  width: 34%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,.22),
+      transparent
+    );
+}
 
         .price-row strong {
           color: #f2f2f2;
