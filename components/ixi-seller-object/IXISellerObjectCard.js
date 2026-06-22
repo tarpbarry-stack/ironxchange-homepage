@@ -248,81 +248,77 @@ const endDeckFace = availableMachines.length + 2;
   boardOutline={boardOutline}
   machineFace={sellerFace}
   railMode={
-  isSellerIdentityFace
-    ? "next-lit"
-    : "home-lit next-lit prev-lit end-lit"
-}
+    isSellerIdentityFace
+      ? "next-lit"
+      : "home-lit next-lit prev-lit end-lit"
+  }
   onCycleMachineFace={() => {
-  const nextFace =
-    sellerFace >= endDeckFace
-      ? 1
-      : sellerFace + 1;
+    const nextFace =
+      sellerFace >= endDeckFace
+        ? 1
+        : sellerFace + 1;
 
-  onIxiStateChange?.(id, {
-    face: nextFace
-  });
-}}
-onRailSend={() => {
-  if (isSellerIdentityFace) return;
+    onIxiStateChange?.(id, {
+      face: nextFace
+    });
+  }}
+  onRailSend={() => {
+    if (isSellerIdentityFace) return;
 
-  const previousFace =
-    sellerFace <= 2
-      ? 1
-      : sellerFace - 1;
+    const previousFace =
+      sellerFace <= 2
+        ? 1
+        : sellerFace - 1;
 
-  onIxiStateChange?.(id, {
-    face: previousFace
-  });
-}}
+    onIxiStateChange?.(id, {
+      face: previousFace
+    });
+  }}
   onSendFront={
-  isSellerIdentityFace
-    ? onSendFront
-    : () => {
-        onIxiStateChange?.(id, {
-          face: 1
-        });
-      }
-}
- onSendBack={
-  isSellerIdentityFace
-    ? () => {
-        onIxiStateChange?.(id, {
-          face: endDeckFace
-        });
-      }
-    : () => {
-        onIxiStateChange?.(id, {
-          face: endDeckFace
-        });
-      }
-}
+    isSellerIdentityFace
+      ? onSendFront
+      : () => {
+          onIxiStateChange?.(id, {
+            face: 1
+          });
+        }
+  }
+  onSendBack={
+    isSellerIdentityFace
+      ? onSendBack
+      : () => {
+          onIxiStateChange?.(id, {
+            face: endDeckFace
+          });
+        }
+  }
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
   armedDestination={armedDestination}
-onSendToArmedDestination={
-  isSellerIdentityFace
-    ? undefined
-    : () => {
-        if (!activeMachine) return;
+  onSendToArmedDestination={
+    isSellerIdentityFace
+      ? undefined
+      : () => {
+          if (!activeMachine) return;
 
-        const machineId =
-          String(activeMachine?.id?.uuid || activeMachine?.id || "");
+          const machineId =
+            String(activeMachine?.id?.uuid || activeMachine?.id || "");
 
-        onSendToArmedDestination?.(activeMachine);
+          onSendToArmedDestination?.(activeMachine);
 
-        onIxiStateChange?.(id, {
-          checkedOutMachineIds: [
-            ...checkedOutMachineIds,
-            machineId
-          ],
-          face:
-            sellerFace >= endDeckFace - 1
-              ? endDeckFace
-              : sellerFace
-        });
-      }
-}
+          onIxiStateChange?.(id, {
+            checkedOutMachineIds: [
+              ...checkedOutMachineIds,
+              machineId
+            ],
+            face:
+              sellerFace >= endDeckFace - 1
+                ? endDeckFace
+                : sellerFace
+          });
+        }
+  }
 />
 
       <style jsx>{`
