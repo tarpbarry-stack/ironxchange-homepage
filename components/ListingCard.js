@@ -1082,7 +1082,8 @@ text-align: right;
   position: absolute;
 
   top: 6px;
-
+  z-index: 2;
+  
   left: 0;
 
   width: 34%;
@@ -1094,6 +1095,20 @@ text-align: right;
       rgba(255,196,0,.22),
       transparent
     );
+}
+
+.price-row::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background: rgba(255,255,255,.045);
+
+  z-index: 1;
 }
 
         .price-row strong {
