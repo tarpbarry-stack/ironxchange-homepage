@@ -139,20 +139,6 @@ const boardOutline =
 const isSellerIdentityFace =
   sellerFace === 1;
 
-const availableMachines =
-  machines.filter(machine => {
-
-const endDeckFace =
-  availableMachines.length + 2;
-
-const isEndDeckFace =
-  sellerFace === endDeckFace;
-
-const activeMachineIndex =
-  sellerFace > 1 && sellerFace < endDeckFace
-    ? sellerFace - 2
-    : -1;
-    
 const checkedOutMachineIds =
   Array.isArray(ixiState?.checkedOutMachineIds)
     ? ixiState.checkedOutMachineIds.map(String)
@@ -166,12 +152,21 @@ const availableMachines =
     return !checkedOutMachineIds.includes(machineId);
   });
 
+const endDeckFace =
+  availableMachines.length + 2;
+
+const isEndDeckFace =
+  sellerFace === endDeckFace;
+
+const activeMachineIndex =
+  sellerFace > 1 && sellerFace < endDeckFace
+    ? sellerFace - 2
+    : -1;
+
 const activeMachine =
   activeMachineIndex >= 0
     ? availableMachines[activeMachineIndex]
     : null;
-
-const endDeckFace = availableMachines.length + 2;
   
   return (
       <section
