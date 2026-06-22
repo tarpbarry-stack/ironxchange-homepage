@@ -315,7 +315,7 @@ onRailSend={() => {
           checkedOutMachineIds: [
   ...checkedOutMachineIds,
   machineId
-]
+],
           face:
             sellerFace >= endDeckFace - 1
               ? endDeckFace
