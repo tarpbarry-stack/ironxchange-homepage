@@ -913,6 +913,34 @@ function moveMachineBackToBoard(machineId) {
   moveMachineToContainer(machineId, "board");
 }
 
+function checkMachineBackIntoSeller(machineId) {
+  const id = String(machineId);
+  const machineState = ixiCardState[id] || {};
+  const sourceSellerId = String(machineState.sourceSellerId || "");
+
+  if (!sourceSellerId) return;
+
+  const sellerState = ixiCardState[sourceSellerId] || {};
+
+  const checkedOutIds = Array.isArray(sellerState.checkedOutMachineIds)
+    ? sellerState.checkedOutMachineIds.map(String)
+    : [];
+
+  if (!checkedOutIds.includes(id)) return;
+
+  updateIxiCardState(sourceSellerId, {
+    checkedOutMachineIds: checkedOutIds.filter(
+      item => String(item) !== id
+    )
+  });
+
+  updateIxiCardState(id, {
+    sourceSellerId: "",
+    checkedOutFromSeller: false,
+    container: "board"
+  });
+}
+  
 function getListingById(machineId) {
   return listings.find(
     item => String(getListingId(item)) === String(machineId)
@@ -1236,10 +1264,16 @@ function movePocketToStack(pocketKey, stackKey) {
 }
 
 function recallPocketToBoard(pocketKey) {
+  const pocketIds = machineContainers[pocketKey] || [];
+
   movePocketToContainer(
     pocketKey,
     "board"
   );
+
+  pocketIds.forEach(machineId => {
+    checkMachineBackIntoSeller(machineId);
+  });
 }
 
   
@@ -1263,6 +1297,8 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
     };
 
     saveWorkspaceLayout(finalContainers);
+
+    checkMachineBackIntoSeller(id);
 
     return finalContainers;
   });
