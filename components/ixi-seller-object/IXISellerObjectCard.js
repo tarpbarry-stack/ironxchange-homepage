@@ -281,10 +281,10 @@ onRailSend={() => {
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
   armedDestination={armedDestination}
-  onSendToArmedDestination={
+ onSendToArmedDestination={
   isSellerIdentityFace
     ? undefined
-    : onSendToArmedDestination
+    : () => onSendToArmedDestination?.(activeMachine)
 }
 />
 
