@@ -256,44 +256,49 @@ export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
 
-  const allData = [];
-const allIncluded = [];
-let page = 1;
-let totalPages = 1;
+    const allData = [];
+    const allIncluded = [];
+    let page = 1;
+    let totalPages = 1;
 
-do {
-  const response = await fetch(
-    `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&page=${page}&include=images,author,author.profileImage`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json"
+    do {
+      const response = await fetch(
+        `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&page=${page}&include=images,author,author.profileImage`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json"
+          }
+        }
+      );
+
+      const pageData = await safeJson(response);
+
+      if (!response.ok) {
+        throw new Error(
+          `Listings failed on page ${page}: ${JSON.stringify(pageData)}`
+        );
       }
-    }
-  );
 
-  const pageData = await safeJson(response);
+      allData.push(...(pageData.data || []));
+      allIncluded.push(...(pageData.included || []));
 
-  if (!response.ok) {
-    throw new Error(`Listings failed on page ${page}: ${JSON.stringify(pageData)}`);
-  }
+      totalPages =
+        pageData.meta?.totalPages ||
+        pageData.meta?.total_pages ||
+        page;
 
-  allData.push(...(pageData.data || []));
-  allIncluded.push(...(pageData.included || []));
+      page += 1;
+    } while (page <= totalPages);
 
-  totalPages =
-    pageData.meta?.totalPages ||
-    pageData.meta?.total_pages ||
-    page;
+    console.log("IX LISTINGS FETCHED:", allData.length);
 
-  page += 1;
-} while (page <= totalPages);
+    const data = {
+      data: allData,
+      included: allIncluded
+    };
 
-const data = {
-  data: allData,
-  included: allIncluded
-};
     const included = data.included || [];
     const imageById = {};
     const logoById = {};
