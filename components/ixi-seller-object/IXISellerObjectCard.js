@@ -139,6 +139,12 @@ const boardOutline =
 const isSellerIdentityFace =
   sellerFace === 1;
 
+const availableMachines =
+  machines.filter(machine => {
+
+const endDeckFace =
+  availableMachines.length + 2;
+
 const isEndDeckFace =
   sellerFace === endDeckFace;
 
@@ -146,10 +152,10 @@ const activeMachineIndex =
   sellerFace > 1 && sellerFace < endDeckFace
     ? sellerFace - 2
     : -1;
-
-const extractedMachineIds =
-  Array.isArray(ixiState?.extractedMachineIds)
-    ? ixiState.extractedMachineIds.map(String)
+    
+const checkedOutMachineIds =
+  Array.isArray(ixiState?.checkedOutMachineIds)
+    ? ixiState.checkedOutMachineIds.map(String)
     : [];
 
 const availableMachines =
@@ -157,7 +163,7 @@ const availableMachines =
     const machineId =
       String(machine?.id?.uuid || machine?.id || "");
 
-    return !extractedMachineIds.includes(machineId);
+    return !checkedOutMachineIds.includes(machineId);
   });
 
 const activeMachine =
@@ -306,10 +312,10 @@ onRailSend={() => {
         onSendToArmedDestination?.(activeMachine);
 
         onIxiStateChange?.(id, {
-          extractedMachineIds: [
-            ...extractedMachineIds,
-            machineId
-          ],
+          checkedOutMachineIds: [
+  ...checkedOutMachineIds,
+  machineId
+]
           face:
             sellerFace >= endDeckFace - 1
               ? endDeckFace
