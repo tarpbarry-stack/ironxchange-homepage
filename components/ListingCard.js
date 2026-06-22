@@ -409,8 +409,8 @@ function handlePhotoLoad(e, photoUrl) {
   src={currentPhoto || "/images/hero-equipment-yard.jpg"}
   alt={listing.title || "Machine"}
   draggable={false}
-  className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
-  style={getFrameStyle(currentImageObject, "card")}
+ className="card-photo-img photo-fit-contain-force"
+style={{}}
   onLoad={e => handlePhotoLoad(e, currentPhoto)}
   loading="lazy"
 />
@@ -857,7 +857,7 @@ function handlePhotoLoad(e, photoUrl) {
 
         .card-photo {
           position: relative;
-          height: 196px;
+          height: 220px;
           overflow: hidden;
 
           border-bottom: 1px solid rgba(255,255,255,.065);
@@ -911,6 +911,12 @@ function handlePhotoLoad(e, photoUrl) {
   background: #080808;
 }
 
+.card-photo-img.photo-fit-contain-force {
+  object-fit: contain !important;
+  object-position: center center !important;
+  transform: scale(.86) !important;
+  background: #080808;
+}
 
         .card-photo-nav {
           position: absolute;
@@ -979,9 +985,9 @@ function handlePhotoLoad(e, photoUrl) {
   display: flex;
   flex-direction: column;
 
-  height: 195px;
-  min-height: 195px;
-  max-height: 195px;
+  height: 171px;
+  min-height: 171px;
+  max-height: 171px;
 }
 
      .title-row {
