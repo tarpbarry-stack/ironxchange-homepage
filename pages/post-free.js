@@ -184,52 +184,6 @@ function addActivity(type, message) {
   }
 }
 
-async function compressImage(file, maxWidth = 1600, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    const reader = new FileReader();
-
-    reader.onload = event => {
-      image.onload = () => {
-        const scale = Math.min(1, maxWidth / image.width);
-        const width = Math.round(image.width * scale);
-        const height = Math.round(image.height * scale);
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(image, 0, 0, width, height);
-
-        canvas.toBlob(
-          blob => {
-            if (!blob) {
-              reject(new Error("Image compression failed."));
-              return;
-            }
-
-            resolve(
-              new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
-                type: "image/jpeg",
-                lastModified: Date.now()
-              })
-            );
-          },
-          "image/jpeg",
-          quality
-        );
-      };
-
-      image.onerror = reject;
-      image.src = event.target.result;
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 function buildSocialCopy(platform, listing, listingUrl, selectedKeywords = []) {
   const title = clean(listing?.title) || "Equipment Listing";
   const priceLabel = formatMoney(listing?.price);
@@ -336,7 +290,7 @@ export default function PostFreePage() {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState("good-listing");
-  const [photoPolishMode, setPhotoPolishMode] = useState("clean");
+  const [photoPolishMode, setPhotoPolishMode] = useState("original");
 
   useEffect(() => {
   captureIXEvent("post_free_viewed", {
@@ -485,7 +439,6 @@ const badgeCategory = useMemo(() => {
   return getBadgeCategory(category);
 }, [category]);
 
-console.log("CATEGORY RAW:", category);
 const availableKeywords = useMemo(() => {
   return categoryDnaKeywords[badgeCategory] || [];
 }, [badgeCategory]);
@@ -702,13 +655,16 @@ const availableKeywords = useMemo(() => {
           if (!photo.file) return null;
 
           const imageFile =
-  getIXActivePhotoFile(photo) ||
-  await processIXPhoto(photo.file, {
-    mode: photoPolishMode,
-    make,
-    outputQuality: 0.9,
-    maxWidth: 2200
-  });
+  const imageFile =
+  photoPolishMode === "original"
+    ? photo.file
+    : getIXActivePhotoFile(photo) ||
+      await processIXPhoto(photo.file, {
+        mode: photoPolishMode,
+        make,
+        outputQuality: 0.98,
+        maxWidth: 4096
+      });
 
           return sdk.images.upload(
             { image: imageFile },
