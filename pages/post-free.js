@@ -511,6 +511,7 @@ const badgeCategory = useMemo(() => {
   return getBadgeCategory(category);
 }, [category]);
 
+console.log("CATEGORY RAW:", category);
 const availableKeywords = useMemo(() => {
   return categoryDnaKeywords[badgeCategory] || [];
 }, [badgeCategory]);
