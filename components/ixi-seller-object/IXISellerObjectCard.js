@@ -139,8 +139,6 @@ const boardOutline =
 const isSellerIdentityFace =
   sellerFace === 1;
 
-const endDeckFace = machines.length + 2;
-
 const isEndDeckFace =
   sellerFace === endDeckFace;
 
@@ -149,10 +147,25 @@ const activeMachineIndex =
     ? sellerFace - 2
     : -1;
 
+const extractedMachineIds =
+  Array.isArray(ixiState?.extractedMachineIds)
+    ? ixiState.extractedMachineIds.map(String)
+    : [];
+
+const availableMachines =
+  machines.filter(machine => {
+    const machineId =
+      String(machine?.id?.uuid || machine?.id || "");
+
+    return !extractedMachineIds.includes(machineId);
+  });
+
 const activeMachine =
   activeMachineIndex >= 0
-    ? machines[activeMachineIndex]
+    ? availableMachines[activeMachineIndex]
     : null;
+
+const endDeckFace = availableMachines.length + 2;
   
   return (
       <section
@@ -284,7 +297,25 @@ onRailSend={() => {
  onSendToArmedDestination={
   isSellerIdentityFace
     ? undefined
-    : () => onSendToArmedDestination?.(activeMachine)
+    : () => {
+        if (!activeMachine) return;
+
+        const machineId =
+          String(activeMachine?.id?.uuid || activeMachine?.id || "");
+
+        onSendToArmedDestination?.(activeMachine);
+
+        onIxiStateChange?.(id, {
+          extractedMachineIds: [
+            ...extractedMachineIds,
+            machineId
+          ],
+          face:
+            sellerFace >= endDeckFace - 1
+              ? endDeckFace
+              : sellerFace
+        });
+      }
 }
 />
 
