@@ -1482,17 +1482,32 @@ const availableModels = useMemo(() => {
               </div>
             </section>
 
-            <section className="panel seller-panel">
-              <div className="seller-icon">
-                <i className="fa-regular fa-user"></i>
-              </div>
+           <section className="panel seller-panel">
+  {sellerProfile.sellerLogo || sellerProfile.profileImage ? (
+    <img
+      src={sellerProfile.sellerLogo || sellerProfile.profileImage}
+      alt={sellerProfile.sellerCompany || sellerProfile.sellerName}
+    />
+  ) : (
+    <div className="seller-icon">
+      <i className="fa-regular fa-user"></i>
+    </div>
+  )}
 
-              <div>
-                <span>Seller</span>
-                <strong>IronXchange Seller</strong>
-                <p>Add the machine. Build the card. Post it free. Blast it everywhere.</p>
-              </div>
-            </section>
+  <div>
+    <span>Seller</span>
+    <strong>
+      {sellerProfile.sellerCompany ||
+        sellerProfile.sellerName ||
+        "IronXchange Seller"}
+    </strong>
+    <p>
+      {sellerProfile.sellerLocation
+        ? sellerProfile.sellerLocation
+        : "Add the machine. Build the card. Post it free. Blast it everywhere."}
+    </p>
+  </div>
+</section>
           </section>
         </section>
       </main>
