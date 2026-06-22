@@ -3084,6 +3084,24 @@ select {
   margin: 24px auto 0;
 }
 
+.live-card-shell :global(.card.seller-mode) {
+  width: 430px;
+
+  height: 564px;
+  min-height: 564px;
+  max-height: 564px;
+}
+
+.live-card-shell :global(.card-photo) {
+  height: 317px;
+}
+
+.live-card-shell :global(.card.seller-mode .card-body) {
+  height: 247px;
+  min-height: 247px;
+  max-height: 247px;
+}
+
        .listing-preview-card {
   width: min(100%, 430px);
   margin: 24px auto 0;
