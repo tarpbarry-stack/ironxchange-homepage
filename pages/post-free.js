@@ -1472,31 +1472,26 @@ select {
   #0b0b0b;
         }
 
-    .live-card-shell {
-  width: 430px;
-  margin: 24px auto 0;
-}
-
-.live-card-shell {
+   .live-card-shell {
   width: 430px;
   margin: 18px auto 0;
 }
 
 .live-card-shell :global(.card.seller-mode) {
   width: 430px;
-  height: 620px;
-  min-height: 620px;
-  max-height: 620px;
+  height: 564px;
+  min-height: 564px;
+  max-height: 564px;
 }
 
 .live-card-shell :global(.card-photo) {
-  height: 318px;
+  height: 317px;
 }
 
 .live-card-shell :global(.card.seller-mode .card-body) {
-  height: 302px;
-  min-height: 302px;
-  max-height: 302px;
+  height: 247px;
+  min-height: 247px;
+  max-height: 247px;
 }
 
         .launch-wrap {
