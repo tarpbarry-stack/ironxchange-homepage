@@ -503,11 +503,14 @@ const sellerBoardObjects = useMemo(() => {
     ids.forEach(id => checkedOutIds.add(String(id)));
   });
 
-  return marketplaceListings.filter(machine => {
-    const machineId = String(getListingId(machine));
+ return marketplaceListings.filter(machine => {
+  const machineId = String(getListingId(machine));
 
-    return checkedOutIds.has(machineId);
-  });
+  return (
+    checkedOutIds.has(machineId) &&
+    !isTransientCheckedOutMachine(machineId)
+  );
+});
 }, [sellerBoardObjects, ixiCardState, marketplaceListings]);
 
   const boardObjects = useMemo(() => {
@@ -894,6 +897,39 @@ function getListingById(machineId) {
   );
 }
 
+function isTransientCheckedOutMachine(machineId) {
+  const id = String(machineId);
+
+  const state = ixiCardState[id] || {};
+
+  const container =
+    state.container ||
+    getMachineContainer(id) ||
+    "board";
+
+  const hasRelationship =
+    state.color &&
+    state.color !== "none";
+
+  const hasOutline =
+    Number(state.outline || 1) > 1;
+
+  const isContainered =
+    container !== "board";
+
+  const isSaved =
+    savedIds.includes(id);
+
+  return (
+    container === "board" &&
+    !hasRelationship &&
+    !hasOutline &&
+    !isContainered &&
+    !isSaved
+  );
+}
+
+  
 function getActiveDndObject() {
   if (!activeDndId) return null;
 
