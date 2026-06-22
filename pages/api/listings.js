@@ -256,23 +256,44 @@ export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
 
-    const response = await fetch(
-      "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&include=images,author,author.profileImage",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json"
-        }
+  const allData = [];
+const allIncluded = [];
+let page = 1;
+let totalPages = 1;
+
+do {
+  const response = await fetch(
+    `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&page=${page}&include=images,author,author.profileImage`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
       }
-    );
-
-    const data = await safeJson(response);
-
-    if (!response.ok) {
-      throw new Error(`Listings failed: ${JSON.stringify(data)}`);
     }
+  );
 
+  const pageData = await safeJson(response);
+
+  if (!response.ok) {
+    throw new Error(`Listings failed on page ${page}: ${JSON.stringify(pageData)}`);
+  }
+
+  allData.push(...(pageData.data || []));
+  allIncluded.push(...(pageData.included || []));
+
+  totalPages =
+    pageData.meta?.totalPages ||
+    pageData.meta?.total_pages ||
+    page;
+
+  page += 1;
+} while (page <= totalPages);
+
+const data = {
+  data: allData,
+  included: allIncluded
+};
     const included = data.included || [];
     const imageById = {};
     const logoById = {};
