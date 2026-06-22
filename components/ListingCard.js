@@ -1049,11 +1049,11 @@ text-align: right;
   box-shadow: 0 0 0 1px rgba(255,196,0,.10);
 }
 
-       .keyword-row {
-  height: 54px;
-  min-height: 54px;
-  max-height: 54px;
-  margin: 7px 0 8px;
+     .keyword-row {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  margin: 5px 0 4px;
   overflow: hidden;
 }
 
