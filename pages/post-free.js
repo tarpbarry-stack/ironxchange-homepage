@@ -1477,6 +1477,28 @@ select {
   margin: 24px auto 0;
 }
 
+.live-card-shell {
+  width: 430px;
+  margin: 18px auto 0;
+}
+
+.live-card-shell :global(.card.seller-mode) {
+  width: 430px;
+  height: 620px;
+  min-height: 620px;
+  max-height: 620px;
+}
+
+.live-card-shell :global(.card-photo) {
+  height: 318px;
+}
+
+.live-card-shell :global(.card.seller-mode .card-body) {
+  height: 302px;
+  min-height: 302px;
+  max-height: 302px;
+}
+
         .launch-wrap {
           max-width: 1600px;
           margin: 0 auto;
