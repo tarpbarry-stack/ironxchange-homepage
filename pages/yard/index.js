@@ -571,15 +571,28 @@ const validMachineIds = boardObjects.map(item =>
     savedLayout?.machineContainers &&
     !hasAppliedRemoteLayoutRef.current
   ) {
-    setMachineContainers(
-      sanitizeWorkspaceContainers(
-        savedLayout.machineContainers,
-        validMachineIds
-      )
-    );
+    const hydratedContainers =
+  sanitizeWorkspaceContainers(
+    savedLayout.machineContainers,
+    validMachineIds
+  );
 
-    hasAppliedRemoteLayoutRef.current = true;
-    return;
+const placedIds = new Set(
+  Object.values(hydratedContainers)
+    .flat()
+    .map(String)
+);
+
+validMachineIds.forEach(id => {
+  if (!placedIds.has(String(id))) {
+    hydratedContainers.board.push(String(id));
+  }
+});
+
+setMachineContainers(hydratedContainers);
+
+hasAppliedRemoteLayoutRef.current = true;
+return;
   }
 
   if (hasAppliedRemoteLayoutRef.current) {
