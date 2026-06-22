@@ -308,6 +308,13 @@ export default function PostFreePage() {
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [sellerProfile, setSellerProfile] = useState({
+  sellerName: "IronXchange Seller",
+  sellerCompany: "",
+  sellerLogo: "",
+  profileImage: "",
+  sellerLocation: ""
+});
 
   const [category, setCategory] = useState("EXCAVATORS");
   const [year, setYear] = useState("");
@@ -350,8 +357,62 @@ export default function PostFreePage() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        await sdk.currentUser.show();
-        setLoggedIn(true);
+        const currentUser = await sdk.currentUser.show({
+  include: ["profileImage"]
+});
+
+setLoggedIn(true);
+
+const user = currentUser.data.data;
+const included = currentUser.data.included || [];
+const profile = user.attributes?.profile || {};
+const publicData = profile.publicData || {};
+const protectedData = profile.protectedData || {};
+
+const profileImageId =
+  user.relationships?.profileImage?.data?.id?.uuid ||
+  user.relationships?.profileImage?.data?.id;
+
+const profileImageAsset = included.find(item =>
+  String(item.id?.uuid || item.id) === String(profileImageId)
+);
+
+const variants = profileImageAsset?.attributes?.variants || {};
+const logoUrl =
+  variants.default?.url ||
+  variants["scaled-large"]?.url ||
+  variants["scaled-medium"]?.url ||
+  variants["scaled-small"]?.url ||
+  profileImageAsset?.attributes?.url ||
+  "";
+
+const companyName =
+  publicData.companyName ||
+  publicData.company ||
+  publicData.dealerName ||
+  publicData.businessName ||
+  protectedData.companyName ||
+  "";
+
+setSellerProfile({
+  sellerName:
+    publicData.sellerName ||
+    profile.displayName ||
+    companyName ||
+    "IronXchange Seller",
+
+  sellerCompany: companyName,
+  sellerLogo: logoUrl,
+  profileImage: logoUrl,
+
+  sellerLocation:
+    publicData.location ||
+    publicData.sellerLocation ||
+    publicData.cityState ||
+    publicData.loc ||
+    protectedData.location ||
+    ""
+});
       } catch {
         setLoggedIn(false);
       }
@@ -434,7 +495,13 @@ const availableModels = useMemo(() => {
     keywords: selectedKeywords,
     serialNumber,
     stockNumber,
-    description
+    description,
+
+    sellerName: sellerProfile.sellerName,
+    sellerCompany: sellerProfile.sellerCompany,
+    sellerLogo: sellerProfile.sellerLogo,
+    profileImage: sellerProfile.profileImage,
+    sellerLocation: sellerProfile.sellerLocation
   }
 };
 
