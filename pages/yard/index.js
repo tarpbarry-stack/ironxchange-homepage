@@ -554,15 +554,6 @@ useEffect(() => {
   machineContainers,
   savedIds
 ]);
-
-const containerStateKey = useMemo(() => {
-  return boardObjects
-    .map(item => {
-      const id = String(getBoardObjectId(item));
-      return `${id}:${ixiCardState[id]?.container || "board"}`;
-    })
-    .join("|");
-}, [boardObjects, ixiCardState]);
   
 const containerStateKey = useMemo(() => {
   return boardObjects
