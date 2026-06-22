@@ -519,6 +519,50 @@ const sellerBoardObjects = useMemo(() => {
     ...checkedOutMachineObjects
   ];
 }, [sellerBoardObjects, checkedOutMachineObjects]);
+
+const boardObjects = useMemo(() => {
+  return [
+    ...sellerBoardObjects,
+    ...checkedOutMachineObjects
+  ];
+}, [sellerBoardObjects, checkedOutMachineObjects]);
+
+useEffect(() => {
+  sellerBoardObjects.forEach(sellerObject => {
+    const sellerId = String(getBoardObjectId(sellerObject));
+    const state = ixiCardState[sellerId] || {};
+
+    const checkedOutIds = Array.isArray(state.checkedOutMachineIds)
+      ? state.checkedOutMachineIds.map(String)
+      : [];
+
+    if (!checkedOutIds.length) return;
+
+    const stillCheckedOutIds = checkedOutIds.filter(machineId =>
+      !isTransientCheckedOutMachine(machineId)
+    );
+
+    if (stillCheckedOutIds.length === checkedOutIds.length) return;
+
+    updateIxiCardState(sellerId, {
+      checkedOutMachineIds: stillCheckedOutIds
+    });
+  });
+}, [
+  sellerBoardObjects,
+  ixiCardState,
+  machineContainers,
+  savedIds
+]);
+
+const containerStateKey = useMemo(() => {
+  return boardObjects
+    .map(item => {
+      const id = String(getBoardObjectId(item));
+      return `${id}:${ixiCardState[id]?.container || "board"}`;
+    })
+    .join("|");
+}, [boardObjects, ixiCardState]);
   
 const containerStateKey = useMemo(() => {
   return boardObjects
