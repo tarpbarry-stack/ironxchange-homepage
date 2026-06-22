@@ -3081,7 +3081,7 @@ select {
 
 .live-card-shell {
   width: 430px;
-  margin: 24px auto 0;
+  margin: 14px auto 0;
 }
 
 .live-card-shell :global(.card.seller-mode) {
