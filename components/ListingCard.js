@@ -1072,7 +1072,7 @@ text-align: right;
   justify-content: space-between;
   align-items: center;
 
-  margin-top: 18px;
+   margin-top: 8px;
   padding-top: 4px;
 
   border-top: 1px solid rgba(255,255,255,.045);
