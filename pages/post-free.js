@@ -448,30 +448,47 @@ const availableModels = useMemo(() => {
   getIXActivePhotoUrl(photoItems[0]) ||
   "/images/hero-equipment-yard.jpg";
 
- const availableKeywords = useMemo(() => {
-  const taxonomy = taxonomyMap[category];
+const badgeCategoryAliases = {
+  "AERIAL EQUIPMENT": "AERIAL EQUIPMENT",
+  "AGGREGATE": "AGGREGATE",
+  "AGRICULTURE HARVESTERS": "AGRICULTURE HARVESTERS",
+  "AGRICULTURE TRACTORS": "AGRICULTURE TRACTORS",
+  "ASPHALT EQUIPMENT": "ASPHALT EQUIPMENT",
+  "BACKHOE LOADERS": "BACKHOE LOADERS",
+  "COMPACTION/ROLLERS": "COMPACTION/ROLLERS",
+  "CRANES": "CRANES",
+  "CRAWLER CARRIERS / LOADER": "CRAWLER CARRIERS / LOADER",
+  "DOZERS": "DOZERS",
+  "DRILLS & PILING": "DRILLS & PILING",
+  "DUMP TRUCKS - ARTIC/RIGID": "DUMP TRUCKS - ARTIC/RIGID",
+  "EXCAVATORS": "EXCAVATORS",
+  "FORKLIFTS": "FORKLIFTS",
+  "MOTOR GRADERS": "MOTOR GRADERS",
+  "SCRAPER": "SCRAPER",
+  "SKID STEER/CTL": "SKID STEER/CTL",
+  "TELEHANDLERS": "TELEHANDLERS",
+  "TRENCHERS/PLOWS": "TRENCHERS/PLOWS",
+  "TRAILERS": "TRAILERS",
+  "TRUCKS": "TRUCKS",
+  "WHEEL LOADERS": "WHEEL LOADERS",
+  "ATTACHMENTS / PARTS": "ATTACHMENTS / PARTS",
+  "SUPPORT EQUIPMENT": "SUPPORT EQUIPMENT",
+  "UTILITY CARTS": "UTILITY CARTS"
+};
 
-  const raw =
-    Array.isArray(taxonomy?.keywords) ? taxonomy.keywords :
-    Array.isArray(taxonomy?.features) ? taxonomy.features :
-    Array.isArray(taxonomy?.badges) ? taxonomy.badges :
-    Array.isArray(categoryDnaKeywords[category]) ? categoryDnaKeywords[category] :
-    [];
+function getBadgeCategory(category) {
+  const key = String(category || "").trim().toUpperCase();
+  return badgeCategoryAliases[key] || key;
+}
 
-  return raw
-    .map(item => {
-      if (typeof item === "string") return item;
-
-      if (item?.label) return item.label;
-      if (item?.name) return item.name;
-      if (item?.title) return item.title;
-      if (item?.keyword) return item.keyword;
-
-      return "";
-    })
-    .filter(Boolean);
+const badgeCategory = useMemo(() => {
+  return getBadgeCategory(category);
 }, [category]);
 
+const availableKeywords = useMemo(() => {
+  return categoryDnaKeywords[badgeCategory] || [];
+}, [badgeCategory]);
+  
   const filteredKeywords = useMemo(() => {
     const search = keywordSearch.trim().toLowerCase();
 
