@@ -1075,7 +1075,6 @@ text-align: right;
    margin-top: 8px;
   padding-top: 4px;
 
-  border-top: 1px solid rgba(255,255,255,.045);
   gap: 10px;
 }
         .price-row::before {
