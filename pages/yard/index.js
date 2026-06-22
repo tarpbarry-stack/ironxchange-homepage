@@ -513,13 +513,6 @@ const sellerBoardObjects = useMemo(() => {
 });
 }, [sellerBoardObjects, ixiCardState, marketplaceListings]);
 
-  const boardObjects = useMemo(() => {
-  return [
-    ...sellerBoardObjects,
-    ...checkedOutMachineObjects
-  ];
-}, [sellerBoardObjects, checkedOutMachineObjects]);
-
 const boardObjects = useMemo(() => {
   return [
     ...sellerBoardObjects,
