@@ -653,8 +653,7 @@ const availableKeywords = useMemo(() => {
       const uploadedImages = await Promise.all(
         photoItems.map(async photo => {
           if (!photo.file) return null;
-
-          const imageFile =
+          
   const imageFile =
   photoPolishMode === "original"
     ? photo.file
