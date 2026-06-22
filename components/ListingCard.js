@@ -409,8 +409,8 @@ function handlePhotoLoad(e, photoUrl) {
   src={currentPhoto || "/images/hero-equipment-yard.jpg"}
   alt={listing.title || "Machine"}
   draggable={false}
- className="card-photo-img photo-fit-contain-force"
-style={{}}
+ className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
+style={getFrameStyle(currentImageObject, "card")}
   onLoad={e => handlePhotoLoad(e, currentPhoto)}
   loading="lazy"
 />
@@ -885,7 +885,7 @@ style={{}}
   transform-origin: center center;
 }
 
-        .card-photo-img.photo-fit-contain-wide,
+       .card-photo-img.photo-fit-contain-wide,
 .card-photo-img.photo-fit-contain-tall {
   filter:
     contrast(1.035)
@@ -893,29 +893,19 @@ style={{}}
     brightness(1.02);
 }
 
-.photo-fit-soft-cover {
-  object-fit: contain;
+.card-photo-img.photo-fit-soft-cover {
+  object-fit: cover;
   transform: scale(.96);
-  background: #080808;
 }
 
 .card-photo-img.photo-fit-contain-wide {
-  object-fit: contain;
-  transform: scale(.97);
-  background: #080808;
+  object-fit: cover;
+  transform: scale(.94);
 }
 
 .card-photo-img.photo-fit-contain-tall {
-  object-fit: contain;
-  transform: scale(.94);
-  background: #080808;
-}
-
-.card-photo-img.photo-fit-contain-force {
-  object-fit: contain !important;
-  object-position: center center !important;
-  transform: scale(.86) !important;
-  background: #080808;
+  object-fit: cover;
+  transform: scale(.92);
 }
 
         .card-photo-nav {
