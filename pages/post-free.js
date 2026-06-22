@@ -449,7 +449,29 @@ const availableModels = useMemo(() => {
   "/images/hero-equipment-yard.jpg";
 
   const availableKeywords = useMemo(() => {
-  return categoryDnaKeywords[category] || [];
+  const taxonomy = taxonomyMap[category];
+
+  if (Array.isArray(taxonomy)) {
+    return taxonomy;
+  }
+
+  if (Array.isArray(taxonomy?.keywords)) {
+    return taxonomy.keywords;
+  }
+
+  if (Array.isArray(taxonomy?.features)) {
+    return taxonomy.features;
+  }
+
+  if (Array.isArray(taxonomy?.badges)) {
+    return taxonomy.badges;
+  }
+
+  if (Array.isArray(categoryDnaKeywords[category])) {
+    return categoryDnaKeywords[category];
+  }
+
+  return [];
 }, [category]);
 
   const filteredKeywords = useMemo(() => {
