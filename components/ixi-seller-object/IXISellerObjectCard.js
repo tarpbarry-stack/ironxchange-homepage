@@ -302,6 +302,11 @@ const activeMachine =
 
           onSendToArmedDestination?.(activeMachine);
 
+          onIxiStateChange?.(machineId, {
+            sourceSellerId: id,
+            checkedOutFromSeller: true
+                  });
+
           onIxiStateChange?.(id, {
             checkedOutMachineIds: [
               ...checkedOutMachineIds,
