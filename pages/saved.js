@@ -1198,11 +1198,23 @@ function cycleCardScaleMode() {
     setActiveDndId,
     clearMachineDragState
   });  
-    function sendMachineToArmedDestination(listing) {
+   function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
-  if (!POCKET_TARGETS.includes(armedDestination)) return;
 
   const id = String(getListingId(listing));
+
+  if (armedDestination === "theater") {
+    sendMachineToTheater({
+      userId: ixiUserId,
+      listingId: id,
+      receptor: "stack1"
+    });
+
+    return;
+  }
+
+  if (!POCKET_TARGETS.includes(armedDestination)) return;
+
   moveMachineToContainer(id, armedDestination);
 }
             
