@@ -935,6 +935,7 @@ async function buildLiveImageIdsForSave() {
   finalImageIds.push(
     new UUID(photo.imageId)
   );
+   }
 
   continue;
 }
