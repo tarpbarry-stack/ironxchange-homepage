@@ -1204,15 +1204,27 @@ function sendMachineToArmedDestination(listing) {
 
   const id = String(getListingId(listing));
 
-  if (armedDestination === "theater") {
-    sendMachineToTheater({
-      userId: ixiUserId,
-      listingId: id,
-      receptor: "stack1"
+ if (armedDestination === "theater") {
+  console.log("BUTTON 6 THEATER SEND FIRED", {
+    id,
+    ixiUserId,
+    armedDestination
+  });
+
+  sendMachineToTheater({
+    userId: ixiUserId,
+    listingId: id,
+    receptor: "stack1"
+  })
+    .then(() => {
+      console.log("BUTTON 6 THEATER SEND SAVED", id);
+    })
+    .catch(err => {
+      console.error("BUTTON 6 THEATER SEND FAILED", err);
     });
 
-    return;
-  }
+  return;
+}
 
   if (!POCKET_TARGETS.includes(armedDestination)) return;
 
