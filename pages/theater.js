@@ -135,6 +135,7 @@ export default function IXITheater() {
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
   const [activeDragId, setActiveDragId] = useState("");
+  const [ixiUserId, setIxiUserId] = useState("guest");
  
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
@@ -244,6 +245,32 @@ function resetZoomState(screenIndex) {
     lastY: 0
   });
 }
+
+useEffect(() => {
+  async function loadCurrentUser() {
+    try {
+      const res = await fetch("/api/current-user");
+
+      if (!res.ok) return;
+
+      const user = await res.json();
+
+      const userId =
+        user?.id ||
+        user?.user?.id ||
+        user?.currentUser?.id ||
+        "";
+
+      if (userId) {
+        setIxiUserId(String(userId));
+      }
+    } catch (err) {
+      console.error("Failed loading IXI user", err);
+    }
+  }
+
+  loadCurrentUser();
+}, []);
 
   
   useEffect(() => {
