@@ -217,10 +217,13 @@ useEffect(() => {
       const user = await res.json();
 
       const userId =
-        user?.id ||
-        user?.user?.id ||
-        user?.currentUser?.id ||
-        "";
+  user?.id?.uuid ||
+  user?.id ||
+  user?.user?.id?.uuid ||
+  user?.user?.id ||
+  user?.currentUser?.id?.uuid ||
+  user?.currentUser?.id ||
+  "";
 
       if (userId) {
         setIxiUserId(String(userId));
