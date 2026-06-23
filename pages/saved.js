@@ -1085,21 +1085,6 @@ function recallPocketToBoard(pocketKey) {
     "board"
   );
 }
-
- function sendPocketToTheater(pocketKey) {
-  const receptor =
-    THEATER_POCKET_RECEPTOR_MAP[pocketKey];
-
-  if (!receptor) return;
-
-  const stackNumber = receptor.replace("stack", "");
-
-  sendContainerToTheater(
-    pocketKey,
-    receptor,
-    `STACK ${stackNumber}`
-  );
-} 
   
 function recallPocketMachineToBoard(machineId, pocketKey) {
   if (!machineId || !pocketKey) return;
@@ -1261,6 +1246,21 @@ function showTheaterSentNotice(machineIds = [], destinationLabel = "RAIL") {
       console.error("THEATER CONTAINER SEND FAILED", err);
     });
 }         
+
+function sendPocketToTheater(pocketKey) {
+  const receptor =
+    THEATER_POCKET_RECEPTOR_MAP[pocketKey];
+
+  if (!receptor) return;
+
+  const stackNumber = receptor.replace("stack", "");
+
+  sendContainerToTheater(
+    pocketKey,
+    receptor,
+    `STACK ${stackNumber}`
+  );
+} 
             
 function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
