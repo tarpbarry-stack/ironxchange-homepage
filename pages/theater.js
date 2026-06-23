@@ -12,10 +12,13 @@ import {
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
+import { fetchIxiMachineState } from "../lib/ixiMachineStateClient";
 import {
-  fetchIxiMachineState,
-  saveIxiMachinePatch
-} from "../lib/ixiMachineStateClient";
+  IXI_THEATER_QUEUE_ID,
+  THEATER_RECEPTOR_KEYS,
+  createEmptyTheaterContainers,
+  sanitizeTheaterContainers
+} from "../lib/ixiTheaterQueue";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
@@ -140,49 +143,6 @@ export default function IXITheater() {
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
-const THEATER_RECEPTOR_KEYS = [
-  "stack1",
-  "stack2",
-  "stack3",
-  "stack4",
-  "stack5",
-  "stack6"
-];
-
-const IXI_THEATER_QUEUE_ID = "__theaterQueue";
-  
-function createEmptyTheaterContainers() {
-  return {
-    rail: [],
-    stack1: [],
-    stack2: [],
-    stack3: [],
-    stack4: [],
-    stack5: [],
-    stack6: []
-  };
-}
-
-function sanitizeTheaterContainers(rawContainers = {}) {
-  const empty = createEmptyTheaterContainers();
-  const seen = new Set();
-
-  Object.keys(empty).forEach(key => {
-    const source = Array.isArray(rawContainers[key])
-      ? rawContainers[key]
-      : [];
-
-    empty[key] = source
-      .map(id => String(id))
-      .filter(id => {
-        if (!id || seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      });
-  });
-
-  return empty;
-}
   
 const [theaterContainers, setTheaterContainers] = useState(
   createEmptyTheaterContainers()
