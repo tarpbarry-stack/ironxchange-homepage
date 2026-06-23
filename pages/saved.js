@@ -1210,7 +1210,9 @@ function sendMachineToArmedDestination(listing) {
     ixiUserId,
     armedDestination
   });
-
+updateIxiCardState(id, {
+  theaterNotice: "SENDING TO THEATER..."
+});
   sendMachineToTheater({
     userId: ixiUserId,
     listingId: id,
