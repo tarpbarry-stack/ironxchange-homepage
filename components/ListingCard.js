@@ -677,6 +677,48 @@ style={getFrameStyle(currentImageObject, "card")}
           contain: layout paint;
         }
 
+.ixi-theater-card-notice {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 80;
+  pointer-events: none;
+
+  background: rgba(0,0,0,.74);
+  color: rgba(0,194,255,.96);
+
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .9px;
+  text-align: center;
+
+  border: 2px solid rgba(0,194,255,.78);
+  border-radius: inherit;
+
+  box-shadow:
+    0 0 18px rgba(0,194,255,.34),
+    inset 0 0 22px rgba(0,194,255,.10);
+
+  animation: ixiTheaterNoticePulse .22s ease-out;
+}
+
+@keyframes ixiTheaterNoticePulse {
+  from {
+    transform: scale(.96);
+    opacity: .35;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
 .machine-face-test {
   position: absolute;
   top: 10px;
