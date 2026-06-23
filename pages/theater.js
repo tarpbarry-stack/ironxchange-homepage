@@ -139,7 +139,7 @@ export default function IXITheater() {
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
   const [activeDragId, setActiveDragId] = useState("");
-  const [ixiUserId, setIxiUserId] = useState("guest");
+  const [ixiUserId, setIxiUserId] = useState("69f7fb56-bad0-40e5-a9d1-2d28cde38739");
  
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
