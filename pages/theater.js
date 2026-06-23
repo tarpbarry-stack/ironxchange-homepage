@@ -17,7 +17,8 @@ import {
   IXI_THEATER_QUEUE_ID,
   THEATER_RECEPTOR_KEYS,
   createEmptyTheaterContainers,
-  sanitizeTheaterContainers
+  sanitizeTheaterContainers,
+  saveTheaterQueue
 } from "../lib/ixiTheaterQueue";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
@@ -329,15 +330,12 @@ const screenMachines = useMemo(() => {
 }, [screenSlots, railListings, viewCount]);
   
 function saveTheaterContainers(nextContainers) {
-  const safeContainers = sanitizeTheaterContainers(nextContainers);
+  const safeContainers =
+    sanitizeTheaterContainers(nextContainers);
 
-  saveIxiMachinePatch({
+  saveTheaterQueue({
     userId: ixiUserId,
-    listingId: IXI_THEATER_QUEUE_ID,
-    patch: {
-      containers: safeContainers,
-      updatedAt: new Date().toISOString()
-    }
+    containers: safeContainers
   });
 
   return safeContainers;
