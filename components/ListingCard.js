@@ -368,6 +368,11 @@ function handlePhotoLoad(e, photoUrl) {
       zIndex: isBoardDragging ? 50 : undefined
     }}
   >
+{ixiState?.theaterNotice ? (
+  <div className="ixi-theater-card-notice">
+    {ixiState.theaterNotice}
+  </div>
+) : null}
 {Number(machineFace || 1) === 2 ? (
   sellerMode ? (
 <IXISellerMachineObjectFace2
