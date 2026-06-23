@@ -288,7 +288,7 @@ useEffect(() => {
       console.error("Failed restoring Theater queue", err);
     }
 
-    setTheaterContainers(current => {
+    updateTheaterContainers(current => {
       if ((current.rail || []).length) return current;
 
       return {
