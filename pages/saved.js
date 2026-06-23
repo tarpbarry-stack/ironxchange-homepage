@@ -1216,13 +1216,13 @@ updateIxiCardState(id, {
   sendMachineToTheater({
     userId: ixiUserId,
     listingId: id,
-    receptor: "stack1"
+    receptor: "rail"
   })
     .then(() => {
   console.log("BUTTON 6 THEATER SEND SAVED", id);
 
   updateIxiCardState(id, {
-    theaterNotice: "✓ SENT TO THEATER — STACK 1"
+    theaterNotice: "✓ SENT TO THEATER — RAIL"
   });
 
   setTimeout(() => {
