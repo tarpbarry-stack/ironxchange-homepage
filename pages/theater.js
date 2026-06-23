@@ -371,7 +371,7 @@ function handleTheaterDragEnd(event) {
         ]
       };
 
-            return saveTheaterContainers(nextContainers);
+            return nextContainers;
     }
 
     const fromIndex = rail.findIndex(id => String(id) === dragId);
@@ -388,7 +388,7 @@ const nextContainers = {
   rail: nextRail
 };
 
-return saveTheaterContainers(nextContainers);
+return nextContainers;
   });
 }
   
