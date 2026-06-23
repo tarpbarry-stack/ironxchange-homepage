@@ -244,6 +244,19 @@ function shouldShowLabel(item) {
           box-shadow: 0 0 8px rgba(255,196,0,.42);
         }
 
+        .ixi-environment-rail .ixi-environment-link.destination-armed,
+.ixi-environment-rail.mode-med .ixi-environment-link.destination-armed,
+.ixi-environment-rail.mode-high .ixi-environment-link.destination-armed {
+  color: rgba(0,194,255,.96) !important;
+  text-shadow:
+    0 0 8px rgba(0,194,255,.36),
+    0 0 18px rgba(0,194,255,.18) !important;
+}
+
+.ixi-environment-rail .ixi-environment-link.destination-armed:hover {
+  color: rgba(0,194,255,1) !important;
+}
+
         @media (max-width: 850px) {
           .ixi-environment-rail {
             overflow-x: auto;
