@@ -13,32 +13,6 @@ import {
   getV12Models
 } from "../lib/v12TaxonomyAdapter";
 
-import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
-import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
-import dozersTaxonomy from "../lib/dozersTaxonomy";
-import excavatorsTaxonomy from "../lib/excavatorsTaxonomy";
-import aerialTaxonomy from "../lib/aerialTaxonomy";
-import aggregateTaxonomy from "../lib/aggregateTaxonomy";
-import agricultureHarvestersTaxonomy from "../lib/agricultureHarvestersTaxonomy";
-import agricultureTractorsTaxonomy from "../lib/agricultureTractorsTaxonomy";
-import asphaltEquipmentTaxonomy from "../lib/asphaltEquipmentTaxonomy";
-import backhoeLoadersTaxonomy from "../lib/backhoeLoadersTaxonomy";
-import compactionRollersTaxonomy from "../lib/compactionRollersTaxonomy";
-import cranesTaxonomy from "../lib/cranesTaxonomy";
-import crawlerCarriersTaxonomy from "../lib/crawlerCarriersTaxonomy";
-import drillsAndPilingTaxonomy from "../lib/drillsAndPilingTaxonomy";
-import dumpTrucksTaxonomy from "../lib/dumpTrucksTaxonomy";
-import forkliftsTaxonomy from "../lib/forkliftsTaxonomy";
-import scraperTaxonomy from "../lib/scraperTaxonomy";
-import skidSteerCtlTaxonomy from "../lib/skidSteerCtlTaxonomy";
-import telehandlersTaxonomy from "../lib/telehandlersTaxonomy";
-import trenchersTaxonomy from "../lib/trenchersTaxonomy";
-import trailersTaxonomy from "../lib/trailersTaxonomy";
-import trucksTaxonomy from "../lib/trucksTaxonomy";
-import attachmentsPartsTaxonomy from "../lib/attachmentsPartsTaxonomy";
-import supportEquipmentTaxonomy from "../lib/supportEquipmentTaxonomy";
-import utilityCartsTaxonomy from "../lib/utilityCartsTaxonomy";
-
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 import {
   processIXPhoto,
