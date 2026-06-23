@@ -344,9 +344,13 @@ const screenMachines = useMemo(() => {
 function saveTheaterContainers(nextContainers) {
   const safeContainers = sanitizeTheaterContainers(nextContainers);
 
-  console.log("THEATER QUEUE READY TO PERSIST", {
-    queueId: IXI_THEATER_QUEUE_ID,
-    containers: safeContainers
+  saveIxiMachinePatch({
+    userId: ixiUserId,
+    listingId: IXI_THEATER_QUEUE_ID,
+    patch: {
+      containers: safeContainers,
+      updatedAt: new Date().toISOString()
+    }
   });
 
   return safeContainers;
