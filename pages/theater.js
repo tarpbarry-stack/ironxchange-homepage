@@ -272,6 +272,12 @@ useEffect(() => {
       const remoteState = await fetchIxiMachineState(ixiUserId);
       const savedQueue = remoteState?.[IXI_THEATER_QUEUE_ID];
 
+      console.log(
+  "THEATER RESTORE",
+  remoteState,
+  savedQueue,
+  IXI_THEATER_QUEUE_ID
+);
       const savedContainers =
         savedQueue?.containers || savedQueue || null;
 
