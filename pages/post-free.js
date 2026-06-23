@@ -31,34 +31,6 @@ const sdk = createInstance({
   clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
 });
 
-const taxonomyMap = {
-  "AERIAL EQUIPMENT": aerialTaxonomy,
-  "AGGREGATE": aggregateTaxonomy,
-  "AGRICULTURE HARVESTERS": agricultureHarvestersTaxonomy,
-  "AGRICULTURE TRACTORS": agricultureTractorsTaxonomy,
-  "ASPHALT EQUIPMENT": asphaltEquipmentTaxonomy,
-  "BACKHOE LOADERS": backhoeLoadersTaxonomy,
-  "COMPACTION/ROLLERS": compactionRollersTaxonomy,
-  "CRANES": cranesTaxonomy,
-  "CRAWLER CARRIERS / LOADER": crawlerCarriersTaxonomy,
-  "DOZERS": dozersTaxonomy,
-  "DRILLS & PILING": drillsAndPilingTaxonomy,
-  "DUMP TRUCKS - ARTIC/RIGID": dumpTrucksTaxonomy,
-  "EXCAVATORS": excavatorsTaxonomy,
-  "FORKLIFTS": forkliftsTaxonomy,
-  "MOTOR GRADERS": motorGradersTaxonomy,
-  "SCRAPER": scraperTaxonomy,
-  "SKID STEER/CTL": skidSteerCtlTaxonomy,
-  "TELEHANDLERS": telehandlersTaxonomy,
-  "TRENCHERS/PLOWS": trenchersTaxonomy,
-  "TRAILERS": trailersTaxonomy,
-  "TRUCKS": trucksTaxonomy,
-  "WHEEL LOADERS": wheelLoadersTaxonomy,
-  "ATTACHMENTS / PARTS": attachmentsPartsTaxonomy,
-  "SUPPORT EQUIPMENT": supportEquipmentTaxonomy,
-  "UTILITY CARTS": utilityCartsTaxonomy
-};
-
 const categories = getV12CategoryNames();
 
 const stateOptions = [
