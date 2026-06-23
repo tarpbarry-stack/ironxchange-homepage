@@ -1219,8 +1219,18 @@ updateIxiCardState(id, {
     receptor: "stack1"
   })
     .then(() => {
-      console.log("BUTTON 6 THEATER SEND SAVED", id);
-    })
+  console.log("BUTTON 6 THEATER SEND SAVED", id);
+
+  updateIxiCardState(id, {
+    theaterNotice: "✓ SENT TO THEATER — STACK 1"
+  });
+
+  setTimeout(() => {
+    updateIxiCardState(id, {
+      theaterNotice: ""
+    });
+  }, 1800);
+})
     .catch(err => {
       console.error("BUTTON 6 THEATER SEND FAILED", err);
     });
