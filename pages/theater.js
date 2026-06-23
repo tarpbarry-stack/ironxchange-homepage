@@ -193,10 +193,6 @@ const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "of
 
 const [zoomSyncOn, setZoomSyncOn] = useState(false);
 
-useEffect(() => {
-  console.log("THEATER CONTAINERS", theaterContainers);
-}, [theaterContainers]);
-
 function cycleScreenFactMode(screenIndex) {
   setScreenFactModes(current => {
     const next = [...current];
