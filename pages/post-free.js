@@ -2544,11 +2544,6 @@ animation: goldBreath 3.8s ease-in-out infinite;
     0 12px 28px rgba(255,196,0,.20);
 }
 
-.listing-preview-card {
-  margin: 24px auto 0;
-}
-
-
        .distribution-head h2 {
   margin: 0;
 
@@ -3328,14 +3323,6 @@ textarea:focus,
     flex: 0 0 220px;
   }
 
-  .listing-preview-card {
-    transform: none;
-  }
-
-  .listing-preview-card:hover {
-    transform: translateY(-2px);
-  }
-
   .lower-grid,
   .footer-ops {
     grid-template-columns: 1fr;
@@ -3372,14 +3359,6 @@ textarea:focus,
 
   .inventory-mini {
     flex: 0 0 220px;
-  }
-
-  .listing-preview-card {
-    transform: none;
-  }
-
-  .listing-preview-card:hover {
-    transform: translateY(-2px);
   }
 
   .lower-grid,
