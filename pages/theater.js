@@ -23,6 +23,11 @@ import {
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
+const THEATER_DEMO_MACHINE_IDS = [
+  "69f7ffd8-f07e-4587-a4dd-4a1fa7626d91",
+  "69f90189-5b6b-43ab-a409-f2a1fe56895f"
+];
+
 function getImage(machine = {}) {
   const image =
     machine.image ||
