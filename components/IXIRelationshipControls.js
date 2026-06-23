@@ -129,13 +129,16 @@ export default function IXIRelationshipControls({
           </div>
 
           <button
-            type="button"
-            className="ixi-theater-button"
-            aria-label="IXI Theater"
-            title="IXI Theater"
-          >
-            <span>T</span>
-          </button>
+  type="button"
+  className={`ixi-theater-button ${
+    armedDestination === "theater" ? "armed" : ""
+  }`}
+  onClick={() => onToggleArmedDestination("theater")}
+  aria-label="Arm IXI Theater"
+  title="Arm IXI Theater"
+>
+  <span>T</span>
+</button>
 
 <button
   type="button"
@@ -283,6 +286,15 @@ export default function IXIRelationshipControls({
           color: rgba(255,196,0,.82);
           text-shadow: 0 0 8px rgba(255,196,0,.16);
         }
+
+        .ixi-relationship-shell.revealed .ixi-theater-button.armed {
+  opacity: 1;
+  color: rgba(0,194,255,.96);
+  border-color: rgba(0,194,255,.72);
+  text-shadow:
+    0 0 6px rgba(0,194,255,.42),
+    0 0 14px rgba(0,194,255,.20);
+}
 
         .ixi-pocket-indicator-row {
   width: 100%;
