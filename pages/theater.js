@@ -12,6 +12,10 @@ import {
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
+import {
+  fetchIxiMachineState,
+  saveIxiMachinePatch
+} from "../lib/ixiMachineStateClient";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
