@@ -62,7 +62,9 @@ export default function IXIPocketL1({
     e.preventDefault();
     e.stopPropagation();
 
-    sendPocketToTheater?.("pocketLeft");
+    console.log("L1 THEATER BUTTON CLICKED");
+
+sendPocketToTheater?.("pocketLeft");
   }}
 />
 
