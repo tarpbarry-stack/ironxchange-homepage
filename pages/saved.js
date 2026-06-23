@@ -1197,8 +1197,9 @@ function cycleCardScaleMode() {
     setRightPocket2Mode,
     setActiveDndId,
     clearMachineDragState
-  });  
-   function sendMachineToArmedDestination(listing) {
+  });
+
+function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
   const id = String(getListingId(listing));
@@ -1218,6 +1219,7 @@ function cycleCardScaleMode() {
   moveMachineToContainer(id, armedDestination);
 }
             
+  return (
   <IXIDragEngine
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
