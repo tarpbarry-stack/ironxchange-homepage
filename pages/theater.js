@@ -738,7 +738,7 @@ return (
   className="theater-unload-dash"
   title="Unload loaded rail to stack"
   onClick={() => {
-    setTheaterContainers(current => {
+    updateTheaterContainers(current => {
       const railIds = current.rail || [];
 
       if (!railIds.length) return current;
