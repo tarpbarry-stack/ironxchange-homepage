@@ -241,19 +241,17 @@ useEffect(() => {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-          setListings(
-            data
-              .filter(item => {
-                const status =
-                  item.listingStatus ||
-                  item.publicData?.listingStatus ||
-                  item.attributes?.publicData?.listingStatus;
+  setListings(
+    data.filter(item => {
+      const status =
+        item.listingStatus ||
+        item.publicData?.listingStatus ||
+        item.attributes?.publicData?.listingStatus;
 
-                return status !== "archived";
-              })
-              .slice(0, 8)
-          );
-        }
+      return status !== "archived";
+    })
+  );
+}
       } catch (err) {
         console.error("IXI Theater load failed", err);
       }
