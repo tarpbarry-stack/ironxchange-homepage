@@ -5,7 +5,6 @@ import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import MachineBadges from "../components/MachineBadges";
 import ListingCard from "../components/ListingCard";
 
 import {
