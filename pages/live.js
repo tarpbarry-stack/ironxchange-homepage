@@ -19,10 +19,11 @@ import {
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 import {
+  processIXPhoto,
   buildIXPhotoVariants,
+  getIXActivePhotoFile,
   getIXActivePhotoUrl
 } from "../lib/ixvision/pipeline/processIXPhoto";
-
 const BRAND_YELLOW = "#FFC400";
 
 const { UUID } = sdkTypes;
@@ -357,6 +358,8 @@ export default function ListingLivePage() {
   const [previewColor, setPreviewColor] = useState("none");
   const [previewOutline, setPreviewOutline] = useState(1);
 
+  const [photoPolishMode, setPhotoPolishMode] = useState("original");
+
   const [edit, setEdit] = useState({
   price: "",
   hours: "",
@@ -544,40 +547,40 @@ const rawListingCategory =
   listing?.categoryLevel1 ||
   "";
 
-function normalizeDnaCategory(value = "") {
-  const raw = String(value || "").trim();
+const badgeCategoryAliases = {
+  "AERIAL EQUIPMENT": "AERIAL EQUIPMENT",
+  "AGGREGATE": "AGGREGATE",
+  "AGRICULTURE HARVESTERS": "AGRICULTURE HARVESTERS",
+  "AGRICULTURE TRACTORS": "AGRICULTURE TRACTORS",
+  "ASPHALT EQUIPMENT": "ASPHALT EQUIPMENT",
+  "BACKHOE LOADERS": "BACKHOE LOADERS",
+  "COMPACTION / ROLLERS": "COMPACTION/ROLLERS",
+  "CRANES": "CRANES",
+  "CRAWLER CARRIERS / LOADER": "CRAWLER CARRIERS / LOADER",
+  "DOZERS": "DOZERS",
+  "DRILLS / PILING": "DRILLS & PILING",
+ "DUMP TRUCKS / ARTIC / RIGID": "DUMP TRUCKS - ARTIC/RIGID",
+  "EXCAVATORS": "EXCAVATORS",
+  "FORKLIFTS": "FORKLIFTS",
+  "MOTOR GRADERS": "MOTOR GRADERS",
+  "SCRAPER": "SCRAPER",
+   "SKID STEER / CTL": "SKID STEER/CTL",
+  "TELEHANDLERS": "TELEHANDLERS",
+  "TRENCHERS": "TRENCHERS/PLOWS",
+  "TRAILERS": "TRAILERS",
+  "TRUCKS": "TRUCKS",
+  "WHEEL LOADERS": "WHEEL LOADERS",
+  "ATTACHMENTS / PARTS": "ATTACHMENTS / PARTS",
+  "SUPPORT EQUIPMENT": "SUPPORT EQUIPMENT",
+  "UTILITY CARTS": "UTILITY CARTS",
+};
 
-  const aliases = {
-    "skid-steer-ctl": "SKID STEER/CTL",
-    "skid-steer": "SKID STEER/CTL",
-    "skidsteer": "SKID STEER/CTL",
-    "skid-steer-loaders": "SKID STEER/CTL",
-    "skid steer loaders": "SKID STEER/CTL",
-    "skid steer loader": "SKID STEER/CTL",
-    "compact-track-loader": "SKID STEER/CTL",
-    "compact track loader": "SKID STEER/CTL",
-    "ctl": "SKID STEER/CTL"
-  };
-
-  const alias = aliases[raw.toLowerCase()];
-  if (alias && categoryDnaKeywords[alias]) return alias;
-
-  if (categoryDnaKeywords[raw]) return raw;
-
-  const upper = raw.toUpperCase();
-  if (categoryDnaKeywords[upper]) return upper;
-
-  const slugMatch = Object.keys(categoryDnaKeywords).find(key =>
-    key
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") === raw.toLowerCase()
-  );
-
-  return slugMatch || "";
+function getBadgeCategory(category) {
+  const key = String(category || "").trim().toUpperCase();
+  return badgeCategoryAliases[key] || key;
 }
 
-const listingCategory = normalizeDnaCategory(rawListingCategory);
+const listingCategory = getBadgeCategory(rawListingCategory);
   const selectedKeywordSet = useMemo(() => {
   return new Set(selectedKeywords);
 }, [selectedKeywords]);
@@ -703,7 +706,7 @@ function goToListing(targetListing) {
     files.slice(0, 24).map(file =>
       buildIXPhotoVariants(file, {
         make,
-        mode: "clean",
+        mode: photoPolishMode,
         userEmail: listing?.sellerEmail,
         companyName: sellerName
       })
@@ -935,17 +938,29 @@ async function buildLiveImageIdsForSave() {
 
   continue;
 }
-    if (!photo.file) continue;
+   if (!photo.file) continue;
 
-    const upload = await sdk.images.upload(
-      { image: photo.file },
-      { expand: true }
-    );
+const make = getListingMake(listing);
 
-    finalImageIds.push(
-      new UUID(upload.data.data.id.uuid)
-    );
-  }
+const imageFile =
+  photoPolishMode === "original"
+    ? photo.file
+    : getIXActivePhotoFile(photo) ||
+      await processIXPhoto(photo.file, {
+        mode: photoPolishMode,
+        make,
+        outputQuality: 0.98,
+        maxWidth: 4096
+      });
+
+const upload = await sdk.images.upload(
+  { image: imageFile },
+  { expand: true }
+);
+
+finalImageIds.push(
+  new UUID(upload.data.data.id.uuid)
+);
 
   if (photoItems.length > 0 && finalImageIds.length !== photoItems.length) {
     throw new Error(
