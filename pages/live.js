@@ -818,7 +818,7 @@ async function reprocessExistingPhoto(photoId, mode) {
     files.slice(0, 24).map(file =>
       buildIXPhotoVariants(file, {
         make,
-        mode: "clean",
+        mode: photoPolishMode,
         userEmail: listing?.sellerEmail,
         companyName: sellerName
       })
