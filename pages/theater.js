@@ -783,7 +783,7 @@ return (
   type="button"
   className="theater-stack-dash load"
   onClick={() => {
-    setTheaterContainers(current => {
+    updateTheaterContainers(current => {
       const stackIds = current[stackKey] || [];
 
       if (!stackIds.length) return current;
