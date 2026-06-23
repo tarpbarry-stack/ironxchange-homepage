@@ -93,6 +93,10 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
+import {
+  sendMachineToTheater
+} from "../lib/ixiTheaterQueue";
+
 export default function SavedListings() {
   const [listings, setListings] = useState([]);
   
@@ -1195,12 +1199,24 @@ function cycleCardScaleMode() {
     clearMachineDragState
   });  
     function sendMachineToArmedDestination(listing) {
-      if (!armedDestination) return;
-      if (!POCKET_TARGETS.includes(armedDestination)) return;
+  if (!armedDestination) return;
 
-      const id = String(getListingId(listing));
-      moveMachineToContainer(id, armedDestination);
-    }
+  const id = String(getListingId(listing));
+
+  if (armedDestination === "theater") {
+    sendMachineToTheater({
+      userId: ixiUserId,
+      listingId: id,
+      receptor: "stack1"
+    });
+
+    return;
+  }
+
+  if (!POCKET_TARGETS.includes(armedDestination)) return;
+
+  moveMachineToContainer(id, armedDestination);
+}
 
     return (
   <IXIDragEngine
