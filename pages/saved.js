@@ -1010,15 +1010,25 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
   }));
 }
 
- function sendActiveStackToTheater(stackKey) {
+function sendActiveStackToTheater(stackKey) {
   const sourceContainer = getStackContainerKey(stackKey);
-  const stackIds = machineContainers[sourceContainer] || [];
 
-  console.log("IXI THEATER STACK", {
-    stackKey,
-    machineIds: stackIds
-  });
-} 
+  const receptor =
+    stackKey === "top"
+      ? "stack5"
+      : "stack6";
+
+  const destinationLabel =
+    stackKey === "top"
+      ? "STACK 5"
+      : "STACK 6";
+
+  sendContainerToTheater(
+    sourceContainer,
+    receptor,
+    destinationLabel
+  );
+}
   
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
