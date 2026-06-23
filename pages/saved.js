@@ -94,7 +94,8 @@ import {
 } from "../lib/savedListings";
 
 import {
-  sendMachineToTheater
+  sendMachineToTheater,
+  sendMachinesToTheater
 } from "../lib/ixiTheaterQueue";
 
 export default function SavedListings() {
@@ -158,6 +159,12 @@ const POCKET_TARGETS = [
   "pocketRight2"
 ];
 
+ const THEATER_POCKET_RECEPTOR_MAP = {
+  pocketLeft: "stack1",
+  pocketLeft2: "stack2",
+  pocketRight: "stack3",
+  pocketRight2: "stack4"
+}; 
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
@@ -1079,6 +1086,20 @@ function recallPocketToBoard(pocketKey) {
   );
 }
 
+ function sendPocketToTheater(pocketKey) {
+  const receptor =
+    THEATER_POCKET_RECEPTOR_MAP[pocketKey];
+
+  if (!receptor) return;
+
+  const stackNumber = receptor.replace("stack", "");
+
+  sendContainerToTheater(
+    pocketKey,
+    receptor,
+    `STACK ${stackNumber}`
+  );
+} 
   
 function recallPocketMachineToBoard(machineId, pocketKey) {
   if (!machineId || !pocketKey) return;
@@ -1199,6 +1220,48 @@ function cycleCardScaleMode() {
     clearMachineDragState
   });
 
+function showTheaterSentNotice(machineIds = [], destinationLabel = "RAIL") {
+  machineIds.forEach(machineId => {
+    updateIxiCardState(machineId, {
+      theaterNotice: `✓ SENT TO THEATER — ${destinationLabel}`
+    });
+  });
+
+  setTimeout(() => {
+    machineIds.forEach(machineId => {
+      updateIxiCardState(machineId, {
+        theaterNotice: ""
+      });
+    });
+  }, 1800);
+}
+
+   function sendContainerToTheater(containerKey, receptor, destinationLabel) {
+  const machineIds = (machineContainers[containerKey] || [])
+    .map(id => String(id))
+    .filter(Boolean);
+
+  if (!machineIds.length) return;
+
+  machineIds.forEach(machineId => {
+    updateIxiCardState(machineId, {
+      theaterNotice: "SENDING TO THEATER..."
+    });
+  });
+
+  sendMachinesToTheater({
+    userId: ixiUserId,
+    listingIds: machineIds,
+    receptor
+  })
+    .then(() => {
+      showTheaterSentNotice(machineIds, destinationLabel);
+    })
+    .catch(err => {
+      console.error("THEATER CONTAINER SEND FAILED", err);
+    });
+}         
+            
 function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
@@ -1282,6 +1345,7 @@ updateIxiCardState(id, {
   recallPocketToBoard={recallPocketToBoard}
   rotatePocket={rotatePocket}
   toggleArmedDestination={toggleArmedDestination}
+  sendPocketToTheater={sendPocketToTheater}
   pocketThumbSize={pocketThumbSize}
   getListingById={getListingById}
   IXISortableMachineCard={IXISortableMachineCard}
@@ -1298,6 +1362,7 @@ updateIxiCardState(id, {
   recallPocketToBoard={recallPocketToBoard}
   rotatePocket={rotatePocket}
   toggleArmedDestination={toggleArmedDestination}
+  sendPocketToTheater={sendPocketToTheater}
   pocketThumbSize={pocketThumbSize}
   getListingById={getListingById}
   IXISortableMachineCard={IXISortableMachineCard}
@@ -1340,6 +1405,7 @@ updateIxiCardState(id, {
   recallPocketToBoard={recallPocketToBoard}
   rotatePocket={rotatePocket}
   toggleArmedDestination={toggleArmedDestination}
+  sendPocketToTheater={sendPocketToTheater}
   pocketThumbSize={pocketThumbSize}
   getListingById={getListingById}
   IXISortableMachineCard={IXISortableMachineCard}
@@ -1356,6 +1422,7 @@ updateIxiCardState(id, {
   recallPocketToBoard={recallPocketToBoard}
   rotatePocket={rotatePocket}
   toggleArmedDestination={toggleArmedDestination}
+  sendPocketToTheater={sendPocketToTheater}
   pocketThumbSize={pocketThumbSize}
   getListingById={getListingById}
   IXISortableMachineCard={IXISortableMachineCard}
