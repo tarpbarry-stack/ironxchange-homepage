@@ -278,6 +278,8 @@ useEffect(() => {
   savedQueue,
   IXI_THEATER_QUEUE_ID
 );
+      console.log("THEATER USER", ixiUserId);
+      
       const savedContainers =
         savedQueue?.containers || savedQueue || null;
 
