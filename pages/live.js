@@ -927,41 +927,42 @@ async function buildLiveImageIdsForSave() {
   const finalImageIds = [];
 
   for (const photo of photoItems) {
-   if (
-  photo.existing &&
-  photo.imageId &&
-  !photo.file
-) {
-  finalImageIds.push(
-    new UUID(photo.imageId)
-  );
-   }
+    if (
+      photo.existing &&
+      photo.imageId &&
+      !photo.file
+    ) {
+      finalImageIds.push(
+        new UUID(photo.imageId)
+      );
 
-  continue;
-}
-   if (!photo.file) continue;
+      continue;
+    }
 
-const make = getListingMake(listing);
+    if (!photo.file) continue;
 
-const imageFile =
-  photoPolishMode === "original"
-    ? photo.file
-    : getIXActivePhotoFile(photo) ||
-      await processIXPhoto(photo.file, {
-        mode: photoPolishMode,
-        make,
-        outputQuality: 0.98,
-        maxWidth: 4096
-      });
+    const make = getListingMake(listing);
 
-const upload = await sdk.images.upload(
-  { image: imageFile },
-  { expand: true }
-);
+    const imageFile =
+      photoPolishMode === "original"
+        ? photo.file
+        : getIXActivePhotoFile(photo) ||
+          await processIXPhoto(photo.file, {
+            mode: photoPolishMode,
+            make,
+            outputQuality: 0.98,
+            maxWidth: 4096
+          });
 
-finalImageIds.push(
-  new UUID(upload.data.data.id.uuid)
-);
+    const upload = await sdk.images.upload(
+      { image: imageFile },
+      { expand: true }
+    );
+
+    finalImageIds.push(
+      new UUID(upload.data.data.id.uuid)
+    );
+  }
 
   if (photoItems.length > 0 && finalImageIds.length !== photoItems.length) {
     throw new Error(
@@ -972,13 +973,6 @@ finalImageIds.push(
   return finalImageIds;
 }
 
-
-
-
-
-  
-
-  
 
   async function saveQuickEdit() {
     if (!listingId) return;
