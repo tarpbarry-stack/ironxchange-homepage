@@ -338,6 +338,17 @@ function saveTheaterContainers(nextContainers) {
 
   return safeContainers;
 }
+
+function updateTheaterContainers(updater) {
+  setTheaterContainers(current => {
+    const nextContainers =
+      typeof updater === "function"
+        ? updater(current)
+        : updater;
+
+    return saveTheaterContainers(nextContainers);
+  });
+}
   
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
