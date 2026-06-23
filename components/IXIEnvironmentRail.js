@@ -30,6 +30,8 @@ export default function IXIEnvironmentRail({
   hasAccount = false,
   hasRelationship = false,
   hasInventory = false,
+  armedDestination = "",
+  toggleArmedDestination,
   className = ""
 }) {
   const [railMode, setRailMode] = useState("dead");
@@ -75,13 +77,26 @@ function shouldShowLabel(item) {
        <a
   key={item.label}
   href={item.access === "demo" ? "#" : item.href}
-  onClick={
-    item.access === "demo"
-      ? (e) => e.preventDefault()
-      : undefined
-  }
+    onClick={(e) => {
+    if (item.access === "demo") {
+      e.preventDefault();
+      return;
+    }
+
+    if (
+      item.label === "IXI THEATER" &&
+      typeof toggleArmedDestination === "function"
+    ) {
+      e.preventDefault();
+      toggleArmedDestination("theater");
+    }
+  }}
   className={`ixi-environment-link state-${getRailItemState(item)} ${
     item.postFree ? "post-free" : ""
+  } ${
+    item.label === "IXI THEATER" && armedDestination === "theater"
+      ? "destination-armed"
+      : ""
   }`}
 >
           {shouldShowLabel(item) ? (
@@ -140,6 +155,13 @@ function shouldShowLabel(item) {
         .ixi-environment-link.state-active {
           color: rgba(255,196,0,.86);
         }
+
+        .ixi-environment-link.destination-armed {
+  color: rgba(0,194,255,.92);
+  text-shadow:
+    0 0 8px rgba(0,194,255,.28),
+    0 0 16px rgba(0,194,255,.14);
+}
 
         .ixi-environment-link.state-unlocked {
           color: rgba(0,194,255,.70);
