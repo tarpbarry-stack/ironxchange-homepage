@@ -305,15 +305,42 @@ useEffect(() => {
   useEffect(() => {
   if (!listings.length) return;
 
-  setTheaterContainers(current => {
-    if ((current.rail || []).length) return current;
+  async function restoreTheaterQueue() {
+    try {
+      const remoteState = await fetchIxiMachineState(ixiUserId);
+      const savedQueue = remoteState?.[IXI_THEATER_QUEUE_ID];
 
-    return {
-      ...current,
-      rail: listings.map(item => String(getListingId(item)))
-    };
-  });
-}, [listings]);
+      const savedContainers =
+        savedQueue?.containers || savedQueue || null;
+
+      if (savedContainers) {
+        const restoredContainers =
+          sanitizeTheaterContainers(savedContainers);
+
+        const hasAnySavedMachine = Object.values(restoredContainers)
+          .some(list => Array.isArray(list) && list.length > 0);
+
+        if (hasAnySavedMachine) {
+          setTheaterContainers(restoredContainers);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("Failed restoring Theater queue", err);
+    }
+
+    setTheaterContainers(current => {
+      if ((current.rail || []).length) return current;
+
+      return {
+        ...current,
+        rail: listings.map(item => String(getListingId(item)))
+      };
+    });
+  }
+
+  restoreTheaterQueue();
+}, [listings, ixiUserId]);
 
 
   const railListings = useMemo(() => {
