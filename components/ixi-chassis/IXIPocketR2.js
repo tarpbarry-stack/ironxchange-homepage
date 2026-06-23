@@ -7,6 +7,7 @@ export default function IXIPocketR2({
   recallPocketToBoard,
   rotatePocket,
   toggleArmedDestination,
+  sendPocketToTheater,
   pocketThumbSize,
   getListingById,
   IXISortableMachineCard,
@@ -86,10 +87,16 @@ export default function IXIPocketR2({
 />
 
     <button
-      type="button"
-      className="ixi-pocket-rail-action theater"
-      data-label="IXI THEATER"
-    />
+  type="button"
+  className="ixi-pocket-rail-action theater"
+  data-label="IXI THEATER"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    sendPocketToTheater?.("pocketRight2");
+  }}
+/>
   </div>
 
   <button
