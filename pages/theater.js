@@ -135,15 +135,53 @@ export default function IXITheater() {
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
 const [selectedSlot, setSelectedSlot] = useState(0);
-const [theaterContainers, setTheaterContainers] = useState({
-  rail: [],
-  stack1: [],
-  stack2: [],
-  stack3: [],
-  stack4: [],
-  stack5: [],
-  stack6: []
-});
+const THEATER_RECEPTOR_KEYS = [
+  "stack1",
+  "stack2",
+  "stack3",
+  "stack4",
+  "stack5",
+  "stack6"
+];
+
+const IXI_THEATER_QUEUE_ID = "__theaterQueue";
+  
+function createEmptyTheaterContainers() {
+  return {
+    rail: [],
+    stack1: [],
+    stack2: [],
+    stack3: [],
+    stack4: [],
+    stack5: [],
+    stack6: []
+  };
+}
+
+function sanitizeTheaterContainers(rawContainers = {}) {
+  const empty = createEmptyTheaterContainers();
+  const seen = new Set();
+
+  Object.keys(empty).forEach(key => {
+    const source = Array.isArray(rawContainers[key])
+      ? rawContainers[key]
+      : [];
+
+    empty[key] = source
+      .map(id => String(id))
+      .filter(id => {
+        if (!id || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+  });
+
+  return empty;
+}
+  
+const [theaterContainers, setTheaterContainers] = useState(
+  createEmptyTheaterContainers()
+);
 
 const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "off"]);
   const [screenZoomStates, setScreenZoomStates] = useState([
@@ -272,27 +310,26 @@ const screenMachines = useMemo(() => {
     .filter(Boolean);
 }, [screenSlots, railListings, viewCount]);
   
-
+function saveTheaterContainers(nextContainers) {
+  console.log("THEATER SAVE READY", {
+    queueId: IXI_THEATER_QUEUE_ID,
+    containers: nextContainers
+  });
+}
+  
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
   const overId = String(event?.over?.id || "");
 
   if (!dragId || !overId || dragId === overId) return;
 
-  const stackTargets = [
-    "stack1",
-    "stack2",
-    "stack3",
-    "stack4",
-    "stack5",
-    "stack6"
-  ];
+    const stackTargets = THEATER_RECEPTOR_KEYS;
 
   setTheaterContainers(current => {
     const rail = current.rail || [];
 
-    if (stackTargets.includes(overId)) {
-      return {
+        if (stackTargets.includes(overId)) {
+      const nextContainers = {
         ...current,
         rail: rail.filter(id => String(id) !== dragId),
         [overId]: [
@@ -300,6 +337,10 @@ function handleTheaterDragEnd(event) {
           dragId
         ]
       };
+
+      saveTheaterContainers(nextContainers);
+
+      return nextContainers;
     }
 
     const fromIndex = rail.findIndex(id => String(id) === dragId);
@@ -311,10 +352,14 @@ function handleTheaterDragEnd(event) {
     const [moved] = nextRail.splice(fromIndex, 1);
     nextRail.splice(toIndex, 0, moved);
 
-    return {
+        const nextContainers = {
       ...current,
       rail: nextRail
     };
+
+    saveTheaterContainers(nextContainers);
+
+    return nextContainers;
   });
 }
   
@@ -668,15 +713,8 @@ return (
 
       if (!railIds.length) return current;
 
-      const stackTargets = [
-        "stack1",
-        "stack2",
-        "stack3",
-        "stack4",
-        "stack5",
-        "stack6"
-      ];
-
+            const stackTargets = THEATER_RECEPTOR_KEYS;
+      
       const emptyStack =
         stackTargets.find(
           key => !(current[key] || []).length
