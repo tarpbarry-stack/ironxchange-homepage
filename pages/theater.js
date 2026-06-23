@@ -311,10 +311,14 @@ const screenMachines = useMemo(() => {
 }, [screenSlots, railListings, viewCount]);
   
 function saveTheaterContainers(nextContainers) {
-  console.log("THEATER SAVE READY", {
+  const safeContainers = sanitizeTheaterContainers(nextContainers);
+
+  console.log("THEATER QUEUE READY TO PERSIST", {
     queueId: IXI_THEATER_QUEUE_ID,
-    containers: nextContainers
+    containers: safeContainers
   });
+
+  return safeContainers;
 }
   
 function handleTheaterDragEnd(event) {
@@ -338,9 +342,7 @@ function handleTheaterDragEnd(event) {
         ]
       };
 
-      saveTheaterContainers(nextContainers);
-
-      return nextContainers;
+            return saveTheaterContainers(nextContainers);
     }
 
     const fromIndex = rail.findIndex(id => String(id) === dragId);
@@ -348,18 +350,16 @@ function handleTheaterDragEnd(event) {
 
     if (fromIndex === -1 || toIndex === -1) return current;
 
-    const nextRail = [...rail];
-    const [moved] = nextRail.splice(fromIndex, 1);
-    nextRail.splice(toIndex, 0, moved);
+const nextRail = [...rail];
+const [moved] = nextRail.splice(fromIndex, 1);
+nextRail.splice(toIndex, 0, moved);
 
-        const nextContainers = {
-      ...current,
-      rail: nextRail
-    };
+const nextContainers = {
+  ...current,
+  rail: nextRail
+};
 
-    saveTheaterContainers(nextContainers);
-
-    return nextContainers;
+return saveTheaterContainers(nextContainers);
   });
 }
   
