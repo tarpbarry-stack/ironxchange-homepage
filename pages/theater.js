@@ -490,8 +490,9 @@ function prevPhotoForMachine(machine) {
               <span>IXI THEATER</span>
 
               <p>
-                {listings.length || 8} machines loaded for inspection.
-              </p>
+  {Object.values(theaterContainers)
+    .reduce((total, ids) => total + (Array.isArray(ids) ? ids.length : 0), 0) || 8} machines loaded for inspection.
+</p>
 
               <button type="button" onClick={() => setEntered(true)}>
                 ENTER THEATER
@@ -738,14 +739,14 @@ return (
           key => !(current[key] || []).length
         ) || "stack1";
 
-      return {
-        ...current,
-        [emptyStack]: [
-          ...(current[emptyStack] || []),
-          ...railIds
-        ],
-        rail: []
-      };
+      return saveTheaterContainers({
+  ...current,
+  [emptyStack]: [
+    ...(current[emptyStack] || []),
+    ...railIds
+  ],
+  rail: []
+});
     });
   }}
 />
@@ -776,14 +777,14 @@ return (
 
       if (!stackIds.length) return current;
 
-      return {
-        ...current,
-        rail: [
-          ...(current.rail || []),
-          ...stackIds
-        ],
-        [stackKey]: []
-      };
+     return saveTheaterContainers({
+  ...current,
+  rail: [
+    ...(current.rail || []),
+    ...stackIds
+  ],
+  [stackKey]: []
+});
     });
   }}
 />
@@ -796,13 +797,13 @@ return (
 
       if (stackIds.length <= 1) return current;
 
-      return {
-        ...current,
-        [stackKey]: [
-          ...stackIds.slice(1),
-          stackIds[0]
-        ]
-      };
+     return saveTheaterContainers({
+  ...current,
+  [stackKey]: [
+    ...stackIds.slice(1),
+    stackIds[0]
+  ]
+});
     });
   }}
 />
@@ -810,10 +811,12 @@ return (
   type="button"
   className="theater-stack-dash orbit"
   onClick={() => {
-    setTheaterContainers(current => ({
-      ...current,
-      [stackKey]: []
-    }));
+    setTheaterContainers(current =>
+  saveTheaterContainers({
+    ...current,
+    [stackKey]: []
+  })
+);
   }}
 />
           </div>
