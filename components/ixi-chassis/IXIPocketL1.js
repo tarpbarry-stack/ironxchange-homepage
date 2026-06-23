@@ -7,6 +7,7 @@ export default function IXIPocketL1({
   recallPocketToBoard,
   rotatePocket,
   toggleArmedDestination,
+  sendPocketToTheater,
   pocketThumbSize,
   getListingById,
   IXISortableMachineCard,
@@ -53,7 +54,17 @@ export default function IXIPocketL1({
       : "has-machines"
   } pocket-mode-${leftPocketMode}`}
 >
- <button type="button" className="ixi-pocket-rail-action theater" data-label="IXI THEATER" />
+ <button
+  type="button"
+  className="ixi-pocket-rail-action theater"
+  data-label="IXI THEATER"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    sendPocketToTheater?.("pocketLeft");
+  }}
+/>
 
 <button
   type="button"
