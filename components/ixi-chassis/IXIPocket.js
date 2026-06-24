@@ -169,7 +169,7 @@ export default function IXIPocket({
 
       {pocketMode !== "closed" && hasMachines && (
         <div className={`ixi-pocket-thumbs thumb-size-${pocketThumbSize}`}>
-          {[...machines].reverse().map((machineId, index) => {
+          {machines.map((machineId, index) => {
             const machine = getListingById(machineId);
             if (!machine) return null;
 
