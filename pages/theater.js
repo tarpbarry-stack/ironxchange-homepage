@@ -344,21 +344,20 @@ const screenMachines = useMemo(() => {
     .filter(Boolean);
 }, [screenSlots, railListings, viewCount]);
 
-function removeDuplicateTheaterIds(containers = {}) {
+function cleanTheaterContainers(containers = {}) {
   const next = {};
-  const seen = new Set();
 
   ["rail", ...THEATER_RECEPTOR_KEYS].forEach(key => {
-    next[key] = [];
+    const seenInContainer = new Set();
 
-    (containers[key] || []).forEach(rawId => {
-      const id = String(rawId);
+    next[key] = (containers[key] || [])
+      .map(id => String(id))
+      .filter(id => {
+        if (!id || seenInContainer.has(id)) return false;
 
-      if (!id || seen.has(id)) return;
-
-      seen.add(id);
-      next[key].push(id);
-    });
+        seenInContainer.add(id);
+        return true;
+      });
   });
 
   return next;
@@ -367,7 +366,7 @@ function removeDuplicateTheaterIds(containers = {}) {
 function saveTheaterContainers(nextContainers) {
   const safeContainers =
     sanitizeTheaterContainers(
-      removeDuplicateTheaterIds(nextContainers)
+      cleanTheaterContainers(nextContainers)
     );
 
   saveTheaterQueue({
