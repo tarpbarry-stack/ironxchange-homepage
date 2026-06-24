@@ -386,62 +386,76 @@ function updateTheaterContainers(updater) {
   });
 } 
   
+function removeIdFromAllTheaterContainers(current, dragId) {
+  const next = { ...current };
+
+  ["rail", ...THEATER_RECEPTOR_KEYS].forEach(key => {
+    next[key] = (next[key] || []).filter(id => String(id) !== String(dragId));
+  });
+
+  return next;
+}
+
+function getTheaterSourceContainer(current, dragId) {
+  return ["rail", ...THEATER_RECEPTOR_KEYS].find(key =>
+    (current[key] || []).some(id => String(id) === String(dragId))
+  );
+}
+
+function moveTheaterMachineToContainer(current, dragId, targetContainer, overId = "") {
+  const validTargets = ["rail", ...THEATER_RECEPTOR_KEYS];
+
+  if (!validTargets.includes(targetContainer)) return current;
+
+  const cleaned = removeIdFromAllTheaterContainers(current, dragId);
+  const targetList = [...(cleaned[targetContainer] || [])];
+
+  const overIndex = targetList.findIndex(id => String(id) === String(overId));
+
+  if (overIndex >= 0) {
+    targetList.splice(overIndex, 0, dragId);
+  } else {
+    targetList.push(dragId);
+  }
+
+  return {
+    ...cleaned,
+    [targetContainer]: targetList
+  };
+}
+
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
   const overId = String(event?.over?.id || "");
 
-  const sourceContainer =
-  event?.active?.data?.current?.containerId ||
-  event?.active?.data?.current?.sortable?.containerId ||
-  "";
-
-const targetContainer =
-  event?.over?.data?.current?.containerId ||
-  event?.over?.data?.current?.sortable?.containerId ||
-  overId;
-
   if (!dragId || !overId || dragId === overId) return;
 
-    const stackTargets = THEATER_RECEPTOR_KEYS;
+  const explicitTargetContainer =
+    event?.over?.data?.current?.containerId ||
+    event?.over?.data?.current?.sortable?.containerId ||
+    "";
 
-  const sourceStackKey = stackTargets.find(key =>
-  (theaterContainers[key] || []).some(id => String(id) === dragId)
+  updateTheaterContainers(current => {
+    const sourceContainer = getTheaterSourceContainer(current, dragId);
+
+    if (!sourceContainer) return current;
+
+    const isOverRailCard = (current.rail || []).some(
+  id => String(id) === String(overId)
 );
-  
-  setTheaterContainers(current => {
-    const rail = current.rail || [];
 
-      if (stackTargets.includes(targetContainer)) {
-  const nextContainers = {
-    ...current,
-    [sourceContainer]: (current[sourceContainer] || []).filter(
-      id => String(id) !== dragId
-    ),
-    [targetContainer]: [
-      ...(current[targetContainer] || []).filter(
-        id => String(id) !== dragId
-      ),
-      dragId
-    ]
-  };
+const targetContainer =
+  explicitTargetContainer ||
+  (THEATER_RECEPTOR_KEYS.includes(overId) ? overId : "") ||
+  (isOverRailCard ? "rail" : "");
+    if (!targetContainer) return current;
 
-  return saveTheaterContainers(nextContainers);
-}
-    const fromIndex = rail.findIndex(id => String(id) === dragId);
-    const toIndex = rail.findIndex(id => String(id) === overId);
-
-    if (fromIndex === -1 || toIndex === -1) return current;
-
-const nextRail = [...rail];
-const [moved] = nextRail.splice(fromIndex, 1);
-nextRail.splice(toIndex, 0, moved);
-
-const nextContainers = {
-  ...current,
-  rail: nextRail
-};
-
-return nextContainers;
+    return moveTheaterMachineToContainer(
+      current,
+      dragId,
+      targetContainer,
+      overId
+    );
   });
 }
   
