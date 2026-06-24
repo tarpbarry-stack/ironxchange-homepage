@@ -343,10 +343,32 @@ const screenMachines = useMemo(() => {
     .map(slotIndex => railListings[slotIndex])
     .filter(Boolean);
 }, [screenSlots, railListings, viewCount]);
+
+function removeDuplicateTheaterIds(containers = {}) {
+  const next = {};
+  const seen = new Set();
+
+  ["rail", ...THEATER_RECEPTOR_KEYS].forEach(key => {
+    next[key] = [];
+
+    (containers[key] || []).forEach(rawId => {
+      const id = String(rawId);
+
+      if (!id || seen.has(id)) return;
+
+      seen.add(id);
+      next[key].push(id);
+    });
+  });
+
+  return next;
+}
   
 function saveTheaterContainers(nextContainers) {
   const safeContainers =
-    sanitizeTheaterContainers(nextContainers);
+    sanitizeTheaterContainers(
+      removeDuplicateTheaterIds(nextContainers)
+    );
 
   saveTheaterQueue({
     userId: ixiUserId,
@@ -390,7 +412,11 @@ function removeIdFromAllTheaterContainers(current, dragId) {
   const next = { ...current };
 
   ["rail", ...THEATER_RECEPTOR_KEYS].forEach(key => {
-    next[key] = (next[key] || []).filter(id => String(id) !== String(dragId));
+    next[key] = (next[key] || [])
+      .filter(id => String(id) !== String(dragId))
+      .filter((id, index, arr) =>
+        arr.findIndex(item => String(item) === String(id)) === index
+      );
   });
 
   return next;
@@ -407,15 +433,20 @@ function moveTheaterMachineToContainer(current, dragId, targetContainer, overId 
 
   if (!validTargets.includes(targetContainer)) return current;
 
-  const cleaned = removeIdFromAllTheaterContainers(current, dragId);
-  const targetList = [...(cleaned[targetContainer] || [])];
+  const id = String(dragId);
+  const cleaned = removeIdFromAllTheaterContainers(current, id);
 
-  const overIndex = targetList.findIndex(id => String(id) === String(overId));
+  const targetList = [...(cleaned[targetContainer] || [])]
+    .filter(item => String(item) !== id);
+
+  const overIndex = targetList.findIndex(
+    item => String(item) === String(overId)
+  );
 
   if (overIndex >= 0) {
-    targetList.splice(overIndex, 0, dragId);
+    targetList.splice(overIndex, 0, id);
   } else {
-    targetList.push(dragId);
+    targetList.push(id);
   }
 
   return {
