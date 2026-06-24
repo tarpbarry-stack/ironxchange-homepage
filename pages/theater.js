@@ -873,18 +873,21 @@ return (
 
          <div className="theater-stack-thumb-zone">
   {topMachine ? (
-    <div className="theater-stack-thumb-head has-machine">
-      {topImage ? (
-        <img src={topImage} alt="" />
-      ) : (
-        <span>
-          {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
-        </span>
-      )}
-    </div>
-  ) : (
-    <div className="theater-stack-thumb-head" />
-  )}
+  <TheaterDraggableCard
+    id={String(getListingId(topMachine))}
+    className="theater-stack-thumb-head has-machine"
+  >
+    {topImage ? (
+      <img src={topImage} alt="" />
+    ) : (
+      <span>
+        {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
+      </span>
+    )}
+  </TheaterDraggableCard>
+) : (
+  <div className="theater-stack-thumb-head" />
+)}
 </div>
 
           <div className="theater-stack-drop-surface" />
