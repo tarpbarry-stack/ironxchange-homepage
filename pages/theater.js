@@ -391,7 +391,13 @@ function getTheaterSourceContainer(current, dragId) {
   );
 }
 
-function moveTheaterMachineToContainer(current, dragId, targetContainer, overId = "") {
+function moveTheaterMachineToContainer(
+  current,
+  dragId,
+  targetContainer,
+  overId = "",
+  insertAfter = false
+) {
   const validTargets = ["rail", ...THEATER_RECEPTOR_KEYS];
 
   if (!validTargets.includes(targetContainer)) return current;
@@ -407,10 +413,10 @@ function moveTheaterMachineToContainer(current, dragId, targetContainer, overId 
   );
 
   if (overIndex >= 0) {
-    targetList.splice(overIndex, 0, id);
-  } else {
-    targetList.push(id);
-  }
+  targetList.splice(insertAfter ? overIndex + 1 : overIndex, 0, id);
+} else {
+  targetList.push(id);
+}
 
   return {
     ...cleaned,
@@ -447,12 +453,23 @@ function handleTheaterDragEnd(event) {
 
     if (!targetContainer) return current;
 
-    return moveTheaterMachineToContainer(
-      current,
-      dragId,
-      targetContainer,
-      targetId
-    );
+   const sourceList = current[sourceContainer] || [];
+const fromIndex = sourceList.findIndex(id => String(id) === String(dragId));
+const toIndex = sourceList.findIndex(id => String(id) === String(targetId));
+
+const insertAfter =
+  sourceContainer === targetContainer &&
+  fromIndex >= 0 &&
+  toIndex >= 0 &&
+  fromIndex < toIndex;
+
+return moveTheaterMachineToContainer(
+  current,
+  dragId,
+  targetContainer,
+  targetId,
+  insertAfter
+);
   });
 }
   
