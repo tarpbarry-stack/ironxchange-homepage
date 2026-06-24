@@ -67,7 +67,11 @@ function TheaterDraggableCard({
       ref={setNodeRef}
       className={`${className || ""} ${isDragging ? "is-dragging" : ""}`}
       onClick={onClick}
-           style={undefined}
+               style={{
+      transform: transform
+        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+        : undefined
+    }}
       {...listeners}
       {...attributes}
     >
@@ -116,7 +120,11 @@ function TheaterRailCard({
       ref={setNodeRef}
       className={`${className || ""} ${isDragging ? "is-dragging" : ""} ${isOver ? "is-over" : ""}`}
       onClick={onClick}
-           style={undefined}
+           style={{
+  transform: transform
+    ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+    : undefined
+}}
       {...listeners}
       {...attributes}
     >
@@ -977,7 +985,7 @@ return (
           </section>
           </section>
         )}
-           <DragOverlay>
+          {/* <DragOverlay>
   {activeDragMachine ? (
     <div className="theater-drag-overlay-card">
       <div className="loaded-card-scale">
@@ -1002,7 +1010,7 @@ return (
       </div>
     </div>
   ) : null}
-</DragOverlay>
+</DragOverlay> */}
 
 </main>
 </DndContext>
