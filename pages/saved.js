@@ -1009,26 +1009,6 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     [stackKey]: false
   }));
 }
-
-function sendActiveStackToTheater(stackKey) {
-  const sourceContainer = getStackContainerKey(stackKey);
-
-  const receptor =
-    stackKey === "top"
-      ? "stack5"
-      : "stack6";
-
-  const destinationLabel =
-    stackKey === "top"
-      ? "STACK 5"
-      : "STACK 6";
-
-  sendContainerToTheater(
-    sourceContainer,
-    receptor,
-    destinationLabel
-  );
-}
   
 function addListingToActiveStack(stackKey, listingId) {
   if (!listingId) return;
@@ -1271,6 +1251,26 @@ function sendPocketToTheater(pocketKey) {
     `STACK ${stackNumber}`
   );
 } 
+
+function sendActiveStackToTheater(stackKey) {
+  const sourceContainer = getStackContainerKey(stackKey);
+
+  const receptor =
+    stackKey === "top"
+      ? "stack5"
+      : "stack6";
+
+  const destinationLabel =
+    stackKey === "top"
+      ? "STACK 5"
+      : "STACK 6";
+
+  sendContainerToTheater(
+    sourceContainer,
+    receptor,
+    destinationLabel
+  );
+}
             
 function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
