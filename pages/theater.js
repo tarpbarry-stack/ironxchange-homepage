@@ -390,6 +390,16 @@ function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
   const overId = String(event?.over?.id || "");
 
+  const sourceContainer =
+  event?.active?.data?.current?.containerId ||
+  event?.active?.data?.current?.sortable?.containerId ||
+  "";
+
+const targetContainer =
+  event?.over?.data?.current?.containerId ||
+  event?.over?.data?.current?.sortable?.containerId ||
+  overId;
+
   if (!dragId || !overId || dragId === overId) return;
 
     const stackTargets = THEATER_RECEPTOR_KEYS;
@@ -401,19 +411,16 @@ function handleTheaterDragEnd(event) {
   setTheaterContainers(current => {
     const rail = current.rail || [];
 
-       if (stackTargets.includes(overId)) {
+      if (stackTargets.includes(targetContainer)) {
   const nextContainers = {
     ...current,
-    rail: rail.filter(id => String(id) !== dragId),
-    ...(sourceStackKey
-      ? {
-          [sourceStackKey]: (current[sourceStackKey] || []).filter(
-            id => String(id) !== dragId
-          )
-        }
-      : {}),
-    [overId]: [
-      ...(current[overId] || []).filter(id => String(id) !== dragId),
+    [sourceContainer]: (current[sourceContainer] || []).filter(
+      id => String(id) !== dragId
+    ),
+    [targetContainer]: [
+      ...(current[targetContainer] || []).filter(
+        id => String(id) !== dragId
+      ),
       dragId
     ]
   };
