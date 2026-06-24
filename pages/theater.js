@@ -467,14 +467,15 @@ function moveTheaterMachineToContainer(current, dragId, targetContainer, overId 
 
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
   const overData = event?.over?.data?.current || {};
   const targetId = String(overData.targetId || overId);
 
   if (!dragId || !overId || dragId === overId) return;
 
   const explicitTargetContainer =
-    event?.over?.data?.current?.containerId ||
-    event?.over?.data?.current?.sortable?.containerId ||
+    overData.containerId ||
+    overData.sortable?.containerId ||
     "";
 
   updateTheaterContainers(current => {
@@ -483,21 +484,24 @@ function handleTheaterDragEnd(event) {
     if (!sourceContainer) return current;
 
     const isOverRailCard = (current.rail || []).some(
-  id => String(id) === String(overId)
-);
+      id => String(id) === String(targetId)
+    );
 
-const targetContainer =
-  explicitTargetContainer ||
-  (THEATER_RECEPTOR_KEYS.includes(overId) ? overId : "") ||
-  (isOverRailCard ? "rail" : "");
+    const targetContainer =
+      explicitTargetContainer ||
+      (THEATER_RECEPTOR_KEYS.includes(overId) ? overId : "") ||
+      (isOverRailCard ? "rail" : "");
+
     if (!targetContainer) return current;
 
     return moveTheaterMachineToContainer(
-  current,
-  dragId,
-  targetContainer,
-  targetId
-);
+      current,
+      dragId,
+      targetContainer,
+      targetId
+    );
+  });
+}
   
 
 function getMachineImages(machine = {}) {
