@@ -604,8 +604,12 @@ function prevPhotoForMachine(machine) {
               <span>IXI THEATER</span>
 
               <p>
-  {Object.values(theaterContainers)
-    .reduce((total, ids) => total + (Array.isArray(ids) ? ids.length : 0), 0) || 8} machines loaded for inspection.
+ {new Set(
+  Object.values(theaterContainers)
+    .flat()
+    .map(id => String(id))
+    .filter(Boolean)
+).size} machines loaded for inspection.
 </p>
 
               <button type="button" onClick={() => setEntered(true)}>
