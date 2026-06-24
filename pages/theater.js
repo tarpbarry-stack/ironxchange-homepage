@@ -22,6 +22,7 @@ import {
 } from "../lib/ixiTheaterQueue";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
 
 const THEATER_DEMO_MACHINE_IDS = [
   "69f7ffd8-f07e-4587-a4dd-4a1fa7626d91",
@@ -883,20 +884,30 @@ return (
 
 <div className="theater-stack-thumb-zone">
   {topMachine ? (
-    <div className="theater-stack-thumb-head has-machine">
-      {topImage ? (
-        <img src={topImage} alt="" />
-      ) : (
-        <span>
-          {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
-        </span>
+    <IXISortableMachineCard
+      id={String(getListingId(topMachine))}
+      containerId={stackKey}
+      className="theater-stack-thumb-dnd"
+    >
+      {({ dragHandleProps }) => (
+        <div
+          className="theater-stack-thumb-head has-machine"
+          {...dragHandleProps}
+        >
+          {topImage ? (
+            <img src={topImage} alt="" />
+          ) : (
+            <span>
+              {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
+            </span>
+          )}
+        </div>
       )}
-    </div>
+    </IXISortableMachineCard>
   ) : (
     <div className="theater-stack-thumb-head" />
   )}
 </div>
-
           <div className="theater-stack-drop-surface" />
       </TheaterStackDropZone>
   );
@@ -1643,6 +1654,22 @@ margin-top: -25px;
   justify-content: center;
 
   pointer-events: none;
+}
+
+:global(.theater-stack-thumb-dnd) {
+  width: 90px;
+  height: 60px;
+
+  display: block;
+
+  position: relative;
+  z-index: 90;
+
+  cursor: grab;
+}
+
+:global(.theater-stack-thumb-dnd:active) {
+  cursor: grabbing;
 }
 
 .theater-stack-thumb-head {
