@@ -84,12 +84,18 @@ function shouldShowLabel(item) {
     }
 
     if (
-      item.label === "IXI THEATER" &&
-      typeof toggleArmedDestination === "function"
-    ) {
-      e.preventDefault();
-      toggleArmedDestination("theater");
-    }
+  item.label === "IXI THEATER" &&
+  typeof toggleArmedDestination === "function"
+) {
+  e.preventDefault();
+  toggleArmedDestination("theater");
+}
+  }}
+onDoubleClick={(e) => {
+    if (item.label !== "IXI THEATER") return;
+
+    e.preventDefault();
+    window.location.href = "/theater";
   }}
   className={`ixi-environment-link state-${getRailItemState(item)} ${
     item.postFree ? "post-free" : ""
