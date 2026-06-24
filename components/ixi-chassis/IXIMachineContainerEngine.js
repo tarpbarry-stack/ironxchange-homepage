@@ -125,16 +125,10 @@ function moveMachineToContainerState({
     "pocketRight2"
   ].includes(targetContainer);
 
-  next[targetContainer] = isPocket
-    ? [
-        id,
-        ...(next[targetContainer] || [])
-      ]
-    : [
-        ...(next[targetContainer] || []),
-        id
-      ];
-
+  next[targetContainer] = [
+  ...(next[targetContainer] || []),
+  id
+];
   return next;
 }
 
