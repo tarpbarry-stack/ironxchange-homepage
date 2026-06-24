@@ -115,7 +115,7 @@ function TheaterRailCard({
     setDropNodeRef(node);
   }
 
-    return (
+  return (
     <div
       ref={setNodeRef}
       className={`${className || ""} ${isDragging ? "is-dragging" : ""} ${isOver ? "is-over" : ""}`}
@@ -132,6 +132,7 @@ function TheaterRailCard({
     </div>
   );
 }
+
 function TheaterStackDropZone({
   id,
   children,
