@@ -1674,7 +1674,7 @@ margin-top: -25px;
   align-items: flex-end;
   justify-content: center;
 
-  pointer-events: none;
+    pointer-events: auto;
 }
 
 :global(.theater-stack-thumb-dnd) {
