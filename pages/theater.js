@@ -878,26 +878,23 @@ return (
           </div>
 
           <div className="theater-stack-label">
-            STACK {stackNumber}
-          </div>
+  STACK {stackNumber}
+</div>
 
-         <div className="theater-stack-thumb-zone">
+<div className="theater-stack-thumb-zone">
   {topMachine ? (
-  <TheaterDraggableCard
-    id={String(getListingId(topMachine))}
-    className="theater-stack-thumb-head has-machine"
-  >
-    {topImage ? (
-      <img src={topImage} alt="" />
-    ) : (
-      <span>
-        {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
-      </span>
-    )}
-  </TheaterDraggableCard>
-) : (
-  <div className="theater-stack-thumb-head" />
-)}
+    <div className="theater-stack-thumb-head has-machine">
+      {topImage ? (
+        <img src={topImage} alt="" />
+      ) : (
+        <span>
+          {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
+        </span>
+      )}
+    </div>
+  ) : (
+    <div className="theater-stack-thumb-head" />
+  )}
 </div>
 
           <div className="theater-stack-drop-surface" />
