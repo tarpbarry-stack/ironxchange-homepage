@@ -393,22 +393,32 @@ function handleTheaterDragEnd(event) {
 
     const stackTargets = THEATER_RECEPTOR_KEYS;
 
+  const sourceStackKey = stackTargets.find(key =>
+  (theaterContainers[key] || []).some(id => String(id) === dragId)
+);
+  
   setTheaterContainers(current => {
     const rail = current.rail || [];
 
-        if (stackTargets.includes(overId)) {
-      const nextContainers = {
-        ...current,
-        rail: rail.filter(id => String(id) !== dragId),
-        [overId]: [
-          ...(current[overId] || []).filter(id => String(id) !== dragId),
-          dragId
-        ]
-      };
+       if (stackTargets.includes(overId)) {
+  const nextContainers = {
+    ...current,
+    rail: rail.filter(id => String(id) !== dragId),
+    ...(sourceStackKey
+      ? {
+          [sourceStackKey]: (current[sourceStackKey] || []).filter(
+            id => String(id) !== dragId
+          )
+        }
+      : {}),
+    [overId]: [
+      ...(current[overId] || []).filter(id => String(id) !== dragId),
+      dragId
+    ]
+  };
 
-            return nextContainers;
-    }
-
+  return saveTheaterContainers(nextContainers);
+}
     const fromIndex = rail.findIndex(id => String(id) === dragId);
     const toIndex = rail.findIndex(id => String(id) === overId);
 
