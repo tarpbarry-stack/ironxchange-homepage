@@ -954,7 +954,7 @@ return (
           </section>
           </section>
         )}
-          {/* <DragOverlay>
+          <DragOverlay>
   {activeDragMachine ? (
     <div className="theater-drag-overlay-card">
       <div className="loaded-card-scale">
@@ -979,7 +979,7 @@ return (
       </div>
     </div>
   ) : null}
-</DragOverlay> */}
+</DragOverlay>
 
 </main>
 </DndContext>
