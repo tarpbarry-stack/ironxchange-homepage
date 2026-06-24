@@ -9,6 +9,11 @@ import {
   pointerWithin
 } from "@dnd-kit/core";
 
+import {
+  SortableContext,
+  horizontalListSortingStrategy
+} from "@dnd-kit/sortable";
+
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
@@ -80,58 +85,6 @@ function TheaterDraggableCard({
   );
 }
 
-function TheaterRailCard({
-  id,
-  children,
-  className,
-  onClick
-}) {
-  const dragId = String(id);
-  const dropId = `rail-drop-${dragId}`;
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setDragNodeRef,
-    transform,
-    isDragging
-  } = useDraggable({
-    id: dragId
-  });
-
-  const {
-    setNodeRef: setDropNodeRef,
-    isOver
-  } = useDroppable({
-    id: dropId,
-    data: {
-      containerId: "rail",
-      targetId: dragId
-    }
-  });
-
-  function setNodeRef(node) {
-    setDragNodeRef(node);
-    setDropNodeRef(node);
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`${className || ""} ${isDragging ? "is-dragging" : ""} ${isOver ? "is-over" : ""}`}
-      onClick={onClick}
-           style={{
-  transform: transform
-    ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-    : undefined
-}}
-      {...listeners}
-      {...attributes}
-    >
-      {children}
-    </div>
-  );
-}
 
 function TheaterStackDropZone({
   id,
@@ -800,51 +753,67 @@ return (
   className="theater-loaded-zone"
 >
     <div className="loaded-cards">
-      {railListings.map((machine, index) => {
-                  const id = String(getListingId(machine));
+  <SortableContext
+    id="rail"
+    items={(theaterContainers.rail || []).map(id => String(id))}
+    strategy={horizontalListSortingStrategy}
+  >
+    {railListings.map((machine, index) => {
+      const id = String(getListingId(machine));
 
-                  return (
-                  <TheaterRailCard
-  key={id}
-  id={id}
-  className={`loaded-card ${
-    screenSlots.includes(index) ? "on-screen" : ""
-  }`}
-  onClick={() => {
-    setScreenSlots(current => {
-      const next = [...current];
-      next[selectedSlot] = index;
-      return next;
-    });
-  }}
->
-                  {screenSlots.includes(index) && (
-  <div className="loaded-card-screen-label">
-    {screenSlots.indexOf(index) + 1}
-  </div>
-)}
+      return (
+        <IXISortableMachineCard
+          key={id}
+          id={id}
+          containerId="rail"
+          className={`loaded-card ${
+            screenSlots.includes(index) ? "on-screen" : ""
+          }`}
+        >
+          {({ dragHandleProps }) => (
+            <div
+              {...dragHandleProps}
+              onClick={() => {
+                setScreenSlots(current => {
+                  const next = [...current];
+                  next[selectedSlot] = index;
+                  return next;
+                });
+              }}
+            >
+              {screenSlots.includes(index) && (
+                <div className="loaded-card-screen-label">
+                  {screenSlots.indexOf(index) + 1}
+                </div>
+              )}
 
-<div className="loaded-card-scale">
-  <ListingCard
-    listing={machine}
-                        saved={false}
-                        onToggleSaved={() => {}}
-                        from="saved"
-                        ixiState={{
-                          color: "none",
-                          outline: 1
-                        }}
-                        onIxiStateChange={() => {}}
-                        onSendFront={() => {}}
-                        onSendBack={() => {}}
-                        isBoardDraggingCard={false}
-                        isGhostTarget={false}
-                        onBoardDragStart={() => {}}
-  onBoardDragOver={() => {}}
-  onBoardDragEnd={() => {}}
-/>
+              <div className="loaded-card-scale">
+                <ListingCard
+                  listing={machine}
+                  saved={false}
+                  onToggleSaved={() => {}}
+                  from="saved"
+                  ixiState={{
+                    color: "none",
+                    outline: 1
+                  }}
+                  onIxiStateChange={() => {}}
+                  onSendFront={() => {}}
+                  onSendBack={() => {}}
+                  isBoardDraggingCard={false}
+                  isGhostTarget={false}
+                  onBoardDragStart={() => {}}
+                  onBoardDragOver={() => {}}
+                  onBoardDragEnd={() => {}}
+                />
+              </div>
+            </div>
+          )}
+        </IXISortableMachineCard>
+      );
+    })}
+  </SortableContext>
 </div>
-</TheaterRailCard>
                   );
                 })}
                           </div>
