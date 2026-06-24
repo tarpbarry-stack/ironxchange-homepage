@@ -67,11 +67,7 @@ function TheaterDraggableCard({
       ref={setNodeRef}
       className={`${className || ""} ${isDragging ? "is-dragging" : ""}`}
       onClick={onClick}
-      style={{
-        transform: transform
-          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-          : undefined
-      }}
+           style={undefined}
       {...listeners}
       {...attributes}
     >
@@ -120,11 +116,7 @@ function TheaterRailCard({
       ref={setNodeRef}
       className={`${className || ""} ${isDragging ? "is-dragging" : ""} ${isOver ? "is-over" : ""}`}
       onClick={onClick}
-      style={{
-        transform: transform
-          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-          : undefined
-      }}
+           style={undefined}
       {...listeners}
       {...attributes}
     >
