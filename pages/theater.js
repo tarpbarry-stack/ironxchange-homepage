@@ -365,6 +365,25 @@ function updateTheaterContainers(updater) {
     return saveTheaterContainers(nextContainers);
   });
 }
+
+ function moveTheaterStack(sourceStackKey, targetKey) {
+  if (!sourceStackKey || !targetKey || sourceStackKey === targetKey) return;
+
+  updateTheaterContainers(current => {
+    const sourceIds = current[sourceStackKey] || [];
+
+    if (!sourceIds.length) return current;
+
+    return {
+      ...current,
+      [targetKey]: [
+        ...(current[targetKey] || []),
+        ...sourceIds
+      ],
+      [sourceStackKey]: []
+    };
+  });
+} 
   
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
