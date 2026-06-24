@@ -747,7 +747,10 @@ return (
 </div>
                 
             <div className="theater-bottom-dock">
-  <div className="theater-loaded-zone">
+  <TheaterStackDropZone
+  id="rail"
+  className="theater-loaded-zone"
+>
     <div className="loaded-cards">
       {railListings.map((machine, index) => {
                   const id = String(getListingId(machine));
@@ -797,7 +800,7 @@ return (
                   );
                 })}
                           </div>
-          </div>
+          </TheaterStackDropZone>
 <div className="theater-import-zone">
   <div className="theater-stack-grid">
     <button
@@ -1498,6 +1501,9 @@ margin-top: -25px;
 
   position: relative;
   top: 55px;
+
+    pointer-events: auto;
+  z-index: 100;
 }
 
 .theater-import-zone {
