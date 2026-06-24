@@ -905,16 +905,11 @@ return (
 
 <div className="theater-stack-thumb-zone">
   {topMachine ? (
-    <IXISortableMachineCard
+    <TheaterDraggableCard
       id={String(getListingId(topMachine))}
-      containerId={stackKey}
       className="theater-stack-thumb-dnd"
     >
-      {({ dragHandleProps }) => (
-        <div
-          className="theater-stack-thumb-head has-machine"
-          {...dragHandleProps}
-        >
+      <div className="theater-stack-thumb-head has-machine">
           {topImage ? (
             <img src={topImage} alt="" />
           ) : (
@@ -922,9 +917,8 @@ return (
               {topMachine.year || ""} {topMachine.make || ""} {topMachine.model || ""}
             </span>
           )}
-        </div>
-      )}
-    </IXISortableMachineCard>
+             </div>
+    </TheaterDraggableCard>
   ) : (
     <div className="theater-stack-thumb-head" />
   )}
@@ -1660,7 +1654,7 @@ margin-top: -25px;
   box-shadow: 0 0 8px rgba(255,196,0,.20);
 }
 
-.theater-stack-thumb-zone {
+:global(.theater-stack-thumb-zone) {
   position: absolute;
   left: 50%;
   bottom: 14px;
@@ -1674,7 +1668,8 @@ margin-top: -25px;
   align-items: flex-end;
   justify-content: center;
 
-    pointer-events: auto;
+      z-index: 120;
+  pointer-events: auto;
 }
 
 :global(.theater-stack-thumb-dnd) {
@@ -1693,7 +1688,7 @@ margin-top: -25px;
   cursor: grabbing;
 }
 
-.theater-stack-thumb-head {
+:global(.theater-stack-thumb-head) {
   width: 90px;
   height: 60px;
 
@@ -1730,7 +1725,7 @@ margin-top: -25px;
   line-height: 1.1;
 }
 
-.theater-stack-drop-surface {
+:global(.theater-stack-drop-surface) {
   position: absolute;
   left: 8px;
   right: 8px;
@@ -1741,6 +1736,7 @@ margin-top: -25px;
   border-radius: 8px;
 
   pointer-events: auto;
+  z-index: 20;
 }
 
         .theater-room,
