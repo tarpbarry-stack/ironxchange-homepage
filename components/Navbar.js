@@ -30,7 +30,7 @@ useEffect(() => {
   return (
     <nav className="nav">
       <div className="brand-side">
-        <a href="/" className="logo-wrap">
+        <a href="/browse-v2" className="logo-wrap">
           <img
             src="/images/ironxchange-logo.png"
             className="logo-img"
