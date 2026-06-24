@@ -752,72 +752,66 @@ return (
   id="rail"
   className="theater-loaded-zone"
 >
-    <div className="loaded-cards">
-  <SortableContext
-    id="rail"
-    items={(theaterContainers.rail || []).map(id => String(id))}
-    strategy={horizontalListSortingStrategy}
-  >
-    {railListings.map((machine, index) => {
-      const id = String(getListingId(machine));
+  <div className="loaded-cards">
+    <SortableContext
+      id="rail"
+      items={(theaterContainers.rail || []).map(id => String(id))}
+      strategy={horizontalListSortingStrategy}
+    >
+      {railListings.map((machine, index) => {
+        const id = String(getListingId(machine));
 
-      return (
-        <IXISortableMachineCard
-          key={id}
-          id={id}
-          containerId="rail"
-          className={`loaded-card ${
-            screenSlots.includes(index) ? "on-screen" : ""
-          }`}
-        >
-          {({ dragHandleProps }) => (
-            <div
-              {...dragHandleProps}
-              onClick={() => {
-                setScreenSlots(current => {
-                  const next = [...current];
-                  next[selectedSlot] = index;
-                  return next;
-                });
-              }}
-            >
-              {screenSlots.includes(index) && (
-                <div className="loaded-card-screen-label">
-                  {screenSlots.indexOf(index) + 1}
+        return (
+          <IXISortableMachineCard
+            key={id}
+            id={id}
+            containerId="rail"
+            className={`loaded-card ${
+              screenSlots.includes(index) ? "on-screen" : ""
+            }`}
+          >
+            {({ dragHandleProps }) => (
+              <div
+                {...dragHandleProps}
+                onClick={() => {
+                  setScreenSlots(current => {
+                    const next = [...current];
+                    next[selectedSlot] = index;
+                    return next;
+                  });
+                }}
+              >
+                {screenSlots.includes(index) && (
+                  <div className="loaded-card-screen-label">
+                    {screenSlots.indexOf(index) + 1}
+                  </div>
+                )}
+
+                <div className="loaded-card-scale">
+                  <ListingCard
+                    listing={machine}
+                    saved={false}
+                    onToggleSaved={() => {}}
+                    from="saved"
+                    ixiState={{ color: "none", outline: 1 }}
+                    onIxiStateChange={() => {}}
+                    onSendFront={() => {}}
+                    onSendBack={() => {}}
+                    isBoardDraggingCard={false}
+                    isGhostTarget={false}
+                    onBoardDragStart={() => {}}
+                    onBoardDragOver={() => {}}
+                    onBoardDragEnd={() => {}}
+                  />
                 </div>
-              )}
-
-              <div className="loaded-card-scale">
-                <ListingCard
-                  listing={machine}
-                  saved={false}
-                  onToggleSaved={() => {}}
-                  from="saved"
-                  ixiState={{
-                    color: "none",
-                    outline: 1
-                  }}
-                  onIxiStateChange={() => {}}
-                  onSendFront={() => {}}
-                  onSendBack={() => {}}
-                  isBoardDraggingCard={false}
-                  isGhostTarget={false}
-                  onBoardDragStart={() => {}}
-                  onBoardDragOver={() => {}}
-                  onBoardDragEnd={() => {}}
-                />
               </div>
-            </div>
-          )}
-        </IXISortableMachineCard>
-      );
-    })}
-  </SortableContext>
-</div>
-                  );
-                })}
-                          </div>
-          </TheaterStackDropZone>
+            )}
+          </IXISortableMachineCard>
+        );
+      })}
+    </SortableContext>
+  </div>
+</TheaterStackDropZone>
 <div className="theater-import-zone">
   <div className="theater-stack-grid">
     <button
