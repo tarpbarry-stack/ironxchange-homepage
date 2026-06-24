@@ -80,24 +80,35 @@ function TheaterDraggableCard({
   );
 }
 
-function TheaterDropCard({
+function TheaterRailCard({
   id,
   children,
   className,
   onClick
 }) {
+  const dragId = String(id);
+  const dropId = `rail-drop-${dragId}`;
+
   const {
     attributes,
     listeners,
     setNodeRef: setDragNodeRef,
     transform,
     isDragging
-  } = useDraggable({ id });
+  } = useDraggable({
+    id: dragId
+  });
 
   const {
     setNodeRef: setDropNodeRef,
     isOver
-  } = useDroppable({ id });
+  } = useDroppable({
+    id: dropId,
+    data: {
+      containerId: "rail",
+      targetId: dragId
+    }
+  });
 
   function setNodeRef(node) {
     setDragNodeRef(node);
@@ -456,7 +467,8 @@ function moveTheaterMachineToContainer(current, dragId, targetContainer, overId 
 
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
-  const overId = String(event?.over?.id || "");
+  const overData = event?.over?.data?.current || {};
+  const targetId = String(overData.targetId || overId);
 
   if (!dragId || !overId || dragId === overId) return;
 
@@ -481,13 +493,11 @@ const targetContainer =
     if (!targetContainer) return current;
 
     return moveTheaterMachineToContainer(
-      current,
-      dragId,
-      targetContainer,
-      overId
-    );
-  });
-}
+  current,
+  dragId,
+  targetContainer,
+  targetId
+);
   
 
 function getMachineImages(machine = {}) {
@@ -786,7 +796,7 @@ return (
                   const id = String(getListingId(machine));
 
                   return (
-                  <TheaterDropCard
+                  <TheaterRailCard
   key={id}
   id={id}
   className={`loaded-card ${
@@ -826,7 +836,7 @@ return (
   onBoardDragEnd={() => {}}
 />
 </div>
-</TheaterDropCard>
+</TheaterRailCard>
                   );
                 })}
                           </div>
