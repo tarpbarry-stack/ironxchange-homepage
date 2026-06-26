@@ -220,13 +220,14 @@ const activeMachine =
         </div>
           </>
   ) : activeMachine ? (
-    <ListingCard
-      listing={activeMachine}
-      saved={false}
-      showSave={false}
-      machineFace={1}
-      useDndDrag={false}
-    />
+   <ListingCard
+  listing={activeMachine}
+  saved={false}
+  showSave={false}
+  machineFace={1}
+  useDndDrag={false}
+  ixiState={ixiState}
+/>
   ) : (
     <div className="seller-end-deck">
   <span>END DECK</span>
