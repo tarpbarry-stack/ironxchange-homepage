@@ -95,6 +95,10 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
+import {
+  sendMachineToTheater
+} from "../../lib/ixiTheaterQueue";
+
 export default function SellerIndexPage() {
   const [listings, setListings] = useState([]);
   
@@ -1503,12 +1507,14 @@ function cycleCardScaleMode() {
   >
     <main>
   <section className="saved-environment-shell">
-        <IXIEnvironmentRail
-      activeEnvironment="IXI SELLERS"
-      hasAccount={!!sdk}
-      hasRelationship={true}
-      hasInventory={!!sdk}
-    />
+       <IXIEnvironmentRail
+  activeEnvironment="IXI SELLERS"
+  hasAccount={!!sdk}
+  hasRelationship={true}
+  hasInventory={!!sdk}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
   </section>
 
 <section className="yard-head">
