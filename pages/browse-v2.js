@@ -1188,17 +1188,33 @@ function cycleCardScaleMode() {
 
   const id = String(getListingId(listing));
 
-  if (armedDestination === "theater") {
-    console.log("BUTTON 6 THEATER SEND", id);
+if (armedDestination === "theater") {
+  updateIxiCardState(id, {
+    theaterNotice: "SENDING TO THEATER..."
+  });
 
-    sendMachineToTheater({
-      userId: ixiUserId,
-      listingId: id,
-      receptor: "rail"
+  sendMachineToTheater({
+    userId: ixiUserId,
+    listingId: id,
+    receptor: "rail"
+  })
+    .then(() => {
+      updateIxiCardState(id, {
+        theaterNotice: "✓ SENT TO THEATER — RAIL"
+      });
+
+      setTimeout(() => {
+        updateIxiCardState(id, {
+          theaterNotice: ""
+        });
+      }, 1800);
+    })
+    .catch(err => {
+      console.error("BROWSE THEATER SEND FAILED", err);
     });
 
-    return;
-  }
+  return;
+}
 
   if (!POCKET_TARGETS.includes(armedDestination)) {
     return;
