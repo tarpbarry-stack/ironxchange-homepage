@@ -303,21 +303,23 @@ const activeMachine =
 
           onSendToArmedDestination?.(activeMachine);
 
-          onIxiStateChange?.(machineId, {
-            sourceSellerId: id,
-            checkedOutFromSeller: true
-                  });
+if (armedDestination !== "theater") {
+  onIxiStateChange?.(machineId, {
+    sourceSellerId: id,
+    checkedOutFromSeller: true
+  });
 
-          onIxiStateChange?.(id, {
-            checkedOutMachineIds: [
-              ...checkedOutMachineIds,
-              machineId
-            ],
-            face:
-              sellerFace >= endDeckFace - 1
-                ? endDeckFace
-                : sellerFace
-          });
+  onIxiStateChange?.(id, {
+    checkedOutMachineIds: [
+      ...checkedOutMachineIds.filter(item => String(item) !== machineId),
+      machineId
+    ],
+    face:
+      sellerFace >= endDeckFace - 1
+        ? endDeckFace
+        : sellerFace
+  });
+}
         }
   }
 />
