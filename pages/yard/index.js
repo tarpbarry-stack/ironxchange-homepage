@@ -235,6 +235,23 @@ function handleWorkspaceDragEnd(event) {
     return;
   }
 
+const draggedState = ixiCardState[dragId] || {};
+const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
+
+if (
+  sourceContainer === "board" &&
+  targetContainer === "board" &&
+  draggedState.checkedOutFromSeller &&
+  draggedSourceSellerId &&
+  String(overId) === draggedSourceSellerId
+) {
+  checkMachineBackIntoSeller(dragId);
+
+  setActiveDndId("");
+  clearMachineDragState();
+  return;
+}
+  
   if (
     sourceContainer &&
     targetContainer &&
