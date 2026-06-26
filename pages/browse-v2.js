@@ -1224,10 +1224,12 @@ function cycleCardScaleMode() {
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
   activeEnvironment="IXI MARKETPLACE"
-      hasAccount={!!sdk}
-      hasRelationship={true}
-      hasInventory={!!sdk}
-    />
+  hasAccount={!!sdk}
+  hasRelationship={true}
+  hasInventory={!!sdk}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
   </section>
       
 
