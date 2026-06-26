@@ -1484,12 +1484,44 @@ function cycleCardScaleMode() {
     clearMachineDragState
   });  
     function sendMachineToArmedDestination(listing) {
-      if (!armedDestination) return;
-      if (!POCKET_TARGETS.includes(armedDestination)) return;
+  if (!armedDestination) return;
 
-      const id = String(getListingId(listing));
-      moveMachineToContainer(id, armedDestination);
-    }
+  const id = String(getBoardObjectId(listing));
+
+  if (armedDestination === "theater") {
+    updateIxiCardState(id, {
+      theaterNotice: "SENDING TO THEATER..."
+    });
+
+    sendMachineToTheater({
+      userId: ixiUserId,
+      listingId: id,
+      receptor: "rail"
+    })
+      .then(() => {
+        updateIxiCardState(id, {
+          theaterNotice: "✓ SENT TO THEATER — RAIL"
+        });
+
+        setTimeout(() => {
+          updateIxiCardState(id, {
+            theaterNotice: ""
+          });
+        }, 1800);
+      })
+      .catch(err => {
+        console.error("IXI SELLERS THEATER SEND FAILED", err);
+      });
+
+    return;
+  }
+
+  if (!POCKET_TARGETS.includes(armedDestination)) {
+    return;
+  }
+
+  moveMachineToContainer(id, armedDestination);
+}
 
     return (
   <IXIDragEngine
