@@ -95,6 +95,10 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
+import {
+  sendMachineToTheater
+} from "../../lib/ixiTheaterQueue";
+
 export default function SellerYardPage() {
   const router = useRouter();
   const { sellerSlug } = router.query;
@@ -1332,13 +1336,44 @@ function cycleCardScaleMode() {
     clearMachineDragState
   });  
     function sendMachineToArmedDestination(listing) {
-      if (!armedDestination) return;
-      if (!POCKET_TARGETS.includes(armedDestination)) return;
+  if (!armedDestination) return;
 
-      const id = String(getListingId(listing));
-      moveMachineToContainer(id, armedDestination);
-    }
+  const id = String(getListingId(listing));
 
+  if (armedDestination === "theater") {
+    updateIxiCardState(id, {
+      theaterNotice: "SENDING TO THEATER..."
+    });
+
+    sendMachineToTheater({
+      userId: ixiUserId,
+      listingId: id,
+      receptor: "rail"
+    })
+      .then(() => {
+        updateIxiCardState(id, {
+          theaterNotice: "✓ SENT TO THEATER — RAIL"
+        });
+
+        setTimeout(() => {
+          updateIxiCardState(id, {
+            theaterNotice: ""
+          });
+        }, 1800);
+      })
+      .catch(err => {
+        console.error("SELLER YARD THEATER SEND FAILED", err);
+      });
+
+    return;
+  }
+
+  if (!POCKET_TARGETS.includes(armedDestination)) {
+    return;
+  }
+
+  moveMachineToContainer(id, armedDestination);
+}
     return (
   <IXIDragEngine
     sensors={sensors}
@@ -1354,12 +1389,14 @@ function cycleCardScaleMode() {
   >
     <main>
   <section className="saved-environment-shell">
-    <IXIEnvironmentRail
-  activeEnvironment="IXI MARKETPLACE"
-      hasAccount={!!sdk}
-      hasRelationship={true}
-      hasInventory={!!sdk}
-    />
+   <IXIEnvironmentRail
+  activeEnvironment="IXI SELLER YARD"
+  hasAccount={!!sdk}
+  hasRelationship={true}
+  hasInventory={false}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
   </section>
 
 <section className="yard-head">
