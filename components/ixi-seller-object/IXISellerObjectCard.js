@@ -167,6 +167,16 @@ const activeMachine =
   activeMachineIndex >= 0
     ? availableMachines[activeMachineIndex]
     : null;
+
+const activeMachineId =
+  activeMachine
+    ? String(activeMachine?.id?.uuid || activeMachine?.id || "")
+    : "";
+
+const activeMachineState =
+  activeMachineId && sellerObject?.ixiCardState
+    ? sellerObject.ixiCardState[activeMachineId]
+    : null;
   
   return (
       <section
@@ -226,7 +236,7 @@ const activeMachine =
   showSave={false}
   machineFace={1}
   useDndDrag={false}
-  ixiState={ixiState}
+  ixiState={activeMachine?.ixiState || ixiState}
 />
   ) : (
     <div className="seller-end-deck">
