@@ -1499,7 +1499,32 @@ function cycleCardScaleMode() {
     setRightPocket2Mode,
     setActiveDndId,
     clearMachineDragState
-  });  
+  });
+
+  function handleWorkspaceDragEnd(event) {
+    const dragId = String(event?.active?.id || "");
+    const overId = String(event?.over?.id || "");
+
+    const draggedState = ixiCardState[dragId] || {};
+    const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
+
+    if (
+      dragId &&
+      overId &&
+      draggedState.checkedOutFromSeller &&
+      draggedSourceSellerId &&
+      String(overId) === draggedSourceSellerId
+    ) {
+      checkMachineBackIntoSeller(dragId);
+
+      setActiveDndId("");
+      clearMachineDragState();
+      return;
+    }
+
+    handleStandardWorkspaceDragEnd(event);
+  }
+
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
