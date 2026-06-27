@@ -355,27 +355,15 @@ const {
           onSendToArmedDestination?.(activeMachine);
 
 if (armedDestination !== "theater") {
-  const checkoutRecord = createCheckoutRecord({
+  onCheckoutObject?.({
     objectId: machineId,
     sourceParentId: id,
     sourceParentType: "seller-object",
-    checkoutContainer: armedDestination || "board",
-    checkoutReason: "drag-out"
+    targetContainer: armedDestination || "board",
+    checkoutReason: "seller-rail-send"
   });
 
-  onIxiStateChange?.(
-    machineId,
-    markCheckedOutFromParent(
-      activeMachineIxiState,
-      checkoutRecord
-    )
-  );
-
   onIxiStateChange?.(id, {
-    checkedOutMachineIds: [
-      ...checkedOutMachineIds.filter(item => String(item) !== machineId),
-      machineId
-    ],
     face:
       sellerFace >= endDeckFace - 1
         ? endDeckFace
