@@ -320,10 +320,21 @@ const activeMachineIxiState =
           onSendToArmedDestination?.(activeMachine);
 
 if (armedDestination !== "theater") {
-  onIxiStateChange?.(machineId, {
-    sourceSellerId: id,
-    checkedOutFromSeller: true
+  const checkoutRecord = createCheckoutRecord({
+    objectId: machineId,
+    sourceParentId: id,
+    sourceParentType: "seller-object",
+    checkoutContainer: armedDestination || "board",
+    checkoutReason: "drag-out"
   });
+
+  onIxiStateChange?.(
+    machineId,
+    markCheckedOutFromParent(
+      activeMachineIxiState,
+      checkoutRecord
+    )
+  );
 
   onIxiStateChange?.(id, {
     checkedOutMachineIds: [
