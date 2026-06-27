@@ -1233,6 +1233,17 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
   );
 
   stackIds.forEach(machineId => {
+    const state = ixiCardState[String(machineId)] || {};
+
+    if (
+      targetContainer === "board" &&
+      state.checkedOutFromParent &&
+      state.sourceParentId
+    ) {
+      checkMachineBackIntoSeller(machineId);
+      return;
+    }
+
     moveMachineToContainer(machineId, targetContainer);
   });
 
@@ -1241,7 +1252,6 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     [stackKey]: false
   }));
 }
-
  function sendActiveStackToTheater(stackKey) {
   const sourceContainer = getStackContainerKey(stackKey);
   const stackIds = machineContainers[sourceContainer] || [];
