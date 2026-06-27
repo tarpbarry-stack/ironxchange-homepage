@@ -1677,10 +1677,13 @@ function cycleCardScaleMode() {
   }
 
   const draggedState = ixiCardState[dragId] || {};
-  const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
+const draggedSourceParentId =
+  String(draggedState.sourceParentId || draggedState.sourceSellerId || "");
+
 if (
   dragId &&
   overId &&
+  draggedSourceParentId &&
   canReturnToParent({
     objectState: {
       ...draggedState,
