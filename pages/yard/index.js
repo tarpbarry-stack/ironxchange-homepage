@@ -1009,34 +1009,18 @@ function getListingById(machineId) {
 
 function isTransientCheckedOutMachine(machineId) {
   const id = String(machineId);
-
   const state = ixiCardState[id] || {};
 
   const container =
-  getMachineContainer(id) ||
-  state.container ||
-  "board";
+    getMachineContainer(id) ||
+    state.container ||
+    "board";
 
-  const hasRelationship =
-    state.color &&
-    state.color !== "none";
-
-  const hasOutline =
-    Number(state.outline || 1) > 1;
-
-  const isContainered =
-    container !== "board";
-
-  const isSaved =
-    savedIds.includes(id);
-
-  return (
-    container === "board" &&
-    !hasRelationship &&
-    !hasOutline &&
-    !isContainered &&
-    !isSaved
-  );
+  return isTemporaryBoardCheckout({
+    ...state,
+    checkoutContainer: container,
+    saved: savedIds.includes(id)
+  });
 }
 
   
