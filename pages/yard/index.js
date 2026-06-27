@@ -554,12 +554,35 @@ const sellerBoardObjects = useMemo(() => {
 }, [sellerBoardObjects, ixiCardState, marketplaceListings]);
 
 const boardObjects = useMemo(() => {
+  const validCheckedOutMachines = checkedOutMachineObjects.filter(machine => {
+    const machineId = String(getListingId(machine));
+    const state = ixiCardState[machineId] || {};
+
+    return (
+      state.checkedOutFromParent &&
+      state.sourceParentId &&
+      !isTemporaryBoardCheckout({
+        ...state,
+        checkoutContainer:
+          getMachineContainer(machineId) ||
+          state.container ||
+          "board",
+        saved: savedIds.includes(machineId)
+      })
+    );
+  });
+
   return [
     ...sellerBoardObjects,
-    ...checkedOutMachineObjects
+    ...validCheckedOutMachines
   ];
-}, [sellerBoardObjects, checkedOutMachineObjects]);
-
+}, [
+  sellerBoardObjects,
+  checkedOutMachineObjects,
+  ixiCardState,
+  machineContainers,
+  savedIds
+]);
 useEffect(() => {
   sellerBoardObjects.forEach(sellerObject => {
     const sellerId = String(getBoardObjectId(sellerObject));
