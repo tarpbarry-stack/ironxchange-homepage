@@ -469,3 +469,48 @@ export function recoverSellerDeckTransaction({
     patchesToPersist
   };
 }
+export const IXI_TRANSACTION_TYPES = {
+  CHECKOUT: "CHECKOUT",
+  CHECKIN: "CHECKIN",
+  MOVE: "MOVE",
+  MOVE_TO_POSITION: "MOVE_TO_POSITION",
+  BULK_MOVE_OR_CHECKIN: "BULK_MOVE_OR_CHECKIN",
+  RECOVER_SELLER_DECK: "RECOVER_SELLER_DECK"
+};
+
+export function executeIXIObjectTransaction({
+  type,
+  payload = {}
+}) {
+  if (type === IXI_TRANSACTION_TYPES.CHECKOUT) {
+    return checkoutObjectTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.CHECKIN) {
+    return checkInObjectTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.MOVE) {
+    return moveObjectTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.MOVE_TO_POSITION) {
+    return moveObjectToPositionTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN) {
+    return bulkMoveOrCheckInTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.RECOVER_SELLER_DECK) {
+    return recoverSellerDeckTransaction(payload);
+  }
+
+  console.warn("IXI UNKNOWN TRANSACTION TYPE", type);
+
+  return {
+    nextIxiCardState: payload.ixiCardState || {},
+    nextMachineContainers: payload.machineContainers || {},
+    patchesToPersist: []
+  };
+}
