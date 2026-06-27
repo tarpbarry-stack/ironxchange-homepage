@@ -168,16 +168,6 @@ const activeMachine =
   activeMachineIndex >= 0
     ? availableMachines[activeMachineIndex]
     : null;
-
-const activeMachineId =
-  activeMachine
-    ? String(activeMachine?.id?.uuid || activeMachine?.id || "")
-    : "";
-
-const activeMachineIxiState =
-  activeMachineId
-    ? ixiCardState[activeMachineId] || {}
-    : {};
   
 const activeMachineId =
   activeMachine
