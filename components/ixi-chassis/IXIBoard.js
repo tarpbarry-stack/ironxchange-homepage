@@ -65,12 +65,13 @@ export default function IXIBoard({
   objectId={id}
   dragHandleProps={dragHandleProps}
   ixiState={
-        ixiCardState[id] || {
-          color: "none",
-          outline: 1
-        }
-      }
-      onIxiStateChange={updateIxiCardState}
+    ixiCardState[id] || {
+      color: "none",
+      outline: 1
+    }
+  }
+  ixiCardState={ixiCardState}
+  onIxiStateChange={updateIxiCardState}
       saved={savedIds.includes(id)}
       armedDestination={armedDestination}
       onSendFront={sendListingToFront}
