@@ -944,30 +944,6 @@ function executeIXITransaction(result) {
   saveWorkspaceLayout(nextMachineContainers);
 }
 
-  
-function moveMachineToContainer(machineId, targetContainer) {
-  if (!machineId || !targetContainer) return;
-
-  const id = String(machineId);
-
-  updateIxiCardState(id, {
-    container: targetContainer
-  });
-
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerState({
-        currentContainers: current,
-        machineId,
-        targetContainer
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
-}
-
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
