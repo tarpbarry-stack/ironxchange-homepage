@@ -306,3 +306,81 @@ export function bulkMoveOrCheckInTransaction({
     patchesToPersist
   };
 }
+export function recoverSellerDeckTransaction({
+  sellerObject,
+  ixiCardState = {},
+  machineContainers = {}
+}) {
+  const sellerId = String(sellerObject?.id || "");
+  const machines = Array.isArray(sellerObject?.machines)
+    ? sellerObject.machines
+    : [];
+
+  if (!sellerId || !machines.length) {
+    return {
+      nextIxiCardState: ixiCardState,
+      nextMachineContainers: machineContainers,
+      patchesToPersist: []
+    };
+  }
+
+  const machineIds = machines
+    .map(machine => String(machine?.id?.uuid || machine?.id || ""))
+    .filter(Boolean);
+
+  let nextIxiCardState = {
+    ...ixiCardState,
+    [sellerId]: {
+      ...(ixiCardState[sellerId] || {}),
+      checkedOutMachineIds: [],
+      face: 1,
+      updatedAt: Date.now()
+    }
+  };
+
+  machineIds.forEach(machineId => {
+    const currentMachineState = nextIxiCardState[machineId] || {};
+
+    nextIxiCardState[machineId] = {
+      ...currentMachineState,
+      sourceParentId: "",
+      sourceParentType: "",
+      sourceDeckId: "",
+      checkedOutFromParent: false,
+      checkedOutFromSeller: false,
+      checkoutContainer: "",
+      checkoutReason: "",
+      sourceSellerId: "",
+      container: "board",
+      updatedAt: Date.now()
+    };
+  });
+
+  const machineIdSet = new Set(machineIds);
+
+  const nextMachineContainers = Object.fromEntries(
+    Object.entries(machineContainers || {}).map(([containerKey, ids]) => [
+      containerKey,
+      Array.isArray(ids)
+        ? ids.map(String).filter(id => !machineIdSet.has(id))
+        : []
+    ])
+  );
+
+  const patchesToPersist = [
+    {
+      listingId: sellerId,
+      patch: nextIxiCardState[sellerId]
+    },
+    ...machineIds.map(machineId => ({
+      listingId: machineId,
+      patch: nextIxiCardState[machineId]
+    }))
+  ];
+
+  return {
+    nextIxiCardState,
+    nextMachineContainers,
+    patchesToPersist
+  };
+}
