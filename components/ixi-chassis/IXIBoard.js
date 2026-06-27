@@ -21,10 +21,11 @@ export default function IXIBoard({
   draggingListingId,
   ghostListingId,
   getSellerListingCardProps,
-    SellerObjectCard,
+  SellerObjectCard,
   enableCardScaling = false,
   cardScaleMode = "xl",
-  cardScaleMetrics
+  cardScaleMetrics,
+  onRecoverSellerObject,
 }) {
   
   return (
@@ -72,6 +73,7 @@ export default function IXIBoard({
   }
   ixiCardState={ixiCardState}
   onIxiStateChange={updateIxiCardState}
+  onRecoverSellerObject={onRecoverSellerObject}
       saved={savedIds.includes(id)}
       armedDestination={armedDestination}
       onSendFront={sendListingToFront}
