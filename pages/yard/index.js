@@ -1227,10 +1227,12 @@ function toggleActiveStackLayout(stackKey) {
 }
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
+  const sourceContainer = getStackContainerKey(stackKey);
+
   const stackIds = getMachineIdsForStack(
     machineContainers,
     stackKey
-  );
+  ).map(String);
 
   stackIds.forEach(machineId => {
     const state = ixiCardState[String(machineId)] || {};
@@ -1246,6 +1248,35 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
 
     moveMachineToContainer(machineId, targetContainer);
   });
+
+  if (targetContainer === "board") {
+    setMachineContainers(current => {
+      const checkInIds = stackIds.filter(machineId => {
+        const state = ixiCardState[String(machineId)] || {};
+
+        return (
+          state.checkedOutFromParent &&
+          state.sourceParentId
+        );
+      });
+
+      if (!checkInIds.length) return current;
+
+      const finalContainers = {
+        ...current,
+        [sourceContainer]: (current[sourceContainer] || []).filter(
+          id => !checkInIds.includes(String(id))
+        ),
+        board: (current.board || []).filter(
+          id => !checkInIds.includes(String(id))
+        )
+      };
+
+      saveWorkspaceLayout(finalContainers);
+
+      return finalContainers;
+    });
+  }
 
   setActiveStacksOpen(current => ({
     ...current,
