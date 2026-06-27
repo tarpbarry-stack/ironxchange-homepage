@@ -969,9 +969,25 @@ function moveMachineBackToBoard(machineId) {
 function checkMachineBackIntoSeller(machineId) {
   const id = String(machineId);
   const machineState = ixiCardState[id] || {};
-  const sourceSellerId = String(machineState.sourceSellerId || "");
+  const sourceSellerId =
+    String(machineState.sourceParentId || machineState.sourceSellerId || "");
 
   if (!sourceSellerId) return;
+
+  if (
+    !canReturnToParent({
+      objectState: {
+        ...machineState,
+        sourceParentId: sourceSellerId,
+        checkedOutFromParent:
+          machineState.checkedOutFromParent ||
+          machineState.checkedOutFromSeller
+      },
+      targetParentId: sourceSellerId
+    })
+  ) {
+    return;
+  }
 
   const sellerState = ixiCardState[sourceSellerId] || {};
 
@@ -988,8 +1004,11 @@ function checkMachineBackIntoSeller(machineId) {
   });
 
   updateIxiCardState(id, {
+    ...returnCheckedOutToParent(machineState),
     sourceSellerId: "",
+    sourceParentId: "",
     checkedOutFromSeller: false,
+    checkedOutFromParent: false,
     container: "board"
   });
 }
