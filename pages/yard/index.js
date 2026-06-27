@@ -969,35 +969,28 @@ function moveMachineBackToBoard(machineId) {
 function checkMachineBackIntoSeller(machineId) {
   const id = String(machineId);
   const machineState = ixiCardState[id] || {};
-  const sourceSellerId =
-    String(machineState.sourceParentId || machineState.sourceSellerId || "");
+  const sourceParentId = String(machineState.sourceParentId || "");
 
-  if (!sourceSellerId) return;
+  if (!sourceParentId) return;
 
   if (
     !canReturnToParent({
-      objectState: {
-        ...machineState,
-        sourceParentId: sourceSellerId,
-        checkedOutFromParent:
-          machineState.checkedOutFromParent ||
-          machineState.checkedOutFromSeller
-      },
-      targetParentId: sourceSellerId
+      objectState: machineState,
+      targetParentId: sourceParentId
     })
   ) {
     return;
   }
 
-  const sellerState = ixiCardState[sourceSellerId] || {};
+  const parentState = ixiCardState[sourceParentId] || {};
 
-  const checkedOutIds = Array.isArray(sellerState.checkedOutMachineIds)
-    ? sellerState.checkedOutMachineIds.map(String)
+  const checkedOutIds = Array.isArray(parentState.checkedOutMachineIds)
+    ? parentState.checkedOutMachineIds.map(String)
     : [];
 
   if (!checkedOutIds.includes(id)) return;
 
-  updateIxiCardState(sourceSellerId, {
+  updateIxiCardState(sourceParentId, {
     checkedOutMachineIds: checkedOutIds.filter(
       item => String(item) !== id
     )
@@ -1005,9 +998,9 @@ function checkMachineBackIntoSeller(machineId) {
 
   updateIxiCardState(id, {
     ...returnCheckedOutToParent(machineState),
-    sourceSellerId: "",
     sourceParentId: "",
-    checkedOutFromSeller: false,
+    sourceParentType: "",
+    sourceDeckId: "",
     checkedOutFromParent: false,
     container: "board"
   });
