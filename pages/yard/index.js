@@ -974,6 +974,28 @@ function checkMachineBackIntoSeller(machineId) {
     container: "board"
   });
 }
+
+useEffect(() => {
+  function returnLooseSellerMachines() {
+    Object.entries(ixiCardState || {}).forEach(([machineId, state]) => {
+      if (!state?.checkedOutFromSeller) return;
+      if (!state?.sourceSellerId) return;
+
+      const container = getMachineContainer(machineId);
+
+      if (container !== "board") return;
+
+      checkMachineBackIntoSeller(machineId);
+    });
+  }
+
+  window.addEventListener("beforeunload", returnLooseSellerMachines);
+
+  return () => {
+    returnLooseSellerMachines();
+    window.removeEventListener("beforeunload", returnLooseSellerMachines);
+  };
+}, [ixiCardState, machineContainers]);
   
 function getListingById(machineId) {
   return listings.find(
