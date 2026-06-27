@@ -968,41 +968,17 @@ function moveMachineToContainer(machineId, targetContainer) {
   });
 }
 
-function moveMachineToContainerAtPosition(
-  machineId,
-  targetContainer,
-  targetId,
-  insertAfter = false
-) {
-  if (!machineId || !targetContainer || !targetId) return;
+function moveMachineToContainer(machineId, targetContainer) {
+  if (!machineId || !targetContainer) return;
 
-  const id = String(machineId);
-
-  saveIxiMachinePatch({
-    userId: ixiUserId,
-    listingId: id,
-    patch: {
-      ...(ixiCardState[id] || {}),
-      container: targetContainer,
-      touched: true,
-      updatedAt: Date.now()
-    }
+  const result = moveObjectTransaction({
+    objectId: machineId,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerAtPositionState({
-        currentContainers: current,
-        machineId,
-        targetContainer,
-        targetId,
-        insertAfter
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
