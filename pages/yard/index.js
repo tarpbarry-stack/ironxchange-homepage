@@ -988,9 +988,7 @@ function checkMachineBackIntoSeller(machineId) {
     ? parentState.checkedOutMachineIds.map(String)
     : [];
 
-  if (!checkedOutIds.includes(id)) return;
-
-  updateIxiCardState(sourceParentId, {
+    updateIxiCardState(sourceParentId, {
     checkedOutMachineIds: checkedOutIds.filter(
       item => String(item) !== id
     )
