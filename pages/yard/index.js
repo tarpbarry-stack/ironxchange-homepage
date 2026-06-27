@@ -119,7 +119,11 @@ import {
 } from "../../components/ixi-object-system/IXIReconciliationEngine";
 
 import {
-  recoverSellerDeckTransaction
+  recoverSellerDeckTransaction,
+  checkoutObjectTransaction,
+  checkInObjectTransaction,
+  moveObjectTransaction,
+  bulkMoveOrCheckInTransaction
 } from "../../components/ixi-object-system/IXIObjectTransactionEngine";
 
 export default function SellerIndexPage() {
