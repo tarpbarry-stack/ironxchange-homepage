@@ -956,6 +956,43 @@ function moveMachineToContainer(machineId, targetContainer) {
 
   executeIXITransaction(result);
 }
+
+function moveMachineToContainerAtPosition(
+  machineId,
+  targetContainer,
+  targetId,
+  insertAfter = false
+) {
+  if (!machineId || !targetContainer || !targetId) return;
+
+  const id = String(machineId);
+
+  saveIxiMachinePatch({
+    userId: ixiUserId,
+    listingId: id,
+    patch: {
+      ...(ixiCardState[id] || {}),
+      container: targetContainer,
+      touched: true,
+      updatedAt: Date.now()
+    }
+  });
+
+  setMachineContainers(current => {
+    const finalContainers =
+      moveMachineToContainerAtPositionState({
+        currentContainers: current,
+        machineId,
+        targetContainer,
+        targetId,
+        insertAfter
+      });
+
+    saveWorkspaceLayout(finalContainers);
+
+    return finalContainers;
+  });
+}
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
   setMachineContainers(current => {
