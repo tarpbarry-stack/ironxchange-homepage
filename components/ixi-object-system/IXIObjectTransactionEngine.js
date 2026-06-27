@@ -39,6 +39,44 @@ function addIdToContainer(containers = {}, objectId, targetContainer) {
   };
 }
 
+function addIdToContainerAtPosition(
+  containers = {},
+  objectId,
+  targetContainer,
+  targetId,
+  insertAfter = false
+) {
+  const id = toId(objectId);
+  const target = toId(targetContainer);
+  const anchorId = toId(targetId);
+
+  if (!id || !target || !anchorId) return containers;
+
+  const cleaned = removeIdFromContainers(containers, id);
+  const targetList = Array.isArray(cleaned[target])
+    ? cleaned[target].map(String)
+    : [];
+
+  const anchorIndex = targetList.findIndex(item => item === anchorId);
+
+  if (anchorIndex === -1) {
+    return {
+      ...cleaned,
+      [target]: [...targetList, id]
+    };
+  }
+
+  const insertIndex = insertAfter ? anchorIndex + 1 : anchorIndex;
+  const nextList = [...targetList];
+
+  nextList.splice(insertIndex, 0, id);
+
+  return {
+    ...cleaned,
+    [target]: nextList
+  };
+}
+
 function removeIdFromParentCheckoutList(cardState = {}, parentId, objectId) {
   const pId = toId(parentId);
   const oId = toId(objectId);
@@ -194,6 +232,53 @@ export function checkInObjectTransaction({
   };
 }
 
+export function moveObjectToPositionTransaction({
+  objectId,
+  targetContainer,
+  targetId,
+  insertAfter = false,
+  ixiCardState = {},
+  machineContainers = {}
+}) {
+  const id = toId(objectId);
+  const target = toId(targetContainer);
+
+  if (!id || !target || !targetId) {
+    return {
+      nextIxiCardState: ixiCardState,
+      nextMachineContainers: machineContainers,
+      patchesToPersist: []
+    };
+  }
+
+  const currentObjectState = ixiCardState[id] || {};
+
+  const nextIxiCardState = {
+    ...ixiCardState,
+    [id]: {
+      ...currentObjectState,
+      container: target,
+      touched: true,
+      updatedAt: Date.now()
+    }
+  };
+
+  const nextMachineContainers = addIdToContainerAtPosition(
+    machineContainers,
+    id,
+    target,
+    targetId,
+    insertAfter
+  );
+
+  return {
+    nextIxiCardState,
+    nextMachineContainers,
+    patchesToPersist: [
+      { listingId: id, patch: nextIxiCardState[id] }
+    ]
+  };
+}
 export function moveObjectTransaction({
   objectId,
   targetContainer,
