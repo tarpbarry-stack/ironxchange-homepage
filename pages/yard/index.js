@@ -1234,49 +1234,97 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     stackKey
   ).map(String);
 
-  stackIds.forEach(machineId => {
-    const state = ixiCardState[String(machineId)] || {};
-
-    if (
-      targetContainer === "board" &&
-      state.checkedOutFromParent &&
-      state.sourceParentId
-    ) {
-      checkMachineBackIntoSeller(machineId);
-      return;
-    }
-
-    moveMachineToContainer(machineId, targetContainer);
-  });
-
   if (targetContainer === "board") {
-    setMachineContainers(current => {
-      const checkInIds = stackIds.filter(machineId => {
-        const state = ixiCardState[String(machineId)] || {};
+    const checkInIds = stackIds.filter(machineId => {
+      const state = ixiCardState[machineId] || {};
 
-        return (
-          state.checkedOutFromParent &&
-          state.sourceParentId
-        );
+      return (
+        state.checkedOutFromParent &&
+        state.sourceParentId
+      );
+    });
+
+    if (checkInIds.length) {
+      const parentPatches = {};
+
+      checkInIds.forEach(machineId => {
+        const state = ixiCardState[machineId] || {};
+        const sourceParentId = String(state.sourceParentId || "");
+
+        if (!sourceParentId) return;
+
+        const parentState =
+          parentPatches[sourceParentId] ||
+          ixiCardState[sourceParentId] ||
+          {};
+
+        const checkedOutIds = Array.isArray(parentState.checkedOutMachineIds)
+          ? parentState.checkedOutMachineIds.map(String)
+          : [];
+
+        parentPatches[sourceParentId] = {
+          ...parentState,
+          checkedOutMachineIds: checkedOutIds.filter(
+            id => String(id) !== machineId
+          )
+        };
       });
 
-      if (!checkInIds.length) return current;
+      Object.entries(parentPatches).forEach(([parentId, patch]) => {
+        updateIxiCardState(parentId, {
+          checkedOutMachineIds: patch.checkedOutMachineIds || []
+        });
+      });
 
-      const finalContainers = {
-        ...current,
-        [sourceContainer]: (current[sourceContainer] || []).filter(
-          id => !checkInIds.includes(String(id))
-        ),
-        board: (current.board || []).filter(
-          id => !checkInIds.includes(String(id))
-        )
-      };
+      checkInIds.forEach(machineId => {
+        const state = ixiCardState[machineId] || {};
 
-      saveWorkspaceLayout(finalContainers);
+        updateIxiCardState(machineId, {
+          ...returnCheckedOutToParent(state),
+          sourceParentId: "",
+          sourceParentType: "",
+          sourceDeckId: "",
+          checkedOutFromParent: false,
+          container: "board"
+        });
+      });
 
-      return finalContainers;
+      setMachineContainers(current => {
+        const finalContainers = {
+          ...current,
+          [sourceContainer]: (current[sourceContainer] || []).filter(
+            id => !checkInIds.includes(String(id))
+          ),
+          board: (current.board || []).filter(
+            id => !checkInIds.includes(String(id))
+          )
+        };
+
+        saveWorkspaceLayout(finalContainers);
+
+        return finalContainers;
+      });
+    }
+
+    const normalIds = stackIds.filter(
+      id => !checkInIds.includes(String(id))
+    );
+
+    normalIds.forEach(machineId => {
+      moveMachineToContainer(machineId, targetContainer);
     });
+
+    setActiveStacksOpen(current => ({
+      ...current,
+      [stackKey]: false
+    }));
+
+    return;
   }
+
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(machineId, targetContainer);
+  });
 
   setActiveStacksOpen(current => ({
     ...current,
