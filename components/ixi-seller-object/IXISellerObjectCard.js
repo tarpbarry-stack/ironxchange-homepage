@@ -8,8 +8,6 @@ import {
 } from "../ixi-object-system/IXILineageEngine";
 
 function formatMoney(value) {
-
-function formatMoney(value) {
   const amount = Number(value || 0);
 
   if (!amount) return "CALL";
