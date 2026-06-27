@@ -2,6 +2,13 @@ import SellerLogoDecal from "../SellerLogoDecal";
 import IXIMachineRail from "../IXIMachineRail";
 import ListingCard from "../ListingCard";
 
+import {
+  createCheckoutRecord,
+  markCheckedOutFromParent
+} from "../ixi-object-system/IXILineageEngine";
+
+function formatMoney(value) {
+
 function formatMoney(value) {
   const amount = Number(value || 0);
 
