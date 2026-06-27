@@ -957,6 +957,31 @@ function moveMachineToContainer(machineId, targetContainer) {
   executeIXITransaction(result);
 }
 
+function checkoutObjectToContainer({
+  objectId,
+  sourceParentId,
+  sourceParentType = "seller-object",
+  targetContainer = "board",
+  checkoutReason = "checkout"
+}) {
+  if (!objectId || !sourceParentId) return;
+
+  const result = executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.CHECKOUT,
+    payload: {
+      objectId,
+      sourceParentId,
+      sourceParentType,
+      targetContainer,
+      checkoutReason,
+      ixiCardState,
+      machineContainers
+    }
+  });
+
+  executeIXITransaction(result);
+}
+  
 function moveMachineToContainerAtPosition(
   machineId,
   targetContainer,
@@ -2023,6 +2048,7 @@ if (
   <IXIBoard
   items={visibleSellerListings}
   onRecoverSellerObject={recoverSellerObject}
+  onCheckoutObject={checkoutObjectToContainer}
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
