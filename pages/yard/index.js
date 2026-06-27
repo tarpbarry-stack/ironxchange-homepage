@@ -2013,6 +2013,7 @@ if (
   
   <IXIBoard
   items={visibleSellerListings}
+  onRecoverSellerObject={recoverSellerObject}
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
