@@ -1,3 +1,5 @@
+import { useDraggable } from "@dnd-kit/core";
+
 import SellerLogoDecal from "../SellerLogoDecal";
 import IXIMachineRail from "../IXIMachineRail";
 import ListingCard from "../ListingCard";
@@ -6,6 +8,11 @@ import {
   createCheckoutRecord,
   markCheckedOutFromParent
 } from "../ixi-object-system/IXILineageEngine";
+
+import {
+  IXI_DRAG_TYPES,
+  createDragPayload
+} from "../ixi-object-system/IXIDragTypeEngine";
 
 function formatMoney(value) {
   const amount = Number(value || 0);
@@ -183,6 +190,24 @@ const activeMachineIxiState =
   activeMachineId
     ? ixiCardState[activeMachineId] || {}
     : {};
+
+const {
+  attributes: childDragAttributes,
+  listeners: childDragListeners,
+  setNodeRef: setChildDragNodeRef,
+  isDragging: isChildDragging
+} = useDraggable({
+  id: activeMachineId || `${id}-inactive-child`,
+  disabled: isSellerIdentityFace || !activeMachineId,
+  data: createDragPayload({
+    type: IXI_DRAG_TYPES.SELLER_CHILD_MACHINE,
+    objectId: activeMachineId,
+    sourceContainer: "sellerDeck",
+    sourceParentId: id,
+    sourceParentType: "seller-object",
+    action: "checkout-drag"
+  })
+});
   
   return (
   <section
@@ -235,15 +260,24 @@ const activeMachineIxiState =
           </a>
         </div>
           </>
-  ) : activeMachine ? (
-   <ListingCard
-  listing={activeMachine}
-  saved={false}
-  showSave={false}
-  machineFace={1}
-  useDndDrag={false}
-  ixiState={activeMachineIxiState}
-/>
+    ) : activeMachine ? (
+    <div
+      ref={setChildDragNodeRef}
+      className={`seller-child-machine-drag ${
+        isChildDragging ? "is-dragging" : ""
+      }`}
+      {...childDragAttributes}
+      {...childDragListeners}
+    >
+      <ListingCard
+        listing={activeMachine}
+        saved={false}
+        showSave={false}
+        machineFace={1}
+        useDndDrag={false}
+        ixiState={activeMachineIxiState}
+      />
+    </div>
   ) : (
     <div className="seller-end-deck">
   <span>END DECK</span>
@@ -559,6 +593,17 @@ border-radius: 14px;
   inset: 0 0 16px 0;
   padding: 0;
   overflow: hidden;
+}
+
+.seller-child-machine-drag {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.seller-child-machine-drag.is-dragging {
+  opacity: .42;
 }
 
 .seller-end-deck {
