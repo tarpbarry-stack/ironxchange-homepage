@@ -1587,6 +1587,35 @@ function cycleCardScaleMode() {
     return next;
   });
 }
+
+function recoverSellerObject(sellerObject) {
+  if (!sellerObject) return;
+
+  const result = recoverSellerDeckTransaction({
+    sellerObject,
+    ixiCardState,
+    machineContainers
+  });
+
+  setIxiCardState(result.nextIxiCardState);
+  setMachineContainers(result.nextMachineContainers);
+
+  result.patchesToPersist.forEach(item => {
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: item.listingId,
+      patch: item.patch
+    });
+  });
+
+  saveWorkspaceLayout(result.nextMachineContainers);
+
+  console.log(
+    "IXI RECOVERY COMPLETE",
+    sellerObject.sellerDisplay?.yardTitle ||
+      sellerObject.title
+  );
+}
   
   return (
     <>
