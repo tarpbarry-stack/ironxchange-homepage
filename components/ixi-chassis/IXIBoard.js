@@ -75,6 +75,7 @@ export default function IXIBoard({
   ixiCardState={ixiCardState}
   onIxiStateChange={updateIxiCardState}
   onRecoverSellerObject={onRecoverSellerObject}
+  onCheckoutObject={onCheckoutObject}
       saved={savedIds.includes(id)}
       armedDestination={armedDestination}
       onSendFront={sendListingToFront}
