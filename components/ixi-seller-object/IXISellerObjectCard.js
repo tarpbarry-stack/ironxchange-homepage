@@ -27,6 +27,7 @@ export default function IXISellerObjectCard({
   dragHandleProps,
 
   ixiState,
+  ixiCardState = {},
   onIxiStateChange,
 
   boardColor: boardColorProp = "none",
@@ -173,6 +174,16 @@ const activeMachineId =
     ? String(activeMachine?.id?.uuid || activeMachine?.id || "")
     : "";
 
+const activeMachineIxiState =
+  activeMachineId
+    ? ixiCardState[activeMachineId] || {}
+    : {};
+  
+const activeMachineId =
+  activeMachine
+    ? String(activeMachine?.id?.uuid || activeMachine?.id || "")
+    : "";
+
 const activeMachineState =
   activeMachineId && sellerObject?.ixiCardState
     ? sellerObject.ixiCardState[activeMachineId]
@@ -236,7 +247,7 @@ const activeMachineState =
   showSave={false}
   machineFace={1}
   useDndDrag={false}
-  ixiState={activeMachine?.ixiState || ixiState}
+  ixiState={activeMachineIxiState}
 />
   ) : (
     <div className="seller-end-deck">
