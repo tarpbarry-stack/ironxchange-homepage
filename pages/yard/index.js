@@ -1509,6 +1509,14 @@ function cycleCardScaleMode() {
     const draggedState = ixiCardState[dragId] || {};
     const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
 
+    console.log("IXI SELLER CHECK-IN TEST", {
+  dragId,
+  overId,
+  draggedState,
+  draggedSourceSellerId,
+  checkedOutFromSeller: draggedState.checkedOutFromSeller
+});
+
     if (
       dragId &&
       overId &&
