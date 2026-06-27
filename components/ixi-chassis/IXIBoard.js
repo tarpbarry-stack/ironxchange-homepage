@@ -26,6 +26,7 @@ export default function IXIBoard({
   cardScaleMode = "xl",
   cardScaleMetrics,
   onRecoverSellerObject,
+  onCheckoutObject,
 }) {
   
   return (
