@@ -123,6 +123,7 @@ import {
   checkoutObjectTransaction,
   checkInObjectTransaction,
   moveObjectTransaction,
+  moveObjectToPositionTransaction,
   bulkMoveOrCheckInTransaction
 } from "../../components/ixi-object-system/IXIObjectTransactionEngine";
 
