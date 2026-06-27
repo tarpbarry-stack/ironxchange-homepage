@@ -174,10 +174,10 @@ const activeMachineId =
     ? String(activeMachine?.id?.uuid || activeMachine?.id || "")
     : "";
 
-const activeMachineState =
-  activeMachineId && sellerObject?.ixiCardState
-    ? sellerObject.ixiCardState[activeMachineId]
-    : null;
+const activeMachineIxiState =
+  activeMachineId
+    ? ixiCardState[activeMachineId] || {}
+    : {};
   
   return (
       <section
