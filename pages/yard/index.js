@@ -1529,29 +1529,29 @@ function cycleCardScaleMode() {
     const overId = String(event?.over?.id || "");
 
     const draggedState = ixiCardState[dragId] || {};
-    const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
+const draggedSourceParentId =
+  String(draggedState.sourceParentId || draggedState.sourceSellerId || "");
 
-    console.log("IXI SELLER CHECK-IN TEST", {
-  dragId,
-  overId,
-  draggedState,
-  draggedSourceSellerId,
-  checkedOutFromSeller: draggedState.checkedOutFromSeller
-});
+if (
+  dragId &&
+  overId &&
+  canReturnToParent({
+    objectState: {
+      ...draggedState,
+      sourceParentId: draggedSourceParentId,
+      checkedOutFromParent:
+        draggedState.checkedOutFromParent ||
+        draggedState.checkedOutFromSeller
+    },
+    targetParentId: overId
+  })
+) {
+  checkMachineBackIntoSeller(dragId);
 
-    if (
-      dragId &&
-      overId &&
-      draggedState.checkedOutFromSeller &&
-      draggedSourceSellerId &&
-      String(overId) === draggedSourceSellerId
-    ) {
-      checkMachineBackIntoSeller(dragId);
-
-      setActiveDndId("");
-      clearMachineDragState();
-      return;
-    }
+  setActiveDndId("");
+  clearMachineDragState();
+  return;
+}
 
     handleStandardWorkspaceDragEnd(event);
   }
