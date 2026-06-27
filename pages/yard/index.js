@@ -1525,13 +1525,56 @@ function cycleCardScaleMode() {
   });
 
   function handleWorkspaceDragEnd(event) {
-    const dragId = String(event?.active?.id || "");
-    const overId = String(event?.over?.id || "");
+  const dragId = String(event?.active?.id || "");
+  const overId = String(event?.over?.id || "");
+  const activeData = event?.active?.data?.current || {};
 
-    const draggedState = ixiCardState[dragId] || {};
-const draggedSourceParentId =
-  String(draggedState.sourceParentId || draggedState.sourceSellerId || "");
+  if (activeData?.type === IXI_DRAG_TYPES.SELLER_CHILD_MACHINE) {
+    const childMachineId = String(activeData.objectId || dragId || "");
+    const sourceSellerId = String(activeData.sourceParentId || "");
+    const targetContainer =
+      overId === "stackTop" ||
+      overId === "stackBottom" ||
+      overId === "pocketLeft" ||
+      overId === "pocketRight" ||
+      overId === "pocketLeft2" ||
+      overId === "pocketRight2"
+        ? overId
+        : "board";
 
+    if (childMachineId && sourceSellerId) {
+      const sellerState = ixiCardState[sourceSellerId] || {};
+      const checkedOutIds = Array.isArray(sellerState.checkedOutMachineIds)
+        ? sellerState.checkedOutMachineIds.map(String)
+        : [];
+
+      updateIxiCardState(sourceSellerId, {
+        checkedOutMachineIds: [
+          ...checkedOutIds.filter(item => String(item) !== childMachineId),
+          childMachineId
+        ]
+      });
+
+      updateIxiCardState(childMachineId, {
+        sourceParentId: sourceSellerId,
+        sourceParentType: "seller-object",
+        checkedOutFromParent: true,
+        checkoutContainer: targetContainer,
+        checkoutReason: "checkout-drag",
+        returnRule: "original-parent-only",
+        container: targetContainer
+      });
+
+      moveMachineToContainer(childMachineId, targetContainer);
+    }
+
+    setActiveDndId("");
+    clearMachineDragState();
+    return;
+  }
+
+  const draggedState = ixiCardState[dragId] || {};
+  const draggedSourceSellerId = String(draggedState.sourceSellerId || "");
 if (
   dragId &&
   overId &&
