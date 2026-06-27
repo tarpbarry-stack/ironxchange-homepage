@@ -185,7 +185,6 @@ const activeMachineIxiState =
     : {};
   
   return (
-      <section
   <section
   className={`seller-object-card card board-color-${boardColor || "none"} board-outline-${boardOutline || 1}`}
   {...(isSellerIdentityFace ? dragHandleProps || {} : {})}
