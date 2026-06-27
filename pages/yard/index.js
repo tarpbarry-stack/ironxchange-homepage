@@ -1591,11 +1591,44 @@ function cycleCardScaleMode() {
 function recoverSellerObject(sellerObject) {
   if (!sellerObject) return;
 
+  const sellerId = String(getBoardObjectId(sellerObject));
+  const machineIds = Array.isArray(sellerObject.machines)
+    ? sellerObject.machines
+        .map(machine => String(getListingId(machine)))
+        .filter(Boolean)
+    : [];
+
+  if (!sellerId || !machineIds.length) {
+    console.warn("IXI RECOVERY BLOCKED — missing seller or machines", {
+      sellerId,
+      machineCount: machineIds.length
+    });
+    return;
+  }
+
   const result = recoverSellerDeckTransaction({
-    sellerObject,
+    sellerObject: {
+      ...sellerObject,
+      id: sellerId
+    },
     ixiCardState,
     machineContainers
   });
+
+  const recoveredIds = new Set(machineIds);
+
+  const remainingContainerHits = Object.values(result.nextMachineContainers || {})
+    .flat()
+    .map(String)
+    .filter(id => recoveredIds.has(id));
+
+  if (remainingContainerHits.length) {
+    console.error("IXI RECOVERY FAILED — recovered machines still in containers", {
+      sellerId,
+      remainingContainerHits
+    });
+    return;
+  }
 
   setIxiCardState(result.nextIxiCardState);
   setMachineContainers(result.nextMachineContainers);
@@ -1610,11 +1643,10 @@ function recoverSellerObject(sellerObject) {
 
   saveWorkspaceLayout(result.nextMachineContainers);
 
-  console.log(
-    "IXI RECOVERY COMPLETE",
-    sellerObject.sellerDisplay?.yardTitle ||
-      sellerObject.title
-  );
+  console.log("IXI RECOVERY COMPLETE", {
+    sellerId,
+    recoveredMachineCount: machineIds.length
+  });
 }
   
   return (
