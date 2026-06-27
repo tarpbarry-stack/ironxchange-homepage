@@ -118,6 +118,10 @@ import {
   reconcileSellerBoardOnLoad
 } from "../../components/ixi-object-system/IXIReconciliationEngine";
 
+import {
+  recoverSellerDeckTransaction
+} from "../../components/ixi-object-system/IXIObjectTransactionEngine";
+
 export default function SellerIndexPage() {
   const [listings, setListings] = useState([]);
   
