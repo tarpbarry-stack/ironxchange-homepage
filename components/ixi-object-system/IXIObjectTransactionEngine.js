@@ -77,6 +77,43 @@ function addIdToContainerAtPosition(
   };
 }
 
+function reorderIdWithinContainer(
+  containers = {},
+  containerKey,
+  objectId,
+  targetId,
+  insertAfter = false
+) {
+  const key = toId(containerKey);
+  const id = toId(objectId);
+  const anchorId = toId(targetId);
+
+  if (!key || !id || !anchorId) return containers;
+
+  const currentList = Array.isArray(containers[key])
+    ? containers[key].map(String)
+    : [];
+
+  const fromIndex = currentList.findIndex(item => item === id);
+  const targetIndex = currentList.findIndex(item => item === anchorId);
+
+  if (fromIndex === -1 || targetIndex === -1 || id === anchorId) {
+    return containers;
+  }
+
+  const withoutMoved = currentList.filter(item => item !== id);
+  const anchorIndex = withoutMoved.findIndex(item => item === anchorId);
+  const insertIndex = insertAfter ? anchorIndex + 1 : anchorIndex;
+
+  const nextList = [...withoutMoved];
+  nextList.splice(insertIndex, 0, id);
+
+  return {
+    ...containers,
+    [key]: nextList
+  };
+}
+
 function removeIdFromParentCheckoutList(cardState = {}, parentId, objectId) {
   const pId = toId(parentId);
   const oId = toId(objectId);
@@ -279,6 +316,40 @@ export function moveObjectToPositionTransaction({
     ]
   };
 }
+
+export function reorderObjectWithinContainerTransaction({
+  containerKey,
+  objectId,
+  targetId,
+  insertAfter = false,
+  ixiCardState = {},
+  machineContainers = {}
+}) {
+  const id = toId(objectId);
+
+  if (!containerKey || !id || !targetId) {
+    return {
+      nextIxiCardState: ixiCardState,
+      nextMachineContainers: machineContainers,
+      patchesToPersist: []
+    };
+  }
+
+  const nextMachineContainers = reorderIdWithinContainer(
+    machineContainers,
+    containerKey,
+    id,
+    targetId,
+    insertAfter
+  );
+
+  return {
+    nextIxiCardState: ixiCardState,
+    nextMachineContainers,
+    patchesToPersist: []
+  };
+}
+
 export function moveObjectTransaction({
   objectId,
   targetContainer,
@@ -475,7 +546,8 @@ export const IXI_TRANSACTION_TYPES = {
   MOVE: "MOVE",
   MOVE_TO_POSITION: "MOVE_TO_POSITION",
   BULK_MOVE_OR_CHECKIN: "BULK_MOVE_OR_CHECKIN",
-  RECOVER_SELLER_DECK: "RECOVER_SELLER_DECK"
+  RECOVER_SELLER_DECK: "RECOVER_SELLER_DECK",
+  REORDER_WITHIN_CONTAINER: "REORDER_WITHIN_CONTAINER",
 };
 
 export function executeIXIObjectTransaction({
@@ -498,6 +570,10 @@ export function executeIXIObjectTransaction({
     return moveObjectToPositionTransaction(payload);
   }
 
+  if (type === IXI_TRANSACTION_TYPES.REORDER_WITHIN_CONTAINER) {
+  return reorderObjectWithinContainerTransaction(payload);
+  }
+  
   if (type === IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN) {
     return bulkMoveOrCheckInTransaction(payload);
   }
