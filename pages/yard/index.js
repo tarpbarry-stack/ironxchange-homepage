@@ -1485,7 +1485,7 @@ function cycleCardScaleMode() {
     setArmedDestination,
     toggleArmedDestination
   }) => {
-          const handleWorkspaceDragEnd =
+          const handleStandardWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
     getMachineContainer,
     machineContainers,
