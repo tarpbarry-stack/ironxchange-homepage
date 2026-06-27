@@ -52,7 +52,8 @@ export default function IXISellerObjectCard({
   onToggleSaved,
   onSendFront,
   onSendBack,
-  onSendToArmedDestination,
+    onSendToArmedDestination,
+  onCheckoutObject,
   onCycleSellerFace
 }) {
   const display = sellerObject?.sellerDisplay || {};
