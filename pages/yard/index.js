@@ -965,33 +965,19 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
-  const id = String(machineId);
-
-  saveIxiMachinePatch({
-    userId: ixiUserId,
-    listingId: id,
-    patch: {
-      ...(ixiCardState[id] || {}),
-      container: targetContainer,
-      touched: true,
-      updatedAt: Date.now()
+  const result = executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.MOVE_TO_POSITION,
+    payload: {
+      objectId: machineId,
+      targetContainer,
+      targetId,
+      insertAfter,
+      ixiCardState,
+      machineContainers
     }
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerAtPositionState({
-        currentContainers: current,
-        machineId,
-        targetContainer,
-        targetId,
-        insertAfter
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
