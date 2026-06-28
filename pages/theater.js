@@ -29,6 +29,10 @@ import {
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
 
+import {
+  IXI_THEATER_COMMANDS
+} from "../components/ixi-object-system/IXITheaterCommandBus";
+
 const THEATER_DEMO_MACHINE_IDS = [
   "69f7ffd8-f07e-4587-a4dd-4a1fa7626d91",
   "69f90189-5b6b-43ab-a409-f2a1fe56895f"
