@@ -981,14 +981,9 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     ? machineContainers[sourceContainer].map(String)
     : [];
 
-  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
-    objectIds: stackIds,
-    targetContainer,
-    ixiCardState,
-    machineContainers
+  stackIds.forEach(machineId => {
+    moveMachineToContainer(machineId, targetContainer);
   });
-
-  executeIXITransaction(result);
 
   setActiveStacksOpen(current => ({
     ...current,
@@ -1035,14 +1030,9 @@ function movePocketToContainer(pocketKey, targetContainer) {
     ? machineContainers[pocketKey].map(String)
     : [];
 
-  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
-    objectIds: pocketIds,
-    targetContainer,
-    ixiCardState,
-    machineContainers
+  pocketIds.forEach(machineId => {
+    moveMachineToContainer(machineId, targetContainer);
   });
-
-  executeIXITransaction(result);
 }
 
 function movePocketToStack(pocketKey, stackKey) {
