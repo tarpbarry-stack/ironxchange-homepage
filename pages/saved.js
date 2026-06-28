@@ -1044,25 +1044,18 @@ function addListingToLeftPocket(listingId) {
 }
 
 function movePocketToContainer(pocketKey, targetContainer) {
-  setMachineContainers(current => {
-    const finalContainers = movePocketToContainerState(
-      current,
-      pocketKey,
-      targetContainer
-    );
+  const pocketIds = Array.isArray(machineContainers[pocketKey])
+    ? machineContainers[pocketKey].map(String)
+    : [];
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-
-      (current[pocketKey] || []).forEach(machineId => {
-        updateIxiCardState(machineId, {
-          container: targetContainer
-        });
-      });
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+    objectIds: pocketIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
 
 function movePocketToStack(pocketKey, stackKey) {
