@@ -1745,6 +1745,13 @@ onClick={async () => {
       boardColor={previewColor}
       boardOutline={previewOutline}
       machineFace={previewFace}
+      priceValue={edit.price}
+onPriceChange={value =>
+  setEdit(current => ({
+    ...current,
+    price: value
+  }))
+}
       onCycleMachineFace={cyclePreviewFace}
       onCycleColor={cyclePreviewColor}
       onCycleOutline={cyclePreviewOutline}
