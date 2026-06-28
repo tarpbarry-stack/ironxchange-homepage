@@ -119,9 +119,8 @@ import {
 } from "../../components/ixi-object-system/IXIReconciliationEngine";
 
 import {
-  IXI_TRANSACTION_TYPES,
-  executeIXIObjectTransaction
-} from "../../components/ixi-object-system/IXIObjectTransactionEngine";
+  IXI_COMMANDS
+} from "../../components/ixi-object-system/IXICommandBus";
 
 export default function SellerIndexPage() {
   const [listings, setListings] = useState([]);
