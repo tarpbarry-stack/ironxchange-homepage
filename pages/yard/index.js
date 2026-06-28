@@ -1027,7 +1027,7 @@ function moveMachineBackToBoard(machineId) {
   moveMachineToContainer(machineId, "board");
 }
 
-function checkMachineBackIntoSeller(machineId) {
+function checkObjectBackIntoParent(machineId) {
   const id = String(machineId);
   const machineState = ixiCardState[id] || {};
   const sourceParentId = String(machineState.sourceParentId || "");
