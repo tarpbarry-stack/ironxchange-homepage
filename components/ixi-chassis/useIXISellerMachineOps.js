@@ -12,7 +12,8 @@ function formatPriceInput(value) {
 }
 
 export default function useIXISellerMachineOps({
-  setSellerListings
+  setSellerListings,
+  showActionNotice
 }) {
   const [savingPriceId, setSavingPriceId] = useState("");
   const [savingDescriptionId, setSavingDescriptionId] = useState("");
@@ -47,9 +48,21 @@ export default function useIXISellerMachineOps({
 
       input.value = Number(newPrice).toLocaleString();
       input.classList.add("saved");
+      showActionNotice?.({
+  listingId: listing.id,
+  message: "PRICE UPDATED",
+  tone: "success"
+});
     } catch {
       input.classList.add("error");
-      alert("Price update failed.");
+
+showActionNotice?.({
+  listingId: listing.id,
+  message: "PRICE FAILED",
+  tone: "error"
+});
+
+alert("Price update failed.");
     } finally {
       setSavingPriceId("");
     }
