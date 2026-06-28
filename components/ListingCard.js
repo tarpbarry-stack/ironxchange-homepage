@@ -373,9 +373,11 @@ function handlePhotoLoad(e, photoUrl) {
       zIndex: isBoardDragging ? 50 : undefined
     }}
   >
-{ixiState?.theaterNotice ? (
-  <div className="ixi-theater-card-notice">
-    {ixiState.theaterNotice}
+{ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
+  <div className={`ixi-action-card-notice ${
+    ixiState?.actionNotice?.tone || "success"
+  }`}>
+    {ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
@@ -705,7 +707,7 @@ style={getFrameStyle(currentImageObject, "card")}
           contain: layout paint;
         }
 
-.ixi-theater-card-notice {
+.ixi-action-card-notice {
   position: absolute;
   inset: 0;
 
