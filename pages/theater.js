@@ -432,48 +432,18 @@ function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
   const overId = String(event?.over?.id || "");
   const overData = event?.over?.data?.current || {};
-  const targetId = String(overData.targetId || overId);
 
-  if (!dragId || !overId || dragId === overId) return;
-
-  const explicitTargetContainer =
-    overData.containerId ||
-    overData.sortable?.containerId ||
-    "";
+  if (!dragId || !overId) return;
 
   updateTheaterContainers(current => {
-    const sourceContainer = getTheaterSourceContainer(current, dragId);
+    const result = IXI_THEATER_COMMANDS.handleTheaterDrop({
+      dragId,
+      overId,
+      overData,
+      theaterContainers: current
+    });
 
-    if (!sourceContainer) return current;
-
-    const isOverRailCard = (current.rail || []).some(
-      id => String(id) === String(targetId)
-    );
-
-    const targetContainer =
-      explicitTargetContainer ||
-      (THEATER_RECEPTOR_KEYS.includes(overId) ? overId : "") ||
-      (isOverRailCard ? "rail" : "");
-
-    if (!targetContainer) return current;
-
-   const sourceList = current[sourceContainer] || [];
-const fromIndex = sourceList.findIndex(id => String(id) === String(dragId));
-const toIndex = sourceList.findIndex(id => String(id) === String(targetId));
-
-const insertAfter =
-  sourceContainer === targetContainer &&
-  fromIndex >= 0 &&
-  toIndex >= 0 &&
-  fromIndex < toIndex;
-
-return moveTheaterMachineToContainer(
-  current,
-  dragId,
-  targetContainer,
-  targetId,
-  insertAfter
-);
+    return result.nextTheaterContainers;
   });
 }
   
