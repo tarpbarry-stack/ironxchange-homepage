@@ -148,6 +148,12 @@ alert("Price update failed.");
 
     input.classList.add("saved");
 
+    showActionNotice?.({
+  listingId: listing.id,
+  message: "DESCRIPTION UPDATED",
+  tone: "success"
+});
+
     setSellerListings(current =>
       current.map(item =>
         String(item.id) === String(listing.id)
@@ -165,7 +171,14 @@ alert("Price update failed.");
     );
   } catch {
     input.classList.add("error");
-    alert("Description update failed.");
+
+showActionNotice?.({
+  listingId: listing.id,
+  message: "DESCRIPTION FAILED",
+  tone: "error"
+});
+
+alert("Description update failed.");
   } finally {
     setSavingDescriptionId("");
   }
