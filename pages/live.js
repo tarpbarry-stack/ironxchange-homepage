@@ -366,6 +366,7 @@ export default function ListingLivePage() {
   const [commandBusy, setCommandBusy] = useState("");
 
   const [currentUserId, setCurrentUserId] = useState("");
+  const [launchActionNotice, setLaunchActionNotice] = useState(null);
 
   const [previewFace, setPreviewFace] = useState(1);
   const [previewColor, setPreviewColor] = useState("none");
@@ -1840,7 +1841,7 @@ onClick={async () => {
       boardColor={previewColor}
       boardOutline={previewOutline}
       machineFace={previewFace}
-      ixiState={ixiCardState[String(listingId)] || {}}
+      actionNotice={launchActionNotice}
       onPriceKeyDown={saveLaunchFieldOnEnter("PRICE UPDATED")}
       onHoursKeyDown={saveLaunchFieldOnEnter("HOURS UPDATED")}
       onLocationKeyDown={saveLaunchFieldOnEnter("LOCATION UPDATED")}
