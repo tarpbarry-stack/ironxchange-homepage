@@ -1051,10 +1051,24 @@ async function saveLaunchMachineFacts(message = "LISTING UPDATED") {
       )
     );
 
-    showLaunchActionNotice(message, "success");
+    setLaunchActionNotice({
+  message,
+  tone: "success"
+});
+
+setTimeout(() => {
+  setLaunchActionNotice(null);
+}, 1600);
   } catch (err) {
     console.error("LAUNCH FIELD UPDATE FAILED:", err);
-    showLaunchActionNotice("UPDATE FAILED", "error");
+    setLaunchActionNotice({
+  message: "UPDATE FAILED",
+  tone: "error"
+});
+
+setTimeout(() => {
+  setLaunchActionNotice(null);
+}, 1600);
     alert(`Update failed: ${err.message}`);
   } finally {
     setSaving(false);
