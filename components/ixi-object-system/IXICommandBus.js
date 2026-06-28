@@ -215,4 +215,79 @@ export const IXI_COMMANDS = {
       machineContainers
     });
   }
+
+  handleRelationshipDrop({
+  dragId,
+  overId,
+  sourceContainer,
+  targetContainer,
+  ixiCardState,
+  machineContainers
+}) {
+  const id = String(dragId || "");
+  const over = String(overId || "");
+
+  if (!id || !over || !targetContainer) {
+    return emptyCommandResult({
+      ixiCardState,
+      machineContainers
+    });
+  }
+
+  if (
+    sourceContainer &&
+    targetContainer &&
+    sourceContainer === targetContainer &&
+    id !== over
+  ) {
+    const ids = Array.isArray(machineContainers[sourceContainer])
+      ? machineContainers[sourceContainer].map(String)
+      : [];
+
+    const fromIndex = ids.findIndex(item => item === id);
+    const toIndex = ids.findIndex(item => item === over);
+
+    const insertAfter = fromIndex < toIndex;
+
+    return this.reorderWithinContainer({
+      containerKey: sourceContainer,
+      objectId: id,
+      targetId: over,
+      insertAfter,
+      ixiCardState,
+      machineContainers
+    });
+  }
+
+  if (
+    sourceContainer !== "board" &&
+    targetContainer === "board" &&
+    over &&
+    over !== "board" &&
+    id !== over
+  ) {
+    return this.moveObjectToPosition({
+      objectId: id,
+      targetContainer: "board",
+      targetId: over,
+      insertAfter: false,
+      ixiCardState,
+      machineContainers
+    });
+  }
+
+  if (targetContainer && targetContainer !== sourceContainer) {
+    return this.moveObject({
+      objectId: id,
+      targetContainer,
+      ixiCardState,
+      machineContainers
+    });
+  }
+
+  return emptyCommandResult({
+    ixiCardState,
+    machineContainers
+  });
+}
 };
