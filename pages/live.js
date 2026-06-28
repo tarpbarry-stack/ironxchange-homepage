@@ -1043,16 +1043,7 @@ try {
     `Photo save failed: ${imageError.message || "Sharetribe image update failed"}`
   );
 }
-    {
-      id: new UUID(listingId),
-      images: imageIds
-    },
-    {
-      expand: true,
-      include: ["images"]
-    }
-  );
-}
+    
 
      trackLaunchEvent("launch_card_saved", {
   listingId: String(listingId),
