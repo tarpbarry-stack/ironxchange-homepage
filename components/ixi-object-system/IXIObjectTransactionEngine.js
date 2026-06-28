@@ -510,6 +510,50 @@ export function moveObjectTransaction({
   };
 }
 
+export function theaterMoveObjectTransaction({
+  objectId,
+  targetContainer,
+  theaterContainers = {}
+}) {
+  return moveObjectWithinTheaterContainers({
+    objectId,
+    targetContainer,
+    theaterContainers
+  });
+}
+
+export function theaterMoveObjectToPositionTransaction({
+  objectId,
+  targetContainer,
+  targetId,
+  insertAfter = false,
+  theaterContainers = {}
+}) {
+  return moveObjectWithinTheaterContainers({
+    objectId,
+    targetContainer,
+    targetId,
+    insertAfter,
+    theaterContainers
+  });
+}
+
+export function theaterReorderObjectWithinContainerTransaction({
+  containerKey,
+  objectId,
+  targetId,
+  insertAfter = false,
+  theaterContainers = {}
+}) {
+  return reorderObjectWithinTheaterContainer({
+    containerKey,
+    objectId,
+    targetId,
+    insertAfter,
+    theaterContainers
+  });
+}
+
 export function bulkCheckInTransaction({
   objectIds = [],
   ixiCardState = {},
