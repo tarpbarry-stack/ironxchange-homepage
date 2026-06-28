@@ -753,24 +753,14 @@ function executeIXITransaction(result) {
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
-  const id = String(machineId);
-
-  updateIxiCardState(id, {
-    container: targetContainer
+  const result = IXI_COMMANDS.moveObject({
+    objectId: machineId,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerState({
-        currentContainers: current,
-        machineId,
-        targetContainer
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
 
 function moveMachineToContainerAtPosition(
