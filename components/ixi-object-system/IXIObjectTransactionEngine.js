@@ -739,6 +739,18 @@ export function executeIXIObjectTransaction({
   if (type === IXI_TRANSACTION_TYPES.REORDER_WITHIN_CONTAINER) {
   return reorderObjectWithinContainerTransaction(payload);
   }
+
+  if (type === IXI_TRANSACTION_TYPES.THEATER_MOVE) {
+  return theaterMoveObjectTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.THEATER_MOVE_TO_POSITION) {
+  return theaterMoveObjectToPositionTransaction(payload);
+  }
+
+  if (type === IXI_TRANSACTION_TYPES.THEATER_REORDER_WITHIN_CONTAINER) {
+  return theaterReorderObjectWithinContainerTransaction(payload);
+  }
   
   if (type === IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN) {
     return bulkMoveOrCheckInTransaction(payload);
