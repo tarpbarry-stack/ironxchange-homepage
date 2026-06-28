@@ -29,6 +29,10 @@ import {
   IXI_PUBLISHING_COMMANDS
 } from "../components/ixi-object-system/IXIPublishingCommandBus";
 
+import {
+  setIXIActionNotice
+} from "../components/ixi-object-system/IXIActionNoticeEngine";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { UUID } = sdkTypes;
