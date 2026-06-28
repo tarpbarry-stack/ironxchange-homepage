@@ -66,30 +66,35 @@ export default function ListingCard({
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
+  onPriceChange,
   onPriceKeyDown,
   savingPrice = false,
+
+  hoursValue,
+  onHoursChange,
   onHoursKeyDown,
 
-descriptionValue,
-onDescriptionChange,
-onDescriptionKeyDown,
-savingDescription = false,
+  descriptionValue,
+  onDescriptionChange,
+  onDescriptionKeyDown,
+  savingDescription = false,
 
-isPaused = false,
+  isPaused = false,
 
   locationValue,
+  onLocationChange,
   onLocationKeyDown,
-
+  
   onEdit,
-onPause,
-onReactivate,
-onDelete,
+  onPause,
+  onReactivate,
+  onDelete,
 
-machineFace = 1,
-onCycleMachineFace,
+  machineFace = 1,
+  onCycleMachineFace,
 
-onSendFront,
-onSendBack,
+  onSendFront,
+  onSendBack,
 
 armedDestination,
 onSendToArmedDestination,
