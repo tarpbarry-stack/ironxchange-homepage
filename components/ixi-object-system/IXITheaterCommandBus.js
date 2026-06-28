@@ -3,6 +3,11 @@ import {
   sanitizeTheaterContainers
 } from "../../lib/ixiTheaterQueue";
 
+import {
+  IXI_TRANSACTION_TYPES,
+  executeIXIObjectTransaction
+} from "./IXIObjectTransactionEngine";
+
 const THEATER_CONTAINER_KEYS = ["rail", ...THEATER_RECEPTOR_KEYS];
 
 function emptyTheaterResult(theaterContainers) {
