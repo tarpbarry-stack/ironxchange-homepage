@@ -790,17 +790,17 @@ return (
 </TheaterStackDropZone>
 <div className="theater-import-zone">
   <div className="theater-stack-grid">
-    <button
+   <button
   type="button"
   className="theater-unload-dash"
-  title="Unload loaded rail to stack"
+  title="UNLOAD TO STACK"
   onClick={() => {
-  updateTheaterContainers(current => {
-    const result = IXI_THEATER_COMMANDS.unloadRailToStack({
-      theaterContainers: current
-    });
+    updateTheaterContainers(current => {
+      const result = IXI_THEATER_COMMANDS.unloadRailToStack({
+        theaterContainers: current
+      });
 
-    return result.nextTheaterContainers;
+      return result.nextTheaterContainers;
     });
   }}
 />
@@ -822,47 +822,50 @@ return (
   >
   
   <div className="theater-stack-control-rail">
-            <button
-  type="button"
-  className="theater-stack-dash load"
-  onClick={() => {
-  updateTheaterContainers(current => {
-    const result = IXI_THEATER_COMMANDS.loadStackToRail({
-      stackKey,
-      theaterContainers: current
-    });
-
-    return result.nextTheaterContainers;
-  });
-}}
-/>
            <button
   type="button"
-  className="theater-stack-dash loop"
+  className="theater-stack-dash load"
+  title="LOAD TO RAIL"
   onClick={() => {
-  updateTheaterContainers(current => {
-    const result = IXI_THEATER_COMMANDS.rotateStack({
-      stackKey,
-      theaterContainers: current
-    });
+    updateTheaterContainers(current => {
+      const result = IXI_THEATER_COMMANDS.loadStackToRail({
+        stackKey,
+        theaterContainers: current
+      });
 
-    return result.nextTheaterContainers;
-  });
-}}
+      return result.nextTheaterContainers;
+    });
+  }}
+/>
+          <button
+  type="button"
+  className="theater-stack-dash loop"
+  title="ROTATE STACK"
+  onClick={() => {
+    updateTheaterContainers(current => {
+      const result = IXI_THEATER_COMMANDS.rotateStack({
+        stackKey,
+        theaterContainers: current
+      });
+
+      return result.nextTheaterContainers;
+    });
+  }}
 />
             <button
   type="button"
   className="theater-stack-dash orbit"
+  title="CLEAR STACK"
   onClick={() => {
-  updateTheaterContainers(current => {
-    const result = IXI_THEATER_COMMANDS.clearStack({
-      stackKey,
-      theaterContainers: current
-    });
+    updateTheaterContainers(current => {
+      const result = IXI_THEATER_COMMANDS.clearStack({
+        stackKey,
+        theaterContainers: current
+      });
 
-    return result.nextTheaterContainers;
-  });
-}}
+      return result.nextTheaterContainers;
+    });
+  }}
 />
           </div>
 
