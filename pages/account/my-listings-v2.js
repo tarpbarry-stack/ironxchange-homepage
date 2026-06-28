@@ -94,6 +94,10 @@ import {
   toggleSavedListing
 } from "../../lib/savedListings";
 
+import {
+  IXI_COMMANDS
+} from "../../components/ixi-object-system/IXICommandBus";
+
 export default function MyListingsV2() {
   const [listings, setListings] = useState([]);
   
