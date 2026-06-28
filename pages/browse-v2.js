@@ -97,6 +97,10 @@ import {
   sendMachineToTheater
 } from "../lib/ixiTheaterQueue";
 
+import {
+  IXI_COMMANDS
+} from "../components/ixi-object-system/IXICommandBus";
+
 export default function BrowseV2() {
   const [listings, setListings] = useState([]);
   
@@ -698,26 +702,15 @@ function getMachineContainer(machineId) {
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
-  const id = String(machineId);
-
-  updateIxiCardState(id, {
-    container: targetContainer
+  const result = IXI_COMMANDS.moveObject({
+    objectId: machineId,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerState({
-        currentContainers: current,
-        machineId,
-        targetContainer
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
-
 function moveMachineToContainerAtPosition(
   machineId,
   targetContainer,
@@ -726,51 +719,31 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
-  const id = String(machineId);
-
-  saveIxiMachinePatch({
-    userId: ixiUserId,
-    listingId: id,
-    patch: {
-      ...(ixiCardState[id] || {}),
-      container: targetContainer,
-      touched: true,
-      updatedAt: Date.now()
-    }
+  const result = IXI_COMMANDS.moveObjectToPosition({
+    objectId: machineId,
+    targetContainer,
+    targetId,
+    insertAfter,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerAtPositionState({
-        currentContainers: current,
-        machineId,
-        targetContainer,
-        targetId,
-        insertAfter
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-  setMachineContainers(current => {
-    const finalContainers = reorderMachineWithinContainerState({
-      currentContainers: current,
-      containerKey,
-      dragId,
-      targetId,
-      insertAfter
-    });
+  if (!containerKey || !dragId || !targetId) return;
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.reorderWithinContainer({
+    containerKey,
+    objectId: dragId,
+    targetId,
+    insertAfter,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
   
 function moveMachineBackToBoard(machineId) {
@@ -973,14 +946,20 @@ function toggleActiveStackLayout(stackKey) {
 }
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
-  const stackIds = getMachineIdsForStack(
-    machineContainers,
-    stackKey
-  );
+  const sourceContainer = getStackContainerKey(stackKey);
 
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(machineId, targetContainer);
+  const stackIds = Array.isArray(machineContainers[sourceContainer])
+    ? machineContainers[sourceContainer].map(String)
+    : [];
+
+  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+    objectIds: stackIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 
   setActiveStacksOpen(current => ({
     ...current,
@@ -1023,25 +1002,18 @@ function addListingToLeftPocket(listingId) {
 }
 
 function movePocketToContainer(pocketKey, targetContainer) {
-  setMachineContainers(current => {
-    const finalContainers = movePocketToContainerState(
-      current,
-      pocketKey,
-      targetContainer
-    );
+  const pocketIds = Array.isArray(machineContainers[pocketKey])
+    ? machineContainers[pocketKey].map(String)
+    : [];
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-
-      (current[pocketKey] || []).forEach(machineId => {
-        updateIxiCardState(machineId, {
-          container: targetContainer
-        });
-      });
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+    objectIds: pocketIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
 
 function movePocketToStack(pocketKey, stackKey) {
