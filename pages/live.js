@@ -1092,25 +1092,10 @@ async function saveExternalLinks() {
   if (!listingId) return;
 
   try {
-    const response = await fetch(
-      "/api/update-listing-external-links",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          listingId,
-          externalLinks
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "External links save failed");
-    }
+    await IXI_PUBLISHING_COMMANDS.saveExternalLinks({
+      listingId,
+      externalLinks
+    });
 
     addActivity(
       "success",
@@ -1123,7 +1108,6 @@ async function saveExternalLinks() {
         listingId: String(listingId)
       }
     );
-
   } catch (error) {
     console.error(error);
 
