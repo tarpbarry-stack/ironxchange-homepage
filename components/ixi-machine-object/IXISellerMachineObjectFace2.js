@@ -107,12 +107,18 @@ export default function IXISellerMachineObjectFace2({
 <div className="mof2-price">{price}</div>
       <div className="mof2-bio seller-bio-editor">
   <textarea
-  value={sellerDescription}
-  onChange={e =>
-    onDescriptionChange?.(
-      e.target.value.slice(0, DESCRIPTION_LIMIT)
-    )
-  }
+  {...(onDescriptionChange
+    ? {
+        value: sellerDescription,
+        onChange: e =>
+          onDescriptionChange(
+            e.target.value.slice(0, DESCRIPTION_LIMIT),
+            listing
+          )
+      }
+    : {
+        defaultValue: sellerDescription
+      })}
   onKeyDown={e => onDescriptionKeyDown?.(e, listing)}
   maxLength={DESCRIPTION_LIMIT}
   spellCheck={true}
