@@ -1825,6 +1825,7 @@ onClick={async () => {
       boardColor={previewColor}
       boardOutline={previewOutline}
       machineFace={previewFace}
+      ixiState={ixiCardState[String(listingId)] || {}}
       onPriceKeyDown={saveLaunchFieldOnEnter("PRICE UPDATED")}
       onHoursKeyDown={saveLaunchFieldOnEnter("HOURS UPDATED")}
       onLocationKeyDown={saveLaunchFieldOnEnter("LOCATION UPDATED")}
