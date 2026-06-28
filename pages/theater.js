@@ -265,9 +265,35 @@ useEffect(() => {
           .some(list => Array.isArray(list) && list.length > 0);
 
         if (hasAnySavedMachine) {
-          setTheaterContainers(restoredContainers);
-          return;
-        }
+  setTheaterContainers(restoredContainers);
+
+  const savedRoom = savedQueue?.room || {};
+
+  if (Array.isArray(savedRoom.screenSlots)) {
+    setScreenSlots(savedRoom.screenSlots);
+  }
+
+  if (Number.isFinite(Number(savedRoom.selectedSlot))) {
+    setSelectedSlot(Number(savedRoom.selectedSlot));
+  }
+
+  if (Number.isFinite(Number(savedRoom.viewCount))) {
+    setViewCount(Number(savedRoom.viewCount));
+  }
+
+  if (Array.isArray(savedRoom.screenFactModes)) {
+    setScreenFactModes(savedRoom.screenFactModes);
+  }
+
+  if (
+    savedRoom.slotPhotoIndexes &&
+    typeof savedRoom.slotPhotoIndexes === "object"
+  ) {
+    setSlotPhotoIndexes(savedRoom.slotPhotoIndexes);
+  }
+
+  return;
+}
       }
     } catch (err) {
       console.error("Failed restoring Theater queue", err);
