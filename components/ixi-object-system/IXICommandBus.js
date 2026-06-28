@@ -63,3 +63,24 @@ export const IXI_COMMANDS = {
     });
   }
 };
+bulkMoveObjects({ objectIds = [], targetContainer, ixiCardState, machineContainers }) {
+  let result = {
+    nextIxiCardState: ixiCardState,
+    nextMachineContainers: machineContainers,
+    patchesToPersist: []
+  };
+
+  objectIds.map(String).filter(Boolean).forEach(objectId => {
+    result = runIXICommand({
+      command: IXI_TRANSACTION_TYPES.MOVE,
+      payload: {
+        objectId,
+        targetContainer,
+        ixiCardState: result.nextIxiCardState,
+        machineContainers: result.nextMachineContainers
+      }
+    });
+  });
+
+  return result;
+},
