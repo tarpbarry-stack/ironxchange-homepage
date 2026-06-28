@@ -488,6 +488,7 @@ async function saveLocation(e, listing) {
       priceValue: formatPriceInput(listing.price),
       onPriceKeyDown: savePrice,
       onHoursKeyDown: saveHours,
+      onLocationKeyDown: saveLocation,
 
       savingPrice: savingPriceId === String(listingId),
 
