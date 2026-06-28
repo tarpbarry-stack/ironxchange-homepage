@@ -511,10 +511,11 @@ style={getFrameStyle(currentImageObject, "card")}
 
         <div className="price-row">
           {sellerMode ? (
-          <input
+         <input
   className="price-input seller-inline-input"
-  defaultValue={priceValue ?? listing.price ?? ""}
+  value={priceValue ?? listing.price ?? ""}
   onClick={stopCardClick}
+  onChange={e => onPriceChange?.(e.target.value, listing)}
   onKeyDown={e => onPriceKeyDown?.(e, listing)}
 />
           ) : (
