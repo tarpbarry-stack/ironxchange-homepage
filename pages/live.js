@@ -1881,6 +1881,13 @@ onLocationChange={value =>
     location: value
   }))
 }
+descriptionValue={edit.description}
+onDescriptionChange={value =>
+  setEdit(current => ({
+    ...current,
+    description: value
+  }))
+}
       onCycleMachineFace={cyclePreviewFace}
       onCycleColor={cyclePreviewColor}
       onCycleOutline={cyclePreviewOutline}
