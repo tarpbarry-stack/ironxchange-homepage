@@ -375,58 +375,6 @@ function updateTheaterContainers(updater) {
   });
 } 
   
-function removeIdFromAllTheaterContainers(current, dragId) {
-  const next = { ...current };
-
-  ["rail", ...THEATER_RECEPTOR_KEYS].forEach(key => {
-    next[key] = (next[key] || [])
-      .filter(id => String(id) !== String(dragId))
-      .filter((id, index, arr) =>
-        arr.findIndex(item => String(item) === String(id)) === index
-      );
-  });
-
-  return next;
-}
-
-function getTheaterSourceContainer(current, dragId) {
-  return ["rail", ...THEATER_RECEPTOR_KEYS].find(key =>
-    (current[key] || []).some(id => String(id) === String(dragId))
-  );
-}
-
-function moveTheaterMachineToContainer(
-  current,
-  dragId,
-  targetContainer,
-  overId = "",
-  insertAfter = false
-) {
-  const validTargets = ["rail", ...THEATER_RECEPTOR_KEYS];
-
-  if (!validTargets.includes(targetContainer)) return current;
-
-  const id = String(dragId);
-  const cleaned = removeIdFromAllTheaterContainers(current, id);
-
-  const targetList = [...(cleaned[targetContainer] || [])]
-    .filter(item => String(item) !== id);
-
-  const overIndex = targetList.findIndex(
-    item => String(item) === String(overId)
-  );
-
-  if (overIndex >= 0) {
-  targetList.splice(insertAfter ? overIndex + 1 : overIndex, 0, id);
-} else {
-  targetList.push(id);
-}
-
-  return {
-    ...cleaned,
-    [targetContainer]: targetList
-  };
-}
 
 function handleTheaterDragEnd(event) {
   const dragId = String(event?.active?.id || "");
