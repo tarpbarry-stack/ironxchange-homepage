@@ -472,15 +472,19 @@ style={getFrameStyle(currentImageObject, "card")}
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
      {sellerMode ? (
- <input
+<input
   className="hours-inline hours-input"
-  value={
-    hoursValue ??
-    String(listing.hours || publicData.hours || "")
-      .replace(/[^0-9]/g, "")
-  }
+  {...(onHoursChange
+    ? {
+        value:
+          hoursValue ??
+          String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, ""),
+        onChange: e => onHoursChange(e.target.value, listing)
+      }
+    : {
+        defaultValue: String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, "")
+      })}
   onClick={stopCardClick}
-  onChange={e => onHoursChange?.(e.target.value, listing)}
   onKeyDown={e => onHoursKeyDown?.(e, listing)}
   inputMode="numeric"
   maxLength={5}
@@ -515,11 +519,17 @@ style={getFrameStyle(currentImageObject, "card")}
 
         <div className="price-row">
           {sellerMode ? (
-         <input
+        <input
   className="price-input seller-inline-input"
-  value={priceValue ?? listing.price ?? ""}
+  {...(onPriceChange
+    ? {
+        value: priceValue ?? listing.price ?? "",
+        onChange: e => onPriceChange(e.target.value, listing)
+      }
+    : {
+        defaultValue: priceValue ?? listing.price ?? ""
+      })}
   onClick={stopCardClick}
-  onChange={e => onPriceChange?.(e.target.value, listing)}
   onKeyDown={e => onPriceKeyDown?.(e, listing)}
 />
           ) : (
@@ -534,36 +544,46 @@ style={getFrameStyle(currentImageObject, "card")}
           <div className="location-row">
 <input
   className="city-input location-input"
-  value={locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity()}
-  onClick={stopCardClick}
-  onChange={e => {
-    const state =
-      locationValue && String(locationValue).includes(",")
-        ? String(locationValue).split(",")[1]?.trim()
-        : getSellerState();
+  {...(onLocationChange
+    ? {
+        value: locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity(),
+        onChange: e => {
+          const state =
+            locationValue && String(locationValue).includes(",")
+              ? String(locationValue).split(",")[1]?.trim()
+              : getSellerState();
 
-    onLocationChange?.(`${e.target.value}, ${state}`.trim(), listing);
-  }}
+          onLocationChange(`${e.target.value}, ${state}`.trim(), listing);
+        }
+      }
+    : {
+        defaultValue: getSellerCity()
+      })}
+  onClick={stopCardClick}
   onKeyDown={e => onLocationKeyDown?.(e, listing)}
   maxLength={18}
 />
-
  <input
   className="state-input location-input"
-  value={
-    locationValue && String(locationValue).includes(",")
-      ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
-      : getSellerState()
-  }
-  onClick={stopCardClick}
-  onChange={e => {
-    const city =
-      locationValue && String(locationValue).includes(",")
-        ? String(locationValue).split(",")[0]?.trim()
-        : getSellerCity();
+  {...(onLocationChange
+    ? {
+        value:
+          locationValue && String(locationValue).includes(",")
+            ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
+            : getSellerState(),
+        onChange: e => {
+          const city =
+            locationValue && String(locationValue).includes(",")
+              ? String(locationValue).split(",")[0]?.trim()
+              : getSellerCity();
 
-    onLocationChange?.(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
-  }}
+          onLocationChange(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
+        }
+      }
+    : {
+        defaultValue: getSellerState()
+      })}
+  onClick={stopCardClick}
   onKeyDown={e => onLocationKeyDown?.(e, listing)}
   maxLength={2}
 />
