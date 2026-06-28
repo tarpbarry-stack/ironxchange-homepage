@@ -1022,10 +1022,13 @@ async function buildLiveImageIdsForSave() {
 
 let imageIds = [];
 
-try {
-  imageIds = await buildLiveImageIdsForSave();
+const hasNewPhotoFiles = photoItems.some(photo => photo?.file);
 
-  if (imageIds.length > 0) {
+try {
+  if (hasNewPhotoFiles) {
+    imageIds = await buildLiveImageIdsForSave();
+
+    if (imageIds.length > 0) {
     await sdk.ownListings.update(
       {
         id: new UUID(listingId),
@@ -1035,7 +1038,8 @@ try {
         expand: true,
         include: ["images"]
       }
-    );
+        );
+    }
   }
 } catch (imageError) {
   console.error("LAUNCH IMAGE SAVE FAILED:", imageError);
