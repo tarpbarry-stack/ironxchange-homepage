@@ -258,17 +258,30 @@ export const IXI_THEATER_COMMANDS = {
     const toIndex = sourceList.findIndex(item => String(item) === targetId);
 
     const insertAfter =
-      sourceContainer === targetContainer &&
-      fromIndex >= 0 &&
-      toIndex >= 0 &&
-      fromIndex < toIndex;
+  sourceContainer === targetContainer &&
+  fromIndex >= 0 &&
+  toIndex >= 0 &&
+  fromIndex < toIndex;
 
-    return moveTheaterObjectToContainer({
+if (sourceContainer === targetContainer) {
+  return executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.THEATER_REORDER_WITHIN_CONTAINER,
+    payload: {
+      containerKey: sourceContainer,
       objectId: id,
-      targetContainer,
       targetId,
       insertAfter,
       theaterContainers: current
-    });
+    }
+  });
+}
+
+return moveTheaterObjectToContainer({
+  objectId: id,
+  targetContainer,
+  targetId,
+  insertAfter,
+  theaterContainers: current
+});
   }
 };
