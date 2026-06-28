@@ -1081,6 +1081,8 @@ try {
 
 setPhotosDirty(false);
 
+showLaunchActionNotice("LISTING UPDATED", "success");
+
 alert("Launched. Listing updates applied.");
     } catch (err) {
       console.error("SAVE QUICK EDIT ERROR:", err);
