@@ -789,21 +789,15 @@ return (
   type="button"
   className="theater-stack-dash load"
   onClick={() => {
-    updateTheaterContainers(current => {
-      const stackIds = current[stackKey] || [];
-
-      if (!stackIds.length) return current;
-
-     return saveTheaterContainers({
-  ...current,
-  rail: [
-    ...(current.rail || []),
-    ...stackIds
-  ],
-  [stackKey]: []
-});
+  updateTheaterContainers(current => {
+    const result = IXI_THEATER_COMMANDS.loadStackToRail({
+      stackKey,
+      theaterContainers: current
     });
-  }}
+
+    return result.nextTheaterContainers;
+  });
+}}
 />
            <button
   type="button"
