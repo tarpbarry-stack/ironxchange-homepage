@@ -784,21 +784,18 @@ function moveMachineToContainerAtPosition(
 }
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-  setMachineContainers(current => {
-    const finalContainers = reorderMachineWithinContainerState({
-      currentContainers: current,
-      containerKey,
-      dragId,
-      targetId,
-      insertAfter
-    });
+  if (!containerKey || !dragId || !targetId) return;
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.reorderWithinContainer({
+    containerKey,
+    objectId: dragId,
+    targetId,
+    insertAfter,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
   
 function moveMachineBackToBoard(machineId) {
