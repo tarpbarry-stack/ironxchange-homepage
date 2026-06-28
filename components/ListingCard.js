@@ -100,6 +100,7 @@ armedDestination,
 onSendToArmedDestination,
 
 ixiState,
+actionNotice,
 onIxiStateChange,
 
 isBoardDraggingCard = false,
@@ -373,11 +374,11 @@ function handlePhotoLoad(e, photoUrl) {
       zIndex: isBoardDragging ? 50 : undefined
     }}
   >
-{ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
+{actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
-    ixiState?.actionNotice?.tone || "success"
+    actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
   }`}>
-    {ixiState?.actionNotice?.message || ixiState.theaterNotice}
+    {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
