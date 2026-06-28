@@ -1381,16 +1381,21 @@ function movePocketToStack(pocketKey, stackKey) {
 }
 
 function recallPocketToBoard(pocketKey) {
-  const pocketIds = machineContainers[pocketKey] || [];
+  const pocketIds = Array.isArray(machineContainers[pocketKey])
+    ? machineContainers[pocketKey].map(String)
+    : [];
 
-  movePocketToContainer(
-    pocketKey,
-    "board"
-  );
-
-  pocketIds.forEach(machineId => {
-    checkMachineBackIntoSeller(machineId);
+  const result = executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN,
+    payload: {
+      objectIds: pocketIds,
+      targetContainer: "board",
+      ixiCardState,
+      machineContainers
+    }
   });
+
+  executeIXITransaction(result);
 }
 
   
