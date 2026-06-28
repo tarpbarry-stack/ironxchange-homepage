@@ -217,6 +217,12 @@ async function saveHours(e, listing) {
     input.value = Number(newHours).toLocaleString();
     input.classList.add("saved");
 
+    showActionNotice?.({
+  listingId: listing.id,
+  message: "HOURS UPDATED",
+  tone: "success"
+});
+
     setSellerListings(current =>
       current.map(item =>
         String(item.id) === String(listing.id)
@@ -233,7 +239,14 @@ async function saveHours(e, listing) {
     );
   } catch {
     input.classList.add("error");
-    alert("Hours update failed.");
+
+showActionNotice?.({
+  listingId: listing.id,
+  message: "HOURS FAILED",
+  tone: "error"
+});
+
+alert("Hours update failed.");
   }
 }
 
