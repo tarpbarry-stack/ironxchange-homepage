@@ -962,18 +962,15 @@ function checkoutObjectToContainer({
 }) {
   if (!objectId || !sourceParentId) return;
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.CHECKOUT,
-    payload: {
-      objectId,
-      sourceParentId,
-      sourceParentType,
-      targetContainer,
-      checkoutReason,
-      ixiCardState,
-      machineContainers
-    }
-  });
+  const result = IXI_COMMANDS.checkoutObject({
+  objectId,
+  sourceParentId,
+  sourceParentType,
+  targetContainer,
+  checkoutReason,
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 }
@@ -986,17 +983,14 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.MOVE_TO_POSITION,
-    payload: {
-      objectId: machineId,
-      targetContainer,
-      targetId,
-      insertAfter,
-      ixiCardState,
-      machineContainers
-    }
-  });
+  const result = IXI_COMMANDS.moveObjectToPosition({
+  objectId: machineId,
+  targetContainer,
+  targetId,
+  insertAfter,
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 }
@@ -1026,14 +1020,11 @@ function moveMachineBackToBoard(machineId) {
 function checkObjectBackIntoParent(machineId) {
   if (!machineId) return;
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.CHECKIN,
-    payload: {
-      objectId: machineId,
-      ixiCardState,
-      machineContainers
-    }
-  });
+  const result = IXI_COMMANDS.checkInObject({
+  objectId: machineId,
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 }
@@ -1266,15 +1257,12 @@ function moveActiveStackToContainer(stackKey, targetContainer) {
     ? machineContainers[sourceContainer].map(String)
     : [];
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN,
-    payload: {
-      objectIds: stackIds,
-      targetContainer,
-      ixiCardState,
-      machineContainers
-    }
-  });
+  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+  objectIds: stackIds,
+  targetContainer,
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 
@@ -1357,15 +1345,12 @@ function recallPocketToBoard(pocketKey) {
     ? machineContainers[pocketKey].map(String)
     : [];
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN,
-    payload: {
-      objectIds: pocketIds,
-      targetContainer: "board",
-      ixiCardState,
-      machineContainers
-    }
-  });
+ const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+  objectIds: pocketIds,
+  targetContainer: "board",
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 }
@@ -1536,7 +1521,7 @@ function recoverSellerObject(sellerObject) {
     return;
   }
 
-  const result = recoverSellerDeckTransaction({
+  const result = IXI_COMMANDS.recoverSellerDeck({
     sellerObject: {
       ...sellerObject,
       id: sellerId
