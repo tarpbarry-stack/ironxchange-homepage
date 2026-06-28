@@ -20,7 +20,6 @@ import { getListingId } from "../lib/listingFormatters";
 import { fetchIxiMachineState } from "../lib/ixiMachineStateClient";
 import {
   IXI_THEATER_QUEUE_ID,
-  IXI_THEATER_ROOM_ID,
   THEATER_RECEPTOR_KEYS,
   createEmptyTheaterContainers,
   sanitizeTheaterContainers,
@@ -332,6 +331,16 @@ function cleanTheaterContainers(containers = {}) {
   return next;
 }
   
+function getCurrentTheaterRoomState() {
+  return {
+    screenSlots,
+    selectedSlot,
+    viewCount,
+    screenFactModes,
+    slotPhotoIndexes
+  };
+}
+
 function saveTheaterContainers(nextContainers) {
   const safeContainers =
     sanitizeTheaterContainers(
@@ -340,7 +349,8 @@ function saveTheaterContainers(nextContainers) {
 
   saveTheaterQueue({
     userId: ixiUserId,
-    containers: safeContainers
+    containers: safeContainers,
+    room: getCurrentTheaterRoomState()
   });
 
   return safeContainers;
