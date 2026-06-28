@@ -60,33 +60,27 @@ function moveTheaterObjectToContainer({
   insertAfter = false,
   theaterContainers
 }) {
-  const id = String(objectId || "");
-  const target = String(targetContainer || "");
-  const over = String(targetId || "");
-
-  if (!id || !THEATER_CONTAINER_KEYS.includes(target)) {
-    return emptyTheaterResult(theaterContainers);
+  if (targetId) {
+    return executeIXIObjectTransaction({
+      type: IXI_TRANSACTION_TYPES.THEATER_MOVE_TO_POSITION,
+      payload: {
+        objectId,
+        targetContainer,
+        targetId,
+        insertAfter,
+        theaterContainers
+      }
+    });
   }
 
-  const cleaned = removeIdFromAllTheaterContainers(theaterContainers, id);
-  const targetList = [...(cleaned[target] || [])].filter(
-    item => String(item) !== id
-  );
-
-  const overIndex = targetList.findIndex(item => String(item) === over);
-
-  if (overIndex >= 0) {
-    targetList.splice(insertAfter ? overIndex + 1 : overIndex, 0, id);
-  } else {
-    targetList.push(id);
-  }
-
-  return {
-    nextTheaterContainers: cleanTheaterContainers({
-      ...cleaned,
-      [target]: targetList
-    })
-  };
+  return executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.THEATER_MOVE,
+    payload: {
+      objectId,
+      targetContainer,
+      theaterContainers
+    }
+  });
 }
 
 export const IXI_THEATER_COMMANDS = {
