@@ -994,40 +994,15 @@ async function buildLiveImageIdsForSave() {
     setSaving(true);
 
     try {
-      const detailsResponse = await fetch("/api/update-listing-details", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId,
-          hours: edit.hours,
-          location: edit.location,
-          description: edit.description,
-          keywords: selectedKeywords
-        })
-      });
-
-      const detailsData = await detailsResponse.json();
-
-      if (!detailsResponse.ok) {
-        throw new Error(detailsData?.error || "Details update failed");
-      }
-
-      if (cleanNumber(edit.price)) {
-        const priceResponse = await fetch("/api/update-listing-price", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            listingId,
-            price: cleanNumber(edit.price)
-          })
-        });
-
-        const priceData = await priceResponse.json();
-
-        if (!priceResponse.ok) {
-          throw new Error(priceData?.error || "Price update failed");
-        }
-      }
+ const updateResult = await IXI_PUBLISHING_COMMANDS.updateMachineFacts({
+  listingId,
+  title,
+  price: edit.price,
+  hours: edit.hours,
+  location: edit.location,
+  description: edit.description,
+  keywords: selectedKeywords
+});
 
 let imageIds = [];
 
