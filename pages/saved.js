@@ -229,109 +229,29 @@ function handleWorkspaceDragEnd(event) {
       ? overId
       : getMachineContainer(overId));
 
-  console.log("IXI DND DROP", {
+  const result = IXI_COMMANDS.handleRelationshipDrop({
     dragId,
     overId,
     sourceContainer,
     targetContainer,
-    activeData: event?.active?.data?.current,
-    overData: event?.over?.data?.current
+    ixiCardState,
+    machineContainers
   });
 
-  if (!dragId || !overId) {
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
+  executeIXITransaction(result);
+
+  if (targetContainer === "stackTop") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: true
+    }));
   }
 
-  if (
-    sourceContainer &&
-    targetContainer &&
-    sourceContainer === targetContainer &&
-    dragId !== overId
-  ) {
-    const ids = machineContainers[sourceContainer] || [];
-
-    const fromIndex = ids.findIndex(
-      item => String(item) === String(dragId)
-    );
-
-    const toIndex = ids.findIndex(
-      item => String(item) === String(overId)
-    );
-
-    const insertAfter = fromIndex < toIndex;
-
-    moveMachineWithinContainer(
-      sourceContainer,
-      dragId,
-      overId,
-      insertAfter
-    );
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
-  }
-
-  if (
-    sourceContainer !== "board" &&
-    targetContainer === "board" &&
-    overId &&
-    overId !== "board" &&
-    dragId !== overId
-  ) {
-    console.log("IXI INSERT TO BOARD", {
-      dragId,
-      overId,
-      sourceContainer,
-      targetContainer
-    });
-
-    moveMachineToContainerAtPosition(
-      dragId,
-      "board",
-      overId,
-      false
-    );
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
-  }
-
-  if (
-    targetContainer &&
-    targetContainer !== sourceContainer &&
-    [
-      "board",
-      "stackTop",
-      "stackBottom",
-      "pocketLeft",
-      "pocketRight",
-      "pocketLeft2",
-      "pocketRight2"
-    ].includes(targetContainer)
-  ) {
-    moveMachineToContainer(dragId, targetContainer);
-
-    if (targetContainer === "stackTop") {
-      setActiveStacksOpen(current => ({
-        ...current,
-        top: true
-      }));
-    }
-
-    if (targetContainer === "stackBottom") {
-      setActiveStacksOpen(current => ({
-        ...current,
-        bottom: true
-      }));
-    }
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
+  if (targetContainer === "stackBottom") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      bottom: true
+    }));
   }
 
   setActiveDndId("");
