@@ -1752,6 +1752,13 @@ onPriceChange={value =>
     price: value
   }))
 }
+hoursValue={edit.hours}
+onHoursChange={value =>
+  setEdit(current => ({
+    ...current,
+    hours: value
+  }))
+}
       onCycleMachineFace={cyclePreviewFace}
       onCycleColor={cyclePreviewColor}
       onCycleOutline={cyclePreviewOutline}
