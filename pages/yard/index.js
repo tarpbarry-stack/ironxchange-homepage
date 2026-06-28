@@ -269,7 +269,7 @@ if (
   draggedSourceSellerId &&
   String(overId) === draggedSourceSellerId
 ) {
-  checkMachineBackIntoSeller(dragId);
+  checkObjectBackIntoParent(dragId);
 
   setActiveDndId("");
   clearMachineDragState();
@@ -1420,7 +1420,7 @@ function recallPocketMachineToBoard(machineId, pocketKey) {
 
     saveWorkspaceLayout(finalContainers);
 
-    checkMachineBackIntoSeller(id);
+    checkObjectBackIntoParent(id);
 
     return finalContainers;
   });
@@ -1702,7 +1702,7 @@ if (
     targetParentId: overId
   })
 ) {
-  checkMachineBackIntoSeller(dragId);
+  checkObjectBackIntoParent(dragId);
 
   setActiveDndId("");
   clearMachineDragState();
