@@ -202,7 +202,7 @@ export const IXI_COMMANDS = {
     });
   },
 
-  moveObjectToContainerEnd({
+    moveObjectToContainerEnd({
     objectId,
     containerKey = "board",
     ixiCardState,
@@ -214,7 +214,7 @@ export const IXI_COMMANDS = {
       ixiCardState,
       machineContainers
     });
-  }
+  },
 
   handleRelationshipDrop({
   dragId,
