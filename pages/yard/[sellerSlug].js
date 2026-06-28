@@ -785,6 +785,35 @@ function getMachineContainer(machineId) {
     machineId
   );
 }
+
+function executeIXITransaction(result) {
+  if (!result) return;
+
+  const nextIxiCardState =
+    result.nextIxiCardState || ixiCardState;
+
+  const nextMachineContainers =
+    result.nextMachineContainers || machineContainers;
+
+  setIxiCardState(nextIxiCardState);
+  setMachineContainers(nextMachineContainers);
+
+  const patches = Array.isArray(result.patchesToPersist)
+    ? result.patchesToPersist
+    : [];
+
+  patches.forEach(item => {
+    if (!item?.listingId) return;
+
+    saveIxiMachinePatch({
+      userId: ixiUserId,
+      listingId: item.listingId,
+      patch: item.patch || {}
+    });
+  });
+
+  saveWorkspaceLayout(nextMachineContainers);
+}
   
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
