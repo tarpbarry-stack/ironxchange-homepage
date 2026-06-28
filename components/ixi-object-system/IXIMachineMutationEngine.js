@@ -1,0 +1,75 @@
+export function getUpdatedMachineFactMessages({
+  before = {},
+  after = {}
+}) {
+  const messages = [];
+
+  const beforePrice = String(before.price || "").replace(/[^0-9]/g, "");
+  const afterPrice = String(after.price || "").replace(/[^0-9]/g, "");
+
+  const beforeHours = String(before.hours || "").replace(/[^0-9]/g, "");
+  const afterHours = String(after.hours || "").replace(/[^0-9]/g, "");
+
+  const beforeLocation = String(before.location || "");
+  const afterLocation = String(after.location || "");
+
+  const beforeDescription = String(before.description || "");
+  const afterDescription = String(after.description || "");
+
+  if (beforePrice !== afterPrice) {
+    messages.push("PRICE UPDATED");
+  }
+
+  if (beforeHours !== afterHours) {
+    messages.push("HOURS UPDATED");
+  }
+
+  if (beforeLocation !== afterLocation) {
+    messages.push("LOCATION UPDATED");
+  }
+
+  if (beforeDescription !== afterDescription) {
+    messages.push("DESCRIPTION UPDATED");
+  }
+
+  if (!messages.length) {
+    messages.push("LISTING UPDATED");
+  }
+
+  return messages;
+}
+
+export async function updateMachineFacts({
+  commandBus,
+  listingId,
+  title = "",
+  before = {},
+  after = {}
+}) {
+  if (!listingId) {
+    throw new Error("Missing listingId");
+  }
+
+  if (!commandBus?.updateMachineFacts) {
+    throw new Error("Missing updateMachineFacts command");
+  }
+
+  const result = await commandBus.updateMachineFacts({
+    listingId,
+    title,
+    price: after.price,
+    hours: after.hours,
+    location: after.location,
+    description: after.description,
+    keywords: after.keywords || []
+  });
+
+  return {
+    ok: true,
+    result,
+    notices: getUpdatedMachineFactMessages({
+      before,
+      after
+    })
+  };
+}
