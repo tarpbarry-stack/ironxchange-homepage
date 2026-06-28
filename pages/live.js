@@ -24,6 +24,11 @@ import {
   getIXActivePhotoFile,
   getIXActivePhotoUrl
 } from "../lib/ixvision/pipeline/processIXPhoto";
+
+import {
+  IXI_PUBLISHING_COMMANDS
+} from "../components/ixi-object-system/IXIPublishingCommandBus";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { UUID } = sdkTypes;
@@ -1048,33 +1053,39 @@ if (imageIds.length > 0) {
   }
 
   async function updateWorkflow(nextWorkflow) {
-    if (!listingId) return;
+  if (!listingId) return;
 
-    setWorkflowStatus(nextWorkflow);
+  setWorkflowStatus(nextWorkflow);
 
-    try {
-      const response = await fetch("/api/update-listing-workflow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId,
-          workflowStatus: nextWorkflow
-        })
-      });
+  try {
+    await IXI_PUBLISHING_COMMANDS.saveWorkflow({
+      listingId,
+      workflowStatus: nextWorkflow
+    });
 
-      if (!response.ok) throw new Error("Workflow update failed");
+    addActivity(
+      "success",
+      `Workflow set to ${nextWorkflow} — ${title}`
+    );
 
-      addActivity("success", `Workflow set to ${nextWorkflow} — ${title}`);
-      trackLaunchEvent("launch_workflow_updated", {
+    trackLaunchEvent(
+      "launch_workflow_updated",
+      {
         listingId: String(listingId),
         workflowStatus: nextWorkflow
-      });
-    } catch (err) {
-      console.error(err);
-      addActivity("error", `Workflow update failed — ${title}`);
-      alert("Workflow update failed.");
-    }
+      }
+    );
+  } catch (err) {
+    console.error(err);
+
+    addActivity(
+      "error",
+      `Workflow update failed — ${title}`
+    );
+
+    alert("Workflow update failed.");
   }
+}
 
 
 async function saveExternalLinks() {
