@@ -184,7 +184,35 @@ export const IXI_COMMANDS = {
           id
         ]
       },
-      patchesToPersist: []
+            patchesToPersist: []
     };
+  },
+
+  moveObjectToContainerStart({
+    objectId,
+    containerKey = "board",
+    ixiCardState,
+    machineContainers
+  }) {
+    return this.sendObjectToFront({
+      objectId,
+      containerKey,
+      ixiCardState,
+      machineContainers
+    });
+  },
+
+  moveObjectToContainerEnd({
+    objectId,
+    containerKey = "board",
+    ixiCardState,
+    machineContainers
+  }) {
+    return this.sendObjectToBack({
+      objectId,
+      containerKey,
+      ixiCardState,
+      machineContainers
+    });
   }
 };
