@@ -226,109 +226,29 @@ function handleWorkspaceDragEnd(event) {
       ? overId
       : getMachineContainer(overId));
 
-  console.log("IXI DND DROP", {
+  const result = IXI_COMMANDS.handleRelationshipDrop({
     dragId,
     overId,
     sourceContainer,
     targetContainer,
-    activeData: event?.active?.data?.current,
-    overData: event?.over?.data?.current
+    ixiCardState,
+    machineContainers
   });
 
-  if (!dragId || !overId) {
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
+  executeIXITransaction(result);
+
+  if (targetContainer === "stackTop") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: true
+    }));
   }
 
-  if (
-    sourceContainer &&
-    targetContainer &&
-    sourceContainer === targetContainer &&
-    dragId !== overId
-  ) {
-    const ids = machineContainers[sourceContainer] || [];
-
-    const fromIndex = ids.findIndex(
-      item => String(item) === String(dragId)
-    );
-
-    const toIndex = ids.findIndex(
-      item => String(item) === String(overId)
-    );
-
-    const insertAfter = fromIndex < toIndex;
-
-    moveMachineWithinContainer(
-      sourceContainer,
-      dragId,
-      overId,
-      insertAfter
-    );
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
-  }
-
-  if (
-    sourceContainer !== "board" &&
-    targetContainer === "board" &&
-    overId &&
-    overId !== "board" &&
-    dragId !== overId
-  ) {
-    console.log("IXI INSERT TO BOARD", {
-      dragId,
-      overId,
-      sourceContainer,
-      targetContainer
-    });
-
-    moveMachineToContainerAtPosition(
-      dragId,
-      "board",
-      overId,
-      false
-    );
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
-  }
-
-  if (
-    targetContainer &&
-    targetContainer !== sourceContainer &&
-    [
-      "board",
-      "stackTop",
-      "stackBottom",
-      "pocketLeft",
-      "pocketRight",
-      "pocketLeft2",
-      "pocketRight2"
-    ].includes(targetContainer)
-  ) {
-    moveMachineToContainer(dragId, targetContainer);
-
-    if (targetContainer === "stackTop") {
-      setActiveStacksOpen(current => ({
-        ...current,
-        top: true
-      }));
-    }
-
-    if (targetContainer === "stackBottom") {
-      setActiveStacksOpen(current => ({
-        ...current,
-        bottom: true
-      }));
-    }
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
+  if (targetContainer === "stackBottom") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      bottom: true
+    }));
   }
 
   setActiveDndId("");
@@ -818,24 +738,14 @@ function executeIXITransaction(result) {
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
-  const id = String(machineId);
-
-  updateIxiCardState(id, {
-    container: targetContainer
+  const result = IXI_COMMANDS.moveObject({
+    objectId: machineId,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerState({
-        currentContainers: current,
-        machineId,
-        targetContainer
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
 
 function moveMachineToContainerAtPosition(
@@ -846,51 +756,31 @@ function moveMachineToContainerAtPosition(
 ) {
   if (!machineId || !targetContainer || !targetId) return;
 
-  const id = String(machineId);
-
-  saveIxiMachinePatch({
-    userId: ixiUserId,
-    listingId: id,
-    patch: {
-      ...(ixiCardState[id] || {}),
-      container: targetContainer,
-      touched: true,
-      updatedAt: Date.now()
-    }
+  const result = IXI_COMMANDS.moveObjectToPosition({
+    objectId: machineId,
+    targetContainer,
+    targetId,
+    insertAfter,
+    ixiCardState,
+    machineContainers
   });
 
-  setMachineContainers(current => {
-    const finalContainers =
-      moveMachineToContainerAtPositionState({
-        currentContainers: current,
-        machineId,
-        targetContainer,
-        targetId,
-        insertAfter
-      });
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
+  executeIXITransaction(result);
 }
   
  function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-  setMachineContainers(current => {
-    const finalContainers = reorderMachineWithinContainerState({
-      currentContainers: current,
-      containerKey,
-      dragId,
-      targetId,
-      insertAfter
-    });
+  if (!containerKey || !dragId || !targetId) return;
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.reorderWithinContainer({
+    containerKey,
+    objectId: dragId,
+    targetId,
+    insertAfter,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
   
 function moveMachineBackToBoard(machineId) {
@@ -982,45 +872,27 @@ function cyclePocketMode(side) {
 function sendListingToFront(listing) {
   const listingId = String(getListingId(listing));
 
-  console.log("IXI SEND FRONT CLICKED", listingId);
-
-  setMachineContainers(current => {
-    const boardIds = current.board || [];
-
-    if (!boardIds.includes(listingId)) {
-      return current;
-    }
-
-    return {
-      ...current,
-      board: [
-        listingId,
-        ...boardIds.filter(id => String(id) !== listingId)
-      ]
-    };
+  const result = IXI_COMMANDS.moveObjectToContainerStart({
+    objectId: listingId,
+    containerKey: "board",
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
 
 function sendListingToBack(listing) {
   const listingId = String(getListingId(listing));
 
-  console.log("IXI SEND BACK CLICKED", listingId);
-
-  setMachineContainers(current => {
-    const boardIds = current.board || [];
-
-    if (!boardIds.includes(listingId)) {
-      return current;
-    }
-
-    return {
-      ...current,
-      board: [
-        ...boardIds.filter(id => String(id) !== listingId),
-        listingId
-      ]
-    };
+  const result = IXI_COMMANDS.moveObjectToContainerEnd({
+    objectId: listingId,
+    containerKey: "board",
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
   async function toggleSave(listing) {
     if (!sdk) {
@@ -1093,14 +965,20 @@ function toggleActiveStackLayout(stackKey) {
 }
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
-  const stackIds = getMachineIdsForStack(
-    machineContainers,
-    stackKey
-  );
+  const sourceContainer = getStackContainerKey(stackKey);
 
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(machineId, targetContainer);
+  const stackIds = Array.isArray(machineContainers[sourceContainer])
+    ? machineContainers[sourceContainer].map(String)
+    : [];
+
+  const result = IXI_COMMANDS.bulkMoveObjects({
+    objectIds: stackIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 
   setActiveStacksOpen(current => ({
     ...current,
@@ -1143,25 +1021,18 @@ function addListingToLeftPocket(listingId) {
 }
 
 function movePocketToContainer(pocketKey, targetContainer) {
-  setMachineContainers(current => {
-    const finalContainers = movePocketToContainerState(
-      current,
-      pocketKey,
-      targetContainer
-    );
+  const pocketIds = Array.isArray(machineContainers[pocketKey])
+    ? machineContainers[pocketKey].map(String)
+    : [];
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-
-      (current[pocketKey] || []).forEach(machineId => {
-        updateIxiCardState(machineId, {
-          container: targetContainer
-        });
-      });
-    }
-
-    return finalContainers;
+  const result = IXI_COMMANDS.bulkMoveObjects({
+    objectIds: pocketIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
 
 function movePocketToStack(pocketKey, stackKey) {
