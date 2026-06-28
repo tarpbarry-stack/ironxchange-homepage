@@ -817,13 +817,15 @@ return (
   type="button"
   className="theater-stack-dash orbit"
   onClick={() => {
-    setTheaterContainers(current =>
-  saveTheaterContainers({
-    ...current,
-    [stackKey]: []
-  })
-);
-  }}
+  updateTheaterContainers(current => {
+    const result = IXI_THEATER_COMMANDS.clearStack({
+      stackKey,
+      theaterContainers: current
+    });
+
+    return result.nextTheaterContainers;
+  });
+}}
 />
           </div>
 
