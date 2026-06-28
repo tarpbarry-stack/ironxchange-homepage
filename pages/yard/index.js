@@ -1028,43 +1028,19 @@ function moveMachineBackToBoard(machineId) {
 }
 
 function checkObjectBackIntoParent(machineId) {
-  const id = String(machineId);
-  const machineState = ixiCardState[id] || {};
-  const sourceParentId = String(machineState.sourceParentId || "");
+  if (!machineId) return;
 
-  if (!sourceParentId) return;
-
-  if (
-    !canReturnToParent({
-      objectState: machineState,
-      targetParentId: sourceParentId
-    })
-  ) {
-    return;
-  }
-
-  const parentState = ixiCardState[sourceParentId] || {};
-
-  const checkedOutIds = Array.isArray(parentState.checkedOutMachineIds)
-    ? parentState.checkedOutMachineIds.map(String)
-    : [];
-
-    updateIxiCardState(sourceParentId, {
-    checkedOutMachineIds: checkedOutIds.filter(
-      item => String(item) !== id
-    )
+  const result = executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.CHECKIN,
+    payload: {
+      objectId: machineId,
+      ixiCardState,
+      machineContainers
+    }
   });
 
-  updateIxiCardState(id, {
-    ...returnCheckedOutToParent(machineState),
-    sourceParentId: "",
-    sourceParentType: "",
-    sourceDeckId: "",
-    checkedOutFromParent: false,
-    container: "board"
-  });
+  executeIXITransaction(result);
 }
-
   
 function getListingById(machineId) {
   return listings.find(
