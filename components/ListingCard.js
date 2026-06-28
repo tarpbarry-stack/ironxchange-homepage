@@ -470,17 +470,19 @@ style={getFrameStyle(currentImageObject, "card")}
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
      {sellerMode ? (
-  <input
-    className="hours-inline hours-input"
-    defaultValue={
-  String(listing.hours || publicData.hours || "")
-    .replace(/[^0-9]/g, "")
-}
-    onClick={stopCardClick}
-    onKeyDown={e => onHoursKeyDown?.(e, listing)}
-    inputMode="numeric"
-    maxLength={5}
-  />
+ <input
+  className="hours-inline hours-input"
+  value={
+    hoursValue ??
+    String(listing.hours || publicData.hours || "")
+      .replace(/[^0-9]/g, "")
+  }
+  onClick={stopCardClick}
+  onChange={e => onHoursChange?.(e.target.value, listing)}
+  onKeyDown={e => onHoursKeyDown?.(e, listing)}
+  inputMode="numeric"
+  maxLength={5}
+/>
 ) : (
   <h3 className="hours-inline">
     {formatHours(listing.hours)}
