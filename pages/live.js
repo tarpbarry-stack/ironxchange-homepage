@@ -721,7 +721,9 @@ function goToListing(targetListing) {
 
   setPhotoItems(current => [...current, ...mapped]);
 
-  addActivity(
+setPhotosDirty(true);
+
+addActivity(
     "success",
     `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`
   );
@@ -833,7 +835,9 @@ async function reprocessExistingPhoto(photoId, mode) {
 
   setPhotoItems(current => [...current, ...mapped]);
 
-  addActivity(
+setPhotosDirty(true);
+
+addActivity(
     "success",
     `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`
   );
@@ -848,6 +852,8 @@ async function reprocessExistingPhoto(photoId, mode) {
   function removePhoto(indexToRemove) {
     setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
     setActivePhotoIndex(0);
+    
+    setPhotosDirty(true);
 
     addActivity("success", `Photo removed — ${title}`);
     trackLaunchEvent("launch_photo_removed", {
@@ -1025,23 +1031,21 @@ async function buildLiveImageIdsForSave() {
 
 let imageIds = [];
 
-const hasNewPhotoFiles = photoItems.some(photo => photo?.file);
-
 try {
-  if (hasNewPhotoFiles) {
+  if (photosDirty) {
     imageIds = await buildLiveImageIdsForSave();
 
     if (imageIds.length > 0) {
-    await sdk.ownListings.update(
-      {
-        id: new UUID(listingId),
-        images: imageIds
-      },
-      {
-        expand: true,
-        include: ["images"]
-      }
-        );
+      await sdk.ownListings.update(
+        {
+          id: new UUID(listingId),
+          images: imageIds
+        },
+        {
+          expand: true,
+          include: ["images"]
+        }
+      );
     }
   }
 } catch (imageError) {
@@ -1059,7 +1063,9 @@ try {
   savedImageCount: imageIds.length
 });
 
-      alert("Launched. Listing updates applied.");
+setPhotosDirty(false);
+
+alert("Launched. Listing updates applied.");
     } catch (err) {
       console.error("SAVE QUICK EDIT ERROR:", err);
       addActivity("error", `Launch failed — ${title}`);
