@@ -1165,7 +1165,7 @@ user-select: none;
   width: max-content;
   max-width: none;
 
-  padding: 6px 8px;
+  padding: 9px 12px;
 
   background: rgba(0,0,0,.72);
   border: 1px solid rgba(255,255,255,.08);
@@ -1173,7 +1173,7 @@ user-select: none;
 
   color: rgba(235,235,235,.68);
 
-  font-size: 8px;
+  font-size: 15px;
   font-weight: 950;
   letter-spacing: .45px;
   text-transform: uppercase;
@@ -1264,29 +1264,30 @@ margin-top: -25px;
 
      .theater-mode-dashes {
   position: absolute;
-  top: 64px;
+  top: 22px;
   left: 50%;
   transform: translateX(-50%);
 
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
 
-  z-index: 20;
+  z-index: 500;
+  pointer-events: auto;
 }
 
-        .theater-mode-dashes button {
-          width: 28px;
-          height: 8px;
+.theater-mode-dashes button {
+  width: 42px;
+  height: 14px;
 
-          border: 0;
-          border-radius: 2px;
+  border: 0;
+  border-radius: 3px;
 
-          background: rgba(255,255,255,.18);
-          color: transparent;
+  background: rgba(255,255,255,.18);
+  color: transparent;
 
-          cursor: pointer;
-        }
+  cursor: pointer;
+}
 
         .theater-mode-dashes button.active {
           background: rgba(180,180,180,.72);
