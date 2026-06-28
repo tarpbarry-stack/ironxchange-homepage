@@ -33,6 +33,10 @@ import {
   setIXIActionNotice
 } from "../components/ixi-object-system/IXIActionNoticeEngine";
 
+import {
+  updateMachineFacts
+} from "../components/ixi-object-system/IXIMachineMutationEngine";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { UUID } = sdkTypes;
