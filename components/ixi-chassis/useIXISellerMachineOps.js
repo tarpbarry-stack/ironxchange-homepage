@@ -250,6 +250,95 @@ alert("Hours update failed.");
   }
 }
 
+async function saveLocation(e, listing) {
+  if (e.key !== "Enter") return;
+
+  e.preventDefault();
+
+  const input = e.currentTarget;
+  const row = input.closest(".location-row");
+
+  const cityInput = row?.querySelector(".city-input");
+  const stateInput = row?.querySelector(".state-input");
+
+  const city = String(cityInput?.value || "").trim();
+  const state = String(stateInput?.value || "").trim().toUpperCase();
+
+  const newLocation = [city, state].filter(Boolean).join(", ");
+
+  if (!listing?.id || !newLocation) return;
+
+  cityInput?.classList.remove("saved", "error");
+  stateInput?.classList.remove("saved", "error");
+
+  try {
+    const response = await fetch("/api/update-listing-details", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId: listing.id,
+        location: newLocation,
+
+        hours:
+          listing.hours ||
+          listing.publicData?.hours ||
+          "",
+
+        description:
+          listing.description ||
+          listing.publicData?.description ||
+          listing.publicData?.details ||
+          "",
+
+        keywords:
+          listing.keywords ||
+          listing.publicData?.keywords ||
+          []
+      })
+    });
+
+    if (!response.ok) throw new Error("Location update failed");
+
+    cityInput?.classList.add("saved");
+    stateInput?.classList.add("saved");
+
+    showActionNotice?.({
+      listingId: listing.id,
+      message: "LOCATION UPDATED",
+      tone: "success"
+    });
+
+    setSellerListings(current =>
+      current.map(item =>
+        String(item.id) === String(listing.id)
+          ? {
+              ...item,
+              location: newLocation,
+              publicData: {
+                ...(item.publicData || {}),
+                location: newLocation,
+                city: newLocation
+              }
+            }
+          : item
+      )
+    );
+  } catch {
+    cityInput?.classList.add("error");
+    stateInput?.classList.add("error");
+
+    showActionNotice?.({
+      listingId: listing.id,
+      message: "LOCATION FAILED",
+      tone: "error"
+    });
+
+    alert("Location update failed.");
+  }
+}
+  
   async function pauseListing(listing) {
     const ok = window.confirm(
       `Pause this listing?\n\n${formatCleanMachineTitle(listing.title)}`
