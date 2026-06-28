@@ -803,20 +803,15 @@ return (
   type="button"
   className="theater-stack-dash loop"
   onClick={() => {
-    setTheaterContainers(current => {
-      const stackIds = current[stackKey] || [];
-
-      if (stackIds.length <= 1) return current;
-
-     return saveTheaterContainers({
-  ...current,
-  [stackKey]: [
-    ...stackIds.slice(1),
-    stackIds[0]
-  ]
-});
+  updateTheaterContainers(current => {
+    const result = IXI_THEATER_COMMANDS.rotateStack({
+      stackKey,
+      theaterContainers: current
     });
-  }}
+
+    return result.nextTheaterContainers;
+  });
+}}
 />
             <button
   type="button"
