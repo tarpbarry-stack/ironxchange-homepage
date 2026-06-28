@@ -1020,10 +1020,29 @@ async function buildLiveImageIdsForSave() {
         }
       }
 
-const imageIds = await buildLiveImageIdsForSave();
+let imageIds = [];
 
-if (imageIds.length > 0) {
-  await sdk.ownListings.update(
+try {
+  imageIds = await buildLiveImageIdsForSave();
+
+  if (imageIds.length > 0) {
+    await sdk.ownListings.update(
+      {
+        id: new UUID(listingId),
+        images: imageIds
+      },
+      {
+        expand: true,
+        include: ["images"]
+      }
+    );
+  }
+} catch (imageError) {
+  console.error("LAUNCH IMAGE SAVE FAILED:", imageError);
+  throw new Error(
+    `Photo save failed: ${imageError.message || "Sharetribe image update failed"}`
+  );
+}
     {
       id: new UUID(listingId),
       images: imageIds
