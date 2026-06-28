@@ -1002,6 +1002,69 @@ function showLaunchActionNotice(message, tone = "success") {
     tone
   });
 }
+
+
+async function saveLaunchMachineFacts(message = "LISTING UPDATED") {
+  if (!listingId) return;
+
+  setSaving(true);
+
+  try {
+    const updateResult = await IXI_PUBLISHING_COMMANDS.updateMachineFacts({
+      listingId,
+      title,
+      price: edit.price,
+      hours: edit.hours,
+      location: edit.location,
+      description: edit.description,
+      keywords: selectedKeywords
+    });
+
+    setListings(current =>
+      current.map(item =>
+        String(getListingId(item)) === String(listingId)
+          ? {
+              ...item,
+              price: cleanNumber(edit.price) || item.price,
+              hours: edit.hours,
+              location: edit.location,
+              description: edit.description,
+              keywords: selectedKeywords,
+              publicData: {
+                ...(item.publicData || {}),
+                price: cleanNumber(edit.price) || item.publicData?.price,
+                hours: edit.hours,
+                location: edit.location,
+                city: edit.location,
+                description: edit.description,
+                details: edit.description,
+                keywords: selectedKeywords
+              },
+              _sharetribeVerified: updateResult
+            }
+          : item
+      )
+    );
+
+    showLaunchActionNotice(message, "success");
+  } catch (err) {
+    console.error("LAUNCH FIELD UPDATE FAILED:", err);
+    showLaunchActionNotice("UPDATE FAILED", "error");
+    alert(`Update failed: ${err.message}`);
+  } finally {
+    setSaving(false);
+  }
+}
+
+function saveLaunchFieldOnEnter(message) {
+  return e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    saveLaunchMachineFacts(message);
+  };
+}
+
+
   
   async function saveQuickEdit() {
     if (!listingId) return;
@@ -1762,6 +1825,10 @@ onClick={async () => {
       boardColor={previewColor}
       boardOutline={previewOutline}
       machineFace={previewFace}
+      onPriceKeyDown={saveLaunchFieldOnEnter("PRICE UPDATED")}
+      onHoursKeyDown={saveLaunchFieldOnEnter("HOURS UPDATED")}
+      onLocationKeyDown={saveLaunchFieldOnEnter("LOCATION UPDATED")}
+      onDescriptionKeyDown={saveLaunchFieldOnEnter("DESCRIPTION UPDATED")}
       priceValue={edit.price}
 onPriceChange={value =>
   setEdit(current => ({
