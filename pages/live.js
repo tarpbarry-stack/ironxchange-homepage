@@ -1076,15 +1076,26 @@ function saveLaunchFieldOnEnter(message) {
     setSaving(true);
 
     try {
- const updateResult = await IXI_PUBLISHING_COMMANDS.updateMachineFacts({
+ const mutation = await updateMachineFacts({
+  commandBus: IXI_PUBLISHING_COMMANDS,
   listingId,
   title,
-  price: edit.price,
-  hours: edit.hours,
-  location: edit.location,
-  description: edit.description,
-  keywords: selectedKeywords
+  before: {
+    price: currentListing?.price,
+    hours: currentListing?.hours,
+    location: currentListing?.location,
+    description: currentListing?.description
+  },
+  after: {
+    price: edit.price,
+    hours: edit.hours,
+    location: edit.location,
+    description: edit.description,
+    keywords: selectedKeywords
+  }
 });
+
+const updateResult = mutation.result;
 
 setListings(current =>
   current.map(item =>
