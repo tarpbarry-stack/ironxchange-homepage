@@ -1668,36 +1668,20 @@ function recoverSellerObject(sellerObject) {
         ? overId
         : "board";
 
-    if (childMachineId && sourceSellerId) {
-      const sellerState = ixiCardState[sourceSellerId] || {};
-      const checkedOutIds = Array.isArray(sellerState.checkedOutMachineIds)
-        ? sellerState.checkedOutMachineIds.map(String)
-        : [];
+   if (childMachineId && sourceSellerId) {
+  checkoutObjectToContainer({
+    objectId: childMachineId,
+    sourceParentId: sourceSellerId,
+    sourceParentType: "seller-object",
+    targetContainer,
+    checkoutReason: "seller-child-drag"
+  });
+}
 
-      updateIxiCardState(sourceSellerId, {
-        checkedOutMachineIds: [
-          ...checkedOutIds.filter(item => String(item) !== childMachineId),
-          childMachineId
-        ]
-      });
-
-      updateIxiCardState(childMachineId, {
-        sourceParentId: sourceSellerId,
-        sourceParentType: "seller-object",
-        checkedOutFromParent: true,
-        checkoutContainer: targetContainer,
-        checkoutReason: "checkout-drag",
-        returnRule: "original-parent-only",
-        container: targetContainer
-      });
-
-      moveMachineToContainer(childMachineId, targetContainer);
-    }
-
-    setActiveDndId("");
-    clearMachineDragState();
-    return;
-  }
+setActiveDndId("");
+clearMachineDragState();
+return;
+}
 
   const draggedState = ixiCardState[dragId] || {};
 const draggedSourceParentId =
