@@ -382,6 +382,7 @@ useEffect(() => {
   const [photoItems, setPhotoItems] = useState([]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [draggedPhotoIndex, setDraggedPhotoIndex] = useState(null);
+  const [photosDirty, setPhotosDirty] = useState(false);
 
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [keywordSearch, setKeywordSearch] = useState("");
@@ -867,6 +868,8 @@ async function reprocessExistingPhoto(photoId, mode) {
     });
 
     setActivePhotoIndex(toIndex);
+    
+    setPhotosDirty(true);
 
     addActivity("success", `Photo order changed — ${title}`);
     trackLaunchEvent("launch_photo_reordered", {
