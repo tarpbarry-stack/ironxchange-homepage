@@ -530,18 +530,38 @@ style={getFrameStyle(currentImageObject, "card")}
 
             {sellerMode ? (
           <div className="location-row">
- <input
+<input
   className="city-input location-input"
-  defaultValue={getSellerCity()}
+  value={locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity()}
   onClick={stopCardClick}
+  onChange={e => {
+    const state =
+      locationValue && String(locationValue).includes(",")
+        ? String(locationValue).split(",")[1]?.trim()
+        : getSellerState();
+
+    onLocationChange?.(`${e.target.value}, ${state}`.trim(), listing);
+  }}
   onKeyDown={e => onLocationKeyDown?.(e, listing)}
   maxLength={18}
 />
 
-  <input
+ <input
   className="state-input location-input"
-  defaultValue={getSellerState()}
+  value={
+    locationValue && String(locationValue).includes(",")
+      ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
+      : getSellerState()
+  }
   onClick={stopCardClick}
+  onChange={e => {
+    const city =
+      locationValue && String(locationValue).includes(",")
+        ? String(locationValue).split(",")[0]?.trim()
+        : getSellerCity();
+
+    onLocationChange?.(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
+  }}
   onKeyDown={e => onLocationKeyDown?.(e, listing)}
   maxLength={2}
 />
