@@ -758,26 +758,12 @@ return (
   className="theater-unload-dash"
   title="Unload loaded rail to stack"
   onClick={() => {
-    updateTheaterContainers(current => {
-      const railIds = current.rail || [];
+  updateTheaterContainers(current => {
+    const result = IXI_THEATER_COMMANDS.unloadRailToStack({
+      theaterContainers: current
+    });
 
-      if (!railIds.length) return current;
-
-            const stackTargets = THEATER_RECEPTOR_KEYS;
-      
-      const emptyStack =
-        stackTargets.find(
-          key => !(current[key] || []).length
-        ) || "stack1";
-
-      return saveTheaterContainers({
-  ...current,
-  [emptyStack]: [
-    ...(current[emptyStack] || []),
-    ...railIds
-  ],
-  rail: []
-});
+    return result.nextTheaterContainers;
     });
   }}
 />
