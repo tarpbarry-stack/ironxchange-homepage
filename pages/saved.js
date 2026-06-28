@@ -998,14 +998,20 @@ function toggleActiveStackLayout(stackKey) {
 }
 
 function moveActiveStackToContainer(stackKey, targetContainer) {
-  const stackIds = getMachineIdsForStack(
-    machineContainers,
-    stackKey
-  );
+  const sourceContainer = getStackContainerKey(stackKey);
 
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(machineId, targetContainer);
+  const stackIds = Array.isArray(machineContainers[sourceContainer])
+    ? machineContainers[sourceContainer].map(String)
+    : [];
+
+  const result = IXI_COMMANDS.bulkMoveOrCheckIn({
+    objectIds: stackIds,
+    targetContainer,
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 
   setActiveStacksOpen(current => ({
     ...current,
