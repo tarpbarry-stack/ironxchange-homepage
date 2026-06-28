@@ -20,6 +20,7 @@ import { getListingId } from "../lib/listingFormatters";
 import { fetchIxiMachineState } from "../lib/ixiMachineStateClient";
 import {
   IXI_THEATER_QUEUE_ID,
+  IXI_THEATER_ROOM_ID,
   THEATER_RECEPTOR_KEYS,
   createEmptyTheaterContainers,
   sanitizeTheaterContainers,
