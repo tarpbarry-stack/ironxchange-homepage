@@ -114,6 +114,122 @@ function reorderIdWithinContainer(
   };
 }
 
+function sanitizeTheaterTransactionContainers(containers = {}) {
+  const keys = ["rail", "stack1", "stack2", "stack3", "stack4", "stack5", "stack6"];
+  const next = {};
+
+  keys.forEach(key => {
+    const seen = new Set();
+
+    next[key] = Array.isArray(containers[key])
+      ? containers[key]
+          .map(String)
+          .filter(id => {
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+      : [];
+  });
+
+  return next;
+}
+
+function removeIdFromTheaterContainers(containers = {}, objectId) {
+  const id = toId(objectId);
+  const clean = sanitizeTheaterTransactionContainers(containers);
+
+  return Object.fromEntries(
+    Object.entries(clean).map(([key, list]) => [
+      key,
+      list.filter(item => item !== id)
+    ])
+  );
+}
+
+function moveObjectWithinTheaterContainers({
+  objectId,
+  targetContainer,
+  targetId = "",
+  insertAfter = false,
+  theaterContainers = {}
+}) {
+  const id = toId(objectId);
+  const target = toId(targetContainer);
+
+  if (!id || !target) {
+    return {
+      nextTheaterContainers: sanitizeTheaterTransactionContainers(theaterContainers)
+    };
+  }
+
+  const cleaned = removeIdFromTheaterContainers(theaterContainers, id);
+  const targetList = Array.isArray(cleaned[target])
+    ? cleaned[target].map(String)
+    : [];
+
+  const anchorId = toId(targetId);
+  const anchorIndex = targetList.findIndex(item => item === anchorId);
+
+  if (anchorId && anchorIndex >= 0) {
+    targetList.splice(insertAfter ? anchorIndex + 1 : anchorIndex, 0, id);
+  } else {
+    targetList.push(id);
+  }
+
+  return {
+    nextTheaterContainers: sanitizeTheaterTransactionContainers({
+      ...cleaned,
+      [target]: targetList
+    })
+  };
+}
+
+function reorderObjectWithinTheaterContainer({
+  containerKey,
+  objectId,
+  targetId,
+  insertAfter = false,
+  theaterContainers = {}
+}) {
+  const key = toId(containerKey);
+  const id = toId(objectId);
+  const anchorId = toId(targetId);
+
+  if (!key || !id || !anchorId) {
+    return {
+      nextTheaterContainers: sanitizeTheaterTransactionContainers(theaterContainers)
+    };
+  }
+
+  const current = sanitizeTheaterTransactionContainers(theaterContainers);
+  const currentList = Array.isArray(current[key])
+    ? current[key].map(String)
+    : [];
+
+  const fromIndex = currentList.findIndex(item => item === id);
+  const targetIndex = currentList.findIndex(item => item === anchorId);
+
+  if (fromIndex === -1 || targetIndex === -1 || id === anchorId) {
+    return {
+      nextTheaterContainers: current
+    };
+  }
+
+  const withoutMoved = currentList.filter(item => item !== id);
+  const anchorIndex = withoutMoved.findIndex(item => item === anchorId);
+  const insertIndex = insertAfter ? anchorIndex + 1 : anchorIndex;
+
+  const nextList = [...withoutMoved];
+  nextList.splice(insertIndex, 0, id);
+
+  return {
+    nextTheaterContainers: sanitizeTheaterTransactionContainers({
+      ...current,
+      [key]: nextList
+    })
+  };
+}
 function removeIdFromParentCheckoutList(cardState = {}, parentId, objectId) {
   const pId = toId(parentId);
   const oId = toId(objectId);
