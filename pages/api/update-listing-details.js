@@ -74,10 +74,11 @@ export default async function handler(req, res) {
       description: description || "",
 
       publicData: {
-        hours: Number(cleanNumber(hours)),
-        city: location || "",
-        keywords: Array.isArray(keywords) ? keywords : []
-      }
+  hours: Number(cleanNumber(hours)),
+  location: location || "",
+  city: location || "",
+  keywords: Array.isArray(keywords) ? keywords : []
+}
     };
 
     if (title) {
