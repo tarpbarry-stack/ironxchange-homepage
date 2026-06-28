@@ -864,45 +864,27 @@ function cyclePocketMode(side) {
 function sendListingToFront(listing) {
   const listingId = String(getListingId(listing));
 
-  console.log("IXI SEND FRONT CLICKED", listingId);
-
-  setMachineContainers(current => {
-    const boardIds = current.board || [];
-
-    if (!boardIds.includes(listingId)) {
-      return current;
-    }
-
-    return {
-      ...current,
-      board: [
-        listingId,
-        ...boardIds.filter(id => String(id) !== listingId)
-      ]
-    };
+  const result = IXI_COMMANDS.sendObjectToFront({
+    objectId: listingId,
+    containerKey: "board",
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
 
 function sendListingToBack(listing) {
   const listingId = String(getListingId(listing));
 
-  console.log("IXI SEND BACK CLICKED", listingId);
-
-  setMachineContainers(current => {
-    const boardIds = current.board || [];
-
-    if (!boardIds.includes(listingId)) {
-      return current;
-    }
-
-    return {
-      ...current,
-      board: [
-        ...boardIds.filter(id => String(id) !== listingId),
-        listingId
-      ]
-    };
+  const result = IXI_COMMANDS.sendObjectToBack({
+    objectId: listingId,
+    containerKey: "board",
+    ixiCardState,
+    machineContainers
   });
+
+  executeIXITransaction(result);
 }
   async function toggleSave(listing) {
     if (!sdk) {
