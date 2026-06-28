@@ -1759,6 +1759,13 @@ onHoursChange={value =>
     hours: value
   }))
 }
+locationValue={edit.location}
+onLocationChange={value =>
+  setEdit(current => ({
+    ...current,
+    location: value
+  }))
+}
       onCycleMachineFace={cyclePreviewFace}
       onCycleColor={cyclePreviewColor}
       onCycleOutline={cyclePreviewOutline}
