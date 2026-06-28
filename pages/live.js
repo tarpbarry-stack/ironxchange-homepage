@@ -992,6 +992,17 @@ async function buildLiveImageIdsForSave() {
 }
 
 
+function showLaunchActionNotice(message, tone = "success") {
+  if (!listingId) return;
+
+  setIXIActionNotice({
+    setState: setIxiCardState,
+    listingId,
+    message,
+    tone
+  });
+}
+  
   async function saveQuickEdit() {
     if (!listingId) return;
 
