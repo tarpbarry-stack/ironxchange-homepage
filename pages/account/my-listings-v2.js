@@ -98,6 +98,10 @@ import {
   IXI_COMMANDS
 } from "../../components/ixi-object-system/IXICommandBus";
 
+import {
+  setIXIActionNotice
+} from "../../components/ixi-object-system/IXIActionNoticeEngine";
+
 export default function MyListingsV2() {
   const [listings, setListings] = useState([]);
   
@@ -177,7 +181,14 @@ const POCKET_TARGETS = [
   const {
   getSellerListingCardProps
 } = useIXISellerMachineOps({
-  setSellerListings: setListings
+  setSellerListings: setListings,
+  showActionNotice: ({ listingId, message, tone }) =>
+    setIXIActionNotice({
+      setState: setIxiCardState,
+      listingId,
+      message,
+      tone
+    })
 });
 
 const handleWorkspaceDragStart =
