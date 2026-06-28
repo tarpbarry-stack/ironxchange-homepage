@@ -943,15 +943,12 @@ function executeIXITransaction(result) {
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
 
-  const result = executeIXIObjectTransaction({
-    type: IXI_TRANSACTION_TYPES.MOVE,
-    payload: {
-      objectId: machineId,
-      targetContainer,
-      ixiCardState,
-      machineContainers
-    }
-  });
+  const result = IXI_COMMANDS.moveObject({
+  objectId: machineId,
+  targetContainer,
+  ixiCardState,
+  machineContainers
+});
 
   executeIXITransaction(result);
 }
