@@ -1004,6 +1004,32 @@ async function buildLiveImageIdsForSave() {
   keywords: selectedKeywords
 });
 
+setListings(current =>
+  current.map(item =>
+    String(getListingId(item)) === String(listingId)
+      ? {
+          ...item,
+          price: cleanNumber(edit.price) || item.price,
+          hours: edit.hours,
+          location: edit.location,
+          description: edit.description,
+          keywords: selectedKeywords,
+          publicData: {
+            ...(item.publicData || {}),
+            price: cleanNumber(edit.price) || item.publicData?.price,
+            hours: edit.hours,
+            location: edit.location,
+            city: edit.location,
+            description: edit.description,
+            details: edit.description,
+            keywords: selectedKeywords
+          },
+          _sharetribeVerified: updateResult
+        }
+      : item
+  )
+);
+      
 let imageIds = [];
 
 try {
