@@ -1290,102 +1290,21 @@ function toggleActiveStackLayout(stackKey) {
 function moveActiveStackToContainer(stackKey, targetContainer) {
   const sourceContainer = getStackContainerKey(stackKey);
 
-  const stackIds = getMachineIdsForStack(
-    machineContainers,
-    stackKey
-  ).map(String);
+  const stackIds = Array.isArray(machineContainers[sourceContainer])
+    ? machineContainers[sourceContainer].map(String)
+    : [];
 
-  if (targetContainer === "board") {
-    const checkInIds = stackIds.filter(machineId => {
-      const state = ixiCardState[machineId] || {};
-
-      return (
-        state.checkedOutFromParent &&
-        state.sourceParentId
-      );
-    });
-
-    if (checkInIds.length) {
-      const parentPatches = {};
-
-      checkInIds.forEach(machineId => {
-        const state = ixiCardState[machineId] || {};
-        const sourceParentId = String(state.sourceParentId || "");
-
-        if (!sourceParentId) return;
-
-        const parentState =
-          parentPatches[sourceParentId] ||
-          ixiCardState[sourceParentId] ||
-          {};
-
-        const checkedOutIds = Array.isArray(parentState.checkedOutMachineIds)
-          ? parentState.checkedOutMachineIds.map(String)
-          : [];
-
-        parentPatches[sourceParentId] = {
-          ...parentState,
-          checkedOutMachineIds: checkedOutIds.filter(
-            id => String(id) !== machineId
-          )
-        };
-      });
-
-      Object.entries(parentPatches).forEach(([parentId, patch]) => {
-        updateIxiCardState(parentId, {
-          checkedOutMachineIds: patch.checkedOutMachineIds || []
-        });
-      });
-
-      checkInIds.forEach(machineId => {
-        const state = ixiCardState[machineId] || {};
-
-        updateIxiCardState(machineId, {
-          ...returnCheckedOutToParent(state),
-          sourceParentId: "",
-          sourceParentType: "",
-          sourceDeckId: "",
-          checkedOutFromParent: false,
-          container: "board"
-        });
-      });
-
-      setMachineContainers(current => {
-        const finalContainers = {
-          ...current,
-          [sourceContainer]: (current[sourceContainer] || []).filter(
-            id => !checkInIds.includes(String(id))
-          ),
-          board: (current.board || []).filter(
-            id => !checkInIds.includes(String(id))
-          )
-        };
-
-        saveWorkspaceLayout(finalContainers);
-
-        return finalContainers;
-      });
+  const result = executeIXIObjectTransaction({
+    type: IXI_TRANSACTION_TYPES.BULK_MOVE_OR_CHECKIN,
+    payload: {
+      objectIds: stackIds,
+      targetContainer,
+      ixiCardState,
+      machineContainers
     }
-
-    const normalIds = stackIds.filter(
-      id => !checkInIds.includes(String(id))
-    );
-
-    normalIds.forEach(machineId => {
-      moveMachineToContainer(machineId, targetContainer);
-    });
-
-    setActiveStacksOpen(current => ({
-      ...current,
-      [stackKey]: false
-    }));
-
-    return;
-  }
-
-  stackIds.forEach(machineId => {
-    moveMachineToContainer(machineId, targetContainer);
   });
+
+  executeIXITransaction(result);
 
   setActiveStacksOpen(current => ({
     ...current,
