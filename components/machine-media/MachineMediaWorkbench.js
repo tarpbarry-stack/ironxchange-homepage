@@ -259,29 +259,30 @@ export default function MachineMediaWorkbench({
                       return;
                     }
 
-                    setPhotoItems(current =>
-                      current.map(item =>
-                        item.id === photo.id
-                          ? {
-                              ...item,
-                              activeMode: mode,
-                              url:
-  file:
-  mode === "original"
-    ? item.originalFile || item.file || null
-    : mode === "dealerPop"
-      ? item.dealerPopFile || item.file || null
-      : item.cleanFile || item.file || null,
-                             url:
-  mode === "original"
-    ? item.originalUrl || item.url
-    : mode === "dealerPop"
-      ? item.dealerPopUrl || item.url
-      : item.cleanUrl || item.url
-                            }
-                          : item
-                      )
-                    );
+                  setPhotoItems(current =>
+  current.map(item =>
+    item.id === photo.id
+      ? {
+          ...item,
+          activeMode: mode,
+
+          file:
+            mode === "original"
+              ? item.originalFile || item.file || null
+              : mode === "dealerPop"
+                ? item.dealerPopFile || item.file || null
+                : item.cleanFile || item.file || null,
+
+          url:
+            mode === "original"
+              ? item.originalUrl || item.url
+              : mode === "dealerPop"
+                ? item.dealerPopUrl || item.url
+                : item.cleanUrl || item.url
+        }
+      : item
+  )
+);
 
                     setPhotosDirty?.(true);
                   }}
