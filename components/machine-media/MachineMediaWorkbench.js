@@ -427,12 +427,33 @@ export default function MachineMediaWorkbench({
         }
 
         .photo-strip {
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          overflow-y: hidden;
-          padding: 4px 2px 10px;
-        }
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 12px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 196, 0, 0.42) rgba(255, 255, 255, 0.06);
+}
+
+.photo-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.photo-strip::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.055);
+  border-radius: 999px;
+}
+
+.photo-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 196, 0, 0.42);
+  border-radius: 999px;
+}
+
+.photo-strip::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 196, 0, 0.68);
+}
 
         .photo-tile {
           position: relative;
