@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const result = await updateMachineFactsVerified({
+        const result = await updateMachineFactsVerified({
       listingId,
       title,
       price,
@@ -38,10 +38,22 @@ export default async function handler(req, res) {
       keywords
     });
 
-    return res.status(200).json(result);
+    return res.status(200).json({
+      ok: true,
+      command: "UPDATE_MACHINE_FACTS",
+      listingId: String(listingId),
+      requested: {
+        title,
+        price,
+        hours,
+        location,
+        description,
+        keywords
+      },
+      ...result
+    });
   } catch (error) {
     console.error("UPDATE MACHINE FACTS ERROR:", error);
-
     return res.status(500).json({
       ok: false,
       error: error.message
