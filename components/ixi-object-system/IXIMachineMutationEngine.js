@@ -56,7 +56,8 @@ export async function updateMachineFacts({
   listingId,
   title = "",
   before = {},
-  after = {}
+  after = {},
+  context = ""
 }) {
   if (!listingId) {
     throw new Error("Missing listingId");
@@ -76,12 +77,27 @@ export async function updateMachineFacts({
     keywords: after.keywords || []
   });
 
+  const notices = getUpdatedMachineFactMessages({
+    before,
+    after
+  });
+
   return {
     ok: true,
+    command: "UPDATE_MACHINE_FACTS",
+    context,
+    listingId: String(listingId),
+    requested: {
+      title,
+      price: after.price,
+      hours: after.hours,
+      location: after.location,
+      description: after.description,
+      keywords: after.keywords || []
+    },
     result,
-    notices: getUpdatedMachineFactMessages({
-      before,
-      after
-    })
+    listing: result?.listing,
+    verification: result?.verification,
+    notices
   };
 }
