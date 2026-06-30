@@ -1630,6 +1630,32 @@ const previewListing = listing
             </div>
           </section>
 
+
+<MachineMediaWorkbench
+  listing={listing}
+  title={title}
+  sellerName={sellerName}
+
+  photoItems={photoItems}
+  setPhotoItems={setPhotoItems}
+
+  activePhotoIndex={activePhotoIndex}
+  setActivePhotoIndex={setActivePhotoIndex}
+
+  photoPolishMode={photoPolishMode}
+  setPhotoPolishMode={setPhotoPolishMode}
+
+  setPhotosDirty={setPhotosDirty}
+
+  commandBusy={commandBusy}
+  setCommandBusy={setCommandBusy}
+
+  trackLaunchEvent={trackLaunchEvent}
+  addActivity={addActivity}
+/>
+
+
+                
           <section className="photo-workbench">
             <div className="workbench-head">
               <div>
