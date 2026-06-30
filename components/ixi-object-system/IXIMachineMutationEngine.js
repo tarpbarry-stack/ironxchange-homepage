@@ -13,8 +13,16 @@ export function getUpdatedMachineFactMessages({
   const beforeLocation = String(before.location || "");
   const afterLocation = String(after.location || "");
 
-  const beforeDescription = String(before.description || "");
+    const beforeDescription = String(before.description || "");
   const afterDescription = String(after.description || "");
+
+  const beforeKeywords = Array.isArray(before.keywords)
+    ? before.keywords.map(String).sort()
+    : [];
+
+  const afterKeywords = Array.isArray(after.keywords)
+    ? after.keywords.map(String).sort()
+    : [];
 
   if (beforePrice !== afterPrice) {
     messages.push("PRICE UPDATED");
@@ -28,8 +36,12 @@ export function getUpdatedMachineFactMessages({
     messages.push("LOCATION UPDATED");
   }
 
-  if (beforeDescription !== afterDescription) {
+    if (beforeDescription !== afterDescription) {
     messages.push("DESCRIPTION UPDATED");
+  }
+
+  if (JSON.stringify(beforeKeywords) !== JSON.stringify(afterKeywords)) {
+    messages.push("KEYWORDS UPDATED");
   }
 
   if (!messages.length) {
