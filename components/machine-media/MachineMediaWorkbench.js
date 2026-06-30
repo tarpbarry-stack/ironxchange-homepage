@@ -27,9 +27,9 @@ export default function MachineMediaWorkbench({
   listing,
   title = "",
   sellerName = "IronXchange Seller",
-  photoItems,
+  photoItems = [],
   setPhotoItems,
-  activePhotoIndex,
+  activePhotoIndex = 0,
   setActivePhotoIndex,
   photoPolishMode = "original",
   setPhotosDirty,
@@ -45,7 +45,7 @@ export default function MachineMediaWorkbench({
       file.type.startsWith("image/")
     );
 
-    if (!files.length) {
+    if (files.length === 0) {
       e.target.value = "";
       return;
     }
@@ -65,7 +65,11 @@ export default function MachineMediaWorkbench({
 
     setPhotoItems(current => [...current, ...mapped]);
     setPhotosDirty?.(true);
-    addActivity("success", `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`);
+
+    addActivity(
+      "success",
+      `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`
+    );
 
     trackLaunchEvent("launch_ix_photos_added", {
       listingId: String(listing?.id?.uuid || listing?.id || ""),
@@ -83,7 +87,7 @@ export default function MachineMediaWorkbench({
       file.type.startsWith("image/")
     );
 
-    if (!files.length) return;
+    if (files.length === 0) return;
 
     const make = getListingMake(listing);
 
@@ -100,7 +104,11 @@ export default function MachineMediaWorkbench({
 
     setPhotoItems(current => [...current, ...mapped]);
     setPhotosDirty?.(true);
-    addActivity("success", `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`);
+
+    addActivity(
+      "success",
+      `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`
+    );
 
     trackLaunchEvent("launch_ix_photos_dropped", {
       listingId: String(listing?.id?.uuid || listing?.id || ""),
@@ -125,29 +133,33 @@ export default function MachineMediaWorkbench({
         type: blob.type || "image/jpeg"
       });
 
+      const make = getListingMake(listing);
+
       const processed = await buildIXPhotoVariants(file, {
-        make: getListingMake(listing),
+        make,
         mode,
         userEmail: listing?.sellerEmail,
         companyName: sellerName
       });
 
       setPhotoItems(current =>
-        current.map(photo =>
-          photo.id !== photoId
-            ? photo
-            : {
-                ...photo,
-                cleanUrl: mode === "clean" ? processed.cleanUrl : photo.cleanUrl,
-                cleanFile: mode === "clean" ? processed.cleanFile : photo.cleanFile,
-                dealerPopUrl: mode === "dealerPop" ? processed.dealerPopUrl : photo.dealerPopUrl,
-                dealerPopFile: mode === "dealerPop" ? processed.dealerPopFile : photo.dealerPopFile,
-                url: getIXActivePhotoUrl(processed),
-                file: processed.file,
-                activeMode: mode,
-                existing: false
-              }
-        )
+        current.map(photo => {
+          if (photo.id !== photoId) return photo;
+
+          return {
+            ...photo,
+            cleanUrl: mode === "clean" ? processed.cleanUrl : photo.cleanUrl,
+            cleanFile: mode === "clean" ? processed.cleanFile : photo.cleanFile,
+            dealerPopUrl:
+              mode === "dealerPop" ? processed.dealerPopUrl : photo.dealerPopUrl,
+            dealerPopFile:
+              mode === "dealerPop" ? processed.dealerPopFile : photo.dealerPopFile,
+            url: getIXActivePhotoUrl(processed),
+            file: processed.file,
+            activeMode: mode,
+            existing: false
+          };
+        })
       );
 
       setPhotosDirty?.(true);
@@ -217,7 +229,7 @@ export default function MachineMediaWorkbench({
       <div className="photo-strip">
         {photoItems.map((photo, index) => (
           <div
-            key={photo.id}
+            key={photo.id || index}
             className={`photo-tile ${index === 0 ? "hero" : ""} ${
               index === activePhotoIndex ? "active" : ""
             }`}
@@ -297,6 +309,16 @@ export default function MachineMediaWorkbench({
 
       <style jsx>{`
         .photo-workbench {
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,0)),
+            radial-gradient(circle at top, rgba(255,255,255,.018), transparent 72%),
+            #141414;
+          border: 1px solid rgba(255,255,255,.065);
+          outline: 1px solid rgba(255,255,255,.018);
+          border-radius: 14px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.045) inset,
+            0 16px 38px rgba(0,0,0,.24);
           padding: 9px 12px 10px;
           margin-bottom: 9px;
         }
