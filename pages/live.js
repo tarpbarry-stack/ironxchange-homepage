@@ -30,12 +30,16 @@ import {
 } from "../components/ixi-object-system/IXIPublishingCommandBus";
 
 import {
-  setIXIActionNotice
-} from "../components/ixi-object-system/IXIActionNoticeEngine";
-
-import {
   updateMachineFacts
 } from "../components/ixi-object-system/IXIMachineMutationEngine";
+
+import {
+  IXI_PHOTO_MUTATION_COMMANDS
+} from "../components/ixi-object-system/IXIPhotoMutationCommandBus";
+
+import {
+  updateListingPhotos
+} from "../components/ixi-object-system/IXIPhotoMutationEngine";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -997,17 +1001,6 @@ async function buildLiveImageIdsForSave() {
 }
 
 
-function showLaunchActionNotice(message, tone = "success") {
-  if (!listingId) return;
-
-  setIXIActionNotice({
-    setState: setIxiCardState,
-    listingId,
-    message,
-    tone
-  });
-}
-
 
 async function saveLaunchMachineFacts(message = "LISTING UPDATED") {
   if (!listingId) return;
@@ -1139,22 +1132,26 @@ setListings(current =>
 );
       
 let imageIds = [];
+let photoMutation = null;
 
 try {
   if (photosDirty) {
     imageIds = await buildLiveImageIdsForSave();
 
     if (imageIds.length > 0) {
-      await sdk.ownListings.update(
-        {
-          id: new UUID(listingId),
-          images: imageIds
-        },
-        {
-          expand: true,
-          include: ["images"]
-        }
-      );
+      const beforeImageIds = (listing?.imageObjects || [])
+        .map(getImageId)
+        .filter(Boolean);
+
+      photoMutation = await updateListingPhotos({
+        commandBus: IXI_PHOTO_MUTATION_COMMANDS,
+        listingId,
+        beforeImageIds,
+        afterImageIds: imageIds.map(item =>
+          item?.uuid ? item.uuid : String(item)
+        ),
+        context: "launch-photo-workbench"
+      });
     }
   }
 } catch (imageError) {
@@ -1169,12 +1166,23 @@ try {
   listingId: String(listingId),
   selectedKeywordCount: selectedKeywords.length,
   photoCount: photoItems.length,
-  savedImageCount: imageIds.length
+  savedImageCount: imageIds.length,
+  photoMutationCommand: photoMutation?.command || ""
 });
 
 setPhotosDirty(false);
 
-showLaunchActionNotice("LISTING UPDATED", "success");
+setLaunchActionNotice({
+  message:
+    photoMutation?.notices?.[0] ||
+    mutation.notices?.[0] ||
+    "LISTING UPDATED",
+  tone: "success"
+});
+
+setTimeout(() => {
+  setLaunchActionNotice(null);
+}, 1600);
 
 alert("Launched. Listing updates applied.");
     } catch (err) {
