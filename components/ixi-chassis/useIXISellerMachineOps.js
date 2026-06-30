@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { getListingId, cleanMachineTitle as formatCleanMachineTitle } from "../../lib/listingFormatters";
+
+import {
+  getListingId,
+  cleanMachineTitle as formatCleanMachineTitle
+} from "../../lib/listingFormatters";
+
+import {
+  IXI_MACHINE_MUTATION_COMMANDS
+} from "../ixi-object-system/IXIMachineMutationCommandBus";
+
+import {
+  updateMachineFacts
+} from "../ixi-object-system/IXIMachineMutationEngine";
 
 function toNumber(value) {
   const raw = String(value || "").replace(/[^0-9]/g, "");
@@ -11,6 +23,36 @@ function formatPriceInput(value) {
   return num ? num.toLocaleString() : "";
 }
 
+function getListingMachineFacts(listing = {}) {
+  return {
+    price:
+      listing.price ||
+      listing.publicData?.price ||
+      "",
+
+    hours:
+      listing.hours ||
+      listing.publicData?.hours ||
+      "",
+
+    location:
+      listing.location ||
+      listing.publicData?.location ||
+      listing.publicData?.city ||
+      "",
+
+    description:
+      listing.description ||
+      listing.publicData?.description ||
+      listing.publicData?.details ||
+      "",
+
+    keywords:
+      listing.keywords ||
+      listing.publicData?.keywords ||
+      []
+  };
+}
 export default function useIXISellerMachineOps({
   setSellerListings,
   showActionNotice
@@ -18,6 +60,31 @@ export default function useIXISellerMachineOps({
   const [savingPriceId, setSavingPriceId] = useState("");
   const [savingDescriptionId, setSavingDescriptionId] = useState("");
   const [listingWorkflows, setListingWorkflows] = useState({});
+    async function runInventoryMachineMutation({
+    listing,
+    after = {},
+    context = "inventory"
+  }) {
+    const listingId = getListingId(listing);
+
+    if (!listingId) {
+      throw new Error("Missing listingId");
+    }
+
+    const beforeFacts = getListingMachineFacts(listing);
+
+    return updateMachineFacts({
+      commandBus: IXI_MACHINE_MUTATION_COMMANDS,
+      listingId,
+      title: listing.title || "",
+      before: beforeFacts,
+      after: {
+        ...beforeFacts,
+        ...after
+      },
+      context
+    });
+  }
 
   async function savePrice(e, listing) {
     if (e.key !== "Enter") return;
@@ -26,43 +93,56 @@ export default function useIXISellerMachineOps({
 
     const input = e.currentTarget;
     const newPrice = input.value.replace(/,/g, "").trim();
+    const listingId = getListingId(listing);
 
-    if (!listing?.id || !newPrice) return;
+    if (!listingId || !newPrice) return;
 
-    setSavingPriceId(String(listing.id));
+    setSavingPriceId(String(listingId));
     input.classList.remove("saved", "error");
 
     try {
-      const response = await fetch("/api/update-listing-price", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          listingId: listing.id,
+      const mutation = await runInventoryMachineMutation({
+        listing,
+        after: {
           price: newPrice
-        })
+        },
+        context: "inventory-price"
       });
-
-      if (!response.ok) throw new Error("Price update failed");
 
       input.value = Number(newPrice).toLocaleString();
       input.classList.add("saved");
+
       showActionNotice?.({
-  listingId: listing.id,
-  message: "PRICE UPDATED",
-  tone: "success"
-});
-    } catch {
+        listingId,
+        message: mutation.notices?.[0] || "PRICE UPDATED",
+        tone: "success"
+      });
+
+      setSellerListings(current =>
+        current.map(item =>
+          String(getListingId(item)) === String(listingId)
+            ? {
+                ...item,
+                price: newPrice,
+                publicData: {
+                  ...(item.publicData || {}),
+                  price: Number(newPrice)
+                },
+                _machineMutation: mutation
+              }
+            : item
+        )
+      );
+    } catch (error) {
       input.classList.add("error");
 
-showActionNotice?.({
-  listingId: listing.id,
-  message: "PRICE FAILED",
-  tone: "error"
-});
+      showActionNotice?.({
+        listingId,
+        message: "PRICE FAILED",
+        tone: "error"
+      });
 
-alert("Price update failed.");
+      alert(`Price update failed: ${error.message}`);
     } finally {
       setSavingPriceId("");
     }
@@ -103,86 +183,67 @@ alert("Price update failed.");
     }
   }
 
-  async function saveDescription(e, listing) {
-  if (e.key !== "Enter") return;
+    async function saveDescription(e, listing) {
+    if (e.key !== "Enter") return;
 
-  e.preventDefault();
+    e.preventDefault();
 
-  const input = e.currentTarget;
-  const newDescription = input.value.trim();
+    const input = e.currentTarget;
+    const newDescription = input.value.trim();
+    const listingId = getListingId(listing);
 
-  if (!listing?.id) return;
+    if (!listingId) return;
 
-  setSavingDescriptionId(String(listing.id));
-  input.classList.remove("saved", "error");
+    setSavingDescriptionId(String(listingId));
+    input.classList.remove("saved", "error");
 
-  try {
-    const response = await fetch("/api/update-listing-details", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-  listingId: listing.id,
-  description: newDescription,
+    try {
+      const mutation = await runInventoryMachineMutation({
+        listing,
+        after: {
+          description: newDescription
+        },
+        context: "inventory-description"
+      });
 
-  hours:
-    listing.hours ||
-    listing.publicData?.hours ||
-    "",
+      input.classList.add("saved");
 
-  location:
-    listing.location ||
-    listing.publicData?.city ||
-    listing.publicData?.location ||
-    "",
+      showActionNotice?.({
+        listingId,
+        message: mutation.notices?.[0] || "DESCRIPTION UPDATED",
+        tone: "success"
+      });
 
-  keywords:
-    listing.keywords ||
-    listing.publicData?.keywords ||
-    []
-})
-    });
-
-    if (!response.ok) throw new Error("Description update failed");
-
-    input.classList.add("saved");
-
-    showActionNotice?.({
-  listingId: listing.id,
-  message: "DESCRIPTION UPDATED",
-  tone: "success"
-});
-
-    setSellerListings(current =>
-      current.map(item =>
-        String(item.id) === String(listing.id)
-          ? {
-              ...item,
-              description: newDescription,
-              publicData: {
-                ...(item.publicData || {}),
+      setSellerListings(current =>
+        current.map(item =>
+          String(getListingId(item)) === String(listingId)
+            ? {
+                ...item,
                 description: newDescription,
-                details: newDescription
+                publicData: {
+                  ...(item.publicData || {}),
+                  description: newDescription,
+                  details: newDescription
+                },
+                _machineMutation: mutation
               }
-            }
-          : item
-      )
-    );
-  } catch {
-    input.classList.add("error");
+            : item
+        )
+      );
+    } catch (error) {
+      input.classList.add("error");
 
-showActionNotice?.({
-  listingId: listing.id,
-  message: "DESCRIPTION FAILED",
-  tone: "error"
-});
+      showActionNotice?.({
+        listingId,
+        message: "DESCRIPTION FAILED",
+        tone: "error"
+      });
 
-alert("Description update failed.");
-  } finally {
-    setSavingDescriptionId("");
+      alert(`Description update failed: ${error.message}`);
+    } finally {
+      setSavingDescriptionId("");
+    }
   }
-}
 
 async function saveHours(e, listing) {
   if (e.key !== "Enter") return;
@@ -191,75 +252,55 @@ async function saveHours(e, listing) {
 
   const input = e.currentTarget;
   const newHours = input.value.replace(/[^0-9]/g, "").trim();
+  const listingId = getListingId(listing);
 
-  if (!listing?.id || !newHours) return;
+  if (!listingId || !newHours) return;
 
   input.classList.remove("saved", "error");
 
   try {
-    const response = await fetch("/api/update-listing-details", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+    const mutation = await runInventoryMachineMutation({
+      listing,
+      after: {
+        hours: newHours
       },
-      body: JSON.stringify({
-        listingId: listing.id,
-        hours: newHours,
-
-        description:
-          listing.description ||
-          listing.publicData?.description ||
-          listing.publicData?.details ||
-          "",
-
-        location:
-          listing.location ||
-          listing.publicData?.city ||
-          listing.publicData?.location ||
-          "",
-
-        keywords:
-          listing.keywords ||
-          listing.publicData?.keywords ||
-          []
-      })
+      context: "inventory-hours"
     });
-
-    if (!response.ok) throw new Error("Hours update failed");
 
     input.value = Number(newHours).toLocaleString();
     input.classList.add("saved");
 
     showActionNotice?.({
-  listingId: listing.id,
-  message: "HOURS UPDATED",
-  tone: "success"
-});
+      listingId,
+      message: mutation.notices?.[0] || "HOURS UPDATED",
+      tone: "success"
+    });
 
     setSellerListings(current =>
       current.map(item =>
-        String(item.id) === String(listing.id)
+        String(getListingId(item)) === String(listingId)
           ? {
               ...item,
               hours: newHours,
               publicData: {
                 ...(item.publicData || {}),
                 hours: Number(newHours)
-              }
+              },
+              _machineMutation: mutation
             }
           : item
       )
     );
-  } catch {
+  } catch (error) {
     input.classList.add("error");
 
-showActionNotice?.({
-  listingId: listing.id,
-  message: "HOURS FAILED",
-  tone: "error"
-});
+    showActionNotice?.({
+      listingId,
+      message: "HOURS FAILED",
+      tone: "error"
+    });
 
-alert("Hours update failed.");
+    alert(`Hours update failed: ${error.message}`);
   }
 }
 
@@ -278,54 +319,34 @@ async function saveLocation(e, listing) {
   const state = String(stateInput?.value || "").trim().toUpperCase();
 
   const newLocation = [city, state].filter(Boolean).join(", ");
+  const listingId = getListingId(listing);
 
-  if (!listing?.id || !newLocation) return;
+  if (!listingId || !newLocation) return;
 
   cityInput?.classList.remove("saved", "error");
   stateInput?.classList.remove("saved", "error");
 
   try {
-    const response = await fetch("/api/update-listing-details", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+    const mutation = await runInventoryMachineMutation({
+      listing,
+      after: {
+        location: newLocation
       },
-      body: JSON.stringify({
-        listingId: listing.id,
-        location: newLocation,
-
-        hours:
-          listing.hours ||
-          listing.publicData?.hours ||
-          "",
-
-        description:
-          listing.description ||
-          listing.publicData?.description ||
-          listing.publicData?.details ||
-          "",
-
-        keywords:
-          listing.keywords ||
-          listing.publicData?.keywords ||
-          []
-      })
+      context: "inventory-location"
     });
-
-    if (!response.ok) throw new Error("Location update failed");
 
     cityInput?.classList.add("saved");
     stateInput?.classList.add("saved");
 
     showActionNotice?.({
-      listingId: listing.id,
-      message: "LOCATION UPDATED",
+      listingId,
+      message: mutation.notices?.[0] || "LOCATION UPDATED",
       tone: "success"
     });
 
     setSellerListings(current =>
       current.map(item =>
-        String(item.id) === String(listing.id)
+        String(getListingId(item)) === String(listingId)
           ? {
               ...item,
               location: newLocation,
@@ -333,22 +354,23 @@ async function saveLocation(e, listing) {
                 ...(item.publicData || {}),
                 location: newLocation,
                 city: newLocation
-              }
+              },
+              _machineMutation: mutation
             }
           : item
       )
     );
-  } catch {
+  } catch (error) {
     cityInput?.classList.add("error");
     stateInput?.classList.add("error");
 
     showActionNotice?.({
-      listingId: listing.id,
+      listingId,
       message: "LOCATION FAILED",
       tone: "error"
     });
 
-    alert("Location update failed.");
+    alert(`Location update failed: ${error.message}`);
   }
 }
   
