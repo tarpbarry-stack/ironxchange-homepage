@@ -8,10 +8,11 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 import ListingCard from "../components/ListingCard";
+import ListingCard from "../components/ListingCard";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
+import MachineMediaWorkbench from "../components/machine-media/MachineMediaWorkbench";
 
 import MachineBadges from "../components/MachineBadges";
-
 import {
   getFrameClass,
   getFrameStyle
