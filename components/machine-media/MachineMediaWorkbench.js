@@ -265,18 +265,19 @@ export default function MachineMediaWorkbench({
                           ? {
                               ...item,
                               activeMode: mode,
-                              file:
-                                mode === "original"
-                                  ? item.originalFile || null
-                                  : mode === "dealerPop"
-                                    ? item.dealerPopFile || null
-                                    : item.cleanFile || null,
                               url:
-                                mode === "original"
-                                  ? item.originalUrl
-                                  : mode === "dealerPop"
-                                    ? item.dealerPopUrl
-                                    : item.cleanUrl
+  file:
+  mode === "original"
+    ? item.originalFile || item.file || null
+    : mode === "dealerPop"
+      ? item.dealerPopFile || item.file || null
+      : item.cleanFile || item.file || null,
+                             url:
+  mode === "original"
+    ? item.originalUrl || item.url
+    : mode === "dealerPop"
+      ? item.dealerPopUrl || item.url
+      : item.cleanUrl || item.url
                             }
                           : item
                       )
