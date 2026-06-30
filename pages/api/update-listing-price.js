@@ -1,94 +1,70 @@
-async function safeJson(response) {
-  const text = await response.text();
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(
-      `Expected JSON but got ${response.status}: ${text.slice(0, 120)}`
-    );
-  }
-}
-
-async function getAccessToken() {
-  const response = await fetch(
-    "https://flex-api.sharetribe.com/v1/auth/token",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/x-www-form-urlencoded; charset=utf-8",
-        Accept: "application/json"
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: process.env.SHARETRIBE_CLIENT_ID,
-        client_secret: process.env.SHARETRIBE_CLIENT_SECRET,
-        scope: "integ"
-      })
-    }
-  );
-
-  const data = await safeJson(response);
-
-  if (!response.ok) {
-    throw new Error(`Auth failed: ${JSON.stringify(data)}`);
-  }
-
-  return data.access_token;
-}
+import {
+  updateMachineFactsVerified
+} from "../../lib/sharetribe/IXISharetribeMutationEngine";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
+      ok: false,
       error: "Method not allowed"
     });
   }
 
   try {
-    const { listingId, price } = req.body;
+    const {
+      listingId,
+      title = "",
+      price = "",
+      hours = "",
+      location = "",
+      description = "",
+      keywords = []
+    } = req.body || {};
 
-    if (!listingId || !price) {
+    if (!listingId) {
       return res.status(400).json({
-        error: "Missing listingId or price"
+        ok: false,
+        error: "Missing listingId"
       });
     }
 
-    const token = await getAccessToken();
-
-    const response = await fetch(
-  "https://flex-integ-api.sharetribe.com/v1/integration_api/listings/update",
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    },
-    body: JSON.stringify({
-      id: listingId,
-      price: {
-        amount:
-          Number(String(price).replace(/,/g, "")) * 100,
-        currency: "USD"
-      }
-    })
-  }
-);
-
-const data = await safeJson(response);
-    if (!response.ok) {
-      throw new Error(JSON.stringify(data));
+    if (!price) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing price"
+      });
     }
 
-    res.status(200).json({
-      ok: true
+    const result = await updateMachineFactsVerified({
+      listingId,
+      title,
+      price,
+      hours,
+      location,
+      description,
+      keywords
     });
-  } catch (err) {
-    console.error("PRICE UPDATE ERROR:", err);
 
-    res.status(500).json({
-      error: err.message
+    return res.status(200).json({
+      ok: true,
+      command: "UPDATE_MACHINE_FACTS_COMPAT_PRICE",
+      listingId: String(listingId),
+      requested: {
+        title,
+        price,
+        hours,
+        location,
+        description,
+        keywords
+      },
+      ...result
+    });
+  } catch (error) {
+    console.error("UPDATE LISTING PRICE COMPAT ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Listing price update failed"
     });
   }
 }
