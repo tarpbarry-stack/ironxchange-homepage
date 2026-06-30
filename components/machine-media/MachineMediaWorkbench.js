@@ -360,6 +360,179 @@ export default function MachineMediaWorkbench({
           </div>
         ))}
       </div>
+          
+         <style jsx>{`
+        .photo-workbench {
+          margin: 18px 0 24px;
+          padding: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 14px;
+          background: linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.025),
+              rgba(255, 255, 255, 0)
+            ),
+            #101010;
+        }
+
+        .workbench-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          margin-bottom: 14px;
+        }
+
+        .workbench-head span {
+          display: block;
+          color: #ffc400;
+          font-size: 10px;
+          font-weight: 950;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .workbench-head strong {
+          display: block;
+          margin-top: 4px;
+          color: rgba(255, 255, 255, 0.48);
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .photo-add {
+          position: relative;
+          min-width: 130px;
+          height: 34px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(255, 196, 0, 0.32);
+          border-radius: 8px;
+          background: rgba(255, 196, 0, 0.08);
+          color: #ffc400;
+          font-size: 10px;
+          font-weight: 950;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          overflow: hidden;
+        }
+
+        .photo-add input {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          cursor: pointer;
+        }
+
+        .photo-strip {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 4px 2px 10px;
+        }
+
+        .photo-tile {
+          position: relative;
+          flex: 0 0 136px;
+          width: 136px;
+          height: 104px;
+          border: 1px solid rgba(255, 255, 255, 0.11);
+          border-radius: 10px;
+          background: #080808;
+          overflow: hidden;
+          cursor: grab;
+        }
+
+        .photo-tile.active {
+          border-color: rgba(255, 196, 0, 0.78);
+          box-shadow: 0 0 0 1px rgba(255, 196, 0, 0.12),
+            0 0 16px rgba(255, 196, 0, 0.16);
+        }
+
+        .photo-tile.hero {
+          border-color: rgba(0, 194, 255, 0.7);
+        }
+
+        .photo-tile img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          display: block;
+          background: #050505;
+        }
+
+        .hero-badge {
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          z-index: 3;
+          padding: 3px 5px;
+          border-radius: 5px;
+          background: rgba(0, 194, 255, 0.9);
+          color: #001018;
+          font-size: 7px;
+          font-weight: 950;
+          letter-spacing: 0.08em;
+        }
+
+        .photo-remove {
+          position: absolute;
+          top: 5px;
+          right: 5px;
+          z-index: 4;
+          width: 18px;
+          height: 18px;
+          border: 0;
+          border-radius: 999px;
+          background: rgba(0, 0, 0, 0.72);
+          color: white;
+          font-size: 14px;
+          line-height: 18px;
+          cursor: pointer;
+        }
+
+        .photo-tile small {
+          position: absolute;
+          right: 6px;
+          bottom: 5px;
+          z-index: 3;
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 8px;
+          font-weight: 950;
+        }
+
+        .polish-toggle {
+          position: absolute;
+          left: 5px;
+          right: 5px;
+          bottom: 5px;
+          z-index: 5;
+          display: flex;
+          gap: 4px;
+        }
+
+        .polish-toggle button {
+          flex: 1;
+          height: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 4px;
+          background: rgba(0, 0, 0, 0.68);
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 7px;
+          font-weight: 950;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .polish-toggle button.active {
+          border-color: rgba(255, 196, 0, 0.75);
+          background: rgba(255, 196, 0, 0.2);
+          color: #ffc400;
+        }
+      `}</style>
     </section>
   );
 }
