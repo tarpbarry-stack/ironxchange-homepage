@@ -1089,11 +1089,12 @@ function saveLaunchFieldOnEnter(message) {
   listingId,
   title,
   before: {
-    price: currentListing?.price,
-    hours: currentListing?.hours,
-    location: currentListing?.location,
-    description: currentListing?.description
-  },
+  price: listing?.price,
+  hours: listing?.hours,
+  location: listing?.location,
+  description: listing?.description || listing?.publicData?.description,
+  keywords: getListingKeywords(listing)
+},
   after: {
     price: edit.price,
     hours: edit.hours,
