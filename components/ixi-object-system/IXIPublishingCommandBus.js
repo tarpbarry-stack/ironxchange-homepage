@@ -8,68 +8,12 @@ export const IXI_PUBLISHING_COMMANDS = {
     return IXI_MACHINE_MUTATION_COMMANDS.updateMachineFacts(payload);
   },
   
-  async saveListingDetails({
-    listingId,
-    hours = "",
-    location = "",
-    description = "",
-    keywords = []
-  }) {
-    if (!listingId) {
-      return { ok: false, error: "Missing listingId" };
-    }
-
-    const response = await fetch("/api/update-listing-details", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        listingId,
-        hours,
-        location,
-        description,
-        keywords
-      })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(data?.error || "Listing details update failed");
-    }
-
-    return { ok: true, data };
+   async saveListingDetails(payload = {}) {
+    return IXI_MACHINE_MUTATION_COMMANDS.updateMachineFacts(payload);
   },
 
-  async saveListingPrice({
-    listingId,
-    price = ""
-  }) {
-    if (!listingId) {
-      return { ok: false, error: "Missing listingId" };
-    }
-
-    const cleanPrice = String(price || "").replace(/[^0-9]/g, "");
-
-    if (!cleanPrice) {
-      return { ok: true, skipped: true };
-    }
-
-    const response = await fetch("/api/update-listing-price", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        listingId,
-        price: cleanPrice
-      })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(data?.error || "Listing price update failed");
-    }
-
-    return { ok: true, data };
+    async saveListingPrice(payload = {}) {
+    return IXI_MACHINE_MUTATION_COMMANDS.updateMachineFacts(payload);
   },
 
   async saveWorkflow({
