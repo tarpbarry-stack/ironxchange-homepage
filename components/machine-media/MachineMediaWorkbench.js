@@ -1,9 +1,7 @@
 import { useState } from "react";
 
 import {
-  processIXPhoto,
   buildIXPhotoVariants,
-  getIXActivePhotoFile,
   getIXActivePhotoUrl
 } from "../../lib/ixvision/pipeline/processIXPhoto";
 
@@ -12,26 +10,6 @@ function slugify(text = "") {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-function clean(value) {
-  return value ? String(value).trim() : "";
-}
-
-function getImageUrl(img) {
-  if (!img) return null;
-  if (typeof img === "string") return img;
-
-  return (
-    img.url ||
-    img.src ||
-    img.attributes?.variants?.["scaled-large"]?.url ||
-    img.attributes?.variants?.["scaled-medium"]?.url ||
-    img.attributes?.variants?.default?.url ||
-    img.attributes?.variants?.["landscape-crop"]?.url ||
-    img.attributes?.variants?.["scaled-small"]?.url ||
-    null
-  );
 }
 
 function getListingMake(listing = {}) {
@@ -49,21 +27,14 @@ export default function MachineMediaWorkbench({
   listing,
   title = "",
   sellerName = "IronXchange Seller",
-
   photoItems,
   setPhotoItems,
-
   activePhotoIndex,
   setActivePhotoIndex,
-
   photoPolishMode = "original",
-  setPhotoPolishMode,
-
   setPhotosDirty,
-
   commandBusy = "",
   setCommandBusy = () => {},
-
   trackLaunchEvent = () => {},
   addActivity = () => {}
 }) {
@@ -74,7 +45,7 @@ export default function MachineMediaWorkbench({
       file.type.startsWith("image/")
     );
 
-    if (files.length === 0) {
+    if (!files.length) {
       e.target.value = "";
       return;
     }
@@ -94,11 +65,7 @@ export default function MachineMediaWorkbench({
 
     setPhotoItems(current => [...current, ...mapped]);
     setPhotosDirty?.(true);
-
-    addActivity(
-      "success",
-      `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`
-    );
+    addActivity("success", `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} added`);
 
     trackLaunchEvent("launch_ix_photos_added", {
       listingId: String(listing?.id?.uuid || listing?.id || ""),
@@ -116,7 +83,7 @@ export default function MachineMediaWorkbench({
       file.type.startsWith("image/")
     );
 
-    if (files.length === 0) return;
+    if (!files.length) return;
 
     const make = getListingMake(listing);
 
@@ -133,11 +100,7 @@ export default function MachineMediaWorkbench({
 
     setPhotoItems(current => [...current, ...mapped]);
     setPhotosDirty?.(true);
-
-    addActivity(
-      "success",
-      `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`
-    );
+    addActivity("success", `${mapped.length} IX polished photo${mapped.length === 1 ? "" : "s"} dropped`);
 
     trackLaunchEvent("launch_ix_photos_dropped", {
       listingId: String(listing?.id?.uuid || listing?.id || ""),
@@ -150,7 +113,6 @@ export default function MachineMediaWorkbench({
     if (!mode || mode === "original") return;
 
     const targetPhoto = photoItems.find(photo => photo.id === photoId);
-
     if (!targetPhoto?.originalUrl) return;
 
     try {
@@ -159,55 +121,33 @@ export default function MachineMediaWorkbench({
       const response = await fetch(targetPhoto.originalUrl);
       const blob = await response.blob();
 
-      const file = new File(
-        [blob],
-        `${slugify(title)}-${mode}.jpg`,
-        { type: blob.type || "image/jpeg" }
-      );
-
-      const make = getListingMake(listing);
+      const file = new File([blob], `${slugify(title)}-${mode}.jpg`, {
+        type: blob.type || "image/jpeg"
+      });
 
       const processed = await buildIXPhotoVariants(file, {
-        make,
+        make: getListingMake(listing),
         mode,
         userEmail: listing?.sellerEmail,
         companyName: sellerName
       });
 
       setPhotoItems(current =>
-        current.map(photo => {
-          if (photo.id !== photoId) return photo;
-
-          return {
-            ...photo,
-
-            cleanUrl:
-              mode === "clean"
-                ? processed.cleanUrl
-                : photo.cleanUrl,
-
-            cleanFile:
-              mode === "clean"
-                ? processed.cleanFile
-                : photo.cleanFile,
-
-            dealerPopUrl:
-              mode === "dealerPop"
-                ? processed.dealerPopUrl
-                : photo.dealerPopUrl,
-
-            dealerPopFile:
-              mode === "dealerPop"
-                ? processed.dealerPopFile
-                : photo.dealerPopFile,
-
-            url: getIXActivePhotoUrl(processed),
-            file: processed.file,
-
-            activeMode: mode,
-            existing: false
-          };
-        })
+        current.map(photo =>
+          photo.id !== photoId
+            ? photo
+            : {
+                ...photo,
+                cleanUrl: mode === "clean" ? processed.cleanUrl : photo.cleanUrl,
+                cleanFile: mode === "clean" ? processed.cleanFile : photo.cleanFile,
+                dealerPopUrl: mode === "dealerPop" ? processed.dealerPopUrl : photo.dealerPopUrl,
+                dealerPopFile: mode === "dealerPop" ? processed.dealerPopFile : photo.dealerPopFile,
+                url: getIXActivePhotoUrl(processed),
+                file: processed.file,
+                activeMode: mode,
+                existing: false
+              }
+        )
       );
 
       setPhotosDirty?.(true);
@@ -294,10 +234,7 @@ export default function MachineMediaWorkbench({
 
             <img src={getIXActivePhotoUrl(photo)} alt={`Photo ${index + 1}`} />
 
-            <div
-              className="polish-toggle"
-              onClick={e => e.stopPropagation()}
-            >
+            <div className="polish-toggle" onClick={e => e.stopPropagation()}>
               {["original", "clean", "dealerPop"].map(mode => (
                 <button
                   key={mode}
@@ -315,16 +252,13 @@ export default function MachineMediaWorkbench({
                         item.id === photo.id
                           ? {
                               ...item,
-
                               activeMode: mode,
-
                               file:
                                 mode === "original"
                                   ? item.originalFile || null
                                   : mode === "dealerPop"
                                     ? item.dealerPopFile || null
                                     : item.cleanFile || null,
-
                               url:
                                 mode === "original"
                                   ? item.originalUrl
@@ -360,198 +294,246 @@ export default function MachineMediaWorkbench({
           </div>
         ))}
       </div>
-          
-         <style jsx>{`
+
+      <style jsx>{`
         .photo-workbench {
-          margin: 18px 0 24px;
-          padding: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 14px;
-          background: linear-gradient(
-              180deg,
-              rgba(255, 255, 255, 0.025),
-              rgba(255, 255, 255, 0)
-            ),
-            #101010;
+          padding: 9px 12px 10px;
+          margin-bottom: 9px;
         }
 
         .workbench-head {
+          min-height: 30px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
+          align-items: center;
+          padding: 12px 14px 14px;
           gap: 14px;
-          margin-bottom: 14px;
+          margin-bottom: 8px;
         }
 
         .workbench-head span {
           display: block;
-          color: #ffc400;
-          font-size: 10px;
+          margin-bottom: 3px;
+          color: #FFC400;
+          font-size: 8px;
           font-weight: 950;
+          letter-spacing: .78px;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
         }
 
         .workbench-head strong {
           display: block;
-          margin-top: 4px;
-          color: rgba(255, 255, 255, 0.48);
-          font-size: 11px;
-          font-weight: 800;
+          color: rgba(255,255,255,.46);
+          font-size: 9.5px;
+          font-weight: 850;
+          letter-spacing: .32px;
+          text-rendering: geometricPrecision;
+          -webkit-font-smoothing: antialiased;
         }
 
         .photo-add {
-          position: relative;
-          min-width: 130px;
-          height: 34px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(255, 196, 0, 0.32);
-          border-radius: 8px;
-          background: rgba(255, 196, 0, 0.08);
-          color: #ffc400;
-          font-size: 10px;
+          min-width: 126px;
+          height: 28px;
+          display: grid;
+          place-items: center;
+          border-radius: 999px;
+          border: 1px dashed rgba(255,196,0,.30);
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.06), rgba(255,196,0,0)),
+            #101010;
+          color: #FFC400;
+          font-size: 8.5px;
           font-weight: 950;
+          letter-spacing: .58px;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
           cursor: pointer;
-          overflow: hidden;
+          box-shadow: 0 1px 0 rgba(255,255,255,.025) inset;
+          transition:
+            transform .14s ease,
+            border-color .14s ease,
+            background .14s ease,
+            box-shadow .14s ease;
+        }
+
+        .photo-add:hover {
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.55);
+          background:
+            linear-gradient(180deg, rgba(255,196,0,.10), rgba(255,196,0,0)),
+            #151515;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.035) inset,
+            0 0 16px rgba(255,196,0,.06);
         }
 
         .photo-add input {
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          cursor: pointer;
+          display: none;
         }
 
         .photo-strip {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 4px 2px 12px;
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 196, 0, 0.42) rgba(255, 255, 255, 0.06);
-}
-
-.photo-strip::-webkit-scrollbar {
-  height: 8px;
-}
-
-.photo-strip::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.055);
-  border-radius: 999px;
-}
-
-.photo-strip::-webkit-scrollbar-thumb {
-  background: rgba(255, 196, 0, 0.42);
-  border-radius: 999px;
-}
-
-.photo-strip::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 196, 0, 0.68);
-}
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 5px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,.14) transparent;
+        }
 
         .photo-tile {
           position: relative;
-          flex: 0 0 136px;
-          width: 136px;
-          height: 104px;
-          border: 1px solid rgba(255, 255, 255, 0.11);
-          border-radius: 10px;
-          background: #080808;
+          flex: 0 0 190px;
+          height: 134px;
           overflow: hidden;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,.07);
+          background: #080808;
           cursor: grab;
+          opacity: .72;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.025) inset,
+            0 10px 22px rgba(0,0,0,.16);
+          transition:
+            opacity .15s ease,
+            transform .15s ease,
+            border-color .15s ease,
+            box-shadow .15s ease,
+            filter .15s ease;
         }
 
+        .photo-tile:hover,
         .photo-tile.active {
-          border-color: rgba(255, 196, 0, 0.78);
-          box-shadow: 0 0 0 1px rgba(255, 196, 0, 0.12),
-            0 0 16px rgba(255, 196, 0, 0.16);
+          opacity: 1;
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.36);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 14px 28px rgba(0,0,0,.22),
+            0 0 18px rgba(255,196,0,.055);
+          filter:
+            contrast(1.03)
+            saturate(1.02);
         }
 
         .photo-tile.hero {
-          border-color: rgba(0, 194, 255, 0.7);
+          border: 2px solid rgba(255,196,0,.94);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.04) inset,
+            0 14px 30px rgba(0,0,0,.24),
+            0 0 22px rgba(255,196,0,.08);
         }
 
         .photo-tile img {
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: cover;
           display: block;
-          background: #050505;
         }
 
         .hero-badge {
           position: absolute;
-          top: 5px;
-          left: 5px;
+          top: 7px;
+          left: 7px;
           z-index: 3;
-          padding: 3px 5px;
-          border-radius: 5px;
-          background: rgba(0, 194, 255, 0.9);
-          color: #001018;
-          font-size: 7px;
+          padding: 4px 7px;
+          border-radius: 999px;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0)),
+            #FFC400;
+          color: #050505;
+          font-size: 8px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: .35px;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.22) inset,
+            0 0 12px rgba(255,196,0,.10);
         }
 
         .photo-remove {
           position: absolute;
-          top: 5px;
-          right: 5px;
-          z-index: 4;
-          width: 18px;
-          height: 18px;
-          border: 0;
-          border-radius: 999px;
-          background: rgba(0, 0, 0, 0.72);
+          top: 7px;
+          right: 7px;
+          z-index: 3;
+          width: 22px;
+          height: 22px;
+          border: 1px solid rgba(255,255,255,.10);
+          border-radius: 50%;
+          background: rgba(185,28,28,.86);
           color: white;
-          font-size: 14px;
-          line-height: 18px;
+          font-size: 13px;
+          font-weight: 950;
           cursor: pointer;
+          opacity: .88;
+          transition:
+            transform .14s ease,
+            background .14s ease,
+            opacity .14s ease;
+        }
+
+        .photo-remove:hover {
+          transform: scale(1.06);
+          background: rgba(229,62,62,.96);
+          opacity: 1;
         }
 
         .photo-tile small {
           position: absolute;
-          right: 6px;
-          bottom: 5px;
+          bottom: 7px;
+          right: 7px;
           z-index: 3;
-          color: rgba(255, 255, 255, 0.62);
-          font-size: 8px;
+          color: rgba(255,255,255,.72);
+          font-size: 9px;
           font-weight: 950;
         }
 
         .polish-toggle {
           position: absolute;
-          left: 5px;
-          right: 5px;
-          bottom: 5px;
-          z-index: 5;
+          left: 7px;
+          bottom: 7px;
+          z-index: 4;
           display: flex;
-          gap: 4px;
+          gap: 3px;
+          padding: 3px;
+          border-radius: 999px;
+          background: rgba(0,0,0,.50);
+          backdrop-filter: blur(4px);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.05) inset;
         }
 
         .polish-toggle button {
-          flex: 1;
-          height: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          border-radius: 4px;
-          background: rgba(0, 0, 0, 0.68);
-          color: rgba(255, 255, 255, 0.68);
-          font-size: 7px;
+          position: static;
+          width: auto;
+          height: 17px;
+          padding: 0 5px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.12);
+          background: rgba(255,255,255,.08);
+          color: rgba(255,255,255,.72);
+          font-size: 6.5px;
           font-weight: 950;
+          letter-spacing: .35px;
           text-transform: uppercase;
           cursor: pointer;
+          transition:
+            background .14s ease,
+            color .14s ease,
+            border-color .14s ease,
+            transform .14s ease;
+        }
+
+        .polish-toggle button:hover {
+          transform: translateY(-1px);
+          border-color: rgba(255,196,0,.28);
+          color: #FFC400;
         }
 
         .polish-toggle button.active {
-          border-color: rgba(255, 196, 0, 0.75);
-          background: rgba(255, 196, 0, 0.2);
-          color: #ffc400;
+          background: #FFC400;
+          border-color: #FFC400;
+          color: #050505;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.22) inset;
         }
       `}</style>
     </section>
