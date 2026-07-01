@@ -1076,7 +1076,6 @@ setListings(current =>
   current.map(item =>
     String(getListingId(item)) === String(listingId)
       ? {
-          {
   ...item,
   price: cleanNumber(edit.price) || item.price,
   hours: edit.hours,
