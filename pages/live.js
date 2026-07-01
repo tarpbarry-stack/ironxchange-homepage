@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
+import { createInstance } from "sharetribe-flex-sdk";
 import { captureIXEvent } from "../lib/posthog";
 
 import Navbar from "../components/Navbar";
@@ -17,12 +17,8 @@ import {
   getFrameStyle
 } from "../lib/ixvision/frameEngine";
 
-import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 import {
-  processIXPhoto,
-  buildIXPhotoVariants,
-  getIXActivePhotoFile,
-  getIXActivePhotoUrl
+  buildIXPhotoVariants
 } from "../lib/ixvision/pipeline/processIXPhoto";
 
 import {
@@ -55,8 +51,6 @@ import {
 } from "../components/ixi-object-system/IXIMachineMutationEngine";
 
 const BRAND_YELLOW = "#FFC400";
-
-const { UUID } = sdkTypes;
 
 const sdk = createInstance({
   clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
@@ -849,41 +843,38 @@ addActivity(
   });
 }
 
-  function removePhoto(indexToRemove) {
-    setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
-    setActivePhotoIndex(0);
-    
-    setPhotosDirty(true);
+ function removePhoto(indexToRemove) {
+  setPhotoItems(current =>
+    removeMachineMediaItem(current, indexToRemove)
+  );
 
-    addActivity("success", `Photo removed — ${title}`);
-    trackLaunchEvent("launch_photo_removed", {
-      listingId: String(listingId || ""),
-      photoIndex: indexToRemove
-    });
-  }
+  setActivePhotoIndex(0);
+  setPhotosDirty(true);
+
+  addActivity("success", `Photo removed — ${title}`);
+
+  trackLaunchEvent("launch_photo_removed", {
+    listingId: String(listingId || ""),
+    photoIndex: indexToRemove
+  });
+}
 
   function reorderPhotos(fromIndex, toIndex) {
-    setPhotoItems(current => {
-      if (fromIndex === null || fromIndex === toIndex) return current;
+  setPhotoItems(current =>
+    moveMachineMediaItem(current, fromIndex, toIndex)
+  );
 
-      const next = [...current];
-      const [movedPhoto] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, movedPhoto);
+  setActivePhotoIndex(toIndex);
+  setPhotosDirty(true);
 
-      return next;
-    });
+  addActivity("success", `Photo order changed — ${title}`);
 
-    setActivePhotoIndex(toIndex);
-    
-    setPhotosDirty(true);
-
-    addActivity("success", `Photo order changed — ${title}`);
-    trackLaunchEvent("launch_photo_reordered", {
-      listingId: String(listingId || ""),
-      fromIndex,
-      toIndex
-    });
-  }
+  trackLaunchEvent("launch_photo_reordered", {
+    listingId: String(listingId || ""),
+    fromIndex,
+    toIndex
+  });
+}
 
   async function copyText(label, text) {
     try {
@@ -937,54 +928,18 @@ addActivity(
   }
 
 
-async function buildLiveImageIdsForSave() {
-  const finalImageIds = [];
-
-  for (const photo of photoItems) {
-    if (
-      photo.existing &&
-      photo.imageId &&
-      !photo.file
-    ) {
-      finalImageIds.push(
-        new UUID(photo.imageId)
-      );
-
-      continue;
-    }
-
-    if (!photo.file) continue;
-
-    const make = getListingMake(listing);
-
-    const imageFile =
-      photoPolishMode === "original"
-        ? photo.file
-        : getIXActivePhotoFile(photo) ||
-          await processIXPhoto(photo.file, {
-            mode: photoPolishMode,
-            make,
-            outputQuality: 0.98,
-            maxWidth: 4096
-          });
-
-    const upload = await sdk.images.upload(
-      { image: imageFile },
-      { expand: true }
-    );
-
-    finalImageIds.push(
-      new UUID(upload.data.data.id.uuid)
-    );
+async function saveLaunchMedia() {
+  if (!listingId) {
+    throw new Error("Missing listing id.");
   }
 
-  if (photoItems.length > 0 && finalImageIds.length !== photoItems.length) {
-    throw new Error(
-      "Photo save stopped: final image count mismatch."
-    );
-  }
+  const result = await updateListingMediaWithSharetribe({
+    sdk,
+    listingId,
+    mediaItems: photoItems
+  });
 
-  return finalImageIds;
+  return result;
 }
 
 
@@ -1129,29 +1084,17 @@ setListings(current =>
   )
 );
       
-let imageIds = [];
+let mediaSaveResult = null;
 
 try {
   if (photosDirty) {
-    imageIds = await buildLiveImageIdsForSave();
-
-    if (imageIds.length > 0) {
-      await sdk.ownListings.update(
-        {
-          id: new UUID(listingId),
-          images: imageIds
-        },
-        {
-          expand: true,
-          include: ["images"]
-        }
-      );
-    }
+    mediaSaveResult = await saveLaunchMedia();
   }
 } catch (imageError) {
-  console.error("LAUNCH IMAGE SAVE FAILED:", imageError);
+  console.error("LAUNCH MEDIA SAVE FAILED:", imageError);
+
   throw new Error(
-    `Photo save failed: ${imageError.message || "Sharetribe image update failed"}`
+    `Media save failed: ${imageError.message || "Sharetribe media update failed"}`
   );
 }
     
@@ -1160,7 +1103,7 @@ try {
   listingId: String(listingId),
   selectedKeywordCount: selectedKeywords.length,
   photoCount: photoItems.length,
-  savedImageCount: imageIds.length
+  savedImageCount: mediaSaveResult?.imageCount || photoItems.length
 });
 
 setPhotosDirty(false);
