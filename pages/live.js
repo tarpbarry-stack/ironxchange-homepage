@@ -1064,13 +1064,26 @@ setListings(current =>
   current.map(item =>
     String(getListingId(item)) === String(listingId)
       ? {
-          ...item,
-          price: cleanNumber(edit.price) || item.price,
-          hours: edit.hours,
-          location: edit.location,
-          description: edit.description,
-          keywords: selectedKeywords,
-          publicData: {
+          {
+  ...item,
+  price: cleanNumber(edit.price) || item.price,
+  hours: edit.hours,
+  location: edit.location,
+  description: edit.description,
+  keywords: selectedKeywords,
+
+  imageObjects: photoItems.map((photo, index) => ({
+    ...photo,
+    url: getActiveMachineMediaUrl(photo),
+    position: index,
+    hero: index === 0
+  })),
+  imageUrls: getMachineMediaPreviewUrls(photoItems),
+  images: getMachineMediaPreviewUrls(photoItems),
+  imageUrl: getActiveMachineMediaUrl(photoItems[0]) || item.imageUrl || item.image,
+  image: getActiveMachineMediaUrl(photoItems[0]) || item.image || item.imageUrl,
+
+  publicData: {
             ...(item.publicData || {}),
             price: cleanNumber(edit.price) || item.publicData?.price,
             hours: edit.hours,
