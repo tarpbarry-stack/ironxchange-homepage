@@ -26,6 +26,23 @@ import {
 } from "../lib/ixvision/pipeline/processIXPhoto";
 
 import {
+  createMachineMediaModelFromListing,
+  getMachineMediaHeroUrl,
+  getMachineMediaPreviewUrls,
+  moveMachineMediaItem,
+  removeMachineMediaItem
+} from "../lib/machine-media/createMachineMediaModel";
+
+import {
+  getActiveMachineMediaUrl,
+  getActiveMachineMediaFile
+} from "../lib/machine-media/machineMediaIdentity";
+
+import {
+  updateListingMediaWithSharetribe
+} from "../lib/machine-media/machineMediaSharetribeAdapter";
+
+import {
   IXI_PUBLISHING_COMMANDS
 } from "../components/ixi-object-system/IXIPublishingCommandBus";
 
@@ -493,33 +510,7 @@ setExternalLinks([
 ]);
 
 
-const rawImages = Array.isArray(listing?.imageObjects) && listing.imageObjects.length > 0
-  ? listing.imageObjects
-  : Array.isArray(listing?.images)
-    ? listing.images
-    : [];
-
-setPhotoItems(
-  rawImages
-    .map((img, index) => ({
-      id: `existing-${index}-${getImageUrl(img)}`,
-
-      imageId: getImageId(img),
-
-      url: getImageUrl(img),
-
-      originalUrl: getImageUrl(img),
-      cleanUrl: getImageUrl(img),
-      dealerPopUrl: getImageUrl(img),
-
-      activeMode: "original",
-
-      file: null,
-
-      existing: true
-    }))
-    .filter(item => item.url)
-);
+setPhotoItems(createMachineMediaModelFromListing(listing));
 
     
 
@@ -534,13 +525,13 @@ setPhotoItems(
   }, [listing]);
 
  const heroPhoto =
-  getIXActivePhotoUrl(photoItems[activePhotoIndex]) ||
-  getIXActivePhotoUrl(photoItems[0]) ||
+  getActiveMachineMediaUrl(photoItems[activePhotoIndex]) ||
+  getMachineMediaHeroUrl(photoItems) ||
   listing?.imageUrl ||
   listing?.image ||
   "/images/hero-equipment-yard.jpg";
 
-  const activePreviewPhoto =
+const activePreviewPhoto =
   photoItems[activePhotoIndex] ||
   photoItems[0] ||
   { url: heroPhoto };
@@ -1503,10 +1494,10 @@ const previewListing = listing
       description: edit.description || listing.description,
       keywords: selectedKeywords,
       imageObjects: photoItems.map(photo => ({
-        ...photo,
-        url: getIXActivePhotoUrl(photo)
-      })),
-      imageUrls: photoItems.map(photo => getIXActivePhotoUrl(photo)).filter(Boolean),
+  ...photo,
+  url: getActiveMachineMediaUrl(photo)
+})),
+imageUrls: getMachineMediaPreviewUrls(photoItems),
       imageUrl: heroPhoto
     }
   : listing;
@@ -1655,7 +1646,7 @@ const previewListing = listing
                 >
                   {index === 0 ? <span className="hero-badge">HERO</span> : null}
 
-                  <img src={getIXActivePhotoUrl(photo)} alt={`Photo ${index + 1}`} />
+                  <img src={getActiveMachineMediaUrl(photo)} alt={`Photo ${index + 1}`} />
 
                     {true ? (
   <div
@@ -1691,11 +1682,11 @@ onClick={async () => {
                   : item.cleanFile || null,
 
             url:
-              mode === "original"
-                ? item.originalUrl
-                : mode === "dealerPop"
-                  ? item.dealerPopUrl
-                  : item.cleanUrl
+  mode === "original"
+    ? item.originalUrl || item.url
+    : mode === "dealerPop"
+      ? item.dealerPopUrl || item.url
+      : item.cleanUrl || item.url
           }
         : item
     )
