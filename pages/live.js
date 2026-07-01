@@ -9,9 +9,9 @@ import Footer from "../components/Footer";
 
 import ListingCard from "../components/ListingCard";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
-import MachineMediaWorkbench from "../components/machine-media/MachineMediaWorkbench";
 
 import MachineBadges from "../components/MachineBadges";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -1629,30 +1629,115 @@ const previewListing = listing
             </div>
           </section>
 
+          <section className="photo-workbench">
+            <div className="workbench-head">
+              <div>
+                <span>Photo Workbench</span>
+                <strong>Drag to reorder • first image becomes hero</strong>
+              </div>
 
-<MachineMediaWorkbench
-  listing={listing}
-  title={title}
-  sellerName={sellerName}
+              <label
+                className="photo-add"
+                onDragOver={e => e.preventDefault()}
+                onDrop={handlePhotoDrop}
+              >
+                <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+                + Add Photos
+              </label>
+            </div>
 
-  photoItems={photoItems}
-  setPhotoItems={setPhotoItems}
+            <div className="photo-strip">
+              {photoItems.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={`photo-tile ${index === 0 ? "hero" : ""} ${
+                    index === activePhotoIndex ? "active" : ""
+                  }`}
+                  draggable
+                  onDragStart={() => setDraggedPhotoIndex(index)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => {
+                    reorderPhotos(draggedPhotoIndex, index);
+                    setDraggedPhotoIndex(null);
+                  }}
+                  onClick={() => setActivePhotoIndex(index)}
+                >
+                  {index === 0 ? <span className="hero-badge">HERO</span> : null}
 
-  activePhotoIndex={activePhotoIndex}
-  setActivePhotoIndex={setActivePhotoIndex}
+                  <img src={getIXActivePhotoUrl(photo)} alt={`Photo ${index + 1}`} />
 
-  photoPolishMode={photoPolishMode}
-  setPhotoPolishMode={setPhotoPolishMode}
+                    {true ? (
+  <div
+    className="polish-toggle"
+    onClick={e => e.stopPropagation()}
+  >
+    {["original", "clean", "dealerPop"].map(mode => (
+      <button
+        key={mode}
+        type="button"
+        className={photo.activeMode === mode ? "active" : ""}
 
-  setPhotosDirty={setPhotosDirty}
 
-  commandBusy={commandBusy}
-  setCommandBusy={setCommandBusy}
+onClick={async () => {
+  if (photo.existing && mode !== "original") {
+    await reprocessExistingPhoto(photo.id, mode);
+    return;
+  }
 
-  trackLaunchEvent={trackLaunchEvent}
-  addActivity={addActivity}
-/>
+  setPhotoItems(current =>
+    current.map(item =>
+      item.id === photo.id
+        ? {
+            ...item,
 
+            activeMode: mode,
+
+            file:
+              mode === "original"
+                ? item.originalFile || null
+                : mode === "dealerPop"
+                  ? item.dealerPopFile || null
+                  : item.cleanFile || null,
+
+            url:
+              mode === "original"
+                ? item.originalUrl
+                : mode === "dealerPop"
+                  ? item.dealerPopUrl
+                  : item.cleanUrl
+          }
+        : item
+    )
+  );
+}}
+
+
+
+
+      >
+        {mode === "dealerPop" ? "Pop" : mode}
+      </button>
+    ))}
+  </div>
+) : null}
+                    
+                  <button
+                  type="button"
+                  className="photo-remove"
+                    onClick={e => {
+                      e.stopPropagation();
+                      removePhoto(index);
+                    }}
+                    aria-label="Remove photo"
+                  >
+                    ×
+                  </button>
+
+                  <small>{index + 1}</small>
+                </div>
+              ))}
+            </div>
+          </section>
 
           <section className="studio-grid">
             <aside className="inventory-rail">
