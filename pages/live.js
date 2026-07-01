@@ -30,9 +30,12 @@ import {
 } from "../components/ixi-object-system/IXIPublishingCommandBus";
 
 import {
+  setIXIActionNotice
+} from "../components/ixi-object-system/IXIActionNoticeEngine";
+
+import {
   updateMachineFacts
 } from "../components/ixi-object-system/IXIMachineMutationEngine";
-
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -994,6 +997,17 @@ async function buildLiveImageIdsForSave() {
 }
 
 
+function showLaunchActionNotice(message, tone = "success") {
+  if (!listingId) return;
+
+  setIXIActionNotice({
+    setState: setIxiCardState,
+    listingId,
+    message,
+    tone
+  });
+}
+
 
 async function saveLaunchMachineFacts(message = "LISTING UPDATED") {
   if (!listingId) return;
@@ -1082,12 +1096,11 @@ function saveLaunchFieldOnEnter(message) {
   listingId,
   title,
   before: {
-  price: listing?.price,
-  hours: listing?.hours,
-  location: listing?.location,
-  description: listing?.description || listing?.publicData?.description,
-  keywords: getListingKeywords(listing)
-},
+    price: currentListing?.price,
+    hours: currentListing?.hours,
+    location: currentListing?.location,
+    description: currentListing?.description
+  },
   after: {
     price: edit.price,
     hours: edit.hours,
@@ -1126,24 +1139,23 @@ setListings(current =>
 );
       
 let imageIds = [];
-let photoMutation = null;
 
 try {
   if (photosDirty) {
     imageIds = await buildLiveImageIdsForSave();
 
     if (imageIds.length > 0) {
-      const beforeImageIds = (listing?.imageObjects || [])
-        .map(getImageId)
-        .filter(Boolean);
-
-      photoMutation = await sdk.ownListings.update(
-  {
-    id: new UUID(listingId),
-    images: imageIds
-  },
-  { expand: true }
-);
+      await sdk.ownListings.update(
+        {
+          id: new UUID(listingId),
+          images: imageIds
+        },
+        {
+          expand: true,
+          include: ["images"]
+        }
+      );
+    }
   }
 } catch (imageError) {
   console.error("LAUNCH IMAGE SAVE FAILED:", imageError);
@@ -1157,23 +1169,12 @@ try {
   listingId: String(listingId),
   selectedKeywordCount: selectedKeywords.length,
   photoCount: photoItems.length,
-  savedImageCount: imageIds.length,
-  photoMutationCommand: photoMutation?.command || ""
+  savedImageCount: imageIds.length
 });
 
 setPhotosDirty(false);
 
-setLaunchActionNotice({
-  message:
-    message: mutation.notices?.[0] || "LISTING UPDATED",
-    mutation.notices?.[0] ||
-    "LISTING UPDATED",
-  tone: "success"
-});
-
-setTimeout(() => {
-  setLaunchActionNotice(null);
-}, 1600);
+showLaunchActionNotice("LISTING UPDATED", "success");
 
 alert("Launched. Listing updates applied.");
     } catch (err) {
