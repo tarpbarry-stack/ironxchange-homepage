@@ -983,7 +983,19 @@ async function saveLaunchMachineFacts(message = "LISTING UPDATED") {
               location: edit.location,
               description: edit.description,
               keywords: selectedKeywords,
-              publicData: {
+
+imageObjects: photoItems.map((photo, index) => ({
+  ...photo,
+  url: getActiveMachineMediaUrl(photo),
+  position: index,
+  hero: index === 0
+})),
+imageUrls: getMachineMediaPreviewUrls(photoItems),
+images: getMachineMediaPreviewUrls(photoItems),
+imageUrl: getActiveMachineMediaUrl(photoItems[0]) || item.imageUrl || item.image,
+image: getActiveMachineMediaUrl(photoItems[0]) || item.image || item.imageUrl,
+
+publicData: {
                 ...(item.publicData || {}),
                 price: cleanNumber(edit.price) || item.publicData?.price,
                 hours: edit.hours,
