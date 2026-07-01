@@ -786,7 +786,7 @@ async function reprocessExistingPhoto(photoId, mode) {
               ? processed.dealerPopFile
               : photo.dealerPopFile,
 
-          url: getIXActivePhotoUrl(processed),
+         url: getActiveMachineMediaUrl(processed),
           file: processed.file,
 
           activeMode: mode,
