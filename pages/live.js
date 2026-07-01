@@ -935,9 +935,13 @@ async function saveLaunchMedia() {
     throw new Error("Missing listing id.");
   }
 
-  return {
-    imageCount: photoItems.length
-  };
+  const result = await updateListingMediaWithSharetribe({
+    sdk,
+    listingId,
+    mediaItems: photoItems
+  });
+
+  return result;
 }
 
 
