@@ -12,6 +12,8 @@ import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
 import MachineBadges from "../components/MachineBadges";
 
+import categoryDnaKeywords from "../lib/categoryDnaKeywords";
+
 import {
   getFrameClass,
   getFrameStyle
