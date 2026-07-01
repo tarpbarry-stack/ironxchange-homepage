@@ -1137,16 +1137,13 @@ try {
         .map(getImageId)
         .filter(Boolean);
 
-      photoMutation = await updateListingPhotos({
-        commandBus: IXI_PHOTO_MUTATION_COMMANDS,
-        listingId,
-        beforeImageIds,
-        afterImageIds: imageIds.map(item =>
-          item?.uuid ? item.uuid : String(item)
-        ),
-        context: "launch-photo-workbench"
-      });
-    }
+      photoMutation = await sdk.ownListings.update(
+  {
+    id: new UUID(listingId),
+    images: imageIds
+  },
+  { expand: true }
+);
   }
 } catch (imageError) {
   console.error("LAUNCH IMAGE SAVE FAILED:", imageError);
@@ -1168,7 +1165,7 @@ setPhotosDirty(false);
 
 setLaunchActionNotice({
   message:
-    photoMutation?.notices?.[0] ||
+    message: mutation.notices?.[0] || "LISTING UPDATED",
     mutation.notices?.[0] ||
     "LISTING UPDATED",
   tone: "success"
