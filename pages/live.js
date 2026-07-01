@@ -36,9 +36,9 @@ import {
   getActiveMachineMediaFile
 } from "../lib/machine-media/machineMediaIdentity";
 
-// import {
-//   updateListingMediaWithSharetribe
-// } from "../lib/machine-media/machineMediaSharetribeAdapter";
+import {
+  updateListingMediaWithSharetribe
+} from "../lib/machine-media/machineMediaSharetribeAdapter";
 
 import {
   IXI_PUBLISHING_COMMANDS
