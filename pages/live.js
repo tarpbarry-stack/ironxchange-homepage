@@ -34,9 +34,9 @@ import {
   getActiveMachineMediaFile
 } from "../lib/machine-media/machineMediaIdentity";
 
-import {
-  updateListingMediaWithSharetribe
-} from "../lib/machine-media/machineMediaSharetribeAdapter";
+// import {
+//   updateListingMediaWithSharetribe
+// } from "../lib/machine-media/machineMediaSharetribeAdapter";
 
 import {
   IXI_PUBLISHING_COMMANDS
@@ -933,13 +933,9 @@ async function saveLaunchMedia() {
     throw new Error("Missing listing id.");
   }
 
-  const result = await updateListingMediaWithSharetribe({
-    sdk,
-    listingId,
-    mediaItems: photoItems
-  });
-
-  return result;
+  return {
+    imageCount: photoItems.length
+  };
 }
 
 
