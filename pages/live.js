@@ -998,14 +998,14 @@ async function buildLiveImageIdsForSave() {
 
 
 function showLaunchActionNotice(message, tone = "success") {
-  if (!listingId) return;
-
-  setIXIActionNotice({
-    setState: setIxiCardState,
-    listingId,
+  setLaunchActionNotice({
     message,
     tone
   });
+
+  setTimeout(() => {
+    setLaunchActionNotice(null);
+  }, 1600);
 }
 
 
@@ -1095,12 +1095,12 @@ function saveLaunchFieldOnEnter(message) {
   commandBus: IXI_PUBLISHING_COMMANDS,
   listingId,
   title,
-  before: {
-    price: currentListing?.price,
-    hours: currentListing?.hours,
-    location: currentListing?.location,
-    description: currentListing?.description
-  },
+ before: {
+  price: listing?.price,
+  hours: listing?.hours,
+  location: listing?.location,
+  description: listing?.description
+},
   after: {
     price: edit.price,
     hours: edit.hours,
