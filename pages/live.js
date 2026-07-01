@@ -33,13 +33,6 @@ import {
   updateMachineFacts
 } from "../components/ixi-object-system/IXIMachineMutationEngine";
 
-import {
-  IXI_PHOTO_MUTATION_COMMANDS
-} from "../components/ixi-object-system/IXIPhotoMutationCommandBus";
-
-import {
-  updateListingPhotos
-} from "../components/ixi-object-system/IXIPhotoMutationEngine";
 
 const BRAND_YELLOW = "#FFC400";
 
