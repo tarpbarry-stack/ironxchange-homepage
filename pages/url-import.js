@@ -876,6 +876,8 @@ setPhotoItems(current => [...current, ...mapped]);
       router.push(`/live?id=${newListingId}`);
     } catch (err) {
       console.error("CREATE LISTING ERROR:", err);
+console.error("SHARETRIBE 400 DATA:", err?.response?.data);
+console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
 
       addActivity("error", `Post failed — ${sharetribeTitle}`);
 
