@@ -35,7 +35,7 @@ import {
 } from "../lib/machine-media/machineMediaSharetribeAdapter";
 
 import {
-  detectAcquisitionSource
+  parseAcquisitionUrl
 } from "../lib/acquisition";
 
 import { captureIXEvent } from "../lib/posthog";
@@ -508,18 +508,20 @@ async function importMachineFromUrl() {
   setImporting(true);
 
   try {
-    const source = detectAcquisitionSource(url);
+    const result = await parseAcquisitionUrl(url);
 
-    console.log("ACQUISITION SOURCE:", source);
+console.log("ACQUISITION RESULT:", result);
 
-    alert(
-      `${source.label}\n\nSupported: ${source.supported ? "YES" : "NOT YET"}`
-    );
+alert(
+  `${result.source.label}\n\nMachine: ${
+    result.machine?.title || "Not supported yet"
+  }`
+);
 
-    addActivity(
-      "success",
-      `Detected ${source.label}`
-    );
+addActivity(
+  "success",
+  `Parsed ${result.source.label}`
+);
   } catch (error) {
     console.error("URL IMPORT FAILED:", error);
     alert(`URL import failed: ${error.message}`);
