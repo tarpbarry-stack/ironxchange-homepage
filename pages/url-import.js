@@ -217,10 +217,12 @@ ${linkLine}`;
 export default function PostFreePage() {
   const router = useRouter();
 
-  const [copied, setCopied] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [sellerProfile, setSellerProfile] = useState({
+const [copied, setCopied] = useState("");
+const [saving, setSaving] = useState(false);
+const [importUrl, setImportUrl] = useState("");
+const [importing, setImporting] = useState(false);
+const [loggedIn, setLoggedIn] = useState(false);
+const [sellerProfile, setSellerProfile] = useState({
   sellerName: "IronXchange Seller",
   sellerCompany: "",
   sellerLogo: "",
@@ -491,6 +493,28 @@ publicData: {
   );
 }
 
+async function importMachineFromUrl() {
+  const url = String(importUrl || "").trim();
+
+  if (!url) {
+    alert("Paste a machine URL first.");
+    return;
+  }
+
+  setImporting(true);
+
+  try {
+    addActivity("success", `URL import started — ${url}`);
+
+    alert("URL Import chassis is wired. Parser comes next.");
+  } catch (error) {
+    console.error("URL IMPORT FAILED:", error);
+    alert(`URL import failed: ${error.message}`);
+  } finally {
+    setImporting(false);
+  }
+}
+  
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
       current.includes(keyword)
@@ -806,15 +830,21 @@ setPhotoItems(current => [...current, ...mapped]);
               </div>
             </div>
 
-            <div className="url-import-bar">
+           <div className="url-import-bar">
   <input
     type="url"
+    value={importUrl}
+    onChange={e => setImportUrl(e.target.value)}
     placeholder="PASTE MACHINE URL"
   />
 
-  <button type="button">
-    Import
-  </button>
+  <button
+  type="button"
+  onClick={importMachineFromUrl}
+  disabled={importing}
+>
+  {importing ? "Importing..." : "Import"}
+</button>
 </div>
     
             <div className="launch-header-actions">
