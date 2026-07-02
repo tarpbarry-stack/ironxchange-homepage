@@ -14,12 +14,21 @@ import {
 } from "../lib/v12TaxonomyAdapter";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
+
 import {
   processIXPhoto,
   buildIXPhotoVariants,
-  getIXActivePhotoFile,
-  getIXActivePhotoUrl
+  getIXActivePhotoFile
 } from "../lib/ixvision/pipeline/processIXPhoto";
+import {
+  getMachineMediaPreviewUrls,
+  moveMachineMediaItem,
+  removeMachineMediaItem
+} from "../lib/machine-media/createMachineMediaModel";
+
+import {
+  getActiveMachineMediaUrl
+} from "../lib/machine-media/machineMediaIdentity";
 
 import { captureIXEvent } from "../lib/posthog";
 
@@ -343,8 +352,8 @@ const availableModels = useMemo(() => {
   const locationLabel = [city, stateCode].filter(Boolean).join(", ");
 
   const heroPhoto =
-  getIXActivePhotoUrl(photoItems[activePhotoIndex]) ||
-  getIXActivePhotoUrl(photoItems[0]) ||
+  getActiveMachineMediaUrl(photoItems[activePhotoIndex]) ||
+  getActiveMachineMediaUrl(photoItems[0]) ||
   "/images/hero-equipment-yard.jpg";
 
 const badgeCategoryAliases = {
@@ -413,12 +422,20 @@ const availableKeywords = useMemo(() => {
   hours,
   location: locationLabel,
   description,
-  keywords: selectedKeywords,
-  imageUrls: photoItems
-    .map(photo => getIXActivePhotoUrl(photo))
-    .filter(Boolean),
-  imageUrl: heroPhoto,
-  publicData: {
+ keywords: selectedKeywords,
+
+imageObjects: photoItems.map((photo, index) => ({
+  ...photo,
+  url: getActiveMachineMediaUrl(photo),
+  position: index,
+  hero: index === 0
+})),
+imageUrls: getMachineMediaPreviewUrls(photoItems),
+images: getMachineMediaPreviewUrls(photoItems),
+imageUrl: heroPhoto,
+image: heroPhoto,
+
+publicData: {
     category,
     year,
     make,
@@ -517,21 +534,25 @@ const availableKeywords = useMemo(() => {
     e.target.value = "";
   }
 
-  function handlePhotoDrop(e) {
+  async function handlePhotoDrop(e) {
     e.preventDefault();
 
     const files = Array.from(e.dataTransfer.files || []).filter(file =>
       file.type.startsWith("image/")
     );
 
-    const mapped = files.slice(0, 24).map(file => ({
-      id: `${Date.now()}-${file.name}-${Math.random()}`,
-      file,
-      url: URL.createObjectURL(file),
-      existing: false
-    }));
+   const mapped = await Promise.all(
+  files.slice(0, 24).map(file =>
+    buildIXPhotoVariants(file, {
+      make,
+      mode: photoPolishMode,
+      companyName: "IronXchange",
+      userEmail: "tarpbarry@gmail.com"
+    })
+  )
+);
 
-    setPhotoItems(current => [...current, ...mapped]);
+setPhotoItems(current => [...current, ...mapped]);
 
     addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
 
@@ -541,27 +562,23 @@ const availableKeywords = useMemo(() => {
   }
 
   function removePhoto(indexToRemove) {
-    setPhotoItems(current => current.filter((_, index) => index !== indexToRemove));
-    setActivePhotoIndex(0);
+  setPhotoItems(current =>
+    removeMachineMediaItem(current, indexToRemove)
+  );
 
-    addActivity("success", `Photo removed — ${cardTitle}`);
-  }
+  setActivePhotoIndex(0);
 
+  addActivity("success", `Photo removed — ${cardTitle}`);
+}
   function reorderPhotos(fromIndex, toIndex) {
-    setPhotoItems(current => {
-      if (fromIndex === null || fromIndex === toIndex) return current;
+  setPhotoItems(current =>
+    moveMachineMediaItem(current, fromIndex, toIndex)
+  );
 
-      const next = [...current];
-      const [movedPhoto] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, movedPhoto);
+  setActivePhotoIndex(toIndex);
 
-      return next;
-    });
-
-    setActivePhotoIndex(toIndex);
-
-    addActivity("success", `Photo order changed — ${cardTitle}`);
-  }
+  addActivity("success", `Photo order changed — ${cardTitle}`);
+}
 
   async function copyText(label, text) {
     try {
@@ -893,7 +910,7 @@ const availableKeywords = useMemo(() => {
                 >
                   {index === 0 ? <span className="hero-badge">HERO</span> : null}
 
-                  <img src={photo.url} alt={`Photo ${index + 1}`} />
+                  <img src={getActiveMachineMediaUrl(photo)} alt={`Photo ${index + 1}`} />
 
                   <button
                     type="button"
