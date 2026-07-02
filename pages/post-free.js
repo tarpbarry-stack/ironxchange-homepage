@@ -16,10 +16,9 @@ import {
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
 
 import {
-  processIXPhoto,
-  buildIXPhotoVariants,
-  getIXActivePhotoFile
+  buildIXPhotoVariants
 } from "../lib/ixvision/pipeline/processIXPhoto";
+
 import {
   getMachineMediaPreviewUrls,
   moveMachineMediaItem,
@@ -27,8 +26,13 @@ import {
 } from "../lib/machine-media/createMachineMediaModel";
 
 import {
-  getActiveMachineMediaUrl
+  getActiveMachineMediaUrl,
+  getActiveMachineMediaFile
 } from "../lib/machine-media/machineMediaIdentity";
+
+import {
+  buildSharetribeImageIdsFromMedia
+} from "../lib/machine-media/machineMediaSharetribeAdapter";
 
 import { captureIXEvent } from "../lib/posthog";
 
@@ -612,33 +616,10 @@ setPhotoItems(current => [...current, ...mapped]);
     setSaving(true);
 
     try {
-      const uploadedImages = await Promise.all(
-        photoItems.map(async photo => {
-          if (!photo.file) return null;
-          
-  const imageFile =
-  photoPolishMode === "original"
-    ? photo.file
-    : getIXActivePhotoFile(photo) ||
-      await processIXPhoto(photo.file, {
-        mode: photoPolishMode,
-        make,
-        outputQuality: 0.98,
-        maxWidth: 4096
-      });
-
-          return sdk.images.upload(
-            { image: imageFile },
-            { expand: true }
-          );
-        })
-      );
-
-      const validUploads = uploadedImages.filter(Boolean);
-
-      const imageIds = validUploads.map(
-        upload => new UUID(upload.data.data.id.uuid)
-      );
+      const imageIds = await buildSharetribeImageIdsFromMedia({
+  sdk,
+  mediaItems: photoItems
+});
 
       const categorySlug = slugify(category);
       const makeSlug = slugify(`${category}-${make}`);
