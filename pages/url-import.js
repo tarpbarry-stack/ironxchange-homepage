@@ -34,6 +34,10 @@ import {
   buildSharetribeImageIdsFromMedia
 } from "../lib/machine-media/machineMediaSharetribeAdapter";
 
+import {
+  detectAcquisitionSource
+} from "../lib/acquisition";
+
 import { captureIXEvent } from "../lib/posthog";
 
 const BRAND_YELLOW = "#FFC400";
@@ -494,7 +498,7 @@ publicData: {
 }
 
 async function importMachineFromUrl() {
-  const url = String(importUrl || "").trim();
+    const url = String(importUrl || "").trim();
 
   if (!url) {
     alert("Paste a machine URL first.");
@@ -504,16 +508,25 @@ async function importMachineFromUrl() {
   setImporting(true);
 
   try {
-    addActivity("success", `URL import started — ${url}`);
+    const source = detectAcquisitionSource(url);
 
-    alert("URL Import chassis is wired. Parser comes next.");
+    console.log("ACQUISITION SOURCE:", source);
+
+    alert(
+      `${source.label}\n\nSupported: ${source.supported ? "YES" : "NOT YET"}`
+    );
+
+    addActivity(
+      "success",
+      `Detected ${source.label}`
+    );
   } catch (error) {
-    console.error("URL IMPORT FAILED:", error);
-    alert(`URL import failed: ${error.message}`);
+    console.error(error);
+
+    alert(error.message);
   } finally {
     setImporting(false);
   }
-}
   
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
