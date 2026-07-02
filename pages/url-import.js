@@ -524,8 +524,29 @@ if (!response.ok || !data.ok) {
 }
 
 const result = data.result;
+const machine = result.machine || {};
 
 setImportResult(result);
+
+if (machine.category) setCategory(machine.category);
+if (machine.year) setYear(String(machine.year));
+if (machine.make) setMake(machine.make);
+if (machine.model) setModel(machine.model);
+if (machine.hours) setHours(String(machine.hours));
+if (machine.price) setPrice(String(machine.price));
+if (machine.serialNumber) setSerialNumber(machine.serialNumber);
+if (machine.stockNumber) setStockNumber(machine.stockNumber);
+if (machine.city) setCity(machine.city);
+if (machine.stateCode || machine.state) {
+  setStateCode(machine.stateCode || machine.state);
+}
+if (machine.description) setDescription(machine.description);
+if (Array.isArray(machine.keywords)) setSelectedKeywords(machine.keywords);
+
+if (Array.isArray(result.media) && result.media.length > 0) {
+  setPhotoItems(createMachineMediaFromUrls(result.media));
+  setActivePhotoIndex(0);
+}
 
 console.log("ACQUISITION RESULT:", result);
 
