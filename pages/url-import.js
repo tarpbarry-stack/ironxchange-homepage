@@ -527,11 +527,28 @@ const result = data.result;
 const machine = result.machine || {};
 
 setImportResult(result);
-
-if (machine.category) setCategory(machine.category);
+    
 if (machine.year) setYear(String(machine.year));
-if (machine.make) setMake(machine.make);
-if (machine.model) setModel(machine.model);
+const importedCategory = machine.category || category;
+
+if (importedCategory) {
+  setCategory(importedCategory);
+
+  const importedMakes = getV12Makes(importedCategory);
+
+  const matchedMake =
+    importedMakes.find(item =>
+      String(item).toLowerCase() === String(machine.make).toLowerCase()
+    ) || machine.make;
+
+  if (matchedMake) {
+    setMake(matchedMake);
+  }
+}
+
+if (machine.model) {
+  setModel(String(machine.model));
+}
 if (machine.hours) setHours(String(machine.hours));
 if (machine.price) setPrice(String(machine.price));
 if (machine.serialNumber) setSerialNumber(machine.serialNumber);
