@@ -27,7 +27,7 @@ import {
 
 import {
   getActiveMachineMediaUrl,
-  getActiveMachineMediaFile
+  createMachineMediaFromUrls
 } from "../lib/machine-media/machineMediaIdentity";
 
 import {
