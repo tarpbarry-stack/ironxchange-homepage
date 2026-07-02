@@ -498,7 +498,7 @@ publicData: {
 }
 
 async function importMachineFromUrl() {
-    const url = String(importUrl || "").trim();
+  const url = String(importUrl || "").trim();
 
   if (!url) {
     alert("Paste a machine URL first.");
@@ -521,12 +521,12 @@ async function importMachineFromUrl() {
       `Detected ${source.label}`
     );
   } catch (error) {
-    console.error(error);
-
-    alert(error.message);
+    console.error("URL IMPORT FAILED:", error);
+    alert(`URL import failed: ${error.message}`);
   } finally {
     setImporting(false);
   }
+}
   
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
