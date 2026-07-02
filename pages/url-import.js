@@ -225,6 +225,7 @@ const [copied, setCopied] = useState("");
 const [saving, setSaving] = useState(false);
 const [importUrl, setImportUrl] = useState("");
 const [importing, setImporting] = useState(false);
+const [importResult, setImportResult] = useState(null);
 const [loggedIn, setLoggedIn] = useState(false);
 const [sellerProfile, setSellerProfile] = useState({
   sellerName: "IronXchange Seller",
@@ -509,6 +510,8 @@ async function importMachineFromUrl() {
 
   try {
     const result = await parseAcquisitionUrl(url);
+
+setImportResult(result);
 
 console.log("ACQUISITION RESULT:", result);
 
@@ -954,7 +957,44 @@ setPhotoItems(current => [...current, ...mapped]);
                 </div>
               ))}
             </div>
-          </section>
+                   </section>
+
+          {importResult ? (
+            <section className="parser-inspector">
+              <div className="parser-inspector-head">
+                <div>
+                  <span>Parser Inspector</span>
+                  <strong>{importResult.source?.label || "Unknown Source"}</strong>
+                </div>
+
+                <small>
+                  {importResult.machine ? "MACHINE OBJECT CREATED" : "UNSUPPORTED"}
+                </small>
+              </div>
+
+              <div className="parser-inspector-grid">
+                <div>
+                  <span>Source Type</span>
+                  <strong>{importResult.source?.type || "unknown"}</strong>
+                </div>
+
+                <div>
+                  <span>Title</span>
+                  <strong>{importResult.machine?.title || "Not parsed"}</strong>
+                </div>
+
+                <div>
+                  <span>Facts</span>
+                  <strong>{importResult.confidence?.facts || "unknown"}</strong>
+                </div>
+
+                <div>
+                  <span>Photos</span>
+                  <strong>{importResult.confidence?.photos || "unknown"}</strong>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <section className="studio-grid">
             <aside className="inventory-rail">
@@ -1844,6 +1884,105 @@ select {
           background: rgba(229,62,62,.12);
           border-color: rgba(229,62,62,.60);
         }
+
+        .parser-inspector {
+  margin-bottom: 9px;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(0,209,255,.16);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(180deg, rgba(0,209,255,.045), rgba(0,209,255,0)),
+    #101010;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.035) inset,
+    0 12px 28px rgba(0,0,0,.20);
+}
+
+.parser-inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding-bottom: 8px;
+  margin-bottom: 9px;
+
+  border-bottom: 1px solid rgba(255,255,255,.055);
+}
+
+.parser-inspector-head span,
+.parser-inspector-grid span {
+  display: block;
+
+  color: #7DEBFF;
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.parser-inspector-head strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #f2f2f2;
+
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+
+.parser-inspector-head small {
+  padding: 5px 8px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(0,209,255,.22);
+
+  color: #7DEBFF;
+  background: rgba(0,209,255,.055);
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.parser-inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 8px;
+}
+
+.parser-inspector-grid div {
+  padding: 8px 9px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
+    #0b0b0b;
+}
+
+.parser-inspector-grid strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color: rgba(255,255,255,.78);
+
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+}
 
         .photo-workbench {
   padding: 9px 12px 10px;
