@@ -509,7 +509,21 @@ async function importMachineFromUrl() {
   setImporting(true);
 
   try {
-    const result = await parseAcquisitionUrl(url);
+   const response = await fetch("/api/acquisition/parse-url", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ url })
+});
+
+const data = await response.json();
+
+if (!response.ok || !data.ok) {
+  throw new Error(data.error || "URL parse failed.");
+}
+
+const result = data.result;
 
 setImportResult(result);
 
