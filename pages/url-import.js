@@ -527,6 +527,28 @@ const result = data.result;
 const machine = result.machine || {};
 
 setImportResult(result);
+
+if (
+  Array.isArray(result.distributionLinks) &&
+  result.distributionLinks.length > 0
+) {
+  const hydrated = [
+    { label: "", url: "" },
+    { label: "", url: "" },
+    { label: "", url: "" }
+  ];
+
+  result.distributionLinks
+    .slice(0, 3)
+    .forEach((link, index) => {
+      hydrated[index] = {
+        label: link.name || "",
+        url: link.url || ""
+      };
+    });
+
+  setExternalLinks(hydrated);
+}    
     
 if (machine.year) setYear(String(machine.year));
 const importedCategory = machine.category || category;
