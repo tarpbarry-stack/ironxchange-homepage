@@ -2,7 +2,7 @@
 
 import {
   parseFacebookMarketplace
-} from "../../lib/acquisition/parsers/parseFacebookMarketplace";
+} from "../../../lib/acquisition/parsers/parseFacebookMarketplace";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
