@@ -315,9 +315,6 @@ const [sellerProfile, setSellerProfile] = useState({
   const [city, setCity] = useState("");
   const [stateCode, setStateCode] = useState("");
 
-  const [sandhillsHtmlMode, setSandhillsHtmlMode] = useState(false);
-  const [sandhillsHtml, setSandhillsHtml] = useState("");
-
   const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
@@ -1061,37 +1058,7 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
 </button>
 </div>
 
-  {sandhillsHtmlMode ? (
-  <div className="sandhills-html-panel">
-    <strong>Sandhills Import</strong>
-    <p>Upload or paste the saved MachineryTrader page HTML.</p>
-
-    <input
-      type="file"
-      accept=".html,.htm,.txt"
-      onChange={async e => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const text = await file.text();
-        setSandhillsHtml(text);
-      }}
-    />
-
-    <textarea
-      value={sandhillsHtml}
-      onChange={e => setSandhillsHtml(e.target.value)}
-      placeholder="Paste saved page HTML here..."
-    />
-
-    <button
-      type="button"
-      onClick={importMachineFromSavedHtml}
-      disabled={importing || !sandhillsHtml.trim()}
-    >
-      {importing ? "Processing..." : "Parse Saved Page"}
-    </button>
-  </div>
-) : null}
+ 
     
             <div className="launch-header-actions">
               <button type="button" className="status-command live">
