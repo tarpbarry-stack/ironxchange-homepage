@@ -58,6 +58,75 @@ const stateOptions = [
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 ];
 
+const stateNameToCode = {
+  Alabama: "AL",
+  Alaska: "AK",
+  Arizona: "AZ",
+  Arkansas: "AR",
+  California: "CA",
+  Colorado: "CO",
+  Connecticut: "CT",
+  Delaware: "DE",
+  Florida: "FL",
+  Georgia: "GA",
+  Hawaii: "HI",
+  Idaho: "ID",
+  Illinois: "IL",
+  Indiana: "IN",
+  Iowa: "IA",
+  Kansas: "KS",
+  Kentucky: "KY",
+  Louisiana: "LA",
+  Maine: "ME",
+  Maryland: "MD",
+  Massachusetts: "MA",
+  Michigan: "MI",
+  Minnesota: "MN",
+  Mississippi: "MS",
+  Missouri: "MO",
+  Montana: "MT",
+  Nebraska: "NE",
+  Nevada: "NV",
+  "New Hampshire": "NH",
+  "New Jersey": "NJ",
+  "New Mexico": "NM",
+  "New York": "NY",
+  "North Carolina": "NC",
+  "North Dakota": "ND",
+  Ohio: "OH",
+  Oklahoma: "OK",
+  Oregon: "OR",
+  Pennsylvania: "PA",
+  "Rhode Island": "RI",
+  "South Carolina": "SC",
+  "South Dakota": "SD",
+  Tennessee: "TN",
+  Texas: "TX",
+  Utah: "UT",
+  Vermont: "VT",
+  Virginia: "VA",
+  Washington: "WA",
+  "West Virginia": "WV",
+  Wisconsin: "WI",
+  Wyoming: "WY"
+};
+
+function normalizeStateCode(value = "") {
+  const raw = String(value || "").trim();
+
+  if (!raw) return "";
+
+  const upper = raw.toUpperCase();
+
+  if (stateOptions.includes(upper)) return upper;
+
+  const matchedName = Object.keys(stateNameToCode).find(
+    name => name.toLowerCase() === raw.toLowerCase()
+  );
+
+  return matchedName ? stateNameToCode[matchedName] : "";
+}
+
 const workflowOptions = [
   { value: "good-listing", label: "Good Listing" },
   { value: "reprice", label: "Reprice" },
@@ -576,8 +645,10 @@ if (machine.price) setPrice(String(machine.price));
 if (machine.serialNumber) setSerialNumber(machine.serialNumber);
 if (machine.stockNumber) setStockNumber(machine.stockNumber);
 if (machine.city) setCity(machine.city);
-if (machine.stateCode || machine.state) {
-  setStateCode(machine.stateCode || machine.state);
+const normalizedState = normalizeStateCode(machine.stateCode || machine.state);
+
+if (normalizedState) {
+  setStateCode(normalizedState);
 }
 if (machine.description) setDescription(machine.description);
 if (Array.isArray(machine.keywords)) setSelectedKeywords(machine.keywords);
