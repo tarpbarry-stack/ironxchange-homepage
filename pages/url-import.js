@@ -315,6 +315,9 @@ const [sellerProfile, setSellerProfile] = useState({
   const [city, setCity] = useState("");
   const [stateCode, setStateCode] = useState("");
 
+  const [sandhillsHtmlMode, setSandhillsHtmlMode] = useState(false);
+  const [sandhillsHtml, setSandhillsHtml] = useState("");
+
   const [description, setDescription] = useState("");
 
   const [photoItems, setPhotoItems] = useState([]);
@@ -570,6 +573,17 @@ publicData: {
 async function importMachineFromUrl() {
   const url = String(importUrl || "").trim();
 
+  const lowerUrl = url.toLowerCase();
+
+if (
+  lowerUrl.includes("machinerytrader.com") ||
+  lowerUrl.includes("tractorhouse.com") ||
+  lowerUrl.includes("truckpaper.com")
+) {
+  setSandhillsHtmlMode(true);
+  return;
+}
+
   if (!url) {
     alert("Paste a machine URL first.");
     return;
@@ -673,6 +687,41 @@ addActivity(
   } catch (error) {
     console.error("URL IMPORT FAILED:", error);
     alert(`URL import failed: ${error.message}`);
+  } finally {
+    setImporting(false);
+  }
+}
+
+async function importMachineFromSavedHtml() {
+  const url = String(importUrl || "").trim();
+  const html = String(sandhillsHtml || "").trim();
+
+  if (!url || !html) {
+    alert("Paste the MachineryTrader URL and upload or paste the saved HTML.");
+    return;
+  }
+
+  setImporting(true);
+
+  try {
+    const response = await fetch("/api/test-machinerytrader-html", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url, html })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Saved HTML parse failed.");
+    }
+
+    hydrateImportResult(data.result);
+  } catch (error) {
+    console.error("SANDHILLS HTML IMPORT FAILED:", error);
+    alert(`Saved page import failed: ${error.message}`);
   } finally {
     setImporting(false);
   }
@@ -1011,6 +1060,38 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
   {importing ? "Importing..." : "Import"}
 </button>
 </div>
+
+  {sandhillsHtmlMode ? (
+  <div className="sandhills-html-panel">
+    <strong>Sandhills Import</strong>
+    <p>Upload or paste the saved MachineryTrader page HTML.</p>
+
+    <input
+      type="file"
+      accept=".html,.htm,.txt"
+      onChange={async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        setSandhillsHtml(text);
+      }}
+    />
+
+    <textarea
+      value={sandhillsHtml}
+      onChange={e => setSandhillsHtml(e.target.value)}
+      placeholder="Paste saved page HTML here..."
+    />
+
+    <button
+      type="button"
+      onClick={importMachineFromSavedHtml}
+      disabled={importing || !sandhillsHtml.trim()}
+    >
+      {importing ? "Processing..." : "Parse Saved Page"}
+    </button>
+  </div>
+) : null}
     
             <div className="launch-header-actions">
               <button type="button" className="status-command live">
