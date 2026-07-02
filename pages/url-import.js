@@ -689,40 +689,6 @@ addActivity(
   }
 }
 
-async function importMachineFromSavedHtml() {
-  const url = String(importUrl || "").trim();
-  const html = String(sandhillsHtml || "").trim();
-
-  if (!url || !html) {
-    alert("Paste the MachineryTrader URL and upload or paste the saved HTML.");
-    return;
-  }
-
-  setImporting(true);
-
-  try {
-    const response = await fetch("/api/test-machinerytrader-html", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url, html })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Saved HTML parse failed.");
-    }
-
-    hydrateImportResult(data.result);
-  } catch (error) {
-    console.error("SANDHILLS HTML IMPORT FAILED:", error);
-    alert(`Saved page import failed: ${error.message}`);
-  } finally {
-    setImporting(false);
-  }
-}
   
   function toggleKeyword(keyword) {
     setSelectedKeywords(current =>
