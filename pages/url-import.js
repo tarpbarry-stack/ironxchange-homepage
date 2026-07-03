@@ -181,6 +181,19 @@ function buildSharetribeTitle(year, make, model, hours) {
   return `${cardTitle} - ${Number(rawHours).toLocaleString()} Hrs`;
 }
 
+function buildImportedMachineTitle(machine = {}) {
+  return [
+    machine.year,
+    machine.make,
+    machine.model
+  ]
+    .filter(Boolean)
+    .map(item => String(item).trim())
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function trackLaunchEvent(eventName, payload = {}) {
   if (typeof window === "undefined") return;
 
@@ -607,28 +620,31 @@ const result = data.result;
 const machine = result.machine || {};
 
 setImportResult(result);
+setImportUrl(result.source?.url || url);
 
-if (
-  Array.isArray(result.distributionLinks) &&
-  result.distributionLinks.length > 0
-) {
+const sourceLinks =
+  Array.isArray(result.distributionLinks) && result.distributionLinks.length > 0
+    ? result.distributionLinks
+    : result.source?.url
+      ? [{ name: result.source?.label || "Source Listing", url: result.source.url }]
+      : [];
+
+if (sourceLinks.length > 0) {
   const hydrated = [
     { label: "", url: "" },
     { label: "", url: "" },
     { label: "", url: "" }
   ];
 
-  result.distributionLinks
-    .slice(0, 3)
-    .forEach((link, index) => {
-      hydrated[index] = {
-        label: link.name || "",
-        url: link.url || ""
-      };
-    });
+  sourceLinks.slice(0, 3).forEach((link, index) => {
+    hydrated[index] = {
+      label: link.name || link.label || "",
+      url: link.url || ""
+    };
+  });
 
   setExternalLinks(hydrated);
-}    
+}
     
 if (machine.year) setYear(String(machine.year));
 const importedCategory = machine.category || category;
@@ -671,9 +687,11 @@ if (Array.isArray(result.media) && result.media.length > 0) {
 
 console.log("ACQUISITION RESULT:", result);
 
+const importedMachineTitle = buildImportedMachineTitle(machine);
+
 alert(
-  `${result.source.label}\n\nMachine: ${
-    result.machine?.title || "Not supported yet"
+  `${result.source?.label || "Machine Source"}\n\nMachine: ${
+    importedMachineTitle || "Unknown Machine"
   }`
 );
 
@@ -1082,6 +1100,52 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
     </label>
   </div>
 </div>
+{importResult ? (
+            <section className="parser-inspector">
+              <div className="parser-inspector-head">
+                <div>
+                  <span>Parser Inspector</span>
+                  <strong>{importResult.source?.label || "Unknown Source"}</strong>
+                </div>
+
+                <small>
+                  {importResult.machine ? "MACHINE OBJECT CREATED" : "UNSUPPORTED"}
+                </small>
+              </div>
+
+              <div className="parser-inspector-grid">
+                <div>
+                  <span>Source Type</span>
+                  <strong>{importResult.source?.type || "unknown"}</strong>
+                </div>
+
+                <div>
+                  <span>Title</span>
+                  <strong>
+  {buildImportedMachineTitle(importResult.machine) || "Not parsed"}
+</strong>
+                </div>
+
+                <div>
+                  <span>Facts</span>
+                  <strong>
+  {importResult.machine?.year ||
+  importResult.machine?.make ||
+  importResult.machine?.model ||
+  importResult.machine?.hours ||
+  importResult.machine?.price
+    ? "parsed"
+    : importResult.confidence?.facts || "unknown"}
+</strong>
+                </div>
+
+                <div>
+                  <span>Photos</span>
+                  <strong>{importResult.confidence?.photos || "unknown"}</strong>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
             <div className="photo-strip">
               {photoItems.map((photo, index) => (
@@ -1120,42 +1184,7 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
             </div>
                    </section>
 
-          {importResult ? (
-            <section className="parser-inspector">
-              <div className="parser-inspector-head">
-                <div>
-                  <span>Parser Inspector</span>
-                  <strong>{importResult.source?.label || "Unknown Source"}</strong>
-                </div>
-
-                <small>
-                  {importResult.machine ? "MACHINE OBJECT CREATED" : "UNSUPPORTED"}
-                </small>
-              </div>
-
-              <div className="parser-inspector-grid">
-                <div>
-                  <span>Source Type</span>
-                  <strong>{importResult.source?.type || "unknown"}</strong>
-                </div>
-
-                <div>
-                  <span>Title</span>
-                  <strong>{importResult.machine?.title || "Not parsed"}</strong>
-                </div>
-
-                <div>
-                  <span>Facts</span>
-                  <strong>{importResult.confidence?.facts || "unknown"}</strong>
-                </div>
-
-                <div>
-                  <span>Photos</span>
-                  <strong>{importResult.confidence?.photos || "unknown"}</strong>
-                </div>
-              </div>
-            </section>
-          ) : null}
+          
 
           <section className="studio-grid">
             <aside className="inventory-rail">
