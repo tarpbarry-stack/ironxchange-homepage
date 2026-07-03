@@ -1069,37 +1069,6 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
             </div>
           </section>
 
-          <section className="photo-workbench">
-            <div className="workbench-head">
-  <div>
-    <span>Photo Workbench</span>
-    <strong>Drag to reorder • first image becomes hero</strong>
-  </div>
-
-  <div className="workbench-actions">
-    <div className="photo-polish-toggle">
-     {["original", "clean", "dealerPop"].map(mode => (
-        <button
-          key={mode}
-          type="button"
-          className={photoPolishMode === mode ? "active" : ""}
-          onClick={() => setPhotoPolishMode(mode)}
-        >
-          {mode === "dealerPop" ? "POP" : mode}
-        </button>
-      ))}
-    </div>
-
-    <label
-      className="photo-add"
-      onDragOver={e => e.preventDefault()}
-      onDrop={handlePhotoDrop}
-    >
-      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
-      + Add Photos
-    </label>
-  </div>
-</div>
 {importResult ? (
             <section className="parser-inspector">
               <div className="parser-inspector-head">
@@ -1146,7 +1115,38 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
               </div>
             </section>
           ) : null}
+                  
+          <section className="photo-workbench">
+            <div className="workbench-head">
+  <div>
+    <span>Photo Workbench</span>
+    <strong>Drag to reorder • first image becomes hero</strong>
+  </div>
 
+  <div className="workbench-actions">
+    <div className="photo-polish-toggle">
+     {["original", "clean", "dealerPop"].map(mode => (
+        <button
+          key={mode}
+          type="button"
+          className={photoPolishMode === mode ? "active" : ""}
+          onClick={() => setPhotoPolishMode(mode)}
+        >
+          {mode === "dealerPop" ? "POP" : mode}
+        </button>
+      ))}
+    </div>
+
+    <label
+      className="photo-add"
+      onDragOver={e => e.preventDefault()}
+      onDrop={handlePhotoDrop}
+    >
+      <input type="file" multiple accept="image/*" onChange={handlePhotos} />
+      + Add Photos
+    </label>
+  </div>
+</div>
             <div className="photo-strip">
               {photoItems.map((photo, index) => (
                 <div
