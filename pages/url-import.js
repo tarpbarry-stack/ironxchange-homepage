@@ -1793,10 +1793,11 @@ select {
 
 .live-card-shell :global(.card-photo img),
 .live-card-shell :global(.card-image img),
-.live-card-shell :global(.listing-card-photo img),
-.live-card-shell :global(img) {
-  object-fit: contain !important;
-  object-position: center center !important;
+.live-card-shell :global(.listing-card-photo img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
   background: #080808;
 }
 
