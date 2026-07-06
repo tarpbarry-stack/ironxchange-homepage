@@ -1782,6 +1782,14 @@ select {
   height: 317px;
 }
 
+.photo-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #080808;
+}
+
 .live-card-shell :global(.card.seller-mode .card-body) {
   height: 247px;
   min-height: 247px;
@@ -2386,12 +2394,13 @@ select {
     0 0 22px rgba(255,196,0,.08);
 }
 
-        .photo-tile img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
+       .photo-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #080808;
+}
 
        .hero-badge {
   position: absolute;
