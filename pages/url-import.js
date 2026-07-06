@@ -681,7 +681,16 @@ if (machine.description) setDescription(machine.description);
 if (Array.isArray(machine.keywords)) setSelectedKeywords(machine.keywords);
 
 if (Array.isArray(result.media) && result.media.length > 0) {
-  setPhotoItems(createMachineMediaFromUrls(result.media));
+  const importedMedia = createMachineMediaFromUrls(result.media).map(item => ({
+    ...item,
+    fit: "contain",
+    objectFit: "contain",
+    objectPosition: "center center",
+    imported: true,
+    source: "url-import"
+  }));
+
+  setPhotoItems(importedMedia);
   setActivePhotoIndex(0);
 }
 
@@ -1780,6 +1789,15 @@ select {
 
 .live-card-shell :global(.card-photo) {
   height: 317px;
+}
+
+.live-card-shell :global(.card-photo img),
+.live-card-shell :global(.card-image img),
+.live-card-shell :global(.listing-card-photo img),
+.live-card-shell :global(img) {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: #080808;
 }
 
 .photo-tile img {
