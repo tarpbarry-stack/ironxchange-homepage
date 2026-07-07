@@ -585,15 +585,6 @@ async function importMachineFromUrl() {
 
   const lowerUrl = url.toLowerCase();
 
-if (
-  lowerUrl.includes("machinerytrader.com") ||
-  lowerUrl.includes("tractorhouse.com") ||
-  lowerUrl.includes("truckpaper.com")
-) {
-  setSandhillsHtmlMode(true);
-  return;
-}
-
   if (!url) {
     alert("Paste a machine URL first.");
     return;
