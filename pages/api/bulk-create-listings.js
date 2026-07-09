@@ -3,6 +3,10 @@ const sharetribeSdk = require("sharetribe-flex-sdk");
 
 const { UUID, Money } = sharetribeSdk.types;
 
+const {
+  attachPassportToSharetribeListing
+} = require("../../lib/passport/attachPassportToSharetribeListing");
+
 function slugify(text = "") {
   return String(text)
     .toLowerCase()
@@ -161,17 +165,28 @@ export default async function handler(req, res) {
       );
 
       const listingId =
-        created?.data?.data?.id?.uuid || null;
+  created?.data?.data?.id?.uuid || null;
 
-      results.push({
-        row: row.rowNumber,
-        status: "created",
-        title,
-        listingId,
-        launchStudioUrl: listingId ? `/live?id=${listingId}` : null,
-        publicUrl: `/listing/${slugify(title)}`,
-        error: null
-      });
+let passport = null;
+
+if (listingId) {
+  passport = await attachPassportToSharetribeListing({
+    sdk,
+    listingId
+  });
+}
+
+results.push({
+  row: row.rowNumber,
+  status: "created",
+  title,
+  listingId,
+  passportId: passport?.passportId || null,
+  passportUrl: passport?.passportUrl || null,
+  launchStudioUrl: listingId ? `/live?id=${listingId}` : null,
+  publicUrl: `/listing/${slugify(title)}`,
+  error: null
+});
     } catch (err) {
       console.error("BULK CREATE ROW ERROR:", {
         row: row?.rowNumber,
