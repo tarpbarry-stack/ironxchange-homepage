@@ -896,11 +896,11 @@ setPhotoItems(current => [...current, ...mapped]);
         images: imageIds
       });
 
-    const newListingId = response.data.data.id.uuid;
-    
-      alert(`URL Upload created listing: ${newListingId}`);
+   const newListingId = response.data.data.id.uuid;
 
-      let passport = null;
+alert(`URL Upload created listing: ${newListingId}`);
+
+let passport = null;
 
 try {
   passport = await attachPassportToSharetribeListing({
@@ -911,11 +911,39 @@ try {
   alert(`URL Upload Passport: ${passport?.passportId || "NO PASSPORT"}`);
 } catch (passportError) {
   console.error("PASSPORT ATTACH ERROR:", passportError);
-
+  alert(`URL Upload Passport failed: ${passportError.message}`);
   throw passportError;
 }
-  alert(`URL Upload Passport failed: ${passportError.message}`);
-}
+
+addActivity(
+  "success",
+  passport?.passportId
+    ? `Posted URL Import + Passport ${passport.passportId} — ${sharetribeTitle}`
+    : `Posted URL Import — ${sharetribeTitle}`
+);
+
+     trackLaunchEvent("post_free_listing_created", {
+  listingId: newListingId,
+  passportId: passport?.passportId || "",
+  passportUrl: passport?.passportUrl || "",
+  title: sharetribeTitle,
+  selectedKeywordCount: selectedKeywords.length,
+  photoCount: photoItems.length
+});
+
+      router.push(`/live?id=${newListingId}`);
+    } catch (err) {
+      console.error("CREATE LISTING ERROR:", err);
+console.error("SHARETRIBE 400 DATA:", err?.response?.data);
+console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
+
+      addActivity("error", `Post failed — ${sharetribeTitle}`);
+
+      alert(`Post failed: ${err.message || JSON.stringify(err)}`);
+    } finally {
+      setSaving(false);
+    }
+  }
 
       addActivity(
   "success",
