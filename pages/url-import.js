@@ -945,36 +945,6 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
     }
   }
 
-      addActivity(
-  "success",
-  passport?.passportId
-    ? `Posted URL Import + Passport ${passport.passportId} — ${sharetribeTitle}`
-    : `Posted URL Import — ${sharetribeTitle}`
-);
-
-     trackLaunchEvent("post_free_listing_created", {
-  listingId: newListingId,
-  passportId: passport?.passportId || "",
-  passportUrl: passport?.passportUrl || "",
-  title: sharetribeTitle,
-  selectedKeywordCount: selectedKeywords.length,
-  photoCount: photoItems.length
-});
-
-      router.push(`/live?id=${newListingId}`);
-    } catch (err) {
-      console.error("CREATE LISTING ERROR:", err);
-console.error("SHARETRIBE 400 DATA:", err?.response?.data);
-console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
-
-      addActivity("error", `Post failed — ${sharetribeTitle}`);
-
-      alert(`Post failed: ${err.message || JSON.stringify(err)}`);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   function launchExternal(platform, url, copyLabel, copy) {
     copyText(copyLabel, copy);
 
