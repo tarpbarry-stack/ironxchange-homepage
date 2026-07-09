@@ -1,6 +1,10 @@
 const integrationSdk = require("sharetribe-flex-integration-sdk");
 const sharetribeSdk = require("sharetribe-flex-sdk");
 
+import {
+  attachPassportToIntegrationListing
+} from "../../lib/passport/attachPassportToIntegrationListing";
+
 const { UUID, Money } = sharetribeSdk.types;
 
 const {
