@@ -442,6 +442,16 @@ const [externalLinks, setExternalLinks] = useState([
     if (!id || listings.length === 0) return null;
     return listings.find(item => String(getListingId(item)) === String(id)) || null;
   }, [id, listings]);
+
+  useEffect(() => {
+  if (!listing) return;
+
+  console.log("========== SHARETRIBE LISTING ==========");
+  console.log("Listing ID:", getListingId(listing));
+  console.log("PUBLIC DATA:", listing.publicData);
+  console.log("FULL LISTING:", listing);
+  console.log("========================================");
+}, [listing]);
   
   const listingId = getListingId(listing || {});
   const listingUrl = listing ? getListingUrl(listing) : "";
