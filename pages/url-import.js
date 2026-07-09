@@ -689,8 +689,6 @@ if (Array.isArray(result.media) && result.media.length > 0) {
   setActivePhotoIndex(0);
 }
 
-console.log("ACQUISITION RESULT:", result);
-
 const importedMachineTitle = buildImportedMachineTitle(machine);
 
 alert(
@@ -898,8 +896,6 @@ setPhotoItems(current => [...current, ...mapped]);
 
    const newListingId = response.data.data.id.uuid;
 
-alert(`URL Upload created listing: ${newListingId}`);
-
 let passport = null;
 
 try {
@@ -908,13 +904,12 @@ try {
     listingId: newListingId
   });
 
-  alert(`URL Upload Passport: ${passport?.passportId || "NO PASSPORT"}`);
+  if (passport?.passportId) {
+    alert(`Passport created: ${passport.passportId}`);
+  }
 } catch (passportError) {
-  console.error("PASSPORT ATTACH ERROR:", passportError);
-  alert(`URL Upload Passport failed: ${passportError.message}`);
   throw passportError;
 }
-
 addActivity(
   "success",
   passport?.passportId
