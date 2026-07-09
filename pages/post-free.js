@@ -36,6 +36,10 @@ import {
 
 import { captureIXEvent } from "../lib/posthog";
 
+import {
+  attachPassportToSharetribeListing
+} from "../lib/passport/attachPassportToSharetribeListing";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { Money, UUID } = sdkTypes;
