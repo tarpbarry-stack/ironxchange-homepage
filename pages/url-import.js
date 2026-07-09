@@ -40,6 +40,10 @@ import {
 
 import { captureIXEvent } from "../lib/posthog";
 
+import {
+  attachPassportToSharetribeListing
+} from "../lib/passport/attachPassportToSharetribeListing";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { Money, UUID } = sdkTypes;
@@ -892,16 +896,34 @@ setPhotoItems(current => [...current, ...mapped]);
         images: imageIds
       });
 
-      const newListingId = response.data.data.id.uuid;
+      const newListingId = response.data.data.id.uuid
 
-      addActivity("success", `Posted free listing — ${sharetribeTitle}`);
+      let passport = null;
 
-      trackLaunchEvent("post_free_listing_created", {
-        listingId: newListingId,
-        title: sharetribeTitle,
-        selectedKeywordCount: selectedKeywords.length,
-        photoCount: photoItems.length
-      });
+try {
+  passport = await attachPassportToSharetribeListing({
+    sdk,
+    listingId: newListingId
+  });
+} catch (passportError) {
+  console.error("PASSPORT ATTACH ERROR:", passportError);
+}
+
+      addActivity(
+  "success",
+  passport?.passportId
+    ? `Posted URL Import + Passport ${passport.passportId} — ${sharetribeTitle}`
+    : `Posted URL Import — ${sharetribeTitle}`
+);
+
+     trackLaunchEvent("post_free_listing_created", {
+  listingId: newListingId,
+  passportId: passport?.passportId || "",
+  passportUrl: passport?.passportUrl || "",
+  title: sharetribeTitle,
+  selectedKeywordCount: selectedKeywords.length,
+  photoCount: photoItems.length
+});
 
       router.push(`/live?id=${newListingId}`);
     } catch (err) {
