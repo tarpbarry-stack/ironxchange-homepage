@@ -677,14 +677,34 @@ setPhotoItems(current => [...current, ...mapped]);
 
       const newListingId = response.data.data.id.uuid;
 
-      addActivity("success", `Posted free listing — ${sharetribeTitle}`);
+let passport = null;
+
+try {
+  passport = await attachPassportToSharetribeListing({
+    sdk,
+    listingId: newListingId,
+    visibility: "private",
+    status: "active"
+  });
+} catch (passportError) {
+  console.error("PASSPORT ATTACH ERROR:", passportError);
+}
+
+addActivity(
+  "success",
+  passport?.passportId
+    ? `Posted free listing + Passport ${passport.passportId} — ${sharetribeTitle}`
+    : `Posted free listing — ${sharetribeTitle}`
+);
 
       trackLaunchEvent("post_free_listing_created", {
-        listingId: newListingId,
-        title: sharetribeTitle,
-        selectedKeywordCount: selectedKeywords.length,
-        photoCount: photoItems.length
-      });
+  listingId: newListingId,
+  passportId: passport?.passportId || "",
+  passportUrl: passport?.passportUrl || "",
+  title: sharetribeTitle,
+  selectedKeywordCount: selectedKeywords.length,
+  photoCount: photoItems.length
+});
 
       router.push(`/live?id=${newListingId}`);
     } catch (err) {
