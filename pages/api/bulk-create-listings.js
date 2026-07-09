@@ -174,10 +174,10 @@ export default async function handler(req, res) {
 let passport = null;
 
 if (listingId) {
-  passport = await attachPassportToSharetribeListing({
+  passport = await attachPassportToIntegrationListing({
     sdk,
     listingId
-  });
+});
 }
 
 results.push({
