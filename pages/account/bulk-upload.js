@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
-import sharetribeSdk from "sharetribe-flex-sdk";
+import { createInstance } from "sharetribe-flex-sdk";
 import { normalizeListingRow } from "../../lib/normalizeListingRow";
 
 const CSV_HEADERS = [
@@ -61,11 +61,9 @@ export default function BulkUploadPage() {
           return;
         }
 
-        const sdk =
-          sharetribeSdk.createInstance({
-            clientId,
-          });
-
+        const sdk = createInstance({
+  clientId
+});
         const response =
           await sdk.currentUser.show();
 
