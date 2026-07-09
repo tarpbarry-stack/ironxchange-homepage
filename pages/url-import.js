@@ -911,6 +911,9 @@ try {
   alert(`URL Upload Passport: ${passport?.passportId || "NO PASSPORT"}`);
 } catch (passportError) {
   console.error("PASSPORT ATTACH ERROR:", passportError);
+
+  throw passportError;
+}
   alert(`URL Upload Passport failed: ${passportError.message}`);
 }
 
