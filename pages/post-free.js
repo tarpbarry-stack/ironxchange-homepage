@@ -680,12 +680,10 @@ setPhotoItems(current => [...current, ...mapped]);
 let passport = null;
 
 try {
-  passport = await attachPassportToSharetribeListing({
+ passport = await attachPassportToSharetribeListing({
     sdk,
-    listingId: newListingId,
-    visibility: "private",
-    status: "active"
-  });
+    listingId: newListingId
+});
 } catch (passportError) {
   console.error("PASSPORT ATTACH ERROR:", passportError);
 }
