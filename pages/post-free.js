@@ -829,9 +829,12 @@ addActivity(
             </div>
 
             <div className="post-header-imports">
-  <button type="button" onClick={() => router.push("/bulk-import")}>
-    Bulk Import
-  </button>
+  <button
+  type="button"
+  onClick={() => router.push("/account/bulk-upload")}
+>
+  Bulk Upload
+</button>
 
   <button type="button" onClick={() => router.push("/url-import")}>
     URL Import
