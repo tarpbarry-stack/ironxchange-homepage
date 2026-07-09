@@ -896,7 +896,9 @@ setPhotoItems(current => [...current, ...mapped]);
         images: imageIds
       });
 
-      const newListingId = response.data.data.id.uuid
+    const newListingId = response.data.data.id.uuid;
+    
+      alert(`URL Upload created listing: ${newListingId}`);
 
       let passport = null;
 
@@ -905,8 +907,11 @@ try {
     sdk,
     listingId: newListingId
   });
+
+  alert(`URL Upload Passport: ${passport?.passportId || "NO PASSPORT"}`);
 } catch (passportError) {
   console.error("PASSPORT ATTACH ERROR:", passportError);
+  alert(`URL Upload Passport failed: ${passportError.message}`);
 }
 
       addActivity(
