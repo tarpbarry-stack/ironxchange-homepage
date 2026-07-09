@@ -9,17 +9,14 @@ export default async function handler(req, res) {
     const sourceType = req.query.sourceType || "vercel-test";
     const sourceId = req.query.sourceId || "machine-001";
 
-    const passport = await ensurePassportForMachine({
+    const result = await ensurePassportForMachine({
       sourceType,
       sourceId,
       visibility: "private",
       status: "active"
     });
 
-    return res.status(200).json({
-      ok: true,
-      passport
-    });
+    return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
       ok: false,
