@@ -72,12 +72,11 @@ export default function BulkUploadPage() {
         const uuid =
           response?.data?.data?.id?.uuid;
 
-        if (!uuid) {
-          setSellerStatus(
-            "Seller not detected. Use UUID below."
-          );
-          return;
-        }
+       if (!uuid) {
+  setSellerStatus("Seller not detected. Please log in again.");
+  setAuthorId("");
+  return;
+}
 
         setAuthorId(uuid);
 
@@ -91,9 +90,8 @@ export default function BulkUploadPage() {
           err
         );
 
-        setSellerStatus(
-          "Seller not detected. Use UUID below."
-        );
+       setSellerStatus("Seller not detected. Please log in again.");
+setAuthorId("");
       }
     }
 
@@ -188,9 +186,9 @@ export default function BulkUploadPage() {
     setResults([]);
 
     if (!authorId.trim()) {
-      setError(
-        "Missing seller UUID"
-      );
+     setError(
+  "Seller account not detected. Please log in again."
+);
       return;
     }
 
@@ -332,26 +330,9 @@ export default function BulkUploadPage() {
               <strong>
                 {sellerStatus}
               </strong>
-
-              <small>
-                Auto seller
-                detection is not
-                available yet.
-                Use seller UUID
-                for V1.
-              </small>
-
-              <input
-                value={authorId}
-
-                onChange={event =>
-                  setAuthorId(
-                    event.target.value
-                  )
-                }
-
-                placeholder="Seller UUID"
-              />
+<small>
+  Bulk Upload will use the currently logged-in seller account.
+</small>
             </div>
           </div>
 
@@ -406,10 +387,11 @@ export default function BulkUploadPage() {
             )}
 
             <button
-              type="button"
-              className="primary-btn"
-              onClick={importMachines}
-            >
+  type="button"
+  className="primary-btn"
+  onClick={importMachines}
+  disabled={isImporting || !authorId}
+>
               {isImporting
                 ? "Importing..."
                 : "Import Machines"}
