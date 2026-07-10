@@ -7,6 +7,11 @@ export default function IXIMachineObjectFace2({
 }) {
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
+  const passportId =
+  listing.passportId ||
+  publicData.passportId ||
+  "";
+
   const sellerLogo =
     listing.sellerLogo ||
     listing.profileImage ||
@@ -55,6 +60,31 @@ export default function IXIMachineObjectFace2({
   className="mof2"
   {...(dragHandleProps || {})}
 >
+
+  <div className="mof2-passport-wrap">
+  <div className="mof2-passport-label">
+    IXI Machine Passport
+  </div>
+
+  {passportId ? (
+    <a
+      href={`/p/${passportId}`}
+      className="mof2-passport-id"
+      onClick={event => {
+        event.stopPropagation();
+      }}
+      onPointerDown={event => {
+        event.stopPropagation();
+      }}
+    >
+      {passportId}
+    </a>
+  ) : (
+    <div className="mof2-passport-id mof2-passport-id-empty">
+      &nbsp;
+    </div>
+  )}
+</div>
       <div className="mof2-logo-wrap">
         {sellerLogo ? (
           <img src={sellerLogo} alt={sellerName} />
@@ -113,7 +143,7 @@ export default function IXIMachineObjectFace2({
 
   position: relative;
 
-  padding: 14px 14px 30px;
+  padding: 10px 14px 30px;
 
   display: flex;
           flex-direction: column;
@@ -126,16 +156,69 @@ export default function IXIMachineObjectFace2({
           color: #f2f2f2;
         }
 
+.mof2-passport-wrap {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin: 0 0 6px;
+}
+
+.mof2-passport-label {
+  color: rgba(255,255,255,.27);
+
+  font-size: 6.5px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .86px;
+
+  text-transform: uppercase;
+}
+
+.mof2-passport-id {
+  display: inline-block;
+
+  margin-top: 4px;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 8px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .82px;
+
+  text-decoration: none;
+  text-transform: uppercase;
+
+  transition:
+    color .14s ease,
+    text-shadow .14s ease;
+}
+
+.mof2-passport-id:hover {
+  color: #FFC400;
+
+  text-shadow:
+    0 0 12px rgba(255,196,0,.12);
+}
+
+.mof2-passport-id-empty {
+  min-height: 8px;
+  pointer-events: none;
+}
+
         .mof2-logo-wrap {
-          height: 54px;
+          height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .mof2-logo-wrap img {
-          max-height: 46px;
+          max-height: 42px;
           max-width: 150px;
           object-fit: contain;
         }
