@@ -839,7 +839,6 @@ function cycleSlugOutline(e) {
 </div>
   </div>
 </section>
-        </section>
 
        <IXInspectLightbox
   open={lightboxOpen}
