@@ -433,11 +433,11 @@ const heroImage =
 
   const sellerLogo = getSellerLogoUrl(listing);
 
-  const description =
-    cleanText(listing.description) ||
-    cleanText(listing.publicData?.description) ||
-    cleanText(listing.publicData?.details) ||
-    "Seller description has not been added yet.";
+ const description =
+  cleanText(listing.description) ||
+  cleanText(listing.publicData?.description) ||
+  cleanText(listing.publicData?.details) ||
+  "";
 
   const selectedHighlights = [
     ...(Array.isArray(listing.keywords) ? listing.keywords : []),
@@ -724,9 +724,25 @@ function cycleSlugOutline(e) {
           </div>
 
           <section className="panel description">
-            <h2>Description</h2>
+            <div className="description-meta-row">
+  <div className="description-meta-item description-heading">
+    Description
+  </div>
 
-            <p>{description}</p>
+  <div className="description-meta-item">
+    Serial : <span>{serial}</span>
+  </div>
+
+  <div className="description-meta-item">
+    Stock : <span>{stockNumber}</span>
+  </div>
+
+  <div className="description-meta-item">
+    Loc : <span>{location}</span>
+  </div>
+</div>
+
+<p>{description}</p>
           </section>
 
           <section className="panel seller-panel">
@@ -2184,8 +2200,20 @@ min-width: 0;
   border-radius: 15px;
 }
 
-        .description h2 {
+        .description-meta-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: baseline;
+
+  width: 100%;
   margin: 0 0 15px;
+  padding: 0 0 12px;
+
+  border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+.description-meta-item {
+  min-width: 0;
 
   color: rgba(255,255,255,.86);
 
@@ -2195,8 +2223,22 @@ min-width: 0;
   letter-spacing: .72px;
   text-transform: uppercase;
 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
+}
+
+.description-meta-item:nth-child(2),
+.description-meta-item:nth-child(3),
+.description-meta-item:nth-child(4) {
+  text-align: center;
+}
+
+.description-meta-item span {
+  color: rgba(255,255,255,.58);
 }
 
         .description p {
@@ -2625,10 +2667,44 @@ min-width: 0;
     padding: 14px 4% 38px;
     gap: 0;
   }
+  
+@media (max-width: 700px) {
+  .description-meta-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+  }
+
+  .description-meta-item {
+    text-align: left !important;
+  }
+
+  .description-heading {
+    order: 4;
+  }
+
+  .description-meta-item:nth-child(2) {
+    order: 1;
+  }
+
+  .description-meta-item:nth-child(3) {
+    order: 2;
+  }
+
+  .description-meta-item:nth-child(4) {
+    order: 3;
+  }
 
   .title-row {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+@media (max-width: 430px) {
+  .description-meta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .description-heading {
+    order: 4;
   }
 
  h1 {
