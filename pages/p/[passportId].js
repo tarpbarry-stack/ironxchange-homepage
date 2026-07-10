@@ -450,6 +450,12 @@ const salesmanPhone =
 const salesmanEmail =
   cleanText(passport?.salesmanEmail) || "";
 
+const hasSalesContact = Boolean(
+  salesmanName ||
+  salesmanPhone ||
+  salesmanEmail
+);
+
  const description =
   cleanText(listing.description) ||
   cleanText(listing.publicData?.description) ||
@@ -763,7 +769,13 @@ function cycleSlugOutline(e) {
 <p>{description}</p>
           </section>
 
-          <section className="panel seller-panel">
+          <section
+  className={`panel seller-panel ${
+    hasSalesContact
+      ? "has-sales-contact"
+      : "no-sales-contact"
+  }`}
+>
   <div className="seller-company-block">
     <span className="seller-eyebrow">Presented By</span>
 
@@ -775,15 +787,19 @@ function cycleSlugOutline(e) {
       />
 
       <div className="seller-company-copy">
-        <strong>{sellerName}</strong>
+  <strong>{sellerName}</strong>
 
-        <p>{sellerCompanyName}</p>
+  {sellerCompanyName &&
+  sellerCompanyName.toLowerCase() !== sellerName.toLowerCase() ? (
+    <p>{sellerCompanyName}</p>
+  ) : null}
 
-        <p>{sellerLocation}</p>
-      </div>
+  <p>{sellerLocation}</p>
+</div>
     </div>
   </div>
 
+  {hasSalesContact && (
   <div className="salesman-block">
     <span className="salesman-label">Sales Contact</span>
 
@@ -802,6 +818,7 @@ function cycleSlugOutline(e) {
       <strong>{salesmanEmail}</strong>
     </div>
   </div>
+)}
 
   <div className="seller-actions">
     <a
@@ -817,17 +834,14 @@ function cycleSlugOutline(e) {
       Message
     </a>
 
-    <button
-      type="button"
-      className="call-btn"
-      onClick={() => {
-        if (salesmanPhone) {
-          window.location.href = `tel:${salesmanPhone}`;
-        }
-      }}
-    >
-      Call
-    </button>
+    {salesmanPhone ? (
+  <a
+    href={`tel:${salesmanPhone}`}
+    className="call-btn"
+  >
+    Call
+  </a>
+) : null}
 
     <a
       href={`/yard/${listing.authorId}`}
@@ -1376,18 +1390,25 @@ function cycleSlugOutline(e) {
      ========================================================= */
 
   .seller-panel {
-    display: grid;
-    grid-template-columns:
-      minmax(300px, 1.15fr)
-      minmax(245px, 0.85fr)
-      auto;
+  display: grid;
+  align-items: center;
+  gap: 20px;
 
-    align-items: center;
-    gap: 20px;
+  padding: 16px 18px;
+}
 
-    padding: 16px 18px;
-  }
+.seller-panel.has-sales-contact {
+  grid-template-columns:
+    minmax(300px, 1.15fr)
+    minmax(245px, 0.85fr)
+    auto;
+}
 
+.seller-panel.no-sales-contact {
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+}
   .seller-company-block,
   .seller-company-copy,
   .salesman-block {
@@ -1714,23 +1735,39 @@ function cycleSlugOutline(e) {
         0 11px 25px rgba(0, 0, 0, 0.18);
     }
 
-    .seller-panel {
-      grid-template-columns:
-        minmax(260px, 1fr)
-        minmax(215px, 0.8fr);
+    .seller-panel.has-sales-contact {
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(215px, 0.8fr);
 
-      gap: 18px;
-    }
+  gap: 18px;
+}
 
-    .seller-actions {
-      grid-column: 1 / -1;
+.seller-panel.no-sales-contact {
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
 
-      justify-content: flex-end;
+  gap: 18px;
+}
 
-      padding-top: 11px;
+.seller-panel.has-sales-contact .seller-actions {
+  grid-column: 1 / -1;
 
-      border-top: 1px solid rgba(255, 255, 255, 0.045);
-    }
+  justify-content: flex-end;
+
+  padding-top: 11px;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+}
+
+.seller-panel.no-sales-contact .seller-actions {
+  grid-column: auto;
+
+  padding-top: 0;
+
+  border-top: 0;
+}
   }
 
   /* =========================================================
