@@ -433,6 +433,15 @@ const heroImage =
 
   const sellerLogo = getSellerLogoUrl(listing);
 
+const salesmanName =
+  cleanText(passport?.salesmanName) || "";
+
+const salesmanPhone =
+  cleanText(passport?.salesmanPhone) || "";
+
+const salesmanEmail =
+  cleanText(passport?.salesmanEmail) || "";
+
  const description =
   cleanText(listing.description) ||
   cleanText(listing.publicData?.description) ||
@@ -636,7 +645,8 @@ function cycleSlugOutline(e) {
       <main>
         <Navbar />
 
-        <section className="page">
+       <section className="page">
+  <div className="passport-shell">
           {cameFromBrowse && (
             <button
               type="button"
@@ -746,50 +756,89 @@ function cycleSlugOutline(e) {
           </section>
 
           <section className="panel seller-panel">
-            <div>
-              <span className="seller-eyebrow">IronXchange Seller</span>
-              <h2>Contact Seller</h2>
+  <div className="seller-company-block">
+    <span className="seller-eyebrow">Presented By</span>
 
-             <div className="seller-row">
-  <SellerLogoDecal
-  logo={sellerLogo}
-  name={sellerName}
-  variant="slug"
-/>
+    <div className="seller-row">
+      <SellerLogoDecal
+        logo={sellerLogo}
+        name={sellerName}
+        variant="slug"
+      />
 
-  <div>
-    <strong>{sellerName}</strong>
-    <p>{sellerCompanyName}</p>
-    <p>{sellerLocation}</p>
+      <div className="seller-company-copy">
+        <strong>{sellerName}</strong>
+
+        <p>{sellerCompanyName}</p>
+
+        <p>{sellerLocation}</p>
+      </div>
+    </div>
   </div>
+
+  <div className="salesman-block">
+    <span className="salesman-label">Sales Contact</span>
+
+    <div className="salesman-line">
+      <span>Name</span>
+      <strong>{salesmanName}</strong>
+    </div>
+
+    <div className="salesman-line">
+      <span>Phone</span>
+      <strong>{salesmanPhone}</strong>
+    </div>
+
+    <div className="salesman-line">
+      <span>Email</span>
+      <strong>{salesmanEmail}</strong>
+    </div>
+  </div>
+
+  <div className="seller-actions">
+    <a
+      href={
+        loggedIn
+          ? `/inquire?listingId=${listing.id}`
+          : `/login?next=${encodeURIComponent(
+              `/inquire?listingId=${listing.id}`
+            )}`
+      }
+      className="message-btn"
+    >
+      Message
+    </a>
+
+    <button
+      type="button"
+      className="call-btn"
+      onClick={() => {
+        if (salesmanPhone) {
+          window.location.href = `tel:${salesmanPhone}`;
+        }
+      }}
+    >
+      Call
+    </button>
+
+    <a
+      href={`/yard/${listing.authorId}`}
+      className="yard-btn"
+    >
+      Seller Yard
+    </a>
+  </div>
+</section>
+<div className="passport-identity">
+  <div>
+    <strong>IXI Machine Passport</strong>
+    <span>{passport?.passportId || ""}</span>
+  </div>
+
+  <span>Powered by IronXchange</span>
 </div>
-
-      </div>           
-      
-      <div className="seller-actions">
-              <a
-                href={
-                  loggedIn
-                    ? `/inquire?listingId=${listing.id}`
-                    : `/login?next=${encodeURIComponent(`/inquire?listingId=${listing.id}`)}`
-                }
-                className="message-btn"
-              >
-                Message Seller
-              </a>
-
-              <a
-                href={`/yard/${listing.authorId}`}
-                className="yard-btn"
-              >
-                View Seller Yard
-              </a>
-
-              <button type="button" className="call-btn">
-                Call
-              </button>
-            </div>
-          </section>
+  </div>
+</section>
         </section>
 
        <IXInspectLightbox
@@ -846,6 +895,47 @@ a {
   font-family: inherit;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
+}
+
+.passport-shell {
+  width: 100%;
+
+  padding: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    #101010;
+
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 20px;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset,
+    0 30px 80px rgba(0,0,0,.30);
+}
+.passport-shell .photo-grid {
+  margin-bottom: 10px;
+}
+
+.passport-shell .description {
+  margin-top: 10px;
+}
+
+.passport-shell .seller-panel {
+  margin-top: 10px;
+}
+
+.passport-shell .passport-identity {
+  margin-top: 10px;
+}
+
+.passport-shell .panel + .panel,
+.passport-shell .panel + section {
+  margin-top: 10px;
 }
 
 button {
@@ -2259,16 +2349,81 @@ min-width: 0;
   -webkit-font-smoothing: antialiased;
 }
 
-     .seller-panel {
-  padding: 20px 22px;
+    .seller-panel {
+  padding: 16px 18px;
 
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.2fr)
+    minmax(220px, .8fr)
+    auto;
+
   align-items: center;
-
   gap: 24px;
 
   border-radius: 15px;
+}
+
+.seller-company-block,
+.salesman-block {
+  min-width: 0;
+}
+
+.seller-company-copy {
+  min-width: 0;
+}
+
+.salesman-block {
+  padding-left: 22px;
+
+  border-left: 1px solid rgba(255,255,255,.055);
+}
+
+.salesman-label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: rgba(255,255,255,.34);
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .72px;
+  text-transform: uppercase;
+}
+
+.salesman-line {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+
+  align-items: baseline;
+  gap: 10px;
+
+  margin-top: 7px;
+}
+
+.salesman-line span {
+  color: rgba(255,255,255,.30);
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .58px;
+  text-transform: uppercase;
+}
+
+.salesman-line strong {
+  min-width: 0;
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 11px;
+  font-weight: 750;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
         .seller-row {
@@ -2338,86 +2493,32 @@ min-width: 0;
   text-transform: uppercase;
 }
 
-        .seller-actions {
-  display: flex;
-  justify-content: flex-end;
+       .seller-actions {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+
   align-items: center;
+  justify-content: end;
 
-  gap: 10px;
-
-  min-width: 0;
-
-  flex-wrap: wrap;
+  gap: 7px;
 }
 
-        .message-btn,
+.message-btn,
 .yard-btn,
 .call-btn {
-  height: 40px;
+  height: 34px;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 82px;
 
-  padding: 0 17px;
+  padding: 0 12px;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
-    ),
-    #101010;
+  border-radius: 10px;
 
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 12px;
-
-  color: #EAEAEA;
-
-  text-decoration: none;
-
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 950;
 
-  letter-spacing: .62px;
-  text-transform: uppercase;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
-
-  transition:
-    border-color .15s ease,
-    background .15s ease,
-    color .15s ease,
-    transform .15s ease,
-    box-shadow .15s ease;
+  letter-spacing: .58px;
 }
-
-       .message-btn {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.10),
-      rgba(255,196,0,0)
-    ),
-    #151515;
-
-  border-color: rgba(255,196,0,.24);
-
-  color: #FFC400;
-
-  min-width: 142px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset,
-    0 0 18px rgba(255,196,0,.05);
-}
-
-        .yard-btn,
-.call-btn {
-  min-width: 108px;
-}
-
         .message-btn:hover,
 .yard-btn:hover,
 .call-btn:hover {
@@ -2464,8 +2565,46 @@ min-width: 0;
   text-transform: uppercase;
 }
 
+.passport-identity {
+  min-height: 46px;
 
-        .mobile-gallery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 12px 4px 0;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+
+  color: rgba(255,255,255,.30);
+
+  text-transform: uppercase;
+}
+
+.passport-identity > div {
+  display: flex;
+  align-items: baseline;
+
+  gap: 12px;
+}
+
+.passport-identity strong {
+  color: rgba(255,255,255,.58);
+
+  font-size: 9px;
+  font-weight: 950;
+
+  letter-spacing: .72px;
+}
+
+.passport-identity span {
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: .64px;
+}        .mobile-gallery {
           display: none;
         }
 
@@ -2663,10 +2802,46 @@ min-width: 0;
         }
 
     @media (max-width: 850px) {
-  .page {
-    padding: 14px 4% 38px;
-    gap: 0;
+  .passport-shell {
+    padding: 10px;
+
+    border-radius: 16px;
   }
+
+  .seller-panel {
+    grid-template-columns: 1fr;
+
+    align-items: stretch;
+
+    gap: 16px;
+
+    padding: 15px;
+  }
+
+  .salesman-block {
+    padding: 14px 0 0;
+
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,.055);
+  }
+
+  .seller-actions {
+    grid-template-columns: 1fr;
+
+    width: 100%;
+
+    gap: 7px;
+  }
+
+  .message-btn,
+  .yard-btn,
+  .call-btn {
+    width: 100%;
+    min-width: 0;
+
+    height: 36px;
+  }
+}
   
 @media (max-width: 700px) {
   .description-meta-row {
@@ -2698,6 +2873,19 @@ min-width: 0;
     grid-template-columns: 1fr;
     gap: 6px;
   }
+  
+@media (max-width: 600px) {
+  .passport-identity {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+  .passport-identity > div {
+    flex-wrap: wrap;
+  }
+}  
 @media (max-width: 430px) {
   .description-meta-row {
     grid-template-columns: 1fr;
