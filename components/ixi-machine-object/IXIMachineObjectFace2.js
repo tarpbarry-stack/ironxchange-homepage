@@ -61,7 +61,7 @@ export default function IXIMachineObjectFace2({
   {...(dragHandleProps || {})}
 >
 
-  <div className="mof2-passport-wrap">
+ <div className="mof2-passport-wrap">
   <div className="mof2-passport-label">
     IXI Machine Passport
   </div>
@@ -160,51 +160,65 @@ export default function IXIMachineObjectFace2({
   width: 100%;
 
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
 
-  margin: 0 0 6px;
+  gap: 12px;
+
+  margin: 0 0 7px;
+  padding: 0 1px 6px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .mof2-passport-label {
-  color: rgba(255,255,255,.27);
+  min-width: 0;
+
+  color: rgba(255, 255, 255, 0.32);
 
   font-size: 6.5px;
   font-weight: 950;
   line-height: 1;
-  letter-spacing: .86px;
+  letter-spacing: 0.86px;
 
+  text-align: left;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .mof2-passport-id {
-  display: inline-block;
+  display: block;
+  min-width: 0;
 
-  margin-top: 4px;
+  margin: 0;
 
-  color: rgba(255,255,255,.62);
+  color: rgba(255, 255, 255, 0.68);
 
   font-size: 8px;
   font-weight: 950;
   line-height: 1;
-  letter-spacing: .82px;
+  letter-spacing: 0.82px;
 
+  text-align: right;
   text-decoration: none;
   text-transform: uppercase;
+  white-space: nowrap;
 
   transition:
-    color .14s ease,
-    text-shadow .14s ease;
+    color 0.14s ease,
+    text-shadow 0.14s ease;
 }
 
 .mof2-passport-id:hover {
-  color: #FFC400;
+  color: #ffc400;
 
   text-shadow:
-    0 0 12px rgba(255,196,0,.12);
+    0 0 12px rgba(255, 196, 0, 0.12);
 }
 
 .mof2-passport-id-empty {
+  min-width: 40px;
   min-height: 8px;
   pointer-events: none;
 }
