@@ -854,7 +854,10 @@ function cycleSlugOutline(e) {
 <div className="passport-identity">
   <div>
     <strong>IXI Machine Passport</strong>
-    <span>{passport?.passportId || ""}</span>
+
+    <span className="passport-number">
+      Passport: {passport?.passportId || ""}
+    </span>
   </div>
 
   <span>Powered by IronXchange</span>
@@ -974,7 +977,7 @@ function cycleSlugOutline(e) {
     width: 100%;
     max-width: 1530px;
     margin: 0 auto;
-    padding: 18px 2.5% 42px;
+    padding: 24px 2.5% 42px;
   }
 
   .passport-shell {
@@ -990,7 +993,7 @@ function cycleSlugOutline(e) {
       #101010;
 
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
+    border-radius: 24px;
 
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.025),
@@ -1043,7 +1046,7 @@ function cycleSlugOutline(e) {
     align-items: end;
     gap: 20px;
 
-    margin: 0 0 9px;
+    margin: 0 0 7px;
     padding: 0 2px 10px;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.055);
@@ -1126,7 +1129,7 @@ function cycleSlugOutline(e) {
     align-items: start;
     gap: 12px;
 
-    margin: 0 0 9px;
+    margin: 0 0 7px;
   }
 
   .hero-wrap {
@@ -1320,7 +1323,7 @@ function cycleSlugOutline(e) {
 
   .description,
   .seller-panel {
-    margin-top: 9px;
+    margin-top: 7px;
   }
 
   /* =========================================================
@@ -1338,7 +1341,7 @@ function cycleSlugOutline(e) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: baseline;
 
-    margin: 0 0 13px;
+    margin: 0 0 15px;
     padding: 0 0 11px;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.045);
@@ -1436,12 +1439,12 @@ function cycleSlugOutline(e) {
   }
 
   .seller-row {
-    display: flex;
-    align-items: center;
-    gap: 17px;
+  display: flex;
+  align-items: center;
+  gap: 19px;
 
-    min-width: 0;
-  }
+  min-width: 0;
+}
 
   .seller-company-copy strong {
     display: block;
@@ -1511,20 +1514,22 @@ function cycleSlugOutline(e) {
     text-overflow: ellipsis;
   }
 
-  .seller-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 7px;
+ .seller-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
 
-    min-width: 0;
-  }
+  min-width: 0;
+
+  transform: translateY(-1px);
+}
 
   .message-btn,
   .yard-btn,
   .call-btn {
     min-width: 84px;
-    height: 34px;
+    height: 32px;
 
     display: inline-flex;
     align-items: center;
@@ -1610,15 +1615,15 @@ function cycleSlugOutline(e) {
      ========================================================= */
 
   .passport-identity {
-    min-height: 43px;
+    min-height: 40px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 18px;
 
-    margin-top: 9px;
-    padding: 11px 4px 0;
+    margin-top: 7px;
+    padding: 9px 4px 0;
 
     border-top: 1px solid rgba(255, 255, 255, 0.045);
 
@@ -1634,7 +1639,7 @@ function cycleSlugOutline(e) {
   }
 
   .passport-identity strong {
-    color: rgba(255, 255, 255, 0.57);
+    color: rgba(255, 255, 255, 0.63);
 
     font-size: 9px;
     font-weight: 950;
@@ -1647,6 +1652,10 @@ function cycleSlugOutline(e) {
     letter-spacing: 0.64px;
   }
 
+  .passport-number {
+  color: rgba(255, 255, 255, 0.38);
+}
+
   /* =========================================================
      TABLET / MOBILE PHOTOGRAPHY
      ========================================================= */
@@ -1658,7 +1667,7 @@ function cycleSlugOutline(e) {
 
     .passport-shell {
       padding: 12px;
-      border-radius: 17px;
+      border-radius: 20px;
     }
 
     .photo-grid {
@@ -1853,7 +1862,7 @@ function cycleSlugOutline(e) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 9px 14px;
 
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       padding-bottom: 10px;
     }
 
@@ -1908,6 +1917,8 @@ function cycleSlugOutline(e) {
       padding-top: 13px;
 
       border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+      transform: none;
     }
 
     .message-btn,
