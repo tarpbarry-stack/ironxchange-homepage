@@ -7,7 +7,6 @@ import { getListingId } from "../../lib/listingFormatters";
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 
 import MachineBadges from "../../components/MachineBadges";
 import IXInspectLightbox from "../../components/IXInspectLightbox";
@@ -864,8 +863,6 @@ function cycleSlugOutline(e) {
   }}
 />
       </main>
-
-      <Footer />
 
               <style jsx>{`
   :global(html),
@@ -1927,7 +1924,7 @@ function cycleSlugOutline(e) {
     .seller-row {
       gap: 12px;
     }
-
+    
     .seller-company-copy strong {
       font-size: 15px;
     }
