@@ -156,9 +156,11 @@ ${listingUrl}`;
 
 export default function ListingPage() {
   const router = useRouter();
-  const { slug, from } = router.query;
-
+  const { passportId, from } = router.query;
+  
   const [listings, setListings] = useState([]);
+  const [passport, setPassport] = useState(null);
+  const [passportError, setPassportError] = useState("");
   const [savedIds, setSavedIds] = useState([]);
   const [saveBusy, setSaveBusy] = useState(false);
   const [sdkInstance, setSdkInstance] = useState(null);
@@ -176,36 +178,75 @@ export default function ListingPage() {
 }, []);
   
   useEffect(() => {
-    async function loadPage() {
+  if (!router.isReady || !passportId) return;
+
+  async function loadPage() {
+    try {
+      setPassportError("");
+
+      const SharetribeSdk = await import("sharetribe-flex-sdk");
+
+      const sdk = SharetribeSdk.createInstance({
+        clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+      });
+
+      setSdkInstance(sdk);
+
       try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
-
-        const sdk = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
-
-        setSdkInstance(sdk);
-
-        try {
-          const currentUser = await fetchCurrentUserWithSavedListings(sdk);
-          setSavedIds(getSavedListingIdsFromUser(currentUser));
-        } catch {
-          setSavedIds([]);
-        }
-
-        const res = await fetch("/api/listings");
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setListings(data);
-        }
-      } catch (err) {
-        console.error("Listing page load failed:", err);
+        const currentUser = await fetchCurrentUserWithSavedListings(sdk);
+        setSavedIds(getSavedListingIdsFromUser(currentUser));
+      } catch {
+        setSavedIds([]);
       }
-    }
 
-    loadPage();
-  }, []);
+      /*
+       * 1. Resolve permanent Passport identity.
+       */
+      const passportResponse = await fetch(
+        `/api/passport/${encodeURIComponent(passportId)}`
+      );
+
+      const passportPayload = await passportResponse.json();
+
+      if (!passportResponse.ok || !passportPayload?.ok) {
+        throw new Error(
+          passportPayload?.error || "Passport could not be found"
+        );
+      }
+
+      const resolvedPassport = passportPayload.passport;
+
+      if (!resolvedPassport?.sourceId) {
+        throw new Error("Passport does not contain a sourceId");
+      }
+
+      setPassport(resolvedPassport);
+
+      /*
+       * 2. Load current Sharetribe listings.
+       *
+       * This preserves the same normalized listing object that the slug page
+       * already uses. We are only changing how the correct machine is selected.
+       */
+      const listingsResponse = await fetch("/api/listings");
+      const listingsPayload = await listingsResponse.json();
+
+      if (!listingsResponse.ok || !Array.isArray(listingsPayload)) {
+        throw new Error("Machine listing lookup failed");
+      }
+
+      setListings(listingsPayload);
+    } catch (error) {
+      console.error("Passport page load failed:", error);
+
+      setPassportError(
+        error.message || "Passport could not be loaded"
+      );
+    }
+  }
+
+  loadPage();
+}, [router.isReady, passportId]);
 
   useEffect(() => {
     async function checkAuth() {
@@ -227,9 +268,16 @@ export default function ListingPage() {
   }, []);
 
   const listing = useMemo(() => {
-    if (!slug || listings.length === 0) return null;
-    return listings.find(item => slugify(item.title) === slug);
-  }, [slug, listings]);
+  if (!passport?.sourceId || listings.length === 0) {
+    return null;
+  }
+
+  return listings.find(item => {
+    const itemId = String(getListingId(item) || item.id || "");
+
+    return itemId === String(passport.sourceId);
+  });
+}, [passport, listings]);
 
 useEffect(() => {
   if (!listing) return;
@@ -260,22 +308,50 @@ useEffect(() => {
 
   
 
-  const currentIndex = useMemo(() => {
-    if (!slug || listings.length === 0) return -1;
-    return listings.findIndex(item => slugify(item.title) === slug);
-  }, [slug, listings]);
+  const prevListing = null;
+  const nextListing = null;
+  
+ if (passportError) {
+  return (
+    <main className="loading">
+      <div>
+        <strong>Machine Passport unavailable</strong>
+        <p>{passportError}</p>
+      </div>
 
-  const prevListing = currentIndex > 0 ? listings[currentIndex - 1] : null;
+      <style jsx>{`
+        .loading {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          padding: 40px;
+          background: #0b0b0b;
+          color: #d6d6d6;
+          font-family: Arial, sans-serif;
+          text-align: center;
+        }
 
-  const nextListing =
-    currentIndex >= 0 && currentIndex < listings.length - 1
-      ? listings[currentIndex + 1]
-      : null;
+        strong {
+          display: block;
+          margin-bottom: 10px;
+          color: #f2f2f2;
+          font-size: 20px;
+        }
 
-  if (!listing) {
-    return (
-      <main className="loading">
-        Loading listing...
+        p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.48);
+          font-size: 13px;
+        }
+      `}</style>
+    </main>
+  );
+}
+
+if (!passport || !listing) {
+  return (
+    <main className="loading">
+      Loading Machine Passport...
         <style jsx>{`
           .loading {
             min-height: 100vh;
@@ -383,10 +459,14 @@ const heroImage =
   const listingId = getListingId(listing);
   const isSaved = savedIds.includes(String(listingId));
 
-  const listingUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : `https://www.ironxchange.com/listing/${slugify(title)}`;
+  const passportUrl =
+  passport?.passportUrl ||
+  `https://www.ironxchange.com/p/${passportId}`;
+
+const listingUrl =
+  typeof window !== "undefined"
+    ? window.location.href
+    : passportUrl;
 
   const buyerShareCopy = buildBuyerShareCopy(
     listing,
@@ -545,7 +625,7 @@ function cycleSlugOutline(e) {
 
         <>
       <Head>
-        <title>{title} | IronXchange</title>
+        <title>{title} | IXI Machine Passport</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
