@@ -161,6 +161,11 @@ const POCKET_TARGETS = [
   "pocketRight",
   "pocketRight2"
 ];
+  const DIRECT_CONTAINER_TARGETS = [
+  ...POCKET_TARGETS,
+  "stackTop",
+  "stackBottom"
+];
 
 
   const [activeStackHover, setActiveStackHover] = useState("");
@@ -1041,19 +1046,20 @@ function cycleCardScaleMode() {
 
    
 <IXIWorkspaceEngine>
-  {({
-    leftPocketMode,
-    setLeftPocketMode,
-    rightPocketMode,
-    setRightPocketMode,
-    leftPocket2Mode,
-    setLeftPocket2Mode,
-    rightPocket2Mode,
-    setRightPocket2Mode,
-    armedDestination,
-    setArmedDestination,
-    toggleArmedDestination
-  }) => {
+ {({
+  leftPocketMode,
+  setLeftPocketMode,
+  rightPocketMode,
+  setRightPocketMode,
+  leftPocket2Mode,
+  setLeftPocket2Mode,
+  rightPocket2Mode,
+  setRightPocket2Mode,
+  armedDestination,
+  setArmedDestination,
+  toggleArmedDestination,
+  cycleActiveStackTarget
+}) => {
           const handleWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
     getMachineContainer,
@@ -1102,11 +1108,25 @@ if (armedDestination === "theater") {
   return;
 }
 
-  if (!POCKET_TARGETS.includes(armedDestination)) {
-    return;
-  }
+ if (!DIRECT_CONTAINER_TARGETS.includes(armedDestination)) {
+  return;
+}
 
-  moveMachineToContainer(id, armedDestination);
+moveMachineToContainer(id, armedDestination);
+
+if (armedDestination === "stackTop") {
+  setActiveStacksOpen(current => ({
+    ...current,
+    top: true
+  }));
+}
+
+if (armedDestination === "stackBottom") {
+  setActiveStacksOpen(current => ({
+    ...current,
+    bottom: true
+  }));
+}
 }
 
     return (
