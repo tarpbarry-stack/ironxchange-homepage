@@ -1212,6 +1212,7 @@ if (armedDestination === "stackBottom") {
   toggleOutlineFilter={toggleOutlineFilter}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
+  cycleActiveStackTarget={cycleActiveStackTarget}
 />
                 </div>
 
