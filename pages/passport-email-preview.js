@@ -29,8 +29,7 @@ sellerLocation: "Charlotte, NC",
 sellerPhone: "704-555-0100",
 sellerEmail: "sales@example.com",
 
-sellerLogo:
-  "PASTE_THE_REAL_COMMERCIAL_CREDIT_GROUP_LOGO_URL_HERE",
+sellerLogo: "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a395a42-3040-45af-a441-50aa1e74d14a?auto=format&fit=clip&h=750&w=750&s=f285ae22a5324766575122a7b48c6b42",
   
     photoUrls: [
   "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9c-353a-45d2-bb91-4096af1efe67?auto=format&fit=clip&h=750&w=750&s=15b56c74de2886f2aebd240de2b8cec8",
