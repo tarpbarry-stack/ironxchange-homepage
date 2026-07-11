@@ -170,6 +170,10 @@ const POCKET_TARGETS = [
   "pocketRight2"
 ];
 
+const DIRECT_CONTAINER_TARGETS = [
+  ...POCKET_TARGETS,
+  "stackTop"
+];
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
@@ -1299,39 +1303,25 @@ function cycleCardScaleMode() {
 
   const id = String(getListingId(listing));
 
-  if (armedDestination === "theater") {
-    updateIxiCardState(id, {
-      theaterNotice: "SENDING TO THEATER..."
-    });
-
-    sendMachineToTheater({
-      userId: ixiUserId,
-      listingId: id,
-      receptor: "rail"
-    })
-      .then(() => {
-        updateIxiCardState(id, {
-          theaterNotice: "✓ SENT TO THEATER — RAIL"
-        });
-
-        setTimeout(() => {
-          updateIxiCardState(id, {
-            theaterNotice: ""
-          });
-        }, 1800);
-      })
-      .catch(err => {
-        console.error("SELLER YARD THEATER SEND FAILED", err);
-      });
-
+  if (
+    !DIRECT_CONTAINER_TARGETS.includes(
+      armedDestination
+    )
+  ) {
     return;
   }
 
-  if (!POCKET_TARGETS.includes(armedDestination)) {
-    return;
-  }
+  moveMachineToContainer(
+    id,
+    armedDestination
+  );
 
-  moveMachineToContainer(id, armedDestination);
+  if (armedDestination === "stackTop") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: true
+    }));
+  }
 }
     return (
   <IXIDragEngine
