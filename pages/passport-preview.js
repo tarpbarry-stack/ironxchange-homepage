@@ -2,6 +2,8 @@
 
 import buildPassportPresentation from "../lib/passport/buildPassportPresentation";
 
+import PassportPresentationCard from "../components/passport/PassportPresentationCard";
+
 const TEST_LISTING = {
   attributes: {
     title: "2020 JOHN DEERE 872GP",
@@ -53,48 +55,10 @@ export default function PassportPreviewPage() {
         fontFamily: "Arial, sans-serif"
       }}
     >
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto"
-        }}
-      >
-        <div
-          style={{
-            color: "#ffc400",
-            fontSize: "12px",
-            fontWeight: "800",
-            letterSpacing: "0.14em",
-            marginBottom: "10px"
-          }}
-        >
-          PASSPORT PRESENTATION ENGINE TEST
-        </div>
-
-        <h1
-          style={{
-            margin: "0 0 24px",
-            fontSize: "36px"
-          }}
-        >
-          {presentation.title}
-        </h1>
-
-        <pre
-          style={{
-            whiteSpace: "pre-wrap",
-            overflowWrap: "anywhere",
-            background: "#111111",
-            border: "1px solid #333333",
-            borderRadius: "10px",
-            padding: "24px",
-            fontSize: "14px",
-            lineHeight: "1.6"
-          }}
-        >
-          {JSON.stringify(presentation, null, 2)}
-        </pre>
-      </div>
+     
+<PassportPresentationCard
+  presentation={presentation}
+/>
     </main>
   );
 }
