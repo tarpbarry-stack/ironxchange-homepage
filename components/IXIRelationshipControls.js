@@ -539,176 +539,348 @@ export default function IXIRelationshipControls({
           gap: clamp(5px, 1.15vw, 14px);
         }
 
-        .ixi-relationship-color,
-        .ixi-relationship-outline {
-          border: 1px solid rgba(255,255,255,.04);
-          background: transparent;
-          padding: 0;
-          cursor: pointer;
-          opacity: .12;
-          filter: grayscale(1);
-          transition:
-            opacity .16s ease,
-            box-shadow .16s ease,
-            border-color .16s ease,
-            transform .16s ease,
-            filter .16s ease;
-        }
+        /* ================================================= */
+/* IXI RELATIONSHIP COLOR + OUTLINE CONTROL LANGUAGE */
+/* ================================================= */
 
-        .ixi-relationship-shell.revealed .stage-dead {
-          opacity: .34;
-          filter: grayscale(1);
-          border-color: rgba(255,255,255,.075);
-        }
+/*
+ * LIGHTS OFF
+ *
+ * Every control remains visible.
+ * Colors remain grayscale.
+ * Existing and selected relationships are still distinguishable.
+ */
+.ixi-relationship-color,
+.ixi-relationship-outline {
+  border: 1px solid rgba(255,255,255,.04);
+  padding: 0;
+  cursor: pointer;
 
-        .ixi-relationship-color {
-          width: 20px;
-          height: 8px;
-          border-radius: 1px;
-        }
+  opacity: .16;
+  filter: grayscale(1);
 
-        .ixi-relationship-outline {
-          width: 24px;
-          height: 14px;
-          border-radius: 3px;
-          position: relative;
-          margin-left: -2px;
-          margin-right: -2px;
-        }
+  box-shadow: none;
 
-        .ixi-relationship-outline::after {
-          content: "";
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          width: 15px;
-          transform: translate(-50%, -50%);
-          background: rgba(255,255,255,.18);
-        }
+  transition:
+    opacity .16s ease,
+    box-shadow .16s ease,
+    border-color .16s ease,
+    transform .16s ease,
+    filter .16s ease;
+}
 
-        .outline-1::after {
-          height: 1px;
-        }
+/* ----------------------------- */
+/* COLOR CONTROL BASE GEOMETRY   */
+/* ----------------------------- */
 
-        .outline-3::after {
-          height: 3px;
-        }
+.ixi-relationship-color {
+  width: 20px;
+  height: 8px;
 
-        .outline-5::after {
-          height: 5px;
-        }
+  border-radius: 1px;
+}
 
-        .stage-dead {
-          background: transparent !important;
-          box-shadow: none;
-        }
+/* ----------------------------- */
+/* OUTLINE CONTROL BASE GEOMETRY */
+/* ----------------------------- */
 
-        .ixi-relationship-color.stage-dead {
-          background: transparent !important;
-        }
+.ixi-relationship-outline {
+  width: 24px;
+  height: 14px;
 
-        .stage-exists {
-          opacity: .46;
-          filter: grayscale(.35);
-          box-shadow: none;
-        }
+  position: relative;
 
-        .ixi-relationship-shell.revealed .stage-exists {
-          opacity: .58;
-          filter: grayscale(.22);
-          box-shadow: 0 0 6px rgba(255,255,255,.035);
-        }
+  margin-left: -2px;
+  margin-right: -2px;
 
-        .stage-selected {
-          opacity: 1;
-          filter: grayscale(0);
-          transform: translateY(-1px);
-          border-color: rgba(255,255,255,.18);
-          box-shadow:
-            0 0 0 1px rgba(255,255,255,.08),
-            0 0 10px rgba(255,255,255,.08);
-        }
+  border-radius: 3px;
+  background: transparent;
+}
 
-        .ixi-relationship-outline.stage-dead {
-          opacity: .16;
-          background: transparent;
-          border-color: rgba(255,255,255,.04);
-          box-shadow: none;
-        }
+.ixi-relationship-outline::after {
+  content: "";
 
-        .ixi-relationship-shell.revealed .ixi-relationship-outline.stage-dead {
-          opacity: .34;
-          border-color: rgba(255,255,255,.075);
-        }
+  position: absolute;
+  left: 50%;
+  top: 50%;
 
-        .ixi-relationship-outline.stage-dead::after {
-          background: rgba(255,255,255,.14);
-        }
+  width: 15px;
 
-        .ixi-relationship-outline.stage-exists {
-          opacity: .52;
-          border-color: rgba(255,255,255,.095);
-          box-shadow: none;
-        }
+  transform: translate(-50%, -50%);
 
-        .ixi-relationship-shell.revealed .ixi-relationship-outline.stage-exists {
-          opacity: .62;
-          border-color: rgba(255,255,255,.12);
-          box-shadow: 0 0 6px rgba(255,255,255,.035);
-        }
+  background: rgba(255,255,255,.18);
+}
 
-        .ixi-relationship-outline.stage-exists::after {
-          background: rgba(255,255,255,.38);
-        }
+.outline-1::after {
+  height: 1px;
+}
 
-        .ixi-relationship-outline.stage-selected {
-          opacity: 1;
-          border-color: rgba(255,255,255,.18);
-          box-shadow:
-            0 0 0 1px rgba(255,255,255,.08),
-            0 0 10px rgba(255,255,255,.08);
-        }
+.outline-3::after {
+  height: 3px;
+}
 
-        .ixi-relationship-outline.stage-selected::after {
-          background: rgba(255,255,255,.82);
-        }
+.outline-5::after {
+  height: 5px;
+}
 
-        .ixi-relationship-color:hover,
-        .ixi-relationship-outline:hover {
-          transform: translateY(-1px);
-        }
+/* ================================= */
+/* COLOR STATES — LIGHTS OFF         */
+/* ================================= */
 
-        .color-none {
-          background: rgba(255,255,255,.12);
-        }
+/*
+ * UNUSED COLOR
+ *
+ * Visible as its grayscale equivalent.
+ * No longer erased with transparent !important.
+ */
+.ixi-relationship-color.stage-dead {
+  opacity: .18;
+  filter: grayscale(1);
 
-        .color-green {
-          background: rgba(56,161,105,.82);
-        }
+  border-color: rgba(255,255,255,.045);
 
-        .color-yellow {
-          background: rgba(255,196,0,.82);
-        }
+  box-shadow: none;
+}
 
-        .color-red {
-          background: rgba(229,62,62,.82);
-        }
+/*
+ * COLOR EXISTS ON ONE OR MORE MACHINES
+ *
+ * Slightly more visible than unused,
+ * but still grayscale while the lights are off.
+ */
+.ixi-relationship-color.stage-exists {
+  opacity: .32;
+  filter: grayscale(1);
 
-        .color-cyan {
-          background: rgba(0,194,255,.82);
-        }
+  border-color: rgba(255,255,255,.075);
 
-        .color-white {
-          background: rgba(255,255,255,.72);
-        }
+  box-shadow: none;
+}
 
-        .color-blue {
-          background: rgba(49,130,206,.82);
-        }
+/*
+ * SELECTED FOR FILTERING
+ *
+ * Selection remains recognizable even with
+ * the relationship lights turned off.
+ */
+.ixi-relationship-color.stage-selected {
+  opacity: .62;
+  filter: grayscale(1);
 
-        .color-orange {
-          background: rgba(249,133,18,.82);
-        }
+  transform: translateY(-1px);
+
+  border-color: rgba(255,255,255,.17);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.055),
+    0 0 7px rgba(255,255,255,.045);
+}
+
+/* ================================= */
+/* COLOR STATES — LIGHTS ON          */
+/* ================================= */
+
+/*
+ * UNUSED COLOR
+ *
+ * Lights are on, but no machine currently
+ * carries this relationship color.
+ *
+ * It remains grayscale and clearly visible.
+ */
+.ixi-relationship-shell.revealed
+.ixi-relationship-color.stage-dead {
+  opacity: .36;
+  filter: grayscale(1);
+
+  border-color: rgba(255,255,255,.085);
+
+  box-shadow: none;
+}
+
+/*
+ * RELATIONSHIP EXISTS
+ *
+ * Bring back a restrained amount of the
+ * actual color so occupancy is immediately visible.
+ */
+.ixi-relationship-shell.revealed
+.ixi-relationship-color.stage-exists {
+  opacity: .66;
+  filter: grayscale(.18);
+
+  border-color: rgba(255,255,255,.12);
+
+  box-shadow:
+    0 0 6px rgba(255,255,255,.035);
+}
+
+/*
+ * SELECTED FOR FILTERING
+ *
+ * Full actual color.
+ * Only slightly brighter than the relationship-exists state.
+ */
+.ixi-relationship-shell.revealed
+.ixi-relationship-color.stage-selected {
+  opacity: 1;
+  filter: grayscale(0);
+
+  transform: translateY(-1px);
+
+  border-color: rgba(255,255,255,.22);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.075),
+    0 0 10px rgba(255,255,255,.09);
+}
+
+/* ================================= */
+/* OUTLINE STATES — LIGHTS OFF       */
+/* ================================= */
+
+.ixi-relationship-outline.stage-dead {
+  opacity: .16;
+
+  border-color: rgba(255,255,255,.04);
+  background: transparent;
+
+  box-shadow: none;
+}
+
+.ixi-relationship-outline.stage-dead::after {
+  background: rgba(255,255,255,.14);
+}
+
+.ixi-relationship-outline.stage-exists {
+  opacity: .34;
+
+  border-color: rgba(255,255,255,.08);
+
+  box-shadow: none;
+}
+
+.ixi-relationship-outline.stage-exists::after {
+  background: rgba(255,255,255,.34);
+}
+
+.ixi-relationship-outline.stage-selected {
+  opacity: .68;
+
+  transform: translateY(-1px);
+
+  border-color: rgba(255,255,255,.17);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.055),
+    0 0 7px rgba(255,255,255,.045);
+}
+
+.ixi-relationship-outline.stage-selected::after {
+  background: rgba(255,255,255,.68);
+}
+
+/* ================================= */
+/* OUTLINE STATES — LIGHTS ON        */
+/* ================================= */
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-dead {
+  opacity: .34;
+
+  border-color: rgba(255,255,255,.075);
+
+  box-shadow: none;
+}
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-dead::after {
+  background: rgba(255,255,255,.22);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-exists {
+  opacity: .64;
+
+  border-color: rgba(255,255,255,.12);
+
+  box-shadow:
+    0 0 6px rgba(255,255,255,.035);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-exists::after {
+  background: rgba(255,255,255,.48);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-selected {
+  opacity: 1;
+
+  transform: translateY(-1px);
+
+  border-color: rgba(255,255,255,.20);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.075),
+    0 0 10px rgba(255,255,255,.085);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-relationship-outline.stage-selected::after {
+  background: rgba(255,255,255,.88);
+}
+
+/* ----------------------------- */
+/* CONTROL HOVER                 */
+/* ----------------------------- */
+
+.ixi-relationship-color:hover,
+.ixi-relationship-outline:hover {
+  transform: translateY(-1px);
+}
+
+/* ----------------------------- */
+/* REAL COLOR DEFINITIONS        */
+/* ----------------------------- */
+
+/*
+ * These backgrounds always remain underneath.
+ * The grayscale filter controls whether the
+ * actual color is visible.
+ */
+
+.color-none {
+  background: rgba(255,255,255,.12);
+}
+
+.color-green {
+  background: rgba(56,161,105,.82);
+}
+
+.color-yellow {
+  background: rgba(255,196,0,.82);
+}
+
+.color-red {
+  background: rgba(229,62,62,.82);
+}
+
+.color-cyan {
+  background: rgba(0,194,255,.82);
+}
+
+.color-white {
+  background: rgba(255,255,255,.72);
+}
+
+.color-blue {
+  background: rgba(49,130,206,.82);
+}
+
+.color-orange {
+  background: rgba(249,133,18,.82);
+}
 
         .ixi-mobile-nav-row {
           display: none;
