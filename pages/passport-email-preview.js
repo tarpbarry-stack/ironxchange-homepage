@@ -9,12 +9,13 @@ const TEST_LISTING = {
     description:
       "Clean 872GP motor grader with Topcon components, good tires, cold air, and job-ready condition.",
 
-    publicData: {
-      passportId: "IXIA8D72FK",
+   publicData: {
+  passportId: "IXIWQMZWAE",
+  passportUrl: "https://preview.ironxchange.com/p/IXIWQMZWAE",
 
-      year: "2020",
-      make: "JOHN DEERE",
-      model: "872GP",
+  year: "2020",
+  make: "DEERE",
+  model: "872GP",
 
       hours: "3994",
       price: "169500",
@@ -28,13 +29,19 @@ const TEST_LISTING = {
       sellerPhone: "704-555-0100",
       sellerEmail: "sales@example.com",
 
-      photoUrls: [
-        "https://placehold.co/1200x800?text=Hero+Photo",
-        "https://placehold.co/600x400?text=Photo+2",
-        "https://placehold.co/600x400?text=Photo+3",
-        "https://placehold.co/600x400?text=Photo+4",
-        "https://placehold.co/600x400?text=Photo+5"
-      ]
+  
+    photoUrls: [
+  "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9c-353a-45d2-bb91-4096af1efe67?auto=format&fit=clip&h=750&w=750&s=15b56c74de2886f2aebd240de2b8cec8",
+
+  "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9d-b6b2-4fdd-986b-dda7162e5135?auto=format&fit=clip&h=750&w=750&s=272961cccb1e65610384eddc41ed8d5e",
+
+  "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9a-5b7e-42e5-94ca-9a74a9a7fe7d?auto=format&fit=clip&h=750&w=750&s=02029b5d1acc5e832c67289737cc15fa",
+
+  "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b98-acf6-47bf-9bea-b2cf577fee12?auto=format&fit=clip&h=750&w=750&s=c1e46ca4155123256de61e650584d220",
+
+  "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9d-bb2d-4a5d-b549-f106851b051f?auto=format&fit=clip&h=750&w=750&s=47757339cfe305a5bac147d5193e91df"     
+]
+      
     }
   }
 };
@@ -43,7 +50,8 @@ export default function PassportEmailPreviewPage() {
   const presentation = buildPassportPresentation({
     listing: TEST_LISTING
   });
-
+console.log(presentation);
+  
   const email = renderPassportEmailHtml({
     presentation,
     baseUrl: "https://preview.ironxchange.com"
@@ -88,7 +96,7 @@ export default function PassportEmailPreviewPage() {
           Subject: {email.subject}
         </div>
 
-        <iframe
+                <iframe
           title="Passport Email Preview"
           srcDoc={email.html}
           style={{
