@@ -146,6 +146,10 @@ function handlePocketArm(target) {
   onToggleArmedDestination(target);
 }
 
+function handleTheaterArm() {
+  handlePocketArm("theater");
+}
+  
 function handleActiveStackArm() {
   if (controlsAreLocked()) {
     console.info(
