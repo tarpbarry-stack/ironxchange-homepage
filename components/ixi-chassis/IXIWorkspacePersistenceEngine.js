@@ -67,11 +67,44 @@ function saveWorkspaceLayoutRecord({
   });
 }
 
+function saveWorkspaceSettingsRecord({
+  saveIxiMachinePatch,
+  userId,
+  settings = {},
+  settingsId = IXI_WORKSPACE_SETTINGS_ID
+}) {
+  if (!userId) {
+    console.warn(
+      "IXI WORKSPACE SETTINGS WRITE BLOCKED — IDENTITY NOT READY"
+    );
+
+    return null;
+  }
+
+  if (typeof saveIxiMachinePatch !== "function") {
+    console.warn(
+      "IXI WORKSPACE SETTINGS WRITE BLOCKED — SAVE CLIENT MISSING"
+    );
+
+    return null;
+  }
+
+  return saveIxiMachinePatch({
+    userId,
+    listingId: settingsId,
+    patch: {
+      ...settings,
+      updatedAt: Date.now()
+    }
+  });
+}
+
 export {
   IXI_WORKSPACE_SETTINGS_ID,
   IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord
+  saveWorkspaceLayoutRecord,
+  saveWorkspaceSettingsRecord
 };
 
