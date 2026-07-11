@@ -52,7 +52,8 @@ export default function PassportEmailPreviewPage() {
   const presentation = buildPassportPresentation({
     listing: TEST_LISTING
   });
-console.log(presentation);
+  
+console.log("PASSPORT SELLER", presentation.seller);
   
   const email = renderPassportEmailHtml({
     presentation,
