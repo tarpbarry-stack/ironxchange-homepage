@@ -25,10 +25,12 @@ const TEST_LISTING = {
       stockNumber: "BM1339",
 
       sellerName: "Commercial Credit Group",
-      sellerLocation: "Charlotte, NC",
-      sellerPhone: "704-555-0100",
-      sellerEmail: "sales@example.com",
+sellerLocation: "Charlotte, NC",
+sellerPhone: "704-555-0100",
+sellerEmail: "sales@example.com",
 
+sellerLogo:
+  "PASTE_THE_REAL_COMMERCIAL_CREDIT_GROUP_LOGO_URL_HERE",
   
     photoUrls: [
   "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/6a507b9c-353a-45d2-bb91-4096af1efe67?auto=format&fit=clip&h=750&w=750&s=15b56c74de2886f2aebd240de2b8cec8",
