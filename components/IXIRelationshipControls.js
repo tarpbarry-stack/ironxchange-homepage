@@ -52,7 +52,8 @@ export default function IXIRelationshipControls({
   setPocketThumbSize = null,
   isMachineDragging = false,
   armedDestination = "",
-  onToggleArmedDestination = () => {}
+  onToggleArmedDestination = () => {},
+  onCycleActiveStackTarget = () => {}
 }) {
   const [railRevealed, setRailRevealed] = useState(false);
   const [parkBrakeOn, setParkBrakeOn] = useState(false);
@@ -142,9 +143,21 @@ export default function IXIRelationshipControls({
 
 <button
   type="button"
-  className="ixi-active-stack-button"
-  aria-label="Active stack"
-  title="Active Stack"
+  className={`ixi-active-stack-button ${
+    armedDestination === "stackTop" ||
+    armedDestination === "stackBottom"
+      ? "armed"
+      : ""
+  }`}
+  onClick={onCycleActiveStackTarget}
+  aria-label="Cycle active stack destination"
+  title={
+    armedDestination === "stackTop"
+      ? "Top Active Stack Armed"
+      : armedDestination === "stackBottom"
+      ? "Bottom Active Stack Armed"
+      : "Arm Active Stack"
+  }
 >
   <span>A</span>
 </button>
@@ -288,6 +301,16 @@ export default function IXIRelationshipControls({
         }
 
         .ixi-relationship-shell.revealed .ixi-theater-button.armed {
+  opacity: 1;
+  color: rgba(0,194,255,.96);
+  border-color: rgba(0,194,255,.72);
+  text-shadow:
+    0 0 6px rgba(0,194,255,.42),
+    0 0 14px rgba(0,194,255,.20);
+}
+
+.ixi-relationship-shell.revealed
+.ixi-active-stack-button.armed {
   opacity: 1;
   color: rgba(0,194,255,.96);
   border-color: rgba(0,194,255,.72);
