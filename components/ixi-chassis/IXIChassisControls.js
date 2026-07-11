@@ -19,7 +19,13 @@ export default function IXIChassisControls({
   ixiOutlineFilter,
   toggleOutlineFilter,
   armedDestination,
-  toggleArmedDestination
+  toggleArmedDestination,
+  
+railRevealed = false,
+toggleRailRevealed = () => {},
+parkBrakeOn = false,
+toggleParkBrake = () => {},
+cycleActiveStackTarget = () => {}
 }) {
   return (
     <section className="workspace-controls">
@@ -60,6 +66,15 @@ export default function IXIChassisControls({
           setPocketThumbSize={setPocketThumbSize}
           armedDestination={armedDestination}
           onToggleArmedDestination={toggleArmedDestination}
+          railRevealed={railRevealed}
+          onToggleRailRevealed={toggleRailRevealed}
+
+          parkBrakeOn={parkBrakeOn}
+          onToggleParkBrake={toggleParkBrake}
+
+          onCycleActiveStackTarget={
+              cycleActiveStackTarget
+          }
         />
       </IXIControlSurface>
 
