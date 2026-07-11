@@ -10,6 +10,10 @@ import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
+import {
+  loadIXIListingsEnvironment
+} from "../lib/listings/IXIListingsEngine";
+
 import MachineBadges from "../components/MachineBadges";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
@@ -379,6 +383,8 @@ export default function ListingLivePage() {
   const [commandBusy, setCommandBusy] = useState("");
 
   const [currentUserId, setCurrentUserId] = useState("");
+  const [isAuthenticated, setIsAuthenticated] =
+  useState(false);
   const [launchActionNotice, setLaunchActionNotice] = useState(null);
 
   const [previewFace, setPreviewFace] = useState(1);
@@ -417,14 +423,79 @@ const [externalLinks, setExternalLinks] = useState([
 ]);
 
   useEffect(() => {
-    fetch("/api/listings")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setListings(data);
-      })
-      .catch(err => console.error("Launch Studio load failed:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  let cancelled = false;
+
+  async function loadLaunchEnvironment() {
+    try {
+      const environment =
+        await loadIXIListingsEnvironment({
+          includePrivateState: true
+        });
+
+      if (cancelled) return;
+
+      if (!environment.isAuthenticated) {
+        setIsAuthenticated(false);
+        setCurrentUserId("");
+        setListings([]);
+        setLoading(false);
+
+        router.replace(
+          `/login?returnTo=${encodeURIComponent(
+            router.asPath || "/live"
+          )}`
+        );
+
+        return;
+      }
+
+      const authenticatedUserId =
+        String(environment.userId || "");
+
+      const ownedListings =
+        (environment.listings || []).filter(item => {
+          const authorId =
+            String(getAuthorId(item) || "");
+
+          const status =
+            getListingStatus(item);
+
+          return (
+            authorId === authenticatedUserId &&
+            status !== "deleted" &&
+            status !== "archived"
+          );
+        });
+
+      setIsAuthenticated(true);
+      setCurrentUserId(authenticatedUserId);
+      setListings(ownedListings);
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "LAUNCH ENVIRONMENT LOAD FAILED:",
+        error
+      );
+
+      setIsAuthenticated(false);
+      setCurrentUserId("");
+      setListings([]);
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  }
+
+  if (router.isReady) {
+    loadLaunchEnvironment();
+  }
+
+  return () => {
+    cancelled = true;
+  };
+}, [router.isReady]);
 
   useEffect(() => {
   if (!router.isReady) return;
@@ -449,22 +520,28 @@ const [externalLinks, setExternalLinks] = useState([
   const isPaused = listingStatus === "paused";
 
   const sellerInventory = useMemo(() => {
-    if (!listing) return [];
+  if (!isAuthenticated || !currentUserId) {
+    return [];
+  }
 
-    const authorId = getAuthorId(listing);
+  return listings.filter(item => {
+    const itemStatus =
+      getListingStatus(item);
 
-    return listings.filter(item => {
-      const itemStatus = getListingStatus(item);
+    const authorId =
+      String(getAuthorId(item) || "");
 
-      if (itemStatus === "deleted" || itemStatus === "archived") return false;
-
-      if (authorId) {
-        return String(getAuthorId(item)) === String(authorId);
-      }
-
-      return true;
-    });
-  }, [listing, listings]);
+    return (
+      authorId === String(currentUserId) &&
+      itemStatus !== "deleted" &&
+      itemStatus !== "archived"
+    );
+  });
+}, [
+  listings,
+  isAuthenticated,
+  currentUserId
+]);
 
   const currentInventoryIndex = useMemo(() => {
     if (!listing) return -1;
@@ -1488,12 +1565,12 @@ imageUrls: getMachineMediaPreviewUrls(photoItems),
         <Navbar />
 <div className="live-env-rail-shell">
   <IXIEnvironmentRail
-    activeEnvironment="LAUNCH"
-    hasAccount={true}
-    hasInventory={true}
-    hasRelationship={true}
-    className="live-env-rail"
-  />
+  activeEnvironment="LAUNCH"
+  hasAccount={isAuthenticated}
+  hasInventory={isAuthenticated}
+  hasRelationship={true}
+  className="live-env-rail"
+/>
 </div>           
 
         <section className="launch-wrap">
