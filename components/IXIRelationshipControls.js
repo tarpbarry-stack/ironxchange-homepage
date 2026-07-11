@@ -149,7 +149,19 @@ export default function IXIRelationshipControls({
       ? "armed"
       : ""
   }`}
-  onClick={onCycleActiveStackTarget}
+  onClick={() => {
+    if (armedDestination === "stackTop") {
+      onToggleArmedDestination("stackBottom");
+      return;
+    }
+
+    if (armedDestination === "stackBottom") {
+      onToggleArmedDestination("");
+      return;
+    }
+
+    onToggleArmedDestination("stackTop");
+  }}
   aria-label="Cycle active stack destination"
   title={
     armedDestination === "stackTop"
@@ -161,7 +173,6 @@ export default function IXIRelationshipControls({
 >
   <span>A</span>
 </button>
-  </div>
     
         <div className="ixi-pocket-right-cluster">
           <button
