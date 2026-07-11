@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const COLOR_CONTROLS = [
   "none",
@@ -60,15 +60,55 @@ export default function IXIRelationshipControls({
   armedDestination = "",
   onToggleArmedDestination = () => {},
 
-  railRevealed = false,
-  onToggleRailRevealed = () => {},
+railRevealed,
+onToggleRailRevealed,
 
-  parkBrakeOn = false,
-  onToggleParkBrake = () => {},
+parkBrakeOn,
+onToggleParkBrake,
 
-  onCycleActiveStackTarget = () => {}
+onCycleActiveStackTarget
 }) {
 
+  const [localRailRevealed, setLocalRailRevealed] =
+  useState(false);
+
+const [localParkBrakeOn, setLocalParkBrakeOn] =
+  useState(false);
+
+const effectiveRailRevealed =
+  typeof railRevealed === "boolean"
+    ? railRevealed
+    : localRailRevealed;
+
+const effectiveParkBrakeOn =
+  typeof parkBrakeOn === "boolean"
+    ? parkBrakeOn
+    : localParkBrakeOn;
+
+  function handleRailRevealToggle() {
+  if (
+    typeof onToggleRailRevealed ===
+    "function"
+  ) {
+    onToggleRailRevealed();
+    return;
+  }
+
+  setLocalRailRevealed(current => !current);
+}
+
+function handleParkBrakeToggle() {
+  if (
+    typeof onToggleParkBrake ===
+    "function"
+  ) {
+    onToggleParkBrake();
+    return;
+  }
+
+  setLocalParkBrakeOn(current => !current);
+}
+  
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
@@ -79,7 +119,7 @@ export default function IXIRelationshipControls({
   const machineControlsHinted = hasAnyRelationship || isMachineDragging;
 
   function controlsAreLocked() {
-  return Boolean(parkBrakeOn);
+  return Boolean(effectiveParkBrakeOn);
 }
 
 function handleColorClick(color) {
@@ -106,10 +146,6 @@ function handlePocketArm(target) {
   onToggleArmedDestination(target);
 }
 
-function handleTheaterArm() {
-  handlePocketArm("theater");
-}
-
 function handleActiveStackArm() {
   if (controlsAreLocked()) {
     console.info(
@@ -119,7 +155,25 @@ function handleActiveStackArm() {
     return;
   }
 
-  onCycleActiveStackTarget();
+  if (
+    typeof onCycleActiveStackTarget ===
+    "function"
+  ) {
+    onCycleActiveStackTarget();
+    return;
+  }
+
+  if (armedDestination === "stackTop") {
+    onToggleArmedDestination("stackBottom");
+    return;
+  }
+
+  if (armedDestination === "stackBottom") {
+    onToggleArmedDestination("stackBottom");
+    return;
+  }
+
+  onToggleArmedDestination("stackTop");
 }
 
   function getColorStage(color) {
@@ -152,12 +206,16 @@ function handleActiveStackArm() {
 
   return (
     <div
-      className={`ixi-relationship-shell ${
-  railRevealed ? "revealed" : ""
+     className={`ixi-relationship-shell ${
+  effectiveRailRevealed ? "revealed" : ""
 } ${
-  parkBrakeOn ? "park-brake-engaged" : ""
+  effectiveParkBrakeOn
+    ? "park-brake-engaged"
+    : ""
 } ${
-  machineControlsHinted ? "machine-hinted" : ""
+  machineControlsHinted
+    ? "machine-hinted"
+    : ""
 } ${className}`}
     >
       <div className="ixi-relationship-head">
@@ -166,14 +224,14 @@ function handleActiveStackArm() {
         <button
   type="button"
   className="ixi-relationship-power"
-  onClick={onToggleRailRevealed}
+  onClick={handleRailRevealToggle}
   aria-label={
-    railRevealed
+    effectiveRailRevealed
       ? "Turn machine control lights off"
       : "Turn machine control lights on"
   }
   title={
-    railRevealed
+    effectiveRailRevealed
       ? "Machine Control Lights On"
       : "Machine Control Lights Off"
   }
@@ -252,10 +310,12 @@ function handleActiveStackArm() {
         <div className="ixi-pocket-right-cluster">
           <button
             type="button"
-            className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-            onClick={onToggleParkBrake}
-            aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
-            title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+            className={`ixi-park-brake ${
+  effectiveParkBrakeOn ? "engaged" : ""
+}`}
+            onClick={handleParkBrakeToggle}
+            aria-label={effectiveParkBrakeOn ? "Park brake engaged" : "Park brake off"}
+            title={effectiveParkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
           >
             <span className="park-left">(</span>
             <span className="park-core">P</span>
