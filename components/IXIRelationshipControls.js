@@ -173,6 +173,8 @@ export default function IXIRelationshipControls({
 >
   <span>A</span>
 </button>
+
+    </div>
     
         <div className="ixi-pocket-right-cluster">
           <button
