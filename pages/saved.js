@@ -164,6 +164,11 @@ const POCKET_TARGETS = [
   "pocketRight2"
 ];
 
+const DIRECT_CONTAINER_TARGETS = [
+  ...POCKET_TARGETS,
+  "stackTop"
+];
+  
  const THEATER_POCKET_RECEPTOR_MAP = {
   pocketLeft: "stack1",
   pocketLeft2: "stack2",
@@ -1199,9 +1204,25 @@ updateIxiCardState(id, {
   return;
 }
 
-  if (!POCKET_TARGETS.includes(armedDestination)) return;
+  if (
+  !DIRECT_CONTAINER_TARGETS.includes(
+    armedDestination
+  )
+) {
+  return;
+}
 
-  moveMachineToContainer(id, armedDestination);
+moveMachineToContainer(
+  id,
+  armedDestination
+);
+
+if (armedDestination === "stackTop") {
+  setActiveStacksOpen(current => ({
+    ...current,
+    top: true
+  }));
+}
 }
             
   return (
