@@ -19,7 +19,8 @@ export default function IXIChassisControls({
   ixiOutlineFilter,
   toggleOutlineFilter,
   armedDestination,
-  toggleArmedDestination
+  toggleArmedDestination,
+  cycleActiveStackTarget
 }) {
   return (
     <section className="workspace-controls">
@@ -60,6 +61,7 @@ export default function IXIChassisControls({
           setPocketThumbSize={setPocketThumbSize}
           armedDestination={armedDestination}
           onToggleArmedDestination={toggleArmedDestination}
+          onCycleActiveStackTarget={cycleActiveStackTarget}
         />
       </IXIControlSurface>
 
