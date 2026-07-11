@@ -24,10 +24,14 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import ListingCard from "../../components/ListingCard";
 
-import { getListingId } from "../../lib/listingFormatters";
 import {
-  fetchIxiMachineState,
-  saveIxiMachinePatch,
+  loadIXIListingsEnvironment
+} from "../../lib/listings/IXIListingsEngine";
+
+import { getListingId } from "../../lib/listingFormatters";
+
+import {
+  saveIxiMachinePatch
 } from "../../lib/ixiMachineStateClient";
 
 import { captureIXEvent } from "../../lib/posthog";
@@ -89,8 +93,6 @@ import {
 } from "../../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
-  fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
   filterSavedListings,
   toggleSavedListing
 } from "../../lib/savedListings";
@@ -110,6 +112,8 @@ export default function SellerYardPage() {
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] =
+  useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
 const [workspaceFilters, setWorkspaceFilters] = useState({
@@ -169,7 +173,7 @@ const POCKET_TARGETS = [
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
-  const [ixiUserId, setIxiUserId] = useState("guest");
+  const [ixiUserId, setIxiUserId] = useState("");
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -275,65 +279,98 @@ const sensors = useSensors(
   }, []);
 
   useEffect(() => {
-    async function loadSavedPage() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
+  let cancelled = false;
 
-        const sdkInstance = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+  async function loadSellerYardEnvironment() {
+    try {
+      const environment =
+        await loadIXIListingsEnvironment({
+          includePrivateState: true
         });
 
-        setSdk(sdkInstance);
+      if (cancelled) return;
 
-        const currentUser =
-          await fetchCurrentUserWithSavedListings(sdkInstance);
+      setListings(
+        Array.isArray(environment.listings)
+          ? environment.listings
+          : []
+      );
 
-        const userId =
-  currentUser?.id?.uuid ||
-  currentUser?.id ||
-  "guest";
+      setSdk(environment.sdk || null);
 
-setIxiUserId(String(userId));
-
-const remoteIxiResponse =
-  await fetchIxiMachineState(String(userId));
-
-const remoteIxiState =
-  remoteIxiResponse?.state || remoteIxiResponse || {};
-
-const workspaceSettings =
-  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
-
-const workspaceLayout =
-  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
-
-console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
-
-setIxiCardState(remoteIxiState);
-
-if (workspaceSettings.cardScaleMode) {
-  setCardScaleMode(workspaceSettings.cardScaleMode);
-}
-        
-setSavedIds(
-  getSavedListingIdsFromUser(currentUser)
+  setIsAuthenticated(
+  Boolean(environment.isAuthenticated)
 );
+      setIxiUserId(
+        String(environment.userId || "")
+      );
 
-const res = await fetch("/api/listings");
-const data = await res.json();
+      setSavedIds(
+        Array.isArray(environment.savedIds)
+          ? environment.savedIds
+          : []
+      );
 
-if (Array.isArray(data)) {
-  setListings(data);
-}
+      setIxiCardState(
+        environment.ixiState || {}
+      );
 
-      } catch (err) {
-        console.error("Saved page load failed:", err);
-        setSavedIds([]);
+      const workspaceSettings =
+        environment.workspaceSettings || {};
+
+      const workspaceLayout =
+        environment.workspaceLayout || {};
+
+      if (workspaceSettings.cardScaleMode) {
+        setCardScaleMode(
+          workspaceSettings.cardScaleMode
+        );
       }
-    }
 
-    loadSavedPage();
-  }, []);
+      if (workspaceLayout.activeStackLayouts) {
+        setActiveStackLayouts(current => ({
+          ...current,
+          ...workspaceLayout.activeStackLayouts
+        }));
+      }
+
+      if (workspaceLayout.activeStacksOpen) {
+        setActiveStacksOpen(current => ({
+          ...current,
+          ...workspaceLayout.activeStacksOpen
+        }));
+      }
+
+      console.log("IXI SELLER YARD ENVIRONMENT", {
+        identity: environment.identity,
+        isAuthenticated: environment.isAuthenticated,
+        listingCount: environment.listings?.length || 0,
+        savedCount: environment.savedIds?.length || 0,
+        errors: environment.errors
+      });
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "IXI SELLER YARD ENVIRONMENT LOAD FAILED:",
+        error
+      );
+
+     setListings([]);
+setSavedIds([]);
+setSdk(null);
+setIsAuthenticated(false);
+setIxiCardState({});
+setIxiUserId("");
+    }
+  }
+
+  loadSellerYardEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
@@ -633,6 +670,14 @@ const formattedVisibleYardValue =
 
   
   function updateIxiCardState(listingId, patch) {
+  if (!ixiUserId) {
+    console.warn(
+      "IXI STATE WRITE BLOCKED — IDENTITY NOT READY"
+    );
+
+    return;
+  }
+
   const id = String(listingId);
 
   setIxiCardState(current => {
@@ -1169,7 +1214,17 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
-function saveWorkspaceLayout(nextContainers = machineContainers) {
+function saveWorkspaceLayout(
+  nextContainers = machineContainers
+) {
+  if (!ixiUserId) {
+    console.warn(
+      "IXI WORKSPACE WRITE BLOCKED — IDENTITY NOT READY"
+    );
+
+    return;
+  }
+
   saveWorkspaceLayoutRecord({
     saveIxiMachinePatch,
     userId: ixiUserId,
@@ -1295,7 +1350,7 @@ function cycleCardScaleMode() {
   <section className="saved-environment-shell">
    <IXIEnvironmentRail
   activeEnvironment="IXI SELLER YARD"
-  hasAccount={!!sdk}
+  hasAccount={isAuthenticated}
   hasRelationship={true}
   hasInventory={false}
   armedDestination={armedDestination}
