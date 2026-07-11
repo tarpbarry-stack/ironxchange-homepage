@@ -87,11 +87,12 @@ import {
 } from "../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
-  fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
   filterSavedListings,
   toggleSavedListing
 } from "../lib/savedListings";
+
+import loadIXIListingsEnvironment
+  from "../lib/listings/IXIListingsEngine";
 
 import {
   sendMachineToTheater,
@@ -277,66 +278,49 @@ const sensors = useSensors(
     });
   }, []);
 
-  useEffect(() => {
-    async function loadSavedPage() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
+ useEffect(() => {
+  async function loadWorkspaceEnvironment() {
+    const environment =
+      await loadIXIListingsEnvironment({
+        includePrivateState: true
+      });
 
-        const sdkInstance = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
+    setListings(environment.listings);
+    setSdk(environment.sdk);
+    setSavedIds(environment.savedIds);
+    setIxiUserId(environment.userId);
+    setIxiCardState(environment.ixiState);
 
-        setSdk(sdkInstance);
+    console.log(
+      "IXI WORKSPACE LAYOUT LOADED",
+      environment.workspaceLayout
+    );
 
-        const currentUser =
-          await fetchCurrentUserWithSavedListings(sdkInstance);
-
-        const userId =
-  currentUser?.id?.uuid ||
-  currentUser?.id ||
-  "guest";
-
-setIxiUserId(String(userId));
-
-const remoteIxiResponse =
-  await fetchIxiMachineState(String(userId));
-
-const remoteIxiState =
-  remoteIxiResponse?.state || remoteIxiResponse || {};
-
-const workspaceSettings =
-  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
-
-const workspaceLayout =
-  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
-
-console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
-
-setIxiCardState(remoteIxiState);
-
-if (workspaceSettings.cardScaleMode) {
-  setCardScaleMode(workspaceSettings.cardScaleMode);
-}
-        
-setSavedIds(
-  getSavedListingIdsFromUser(currentUser)
-);
-
-const res = await fetch("/api/listings");
-const data = await res.json();
-
-if (Array.isArray(data)) {
-  setListings(data);
-}
-
-      } catch (err) {
-        console.error("Saved page load failed:", err);
-        setSavedIds([]);
-      }
+    if (
+      environment.workspaceSettings?.cardScaleMode
+    ) {
+      setCardScaleMode(
+        environment.workspaceSettings.cardScaleMode
+      );
     }
 
-    loadSavedPage();
-  }, []);
+    if (environment.errors.publicListings) {
+      console.error(
+        "WORKSPACE PUBLIC LISTINGS FAILED:",
+        environment.errors.publicListings
+      );
+    }
+
+    if (environment.errors.privateState) {
+      console.warn(
+        "WORKSPACE PRIVATE STATE UNAVAILABLE — GUEST MODE:",
+        environment.errors.privateState
+      );
+    }
+  }
+
+  loadWorkspaceEnvironment();
+}, []);
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
