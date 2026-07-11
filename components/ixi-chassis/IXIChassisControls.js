@@ -19,30 +19,24 @@ export default function IXIChassisControls({
   ixiOutlineFilter,
   toggleOutlineFilter,
   armedDestination,
-  toggleArmedDestination,
-  
-railRevealed = false,
-toggleRailRevealed = () => {},
-parkBrakeOn = false,
-toggleParkBrake = () => {},
-cycleActiveStackTarget = () => {}
+  toggleArmedDestination
 }) {
   return (
     <section className="workspace-controls">
       <IXIControlSurface>
         <div className="desktop-search-surface">
-  <IXSearchSurface
-    listings={listings}
-    searchQuery={searchQuery}
-    setSearchQuery={setSearchQuery}
-    filters={workspaceFilters}
-    setFilters={setWorkspaceFilters}
-    sortMode={savedBoardMode}
-    setSortMode={setSavedBoardMode}
-    pocketThumbSize={pocketThumbSize}
-    setPocketThumbSize={setPocketThumbSize}
-  />
-</div>
+          <IXSearchSurface
+            listings={listings}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filters={workspaceFilters}
+            setFilters={setWorkspaceFilters}
+            sortMode={savedBoardMode}
+            setSortMode={setSavedBoardMode}
+            pocketThumbSize={pocketThumbSize}
+            setPocketThumbSize={setPocketThumbSize}
+          />
+        </div>
 
         <div className="mobile-search-surface">
           <IXSearchSurfaceMobile
@@ -66,15 +60,6 @@ cycleActiveStackTarget = () => {}
           setPocketThumbSize={setPocketThumbSize}
           armedDestination={armedDestination}
           onToggleArmedDestination={toggleArmedDestination}
-          railRevealed={railRevealed}
-          onToggleRailRevealed={toggleRailRevealed}
-
-          parkBrakeOn={parkBrakeOn}
-          onToggleParkBrake={toggleParkBrake}
-
-          onCycleActiveStackTarget={
-              cycleActiveStackTarget
-          }
         />
       </IXIControlSurface>
 
