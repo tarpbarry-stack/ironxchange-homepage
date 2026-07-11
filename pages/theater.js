@@ -17,7 +17,7 @@ import {
 import Navbar from "../components/Navbar";
 import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
-import { fetchIxiMachineState } from "../lib/ixiMachineStateClient";
+
 import {
   IXI_THEATER_QUEUE_ID,
   THEATER_RECEPTOR_KEYS,
@@ -25,6 +25,10 @@ import {
   sanitizeTheaterContainers,
   saveTheaterQueue
 } from "../lib/ixiTheaterQueue";
+
+import {
+  loadIXIListingsEnvironment
+} from "../lib/listings/IXIListingsEngine";
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
@@ -113,7 +117,12 @@ export default function IXITheater() {
   const [viewCount, setViewCount] = useState(2);
   const [entered, setEntered] = useState(false);
   const [activeDragId, setActiveDragId] = useState("");
-  const [ixiUserId, setIxiUserId] = useState("69f7fb56-bad0-40e5-a9d1-2d28cde38739");
+  const [ixiUserId, setIxiUserId] = useState("");
+const [isAuthenticated, setIsAuthenticated] =
+  useState(false);
+const [ixiState, setIxiState] = useState({});
+const [environmentReady, setEnvironmentReady] =
+  useState(false);
  
 const [slotPhotoIndexes, setSlotPhotoIndexes] = useState({});
 const [screenSlots, setScreenSlots] = useState([0, 1, 2, 3]);
@@ -182,136 +191,188 @@ function resetZoomState(screenIndex) {
 }
 
 useEffect(() => {
-  async function loadCurrentUser() {
+  let cancelled = false;
+
+  async function loadTheaterEnvironment() {
     try {
-      const res = await fetch("/api/current-user");
+      const environment =
+        await loadIXIListingsEnvironment({
+          includePrivateState: true
+        });
 
-      if (!res.ok) return;
+      if (cancelled) return;
 
-      const user = await res.json();
+      const activeListings =
+        (environment.listings || []).filter(item => {
+          const status =
+            item.listingStatus ||
+            item.publicData?.listingStatus ||
+            item.attributes?.publicData?.listingStatus;
 
-      const userId =
-  user?.id?.uuid ||
-  user?.id ||
-  user?.user?.id?.uuid ||
-  user?.user?.id ||
-  user?.currentUser?.id?.uuid ||
-  user?.currentUser?.id ||
-  "";
+          return (
+            status !== "archived" &&
+            status !== "deleted"
+          );
+        });
 
-      if (userId) {
-        setIxiUserId(String(userId));
-      }
-    } catch (err) {
-      console.error("Failed loading IXI user", err);
+      setListings(activeListings);
+      setIxiUserId(
+        String(environment.userId || "")
+      );
+      setIsAuthenticated(
+        Boolean(environment.isAuthenticated)
+      );
+      setIxiState(
+        environment.ixiState || {}
+      );
+      setEnvironmentReady(true);
+
+      console.log("IXI THEATER ENVIRONMENT", {
+        identity: environment.identity,
+        userId: environment.userId,
+        isAuthenticated:
+          environment.isAuthenticated,
+        listingCount: activeListings.length,
+        errors: environment.errors
+      });
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "IXI THEATER ENVIRONMENT LOAD FAILED:",
+        error
+      );
+
+      setListings([]);
+      setIxiUserId("");
+      setIsAuthenticated(false);
+      setIxiState({});
+      setEnvironmentReady(true);
     }
   }
 
-  loadCurrentUser();
+  loadTheaterEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
 }, []);
 
-  
-  useEffect(() => {
-    async function loadTheater() {
-      try {
-        const res = await fetch("/api/listings");
-        const data = await res.json();
 
-        if (Array.isArray(data)) {
-  setListings(
-    data.filter(item => {
-      const status =
-        item.listingStatus ||
-        item.publicData?.listingStatus ||
-        item.attributes?.publicData?.listingStatus;
-
-      return status !== "archived";
-    })
-  );
-}
-      } catch (err) {
-        console.error("IXI Theater load failed", err);
-      }
-    }
-
-    loadTheater();
-  }, []);
-
-
-  useEffect(() => {
+ useEffect(() => {
+  if (!environmentReady) return;
+  if (!ixiUserId) return;
   if (!listings.length) return;
 
-  async function restoreTheaterQueue() {
-    try {
-      const remoteState = await fetchIxiMachineState(ixiUserId);
-      const savedQueue = remoteState?.[IXI_THEATER_QUEUE_ID];
+  const savedQueue =
+    ixiState?.[IXI_THEATER_QUEUE_ID];
 
-      console.log(
-  "THEATER RESTORE",
-  remoteState,
-  savedQueue,
-  IXI_THEATER_QUEUE_ID
-);
-      console.log("THEATER USER", ixiUserId);
-      
-      const savedContainers =
-        savedQueue?.containers || savedQueue || null;
+  console.log("THEATER RESTORE", {
+    userId: ixiUserId,
+    savedQueue,
+    theaterQueueId: IXI_THEATER_QUEUE_ID
+  });
 
-      if (savedContainers) {
-        const restoredContainers =
-          sanitizeTheaterContainers(savedContainers);
+  const savedContainers =
+    savedQueue?.containers ||
+    savedQueue ||
+    null;
 
-        const hasAnySavedMachine = Object.values(restoredContainers)
-          .some(list => Array.isArray(list) && list.length > 0);
+  if (savedContainers) {
+    const restoredContainers =
+      sanitizeTheaterContainers(
+        savedContainers
+      );
 
-        if (hasAnySavedMachine) {
-  setTheaterContainers(restoredContainers);
+    const hasAnySavedMachine =
+      Object.values(restoredContainers)
+        .some(list =>
+          Array.isArray(list) &&
+          list.length > 0
+        );
 
-  const savedRoom = savedQueue?.room || {};
+    if (hasAnySavedMachine) {
+      setTheaterContainers(
+        restoredContainers
+      );
 
-  if (Array.isArray(savedRoom.screenSlots)) {
-    setScreenSlots(savedRoom.screenSlots);
-  }
+      const savedRoom =
+        savedQueue?.room || {};
 
-  if (Number.isFinite(Number(savedRoom.selectedSlot))) {
-    setSelectedSlot(Number(savedRoom.selectedSlot));
-  }
-
-  if (Number.isFinite(Number(savedRoom.viewCount))) {
-    setViewCount(Number(savedRoom.viewCount));
-  }
-
-  if (Array.isArray(savedRoom.screenFactModes)) {
-    setScreenFactModes(savedRoom.screenFactModes);
-  }
-
-  if (
-    savedRoom.slotPhotoIndexes &&
-    typeof savedRoom.slotPhotoIndexes === "object"
-  ) {
-    setSlotPhotoIndexes(savedRoom.slotPhotoIndexes);
-  }
-
-  return;
-}
+      if (
+        Array.isArray(savedRoom.screenSlots)
+      ) {
+        setScreenSlots(
+          savedRoom.screenSlots
+        );
       }
-    } catch (err) {
-      console.error("Failed restoring Theater queue", err);
+
+      if (
+        Number.isFinite(
+          Number(savedRoom.selectedSlot)
+        )
+      ) {
+        setSelectedSlot(
+          Number(savedRoom.selectedSlot)
+        );
+      }
+
+      if (
+        Number.isFinite(
+          Number(savedRoom.viewCount)
+        )
+      ) {
+        setViewCount(
+          Number(savedRoom.viewCount)
+        );
+      }
+
+      if (
+        Array.isArray(
+          savedRoom.screenFactModes
+        )
+      ) {
+        setScreenFactModes(
+          savedRoom.screenFactModes
+        );
+      }
+
+      if (
+        savedRoom.slotPhotoIndexes &&
+        typeof savedRoom.slotPhotoIndexes ===
+          "object"
+      ) {
+        setSlotPhotoIndexes(
+          savedRoom.slotPhotoIndexes
+        );
+      }
+
+      return;
     }
-
-    updateTheaterContainers(current => {
-      if ((current.rail || []).length) return current;
-
-      return {
-        ...current,
-        rail: listings.map(item => String(getListingId(item)))
-      };
-    });
   }
 
-  restoreTheaterQueue();
-}, [listings, ixiUserId]);
+  const validListingIds =
+    new Set(
+      listings.map(item =>
+        String(getListingId(item))
+      )
+    );
 
+  const demoIds =
+    THEATER_DEMO_MACHINE_IDS.filter(id =>
+      validListingIds.has(String(id))
+    );
+
+  setTheaterContainers({
+    ...createEmptyTheaterContainers(),
+    rail: demoIds
+  });
+}, [
+  environmentReady,
+  ixiUserId,
+  ixiState,
+  listings
+]);
 
   const railListings = useMemo(() => {
   return (theaterContainers.rail || [])
@@ -368,6 +429,16 @@ function getCurrentTheaterRoomState() {
 }
 
 function saveTheaterContainers(nextContainers) {
+  if (!ixiUserId) {
+    console.warn(
+      "THEATER SAVE BLOCKED — IDENTITY NOT READY"
+    );
+
+    return sanitizeTheaterContainers(
+      nextContainers
+    );
+  }
+
   const safeContainers =
     sanitizeTheaterContainers(
       cleanTheaterContainers(nextContainers)
@@ -559,12 +630,12 @@ function prevPhotoForMachine(machine) {
         {entered && (
           <section className={`theater-room view-${viewCount}`}>
             <div className="theater-env-shell">
-  <IXIEnvironmentRail
-    activeEnvironment="IXI THEATER"
-    hasAccount
-    hasRelationship
-    hasInventory
-  />
+ <IXIEnvironmentRail
+  activeEnvironment="IXI THEATER"
+  hasAccount={isAuthenticated}
+  hasRelationship={true}
+  hasInventory={isAuthenticated}
+/>
 </div>
 
           <section className="theater-screen">
