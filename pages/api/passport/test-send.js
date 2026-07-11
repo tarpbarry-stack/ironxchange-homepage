@@ -121,15 +121,18 @@ export default async function handler(req, res) {
 
     const ses = createSesClient();
 
-    const command = new SendEmailCommand({
-      FromEmailAddress:
-        `IXI Machine Passport <${fromEmail}>`,
+   const replyToEmail = String(
+  process.env.SES_REPLY_TO_EMAIL || fromEmail
+).trim();
 
-      Destination: {
-        ToAddresses: [to]
-      },
+const command = new SendEmailCommand({
+  FromEmailAddress: fromEmail,
 
-      ReplyToAddresses: [fromEmail],
+  Destination: {
+    ToAddresses: [to]
+  },
+
+  ReplyToAddresses: [replyToEmail],
 
       Content: {
         Simple: {
