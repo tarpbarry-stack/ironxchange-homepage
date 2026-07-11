@@ -43,72 +43,20 @@ function getExistingOutlines(ixiCardState = {}) {
 
 export default function IXIRelationshipControls({
   ixiCardState = {},
-
   activeColors = [],
   onToggleColor = () => {},
-
   activeOutline = "all",
   onToggleOutline = () => {},
-
   className = "",
-
   pocketThumbSize = "medium",
   setPocketThumbSize = null,
-
   isMachineDragging = false,
-
   armedDestination = "",
-  onToggleArmedDestination = () => {},
-
-railRevealed,
-onToggleRailRevealed,
-
-parkBrakeOn,
-onToggleParkBrake,
-
-onCycleActiveStackTarget
+  onToggleArmedDestination = () => {}
 }) {
+  const [railRevealed, setRailRevealed] = useState(false);
+  const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
-  const [localRailRevealed, setLocalRailRevealed] =
-  useState(false);
-
-const [localParkBrakeOn, setLocalParkBrakeOn] =
-  useState(false);
-
-const effectiveRailRevealed =
-  typeof railRevealed === "boolean"
-    ? railRevealed
-    : localRailRevealed;
-
-const effectiveParkBrakeOn =
-  typeof parkBrakeOn === "boolean"
-    ? parkBrakeOn
-    : localParkBrakeOn;
-
-  function handleRailRevealToggle() {
-  if (
-    typeof onToggleRailRevealed ===
-    "function"
-  ) {
-    onToggleRailRevealed();
-    return;
-  }
-
-  setLocalRailRevealed(current => !current);
-}
-
-function handleParkBrakeToggle() {
-  if (
-    typeof onToggleParkBrake ===
-    "function"
-  ) {
-    onToggleParkBrake();
-    return;
-  }
-
-  setLocalParkBrakeOn(current => !current);
-}
-  
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
 
@@ -118,67 +66,9 @@ function handleParkBrakeToggle() {
 
   const machineControlsHinted = hasAnyRelationship || isMachineDragging;
 
-  function controlsAreLocked() {
-  return Boolean(effectiveParkBrakeOn);
-}
-
-function handleColorClick(color) {
-  if (controlsAreLocked()) {
-    console.info(
-      "IXI COLOR COMMAND BLOCKED — PARK BRAKE ENGAGED"
-    );
-
-    return;
+  function toggleRailReveal() {
+    setRailRevealed(current => !current);
   }
-
-  onToggleColor(color);
-}
-
-function handlePocketArm(target) {
-  if (controlsAreLocked()) {
-    console.info(
-      "IXI DESTINATION ARM BLOCKED — PARK BRAKE ENGAGED"
-    );
-
-    return;
-  }
-
-  onToggleArmedDestination(target);
-}
-
-function handleTheaterArm() {
-  handlePocketArm("theater");
-}
-  
-function handleActiveStackArm() {
-  if (controlsAreLocked()) {
-    console.info(
-      "IXI ACTIVE STACK ARM BLOCKED — PARK BRAKE ENGAGED"
-    );
-
-    return;
-  }
-
-  if (
-    typeof onCycleActiveStackTarget ===
-    "function"
-  ) {
-    onCycleActiveStackTarget();
-    return;
-  }
-
-  if (armedDestination === "stackTop") {
-    onToggleArmedDestination("stackBottom");
-    return;
-  }
-
-  if (armedDestination === "stackBottom") {
-    onToggleArmedDestination("stackBottom");
-    return;
-  }
-
-  onToggleArmedDestination("stackTop");
-}
 
   function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
@@ -192,54 +82,26 @@ function handleActiveStackArm() {
     return "dead";
   }
 
- function handleOutlineClick(outline) {
-  if (controlsAreLocked()) {
-    console.info(
-      "IXI OUTLINE COMMAND BLOCKED — PARK BRAKE ENGAGED"
-    );
-
-    return;
+  function handleOutlineClick(outline) {
+    if (!activeColors.includes("none")) onToggleColor("none");
+    onToggleOutline(outline);
   }
-
-  if (!activeColors.includes("none")) {
-    onToggleColor("none");
-  }
-
-  onToggleOutline(outline);
-}
 
   return (
     <div
-     className={`ixi-relationship-shell ${
-  effectiveRailRevealed ? "revealed" : ""
-} ${
-  effectiveParkBrakeOn
-    ? "park-brake-engaged"
-    : ""
-} ${
-  machineControlsHinted
-    ? "machine-hinted"
-    : ""
-} ${className}`}
+      className={`ixi-relationship-shell ${
+        railRevealed ? "revealed" : ""
+      } ${machineControlsHinted ? "machine-hinted" : ""} ${className}`}
     >
       <div className="ixi-relationship-head">
         <span>IXI Machine Controls™</span>
 
         <button
-  type="button"
-  className="ixi-relationship-power"
-  onClick={handleRailRevealToggle}
-  aria-label={
-    effectiveRailRevealed
-      ? "Turn machine control lights off"
-      : "Turn machine control lights on"
-  }
-  title={
-    effectiveRailRevealed
-      ? "Machine Control Lights On"
-      : "Machine Control Lights Off"
-  }
-/>
+          type="button"
+          className="ixi-relationship-power"
+          onClick={toggleRailReveal}
+          aria-label="Toggle machine controls"
+        />
       </div>
 
       <div className="ixi-pocket-indicator-row">
@@ -250,9 +112,7 @@ function handleActiveStackArm() {
              className={`ixi-pocket-indicator pocket-left-top ${
             armedDestination === "pocketLeft" ? "armed" : ""
                     }`}
-              onClick={() =>
-  handlePocketArm("pocketLeft")
-}
+              onClick={() => onToggleArmedDestination("pocketLeft")}
               aria-label="Arm left top pocket"
               title="Left Top Pocket"
             />
@@ -262,9 +122,7 @@ function handleActiveStackArm() {
               className={`ixi-pocket-indicator pocket-left-bottom ${
               armedDestination === "pocketLeft2" ? "armed" : ""
                     }`}
-              onClick={() =>
-  handlePocketArm("pocketLeft2")
-}
+              onClick={() => onToggleArmedDestination("pocketLeft2")}
               aria-label="Arm left bottom pocket"
               title="Left Bottom Pocket"
             />
@@ -275,7 +133,7 @@ function handleActiveStackArm() {
   className={`ixi-theater-button ${
     armedDestination === "theater" ? "armed" : ""
   }`}
-  onClick={handleTheaterArm}
+  onClick={() => onToggleArmedDestination("theater")}
   aria-label="Arm IXI Theater"
   title="Arm IXI Theater"
 >
@@ -284,28 +142,9 @@ function handleActiveStackArm() {
 
 <button
   type="button"
-  className={`ixi-active-stack-button ${
-    armedDestination === "stackTop"
-      ? "armed stack-top-armed"
-      : armedDestination === "stackBottom"
-        ? "armed stack-bottom-armed"
-        : ""
-  }`}
-  onClick={handleActiveStackArm}
-  aria-label={
-    armedDestination === "stackTop"
-      ? "Top active stack armed"
-      : armedDestination === "stackBottom"
-        ? "Bottom active stack armed"
-        : "Arm active stack"
-  }
-  title={
-    armedDestination === "stackTop"
-      ? "Top Active Stack Armed"
-      : armedDestination === "stackBottom"
-        ? "Bottom Active Stack Armed"
-        : "Arm Active Stack"
-  }
+  className="ixi-active-stack-button"
+  aria-label="Active stack"
+  title="Active Stack"
 >
   <span>A</span>
 </button>
@@ -314,12 +153,10 @@ function handleActiveStackArm() {
         <div className="ixi-pocket-right-cluster">
           <button
             type="button"
-            className={`ixi-park-brake ${
-  effectiveParkBrakeOn ? "engaged" : ""
-}`}
-            onClick={handleParkBrakeToggle}
-            aria-label={effectiveParkBrakeOn ? "Park brake engaged" : "Park brake off"}
-            title={effectiveParkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
+            className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
+            onClick={() => setParkBrakeOn(current => !current)}
+            aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
+            title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
           >
             <span className="park-left">(</span>
             <span className="park-core">P</span>
@@ -332,9 +169,7 @@ function handleActiveStackArm() {
              className={`ixi-pocket-indicator pocket-right-top ${
             armedDestination === "pocketRight" ? "armed" : ""
                   }`}
-             onClick={() =>
-  handlePocketArm("pocketRight")
-}
+              onClick={() => onToggleArmedDestination("pocketRight")}
               aria-label="Arm right top pocket"
               title="Right Top Pocket"
             />
@@ -344,9 +179,7 @@ function handleActiveStackArm() {
               className={`ixi-pocket-indicator pocket-right-bottom ${
               armedDestination === "pocketRight2" ? "armed" : ""
                   }`}
-              onClick={() =>
-  handlePocketArm("pocketRight2")
-}
+              onClick={() => onToggleArmedDestination("pocketRight2")}
               aria-label="Arm right bottom pocket"
               title="Right Bottom Pocket"
             />
@@ -362,7 +195,7 @@ function handleActiveStackArm() {
               className={`ixi-relationship-color color-${color} stage-${getColorStage(
                 color
               )}`}
-              onClick={() => handleColorClick(color)}
+              onClick={() => onToggleColor(color)}
               aria-label={`Filter ${color}`}
             />
           </div>
@@ -385,24 +218,10 @@ function handleActiveStackArm() {
             type="button"
             className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
             onClick={() => {
-  if (controlsAreLocked()) {
-    console.info(
-      "IXI THUMB SIZE COMMAND BLOCKED — PARK BRAKE ENGAGED"
-    );
-
-    return;
-  }
-
-  if (pocketThumbSize === "small") {
-    return setPocketThumbSize("medium");
-  }
-
-  if (pocketThumbSize === "medium") {
-    return setPocketThumbSize("large");
-  }
-
-  return setPocketThumbSize("small");
-}}
+              if (pocketThumbSize === "small") return setPocketThumbSize("medium");
+              if (pocketThumbSize === "medium") return setPocketThumbSize("large");
+              return setPocketThumbSize("small");
+            }}
             aria-label={`Pocket thumb size ${pocketThumbSize}`}
             title={`Pocket thumbs ${pocketThumbSize}`}
           >
@@ -580,29 +399,6 @@ function handleActiveStackArm() {
   text-shadow: 0 0 5px rgba(0,194,255,.18);
 }
 
-.ixi-relationship-shell.revealed
-  .ixi-active-stack-button.armed {
-  opacity: 1;
-  color: rgba(0,194,255,.96);
-  border-color: rgba(0,194,255,.72);
-
-  text-shadow:
-    0 0 6px rgba(0,194,255,.42),
-    0 0 14px rgba(0,194,255,.20);
-
-  box-shadow:
-    0 0 6px rgba(0,194,255,.18);
-}
-
-.ixi-relationship-shell.revealed
-  .ixi-active-stack-button.stack-top-armed {
-  transform: translateY(-1px);
-}
-
-.ixi-relationship-shell.revealed
-  .ixi-active-stack-button.stack-bottom-armed {
-  transform: translateY(1px);
-}
         
 
         .ixi-relationship-shell.revealed .ixi-theater-button {
@@ -667,34 +463,6 @@ function handleActiveStackArm() {
         .park-core {
           font-weight: 950;
         }
-
-        .ixi-relationship-shell.park-brake-engaged
-  .ixi-relationship-controls,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-pocket-indicator,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-theater-button,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-active-stack-button {
-  filter: grayscale(1);
-}
-
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-relationship-color,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-relationship-outline,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-pocket-indicator,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-theater-button,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-active-stack-button,
-.ixi-relationship-shell.park-brake-engaged
-  .ixi-thumb-size-toggle {
-  opacity: .16;
-  cursor: not-allowed;
-  box-shadow: none;
-}
 
         .ixi-pocket-indicator {
           width: 10px;
@@ -830,10 +598,14 @@ function handleActiveStackArm() {
           height: 5px;
         }
 
-       .stage-dead {
-  box-shadow: none;
-}
+        .stage-dead {
+          background: transparent !important;
+          box-shadow: none;
+        }
 
+        .ixi-relationship-color.stage-dead {
+          background: transparent !important;
+        }
 
         .stage-exists {
           opacity: .46;
@@ -937,64 +709,6 @@ function handleActiveStackArm() {
         .color-orange {
           background: rgba(249,133,18,.82);
         }
-
-        /*
- * LIGHTS OFF
- *
- * Every control remains visible in a muted
- * industrial grayscale state.
- */
-.ixi-relationship-shell:not(.revealed)
-  .ixi-relationship-color {
-  opacity: .24;
-  filter: grayscale(1) brightness(.55);
-  border-color: rgba(255,255,255,.055);
-  box-shadow: none;
-}
-
-/*
- * LIGHTS ON — UNUSED
- *
- * A restrained hint of the actual control color.
- */
-.ixi-relationship-shell.revealed
-  .ixi-relationship-color.stage-dead {
-  opacity: .28;
-  filter: grayscale(.72) brightness(.70);
-  border-color: rgba(255,255,255,.075);
-  box-shadow: none;
-}
-
-/*
- * LIGHTS ON — COLOR EXISTS
- *
- * Machines currently use this relationship color.
- */
-.ixi-relationship-shell.revealed
-  .ixi-relationship-color.stage-exists {
-  opacity: .62;
-  filter: grayscale(.20) brightness(.86);
-  border-color: rgba(255,255,255,.11);
-
-  box-shadow:
-    0 0 5px rgba(255,255,255,.035);
-}
-
-/*
- * LIGHTS ON — FILTER SELECTED
- */
-.ixi-relationship-shell.revealed
-  .ixi-relationship-color.stage-selected {
-  opacity: 1;
-  filter: grayscale(0) brightness(1.08);
-  transform: translateY(-1px);
-  border-color: rgba(255,255,255,.22);
-
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.07),
-    0 0 8px rgba(255,255,255,.08),
-    0 0 13px rgba(255,255,255,.045);
-}
 
         .ixi-mobile-nav-row {
           display: none;
