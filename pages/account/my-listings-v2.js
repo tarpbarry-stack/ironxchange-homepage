@@ -163,6 +163,10 @@ const POCKET_TARGETS = [
   "pocketRight2"
 ];
 
+  const DIRECT_CONTAINER_TARGETS = [
+  ...POCKET_TARGETS,
+  "stackTop"
+];
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
@@ -1108,12 +1112,30 @@ function cycleCardScaleMode() {
     clearMachineDragState
   });  
     function sendMachineToArmedDestination(listing) {
-      if (!armedDestination) return;
-      if (!POCKET_TARGETS.includes(armedDestination)) return;
+  if (!armedDestination) return;
 
-      const id = String(getListingId(listing));
-      moveMachineToContainer(id, armedDestination);
-    }
+  const id = String(getListingId(listing));
+
+  if (
+    !DIRECT_CONTAINER_TARGETS.includes(
+      armedDestination
+    )
+  ) {
+    return;
+  }
+
+  moveMachineToContainer(
+    id,
+    armedDestination
+  );
+
+  if (armedDestination === "stackTop") {
+    setActiveStacksOpen(current => ({
+      ...current,
+      top: true
+    }));
+  }
+}
 
     return (
   <IXIDragEngine
@@ -1130,12 +1152,14 @@ function cycleCardScaleMode() {
   >
     <main>
   <section className="saved-environment-shell">
-    <IXIEnvironmentRail
+   <IXIEnvironmentRail
   activeEnvironment="INVENTORY"
-      hasAccount={!!sdk}
-      hasRelationship={true}
-      hasInventory={!!sdk}
-    />
+  hasAccount={!!sdk}
+  hasRelationship={true}
+  hasInventory={!!sdk}
+  armedDestination={armedDestination}
+  toggleArmedDestination={toggleArmedDestination}
+/>
   </section>
       
 
