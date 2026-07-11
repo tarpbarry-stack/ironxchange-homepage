@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const COLOR_CONTROLS = [
   "none",
@@ -43,19 +43,31 @@ function getExistingOutlines(ixiCardState = {}) {
 
 export default function IXIRelationshipControls({
   ixiCardState = {},
+
   activeColors = [],
   onToggleColor = () => {},
+
   activeOutline = "all",
   onToggleOutline = () => {},
+
   className = "",
+
   pocketThumbSize = "medium",
   setPocketThumbSize = null,
+
   isMachineDragging = false,
+
   armedDestination = "",
-  onToggleArmedDestination = () => {}
+  onToggleArmedDestination = () => {},
+
+  railRevealed = false,
+  onToggleRailRevealed = () => {},
+
+  parkBrakeOn = false,
+  onToggleParkBrake = () => {},
+
+  onCycleActiveStackTarget = () => {}
 }) {
-  const [railRevealed, setRailRevealed] = useState(false);
-  const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
   const existingOutlines = getExistingOutlines(ixiCardState);
@@ -66,9 +78,49 @@ export default function IXIRelationshipControls({
 
   const machineControlsHinted = hasAnyRelationship || isMachineDragging;
 
-  function toggleRailReveal() {
-    setRailRevealed(current => !current);
+  function controlsAreLocked() {
+  return Boolean(parkBrakeOn);
+}
+
+function handleColorClick(color) {
+  if (controlsAreLocked()) {
+    console.info(
+      "IXI COLOR COMMAND BLOCKED — PARK BRAKE ENGAGED"
+    );
+
+    return;
   }
+
+  onToggleColor(color);
+}
+
+function handlePocketArm(target) {
+  if (controlsAreLocked()) {
+    console.info(
+      "IXI DESTINATION ARM BLOCKED — PARK BRAKE ENGAGED"
+    );
+
+    return;
+  }
+
+  onToggleArmedDestination(target);
+}
+
+function handleTheaterArm() {
+  handlePocketArm("theater");
+}
+
+function handleActiveStackArm() {
+  if (controlsAreLocked()) {
+    console.info(
+      "IXI ACTIVE STACK ARM BLOCKED — PARK BRAKE ENGAGED"
+    );
+
+    return;
+  }
+
+  onCycleActiveStackTarget();
+}
 
   function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
@@ -82,26 +134,50 @@ export default function IXIRelationshipControls({
     return "dead";
   }
 
-  function handleOutlineClick(outline) {
-    if (!activeColors.includes("none")) onToggleColor("none");
-    onToggleOutline(outline);
+ function handleOutlineClick(outline) {
+  if (controlsAreLocked()) {
+    console.info(
+      "IXI OUTLINE COMMAND BLOCKED — PARK BRAKE ENGAGED"
+    );
+
+    return;
   }
+
+  if (!activeColors.includes("none")) {
+    onToggleColor("none");
+  }
+
+  onToggleOutline(outline);
+}
 
   return (
     <div
       className={`ixi-relationship-shell ${
-        railRevealed ? "revealed" : ""
-      } ${machineControlsHinted ? "machine-hinted" : ""} ${className}`}
+  railRevealed ? "revealed" : ""
+} ${
+  parkBrakeOn ? "park-brake-engaged" : ""
+} ${
+  machineControlsHinted ? "machine-hinted" : ""
+} ${className}`}
     >
       <div className="ixi-relationship-head">
         <span>IXI Machine Controls™</span>
 
         <button
-          type="button"
-          className="ixi-relationship-power"
-          onClick={toggleRailReveal}
-          aria-label="Toggle machine controls"
-        />
+  type="button"
+  className="ixi-relationship-power"
+  onClick={onToggleRailRevealed}
+  aria-label={
+    railRevealed
+      ? "Turn machine control lights off"
+      : "Turn machine control lights on"
+  }
+  title={
+    railRevealed
+      ? "Machine Control Lights On"
+      : "Machine Control Lights Off"
+  }
+/>
       </div>
 
       <div className="ixi-pocket-indicator-row">
@@ -112,7 +188,9 @@ export default function IXIRelationshipControls({
              className={`ixi-pocket-indicator pocket-left-top ${
             armedDestination === "pocketLeft" ? "armed" : ""
                     }`}
-              onClick={() => onToggleArmedDestination("pocketLeft")}
+              onClick={() =>
+  handlePocketArm("pocketLeft")
+}
               aria-label="Arm left top pocket"
               title="Left Top Pocket"
             />
@@ -122,7 +200,9 @@ export default function IXIRelationshipControls({
               className={`ixi-pocket-indicator pocket-left-bottom ${
               armedDestination === "pocketLeft2" ? "armed" : ""
                     }`}
-              onClick={() => onToggleArmedDestination("pocketLeft2")}
+              onClick={() =>
+  handlePocketArm("pocketLeft2")
+}
               aria-label="Arm left bottom pocket"
               title="Left Bottom Pocket"
             />
@@ -133,7 +213,7 @@ export default function IXIRelationshipControls({
   className={`ixi-theater-button ${
     armedDestination === "theater" ? "armed" : ""
   }`}
-  onClick={() => onToggleArmedDestination("theater")}
+  onClick={handleTheaterArm}
   aria-label="Arm IXI Theater"
   title="Arm IXI Theater"
 >
@@ -142,9 +222,28 @@ export default function IXIRelationshipControls({
 
 <button
   type="button"
-  className="ixi-active-stack-button"
-  aria-label="Active stack"
-  title="Active Stack"
+  className={`ixi-active-stack-button ${
+    armedDestination === "stackTop"
+      ? "armed stack-top-armed"
+      : armedDestination === "stackBottom"
+        ? "armed stack-bottom-armed"
+        : ""
+  }`}
+  onClick={handleActiveStackArm}
+  aria-label={
+    armedDestination === "stackTop"
+      ? "Top active stack armed"
+      : armedDestination === "stackBottom"
+        ? "Bottom active stack armed"
+        : "Arm active stack"
+  }
+  title={
+    armedDestination === "stackTop"
+      ? "Top Active Stack Armed"
+      : armedDestination === "stackBottom"
+        ? "Bottom Active Stack Armed"
+        : "Arm Active Stack"
+  }
 >
   <span>A</span>
 </button>
@@ -154,7 +253,7 @@ export default function IXIRelationshipControls({
           <button
             type="button"
             className={`ixi-park-brake ${parkBrakeOn ? "engaged" : ""}`}
-            onClick={() => setParkBrakeOn(current => !current)}
+            onClick={onToggleParkBrake}
             aria-label={parkBrakeOn ? "Park brake engaged" : "Park brake off"}
             title={parkBrakeOn ? "Park Brake Engaged" : "Park Brake"}
           >
@@ -169,7 +268,9 @@ export default function IXIRelationshipControls({
              className={`ixi-pocket-indicator pocket-right-top ${
             armedDestination === "pocketRight" ? "armed" : ""
                   }`}
-              onClick={() => onToggleArmedDestination("pocketRight")}
+             onClick={() =>
+  handlePocketArm("pocketRight")
+}
               aria-label="Arm right top pocket"
               title="Right Top Pocket"
             />
@@ -179,7 +280,9 @@ export default function IXIRelationshipControls({
               className={`ixi-pocket-indicator pocket-right-bottom ${
               armedDestination === "pocketRight2" ? "armed" : ""
                   }`}
-              onClick={() => onToggleArmedDestination("pocketRight2")}
+              onClick={() =>
+  handlePocketArm("pocketRight2")
+}
               aria-label="Arm right bottom pocket"
               title="Right Bottom Pocket"
             />
@@ -195,7 +298,7 @@ export default function IXIRelationshipControls({
               className={`ixi-relationship-color color-${color} stage-${getColorStage(
                 color
               )}`}
-              onClick={() => onToggleColor(color)}
+              onClick={() => handleColorClick(color)}
               aria-label={`Filter ${color}`}
             />
           </div>
@@ -218,10 +321,24 @@ export default function IXIRelationshipControls({
             type="button"
             className={`ixi-thumb-size-toggle thumb-setting-${pocketThumbSize}`}
             onClick={() => {
-              if (pocketThumbSize === "small") return setPocketThumbSize("medium");
-              if (pocketThumbSize === "medium") return setPocketThumbSize("large");
-              return setPocketThumbSize("small");
-            }}
+  if (controlsAreLocked()) {
+    console.info(
+      "IXI THUMB SIZE COMMAND BLOCKED — PARK BRAKE ENGAGED"
+    );
+
+    return;
+  }
+
+  if (pocketThumbSize === "small") {
+    return setPocketThumbSize("medium");
+  }
+
+  if (pocketThumbSize === "medium") {
+    return setPocketThumbSize("large");
+  }
+
+  return setPocketThumbSize("small");
+}}
             aria-label={`Pocket thumb size ${pocketThumbSize}`}
             title={`Pocket thumbs ${pocketThumbSize}`}
           >
@@ -399,6 +516,29 @@ export default function IXIRelationshipControls({
   text-shadow: 0 0 5px rgba(0,194,255,.18);
 }
 
+.ixi-relationship-shell.revealed
+  .ixi-active-stack-button.armed {
+  opacity: 1;
+  color: rgba(0,194,255,.96);
+  border-color: rgba(0,194,255,.72);
+
+  text-shadow:
+    0 0 6px rgba(0,194,255,.42),
+    0 0 14px rgba(0,194,255,.20);
+
+  box-shadow:
+    0 0 6px rgba(0,194,255,.18);
+}
+
+.ixi-relationship-shell.revealed
+  .ixi-active-stack-button.stack-top-armed {
+  transform: translateY(-1px);
+}
+
+.ixi-relationship-shell.revealed
+  .ixi-active-stack-button.stack-bottom-armed {
+  transform: translateY(1px);
+}
         
 
         .ixi-relationship-shell.revealed .ixi-theater-button {
@@ -463,6 +603,34 @@ export default function IXIRelationshipControls({
         .park-core {
           font-weight: 950;
         }
+
+        .ixi-relationship-shell.park-brake-engaged
+  .ixi-relationship-controls,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-pocket-indicator,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-theater-button,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-active-stack-button {
+  filter: grayscale(1);
+}
+
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-relationship-color,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-relationship-outline,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-pocket-indicator,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-theater-button,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-active-stack-button,
+.ixi-relationship-shell.park-brake-engaged
+  .ixi-thumb-size-toggle {
+  opacity: .16;
+  cursor: not-allowed;
+  box-shadow: none;
+}
 
         .ixi-pocket-indicator {
           width: 10px;
@@ -598,14 +766,10 @@ export default function IXIRelationshipControls({
           height: 5px;
         }
 
-        .stage-dead {
-          background: transparent !important;
-          box-shadow: none;
-        }
+       .stage-dead {
+  box-shadow: none;
+}
 
-        .ixi-relationship-color.stage-dead {
-          background: transparent !important;
-        }
 
         .stage-exists {
           opacity: .46;
@@ -709,6 +873,64 @@ export default function IXIRelationshipControls({
         .color-orange {
           background: rgba(249,133,18,.82);
         }
+
+        /*
+ * LIGHTS OFF
+ *
+ * Every control remains visible in a muted
+ * industrial grayscale state.
+ */
+.ixi-relationship-shell:not(.revealed)
+  .ixi-relationship-color {
+  opacity: .24;
+  filter: grayscale(1) brightness(.55);
+  border-color: rgba(255,255,255,.055);
+  box-shadow: none;
+}
+
+/*
+ * LIGHTS ON — UNUSED
+ *
+ * A restrained hint of the actual control color.
+ */
+.ixi-relationship-shell.revealed
+  .ixi-relationship-color.stage-dead {
+  opacity: .28;
+  filter: grayscale(.72) brightness(.70);
+  border-color: rgba(255,255,255,.075);
+  box-shadow: none;
+}
+
+/*
+ * LIGHTS ON — COLOR EXISTS
+ *
+ * Machines currently use this relationship color.
+ */
+.ixi-relationship-shell.revealed
+  .ixi-relationship-color.stage-exists {
+  opacity: .62;
+  filter: grayscale(.20) brightness(.86);
+  border-color: rgba(255,255,255,.11);
+
+  box-shadow:
+    0 0 5px rgba(255,255,255,.035);
+}
+
+/*
+ * LIGHTS ON — FILTER SELECTED
+ */
+.ixi-relationship-shell.revealed
+  .ixi-relationship-color.stage-selected {
+  opacity: 1;
+  filter: grayscale(0) brightness(1.08);
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.22);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.07),
+    0 0 8px rgba(255,255,255,.08),
+    0 0 13px rgba(255,255,255,.045);
+}
 
         .ixi-mobile-nav-row {
           display: none;
