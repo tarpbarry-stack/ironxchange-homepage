@@ -3,6 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import {
+  loadIXIListingsEnvironment
+} from "../../lib/listings/IXIListingsEngine";
+
+import {
   PointerSensor,
   KeyboardSensor,
   useSensor,
@@ -26,8 +30,7 @@ import IXISellerObjectCard from "../../components/ixi-seller-object/IXISellerObj
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
-  fetchIxiMachineState,
-  saveIxiMachinePatch,
+  saveIxiMachinePatch
 } from "../../lib/ixiMachineStateClient";
 
 import { captureIXEvent } from "../../lib/posthog";
@@ -89,12 +92,9 @@ import {
 } from "../../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
-  fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
   filterSavedListings,
   toggleSavedListing
 } from "../../lib/savedListings";
-
 import {
   sendMachineToTheater
 } from "../../lib/ixiTheaterQueue";
@@ -186,7 +186,9 @@ const POCKET_TARGETS = [
 
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
-  const [ixiUserId, setIxiUserId] = useState("guest");
+  const [ixiUserId, setIxiUserId] = useState("");
+  const [isAuthenticated, setIsAuthenticated] =
+                                          useState(false);
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -388,66 +390,106 @@ const sensors = useSensors(
 });
   }, []);
 
-  useEffect(() => {
-    async function loadSavedPage() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
+ useEffect(() => {
+  let cancelled = false;
 
-        const sdkInstance = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+  async function loadSellerIndexEnvironment() {
+    try {
+      const environment =
+        await loadIXIListingsEnvironment({
+          includePrivateState: true
         });
 
-        setSdk(sdkInstance);
+      if (cancelled) return;
 
-        const currentUser =
-          await fetchCurrentUserWithSavedListings(sdkInstance);
+      setListings(
+        Array.isArray(environment.listings)
+          ? environment.listings
+          : []
+      );
 
-        const userId =
-  currentUser?.id?.uuid ||
-  currentUser?.id ||
-  "guest";
+      setSdk(environment.sdk || null);
 
-setIxiUserId(String(userId));
+      setIsAuthenticated(
+        Boolean(environment.isAuthenticated)
+      );
 
-const remoteIxiResponse =
-  await fetchIxiMachineState(String(userId));
+      setIxiUserId(
+        String(environment.userId || "")
+      );
 
-const remoteIxiState =
-  remoteIxiResponse?.state || remoteIxiResponse || {};
+      setSavedIds(
+        Array.isArray(environment.savedIds)
+          ? environment.savedIds
+          : []
+      );
 
-const workspaceSettings =
-  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
+      setIxiCardState(
+        environment.ixiState || {}
+      );
 
-const workspaceLayout =
-  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
+      const workspaceSettings =
+        environment.workspaceSettings || {};
 
-console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
+      const workspaceLayout =
+        environment.workspaceLayout || {};
 
-setIxiCardState(remoteIxiState);
-
-if (workspaceSettings.cardScaleMode) {
-  setCardScaleMode(workspaceSettings.cardScaleMode);
-}
-        
-setSavedIds(
-  getSavedListingIdsFromUser(currentUser)
-);
-
-const res = await fetch("/api/listings");
-const data = await res.json();
-
-if (Array.isArray(data)) {
-  setListings(data);
-}
-
-      } catch (err) {
-        console.error("Saved page load failed:", err);
-        setSavedIds([]);
+      if (workspaceSettings.cardScaleMode) {
+        setCardScaleMode(
+          workspaceSettings.cardScaleMode
+        );
       }
-    }
 
-    loadSavedPage();
-  }, []);
+      if (workspaceLayout.activeStackLayouts) {
+        setActiveStackLayouts(current => ({
+          ...current,
+          ...workspaceLayout.activeStackLayouts
+        }));
+      }
+
+      if (workspaceLayout.activeStacksOpen) {
+        setActiveStacksOpen(current => ({
+          ...current,
+          ...workspaceLayout.activeStacksOpen
+        }));
+      }
+
+      console.log(
+        "IXI SELLER INDEX ENVIRONMENT",
+        {
+          identity: environment.identity,
+          isAuthenticated:
+            environment.isAuthenticated,
+          listingCount:
+            environment.listings?.length || 0,
+          savedCount:
+            environment.savedIds?.length || 0,
+          errors: environment.errors
+        }
+      );
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "IXI SELLER INDEX LOAD FAILED:",
+        error
+      );
+
+      setListings([]);
+      setSavedIds([]);
+      setSdk(null);
+      setIsAuthenticated(false);
+      setIxiCardState({});
+      setIxiUserId("");
+    }
+  }
+
+  loadSellerIndexEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
@@ -838,7 +880,14 @@ const formattedVisibleYardValue =
 
   
   function updateIxiCardState(listingId, patch) {
-  const id = String(listingId);
+    if (!ixiUserId) {
+  console.warn(
+    "IXI STATE WRITE BLOCKED — IDENTITY NOT READY"
+  );
+
+  return;
+}
+    const id = String(listingId);
 
   setIxiCardState(current => {
     const nextRecord = {
@@ -1477,6 +1526,14 @@ function getIxiColorValue(color) {
 }
 
 function saveWorkspaceLayout(nextContainers = machineContainers) {
+if (!ixiUserId) {
+  console.warn(
+    "IXI LAYOUT WRITE BLOCKED — IDENTITY NOT READY"
+  );
+
+  return;
+}
+
   saveWorkspaceLayoutRecord({
     saveIxiMachinePatch,
     userId: ixiUserId,
@@ -1727,9 +1784,9 @@ if (
   <section className="saved-environment-shell">
        <IXIEnvironmentRail
   activeEnvironment="IXI SELLERS"
-  hasAccount={!!sdk}
+  hasAccount={isAuthenticated}
   hasRelationship={true}
-  hasInventory={!!sdk}
+  hasInventory={isAuthenticated}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
 />
