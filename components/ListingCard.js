@@ -696,31 +696,33 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         ) : null}
 
-                        {sellerMode &&
-        !creationMode &&
-        onMachinePlacementChange ? (
-          <div className="seller-placement-control">
-            <IXIMachinePlacementControl
-              machineAccess={machineAccess}
-              machineChannel={machineChannel}
-              disabled={machinePlacementBusy}
-              onChange={nextPlacement =>
-                onMachinePlacementChange(
-                  listing,
-                  nextPlacement
-                )
-              }
-            />
-          </div>
-        ) : null}
+                        {sellerMode ? (
+  <div className="seller-meta-row">
+    {sellerMode &&
+    !creationMode &&
+    onMachinePlacementChange ? (
+      <div className="seller-placement-control">
+        <IXIMachinePlacementControl
+          machineAccess={machineAccess}
+          machineChannel={machineChannel}
+          disabled={machinePlacementBusy}
+          onChange={nextPlacement =>
+            onMachinePlacementChange(
+              listing,
+              nextPlacement
+            )
+          }
+        />
+      </div>
+    ) : null}
 
-        {sellerMode ? (
-          <div className="seller-meta-row">
-            <span>Age: {listing.age ?? "—"}</span>
-            <span>Views: {listing.views || "—"}</span>
-            <span>States: {listing.states || listing.saves || "—"}</span>
-           </div>
-        ) : null}
+    <div className="seller-stats">
+      <span>Age: {listing.age ?? "—"}</span>
+      <span>Views: {listing.views || "—"}</span>
+      <span>States: {listing.states || listing.saves || "—"}</span>
+    </div>
+  </div>
+) : null}
 
            </div>
 
@@ -1520,20 +1522,40 @@ text-align: right;
         }
 
         .seller-placement-control {
-          margin-top: 8px;
-        }
+  width: 132px;
+  flex: 0 0 132px;
+}
         
         .seller-meta-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 2px;
-          padding-top: 10px;
-          border-top: 1px solid rgba(255,255,255,.045);
-          color: rgba(255,255,255,.38);
-          font-size: 10px;
-          font-weight: 800;
-        }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-top: 8px;
+  padding-top: 8px;
+
+  border-top: 1px solid rgba(255,255,255,.045);
+}
+
+.seller-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 9px;
+
+  min-width: 0;
+  margin-left: auto;
+
+  color: rgba(255,255,255,.38);
+
+  font-size: 8.5px;
+  font-weight: 850;
+
+  white-space: nowrap;
+}
 
                @media (max-width: 850px) {
           .card.seller-mode {
