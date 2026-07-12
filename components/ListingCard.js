@@ -16,6 +16,9 @@ import MachineBadges from "./MachineBadges";
 
 import IXIMachineRail from "./IXIMachineRail";
 
+import IXIMachinePlacementControl
+from "./ixi-machine-placement/IXIMachinePlacementControl";
+
 import IXIMachineObjectFace2
 from "./ixi-machine-object/IXIMachineObjectFace2";
 
@@ -79,7 +82,12 @@ export default function ListingCard({
   onDescriptionKeyDown,
   savingDescription = false,
 
-  isPaused = false,
+    isPaused = false,
+
+  machineAccess = "public",
+  machineChannel = "marketplace",
+  machinePlacementBusy = false,
+  onMachinePlacementChange,
 
   locationValue,
   onLocationChange,
@@ -653,6 +661,24 @@ style={getFrameStyle(currentImageObject, "card")}
             >
               DELETE
             </button>
+          </div>
+        ) : null}
+
+                        {sellerMode &&
+        !creationMode &&
+        onMachinePlacementChange ? (
+          <div className="seller-placement-control">
+            <IXIMachinePlacementControl
+              machineAccess={machineAccess}
+              machineChannel={machineChannel}
+              disabled={machinePlacementBusy}
+              onChange={nextPlacement =>
+                onMachinePlacementChange(
+                  listing,
+                  nextPlacement
+                )
+              }
+            />
           </div>
         ) : null}
 
@@ -1451,6 +1477,10 @@ text-align: right;
           color: #E53E3E !important;
         }
 
+        .seller-placement-control {
+          margin-top: 8px;
+        }
+        
         .seller-meta-row {
           display: flex;
           flex-wrap: wrap;
