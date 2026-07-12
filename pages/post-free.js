@@ -796,12 +796,12 @@ setPhotoItems(current => [...current, ...mapped]);
     }
 
 if (
-    listingVisibility !== "public" &&
-    listingVisibility !== "private"
-  ) {
-    alert("Choose Public or Private before posting.");
-    return;
-  }
+  !machineAccess ||
+  !machineChannel
+) {
+  alert("Choose LIVE, PRIV, or AUCT before posting.");
+  return;
+}
   
     setSaving(true);
 
@@ -852,7 +852,8 @@ if (
 
           listingType: "free-listing",
           listingStatus: "live",
-          listingVisibility,
+          machineAccess,
+          machineChannel,
 
           transactionProcessAlias: "default-inquiry/release-1",
           unitType: "inquiry"
@@ -2501,123 +2502,32 @@ select {
   gap: 5px;
 }
 
-.listing-visibility-control {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.listing-placement-control {
+  display: grid;
+  gap: 6px;
 
-  min-height: 28px;
   margin-top: 7px;
-  padding: 0 2px;
+  padding: 8px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    #0c0c0c;
 }
 
-.listing-visibility-label {
+.listing-placement-label {
   color: rgba(255,255,255,.44);
 
   font-size: 8px;
   font-weight: 950;
   letter-spacing: .62px;
   text-transform: uppercase;
-}
-
-.listing-visibility-options {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.listing-visibility-option {
-  display: inline-flex;
-  grid-template-columns: none;
-  align-items: center;
-  gap: 6px;
-
-  color: rgba(255,255,255,.42);
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .55px;
-  text-transform: uppercase;
-
-  cursor: pointer;
-  transition:
-    color .14s ease,
-    text-shadow .14s ease;
-}
-
-.listing-visibility-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.visibility-box {
-  width: 12px;
-  height: 12px;
-
-  display: block;
-
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 3px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.025),
-      rgba(255,255,255,0)
-    ),
-    #0c0c0c;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
-
-  transition:
-    border-color .14s ease,
-    background .14s ease,
-    box-shadow .14s ease;
-}
-
-.listing-visibility-option:hover {
-  color: rgba(255,255,255,.68);
-}
-
-.listing-visibility-option.active {
-  color: #7DEBFF;
-  text-shadow: 0 0 10px rgba(0,209,255,.12);
-}
-
-.listing-visibility-option.active .visibility-box {
-  border-color: rgba(0,209,255,.68);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,209,255,.34),
-      rgba(0,209,255,.12)
-    ),
-    #071317;
-
-  box-shadow:
-    0 0 0 1px rgba(0,209,255,.08),
-    0 0 10px rgba(0,209,255,.14),
-    0 1px 0 rgba(255,255,255,.06) inset;
-}
-
-.listing-visibility-option.active .visibility-box::after {
-  content: "";
-
-  display: block;
-
-  width: 4px;
-  height: 4px;
-
-  margin: 3px;
-
-  border-radius: 1px;
-  background: #7DEBFF;
-
-  box-shadow:
-    0 0 6px rgba(0,209,255,.56);
 }
       
 .post-link-strip {
