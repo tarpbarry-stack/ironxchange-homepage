@@ -312,6 +312,10 @@ const [saving, setSaving] = useState(false);
 const [importUrl, setImportUrl] = useState("");
 const [importing, setImporting] = useState(false);
 const [importResult, setImportResult] = useState(null);
+
+const [importAuthorization, setImportAuthorization] =
+  useState("");
+  
 const [loggedIn, setLoggedIn] = useState(false);
 const [sellerProfile, setSellerProfile] = useState({
   sellerName: "IronXchange Seller",
