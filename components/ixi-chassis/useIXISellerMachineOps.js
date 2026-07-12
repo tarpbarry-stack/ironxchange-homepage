@@ -649,7 +649,26 @@ async function saveLocation(e, listing) {
 
       isPaused: listingStatus === "paused",
 
-      onEdit: item => {
+machineAccess:
+  listing.machineAccess ||
+  listing.publicData?.machineAccess ||
+  listing.metadata?.machineAccess ||
+  "public",
+
+machineChannel:
+  listing.machineChannel ||
+  listing.publicData?.machineChannel ||
+  listing.metadata?.machineChannel ||
+  "marketplace",
+
+machinePlacementBusy:
+  machinePlacementBusyId ===
+  String(listingId),
+
+onMachinePlacementChange:
+  updateMachinePlacement,
+
+onEdit: item => {
         window.location.href = `/live?id=${getListingId(item)}`;
       },
 
