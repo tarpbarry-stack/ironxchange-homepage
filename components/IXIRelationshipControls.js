@@ -53,9 +53,11 @@ export default function IXIRelationshipControls({
   isMachineDragging = false,
   armedDestination = "",
   onToggleArmedDestination = () => {},
-  onCycleActiveStackTarget = () => {}
+  onCycleActiveStackTarget = () => {},
+  railRevealed = false,
+  onToggleRailRevealed = () => {}
 }) {
-  const [railRevealed, setRailRevealed] = useState(false);
+  
   const [parkBrakeOn, setParkBrakeOn] = useState(false);
 
   const existingColors = getExistingColors(ixiCardState);
@@ -66,10 +68,6 @@ export default function IXIRelationshipControls({
   );
 
   const machineControlsHinted = hasAnyRelationship || isMachineDragging;
-
-  function toggleRailReveal() {
-    setRailRevealed(current => !current);
-  }
 
   function getColorStage(color) {
     if (activeColors.includes(color)) return "selected";
@@ -100,7 +98,7 @@ export default function IXIRelationshipControls({
         <button
           type="button"
           className="ixi-relationship-power"
-          onClick={toggleRailReveal}
+          onClick={onToggleRailRevealed}
           aria-label="Toggle machine controls"
         />
       </div>
