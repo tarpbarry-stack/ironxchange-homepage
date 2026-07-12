@@ -53,7 +53,8 @@ import {
   IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord
+  saveWorkspaceLayoutRecord,
+  saveWorkspaceSettingsRecord
 } from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
 import {
@@ -171,6 +172,8 @@ const POCKET_TARGETS = [
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
+  const [workspaceSettings, setWorkspaceSettings] =
+  useState({});
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -316,6 +319,8 @@ const remoteIxiState =
 
 const workspaceSettings =
   remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
+
+setWorkspaceSettings(workspaceSettings);
 
 const workspaceLayout =
   remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
@@ -1041,6 +1046,26 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
+function saveWorkspaceSettings(patch = {}) {
+  if (!ixiUserId) {
+    return null;
+  }
+
+  const nextSettings = {
+    ...workspaceSettings,
+    ...patch,
+    updatedAt: Date.now()
+  };
+
+  setWorkspaceSettings(nextSettings);
+
+  return saveWorkspaceSettingsRecord({
+    saveIxiMachinePatch,
+    userId: ixiUserId,
+    settings: nextSettings
+  });
+}
+  
 function saveWorkspaceLayout(nextContainers = machineContainers) {
   saveWorkspaceLayoutRecord({
     saveIxiMachinePatch,
@@ -1082,7 +1107,10 @@ function cycleCardScaleMode() {
             <Navbar />
 
    
-<IXIWorkspaceEngine>
+<IXIWorkspaceEngine
+  workspaceSettings={workspaceSettings}
+  onSaveWorkspaceSettings={saveWorkspaceSettings}
+>
   {({
     leftPocketMode,
     setLeftPocketMode,
@@ -1093,8 +1121,14 @@ function cycleCardScaleMode() {
     rightPocket2Mode,
     setRightPocket2Mode,
     armedDestination,
-    setArmedDestination,
-    toggleArmedDestination
+setArmedDestination,
+toggleArmedDestination,
+
+railRevealed,
+toggleRailRevealed,
+
+searchSurfaceRevealed,
+toggleSearchSurfaceRevealed
   }) => {
           const handleWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
@@ -1220,7 +1254,11 @@ function cycleCardScaleMode() {
   toggleOutlineFilter={toggleOutlineFilter}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
-/>
+  railRevealed={railRevealed}
+  toggleRailRevealed={toggleRailRevealed}
+
+  searchSurfaceRevealed={searchSurfaceRevealed}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
                 </div>
 
   <aside className="ixi-command-right">
