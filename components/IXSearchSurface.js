@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 
 import {
   getV12CategoryNames,
@@ -50,9 +50,11 @@ export default function IXSearchSurface({
   setFilters = () => {},
   sortMode = "custom",
   setSortMode = () => {},
-   onClear = null,
+  onClear = null,
   listings = [],
   hasRelationship = false,
+  searchSurfaceRevealed = false,
+  onToggleSearchSurfaceRevealed = () => {}
 }) {
 
   const sortOptions = [
@@ -139,8 +141,6 @@ const availableModels =
           modelKeysInSelectedMake.has(taxonomyKey(model))
         )
       ];
-const [panelLit, setPanelLit] = useState(false);
-
   
   function updateFilter(key, value) {
     setFilters({
@@ -173,7 +173,11 @@ const [panelLit, setPanelLit] = useState(false);
   }
 
   return (
- <div className={`ix-search-surface ${panelLit ? "lit" : ""}`}>
+<div
+  className={`ix-search-surface ${
+    searchSurfaceRevealed ? "lit" : ""
+  }`}
+>
 
 <div className="desktop-panel-head">
   <span>IXSearchSurface™</span>
@@ -183,7 +187,7 @@ const [panelLit, setPanelLit] = useState(false);
     <button
       type="button"
       className="desktop-panel-power"
-      onClick={() => setPanelLit(current => !current)}
+      onClick={onToggleSearchSurfaceRevealed}
       aria-label="Toggle search surface"
     />
   </div>
