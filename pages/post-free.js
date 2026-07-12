@@ -3123,22 +3123,32 @@ animation: goldBreath 3.8s ease-in-out infinite;
     .badge-studio-head {
   min-height: 30px;
 
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px auto;
   align-items: center;
 
   gap: 12px;
+
+  white-space: nowrap;
 }
 
 .badge-studio-title {
   min-width: 0;
-  flex: 1;
 
   display: flex;
   align-items: center;
+  justify-content: space-between;
+
   gap: 12px;
 }
 
+.badge-studio-title h2 {
+  flex: 0 0 auto;
+}
+
 .badge-studio-title span {
+  flex: 0 0 auto;
+
   margin-left: auto;
   padding-right: 2px;
 
@@ -3152,12 +3162,12 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .badge-studio-divider {
-  flex: 0 0 1px;
-
   width: 1px;
   height: 22px;
 
-  margin-left: 0;
+  align-self: center;
+
+  margin: 0;
 
   background:
     linear-gradient(
@@ -3169,7 +3179,8 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .listing-controls-panel {
-  flex: 0 0 auto;
+  position: relative;
+  left: -80px;
 
   display: flex;
   align-items: center;
@@ -3191,7 +3202,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
   box-shadow:
     0 1px 0 rgba(255,255,255,.025) inset;
 
-  transform: translateX(-80px);
+  white-space: nowrap;
 }
 
 .listing-controls-label {
