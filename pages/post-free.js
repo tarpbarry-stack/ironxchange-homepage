@@ -1,5 +1,10 @@
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { useRouter } from "next/router";
 import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
@@ -39,6 +44,12 @@ import { captureIXEvent } from "../lib/posthog";
 import {
   attachPassportToSharetribeListing
 } from "../lib/passport/attachPassportToSharetribeListing";
+
+import {
+  loadPostFreeDraft,
+  savePostFreeDraft,
+  hasMeaningfulPostFreeDraft
+} from "../lib/post-free/IXIPostFreeDraftEngine";
 
 const BRAND_YELLOW = "#FFC400";
 
@@ -220,6 +231,11 @@ ${linkLine}`;
 
 export default function PostFreePage() {
   const router = useRouter();
+  const draftHydratedRef = useRef(false);
+  const draftSaveTimerRef = useRef(null);
+
+  const [draftHydrated, setDraftHydrated] =
+  useState(false);
 
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
@@ -269,6 +285,168 @@ export default function PostFreePage() {
 ]);
 
   const [previewFace, setPreviewFace] = useState(1);
+
+  useEffect(() => {
+  if (draftHydratedRef.current) {
+    return;
+  }
+
+  draftHydratedRef.current = true;
+
+  const savedDraft = loadPostFreeDraft();
+
+  if (
+    savedDraft &&
+    hasMeaningfulPostFreeDraft(savedDraft)
+  ) {
+    setCategory(savedDraft.category || "EXCAVATORS");
+    setYear(savedDraft.year || "");
+    setMake(savedDraft.make || "");
+    setModel(savedDraft.model || "");
+
+    setHours(savedDraft.hours || "");
+    setPrice(savedDraft.price || "");
+
+    setSerialNumber(
+      savedDraft.serialNumber || ""
+    );
+
+    setStockNumber(
+      savedDraft.stockNumber || ""
+    );
+
+    setCity(savedDraft.city || "");
+    setStateCode(savedDraft.stateCode || "");
+
+    setDescription(
+      savedDraft.description || ""
+    );
+
+    setSelectedKeywords(
+      Array.isArray(savedDraft.selectedKeywords)
+        ? savedDraft.selectedKeywords
+        : []
+    );
+
+    setKeywordSearch(
+      savedDraft.keywordSearch || ""
+    );
+
+    setWorkflowStatus(
+      savedDraft.workflowStatus ||
+      "good-listing"
+    );
+
+    setPhotoPolishMode(
+      savedDraft.photoPolishMode ||
+      "original"
+    );
+
+    setExternalLinks(
+      Array.isArray(savedDraft.externalLinks)
+        ? savedDraft.externalLinks
+        : [
+            { label: "", url: "" },
+            { label: "", url: "" },
+            { label: "", url: "" }
+          ]
+    );
+
+    setPreviewFace(
+      Number(savedDraft.previewFace || 1)
+    );
+
+    setActivePhotoIndex(
+      Number(savedDraft.activePhotoIndex || 0)
+    );
+  }
+
+  setDraftHydrated(true);
+}, []);
+
+  useEffect(() => {
+  if (!draftHydrated) {
+    return;
+  }
+
+  if (draftSaveTimerRef.current) {
+    clearTimeout(draftSaveTimerRef.current);
+  }
+
+  draftSaveTimerRef.current = setTimeout(() => {
+    savePostFreeDraft({
+      category,
+      year,
+      make,
+      model,
+
+      hours,
+      price,
+
+      serialNumber,
+      stockNumber,
+
+      city,
+      stateCode,
+
+      description,
+
+      selectedKeywords,
+      keywordSearch,
+
+      workflowStatus,
+      photoPolishMode,
+
+      externalLinks,
+
+      previewFace,
+      activePhotoIndex,
+
+      photoOrder: photoItems
+        .map(photo =>
+          String(photo?.id || "")
+        )
+        .filter(Boolean)
+    });
+  }, 450);
+
+  return () => {
+    if (draftSaveTimerRef.current) {
+      clearTimeout(draftSaveTimerRef.current);
+    }
+  };
+}, [
+  draftHydrated,
+
+  category,
+  year,
+  make,
+  model,
+
+  hours,
+  price,
+
+  serialNumber,
+  stockNumber,
+
+  city,
+  stateCode,
+
+  description,
+
+  selectedKeywords,
+  keywordSearch,
+
+  workflowStatus,
+  photoPolishMode,
+
+  externalLinks,
+
+  previewFace,
+  activePhotoIndex,
+
+  photoItems
+]);
 
   useEffect(() => {
     async function checkAuth() {
