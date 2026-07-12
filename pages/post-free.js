@@ -2480,7 +2480,7 @@ select {
   display: grid;
   gap: 6px;
 
-  margin-top: 7px;
+  margin-top: 5px;
   padding: 8px;
 
   border: 1px solid rgba(255,255,255,.06);
@@ -2505,7 +2505,7 @@ select {
 }
       
 .post-link-strip {
-  margin-top: 4px;
+  margin-top: 1px;
   padding: 8px 8px 7px;
 
   display: grid;
