@@ -18,7 +18,7 @@ export default function IXIChassisControls({
   toggleColorFilter,
   ixiOutlineFilter,
   toggleOutlineFilter,
-   armedDestination,
+  armedDestination,
   toggleArmedDestination,
   railRevealed = false,
   toggleRailRevealed = () => {},
@@ -53,20 +53,20 @@ export default function IXIChassisControls({
           />
         </div>
 
-        <IXIRelationshipControls
-          ixiCardState={ixiCardState}
-          activeColors={ixiColorFilters}
-          onToggleColor={toggleColorFilter}
-          activeOutline={ixiOutlineFilter}
-          onToggleOutline={toggleOutlineFilter}
-          pocketThumbSize={pocketThumbSize}
-          setPocketThumbSize={setPocketThumbSize}
-          armedDestination={armedDestination}
-          onToggleArmedDestination={toggleArmedDestination}
-          railRevealed={railRevealed}
-          onToggleRailRevealed={toggleRailRevealed}
-          onCycleActiveStackTarget={cycleActiveStackTarget}
-        />
+       <IXIRelationshipControls
+  ixiCardState={ixiCardState}
+  activeColors={ixiColorFilters}
+  onToggleColor={toggleColorFilter}
+  activeOutline={ixiOutlineFilter}
+  onToggleOutline={toggleOutlineFilter}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+  armedDestination={armedDestination}
+  onToggleArmedDestination={toggleArmedDestination}
+  railRevealed={railRevealed}
+  onToggleRailRevealed={toggleRailRevealed}
+  onCycleActiveStackTarget={cycleActiveStackTarget}
+/>
       </IXIControlSurface>
 
       <style jsx>{`
