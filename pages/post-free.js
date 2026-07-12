@@ -3121,13 +3121,15 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
     .badge-studio-head {
-  min-height: 30px;
+  position: relative;
 
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 1px auto;
+  min-height: 30px;
+  height: 30px;
+
+  display: flex;
   align-items: center;
 
-  gap: 12px;
+  padding-right: 0;
 
   white-space: nowrap;
 }
@@ -3135,22 +3137,25 @@ animation: goldBreath 3.8s ease-in-out infinite;
 .badge-studio-title {
   min-width: 0;
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-
   gap: 12px;
 }
 
 .badge-studio-title h2 {
+  margin: 0;
   flex: 0 0 auto;
 }
 
 .badge-studio-title span {
-  flex: 0 0 auto;
+  position: absolute;
+  left: 430px;
+  top: 50%;
 
-  margin-left: auto;
-  padding-right: 2px;
+  transform: translateY(-50%);
+
+  margin: 0;
+  padding: 0;
 
   color: #FFC400;
 
@@ -3162,10 +3167,14 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .badge-studio-divider {
+  position: absolute;
+  left: 505px;
+  top: 50%;
+
   width: 1px;
   height: 22px;
 
-  align-self: center;
+  transform: translateY(-50%);
 
   margin: 0;
 
@@ -3179,8 +3188,11 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .listing-controls-panel {
-  position: relative;
-  left: -80px;
+  position: absolute;
+  left: 525px;
+  top: 50%;
+
+  transform: translateY(-50%);
 
   display: flex;
   align-items: center;
