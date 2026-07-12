@@ -2505,7 +2505,7 @@ select {
 }
       
 .post-link-strip {
-  margin-top: 12px;
+  margin-top: 4px;
   padding: 8px 8px 7px;
 
   display: grid;
