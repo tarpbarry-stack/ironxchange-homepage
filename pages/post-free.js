@@ -1855,6 +1855,13 @@ select {
     0 0 14px rgba(0,209,255,.045);
 }
 
+.launch-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 0 1 auto;
+}      
         .launch-title button {
   height: 30px;
   padding: 0 11px;
