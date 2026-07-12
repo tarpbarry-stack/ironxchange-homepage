@@ -506,9 +506,11 @@ border-radius: 14px;
           text-transform: uppercase;
         }
 
-        .seller-object-footer {
+      .seller-object-footer {
   margin-top: auto;
+
   padding-top: 12px;
+  margin-bottom: 10px;
 
   display: grid;
   grid-template-columns: 1fr;
