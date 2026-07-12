@@ -1776,37 +1776,36 @@ select {
 .post-header-imports button {
   position: relative;
 
-  width: 142px;
-  height: 31px;
+  width: 146px;
+  height: 32px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  border: 1px solid rgba(255,255,255,.09);
+  border: 1px solid rgba(0,194,255,.24);
   border-radius: 8px;
 
   background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.03),
-      rgba(255,255,255,0)
-    ),
+    linear-gradient(180deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,0)),
     #101010;
 
-  color: rgba(255,255,255,.68);
+  color: #63DEFF;
 
-  font-size: 8.5px;
+  font-size: 9.25px;
   font-weight: 950;
-  letter-spacing: .62px;
+  letter-spacing: .75px;
   text-transform: uppercase;
 
   cursor: pointer;
   overflow: hidden;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 7px 16px rgba(0,0,0,.15);
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 10px rgba(0,194,255,.045),
+    0 8px 18px rgba(0,0,0,.16);
 
   transition:
     transform .14s ease,
@@ -1820,8 +1819,9 @@ select {
   content: "";
 
   position: absolute;
-  left: 18px;
-  right: 18px;
+
+  left: 12px;
+  right: 12px;
   top: 0;
 
   height: 1px;
@@ -1830,29 +1830,32 @@ select {
     linear-gradient(
       90deg,
       transparent,
-      rgba(0,209,255,.42),
+      rgba(0,194,255,.82),
       transparent
     );
+
+  opacity: .95;
 }
 
 .post-header-imports button:hover {
   transform: translateY(-1px);
 
-  border-color: rgba(0,209,255,.34);
-  color: #7DEBFF;
+  color: #9BF1FF;
+
+  border-color: rgba(0,194,255,.62);
 
   background:
     linear-gradient(
       180deg,
-      rgba(0,209,255,.055),
-      rgba(0,209,255,0)
+      rgba(0,194,255,.075),
+      rgba(0,194,255,0)
     ),
-    #121212;
+    #131313;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset,
-    0 9px 20px rgba(0,0,0,.18),
-    0 0 14px rgba(0,209,255,.045);
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 0 18px rgba(0,194,255,.12),
+    0 10px 22px rgba(0,0,0,.18);
 }
 
 .launch-title {
