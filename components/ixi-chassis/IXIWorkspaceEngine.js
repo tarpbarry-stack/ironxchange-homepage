@@ -83,16 +83,14 @@ export default function IXIWorkspaceEngine({
   }
 
   function toggleRailRevealed() {
-    setRailRevealed(current => {
-      const next = !current;
+  const next = !railRevealed;
 
-      persistControlSettings({
-        railRevealed: next
-      });
+  setRailRevealed(next);
 
-      return next;
-    });
-  }
+  persistControlSettings({
+    railRevealed: next
+  });
+}
 
   return children({
     leftPocketMode,
