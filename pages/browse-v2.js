@@ -172,6 +172,10 @@ const POCKET_TARGETS = [
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
+  
+  const [workspaceSettings, setWorkspaceSettings] =
+  useState({});
+  
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -288,6 +292,13 @@ const sensors = useSensors(
     setSavedIds(environment.savedIds);
     setIxiUserId(environment.userId);
     setIxiCardState(environment.ixiState);
+
+    const loadedWorkspaceSettings =
+  environment.workspaceSettings || {};
+
+setWorkspaceSettings(
+  loadedWorkspaceSettings
+);
 
     console.log(
       "IXI WORKSPACE LAYOUT LOADED",
@@ -1005,6 +1016,28 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
+  function saveWorkspaceSettings(patch = {}) {
+  if (!ixiUserId) {
+    console.warn(
+      "IXI WORKSPACE SETTINGS WRITE BLOCKED — IDENTITY NOT READY"
+    );
+
+    return null;
+  }
+
+  setWorkspaceSettings(current => ({
+    ...current,
+    ...patch,
+    updatedAt: Date.now()
+  }));
+
+  return saveWorkspaceSettingsRecord({
+    saveIxiMachinePatch,
+    userId: ixiUserId,
+    settings: patch
+  });
+}
+
 function saveWorkspaceLayout(nextContainers = machineContainers) {
   saveWorkspaceLayoutRecord({
     saveIxiMachinePatch,
@@ -1046,7 +1079,10 @@ function cycleCardScaleMode() {
             <Navbar />
 
    
-<IXIWorkspaceEngine>
+<IXIWorkspaceEngine
+  workspaceSettings={workspaceSettings}
+  onSaveWorkspaceSettings={saveWorkspaceSettings}
+>
  {({
   leftPocketMode,
   setLeftPocketMode,
@@ -1057,9 +1093,11 @@ function cycleCardScaleMode() {
   rightPocket2Mode,
   setRightPocket2Mode,
   armedDestination,
-  setArmedDestination,
-  toggleArmedDestination,
-  cycleActiveStackTarget
+setArmedDestination,
+toggleArmedDestination,
+railRevealed,
+toggleRailRevealed,
+cycleActiveStackTarget
 }) => {
           const handleWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
@@ -1214,7 +1252,9 @@ if (armedDestination === "stackBottom") {
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
   cycleActiveStackTarget={cycleActiveStackTarget}
-/>
+  railRevealed={railRevealed}
+  toggleRailRevealed={toggleRailRevealed}
+  />
                 </div>
 
   <aside className="ixi-command-right">
