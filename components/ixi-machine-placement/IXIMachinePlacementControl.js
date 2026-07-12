@@ -131,26 +131,39 @@ export default function IXIMachinePlacementControl({
             transform .14s ease;
         }
 
-        button:hover:not(:disabled):not(.active) {
-          transform: translateY(-1px);
+       button:hover:not(:disabled):not(.active) {
+  transform: translateY(-1px);
 
-          color: #ffc400;
-          border-color: rgba(255,196,0,.34);
-        }
+  color: rgba(255,255,255,.72);
+  border-color: rgba(255,255,255,.16);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,0)
+    ),
+    #141414;
+}
 
         button.active {
-          color: #050505;
+  color: #FFC400;
 
-          border-color: #ffc400;
+  border-color: rgba(255,196,0,.58);
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.18),
-              rgba(255,255,255,0)
-            ),
-            #ffc400;
-        }
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.055),
+      rgba(255,196,0,.008)
+    ),
+    #101010;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 0 1px rgba(255,196,0,.035),
+    0 0 8px rgba(255,196,0,.08);
+}
 
         button:disabled {
           cursor: wait;
