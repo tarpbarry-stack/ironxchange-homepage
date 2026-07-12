@@ -1338,6 +1338,8 @@ addActivity(
       listing={previewListing}
       sellerMode={true}
       creationMode={true}
+      machineAccess={machineAccess}
+      machineChannel={machineChannel}
       saved={false}
       machineFace={previewFace}
       onCycleMachineFace={cyclePreviewFace}
