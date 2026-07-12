@@ -587,16 +587,23 @@ publicData: {
 async function importMachineFromUrl() {
   const url = String(importUrl || "").trim();
 
-  const lowerUrl = url.toLowerCase();
-
   if (!url) {
     alert("Paste a machine URL first.");
+    return;
+  }
+
+  if (
+    importAuthorization !== "public" &&
+    importAuthorization !== "private"
+  ) {
+    alert("Select Public or Private before importing.");
     return;
   }
 
   setImporting(true);
 
   try {
+    
    const response = await fetch("/api/acquisition/parse-url", {
   method: "POST",
   headers: {
@@ -1048,21 +1055,61 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
               </div>
             </div>
 
-           <div className="url-import-bar">
-  <input
-    type="url"
-    value={importUrl}
-    onChange={e => setImportUrl(e.target.value)}
-    placeholder="PASTE MACHINE URL"
-  />
+           <div className="url-import-shell">
+  <div className="url-import-bar">
+    <input
+      type="url"
+      value={importUrl}
+      onChange={e => setImportUrl(e.target.value)}
+      placeholder="PASTE MACHINE URL"
+    />
 
-  <button
-  type="button"
-  onClick={importMachineFromUrl}
-  disabled={importing}
->
-  {importing ? "Importing..." : "Import"}
-</button>
+    <button
+      type="button"
+      onClick={importMachineFromUrl}
+      disabled={importing}
+    >
+      {importing ? "Building..." : "Import"}
+    </button>
+  </div>
+
+  <div className="url-import-authorization">
+    <label
+      className={`url-authorization-option ${
+        importAuthorization === "public" ? "active" : ""
+      }`}
+    >
+      <span>Public</span>
+
+      <input
+        type="radio"
+        name="importAuthorization"
+        value="public"
+        checked={importAuthorization === "public"}
+        onChange={() => setImportAuthorization("public")}
+      />
+
+      <span className="url-authorization-box" />
+    </label>
+
+    <label
+      className={`url-authorization-option ${
+        importAuthorization === "private" ? "active" : ""
+      }`}
+    >
+      <span>Private</span>
+
+      <input
+        type="radio"
+        name="importAuthorization"
+        value="private"
+        checked={importAuthorization === "private"}
+        onChange={() => setImportAuthorization("private")}
+      />
+
+      <span className="url-authorization-box" />
+    </label>
+  </div>
 </div>
 
  
@@ -1864,6 +1911,7 @@ select {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
   gap: 14px;
 }
 
@@ -1923,6 +1971,132 @@ select {
     0 1px 0 rgba(255,255,255,.035) inset,
     0 0 18px rgba(0,209,255,.10);
 }
+
+
+.url-import-bar {
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  align-items: center;
+  gap: 6px;
+}
+
+.url-import-bar input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: 8px;
+
+  background: #0b0b0b;
+  color: rgba(255,255,255,.86);
+
+  padding: 0 10px;
+
+  font-size: 9px;
+  font-weight: 850;
+
+  outline: none;
+}
+
+.url-import-bar input:focus {
+  border-color: rgba(0,209,255,.52);
+
+  box-shadow:
+    0 0 0 1px rgba(0,209,255,.10),
+    0 0 14px rgba(0,209,255,.065);
+}
+
+.url-import-bar button {
+  height: 32px;
+
+  border: 1px solid rgba(0,209,255,.34);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,209,255,.085),
+      rgba(0,209,255,0)
+    ),
+    #101719;
+
+  color: #7DEBFF;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .62px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.url-import-authorization {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding-left: 10px;
+
+  border-left: 1px solid rgba(0,209,255,.14);
+}
+
+.url-authorization-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 7.5px;
+  font-weight: 950;
+  letter-spacing: .55px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.url-authorization-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.url-authorization-box {
+  width: 12px;
+  height: 12px;
+
+  border: 1px solid rgba(255,255,255,.20);
+  border-radius: 3px;
+
+  background: #090909;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
+}
+
+.url-authorization-option.active {
+  color: #7DEBFF;
+}
+
+.url-authorization-option.active .url-authorization-box {
+  border-color: rgba(0,209,255,.72);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,209,255,.50),
+      rgba(0,209,255,.18)
+    ),
+    #071317;
+
+  box-shadow:
+    0 0 9px rgba(0,209,255,.20);
+}
+
 
         .launch-title {
           display: flex;
