@@ -1513,32 +1513,37 @@ addActivity(
             <section className="panel badge-panel">
 
   <div className="panel-head badge-studio-head">
+  <div className="badge-studio-title">
+    <h2>Badge Studio</h2>
 
-    <div className="badge-studio-title">
-      <div>
-        <span>Badge Studio</span>
-        <h2>Machine DNA Keywords</h2>
-      </div>
-    </div>
-
-    <div className="badge-head-actions">
-      <button
-        type="button"
-        className="badge-draft-command"
-      >
-        Auto Select
-      </button>
-
-      <button
-        type="button"
-        className="badge-draft-command clear"
-        onClick={() => setSelectedKeywords([])}
-      >
-        Clear
-      </button>
-    </div>
-
+    <span>
+      {selectedKeywords.length} selected
+    </span>
   </div>
+
+  <div className="badge-head-actions">
+    <button
+      type="button"
+      className="badge-draft-command continue"
+    >
+      Continue
+    </button>
+
+    <button
+      type="button"
+      className="badge-draft-command start-new"
+    >
+      Start New
+    </button>
+
+    <button
+      type="button"
+      className="badge-draft-command clear"
+    >
+      Clear
+    </button>
+  </div>
+</div>
 
   <div className="selected-badges">
                 {selectedKeywords.slice(0, 16).map((keyword, index) => (
