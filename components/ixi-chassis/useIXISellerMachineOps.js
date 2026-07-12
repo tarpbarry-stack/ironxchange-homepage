@@ -13,6 +13,10 @@ import {
   updateMachineFacts
 } from "../ixi-object-system/IXIMachineMutationEngine";
 
+import {
+  saveMachinePlacement
+} from "../../lib/machine-access/saveMachinePlacement";
+
 function toNumber(value) {
   const raw = String(value || "").replace(/[^0-9]/g, "");
   return raw ? Number(raw) : null;
@@ -58,8 +62,9 @@ export default function useIXISellerMachineOps({
   showActionNotice
 }) {
   const [savingPriceId, setSavingPriceId] = useState("");
-  const [savingDescriptionId, setSavingDescriptionId] = useState("");
-  const [listingWorkflows, setListingWorkflows] = useState({});
+const [savingDescriptionId, setSavingDescriptionId] = useState("");
+const [machinePlacementBusyId, setMachinePlacementBusyId] = useState("");
+const [listingWorkflows, setListingWorkflows] = useState({});
     async function runInventoryMachineMutation({
     listing,
     after = {},
@@ -455,6 +460,110 @@ async function saveLocation(e, listing) {
       console.error("Reactivate failed:", error);
     }
   }
+
+  async function updateMachinePlacement(
+  listing,
+  nextPlacement = {}
+) {
+  const listingId = getListingId(listing);
+
+  if (!listingId) {
+    return;
+  }
+
+  const {
+    machineAccess,
+    machineChannel
+  } = nextPlacement;
+
+  setMachinePlacementBusyId(
+    String(listingId)
+  );
+
+  try {
+    const result =
+      await saveMachinePlacement({
+        listingId,
+        machineAccess,
+        machineChannel
+      });
+
+    setSellerListings(current =>
+      current.map(item =>
+        String(getListingId(item)) ===
+        String(listingId)
+          ? {
+              ...item,
+
+              machineAccess:
+                result.machineAccess,
+
+              machineChannel:
+                result.machineChannel,
+
+              publicData: {
+                ...(item.publicData || {}),
+
+                machineAccess:
+                  result.machineAccess,
+
+                machineChannel:
+                  result.machineChannel,
+
+                machinePlacementChangedAt:
+                  result.changedAt
+              },
+
+              metadata: {
+                ...(item.metadata || {}),
+
+                machineAccess:
+                  result.machineAccess,
+
+                machineChannel:
+                  result.machineChannel,
+
+                machinePlacementChangedAt:
+                  result.changedAt,
+
+                machinePlacementVersion: 1
+              }
+            }
+          : item
+      )
+    );
+
+    const placementLabel =
+      result.machineChannel === "marketplace"
+        ? "MACHINE MOVED TO MARKETPLACE"
+        : result.machineChannel === "auction"
+          ? "MACHINE MOVED TO AUCTION"
+          : "MACHINE CHANGED TO PRIVATE";
+
+    showActionNotice?.({
+      listingId,
+      message: placementLabel,
+      tone: "success"
+    });
+  } catch (error) {
+    console.error(
+      "MACHINE PLACEMENT UPDATE FAILED:",
+      error
+    );
+
+    showActionNotice?.({
+      listingId,
+      message: "PLACEMENT UPDATE FAILED",
+      tone: "error"
+    });
+
+    alert(
+      `Machine placement failed: ${error.message}`
+    );
+  } finally {
+    setMachinePlacementBusyId("");
+  }
+}
 
   function getWorkflowStatus(listing) {
     const listingId = getListingId(listing);
