@@ -998,39 +998,19 @@ addActivity(
             </div>
 
            <div className="post-header-imports">
-  <div className="post-import-shell">
-    <button
-      type="button"
-      className="post-import-command"
-      onClick={() => router.push("/account/bulk-upload")}
-    >
-      <span className="post-import-icon">
-        <i className="fa-solid fa-layer-group"></i>
-      </span>
+  <button
+    type="button"
+    onClick={() => router.push("/account/bulk-upload")}
+  >
+    Bulk Upload
+  </button>
 
-      <span className="post-import-copy">
-        <strong>Bulk Upload</strong>
-        <small>CSV • XLSX</small>
-      </span>
-    </button>
-
-    <span className="post-import-divider" />
-
-    <button
-      type="button"
-      className="post-import-command"
-      onClick={() => router.push("/url-import")}
-    >
-      <span className="post-import-icon">
-        <i className="fa-solid fa-link"></i>
-      </span>
-
-      <span className="post-import-copy">
-        <strong>URL Import</strong>
-        <small>Machine Listing URL</small>
-      </span>
-    </button>
-  </div>
+  <button
+    type="button"
+    onClick={() => router.push("/url-import")}
+  >
+    URL Import
+  </button>
 </div>
     
             <div className="launch-header-actions">
@@ -1792,23 +1772,23 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 
   justify-self: center;
 }
 
-.post-import-shell {
-  width: 100%;
-  height: 42px;
+.post-header-imports button {
+  position: relative;
 
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  align-items: stretch;
+  width: 142px;
+  height: 31px;
 
-  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  border: 1px solid rgba(0,209,255,.17);
-  outline: 1px solid rgba(255,255,255,.018);
-  border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 8px;
 
   background:
     linear-gradient(
@@ -1816,50 +1796,21 @@ select {
       rgba(255,255,255,.03),
       rgba(255,255,255,0)
     ),
-    radial-gradient(
-      circle at center,
-      rgba(0,209,255,.035),
-      transparent 72%
-    ),
-    #0d0d0d;
+    #101010;
+
+  color: rgba(255,255,255,.68);
+
+  font-size: 8.5px;
+  font-weight: 950;
+  letter-spacing: .62px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  overflow: hidden;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.035) inset,
-    0 8px 20px rgba(0,0,0,.18);
-}
-
-.post-import-divider {
-  width: 1px;
-  margin: 5px 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      transparent,
-      rgba(0,209,255,.22),
-      transparent
-    );
-}
-
-.post-import-command {
-  min-width: 0;
-  height: 34px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-
-  border: 1px solid transparent;
-  border-radius: 8px;
-
-  background: transparent;
-  color: rgba(255,255,255,.68);
-
-  padding: 0 12px;
-
-  cursor: pointer;
-  text-align: left;
+    0 7px 16px rgba(0,0,0,.15);
 
   transition:
     transform .14s ease,
@@ -1869,105 +1820,43 @@ select {
     box-shadow .14s ease;
 }
 
-.post-import-icon {
-  width: 22px;
-  height: 22px;
+.post-header-imports button::before {
+  content: "";
 
-  flex: 0 0 22px;
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 0;
 
-  display: grid;
-  place-items: center;
-
-  border: 1px solid rgba(0,209,255,.18);
-  border-radius: 6px;
+  height: 1px;
 
   background:
     linear-gradient(
-      180deg,
-      rgba(0,209,255,.06),
-      rgba(0,209,255,0)
-    ),
-    #101010;
-
-  color: rgba(125,235,255,.72);
-
-  font-size: 9px;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
+      90deg,
+      transparent,
+      rgba(0,209,255,.42),
+      transparent
+    );
 }
 
-.post-import-copy {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.post-import-copy strong {
-  color: rgba(230,250,255,.82);
-
-  font-size: 8.5px;
-  font-weight: 950;
-  letter-spacing: .62px;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.post-import-copy small {
-  margin-top: 3px;
-
-  color: rgba(255,255,255,.31);
-
-  font-size: 6.5px;
-  font-weight: 900;
-  letter-spacing: .42px;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.post-import-command:hover {
+.post-header-imports button:hover {
   transform: translateY(-1px);
 
-  border-color: rgba(0,209,255,.24);
+  border-color: rgba(0,209,255,.34);
+  color: #7DEBFF;
 
   background:
     linear-gradient(
       180deg,
-      rgba(0,209,255,.07),
-      rgba(0,209,255,.012)
-    );
+      rgba(0,209,255,.055),
+      rgba(0,209,255,0)
+    ),
+    #121212;
 
   box-shadow:
-    0 0 16px rgba(0,209,255,.055);
-}
-
-.post-import-command:hover .post-import-icon {
-  border-color: rgba(0,209,255,.46);
-  color: #7DEBFF;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.035) inset,
-    0 0 12px rgba(0,209,255,.09);
-}
-
-.post-import-command:hover .post-import-copy strong {
-  color: #7DEBFF;
-}
-
-.post-import-command:hover .post-import-copy small {
-  color: rgba(255,255,255,.48);
-}
-        .launch-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-
-  justify-self: start;
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 9px 20px rgba(0,0,0,.18),
+    0 0 14px rgba(0,209,255,.045);
 }
 
         .launch-title button {
