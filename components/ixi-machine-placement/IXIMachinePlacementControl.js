@@ -8,19 +8,19 @@ import {
 const PLACEMENT_OPTIONS = [
   {
     key: "marketplace",
-    label: "MARKETPLACE",
+    label: "LIVE",
     access: IXI_MACHINE_ACCESS.PUBLIC,
     channel: IXI_MACHINE_CHANNELS.MARKETPLACE
   },
   {
     key: "private",
-    label: "PRIVATE",
+    label: "PRIV",
     access: IXI_MACHINE_ACCESS.PRIVATE,
     channel: IXI_MACHINE_CHANNELS.NONE
   },
   {
     key: "auction",
-    label: "AUCTION",
+    label: "AUCT",
     access: IXI_MACHINE_ACCESS.PUBLIC,
     channel: IXI_MACHINE_CHANNELS.AUCTION
   }
@@ -94,20 +94,19 @@ export default function IXIMachinePlacementControl({
       })}
 
       <style jsx>{`
-        .ixi-machine-placement-control {
-          width: 100%;
+       .ixi-machine-placement-control {
+  width: 100%;
 
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
 
-          gap: 4px;
-        }
-
+  gap: 3px;
+}
         button {
-          height: 27px;
+          height: 19px;
 
           border: 1px solid rgba(255,255,255,.08);
-          border-radius: 7px;
+          border-radius: 5px;
 
           background:
             linear-gradient(
@@ -119,9 +118,9 @@ export default function IXIMachinePlacementControl({
 
           color: rgba(255,255,255,.48);
 
-          font-size: 7.5px;
+          font-size: 6.5px;
           font-weight: 950;
-          letter-spacing: .45px;
+          letter-spacing: .38px;
 
           cursor: pointer;
 
