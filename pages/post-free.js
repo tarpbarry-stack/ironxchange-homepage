@@ -1752,16 +1752,12 @@ select {
 }
 
 .launch-header {
-  min-height: 58px;
+  min-height: 52px;
   margin-bottom: 8px;
-  padding: 7px 12px;
+  padding: 8px 12px;
 
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    430px
-    minmax(0, 1fr);
-
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 14px;
 }
@@ -1938,8 +1934,6 @@ select {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-
-  justify-self: end;
 }
 
         .status-command,
@@ -3599,16 +3593,6 @@ textarea:focus,
   .studio-grid {
     grid-template-columns: 1fr;
   }
-
-.launch-header {
-  grid-template-columns: 1fr;
-}
-
-.launch-title,
-.post-header-imports,
-.launch-header-actions {
-  justify-self: center;
-}
 
 .post-header-imports {
   width: min(430px, 100%);
