@@ -179,6 +179,8 @@ const DIRECT_CONTAINER_TARGETS = [
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
+  const [workspaceSettings, setWorkspaceSettings] =
+  useState({});
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
   const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
 
@@ -295,6 +297,13 @@ const sensors = useSensors(
     setSavedIds(environment.savedIds);
     setIxiUserId(environment.userId);
     setIxiCardState(environment.ixiState);
+
+    const loadedWorkspaceSettings =
+  environment.workspaceSettings || {};
+
+setWorkspaceSettings(
+  loadedWorkspaceSettings
+);
 
     console.log(
       "IXI WORKSPACE LAYOUT LOADED",
@@ -1017,6 +1026,26 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
+function saveWorkspaceSettings(patch = {}) {
+  if (!ixiUserId) {
+    return null;
+  }
+
+  const nextSettings = {
+    ...workspaceSettings,
+    ...patch,
+    updatedAt: Date.now()
+  };
+
+  setWorkspaceSettings(nextSettings);
+
+  return saveWorkspaceSettingsRecord({
+    saveIxiMachinePatch,
+    userId: ixiUserId,
+    settings: nextSettings
+  });
+}
+  
 function saveWorkspaceLayout(nextContainers = machineContainers) {
   saveWorkspaceLayoutRecord({
     saveIxiMachinePatch,
@@ -1058,7 +1087,10 @@ function cycleCardScaleMode() {
             <Navbar />
 
    
-<IXIWorkspaceEngine>
+<IXIWorkspaceEngine
+  workspaceSettings={workspaceSettings}
+  onSaveWorkspaceSettings={saveWorkspaceSettings}
+>
   {({
     leftPocketMode,
     setLeftPocketMode,
@@ -1070,7 +1102,12 @@ function cycleCardScaleMode() {
     setRightPocket2Mode,
     armedDestination,
     setArmedDestination,
-    toggleArmedDestination
+    toggleArmedDestination,
+    railRevealed,
+    toggleRailRevealed,
+
+    searchSurfaceRevealed,
+    toggleSearchSurfaceRevealed,
   }) => {
           const handleWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
@@ -1310,6 +1347,11 @@ if (armedDestination === "stackTop") {
   toggleOutlineFilter={toggleOutlineFilter}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
+  railRevealed={railRevealed}
+  toggleRailRevealed={toggleRailRevealed}
+
+  searchSurfaceRevealed={searchSurfaceRevealed}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
 />
                 </div>
 
