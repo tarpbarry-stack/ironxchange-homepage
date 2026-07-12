@@ -1,3 +1,13 @@
+// /pages/api/account-listings.js
+
+import {
+  fetchSharetribeListingsByAuthor
+} from "../../lib/listings/fetchSharetribeListingsByAuthor";
+
+import {
+  normalizeSharetribeListings
+} from "../../lib/listings/normalizeSharetribeListings";
+
 export default async function handler(req, res) {
   try {
     const { authorId } = req.query;
@@ -8,60 +18,62 @@ export default async function handler(req, res) {
       });
     }
 
-    const protocol = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers.host;
+    const rawInventory =
+      await fetchSharetribeListingsByAuthor(
+        String(authorId)
+      );
 
-    const response = await fetch(`${protocol}://${host}/api/listings`);
+    const normalizedListings =
+      normalizeSharetribeListings(
+        rawInventory
+      );
 
-    if (!response.ok) {
-      throw new Error(`Listings API failed: ${response.status}`);
-    }
-
-    const listings = await response.json();
-
-    const myListings = Array.isArray(listings)
-      ? listings.filter((item) => {
+    const activeInventory =
+      normalizedListings
+        .filter(item => {
           return (
-            item.authorId === authorId ||
-            item.sellerId === authorId ||
-            item.author?.id === authorId ||
-            item.author?.id?.uuid === authorId
+            item.listingStatus !== "deleted" &&
+            item.listingStatus !== "archived"
           );
         })
-      : [];
+        .map(item => {
+          let age = null;
 
-    const withAge = myListings.map((item) => {
-     const createdAt =
-  item.attributes?.publishedAt ||
-  item.attributes?.createdAt ||
-  item.createdAt ||
-  item.created_at ||
-  item.attributes?.created_at;
+          if (item.createdAt) {
+            const created =
+              new Date(item.createdAt);
 
-      let age = null;
+            const now =
+              new Date();
 
-      if (createdAt) {
-        const created = new Date(createdAt);
-        const now = new Date();
+            age = Math.max(
+              0,
+              Math.floor(
+                (now - created) /
+                  (1000 * 60 * 60 * 24)
+              )
+            );
+          }
 
-        age = Math.max(
-          0,
-          Math.floor((now - created) / (1000 * 60 * 60 * 24))
-        );
-      }
+          return {
+            ...item,
+            age
+          };
+        });
 
-      return {
-        ...item,
-        age
-      };
-    });
-
-    res.status(200).json(withAge);
+    return res
+      .status(200)
+      .json(activeInventory);
   } catch (error) {
-    console.error("ACCOUNT LISTINGS ERROR:", error);
+    console.error(
+      "ACCOUNT LISTINGS ERROR:",
+      error
+    );
 
-    res.status(500).json({
-      error: "Failed to load account listings"
+    return res.status(500).json({
+      error:
+        error.message ||
+        "Failed to load account listings"
     });
   }
 }
