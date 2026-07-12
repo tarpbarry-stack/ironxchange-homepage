@@ -3104,14 +3104,13 @@ animation: goldBreath 3.8s ease-in-out infinite;
   text-transform: uppercase;
 }
 
-      .badge-studio-head {
-  min-height: 56px;
+    .badge-studio-head {
+  min-height: 30px;
 
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 1px 360px;
+  display: flex;
   align-items: center;
 
-  gap: 14px;
+  gap: 12px;
 }
 
 .badge-studio-title span {
@@ -3126,25 +3125,30 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
 .badge-studio-divider {
   width: 1px;
-  height: 38px;
+  height: 22px;
+
+  margin-left: 10px;
 
   background:
     linear-gradient(
       180deg,
       transparent,
-      rgba(255,255,255,.15),
+      rgba(255,255,255,.16),
       transparent
     );
 }
 
 .listing-controls-panel {
-  display: grid;
-  gap: 6px;
+  margin-left: 80px;
 
-  padding: 7px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 3px 7px;
 
   border: 1px solid rgba(255,255,255,.06);
-  border-radius: 9px;
+  border-radius: 8px;
 
   background:
     linear-gradient(
@@ -3159,29 +3163,31 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .listing-controls-label {
-  color: rgba(255,255,255,.44) !important;
+  margin-right: 8px;
 
-  font-size: 8px !important;
-  font-weight: 950 !important;
-  letter-spacing: .62px !important;
+  color: rgba(255,255,255,.42);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .62px;
   text-transform: uppercase;
+
+  white-space: nowrap;
 }
 
 .listing-controls-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
+  display: flex;
+  align-items: center;
   gap: 4px;
 }
-
        .badge-draft-command {
-  height: 22px;
+  height: 20px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0 10px;
+  padding: 0 8px;
 
   border: 1px solid rgba(255,255,255,.075);
   border-radius: 7px;
@@ -3196,7 +3202,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   color: rgba(255,255,255,.52);
 
-  font-size: 7.5px;
+  font-size: 6.5px;
   font-weight: 950;
   letter-spacing: .55px;
   text-transform: uppercase;
