@@ -411,11 +411,14 @@ border-radius: 14px;
         }
 
         .seller-object-main {
-          flex: 1;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-        }
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding-bottom: 18px;
+}
 
         .seller-object-top {
           display: flex;
@@ -505,12 +508,11 @@ border-radius: 14px;
 
         .seller-object-footer {
   margin-top: auto;
+  padding-top: 12px;
 
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-
-  padding-top: 18px;
 }
 
         .seller-object-footer a {
