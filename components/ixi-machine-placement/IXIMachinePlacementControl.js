@@ -103,10 +103,10 @@ export default function IXIMachinePlacementControl({
   gap: 3px;
 }
         button {
-          height: 19px;
+          height: 17px;
 
           border: 1px solid rgba(255,255,255,.08);
-          border-radius: 5px;
+          border-radius: 4px;
 
           background:
             linear-gradient(
@@ -118,7 +118,7 @@ export default function IXIMachinePlacementControl({
 
           color: rgba(255,255,255,.48);
 
-          font-size: 6.5px;
+          font-size: 6px;
           font-weight: 950;
           letter-spacing: .38px;
 
