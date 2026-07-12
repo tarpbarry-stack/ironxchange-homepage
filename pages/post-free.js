@@ -3129,7 +3129,19 @@ animation: goldBreath 3.8s ease-in-out infinite;
   gap: 12px;
 }
 
+.badge-studio-title {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .badge-studio-title span {
+  margin-left: auto;
+  padding-right: 2px;
+
   color: #FFC400;
 
   font-size: 8px;
@@ -3140,10 +3152,12 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .badge-studio-divider {
+  flex: 0 0 1px;
+
   width: 1px;
   height: 22px;
 
-  margin-left: 10px;
+  margin-left: 0;
 
   background:
     linear-gradient(
@@ -3155,7 +3169,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
 .listing-controls-panel {
-  margin-left: 80px;
+  flex: 0 0 auto;
 
   display: flex;
   align-items: center;
@@ -3176,6 +3190,8 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.025) inset;
+
+  transform: translateX(-80px);
 }
 
 .listing-controls-label {
@@ -3196,7 +3212,8 @@ animation: goldBreath 3.8s ease-in-out infinite;
   align-items: center;
   gap: 4px;
 }
-       .badge-draft-command {
+
+.badge-draft-command {
   height: 20px;
 
   display: inline-flex;
