@@ -248,6 +248,36 @@ function endBoardDrag(e) {
   listing.attributes?.publicData ||
   {};
 
+const resolvedMachineAccess =
+  machineAccess ||
+  listing.machineAccess ||
+  publicData.machineAccess ||
+  listing.metadata?.machineAccess ||
+  listing.attributes?.metadata?.machineAccess ||
+  "public";
+
+const resolvedMachineChannel =
+  machineChannel ||
+  listing.machineChannel ||
+  publicData.machineChannel ||
+  listing.metadata?.machineChannel ||
+  listing.attributes?.metadata?.machineChannel ||
+  "marketplace";
+
+const sellerPlacementLabel =
+  resolvedMachineAccess === "private"
+    ? "PRIV"
+    : resolvedMachineChannel === "auction"
+      ? "AUCT"
+      : "LIVE";
+
+const sellerPlacementClass =
+  resolvedMachineAccess === "private"
+    ? "private"
+    : resolvedMachineChannel === "auction"
+      ? "auction"
+      : "live";
+  
 const rawLocation =
   locationValue ||
   listing.location ||
@@ -437,10 +467,12 @@ style={getFrameStyle(currentImageObject, "card")}
 />
 
     {sellerMode ? (
-      <div className={`status-photo-pill ${isPaused ? "paused" : "live"}`}>
-        {isPaused ? "PAUSED" : "LIVE"}
-      </div>
-    ) : null}
+  <div
+    className={`status-photo-pill ${sellerPlacementClass}`}
+  >
+    {sellerPlacementLabel}
+  </div>
+) : null}
 
     {images.length > 1 ? (
       <>
