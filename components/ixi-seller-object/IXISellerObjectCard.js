@@ -504,11 +504,14 @@ border-radius: 14px;
         }
 
         .seller-object-footer {
-          margin-top: 18px;
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 8px;
-        }
+  margin-top: auto;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+
+  padding-top: 18px;
+}
 
         .seller-object-footer a {
           height: 30px;
