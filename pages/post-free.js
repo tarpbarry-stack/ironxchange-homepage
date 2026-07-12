@@ -788,6 +788,14 @@ setPhotoItems(current => [...current, ...mapped]);
       return;
     }
 
+if (
+    listingVisibility !== "public" &&
+    listingVisibility !== "private"
+  ) {
+    alert("Choose Public or Private before posting.");
+    return;
+  }
+  
     setSaving(true);
 
     try {
@@ -837,6 +845,7 @@ setPhotoItems(current => [...current, ...mapped]);
 
           listingType: "free-listing",
           listingStatus: "live",
+          listingVisibility,
 
           transactionProcessAlias: "default-inquiry/release-1",
           unitType: "inquiry"
@@ -1245,7 +1254,7 @@ addActivity(
 
 <div className="listing-visibility-control">
   <span className="listing-visibility-label">
-    Visibility
+    Machine State
   </span>
 
   <div className="listing-visibility-options">
