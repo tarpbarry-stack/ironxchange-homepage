@@ -52,7 +52,8 @@ import {
   IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord
+  saveWorkspaceLayoutRecord,
+  saveWorkspaceSettingsRecord
 } from "../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
 import {
