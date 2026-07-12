@@ -1335,12 +1335,28 @@ addActivity(
 
   <div className="live-card-shell">
     <ListingCard
-      listing={previewListing}
-      sellerMode={true}
-      creationMode={true}
-      machineAccess={machineAccess}
-      machineChannel={machineChannel}
-      saved={false}
+  listing={previewListing}
+  sellerMode={true}
+  creationMode={false}
+
+  machineAccess={machineAccess}
+  machineChannel={machineChannel}
+
+  onMachinePlacementChange={(
+    listing,
+    nextPlacement
+  ) => {
+    setMachineAccess(
+      nextPlacement.machineAccess
+    );
+
+    setMachineChannel(
+      nextPlacement.machineChannel
+    );
+  }}
+
+  saved={false}
+
       machineFace={previewFace}
       onCycleMachineFace={cyclePreviewFace}
       descriptionValue={description}
