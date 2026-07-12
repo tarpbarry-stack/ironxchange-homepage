@@ -12,6 +12,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 
+import IXIMachinePlacementControl
+from "../components/ixi-machine-placement/IXIMachinePlacementControl";
+
 import {
   getV12CategoryNames,
   getV12Makes,
