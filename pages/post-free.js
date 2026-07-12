@@ -1763,14 +1763,15 @@ select {
 }
 
 .post-header-imports {
-  width: 430px;
-
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 
-  justify-self: center;
+  margin-left: auto;
+  margin-right: auto;
+
+  transform: translateX(-80px);
 }
 
 .post-header-imports button {
