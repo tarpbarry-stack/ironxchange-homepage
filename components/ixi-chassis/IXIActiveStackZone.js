@@ -60,16 +60,14 @@ export default function IXIActiveStackZone({
           >
             <div className="active-stack-pocket-corners">
               <button
-                type="button"
-                className={`stack-pocket-power top-left ${
-                  armedDestination === "pocketLeft"
-                    ? "destination-armed"
-                    : ""
-                }`}
-                data-label="L1"
-                title="Arm L1"
-                onClick={() => toggleArmedDestination("pocketLeft")}
-              />
+  type="button"
+  className="stack-pocket-power top-left"
+  data-label="L1"
+  title="Send stack to L1"
+  onClick={() =>
+    moveActiveStackToContainer(stackKey, "pocketLeft")
+  }
+/>
 
               <button
                 type="button"
@@ -143,18 +141,14 @@ export default function IXIActiveStackZone({
             {activeStackSendMenu === stackKey && (
               <div className="active-stack-send-menu">
                 <button
-                  type="button"
-                  className={`stack-pocket-power top-left ${
-                    armedDestination === "pocketLeft"
-                      ? "destination-armed"
-                      : ""
-                  }`}
-                  data-label="L1"
-                  title="Arm L1"
-                  onClick={() => {
-                    toggleArmedDestination("pocketLeft");
-                  }}
-                />
+  type="button"
+  className="stack-send-option"
+  data-label="L1"
+  title="Send stack to L1"
+  onClick={() =>
+    moveActiveStackToContainer(stackKey, "pocketLeft")
+  }
+/>
 
                 <button
                   type="button"
