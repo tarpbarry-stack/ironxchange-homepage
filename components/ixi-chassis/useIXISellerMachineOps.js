@@ -534,11 +534,11 @@ async function saveLocation(e, listing) {
     );
 
     const placementLabel =
-      result.machineChannel === "marketplace"
-        ? "MACHINE MOVED TO MARKETPLACE"
-        : result.machineChannel === "auction"
-          ? "MACHINE MOVED TO AUCTION"
-          : "MACHINE CHANGED TO PRIVATE";
+  result.machineChannel === "marketplace"
+    ? "Published to IXI Marketplace"
+    : result.machineChannel === "auction"
+      ? "Published to IXI Auction Market"
+      : "Removed from IXI Marketplace";
 
     showActionNotice?.({
       listingId,
