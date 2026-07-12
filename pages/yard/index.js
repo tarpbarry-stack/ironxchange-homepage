@@ -437,28 +437,28 @@ const sensors = useSensors(
         environment.ixiState || {}
       );
 
-      const loadedWorkspaceSettings =
+     const loadedWorkspaceSettings =
   environment.workspaceSettings || {};
 
 setWorkspaceSettings(
   loadedWorkspaceSettings
 );
 
-      const workspaceLayout =
-        environment.workspaceLayout || {};
+const workspaceLayout =
+  environment.workspaceLayout || {};
 
-      if (loadedWorkspaceSettings.cardScaleMode)
-        setCardScaleMode(
-          workspaceSettings.cardScaleMode
-        );
-      }
+if (loadedWorkspaceSettings.cardScaleMode) {
+  setCardScaleMode(
+    loadedWorkspaceSettings.cardScaleMode
+  );
+}
 
-      if (workspaceLayout.activeStackLayouts) {
-        setActiveStackLayouts(current => ({
-          ...current,
-          ...workspaceLayout.activeStackLayouts
-        }));
-      }
+if (workspaceLayout.activeStackLayouts) {
+  setActiveStackLayouts(current => ({
+    ...current,
+    ...workspaceLayout.activeStackLayouts
+  }));
+}
 
       if (workspaceLayout.activeStacksOpen) {
         setActiveStacksOpen(current => ({
