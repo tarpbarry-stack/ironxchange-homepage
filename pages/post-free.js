@@ -1771,7 +1771,7 @@ select {
   margin-left: auto;
   margin-right: auto;
 
-  transform: translateX(-90px);
+  transform: translateX(-110px);
 }
 
 .post-header-imports button {
