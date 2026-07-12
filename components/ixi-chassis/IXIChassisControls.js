@@ -18,8 +18,10 @@ export default function IXIChassisControls({
   toggleColorFilter,
   ixiOutlineFilter,
   toggleOutlineFilter,
-  armedDestination,
+   armedDestination,
   toggleArmedDestination,
+  railRevealed = false,
+  toggleRailRevealed = () => {},
   cycleActiveStackTarget
 }) {
   return (
@@ -61,6 +63,8 @@ export default function IXIChassisControls({
           setPocketThumbSize={setPocketThumbSize}
           armedDestination={armedDestination}
           onToggleArmedDestination={toggleArmedDestination}
+          railRevealed={railRevealed}
+          onToggleRailRevealed={toggleRailRevealed}
           onCycleActiveStackTarget={cycleActiveStackTarget}
         />
       </IXIControlSurface>
