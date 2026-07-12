@@ -1042,9 +1042,9 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
 </button>
 
               <div>
-                <span>IronXchange Post Free</span>
+                <span>IronXchange URL Import</span>
                 <h1>{cardTitle || "URL IMPORT"}</h1>
-                <p>Add the machine. Build the card. Post it free. Then blast it everywhere.</p>
+                <p>Drop URL. Click Import. Build Workflow.</p>
               </div>
             </div>
 
