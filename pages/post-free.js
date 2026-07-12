@@ -993,7 +993,7 @@ addActivity(
               <div>
                 <span>IronXchange Post Free</span>
                 <h1>{cardTitle || "Machine Listing"}</h1>
-                <p>Add Machine. Build Card. Post Free. Blast Anywhere.</p>
+                <p>Add Machine. Build Card. Post Free.</p>
               </div>
             </div>
 
