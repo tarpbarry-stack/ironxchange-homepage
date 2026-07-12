@@ -1025,16 +1025,18 @@ function getIxiColorValue(color) {
     return null;
   }
 
-  setWorkspaceSettings(current => ({
-    ...current,
+  const nextSettings = {
+    ...workspaceSettings,
     ...patch,
     updatedAt: Date.now()
-  }));
+  };
+
+  setWorkspaceSettings(nextSettings);
 
   return saveWorkspaceSettingsRecord({
     saveIxiMachinePatch,
     userId: ixiUserId,
-    settings: patch
+    settings: nextSettings
   });
 }
 
