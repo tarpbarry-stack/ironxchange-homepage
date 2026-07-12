@@ -1097,8 +1097,13 @@ function cycleCardScaleMode() {
   armedDestination,
 setArmedDestination,
 toggleArmedDestination,
+
 railRevealed,
 toggleRailRevealed,
+
+searchSurfaceRevealed,
+toggleSearchSurfaceRevealed,
+
 cycleActiveStackTarget
 }) => {
           const handleWorkspaceDragEnd =
@@ -1256,6 +1261,8 @@ if (armedDestination === "stackBottom") {
   cycleActiveStackTarget={cycleActiveStackTarget}
   railRevealed={railRevealed}
   toggleRailRevealed={toggleRailRevealed}
+  searchSurfaceRevealed={searchSurfaceRevealed}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
   />
                 </div>
 
