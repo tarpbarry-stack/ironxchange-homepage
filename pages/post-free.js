@@ -252,8 +252,12 @@ export default function PostFreePage() {
   const [stockNumber, setStockNumber] = useState("");
   const [city, setCity] = useState("");
   const [stateCode, setStateCode] = useState("");
-  const [listingVisibility, setListingVisibility] =
+
+const [machineAccess, setMachineAccess] =
   useState("public");
+
+const [machineChannel, setMachineChannel] =
+  useState("marketplace");
 
   const [description, setDescription] = useState("");
 
