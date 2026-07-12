@@ -1542,27 +1542,35 @@ addActivity(
     </span>
   </div>
 
-  <div className="badge-head-actions">
-    <button
-      type="button"
-      className="badge-draft-command continue"
-    >
-      Continue
-    </button>
+  <div className="badge-studio-divider" />
 
-    <button
-      type="button"
-      className="badge-draft-command start-new"
-    >
-      Start New
-    </button>
+  <div className="listing-controls-panel">
+    <span className="listing-controls-label">
+      Listing Controls
+    </span>
 
-    <button
-      type="button"
-      className="badge-draft-command clear"
-    >
-      Clear
-    </button>
+    <div className="listing-controls-buttons">
+      <button
+        type="button"
+        className="badge-draft-command continue"
+      >
+        Continue
+      </button>
+
+      <button
+        type="button"
+        className="badge-draft-command start-new"
+      >
+        Start New
+      </button>
+
+      <button
+        type="button"
+        className="badge-draft-command clear"
+      >
+        Clear
+      </button>
+    </div>
   </div>
 </div>
 
@@ -3097,15 +3105,13 @@ animation: goldBreath 3.8s ease-in-out infinite;
 }
 
       .badge-studio-head {
-  min-height: 29px;
-}
+  min-height: 56px;
 
-.badge-studio-title {
-  min-width: 0;
-
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px 360px;
   align-items: center;
-  gap: 12px;
+
+  gap: 14px;
 }
 
 .badge-studio-title span {
@@ -3118,15 +3124,58 @@ animation: goldBreath 3.8s ease-in-out infinite;
   white-space: nowrap;
 }
 
-.badge-head-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.badge-studio-divider {
+  width: 1px;
+  height: 38px;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255,255,255,.15),
+      transparent
+    );
+}
+
+.listing-controls-panel {
+  display: grid;
   gap: 6px;
+
+  padding: 7px 8px;
+
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,0)
+    ),
+    #0c0c0c;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.025) inset;
+}
+
+.listing-controls-label {
+  color: rgba(255,255,255,.44) !important;
+
+  font-size: 8px !important;
+  font-weight: 950 !important;
+  letter-spacing: .62px !important;
+  text-transform: uppercase;
+}
+
+.listing-controls-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 4px;
 }
 
        .badge-draft-command {
-  height: 26px;
+  height: 22px;
 
   display: inline-flex;
   align-items: center;
