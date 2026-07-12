@@ -57,7 +57,8 @@ import {
   IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord
+  saveWorkspaceLayoutRecord,
+  saveWorkspaceSettingsRecord
 } from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
 
 import {
@@ -192,6 +193,9 @@ const DIRECT_CONTAINER_TARGETS = [
   const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("");
+  const [workspaceSettings, setWorkspaceSettings] =
+  useState({});
+  
   const [isAuthenticated, setIsAuthenticated] =
                                           useState(false);
   const [ixiColorFilters, setIxiColorFilters] = useState([]);
@@ -433,13 +437,17 @@ const sensors = useSensors(
         environment.ixiState || {}
       );
 
-      const workspaceSettings =
-        environment.workspaceSettings || {};
+      const loadedWorkspaceSettings =
+  environment.workspaceSettings || {};
+
+setWorkspaceSettings(
+  loadedWorkspaceSettings
+);
 
       const workspaceLayout =
         environment.workspaceLayout || {};
 
-      if (workspaceSettings.cardScaleMode) {
+      if (loadedWorkspaceSettings.cardScaleMode)
         setCardScaleMode(
           workspaceSettings.cardScaleMode
         );
@@ -1530,6 +1538,27 @@ function getIxiColorValue(color) {
   return colors[color] || "rgba(255,255,255,.12)";
 }
 
+
+function saveWorkspaceSettings(patch = {}) {
+  if (!ixiUserId) {
+    return null;
+  }
+
+  const nextSettings = {
+    ...workspaceSettings,
+    ...patch,
+    updatedAt: Date.now()
+  };
+
+  setWorkspaceSettings(nextSettings);
+
+  return saveWorkspaceSettingsRecord({
+    saveIxiMachinePatch,
+    userId: ixiUserId,
+    settings: nextSettings
+  });
+}
+
 function saveWorkspaceLayout(nextContainers = machineContainers) {
 if (!ixiUserId) {
   console.warn(
@@ -1639,7 +1668,10 @@ function recoverSellerObject(sellerObject) {
             <Navbar />
 
    
-<IXIWorkspaceEngine>
+<IXIWorkspaceEngine
+  workspaceSettings={workspaceSettings}
+  onSaveWorkspaceSettings={saveWorkspaceSettings}
+>
   {({
     leftPocketMode,
     setLeftPocketMode,
@@ -1651,7 +1683,12 @@ function recoverSellerObject(sellerObject) {
     setRightPocket2Mode,
     armedDestination,
     setArmedDestination,
-    toggleArmedDestination
+    toggleArmedDestination,
+    railRevealed,
+    toggleRailRevealed,
+
+searchSurfaceRevealed,
+toggleSearchSurfaceRevealed,
   }) => {
           const handleStandardWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
@@ -1870,6 +1907,11 @@ if (
   toggleOutlineFilter={toggleOutlineFilter}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
+  railRevealed={railRevealed}
+  toggleRailRevealed={toggleRailRevealed}
+
+  searchSurfaceRevealed={searchSurfaceRevealed}
+  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
 />
                 </div>
 
