@@ -1533,8 +1533,8 @@ text-align: right;
 
   gap: 10px;
 
-  margin-top: 3px;
-  padding-top: 3px;
+  margin-top: 5px;
+  padding-top: 5px;
 
   border-top: 1px solid rgba(255,255,255,.045);
 }
