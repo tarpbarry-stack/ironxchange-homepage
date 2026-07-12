@@ -1327,12 +1327,22 @@ text-align: right;
     0 8px 20px rgba(0,0,0,.28);
 }
 
-.status-photo-pill.paused {
-  background: rgba(120,120,120,.14);
-  border-color: rgba(180,180,180,.30);
-  color: rgba(255,255,255,.52);
+.status-photo-pill.private {
+  background: rgba(120,120,120,.16);
+  border-color: rgba(190,190,190,.34);
+  color: rgba(255,255,255,.66);
 }
 
+.status-photo-pill.auction {
+  background: rgba(255,196,0,.14);
+  border-color: rgba(255,196,0,.52);
+  color: #FFC400;
+
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.05),
+    0 8px 20px rgba(0,0,0,.28),
+    0 0 14px rgba(255,196,0,.08);
+}
 
         .workflow-photo-pill {
           position: absolute;
