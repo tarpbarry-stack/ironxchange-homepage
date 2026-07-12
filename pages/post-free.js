@@ -1260,50 +1260,24 @@ addActivity(
                   </label>
                 </div>
 
-<div className="listing-visibility-control">
-  <span className="listing-visibility-label">
-    Machine State
+<div className="listing-placement-control">
+  <span className="listing-placement-label">
+    Machine Placement
   </span>
 
-  <div className="listing-visibility-options">
-    <label
-      className={`listing-visibility-option ${
-        listingVisibility === "public" ? "active" : ""
-      }`}
-    >
-      <span>Public</span>
+  <IXIMachinePlacementControl
+    machineAccess={machineAccess}
+    machineChannel={machineChannel}
+    onChange={nextPlacement => {
+      setMachineAccess(
+        nextPlacement.machineAccess
+      );
 
-      <input
-        type="radio"
-        name="listingVisibility"
-        value="public"
-        checked={listingVisibility === "public"}
-        onChange={() => setListingVisibility("public")}
-        required
-      />
-
-      <span className="visibility-box" />
-    </label>
-
-    <label
-      className={`listing-visibility-option ${
-        listingVisibility === "private" ? "active" : ""
-      }`}
-    >
-      <span>Private</span>
-
-      <input
-        type="radio"
-        name="listingVisibility"
-        value="private"
-        checked={listingVisibility === "private"}
-        onChange={() => setListingVisibility("private")}
-        required
-      />
-
-      <span className="visibility-box" />
-    </label>
-  </div>
+      setMachineChannel(
+        nextPlacement.machineChannel
+      );
+    }}
+  />
 </div>
                       
               <div className="post-link-strip">
