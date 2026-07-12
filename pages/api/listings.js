@@ -1,3 +1,8 @@
+import {
+  normalizeMachineAccess,
+  normalizeMachineChannel
+} from "../../lib/machine-access/IXIMachineAccess";
+
 async function safeJson(response) {
   const text = await response.text();
 
@@ -426,10 +431,20 @@ bulkImageUrls,
             attrs.description ||
             "",
 
-          publicData,
-          metadata,
+         publicData,
+metadata,
 
-          keywords: Array.isArray(publicData.keywords)
+machineAccess: normalizeMachineAccess(
+  publicData.machineAccess ||
+  metadata.machineAccess
+),
+
+machineChannel: normalizeMachineChannel(
+  publicData.machineChannel ||
+  metadata.machineChannel
+),
+
+keywords: Array.isArray(publicData.keywords)
             ? publicData.keywords
             : [],
 
