@@ -22,23 +22,29 @@ export default function IXIChassisControls({
   toggleArmedDestination,
   railRevealed = false,
   toggleRailRevealed = () => {},
+  searchSurfaceRevealed = false,
+  toggleSearchSurfaceRevealed = () => {},
   cycleActiveStackTarget
 }) {
   return (
     <section className="workspace-controls">
       <IXIControlSurface>
         <div className="desktop-search-surface">
-          <IXSearchSurface
-            listings={listings}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filters={workspaceFilters}
-            setFilters={setWorkspaceFilters}
-            sortMode={savedBoardMode}
-            setSortMode={setSavedBoardMode}
-            pocketThumbSize={pocketThumbSize}
-            setPocketThumbSize={setPocketThumbSize}
-          />
+         <IXSearchSurface
+  listings={listings}
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  filters={workspaceFilters}
+  setFilters={setWorkspaceFilters}
+  sortMode={savedBoardMode}
+  setSortMode={setSavedBoardMode}
+  pocketThumbSize={pocketThumbSize}
+  setPocketThumbSize={setPocketThumbSize}
+  searchSurfaceRevealed={searchSurfaceRevealed}
+  onToggleSearchSurfaceRevealed={
+    toggleSearchSurfaceRevealed
+  }
+/>
         </div>
 
         <div className="mobile-search-surface">
