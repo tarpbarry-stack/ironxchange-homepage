@@ -2480,7 +2480,7 @@ select {
   display: grid;
   gap: 6px;
 
-  margin-top: 2px;
+  margin-top: 0px;
   padding: 8px;
 
   border: 1px solid rgba(255,255,255,.06);
