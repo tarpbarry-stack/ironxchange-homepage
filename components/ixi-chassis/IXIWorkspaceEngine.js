@@ -1,12 +1,6 @@
 import {
-  useEffect,
-  useRef,
   useState
 } from "react";
-
-const DEFAULT_CONTROL_SETTINGS = {
-  railRevealed: false
-};
 
 export default function IXIWorkspaceEngine({
   children,
@@ -28,53 +22,8 @@ export default function IXIWorkspaceEngine({
   const [armedDestination, setArmedDestination] =
     useState("");
 
-  const [railRevealed, setRailRevealed] =
-    useState(DEFAULT_CONTROL_SETTINGS.railRevealed);
-
-  const hasHydratedControlSettingsRef =
-    useRef(false);
-
-  useEffect(() => {
-    if (hasHydratedControlSettingsRef.current) {
-      return;
-    }
-
-    if (
-      !workspaceSettings ||
-      typeof workspaceSettings !== "object"
-    ) {
-      return;
-    }
-
-    const hasRemoteSettings =
-      Object.keys(workspaceSettings).length > 0;
-
-    if (!hasRemoteSettings) {
-      return;
-    }
-
-    if (
-      typeof workspaceSettings.railRevealed ===
-      "boolean"
-    ) {
-      setRailRevealed(
-        workspaceSettings.railRevealed
-      );
-    }
-
-    hasHydratedControlSettingsRef.current = true;
-  }, [workspaceSettings]);
-
-  function persistControlSettings(patch = {}) {
-    if (
-      typeof onSaveWorkspaceSettings !==
-      "function"
-    ) {
-      return;
-    }
-
-    onSaveWorkspaceSettings(patch);
-  }
+  const railRevealed =
+    workspaceSettings?.railRevealed === true;
 
   function toggleArmedDestination(target) {
     setArmedDestination(current =>
@@ -83,14 +32,17 @@ export default function IXIWorkspaceEngine({
   }
 
   function toggleRailRevealed() {
-  const next = !railRevealed;
+    if (
+      typeof onSaveWorkspaceSettings !==
+      "function"
+    ) {
+      return;
+    }
 
-  setRailRevealed(next);
-
-  persistControlSettings({
-    railRevealed: next
-  });
-}
+    onSaveWorkspaceSettings({
+      railRevealed: !railRevealed
+    });
+  }
 
   return children({
     leftPocketMode,
@@ -110,7 +62,6 @@ export default function IXIWorkspaceEngine({
     toggleArmedDestination,
 
     railRevealed,
-    setRailRevealed,
     toggleRailRevealed
   });
 }
