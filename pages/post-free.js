@@ -2438,7 +2438,7 @@ select {
 }
 
 .post-link-strip {
-  margin-top: 18px;
+  margin-top: 48px;
   padding: 8px 8px 7px;
 
   display: grid;
