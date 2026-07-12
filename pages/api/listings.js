@@ -328,21 +328,33 @@ export default async function handler(req, res) {
 
     const listings = (data.data || [])
       .filter(item => {
-        const attrs = item.attributes || {};
-        const publicData = attrs.publicData || {};
-        const metadata = attrs.metadata || {};
+  const attrs = item.attributes || {};
+  const publicData = attrs.publicData || {};
+  const metadata = attrs.metadata || {};
 
-        const listingStatus =
-          publicData.listingStatus ||
-          metadata.listingStatus ||
-          "";
+  const listingStatus =
+    publicData.listingStatus ||
+    metadata.listingStatus ||
+    "";
 
-        return (
-          attrs.state === "published" &&
-          listingStatus !== "deleted" &&
-          listingStatus !== "archived"
-        );
-      })
+  const machineAccess = normalizeMachineAccess(
+    publicData.machineAccess ||
+    metadata.machineAccess
+  );
+
+  const machineChannel = normalizeMachineChannel(
+    publicData.machineChannel ||
+    metadata.machineChannel
+  );
+
+  return (
+    attrs.state === "published" &&
+    listingStatus !== "deleted" &&
+    listingStatus !== "archived" &&
+    machineAccess === "public" &&
+    machineChannel === "marketplace"
+  );
+})
       .map(item => {
         const attrs = item.attributes || {};
         const publicData = attrs.publicData || {};
