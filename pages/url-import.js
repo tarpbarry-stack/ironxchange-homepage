@@ -42,8 +42,8 @@ import {
 } from "../lib/acquisition";
 
 import {
-  parseAcquisitionUrl
-} from "../lib/acquisition";
+  processURLImportMedia
+} from "../lib/media/ixiMediaClient";
 
 import { captureIXEvent } from "../lib/posthog";
 
