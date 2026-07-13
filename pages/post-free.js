@@ -54,6 +54,12 @@ import {
   hasMeaningfulPostFreeDraft
 } from "../lib/post-free/IXIPostFreeDraftEngine";
 
+import {
+  IXI_ACTION_NOTICE_TONES,
+  setIXIActionNotice,
+  clearIXIActionNotice
+} from "../components/ixi-object-system/IXIActionNoticeEngine";
+
 const BRAND_YELLOW = "#FFC400";
 
 const { Money, UUID } = sdkTypes;
@@ -234,14 +240,19 @@ export default function PostFreePage() {
   const [copied, setCopied] = useState("");
 const [saving, setSaving] = useState(false);
 
-const [machineNotice, setMachineNotice] = useState({
-  visible: false,
-  message: "",
-  tone: "info",
-  blocking: false
-});
+const POST_FREE_PREVIEW_ID =
+  "post-free-preview";
 
-const machineNoticeTimerRef = useRef(null);
+const [ixiActionNotices, setIxiActionNotices] =
+  useState({
+    [POST_FREE_PREVIEW_ID]: {
+      actionNotice: null
+    }
+  });
+
+const machineNotice =
+  ixiActionNotices?.[POST_FREE_PREVIEW_ID]
+    ?.actionNotice;
   const [loggedIn, setLoggedIn] = useState(false);
   const [sellerProfile, setSellerProfile] = useState({
   sellerName: "IronXchange Seller",
@@ -919,47 +930,24 @@ async function handlePhotos(e) {
 
 function showMachineNotice({
   message,
-  tone = "info",
+  tone = IXI_ACTION_NOTICE_TONES.INFO,
   blocking = false,
   duration = 0
 } = {}) {
-  if (machineNoticeTimerRef.current) {
-    clearTimeout(machineNoticeTimerRef.current);
-    machineNoticeTimerRef.current = null;
-  }
-
-  setMachineNotice({
-    visible: Boolean(message),
-    message: String(message || ""),
+  return setIXIActionNotice({
+    setState: setIxiActionNotices,
+    listingId: POST_FREE_PREVIEW_ID,
+    message,
     tone,
-    blocking
+    blocking,
+    duration
   });
-
-  if (duration > 0) {
-    machineNoticeTimerRef.current = setTimeout(() => {
-      setMachineNotice({
-        visible: false,
-        message: "",
-        tone: "info",
-        blocking: false
-      });
-
-      machineNoticeTimerRef.current = null;
-    }, duration);
-  }
 }
 
 function clearMachineNotice() {
-  if (machineNoticeTimerRef.current) {
-    clearTimeout(machineNoticeTimerRef.current);
-    machineNoticeTimerRef.current = null;
-  }
-
-  setMachineNotice({
-    visible: false,
-    message: "",
-    tone: "info",
-    blocking: false
+  clearIXIActionNotice({
+    setState: setIxiActionNotices,
+    listingId: POST_FREE_PREVIEW_ID
   });
 }
   
@@ -1704,7 +1692,7 @@ async function createListing() {
   </div>
 
   <div className="live-card-shell">
-  {machineNotice.visible ? (
+  {machineNotice ? (
     <div
       className={`machine-card-notice ${machineNotice.tone} ${
         machineNotice.blocking ? "blocking" : ""
