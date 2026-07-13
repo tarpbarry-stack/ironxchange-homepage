@@ -703,6 +703,94 @@ publicData: {
     });
   }
 
+async function handlePhotos(e) {
+  const files = Array.from(
+    e.target.files || []
+  ).filter(file =>
+    file.type.startsWith("image/")
+  );
+
+  if (files.length === 0) {
+    return;
+  }
+
+  const limitedFiles =
+    files.slice(0, 24);
+
+  const photoLabel =
+    limitedFiles.length === 1
+      ? "PHOTO"
+      : "PHOTOS";
+
+  showMachineNotice({
+    message:
+      `PROCESSING ${limitedFiles.length} ${photoLabel}...`,
+    tone: "info",
+    blocking: true
+  });
+
+  try {
+    const mapped = await Promise.all(
+      limitedFiles.map(file =>
+        buildIXPhotoVariants(file, {
+          make,
+          mode: photoPolishMode,
+          companyName: "IronXchange",
+          userEmail: "tarpbarry@gmail.com"
+        })
+      )
+    );
+
+    setPhotoItems(current => [
+      ...current,
+      ...mapped
+    ]);
+
+    showMachineNotice({
+      message:
+        `${mapped.length} ${
+          mapped.length === 1
+            ? "PHOTO"
+            : "PHOTOS"
+        } READY`,
+      tone: "success",
+      duration: 1600
+    });
+
+    addActivity(
+      "success",
+      `${mapped.length} photo${
+        mapped.length === 1 ? "" : "s"
+      } added`
+    );
+
+    trackLaunchEvent(
+      "post_free_photos_added",
+      {
+        count: mapped.length
+      }
+    );
+  } catch (error) {
+    console.error(
+      "POST FREE PHOTO PROCESSING FAILED:",
+      error
+    );
+
+    showMachineNotice({
+      message: "PHOTO UPLOAD FAILED",
+      tone: "error",
+      duration: 3800
+    });
+
+    addActivity(
+      "error",
+      `Photo upload failed — ${cardTitle}`
+    );
+  } finally {
+    e.target.value = "";
+  }
+}
+  
   async function handlePhotoDrop(e) {
   e.preventDefault();
 
@@ -791,32 +879,6 @@ publicData: {
   }
 }
 
-  async function handlePhotoDrop(e) {
-    e.preventDefault();
-
-    const files = Array.from(e.dataTransfer.files || []).filter(file =>
-      file.type.startsWith("image/")
-    );
-
-   const mapped = await Promise.all(
-  files.slice(0, 24).map(file =>
-    buildIXPhotoVariants(file, {
-      make,
-      mode: photoPolishMode,
-      companyName: "IronXchange",
-      userEmail: "tarpbarry@gmail.com"
-    })
-  )
-);
-
-setPhotoItems(current => [...current, ...mapped]);
-
-    addActivity("success", `${mapped.length} photo${mapped.length === 1 ? "" : "s"} dropped`);
-
-    trackLaunchEvent("post_free_photos_dropped", {
-      count: mapped.length
-    });
-  }
 
   function removePhoto(indexToRemove) {
   setPhotoItems(current =>
