@@ -1088,7 +1088,7 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
     Machine Placement
   </span>
 
-  <IXIMachinePlacementControl
+ <IXIMachinePlacementControl
     machineAccess={machineAccess}
     machineChannel={machineChannel}
     onChange={nextPlacement => {
@@ -1103,8 +1103,8 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
   />
 </div>
 
- 
-    
+</div>
+
             <div className="launch-header-actions">
               <button type="button" className="status-command live">
                 <span></span>
