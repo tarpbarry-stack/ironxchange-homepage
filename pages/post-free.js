@@ -1389,7 +1389,19 @@ addActivity(
   </div>
 
   <div className="live-card-shell">
-    <ListingCard
+  {machineNotice.visible ? (
+    <div
+      className={`machine-card-notice ${machineNotice.tone} ${
+        machineNotice.blocking ? "blocking" : ""
+      }`}
+      role="status"
+      aria-live="polite"
+    >
+      <span>{machineNotice.message}</span>
+    </div>
+  ) : null}
+
+  <ListingCard
   listing={previewListing}
   sellerMode={true}
   creationMode={false}
@@ -1842,6 +1854,103 @@ select {
   height: 247px;
   min-height: 247px;
   max-height: 247px;
+}
+
+.live-card-shell {
+  position: relative;
+
+  width: 430px;
+  margin: 4px auto 0;
+}
+
+.machine-card-notice {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  border: 1px solid rgba(0,209,255,.54);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,209,255,.055),
+      rgba(0,209,255,.015)
+    ),
+    rgba(5,10,12,.88);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 0 1px rgba(0,209,255,.06),
+    0 0 30px rgba(0,209,255,.10);
+
+  pointer-events: none;
+}
+
+.machine-card-notice.blocking {
+  pointer-events: auto;
+  cursor: wait;
+}
+
+.machine-card-notice span {
+  color: #7DEBFF;
+
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 1.1px;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 12px rgba(0,209,255,.28);
+}
+
+.machine-card-notice.success {
+  border-color: rgba(0,209,255,.62);
+}
+
+.machine-card-notice.warning {
+  border-color: rgba(255,196,0,.58);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.055),
+      rgba(255,196,0,.012)
+    ),
+    rgba(10,9,5,.90);
+}
+
+.machine-card-notice.warning span {
+  color: #FFC400;
+
+  text-shadow:
+    0 0 12px rgba(255,196,0,.24);
+}
+
+.machine-card-notice.error {
+  border-color: rgba(229,62,62,.62);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(229,62,62,.065),
+      rgba(229,62,62,.015)
+    ),
+    rgba(12,5,5,.91);
+}
+
+.machine-card-notice.error span {
+  color: #FF9B9B;
+
+  text-shadow:
+    0 0 12px rgba(229,62,62,.26);
 }
 
         .launch-wrap {
