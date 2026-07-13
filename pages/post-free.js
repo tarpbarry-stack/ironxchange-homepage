@@ -3189,7 +3189,7 @@ animation: goldBreath 3.8s ease-in-out infinite;
 
 .listing-controls-panel {
   position: absolute;
-  left: 525px;
+  left: 540px;
   top: 50%;
 
   transform: translateY(-50%);
