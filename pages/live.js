@@ -561,79 +561,7 @@ const [externalLinks, setExternalLinks] = useState([
   router.replace(`/live?id=${encodeURIComponent(String(firstListingId))}`);
 }, [router.isReady, id, listings]);
 
-   async function loadLaunchEnvironment() {
-    try {
-      const environment =
-        await loadIXIListingsEnvironment({
-          includePrivateState: true
-        });
-
-      if (cancelled) return;
-
-      if (!environment.isAuthenticated) {
-        setIsAuthenticated(false);
-        setCurrentUserId("");
-        setListings([]);
-        setLoading(false);
-
-        router.replace(
-          `/login?returnTo=${encodeURIComponent(
-            router.asPath || "/live"
-          )}`
-        );
-
-        return;
-      }
-
-      const authenticatedUserId =
-        String(environment.userId || "");
-
-      const ownedListings =
-        (environment.listings || []).filter(item => {
-          const authorId =
-            String(getAuthorId(item) || "");
-
-          const status =
-            getListingStatus(item);
-
-          return (
-            authorId === authenticatedUserId &&
-            status !== "deleted" &&
-            status !== "archived"
-          );
-        });
-
-      setIsAuthenticated(true);
-      setCurrentUserId(authenticatedUserId);
-      setListings(ownedListings);
-    } catch (error) {
-      if (cancelled) return;
-
-      console.error(
-        "LAUNCH ENVIRONMENT LOAD FAILED:",
-        error
-      );
-
-      setIsAuthenticated(false);
-      setCurrentUserId("");
-      setListings([]);
-    } finally {
-      if (!cancelled) {
-        setLoading(false);
-      }
-    }
-  }
-
-  if (router.isReady) {
-    loadLaunchEnvironment();
-  }
-
-  return () => {
-    cancelled = true;
-  };
-}, [router.isReady]);
-
-useEffect(() => {
+ useEffect(() => {
   let cancelled = false;
 
   async function loadRequestedListing() {
@@ -658,8 +586,7 @@ useEffect(() => {
     try {
       const response =
         await sdk.ownListings.show({
-          id:
-            new UUID(String(id)),
+          id: new UUID(String(id)),
 
           include: [
             "images",
@@ -760,21 +687,10 @@ useEffect(() => {
 }, [
   router.isReady,
   id,
-  listings
+  listings,
+  sdk
 ]);
-
-  useEffect(() => {
-  if (!router.isReady) return;
-  if (id) return;
-  if (!Array.isArray(listings) || listings.length === 0) return;
-
-  const firstListingId = getListingId(listings[0]);
-
-  if (!firstListingId) return;
-
-  router.replace(`/live?id=${encodeURIComponent(String(firstListingId))}`);
-}, [router.isReady, id, listings]);
-
+  
   const listing = useMemo(() => {
     if (!id || listings.length === 0) return null;
     return listings.find(item => String(getListingId(item)) === String(id)) || null;
