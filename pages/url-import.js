@@ -839,122 +839,242 @@ setPhotoItems(current => [...current, ...mapped]);
   }
 
   async function createListing() {
-    if (!loggedIn) {
-      router.push("/login");
-      return;
+  if (!loggedIn) {
+    router.push("/login");
+    return;
+  }
+
+  if (!category || !year || !make || !model || !hours || !price) {
+    alert("Category, year, make, model, hours, and price are required.");
+    return;
+  }
+
+  setSaving(true);
+
+  let stage = "START";
+
+  try {
+    /*
+     * STAGE 1 — UPLOAD IMAGES
+     */
+    stage = "IMAGE_UPLOAD";
+
+    console.log("POST STAGE:", stage);
+    console.log("PHOTO ITEMS:", photoItems);
+
+    const imageIds = await buildSharetribeImageIdsFromMedia({
+      sdk,
+      mediaItems: photoItems
+    });
+
+    console.log("IMAGE UPLOAD COMPLETE:", imageIds);
+
+    /*
+     * STAGE 2 — BUILD LISTING PAYLOAD
+     */
+    stage = "BUILD_PAYLOAD";
+
+    const categorySlug = slugify(category);
+    const makeSlug = slugify(`${category}-${make}`);
+    const modelSlug = slugify(`${category}-${make}-${model}`);
+
+    const listingPayload = {
+      title: sharetribeTitle,
+      description: description || "",
+
+      publicData: {
+        categoryLevel1: categorySlug,
+        categoryLevel2: makeSlug,
+        categoryLevel3: modelSlug,
+
+        category,
+        year: String(year),
+        make,
+        model,
+
+        hours: Number(cleanNumber(hours)),
+
+        stockNumber,
+        serialNumber,
+
+        city,
+        location: locationLabel,
+        loc: stateCode,
+
+        keywords: selectedKeywords,
+
+        externalLinks: externalLinks
+          .map(link => ({
+            label: String(link.label || "").trim(),
+            url: String(link.url || "").trim()
+          }))
+          .filter(link => link.label && link.url)
+          .slice(0, 3),
+
+        workflowStatus,
+
+        /*
+         * NEW MACHINE PLACEMENT DATA
+         */
+        machineAccess,
+        machineChannel,
+
+        listingType: "free-listing",
+        listingStatus:
+          machineAccess === "public" &&
+          machineChannel === "marketplace"
+            ? "live"
+            : "private",
+
+        transactionProcessAlias: "default-inquiry/release-1",
+        unitType: "inquiry"
+      },
+
+      price: new Money(
+        Number(cleanNumber(price)) * 100,
+        "USD"
+      ),
+
+      images: imageIds
+    };
+
+    console.log("LISTING PAYLOAD READY:", listingPayload);
+
+    /*
+     * STAGE 3 — CREATE SHARETRIBE LISTING
+     */
+    stage = "SHARETRIBE_CREATE";
+
+    console.log("POST STAGE:", stage);
+
+    const response = await sdk.ownListings.create(listingPayload);
+
+    console.log("SHARETRIBE CREATE RESPONSE:", response);
+
+    const newListingId =
+      response?.data?.data?.id?.uuid ||
+      response?.data?.data?.id;
+
+    if (!newListingId) {
+      throw new Error(
+        "Sharetribe created no usable listing ID."
+      );
     }
 
-    if (!category || !year || !make || !model || !hours || !price) {
-      alert("Category, year, make, model, hours, and price are required.");
-      return;
-    }
-
-    setSaving(true);
+    /*
+     * The listing now exists.
+     * Passport failure must never make the post look failed.
+     */
+    let passport = null;
 
     try {
-      const imageIds = await buildSharetribeImageIdsFromMedia({
-  sdk,
-  mediaItems: photoItems
-});
+      console.log(
+        "PASSPORT ATTACH START:",
+        newListingId
+      );
 
-      const categorySlug = slugify(category);
-      const makeSlug = slugify(`${category}-${make}`);
-      const modelSlug = slugify(`${category}-${make}-${model}`);
+      passport =
+        await attachPassportToSharetribeListing({
+          sdk,
+          listingId: newListingId
+        });
 
-      const response = await sdk.ownListings.create({
-        title: sharetribeTitle,
-        description: description || "",
+      console.log(
+        "PASSPORT ATTACH COMPLETE:",
+        passport
+      );
+    } catch (passportError) {
+      console.error(
+        "PASSPORT ATTACH ERROR:",
+        passportError
+      );
 
-        publicData: {
-          categoryLevel1: categorySlug,
-          categoryLevel2: makeSlug,
-          categoryLevel3: modelSlug,
-
-          category,
-          year: String(year),
-          make,
-          model,
-
-          hours: Number(cleanNumber(hours)),
-
-          stockNumber,
-          serialNumber,
-
-          city,
-          location: locationLabel,
-          loc: stateCode,
-          
-         keywords: selectedKeywords,
-
-         externalLinks: externalLinks
-        .map(link => ({
-         label: String(link.label || "").trim(),
-         url: String(link.url || "").trim()
-         }))
-        .filter(link => link.label && link.url)
-        .slice(0, 3),
-
-          workflowStatus,
-
-          listingType: "free-listing",
-          listingStatus: "live",
-
-          transactionProcessAlias: "default-inquiry/release-1",
-          unitType: "inquiry"
-        },
-
-        price: new Money(
-          Number(cleanNumber(price)) * 100,
-          "USD"
-        ),
-
-        images: imageIds
-      });
-
-   const newListingId = response.data.data.id.uuid;
-
-let passport = null;
-
-try {
-  passport = await attachPassportToSharetribeListing({
-    sdk,
-    listingId: newListingId
-  });
-} catch (passportError) {
-  console.error(
-    "PASSPORT ATTACH ERROR:",
-    passportError
-  );
-}
-addActivity(
-  "success",
-  passport?.passportId
-    ? `Posted URL Import + Passport ${passport.passportId} — ${sharetribeTitle}`
-    : `Posted URL Import — ${sharetribeTitle}`
-);
-
-     trackLaunchEvent("post_free_listing_created", {
-  listingId: newListingId,
-  passportId: passport?.passportId || "",
-  passportUrl: passport?.passportUrl || "",
-  title: sharetribeTitle,
-  selectedKeywordCount: selectedKeywords.length,
-  photoCount: photoItems.length
-});
-
-      router.push(`/live?id=${newListingId}`);
-    } catch (err) {
-      console.error("CREATE LISTING ERROR:", err);
-console.error("SHARETRIBE 400 DATA:", err?.response?.data);
-console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
-
-      addActivity("error", `Post failed — ${sharetribeTitle}`);
-
-      alert(`Post failed: ${err.message || JSON.stringify(err)}`);
-    } finally {
-      setSaving(false);
+      console.error(
+        "PASSPORT RESPONSE:",
+        passportError?.response?.data
+      );
     }
+
+    addActivity(
+      "success",
+      passport?.passportId
+        ? `Posted + Passport ${passport.passportId} — ${sharetribeTitle}`
+        : `Posted — ${sharetribeTitle}`
+    );
+
+    trackLaunchEvent(
+      "post_free_listing_created",
+      {
+        listingId: newListingId,
+        passportId:
+          passport?.passportId || "",
+        passportUrl:
+          passport?.passportUrl || "",
+        machineAccess,
+        machineChannel,
+        title: sharetribeTitle,
+        selectedKeywordCount:
+          selectedKeywords.length,
+        photoCount: photoItems.length
+      }
+    );
+
+    router.push(
+      `/live?id=${newListingId}`
+    );
+  } catch (err) {
+    console.error(
+      "CREATE LISTING FAILED AT STAGE:",
+      stage
+    );
+
+    console.error(
+      "CREATE LISTING ERROR:",
+      err
+    );
+
+    console.error(
+      "ERROR NAME:",
+      err?.name
+    );
+
+    console.error(
+      "ERROR MESSAGE:",
+      err?.message
+    );
+
+    console.error(
+      "ERROR RESPONSE:",
+      err?.response
+    );
+
+    console.error(
+      "ERROR RESPONSE DATA:",
+      err?.response?.data
+    );
+
+    console.error(
+      "ERROR RESPONSE STATUS:",
+      err?.response?.status
+    );
+
+    addActivity(
+      "error",
+      `Post failed at ${stage} — ${sharetribeTitle}`
+    );
+
+    alert(
+      `Post failed during ${stage}: ${
+        err?.response?.data?.error ||
+        err?.response?.data?.errors?.[0]?.detail ||
+        err?.message ||
+        "Unknown error"
+      }`
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   function launchExternal(platform, url, copyLabel, copy) {
     copyText(copyLabel, copy);
