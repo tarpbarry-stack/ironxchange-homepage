@@ -855,7 +855,7 @@ setPhotoItems(current => [...current, ...mapped]);
 
   try {
    
-    /*
+  /*
  * STAGE 1 — IXI MEDIA PLATFORM
  */
 stage = "IXI_MEDIA";
@@ -863,10 +863,12 @@ stage = "IXI_MEDIA";
 console.log("POST STAGE:", stage);
 
 let imageIds = [];
-
 let ixiManifest = null;
 
-if (importResult?.media?.length) {
+if (
+  Array.isArray(importResult?.media) &&
+  importResult.media.length > 0
+) {
   const mediaResult =
     await processURLImportMedia({
       machineId:
@@ -904,76 +906,94 @@ if (importResult?.media?.length) {
   );
 
   /*
-   * Temporary compatibility.
+   * Temporary Sharetribe compatibility hero.
    *
-   * Until Passport, Marketplace,
-   * Theater and Listing Card all
-   * consume IXI manifests directly,
-   * upload ONLY the Hero image to
-   * Sharetribe.
+   * All source photos remain in IXI Media.
+   * Sharetribe receives only one hero image.
    */
-
   const heroUrl =
     ixiManifest?.hero?.hero?.url ||
+    ixiManifest?.media?.find(
+      item =>
+        item.mediaId ===
+        ixiManifest?.heroMediaId
+    )?.hero?.url ||
     ixiManifest?.media?.[0]?.hero?.url ||
     "";
 
   if (heroUrl) {
-  stage = "SHARETRIBE_HERO_DOWNLOAD";
+    stage =
+      "SHARETRIBE_HERO_DOWNLOAD";
 
-  const heroResponse =
-    await fetch(heroUrl);
+    console.log(
+      "POST STAGE:",
+      stage
+    );
 
-  if (!heroResponse.ok) {
-    throw new Error(
-      `Unable to download IXI compatibility hero (${heroResponse.status})`
+    const heroResponse =
+      await fetch(heroUrl);
+
+    if (!heroResponse.ok) {
+      throw new Error(
+        `Unable to download IXI compatibility hero (${heroResponse.status})`
+      );
+    }
+
+    const heroBlob =
+      await heroResponse.blob();
+
+    const heroFile =
+      new File(
+        [heroBlob],
+        "ixi-url-import-hero.webp",
+        {
+          type:
+            heroBlob.type ||
+            "image/webp"
+        }
+      );
+
+    stage =
+      "SHARETRIBE_HERO_UPLOAD";
+
+    console.log(
+      "POST STAGE:",
+      stage
+    );
+
+    const heroUploadResponse =
+      await sdk.images.upload({
+        image:
+          heroFile
+      });
+
+    const heroImageId =
+      heroUploadResponse
+        ?.data
+        ?.data
+        ?.id;
+
+    if (!heroImageId) {
+      throw new Error(
+        "Sharetribe compatibility hero upload returned no image ID"
+      );
+    }
+
+    imageIds = [
+      heroImageId
+    ];
+
+    console.log(
+      "SHARETRIBE COMPATIBILITY HERO COMPLETE:",
+      heroImageId
     );
   }
-
-  const heroBlob =
-    await heroResponse.blob();
-
-  const heroFile =
-    new File(
-      [heroBlob],
-      "ixi-url-import-hero.webp",
-      {
-        type:
-          heroBlob.type ||
-          "image/webp"
-      }
-    );
-
-  stage = "SHARETRIBE_HERO_UPLOAD";
-
-  const heroUploadResponse =
-    await sdk.images.upload({
-      image:
-        heroFile
-    });
-
-  const heroImageId =
-    heroUploadResponse?.data?.data?.id;
-
-  if (!heroImageId) {
-    throw new Error(
-      "Sharetribe compatibility hero upload returned no image ID"
-    );
-  }
-
-  imageIds = [
-    heroImageId
-  ];
-
-  console.log(
-    "SHARETRIBE COMPATIBILITY HERO COMPLETE:",
-    heroImageId
-  );
 }
 
-    /*
-     * STAGE 2 — BUILD LISTING PAYLOAD
-     */
+/*
+ * STAGE 2 — BUILD LISTING PAYLOAD
+ */
+    
     stage = "BUILD_PAYLOAD";
 
     const categorySlug = slugify(category);
