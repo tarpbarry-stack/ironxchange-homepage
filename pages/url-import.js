@@ -854,20 +854,83 @@ setPhotoItems(current => [...current, ...mapped]);
   let stage = "START";
 
   try {
+   
     /*
-     * STAGE 1 — UPLOAD IMAGES
-     */
-    stage = "IMAGE_UPLOAD";
+ * STAGE 1 — IXI MEDIA PLATFORM
+ */
+stage = "IXI_MEDIA";
 
-    console.log("POST STAGE:", stage);
-    console.log("PHOTO ITEMS:", photoItems);
+console.log("POST STAGE:", stage);
 
-    const imageIds = await buildSharetribeImageIdsFromMedia({
-      sdk,
-      mediaItems: photoItems
+let imageIds = [];
+
+let ixiManifest = null;
+
+if (importResult?.media?.length) {
+  const mediaResult =
+    await processURLImportMedia({
+      machineId:
+        `url-import-${Date.now()}`,
+
+      passportId: "",
+
+      sourceType:
+        importResult?.source?.type ||
+        "url-import",
+
+      sourceUrl:
+        importUrl,
+
+      imageUrls:
+        importResult.media,
+
+      onProgress(job) {
+        console.log(
+          "IXI MEDIA:",
+          job.status,
+          job.processedPhotoCount,
+          "/",
+          job.importedPhotoCount
+        );
+      }
     });
 
-    console.log("IMAGE UPLOAD COMPLETE:", imageIds);
+  ixiManifest =
+    mediaResult.manifest;
+
+  console.log(
+    "IXI MANIFEST:",
+    ixiManifest
+  );
+
+  /*
+   * Temporary compatibility.
+   *
+   * Until Passport, Marketplace,
+   * Theater and Listing Card all
+   * consume IXI manifests directly,
+   * upload ONLY the Hero image to
+   * Sharetribe.
+   */
+
+  const heroUrl =
+    ixiManifest?.hero?.hero?.url ||
+    ixiManifest?.media?.[0]?.hero?.url ||
+    "";
+
+  if (heroUrl) {
+    imageIds =
+      await buildSharetribeImageIdsFromMedia({
+        sdk,
+
+        mediaItems: [
+          {
+            url: heroUrl
+          }
+        ]
+      });
+  }
+}
 
     /*
      * STAGE 2 — BUILD LISTING PAYLOAD
@@ -948,6 +1011,50 @@ setPhotoItems(current => [...current, ...mapped]);
     console.log("POST STAGE:", stage);
 
     const response = await sdk.ownListings.create(listingPayload);
+
+    if (
+  ixiManifest &&
+  response?.data?.data?.id
+) {
+  try {
+    await sdk.ownListings.update({
+      id:
+        response.data.data.id,
+
+      publicData: {
+        ...listingPayload.publicData,
+
+        ixiMedia: {
+          machineKey:
+            ixiManifest.canonicalMachineKey,
+
+          passportId:
+            ixiManifest.passportId,
+
+          mediaVersion:
+            ixiManifest.mediaVersion,
+
+          heroMediaId:
+            ixiManifest.heroMediaId,
+
+          manifest:
+            `/api/media/machines/${encodeURIComponent(
+              ixiManifest.canonicalMachineKey
+            )}`
+        }
+      }
+    });
+
+    console.log(
+      "IXI MEDIA LINKED TO LISTING"
+    );
+  } catch (err) {
+    console.error(
+      "IXI MEDIA LINK FAILED",
+      err
+    );
+  }
+}
 
     console.log("SHARETRIBE CREATE RESPONSE:", response);
 
