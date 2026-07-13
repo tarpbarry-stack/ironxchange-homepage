@@ -41,6 +41,10 @@ import {
   parseAcquisitionUrl
 } from "../lib/acquisition";
 
+import {
+  parseAcquisitionUrl
+} from "../lib/acquisition";
+
 import { captureIXEvent } from "../lib/posthog";
 
 import {
