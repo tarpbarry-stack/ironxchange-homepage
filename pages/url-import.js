@@ -307,6 +307,116 @@ ${description}
 ${linkLine}`;
 }
 
+
+async function convertImageBlobToJpegFile(
+  sourceBlob,
+  fileName = "ixi-url-import-hero.jpg"
+) {
+  const objectUrl =
+    URL.createObjectURL(sourceBlob);
+
+  try {
+    const image =
+      await new Promise(
+        (resolve, reject) => {
+          const nextImage =
+            new Image();
+
+          nextImage.onload =
+            () => resolve(nextImage);
+
+          nextImage.onerror =
+            () =>
+              reject(
+                new Error(
+                  "Unable to decode IXI compatibility hero"
+                )
+              );
+
+          nextImage.src =
+            objectUrl;
+        }
+      );
+
+    const canvas =
+      document.createElement("canvas");
+
+    canvas.width =
+      image.naturalWidth ||
+      image.width;
+
+    canvas.height =
+      image.naturalHeight ||
+      image.height;
+
+    const context =
+      canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error(
+        "Unable to create compatibility hero canvas"
+      );
+    }
+
+    context.fillStyle =
+      "#ffffff";
+
+    context.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    context.drawImage(
+      image,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const jpegBlob =
+      await new Promise(
+        (resolve, reject) => {
+          canvas.toBlob(
+            blob => {
+              if (!blob) {
+                reject(
+                  new Error(
+                    "Unable to convert IXI hero to JPEG"
+                  )
+                );
+
+                return;
+              }
+
+              resolve(blob);
+            },
+            "image/jpeg",
+            0.92
+          );
+        }
+      );
+
+    return new File(
+      [jpegBlob],
+      fileName,
+      {
+        type:
+          "image/jpeg"
+      }
+    );
+  } finally {
+    URL.revokeObjectURL(
+      objectUrl
+    );
+  }
+}
+
+
+
+
 export default function PostFreePage() {
   const router = useRouter();
 
@@ -943,16 +1053,24 @@ if (
       await heroResponse.blob();
 
     const heroFile =
-      new File(
-        [heroBlob],
-        "ixi-url-import-hero.webp",
-        {
-          type:
-            heroBlob.type ||
-            "image/webp"
-        }
-      );
+  await convertImageBlobToJpegFile(
+    heroBlob,
+    "ixi-url-import-hero.jpg"
+  );
 
+console.log(
+  "SHARETRIBE HERO FILE:",
+  {
+    name:
+      heroFile.name,
+
+    type:
+      heroFile.type,
+
+    size:
+      heroFile.size
+  }
+);
     stage =
       "SHARETRIBE_HERO_UPLOAD";
 
