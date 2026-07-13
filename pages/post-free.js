@@ -963,38 +963,106 @@ function clearMachineNotice() {
   });
 }
   
-  async function createListing() {
-    if (!loggedIn) {
+async function createListing() {
+  if (!loggedIn) {
+    showMachineNotice({
+      message: "LOGIN REQUIRED TO POST",
+      tone: "warning",
+      duration: 1400
+    });
+
+    setTimeout(() => {
       router.push("/login");
-      return;
-    }
+    }, 900);
 
-    if (!category || !year || !make || !model || !hours || !price) {
-      alert("Category, year, make, model, hours, and price are required.");
-      return;
-    }
+    return;
+  }
 
-if (
-  !machineAccess ||
-  !machineChannel
-) {
-  alert("Choose LIVE, PRIV, or AUCT before posting.");
-  return;
-}
-  
-    setSaving(true);
+  if (
+    !category ||
+    !year ||
+    !make ||
+    !model ||
+    !hours ||
+    !price
+  ) {
+    showMachineNotice({
+      message:
+        "YEAR, MAKE, MODEL, HOURS, AND PRICE REQUIRED",
+      tone: "warning",
+      duration: 2800
+    });
 
-    try {
-      const imageIds = await buildSharetribeImageIdsFromMedia({
-  sdk,
-  mediaItems: photoItems
-});
+    return;
+  }
 
-      const categorySlug = slugify(category);
-      const makeSlug = slugify(`${category}-${make}`);
-      const modelSlug = slugify(`${category}-${make}-${model}`);
+  if (
+    !machineAccess ||
+    !machineChannel
+  ) {
+    showMachineNotice({
+      message: "SELECT MACHINE PLACEMENT",
+      tone: "warning",
+      duration: 2600
+    });
 
-      const response = await sdk.ownListings.create({
+    return;
+  }
+
+  setSaving(true);
+
+  let newListingId = "";
+  let passport = null;
+
+  try {
+    showMachineNotice({
+      message: "PREPARING MACHINE...",
+      tone: "info",
+      blocking: true
+    });
+
+    const photoCount = photoItems.length;
+
+    showMachineNotice({
+      message:
+        photoCount === 1
+          ? "UPLOADING 1 PHOTO..."
+          : `UPLOADING ${photoCount} PHOTOS...`,
+      tone: "info",
+      blocking: true
+    });
+
+    const imageIds =
+      await buildSharetribeImageIdsFromMedia({
+        sdk,
+        mediaItems: photoItems
+      });
+
+    showMachineNotice({
+      message: "BUILDING MACHINE...",
+      tone: "info",
+      blocking: true
+    });
+
+    const categorySlug =
+      slugify(category);
+
+    const makeSlug =
+      slugify(`${category}-${make}`);
+
+    const modelSlug =
+      slugify(
+        `${category}-${make}-${model}`
+      );
+
+    showMachineNotice({
+      message: "CREATING LISTING...",
+      tone: "info",
+      blocking: true
+    });
+
+    const response =
+      await sdk.ownListings.create({
         title: sharetribeTitle,
         description: description || "",
 
@@ -1008,7 +1076,8 @@ if (
           make,
           model,
 
-          hours: Number(cleanNumber(hours)),
+          hours:
+            Number(cleanNumber(hours)),
 
           stockNumber,
           serialNumber,
@@ -1016,25 +1085,37 @@ if (
           city,
           location: locationLabel,
           loc: stateCode,
-          
-         keywords: selectedKeywords,
 
-         externalLinks: externalLinks
-        .map(link => ({
-         label: String(link.label || "").trim(),
-         url: String(link.url || "").trim()
-         }))
-        .filter(link => link.label && link.url)
-        .slice(0, 3),
+          keywords: selectedKeywords,
+
+          externalLinks: externalLinks
+            .map(link => ({
+              label: String(
+                link.label || ""
+              ).trim(),
+
+              url: String(
+                link.url || ""
+              ).trim()
+            }))
+            .filter(
+              link =>
+                link.label &&
+                link.url
+            )
+            .slice(0, 3),
 
           workflowStatus,
 
           listingType: "free-listing",
           listingStatus: "live",
+
           machineAccess,
           machineChannel,
 
-          transactionProcessAlias: "default-inquiry/release-1",
+          transactionProcessAlias:
+            "default-inquiry/release-1",
+
           unitType: "inquiry"
         },
 
@@ -1046,46 +1127,156 @@ if (
         images: imageIds
       });
 
-      const newListingId = response.data.data.id.uuid;
+    newListingId =
+      response.data.data.id.uuid;
 
-let passport = null;
+    showMachineNotice({
+      message:
+        "CREATING MACHINE PASSPORT...",
+      tone: "info",
+      blocking: true
+    });
 
-try {
- passport = await attachPassportToSharetribeListing({
-    sdk,
-    listingId: newListingId
-});
-} catch (passportError) {
-  console.error("PASSPORT ATTACH ERROR:", passportError);
-}
+    try {
+      passport =
+        await attachPassportToSharetribeListing({
+          sdk,
+          listingId: newListingId
+        });
+    } catch (passportError) {
+      console.error(
+        "PASSPORT ATTACH ERROR:",
+        passportError
+      );
 
-addActivity(
-  "success",
-  passport?.passportId
-    ? `Posted free listing + Passport ${passport.passportId} — ${sharetribeTitle}`
-    : `Posted free listing — ${sharetribeTitle}`
-);
+      showMachineNotice({
+        message:
+          "MACHINE CREATED — PASSPORT NEEDS RETRY",
+        tone: "warning",
+        duration: 3200
+      });
 
-      trackLaunchEvent("post_free_listing_created", {
-  listingId: newListingId,
-  passportId: passport?.passportId || "",
-  passportUrl: passport?.passportUrl || "",
-  title: sharetribeTitle,
-  selectedKeywordCount: selectedKeywords.length,
-  photoCount: photoItems.length
-});
+      addActivity(
+        "error",
+        `Machine created — Passport failed — ${sharetribeTitle}`
+      );
 
-      router.push(`/live?id=${newListingId}`);
-    } catch (err) {
-      console.error("CREATE LISTING ERROR:", err);
+      trackLaunchEvent(
+        "post_free_passport_failed",
+        {
+          listingId: newListingId,
+          title: sharetribeTitle
+        }
+      );
 
-      addActivity("error", `Post failed — ${sharetribeTitle}`);
+      await new Promise(resolve =>
+        setTimeout(resolve, 1800)
+      );
 
-      alert(`Post failed: ${err.message || JSON.stringify(err)}`);
-    } finally {
-      setSaving(false);
+      router.push(
+        `/live?id=${newListingId}`
+      );
+
+      return;
     }
+
+    let successMessage =
+      "MARKETPLACE MACHINE CREATED";
+
+    if (
+      machineAccess === "private"
+    ) {
+      successMessage =
+        "PRIVATE MACHINE CREATED";
+    } else if (
+      machineChannel === "auction"
+    ) {
+      successMessage =
+        "AUCTION MACHINE CREATED";
+    }
+
+    showMachineNotice({
+      message: passport?.passportId
+        ? `${successMessage} — PASSPORT READY`
+        : successMessage,
+      tone: "success",
+      duration: 1700
+    });
+
+    addActivity(
+      "success",
+      passport?.passportId
+        ? `Created machine + Passport ${passport.passportId} — ${sharetribeTitle}`
+        : `Created machine — ${sharetribeTitle}`
+    );
+
+    trackLaunchEvent(
+      "post_free_listing_created",
+      {
+        listingId: newListingId,
+
+        passportId:
+          passport?.passportId || "",
+
+        passportUrl:
+          passport?.passportUrl || "",
+
+        machineAccess,
+        machineChannel,
+
+        title: sharetribeTitle,
+
+        selectedKeywordCount:
+          selectedKeywords.length,
+
+        photoCount:
+          photoItems.length
+      }
+    );
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 1500)
+    );
+
+    router.push(
+      `/live?id=${newListingId}`
+    );
+  } catch (error) {
+    console.error(
+      "CREATE LISTING ERROR:",
+      error
+    );
+
+    const failureMessage =
+      newListingId
+        ? "MACHINE CREATED — FINALIZATION FAILED"
+        : "POST FAILED — MACHINE NOT CREATED";
+
+    showMachineNotice({
+      message: failureMessage,
+      tone: "error",
+      duration: 4200
+    });
+
+    addActivity(
+      "error",
+      `${failureMessage} — ${sharetribeTitle}`
+    );
+
+    trackLaunchEvent(
+      "post_free_listing_failed",
+      {
+        listingId: newListingId,
+        title: sharetribeTitle,
+        error:
+          error?.message ||
+          String(error)
+      }
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   function launchExternal(platform, url, copyLabel, copy) {
     copyText(copyLabel, copy);
