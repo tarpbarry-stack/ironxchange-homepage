@@ -1,7 +1,11 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { createInstance } from "sharetribe-flex-sdk";
+import {
+  createInstance,
+  types as sdkTypes
+} from "sharetribe-flex-sdk";
+
 import { captureIXEvent } from "../lib/posthog";
 
 import Navbar from "../components/Navbar";
@@ -59,8 +63,11 @@ import {
 const BRAND_YELLOW = "#FFC400";
 
 const sdk = createInstance({
-  clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+  clientId:
+    process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
 });
+
+const { UUID } = sdkTypes;
 
 const workflowOptions = [
   { value: "good-listing", label: "Good Listing" },
@@ -419,6 +426,10 @@ export default function ListingLivePage() {
 
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
+  const [directListing, setDirectListing] =
+  useState(null);
+  const [directListingLoading, setDirectListingLoading] =
+  useState(false);
   const [copied, setCopied] = useState("");
   const [saving, setSaving] = useState(false);
   const [commandBusy, setCommandBusy] = useState("");
@@ -537,6 +548,220 @@ const [externalLinks, setExternalLinks] = useState([
     cancelled = true;
   };
 }, [router.isReady]);
+
+  useEffect(() => {
+  if (!router.isReady) return;
+  if (id) return;
+  if (!Array.isArray(listings) || listings.length === 0) return;
+
+  const firstListingId = getListingId(listings[0]);
+
+  if (!firstListingId) return;
+
+  router.replace(`/live?id=${encodeURIComponent(String(firstListingId))}`);
+}, [router.isReady, id, listings]);
+
+   async function loadLaunchEnvironment() {
+    try {
+      const environment =
+        await loadIXIListingsEnvironment({
+          includePrivateState: true
+        });
+
+      if (cancelled) return;
+
+      if (!environment.isAuthenticated) {
+        setIsAuthenticated(false);
+        setCurrentUserId("");
+        setListings([]);
+        setLoading(false);
+
+        router.replace(
+          `/login?returnTo=${encodeURIComponent(
+            router.asPath || "/live"
+          )}`
+        );
+
+        return;
+      }
+
+      const authenticatedUserId =
+        String(environment.userId || "");
+
+      const ownedListings =
+        (environment.listings || []).filter(item => {
+          const authorId =
+            String(getAuthorId(item) || "");
+
+          const status =
+            getListingStatus(item);
+
+          return (
+            authorId === authenticatedUserId &&
+            status !== "deleted" &&
+            status !== "archived"
+          );
+        });
+
+      setIsAuthenticated(true);
+      setCurrentUserId(authenticatedUserId);
+      setListings(ownedListings);
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "LAUNCH ENVIRONMENT LOAD FAILED:",
+        error
+      );
+
+      setIsAuthenticated(false);
+      setCurrentUserId("");
+      setListings([]);
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  }
+
+  if (router.isReady) {
+    loadLaunchEnvironment();
+  }
+
+  return () => {
+    cancelled = true;
+  };
+}, [router.isReady]);
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadRequestedListing() {
+    if (!router.isReady || !id) {
+      return;
+    }
+
+    const alreadyLoaded =
+      listings.some(
+        item =>
+          String(getListingId(item)) ===
+          String(id)
+      );
+
+    if (alreadyLoaded) {
+      setDirectListing(null);
+      return;
+    }
+
+    setDirectListingLoading(true);
+
+    try {
+      const response =
+        await sdk.ownListings.show({
+          id:
+            new UUID(String(id)),
+
+          include: [
+            "images",
+            "author",
+            "author.profileImage"
+          ]
+        });
+
+      if (cancelled) return;
+
+      const resource =
+        response?.data?.data;
+
+      const included =
+        response?.data?.included || [];
+
+      if (!resource) {
+        throw new Error(
+          "Sharetribe returned no listing"
+        );
+      }
+
+      const normalizedListing = {
+        id:
+          resource.id?.uuid ||
+          resource.id,
+
+        ...(resource.attributes || {}),
+
+        publicData:
+          resource.attributes
+            ?.publicData || {},
+
+        metadata:
+          resource.attributes
+            ?.metadata || {},
+
+        authorId:
+          resource.relationships
+            ?.author
+            ?.data
+            ?.id
+            ?.uuid ||
+          resource.relationships
+            ?.author
+            ?.data
+            ?.id ||
+          "",
+
+        imageObjects:
+          included.filter(
+            item =>
+              item.type === "image"
+          )
+      };
+
+      setDirectListing(
+        normalizedListing
+      );
+
+      setListings(current => {
+        const exists =
+          current.some(
+            item =>
+              String(
+                getListingId(item)
+              ) === String(id)
+          );
+
+        return exists
+          ? current
+          : [
+              normalizedListing,
+              ...current
+            ];
+      });
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "DIRECT LAUNCH LISTING LOAD FAILED:",
+        error
+      );
+
+      setDirectListing(null);
+    } finally {
+      if (!cancelled) {
+        setDirectListingLoading(false);
+      }
+    }
+  }
+
+  loadRequestedListing();
+
+  return () => {
+    cancelled = true;
+  };
+}, [
+  router.isReady,
+  id,
+  listings
+]);
 
   useEffect(() => {
   if (!router.isReady) return;
@@ -1556,7 +1781,10 @@ async function saveExternalLinks() {
     await copyText("Share Message", message);
   }
 
-  if (loading) {
+ if (
+  loading ||
+  directListingLoading
+) {
     return (
       <main className="loading">
         Loading Launch Studio...
