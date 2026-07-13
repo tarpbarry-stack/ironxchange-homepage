@@ -34,10 +34,6 @@ import IXIMachinePlacementControl
 from "../components/ixi-machine-placement/IXIMachinePlacementControl";
 
 import {
-  buildSharetribeImageIdsFromMedia
-} from "../lib/machine-media/machineMediaSharetribeAdapter";
-
-import {
   parseAcquisitionUrl
 } from "../lib/acquisition";
 
@@ -923,17 +919,56 @@ if (importResult?.media?.length) {
     "";
 
   if (heroUrl) {
-    imageIds =
-      await buildSharetribeImageIdsFromMedia({
-        sdk,
+  stage = "SHARETRIBE_HERO_DOWNLOAD";
 
-        mediaItems: [
-          {
-            url: heroUrl
-          }
-        ]
-      });
+  const heroResponse =
+    await fetch(heroUrl);
+
+  if (!heroResponse.ok) {
+    throw new Error(
+      `Unable to download IXI compatibility hero (${heroResponse.status})`
+    );
   }
+
+  const heroBlob =
+    await heroResponse.blob();
+
+  const heroFile =
+    new File(
+      [heroBlob],
+      "ixi-url-import-hero.webp",
+      {
+        type:
+          heroBlob.type ||
+          "image/webp"
+      }
+    );
+
+  stage = "SHARETRIBE_HERO_UPLOAD";
+
+  const heroUploadResponse =
+    await sdk.images.upload({
+      image:
+        heroFile
+    });
+
+  const heroImageId =
+    heroUploadResponse?.data?.data?.id;
+
+  if (!heroImageId) {
+    throw new Error(
+      "Sharetribe compatibility hero upload returned no image ID"
+    );
+  }
+
+  imageIds = [
+    heroImageId
+  ];
+
+  console.log(
+    "SHARETRIBE COMPATIBILITY HERO COMPLETE:",
+    heroImageId
+  );
 }
 
     /*
