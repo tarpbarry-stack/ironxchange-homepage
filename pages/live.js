@@ -366,6 +366,47 @@ ${description}
 ${linkLine}`;
 }
 
+
+function getMachineAccess(listing = {}) {
+  return (
+    listing.machineAccess ||
+    listing.publicData?.machineAccess ||
+    listing.attributes?.publicData?.machineAccess ||
+    "public"
+  );
+}
+
+function getMachineChannel(listing = {}) {
+  return (
+    listing.machineChannel ||
+    listing.publicData?.machineChannel ||
+    listing.attributes?.publicData?.machineChannel ||
+    "marketplace"
+  );
+}
+
+function getMachinePlacement(listing = {}) {
+  const machineAccess =
+    getMachineAccess(listing);
+
+  const machineChannel =
+    getMachineChannel(listing);
+
+  if (
+    machineAccess === "private" &&
+    machineChannel === "auction"
+  ) {
+    return "auction";
+  }
+
+  if (machineAccess === "private") {
+    return "private";
+  }
+
+  return "live";
+}
+
+
 export async function getServerSideProps() {
   return {
     props: {}
@@ -518,6 +559,24 @@ const [externalLinks, setExternalLinks] = useState([
   const listingUrl = listing ? getListingUrl(listing) : "";
   const listingStatus = getListingStatus(listing || {});
   const isPaused = listingStatus === "paused";
+
+  const machineAccess =
+  getMachineAccess(listing || {});
+
+const machineChannel =
+  getMachineChannel(listing || {});
+
+const machinePlacement =
+  getMachinePlacement(listing || {});
+
+const isPublicMarketplace =
+  machinePlacement === "live";
+
+const isPrivateWorkflow =
+  machinePlacement === "private";
+
+const isAuctionWorkflow =
+  machinePlacement === "auction";
 
   const sellerInventory = useMemo(() => {
   if (!isAuthenticated || !currentUserId) {
@@ -1589,19 +1648,51 @@ imageUrls: getMachineMediaPreviewUrls(photoItems),
 
             <div className="launch-header-actions">
               <button
-                type="button"
-                className={`status-command ${isPaused ? "paused" : "live"}`}
-                onClick={isPaused ? reactivateListing : pauseListing}
-                disabled={commandBusy === "pause" || commandBusy === "reactivate"}
-                title={isPaused ? "Reactivate listing" : "Pause listing"}
-              >
-                <span></span>
-                {commandBusy === "pause" || commandBusy === "reactivate"
-                  ? "Working"
-                  : isPaused
-                    ? "Paused"
-                    : "Live"}
-              </button>
+  type="button"
+  className={`status-command ${
+    isAuctionWorkflow
+      ? "auction"
+      : isPrivateWorkflow
+        ? "private"
+        : isPaused
+          ? "paused"
+          : "live"
+  }`}
+  onClick={
+    isPublicMarketplace
+      ? isPaused
+        ? reactivateListing
+        : pauseListing
+      : undefined
+  }
+  disabled={
+    !isPublicMarketplace ||
+    commandBusy === "pause" ||
+    commandBusy === "reactivate"
+  }
+  title={
+    isAuctionWorkflow
+      ? "Auction workflow"
+      : isPrivateWorkflow
+        ? "Private machine workflow"
+        : isPaused
+          ? "Reactivate listing"
+          : "Pause listing"
+  }
+>
+  <span></span>
+
+  {commandBusy === "pause" ||
+  commandBusy === "reactivate"
+    ? "Working"
+    : isAuctionWorkflow
+      ? "Auction"
+      : isPrivateWorkflow
+        ? "Private"
+        : isPaused
+          ? "Paused"
+          : "Live"}
+</button>
 
               <button
                 type="button"
@@ -1612,9 +1703,31 @@ imageUrls: getMachineMediaPreviewUrls(photoItems),
                 {saving ? "Launching..." : "Launch"}
               </button>
 
-              <a href={listingUrl} target="_blank" rel="noreferrer" className="public-link">
-                View Public
-              </a>
+              {isPublicMarketplace ? (
+  <a
+    href={listingUrl}
+    target="_blank"
+    rel="noreferrer"
+    className="public-link"
+  >
+    View Public
+  </a>
+) : (
+  <button
+    type="button"
+    className="public-link"
+    disabled
+    title={
+      isAuctionWorkflow
+        ? "Auction machines are not public marketplace listings"
+        : "Private machines are not publicly visible"
+    }
+  >
+    {isAuctionWorkflow
+      ? "Auction Workflow"
+      : "Private Workflow"}
+  </button>
+)}
 
               <button
                 type="button"
@@ -2468,6 +2581,28 @@ select {
         .status-command.paused span {
           background: #a0a0a0;
         }
+
+.status-command.private {
+  color: #7DEBFF;
+  border-color: rgba(0, 209, 255, 0.42);
+  background: rgba(0, 209, 255, 0.055);
+}
+
+.status-command.private span {
+  background: #00D1FF;
+  box-shadow: 0 0 10px rgba(0, 209, 255, 0.42);
+}
+
+.status-command.auction {
+  color: #f6ad55;
+  border-color: rgba(246, 173, 85, 0.44);
+  background: rgba(246, 173, 85, 0.06);
+}
+
+.status-command.auction span {
+  background: #f6ad55;
+  box-shadow: 0 0 10px rgba(246, 173, 85, 0.42);
+}
 
       .save-top {
   background:
