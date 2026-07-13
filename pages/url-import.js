@@ -30,6 +30,9 @@ import {
   createMachineMediaFromUrls
 } from "../lib/machine-media/machineMediaIdentity";
 
+import IXIMachinePlacementControl
+from "../components/ixi-machine-placement/IXIMachinePlacementControl";
+
 import {
   buildSharetribeImageIdsFromMedia
 } from "../lib/machine-media/machineMediaSharetribeAdapter";
@@ -313,8 +316,11 @@ const [importUrl, setImportUrl] = useState("");
 const [importing, setImporting] = useState(false);
 const [importResult, setImportResult] = useState(null);
 
-const [importAuthorization, setImportAuthorization] =
-  useState("");
+const [machineAccess, setMachineAccess] =
+  useState("public");
+
+const [machineChannel, setMachineChannel] =
+  useState("marketplace");
   
 const [loggedIn, setLoggedIn] = useState(false);
 const [sellerProfile, setSellerProfile] = useState({
@@ -597,12 +603,12 @@ async function importMachineFromUrl() {
   }
 
   if (
-    importAuthorization !== "public" &&
-    importAuthorization !== "private"
-  ) {
-    alert("Select Public or Private before importing.");
-    return;
-  }
+  !machineAccess ||
+  !machineChannel
+) {
+  alert("Choose LIVE, PRIV, or AUCT before importing.");
+  return;
+}
 
   setImporting(true);
 
@@ -1077,43 +1083,24 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
     </button>
   </div>
 
-  <div className="url-import-authorization">
-    <label
-      className={`url-authorization-option ${
-        importAuthorization === "public" ? "active" : ""
-      }`}
-    >
-      <span>Public</span>
+  <div className="url-import-placement">
+  <span className="url-import-placement-label">
+    Machine Placement
+  </span>
 
-      <input
-        type="radio"
-        name="importAuthorization"
-        value="public"
-        checked={importAuthorization === "public"}
-        onChange={() => setImportAuthorization("public")}
-      />
+  <IXIMachinePlacementControl
+    machineAccess={machineAccess}
+    machineChannel={machineChannel}
+    onChange={nextPlacement => {
+      setMachineAccess(
+        nextPlacement.machineAccess
+      );
 
-      <span className="url-authorization-box" />
-    </label>
-
-    <label
-      className={`url-authorization-option ${
-        importAuthorization === "private" ? "active" : ""
-      }`}
-    >
-      <span>Private</span>
-
-      <input
-        type="radio"
-        name="importAuthorization"
-        value="private"
-        checked={importAuthorization === "private"}
-        onChange={() => setImportAuthorization("private")}
-      />
-
-      <span className="url-authorization-box" />
-    </label>
-  </div>
+      setMachineChannel(
+        nextPlacement.machineChannel
+      );
+    }}
+  />
 </div>
 
  
@@ -1449,10 +1436,27 @@ console.error("SHARETRIBE 400 STATUS:", err?.response?.status);
 
   <div className="live-card-shell">
     <ListingCard
-      listing={previewListing}
-      sellerMode={true}
-      creationMode={true}
-      saved={false}
+  listing={previewListing}
+  sellerMode={true}
+  creationMode={false}
+
+  machineAccess={machineAccess}
+  machineChannel={machineChannel}
+
+  onMachinePlacementChange={(
+    listing,
+    nextPlacement
+  ) => {
+    setMachineAccess(
+      nextPlacement.machineAccess
+    );
+
+    setMachineChannel(
+      nextPlacement.machineChannel
+    );
+  }}
+
+  saved={false}
       machineFace={previewFace}
       onCycleMachineFace={cyclePreviewFace}
       descriptionValue={description}
@@ -1984,7 +1988,7 @@ select {
   width: 590px;
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 132px;
+  grid-template-columns: minmax(0, 1fr) 150px;
   align-items: center;
   gap: 10px;
 
@@ -2069,71 +2073,26 @@ select {
   cursor: pointer;
 }
 
-.url-import-authorization {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
+.url-import-placement {
+  min-width: 0;
+
+  display: grid;
+  gap: 4px;
 
   padding-left: 10px;
 
   border-left: 1px solid rgba(0,209,255,.14);
 }
 
-.url-authorization-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-
+.url-import-placement-label {
   color: rgba(255,255,255,.42);
 
-  font-size: 7.5px;
+  font-size: 6.8px;
   font-weight: 950;
-  letter-spacing: .55px;
+  letter-spacing: .58px;
   text-transform: uppercase;
-
-  cursor: pointer;
+  white-space: nowrap;
 }
-
-.url-authorization-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.url-authorization-box {
-  width: 12px;
-  height: 12px;
-
-  border: 1px solid rgba(255,255,255,.20);
-  border-radius: 3px;
-
-  background: #090909;
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.025) inset;
-}
-
-.url-authorization-option.active {
-  color: #7DEBFF;
-}
-
-.url-authorization-option.active .url-authorization-box {
-  border-color: rgba(0,209,255,.72);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,209,255,.50),
-      rgba(0,209,255,.18)
-    ),
-    #071317;
-
-  box-shadow:
-    0 0 9px rgba(0,209,255,.20);
-}
-
-
         .launch-title {
           display: flex;
           align-items: center;
