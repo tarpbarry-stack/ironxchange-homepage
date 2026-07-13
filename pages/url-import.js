@@ -846,11 +846,19 @@ if (Array.isArray(result.media) && result.media.length > 0) {
 
 const importedMachineTitle = buildImportedMachineTitle(machine);
 
-alert(
-  `${result.source?.label || "Machine Source"}\n\nMachine: ${
-    importedMachineTitle || "Unknown Machine"
-  }`
-);
+    const sourceLabel =
+  result.source?.label ||
+  "Machine Source";
+
+showCardNotice({
+  message: `${sourceLabel} — ${
+    importedMachineTitle || "MACHINE IMPORTED"
+  }`,
+  tone: "success",
+  detail: `${Array.isArray(result.media) ? result.media.length : 0} photos found.`,
+  persistent: false,
+  duration: 5000
+});
 
 addActivity(
   "success",
@@ -858,7 +866,18 @@ addActivity(
 );
   } catch (error) {
     console.error("URL IMPORT FAILED:", error);
-    alert(`URL import failed: ${error.message}`);
+
+showCardNotice({
+  message: "URL IMPORT FAILED",
+  tone: "error",
+  detail:
+    error?.message ||
+    "The source listing could not be imported.",
+  persistent: false,
+  duration: 6000
+});
+
+alert(`URL import failed: ${error.message}`);
   } finally {
     setImporting(false);
   }
@@ -989,6 +1008,13 @@ setPhotoItems(current => [...current, ...mapped]);
 
   setSaving(true);
 
+showCardNotice({
+  message: "BUILDING IXI MACHINE",
+  tone: "info",
+  detail: `${photoItems.length} photos ready for processing.`,
+  persistent: true
+});
+
   let stage = "START";
 
   try {
@@ -1024,15 +1050,60 @@ if (
       imageUrls:
         importResult.media,
 
-      onProgress(job) {
-        console.log(
-          "IXI MEDIA:",
-          job.status,
-          job.processedPhotoCount,
-          "/",
-          job.importedPhotoCount
-        );
-      }
+     onProgress(job) {
+  const processedCount =
+    Number(job.processedPhotoCount || 0);
+
+  const importedCount =
+    Number(
+      job.importedPhotoCount ||
+      job.sourcePhotoCount ||
+      photoItems.length ||
+      0
+    );
+
+  console.log(
+    "IXI MEDIA:",
+    job.status,
+    processedCount,
+    "/",
+    importedCount
+  );
+
+  if (job.status === "queued") {
+    showCardNotice({
+      message: "IXI MEDIA QUEUED",
+      tone: "info",
+      detail: `${importedCount} photos waiting for the media worker.`,
+      persistent: true
+    });
+
+    return;
+  }
+
+  if (job.status === "processing") {
+    showCardNotice({
+      message: "BUILDING MACHINE MEDIA",
+      tone: "info",
+      detail:
+        processedCount > 0
+          ? `${processedCount} of ${importedCount} photos processed.`
+          : `Sorting through ${importedCount} photos.`,
+      persistent: true
+    });
+
+    return;
+  }
+
+  if (job.status === "complete") {
+    showCardNotice({
+      message: "IXI MEDIA COMPLETE",
+      tone: "success",
+      detail: `${importedCount} photos stored in IXI Media.`,
+      persistent: true
+    });
+  }
+}
     });
 
   ixiManifest =
@@ -1059,14 +1130,20 @@ if (
     ixiManifest?.media?.[0]?.hero?.url ||
     "";
 
-  if (heroUrl) {
-    stage =
-      "SHARETRIBE_HERO_DOWNLOAD";
+stage = "SHARETRIBE_HERO_DOWNLOAD";
 
-    console.log(
-      "POST STAGE:",
-      stage
-    );
+console.log(
+  "POST STAGE:",
+  stage
+);
+  
+  if (heroUrl) {
+    showCardNotice({
+  message: "PREPARING LISTING HERO",
+  tone: "info",
+  detail: "Creating the Sharetribe compatibility image.",
+  persistent: true
+});
 
     const heroResponse =
       await fetch(heroUrl);
@@ -1107,6 +1184,13 @@ console.log(
       stage
     );
 
+showCardNotice({
+  message: "UPLOADING LISTING HERO",
+  tone: "info",
+  detail: "Sending one compatibility image to Sharetribe.",
+  persistent: true
+});
+    
     const heroUploadResponse =
       await sdk.images.upload({
         image:
@@ -1215,6 +1299,13 @@ console.log(
 
     console.log("POST STAGE:", stage);
 
+    showCardNotice({
+  message: "CREATING LISTING",
+  tone: "info",
+  detail: `${sharetribeTitle} is being created in Sharetribe.`,
+  persistent: true
+});
+
     const response = await sdk.ownListings.create(listingPayload);
 
     if (
@@ -1285,6 +1376,12 @@ console.log(
         newListingId
       );
 
+showCardNotice({
+  message: "ATTACHING MACHINE PASSPORT",
+  tone: "info",
+  detail: "Connecting the permanent IXI machine identity.",
+  persistent: true
+});      
       passport =
         await attachPassportToSharetribeListing({
           sdk,
@@ -1295,6 +1392,15 @@ console.log(
         "PASSPORT ATTACH COMPLETE:",
         passport
       );
+
+      showCardNotice({
+  message: passport?.passportId
+    ? `PASSPORT ${passport.passportId} ATTACHED`
+    : "PASSPORT ATTACHED",
+  tone: "success",
+  detail: sharetribeTitle,
+  persistent: true
+});
     } catch (passportError) {
       console.error(
         "PASSPORT ATTACH ERROR:",
@@ -1331,6 +1437,24 @@ console.log(
       }
     );
 
+showCardNotice({
+  message:
+    machineChannel === "auction"
+      ? "AUCTION MACHINE CREATED"
+      : machineAccess === "private"
+        ? "PRIVATE MACHINE CREATED"
+        : "LIVE MACHINE CREATED",
+  tone: "success",
+  detail: passport?.passportId
+    ? `${sharetribeTitle} — ${passport.passportId}`
+    : sharetribeTitle,
+  persistent: true
+});
+
+await new Promise(resolve => {
+  window.setTimeout(resolve, 1200);
+});
+    
     router.push(
       `/live?id=${newListingId}`
     );
@@ -1370,6 +1494,18 @@ console.log(
       err?.response?.status
     );
 
+showCardNotice({
+  message: `FAILED DURING ${stage}`,
+  tone: "error",
+  detail:
+    err?.response?.data?.error ||
+    err?.response?.data?.errors?.[0]?.detail ||
+    err?.message ||
+    "Unknown posting error",
+  persistent: false,
+  duration: 7000
+});
+    
     addActivity(
       "error",
       `Post failed at ${stage} — ${sharetribeTitle}`
