@@ -232,7 +232,16 @@ export default function PostFreePage() {
   useState(false);
 
   const [copied, setCopied] = useState("");
-  const [saving, setSaving] = useState(false);
+const [saving, setSaving] = useState(false);
+
+const [machineNotice, setMachineNotice] = useState({
+  visible: false,
+  message: "",
+  tone: "info",
+  blocking: false
+});
+
+const machineNoticeTimerRef = useRef(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [sellerProfile, setSellerProfile] = useState({
   sellerName: "IronXchange Seller",
@@ -784,6 +793,52 @@ setPhotoItems(current => [...current, ...mapped]);
     }
   }
 
+function showMachineNotice({
+  message,
+  tone = "info",
+  blocking = false,
+  duration = 0
+} = {}) {
+  if (machineNoticeTimerRef.current) {
+    clearTimeout(machineNoticeTimerRef.current);
+    machineNoticeTimerRef.current = null;
+  }
+
+  setMachineNotice({
+    visible: Boolean(message),
+    message: String(message || ""),
+    tone,
+    blocking
+  });
+
+  if (duration > 0) {
+    machineNoticeTimerRef.current = setTimeout(() => {
+      setMachineNotice({
+        visible: false,
+        message: "",
+        tone: "info",
+        blocking: false
+      });
+
+      machineNoticeTimerRef.current = null;
+    }, duration);
+  }
+}
+
+function clearMachineNotice() {
+  if (machineNoticeTimerRef.current) {
+    clearTimeout(machineNoticeTimerRef.current);
+    machineNoticeTimerRef.current = null;
+  }
+
+  setMachineNotice({
+    visible: false,
+    message: "",
+    tone: "info",
+    blocking: false
+  });
+}
+  
   async function createListing() {
     if (!loggedIn) {
       router.push("/login");
