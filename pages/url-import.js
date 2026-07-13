@@ -920,12 +920,11 @@ try {
     sdk,
     listingId: newListingId
   });
-
-  if (passport?.passportId) {
-    alert(`Passport created: ${passport.passportId}`);
-  }
 } catch (passportError) {
-  throw passportError;
+  console.error(
+    "PASSPORT ATTACH ERROR:",
+    passportError
+  );
 }
 addActivity(
   "success",
