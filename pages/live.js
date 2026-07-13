@@ -547,21 +547,12 @@ const [externalLinks, setExternalLinks] = useState([
   return () => {
     cancelled = true;
   };
-}, [router.isReady]);
+}, [
+  router.isReady,
+  router.asPath
+]);
 
-  useEffect(() => {
-  if (!router.isReady) return;
-  if (id) return;
-  if (!Array.isArray(listings) || listings.length === 0) return;
-
-  const firstListingId = getListingId(listings[0]);
-
-  if (!firstListingId) return;
-
-  router.replace(`/live?id=${encodeURIComponent(String(firstListingId))}`);
-}, [router.isReady, id, listings]);
-
- useEffect(() => {
+useEffect(() => {
   let cancelled = false;
 
   async function loadRequestedListing() {
@@ -578,6 +569,7 @@ const [externalLinks, setExternalLinks] = useState([
 
     if (alreadyLoaded) {
       setDirectListing(null);
+      setDirectListingLoading(false);
       return;
     }
 
@@ -617,12 +609,10 @@ const [externalLinks, setExternalLinks] = useState([
         ...(resource.attributes || {}),
 
         publicData:
-          resource.attributes
-            ?.publicData || {},
+          resource.attributes?.publicData || {},
 
         metadata:
-          resource.attributes
-            ?.metadata || {},
+          resource.attributes?.metadata || {},
 
         authorId:
           resource.relationships
@@ -651,9 +641,8 @@ const [externalLinks, setExternalLinks] = useState([
         const exists =
           current.some(
             item =>
-              String(
-                getListingId(item)
-              ) === String(id)
+              String(getListingId(item)) ===
+              String(id)
           );
 
         return exists
@@ -687,8 +676,34 @@ const [externalLinks, setExternalLinks] = useState([
 }, [
   router.isReady,
   id,
-  listings,
-  sdk
+  listings
+]);
+
+useEffect(() => {
+  if (!router.isReady) return;
+  if (id) return;
+
+  if (
+    !Array.isArray(listings) ||
+    listings.length === 0
+  ) {
+    return;
+  }
+
+  const firstListingId =
+    getListingId(listings[0]);
+
+  if (!firstListingId) return;
+
+  router.replace(
+    `/live?id=${encodeURIComponent(
+      String(firstListingId)
+    )}`
+  );
+}, [
+  router.isReady,
+  id,
+  listings
 ]);
   
   const listing = useMemo(() => {
