@@ -425,6 +425,8 @@ const [saving, setSaving] = useState(false);
 const [importUrl, setImportUrl] = useState("");
 const [importing, setImporting] = useState(false);
 const [importResult, setImportResult] = useState(null);
+const [cardActionNotice, setCardActionNotice] =
+  useState(null);
 
 const [machineAccess, setMachineAccess] =
   useState("public");
@@ -704,6 +706,32 @@ publicData: {
   );
 }
 
+function showCardNotice({
+  message,
+  tone = "success",
+  detail = "",
+  persistent = false,
+  duration = 2200
+} = {}) {
+  setCardActionNotice({
+    message,
+    tone,
+    detail,
+    persistent,
+    createdAt: Date.now()
+  });
+
+  if (!persistent) {
+    window.setTimeout(() => {
+      setCardActionNotice(null);
+    }, duration);
+  }
+}
+
+function clearCardNotice() {
+  setCardActionNotice(null);
+}
+  
 async function importMachineFromUrl() {
   const url = String(importUrl || "").trim();
 
@@ -1842,6 +1870,7 @@ console.log(
   listing={previewListing}
   sellerMode={true}
   creationMode={false}
+  actionNotice={cardActionNotice}
 
   machineAccess={machineAccess}
   machineChannel={machineChannel}
