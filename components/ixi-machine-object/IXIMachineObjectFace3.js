@@ -323,7 +323,7 @@ function money(value) {
         }
 
        .mof3-machine-line {
-  margin-top: -3px;
+  margin-top: 2px;
   margin-bottom: 2px;
 
   color: rgba(255,255,255,.58);
