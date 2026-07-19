@@ -347,6 +347,41 @@ const res = await fetch(
 
 const data = await res.json();
 
+        console.log(
+  "INVENTORY ACCOUNT LISTING MEDIA DEBUG",
+  Array.isArray(data)
+    ? data.map(item => ({
+        id:
+          item.id?.uuid ||
+          item.id ||
+          "",
+
+        title:
+          item.title ||
+          item.attributes?.title ||
+          "",
+
+        ixiMedia:
+          item.ixiMedia ||
+          item.publicData?.ixiMedia ||
+          item.attributes?.publicData?.ixiMedia ||
+          null,
+
+        ixiMediaMachineKey:
+          item.ixiMediaMachineKey ||
+          item.publicData?.ixiMediaMachineKey ||
+          item.attributes?.publicData?.ixiMediaMachineKey ||
+          "",
+
+        machineKey:
+          item.machineKey ||
+          item.publicData?.machineKey ||
+          item.attributes?.publicData?.machineKey ||
+          ""
+      }))
+    : data
+);
+
 if (Array.isArray(data)) {
   const hydratedListings =
     await hydrateIXIListingCollection(data);
