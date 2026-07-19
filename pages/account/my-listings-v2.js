@@ -108,6 +108,8 @@ import {
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
 export default function MyListingsV2() {
+  console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
+  
   const [listings, setListings] = useState([]);
   
   const [savedIds, setSavedIds] = useState([]);
