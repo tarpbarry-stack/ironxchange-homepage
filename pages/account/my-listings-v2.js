@@ -349,9 +349,10 @@ const res = await fetch(
 
 const data = await res.json();
 
-      const mediaDebug = Array.isArray(data)
-  ? data
-      .map(item => ({
+      console.log(
+  "INVENTORY ACCOUNT LISTING MEDIA DEBUG",
+  Array.isArray(data)
+    ? data.map(item => ({
         id:
           item.id?.uuid ||
           item.id ||
@@ -380,17 +381,7 @@ const data = await res.json();
           item.attributes?.publicData?.machineKey ||
           ""
       }))
-      .filter(item =>
-        item.ixiMedia ||
-        item.ixiMediaMachineKey ||
-        item.machineKey
-      )
-  : [];
-
-alert(
-  mediaDebug.length
-    ? JSON.stringify(mediaDebug, null, 2)
-    : "NO IXI MEDIA KEYS FOUND IN INVENTORY LISTINGS"
+    : data
 );
 
 if (Array.isArray(data)) {
