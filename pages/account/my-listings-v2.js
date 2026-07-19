@@ -358,12 +358,32 @@ const data = await res.json();
   : null;
 
 console.log(
-  "FIRST INVENTORY IXI MEDIA OBJECT",
+  "FIRST INVENTORY PASSPORT DEBUG",
   JSON.stringify(
-    firstIXIListing?.ixiMedia ||
-    firstIXIListing?.publicData?.ixiMedia ||
-    firstIXIListing?.attributes?.publicData?.ixiMedia ||
-    null,
+    {
+      title:
+        firstIXIListing?.title ||
+        firstIXIListing?.attributes?.title ||
+        "",
+
+      passportId:
+        firstIXIListing?.passportId ||
+        firstIXIListing?.publicData?.passportId ||
+        firstIXIListing?.attributes?.publicData?.passportId ||
+        "",
+
+      passportUrl:
+        firstIXIListing?.passportUrl ||
+        firstIXIListing?.publicData?.passportUrl ||
+        firstIXIListing?.attributes?.publicData?.passportUrl ||
+        "",
+
+      ixiMediaPassportId:
+        firstIXIListing?.ixiMedia?.passportId ||
+        firstIXIListing?.publicData?.ixiMedia?.passportId ||
+        firstIXIListing?.attributes?.publicData?.ixiMedia?.passportId ||
+        ""
+    },
     null,
     2
   )
