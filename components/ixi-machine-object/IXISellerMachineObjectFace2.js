@@ -12,6 +12,11 @@ export default function IXISellerMachineObjectFace2({
 }) {
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
+  const passportId =
+  listing.passportId ||
+  publicData.passportId ||
+  "";
+
   const sellerLogo =
     listing.sellerLogo ||
     listing.profileImage ||
@@ -64,6 +69,31 @@ export default function IXISellerMachineObjectFace2({
   className="mof2"
   {...(dragHandleProps || {})}
 >
+
+  <div className="mof2-passport-wrap">
+  <div className="mof2-passport-label">
+    IXI Machine Passport
+  </div>
+
+  {passportId ? (
+    <a
+      href={`/p/${passportId}`}
+      className="mof2-passport-id"
+      onClick={event => {
+        event.stopPropagation();
+      }}
+      onPointerDown={event => {
+        event.stopPropagation();
+      }}
+    >
+      {passportId}
+    </a>
+  ) : (
+    <div className="mof2-passport-id mof2-passport-id-empty">
+      &nbsp;
+    </div>
+  )}
+</div>
       <div className="mof2-logo-wrap">
         {sellerLogo ? (
           <img src={sellerLogo} alt={sellerName} />
@@ -73,7 +103,7 @@ export default function IXISellerMachineObjectFace2({
       </div>
 
     <div className="mof2-plate">
-  <div className="mof2-tag">
+  <div className="mof2-tag mof2-tag-serial">
     <div className="mof2-tag-label">
       SERIAL NUMBER
     </div>
@@ -83,7 +113,7 @@ export default function IXISellerMachineObjectFace2({
     </div>
   </div>
 
-  <div className="mof2-tag">
+  <div className="mof2-tag mof2-tag-stock">
     <div className="mof2-tag-label">
       STOCK NUMBER
     </div>
@@ -145,7 +175,7 @@ export default function IXISellerMachineObjectFace2({
 
   position: relative;
 
-  padding: 14px 14px 30px;
+  padding: 10px 14px 30px;
 
   display: flex;
           flex-direction: column;
@@ -157,6 +187,73 @@ export default function IXISellerMachineObjectFace2({
             #141414;
           color: #f2f2f2;
         }
+
+.mof2-passport-wrap {
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin: 0 0 7px;
+  padding: 0 1px 6px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.mof2-passport-label {
+  min-width: 0;
+
+  color: rgba(255, 255, 255, 0.32);
+
+  font-size: 6.5px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.86px;
+
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mof2-passport-id {
+  display: block;
+  min-width: 0;
+
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.68);
+
+  font-size: 8px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.82px;
+
+  text-align: right;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  transition:
+    color 0.14s ease,
+    text-shadow 0.14s ease;
+}
+
+.mof2-passport-id:hover {
+  color: #ffc400;
+
+  text-shadow:
+    0 0 12px rgba(255, 196, 0, 0.12);
+}
+
+.mof2-passport-id-empty {
+  min-width: 40px;
+  min-height: 8px;
+  pointer-events: none;
+}
 
         .mof2-logo-wrap {
           height: 54px;
@@ -191,7 +288,7 @@ export default function IXISellerMachineObjectFace2({
   justify-content: center;
   align-items: center;
 
-  gap: 26px;
+  gap: 10px;
           border: 1px solid rgba(255,255,255,.12);
           border-radius: 5px;
           background:
@@ -232,10 +329,8 @@ export default function IXISellerMachineObjectFace2({
 }
 
 .mof2-tag-value {
-  font-size: 15px;
-  font-weight: 950;
-
-  letter-spacing: .16em;
+  width: 100%;
+  min-width: 0;
 
   color: rgba(255,255,255,.94);
 
@@ -244,11 +339,24 @@ export default function IXISellerMachineObjectFace2({
     "Arial Narrow",
     sans-serif;
 
+  font-size: clamp(8px, 2.2vw, 12px);
+  font-weight: 950;
+  line-height: 1.1;
+  letter-spacing: .06em;
+
+  text-align: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
 }
 
+.mof2-tag-serial {
+  flex: 1.65;
+}
+
+.mof2-tag-stock {
+  flex: 0.85;
+}
 
         h2 {
           margin: 0;
