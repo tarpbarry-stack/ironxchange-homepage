@@ -28,6 +28,10 @@ import {
   saveIxiMachinePatch,
 } from "../../lib/ixiMachineStateClient";
 
+import {
+  hydrateIXIListingCollection
+} from "../../lib/listings/hydrateIXIListingMedia";
+
 import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
@@ -344,7 +348,10 @@ const res = await fetch(
 const data = await res.json();
 
 if (Array.isArray(data)) {
-  setListings(data);
+  const hydratedListings =
+    await hydrateIXIListingCollection(data);
+
+  setListings(hydratedListings);
 }
 
       } catch (err) {
