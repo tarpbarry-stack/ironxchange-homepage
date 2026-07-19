@@ -45,6 +45,10 @@ import {
 } from "../lib/machine-media/machineMediaIdentity";
 
 import {
+  getIXIMachineMedia
+} from "../lib/media/ixiMediaClient";
+
+import {
   updateListingMediaWithSharetribe
 } from "../lib/machine-media/machineMediaSharetribeAdapter";
 
@@ -163,6 +167,80 @@ function getListingImages(listing) {
     ...objectUrls,
     ...legacyUrls
   ])];
+}
+
+function getIXIMediaMachineKey(listing = {}) {
+  const publicData =
+    listing.publicData ||
+    listing.attributes?.publicData ||
+    {};
+
+  return String(
+    publicData?.ixiMedia?.machineKey ||
+    publicData?.ixiMediaMachineKey ||
+    listing?.ixiMediaMachineKey ||
+    ""
+  ).trim();
+}
+
+function buildIXIManifestImageObjects(
+  manifest = {}
+) {
+  const media =
+    Array.isArray(manifest.media)
+      ? manifest.media
+      : [];
+
+  const orderedMediaIds =
+    Array.isArray(
+      manifest.orderedMediaIds
+    )
+      ? manifest.orderedMediaIds.map(String)
+      : [];
+
+  const byId =
+    new Map(
+      media.map(item => [
+        String(
+          item?.mediaId || ""
+        ),
+        item
+      ])
+    );
+
+  const orderedMedia =
+    orderedMediaIds.length > 0
+      ? orderedMediaIds
+          .map(mediaId =>
+            byId.get(mediaId)
+          )
+          .filter(Boolean)
+      : [...media].sort(
+          (a, b) =>
+            Number(a?.position || 0) -
+            Number(b?.position || 0)
+        );
+
+  return orderedMedia
+    .map(item => ({
+      mediaId:
+        String(
+          item?.mediaId || ""
+        ),
+
+      url:
+        item?.display?.url ||
+        item?.hero?.url ||
+        item?.thumb?.url ||
+        "",
+
+      source:
+        "ixi-media",
+
+      ixiMedia:
+        true
+    }))
+    .filter(item => item.url);
 }
 
 function getListingKeywords(listing) {
@@ -710,6 +788,148 @@ useEffect(() => {
     if (!id || listings.length === 0) return null;
     return listings.find(item => String(getListingId(item)) === String(id)) || null;
   }, [id, listings]);
+
+  useEffect(() => {
+  let cancelled = false;
+
+  async function hydrateSelectedListingMedia() {
+    if (!listing) return;
+
+    const machineKey =
+      getIXIMediaMachineKey(listing);
+
+    if (!machineKey) {
+      return;
+    }
+
+    if (
+  listing.ixiMediaSource === "ixi"
+) {
+  return;
+}
+
+    try {
+      const manifest =
+        await getIXIMachineMedia(
+          machineKey
+        );
+
+      if (cancelled) return;
+
+      const ixiImageObjects =
+        buildIXIManifestImageObjects(
+          manifest
+        );
+
+      if (
+        ixiImageObjects.length === 0
+      ) {
+        console.warn(
+          "IXI MANIFEST CONTAINED NO DISPLAYABLE MEDIA:",
+          {
+            machineKey,
+            listingId:
+              getListingId(listing)
+          }
+        );
+
+        return;
+      }
+
+      setListings(current =>
+        current.map(item =>
+          String(getListingId(item)) ===
+          String(getListingId(listing))
+            ? {
+                ...item,
+
+                imageObjects:
+                  ixiImageObjects,
+
+                imageUrls:
+                  ixiImageObjects.map(
+                    image => image.url
+                  ),
+
+                images:
+                  ixiImageObjects.map(
+                    image => image.url
+                  ),
+
+                imageUrl:
+                  ixiImageObjects[0]?.url ||
+                  item.imageUrl ||
+                  item.image ||
+                  "",
+
+                image:
+                  ixiImageObjects[0]?.url ||
+                  item.image ||
+                  item.imageUrl ||
+                  "",
+
+                ixiMediaSource:
+                  "ixi",
+
+                ixiMediaMachineKey:
+                  machineKey,
+
+                ixiMediaVersion:
+                  manifest.mediaVersion ??
+                  null,
+
+                ixiHeroMediaId:
+                  manifest.heroMediaId ||
+                  "",
+
+                ixiManifest:
+                  manifest
+              }
+            : item
+        )
+      );
+
+      console.log(
+        "IXI LAUNCH GALLERY HYDRATED:",
+        {
+          machineKey,
+          listingId:
+            getListingId(listing),
+          photoCount:
+            ixiImageObjects.length,
+          mediaVersion:
+            manifest.mediaVersion
+        }
+      );
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error(
+        "IXI LAUNCH GALLERY HYDRATION FAILED:",
+        {
+          machineKey,
+          listingId:
+            getListingId(listing),
+          error
+        }
+      );
+
+      /*
+       * Do nothing to the listing.
+       * Its existing Sharetribe compatibility image remains intact.
+       */
+    }
+  }
+
+  hydrateSelectedListingMedia();
+
+  return () => {
+    cancelled = true;
+  };
+}, [
+  listing
+]);
+
   
   const listingId = getListingId(listing || {});
   const listingUrl = listing ? getListingUrl(listing) : "";
