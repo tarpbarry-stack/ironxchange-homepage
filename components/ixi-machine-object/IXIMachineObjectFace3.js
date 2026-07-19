@@ -300,7 +300,7 @@ function money(value) {
           height: 16px;
 
           position: relative;
-          top: 3px;
+          top: -2px;
 
           display: flex;
           align-items: center;
