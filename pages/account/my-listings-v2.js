@@ -371,9 +371,31 @@ console.log(
 
 if (Array.isArray(data)) {
   const hydratedListings =
-    await hydrateIXIListingCollection(data);
+  await hydrateIXIListingCollection(data);
 
-  setListings(hydratedListings);
+const firstHydratedIXIListing =
+  hydratedListings.find(item =>
+    item.ixiMediaSource === "ixi"
+  );
+
+console.log(
+  "INVENTORY HYDRATED LISTING RESULT",
+  {
+    title: firstHydratedIXIListing?.title,
+    imageObjectsLength:
+      firstHydratedIXIListing?.imageObjects?.length,
+    imageUrlsLength:
+      firstHydratedIXIListing?.imageUrls?.length,
+    imagesLength:
+      firstHydratedIXIListing?.images?.length,
+    firstImageUrl:
+      firstHydratedIXIListing?.imageUrls?.[0],
+    source:
+      firstHydratedIXIListing?.ixiMediaSource
+  }
+);
+
+setListings(hydratedListings);
 }
 
       } catch (err) {
