@@ -349,39 +349,24 @@ const res = await fetch(
 
 const data = await res.json();
 
-      console.log(
-  "INVENTORY ACCOUNT LISTING MEDIA DEBUG",
-  Array.isArray(data)
-    ? data.map(item => ({
-        id:
-          item.id?.uuid ||
-          item.id ||
-          "",
+      const firstIXIListing = Array.isArray(data)
+  ? data.find(item =>
+      item.ixiMedia ||
+      item.publicData?.ixiMedia ||
+      item.attributes?.publicData?.ixiMedia
+    )
+  : null;
 
-        title:
-          item.title ||
-          item.attributes?.title ||
-          "",
-
-        ixiMedia:
-          item.ixiMedia ||
-          item.publicData?.ixiMedia ||
-          item.attributes?.publicData?.ixiMedia ||
-          null,
-
-        ixiMediaMachineKey:
-          item.ixiMediaMachineKey ||
-          item.publicData?.ixiMediaMachineKey ||
-          item.attributes?.publicData?.ixiMediaMachineKey ||
-          "",
-
-        machineKey:
-          item.machineKey ||
-          item.publicData?.machineKey ||
-          item.attributes?.publicData?.machineKey ||
-          ""
-      }))
-    : data
+console.log(
+  "FIRST INVENTORY IXI MEDIA OBJECT",
+  JSON.stringify(
+    firstIXIListing?.ixiMedia ||
+    firstIXIListing?.publicData?.ixiMedia ||
+    firstIXIListing?.attributes?.publicData?.ixiMedia ||
+    null,
+    null,
+    2
+  )
 );
 
 if (Array.isArray(data)) {
