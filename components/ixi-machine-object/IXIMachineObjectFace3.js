@@ -322,18 +322,25 @@ function money(value) {
           letter-spacing: .55px;
         }
 
-        .mof3-machine-line {
+       .mof3-machine-line {
   margin-top: -3px;
   margin-bottom: 2px;
+
   color: rgba(255,255,255,.58);
-  font-size: 7.8px;
+
+  font-size: 7.4px;
   font-weight: 950;
-  letter-spacing: .45px;
+  line-height: 1.15;
+  letter-spacing: .28px;
+
   text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+
+  min-height: 18px;
 }
 
         .mof3-grid {
