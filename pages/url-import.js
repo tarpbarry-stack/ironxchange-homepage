@@ -8,9 +8,11 @@ import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 
 import {
+  applyV12TaxonomyPath,
   getV12CategoryNames,
   getV12Makes,
-  getV12Models
+  getV12Models,
+  getV12TaxonomyPath
 } from "../lib/v12TaxonomyAdapter";
 
 import categoryDnaKeywords from "../lib/categoryDnaKeywords";
@@ -54,8 +56,6 @@ const { Money, UUID } = sdkTypes;
 const sdk = createInstance({
   clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
 });
-
-const categories = getV12CategoryNames();
 
 const stateOptions = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -420,6 +420,9 @@ async function convertImageBlobToJpegFile(
 export default function PostFreePage() {
   const router = useRouter();
 
+const [taxonomyRevision, setTaxonomyRevision] =
+  useState(0);
+
 const [copied, setCopied] = useState("");
 const [saving, setSaving] = useState(false);
 const [importUrl, setImportUrl] = useState("");
@@ -552,13 +555,17 @@ setSellerProfile({
     trackLaunchEvent("post_free_opened", { category });
   }, [category]);
 
+const categories = useMemo(() => {
+  return getV12CategoryNames();
+}, [taxonomyRevision]);
+
 const availableMakes = useMemo(() => {
   return getV12Makes(category);
-}, [category]);
+}, [category, taxonomyRevision]);
 
 const availableModels = useMemo(() => {
   return getV12Models(category, make);
-}, [category, make]);
+}, [category, make, taxonomyRevision]);
   
   const cardTitle = useMemo(() => {
     return buildCardTitle(year, make, model);
@@ -796,27 +803,65 @@ if (sourceLinks.length > 0) {
   setExternalLinks(hydrated);
 }
     
-if (machine.year) setYear(String(machine.year));
-const importedCategory = machine.category || category;
+if (machine.year) {
+  setYear(String(machine.year));
+}
+
+const runtimeTaxonomyResult =
+  applyV12TaxonomyPath(
+    result?.identityResolution
+      ?.taxonomyPath ||
+    result?.identity
+      ?.taxonomyPath ||
+    result?.taxonomyPath ||
+    machine?.identityResolution
+      ?.taxonomyPath || {
+      category:
+        machine?.category || "",
+
+      make:
+        machine?.make || "",
+
+      model:
+        machine?.model || ""
+    }
+  );
+
+const importedCategory =
+  runtimeTaxonomyResult?.ok
+    ? runtimeTaxonomyResult.path.category.name
+    : String(machine?.category || "").trim();
+
+const importedMake =
+  runtimeTaxonomyResult?.ok
+    ? runtimeTaxonomyResult.path.make.name
+    : String(machine?.make || "").trim();
+
+const importedModel =
+  runtimeTaxonomyResult?.ok
+    ? runtimeTaxonomyResult.path.model.name
+    : String(machine?.model || "").trim();
+
+/*
+ * Force React to rebuild the dropdown option lists
+ * after applyV12TaxonomyPath mutates the runtime tree.
+ */
+setTaxonomyRevision(current =>
+  current + 1
+);
 
 if (importedCategory) {
   setCategory(importedCategory);
-
-  const importedMakes = getV12Makes(importedCategory);
-
-  const matchedMake =
-    importedMakes.find(item =>
-      String(item).toLowerCase() === String(machine.make).toLowerCase()
-    ) || machine.make;
-
-  if (matchedMake) {
-    setMake(matchedMake);
-  }
 }
 
-if (machine.model) {
-  setModel(String(machine.model));
+if (importedMake) {
+  setMake(importedMake);
 }
+
+if (importedModel) {
+  setModel(importedModel);
+}
+    
 if (machine.hours) setHours(String(machine.hours));
 if (machine.price) setPrice(String(machine.price));
 if (machine.serialNumber) setSerialNumber(machine.serialNumber);
@@ -1226,18 +1271,32 @@ showCardNotice({
     
     stage = "BUILD_PAYLOAD";
 
-    const categorySlug = slugify(category);
-    const makeSlug = slugify(`${category}-${make}`);
-    const modelSlug = slugify(`${category}-${make}-${model}`);
+const taxonomyPath =
+  getV12TaxonomyPath(
+    category,
+    make,
+    model
+  );
 
-    const listingPayload = {
+if (!taxonomyPath) {
+  throw new Error(
+    `No runtime taxonomy path for ${category} / ${make} / ${model}`
+  );
+}
+
+const listingPayload = {
       title: sharetribeTitle,
       description: description || "",
 
       publicData: {
-        categoryLevel1: categorySlug,
-        categoryLevel2: makeSlug,
-        categoryLevel3: modelSlug,
+  categoryLevel1:
+    taxonomyPath.category.id,
+
+  categoryLevel2:
+    taxonomyPath.make.id,
+
+  categoryLevel3:
+    taxonomyPath.model.id,
 
         category,
         year: String(year),
