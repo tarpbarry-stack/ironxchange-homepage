@@ -31,6 +31,9 @@ from "./ixi-machine-object/IXIMachineObjectFace3";
 import IXIMachineObjectFace4
 from "./ixi-machine-object/IXIMachineObjectFace4";
 
+import IXIAuctionObjectFace1
+from "./ixi-auction-object/IXIAuctionObjectFace1";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -277,6 +280,18 @@ const sellerPlacementClass =
     : resolvedMachineChannel === "auction"
       ? "auction"
       : "live";
+
+const isAuctionObject =
+  resolvedMachineChannel === "auction" ||
+  publicData.objectType === "auction" ||
+  publicData.sourceClass === "auction" ||
+  publicData.acquisitionType === "auction" ||
+  Boolean(publicData.auctionData) ||
+  Boolean(publicData.auctionEvent) ||
+  Boolean(publicData.auctionLot) ||
+  Boolean(listing.auctionData) ||
+  Boolean(listing.auctionEvent) ||
+  Boolean(listing.auctionLot);
   
 const rawLocation =
   locationValue ||
@@ -404,7 +419,7 @@ function handlePhotoLoad(e, photoUrl) {
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
-    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    } ${sellerMode && !isAuctionObject ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
@@ -466,14 +481,17 @@ style={getFrameStyle(currentImageObject, "card")}
   loading="lazy"
 />
 
-    {sellerMode ? (
+    {isAuctionObject ? (
+  <div className="status-photo-pill auction">
+    AUCT
+  </div>
+) : sellerMode ? (
   <div
     className={`status-photo-pill ${sellerPlacementClass}`}
   >
     {sellerPlacementLabel}
   </div>
 ) : null}
-
     {images.length > 1 ? (
       <>
         <button
@@ -503,6 +521,13 @@ style={getFrameStyle(currentImageObject, "card")}
 </a>
 
 <div className="card-body">
+  {isAuctionObject ? (
+    <IXIAuctionObjectFace1
+      listing={listing}
+      from={from}
+      onListingClick={handleCardClick}
+    />
+  ) : (
   <>
     <a
     href={getListingHref(listing, from)}
@@ -724,12 +749,12 @@ style={getFrameStyle(currentImageObject, "card")}
   </div>
 ) : null}
 
-           </div>
+                     </div>
 
            </>
+  )}
 
     </div>
-
   </>
 )}
          
