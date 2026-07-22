@@ -1796,9 +1796,13 @@ showCardNotice({
                 </div>
 
                 <div>
-                  <span>Photos</span>
-                  <strong>{importResult.confidence?.photos || "unknown"}</strong>
-                </div>
+  <span>Photos</span>
+  <strong>
+    {Array.isArray(importResult.media) && importResult.media.length > 0
+      ? `${importResult.media.length} parsed`
+      : importResult.confidence?.photos || "none"}
+  </strong>
+</div>
               </div>
             </section>
           ) : null}
