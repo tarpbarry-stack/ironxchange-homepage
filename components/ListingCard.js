@@ -419,9 +419,9 @@ function handlePhotoLoad(e, photoUrl) {
   isBoardDragging ? "board-dragging" : ""
 } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
   isGhostTarget ? "grid-ghost-target" : ""
-} ${sellerMode && !isAuctionObject ? "seller-mode" : ""} ${
-  isAuctionObject ? "auction-object" : ""
-} ${isPaused ? "paused-card" : ""}`}
+} ${sellerMode ? "seller-mode" : ""} ${
+  isPaused ? "paused-card" : ""
+}`}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
