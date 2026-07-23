@@ -412,15 +412,18 @@ export default function IXIAuctionObjectFace1({
         }
 
         .aof1-lot-row {
-          height: 22px;
-          min-height: 22px;
+  height: 32px;
+  min-height: 32px;
 
-          display: flex;
-          align-items: center;
-          gap: 5px;
+  display: flex;
+  align-items: center;
 
-          color: #ffc400;
-        }
+  gap: 9px;
+
+  color: #ffc400;
+
+  margin-bottom: 3px;
+}
 
         .aof1-lot-label,
         .aof1-lot-value {
@@ -432,24 +435,24 @@ export default function IXIAuctionObjectFace1({
           text-transform: uppercase;
         }
 
-        .aof1-lot-input {
-          width: 66px;
-          height: 22px;
+      .aof1-lot-input {
+  width: 82px;
+  height: 28px;
 
-          border: 1px solid #343434;
-          border-radius: 7px;
+  border: 1px solid #343434;
+  border-radius: 8px;
 
-          background: #101010;
-          color: #ffc400;
+  background: #101010;
+  color: #ffc400;
 
-          padding: 0 7px;
+  padding: 0 9px;
 
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .45px;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.45px;
 
-          outline: none;
-        }
+  outline: none;
+}
 
         .aof1-title-link {
           display: block;
@@ -588,19 +591,20 @@ export default function IXIAuctionObjectFace1({
         }
 
         .aof1-bottom {
-          position: relative;
+  position: relative;
 
-          min-height: 42px;
+  height: 42px;
+  min-height: 42px;
 
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
 
-          gap: 10px;
+  gap: 10px;
 
-          margin-top: auto;
-          padding-top: 12px;
-        }
+  margin-top: 5px;
+  padding-top: 12px;
+}
 
         .aof1-bottom::before {
           content: "";
