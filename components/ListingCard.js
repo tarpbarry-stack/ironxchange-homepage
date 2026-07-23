@@ -1239,7 +1239,7 @@ text-align: right;
   content: "";
   position: absolute;
 
-  top: 6px;
+  top: 4px;
   z-index: 2;
   
   left: 0;
@@ -1258,7 +1258,7 @@ text-align: right;
 .price-row::after {
   content: "";
   position: absolute;
-  top: 6px;
+  top: 4px;
   left: 0;
 
   width: 100%;
