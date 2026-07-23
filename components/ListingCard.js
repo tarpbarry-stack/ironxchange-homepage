@@ -1269,7 +1269,9 @@ text-align: right;
   z-index: 1;
 }
 
-        .price-row strong {
+       .price-row strong {
+  position: relative;
+  top: 2px;
           color: #f2f2f2;
           font-size: 17.25px;
           font-weight: 850;
@@ -1277,7 +1279,9 @@ text-align: right;
           white-space: nowrap;
         }
 
-        .meta {
+       .meta {
+  position: relative;
+  top: 2px;
           display: flex;
           align-items: center;
           gap: 9px;
