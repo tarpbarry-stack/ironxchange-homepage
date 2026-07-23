@@ -1258,7 +1258,7 @@ text-align: right;
 .price-row::after {
   content: "";
   position: absolute;
-  top: 4px;
+  top: 8px;
   left: 0;
 
   width: 100%;
@@ -1479,6 +1479,9 @@ text-align: right;
           font-weight: 900;
 
           cursor: pointer;
+
+          position: relative;
+          top: -5px;
 
           transition:
             border-color .14s ease,
