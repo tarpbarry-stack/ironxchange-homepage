@@ -1230,7 +1230,7 @@ text-align: right;
   justify-content: space-between;
   align-items: center;
 
-   margin-top: 8px;
+   margin-top: 10px;
   padding-top: 4px;
 
   gap: 10px;
@@ -1461,7 +1461,7 @@ text-align: right;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 8px;
-          margin-top: 13px;
+          margin-top: 11px;
         }
 
         .seller-actions button {
@@ -1533,7 +1533,7 @@ text-align: right;
 
   gap: 10px;
 
-  margin-top: 5px;
+  margin-top: 3px;
   padding-top: 5px;
 
   border-top: 1px solid rgba(255,255,255,.045);
