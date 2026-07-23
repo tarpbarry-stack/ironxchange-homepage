@@ -31,8 +31,8 @@ export function getAuctionData(listing = {}) {
 }
 
 /*
- * Auction event may be nested inside the canonical
- * auction object or supplied as a separate object.
+ * Prefer the canonical nested auction event.
+ * Compatibility event objects remain fallback-only.
  */
 export function getAuctionEventData(
   listing = {}
@@ -44,10 +44,10 @@ export function getAuctionEventData(
     getAuctionData(listing);
 
   return cleanObject(
-    listing.auctionEvent ||
-    publicData.auctionEvent ||
     auction.event ||
-    auction.auctionEvent
+    auction.auctionEvent ||
+    listing.auctionEvent ||
+    publicData.auctionEvent
   );
 }
 
@@ -130,13 +130,14 @@ export function getAuctionEventName(
     getAuctionEventData(listing);
 
   return clean(
-    event?.name ||
-    event?.eventName ||
-    event?.title ||
-    event?.saleName ||
-    listing.auctionEventName ||
-    publicData.auctionEventName
-  );
+  event?.name ||
+  event?.eventName ||
+  event?.eventTitle ||
+  event?.title ||
+  event?.saleName ||
+  listing.auctionEventName ||
+  publicData.auctionEventName
+);
 }
 
 export function getAuctionFormat(
@@ -152,14 +153,16 @@ export function getAuctionFormat(
     getAuctionEventData(listing);
 
   return clean(
-    event?.format ||
-    event?.auctionFormat ||
-    event?.saleFormat ||
-    auction?.format ||
-    auction?.auctionFormat ||
-    listing.auctionFormat ||
-    publicData.auctionFormat
-  );
+  event?.format ||
+  event?.auctionFormat ||
+  event?.auctionType ||
+  event?.saleFormat ||
+  auction?.format ||
+  auction?.auctionFormat ||
+  auction?.auctionType ||
+  listing.auctionFormat ||
+  publicData.auctionFormat
+);
 }
 
 export function getAuctionParticipation(
@@ -195,15 +198,23 @@ export function getAuctionEventLocation(
     getAuctionEventData(listing);
 
   return clean(
-    event?.location?.label ||
-    event?.location?.name ||
-    event?.location?.address ||
-    event?.locationLabel ||
-    event?.eventLocation ||
-    event?.cityState ||
-    listing.auctionLocation ||
-    publicData.auctionLocation
-  );
+  event?.location?.label ||
+  event?.location?.name ||
+  event?.location?.fullAddress ||
+  event?.location?.address ||
+  event?.location?.street ||
+  [
+    event?.location?.city,
+    event?.location?.state
+  ]
+    .filter(Boolean)
+    .join(", ") ||
+  event?.locationLabel ||
+  event?.eventLocation ||
+  event?.cityState ||
+  listing.auctionLocation ||
+  publicData.auctionLocation
+);
 }
 
 export function getAuctionDate(
