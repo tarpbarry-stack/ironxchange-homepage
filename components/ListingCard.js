@@ -1271,7 +1271,7 @@ text-align: right;
 
        .price-row strong {
   position: relative;
-  top: 2px;
+  top: 5px;
           color: #f2f2f2;
           font-size: 17.25px;
           font-weight: 850;
