@@ -2322,17 +2322,23 @@ showCardNotice({
   machineChannel={machineChannel}
 
   onMachinePlacementChange={(
-    listing,
-    nextPlacement
-  ) => {
-    setMachineAccess(
-      nextPlacement.machineAccess
-    );
+  listing,
+  nextPlacement
+) => {
+  if (auctionImportLocked) {
+    setMachineAccess("public");
+    setMachineChannel("auction");
+    return;
+  }
 
-    setMachineChannel(
-      nextPlacement.machineChannel
-    );
-  }}
+  setMachineAccess(
+    nextPlacement.machineAccess
+  );
+
+  setMachineChannel(
+    nextPlacement.machineChannel
+  );
+}}
 
   saved={false}
       machineFace={previewFace}
