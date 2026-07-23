@@ -1465,7 +1465,7 @@ text-align: right;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 8px;
-          margin-top: 11px;
+          margin-top: 9px;
         }
 
         .seller-actions button {
@@ -1537,7 +1537,7 @@ text-align: right;
 
   gap: 10px;
 
-  margin-top: 3px;
+  margin-top: 1px;
   padding-top: 5px;
 
   border-top: 1px solid rgba(255,255,255,.045);
