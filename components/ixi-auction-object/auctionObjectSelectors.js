@@ -2,6 +2,14 @@ function clean(value = "") {
   return String(value || "").trim();
 }
 
+function cleanObject(value) {
+  return value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+    ? value
+    : {};
+}
+
 export function getPublicData(listing = {}) {
   return (
     listing.publicData ||
@@ -11,48 +19,144 @@ export function getPublicData(listing = {}) {
 }
 
 export function getAuctionData(listing = {}) {
-  const publicData = getPublicData(listing);
+  const publicData =
+    getPublicData(listing);
 
-  return (
+  return cleanObject(
     listing.auction ||
     listing.auctionData ||
     publicData.auction ||
-    publicData.auctionData ||
-    {}
+    publicData.auctionData
   );
 }
 
-export function getAuctionCompany(listing = {}) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+/*
+ * Auction event may be nested inside the canonical
+ * auction object or supplied as a separate object.
+ */
+export function getAuctionEventData(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  return cleanObject(
+    listing.auctionEvent ||
+    publicData.auctionEvent ||
+    auction.event ||
+    auction.auctionEvent
+  );
+}
+
+/*
+ * Auction lot may be nested inside the canonical
+ * auction object or supplied as a separate object.
+ */
+export function getAuctionLotData(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  return cleanObject(
+    listing.auctionLot ||
+    publicData.auctionLot ||
+    auction.lot ||
+    auction.auctionLot
+  );
+}
+
+export function getAuctionTermsData(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  return cleanObject(
+    listing.auctionTerms ||
+    publicData.auctionTerms ||
+    auction.terms ||
+    auction.auctionTerms
+  );
+}
+
+export function getAuctionCompany(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  const event =
+    getAuctionEventData(listing);
 
   return clean(
     auction?.company?.name ||
-    auction?.event?.companyName ||
+    auction?.companyName ||
+    auction?.auctionCompanyName ||
+    event?.company?.name ||
+    event?.companyName ||
+    event?.auctionCompanyName ||
+    auction?.provider?.name ||
+    auction?.providerName ||
+    auction?.provider ||
+    auction?.platform?.name ||
+    auction?.platformName ||
+    auction?.platform ||
     listing.auctionCompanyName ||
     publicData.auctionCompanyName ||
     publicData.auctionCompany
   );
 }
 
-export function getAuctionEventName(listing = {}) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+export function getAuctionEventName(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const event =
+    getAuctionEventData(listing);
 
   return clean(
-    auction?.event?.name ||
-    auction?.event?.eventName ||
+    event?.name ||
+    event?.eventName ||
+    event?.title ||
+    event?.saleName ||
     listing.auctionEventName ||
     publicData.auctionEventName
   );
 }
 
-export function getAuctionFormat(listing = {}) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+export function getAuctionFormat(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  const event =
+    getAuctionEventData(listing);
 
   return clean(
-    auction?.event?.format ||
+    event?.format ||
+    event?.auctionFormat ||
+    event?.saleFormat ||
+    auction?.format ||
+    auction?.auctionFormat ||
     listing.auctionFormat ||
     publicData.auctionFormat
   );
@@ -61,11 +165,21 @@ export function getAuctionFormat(listing = {}) {
 export function getAuctionParticipation(
   listing = {}
 ) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  const event =
+    getAuctionEventData(listing);
 
   return clean(
-    auction?.event?.participation ||
+    event?.participation ||
+    event?.participationType ||
+    event?.biddingType ||
+    auction?.participation ||
+    auction?.participationType ||
     listing.auctionParticipation ||
     publicData.auctionParticipation
   );
@@ -74,37 +188,65 @@ export function getAuctionParticipation(
 export function getAuctionEventLocation(
   listing = {}
 ) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+  const publicData =
+    getPublicData(listing);
+
+  const event =
+    getAuctionEventData(listing);
 
   return clean(
-    auction?.event?.location?.label ||
-    auction?.event?.locationLabel ||
+    event?.location?.label ||
+    event?.location?.name ||
+    event?.location?.address ||
+    event?.locationLabel ||
+    event?.eventLocation ||
+    event?.cityState ||
     listing.auctionLocation ||
     publicData.auctionLocation
   );
 }
 
-export function getAuctionDate(listing = {}) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+export function getAuctionDate(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const event =
+    getAuctionEventData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
 
   return clean(
-    auction?.event?.dateText ||
-    auction?.event?.saleDateText ||
-    auction?.event?.startsAt ||
+    event?.dateText ||
+    event?.saleDateText ||
+    event?.auctionDateText ||
+    event?.startsAt ||
+    event?.startAt ||
+    event?.saleDate ||
+    event?.date ||
+    lot?.saleDateText ||
+    lot?.saleDate ||
     listing.auctionDate ||
     publicData.auctionDate
   );
 }
 
-export function getLotNumber(listing = {}) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+export function getLotNumber(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
 
   return clean(
-    auction?.lot?.number ||
-    auction?.lot?.lotNumber ||
+    lot?.number ||
+    lot?.lotNumber ||
+    lot?.lotNo ||
+    lot?.lotId ||
     listing.lotNumber ||
     publicData.lotNumber
   );
@@ -113,14 +255,34 @@ export function getLotNumber(listing = {}) {
 export function getScheduledCloseAt(
   listing = {}
 ) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  const event =
+    getAuctionEventData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
 
   return clean(
-    auction?.lot?.scheduledCloseAt ||
-    auction?.lot?.closeAt ||
+    lot?.scheduledCloseAt ||
+    lot?.closeAt ||
+    lot?.closesAt ||
+    lot?.endAt ||
+    lot?.timing?.scheduledCloseAt ||
+    lot?.timing?.closeAt ||
     auction?.scheduledCloseAt ||
     auction?.closeAt ||
+    auction?.timing?.scheduledCloseAt ||
+    auction?.timing?.closeAt ||
+    event?.scheduledCloseAt ||
+    event?.closeAt ||
+    event?.endsAt ||
+    event?.timing?.scheduledCloseAt ||
+    event?.timing?.closeAt ||
     listing.scheduledCloseAt ||
     publicData.scheduledCloseAt ||
     publicData.auctionCloseAt
@@ -130,13 +292,25 @@ export function getScheduledCloseAt(
 export function getSourceTimezone(
   listing = {}
 ) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  const event =
+    getAuctionEventData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
 
   return clean(
-    auction?.lot?.timezone ||
-    auction?.event?.timezone ||
+    lot?.timezone ||
+    lot?.timing?.timezone ||
+    event?.timezone ||
+    event?.timing?.timezone ||
     auction?.timezone ||
+    auction?.timing?.timezone ||
     listing.auctionTimezone ||
     publicData.auctionTimezone
   );
@@ -145,11 +319,19 @@ export function getSourceTimezone(
 export function getMachineLocation(
   listing = {}
 ) {
-  const publicData = getPublicData(listing);
-  const auction = getAuctionData(listing);
+  const publicData =
+    getPublicData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
 
   return clean(
-    auction?.lot?.machineLocation?.label ||
+    lot?.machineLocation?.label ||
+    lot?.machineLocation?.name ||
+    lot?.machineLocation?.address ||
+    lot?.machineLocationLabel ||
+    lot?.location?.label ||
+    lot?.locationLabel ||
     listing.location ||
     publicData.location ||
     publicData.cityState ||
@@ -158,16 +340,24 @@ export function getMachineLocation(
   );
 }
 
-export function splitLocation(value = "") {
-  const parts = String(value || "")
-    .split(",")
-    .map(item => item.trim());
+export function splitLocation(
+  value = ""
+) {
+  const parts =
+    String(value || "")
+      .split(",")
+      .map(item =>
+        item.trim()
+      );
 
   return {
-    city: parts[0] || "",
-    state: String(parts[1] || "")
-      .slice(0, 2)
-      .toUpperCase()
+    city:
+      parts[0] || "",
+
+    state:
+      String(parts[1] || "")
+        .slice(0, 2)
+        .toUpperCase()
   };
 }
 
