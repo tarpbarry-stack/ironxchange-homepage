@@ -72,13 +72,16 @@ export default function ListingCard({
   workflowValue = "good-listing",
   onWorkflowChange,
   priceValue,
-  onPriceChange,
-  onPriceKeyDown,
-  savingPrice = false,
+onPriceChange,
+onPriceKeyDown,
+savingPrice = false,
 
-  hoursValue,
-  onHoursChange,
-  onHoursKeyDown,
+lotNumberValue,
+onLotNumberChange,
+
+hoursValue,
+onHoursChange,
+onHoursKeyDown,
 
   descriptionValue,
   onDescriptionChange,
@@ -266,6 +269,17 @@ const resolvedMachineChannel =
   listing.metadata?.machineChannel ||
   listing.attributes?.metadata?.machineChannel ||
   "marketplace";
+
+const isAuctionObject =
+  Boolean(
+    resolvedMachineChannel === "auction" ||
+    listing.isAuctionObject === true ||
+    publicData.isAuctionObject === true ||
+    listing.auction ||
+    publicData.auction ||
+    listing.auctionData ||
+    publicData.auctionData
+  );
 
 const sellerPlacementLabel =
   resolvedMachineAccess === "private"
@@ -506,6 +520,30 @@ style={getFrameStyle(currentImageObject, "card")}
 </a>
 
 <div className="card-body">
+  {isAuctionObject ? (
+    <IXIAuctionObjectFace1
+      listing={listing}
+      from={from}
+      onListingClick={handleCardClick}
+
+      sellerMode={sellerMode}
+
+      lotNumberValue={lotNumberValue}
+      onLotNumberChange={onLotNumberChange}
+
+      hoursValue={hoursValue}
+      onHoursChange={onHoursChange}
+      onHoursKeyDown={onHoursKeyDown}
+
+      priceValue={priceValue}
+      onPriceChange={onPriceChange}
+      onPriceKeyDown={onPriceKeyDown}
+
+      locationValue={locationValue}
+      onLocationChange={onLocationChange}
+      onLocationKeyDown={onLocationKeyDown}
+    />
+  ) : (
   <>
     <a
     href={getListingHref(listing, from)}
@@ -727,9 +765,11 @@ style={getFrameStyle(currentImageObject, "card")}
   </div>
 ) : null}
 
-           </div>
+                     </div>
 
            </>
+
+  )}
 
     </div>
 
