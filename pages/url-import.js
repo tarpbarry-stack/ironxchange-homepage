@@ -201,6 +201,65 @@ function buildImportedMachineTitle(machine = {}) {
     .trim();
 }
 
+function isAuctionAcquisition(result = {}) {
+  const forcedDestination =
+    String(
+      result?.launchPolicy?.forcedDestination || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const allowedDestinations =
+    Array.isArray(
+      result?.launchPolicy?.allowedDestinations
+    )
+      ? result.launchPolicy.allowedDestinations
+          .map(value =>
+            String(value || "")
+              .trim()
+              .toLowerCase()
+          )
+      : [];
+
+  const destinationLocked =
+    result?.launchPolicy?.destinationLocked === true;
+
+  const saleType =
+    String(
+      result?.sale?.type || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const auctionSchemaVersion =
+    String(
+      result?.auction?.schemaVersion || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const auctionProvider =
+    String(
+      result?.auction?.provider ||
+      result?.auction?.platform ||
+      ""
+    )
+      .trim();
+
+  return (
+    forcedDestination === "auction" ||
+    (
+      destinationLocked &&
+      allowedDestinations.includes("auction")
+    ) ||
+    saleType === "auction" ||
+    auctionSchemaVersion.startsWith(
+      "ixi-auction-object"
+    ) ||
+    !!auctionProvider
+  );
+}
+
 function trackLaunchEvent(eventName, payload = {}) {
   if (typeof window === "undefined") return;
 
@@ -468,6 +527,24 @@ const [sellerProfile, setSellerProfile] = useState({
   const [workflowStatus, setWorkflowStatus] = useState("good-listing");
   const [photoPolishMode, setPhotoPolishMode] = useState("original");
 
+  const auctionImportLocked =
+  useMemo(
+    () =>
+      isAuctionAcquisition(
+        importResult
+      ),
+    [importResult]
+  );
+
+  useEffect(() => {
+  if (!auctionImportLocked) {
+    return;
+  }
+
+  setMachineAccess("public");
+  setMachineChannel("auction");
+}, [auctionImportLocked]);
+  
   useEffect(() => {
   captureIXEvent("post_free_viewed", {
     page: "post-free"
@@ -656,10 +733,52 @@ imageObjects: photoItems.map((photo, index) => ({
   position: index,
   hero: index === 0
 })),
-imageUrls: getMachineMediaPreviewUrls(photoItems),
-images: getMachineMediaPreviewUrls(photoItems),
-imageUrl: heroPhoto,
-image: heroPhoto,
+imageUrls:
+  getMachineMediaPreviewUrls(
+    photoItems
+  ),
+
+images:
+  getMachineMediaPreviewUrls(
+    photoItems
+  ),
+
+imageUrl:
+  heroPhoto,
+
+image:
+  heroPhoto,
+
+auction:
+  importResult?.auction ||
+  null,
+
+auctionData:
+  importResult?.auction ||
+  null,
+
+auctionEvent:
+  importResult?.auctionEvent ||
+  importResult?.auction?.event ||
+  null,
+
+auctionLot:
+  importResult?.auctionLot ||
+  importResult?.auction?.lot ||
+  null,
+
+auctionTerms:
+  importResult?.auctionTerms ||
+  importResult?.auction?.terms ||
+  null,
+
+launchPolicy:
+  importResult?.launchPolicy ||
+  null,
+
+sale:
+  importResult?.sale ||
+  null,
 
 publicData: {
     category,
@@ -676,7 +795,39 @@ publicData: {
     stockNumber,
     description,
 
-    sellerName: sellerProfile.sellerName,
+auction:
+  importResult?.auction ||
+  null,
+
+auctionData:
+  importResult?.auction ||
+  null,
+
+auctionEvent:
+  importResult?.auctionEvent ||
+  importResult?.auction?.event ||
+  null,
+
+auctionLot:
+  importResult?.auctionLot ||
+  importResult?.auction?.lot ||
+  null,
+
+auctionTerms:
+  importResult?.auctionTerms ||
+  importResult?.auction?.terms ||
+  null,
+
+launchPolicy:
+  importResult?.launchPolicy ||
+  null,
+
+sale:
+  importResult?.sale ||
+  null,
+
+sellerName:
+  sellerProfile.sellerName,
     sellerCompany: sellerProfile.sellerCompany,
     sellerLogo: sellerProfile.sellerLogo,
     profileImage: sellerProfile.profileImage,
@@ -776,8 +927,18 @@ if (!response.ok || !data.ok) {
 const result = data.result;
 const machine = result.machine || {};
 
+const importedAsAuction =
+  isAuctionAcquisition(result);
+
+if (importedAsAuction) {
+  setMachineAccess("public");
+  setMachineChannel("auction");
+}
+
 setImportResult(result);
-setImportUrl(result.source?.url || url);
+setImportUrl(
+  result.source?.url || url
+);
 
 const sourceLinks =
   Array.isArray(result.distributionLinks) && result.distributionLinks.length > 0
@@ -1284,6 +1445,21 @@ if (!taxonomyPath) {
   );
 }
 
+const postingAuction =
+  isAuctionAcquisition(
+    importResult
+  );
+
+const finalMachineAccess =
+  postingAuction
+    ? "public"
+    : machineAccess;
+
+const finalMachineChannel =
+  postingAuction
+    ? "auction"
+    : machineChannel;
+    
 const listingPayload = {
       title: sharetribeTitle,
       description: description || "",
@@ -1327,15 +1503,69 @@ const listingPayload = {
         /*
          * NEW MACHINE PLACEMENT DATA
          */
-        machineAccess,
-        machineChannel,
+       machineAccess:
+  finalMachineAccess,
 
-        listingType: "free-listing",
-        listingStatus:
-          machineAccess === "public" &&
-          machineChannel === "marketplace"
-            ? "live"
-            : "private",
+machineChannel:
+  finalMachineChannel,
+
+auction:
+  postingAuction
+    ? importResult?.auction || null
+    : null,
+
+auctionData:
+  postingAuction
+    ? importResult?.auction || null
+    : null,
+
+auctionEvent:
+  postingAuction
+    ? (
+        importResult?.auctionEvent ||
+        importResult?.auction?.event ||
+        null
+      )
+    : null,
+
+auctionLot:
+  postingAuction
+    ? (
+        importResult?.auctionLot ||
+        importResult?.auction?.lot ||
+        null
+      )
+    : null,
+
+auctionTerms:
+  postingAuction
+    ? (
+        importResult?.auctionTerms ||
+        importResult?.auction?.terms ||
+        null
+      )
+    : null,
+
+launchPolicy:
+  postingAuction
+    ? importResult?.launchPolicy || null
+    : null,
+
+sale:
+  postingAuction
+    ? importResult?.sale || null
+    : null,
+
+listingType:
+  "free-listing",
+
+listingStatus:
+  finalMachineChannel === "auction"
+    ? "auction"
+    : finalMachineAccess === "public" &&
+      finalMachineChannel === "marketplace"
+      ? "live"
+      : "private",
 
         transactionProcessAlias: "default-inquiry/release-1",
         unitType: "inquiry"
@@ -1487,8 +1717,11 @@ showCardNotice({
           passport?.passportId || "",
         passportUrl:
           passport?.passportUrl || "",
-        machineAccess,
-        machineChannel,
+        machineAccess:
+  finalMachineAccess,
+
+machineChannel:
+  finalMachineChannel,
         title: sharetribeTitle,
         selectedKeywordCount:
           selectedKeywords.length,
@@ -1498,9 +1731,9 @@ showCardNotice({
 
 showCardNotice({
   message:
-    machineChannel === "auction"
+  finalMachineChannel === "auction"
       ? "AUCTION MACHINE CREATED"
-      : machineAccess === "private"
+      : finalMachineAccess === "private"
         ? "PRIVATE MACHINE CREATED"
         : "LIVE MACHINE CREATED",
   tone: "success",
@@ -1709,15 +1942,29 @@ showCardNotice({
     </button>
   </div>
 
-  <div className="url-import-placement">
+  <div
+  className={`url-import-placement ${
+    auctionImportLocked
+      ? "auction-import-locked"
+      : ""
+  }`}
+>
   <span className="url-import-placement-label">
-    Machine Placement
+    {auctionImportLocked
+      ? "Auction Placement Locked"
+      : "Machine Placement"}
   </span>
 
- <IXIMachinePlacementControl
+  <IXIMachinePlacementControl
     machineAccess={machineAccess}
     machineChannel={machineChannel}
     onChange={nextPlacement => {
+      if (auctionImportLocked) {
+        setMachineAccess("public");
+        setMachineChannel("auction");
+        return;
+      }
+
       setMachineAccess(
         nextPlacement.machineAccess
       );
@@ -2730,6 +2977,32 @@ select {
           gap: 12px;
           min-width: 0;
         }
+
+.auction-import-locked
+  :global(
+    .ixi-machine-placement-control
+  ) {
+  grid-template-columns: 1fr;
+}
+
+.auction-import-locked
+  :global(
+    .ixi-machine-placement-control
+    button:not(.active)
+  ) {
+  display: none;
+}
+
+.auction-import-locked
+  :global(
+    .ixi-machine-placement-control
+    button.active
+  ) {
+  width: 100%;
+  cursor: default;
+  pointer-events: none;
+}
+
 
         .launch-title button {
   height: 30px;
