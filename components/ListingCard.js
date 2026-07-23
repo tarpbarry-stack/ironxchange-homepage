@@ -31,6 +31,9 @@ from "./ixi-machine-object/IXIMachineObjectFace3";
 import IXIMachineObjectFace4
 from "./ixi-machine-object/IXIMachineObjectFace4";
 
+import IXIAuctionObjectFace1
+from "./ixi-auction-object/IXIAuctionObjectFace1";
+
 import {
   getFrameClass,
   getFrameStyle
