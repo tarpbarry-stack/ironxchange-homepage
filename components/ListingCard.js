@@ -523,63 +523,55 @@ style={getFrameStyle(currentImageObject, "card")}
 </a>
 
 <div className="card-body">
+  <div className="card-body">
   {isAuctionObject ? (
-  {Number(machineFace || 1) === 2 ? (
-  <IXIAuctionObjectFace2
-    listing={listing}
-    dragHandleProps={dragHandleProps}
+    Number(machineFace || 1) === 2 ? (
+      <IXIAuctionObjectFace2
+        listing={listing}
+        dragHandleProps={dragHandleProps}
+        sellerMode={sellerMode}
+        lotNumberValue={lotNumberValue}
+        onLotNumberChange={onLotNumberChange}
+        hoursValue={hoursValue}
+        onHoursChange={onHoursChange}
+        onHoursKeyDown={onHoursKeyDown}
+        openingBidValue={priceValue}
+        onOpeningBidChange={onPriceChange}
+        onOpeningBidKeyDown={onPriceKeyDown}
+        locationValue={locationValue}
+        onLocationChange={onLocationChange}
+        onLocationKeyDown={onLocationKeyDown}
+      />
+    ) : (
+      <IXIAuctionObjectFace1
+        listing={listing}
+        from={from}
+        onListingClick={handleCardClick}
+        sellerMode={sellerMode}
+        lotNumberValue={lotNumberValue}
+        onLotNumberChange={onLotNumberChange}
+        hoursValue={hoursValue}
+        onHoursChange={onHoursChange}
+        onHoursKeyDown={onHoursKeyDown}
+        priceValue={priceValue}
+        onPriceChange={onPriceChange}
+        onPriceKeyDown={onPriceKeyDown}
+        locationValue={locationValue}
+        onLocationChange={onLocationChange}
+        onLocationKeyDown={onLocationKeyDown}
+      />
+    )
+  ) : (
+    <>
+      <a
+        href={getListingHref(listing, from)}
+        className="title-click-zone"
+        onClick={handleCardClick}
+      >
+        <div className="title-row">
+          <h3>{cleanMachineTitle(listing.title)}</h3>
 
-    sellerMode={sellerMode}
-
-    lotNumberValue={lotNumberValue}
-    onLotNumberChange={onLotNumberChange}
-
-    hoursValue={hoursValue}
-    onHoursChange={onHoursChange}
-    onHoursKeyDown={onHoursKeyDown}
-
-    openingBidValue={priceValue}
-    onOpeningBidChange={onPriceChange}
-    onOpeningBidKeyDown={onPriceKeyDown}
-
-    locationValue={locationValue}
-    onLocationChange={onLocationChange}
-    onLocationKeyDown={onLocationKeyDown}
-  />
-) : (
-  <IXIAuctionObjectFace1
-    listing={listing}
-    from={from}
-    onListingClick={handleCardClick}
-
-    sellerMode={sellerMode}
-
-    lotNumberValue={lotNumberValue}
-    onLotNumberChange={onLotNumberChange}
-
-    hoursValue={hoursValue}
-    onHoursChange={onHoursChange}
-    onHoursKeyDown={onHoursKeyDown}
-
-    priceValue={priceValue}
-    onPriceChange={onPriceChange}
-    onPriceKeyDown={onPriceKeyDown}
-
-    locationValue={locationValue}
-    onLocationChange={onLocationChange}
-    onLocationKeyDown={onLocationKeyDown}
-  />
-)}
-  <>
-    <a
-    href={getListingHref(listing, from)}
-    className="title-click-zone"
-    onClick={handleCardClick}
-  >
-    <div className="title-row">
-      <h3>{cleanMachineTitle(listing.title)}</h3>
-
-     {sellerMode ? (
+          {sellerMode ? (
 <input
   className="hours-inline hours-input"
   {...(onHoursChange
