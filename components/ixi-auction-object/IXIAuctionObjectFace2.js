@@ -14,6 +14,7 @@ import {
   getAuctionDate,
   getAuctionEventLocation,
   getAuctionLotData,
+  getAuctionMachineData,
   getAuctionOpeningBid,
   getAuctionTermsData,
   getPublicData
@@ -27,6 +28,8 @@ function getAuctionRoot(listing = {}) {
   const publicData = getPublicData(listing);
 
   return (
+    listing.auctionObject ||
+    publicData.auctionObject ||
     listing.auction ||
     listing.auctionData ||
     publicData.auction ||
@@ -98,10 +101,18 @@ function getAuctionEventId(listing = {}) {
  */
 function getAuctionMachineId(listing = {}) {
   const publicData = getPublicData(listing);
+  const machine = getAuctionMachineData(listing);
   const lot = getAuctionLotData(listing);
 
   return clean(
+    machine?.machineAuctionId ||
+    machine?.auctionMachineId ||
+    machine?.assetId ||
+    machine?.itemId ||
+    machine?.externalId ||
+    machine?.id ||
     lot?.machineAuctionId ||
+    lot?.auctionMachineId ||
     lot?.assetId ||
     lot?.itemId ||
     lot?.externalId ||
@@ -113,7 +124,6 @@ function getAuctionMachineId(listing = {}) {
     publicData.sourceId
   );
 }
-
 /*
  * Preserve the complete machine ID.
  *
@@ -373,7 +383,14 @@ export default function IXIAuctionObjectFace2({
   onAuctionAlertClick
 }) {
   const publicData = getPublicData(listing);
-  const auctionTerms = getAuctionTermsData(listing);
+const auctionRoot = getAuctionRoot(listing);
+const auctionDeadlines = auctionRoot?.deadlines || {};
+const auctionMachine = getAuctionMachineData(listing);
+const auctionTerms = getAuctionTermsData(listing);
+
+  const passportId =
+    listing.passportId ||
+    publicData.passportId ||
 
   const passportId =
     listing.passportId ||
@@ -391,19 +408,24 @@ export default function IXIAuctionObjectFace2({
     getAuctionEventId(listing) ||
     "NOT LISTED";
 
-  const auctionDate = formatAuctionDate(
-    getAuctionDate(listing)
-  );
+ const auctionDate = formatAuctionDate(
+  auctionDeadlines?.auctionDate ||
+  auctionDeadlines?.saleDate ||
+  auctionDeadlines?.startDate ||
+  getAuctionDate(listing)
+);
 
   const auctionLocation =
     normalizeAuctionLocation(
       getAuctionEventLocation(listing)
     );
 
-  const serial =
-    listing.serialNumber ||
-    publicData.serialNumber ||
-    "—";
+const serial =
+  auctionMachine?.serialNumber ||
+  auctionMachine?.serial ||
+  listing.serialNumber ||
+  publicData.serialNumber ||
+  "—";
 
   const auctionMachineId =
     getDisplayAuctionMachineId(
@@ -411,25 +433,29 @@ export default function IXIAuctionObjectFace2({
     ) || "—";
 
   const year =
-    listing.year ||
-    publicData.year ||
-    "";
+  auctionMachine?.year ||
+  listing.year ||
+  publicData.year ||
+  "";
 
-  const make =
-    listing.make ||
-    publicData.make ||
-    "";
+const make =
+  auctionMachine?.make ||
+  listing.make ||
+  publicData.make ||
+  "";
 
-  const model =
-    listing.model ||
-    publicData.model ||
-    "";
-
+const model =
+  auctionMachine?.model ||
+  listing.model ||
+  publicData.model ||
+  "";
+  
   const hours =
-    hoursValue ??
-    listing.hours ??
-    publicData.hours ??
-    "";
+  hoursValue ??
+  auctionMachine?.hours ??
+  listing.hours ??
+  publicData.hours ??
+  "";
 
   const currentBid =
     getAuctionCurrentBid(listing);
@@ -485,7 +511,13 @@ export default function IXIAuctionObjectFace2({
     "NOT LISTED"
   );
 
-  const paymentDueDate = getTermValue(
+ const paymentDueDate =
+  getFirstMeaningfulValue(
+    auctionDeadlines?.paymentDueDate ||
+    auctionDeadlines?.paymentDue ||
+    auctionDeadlines?.paymentDeadline
+  ) ||
+  getTermValue(
     auctionTerms,
     [
       "paymentDueDate",
@@ -496,7 +528,14 @@ export default function IXIAuctionObjectFace2({
     "NOT LISTED"
   );
 
-  const removalDate = getTermValue(
+  const removalDate =
+  getFirstMeaningfulValue(
+    auctionDeadlines?.removalDate ||
+    auctionDeadlines?.machineRemovalDate ||
+    auctionDeadlines?.removalDeadline ||
+    auctionDeadlines?.pickupDeadline
+  ) ||
+  getTermValue(
     auctionTerms,
     [
       "removalDate",
@@ -507,7 +546,6 @@ export default function IXIAuctionObjectFace2({
     ],
     "NOT LISTED"
   );
-
   const paymentTerms = getTermValue(
     auctionTerms,
     [
@@ -914,17 +952,17 @@ export default function IXIAuctionObjectFace2({
         }
 
         .aof2-event-id-row {
-  width: 100%;
-  min-width: 0;
+  width: min(100%, 330px);
+  min-height: 14px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  gap: 5px;
+  gap: 6px;
 
   margin-top: 2px;
-  padding: 0;
+  padding: 0 4px;
 
   border: 0;
   border-radius: 0;
@@ -948,7 +986,7 @@ export default function IXIAuctionObjectFace2({
         .aof2-event-id-row strong {
   min-width: 0;
 
-  color: rgba(255,255,255,.48);
+  color: rgba(255,255,255,.46);
 
   font-family:
     "Roboto Condensed",
@@ -956,8 +994,8 @@ export default function IXIAuctionObjectFace2({
     sans-serif;
 
   font-size: 6.8px;
-  font-weight: 850;
-  letter-spacing: .12px;
+  font-weight: 900;
+  letter-spacing: .14px;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1022,30 +1060,12 @@ export default function IXIAuctionObjectFace2({
           text-transform: uppercase;
         }
 
-        .aof2-plate {
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-
-  padding: 4px 1px 5px;
-  margin: 0 0 3px;
-
-  display: grid;
-  grid-template-columns:
-    minmax(0, .9fr)
-    minmax(0, 1.1fr);
-
-  align-items: end;
-  gap: 10px;
-
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.055);
-  border-radius: 0;
-
-  background: transparent;
-  box-shadow: none;
-}
-
+        const hours =
+  hoursValue ??
+  auctionMachine?.hours ??
+  listing.hours ??
+  publicData.hours ??
+  "";
         .aof2-tag {
           min-width: 0;
           text-align: left;
@@ -1084,21 +1104,21 @@ export default function IXIAuctionObjectFace2({
           text-align: left;
         }
 
-        .aof2-machine-id-value {
+       .aof2-machine-id-value {
   width: 100%;
   min-width: 0;
 
-  color: rgba(255,255,255,.58);
+  color: rgba(255,255,255,.78);
 
   font-family:
     "Roboto Condensed",
     "Arial Narrow",
     sans-serif;
 
-  font-size: 6.3px;
-  font-weight: 850;
+  font-size: 6.4px;
+  font-weight: 950;
   line-height: 1.1;
-  letter-spacing: .01em;
+  letter-spacing: .015em;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1288,16 +1308,20 @@ export default function IXIAuctionObjectFace2({
 
         .aof2-basic-terms {
   width: 100%;
-  min-width: 0;
 
-  margin-top: 3px;
-  padding: 4px 1px 0;
+  margin-top: 4px;
+  padding: 4px 7px;
 
-  border: 0;
-  border-top: 1px solid rgba(255,255,255,.05);
-  border-radius: 0;
+  border: 1px solid rgba(255,196,0,.10);
+  border-radius: 5px;
 
-  background: transparent;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.028),
+      rgba(255,196,0,0)
+    ),
+    rgba(8,8,8,.34);
 }
 
        .aof2-basic-terms-title {
@@ -1355,7 +1379,7 @@ export default function IXIAuctionObjectFace2({
             0 0 0 1px rgba(255, 196, 0, .08);
         }
 
-        .aof2-actions-footer {
+       .aof2-actions-footer {
   position: static;
 
   width: 100%;
@@ -1371,9 +1395,13 @@ export default function IXIAuctionObjectFace2({
 
   border-top: 1px solid rgba(255,255,255,.065);
 
-  background: #141414;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,20,20,0),
+      #141414 24%
+    );
 }
-
         .aof2-actions-footer :global(.mof-actions) {
           position: static;
           top: auto;
