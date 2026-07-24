@@ -1024,7 +1024,16 @@ if (importedModel) {
 }
     
 if (machine.hours) setHours(String(machine.hours));
-if (machine.price) setPrice(String(machine.price));
+const openingBid =
+  result?.auctionLot?.openingBid ??
+  result?.auction?.openingBid ??
+  result?.auction?.bidding?.openingBid;
+
+if (openingBid != null && openingBid !== "") {
+  setPrice(String(openingBid));
+} else if (machine.price) {
+  setPrice(String(machine.price));
+}
 if (machine.serialNumber) setSerialNumber(machine.serialNumber);
 if (machine.stockNumber) setStockNumber(machine.stockNumber);
 if (machine.city) setCity(machine.city);
