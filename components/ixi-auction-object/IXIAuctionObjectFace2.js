@@ -566,23 +566,7 @@ export default function IXIAuctionObjectFace2({
       </div>
 
       <div className="aof2-company-block">
-        <div className="aof2-logo-wrap">
-          {auctionCompanyLogo ? (
-            <img
-              src={auctionCompanyLogo}
-              alt={auctionCompany}
-            />
-          ) : (
-            <div className="aof2-logo-fallback">
-              {auctionCompany}
-            </div>
-          )}
-        </div>
-
-        <strong className="aof2-company-name">
-          {auctionCompany}
-        </strong>
-
+       https://www.rbauction.com/pdp/2018-cat-926m-wheel-loader/15518062
         <div className="aof2-event-id-row">
           <span>AUCTION ID</span>
 
@@ -780,13 +764,13 @@ export default function IXIAuctionObjectFace2({
           width: 100%;
           max-width: 100%;
 
-          height: 378px;
-          min-height: 378px;
-          max-height: 378px;
+          height: 100%;
+min-height: 100%;
+max-height: 100%;
 
           position: relative;
 
-          padding: 8px 14px 60px;
+          padding: 8px 14px 78px;
 
           display: flex;
           flex-direction: column;
@@ -1338,31 +1322,36 @@ export default function IXIAuctionObjectFace2({
         }
 
         .aof2-actions-footer {
-          position: absolute;
+  position: absolute;
 
-          left: 14px;
-          right: 14px;
-          bottom: 20px;
+  left: 14px;
+  right: 14px;
 
-          height: 36px;
-          min-height: 36px;
+  /*
+   * The command rail is 16px tall.
+   * This places the share buttons 20px above it.
+   */
+  bottom: 36px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+  height: 34px;
+  min-height: 34px;
 
-          padding-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-          border-top:
-            1px solid rgba(255, 255, 255, .065);
+  padding-top: 7px;
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(20, 20, 20, 0),
-              #141414 24%
-            );
-        }
+  border-top:
+    1px solid rgba(255, 255, 255, .065);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 20, 20, 0),
+      #141414 24%
+    );
+}
 
         .aof2-actions-footer :global(.mof-actions) {
           position: static;
