@@ -589,16 +589,17 @@ export default function IXIAuctionObjectFace2({
           </strong>
         </div>
 
-        <div className="aof2-company-date">
-          {auctionDate ||
-            "SALE DATE NOT AVAILABLE"}
-        </div>
+       <div className="aof2-event-meta-row">
+  <div className="aof2-company-date">
+    {auctionDate ||
+      "SALE DATE NOT AVAILABLE"}
+  </div>
 
-        <div className="aof2-company-location">
-          {auctionLocation ||
-            "SALE LOCATION NOT AVAILABLE"}
-        </div>
-      </div>
+  <div className="aof2-company-location">
+    {auctionLocation ||
+      "SALE LOCATION NOT AVAILABLE"}
+  </div>
+</div>
 
       <div className="aof2-plate">
         <div className="aof2-tag">
@@ -778,13 +779,13 @@ export default function IXIAuctionObjectFace2({
           width: 100%;
           max-width: 100%;
 
-          height: 100%;
-min-height: 100%;
-max-height: 100%;
+         height: calc(100% - 16px);
+min-height: 0;
+max-height: none;
 
           position: relative;
 
-          padding: 8px 14px 78px;
+          padding: 8px 14px 10px;
 
           display: flex;
           flex-direction: column;
@@ -967,6 +968,40 @@ max-height: 100%;
           white-space: nowrap;
         }
 
+.aof2-event-meta-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 3px;
+  padding: 0 2px;
+
+  min-width: 0;
+}
+
+.aof2-company-date,
+.aof2-company-location {
+  min-width: 0;
+  margin-top: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aof2-company-date {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.aof2-company-location {
+  flex: 1 1 auto;
+  text-align: right;
+}
         .aof2-company-date {
           margin-top: 2px;
 
