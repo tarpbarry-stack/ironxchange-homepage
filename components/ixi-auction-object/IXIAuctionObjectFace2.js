@@ -23,25 +23,35 @@ function clean(value = "") {
   return String(value || "").trim();
 }
 
-function getAuctionCompanyLogo(
-  listing = {}
-) {
-  const publicData =
-    getPublicData(listing);
+function getAuctionRoot(listing = {}) {
+  const publicData = getPublicData(listing);
 
-  const auction =
+  return (
     listing.auction ||
     listing.auctionData ||
     publicData.auction ||
     publicData.auctionData ||
-    {};
+    {}
+  );
+}
 
-  const event =
+function getAuctionEvent(listing = {}) {
+  const publicData = getPublicData(listing);
+  const auction = getAuctionRoot(listing);
+
+  return (
     auction.event ||
     auction.auctionEvent ||
     listing.auctionEvent ||
     publicData.auctionEvent ||
-    {};
+    {}
+  );
+}
+
+function getAuctionCompanyLogo(listing = {}) {
+  const publicData = getPublicData(listing);
+  const auction = getAuctionRoot(listing);
+  const event = getAuctionEvent(listing);
 
   return clean(
     auction?.company?.logoUrl ||
@@ -56,24 +66,137 @@ function getAuctionCompanyLogo(
   );
 }
 
-function getAuctionId(
-  listing = {}
-) {
-  const publicData =
-    getPublicData(listing);
-
-  const lot =
-    getAuctionLotData(listing);
+/*
+ * Auction event ID.
+ *
+ * This belongs in the auction-company section.
+ */
+function getAuctionEventId(listing = {}) {
+  const publicData = getPublicData(listing);
+  const auction = getAuctionRoot(listing);
+  const event = getAuctionEvent(listing);
 
   return clean(
-    lot?.auctionId ||
+    event?.auctionId ||
+    event?.eventId ||
+    event?.id ||
+    event?.externalId ||
+    event?.saleId ||
+    auction?.eventId ||
+    auction?.saleId ||
+    listing.auctionEventId ||
+    publicData.auctionEventId ||
+    listing.auctionId ||
+    publicData.auctionId
+  );
+}
+
+/*
+ * Machine-specific ID inside the auction system.
+ *
+ * This belongs beside the serial number.
+ */
+function getAuctionMachineId(listing = {}) {
+  const publicData = getPublicData(listing);
+  const lot = getAuctionLotData(listing);
+
+  return clean(
+    lot?.machineAuctionId ||
     lot?.assetId ||
     lot?.itemId ||
     lot?.externalId ||
     lot?.lotId ||
-    listing.auctionId ||
-    publicData.auctionId
+    lot?.auctionId ||
+    listing.auctionMachineId ||
+    publicData.auctionMachineId ||
+    listing.sourceId ||
+    publicData.sourceId
   );
+}
+
+/*
+ * Preserve the complete machine ID.
+ *
+ * Only remove the redundant source prefix because the
+ * auction company is already clearly displayed above.
+ */
+function getDisplayAuctionMachineId(value = "") {
+  return clean(value).replace(/^rbauction-/i, "");
+}
+
+/*
+ * Auction term selectors can return a primitive value,
+ * an array, or an object.
+ *
+ * This extracts the most useful readable value and prevents:
+ *
+ * [object Object]
+ */
+function getFirstMeaningfulValue(value) {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return "";
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return clean(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map(getFirstMeaningfulValue)
+      .filter(Boolean)
+      .join(" • ");
+  }
+
+  if (typeof value === "object") {
+    const preferredKeys = [
+      "display",
+      "displayValue",
+      "formatted",
+      "formattedValue",
+      "label",
+      "text",
+      "value",
+      "amount",
+      "rate",
+      "percentage",
+      "percent",
+      "date",
+      "deadline",
+      "description",
+      "summary"
+    ];
+
+    for (const key of preferredKeys) {
+      const resolved = getFirstMeaningfulValue(
+        value?.[key]
+      );
+
+      if (resolved) {
+        return resolved;
+      }
+    }
+
+    for (const nestedValue of Object.values(value)) {
+      const resolved = getFirstMeaningfulValue(
+        nestedValue
+      );
+
+      if (resolved) {
+        return resolved;
+      }
+    }
+  }
+
+  return "";
 }
 
 function getTermValue(
@@ -82,19 +205,151 @@ function getTermValue(
   fallback = ""
 ) {
   for (const key of keys) {
-    const value =
-      terms?.[key];
+    const value = getFirstMeaningfulValue(
+      terms?.[key]
+    );
 
-    if (
-      value !== undefined &&
-      value !== null &&
-      String(value).trim() !== ""
-    ) {
-      return String(value).trim();
+    if (value) {
+      return value;
     }
   }
 
   return fallback;
+}
+
+function formatMoneyDisplay(value) {
+  const raw = getFirstMeaningfulValue(value);
+
+  if (!raw) {
+    return "NOT AVAILABLE";
+  }
+
+  const normalized = raw.replace(/[$,\s]/g, "");
+
+  if (/^[0-9]+(?:\.[0-9]+)?$/.test(normalized)) {
+    const amount = Number(normalized);
+
+    if (Number.isFinite(amount)) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+  }
+
+  return raw;
+}
+
+function formatAuctionDate(value = "") {
+  const raw = clean(value);
+
+  if (!raw) {
+    return "";
+  }
+
+  const date = new Date(raw);
+
+  if (Number.isNaN(date.getTime())) {
+    return raw.toUpperCase();
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  })
+    .format(date)
+    .toUpperCase();
+}
+
+function normalizeAuctionLocation(value = "") {
+  const raw = clean(value);
+
+  if (!raw) {
+    return "";
+  }
+
+  const stateNames = {
+    AL: "ALABAMA",
+    AK: "ALASKA",
+    AZ: "ARIZONA",
+    AR: "ARKANSAS",
+    CA: "CALIFORNIA",
+    CO: "COLORADO",
+    CT: "CONNECTICUT",
+    DE: "DELAWARE",
+    FL: "FLORIDA",
+    GA: "GEORGIA",
+    HI: "HAWAII",
+    ID: "IDAHO",
+    IL: "ILLINOIS",
+    IN: "INDIANA",
+    IA: "IOWA",
+    KS: "KANSAS",
+    KY: "KENTUCKY",
+    LA: "LOUISIANA",
+    ME: "MAINE",
+    MD: "MARYLAND",
+    MA: "MASSACHUSETTS",
+    MI: "MICHIGAN",
+    MN: "MINNESOTA",
+    MS: "MISSISSIPPI",
+    MO: "MISSOURI",
+    MT: "MONTANA",
+    NE: "NEBRASKA",
+    NV: "NEVADA",
+    NH: "NEW HAMPSHIRE",
+    NJ: "NEW JERSEY",
+    NM: "NEW MEXICO",
+    NY: "NEW YORK",
+    NC: "NORTH CAROLINA",
+    ND: "NORTH DAKOTA",
+    OH: "OHIO",
+    OK: "OKLAHOMA",
+    OR: "OREGON",
+    PA: "PENNSYLVANIA",
+    RI: "RHODE ISLAND",
+    SC: "SOUTH CAROLINA",
+    SD: "SOUTH DAKOTA",
+    TN: "TENNESSEE",
+    TX: "TEXAS",
+    UT: "UTAH",
+    VT: "VERMONT",
+    VA: "VIRGINIA",
+    WA: "WASHINGTON",
+    WV: "WEST VIRGINIA",
+    WI: "WISCONSIN",
+    WY: "WYOMING"
+  };
+
+  const parts = raw
+    .split(",")
+    .map(part => clean(part))
+    .filter(Boolean)
+    .filter(
+      part =>
+        !/^(USA|UNITED STATES|UNITED STATES OF AMERICA)$/i.test(
+          part
+        )
+    );
+
+  if (parts.length >= 2) {
+    const city = parts[0].toUpperCase();
+
+    const stateCode = parts[1]
+      .slice(0, 2)
+      .toUpperCase();
+
+    const state =
+      stateNames[stateCode] ||
+      parts[1].toUpperCase();
+
+    return `${city}, ${state}`;
+  }
+
+  return parts.join(", ").toUpperCase();
 }
 
 export default function IXIAuctionObjectFace2({
@@ -102,18 +357,6 @@ export default function IXIAuctionObjectFace2({
   dragHandleProps,
 
   sellerMode = false,
-
-  auctionCompanyValue,
-  onAuctionCompanyChange,
-
-  auctionDateValue,
-  onAuctionDateChange,
-
-  auctionLocationValue,
-  onAuctionLocationChange,
-
-  auctionIdValue,
-  onAuctionIdChange,
 
   lotNumberValue,
   onLotNumberChange,
@@ -126,35 +369,11 @@ export default function IXIAuctionObjectFace2({
   onOpeningBidChange,
   onOpeningBidKeyDown,
 
-  buyersPremiumValue,
-  onBuyersPremiumChange,
-
-  feesValue,
-  onFeesChange,
-
-  taxRateValue,
-  onTaxRateChange,
-
-  paymentDueDateValue,
-  onPaymentDueDateChange,
-
-  removalDateValue,
-  onRemovalDateChange,
-
-  termsValue,
-  onTermsChange,
-
-  conditionValue,
-  onConditionChange,
-
   auctionAlertsEnabled = false,
   onAuctionAlertClick
 }) {
-  const publicData =
-    getPublicData(listing);
-
-  const auctionTerms =
-    getAuctionTermsData(listing);
+  const publicData = getPublicData(listing);
+  const auctionTerms = getAuctionTermsData(listing);
 
   const passportId =
     listing.passportId ||
@@ -162,34 +381,34 @@ export default function IXIAuctionObjectFace2({
     "";
 
   const auctionCompany =
-    auctionCompanyValue ??
-    getAuctionCompany(listing) ??
-    "";
+    getAuctionCompany(listing) ||
+    "AUCTION COMPANY NOT AVAILABLE";
 
   const auctionCompanyLogo =
     getAuctionCompanyLogo(listing);
 
-  const auctionDate =
-    auctionDateValue ??
-    getAuctionDate(listing) ??
-    "";
+  const auctionEventId =
+    getAuctionEventId(listing) ||
+    "NOT LISTED";
+
+  const auctionDate = formatAuctionDate(
+    getAuctionDate(listing)
+  );
 
   const auctionLocation =
-    auctionLocationValue ??
-    getAuctionEventLocation(
-      listing
-    ) ??
-    "";
+    normalizeAuctionLocation(
+      getAuctionEventLocation(listing)
+    );
 
   const serial =
     listing.serialNumber ||
     publicData.serialNumber ||
     "—";
 
-  const auctionId =
-    auctionIdValue ??
-    getAuctionId(listing) ??
-    "";
+  const auctionMachineId =
+    getDisplayAuctionMachineId(
+      getAuctionMachineId(listing)
+    ) || "—";
 
   const year =
     listing.year ||
@@ -213,171 +432,107 @@ export default function IXIAuctionObjectFace2({
     "";
 
   const currentBid =
-    getAuctionCurrentBid(
-      listing
-    );
+    getAuctionCurrentBid(listing);
 
   const openingBid =
     openingBidValue ??
-    getAuctionOpeningBid(
-      listing
-    );
+    getAuctionOpeningBid(listing);
 
   const displayedBid =
     currentBid ??
     openingBid ??
     "";
 
-  const bidLabel =
+  const hasCurrentBid =
     currentBid !== null &&
     currentBid !== undefined &&
-    currentBid !== ""
-      ? "CURRENT BID"
-      : "OPENING BID";
+    currentBid !== "";
 
-  const buyersPremium =
-    buyersPremiumValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "buyersPremium",
-        "buyerPremium",
-        "buyersPremiumText",
-        "buyerPremiumText"
-      ],
-      "NOT LISTED"
-    );
+  const bidLabel = hasCurrentBid
+    ? "CURRENT BID"
+    : "OPENING BID";
 
-  const fees =
-    feesValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "fees",
-        "feeText",
-        "additionalFees",
-        "internetFee"
-      ],
-      "NOT LISTED"
-    );
-
-  const taxRate =
-    taxRateValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "taxRate",
-        "salesTaxRate",
-        "tax",
-        "taxText"
-      ],
-      "NOT LISTED"
-    );
-
-  const paymentDueDate =
-    paymentDueDateValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "paymentDueDate",
-        "paymentDue",
-        "paymentDeadline",
-        "paymentDeadlineText"
-      ],
-      "NOT LISTED"
-    );
-
-  const removalDate =
-    removalDateValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "removalDate",
-        "machineRemovalDate",
-        "removalDeadline",
-        "pickupDeadline",
-        "removalDeadlineText"
-      ],
-      "NOT LISTED"
-    );
-
-  const paymentTerms =
-    termsValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "paymentTerms",
-        "terms",
-        "termsText",
-        "paymentMethod"
-      ],
-      "NOT LISTED"
-    );
-
-  const condition =
-    conditionValue ??
-    getTermValue(
-      auctionTerms,
-      [
-        "condition",
-        "conditionText",
-        "saleCondition",
-        "asIsWhereIs"
-      ],
-      "AS IS, WHERE IS"
-    );
-
-  const auctionSubtitle =
+  const buyersPremium = getTermValue(
+    auctionTerms,
     [
-      auctionDate,
-      auctionLocation
-    ]
-      .filter(Boolean)
-      .join(" • ");
+      "buyersPremium",
+      "buyerPremium",
+      "buyersPremiumText",
+      "buyerPremiumText"
+    ],
+    "NOT LISTED"
+  );
+
+  const fees = getTermValue(
+    auctionTerms,
+    [
+      "fees",
+      "feeText",
+      "additionalFees",
+      "internetFee"
+    ],
+    "NOT LISTED"
+  );
+
+  const taxRate = getTermValue(
+    auctionTerms,
+    [
+      "taxRate",
+      "salesTaxRate",
+      "tax",
+      "taxText"
+    ],
+    "NOT LISTED"
+  );
+
+  const paymentDueDate = getTermValue(
+    auctionTerms,
+    [
+      "paymentDueDate",
+      "paymentDue",
+      "paymentDeadline",
+      "paymentDeadlineText"
+    ],
+    "NOT LISTED"
+  );
+
+  const removalDate = getTermValue(
+    auctionTerms,
+    [
+      "removalDate",
+      "machineRemovalDate",
+      "removalDeadline",
+      "pickupDeadline",
+      "removalDeadlineText"
+    ],
+    "NOT LISTED"
+  );
+
+  const paymentTerms = getTermValue(
+    auctionTerms,
+    [
+      "paymentTerms",
+      "terms",
+      "termsText",
+      "paymentMethod"
+    ],
+    "NOT LISTED"
+  );
+
+  const condition = getTermValue(
+    auctionTerms,
+    [
+      "condition",
+      "conditionText",
+      "saleCondition",
+      "asIsWhereIs"
+    ],
+    "AS IS, WHERE IS"
+  );
 
   function stopCardClick(event) {
     event.preventDefault();
     event.stopPropagation();
-  }
-
-  function renderEditableField({
-    value,
-    onChange,
-    className = "",
-    placeholder = "",
-    maxLength
-  }) {
-    if (!sellerMode) {
-      return (
-        <div className="aof2-term-value">
-          {value || "NOT LISTED"}
-        </div>
-      );
-    }
-
-    return (
-      <input
-        className={[
-          "aof2-term-input",
-          className
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        value={value || ""}
-        onChange={event =>
-          onChange?.(
-            event.target.value,
-            listing
-          )
-        }
-        onClick={stopCardClick}
-        onPointerDown={event =>
-          event.stopPropagation()
-        }
-        placeholder={placeholder}
-        maxLength={maxLength}
-      />
-    );
   }
 
   return (
@@ -415,85 +570,36 @@ export default function IXIAuctionObjectFace2({
           {auctionCompanyLogo ? (
             <img
               src={auctionCompanyLogo}
-              alt={
-                auctionCompany ||
-                "Auction company"
-              }
+              alt={auctionCompany}
             />
           ) : (
             <div className="aof2-logo-fallback">
-              {auctionCompany ||
-                "AUCTION COMPANY"}
+              {auctionCompany}
             </div>
           )}
         </div>
 
-        {sellerMode ? (
-          <>
-            <input
-              className="aof2-company-input"
-              value={auctionCompany || ""}
-              onChange={event =>
-                onAuctionCompanyChange?.(
-                  event.target.value,
-                  listing
-                )
-              }
-              onClick={stopCardClick}
-              onPointerDown={event =>
-                event.stopPropagation()
-              }
-              placeholder="AUCTION COMPANY"
-            />
+        <strong className="aof2-company-name">
+          {auctionCompany}
+        </strong>
 
-            <div className="aof2-company-meta-edit">
-              <input
-                value={auctionDate || ""}
-                onChange={event =>
-                  onAuctionDateChange?.(
-                    event.target.value,
-                    listing
-                  )
-                }
-                onClick={stopCardClick}
-                onPointerDown={event =>
-                  event.stopPropagation()
-                }
-                placeholder="SALE DATE"
-              />
+        <div className="aof2-event-id-row">
+          <span>AUCTION ID</span>
 
-              <input
-                value={
-                  auctionLocation ||
-                  ""
-                }
-                onChange={event =>
-                  onAuctionLocationChange?.(
-                    event.target.value,
-                    listing
-                  )
-                }
-                onClick={stopCardClick}
-                onPointerDown={event =>
-                  event.stopPropagation()
-                }
-                placeholder="SALE LOCATION"
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <strong className="aof2-company-name">
-              {auctionCompany ||
-                "AUCTION COMPANY NOT AVAILABLE"}
-            </strong>
+          <strong>
+            {auctionEventId}
+          </strong>
+        </div>
 
-            <span className="aof2-company-meta">
-              {auctionSubtitle ||
-                "SALE DATE AND LOCATION NOT AVAILABLE"}
-            </span>
-          </>
-        )}
+        <div className="aof2-company-date">
+          {auctionDate ||
+            "SALE DATE NOT AVAILABLE"}
+        </div>
+
+        <div className="aof2-company-location">
+          {auctionLocation ||
+            "SALE LOCATION NOT AVAILABLE"}
+        </div>
       </div>
 
       <div className="aof2-plate">
@@ -507,50 +613,24 @@ export default function IXIAuctionObjectFace2({
           </div>
         </div>
 
-        <div className="aof2-tag">
+        <div className="aof2-tag aof2-machine-id-tag">
           <div className="aof2-tag-label">
-            AUCTION ID
+            AUCTION MACHINE ID
           </div>
 
-          {sellerMode ? (
-            <input
-              className="aof2-auction-id-input"
-              value={auctionId || ""}
-              onChange={event =>
-                onAuctionIdChange?.(
-                  event.target.value,
-                  listing
-                )
-              }
-              onClick={stopCardClick}
-              onPointerDown={event =>
-                event.stopPropagation()
-              }
-              placeholder="AUCTION ID"
-            />
-          ) : (
-            <div className="aof2-tag-value">
-              {auctionId || "—"}
-            </div>
-          )}
+          <div className="aof2-machine-id-value">
+            {auctionMachineId}
+          </div>
         </div>
       </div>
 
       <IXIAuctionDeadlineRail
         listing={listing}
         sellerMode={sellerMode}
-        lotNumberValue={
-          lotNumberValue
-        }
-        onLotNumberChange={
-          onLotNumberChange
-        }
-        alertsEnabled={
-          auctionAlertsEnabled
-        }
-        onAlertClick={
-          onAuctionAlertClick
-        }
+        lotNumberValue={lotNumberValue}
+        onLotNumberChange={onLotNumberChange}
+        alertsEnabled={auctionAlertsEnabled}
+        onAlertClick={onAuctionAlertClick}
       />
 
       <div className="aof2-title-row">
@@ -571,9 +651,9 @@ export default function IXIAuctionObjectFace2({
               )
             }
             onClick={stopCardClick}
-            onPointerDown={event =>
-              event.stopPropagation()
-            }
+            onPointerDown={event => {
+              event.stopPropagation();
+            }}
             onKeyDown={event =>
               onHoursKeyDown?.(
                 event,
@@ -598,12 +678,7 @@ export default function IXIAuctionObjectFace2({
           {bidLabel}
         </span>
 
-        {sellerMode &&
-        (
-          currentBid === null ||
-          currentBid === undefined ||
-          currentBid === ""
-        ) ? (
+        {sellerMode && !hasCurrentBid ? (
           <input
             className="aof2-bid-input"
             value={openingBid || ""}
@@ -614,9 +689,9 @@ export default function IXIAuctionObjectFace2({
               )
             }
             onClick={stopCardClick}
-            onPointerDown={event =>
-              event.stopPropagation()
-            }
+            onPointerDown={event => {
+              event.stopPropagation();
+            }}
             onKeyDown={event =>
               onOpeningBidKeyDown?.(
                 event,
@@ -628,8 +703,7 @@ export default function IXIAuctionObjectFace2({
           />
         ) : (
           <strong className="aof2-bid-value">
-            {displayedBid ||
-              "NOT AVAILABLE"}
+            {formatMoneyDisplay(displayedBid)}
           </strong>
         )}
       </div>
@@ -640,79 +714,59 @@ export default function IXIAuctionObjectFace2({
             BUYER&apos;S PREMIUM
           </span>
 
-          {renderEditableField({
-            value: buyersPremium,
-            onChange:
-              onBuyersPremiumChange,
-            placeholder:
-              "BUYER'S PREMIUM"
-          })}
+          <strong>
+            {buyersPremium}
+          </strong>
         </div>
 
         <div className="aof2-term">
           <span>FEES</span>
 
-          {renderEditableField({
-            value: fees,
-            onChange: onFeesChange,
-            placeholder: "FEES"
-          })}
+          <strong>
+            {fees}
+          </strong>
         </div>
 
         <div className="aof2-term">
           <span>TAX RATE</span>
 
-          {renderEditableField({
-            value: taxRate,
-            onChange: onTaxRateChange,
-            placeholder: "TAX RATE"
-          })}
+          <strong>
+            {taxRate}
+          </strong>
         </div>
 
         <div className="aof2-term">
-          <span>PAYMENT DUE</span>
+          <span>PAYMENT DUE DATE</span>
 
-          {renderEditableField({
-            value: paymentDueDate,
-            onChange:
-              onPaymentDueDateChange,
-            placeholder:
-              "PAYMENT DUE"
-          })}
-        </div>
-
-        <div className="aof2-term">
-          <span>MACHINE REMOVAL</span>
-
-          {renderEditableField({
-            value: removalDate,
-            onChange:
-              onRemovalDateChange,
-            placeholder:
-              "REMOVAL DATE"
-          })}
+          <strong>
+            {paymentDueDate}
+          </strong>
         </div>
 
         <div className="aof2-term aof2-term-wide">
-          <span>TERMS</span>
+          <span>
+            MACHINE REMOVAL DATE
+          </span>
 
-          {renderEditableField({
-            value: paymentTerms,
-            onChange: onTermsChange,
-            placeholder: "TERMS"
-          })}
+          <strong>
+            {removalDate}
+          </strong>
+        </div>
+      </div>
+
+      <div className="aof2-basic-terms">
+        <div className="aof2-basic-terms-title">
+          BASIC TERMS &amp; CONDITIONS
         </div>
 
-        <div className="aof2-term aof2-term-wide">
-          <span>CONDITION</span>
+        <div className="aof2-basic-terms-lines">
+          <span>
+            {condition}
+          </span>
 
-          {renderEditableField({
-            value: condition,
-            onChange:
-              onConditionChange,
-            placeholder:
-              "AS IS, WHERE IS"
-          })}
+          <span>
+            {paymentTerms}
+          </span>
         </div>
       </div>
 
@@ -723,7 +777,6 @@ export default function IXIAuctionObjectFace2({
       <style jsx>{`
         .aof2 {
           box-sizing: border-box;
-
           width: 100%;
           max-width: 100%;
 
@@ -733,7 +786,7 @@ export default function IXIAuctionObjectFace2({
 
           position: relative;
 
-          padding: 10px 14px 30px;
+          padding: 8px 14px 60px;
 
           display: flex;
           flex-direction: column;
@@ -752,7 +805,6 @@ export default function IXIAuctionObjectFace2({
             #141414;
 
           color: #f2f2f2;
-
           overflow: hidden;
         }
 
@@ -765,29 +817,17 @@ export default function IXIAuctionObjectFace2({
 
           gap: 12px;
 
-          margin: 0 0 6px;
-          padding: 0 1px 5px;
+          margin: 0 0 4px;
+          padding: 0 1px 4px;
 
           border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .055
-            );
+            1px solid rgba(255, 255, 255, .055);
         }
 
         .aof2-passport-label {
           min-width: 0;
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .32
-            );
+          color: rgba(255, 255, 255, .32);
 
           font-size: 6.5px;
           font-weight: 950;
@@ -801,13 +841,7 @@ export default function IXIAuctionObjectFace2({
         .aof2-passport-id {
           min-width: 0;
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .68
-            );
+          color: rgba(255, 255, 255, .68);
 
           font-size: 8px;
           font-weight: 950;
@@ -832,263 +866,222 @@ export default function IXIAuctionObjectFace2({
 
         .aof2-company-block {
           width: 100%;
-          min-height: 48px;
+          min-height: 63px;
 
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
 
-          margin-bottom: 6px;
+          margin-bottom: 4px;
 
           text-align: center;
         }
 
         .aof2-logo-wrap {
-          height: 22px;
+          min-height: 15px;
 
           display: flex;
           align-items: center;
           justify-content: center;
 
-          margin-bottom: 2px;
+          margin-bottom: 1px;
         }
 
         .aof2-logo-wrap img {
-          max-height: 21px;
+          max-height: 16px;
           max-width: 145px;
 
           object-fit: contain;
         }
 
         .aof2-logo-fallback {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .80
-            );
+          color: rgba(255, 255, 255, .86);
 
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 950;
-          letter-spacing: .65px;
+          letter-spacing: .55px;
 
           text-transform: uppercase;
         }
 
         .aof2-company-name {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .82
-            );
+          color: rgba(255, 255, 255, .88);
 
-          font-size: 9.5px;
+          font-size: 9px;
           font-weight: 950;
           letter-spacing: .42px;
 
           text-transform: uppercase;
         }
 
-        .aof2-company-meta {
-          max-width: 100%;
-
-          margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .42
-            );
-
-          font-size: 7.4px;
-          font-weight: 850;
-          letter-spacing: .30px;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        .aof2-company-input {
-          width: 190px;
-          height: 20px;
-
-          margin-bottom: 3px;
-
-          text-align: center;
-        }
-
-        .aof2-company-meta-edit {
-          width: 100%;
-
-          display: grid;
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 5px;
-        }
-
-        .aof2-company-input,
-        .aof2-company-meta-edit input,
-        .aof2-auction-id-input,
-        .aof2-hours-input,
-        .aof2-bid-input,
-        .aof2-term-input {
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .12
-            );
-
-          border-radius: 5px;
-
-          background:
-            rgba(
-              8,
-              8,
-              8,
-              .78
-            );
-
-          color: #f2f2f2;
-
-          padding: 0 6px;
-
-          font-size: 8px;
-          font-weight: 900;
-
-          outline: none;
-        }
-
-        .aof2-company-meta-edit input {
-          min-width: 0;
-          height: 19px;
-
-          text-align: center;
-        }
-
-        .aof2-plate {
-          width: 100%;
-          min-height: 42px;
-
-          padding: 6px 10px;
-          margin-bottom: 5px;
+        .aof2-event-id-row {
+          width: min(100%, 330px);
+          min-height: 16px;
 
           display: flex;
           align-items: center;
           justify-content: center;
 
-          gap: 26px;
+          gap: 6px;
+
+          margin-top: 2px;
+          padding: 2px 6px;
 
           border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .12
-            );
+            1px solid rgba(255, 255, 255, .075);
 
-          border-radius: 5px;
+          border-radius: 4px;
 
-          background:
-            linear-gradient(
-              90deg,
-              rgba(
-                255,
-                255,
-                255,
-                .10
-              ),
-              rgba(
-                255,
-                255,
-                255,
-                .025
-              )
-            ),
-            #1b1b1b;
+          background: rgba(8, 8, 8, .42);
 
-          box-shadow:
-            inset 0 1px 0
-            rgba(
-              255,
-              255,
-              255,
-              .12
-            ),
-            inset 0 -1px 0
-            rgba(
-              0,
-              0,
-              0,
-              .38
-            );
+          overflow: hidden;
         }
 
-        .aof2-tag {
-          flex: 1;
-          min-width: 0;
+        .aof2-event-id-row span {
+          flex: 0 0 auto;
 
-          text-align: center;
-        }
+          color: rgba(255, 255, 255, .32);
 
-        .aof2-tag-label {
-          margin-bottom: 4px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .48
-            );
-
-          font-size: 7px;
+          font-size: 6px;
           font-weight: 950;
-          letter-spacing: .18em;
+          letter-spacing: .52px;
 
           text-transform: uppercase;
         }
 
-        .aof2-tag-value {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .94
-            );
+        .aof2-event-id-row strong {
+          min-width: 0;
+
+          color: rgba(255, 255, 255, .74);
 
           font-family:
             "Roboto Condensed",
             "Arial Narrow",
             sans-serif;
 
-          font-size: 11px;
+          font-size: 7px;
           font-weight: 950;
-          letter-spacing: .12em;
+          letter-spacing: .16px;
 
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .aof2-auction-id-input {
-          width: 100%;
-          height: 20px;
+        .aof2-company-date {
+          margin-top: 2px;
 
-          text-align: center;
+          color: rgba(255, 255, 255, .58);
+
+          font-size: 7px;
+          font-weight: 950;
+          letter-spacing: .42px;
+
+          text-transform: uppercase;
+        }
+
+        .aof2-company-location {
+          margin-top: 1px;
+
+          color: rgba(255, 255, 255, .38);
+
+          font-size: 6.8px;
+          font-weight: 900;
+          letter-spacing: .34px;
+
+          text-transform: uppercase;
+        }
+
+        .aof2-plate {
+          width: 100%;
+          min-height: 39px;
+
+          padding: 5px 7px;
+          margin-bottom: 4px;
+
+          display: grid;
+          grid-template-columns:
+            minmax(0, .88fr)
+            minmax(0, 1.12fr);
+
+          align-items: center;
+
+          gap: 8px;
+
+          border:
+            1px solid rgba(255, 255, 255, .12);
+
+          border-radius: 5px;
+
+          background:
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, .10),
+              rgba(255, 255, 255, .025)
+            ),
+            #1b1b1b;
+
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .12),
+            inset 0 -1px 0 rgba(0, 0, 0, .38);
+        }
+
+        .aof2-tag {
+          min-width: 0;
+          text-align: left;
+        }
+
+        .aof2-tag-label {
+          margin-bottom: 3px;
+
+          color: rgba(255, 255, 255, .44);
+
+          font-size: 6.3px;
+          font-weight: 950;
+          letter-spacing: .14em;
+
+          text-transform: uppercase;
+        }
+
+        .aof2-tag-value {
+          color: rgba(255, 255, 255, .94);
+
+          font-family:
+            "Roboto Condensed",
+            "Arial Narrow",
+            sans-serif;
+
+          font-size: 9.5px;
+          font-weight: 950;
+          letter-spacing: .07em;
+
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .aof2-machine-id-tag {
+          text-align: left;
+        }
+
+        .aof2-machine-id-value {
+          width: 100%;
+
+          color: rgba(255, 255, 255, .88);
+
+          font-family:
+            "Roboto Condensed",
+            "Arial Narrow",
+            sans-serif;
+
+          font-size: 6.6px;
+          font-weight: 950;
+          line-height: 1.12;
+          letter-spacing: .02em;
+
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .aof2-title-row {
@@ -1096,12 +1089,11 @@ export default function IXIAuctionObjectFace2({
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 10px;
 
-          margin-top: 1px;
+          margin-top: 0;
         }
 
         .aof2-title-row h2 {
@@ -1112,7 +1104,7 @@ export default function IXIAuctionObjectFace2({
 
           color: #f2f2f2;
 
-          font-size: 13px;
+          font-size: 12.5px;
           font-weight: 950;
           line-height: 1.05;
           letter-spacing: -.15px;
@@ -1125,19 +1117,32 @@ export default function IXIAuctionObjectFace2({
         }
 
         .aof2-hours {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .52
-            );
+          color: rgba(255, 255, 255, .52);
 
           font-size: 10px;
           font-weight: 850;
           letter-spacing: .38px;
 
           white-space: nowrap;
+        }
+
+        .aof2-hours-input,
+        .aof2-bid-input {
+          border:
+            1px solid rgba(255, 255, 255, .12);
+
+          border-radius: 5px;
+
+          background: rgba(8, 8, 8, .78);
+
+          color: #f2f2f2;
+
+          padding: 0 6px;
+
+          font-size: 8px;
+          font-weight: 900;
+
+          outline: none;
         }
 
         .aof2-hours-input {
@@ -1149,45 +1154,26 @@ export default function IXIAuctionObjectFace2({
 
         .aof2-bid-row {
           width: 100%;
-          min-height: 33px;
+          min-height: 30px;
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 10px;
 
-          margin-top: 4px;
-          padding: 5px 0;
+          margin-top: 3px;
+          padding: 4px 0;
 
           border-top:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .055
-            );
+            1px solid rgba(255, 255, 255, .055);
 
           border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .055
-            );
+            1px solid rgba(255, 255, 255, .055);
         }
 
         .aof2-bid-label {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .38
-            );
+          color: rgba(255, 255, 255, .38);
 
           font-size: 7.2px;
           font-weight: 950;
@@ -1199,7 +1185,7 @@ export default function IXIAuctionObjectFace2({
         .aof2-bid-value {
           color: #ffc400;
 
-          font-size: 17px;
+          font-size: 16px;
           font-weight: 950;
           letter-spacing: -.20px;
 
@@ -1217,73 +1203,57 @@ export default function IXIAuctionObjectFace2({
 
         .aof2-terms-grid {
           width: 100%;
-          flex: 1;
-          min-height: 0;
 
           display: grid;
-          grid-template-columns:
-            1fr 1fr;
+          grid-template-columns: 1fr 1fr;
 
           align-content: start;
 
-          gap: 4px 7px;
+          gap: 4px 10px;
 
-          padding-top: 6px;
-
-          overflow: hidden;
+          padding-top: 5px;
         }
 
         .aof2-term {
           min-width: 0;
 
-          display: grid;
-          grid-template-columns:
-            minmax(58px, auto)
-            minmax(0, 1fr);
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
 
-          align-items: center;
+          gap: 7px;
 
-          gap: 5px;
+          padding-bottom: 2px;
+
+          border-bottom:
+            1px solid rgba(255, 255, 255, .035);
         }
 
         .aof2-term-wide {
           grid-column: 1 / -1;
-
-          grid-template-columns:
-            76px minmax(0, 1fr);
         }
 
-        .aof2-term > span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .32
-            );
+        .aof2-term span {
+          flex: 0 0 auto;
 
-          font-size: 6.5px;
+          color: rgba(255, 255, 255, .30);
+
+          font-size: 6px;
           font-weight: 950;
-          letter-spacing: .42px;
+          letter-spacing: .34px;
 
           text-transform: uppercase;
           white-space: nowrap;
         }
 
-        .aof2-term-value {
+        .aof2-term strong {
           min-width: 0;
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .69
-            );
+          color: rgba(255, 255, 255, .70);
 
-          font-size: 7.4px;
-          font-weight: 850;
-          letter-spacing: .15px;
+          font-size: 6.8px;
+          font-weight: 900;
+          letter-spacing: .10px;
 
           overflow: hidden;
           text-align: right;
@@ -1292,72 +1262,121 @@ export default function IXIAuctionObjectFace2({
           white-space: nowrap;
         }
 
-        .aof2-term-input {
+        .aof2-basic-terms {
           width: 100%;
-          min-width: 0;
-          height: 20px;
 
-          text-align: right;
+          margin-top: 4px;
+          padding: 4px 7px;
+
+          border:
+            1px solid rgba(255, 196, 0, .10);
+
+          border-radius: 5px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255, 196, 0, .028),
+              rgba(255, 196, 0, 0)
+            ),
+            rgba(8, 8, 8, .34);
         }
 
-        .aof2-company-input:focus,
-        .aof2-company-meta-edit input:focus,
-        .aof2-auction-id-input:focus,
+        .aof2-basic-terms-title {
+          color: rgba(255, 196, 0, .76);
+
+          font-size: 6.2px;
+          font-weight: 950;
+          letter-spacing: .56px;
+
+          text-transform: uppercase;
+        }
+
+        .aof2-basic-terms-lines {
+          min-width: 0;
+
+          display: flex;
+          align-items: center;
+
+          gap: 6px;
+
+          margin-top: 2px;
+
+          overflow: hidden;
+        }
+
+        .aof2-basic-terms-lines span {
+          min-width: 0;
+
+          color: rgba(255, 255, 255, .58);
+
+          font-size: 6.4px;
+          font-weight: 850;
+          letter-spacing: .08px;
+
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .aof2-basic-terms-lines span + span::before {
+          content: "•";
+
+          margin-right: 6px;
+
+          color: rgba(255, 196, 0, .42);
+        }
+
         .aof2-hours-input:focus,
-        .aof2-bid-input:focus,
-        .aof2-term-input:focus {
+        .aof2-bid-input:focus {
           border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .48
-            );
+            rgba(255, 196, 0, .48);
 
           box-shadow:
-            0 0 0 1px
-            rgba(
-              255,
-              196,
-              0,
-              .08
-            );
+            0 0 0 1px rgba(255, 196, 0, .08);
         }
 
         .aof2-actions-footer {
           position: absolute;
+
           left: 14px;
           right: 14px;
-          bottom: 5px;
+          bottom: 20px;
 
-          min-height: 22px;
+          height: 36px;
+          min-height: 36px;
 
           display: flex;
           align-items: center;
           justify-content: center;
 
+          padding-top: 7px;
+
           border-top:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .055
-            );
+            1px solid rgba(255, 255, 255, .065);
 
           background:
             linear-gradient(
               180deg,
-              rgba(
-                20,
-                20,
-                20,
-                0
-              ),
-              #141414 28%
+              rgba(20, 20, 20, 0),
+              #141414 24%
             );
+        }
 
-          padding-top: 4px;
+        .aof2-actions-footer :global(.mof-actions) {
+          position: static;
+          top: auto;
+
+          width: 100%;
+
+          margin-top: 0;
+
+          gap: 10px;
+        }
+
+        .aof2-actions-footer :global(.mof-actions button) {
+          height: 26px;
         }
       `}</style>
     </section>
