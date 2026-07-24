@@ -5,7 +5,8 @@ import {
   getAuctionEventLocation,
   getAuctionEventName,
   getAuctionFormat,
-  getAuctionParticipation
+  getAuctionParticipation,
+  getAuctionTime
 } from "./auctionObjectSelectors";
 
 export default function IXIAuctionFacts({
@@ -32,6 +33,16 @@ export default function IXIAuctionFacts({
 
   const auctionDate =
     getAuctionDate(listing);
+
+  const auctionTime =
+  getAuctionTime(listing);
+
+  const auctionDateTimeLine = [
+  auctionDate,
+  auctionTime
+]
+  .filter(Boolean)
+  .join(" • ");
 
   const auctionTypeLine = [
     formatAuctionLabel(
@@ -66,10 +77,10 @@ export default function IXIAuctionFacts({
           "EVENT LOCATION NOT AVAILABLE"}
       </span>
 
-      <span className="auction-date">
-        {auctionDate ||
-          "SALE DATE NOT AVAILABLE"}
-      </span>
+     <span className="auction-date">
+  {auctionDateTimeLine ||
+    "SALE DATE NOT AVAILABLE"}
+</span>
 
       <style jsx>{`
         .auction-facts {
