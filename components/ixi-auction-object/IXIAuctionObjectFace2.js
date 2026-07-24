@@ -773,38 +773,38 @@ export default function IXIAuctionObjectFace2({
       </div>
 
       <style jsx>{`
-        .aof2 {
-          box-sizing: border-box;
-          width: 100%;
-          max-width: 100%;
+       .aof2 {
+  box-sizing: border-box;
 
-         height: calc(100% - 16px);
-min-height: 0;
-max-height: none;
+  width: 100%;
+  max-width: 100%;
 
-          position: relative;
+  height: calc(100% - 16px);
+  min-height: 0;
 
-          padding: 8px 14px 10px;
+  position: relative;
 
-          display: flex;
-          flex-direction: column;
+  padding: 8px 14px 8px;
 
-          background:
-            radial-gradient(
-              circle at top,
-              rgba(255, 196, 0, .05),
-              transparent 42%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(255, 255, 255, .028),
-              rgba(255, 255, 255, 0)
-            ),
-            #141414;
+  display: flex;
+  flex-direction: column;
 
-          color: #f2f2f2;
-          overflow: hidden;
-        }
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255,196,0,.05),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,0)
+    ),
+    #141414;
+
+  color: #f2f2f2;
+  overflow: hidden;
+}
 
         .aof2-passport-wrap {
           width: 100%;
@@ -914,27 +914,24 @@ max-height: none;
         }
 
         .aof2-event-id-row {
-          width: min(100%, 330px);
-          min-height: 16px;
+  width: 100%;
+  min-width: 0;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-          gap: 6px;
+  gap: 5px;
 
-          margin-top: 2px;
-          padding: 2px 6px;
+  margin-top: 2px;
+  padding: 0;
 
-          border:
-            1px solid rgba(255, 255, 255, .075);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 
-          border-radius: 4px;
-
-          background: rgba(8, 8, 8, .42);
-
-          overflow: hidden;
-        }
+  overflow: hidden;
+}
 
         .aof2-event-id-row span {
           flex: 0 0 auto;
@@ -949,23 +946,23 @@ max-height: none;
         }
 
         .aof2-event-id-row strong {
-          min-width: 0;
+  min-width: 0;
 
-          color: rgba(255, 255, 255, .74);
+  color: rgba(255,255,255,.48);
 
-          font-family:
-            "Roboto Condensed",
-            "Arial Narrow",
-            sans-serif;
+  font-family:
+    "Roboto Condensed",
+    "Arial Narrow",
+    sans-serif;
 
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: .16px;
+  font-size: 6.8px;
+  font-weight: 850;
+  letter-spacing: .12px;
 
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .aof2-event-meta-row {
   width: 100%;
@@ -1026,38 +1023,28 @@ max-height: none;
         }
 
         .aof2-plate {
-          width: 100%;
-          min-height: 39px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
 
-          padding: 5px 7px;
-          margin-bottom: 4px;
+  padding: 4px 1px 5px;
+  margin: 0 0 3px;
 
-          display: grid;
-          grid-template-columns:
-            minmax(0, .88fr)
-            minmax(0, 1.12fr);
+  display: grid;
+  grid-template-columns:
+    minmax(0, .9fr)
+    minmax(0, 1.1fr);
 
-          align-items: center;
+  align-items: end;
+  gap: 10px;
 
-          gap: 8px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  border-radius: 0;
 
-          border:
-            1px solid rgba(255, 255, 255, .12);
-
-          border-radius: 5px;
-
-          background:
-            linear-gradient(
-              90deg,
-              rgba(255, 255, 255, .10),
-              rgba(255, 255, 255, .025)
-            ),
-            #1b1b1b;
-
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, .12),
-            inset 0 -1px 0 rgba(0, 0, 0, .38);
-        }
+  background: transparent;
+  box-shadow: none;
+}
 
         .aof2-tag {
           min-width: 0;
@@ -1098,23 +1085,28 @@ max-height: none;
         }
 
         .aof2-machine-id-value {
-          width: 100%;
+  width: 100%;
+  min-width: 0;
 
-          color: rgba(255, 255, 255, .88);
+  color: rgba(255,255,255,.58);
 
-          font-family:
-            "Roboto Condensed",
-            "Arial Narrow",
-            sans-serif;
+  font-family:
+    "Roboto Condensed",
+    "Arial Narrow",
+    sans-serif;
 
-          font-size: 6.6px;
-          font-weight: 950;
-          line-height: 1.12;
-          letter-spacing: .02em;
+  font-size: 6.3px;
+  font-weight: 850;
+  line-height: 1.1;
+  letter-spacing: .01em;
 
-          overflow-wrap: anywhere;
-          word-break: break-word;
-        }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  overflow-wrap: normal;
+  word-break: normal;
+}
 
         .aof2-title-row {
           width: 100%;
@@ -1295,34 +1287,28 @@ max-height: none;
         }
 
         .aof2-basic-terms {
-          width: 100%;
+  width: 100%;
+  min-width: 0;
 
-          margin-top: 4px;
-          padding: 4px 7px;
+  margin-top: 3px;
+  padding: 4px 1px 0;
 
-          border:
-            1px solid rgba(255, 196, 0, .10);
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-radius: 0;
 
-          border-radius: 5px;
+  background: transparent;
+}
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255, 196, 0, .028),
-              rgba(255, 196, 0, 0)
-            ),
-            rgba(8, 8, 8, .34);
-        }
+       .aof2-basic-terms-title {
+  color: rgba(255,196,0,.56);
 
-        .aof2-basic-terms-title {
-          color: rgba(255, 196, 0, .76);
+  font-size: 5.9px;
+  font-weight: 950;
+  letter-spacing: .5px;
 
-          font-size: 6.2px;
-          font-weight: 950;
-          letter-spacing: .56px;
-
-          text-transform: uppercase;
-        }
+  text-transform: uppercase;
+}
 
         .aof2-basic-terms-lines {
           min-width: 0;
@@ -1370,35 +1356,22 @@ max-height: none;
         }
 
         .aof2-actions-footer {
-  position: absolute;
+  position: static;
 
-  left: 14px;
-  right: 14px;
-
-  /*
-   * The command rail is 16px tall.
-   * This places the share buttons 20px above it.
-   */
-  bottom: 36px;
-
+  width: 100%;
   height: 34px;
   min-height: 34px;
+
+  margin-top: auto;
+  padding-top: 7px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding-top: 7px;
+  border-top: 1px solid rgba(255,255,255,.065);
 
-  border-top:
-    1px solid rgba(255, 255, 255, .065);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(20, 20, 20, 0),
-      #141414 24%
-    );
+  background: #141414;
 }
 
         .aof2-actions-footer :global(.mof-actions) {
