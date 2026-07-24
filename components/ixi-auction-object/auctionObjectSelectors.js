@@ -23,6 +23,8 @@ export function getAuctionData(listing = {}) {
     getPublicData(listing);
 
   return cleanObject(
+    listing.auctionObject ||
+    publicData.auctionObject ||
     listing.auction ||
     listing.auctionData ||
     publicData.auction ||
@@ -64,11 +66,15 @@ export function getAuctionLotData(
   const auction =
     getAuctionData(listing);
 
+  const machine =
+    getAuctionMachineData(listing);
+
   return cleanObject(
     listing.auctionLot ||
     publicData.auctionLot ||
     auction.lot ||
-    auction.auctionLot
+    auction.auctionLot ||
+    machine
   );
 }
 
@@ -275,10 +281,17 @@ export function getLotNumber(
   const publicData =
     getPublicData(listing);
 
+  const machine =
+    getAuctionMachineData(listing);
+
   const lot =
     getAuctionLotData(listing);
 
   return clean(
+    machine?.lotNumber ||
+    machine?.lotNo ||
+    machine?.lotId ||
+    machine?.lot ||
     lot?.number ||
     lot?.lotNumber ||
     lot?.lotNo ||
@@ -303,7 +316,14 @@ export function getScheduledCloseAt(
   const lot =
     getAuctionLotData(listing);
 
+  const deadlines =
+    auction?.deadlines || {};
+
   return clean(
+    deadlines?.scheduledCloseAt ||
+    deadlines?.closeAt ||
+    deadlines?.closesAt ||
+    deadlines?.endAt ||
     lot?.scheduledCloseAt ||
     lot?.closeAt ||
     lot?.closesAt ||
@@ -324,7 +344,6 @@ export function getScheduledCloseAt(
     publicData.auctionCloseAt
   );
 }
-
 export function getSourceTimezone(
   listing = {}
 ) {
@@ -411,10 +430,15 @@ export function getAuctionOpeningBid(
   const auction =
     getAuctionData(listing);
 
+  const machine =
+    getAuctionMachineData(listing);
+
   const lot =
     getAuctionLotData(listing);
 
   return (
+    machine?.openingBid ??
+    machine?.bidding?.openingBid ??
     lot?.openingBid ??
     lot?.bidding?.openingBid ??
     auction?.openingBid ??
@@ -429,10 +453,15 @@ export function getAuctionCurrentBid(
   const auction =
     getAuctionData(listing);
 
+  const machine =
+    getAuctionMachineData(listing);
+
   const lot =
     getAuctionLotData(listing);
 
   return (
+    machine?.currentBid ??
+    machine?.bidding?.currentBid ??
     lot?.currentBid ??
     lot?.bidding?.currentBid ??
     auction?.currentBid ??
