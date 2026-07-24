@@ -565,7 +565,7 @@ export default function IXIAuctionObjectFace2({
         )}
       </div>
 
-      <div className="aof2-company-block">
+     <div className="aof2-company-block">
   <div className="aof2-logo-wrap">
     {auctionCompanyLogo ? (
       <img
@@ -580,24 +580,23 @@ export default function IXIAuctionObjectFace2({
   </div>
 
   <div className="aof2-event-id-row">
-        
-          <div className="aof2-event-id-row">
-          <span>AUCTION ID</span>
+    <span>AUCTION ID</span>
 
-          <strong>
-            {auctionEventId}
-          </strong>
-        </div>
-
-       <div className="aof2-event-meta-row">
-  <div className="aof2-company-date">
-    {auctionDate ||
-      "SALE DATE NOT AVAILABLE"}
+    <strong>
+      {auctionEventId}
+    </strong>
   </div>
 
-  <div className="aof2-company-location">
-    {auctionLocation ||
-      "SALE LOCATION NOT AVAILABLE"}
+  <div className="aof2-event-meta-row">
+    <div className="aof2-company-date">
+      {auctionDate ||
+        "SALE DATE NOT AVAILABLE"}
+    </div>
+
+    <div className="aof2-company-location">
+      {auctionLocation ||
+        "SALE LOCATION NOT AVAILABLE"}
+    </div>
   </div>
 </div>
 
