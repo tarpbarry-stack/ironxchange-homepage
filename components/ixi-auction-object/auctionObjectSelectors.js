@@ -244,6 +244,31 @@ export function getAuctionDate(
   );
 }
 
+export function getAuctionTime(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const event =
+    getAuctionEventData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
+
+  return clean(
+    event?.timeText ||
+    event?.saleTimeText ||
+    event?.auctionTimeText ||
+    event?.startTimeText ||
+    event?.time ||
+    lot?.saleTimeText ||
+    lot?.timeText ||
+    listing.auctionTime ||
+    publicData.auctionTime
+  );
+}
+
 export function getLotNumber(
   listing = {}
 ) {
