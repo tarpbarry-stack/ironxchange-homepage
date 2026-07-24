@@ -391,10 +391,6 @@ const auctionTerms = getAuctionTermsData(listing);
   const passportId =
     listing.passportId ||
     publicData.passportId ||
-
-  const passportId =
-    listing.passportId ||
-    publicData.passportId ||
     "";
 
   const auctionCompany =
