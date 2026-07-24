@@ -1,4 +1,6 @@
 import {
+  getAuctionCurrentBid,
+  getAuctionOpeningBid,
   getMachineLocation,
   getPublicData,
   splitLocation
@@ -31,11 +33,21 @@ export default function IXIAuctionMachineFooter({
     machineLocation
   );
 
-  const currentPrice =
-    priceValue ??
-    listing.price ??
-    publicData.price ??
-    "";
+  const currentBid =
+  getAuctionCurrentBid(
+    listing
+  );
+
+const openingBid =
+  getAuctionOpeningBid(
+    listing
+  );
+
+const currentPrice =
+  priceValue ??
+  currentBid ??
+  openingBid ??
+  "";
 
   function stopCardClick(event) {
     event.preventDefault();
