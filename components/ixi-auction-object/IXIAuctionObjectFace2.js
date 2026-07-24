@@ -566,8 +566,22 @@ export default function IXIAuctionObjectFace2({
       </div>
 
       <div className="aof2-company-block">
-       https://www.rbauction.com/pdp/2018-cat-926m-wheel-loader/15518062
-        <div className="aof2-event-id-row">
+  <div className="aof2-logo-wrap">
+    {auctionCompanyLogo ? (
+      <img
+        src={auctionCompanyLogo}
+        alt={auctionCompany}
+      />
+    ) : (
+      <strong className="aof2-company-name">
+        {auctionCompany}
+      </strong>
+    )}
+  </div>
+
+  <div className="aof2-event-id-row">
+        
+          <div className="aof2-event-id-row">
           <span>AUCTION ID</span>
 
           <strong>
