@@ -404,3 +404,39 @@ export function formatAuctionLabel(
     .replace(/[_-]+/g, " ")
     .toUpperCase();
 }
+
+export function getAuctionOpeningBid(
+  listing = {}
+) {
+  const auction =
+    getAuctionData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
+
+  return (
+    lot?.openingBid ??
+    lot?.bidding?.openingBid ??
+    auction?.openingBid ??
+    auction?.bidding?.openingBid ??
+    null
+  );
+}
+
+export function getAuctionCurrentBid(
+  listing = {}
+) {
+  const auction =
+    getAuctionData(listing);
+
+  const lot =
+    getAuctionLotData(listing);
+
+  return (
+    lot?.currentBid ??
+    lot?.bidding?.currentBid ??
+    auction?.currentBid ??
+    auction?.bidding?.currentBid ??
+    null
+  );
+}
