@@ -34,9 +34,6 @@ from "./ixi-machine-object/IXIMachineObjectFace4";
 import IXIAuctionObjectFace1
 from "./ixi-auction-object/IXIAuctionObjectFace1";
 
-import IXIAuctionObjectFace2
-from "./ixi-auction-object/IXIAuctionObjectFace2";
-
 import {
   getFrameClass,
   getFrameStyle
@@ -440,33 +437,15 @@ function handlePhotoLoad(e, photoUrl) {
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
-  isAuctionObject ? (
-    <IXIAuctionObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      openingBidValue={priceValue}
-      onOpeningBidChange={onPriceChange}
-      onOpeningBidKeyDown={onPriceKeyDown}
-    />
-  ) : sellerMode ? (
-    <IXISellerMachineObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
-      descriptionValue={descriptionValue}
-      onDescriptionChange={onDescriptionChange}
-      onDescriptionKeyDown={onDescriptionKeyDown}
-      savingDescription={savingDescription}
-    />
+  sellerMode ? (
+<IXISellerMachineObjectFace2
+  listing={listing}
+  dragHandleProps={dragHandleProps}
+  descriptionValue={descriptionValue}
+  onDescriptionChange={onDescriptionChange}
+  onDescriptionKeyDown={onDescriptionKeyDown}
+  savingDescription={savingDescription}
+/>
   ) : (
     <IXIMachineObjectFace2
       listing={listing}
