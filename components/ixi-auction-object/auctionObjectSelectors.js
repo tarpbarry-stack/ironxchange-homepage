@@ -53,6 +53,23 @@ export function getAuctionEventData(
   );
 }
 
+export function getAuctionMachineData(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
+
+  const auction =
+    getAuctionData(listing);
+
+  return cleanObject(
+    auction.machine ||
+    auction.asset ||
+    listing.auctionMachine ||
+    publicData.auctionMachine
+  );
+}
+
 /*
  * Auction lot may be nested inside the canonical
  * auction object or supplied as a separate object.
