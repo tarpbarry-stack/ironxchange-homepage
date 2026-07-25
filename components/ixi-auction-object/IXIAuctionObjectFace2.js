@@ -501,6 +501,31 @@ const removalRuleData =
   auctionRoot?.removal ||
   {};
 
+const specialFees =
+  Array.isArray(
+    auctionTerms?.specialFees
+  )
+    ? auctionTerms.specialFees
+    : [];
+
+const interestFee =
+  specialFees.find(
+    fee =>
+      clean(
+        fee?.type
+      ).toLowerCase() ===
+      "interest"
+  ) || {};
+
+const lateFee =
+  specialFees.find(
+    fee =>
+      clean(
+        fee?.type
+      ).toLowerCase() ===
+      "late_fee"
+  ) || {};
+  
   const passportId =
     listing.passportId ||
     publicData.passportId ||
@@ -743,9 +768,23 @@ const paymentDueDate =
   taxRuleData?.rawText,
   paymentRuleData?.rawText,
   removalRuleData?.rawText,
+
+  getFirstMeaningfulValue(
+    auctionTerms?.participationRequirements
+  ),
+
+  getFirstMeaningfulValue(
+    auctionTerms?.specialTerms
+  ),
+
+  getFirstMeaningfulValue(
+    auctionTerms?.fullTermsText
+  ),
+
   getFirstMeaningfulValue(
     auctionTerms?.rawText
   ),
+
   getFirstMeaningfulValue(
     auctionTerms?.termsText
   )
@@ -759,6 +798,12 @@ const basicTerms = [
     auctionTermsRawText
   )
     ? "AS IS, WHERE IS"
+    : "",
+
+  /BIDS? CANNOT BE RETRACTED|BID.{0,40}BINDING|CANNOT BE RETRACTED/.test(
+    auctionTermsRawText
+  )
+    ? "BIDS CANNOT BE RETRACTED"
     : "",
 
   /ALL SALES (?:ARE )?FINAL|FINAL SALE/.test(
@@ -793,6 +838,13 @@ const storageFeePerDay =
 const storageFeePerItem =
   removalRuleData?.storageFeePerItem;
 
+const interestRatePercent =
+  interestFee?.ratePercent == null
+    ? null
+    : Number(
+        interestFee.ratePercent
+      );
+
 const feeLines = [
   internetPremiumRate
     ? `${internetPremiumRate}% INTERNET PREMIUM`
@@ -804,16 +856,29 @@ const feeLines = [
       )} CAP`
     : "",
 
-  storageFeePerDay
-    ? `$${Number(storageFeePerDay).toLocaleString(
-        "en-US"
-      )}/DAY STORAGE`
+  Number.isFinite(
+    interestRatePercent
+  )
+    ? `${interestRatePercent}% ANNUAL INTEREST`
     : "",
 
-  storageFeePerItem
-    ? `$${Number(storageFeePerItem).toLocaleString(
-        "en-US"
-      )}/ITEM STORAGE`
+  storageFeePerDay
+    ? (
+        `$${Number(storageFeePerDay).toLocaleString(
+          "en-US"
+        )}/DAY` +
+        (
+          storageFeePerItem
+            ? " PER ITEM STORAGE"
+            : " STORAGE"
+        )
+      )
+    : "",
+
+  lateFee?.rawText
+    ? clean(
+        lateFee.rawText
+      ).toUpperCase()
     : ""
 ].filter(Boolean);
   
