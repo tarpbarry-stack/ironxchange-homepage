@@ -1066,12 +1066,6 @@ const paymentDueDate =
           text-transform: uppercase;
         }
 
-        const hours =
-  hoursValue ??
-  auctionMachine?.hours ??
-  listing.hours ??
-  publicData.hours ??
-  "";
         .aof2-tag {
           min-width: 0;
           text-align: left;
