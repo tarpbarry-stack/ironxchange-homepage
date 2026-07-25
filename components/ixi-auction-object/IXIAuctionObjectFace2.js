@@ -1067,6 +1067,7 @@ const paymentDueDate =
         }
 
 .aof2-plate {
+  align-self: stretch;
   width: 100%;
 
   display: grid;
@@ -1331,9 +1332,12 @@ const paymentDueDate =
 }
 
         .aof2-basic-terms {
-  width: 100%;
+  align-self: stretch;
 
-  margin-top: 4px;
+  width:100%;
+
+  margin-top:4px;
+  ...
   padding: 4px 7px;
 
   border: 1px solid rgba(255,196,0,.10);
