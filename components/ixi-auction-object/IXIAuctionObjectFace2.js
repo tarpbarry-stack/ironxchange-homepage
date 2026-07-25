@@ -240,7 +240,11 @@ function normalizeBuyerPremiumData(
   value = {}
 ) {
   const buyerPremium =
-    cleanObject(value);
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+      ? value
+      : {};
 
   const existingPurchaseTiers =
     Array.isArray(
