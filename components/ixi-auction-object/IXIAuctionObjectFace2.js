@@ -227,6 +227,84 @@ function getTermValue(
   return fallback;
 }
 
+/*
+ * Normalize buyer-premium tier structures for AOF2.
+ *
+ * Existing purchaseTiers always win. This preserves
+ * Proxibid and every parser already using the shared
+ * frontend contract.
+ *
+ * RB-style `tiers` are fallback-only.
+ */
+function normalizeBuyerPremiumData(
+  value = {}
+) {
+  const buyerPremium =
+    cleanObject(value);
+
+  const existingPurchaseTiers =
+    Array.isArray(
+      buyerPremium.purchaseTiers
+    )
+      ? buyerPremium.purchaseTiers
+      : [];
+
+  if (
+    existingPurchaseTiers.length > 0
+  ) {
+    return buyerPremium;
+  }
+
+  const sourceTiers =
+    Array.isArray(
+      buyerPremium.tiers
+    )
+      ? buyerPremium.tiers
+      : [];
+
+  if (sourceTiers.length === 0) {
+    return buyerPremium;
+  }
+
+  return {
+    ...buyerPremium,
+
+    purchaseTiers:
+      sourceTiers.map(tier => ({
+        minAmount:
+          tier?.minAmount ??
+          tier?.minimumAmount ??
+          0,
+
+        minAmountExclusive:
+          tier?.minAmountExclusive ??
+          null,
+
+        maxAmount:
+          tier?.maxAmount ??
+          tier?.maximumAmount ??
+          null,
+
+        cashCheckWireRatePercent:
+          tier?.cashCheckWireRatePercent ??
+          tier?.ratePercent ??
+          null,
+
+        minimumFee:
+          tier?.minimumFee ??
+          null,
+
+        flatFee:
+          tier?.flatFee ??
+          null,
+
+        rawText:
+          tier?.rawText ??
+          ""
+      }))
+  };
+}
+
 function formatMoneyDisplay(value) {
   const raw = getFirstMeaningfulValue(value);
 
@@ -392,9 +470,13 @@ const auctionTerms = getAuctionTermsData(listing);
   auctionRoot?.auctionRules || {};
 
 const buyerPremiumData =
-  auctionRules.buyerPremium ||
-  auctionRoot?.buyerPremium ||
-  {};
+  normalizeBuyerPremiumData(
+    auctionRules?.buyerPremium ||
+    auctionRoot?.buyerPremium ||
+    auctionTerms?.buyerPremium ||
+    auctionTerms?.buyersPremium ||
+    {}
+  );
 
 const paymentRuleData =
   auctionRules.paymentDue ||
@@ -498,23 +580,120 @@ const model =
     : "OPENING BID";
 
 const buyerPremiumLines =
-  buyerPremiumData.purchaseTiers?.length
-    ? buyerPremiumData.purchaseTiers.map(tier => {
-        const minAmount =
-          Number(tier.minAmount || 0);
+  Array.isArray(
+    buyerPremiumData.purchaseTiers
+  ) &&
+  buyerPremiumData.purchaseTiers.length
+    ? buyerPremiumData.purchaseTiers
+        .map(tier => {
+          const minAmountRaw =
+            tier?.minAmountExclusive ??
+            tier?.minAmount ??
+            0;
 
-        const maxAmount =
-          tier.maxAmount == null
-            ? null
-            : Number(tier.maxAmount);
+          const minAmount =
+            Number(minAmountRaw);
 
-        const range =
-          maxAmount == null
-            ? `$${minAmount.toLocaleString("en-US")}+`
-            : `$${minAmount.toLocaleString("en-US")}–$${maxAmount.toLocaleString("en-US")}`;
+          const maxAmount =
+            tier?.maxAmount == null
+              ? null
+              : Number(
+                  tier.maxAmount
+                );
 
-        return `${range} ${tier.cashCheckWireRatePercent}%`;
-      })
+          const ratePercent =
+            tier?.cashCheckWireRatePercent ==
+            null
+              ? null
+              : Number(
+                  tier.cashCheckWireRatePercent
+                );
+
+          const minimumFee =
+            tier?.minimumFee == null
+              ? null
+              : Number(
+                  tier.minimumFee
+                );
+
+          const flatFee =
+            tier?.flatFee == null
+              ? null
+              : Number(
+                  tier.flatFee
+                );
+
+          const safeMinAmount =
+            Number.isFinite(minAmount)
+              ? minAmount
+              : 0;
+
+          const safeMaxAmount =
+            Number.isFinite(maxAmount)
+              ? maxAmount
+              : null;
+
+          let range = "";
+
+          if (
+            safeMaxAmount !== null &&
+            safeMinAmount <= 0
+          ) {
+            range =
+              `UP TO $${safeMaxAmount.toLocaleString(
+                "en-US"
+              )}`;
+          } else if (
+            safeMaxAmount !== null
+          ) {
+            range =
+              `$${safeMinAmount.toLocaleString(
+                "en-US"
+              )}–$${safeMaxAmount.toLocaleString(
+                "en-US"
+              )}`;
+          } else {
+            range =
+              `OVER $${safeMinAmount.toLocaleString(
+                "en-US"
+              )}`;
+          }
+
+          if (
+            Number.isFinite(flatFee)
+          ) {
+            return (
+              `${range} — ` +
+              `$${flatFee.toLocaleString(
+                "en-US"
+              )} FLAT`
+            );
+          }
+
+          if (
+            Number.isFinite(ratePercent)
+          ) {
+            const minimumText =
+              Number.isFinite(minimumFee)
+                ? (
+                    ` — $${minimumFee.toLocaleString(
+                      "en-US"
+                    )} MINIMUM`
+                  )
+                : "";
+
+            return (
+              `${range} — ` +
+              `${ratePercent}%` +
+              minimumText
+            );
+          }
+
+          return clean(
+            tier?.rawText
+          );
+        })
+        .filter(Boolean)
     : [];
 
   const fees = getTermValue(
