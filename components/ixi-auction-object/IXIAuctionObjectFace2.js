@@ -1070,9 +1070,13 @@ const paymentDueDate =
   width: 100%;
 
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    minmax(0,1fr)
+    minmax(0,1fr);
 
   gap: 12px;
+  
+  overflow: hidden;
 
   margin: 2px 0 6px;
   padding: 8px 10px;
@@ -1268,32 +1272,32 @@ const paymentDueDate =
         }
 
         .aof2-terms-grid {
-          width: 100%;
+  width: 100%;
 
-          display: grid;
-          grid-template-columns: 1fr 1fr;
+  display: grid;
 
-          align-content: start;
+  grid-template-columns:
+    minmax(0,1fr)
+    minmax(0,1fr);
 
-          gap: 4px 10px;
+  gap: 6px 10px;
 
-          padding-top: 5px;
-        }
+  overflow: hidden;
+}
 
         .aof2-term {
-          min-width: 0;
+  min-width: 0;
 
-          display: flex;
-          align-items: baseline;
-          justify-content: space-between;
+  display: flex;
 
-          gap: 7px;
+  justify-content: space-between;
 
-          padding-bottom: 2px;
+  align-items: flex-start;
 
-          border-bottom:
-            1px solid rgba(255, 255, 255, .035);
-        }
+  gap: 8px;
+
+  overflow: hidden;
+}
 
         .aof2-term-wide {
           grid-column: 1 / -1;
@@ -1313,20 +1317,18 @@ const paymentDueDate =
         }
 
         .aof2-term strong {
-          min-width: 0;
+  flex: 1;
 
-          color: rgba(255, 255, 255, .70);
+  min-width: 0;
 
-          font-size: 6.8px;
-          font-weight: 900;
-          letter-spacing: .10px;
+  text-align: right;
 
-          overflow: hidden;
-          text-align: right;
-          text-overflow: ellipsis;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
+
+  white-space: normal;
+}
 
         .aof2-basic-terms {
   width: 100%;
