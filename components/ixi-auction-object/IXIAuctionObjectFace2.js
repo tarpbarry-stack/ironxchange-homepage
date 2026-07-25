@@ -24,6 +24,14 @@ function clean(value = "") {
   return String(value || "").trim();
 }
 
+function cleanObject(value) {
+  return value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+    ? value
+    : {};
+}
+
 function getAuctionRoot(listing = {}) {
   const publicData = getPublicData(listing);
 
@@ -240,11 +248,7 @@ function normalizeBuyerPremiumData(
   value = {}
 ) {
   const buyerPremium =
-    value &&
-    typeof value === "object" &&
-    !Array.isArray(value)
-      ? value
-      : {};
+    cleanObject(value);
 
   const existingPurchaseTiers =
     Array.isArray(
