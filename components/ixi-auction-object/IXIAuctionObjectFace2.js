@@ -497,26 +497,25 @@ const model =
     ? "CURRENT BID"
     : "OPENING BID";
 
- const buyersPremium =
+const buyerPremiumLines =
   buyerPremiumData.purchaseTiers?.length
-    ? buyerPremiumData.purchaseTiers
-        .map(tier => {
-          const range =
-            tier.maxAmount == null
-              ? `$${tier.minAmount.toLocaleString()}+`
-              : `$${tier.minAmount.toLocaleString()}-$${tier.maxAmount.toLocaleString()}`;
+    ? buyerPremiumData.purchaseTiers.map(tier => {
+        const minAmount =
+          Number(tier.minAmount || 0);
 
-          return `${range} ${tier.cashCheckWireRatePercent}%`;
-        })
-        .join(" • ")
-    : getTermValue(
-        auctionTerms,
-        [
-          "buyersPremium",
-          "buyerPremium"
-        ],
-        "NOT LISTED"
-      );
+        const maxAmount =
+          tier.maxAmount == null
+            ? null
+            : Number(tier.maxAmount);
+
+        const range =
+          maxAmount == null
+            ? `$${minAmount.toLocaleString("en-US")}+`
+            : `$${minAmount.toLocaleString("en-US")}–$${maxAmount.toLocaleString("en-US")}`;
+
+        return `${range} ${tier.cashCheckWireRatePercent}%`;
+      })
+    : [];
 
   const fees = getTermValue(
     auctionTerms,
@@ -803,15 +802,32 @@ const feeLines = [
       </div>
 
       <div className="aof2-terms-grid">
-        <div className="aof2-term">
-          <span>
-            BUYER&apos;S PREMIUM
-          </span>
+       <div className="aof2-term">
+  <span>
+    BUYER&apos;S PREMIUM
+  </span>
 
-          <strong>
-            {buyersPremium}
-          </strong>
+  {buyerPremiumLines.length ? (
+    <div className="aof2-premium-lines">
+      {buyerPremiumLines.map((line, index) => (
+        <div key={`${line}-${index}`}>
+          {line}
         </div>
+      ))}
+    </div>
+  ) : (
+    <strong>
+      {getTermValue(
+        auctionTerms,
+        [
+          "buyersPremium",
+          "buyerPremium"
+        ],
+        "NOT LISTED"
+      )}
+    </strong>
+  )}
+</div>
 
         <div className="aof2-term">
   <span>FEES</span>
@@ -1411,6 +1427,32 @@ const feeLines = [
 }
 
 .aof2-fee-lines div {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aof2-premium-lines {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  gap: 2px;
+
+  color: rgba(255, 255, 255, .62);
+
+  font-size: 6.4px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: .08px;
+
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.aof2-premium-lines div {
   min-width: 0;
 
   overflow: hidden;
