@@ -388,6 +388,29 @@ const auctionDeadlines = auctionRoot?.deadlines || {};
 const auctionMachine = getAuctionMachineData(listing);
 const auctionTerms = getAuctionTermsData(listing);
 
+  const auctionRules =
+  auctionRoot?.auctionRules || {};
+
+const buyerPremiumData =
+  auctionRules.buyerPremium ||
+  auctionRoot?.buyerPremium ||
+  {};
+
+const paymentRuleData =
+  auctionRules.paymentDue ||
+  auctionRoot?.paymentDue ||
+  {};
+
+const taxRuleData =
+  auctionRules.tax ||
+  auctionRoot?.tax ||
+  {};
+
+const removalRuleData =
+  auctionRules.removal ||
+  auctionRoot?.removal ||
+  {};
+
   const passportId =
     listing.passportId ||
     publicData.passportId ||
@@ -474,16 +497,26 @@ const model =
     ? "CURRENT BID"
     : "OPENING BID";
 
-  const buyersPremium = getTermValue(
-    auctionTerms,
-    [
-      "buyersPremium",
-      "buyerPremium",
-      "buyersPremiumText",
-      "buyerPremiumText"
-    ],
-    "NOT LISTED"
-  );
+ const buyersPremium =
+  buyerPremiumData.purchaseTiers?.length
+    ? buyerPremiumData.purchaseTiers
+        .map(tier => {
+          const range =
+            tier.maxAmount == null
+              ? `$${tier.minAmount.toLocaleString()}+`
+              : `$${tier.minAmount.toLocaleString()}-$${tier.maxAmount.toLocaleString()}`;
+
+          return `${range} ${tier.cashCheckWireRatePercent}%`;
+        })
+        .join(" • ")
+    : getTermValue(
+        auctionTerms,
+        [
+          "buyersPremium",
+          "buyerPremium"
+        ],
+        "NOT LISTED"
+      );
 
   const fees = getTermValue(
     auctionTerms,
@@ -496,51 +529,30 @@ const model =
     "NOT LISTED"
   );
 
-  const taxRate = getTermValue(
-    auctionTerms,
-    [
-      "taxRate",
-      "salesTaxRate",
-      "tax",
-      "taxText"
-    ],
-    "NOT LISTED"
-  );
-
- const paymentDueDate =
-  getFirstMeaningfulValue(
-    auctionDeadlines?.paymentDueDate ||
-    auctionDeadlines?.paymentDue ||
-    auctionDeadlines?.paymentDeadline
-  ) ||
-  getTermValue(
-    auctionTerms,
-    [
-      "paymentDueDate",
-      "paymentDue",
-      "paymentDeadline",
-      "paymentDeadlineText"
-    ],
-    "NOT LISTED"
-  );
-
+ const taxRate =
+  taxRuleData.taxable === true
+    ? "SALES TAX APPLIES"
+    : taxRuleData.taxable === false
+      ? "NO SALES TAX"
+      : "SEE TERMS";
+;
+  
+const paymentDueDate =
+  paymentRuleData.relativeBusinessDays != null
+    ? `${paymentRuleData.relativeBusinessDays} BUSINESS DAYS`
+    : paymentRuleData.dueText ||
+      getFirstMeaningfulValue(
+        auctionDeadlines?.paymentDueDate ||
+        auctionDeadlines?.paymentDue
+      ) ||
+      "NOT LISTED";
+;
+  
   const removalDate =
-  getFirstMeaningfulValue(
-    auctionDeadlines?.removalDate ||
-    auctionDeadlines?.machineRemovalDate ||
-    auctionDeadlines?.removalDeadline ||
-    auctionDeadlines?.pickupDeadline
-  ) ||
-  getTermValue(
-    auctionTerms,
-    [
-      "removalDate",
-      "machineRemovalDate",
-      "removalDeadline",
-      "pickupDeadline",
-      "removalDeadlineText"
-    ],
-    "NOT LISTED"
+  removalRuleData.relativeDays != null
+    ? `${removalRuleData.relativeDays} DAYS`
+    : removalRuleData.deadlineText ||
+      "NOT LISTED";
   );
   const paymentTerms = getTermValue(
     auctionTerms,
