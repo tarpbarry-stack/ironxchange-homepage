@@ -1169,9 +1169,13 @@ const feeLines = [
 }
 
         .aof2-tag {
-          min-width: 0;
-          text-align: left;
-        }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
 
         .aof2-tag-label {
   margin-bottom: 4px;
@@ -1359,9 +1363,12 @@ margin-top: 5px;
         .aof2-term {
   min-width: 0;
 
-  display: flex;
+   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+
+  text-align: center;
 
   gap: 7px;
 
@@ -1414,6 +1421,9 @@ line-height: 1.18;
   width: 100%;
   min-width: 0;
 
+  align-items: center;
+  text-align: center;
+
   display: grid;
   gap: 1px;
 
@@ -1439,6 +1449,9 @@ line-height: 1.18;
 .aof2-premium-lines {
   width: 100%;
   min-width: 0;
+
+  align-items: center;
+  text-align: center;
 
   display: grid;
   gap: 2px;
@@ -1467,6 +1480,10 @@ line-height: 1.18;
   min-width: 0;
   min-height: 58px;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
   margin-top: 4px;
   padding: 7px 9px;
 
@@ -1477,6 +1494,8 @@ line-height: 1.18;
        .aof2-basic-terms-title {
   color: rgba(255,196,0,.56);
 
+  text-align: center;
+
   font-size: 8.2px;
   font-weight: 850;
   letter-spacing: .5px;
@@ -1485,9 +1504,12 @@ line-height: 1.18;
 }
 
        .aof2-basic-terms-lines {
+ width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+
+  text-align: center;
 
   gap: 2px;
 
