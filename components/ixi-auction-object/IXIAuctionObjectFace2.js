@@ -1066,66 +1066,88 @@ const paymentDueDate =
           text-transform: uppercase;
         }
 
+.aof2-plate {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+
+  margin: 2px 0 6px;
+  padding: 8px 10px;
+
+  border:
+    1px solid rgba(255, 196, 0, .16);
+
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 196, 0, .035),
+      rgba(255, 196, 0, 0)
+    ),
+    rgba(8, 8, 8, .52);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .035),
+    0 7px 18px rgba(0, 0, 0, .16);
+}
+
         .aof2-tag {
           min-width: 0;
           text-align: left;
         }
 
         .aof2-tag-label {
-          margin-bottom: 3px;
+  margin-bottom: 4px;
 
-          color: rgba(255, 255, 255, .44);
+  color: rgba(255, 255, 255, .48);
 
-          font-size: 6.3px;
-          font-weight: 950;
-          letter-spacing: .14em;
+  font-size: 7.2px;
+  font-weight: 950;
+  letter-spacing: .14em;
 
-          text-transform: uppercase;
-        }
+  text-transform: uppercase;
+}
 
-        .aof2-tag-value {
-          color: rgba(255, 255, 255, .94);
-
-          font-family:
-            "Roboto Condensed",
-            "Arial Narrow",
-            sans-serif;
-
-          font-size: 9.5px;
-          font-weight: 950;
-          letter-spacing: .07em;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .aof2-machine-id-tag {
-          text-align: left;
-        }
-
-       .aof2-machine-id-value {
-  width: 100%;
-  min-width: 0;
-
-  color: rgba(255,255,255,.78);
+.aof2-tag-value {
+  color: rgba(255, 255, 255, .96);
 
   font-family:
     "Roboto Condensed",
     "Arial Narrow",
     sans-serif;
 
-  font-size: 6.4px;
+  font-size: 11px;
   font-weight: 950;
-  line-height: 1.1;
-  letter-spacing: .015em;
+  letter-spacing: .07em;
 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
 
-  overflow-wrap: normal;
-  word-break: normal;
+.aof2-machine-id-value {
+  width: 100%;
+  min-width: 0;
+
+  color: rgba(255, 255, 255, .82);
+
+  font-family:
+    "Roboto Condensed",
+    "Arial Narrow",
+    sans-serif;
+
+  font-size: 8px;
+  font-weight: 950;
+  line-height: 1.15;
+  letter-spacing: .02em;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
         .aof2-title-row {
