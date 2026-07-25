@@ -579,6 +579,42 @@ const paymentDueDate =
     event.stopPropagation();
   }
 
+const internetPremiumRate =
+  buyerPremiumData?.internetAdditional?.ratePercent;
+
+const internetPremiumCap =
+  buyerPremiumData?.internetAdditional?.capAmount;
+
+const storageFeePerDay =
+  removalRuleData?.storageFeePerDay;
+
+const storageFeePerItem =
+  removalRuleData?.storageFeePerItem;
+
+const feeLines = [
+  internetPremiumRate
+    ? `${internetPremiumRate}% INTERNET PREMIUM`
+    : "",
+
+  internetPremiumCap
+    ? `$${Number(internetPremiumCap).toLocaleString(
+        "en-US"
+      )} CAP`
+    : "",
+
+  storageFeePerDay
+    ? `$${Number(storageFeePerDay).toLocaleString(
+        "en-US"
+      )}/DAY STORAGE`
+    : "",
+
+  storageFeePerItem
+    ? `$${Number(storageFeePerItem).toLocaleString(
+        "en-US"
+      )}/ITEM STORAGE`
+    : ""
+].filter(Boolean);
+  
   return (
     <section
       className="aof2"
@@ -762,12 +798,20 @@ const paymentDueDate =
         </div>
 
         <div className="aof2-term">
-          <span>FEES</span>
+  <span>FEES</span>
 
-          <strong>
-            {fees}
-          </strong>
+  {feeLines.length ? (
+    <div className="aof2-fee-lines">
+      {feeLines.map((line, index) => (
+        <div key={`${line}-${index}`}>
+          {line}
         </div>
+      ))}
+    </div>
+  ) : (
+    <strong>NOT LISTED</strong>
+  )}
+</div>
 
         <div className="aof2-term">
           <span>TAX RATE</span>
@@ -1290,12 +1334,10 @@ const paymentDueDate =
   min-width: 0;
 
   display: flex;
-
-  justify-content: space-between;
-
+  flex-direction: column;
   align-items: flex-start;
 
-  gap: 8px;
+  gap: 2px;
 
   overflow: hidden;
 }
@@ -1304,31 +1346,68 @@ const paymentDueDate =
           grid-column: 1 / -1;
         }
 
-        .aof2-term span {
-          flex: 0 0 auto;
+       .aof2-term > span {
+  width: 100%;
 
-          color: rgba(255, 255, 255, .30);
+  color: rgba(255, 255, 255, .3);
 
-          font-size: 6px;
-          font-weight: 950;
-          letter-spacing: .34px;
+  font-size: 6px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .34px;
 
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
-        .aof2-term strong {
-  flex: 1;
-
+       .aof2-term strong {
+  width: 100%;
   min-width: 0;
 
-  text-align: right;
+  display: block;
 
-  overflow-wrap: anywhere;
+  color: rgba(255, 255, 255, .62);
 
-  word-break: break-word;
+  font-size: 6.4px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: .08px;
+
+  overflow: hidden;
+
+  text-align: left;
+  text-transform: uppercase;
 
   white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.aof2-fee-lines {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  gap: 1px;
+
+  color: rgba(255, 255, 255, .62);
+
+  font-size: 6.4px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: .08px;
+
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.aof2-fee-lines div {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
         .aof2-basic-terms {
