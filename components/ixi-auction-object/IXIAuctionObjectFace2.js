@@ -879,6 +879,11 @@ const feeLines = [
       </div>
 
       <style jsx>{`
+.aof2,
+.aof2 * {
+  box-sizing: border-box;
+}
+      
        .aof2 {
   box-sizing: border-box;
 
@@ -1129,31 +1134,22 @@ const feeLines = [
         }
 
 .aof2-plate {
-  box-sizing: border-box;
-
-  align-self: stretch;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
   min-width: 0;
 
   display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
 
-  border:
-    1px solid rgba(255, 196, 0, .16);
+  gap: 12px;
+  overflow: hidden;
 
+  margin: 2px 0 6px;
+  padding: 8px 10px;
+
+  border: 1px solid rgba(255, 196, 0, .16);
   border-radius: 7px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 196, 0, .035),
-      rgba(255, 196, 0, 0)
-    ),
-    rgba(8, 8, 8, .52);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .035),
-    0 7px 18px rgba(0, 0, 0, .16);
 }
 
         .aof2-tag {
@@ -1423,26 +1419,15 @@ const feeLines = [
 }
 
      .aof2-basic-terms {
-  box-sizing: border-box;
-
-  align-self: stretch;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
   min-width: 0;
+  min-height: 58px;
 
   margin-top: 4px;
   padding: 7px 9px;
 
-  border: 1px solid rgba(255,196,0,.10);
+  border: 1px solid rgba(255, 196, 0, .10);
   border-radius: 5px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.028),
-      rgba(255,196,0,0)
-    ),
-    rgba(8,8,8,.34);
 }
 
        .aof2-basic-terms-title {
