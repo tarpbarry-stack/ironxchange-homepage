@@ -1129,6 +1129,7 @@ const feeLines = [
         }
 
 .aof2-plate {
+  box-sizing: border-box;
   align-self: stretch;
   width: 100%;
 
@@ -1428,10 +1429,10 @@ const feeLines = [
   white-space: nowrap;
 }
 
-        .aof2-basic-terms {
+     .aof2-basic-terms {
+  box-sizing: border-box;
   align-self: stretch;
-
-  width:100%;
+  width: 100%;
 
   margin-top:4px;
   
@@ -1459,41 +1460,27 @@ const feeLines = [
   text-transform: uppercase;
 }
 
-        .aof2-basic-terms-lines {
-          min-width: 0;
+       .aof2-basic-terms-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 
-          display: flex;
-          align-items: center;
+  gap: 2px;
 
-          gap: 6px;
+  margin-top: 4px;
+}
 
-          margin-top: 2px;
+       .aof2-basic-terms-lines span {
+  display: block;
 
-          overflow: hidden;
-        }
+  width: 100%;
 
-        .aof2-basic-terms-lines span {
-          min-width: 0;
+  white-space: nowrap;
 
-          color: rgba(255, 255, 255, .58);
-
-          font-size: 6.4px;
-          font-weight: 850;
-          letter-spacing: .08px;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        .aof2-basic-terms-lines span + span::before {
-          content: "•";
-
-          margin-right: 6px;
-
-          color: rgba(255, 196, 0, .42);
-        }
+  font-size: 6.4px;
+  font-weight: 850;
+}
+      
 
         .aof2-hours-input:focus,
         .aof2-bid-input:focus {
