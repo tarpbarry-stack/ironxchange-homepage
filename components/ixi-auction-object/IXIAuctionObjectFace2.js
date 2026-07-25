@@ -1343,6 +1343,8 @@ const feeLines = [
         .aof2-terms-grid {
   width: 100%;
 
+margin-top: 5px;
+
   display: grid;
 
   grid-template-columns:
@@ -1475,8 +1477,8 @@ line-height: 1.18;
        .aof2-basic-terms-title {
   color: rgba(255,196,0,.56);
 
-  font-size: 5.9px;
-  font-weight: 950;
+  font-size: 8.2px;
+  font-weight: 850;
   letter-spacing: .5px;
 
   text-transform: uppercase;
@@ -1499,7 +1501,7 @@ line-height: 1.18;
 
   white-space: nowrap;
 
-  font-size: 6.4px;
+ font-size: 8.2px;
   font-weight: 850;
 }
       
