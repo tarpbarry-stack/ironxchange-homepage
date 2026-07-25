@@ -1361,7 +1361,7 @@ const feeLines = [
   flex-direction: column;
   align-items: flex-start;
 
-  gap: 2px;
+  gap: 7px;
 
   overflow: hidden;
 }
@@ -1393,9 +1393,9 @@ const feeLines = [
 
   color: rgba(255, 255, 255, .62);
 
-  font-size: 6.4px;
-  font-weight: 850;
-  line-height: 1.25;
+  font-size: 8.2px;
+font-weight: 850;
+line-height: 1.18;
   letter-spacing: .08px;
 
   overflow: hidden;
@@ -1443,9 +1443,9 @@ const feeLines = [
 
   color: rgba(255, 255, 255, .62);
 
-  font-size: 6.4px;
+ font-size: 8.2px;
   font-weight: 850;
-  line-height: 1.25;
+  line-height: 1.18;
   letter-spacing: .08px;
 
   text-align: left;
