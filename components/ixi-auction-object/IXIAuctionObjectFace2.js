@@ -552,27 +552,43 @@ const paymentDueDate =
     : removalRuleData.deadlineText ||
       "NOT LISTED";
   
-  const paymentTerms = getTermValue(
-    auctionTerms,
-    [
-      "paymentTerms",
-      "terms",
-      "termsText",
-      "paymentMethod"
-    ],
-    "NOT LISTED"
-  );
+ const auctionTermsRawText = [
+  buyerPremiumData?.rawText,
+  taxRuleData?.rawText,
+  paymentRuleData?.rawText,
+  removalRuleData?.rawText,
+  getFirstMeaningfulValue(
+    auctionTerms?.rawText
+  ),
+  getFirstMeaningfulValue(
+    auctionTerms?.termsText
+  )
+]
+  .filter(Boolean)
+  .join(" ")
+  .toUpperCase();
 
-  const condition = getTermValue(
-    auctionTerms,
-    [
-      "condition",
-      "conditionText",
-      "saleCondition",
-      "asIsWhereIs"
-    ],
-    "AS IS, WHERE IS"
-  );
+const basicTerms = [
+  /AS[\s-]*IS[\s,/-]*WHERE[\s-]*IS/.test(
+    auctionTermsRawText
+  )
+    ? "AS IS, WHERE IS"
+    : "",
+
+  /ALL SALES (?:ARE )?FINAL|FINAL SALE/.test(
+    auctionTermsRawText
+  )
+    ? "ALL SALES FINAL"
+    : "",
+
+  removalRuleData?.removalAtBuyerExpense ||
+  removalRuleData?.buyerResponsibleForShipping ||
+  /BUYER.{0,60}(?:RESPONSIBLE|EXPENSE).{0,60}(?:REMOVAL|SHIPPING|TRANSPORT)/.test(
+    auctionTermsRawText
+  )
+    ? "BUYER RESPONSIBLE FOR REMOVAL"
+    : ""
+].filter(Boolean);
 
   function stopCardClick(event) {
     event.preventDefault();
@@ -845,15 +861,17 @@ const feeLines = [
           BASIC TERMS &amp; CONDITIONS
         </div>
 
-        <div className="aof2-basic-terms-lines">
-          <span>
-            {condition}
-          </span>
-
-          <span>
-            {paymentTerms}
-          </span>
-        </div>
+       <div className="aof2-basic-terms-lines">
+  {basicTerms.length ? (
+    basicTerms.map((term, index) => (
+      <span key={`${term}-${index}`}>
+        {term}
+      </span>
+    ))
+  ) : (
+    <span>TERMS NOT AVAILABLE</span>
+  )}
+</div>
       </div>
 
       <div className="aof2-actions-footer">
@@ -1416,7 +1434,7 @@ const feeLines = [
   width:100%;
 
   margin-top:4px;
-  ...
+  
   padding: 4px 7px;
 
   border: 1px solid rgba(255,196,0,.10);
