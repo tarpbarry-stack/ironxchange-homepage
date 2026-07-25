@@ -535,7 +535,6 @@ const model =
     : taxRuleData.taxable === false
       ? "NO SALES TAX"
       : "SEE TERMS";
-;
   
 const paymentDueDate =
   paymentRuleData.relativeBusinessDays != null
@@ -546,14 +545,13 @@ const paymentDueDate =
         auctionDeadlines?.paymentDue
       ) ||
       "NOT LISTED";
-;
   
   const removalDate =
   removalRuleData.relativeDays != null
     ? `${removalRuleData.relativeDays} DAYS`
     : removalRuleData.deadlineText ||
       "NOT LISTED";
-  );
+  
   const paymentTerms = getTermValue(
     auctionTerms,
     [
