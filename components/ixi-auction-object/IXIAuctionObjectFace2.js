@@ -1130,20 +1130,13 @@ const feeLines = [
 
 .aof2-plate {
   box-sizing: border-box;
+
   align-self: stretch;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
 
   display: grid;
-  grid-template-columns:
-    minmax(0,1fr)
-    minmax(0,1fr);
-
-  gap: 12px;
-  
-  overflow: hidden;
-
-  margin: 2px 0 6px;
-  padding: 8px 10px;
 
   border:
     1px solid rgba(255, 196, 0, .16);
@@ -1431,12 +1424,14 @@ const feeLines = [
 
      .aof2-basic-terms {
   box-sizing: border-box;
-  align-self: stretch;
-  width: 100%;
 
-  margin-top:4px;
-  
-  padding: 4px 7px;
+  align-self: stretch;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+
+  margin-top: 4px;
+  padding: 7px 9px;
 
   border: 1px solid rgba(255,196,0,.10);
   border-radius: 5px;
