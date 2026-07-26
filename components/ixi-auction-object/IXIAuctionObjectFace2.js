@@ -474,6 +474,16 @@ const auctionDeadlines = auctionRoot?.deadlines || {};
 const auctionMachine = getAuctionMachineData(listing);
 const auctionTerms = getAuctionTermsData(listing);
 
+  const sourceListingUrl = clean(
+  auctionRoot?.providerUrl ||
+  auctionRoot?.source?.url ||
+  listing?.source?.url ||
+  publicData?.source?.url ||
+  listing?.sourceUrl ||
+  publicData?.sourceUrl ||
+  ""
+);
+
   const auctionRules =
   auctionRoot?.auctionRules || {};
 
@@ -1101,6 +1111,25 @@ const feeLines = [
 </div>
       </div>
 
+      {sourceListingUrl ? (
+        <div className="aof2-source-listing">
+          <a
+            href={sourceListingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="aof2-source-link"
+            onClick={event => {
+              event.stopPropagation();
+            }}
+            onPointerDown={event => {
+              event.stopPropagation();
+            }}
+          >
+            OPEN ORIGINAL LISTING →
+          </a>
+        </div>
+      ) : null}
+  
       <div className="aof2-actions-footer">
         <IXIMachineObjectActions />
       </div>
@@ -1747,6 +1776,33 @@ line-height: 1.18;
           box-shadow:
             0 0 0 1px rgba(255, 196, 0, .08);
         }
+
+        .aof2-source-listing {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 4px;
+  padding: 4px 0 2px;
+}
+
+.aof2-source-link {
+  color: rgba(255, 196, 0, .62);
+
+  font-size: 6.8px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .48px;
+
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.aof2-source-link:hover {
+  color: #ffc400;
+}
 
        .aof2-actions-footer {
   position: static;
