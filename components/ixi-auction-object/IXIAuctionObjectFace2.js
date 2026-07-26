@@ -450,6 +450,7 @@ function normalizeAuctionLocation(value = "") {
 
 export default function IXIAuctionObjectFace2({
   listing = {},
+  sourceListingUrl = "",
   dragHandleProps,
 
   sellerMode = false,
@@ -474,15 +475,8 @@ const auctionDeadlines = auctionRoot?.deadlines || {};
 const auctionMachine = getAuctionMachineData(listing);
 const auctionTerms = getAuctionTermsData(listing);
 
-  const sourceListingUrl = clean(
-  auctionRoot?.providerUrl ||
-  auctionRoot?.source?.url ||
-  listing?.source?.url ||
-  publicData?.source?.url ||
-  listing?.sourceUrl ||
-  publicData?.sourceUrl ||
-  ""
-);
+  const originalListingUrl =
+  clean(sourceListingUrl);
 
   const auctionRules =
   auctionRoot?.auctionRules || {};
@@ -1111,24 +1105,24 @@ const feeLines = [
 </div>
       </div>
 
-      {sourceListingUrl ? (
-        <div className="aof2-source-listing">
-          <a
-            href={sourceListingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="aof2-source-link"
-            onClick={event => {
-              event.stopPropagation();
-            }}
-            onPointerDown={event => {
-              event.stopPropagation();
-            }}
-          >
-            OPEN ORIGINAL LISTING →
-          </a>
-        </div>
-      ) : null}
+     {originalListingUrl ? (
+  <div className="aof2-source-listing">
+    <a
+      href={originalListingUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="aof2-source-link"
+      onClick={event => {
+        event.stopPropagation();
+      }}
+      onPointerDown={event => {
+        event.stopPropagation();
+      }}
+    >
+      OPEN ORIGINAL LISTING →
+    </a>
+  </div>
+) : null}
   
       <div className="aof2-actions-footer">
         <IXIMachineObjectActions />
