@@ -64,6 +64,7 @@ function getBulkImageUrls(listing = {}) {
 
 export default function ListingCard({
   listing = {},
+  sourceListingUrl = "",
   saved = false,
   onToggleSaved,
   showSave = true,
@@ -442,8 +443,9 @@ function handlePhotoLoad(e, photoUrl) {
 {Number(machineFace || 1) === 2 ? (
   isAuctionObject ? (
     <IXIAuctionObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
+  listing={listing}
+  sourceListingUrl={sourceListingUrl}
+  dragHandleProps={dragHandleProps}
 
       sellerMode={sellerMode}
 
