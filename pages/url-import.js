@@ -750,7 +750,8 @@ image:
   heroPhoto,
 
 sourceListingUrl:
-  importResult?.launchPayload?.sourceListingUrl ||
+  importResult?.sourceListingUrl ||
+  externalLinks?.[0]?.url ||
   "",
 
 auction:
