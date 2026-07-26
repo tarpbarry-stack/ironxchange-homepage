@@ -749,6 +749,10 @@ imageUrl:
 image:
   heroPhoto,
 
+sourceListingUrl:
+  importResult?.launchPayload?.sourceListingUrl ||
+  "",
+
 auction:
   importResult?.auction ||
   null,
@@ -2323,6 +2327,9 @@ showCardNotice({
   <div className="live-card-shell">
     <ListingCard
   listing={previewListing}
+  sourceListingUrl={
+    previewListing.sourceListingUrl
+  }
   sellerMode={true}
   creationMode={false}
   actionNotice={cardActionNotice}
