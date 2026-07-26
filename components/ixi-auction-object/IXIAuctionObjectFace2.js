@@ -550,9 +550,9 @@ const lateFee =
 );
 
   const auctionLocation =
-    normalizeAuctionLocation(
-      getAuctionEventLocation(listing)
-    );
+  clean(
+    getAuctionEventLocation(listing)
+  ).toUpperCase();
 
 const serial =
   auctionMachine?.serialNumber ||
@@ -763,63 +763,17 @@ const paymentDueDate =
     : removalRuleData.deadlineText ||
       "NOT LISTED";
   
- const auctionTermsRawText = [
-  buyerPremiumData?.rawText,
-  taxRuleData?.rawText,
-  paymentRuleData?.rawText,
-  removalRuleData?.rawText,
-
-  getFirstMeaningfulValue(
-    auctionTerms?.participationRequirements
-  ),
-
-  getFirstMeaningfulValue(
-    auctionTerms?.specialTerms
-  ),
-
-  getFirstMeaningfulValue(
-    auctionTerms?.fullTermsText
-  ),
-
-  getFirstMeaningfulValue(
-    auctionTerms?.rawText
-  ),
-
-  getFirstMeaningfulValue(
-    auctionTerms?.termsText
+ const basicTerms =
+  Array.isArray(
+    auctionTerms?.basicTerms
   )
-]
-  .filter(Boolean)
-  .join(" ")
-  .toUpperCase();
-
-const basicTerms = [
-  /AS[\s-]*IS[\s,/-]*WHERE[\s-]*IS/.test(
-    auctionTermsRawText
-  )
-    ? "AS IS, WHERE IS"
-    : "",
-
-  /BIDS? CANNOT BE RETRACTED|BID.{0,40}BINDING|CANNOT BE RETRACTED/.test(
-    auctionTermsRawText
-  )
-    ? "BIDS CANNOT BE RETRACTED"
-    : "",
-
-  /ALL SALES (?:ARE )?FINAL|FINAL SALE/.test(
-    auctionTermsRawText
-  )
-    ? "ALL SALES FINAL"
-    : "",
-
-  removalRuleData?.removalAtBuyerExpense ||
-  removalRuleData?.buyerResponsibleForShipping ||
-  /BUYER.{0,60}(?:RESPONSIBLE|EXPENSE).{0,60}(?:REMOVAL|SHIPPING|TRANSPORT)/.test(
-    auctionTermsRawText
-  )
-    ? "BUYER RESPONSIBLE FOR REMOVAL"
-    : ""
-].filter(Boolean);
+    ? auctionTerms.basicTerms.filter(
+        term =>
+          term &&
+          term.confirmed !== false &&
+          clean(term.label)
+      )
+    : [];
 
   function stopCardClick(event) {
     event.preventDefault();
@@ -1131,11 +1085,16 @@ const feeLines = [
 
        <div className="aof2-basic-terms-lines">
   {basicTerms.length ? (
-    basicTerms.map((term, index) => (
-      <span key={`${term}-${index}`}>
-        {term}
-      </span>
-    ))
+   basicTerms.map((term, index) => (
+  <span
+    key={
+      term.code ||
+      `${term.label}-${index}`
+    }
+  >
+    {term.label}
+  </span>
+))
   ) : (
     <span>TERMS NOT AVAILABLE</span>
   )}
