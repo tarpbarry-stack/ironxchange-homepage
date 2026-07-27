@@ -47,8 +47,6 @@ export default function IXIEnvironmentRail({
   }
 
 function canAccess(item) {
-  if (item.access === "demo") return true;
-
   if (item.access === "always") return true;
   if (item.access === "account") return hasAccount;
   if (item.access === "relationship") return hasRelationship;
@@ -76,13 +74,8 @@ function shouldShowLabel(item) {
       {RAIL_ITEMS.map(item => (
        <a
   key={item.label}
-  href={item.access === "demo" ? "#" : item.href}
+  href={item.href}
     onClick={(e) => {
-    if (item.access === "demo") {
-      e.preventDefault();
-      return;
-    }
-
     if (
   item.label === "IXI THEATER" &&
   typeof toggleArmedDestination === "function"
