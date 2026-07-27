@@ -4,6 +4,10 @@ import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
+import {
+  loadIXIListingsEnvironment
+} from "../../lib/listings/IXIListingsEngine";
+
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import Navbar from "../../components/Navbar";
@@ -227,14 +231,23 @@ export default function ListingPage() {
        * This preserves the same normalized listing object that the slug page
        * already uses. We are only changing how the correct machine is selected.
        */
-      const listingsResponse = await fetch("/api/listings");
-      const listingsPayload = await listingsResponse.json();
+     const environment =
+  await loadIXIListingsEnvironment({
+    includePrivateState: false
+  });
 
-      if (!listingsResponse.ok || !Array.isArray(listingsPayload)) {
-        throw new Error("Machine listing lookup failed");
-      }
+const hydratedListings =
+  Array.isArray(environment.listings)
+    ? environment.listings
+    : [];
 
-      setListings(listingsPayload);
+setListings(hydratedListings);
+      if (environment.errors?.publicListings) {
+  console.error(
+    "PASSPORT LISTINGS LOAD FAILED:",
+    environment.errors.publicListings
+  );
+}
     } catch (error) {
       console.error("Passport page load failed:", error);
 
