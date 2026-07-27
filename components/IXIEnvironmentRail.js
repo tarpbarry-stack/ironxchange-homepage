@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const RAIL_ITEMS = [
   { label: "IXI MARKETPLACE", href: "/browse-v2", access: "always" },
-  { label: "IXI AUCTION MKT", href: "#", access: "demo" },
+  { label: "IXI AUCTION MKT", href: "/auction-market", access: "always" },
   { label: "IXI WORKSPACE", href: "/saved", access: "relationship" },
   { label: "IXI THEATER", href: "/theater", access: "relationship" },
   { label: "IXI SELLERS", href: "/yard", access: "always" },
