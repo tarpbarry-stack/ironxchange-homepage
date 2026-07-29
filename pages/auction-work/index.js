@@ -108,6 +108,11 @@ import {
   hydrateIXIListingCollection
 } from "../../lib/listings/hydrateIXIListingMedia";
 
+import {
+  getMachineChannel,
+  IXI_MACHINE_CHANNELS
+} from "../../lib/machine-access/IXIMachineAccess";
+
 export default function AuctionWorkspace() {
   const [listings, setListings] = useState([]);
   
@@ -398,14 +403,10 @@ const sensors = useSensors(
 
 const workspaceListings = useMemo(() => {
   return listings.filter(item => {
-    const publicData =
-      item.publicData ||
-      item.attributes?.publicData ||
-      {};
-
     const listingStatus =
       item.listingStatus ||
-      publicData.listingStatus ||
+      item.publicData?.listingStatus ||
+      item.attributes?.publicData?.listingStatus ||
       "";
 
     if (
@@ -415,17 +416,10 @@ const workspaceListings = useMemo(() => {
       return false;
     }
 
-    const visibilityState = String(
-      item.visibilityState ||
-      publicData.visibilityState ||
-      item.destination ||
-      publicData.destination ||
-      ""
-    )
-      .trim()
-      .toUpperCase();
-
-    return visibilityState === "AUCT";
+    return (
+      getMachineChannel(item) ===
+      IXI_MACHINE_CHANNELS.AUCTION
+    );
   });
 }, [listings]);
 
