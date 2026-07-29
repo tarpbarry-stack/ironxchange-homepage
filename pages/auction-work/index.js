@@ -26,7 +26,7 @@ import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
   saveIxiMachinePatch,
-} from "../lib/ixiMachineStateClient";
+} from "../../lib/ixiMachineStateClient";
 
 import { captureIXEvent } from "../../lib/posthog";
 
