@@ -396,7 +396,7 @@ const sensors = useSensors(
     return filterSavedListings(activeListings, savedIds);
   }, [listings, savedIds]);
 
- const workspaceListings = useMemo(() => {
+const workspaceListings = useMemo(() => {
   return listings.filter(item => {
     const publicData =
       item.publicData ||
@@ -415,41 +415,17 @@ const sensors = useSensors(
       return false;
     }
 
-    const auction =
-      item.auction ||
-      publicData.auction ||
-      {};
-
-    const launchPolicy =
-      item.launchPolicy ||
-      publicData.launchPolicy ||
-      {};
-
-    const destination = String(
-      item.forcedDestination ||
-      publicData.forcedDestination ||
-      launchPolicy.forcedDestination ||
-      publicData.destination ||
+    const visibilityState = String(
+      item.visibilityState ||
       publicData.visibilityState ||
+      item.destination ||
+      publicData.destination ||
       ""
-    ).toLowerCase();
+    )
+      .trim()
+      .toUpperCase();
 
-    const saleType = String(
-      item.saleType ||
-      publicData.saleType ||
-      auction.saleType ||
-      ""
-    ).toLowerCase();
-
-    return (
-      destination === "auction" ||
-      destination === "auct" ||
-      saleType === "auction" ||
-      Boolean(auction.event) ||
-      Boolean(auction.lot) ||
-      Boolean(publicData.auctionEvent) ||
-      Boolean(publicData.auctionLot)
-    );
+    return visibilityState === "AUCT";
   });
 }, [listings]);
 
