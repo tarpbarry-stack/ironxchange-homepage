@@ -48,12 +48,13 @@ import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
 import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 
 import {
-  IXI_WORKSPACE_SETTINGS_ID,
-  IXI_WORKSPACE_LAYOUT_ID,
+  IXI_AUCTION_WORKSPACE_SETTINGS_ID,
+  IXI_AUCTION_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
   sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord
-} from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
+  saveWorkspaceLayoutRecord,
+  saveWorkspaceSettingsRecord
+} from "../../components/ixi-chassis/IXIAuctionWorkspacePersistenceEngine";
 
 import {
   getMachineContainerFromContainers,
@@ -392,7 +393,7 @@ useEffect(() => {
   );
 
   const savedLayout =
-    ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
+    ixiCardState?.[IXI_AUCTION_WORKSPACE_LAYOUT_ID];
 
   if (
     savedLayout?.machineContainers &&
@@ -1062,7 +1063,7 @@ function cycleCardScaleMode() {
 
     saveIxiMachinePatch({
       userId: ixiUserId,
-      listingId: IXI_WORKSPACE_SETTINGS_ID,
+      listingId: IXI_AUCTION_WORKSPACE_SETTINGS_ID,
       patch: {
         cardScaleMode: next,
         updatedAt: Date.now()
