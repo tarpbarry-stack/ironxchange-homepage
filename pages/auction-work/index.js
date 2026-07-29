@@ -104,6 +104,10 @@ import {
   IXI_COMMANDS
 } from "../../components/ixi-object-system/IXICommandBus";
 
+import {
+  hydrateIXIListingCollection
+} from "../../lib/listings/hydrateIXIListingMedia";
+
 export default function AuctionWorkspace() {
   const [listings, setListings] = useState([]);
   
@@ -287,54 +291,96 @@ const sensors = useSensors(
   }, []);
 
  useEffect(() => {
-  async function loadWorkspaceEnvironment() {
+  async function loadAuctionWorkspaceEnvironment() {
     const environment =
       await loadIXIListingsEnvironment({
         includePrivateState: true
       });
 
-    setListings(environment.listings);
     setSdk(environment.sdk);
     setSavedIds(environment.savedIds);
     setIxiUserId(environment.userId);
     setIxiCardState(environment.ixiState);
 
     const loadedWorkspaceSettings =
-  environment.workspaceSettings || {};
+      environment.ixiState?.[
+        IXI_AUCTION_WORKSPACE_SETTINGS_ID
+      ] || {};
 
-setWorkspaceSettings(
-  loadedWorkspaceSettings
-);
+    const loadedWorkspaceLayout =
+      environment.ixiState?.[
+        IXI_AUCTION_WORKSPACE_LAYOUT_ID
+      ] || {};
 
-    console.log(
-      "IXI WORKSPACE LAYOUT LOADED",
-      environment.workspaceLayout
+    setWorkspaceSettings(
+      loadedWorkspaceSettings
     );
 
-    if (
-      environment.workspaceSettings?.cardScaleMode
-    ) {
+    console.log(
+      "IXI AUCTION WORKSPACE LAYOUT LOADED",
+      loadedWorkspaceLayout
+    );
+
+    if (loadedWorkspaceSettings.cardScaleMode) {
       setCardScaleMode(
-        environment.workspaceSettings.cardScaleMode
+        loadedWorkspaceSettings.cardScaleMode
       );
     }
 
-    if (environment.errors.publicListings) {
-      console.error(
-        "WORKSPACE PUBLIC LISTINGS FAILED:",
-        environment.errors.publicListings
+    if (!environment.isAuthenticated) {
+      setListings([]);
+
+      console.warn(
+        "IXI AUCTION WORKSPACE REQUIRES AUTHENTICATION"
       );
+
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/account-listings?authorId=${encodeURIComponent(
+          String(environment.userId)
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Auction workspace listings request failed with status ${response.status}`
+        );
+      }
+
+      const payload = await response.json();
+
+      const accountListings =
+        Array.isArray(payload)
+          ? payload
+          : [];
+
+      const hydratedListings =
+        await hydrateIXIListingCollection(
+          accountListings
+        );
+
+      setListings(hydratedListings);
+    } catch (error) {
+      console.error(
+        "AUCTION WORKSPACE LISTINGS FAILED:",
+        error
+      );
+
+      setListings([]);
     }
 
     if (environment.errors.privateState) {
       console.warn(
-        "WORKSPACE PRIVATE STATE UNAVAILABLE — GUEST MODE:",
+        "AUCTION WORKSPACE PRIVATE STATE UNAVAILABLE:",
         environment.errors.privateState
       );
     }
   }
 
-  loadWorkspaceEnvironment();
+  loadAuctionWorkspaceEnvironment();
 }, []);
   
   const savedListings = useMemo(() => {
@@ -350,31 +396,62 @@ setWorkspaceSettings(
     return filterSavedListings(activeListings, savedIds);
   }, [listings, savedIds]);
 
-  const workspaceListings = useMemo(() => {
-  const activeListings = listings.filter(item => {
+ const workspaceListings = useMemo(() => {
+  return listings.filter(item => {
+    const publicData =
+      item.publicData ||
+      item.attributes?.publicData ||
+      {};
+
     const listingStatus =
       item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus;
+      publicData.listingStatus ||
+      "";
 
-    return listingStatus !== "archived";
+    if (
+      listingStatus === "deleted" ||
+      listingStatus === "archived"
+    ) {
+      return false;
+    }
+
+    const auction =
+      item.auction ||
+      publicData.auction ||
+      {};
+
+    const launchPolicy =
+      item.launchPolicy ||
+      publicData.launchPolicy ||
+      {};
+
+    const destination = String(
+      item.forcedDestination ||
+      publicData.forcedDestination ||
+      launchPolicy.forcedDestination ||
+      publicData.destination ||
+      publicData.visibilityState ||
+      ""
+    ).toLowerCase();
+
+    const saleType = String(
+      item.saleType ||
+      publicData.saleType ||
+      auction.saleType ||
+      ""
+    ).toLowerCase();
+
+    return (
+      destination === "auction" ||
+      destination === "auct" ||
+      saleType === "auction" ||
+      Boolean(auction.event) ||
+      Boolean(auction.lot) ||
+      Boolean(publicData.auctionEvent) ||
+      Boolean(publicData.auctionLot)
+    );
   });
-
-const touchedIds = Object.entries(ixiCardState || {})
-  .filter(([id]) => !String(id).startsWith("__"))
-  .filter(([id, state]) =>
-    (state?.color && state.color !== "none") ||
-    Number(state?.outline) > 1 ||
-    state?.saved === true ||
-    state?.pinned === true ||
-    state?.noted === true
-  )
-  .map(([id]) => String(id));
-
-    return activeListings.filter(item =>
-    touchedIds.includes(String(getListingId(item)))
-  );
-}, [listings, ixiCardState]);
+}, [listings]);
 
 const containerStateKey = useMemo(() => {
   return workspaceListings
