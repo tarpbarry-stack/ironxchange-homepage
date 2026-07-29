@@ -36,7 +36,7 @@ import {
 import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
-import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
+import IXIAuctionEnvironmentRail from "../../components/IXIAuctionEnvironmentRail";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
@@ -1803,7 +1803,7 @@ if (
   >
     <main>
   <section className="saved-environment-shell">
-       <IXIEnvironmentRail
+       <IXIAuctionEnvironmentRail
   activeEnvironment="IXI AUCTION MKT"
   hasAccount={isAuthenticated}
   hasRelationship={true}
