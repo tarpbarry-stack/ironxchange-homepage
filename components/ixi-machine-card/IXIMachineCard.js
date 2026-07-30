@@ -1,13 +1,20 @@
 import ListingCard from "../ListingCard";
-import { getMachineCardFamily } from "./getMachineCardFamily";
+
+import {
+  getMachineCardFamily
+} from "./getMachineCardFamily";
 
 export default function IXIMachineCard(props) {
-  const family = getMachineCardFamily(props.listing);
+  const cardFamily =
+    getMachineCardFamily(props.listing);
 
-  return (
-    <ListingCard
-      {...props}
-      resolvedCardFamily={family}
-    />
-  );
+  console.log("IXI MACHINE CARD FAMILY", {
+    listingId:
+      props.listing?.id?.uuid ||
+      props.listing?.id ||
+      "",
+    cardFamily
+  });
+
+  return <ListingCard {...props} />;
 }
