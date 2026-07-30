@@ -1,47 +1,25 @@
-import { useState, useRef } from "react";
-// DnD is owned by IXISortableMachineCard wrapper.
+import { useRef, useState } from "react";
 
-import { captureIXEvent } from "../lib/posthog";
+import { captureIXEvent } from "../../../lib/posthog";
 
 import {
-  cleanMachineTitle,
-  formatHours,
   getCardImages,
-  getFeatureLine,
   getListingHref,
-  getListingId,
-} from "../lib/listingFormatters";
+  getListingId
+} from "../../../lib/listingFormatters";
 
-import MachineBadges from "./MachineBadges";
-
-import IXIMachineRail from "./IXIMachineRail";
-
-import IXIMachinePlacementControl
-from "./ixi-machine-placement/IXIMachinePlacementControl";
-
-import IXIMachineObjectFace2
-from "./ixi-machine-object/IXIMachineObjectFace2";
-
-import IXISellerMachineObjectFace2 
-from "./ixi-machine-object/IXISellerMachineObjectFace2";
-
-import IXIMachineObjectFace3
-from "./ixi-machine-object/IXIMachineObjectFace3";
-
-import IXIMachineObjectFace4
-from "./ixi-machine-object/IXIMachineObjectFace4";
+import IXIMachineRail from "../../IXIMachineRail";
 
 import IXIAuctionObjectFace1
-from "./ixi-auction-object/IXIAuctionObjectFace1";
+  from "../../ixi-auction-object/IXIAuctionObjectFace1";
 
 import IXIAuctionObjectFace2
-from "./ixi-auction-object/IXIAuctionObjectFace2";
+  from "../../ixi-auction-object/IXIAuctionObjectFace2";
 
 import {
   getFrameClass,
   getFrameStyle
-} from "../lib/ixvision/frameEngine";
-
+} from "../../../lib/ixvision/frameEngine";
 
 function getBulkImageUrls(listing = {}) {
   const raw =
@@ -65,48 +43,25 @@ function getBulkImageUrls(listing = {}) {
 export default function AuctionListingCard({
   listing = {},
   sourceListingUrl = "",
+
   saved = false,
   onToggleSaved,
-  showSave = true,
   from = "browse",
 
-  sellerMode = false,
-  launchMode = false,
-  creationMode = false,
-  workflowValue = "good-listing",
-  onWorkflowChange,
   priceValue,
-onPriceChange,
-onPriceKeyDown,
-savingPrice = false,
+  onPriceChange,
+  onPriceKeyDown,
 
-lotNumberValue,
-onLotNumberChange,
+  lotNumberValue,
+  onLotNumberChange,
 
-hoursValue,
-onHoursChange,
-onHoursKeyDown,
-
-  descriptionValue,
-  onDescriptionChange,
-  onDescriptionKeyDown,
-  savingDescription = false,
-
-    isPaused = false,
-
-  machineAccess = "public",
-  machineChannel = "marketplace",
-  machinePlacementBusy = false,
-  onMachinePlacementChange,
+  hoursValue,
+  onHoursChange,
+  onHoursKeyDown,
 
   locationValue,
   onLocationChange,
   onLocationKeyDown,
-  
-  onEdit,
-  onPause,
-  onReactivate,
-  onDelete,
 
   machineFace = 1,
   onCycleMachineFace,
@@ -114,20 +69,21 @@ onHoursKeyDown,
   onSendFront,
   onSendBack,
 
-armedDestination,
-onSendToArmedDestination,
+  armedDestination,
+  onSendToArmedDestination,
 
-ixiState,
-actionNotice,
-onIxiStateChange,
+  ixiState,
+  actionNotice,
+  onIxiStateChange,
 
-isBoardDraggingCard = false,
-isGhostTarget = false,
-onBoardDragStart,
-onBoardDragOver,
-onBoardDragEnd,
-useDndDrag = false,
-dragHandleProps,
+  isBoardDraggingCard = false,
+  isGhostTarget = false,
+
+  onBoardDragStart,
+  onBoardDragOver,
+  onBoardDragEnd,
+
+  dragHandleProps
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -170,20 +126,6 @@ function cycleBoardColor(e) {
   }
 }
 
-function endIxiRelationship(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (onIxiStateChange) {
-    onIxiStateChange(id, {
-      color: "none",
-      outline: 1
-    });
-  } else {
-    setLocalBoardColor("none");
-    setLocalBoardOutline(1);
-  }
-}  
  const boardDragStart = useRef(null);
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 const [isBoardDragging, setIsBoardDragging] = useState(false);
@@ -237,14 +179,10 @@ function moveBoardDrag(e) {
 function endBoardDrag(e) {
   if (!boardDragStart.current) return;
 
-  const dx = e.clientX - boardDragStart.current.x;
-  const dy = e.clientY - boardDragStart.current.y;
-
   boardDragStart.current = null;
 
- onBoardDragEnd?.(e);
+  onBoardDragEnd?.(e);
 
- 
   setTimeout(() => {
     setIsBoardDragging(false);
     setDragOffset({ x: 0, y: 0 });
@@ -253,83 +191,8 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
-  const publicData =
-  listing.publicData ||
-  listing.attributes?.publicData ||
-  {};
-
-const resolvedMachineAccess =
-  machineAccess ||
-  listing.machineAccess ||
-  publicData.machineAccess ||
-  listing.metadata?.machineAccess ||
-  listing.attributes?.metadata?.machineAccess ||
-  "public";
-
-const resolvedMachineChannel =
-  machineChannel ||
-  listing.machineChannel ||
-  publicData.machineChannel ||
-  listing.metadata?.machineChannel ||
-  listing.attributes?.metadata?.machineChannel ||
-  "marketplace";
-
-const isAuctionObject =
-  Boolean(
-    resolvedMachineChannel === "auction" ||
-    listing.isAuctionObject === true ||
-    publicData.isAuctionObject === true ||
-    listing.auction ||
-    publicData.auction ||
-    listing.auctionData ||
-    publicData.auctionData
-  );
-
-const sellerPlacementLabel =
-  resolvedMachineAccess === "private"
-    ? "PRIV"
-    : resolvedMachineChannel === "auction"
-      ? "AUCT"
-      : "LIVE";
-
-const sellerPlacementClass =
-  resolvedMachineAccess === "private"
-    ? "private"
-    : resolvedMachineChannel === "auction"
-      ? "auction"
-      : "live";
-  
-const rawLocation =
-  locationValue ||
-  listing.location ||
-  publicData.location ||
-  publicData.loc?.address ||
-  publicData.loc ||
-  "";
-
-function getSellerCity() {
-  const loc = String(rawLocation || "").trim();
-  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
-
-  if (parts.length >= 2) {
-    return parts[0].length === 2 ? parts[1] : parts[0];
-  }
-
-  return "";
-}
-
-function getSellerState() {
-  const loc = String(rawLocation || "").trim();
-  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
-
-  if (parts.length >= 2) {
-    return parts[0].length === 2
-      ? parts[0].toUpperCase()
-      : parts[1].slice(0, 2).toUpperCase();
-  }
-
-  return loc.length === 2 ? loc.toUpperCase() : "";
-}
+  const auctionFace =
+  Number(machineFace) === 2 ? 2 : 1;
 
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
@@ -342,20 +205,13 @@ function getSellerState() {
   const currentPhoto = images[photoIndex];
   const [photoFitMap, setPhotoFitMap] = useState({});
 
-  const currentImageObject =
-  sharetribeImages[photoIndex] ||
-  { url: currentPhoto };
+  const currentImageValue =
+  images[photoIndex];
 
-  const keywords = Array.isArray(listing?.keywords)
-    ? listing.keywords
-    : Array.isArray(listing?.publicData?.keywords)
-      ? listing.publicData.keywords
-      : [];
-
-  const normalizedKeywords = keywords
-    .filter(Boolean)
-    .map(k => String(k).trim().toLowerCase())
-    .slice(0, 6);
+const currentImageObject =
+  typeof currentImageValue === "string"
+    ? { url: currentImageValue }
+    : currentImageValue || { url: currentPhoto };
 
   function changePhoto(e, direction) {
     e.preventDefault();
@@ -368,20 +224,8 @@ function getSellerState() {
     );
   }
 
-  function toggleSave(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    onToggleSaved?.(id, listing);
-  }
-
-  function stopCardClick(e) {
-  e.preventDefault();
-  e.stopPropagation();
-}
-
 function handleCardClick() {
-  captureIXEvent("listing_card_clicked", {
+  captureIXEvent("auction_listing_card_clicked", {
     listingId: id,
     title: listing.title,
     category: listing.category || listing.type,
@@ -419,20 +263,20 @@ function handlePhotoLoad(e, photoUrl) {
 }
   
   return (
-  <div
-    data-listing-card-id={id}
-    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
-      isBoardDragging ? "board-dragging" : ""
-    } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
-      isGhostTarget ? "grid-ghost-target" : ""
-    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
-    style={{
-      transform: isBoardDragging
-        ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
-        : undefined,
-      zIndex: isBoardDragging ? 50 : undefined
-    }}
-  >
+ <div
+  data-listing-card-id={id}
+  className={`card auction-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
+    isBoardDragging ? "board-dragging" : ""
+  } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
+    isGhostTarget ? "grid-ghost-target" : ""
+  }`}
+  style={{
+    transform: isBoardDragging
+      ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+      : undefined,
+    zIndex: isBoardDragging ? 50 : undefined
+  }}
+>
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
@@ -440,362 +284,130 @@ function handlePhotoLoad(e, photoUrl) {
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-{Number(machineFace || 1) === 2 ? (
-  isAuctionObject ? (
-    <IXIAuctionObjectFace2
-  listing={listing}
-  sourceListingUrl={sourceListingUrl}
-  dragHandleProps={dragHandleProps}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      openingBidValue={priceValue}
-      onOpeningBidChange={onPriceChange}
-      onOpeningBidKeyDown={onPriceKeyDown}
-    />
-  ) : sellerMode ? (
-    <IXISellerMachineObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
-      descriptionValue={descriptionValue}
-      onDescriptionChange={onDescriptionChange}
-      onDescriptionKeyDown={onDescriptionKeyDown}
-      savingDescription={savingDescription}
-    />
-  ) : (
-    <IXIMachineObjectFace2
-      listing={listing}
-      dragHandleProps={dragHandleProps}
-    />
-  )
-) : Number(machineFace || 1) === 3 ? (
-  <IXIMachineObjectFace3
+{auctionFace === 2 ? (
+  <IXIAuctionObjectFace2
     listing={listing}
+    sourceListingUrl={sourceListingUrl}
     dragHandleProps={dragHandleProps}
-  />
-) : Number(machineFace || 1) === 4 ? (
-  <IXIMachineObjectFace4
-    listing={listing}
-    dragHandleProps={dragHandleProps}
+
+    sellerMode={true}
+
+    lotNumberValue={lotNumberValue}
+    onLotNumberChange={onLotNumberChange}
+
+    hoursValue={hoursValue}
+    onHoursChange={onHoursChange}
+    onHoursKeyDown={onHoursKeyDown}
+
+    openingBidValue={priceValue}
+    onOpeningBidChange={onPriceChange}
+    onOpeningBidKeyDown={onPriceKeyDown}
   />
 ) : (
-  <>
-    
-<a
-  href={getListingHref(listing, from)}
-  className={`photo-click-zone ${
-  Number(machineFace || 1) === 1 ? "" : "mof-hidden"
-}`}
-  onClick={handleCardClick}
->
-  <div className="card-photo">
-    <img
-  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
-  alt={listing.title || "Machine"}
-  draggable={false}
- className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
-style={getFrameStyle(currentImageObject, "card")}
-  onLoad={e => handlePhotoLoad(e, currentPhoto)}
-  loading="lazy"
-/>
-
-    {sellerMode ? (
-  <div
-    className={`status-photo-pill ${sellerPlacementClass}`}
-  >
-    {sellerPlacementLabel}
-  </div>
-) : null}
-
-    {images.length > 1 ? (
-      <>
-        <button
-          type="button"
-          className="card-photo-nav left"
-          onClick={e => changePhoto(e, -1)}
-          aria-label="Previous photo"
-        >
-          ‹
-        </button>
-
-        <button
-          type="button"
-          className="card-photo-nav right"
-          onClick={e => changePhoto(e, 1)}
-          aria-label="Next photo"
-        >
-          ›
-        </button>
-
-        <span className="photo-count">
-          {photoIndex + 1}/{images.length}
-        </span>
-      </>
-    ) : null}
-  </div>
-</a>
-
-<div className="card-body">
-  {isAuctionObject ? (
-    <IXIAuctionObjectFace1
-      listing={listing}
-      from={from}
-      onListingClick={handleCardClick}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      priceValue={priceValue}
-      onPriceChange={onPriceChange}
-      onPriceKeyDown={onPriceKeyDown}
-
-      locationValue={locationValue}
-      onLocationChange={onLocationChange}
-      onLocationKeyDown={onLocationKeyDown}
-    />
-  ) : (
   <>
     <a
-    href={getListingHref(listing, from)}
-    className="title-click-zone"
-    onClick={handleCardClick}
-  >
-    <div className="title-row">
-      <h3>{cleanMachineTitle(listing.title)}</h3>
-
-     {sellerMode ? (
-<input
-  className="hours-inline hours-input"
-  {...(onHoursChange
-    ? {
-        value:
-          hoursValue ??
-          String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, ""),
-        onChange: e => onHoursChange(e.target.value, listing)
-      }
-    : {
-        defaultValue: String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, "")
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onHoursKeyDown?.(e, listing)}
-  inputMode="numeric"
-  maxLength={5}
-/>
-) : (
-  <h3 className="hours-inline">
-    {formatHours(listing.hours)}
-  </h3>
-)}
-    </div>
-  </a>
-
-                             <div
-  className="card-board-zone"
-  {...(dragHandleProps || {})}
-  {...(!dragHandleProps
-    ? {
-        onPointerDown: startBoardDrag,
-        onPointerMove: moveBoardDrag,
-        onPointerUp: endBoardDrag,
-        onPointerCancel: endBoardDrag
-      }
-    : {})}
->
-
-        <div className="keyword-row">
-          <MachineBadges
-            keywords={normalizedKeywords}
-            variant="card"
-          />
-        </div>
-
-        <div className="price-row">
-          {sellerMode ? (
-        <input
-  className="price-input seller-inline-input"
-  {...(onPriceChange
-    ? {
-        value: priceValue ?? listing.price ?? "",
-        onChange: e => onPriceChange(e.target.value, listing)
-      }
-    : {
-        defaultValue: priceValue ?? listing.price ?? ""
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onPriceKeyDown?.(e, listing)}
-/>
-          ) : (
-            <strong>{listing.price || "Call for price"}</strong>
+      href={getListingHref(listing, from)}
+      className="photo-click-zone"
+      onClick={handleCardClick}
+    >
+      <div
+        className="card-photo"
+        {...(dragHandleProps || {})}
+        {...(!dragHandleProps
+          ? {
+              onPointerDown: startBoardDrag,
+              onPointerMove: moveBoardDrag,
+              onPointerUp: endBoardDrag,
+              onPointerCancel: endBoardDrag
+            }
+          : {})}
+      >
+        <img
+          src={
+            currentPhoto ||
+            "/images/hero-equipment-yard.jpg"
+          }
+          alt={listing.title || "Machine"}
+          draggable={false}
+          className={`card-photo-img photo-fit-${getSmartPhotoFit(
+            currentPhoto
+          )} ${getFrameClass(
+            currentImageObject,
+            "card"
+          )}`}
+          style={getFrameStyle(
+            currentImageObject,
+            "card"
           )}
+          onLoad={event =>
+            handlePhotoLoad(
+              event,
+              currentPhoto
+            )
+          }
+          loading="lazy"
+        />
 
-
-          <div className="meta">
-            
-
-            {sellerMode ? (
-          <div className="location-row">
-<input
-  className="city-input location-input"
-  {...(onLocationChange
-    ? {
-        value: locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity(),
-        onChange: e => {
-          const state =
-            locationValue && String(locationValue).includes(",")
-              ? String(locationValue).split(",")[1]?.trim()
-              : getSellerState();
-
-          onLocationChange(`${e.target.value}, ${state}`.trim(), listing);
-        }
-      }
-    : {
-        defaultValue: getSellerCity()
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onLocationKeyDown?.(e, listing)}
-  maxLength={18}
-/>
- <input
-  className="state-input location-input"
-  {...(onLocationChange
-    ? {
-        value:
-          locationValue && String(locationValue).includes(",")
-            ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
-            : getSellerState(),
-        onChange: e => {
-          const city =
-            locationValue && String(locationValue).includes(",")
-              ? String(locationValue).split(",")[0]?.trim()
-              : getSellerCity();
-
-          onLocationChange(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
-        }
-      }
-    : {
-        defaultValue: getSellerState()
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onLocationKeyDown?.(e, listing)}
-  maxLength={2}
-/>
-</div>
-            ) : (
-              <span>⌖ {listing.location || "Location not listed"}</span>
-            )}
-          </div>
+        <div className="status-photo-pill auction">
+          AUCT
         </div>
 
-        {sellerMode && !creationMode ? (
-  <div className="seller-actions">
+        {images.length > 1 ? (
+          <>
             <button
-  type="button"
-  onClick={e => {
-    stopCardClick(e);
-    window.open(getListingHref(listing, from), "_blank", "noopener,noreferrer");
-  }}
->
-  {launchMode ? "PUBLIC" : "LAUNCH"}
-</button>
-
-<button
-  type="button"
-  onClick={e => {
-    stopCardClick(e);
-    if (launchMode) {
-      window.location.href = "/yard";
-      return;
-    }
-    window.location.href = getListingHref(listing, "account");
-  }}
->
-  {launchMode ? "YARD" : "VIEW"}
-</button>
-
-            {isPaused ? (
-              <button
-                type="button"
-                onClick={e => {
-                  stopCardClick(e);
-                  onReactivate?.(listing);
-                }}
-              >
-                REACTIVATE
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={e => {
-                  stopCardClick(e);
-                  onPause?.(listing);
-                }}
-              >
-                PAUSE
-              </button>
-            )}
+              type="button"
+              className="card-photo-nav left"
+              onClick={event =>
+                changePhoto(event, -1)
+              }
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
 
             <button
               type="button"
-              className="danger-action"
-              onClick={e => {
-                stopCardClick(e);
-                onDelete?.(listing);
-              }}
+              className="card-photo-nav right"
+              onClick={event =>
+                changePhoto(event, 1)
+              }
+              aria-label="Next photo"
             >
-              DELETE
+              ›
             </button>
-          </div>
+
+            <span className="photo-count">
+              {photoIndex + 1}/{images.length}
+            </span>
+          </>
         ) : null}
-
-                        {sellerMode ? (
-  <div className="seller-meta-row">
-    {sellerMode &&
-    !creationMode &&
-    onMachinePlacementChange ? (
-      <div className="seller-placement-control">
-        <IXIMachinePlacementControl
-          machineAccess={machineAccess}
-          machineChannel={machineChannel}
-          disabled={machinePlacementBusy}
-          onChange={nextPlacement =>
-            onMachinePlacementChange(
-              listing,
-              nextPlacement
-            )
-          }
-        />
       </div>
-    ) : null}
+    </a>
 
-    <div className="seller-stats">
-      <span>Age: {listing.age ?? "—"}</span>
-      <span>Views: {listing.views || "—"}</span>
-      <span>States: {listing.states || listing.saves || "—"}</span>
+    <div className="card-body">
+      <IXIAuctionObjectFace1
+        listing={listing}
+        from={from}
+        onListingClick={handleCardClick}
+
+        sellerMode={true}
+
+        lotNumberValue={lotNumberValue}
+        onLotNumberChange={onLotNumberChange}
+
+        hoursValue={hoursValue}
+        onHoursChange={onHoursChange}
+        onHoursKeyDown={onHoursKeyDown}
+
+        priceValue={priceValue}
+        onPriceChange={onPriceChange}
+        onPriceKeyDown={onPriceKeyDown}
+
+        locationValue={locationValue}
+        onLocationChange={onLocationChange}
+        onLocationKeyDown={onLocationKeyDown}
+      />
     </div>
-  </div>
-) : null}
-
-                     </div>
-
-           </>
-
-  )}
-
-    </div>
-
   </>
 )}
          
@@ -804,8 +416,8 @@ style={getFrameStyle(currentImageObject, "card")}
   saved={saved}
   boardColor={boardColor}
   boardOutline={boardOutline}
-  machineFace={machineFace}
-  onCycleMachineFace={onCycleMachineFace}
+  machineFace={auctionFace}
+onCycleMachineFace={onCycleMachineFace}
   onSendFront={onSendFront}
   onSendBack={onSendBack}
   onCycleColor={cycleBoardColor}
@@ -827,9 +439,9 @@ style={getFrameStyle(currentImageObject, "card")}
           line-height: normal;
           isolation: isolate;
 
-          height: 391px;
-          min-height: 391px;
-          max-height: 391px;
+          height: 470px;
+min-height: 470px;
+max-height: 470px;
 
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
@@ -896,43 +508,10 @@ style={getFrameStyle(currentImageObject, "card")}
 }
 
 
-.machine-face-test {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-
-  z-index: 999;
-
-  padding: 4px 8px;
-
-  background: rgba(0,194,255,.9);
-  color: #00141a;
-
-  border-radius: 4px;
-
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .5px;
-}
-
-.mof-hidden {
-  display: none !important;
-}
-
-        .title-click-zone {
-        display: block;
-        color: inherit;
-        text-decoration: none;
-        }
-
 .photo-click-zone {
   display: block;
   color: inherit;
   text-decoration: none;
-}
-
-.card-board-zone {
-  cursor: grab;
 }
 
 .card.board-dragging {
@@ -1063,22 +642,6 @@ style={getFrameStyle(currentImageObject, "card")}
             0 22px 52px rgba(0,0,0,.30);
         }
 
-      .card.seller-mode {
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
-}
-
-.card.seller-mode .card-body {
-  height: 268px;
-  min-height: 268px;
-  max-height: 268px;
-}
-        .card.paused-card {
-          opacity: .58;
-          filter: grayscale(.42);
-        }
-
         .card-photo {
           position: relative;
           height: 220px;
@@ -1199,175 +762,13 @@ style={getFrameStyle(currentImageObject, "card")}
   display: flex;
   flex-direction: column;
 
-  height: 171px;
-  min-height: 171px;
-  max-height: 171px;
+  height: 268px;
+  min-height: 268px;
+  max-height: 268px;
 }
 
-     .title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-
-  height: 36px;
-  min-height: 36px;
-  max-height: 36px;
-
-  overflow: hidden;
-  position: relative;
-}
-
-       .card .title-row h3 {
-          margin: 0;
-          color: #f2f2f2;
-
-          font-size: 15.5px;
-          font-weight: 900;
-          line-height: 1.12;
-          max-width: calc(100% - 58px);
-          letter-spacing: -0.28px;
-          text-rendering: geometricPrecision;
-          display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
-        }
-
-        .hours-inline {
-          color: rgba(255,255,255,.54) !important;
-          font-family: 'Inter', sans-serif !important;
-          font-size: 12.75px !important;
-          font-weight: 500 !important;
-          letter-spacing: .18px;
-          line-height: 1;
-          white-space: nowrap;
-          position: absolute;
-top: 1px;
-right: 0;
-width: 54px;
-text-align: right;
-        }
-
- .hours-input {
-  width: 54px;
-  height: 32px;
-
-  border: 1px solid #343434;
-  border-radius: 8px;
-
-  background: #101010;
-  color: rgba(255,255,255,.62);
-
-  padding: 0 8px;
-
-  font-size: 11px;
-  font-weight: 900;
-
-  text-align: right;
-  outline: none;
-}
-
-.hours-input:focus {
-  border-color: rgba(255,196,0,.42);
-  box-shadow: 0 0 0 1px rgba(255,196,0,.10);
-}
-
-     .keyword-row {
-  height: 48px;
-  min-height: 48px;
-  max-height: 48px;
-  margin: 5px 0 4px;
-  overflow: hidden;
-}
-
-        .keyword-row :global(.machine-badges.card) {
-          max-height: 60px;
-          overflow: hidden;
-        }
-
-     .price-row {
-  position: relative;
-  height: 42px;
-  min-height: 42px;
-  max-height: 42px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-   margin-top: 10px;
-  padding-top: 4px;
-
-  gap: 10px;
-}
-        .price-row::before {
-  content: "";
-  position: absolute;
-
-  top: 4px;
-  z-index: 2;
-  
-  left: 0;
-
-  width: 34%;
-  height: 1px;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,196,0,.22),
-      transparent
-    );
-}
-
-.price-row::after {
-  content: "";
-  position: absolute;
-  top: 8px;
-  left: 0;
-
-  width: 100%;
-  height: 1px;
-
-  background: rgba(255,255,255,.045);
-
-  z-index: 1;
-}
-
-       .price-row strong {
-  position: relative;
-  top: 5px;
-          color: #f2f2f2;
-          font-size: 17.25px;
-          font-weight: 850;
-          letter-spacing: -0.12px;
-          white-space: nowrap;
-        }
-
-       .meta {
-  position: relative;
-  top: 2px;
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          color: #9a9a9a;
-          flex-wrap: nowrap;
-          justify-content: flex-end;
-          text-align: right;
-          margin-left: auto;
-          min-width: 0;
-        }
-
-        .meta span {
-          color: rgba(255,255,255,.48);
-          font-size: 10.5px;
-          font-weight: 850;
-          letter-spacing: .42px;
-          white-space: nowrap;
-          text-transform: uppercase;
-        }
-
+    
+       
         
 
 .status-photo-pill {
@@ -1399,12 +800,6 @@ text-align: right;
     0 8px 20px rgba(0,0,0,.28);
 }
 
-.status-photo-pill.private {
-  background: rgba(120,120,120,.16);
-  border-color: rgba(190,190,190,.34);
-  color: rgba(255,255,255,.66);
-}
-
 .status-photo-pill.auction {
   background: rgba(255,196,0,.14);
   border-color: rgba(255,196,0,.52);
@@ -1416,242 +811,6 @@ text-align: right;
     0 0 14px rgba(255,196,0,.08);
 }
 
-        .workflow-photo-pill {
-          position: absolute;
-          left: 10px;
-          top: 10px;
-          z-index: 6;
-        }
-
-        .workflow-photo-pill select {
-          height: 24px;
-          max-width: 132px;
-
-          border: 1px solid rgba(255,255,255,.18);
-          border-radius: 999px;
-
-          background:
-            linear-gradient(45deg, transparent 50%, #FFC400 50%),
-            linear-gradient(135deg, #FFC400 50%, transparent 50%),
-            rgba(0,0,0,.72);
-
-          background-position:
-            calc(100% - 13px) 50%,
-            calc(100% - 8px) 50%;
-
-          background-size: 5px 5px, 5px 5px;
-          background-repeat: no-repeat;
-
-          color: #f2f2f2;
-          padding: 0 24px 0 9px;
-
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: .35px;
-          text-transform: uppercase;
-
-          outline: none;
-          appearance: none;
-          cursor: pointer;
-        }
-
-        .price-input,
-        .location-input {
-          height: 32px;
-          border: 1px solid #343434;
-          border-radius: 8px;
-          background: #101010;
-          color: #F2F2F2;
-          padding: 0 10px;
-          font-size: 11px;
-          font-weight: 900;
-          outline: none;
-        }
-
-        .price-input {
-          width: 62px;
-        }
-
-        .location-input {
-          width: 72px;
-          text-align: right;
-          color: rgba(255,255,255,.62);
-          text-transform: uppercase;
-          letter-spacing: .28px;
-        }
-
-       .location-row {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  order: 2;
-}
-
-.city-input {
-  width: 72px;
-}
-
-.state-input {
-  width: 30px;
-  text-transform: uppercase;
-}
-
-        .price-input:focus,
-        .location-input:focus {
-          border-color: rgba(255,196,0,.42);
-          box-shadow: 0 0 0 1px rgba(255,196,0,.10);
-        }
-
-        .status-pill {
-          height: 28px;
-          padding: 0 10px;
-          border-radius: 999px;
-
-          background: rgba(56,161,105,.12);
-          border: 1px solid rgba(56,161,105,.35);
-          color: #38A169;
-
-          font-size: 9px;
-          font-weight: 900;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          white-space: nowrap;
-        }
-
-        .status-pill.paused {
-          background: rgba(120,120,120,.14);
-          border-color: rgba(160,160,160,.35);
-          color: #A0A0A0;
-        }
-
-        .seller-actions {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
-          margin-top: 9px;
-        }
-
-        .seller-actions button {
-          height: 32px;
-          border-radius: 8px;
-          border: 1px solid #343434;
-          background: #101010;
-          color: #D6D6D6;
-
-          font-size: 10px;
-          font-weight: 900;
-
-          cursor: pointer;
-
-          position: relative;
-          top: -5px;
-
-          transition:
-            border-color .14s ease,
-            color .14s ease,
-            background .14s ease,
-            transform .14s ease;
-        }
-
-.launch-action {
-  border-color: rgba(0,194,255,.42) !important;
-  color: rgba(0,194,255,.92) !important;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,194,255,.09),
-      rgba(0,194,255,.03)
-    ) !important;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.03),
-    0 0 0 1px rgba(0,194,255,.04);
-}
-
-.launch-action:hover {
-  border-color: rgba(0,194,255,.72) !important;
-  color: #6FE8FF !important;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,194,255,.14),
-      rgba(0,194,255,.05)
-    ) !important;
-}
-       .seller-actions button:hover:not(.launch-action) {
-  transform: translateY(-1px);
-  border-color: rgba(255,196,0,.45);
-  color: #FFC400;
-}
-
-        .danger-action:hover {
-          border-color: rgba(229,62,62,.45) !important;
-          color: #E53E3E !important;
-        }
-
-        .seller-placement-control {
-  width: 132px;
-  flex: 0 0 132px;
-}
-        
-        .seller-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  margin-top: 1px;
-  padding-top: 5px;
-
-  border-top: 1px solid rgba(255,255,255,.045);
-}
-
-.seller-stats {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 9px;
-
-  min-width: 0;
-  margin-left: auto;
-
-  color: rgba(255,255,255,.38);
-
-  font-size: 8.5px;
-  font-weight: 850;
-
-  white-space: nowrap;
-}
-
-               @media (max-width: 850px) {
-          .card.seller-mode {
-            min-height: 450px;
-          }
-
-          .seller-actions {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .price-row {
-            flex-wrap: wrap;
-          }
-
-          .meta {
-            width: 100%;
-          }
-
-                   .location-input {
-            width: 100%;
-            text-align: left;
-          }
-        }
       `}</style>
     </div>
   );
