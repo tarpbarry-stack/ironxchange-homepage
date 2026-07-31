@@ -1325,9 +1325,9 @@ toggleSearchSurfaceRevealed
   <section className="saved-environment-shell">
    <IXIEnvironmentRail
   activeEnvironment="AOS"
-  hasAccount={!!sdk}
-  hasRelationship={true}
-  hasInventory={!!sdk}
+  hasAccount={!!aosEntity}
+  hasRelationship={!!aosEntity}
+  hasInventory={listings.length > 0}
   armedDestination={armedDestination}
   toggleArmedDestination={toggleArmedDestination}
 />
