@@ -6,7 +6,10 @@ import {
   getMachineCardFamily
 } from "./getMachineCardFamily";
 
-export default function IXIMachineCard(props) {
+export default function IXIMachineCard({
+  cardContext = "workspace",
+  ...props
+}) {
   const cardFamily =
     getMachineCardFamily(props.listing);
 
