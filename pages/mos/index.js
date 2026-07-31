@@ -89,7 +89,7 @@ function formatMoney(value) {
   });
 }
 
-export default function IXIAosPage()
+export default function IXIAosPage() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
 
