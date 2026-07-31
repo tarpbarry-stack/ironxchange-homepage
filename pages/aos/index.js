@@ -1322,55 +1322,6 @@ toggleSearchSurfaceRevealed
     cardScaleMode={cardScaleMode}
   >
     <main>
-  <section className="aos-entity-header">
-    <div className="aos-entity-identity">
-      <span className="aos-eyebrow">
-        IXI ASSET OPERATING SYSTEM
-      </span>
-
-      <h1>
-        {aosEntity?.displayName ||
-          "IXI ENTITY"}
-      </h1>
-
-      <p>ENTITY OPERATING ENVIRONMENT</p>
-    </div>
-
-    <div className="aos-entity-stats">
-      <div>
-        <strong>
-          {listings.length}
-        </strong>
-
-        <span>OWNED ASSETS</span>
-      </div>
-
-      <div>
-        <strong>
-          {aosObjects.length}
-        </strong>
-
-        <span>AOS OBJECTS</span>
-      </div>
-
-      <div>
-        <strong>
-          {systemIndexes.length}
-        </strong>
-
-        <span>INDEXES</span>
-      </div>
-    </div>
-
-    <div className="aos-entity-actions">
-      <button
-        type="button"
-        className="aos-add-button"
-      >
-        + ADD
-      </button>
-    </div>
-  </section>
 
   <section className="saved-environment-shell">
    <IXIEnvironmentRail
@@ -1382,7 +1333,60 @@ toggleSearchSurfaceRevealed
   toggleArmedDestination={toggleArmedDestination}
 />
   </section>
-      
+
+ <section className="aos-scoreboard">
+  <strong className="aos-scoreboard-name">
+    {aosEntity?.displayName ||
+      "IXI ENTITY"}
+  </strong>
+
+  <div className="aos-scoreboard-metrics">
+    <span>
+      {aosScoreboard.assets} Assets
+    </span>
+
+    <i aria-hidden="true">|</i>
+
+    <span>
+      {aosScoreboard.jobs} Jobs
+    </span>
+
+    <i aria-hidden="true">|</i>
+
+    <span>
+      {aosScoreboard.forSale} For Sale
+    </span>
+
+    <i aria-hidden="true">|</i>
+
+    <span>
+      {formatAosValue(
+        aosScoreboard.value
+      )} Value
+    </span>
+  </div>
+
+  <div className="aos-scoreboard-actions">
+    <button
+      type="button"
+      className="aos-scoreboard-action"
+      aria-label="Add"
+      title="Add"
+    >
+      +
+    </button>
+
+    <button
+      type="button"
+      className="aos-scoreboard-action"
+      aria-label="More actions"
+      title="More actions"
+    >
+      ⋯
+    </button>
+  </div>
+</section>
+   
 
 <IXIChassis>
   <aside className="ixi-command-left">
@@ -1611,143 +1615,122 @@ toggleSearchSurfaceRevealed
             #0b0b0b;
         }
 
-.aos-entity-header {
-  width: 100%;
-  margin: 0 auto 16px;
-  padding: 14px 16px;
 
-  display: grid;
-  grid-template-columns:
-    minmax(280px, 1fr)
-    auto
-    minmax(120px, 1fr);
-
-  align-items: center;
-  gap: 24px;
-
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.025),
-      rgba(255,255,255,0)
-    ),
-    #111;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.025),
-    0 12px 28px rgba(0,0,0,.16);
-}
-
-.aos-entity-identity {
-  min-width: 0;
-}
-
-.aos-eyebrow {
-  display: block;
-  margin-bottom: 5px;
-
-  color: #FFC400;
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .75px;
-}
-
-.aos-entity-identity h1 {
-  margin: 0;
-
-  color: #f2f2f2;
-
-  font-size: 20px;
-  font-weight: 950;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-
-.aos-entity-identity p {
-  margin: 5px 0 0;
-
-  color: rgba(255,255,255,.38);
-
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .45px;
-  text-transform: uppercase;
-}
-
-.aos-entity-stats {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-
-.aos-entity-stats div {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  white-space: nowrap;
-}
-
-.aos-entity-stats strong {
-  color: #f2f2f2;
-
-  font-size: 20px;
-  font-weight: 950;
-}
-
-.aos-entity-stats span {
-  color: rgba(255,255,255,.34);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .5px;
-}
-
-.aos-entity-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.aos-add-button {
-  height: 34px;
-  padding: 0 16px;
-
-  border: 1px solid rgba(255,196,0,.42);
-  border-radius: 7px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.06),
-      rgba(255,196,0,0)
-    ),
-    #101010;
-
-  color: #FFC400;
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .55px;
-
-  cursor: pointer;
-}
-
-.aos-add-button:hover {
-  border-color: rgba(255,196,0,.72);
-
-  box-shadow:
-    0 0 12px rgba(255,196,0,.12);
-}
 
        .saved-environment-shell {
   width: 100%;
   margin: 0 auto;
 }
 
+.aos-scoreboard {
+  width: min(100%, 1320px);
+  height: 30px;
 
+  margin: 2px auto 8px;
+  padding: 0 8px 0 12px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(180px, auto)
+    1fr
+    auto;
+
+  align-items: center;
+  gap: 18px;
+
+  border-top:
+    1px solid rgba(255,255,255,.045);
+
+  border-bottom:
+    1px solid rgba(255,255,255,.055);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.012),
+      rgba(255,255,255,0)
+    );
+
+  white-space: nowrap;
+}
+
+.aos-scoreboard-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  color: rgba(255,255,255,.78);
+
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.aos-scoreboard-metrics {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  overflow: hidden;
+}
+
+.aos-scoreboard-metrics span {
+  color: rgba(255,255,255,.43);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .42px;
+  text-transform: uppercase;
+}
+
+.aos-scoreboard-metrics i {
+  color: rgba(255,255,255,.12);
+
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.aos-scoreboard-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.aos-scoreboard-action {
+  width: 22px;
+  height: 18px;
+
+  padding: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 3px;
+
+  background: rgba(255,255,255,.025);
+
+  color: rgba(255,196,0,.72);
+
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.aos-scoreboard-action:hover {
+  background: rgba(255,196,0,.07);
+  color: #FFC400;
+
+  box-shadow:
+    0 0 8px rgba(255,196,0,.09);
+}
 
        
 
@@ -2050,21 +2033,6 @@ toggleSearchSurfaceRevealed
   .ixi-pocket-right {
     display: none !important;
   }
-}
-
-.aos-entity-header {
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-.aos-entity-stats {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-
-.aos-entity-actions {
-  justify-content: flex-start;
 }
 
        .workspace-controls {
@@ -3212,6 +3180,38 @@ outline: none;
   main {
     padding: 18px 4% 48px;
   }
+
+.aos-scoreboard {
+  height: auto;
+  min-height: 30px;
+
+  padding: 6px 7px;
+
+  grid-template-columns: 1fr auto;
+  gap: 5px 10px;
+}
+
+.aos-scoreboard-name {
+  font-size: 8px;
+}
+
+.aos-scoreboard-metrics {
+  grid-column: 1 / -1;
+
+  justify-content: flex-start;
+  gap: 6px;
+
+  overflow-x: auto;
+}
+
+.aos-scoreboard-metrics span {
+  font-size: 6px;
+}
+
+.aos-scoreboard-actions {
+  grid-column: 2;
+  grid-row: 1;
+}
 
   .desktop-search-surface {
   display: none;
