@@ -252,8 +252,6 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
-  const id = String(getListingId(listing));
-
 const presentation =
   transportedPresentation ||
   (sellerMode ? "seller" : "buyer");
@@ -268,11 +266,6 @@ const useAuctionPresentation =
   presentation === "auction";
 
 const publicData =
-  listing.publicData ||
-  listing.attributes?.publicData ||
-  {};
-
-  const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
   {};
