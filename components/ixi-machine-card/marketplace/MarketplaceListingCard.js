@@ -380,7 +380,7 @@ function getSellerState() {
 }
 
 function handleCardClick() {
-  captureIXEvent("listing_card_clicked", {
+  captureIXEvent("marketplace_listing_card_clicked", {
     listingId: id,
     title: listing.title,
     category: listing.category || listing.type,
@@ -388,7 +388,8 @@ function handleCardClick() {
     model: listing.model,
     price: listing.price,
     location: listing.location,
-    from
+    from,
+    cardContext
   });
 }
 
@@ -420,7 +421,7 @@ function handlePhotoLoad(e, photoUrl) {
   return (
   <div
     data-listing-card-id={id}
-    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+    className={`card marketplace-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
