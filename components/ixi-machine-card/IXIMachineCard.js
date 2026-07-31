@@ -21,9 +21,19 @@ export default function IXIMachineCard({
     cardFamily
   });
 
-  if (cardFamily === "auction") {
-  return <AuctionListingCard {...props} />;
+ if (cardFamily === "auction") {
+  return (
+    <AuctionListingCard
+      {...props}
+      cardContext={cardContext}
+    />
+  );
 }
 
-return <ListingCard {...props} />;
+return (
+  <ListingCard
+    {...props}
+    cardContext={cardContext}
+  />
+);
 }
