@@ -1,5 +1,7 @@
 import ListingCard from "../ListingCard";
 
+import AuctionListingCard from "./auction/AuctionListingCard";
+
 import {
   getMachineCardFamily
 } from "./getMachineCardFamily";
@@ -16,5 +18,9 @@ export default function IXIMachineCard(props) {
     cardFamily
   });
 
-  return <ListingCard {...props} />;
+  if (cardFamily === "auction") {
+  return <AuctionListingCard {...props} />;
+}
+
+return <ListingCard {...props} />;
 }
