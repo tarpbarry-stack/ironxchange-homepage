@@ -1415,6 +1415,7 @@ toggleSearchSurfaceRevealed
 >
 <IXIBoard
   items={visibleSavedListings}
+  cardContext="inventory"
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
