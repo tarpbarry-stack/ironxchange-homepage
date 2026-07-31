@@ -1,6 +1,8 @@
 import ListingCard from "../ListingCard";
 import AuctionListingCard from "./auction/AuctionListingCard";
 import PrivateListingCard from "./private/PrivateListingCard";
+import MarketplaceListingCard from
+  "./marketplace/MarketplaceListingCard";
 
 import {
   getMachineCardFamily
@@ -40,7 +42,7 @@ export default function IXIMachineCard({
 }
 
 return (
-  <ListingCard
+  <MarketplaceListingCard
     {...props}
     cardContext={cardContext}
   />
