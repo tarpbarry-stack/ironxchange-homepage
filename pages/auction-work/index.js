@@ -1481,7 +1481,8 @@ if (armedDestination === "stackTop") {
       visibleSavedListings.length === 1
         ? `${cardScaleMetrics.width}px`
         : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-    gap: `${cardScaleMetrics.gap}px`
+    columnGap: `${cardScaleMetrics.gap}px`,
+rowGap: `${cardScaleMetrics.gap + 90}px`
   }}
 >
 <IXIBoard
