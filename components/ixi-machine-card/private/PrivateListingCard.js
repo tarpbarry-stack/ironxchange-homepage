@@ -535,30 +535,6 @@ style={getFrameStyle(currentImageObject, "card")}
 </a>
 
 <div className="card-body">
-  {isAuctionObject ? (
-    <IXIAuctionObjectFace1
-      listing={listing}
-      from={from}
-      onListingClick={handleCardClick}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      priceValue={priceValue}
-      onPriceChange={onPriceChange}
-      onPriceKeyDown={onPriceKeyDown}
-
-      locationValue={locationValue}
-      onLocationChange={onLocationChange}
-      onLocationKeyDown={onLocationKeyDown}
-    />
-  ) : (
   <>
     <a
     href={getListingHref(listing, from)}
@@ -782,11 +758,8 @@ style={getFrameStyle(currentImageObject, "card")}
 
                      </div>
 
-           </>
-
-  )}
-
-    </div>
+            </>
+</div>
 
   </>
 )}
