@@ -12,6 +12,8 @@ import {
   getListingId,
 } from "../../../lib/listingFormatters";
 
+import MachineBadges from "../../MachineBadges";
+
 import IXIMachinePlacementControl
   from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
