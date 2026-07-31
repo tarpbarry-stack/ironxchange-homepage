@@ -257,9 +257,12 @@ function endBoardDrag(e) {
   const isWorkspaceContext =
   cardContext === "workspace";
 
-const isInventoryContext =
+  const isInventoryContext =
   cardContext === "inventory" ||
   cardContext === "enterprise";
+
+  const sellerMode =
+  isInventoryContext;
 
   const publicData =
   listing.publicData ||
@@ -449,26 +452,7 @@ function handlePhotoLoad(e, photoUrl) {
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
-  isAuctionObject ? (
-    <IXIAuctionObjectFace2
-  listing={listing}
-  sourceListingUrl={sourceListingUrl}
-  dragHandleProps={dragHandleProps}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      openingBidValue={priceValue}
-      onOpeningBidChange={onPriceChange}
-      onOpeningBidKeyDown={onPriceKeyDown}
-    />
-  ) : sellerMode ? (
+  sellerMode ? (
     <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={dragHandleProps}
