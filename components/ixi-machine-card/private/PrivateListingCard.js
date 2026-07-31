@@ -75,9 +75,6 @@ onPriceChange,
 onPriceKeyDown,
 savingPrice = false,
 
-lotNumberValue,
-onLotNumberChange,
-
 hoursValue,
 onHoursChange,
 onHoursKeyDown,
@@ -276,30 +273,8 @@ const resolvedMachineChannel =
   listing.attributes?.metadata?.machineChannel ||
   "marketplace";
 
-const isAuctionObject =
-  Boolean(
-    resolvedMachineChannel === "auction" ||
-    listing.isAuctionObject === true ||
-    publicData.isAuctionObject === true ||
-    listing.auction ||
-    publicData.auction ||
-    listing.auctionData ||
-    publicData.auctionData
-  );
-
-const sellerPlacementLabel =
-  resolvedMachineAccess === "private"
-    ? "PRIV"
-    : resolvedMachineChannel === "auction"
-      ? "AUCT"
-      : "LIVE";
-
-const sellerPlacementClass =
-  resolvedMachineAccess === "private"
-    ? "private"
-    : resolvedMachineChannel === "auction"
-      ? "auction"
-      : "live";
+const sellerPlacementLabel = "PRIV";
+const sellerPlacementClass = "private";
   
 const rawLocation =
   locationValue ||
@@ -1359,17 +1334,6 @@ text-align: right;
   background: rgba(120,120,120,.16);
   border-color: rgba(190,190,190,.34);
   color: rgba(255,255,255,.66);
-}
-
-.status-photo-pill.auction {
-  background: rgba(255,196,0,.14);
-  border-color: rgba(255,196,0,.52);
-  color: #FFC400;
-
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.05),
-    0 8px 20px rgba(0,0,0,.28),
-    0 0 14px rgba(255,196,0,.08);
 }
 
         .workflow-photo-pill {
