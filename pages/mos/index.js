@@ -100,6 +100,7 @@ export default function IXIAosPage() {
 
   const [objects, setObjects] = useState([]);
   const [ownedListings, setOwnedListings] = useState([]);
+  const [systemIndexes, setSystemIndexes] = useState([]);
   const [projections, setProjections] = useState({});
 
   const [currentContainer, setCurrentContainer] = useState(null);
@@ -264,6 +265,12 @@ setOwnedListings(
     : []
 );
 
+setSystemIndexes(
+  Array.isArray(environment.systemIndexes)
+    ? environment.systemIndexes
+    : []
+);
+        
 setObjects(loadedObjects);
 
 setProjections(
@@ -618,6 +625,37 @@ setContainerPath([]);
             </button>
           </div>
         </section>
+
+<section className="mos-system-index-proof">
+  {systemIndexes.map(index => (
+    <button
+      key={index.indexId}
+      type="button"
+      className="mos-system-index-proof-card"
+      disabled
+    >
+      <strong>
+        {index.label}
+      </strong>
+
+      <span>
+        {index.itemCount} ITEMS
+      </span>
+
+      <span>
+        {formatMoney(index.value)}
+      </span>
+
+      {index.indexId === "for-sale" ? (
+        <small>
+          {index.metadata?.marketplaceCount || 0} MARKETPLACE
+          {" · "}
+          {index.metadata?.auctionCount || 0} AUCTION
+        </small>
+      ) : null}
+    </button>
+  ))}
+</section>
 
         {currentContainer ? (
           <section className="mos-container-context">
@@ -1168,6 +1206,57 @@ setContainerPath([]);
           color: rgba(255,255,255,.40);
         }
 
+        .mos-system-index-proof {
+  width: 100%;
+  margin: 0 auto 24px;
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.mos-system-index-proof-card {
+  min-height: 84px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.025),
+      rgba(255, 255, 255, 0)
+    ),
+    #0e0e0e;
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+}
+
+.mos-system-index-proof-card strong {
+  color: rgba(255, 196, 0, 0.9);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.8px;
+}
+
+.mos-system-index-proof-card span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.45px;
+}
+
+.mos-system-index-proof-card small {
+  color: rgba(0, 194, 255, 0.7);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.35px;
+}
         @media (max-width: 900px) {
           .mos-entity-header {
             grid-template-columns: 1fr;
