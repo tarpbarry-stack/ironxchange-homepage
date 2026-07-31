@@ -89,7 +89,7 @@ function formatMoney(value) {
   });
 }
 
-export default function IXIMosPage() {
+export default function IXIAosPage()
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
 
@@ -243,25 +243,32 @@ export default function IXIMosPage() {
         }
 
         const loadedObjects =
-          Array.isArray(environment.objects)
-            ? environment.objects
-            : [];
+  Array.isArray(
+    environment.rootObjects
+  )
+    ? environment.rootObjects
+    : [];
 
-        setUserId(
-          String(environment.userId || "")
-        );
+setUserId(
+  String(environment.userId || "")
+);
 
-        setEntity(
-          environment.entity || null
-        );
+setEntity(
+  environment.entity || null
+);
 
-        setObjects(loadedObjects);
-        setCurrentContainer(null);
-        setContainerPath([]);
+setObjects(loadedObjects);
 
-        await hydrateProjectionMap(
-          loadedObjects
-        );
+setProjections(
+  environment.projections &&
+  typeof environment.projections ===
+    "object"
+    ? environment.projections
+    : {}
+);
+
+setCurrentContainer(null);
+setContainerPath([]);
       } catch (loadError) {
         console.error(
           "MOS ENVIRONMENT LOAD FAILED:",
@@ -526,8 +533,8 @@ export default function IXIMosPage() {
     <>
       <Head>
         <title>
-          IXI MOS | IronXchange
-        </title>
+  IXI AOS | IronXchange
+</title>
       </Head>
 
       <Navbar />
@@ -536,7 +543,7 @@ export default function IXIMosPage() {
         <section className="mos-entity-header">
           <div>
             <span className="mos-eyebrow">
-              IXI MACHINE OPERATING SYSTEM
+              IXI ASSET OPERATING SYSTEM
             </span>
 
             <h1>
