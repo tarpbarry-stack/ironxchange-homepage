@@ -1,4 +1,3 @@
-import ListingCard from "../ListingCard";
 import AuctionListingCard from "./auction/AuctionListingCard";
 import PrivateListingCard from "./private/PrivateListingCard";
 import MarketplaceListingCard from
