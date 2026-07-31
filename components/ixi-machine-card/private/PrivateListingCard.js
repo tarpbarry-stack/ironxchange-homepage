@@ -261,9 +261,6 @@ function endBoardDrag(e) {
   cardContext === "inventory" ||
   cardContext === "enterprise";
 
-  const sellerMode =
-  isInventoryContext;
-
   const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
