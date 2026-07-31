@@ -41,7 +41,9 @@ import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
-import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
+import {
+  getIXIAuctionCardScalePreset
+} from "../../lib/ixiCardScalePresets";
 import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
 import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
 import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
@@ -197,8 +199,7 @@ const DIRECT_CONTAINER_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
-
+  const cardScaleMetrics = getIXIAuctionCardScalePreset(cardScaleMode);
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
@@ -1481,8 +1482,8 @@ if (armedDestination === "stackTop") {
       visibleSavedListings.length === 1
         ? `${cardScaleMetrics.width}px`
         : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-   columnGap: `${Math.max(cardScaleMetrics.gap - 8, 8)}px`,
-rowGap: `${cardScaleMetrics.gap + 35}px`
+   columnGap: `${cardScaleMetrics.gap}px`,
+rowGap: `${cardScaleMetrics.gap + 90}px`
   }}
 >
 <IXIBoard
