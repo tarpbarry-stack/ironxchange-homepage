@@ -1322,6 +1322,56 @@ toggleSearchSurfaceRevealed
     cardScaleMode={cardScaleMode}
   >
     <main>
+  <section className="aos-entity-header">
+    <div className="aos-entity-identity">
+      <span className="aos-eyebrow">
+        IXI ASSET OPERATING SYSTEM
+      </span>
+
+      <h1>
+        {aosEntity?.displayName ||
+          "IXI ENTITY"}
+      </h1>
+
+      <p>ENTITY OPERATING ENVIRONMENT</p>
+    </div>
+
+    <div className="aos-entity-stats">
+      <div>
+        <strong>
+          {listings.length}
+        </strong>
+
+        <span>OWNED ASSETS</span>
+      </div>
+
+      <div>
+        <strong>
+          {aosObjects.length}
+        </strong>
+
+        <span>AOS OBJECTS</span>
+      </div>
+
+      <div>
+        <strong>
+          {systemIndexes.length}
+        </strong>
+
+        <span>INDEXES</span>
+      </div>
+    </div>
+
+    <div className="aos-entity-actions">
+      <button
+        type="button"
+        className="aos-add-button"
+      >
+        + ADD
+      </button>
+    </div>
+  </section>
+
   <section className="saved-environment-shell">
    <IXIEnvironmentRail
   activeEnvironment="AOS"
@@ -1560,6 +1610,137 @@ toggleSearchSurfaceRevealed
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
         }
+
+.aos-entity-header {
+  width: 100%;
+  margin: 0 auto 16px;
+  padding: 14px 16px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    auto
+    minmax(120px, 1fr);
+
+  align-items: center;
+  gap: 24px;
+
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(255,255,255,0)
+    ),
+    #111;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 12px 28px rgba(0,0,0,.16);
+}
+
+.aos-entity-identity {
+  min-width: 0;
+}
+
+.aos-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #FFC400;
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .75px;
+}
+
+.aos-entity-identity h1 {
+  margin: 0;
+
+  color: #f2f2f2;
+
+  font-size: 20px;
+  font-weight: 950;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.aos-entity-identity p {
+  margin: 5px 0 0;
+
+  color: rgba(255,255,255,.38);
+
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.aos-entity-stats {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.aos-entity-stats div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.aos-entity-stats strong {
+  color: #f2f2f2;
+
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.aos-entity-stats span {
+  color: rgba(255,255,255,.34);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .5px;
+}
+
+.aos-entity-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.aos-add-button {
+  height: 34px;
+  padding: 0 16px;
+
+  border: 1px solid rgba(255,196,0,.42);
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,196,0,.06),
+      rgba(255,196,0,0)
+    ),
+    #101010;
+
+  color: #FFC400;
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .55px;
+
+  cursor: pointer;
+}
+
+.aos-add-button:hover {
+  border-color: rgba(255,196,0,.72);
+
+  box-shadow:
+    0 0 12px rgba(255,196,0,.12);
+}
 
        .saved-environment-shell {
   width: 100%;
@@ -1871,7 +2052,20 @@ toggleSearchSurfaceRevealed
   }
 }
 
+.aos-entity-header {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
 
+.aos-entity-stats {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.aos-entity-actions {
+  justify-content: flex-start;
+}
 
        .workspace-controls {
   margin: 0 auto;
