@@ -385,7 +385,19 @@ function handlePhotoLoad(e, photoUrl) {
     </a>
 
     <div className="card-body">
-      <IXIAuctionObjectFace1
+  <div
+    className="card-board-zone"
+    {...(dragHandleProps || {})}
+    {...(!dragHandleProps
+      ? {
+          onPointerDown: startBoardDrag,
+          onPointerMove: moveBoardDrag,
+          onPointerUp: endBoardDrag,
+          onPointerCancel: endBoardDrag
+        }
+      : {})}
+  >
+    <IXIAuctionObjectFace1
         listing={listing}
         from={from}
         onListingClick={handleCardClick}
@@ -405,9 +417,10 @@ function handlePhotoLoad(e, photoUrl) {
 
         locationValue={locationValue}
         onLocationChange={onLocationChange}
-        onLocationKeyDown={onLocationKeyDown}
-      />
-    </div>
+              onLocationKeyDown={onLocationKeyDown}
+    />
+  </div>
+</div>
   </>
 )}
          
@@ -546,8 +559,10 @@ max-height: 470px;
   z-index: 20;
 }
 
-
-
+.card-board-zone {
+  height: 100%;
+  cursor: grab;
+}
 .card.board-color-none .rail-color::after {
   background: rgba(255,255,255,.14);
 }
