@@ -99,6 +99,7 @@ export default function IXIAosPage() {
   const [entity, setEntity] = useState(null);
 
   const [objects, setObjects] = useState([]);
+  const [ownedListings, setOwnedListings] = useState([]);
   const [projections, setProjections] = useState({});
 
   const [currentContainer, setCurrentContainer] = useState(null);
@@ -255,6 +256,12 @@ setUserId(
 
 setEntity(
   environment.entity || null
+);
+
+setOwnedListings(
+  Array.isArray(environment.ownedListings)
+    ? environment.ownedListings
+    : []
 );
 
 setObjects(loadedObjects);
@@ -567,6 +574,14 @@ setContainerPath([]);
               <span>OBJECTS</span>
             </div>
 
+<div>
+  <strong>
+    {ownedListings.length}
+  </strong>
+
+  <span>OWNED LISTINGS</span>
+</div>
+              
             <div>
               <strong>
                 {formatMoney(
