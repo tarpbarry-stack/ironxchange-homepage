@@ -254,6 +254,11 @@ function endBoardDrag(e) {
   const useSellerPresentation =
   sellerMode || isInventoryContext;
 
+  const presentation =
+  useSellerPresentation
+    ? "seller"
+    : "comparison";
+
   const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
@@ -389,7 +394,7 @@ function handlePhotoLoad(e, photoUrl) {
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
-    } ${useSellerPresentation ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    } ${presentation === "seller" ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
@@ -405,7 +410,7 @@ function handlePhotoLoad(e, photoUrl) {
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
-useSellerPresentation ? (
+presentation === "seller" ? (
   <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={dragHandleProps}
@@ -451,7 +456,7 @@ style={getFrameStyle(currentImageObject, "card")}
   loading="lazy"
 />
 
-   {useSellerPresentation ? (
+   {presentation === "seller" ? (
   <div
     className={`status-photo-pill ${sellerPlacementClass}`}
   >
@@ -497,7 +502,7 @@ style={getFrameStyle(currentImageObject, "card")}
     <div className="title-row">
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
-     {useSellerPresentation ? (
+     {presentation === "seller" ? (
   <input
     className="hours-inline hours-input"
   {...(onHoursChange
@@ -566,7 +571,7 @@ style={getFrameStyle(currentImageObject, "card")}
           <div className="meta">
             
 
-            {useSellerPresentation ? (
+            {presentation === "seller" ? (
   <div className="location-row">
 <input
   className="city-input location-input"
@@ -620,7 +625,7 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         </div>
 
-       {useSellerPresentation && !creationMode ? (
+       {presentation === "seller" && !creationMode ? (
   <div className="seller-actions">
             <button
   type="button"
@@ -681,9 +686,9 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         ) : null}
 
-                        {useSellerPresentation ? (
+                        {presentation === "seller" ? (
   <div className="seller-meta-row">
-    {useSellerPresentation &&
+    {presentation === "seller" &&
 !creationMode &&
 onMachinePlacementChange ? (
       <div className="seller-placement-control">
