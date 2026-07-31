@@ -31,12 +31,6 @@ import IXIMachineObjectFace3
 import IXIMachineObjectFace4
   from "../../ixi-machine-object/IXIMachineObjectFace4";
 
-import IXIAuctionObjectFace1
-  from "../../ixi-auction-object/IXIAuctionObjectFace1";
-
-import IXIAuctionObjectFace2
-  from "../../ixi-auction-object/IXIAuctionObjectFace2";
-
 import {
   getFrameClass,
   getFrameStyle
@@ -61,11 +55,10 @@ function getBulkImageUrls(listing = {}) {
   return [];
 }
 
-export default function ListingCard({
+export default function MarketplaceListingCard({
   listing = {},
   cardContext = "workspace",
   presentation: transportedPresentation,
-  sourceListingUrl = "",
   saved = false,
   onToggleSaved,
   showSave = true,
@@ -80,9 +73,6 @@ export default function ListingCard({
 onPriceChange,
 onPriceKeyDown,
 savingPrice = false,
-
-lotNumberValue,
-onLotNumberChange,
 
 hoursValue,
 onHoursChange,
@@ -264,9 +254,6 @@ const useSellerPresentation =
 const useBuyerPresentation =
   presentation === "buyer";
 
-const useAuctionPresentation =
-  presentation === "auction";
-
 const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
@@ -288,30 +275,15 @@ const resolvedMachineChannel =
   listing.attributes?.metadata?.machineChannel ||
   "marketplace";
 
-const isAuctionObject =
-  Boolean(
-    resolvedMachineChannel === "auction" ||
-    listing.isAuctionObject === true ||
-    publicData.isAuctionObject === true ||
-    listing.auction ||
-    publicData.auction ||
-    listing.auctionData ||
-    publicData.auctionData
-  );
-
 const sellerPlacementLabel =
   resolvedMachineAccess === "private"
     ? "PRIV"
-    : resolvedMachineChannel === "auction"
-      ? "AUCT"
-      : "LIVE";
+    : "LIVE";
 
 const sellerPlacementClass =
   resolvedMachineAccess === "private"
     ? "private"
-    : resolvedMachineChannel === "auction"
-      ? "auction"
-      : "live";
+    : "live";
   
 const rawLocation =
   locationValue ||
@@ -456,26 +428,7 @@ function handlePhotoLoad(e, photoUrl) {
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
-  isAuctionObject ? (
-    <IXIAuctionObjectFace2
-  listing={listing}
-  sourceListingUrl={sourceListingUrl}
-  dragHandleProps={dragHandleProps}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      openingBidValue={priceValue}
-      onOpeningBidChange={onPriceChange}
-      onOpeningBidKeyDown={onPriceKeyDown}
-    />
-  ) : useSellerPresentation ? (
+  useSellerPresentation ? (
     <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={dragHandleProps}
@@ -558,31 +511,6 @@ style={getFrameStyle(currentImageObject, "card")}
 </a>
 
 <div className="card-body">
-  {isAuctionObject ? (
-    <IXIAuctionObjectFace1
-      listing={listing}
-      from={from}
-      onListingClick={handleCardClick}
-
-      sellerMode={sellerMode}
-
-      lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
-
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
-
-      priceValue={priceValue}
-      onPriceChange={onPriceChange}
-      onPriceKeyDown={onPriceKeyDown}
-
-      locationValue={locationValue}
-      onLocationChange={onLocationChange}
-      onLocationKeyDown={onLocationKeyDown}
-    />
-  ) : (
-  <>
     <a
     href={getListingHref(listing, from)}
     className="title-click-zone"
@@ -804,10 +732,6 @@ style={getFrameStyle(currentImageObject, "card")}
 ) : null}
 
                      </div>
-
-           </>
-
-  )}
 
     </div>
 
@@ -1418,17 +1342,6 @@ text-align: right;
   background: rgba(120,120,120,.16);
   border-color: rgba(190,190,190,.34);
   color: rgba(255,255,255,.66);
-}
-
-.status-photo-pill.auction {
-  background: rgba(255,196,0,.14);
-  border-color: rgba(255,196,0,.52);
-  color: #FFC400;
-
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.05),
-    0 8px 20px rgba(0,0,0,.28),
-    0 0 14px rgba(255,196,0,.08);
 }
 
         .workflow-photo-pill {
