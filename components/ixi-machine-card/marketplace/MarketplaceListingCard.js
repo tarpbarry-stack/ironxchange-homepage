@@ -14,6 +14,8 @@ import {
 
 import MachineBadges from "../../MachineBadges";
 
+import IXIMachineRail from "../../IXIMachineRail";
+
 import IXIMachinePlacementControl
   from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
