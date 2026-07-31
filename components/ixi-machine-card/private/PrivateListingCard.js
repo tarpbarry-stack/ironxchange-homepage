@@ -7,7 +7,6 @@ import {
   cleanMachineTitle,
   formatHours,
   getCardImages,
-  getFeatureLine,
   getListingHref,
   getListingId,
 } from "../../../lib/listingFormatters";
@@ -252,26 +251,13 @@ function endBoardDrag(e) {
   cardContext === "inventory" ||
   cardContext === "enterprise";
 
+  const useSellerPresentation =
+  sellerMode || isInventoryContext;
+
   const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
   {};
-
-const resolvedMachineAccess =
-  machineAccess ||
-  listing.machineAccess ||
-  publicData.machineAccess ||
-  listing.metadata?.machineAccess ||
-  listing.attributes?.metadata?.machineAccess ||
-  "public";
-
-const resolvedMachineChannel =
-  machineChannel ||
-  listing.machineChannel ||
-  publicData.machineChannel ||
-  listing.metadata?.machineChannel ||
-  listing.attributes?.metadata?.machineChannel ||
-  "marketplace";
 
 const sellerPlacementLabel = "PRIV";
 const sellerPlacementClass = "private";
@@ -358,7 +344,7 @@ function getSellerState() {
 }
 
 function handleCardClick() {
-  captureIXEvent("listing_card_clicked", {
+  captureIXEvent("private_listing_card_clicked", {
     listingId: id,
     title: listing.title,
     category: listing.category || listing.type,
@@ -366,7 +352,8 @@ function handleCardClick() {
     model: listing.model,
     price: listing.price,
     location: listing.location,
-    from
+    from,
+cardContext
   });
 }
 
@@ -398,11 +385,11 @@ function handlePhotoLoad(e, photoUrl) {
   return (
   <div
     data-listing-card-id={id}
-    className={`card board-color-${boardColor} board-outline-${boardOutline} ${
+    className={`card private-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
-    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    } ${useSellerPresentation ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
@@ -418,8 +405,8 @@ function handlePhotoLoad(e, photoUrl) {
   </div>
 ) : null}
 {Number(machineFace || 1) === 2 ? (
-  sellerMode ? (
-    <IXISellerMachineObjectFace2
+useSellerPresentation ? (
+  <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={dragHandleProps}
       descriptionValue={descriptionValue}
@@ -464,7 +451,7 @@ style={getFrameStyle(currentImageObject, "card")}
   loading="lazy"
 />
 
-    {sellerMode ? (
+   {useSellerPresentation ? (
   <div
     className={`status-photo-pill ${sellerPlacementClass}`}
   >
@@ -510,9 +497,9 @@ style={getFrameStyle(currentImageObject, "card")}
     <div className="title-row">
       <h3>{cleanMachineTitle(listing.title)}</h3>
 
-     {sellerMode ? (
-<input
-  className="hours-inline hours-input"
+     {useSellerPresentation ? (
+  <input
+    className="hours-inline hours-input"
   {...(onHoursChange
     ? {
         value:
@@ -579,8 +566,8 @@ style={getFrameStyle(currentImageObject, "card")}
           <div className="meta">
             
 
-            {sellerMode ? (
-          <div className="location-row">
+            {useSellerPresentation ? (
+  <div className="location-row">
 <input
   className="city-input location-input"
   {...(onLocationChange
@@ -633,7 +620,7 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         </div>
 
-        {sellerMode && !creationMode ? (
+       {useSellerPresentation && !creationMode ? (
   <div className="seller-actions">
             <button
   type="button"
@@ -694,11 +681,11 @@ style={getFrameStyle(currentImageObject, "card")}
           </div>
         ) : null}
 
-                        {sellerMode ? (
+                        {useSellerPresentation ? (
   <div className="seller-meta-row">
-    {sellerMode &&
-    !creationMode &&
-    onMachinePlacementChange ? (
+    {useSellerPresentation &&
+!creationMode &&
+onMachinePlacementChange ? (
       <div className="seller-placement-control">
         <IXIMachinePlacementControl
           machineAccess={machineAccess}
