@@ -1,11 +1,14 @@
 import AuctionListingCard from "./auction/AuctionListingCard";
 import PrivateListingCard from "./private/PrivateListingCard";
-import MarketplaceListingCard from
-  "./marketplace/MarketplaceListingCard";
+import MarketplaceListingCard
+  from "./marketplace/MarketplaceListingCard";
 
 import {
   getMachineCardFamily
 } from "./getMachineCardFamily";
+
+import resolveMachineCardPresentation
+  from "./resolveMachineCardPresentation";
 
 export default function IXIMachineCard({
   cardContext = "workspace",
@@ -14,36 +17,48 @@ export default function IXIMachineCard({
   const cardFamily =
     getMachineCardFamily(props.listing);
 
+  const presentation =
+    resolveMachineCardPresentation({
+      cardFamily,
+      cardContext,
+      sellerMode: props.sellerMode
+    });
+
   console.log("IXI MACHINE CARD FAMILY", {
     listingId:
       props.listing?.id?.uuid ||
       props.listing?.id ||
       "",
-    cardFamily
+    cardFamily,
+    cardContext,
+    presentation
   });
 
- if (cardFamily === "auction") {
-  return (
-    <AuctionListingCard
-      {...props}
-      cardContext={cardContext}
-    />
-  );
-}
+  if (cardFamily === "auction") {
+    return (
+      <AuctionListingCard
+        {...props}
+        cardContext={cardContext}
+        presentation={presentation}
+      />
+    );
+  }
 
   if (cardFamily === "private") {
+    return (
+      <PrivateListingCard
+        {...props}
+        cardContext={cardContext}
+        presentation={presentation}
+      />
+    );
+  }
+
   return (
-    <PrivateListingCard
+    <MarketplaceListingCard
       {...props}
       cardContext={cardContext}
+      presentation={presentation}
     />
   );
-}
-
-return (
-  <MarketplaceListingCard
-    {...props}
-    cardContext={cardContext}
-  />
-);
 }
