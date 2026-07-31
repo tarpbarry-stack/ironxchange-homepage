@@ -7,6 +7,7 @@ import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
 export default function IXIBoard({
   items = [],
+  cardContext = "workspace",  
   getListingId,
   savedIds = [],
   ixiCardState = {},
@@ -87,7 +88,8 @@ export default function IXIBoard({
 ) : enableCardScaling ? (
   <IXIScaledCardShell size={cardScaleMode}>
     <IXIMachineCard
-      listing={item}
+  listing={item}
+  cardContext={cardContext}
       saved={savedIds.includes(id)}
       onToggleSaved={() => toggleSave(item)}
       from="saved"
@@ -117,7 +119,8 @@ export default function IXIBoard({
   </IXIScaledCardShell>
 ) : (
   <IXIMachineCard
-    listing={item}
+  listing={item}
+  cardContext={cardContext}
     saved={savedIds.includes(id)}
     onToggleSaved={() => toggleSave(item)}
     from="saved"
