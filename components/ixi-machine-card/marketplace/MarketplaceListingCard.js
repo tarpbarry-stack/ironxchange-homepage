@@ -12,30 +12,26 @@ import {
   getListingId,
 } from "../../../lib/listingFormatters";
 
-import MachineBadges from "../../MachineBadges";
-
-import IXIMachineRail from "../../IXIMachineRail";
-
 import IXIMachinePlacementControl
-  from "../ixi-machine-placement/IXIMachinePlacementControl";
+  from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
 import IXIMachineObjectFace2
-  from "../ixi-machine-object/IXIMachineObjectFace2";
+  from "../../ixi-machine-object/IXIMachineObjectFace2";
 
 import IXISellerMachineObjectFace2
-  from "../ixi-machine-object/IXISellerMachineObjectFace2";
+  from "../../ixi-machine-object/IXISellerMachineObjectFace2";
 
 import IXIMachineObjectFace3
-  from "../ixi-machine-object/IXIMachineObjectFace3";
+  from "../../ixi-machine-object/IXIMachineObjectFace3";
 
 import IXIMachineObjectFace4
-  from "../ixi-machine-object/IXIMachineObjectFace4";
+  from "../../ixi-machine-object/IXIMachineObjectFace4";
 
 import IXIAuctionObjectFace1
-  from "../ixi-auction-object/IXIAuctionObjectFace1";
+  from "../../ixi-auction-object/IXIAuctionObjectFace1";
 
 import IXIAuctionObjectFace2
-  from "../ixi-auction-object/IXIAuctionObjectFace2";
+  from "../../ixi-auction-object/IXIAuctionObjectFace2";
 
 import {
   getFrameClass,
