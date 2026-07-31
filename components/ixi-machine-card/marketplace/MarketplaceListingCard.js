@@ -61,6 +61,8 @@ function getBulkImageUrls(listing = {}) {
 
 export default function ListingCard({
   listing = {},
+  cardContext = "workspace",
+  presentation: transportedPresentation,
   sourceListingUrl = "",
   saved = false,
   onToggleSaved,
@@ -250,6 +252,26 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
+  const id = String(getListingId(listing));
+
+const presentation =
+  transportedPresentation ||
+  (sellerMode ? "seller" : "buyer");
+
+const useSellerPresentation =
+  presentation === "seller";
+
+const useBuyerPresentation =
+  presentation === "buyer";
+
+const useAuctionPresentation =
+  presentation === "auction";
+
+const publicData =
+  listing.publicData ||
+  listing.attributes?.publicData ||
+  {};
+
   const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
@@ -423,7 +445,7 @@ function handlePhotoLoad(e, photoUrl) {
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
-    } ${sellerMode ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    } ${useSellerPresentation ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
     style={{
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
@@ -458,7 +480,7 @@ function handlePhotoLoad(e, photoUrl) {
       onOpeningBidChange={onPriceChange}
       onOpeningBidKeyDown={onPriceKeyDown}
     />
-  ) : sellerMode ? (
+  ) : useSellerPresentation ? (
     <IXISellerMachineObjectFace2
       listing={listing}
       dragHandleProps={dragHandleProps}
