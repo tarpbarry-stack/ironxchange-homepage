@@ -58,6 +58,7 @@ function getBulkImageUrls(listing = {}) {
 export default function PrivateListingCard({
   listing = {},
   cardContext = "inventory",
+  presentation: transportedPresentation,
   sourceListingUrl = "",
   saved = false,
   onToggleSaved,
@@ -255,10 +256,11 @@ function endBoardDrag(e) {
   sellerMode || isInventoryContext;
 
   const presentation =
-  useSellerPresentation
+  transportedPresentation ||
+  (useSellerPresentation
     ? "seller"
-    : "comparison";
-
+    : "comparison");
+  
   const publicData =
   listing.publicData ||
   listing.attributes?.publicData ||
