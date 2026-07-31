@@ -1488,6 +1488,7 @@ rowGap: `${cardScaleMetrics.gap + 90}px`
 >
 <IXIBoard
   items={visibleSavedListings}
+  cardContext="auction-work"
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
