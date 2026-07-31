@@ -521,6 +521,62 @@ const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
 
+  const aosScoreboard = useMemo(() => {
+  const jobsIndex =
+    systemIndexes.find(
+      item => item.indexId === "jobs"
+    );
+
+  const forSaleIndex =
+    systemIndexes.find(
+      item => item.indexId === "for-sale"
+    );
+
+  const equipmentIndex =
+    systemIndexes.find(
+      item => item.indexId === "equipment"
+    );
+
+  return {
+    assets:
+      Number(
+        equipmentIndex?.itemCount ??
+        listings.length
+      ) || 0,
+
+    jobs:
+      Number(
+        jobsIndex?.itemCount
+      ) || 0,
+
+    forSale:
+      Number(
+        forSaleIndex?.itemCount
+      ) || 0,
+
+    value:
+      Number(
+        equipmentIndex?.value
+      ) || 0
+  };
+}, [
+  systemIndexes,
+  listings.length
+]);
+
+function formatAosValue(value) {
+  const amount = Number(value) || 0;
+
+  return new Intl.NumberFormat(
+    "en-US",
+    {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    }
+  ).format(amount);
+}
+
 const containerStateKey = useMemo(() => {
   return workspaceListings
     .map(item => {
