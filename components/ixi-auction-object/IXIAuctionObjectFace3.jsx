@@ -312,6 +312,10 @@ function calculateScenario({
 
 export default function IXIAuctionObjectFace3({
   listing = {},
+
+  dealerBidPack = {},
+  onSaveDealerBidPack,
+
   dragHandleProps
 }) {
   const publicData =
@@ -344,65 +348,125 @@ export default function IXIAuctionObjectFace3({
       0
     );
 
-  const [
+ const [
+  estimatedSalePrice,
+  setEstimatedSalePrice
+] = useState(
+  cleanNumber(
+    dealerBidPack
+      ?.estimatedSalePrice ??
+    openingValue
+  )
+);
+
+const [
+  lowAdvertised,
+  setLowAdvertised
+] = useState(
+  cleanNumber(
+    dealerBidPack
+      ?.lowAdvertised
+  )
+);
+ const [
+  averageAdvertised,
+  setAverageAdvertised
+] = useState(
+  cleanNumber(
+    dealerBidPack
+      ?.averageAdvertised
+  )
+);
+ const [
+  myBid,
+  setMyBid
+] = useState(
+  cleanNumber(
+    dealerBidPack?.myBid ??
+    openingValue
+  )
+);
+
+ const [
+  freight1,
+  setFreight1
+] = useState(
+  cleanNumber(
+    dealerBidPack?.freight1
+  )
+);
+
+const [
+  freight2,
+  setFreight2
+] = useState(
+  cleanNumber(
+    dealerBidPack?.freight2
+  )
+);
+
+const [
+  tech,
+  setTech
+] = useState(
+  cleanNumber(
+    dealerBidPack?.tech
+  )
+);
+
+const [
+  clean,
+  setClean
+] = useState(
+  cleanNumber(
+    dealerBidPack?.clean
+  )
+);
+
+const [
+  parts,
+  setParts
+] = useState(
+  cleanNumber(
+    dealerBidPack?.parts
+  )
+);
+
+const [
+  labor,
+  setLabor
+] = useState(
+  cleanNumber(
+    dealerBidPack?.labor
+  )
+);
+
+const [
+  preDelivery,
+  setPreDelivery
+] = useState(
+  cleanNumber(
+    dealerBidPack
+      ?.preDelivery
+  )
+);
+
+function saveBidPack() {
+  onSaveDealerBidPack?.({
     estimatedSalePrice,
-    setEstimatedSalePrice
-  ] = useState(
-    openingValue
-  );
-
-  const [
     lowAdvertised,
-    setLowAdvertised
-  ] = useState(0);
-
-  const [
     averageAdvertised,
-    setAverageAdvertised
-  ] = useState(0);
-
-  const [
     myBid,
-    setMyBid
-  ] = useState(
-    openingValue
-  );
-
-  const [
     freight1,
-    setFreight1
-  ] = useState(0);
-
-  const [
     freight2,
-    setFreight2
-  ] = useState(0);
-
-  const [
     tech,
-    setTech
-  ] = useState(0);
-
-  const [
     clean,
-    setClean
-  ] = useState(0);
-
-  const [
     parts,
-    setParts
-  ] = useState(0);
-
-  const [
     labor,
-    setLabor
-  ] = useState(0);
-
-  const [
-    preDelivery,
-    setPreDelivery
-  ] = useState(0);
-
+    preDelivery
+  });
+}
+  
   const mainScenario =
     useMemo(
       () =>
@@ -524,6 +588,7 @@ export default function IXIAuctionObjectFace3({
           onChange={
             setEstimatedSalePrice
           }
+          onSave={saveBidPack}
         />
 
         <div className="aof3-advertised-row">
@@ -535,6 +600,7 @@ export default function IXIAuctionObjectFace3({
             onChange={
               setLowAdvertised
             }
+            onSave={saveBidPack}
           />
 
           <MiniValue
@@ -545,6 +611,7 @@ export default function IXIAuctionObjectFace3({
             onChange={
               setAverageAdvertised
             }
+            onSave={saveBidPack}            
           />
         </div>
       </section>
@@ -555,9 +622,8 @@ export default function IXIAuctionObjectFace3({
             label="MY BID"
             input
             value={myBid}
-            onChange={
-              setMyBid
-            }
+            onChange={setMyBid}
+            onSave={saveBidPack}            
             emphasized
           />
 
@@ -574,18 +640,16 @@ export default function IXIAuctionObjectFace3({
             label="FREIGHT 1"
             input
             value={freight1}
-            onChange={
-              setFreight1
-            }
+            onChange={setFreight1}
+            onSave={saveBidPack}
           />
 
           <Row
             label="FREIGHT 2"
             input
             value={freight2}
-            onChange={
-              setFreight2
-            }
+            onChange={setFreight2}
+            onSave={saveBidPack}
           />
         </div>
 
@@ -595,6 +659,7 @@ export default function IXIAuctionObjectFace3({
             input
             value={tech}
             onChange={setTech}
+            onSave={saveBidPack}
           />
 
           <Row
@@ -602,6 +667,7 @@ export default function IXIAuctionObjectFace3({
             input
             value={clean}
             onChange={setClean}
+            onSave={saveBidPack}
           />
 
           <Row
@@ -609,6 +675,7 @@ export default function IXIAuctionObjectFace3({
             input
             value={parts}
             onChange={setParts}
+            onSave={saveBidPack}
           />
 
           <Row
@@ -616,15 +683,15 @@ export default function IXIAuctionObjectFace3({
             input
             value={labor}
             onChange={setLabor}
+            onSave={saveBidPack}
           />
 
           <Row
             label="PRE DELIVERY"
             input
             value={preDelivery}
-            onChange={
-              setPreDelivery
-            }
+            onChange={setPreDelivery}
+            onSave={saveBidPack}
           />
         </div>
       </div>
@@ -1277,6 +1344,7 @@ export default function IXIAuctionObjectFace3({
 function MoneyInput({
   value,
   onChange,
+  onSave,
   className = ""
 }) {
   return (
@@ -1284,42 +1352,54 @@ function MoneyInput({
       className={className}
       value={
         value
-          ? Number(
-              value
-            ).toLocaleString(
-              "en-US"
-            )
+          ? Number(value).toLocaleString("en-US")
           : ""
       }
       inputMode="numeric"
+
       onPointerDown={event => {
         event.stopPropagation();
       }}
+
       onChange={event => {
         onChange?.(
-          cleanNumber(
-            event.target.value
-          )
+          cleanNumber(event.target.value)
         );
+      }}
+
+      onBlur={() => {
+        onSave?.();
+      }}
+
+      onKeyDown={event => {
+        if (event.key !== "Enter") return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        onSave?.();
+
+        event.currentTarget.blur();
       }}
     />
   );
 }
-
 function MiniValue({
   label,
   value,
-  onChange
+  onChange,
+  onSave
 }) {
   return (
     <label className="aof3-mini-value">
       <span>{label}</span>
 
       <MoneyInput
-        value={value}
-        onChange={onChange}
-        className="aof3-mini-input"
-      />
+  value={value}
+  onChange={onChange}
+  onSave={onSave}
+  className="aof3-mini-input"
+/>
 
       <style jsx>{`
         .aof3-mini-value {
@@ -1393,7 +1473,8 @@ function Row({
   input = false,
   muted = false,
   emphasized = false,
-  onChange
+  onChange,
+  onSave
 }) {
   return (
     <div className="aof3-row">
@@ -1402,18 +1483,19 @@ function Row({
       </span>
 
       {input ? (
-        <MoneyInput
-          value={value}
-          onChange={onChange}
-          className={[
-            "aof3-input",
-            emphasized
-              ? "emphasized"
-              : ""
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        />
+       <MoneyInput
+  value={value}
+  onChange={onChange}
+  onSave={onSave}
+  className={[
+    "aof3-input",
+    emphasized
+      ? "emphasized"
+      : ""
+  ]
+    .filter(Boolean)
+    .join(" ")}
+/>
       ) : (
         <strong
           className={[
