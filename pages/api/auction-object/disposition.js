@@ -208,38 +208,49 @@ async function updateListingDisposition({
   let patch;
 
   if (
-    action === "move-private"
-  ) {
-    patch = {
-      machineAccess: "private",
-      machineChannel: "private",
+  action === "move-private"
+) {
+  patch = {
+    machineAccess: "private",
+    machineChannel: "private",
 
-      listingStatus: "active",
+    ownershipRole: "owner",
+    ownershipStatus: "owned",
 
-      auctionWorkStatus:
-        "purchased",
+    listingStatus: "active",
 
-      auctionDisposition:
-        "move-private",
+    auctionWorkStatus:
+      "purchased",
 
-      auctionDispositionAt:
-        changedAt,
+    auctionDisposition:
+      "move-private",
 
-      purchasedFromAuction:
-        true
-    };
-  } else {
-    patch = {
-      machineAccess: "private",
-      machineChannel:
-        "auction-archive",
+    auctionDispositionAt:
+      changedAt,
 
-      listingStatus:
-        "archived",
+    purchasedFromAuction:
+      true,
 
-      auctionWorkStatus:
-        "archived",
+    purchasedAt:
+      changedAt
+  };
+} else {
+  patch = {
+    machineAccess: "private",
+    machineChannel:
+      "auction-archive",
 
+    ownershipRole:
+      "non-owner",
+
+    ownershipStatus:
+      "archived-result",
+
+    listingStatus:
+      "archived",
+
+    auctionWorkStatus:
+      "archived",
       auctionDisposition:
         "archive",
 
