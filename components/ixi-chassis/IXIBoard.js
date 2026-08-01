@@ -118,10 +118,31 @@ const sellerCardProps =
   typeof getSellerListingCardProps === "function"
     ? getSellerListingCardProps(item)
     : {};
-          typeof getSellerListingCardProps === "function"
-            ? getSellerListingCardProps(item)
-            : {};
 
+const consoleIsOpen =
+  consoleDepth > 1;
+
+function toggleConsoleWidth(event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  updateIxiCardState?.(
+    id,
+    {
+      consoleDepth:
+        consoleIsOpen
+          ? 1
+          : 2,
+
+      consoleOpen:
+        !consoleIsOpen,
+
+      consoleUpdatedAt:
+        Date.now()
+    }
+  );
+}
+      
         return (
   <IXISortableMachineCard
   key={id}
@@ -198,6 +219,7 @@ const sellerCardProps =
     />
   </IXIScaledCardShell>
 ) : enableCardScaling ? (
+  <div className="ixi-console-test-chassis">
   <IXIScaledCardShell size={cardScaleMode}>
     <IXIMachineCard
   listing={item}
@@ -228,9 +250,35 @@ const sellerCardProps =
       }
       useDndDrag={false}
       dragHandleProps={dragHandleProps}
-    />
+        />
   </IXIScaledCardShell>
+
+  <button
+    type="button"
+    className={`ixi-console-test-actuator ${
+      consoleIsOpen
+        ? "is-open"
+        : ""
+    }`}
+    aria-label={
+      consoleIsOpen
+        ? "Close object console"
+        : "Open object console"
+    }
+    title={
+      consoleIsOpen
+        ? "Close console"
+        : "Open console"
+    }
+    onPointerDown={event => {
+      event.preventDefault();
+      event.stopPropagation();
+    }}
+    onClick={toggleConsoleWidth}
+  />
+</div>
 ) : (
+  <div className="ixi-console-test-chassis">
   <IXIMachineCard
   listing={item}
   cardContext={cardContext}
@@ -261,12 +309,83 @@ const sellerCardProps =
         useDndDrag={false}
     dragHandleProps={dragHandleProps}
   />
+
+ <button
+    type="button"
+    className={`ixi-console-test-actuator ${
+      consoleIsOpen
+        ? "is-open"
+        : ""
+    }`}
+    aria-label={
+      consoleIsOpen
+        ? "Close object console"
+        : "Open object console"
+    }
+    title={
+      consoleIsOpen
+        ? "Close console"
+        : "Open console"
+    }
+    onPointerDown={event => {
+      event.preventDefault();
+      event.stopPropagation();
+    }}
+    onClick={toggleConsoleWidth}
+  />
+</div>
+
 );
 
 }}
 </IXISortableMachineCard>
         );
             })}
+<style jsx>{`
+  .ixi-console-test-chassis {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .ixi-console-test-actuator {
+    position: absolute;
+
+    top: 50%;
+    right: -8px;
+
+    width: 8px;
+    height: 58px;
+
+    transform: translateY(-50%);
+
+    padding: 0;
+
+    border:
+      1px solid
+      rgba(255, 196, 0, .46);
+
+    border-radius:
+      3px 0 0 3px;
+
+    background:
+      rgba(255, 196, 0, .22);
+
+    cursor: pointer;
+
+    z-index: 300;
+  }
+
+  .ixi-console-test-actuator:hover,
+  .ixi-console-test-actuator.is-open {
+    background:
+      rgba(255, 196, 0, .88);
+
+    box-shadow:
+      0 0 10px
+      rgba(255, 196, 0, .30);
+  }
+`}</style>
 </SortableContext>
   );
 }
