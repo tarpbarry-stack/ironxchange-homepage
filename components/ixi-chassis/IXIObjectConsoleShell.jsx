@@ -1,27 +1,49 @@
-import {
-  getConsoleGridSpan
-} from "./IXIObjectConsoleEngine";
-
 export default function IXIObjectConsoleShell({
   consoleDepth = 1,
+  panelWidth = 300,
+  panelGap = 0,
 
   leftHandle,
   rightHandle,
 
   panels = []
 }) {
+  const safeDepth = Math.max(
+    1,
+    Math.min(
+      Number(consoleDepth) || 1,
+      panels.length || 1
+    )
+  );
+
   const visiblePanels =
     panels.slice(
       0,
-      consoleDepth
+      safeDepth
+    );
+
+  const shellWidth =
+    (
+      safeDepth *
+      panelWidth
+    ) +
+    (
+      Math.max(
+        safeDepth - 1,
+        0
+      ) *
+      panelGap
     );
 
   return (
     <div
       className="ixi-console-shell"
       style={{
-        gridColumn: `span ${getConsoleGridSpan(consoleDepth)}`
+        width: `${shellWidth}px`
       }}
+      data-ixi-console-depth={
+        safeDepth
+      }
     >
       {leftHandle ? (
         <div className="console-left">
@@ -29,12 +51,24 @@ export default function IXIObjectConsoleShell({
         </div>
       ) : null}
 
-      <div className="console-panels">
+      <div
+        className="console-panels"
+        style={{
+          gap: `${panelGap}px`
+        }}
+      >
         {visiblePanels.map(
           (panel, index) => (
             <div
               key={index}
               className="console-panel"
+              style={{
+                width:
+                  `${panelWidth}px`,
+
+                flexBasis:
+                  `${panelWidth}px`
+              }}
             >
               {panel}
             </div>
@@ -55,44 +89,46 @@ export default function IXIObjectConsoleShell({
           display: flex;
           align-items: stretch;
 
-          overflow: hidden;
+          max-width: none;
 
-          width: calc(
-            300px * ${consoleDepth}
-          );
-
-          transition:
-            width .18s ease;
+          overflow: visible;
         }
 
         .console-panels {
           display: flex;
-          flex: 1;
+          align-items: stretch;
+
+          width: 100%;
+          min-width: 0;
         }
 
         .console-panel {
-          width: 300px;
-          flex: 0 0 300px;
+          min-width: 0;
+          flex-grow: 0;
+          flex-shrink: 0;
+
+          position: relative;
         }
 
         .console-left,
         .console-right {
           position: absolute;
-
           top: 50%;
 
           transform:
             translateY(-50%);
 
           z-index: 100;
+
+          pointer-events: auto;
         }
 
         .console-left {
-          left: -2px;
+          left: 0;
         }
 
         .console-right {
-          right: -2px;
+          right: 0;
         }
       `}</style>
     </div>
