@@ -227,9 +227,10 @@ function toggleConsoleWidth(event) {
       armedDestination={armedDestination}
       onSendFront={sendListingToFront}
       onSendBack={sendListingToBack}
-      onSendToArmedDestination={sendMachineToArmedDestination}
+           onSendToArmedDestination={sendMachineToArmedDestination}
       onCycleSellerFace={() => cycleMachineFace?.(id)}
     />
+  </IXIScaledCardShell>
 ) : enableCardScaling ? (
   <div className="ixi-console-test-chassis">
     <IXIScaledCardShell size={cardScaleMode}>
