@@ -275,9 +275,9 @@ export default function IXIObjectCreateCard({
 
   isolation: isolate;
 
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
+  height: 391px;
+  min-height: 391px;
+  max-height: 391px;
 
   border: 1px solid rgba(255,255,255,.06);
   outline: 1px solid rgba(255,255,255,.018);
