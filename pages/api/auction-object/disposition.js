@@ -568,6 +568,30 @@ async function permanentlyDeleteAllMedia({
   };
 }
 
+async function permanentlyDeletePassport({
+  listingId
+}) {
+  const url =
+    `${getIXCoreBase()}` +
+    `/passport/by-source/` +
+    `sharetribe-listing/` +
+    `${encodeURIComponent(listingId)}`;
+
+  return fetchJson(url, {
+    method: "DELETE",
+
+    headers: {
+      "Content-Type":
+        "application/json"
+    },
+
+    body: JSON.stringify({
+      confirmation:
+        "PERMANENT_DELETE"
+    })
+  });
+}
+
 async function callExistingDeleteRoute({
   req,
   listingId
@@ -759,6 +783,11 @@ export default async function handler(
               "Listing has no IXI media identity"
           };
 
+const passportDelete =
+  await permanentlyDeletePassport({
+    listingId
+  });
+    
     const listingDelete =
       await callExistingDeleteRoute({
         req,
@@ -766,18 +795,26 @@ export default async function handler(
       });
 
     return res.status(200).json({
-      ok: true,
-      action,
-      listingId,
-      machineKey:
-        machineKey || null,
-      media:
-        mediaResult,
-      listing:
-        listingDelete,
-      message:
-        "Auction machine deleted"
-    });
+  ok: true,
+  action,
+  listingId,
+
+  machineKey:
+    machineKey || null,
+
+  media:
+    mediaResult,
+
+  passport:
+    passportDelete,
+
+  listing:
+    listingDelete,
+
+  message:
+    "Auction machine deleted"
+});
+    
   } catch (error) {
     console.error(
       "AUCTION OBJECT DISPOSITION FAILED:",
