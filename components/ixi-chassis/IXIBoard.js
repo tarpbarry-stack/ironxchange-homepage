@@ -8,13 +8,22 @@ import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 import IXIAuctionObjectFace2
   from "../ixi-auction-object/IXIAuctionObjectFace2";
 
+import IXIAuctionObjectFace3
+  from "../ixi-auction-object/IXIAuctionObjectFace3";
+
+import IXIAuctionObjectFace4
+  from "../ixi-auction-object/IXIAuctionObjectFace4";
+
 import {
   getMachineCardFamily
 } from "../ixi-machine-card/getMachineCardFamily";
 
 import {
   getConsoleDepth,
-  getConsoleGridSpan
+  getConsoleGridSpan,
+  normalizeConsoleSlots,
+  cycleConsoleSlotFace,
+  createConsoleSlotsPatch
 } from "./IXIObjectConsoleEngine";
 
 export default function IXIBoard({
@@ -135,6 +144,43 @@ const isAuctionCard =
 const consoleIsOpen =
   consoleDepth > 1;
 
+const savedConsoleSlots =
+  ixiCardState?.[id]
+    ?.consoleSlots;
+
+const consoleSlots =
+  Array.isArray(savedConsoleSlots) &&
+  savedConsoleSlots.length >= 2
+    ? normalizeConsoleSlots(
+        savedConsoleSlots,
+        {
+          maxSlots: 4
+        }
+      )
+    : [
+        {
+          slotId: "slot-1",
+          face:
+            ixiCardState[id]?.face ||
+            1
+        },
+        {
+          slotId: "slot-2",
+          face: 2
+        }
+      ];
+
+const childConsoleSlot =
+  consoleSlots[1] || {
+    slotId: "slot-2",
+    face: 2
+  };
+
+const childConsoleFace =
+  Number(
+    childConsoleSlot.face
+  ) || 2;
+
 function toggleConsoleWidth(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -153,6 +199,31 @@ function toggleConsoleWidth(event) {
       consoleUpdatedAt:
         Date.now()
     }
+  );
+}
+
+function cycleChildConsoleFace(
+  event
+) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const nextSlots =
+    cycleConsoleSlotFace({
+      slots:
+        consoleSlots,
+
+      slotId:
+        childConsoleSlot.slotId,
+
+      maxFace: 4
+    });
+
+  updateIxiCardState?.(
+    id,
+    createConsoleSlotsPatch(
+      nextSlots
+    )
   );
 }
       
@@ -276,44 +347,78 @@ function toggleConsoleWidth(event) {
       <div className="ixi-console-child-wrap">
         <IXIScaledCardShell size={cardScaleMode}>
           <div className="ixi-console-child-card">
-            <IXIAuctionObjectFace2
-              listing={item}
-              sourceListingUrl={
-                sellerCardProps.sourceListingUrl ||
-                ""
-              }
-              dragHandleProps={
-                dragHandleProps
-              }
-              sellerMode={true}
-              lotNumberValue={
-                sellerCardProps.lotNumberValue
-              }
-              onLotNumberChange={
-                sellerCardProps.onLotNumberChange
-              }
-              onLotNumberKeyDown={
-                sellerCardProps.onLotNumberKeyDown
-              }
-              hoursValue={
-                sellerCardProps.hoursValue
-              }
-              onHoursChange={
-                sellerCardProps.onHoursChange
-              }
-              onHoursKeyDown={
-                sellerCardProps.onHoursKeyDown
-              }
-              openingBidValue={
-                sellerCardProps.priceValue
-              }
-              onOpeningBidChange={
-                sellerCardProps.onPriceChange
-              }
-              onOpeningBidKeyDown={
-                sellerCardProps.onPriceKeyDown
-              }
-            />
+            {childConsoleFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={item}
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : childConsoleFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={item}
+    dragHandleProps={
+      dragHandleProps
+    }
+    auctionDispositionBusy={
+      sellerCardProps
+        .auctionDispositionBusy
+    }
+    onAuctionDisposition={
+      sellerCardProps
+        .onAuctionDisposition
+    }
+  />
+) : (
+  <IXIAuctionObjectFace2
+    listing={item}
+    sourceListingUrl={
+      sellerCardProps
+        .sourceListingUrl ||
+      ""
+    }
+    dragHandleProps={
+      dragHandleProps
+    }
+    sellerMode={true}
+    lotNumberValue={
+      sellerCardProps
+        .lotNumberValue
+    }
+    onLotNumberChange={
+      sellerCardProps
+        .onLotNumberChange
+    }
+    onLotNumberKeyDown={
+      sellerCardProps
+        .onLotNumberKeyDown
+    }
+    hoursValue={
+      sellerCardProps
+        .hoursValue
+    }
+    onHoursChange={
+      sellerCardProps
+        .onHoursChange
+    }
+    onHoursKeyDown={
+      sellerCardProps
+        .onHoursKeyDown
+    }
+    openingBidValue={
+      sellerCardProps
+        .priceValue
+    }
+    onOpeningBidChange={
+      sellerCardProps
+        .onPriceChange
+    }
+    onOpeningBidKeyDown={
+      sellerCardProps
+        .onPriceKeyDown
+    }
+  />
+)}
           </div>
         </IXIScaledCardShell>
       </div>
@@ -378,56 +483,78 @@ function toggleConsoleWidth(event) {
 
 {consoleIsOpen && isAuctionCard ? (
   <div className="ixi-console-empty-panel">
-    <IXIAuctionObjectFace2
-      listing={item}
-
-      sourceListingUrl={
-        sellerCardProps.sourceListingUrl ||
-        ""
-      }
-
-      dragHandleProps={
-        dragHandleProps
-      }
-
-      sellerMode={true}
-
-      lotNumberValue={
-        sellerCardProps.lotNumberValue
-      }
-
-      onLotNumberChange={
-        sellerCardProps.onLotNumberChange
-      }
-
-      onLotNumberKeyDown={
-        sellerCardProps.onLotNumberKeyDown
-      }
-
-      hoursValue={
-        sellerCardProps.hoursValue
-      }
-
-      onHoursChange={
-        sellerCardProps.onHoursChange
-      }
-
-      onHoursKeyDown={
-        sellerCardProps.onHoursKeyDown
-      }
-
-      openingBidValue={
-        sellerCardProps.priceValue
-      }
-
-      onOpeningBidChange={
-        sellerCardProps.onPriceChange
-      }
-
-      onOpeningBidKeyDown={
-        sellerCardProps.onPriceKeyDown
-      }
-    />
+    {childConsoleFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={item}
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : childConsoleFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={item}
+    dragHandleProps={
+      dragHandleProps
+    }
+    auctionDispositionBusy={
+      sellerCardProps
+        .auctionDispositionBusy
+    }
+    onAuctionDisposition={
+      sellerCardProps
+        .onAuctionDisposition
+    }
+  />
+) : (
+  <IXIAuctionObjectFace2
+    listing={item}
+    sourceListingUrl={
+      sellerCardProps
+        .sourceListingUrl ||
+      ""
+    }
+    dragHandleProps={
+      dragHandleProps
+    }
+    sellerMode={true}
+    lotNumberValue={
+      sellerCardProps
+        .lotNumberValue
+    }
+    onLotNumberChange={
+      sellerCardProps
+        .onLotNumberChange
+    }
+    onLotNumberKeyDown={
+      sellerCardProps
+        .onLotNumberKeyDown
+    }
+    hoursValue={
+      sellerCardProps
+        .hoursValue
+    }
+    onHoursChange={
+      sellerCardProps
+        .onHoursChange
+    }
+    onHoursKeyDown={
+      sellerCardProps
+        .onHoursKeyDown
+    }
+    openingBidValue={
+      sellerCardProps
+        .priceValue
+    }
+    onOpeningBidChange={
+      sellerCardProps
+        .onPriceChange
+    }
+    onOpeningBidKeyDown={
+      sellerCardProps
+        .onPriceKeyDown
+    }
+  />
+)}
   </div>
 ) : null}
       
