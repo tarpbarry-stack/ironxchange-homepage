@@ -327,6 +327,21 @@ export default function useIXIAuctionObjectOps({
               };
             }
 
+if (field === "lotNumber") {
+  return {
+    ...item,
+
+    lotNumber: value,
+
+    publicData: {
+      ...publicData,
+      lotNumber: value
+    },
+
+    _machineMutation:
+      mutation
+  };
+}            
             return item;
           })
         );
@@ -341,15 +356,18 @@ export default function useIXIAuctionObjectOps({
           ?.add("saved");
 
         const noticeMap = {
-          price:
-            "AUCTION PRICE UPDATED",
+  price:
+    "AUCTION PRICE UPDATED",
 
-          hours:
-            "AUCTION HOURS UPDATED",
+  hours:
+    "AUCTION HOURS UPDATED",
 
-          location:
-            "MACHINE LOCATION UPDATED"
-        };
+  location:
+    "MACHINE LOCATION UPDATED",
+
+  lotNumber:
+    "AUCTION LOT NUMBER UPDATED"
+};
 
         showActionNotice?.({
           listingId,
@@ -504,6 +522,29 @@ export default function useIXIAuctionObjectOps({
         );
       },
 
+lotNumberValue:
+  draft.lotNumber !== undefined
+    ? draft.lotNumber
+    : (
+        listing?.lotNumber ??
+        publicData?.lotNumber ??
+        ""
+      ),
+
+onLotNumberChange: value => {
+  updateDraft(
+    listing,
+    "lotNumber",
+    value
+  );
+},
+
+onLotNumberKeyDown:
+  createEnterHandler(
+    listing,
+    "lotNumber"
+  ),
+      
       savingAuctionField:
         savingField.listingId ===
         listingId
