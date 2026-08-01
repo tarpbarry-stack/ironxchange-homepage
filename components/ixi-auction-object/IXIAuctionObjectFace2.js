@@ -456,8 +456,9 @@ export default function IXIAuctionObjectFace2({
   sellerMode = false,
 
   lotNumberValue,
-  onLotNumberChange,
-
+onLotNumberChange,
+onLotNumberKeyDown,
+  
   hoursValue,
   onHoursChange,
   onHoursKeyDown,
@@ -932,6 +933,7 @@ const feeLines = [
         sellerMode={sellerMode}
         lotNumberValue={lotNumberValue}
         onLotNumberChange={onLotNumberChange}
+        onLotNumberKeyDown={onLotNumberKeyDown}
         alertsEnabled={auctionAlertsEnabled}
         onAlertClick={onAuctionAlertClick}
       />
