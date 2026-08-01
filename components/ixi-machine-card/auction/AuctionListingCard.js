@@ -16,6 +16,9 @@ import IXIAuctionObjectFace1
 import IXIAuctionObjectFace2
   from "../../ixi-auction-object/IXIAuctionObjectFace2";
 
+import IXIAuctionObjectFace3
+  from "../../ixi-auction-object/IXIAuctionObjectFace3";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -208,9 +211,16 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
-  const auctionFace =
-  Number(machineFace) === 2 ? 2 : 1;
+ const requestedAuctionFace =
+  Number(machineFace);
 
+const auctionFace =
+  requestedAuctionFace === 3
+    ? 3
+    : requestedAuctionFace === 2
+      ? 2
+      : 1;
+  
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
 
@@ -301,7 +311,14 @@ function handlePhotoLoad(e, photoUrl) {
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-{auctionFace === 2 ? (
+{auctionFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={listing}
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : auctionFace === 2 ? (
   <IXIAuctionObjectFace2
     listing={listing}
     sourceListingUrl={sourceListingUrl}
