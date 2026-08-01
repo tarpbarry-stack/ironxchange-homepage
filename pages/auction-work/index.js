@@ -211,6 +211,10 @@ const DIRECT_CONTAINER_TARGETS = [
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
+  const [
+  auctionDispositionBusy,
+  setAuctionDispositionBusy
+] = useState({});
   const {
   getAuctionListingCardProps
 } = useIXIAuctionObjectOps({
@@ -287,7 +291,15 @@ function getAuctionWorkCardProps(
     dealerBidPack,
 
     onSaveDealerBidPack:
-      saveDealerBidPack
+      saveDealerBidPack,
+
+    auctionDispositionBusy:
+  auctionDispositionBusy[
+    listingId
+  ] || "",
+
+onAuctionDisposition:
+  handleAuctionDisposition,
   };
 }
   
@@ -963,6 +975,174 @@ function sendListingToBack(listing) {
 
   executeIXITransaction(result);
 }
+
+
+  async function handleAuctionDisposition(
+  listing,
+  action
+) {
+  const listingId = String(
+    getListingId(listing) || ""
+  );
+
+  if (
+    !listingId ||
+    !action
+  ) {
+    return;
+  }
+
+  setAuctionDispositionBusy(
+    current => ({
+      ...current,
+      [listingId]: action
+    })
+  );
+
+  try {
+    const response = await fetch(
+      "/api/auction-object/disposition",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+          listingId,
+          action
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
+        "Auction disposition failed"
+      );
+    }
+
+    const nextContainers =
+      Object.fromEntries(
+        Object.entries(
+          machineContainers
+        ).map(
+          ([
+            containerKey,
+            ids
+          ]) => [
+            containerKey,
+            Array.isArray(ids)
+              ? ids.filter(
+                  id =>
+                    String(id) !==
+                    listingId
+                )
+              : []
+          ]
+        )
+      );
+
+    setMachineContainers(
+      nextContainers
+    );
+
+    saveWorkspaceLayout(
+      nextContainers
+    );
+
+    setListings(current =>
+      current.filter(
+        item =>
+          String(
+            getListingId(item)
+          ) !== listingId
+      )
+    );
+
+    setSavedIds(current =>
+      current.filter(
+        id =>
+          String(id) !==
+          listingId
+      )
+    );
+
+    setIxiCardState(current => {
+      const next = {
+        ...current
+      };
+
+      delete next[listingId];
+
+      return next;
+    });
+
+    const noticeMap = {
+      "move-private":
+        "MOVED TO PRIVATE INVENTORY",
+
+      archive:
+        "AUCTION RESULT ARCHIVED",
+
+      "hard-delete":
+        "AUCTION MACHINE DELETED"
+    };
+
+    console.log(
+      noticeMap[action] ||
+      "AUCTION OBJECT COMPLETED"
+    );
+  } catch (error) {
+    console.error(
+      "AUCTION DISPOSITION FAILED:",
+      {
+        listingId,
+        action,
+        error
+      }
+    );
+
+    setIXIActionNotice({
+      setState:
+        setIxiCardState,
+
+      listingId,
+
+      message:
+        "AUCTION CLOSEOUT FAILED",
+
+      tone:
+        "error"
+    });
+
+    window.alert(
+      `Auction closeout failed: ${
+        error?.message ||
+        "Unknown error"
+      }`
+    );
+  } finally {
+    setAuctionDispositionBusy(
+      current => {
+        const next = {
+          ...current
+        };
+
+        delete next[listingId];
+
+        return next;
+      }
+    );
+  }
+}
+
+  
   async function toggleSave(listing) {
     if (!sdk) {
       window.location.href = "/login";
