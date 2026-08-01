@@ -1688,7 +1688,11 @@ toggleSearchSurfaceRevealed
     : null
 }
 
-renderCustomItem={({ item }) => {
+renderCustomItem={({
+  item,
+  id,
+  dragHandleProps
+}) => {
   if (
     item?.type !== "AOS CREATE OBJECT"
   ) {
@@ -1754,6 +1758,7 @@ renderCustomItem={({ item }) => {
   return (
     <IXIObjectCreateCard
       listing={temporaryObjectListing}
+      dragHandleProps={dragHandleProps}
 
       cardContext="enterprise"
       presentation="seller"
