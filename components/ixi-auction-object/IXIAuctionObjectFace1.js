@@ -25,7 +25,8 @@ export default function IXIAuctionObjectFace1({
   sellerMode = false,
 
   lotNumberValue,
-  onLotNumberChange,
+onLotNumberChange,
+onLotNumberKeyDown,
 
   hoursValue,
   onHoursChange,
@@ -74,6 +75,10 @@ export default function IXIAuctionObjectFace1({
         onLotNumberChange={
           onLotNumberChange
         }
+
+  onLotNumberKeyDown={
+  onLotNumberKeyDown
+}
 
         alertsEnabled={
           auctionAlertsEnabled
