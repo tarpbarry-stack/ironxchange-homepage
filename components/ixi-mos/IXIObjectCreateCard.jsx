@@ -1174,20 +1174,21 @@ width: 54px;
 text-align: right;
         }
 
- .hours-input {
-  width: 54px;
-  height: 32px;
+.hours-input {
+  width: 52px;
+  height: 23px;
 
-  border: 1px solid #343434;
-  border-radius: 8px;
+  padding: 0 5px;
 
-  background: #101010;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 5px;
+
+  background: rgba(10,10,10,.82);
   color: rgba(255,255,255,.62);
 
-  padding: 0 8px;
-
-  font-size: 11px;
-  font-weight: 900;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
 
   text-align: right;
   outline: none;
@@ -1369,22 +1370,29 @@ text-align: right;
           cursor: pointer;
         }
 
-        .price-input,
-        .location-input {
-          height: 32px;
-          border: 1px solid #343434;
-          border-radius: 8px;
-          background: #101010;
-          color: #F2F2F2;
-          padding: 0 10px;
-          font-size: 11px;
-          font-weight: 900;
-          outline: none;
-        }
+       .price-input,
+.location-input {
+  height: 23px;
 
-        .price-input {
-          width: 62px;
-        }
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 5px;
+
+  background: rgba(10,10,10,.82);
+  color: rgba(255,255,255,.68);
+
+  padding: 0 6px;
+
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+
+  outline: none;
+}
+
+.price-input {
+  width: 82px;
+  text-align: right;
+}
 
         .location-input {
           width: 72px;
@@ -1394,19 +1402,25 @@ text-align: right;
           letter-spacing: .28px;
         }
 
-       .location-row {
+      .location-row {
   display: flex;
   flex-direction: row;
-  gap: 6px;
-  order: 2;
+  align-items: center;
+
+  gap: 4px;
 }
 
 .city-input {
-  width: 72px;
+  width: 76px;
+  text-align: right;
 }
 
 .state-input {
-  width: 30px;
+  width: 27px;
+  padding-left: 3px;
+  padding-right: 3px;
+
+  text-align: center;
   text-transform: uppercase;
 }
 
