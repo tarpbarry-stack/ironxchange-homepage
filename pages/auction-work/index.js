@@ -1,8 +1,8 @@
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import useIXISellerMachineOps
-  from "../../components/ixi-chassis/useIXISellerMachineOps";
+import useIXIAuctionObjectOps
+  from "../../components/ixi-auction-object/useIXIAuctionObjectOps";
 
 import {
   setIXIActionNotice
@@ -206,20 +206,15 @@ const DIRECT_CONTAINER_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const [
-  auctionCardDrafts,
-  setAuctionCardDrafts
-] = useState({});
+  
   const cardScaleMetrics = getIXIAuctionCardScalePreset(cardScaleMode);
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
-
   const {
-  getSellerListingCardProps:
-    getPersistedSellerCardProps
-} = useIXISellerMachineOps({
-  setSellerListings: setListings,
+  getAuctionListingCardProps
+} = useIXIAuctionObjectOps({
+  setListings,
 
   showActionNotice: ({
     listingId,
@@ -227,7 +222,9 @@ const DIRECT_CONTAINER_TARGETS = [
     tone
   }) =>
     setIXIActionNotice({
-      setState: setIxiCardState,
+      setState:
+        setIxiCardState,
+
       listingId,
       message,
       tone
@@ -1342,128 +1339,6 @@ if (armedDestination === "stackTop") {
 }
 
 
-function getAuctionSellerCardProps(
-  listing = {}
-) {
-  const listingId = String(
-    getListingId(listing)
-  );
-
-  const draft =
-    auctionCardDrafts[listingId] || {};
-
-const {
-  onPriceKeyDown,
-  onHoursKeyDown,
-  onLocationKeyDown
-} = getPersistedSellerCardProps(
-  listing
-);
-
-  function updateField(field, value) {
-    setAuctionCardDrafts(current => ({
-      ...current,
-
-      [listingId]: {
-        ...(current[listingId] || {}),
-        [field]: value
-      }
-    }));
-  }
-
-  const existingLocation =
-    listing?.location ||
-    listing?.publicData?.location ||
-    listing?.attributes
-      ?.publicData?.location ||
-    "";
-
-  return {
-    /*
-     * Existing permanent mutation callbacks:
-     * Enter persists to the machine record and
-     * triggers the card notification.
-     */
-     onPriceKeyDown,
-  onHoursKeyDown,
-  onLocationKeyDown,
-
-    /*
-     * Live controlled draft values:
-     * every keystroke remains visible.
-     */
-    priceValue:
-      draft.price !== undefined
-        ? draft.price
-        : (
-            listing?.price ??
-            listing?.publicData?.price ??
-            ""
-          ),
-
-    onPriceChange: value => {
-      updateField(
-        "price",
-        value
-      );
-    },
-
-    hoursValue:
-      draft.hours !== undefined
-        ? draft.hours
-        : String(
-            listing?.hours ??
-            listing?.publicData?.hours ??
-            ""
-          ).replace(
-            /[^0-9]/g,
-            ""
-          ),
-
-    onHoursChange: value => {
-      updateField(
-        "hours",
-        String(value).replace(
-          /[^0-9]/g,
-          ""
-        )
-      );
-    },
-
-    locationValue:
-      draft.location !== undefined
-        ? draft.location
-        : existingLocation,
-
-    onLocationChange: value => {
-      updateField(
-        "location",
-        value
-      );
-    },
-
-    /*
-     * Lot remains live-edit only for this pass.
-     * Its permanent mutation does not exist yet.
-     */
-    lotNumberValue:
-      draft.lotNumber !== undefined
-        ? draft.lotNumber
-        : (
-            listing?.lotNumber ??
-            listing?.publicData
-              ?.lotNumber ??
-            ""
-          ),
-
-    onLotNumberChange: value => {
-      updateField(
-        "lotNumber",
-        value
-      );
-    }
-  };
-}
     
   return (
   <IXIDragEngine
@@ -1658,9 +1533,9 @@ rowGap: `${cardScaleMetrics.gap + 90}px`
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
-  getSellerListingCardProps={
-  getAuctionSellerCardProps
-  }
+ getSellerListingCardProps={
+  getAuctionListingCardProps
+}
 />
         </section>
 
