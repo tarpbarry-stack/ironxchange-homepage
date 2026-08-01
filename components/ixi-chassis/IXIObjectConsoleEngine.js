@@ -208,8 +208,9 @@ export function getConsoleGridSpan(
       max
     }
   );
+}
 
-  export const IXI_CONSOLE_DEFAULT_FACE = 1;
+export const IXI_CONSOLE_DEFAULT_FACE = 1;
 
 export function createConsoleSlot({
   slotId,
