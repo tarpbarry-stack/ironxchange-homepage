@@ -123,7 +123,10 @@ function createEmptyAosObjectForm() {
     customerAssetId: "",
     factualTitle: "",
     value: "",
-    location: ""
+    location: "",
+
+    machineAccess: "private",
+    machineChannel: "private"
   };
 }
 
@@ -1676,9 +1679,10 @@ toggleSearchSurfaceRevealed
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
+  cardScaleMetrics={cardScaleMetrics}
   getSellerListingCardProps={getSellerListingCardProps}
 
-getCustomItemId={item =>
+  getCustomItemId={item =>
   item?.type === "AOS CREATE OBJECT"
     ? item.id
     : null
@@ -1691,16 +1695,148 @@ renderCustomItem={({ item }) => {
     return null;
   }
 
+  const temporaryObjectListing = {
+    id: {
+      uuid: "__aos_create__"
+    },
+
+    title:
+      objectCreateForm.displayName ||
+      "NEW OBJECT",
+
+    type:
+      objectCreateForm.objectType ||
+      "job",
+
+    category:
+      objectCreateForm.customerCategory ||
+      "OBJECT",
+
+    price:
+      objectCreateForm.value ||
+      "",
+
+    location:
+      objectCreateForm.location ||
+      "",
+
+    hours: "",
+
+    age: "—",
+    views: "—",
+    states: "—",
+
+    imageUrls: [],
+
+    publicData: {
+      objectType:
+        objectCreateForm.objectType ||
+        "job",
+
+      customerCategory:
+        objectCreateForm.customerCategory ||
+        "",
+
+      customerAssetId:
+        objectCreateForm.customerAssetId ||
+        "",
+
+      factualTitle:
+        objectCreateForm.factualTitle ||
+        "",
+
+      location:
+        objectCreateForm.location ||
+        ""
+    }
+  };
+
   return (
     <IXIObjectCreateCard
-      form={objectCreateForm}
-      working={objectCreateWorking}
-      error={objectCreateError}
-      onChange={updateObjectCreateForm}
-      onSubmit={() => {}}
-      onCancel={() =>
-        setShowObjectCreator(false)
+      listing={temporaryObjectListing}
+
+      cardContext="enterprise"
+      presentation="seller"
+      sellerMode={true}
+      creationMode={false}
+
+      priceValue={
+        objectCreateForm.value
       }
+
+      onPriceChange={value =>
+        updateObjectCreateForm(
+          "value",
+          value
+        )
+      }
+
+      locationValue={
+        objectCreateForm.location
+      }
+
+      onLocationChange={value =>
+        updateObjectCreateForm(
+          "location",
+          value
+        )
+      }
+
+      machineAccess={
+        objectCreateForm.machineAccess
+      }
+
+      machineChannel={
+        objectCreateForm.machineChannel
+      }
+
+      machinePlacementBusy={
+        objectCreateWorking
+      }
+
+      onMachinePlacementChange={(
+        listing,
+        nextPlacement
+      ) => {
+        updateObjectCreateForm(
+          "machineAccess",
+          nextPlacement?.machineAccess ||
+            nextPlacement?.access ||
+            "private"
+        );
+
+        updateObjectCreateForm(
+          "machineChannel",
+          nextPlacement?.machineChannel ||
+            nextPlacement?.channel ||
+            "private"
+        );
+      }}
+
+      machineFace={1}
+      onCycleMachineFace={() => {}}
+
+      saved={false}
+      onToggleSaved={() => {}}
+
+      armedDestination={
+        armedDestination
+      }
+
+      onSendFront={() => {}}
+      onSendBack={() => {}}
+      onSendToArmedDestination={() => {}}
+
+      onPause={() => {}}
+      onReactivate={() => {}}
+
+      onDelete={() => {
+        setObjectCreateError("");
+        setObjectCreateForm(
+          createEmptyAosObjectForm()
+        );
+        setShowObjectCreator(false);
+      }}
     />
   );
 }}
