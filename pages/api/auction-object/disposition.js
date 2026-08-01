@@ -51,9 +51,8 @@ function getOrigin(req) {
 
 function getIXCoreBase() {
   return (
-    process.env.IX_CORE_INTERNAL_URL ||
     process.env.IX_CORE_BASE_URL ||
-    "http://127.0.0.1:4100"
+    "https://staging.ironxchange.com/ix-core"
   ).replace(/\/+$/, "");
 }
 
