@@ -70,6 +70,9 @@ export default function AuctionListingCard({
   machineFace = 1,
   onCycleMachineFace,
 
+  dealerBidPack = {},
+  onSaveDealerBidPack,
+
   onSendFront,
   onSendBack,
 
@@ -313,11 +316,20 @@ function handlePhotoLoad(e, photoUrl) {
 ) : null}
 {auctionFace === 3 ? (
   <IXIAuctionObjectFace3
-    listing={listing}
-    dragHandleProps={
-      dragHandleProps
-    }
-  />
+  listing={listing}
+
+  dealerBidPack={
+    dealerBidPack
+  }
+
+  onSaveDealerBidPack={
+    onSaveDealerBidPack
+  }
+
+  dragHandleProps={
+    dragHandleProps
+  }
+/>
 ) : auctionFace === 2 ? (
   <IXIAuctionObjectFace2
     listing={listing}
