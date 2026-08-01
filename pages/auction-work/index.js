@@ -1310,7 +1310,16 @@ if (armedDestination === "stackTop") {
   }));
 }
 }
-            
+
+
+function getAuctionSellerCardProps(listing) {
+  console.log("GET SELLER CARD PROPS", listing);
+
+  return {
+    sellerMode: true
+  };
+}
+    
   return (
   <IXIDragEngine
     sensors={sensors}
@@ -1504,7 +1513,10 @@ rowGap: `${cardScaleMetrics.gap + 90}px`
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
-    />
+  getSellerListingCardProps={
+  getAuctionSellerCardProps
+  }
+/>
         </section>
 
 <button
