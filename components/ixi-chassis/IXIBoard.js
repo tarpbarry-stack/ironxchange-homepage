@@ -253,6 +253,10 @@ function toggleConsoleWidth(event) {
         />
   </IXIScaledCardShell>
 
+{consoleIsOpen ? (
+  <div className="ixi-console-empty-panel" />
+) : null}
+        
   <button
     type="button"
     className={`ixi-console-test-actuator ${
@@ -310,6 +314,10 @@ function toggleConsoleWidth(event) {
     dragHandleProps={dragHandleProps}
   />
 
+{consoleIsOpen ? (
+  <div className="ixi-console-empty-panel" />
+) : null}
+      
  <button
     type="button"
     className={`ixi-console-test-actuator ${
@@ -343,10 +351,42 @@ function toggleConsoleWidth(event) {
             })}
 <style jsx>{`
   .ixi-console-test-chassis {
-    position: relative;
-    width: 100%;
-    overflow: visible;
-  }
+  position: relative;
+
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  overflow: visible;
+}
+
+.ixi-console-empty-panel {
+  width: 298px;
+  min-width: 298px;
+  height: 391px;
+
+  position: relative;
+
+  flex: 0 0 298px;
+
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28, 31, 36, .98),
+      rgba(15, 17, 20, .98)
+    );
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, .34),
+    inset 0 1px 0 rgba(255, 255, 255, .04);
+
+  overflow: hidden;
+}
 
   .ixi-console-test-actuator {
     position: absolute;
