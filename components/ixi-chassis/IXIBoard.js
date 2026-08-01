@@ -381,7 +381,7 @@ function toggleConsoleWidth(event) {
   margin-left: -1px;
 
   border: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 0 13px 13px 0;
+  border-radius: 13px;
 
   background:
     linear-gradient(
