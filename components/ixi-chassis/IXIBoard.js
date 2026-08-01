@@ -5,6 +5,11 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
+import {
+  getConsoleDepth,
+  getConsoleGridSpan
+} from "./IXIObjectConsoleEngine";
+
 export default function IXIBoard({
   items = [],
   cardContext = "workspace",  
@@ -30,8 +35,12 @@ export default function IXIBoard({
   onCheckoutObject,
 
   getCustomItemId,
-  renderCustomItem,
+renderCustomItem,
+
+consolePanelWidth,
+consolePanelGap,
 }) {
+  
   function resolveBoardItemId(item) {
     if (
       typeof getCustomItemId === "function"
@@ -55,6 +64,20 @@ export default function IXIBoard({
     );
   }
 
+const resolvedConsolePanelWidth =
+  Number(
+    consolePanelWidth ??
+    cardScaleMetrics?.width ??
+    300
+  ) || 300;
+
+const resolvedConsolePanelGap =
+  Number(
+    consolePanelGap ??
+    cardScaleMetrics?.gap ??
+    0
+  ) || 0;
+  
   return (
 <SortableContext
   id="board"
@@ -66,7 +89,35 @@ export default function IXIBoard({
     {items.map(item => {
         const id =
   resolveBoardItemId(item);
-        const sellerCardProps =
+
+const consoleDepth =
+  getConsoleDepth(
+    ixiCardState,
+    id
+  );
+
+const consoleSpan =
+  getConsoleGridSpan(
+    consoleDepth
+  );
+
+const consoleWidth =
+  (
+    consoleDepth *
+    resolvedConsolePanelWidth
+  ) +
+  (
+    Math.max(
+      consoleDepth - 1,
+      0
+    ) *
+    resolvedConsolePanelGap
+  );
+
+const sellerCardProps =
+  typeof getSellerListingCardProps === "function"
+    ? getSellerListingCardProps(item)
+    : {};
           typeof getSellerListingCardProps === "function"
             ? getSellerListingCardProps(item)
             : {};
@@ -76,9 +127,32 @@ export default function IXIBoard({
   key={id}
   id={id}
   containerId="board"
+
   className={`ixi-board-sortable-card ${
-    item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
+    item?.type === "SELLER OBJECT"
+      ? "ixi-seller-object-sortable-card"
+      : ""
+  } ${
+    consoleDepth > 1
+      ? "ixi-console-expanded"
+      : ""
   }`}
+
+  style={{
+    gridColumn:
+      `span ${consoleSpan}`,
+
+    width:
+      `${consoleWidth}px`,
+
+    maxWidth:
+      consoleDepth > 1
+        ? "none"
+        : `${resolvedConsolePanelWidth}px`,
+
+    justifySelf:
+      "start"
+  }}
 >
          {({ dragHandleProps }) => {
   const customItem =
@@ -128,6 +202,7 @@ export default function IXIBoard({
     <IXIMachineCard
   listing={item}
   cardContext={cardContext}
+  consoleDepth={consoleDepth}
       saved={savedIds.includes(id)}
       onToggleSaved={() => toggleSave(item)}
       from="saved"
@@ -159,6 +234,7 @@ export default function IXIBoard({
   <IXIMachineCard
   listing={item}
   cardContext={cardContext}
+  consoleDepth={consoleDepth}
     saved={savedIds.includes(id)}
     onToggleSaved={() => toggleSave(item)}
     from="saved"
