@@ -68,15 +68,15 @@ const resolvedConsolePanelWidth =
   Number(
     consolePanelWidth ??
     cardScaleMetrics?.width ??
-    300
-  ) || 300;
+    298
+  ) || 298;
 
 const resolvedConsolePanelGap =
   Number(
     consolePanelGap ??
     cardScaleMetrics?.gap ??
-    0
-  ) || 0;
+    12
+  ) || 12;
   
   return (
 <SortableContext
