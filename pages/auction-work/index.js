@@ -199,6 +199,10 @@ const DIRECT_CONTAINER_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
+  const [
+  auctionCardDrafts,
+  setAuctionCardDrafts
+] = useState({});
   const cardScaleMetrics = getIXIAuctionCardScalePreset(cardScaleMode);
   const hasAppliedRemoteLayoutRef = useRef(false);
   
