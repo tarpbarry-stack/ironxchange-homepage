@@ -264,42 +264,54 @@ export default function IXIObjectCreateCard({
 
       <style jsx>{`
         .ixi-object-create-card {
-          width: 320px;
-          min-height: 470px;
-          padding: 14px;
+  position: relative;
 
-          display: flex;
-          flex-direction: column;
-          gap: 11px;
+  text-decoration: none;
+  color: inherit;
 
-          border:
-            1px solid rgba(
-              255,
-              196,
-              0,
-              0.22
-            );
+  font-family: 'Inter', sans-serif;
+  font-size: initial;
+  line-height: normal;
 
-          border-radius: 12px;
+  isolation: isolate;
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                196,
-                0,
-                0.035
-              ),
-              transparent 28%
-            ),
-            #101010;
+  height: 470px;
+  min-height: 470px;
+  max-height: 470px;
 
-          box-shadow:
-            0 14px 30px
-              rgba(0, 0, 0, 0.28);
-        }
+  border: 1px solid rgba(255,255,255,.06);
+  outline: 1px solid rgba(255,255,255,.018);
 
+  border-radius: 13px;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,0)
+    ),
+    #141414;
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.045) inset,
+    0 18px 44px rgba(0,0,0,.22);
+
+  transition:
+    transform .22s cubic-bezier(.22,.61,.36,1),
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+
+  contain: layout paint;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 13px 13px 14px;
+
+  box-sizing: border-box;
+}
         .ixi-object-create-card__top {
           display: flex;
           align-items: center;
