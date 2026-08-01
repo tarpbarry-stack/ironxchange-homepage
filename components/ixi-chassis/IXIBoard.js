@@ -80,18 +80,24 @@ export default function IXIBoard({
     item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
   }`}
 >
-          {({ dragHandleProps }) => (
-  typeof renderCustomItem === "function" &&
-  renderCustomItem({
-    item,
-    id,
-    dragHandleProps
-  }) ? (
-    renderCustomItem({
-      item,
-      id,
-      dragHandleProps
-    })
+         {({ dragHandleProps }) => {
+  const customItem =
+    typeof renderCustomItem === "function"
+      ? renderCustomItem({
+          item,
+          id,
+          dragHandleProps
+        })
+      : null;
+
+  return customItem ? (
+    enableCardScaling ? (
+      <IXIScaledCardShell size={cardScaleMode}>
+        {customItem}
+      </IXIScaledCardShell>
+    ) : (
+      customItem
+    )
   ) : item?.type === "SELLER OBJECT" &&
     SellerObjectCard ? (
   <IXIScaledCardShell size={cardScaleMode}>
@@ -176,12 +182,13 @@ export default function IXIBoard({
     isGhostTarget={
       String(id) === String(ghostListingId)
     }
-    useDndDrag={false}
+        useDndDrag={false}
     dragHandleProps={dragHandleProps}
   />
-)
-)}
-          </IXISortableMachineCard>
+);
+
+}}
+</IXISortableMachineCard>
         );
             })}
 </SortableContext>
