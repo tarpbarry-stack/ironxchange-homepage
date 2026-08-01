@@ -26,46 +26,25 @@ export default function IXIBoard({
   enableCardScaling = false,
   cardScaleMode = "xl",
   cardScaleMetrics,
-   onRecoverSellerObject,
+  onRecoverSellerObject,
   onCheckoutObject,
-
-  getCustomItemId,
-  renderCustomItem,
 }) {
-  function resolveBoardItemId(item) {
-    if (
-      typeof getCustomItemId === "function"
-    ) {
-      const customId =
-        getCustomItemId(item);
-
-      if (customId) {
-        return String(customId);
-      }
-    }
-
-    if (
-      item?.type === "SELLER OBJECT"
-    ) {
-      return String(item.id);
-    }
-
-    return String(
-      getListingId(item)
-    );
-  }
-
+  
   return (
 <SortableContext
   id="board"
   items={items.map(item =>
-  resolveBoardItemId(item)
-)}
+    item?.type === "SELLER OBJECT"
+      ? String(item.id)
+      : String(getListingId(item))
+  )}
   strategy={rectSortingStrategy}
 >
     {items.map(item => {
         const id =
-  resolveBoardItemId(item);
+          item?.type === "SELLER OBJECT"
+            ? String(item.id)
+            : String(getListingId(item));
         const sellerCardProps =
           typeof getSellerListingCardProps === "function"
             ? getSellerListingCardProps(item)
@@ -80,26 +59,9 @@ export default function IXIBoard({
     item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
   }`}
 >
-         {({ dragHandleProps }) => {
-  const customItem =
-    typeof renderCustomItem === "function"
-      ? renderCustomItem({
-          item,
-          id,
-          dragHandleProps
-        })
-      : null;
-
-  return customItem ? (
-    enableCardScaling ? (
-      <IXIScaledCardShell size={cardScaleMode}>
-        {customItem}
-      </IXIScaledCardShell>
-    ) : (
-      customItem
-    )
-  ) : item?.type === "SELLER OBJECT" &&
-    SellerObjectCard ? (
+           {({ dragHandleProps }) => (
+             
+   item?.type === "SELLER OBJECT" && SellerObjectCard ? (
   <IXIScaledCardShell size={cardScaleMode}>
     <SellerObjectCard
   sellerObject={item}
@@ -182,13 +144,12 @@ export default function IXIBoard({
     isGhostTarget={
       String(id) === String(ghostListingId)
     }
-        useDndDrag={false}
+    useDndDrag={false}
     dragHandleProps={dragHandleProps}
   />
-);
-
-}}
-</IXISortableMachineCard>
+)
+)}
+          </IXISortableMachineCard>
         );
             })}
 </SortableContext>
