@@ -557,6 +557,25 @@ const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
 
+const boardItems = useMemo(() => {
+  const items = [];
+
+  if (showObjectCreator) {
+    items.push({
+      id: "__aos_create__",
+      type: "AOS CREATE OBJECT",
+      creationMode: true
+    });
+  }
+
+  items.push(...visibleSavedListings);
+
+  return items;
+}, [
+  showObjectCreator,
+  visibleSavedListings
+]);
+  
   const aosScoreboard = useMemo(() => {
   const jobsIndex =
     systemIndexes.find(
@@ -1459,24 +1478,28 @@ toggleSearchSurfaceRevealed
   </div>
 
   <div className="aos-scoreboard-actions">
-    <button
-      type="button"
-      className="aos-scoreboard-action"
-      aria-label="Add"
-      title="Add"
-    >
-      +
-    </button>
+  <button
+    type="button"
+    className="aos-scoreboard-action"
+    aria-label="Add object"
+    title="Add object"
+    onClick={() => {
+      setObjectCreateError("");
+      setShowObjectCreator(true);
+    }}
+  >
+    +
+  </button>
 
-    <button
-      type="button"
-      className="aos-scoreboard-action"
-      aria-label="More actions"
-      title="More actions"
-    >
-      ⋯
-    </button>
-  </div>
+  <button
+    type="button"
+    className="aos-scoreboard-action"
+    aria-label="More actions"
+    title="More actions"
+  >
+    ⋯
+  </button>
+</div>
 </section>
    
 
@@ -1626,7 +1649,7 @@ toggleSearchSurfaceRevealed
 }}
 >
 <IXIBoard
-  items={visibleSavedListings}
+  items={boardItems}
   cardContext="inventory"
   getListingId={getListingId}
   savedIds={savedIds}
@@ -1644,6 +1667,34 @@ toggleSearchSurfaceRevealed
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
   getSellerListingCardProps={getSellerListingCardProps}
+
+getCustomItemId={item =>
+  item?.type === "AOS CREATE OBJECT"
+    ? item.id
+    : null
+}
+
+renderCustomItem={({ item }) => {
+  if (
+    item?.type !== "AOS CREATE OBJECT"
+  ) {
+    return null;
+  }
+
+  return (
+    <IXIObjectCreateCard
+      form={objectCreateForm}
+      working={objectCreateWorking}
+      error={objectCreateError}
+      onChange={updateObjectCreateForm}
+      onSubmit={() => {}}
+      onCancel={() =>
+        setShowObjectCreator(false)
+      }
+    />
+  );
+}}
+    
     />
         </section>
 
