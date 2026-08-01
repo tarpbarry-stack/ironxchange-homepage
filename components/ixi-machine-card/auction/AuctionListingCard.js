@@ -22,6 +22,21 @@ import IXIAuctionObjectFace3
 import IXIAuctionObjectFace4
   from "../../ixi-auction-object/IXIAuctionObjectFace4";
 
+import IXIObjectConsoleShell
+  from "../../ixi-chassis/IXIObjectConsoleShell";
+
+import {
+  normalizeConsoleSlots,
+  insertConsoleSlot,
+  removeConsoleSlot,
+  cycleConsoleSlotFace,
+  createConsoleSlotsPatch
+} from "../../ixi-chassis/IXIObjectConsoleEngine";
+
+import {
+  renderAuctionPanel
+} from "../../ixi-auction-object/IXIAuctionConsolePanels";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -96,8 +111,11 @@ export default function AuctionListingCard({
   onBoardDragOver,
   onBoardDragEnd,
 
-  dragHandleProps
+consoleDepth = 1,
+
+dragHandleProps
 }) {
+
   const [photoIndex, setPhotoIndex] = useState(0);
   console.log("AUCTION DRAG HANDLE RECEIVED", {
   listingId:
@@ -231,6 +249,101 @@ const auctionFace =
       : requestedAuctionFace === 2
         ? 2
         : 1;
+
+const consoleSlots =
+  normalizeConsoleSlots(
+    ixiState?.consoleSlots,
+    {
+      defaultFace:
+        auctionFace
+    }
+  );
+
+function saveConsoleSlots(
+  nextSlots
+) {
+  if (
+    typeof onIxiStateChange !==
+    "function"
+  ) {
+    return;
+  }
+
+  onIxiStateChange(
+    id,
+    createConsoleSlotsPatch(
+      nextSlots
+    )
+  );
+}
+
+function insertConsolePanelAfter(
+  slotId
+) {
+  const sourceSlot =
+    consoleSlots.find(
+      slot =>
+        String(slot.slotId) ===
+        String(slotId)
+    );
+
+  const nextSlots =
+    insertConsoleSlot({
+      slots:
+        consoleSlots,
+
+      afterSlotId:
+        slotId,
+
+      /*
+       * New panel initially duplicates
+       * the face beside it.
+       */
+      face:
+        sourceSlot?.face ||
+        1,
+
+      maxSlots: 4
+    });
+
+  saveConsoleSlots(
+    nextSlots
+  );
+}
+
+function removeConsolePanel(
+  slotId
+) {
+  const nextSlots =
+    removeConsoleSlot({
+      slots:
+        consoleSlots,
+
+      slotId
+    });
+
+  saveConsoleSlots(
+    nextSlots
+  );
+}
+
+function cycleConsolePanelFace(
+  slotId
+) {
+  const nextSlots =
+    cycleConsoleSlotFace({
+      slots:
+        consoleSlots,
+
+      slotId,
+
+      maxFace: 4
+    });
+
+  saveConsoleSlots(
+    nextSlots
+  );
+}
   
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
