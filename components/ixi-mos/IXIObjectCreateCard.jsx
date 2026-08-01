@@ -1732,304 +1732,420 @@ text-align: right;
 }
 
 .vehicle-face-one {
-  padding: 9px 11px 10px;
-}
+    height: 100%;
+    min-height: 0;
+    padding: 7px 9px 6px;
+
+    overflow: hidden;
+  }
+
+  .vehicle-face-one .card-board-zone {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    cursor: grab;
+  }
+
+  .vehicle-identity-row {
+    display: grid;
+    grid-template-columns:
+      116px
+      minmax(0, 1fr);
+
+    align-items: end;
+    gap: 8px;
+  }
+
+  .vehicle-field {
+    display: block;
+    width: max-content;
+    min-width: 0;
+  }
+
+  .vehicle-field > span,
+  .vehicle-entity > span,
+  .vehicle-home-location > span {
+    display: block;
+    margin-bottom: 2px;
+
+    color: rgba(255, 255, 255, 0.31);
+
+    font-size: 6px;
+    font-weight: 950;
+    letter-spacing: 0.42px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .vehicle-field input {
+    width: 58%;
+    min-width: 0;
+    height: 18px;
+    padding: 0 4px;
+
+    border:
+      1px solid
+      rgba(255, 255, 255, 0.105);
+
+    border-radius: 3px;
+
+    background: rgba(9, 9, 9, 0.82);
+    color: rgba(255, 255, 255, 0.73);
+
+    outline: none;
+
+    font-size: 8px;
+    font-weight: 850;
+    line-height: 16px;
+    text-transform: uppercase;
+  }
+
+  .vehicle-field input:focus {
+    border-color:
+      rgba(255, 196, 0, 0.42);
+
+    box-shadow:
+      0 0 0 1px
+      rgba(255, 196, 0, 0.08);
+  }
+
+  /*
+   * Explicit compact widths.
+   * No Vehicle input is allowed to stretch.
+   */
+
+  .vehicle-field-asset input {
+    width: 116px;
+  }
+
+  .vehicle-field-year input {
+    width: 38px;
+    text-align: center;
+  }
+
+  .vehicle-field-make input {
+    width: 56px;
+  }
+
+  .vehicle-field-model input {
+    width: 68px;
+  }
+
+  .vehicle-field-miles input {
+    width: 54px;
+    text-align: right;
+  }
+
+  .vehicle-field-vin input {
+    width: 126px;
+    letter-spacing: 0.32px;
+  }
 
-.vehicle-face-one .card-board-zone {
-  height: 100%;
+  .vehicle-field-value input {
+    width: 70px;
+    text-align: right;
+  }
+
+  .vehicle-entity {
+    min-width: 0;
+    padding-bottom: 2px;
+
+    text-align: right;
+  }
 
-  display: flex;
-  flex-direction: column;
+  .vehicle-entity strong {
+    display: block;
 
-  cursor: grab;
-}
-
-.vehicle-identity-row {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    92px;
-
-  align-items: end;
-  gap: 8px;
-}
-
-.vehicle-field {
-  display: block;
-  min-width: 0;
-}
-
-.vehicle-field > span,
-.vehicle-entity > span,
-.vehicle-home-location > span {
-  display: block;
-
-  margin-bottom: 3px;
-
-  color: rgba(255,255,255,.31);
-
-  font-size: 6.5px;
-  font-weight: 950;
-  letter-spacing: .48px;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.vehicle-field input {
-  width: 100%;
-  height: 22px;
-
-  padding: 0 5px;
-
-  border: 1px solid rgba(255,255,255,.105);
-  border-radius: 4px;
-
-  background: rgba(9,9,9,.82);
-  color: rgba(255,255,255,.73);
-
-  outline: none;
-
-  font-size: 8.5px;
-  font-weight: 850;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.vehicle-field input:focus {
-  border-color: rgba(255,196,0,.42);
-
-  box-shadow:
-    0 0 0 1px rgba(255,196,0,.08);
-}
-
-.vehicle-entity {
-  min-width: 0;
-
-  padding-bottom: 3px;
-
-  text-align: right;
-}
-
-.vehicle-entity strong {
-  display: block;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  color: rgba(255,255,255,.62);
-
-  font-size: 8px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  text-transform: uppercase;
-}
-
-.vehicle-spec-row {
-  display: grid;
-  grid-template-columns:
-    42px
-    minmax(0, .85fr)
-    minmax(0, 1fr)
-    58px;
-
-  gap: 5px;
-
-  margin-top: 6px;
-}
-
-.vehicle-field-year input,
-.vehicle-field-miles input {
-  text-align: right;
-}
-
-.vehicle-current-block {
-  min-height: 53px;
-
-  margin-top: 7px;
-  padding: 5px 8px;
-
-  position: relative;
-
-  border-top: 1px solid rgba(255,255,255,.05);
-  border-bottom: 1px solid rgba(255,255,255,.05);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0,194,255,.035),
-      transparent 72%
-    );
-}
-
-.vehicle-current-label {
-  position: absolute;
-  right: 7px;
-  top: 5px;
-
-  color: rgba(0,194,255,.43);
-
-  font-size: 6px;
-  font-weight: 950;
-  letter-spacing: .58px;
-}
-
-.vehicle-current-operator {
-  display: block;
-
-  margin: 0 42px 2px 0;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  color: rgba(255,255,255,.87);
-
-  font-size: 12px;
-  font-weight: 950;
-  line-height: 1.08;
-  letter-spacing: .1px;
-  text-transform: uppercase;
-}
-
-.vehicle-current-relationship {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-
-  color: rgba(255,255,255,.55);
-
-  font-size: 7.5px;
-  font-weight: 900;
-  letter-spacing: .35px;
-  text-transform: uppercase;
-}
-
-.vehicle-current-relationship i {
-  color: rgba(255,255,255,.18);
-  font-style: normal;
-}
-
-.vehicle-current-location {
-  margin-top: 3px;
-
-  color: rgba(255,196,0,.67);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-}
-
-.vehicle-vin-row {
-  margin-top: 6px;
-}
-
-.vehicle-field-vin input {
-  letter-spacing: .45px;
-}
-
-.vehicle-value-location-row {
-  display: grid;
-  grid-template-columns:
-    82px
-    minmax(0, 1fr);
-
-  align-items: end;
-  gap: 8px;
-
-  margin-top: 6px;
-}
-
-.vehicle-field-value input {
-  text-align: right;
-}
-
-.vehicle-home-location {
-  min-width: 0;
-}
-
-.vehicle-home-location .location-row {
-  justify-content: flex-end;
-}
-
-.vehicle-home-location .city-input {
-  width: 76px;
-}
-
-.vehicle-home-location .state-input {
-  width: 27px;
-}
-
-.vehicle-bottom-row {
-  display: grid;
-  grid-template-columns:
-    132px
-    minmax(0, 1fr);
-
-  align-items: center;
-  gap: 7px;
-
-  margin-top: auto;
-  padding-top: 6px;
-
-  border-top:
-    1px solid rgba(255,255,255,.045);
-}
-
-.vehicle-placement-control {
-  width: 132px;
-  min-width: 132px;
-}
-
-.vehicle-actions {
-  display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 5px;
-}
-
-.vehicle-actions button {
-  height: 24px;
-  padding: 0 4px;
-
-  border: 1px solid #343434;
-  border-radius: 5px;
-
-  background: #101010;
-  color: rgba(255,255,255,.62);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .28px;
-
-  cursor: pointer;
-}
-
-.vehicle-actions button:disabled {
-  opacity: .28;
-  cursor: default;
-}
-
-.vehicle-actions .save-action {
-  border-color: rgba(0,194,255,.42);
-  color: rgba(0,194,255,.92);
-
-  background:
-    rgba(0,194,255,.045);
-}
-
-.vehicle-actions .save-action:hover {
-  border-color: rgba(0,194,255,.72);
-  color: #6fe8ff;
-}
-
-.vehicle-actions .danger-action:hover {
-  border-color: rgba(229,62,62,.45);
-  color: #e53e3e;
-}
-
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: rgba(255, 255, 255, 0.62);
+
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  .vehicle-spec-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+
+    margin-top: 5px;
+  }
+
+  .vehicle-current-block {
+    flex: 1 1 auto;
+    min-height: 48px;
+
+    margin-top: 6px;
+    padding: 5px 7px;
+
+    position: relative;
+
+    border-top:
+      1px solid
+      rgba(255, 255, 255, 0.05);
+
+    border-bottom:
+      1px solid
+      rgba(255, 255, 255, 0.05);
+
+    background:
+      linear-gradient(
+        90deg,
+        rgba(0, 194, 255, 0.035),
+        transparent 72%
+      );
+  }
+
+  .vehicle-current-label {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+
+    color: rgba(0, 194, 255, 0.43);
+
+    font-size: 6px;
+    font-weight: 950;
+    letter-spacing: 0.58px;
+  }
+
+  .vehicle-current-operator {
+    display: block;
+
+    margin: 0 42px 2px 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: rgba(255, 255, 255, 0.87);
+
+    font-size: 12px;
+    font-weight: 950;
+    line-height: 1.08;
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+  }
+
+  .vehicle-current-relationship {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 7.5px;
+    font-weight: 900;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+  }
+
+  .vehicle-current-relationship i {
+    color: rgba(255, 255, 255, 0.18);
+    font-style: normal;
+  }
+
+  .vehicle-current-location {
+    margin-top: 3px;
+
+    color: rgba(255, 196, 0, 0.67);
+
+    font-size: 7px;
+    font-weight: 950;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  /*
+   * VIN and value/location share one compact row.
+   * VIN does not cross the card.
+   */
+
+  .vehicle-detail-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+
+    margin-top: 5px;
+  }
+
+  .vehicle-vin-row {
+    margin: 0;
+  }
+
+  .vehicle-value-location-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+
+    margin: 0;
+  }
+
+  .vehicle-home-location {
+    width: max-content;
+    min-width: 0;
+  }
+
+  .vehicle-home-location .location-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+  }
+
+  .vehicle-home-location .city-input {
+    width: 58px;
+    height: 18px;
+    padding: 0 4px;
+
+    font-size: 8px;
+    line-height: 16px;
+  }
+
+  .vehicle-home-location .state-input {
+    width: 24px;
+    height: 18px;
+    padding: 0 3px;
+
+    font-size: 8px;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  /*
+   * This row is permanent and always visible.
+   * It cannot be pushed below the card.
+   */
+
+  .vehicle-bottom-row {
+    flex: 0 0 27px;
+
+    width: 100%;
+    min-height: 27px;
+
+    display: grid;
+    grid-template-columns:
+      126px
+      minmax(0, 1fr);
+
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 5px;
+    padding-top: 4px;
+
+    border-top:
+      1px solid
+      rgba(255, 255, 255, 0.055);
+
+    position: relative;
+    z-index: 8;
+
+    overflow: visible;
+  }
+
+  .vehicle-placement-control {
+    display: block;
+    width: 126px;
+    min-width: 126px;
+
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /*
+   * Placement control lives in another component,
+   * so its descendants must be targeted globally.
+   */
+
+  .vehicle-placement-control
+    :global(.ixi-machine-placement-control) {
+    display: flex;
+    width: 126px;
+    height: 22px;
+
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .vehicle-actions {
+    display: grid;
+    grid-template-columns:
+      38px
+      48px
+      45px;
+
+    justify-content: end;
+    align-items: center;
+    gap: 4px;
+
+    min-width: 0;
+
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .vehicle-actions button {
+    height: 22px;
+    min-height: 22px;
+    padding: 0 3px;
+
+    border: 1px solid #343434;
+    border-radius: 4px;
+
+    background: #101010;
+    color: rgba(255, 255, 255, 0.62);
+
+    font-size: 6.5px;
+    font-weight: 950;
+    line-height: 20px;
+    letter-spacing: 0.18px;
+
+    cursor: pointer;
+
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .vehicle-actions button:disabled {
+    opacity: 0.28;
+    cursor: default;
+  }
+
+  .vehicle-actions .create-action,
+  .vehicle-actions .save-action {
+    border-color:
+      rgba(0, 194, 255, 0.48);
+
+    background:
+      rgba(0, 194, 255, 0.05);
+
+    color:
+      rgba(0, 194, 255, 0.96);
+  }
+
+  .vehicle-actions .create-action:hover,
+  .vehicle-actions .save-action:hover {
+    border-color:
+      rgba(0, 194, 255, 0.76);
+
+    color: #6fe8ff;
+  }
+
+  .vehicle-actions .danger-action:hover {
+    border-color:
+      rgba(229, 62, 62, 0.45);
+
+    color: #e53e3e;
+  }
                @media (max-width: 850px) {
           .card.seller-mode {
             min-height: 450px;
