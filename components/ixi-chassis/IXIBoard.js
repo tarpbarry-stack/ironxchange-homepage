@@ -357,22 +357,31 @@ function toggleConsoleWidth(event) {
 
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 0;
 
   overflow: visible;
 }
-
 .ixi-console-empty-panel {
   width: 298px;
   min-width: 298px;
-  height: 391px;
+
+  height: 470px;
+  min-height: 470px;
+  max-height: 470px;
 
   position: relative;
 
   flex: 0 0 298px;
 
+  /*
+   * The child belongs to the parent object.
+   * Overlap the two borders by one pixel so
+   * there is one shared seam and no space.
+   */
+  margin-left: -1px;
+
   border: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 8px;
+  border-radius: 0 13px 13px 0;
 
   background:
     linear-gradient(
