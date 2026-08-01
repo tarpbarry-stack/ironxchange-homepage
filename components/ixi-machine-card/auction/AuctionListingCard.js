@@ -22,21 +22,6 @@ import IXIAuctionObjectFace3
 import IXIAuctionObjectFace4
   from "../../ixi-auction-object/IXIAuctionObjectFace4";
 
-import IXIObjectConsoleShell
-  from "../../ixi-chassis/IXIObjectConsoleShell";
-
-import {
-  normalizeConsoleSlots,
-  insertConsoleSlot,
-  removeConsoleSlot,
-  cycleConsoleSlotFace,
-  createConsoleSlotsPatch
-} from "../../ixi-chassis/IXIObjectConsoleEngine";
-
-import {
-  renderAuctionPanel
-} from "../../ixi-auction-object/IXIAuctionConsolePanels";
-
 import {
   getFrameClass,
   getFrameStyle
@@ -110,8 +95,6 @@ export default function AuctionListingCard({
   onBoardDragStart,
   onBoardDragOver,
   onBoardDragEnd,
-
-consoleDepth = 1,
 
 dragHandleProps
 }) {
@@ -249,101 +232,6 @@ const auctionFace =
       : requestedAuctionFace === 2
         ? 2
         : 1;
-
-const consoleSlots =
-  normalizeConsoleSlots(
-    ixiState?.consoleSlots,
-    {
-      defaultFace:
-        auctionFace
-    }
-  );
-
-function saveConsoleSlots(
-  nextSlots
-) {
-  if (
-    typeof onIxiStateChange !==
-    "function"
-  ) {
-    return;
-  }
-
-  onIxiStateChange(
-    id,
-    createConsoleSlotsPatch(
-      nextSlots
-    )
-  );
-}
-
-function insertConsolePanelAfter(
-  slotId
-) {
-  const sourceSlot =
-    consoleSlots.find(
-      slot =>
-        String(slot.slotId) ===
-        String(slotId)
-    );
-
-  const nextSlots =
-    insertConsoleSlot({
-      slots:
-        consoleSlots,
-
-      afterSlotId:
-        slotId,
-
-      /*
-       * New panel initially duplicates
-       * the face beside it.
-       */
-      face:
-        sourceSlot?.face ||
-        1,
-
-      maxSlots: 4
-    });
-
-  saveConsoleSlots(
-    nextSlots
-  );
-}
-
-function removeConsolePanel(
-  slotId
-) {
-  const nextSlots =
-    removeConsoleSlot({
-      slots:
-        consoleSlots,
-
-      slotId
-    });
-
-  saveConsoleSlots(
-    nextSlots
-  );
-}
-
-function cycleConsolePanelFace(
-  slotId
-) {
-  const nextSlots =
-    cycleConsoleSlotFace({
-      slots:
-        consoleSlots,
-
-      slotId,
-
-      maxFace: 4
-    });
-
-  saveConsoleSlots(
-    nextSlots
-  );
-}
   
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
@@ -412,168 +300,6 @@ function handlePhotoLoad(e, photoUrl) {
     [photoUrl]: fit
   }));
 }
-
-
-
-  return (
-    <>
-      <a
-        href={getListingHref(
-          listing,
-          from
-        )}
-        className="photo-click-zone"
-        onClick={handleCardClick}
-      >
-        <div
-          className="card-photo"
-          {...(dragHandleProps || {})}
-          {...(!dragHandleProps
-            ? {
-                onPointerDown:
-                  startBoardDrag,
-
-                onPointerMove:
-                  moveBoardDrag,
-
-                onPointerUp:
-                  endBoardDrag,
-
-                onPointerCancel:
-                  endBoardDrag
-              }
-            : {})}
-        >
-          <img
-            src={
-              currentPhoto ||
-              "/images/hero-equipment-yard.jpg"
-            }
-            alt={
-              listing.title ||
-              "Machine"
-            }
-            draggable={false}
-            className={`card-photo-img photo-fit-${getSmartPhotoFit(
-              currentPhoto
-            )} ${getFrameClass(
-              currentImageObject,
-              "card"
-            )}`}
-            style={getFrameStyle(
-              currentImageObject,
-              "card"
-            )}
-            onLoad={event =>
-              handlePhotoLoad(
-                event,
-                currentPhoto
-              )
-            }
-            loading="lazy"
-          />
-
-          <div className="status-photo-pill auction">
-            AUCT
-          </div>
-
-          {images.length > 1 ? (
-            <>
-              <button
-                type="button"
-                className="card-photo-nav left"
-                onClick={event =>
-                  changePhoto(
-                    event,
-                    -1
-                  )
-                }
-                aria-label="Previous photo"
-              >
-                ‹
-              </button>
-
-              <button
-                type="button"
-                className="card-photo-nav right"
-                onClick={event =>
-                  changePhoto(
-                    event,
-                    1
-                  )
-                }
-                aria-label="Next photo"
-              >
-                ›
-              </button>
-
-              <span className="photo-count">
-                {photoIndex + 1}/
-                {images.length}
-              </span>
-            </>
-          ) : null}
-        </div>
-      </a>
-
-      <div className="card-body">
-        <div
-          className="card-board-zone"
-          {...(dragHandleProps || {})}
-          {...(!dragHandleProps
-            ? {
-                onPointerDown:
-                  startBoardDrag,
-
-                onPointerMove:
-                  moveBoardDrag,
-
-                onPointerUp:
-                  endBoardDrag,
-
-                onPointerCancel:
-                  endBoardDrag
-              }
-            : {})}
-        >
-          {renderAuctionPanel({
-            face: 1,
-
-            listing,
-            sourceListingUrl,
-            from,
-
-            handleCardClick,
-            dragHandleProps,
-
-            lotNumberValue,
-            onLotNumberChange,
-            onLotNumberKeyDown,
-
-            hoursValue,
-            onHoursChange,
-            onHoursKeyDown,
-
-            priceValue,
-            onPriceChange,
-            onPriceKeyDown,
-
-            locationValue,
-            onLocationChange,
-            onLocationKeyDown,
-
-            dealerBidPack,
-            onSaveDealerBidPack,
-
-            auctionDispositionBusy,
-            onAuctionDisposition
-          })}
-        </div>
-      </div>
-    </>
-  );
-}
-
   
   return (
  <div
@@ -600,12 +326,15 @@ function handlePhotoLoad(e, photoUrl) {
 {auctionFace === 4 ? (
   <IXIAuctionObjectFace4
     listing={listing}
+
     dispositionBusy={
       auctionDispositionBusy
     }
+
     onAuctionDisposition={
       onAuctionDisposition
     }
+
     dragHandleProps={
       dragHandleProps
     }
@@ -613,12 +342,15 @@ function handlePhotoLoad(e, photoUrl) {
 ) : auctionFace === 3 ? (
   <IXIAuctionObjectFace3
     listing={listing}
+
     dealerBidPack={
       dealerBidPack
     }
+
     onSaveDealerBidPack={
       onSaveDealerBidPack
     }
+
     dragHandleProps={
       dragHandleProps
     }
@@ -626,52 +358,27 @@ function handlePhotoLoad(e, photoUrl) {
 ) : auctionFace === 2 ? (
   <IXIAuctionObjectFace2
     listing={listing}
-    sourceListingUrl={
-      sourceListingUrl
-    }
-    dragHandleProps={
-      dragHandleProps
-    }
+    sourceListingUrl={sourceListingUrl}
+    dragHandleProps={dragHandleProps}
 
     sellerMode={true}
 
-    lotNumberValue={
-      lotNumberValue
-    }
-    onLotNumberChange={
-      onLotNumberChange
-    }
-    onLotNumberKeyDown={
-      onLotNumberKeyDown
-    }
+    lotNumberValue={lotNumberValue}
+  onLotNumberChange={onLotNumberChange}
+  onLotNumberKeyDown={onLotNumberKeyDown}
+ 
+    hoursValue={hoursValue}
+    onHoursChange={onHoursChange}
+    onHoursKeyDown={onHoursKeyDown}
 
-    hoursValue={
-      hoursValue
-    }
-    onHoursChange={
-      onHoursChange
-    }
-    onHoursKeyDown={
-      onHoursKeyDown
-    }
-
-    openingBidValue={
-      priceValue
-    }
-    onOpeningBidChange={
-      onPriceChange
-    }
-    onOpeningBidKeyDown={
-      onPriceKeyDown
-    }
+    openingBidValue={priceValue}
+    onOpeningBidChange={onPriceChange}
+    onOpeningBidKeyDown={onPriceKeyDown}
   />
 ) : (
   <>
     <a
-      href={getListingHref(
-        listing,
-        from
-      )}
+      href={getListingHref(listing, from)}
       className="photo-click-zone"
       onClick={handleCardClick}
     >
@@ -680,17 +387,10 @@ function handlePhotoLoad(e, photoUrl) {
         {...(dragHandleProps || {})}
         {...(!dragHandleProps
           ? {
-              onPointerDown:
-                startBoardDrag,
-
-              onPointerMove:
-                moveBoardDrag,
-
-              onPointerUp:
-                endBoardDrag,
-
-              onPointerCancel:
-                endBoardDrag
+              onPointerDown: startBoardDrag,
+              onPointerMove: moveBoardDrag,
+              onPointerUp: endBoardDrag,
+              onPointerCancel: endBoardDrag
             }
           : {})}
       >
@@ -699,10 +399,7 @@ function handlePhotoLoad(e, photoUrl) {
             currentPhoto ||
             "/images/hero-equipment-yard.jpg"
           }
-          alt={
-            listing.title ||
-            "Machine"
-          }
+          alt={listing.title || "Machine"}
           draggable={false}
           className={`card-photo-img photo-fit-${getSmartPhotoFit(
             currentPhoto
@@ -733,10 +430,7 @@ function handlePhotoLoad(e, photoUrl) {
               type="button"
               className="card-photo-nav left"
               onClick={event =>
-                changePhoto(
-                  event,
-                  -1
-                )
+                changePhoto(event, -1)
               }
               aria-label="Previous photo"
             >
@@ -747,10 +441,7 @@ function handlePhotoLoad(e, photoUrl) {
               type="button"
               className="card-photo-nav right"
               onClick={event =>
-                changePhoto(
-                  event,
-                  1
-                )
+                changePhoto(event, 1)
               }
               aria-label="Next photo"
             >
@@ -758,85 +449,51 @@ function handlePhotoLoad(e, photoUrl) {
             </button>
 
             <span className="photo-count">
-              {photoIndex + 1}/
-              {images.length}
+              {photoIndex + 1}/{images.length}
             </span>
           </>
         ) : null}
       </div>
     </a>
 
-    <div className="card-body">
-      <div
-        className="card-board-zone"
-        {...(dragHandleProps || {})}
-        {...(!dragHandleProps
-          ? {
-              onPointerDown:
-                startBoardDrag,
+  <div className="card-body">
+  <div
+    className="card-board-zone"
+    {...(dragHandleProps || {})}
+    {...(!dragHandleProps
+      ? {
+          onPointerDown: startBoardDrag,
+          onPointerMove: moveBoardDrag,
+          onPointerUp: endBoardDrag,
+          onPointerCancel: endBoardDrag
+        }
+      : {})}
+  >
+    <IXIAuctionObjectFace1
+      listing={listing}
+      from={from}
+      onListingClick={handleCardClick}
 
-              onPointerMove:
-                moveBoardDrag,
+      sellerMode={true}
 
-              onPointerUp:
-                endBoardDrag,
+      lotNumberValue={lotNumberValue}
+  onLotNumberChange={onLotNumberChange}
+  onLotNumberKeyDown={onLotNumberKeyDown}
 
-              onPointerCancel:
-                endBoardDrag
-            }
-          : {})}
-      >
-        <IXIAuctionObjectFace1
-          listing={listing}
-          from={from}
-          onListingClick={
-            handleCardClick
-          }
+      hoursValue={hoursValue}
+      onHoursChange={onHoursChange}
+      onHoursKeyDown={onHoursKeyDown}
 
-          sellerMode={true}
+      priceValue={priceValue}
+      onPriceChange={onPriceChange}
+      onPriceKeyDown={onPriceKeyDown}
 
-          lotNumberValue={
-            lotNumberValue
-          }
-          onLotNumberChange={
-            onLotNumberChange
-          }
-          onLotNumberKeyDown={
-            onLotNumberKeyDown
-          }
-
-          hoursValue={
-            hoursValue
-          }
-          onHoursChange={
-            onHoursChange
-          }
-          onHoursKeyDown={
-            onHoursKeyDown
-          }
-
-          priceValue={
-            priceValue
-          }
-          onPriceChange={
-            onPriceChange
-          }
-          onPriceKeyDown={
-            onPriceKeyDown
-          }
-
-          locationValue={
-            locationValue
-          }
-          onLocationChange={
-            onLocationChange
-          }
-          onLocationKeyDown={
-            onLocationKeyDown
-          }
-        />
-      </div>
-    </div>
+      locationValue={locationValue}
+      onLocationChange={onLocationChange}
+      onLocationKeyDown={onLocationKeyDown}
+    />
+  </div>
+</div>
   </>
 )}
          
@@ -867,9 +524,6 @@ onCycleMachineFace={onCycleMachineFace}
           font-size: initial;
           line-height: normal;
           isolation: isolate;
-
-          width: 100%;
-max-width: none;
 
           height: 470px;
 min-height: 470px;
