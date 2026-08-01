@@ -1,6 +1,13 @@
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import useIXISellerMachineOps
+  from "../../components/ixi-chassis/useIXISellerMachineOps";
+
+import {
+  setIXIActionNotice
+} from "../../components/ixi-object-system/IXIActionNoticeEngine";
+
 import {
   PointerSensor,
   KeyboardSensor,
@@ -207,6 +214,25 @@ const DIRECT_CONTAINER_TARGETS = [
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
+
+  const {
+  getSellerListingCardProps:
+    getPersistedSellerCardProps
+} = useIXISellerMachineOps({
+  setSellerListings: setListings,
+
+  showActionNotice: ({
+    listingId,
+    message,
+    tone
+  }) =>
+    setIXIActionNotice({
+      setState: setIxiCardState,
+      listingId,
+      message,
+      tone
+    })
+});
 
 const handleWorkspaceDragStart =
   createWorkspaceDragStartHandler({
@@ -1316,13 +1342,23 @@ if (armedDestination === "stackTop") {
 }
 
 
-function getAuctionSellerCardProps(listing = {}) {
+function getAuctionSellerCardProps(
+  listing = {}
+) {
   const listingId = String(
     getListingId(listing)
   );
 
   const draft =
     auctionCardDrafts[listingId] || {};
+
+const {
+  onPriceKeyDown,
+  onHoursKeyDown,
+  onLocationKeyDown
+} = getPersistedSellerCardProps(
+  listing
+);
 
   function updateField(field, value) {
     setAuctionCardDrafts(current => ({
@@ -1335,11 +1371,35 @@ function getAuctionSellerCardProps(listing = {}) {
     }));
   }
 
-  return {
-    sellerMode: true,
+  const existingLocation =
+    listing?.location ||
+    listing?.publicData?.location ||
+    listing?.attributes
+      ?.publicData?.location ||
+    "";
 
+  return {
+    /*
+     * Existing permanent mutation callbacks:
+     * Enter persists to the machine record and
+     * triggers the card notification.
+     */
+     onPriceKeyDown,
+  onHoursKeyDown,
+  onLocationKeyDown,
+
+    /*
+     * Live controlled draft values:
+     * every keystroke remains visible.
+     */
     priceValue:
-      draft.price,
+      draft.price !== undefined
+        ? draft.price
+        : (
+            listing?.price ??
+            listing?.publicData?.price ??
+            ""
+          ),
 
     onPriceChange: value => {
       updateField(
@@ -1348,18 +1408,17 @@ function getAuctionSellerCardProps(listing = {}) {
       );
     },
 
-    lotNumberValue:
-      draft.lotNumber,
-
-    onLotNumberChange: value => {
-      updateField(
-        "lotNumber",
-        value
-      );
-    },
-
     hoursValue:
-      draft.hours,
+      draft.hours !== undefined
+        ? draft.hours
+        : String(
+            listing?.hours ??
+            listing?.publicData?.hours ??
+            ""
+          ).replace(
+            /[^0-9]/g,
+            ""
+          ),
 
     onHoursChange: value => {
       updateField(
@@ -1372,11 +1431,34 @@ function getAuctionSellerCardProps(listing = {}) {
     },
 
     locationValue:
-      draft.location,
+      draft.location !== undefined
+        ? draft.location
+        : existingLocation,
 
     onLocationChange: value => {
       updateField(
         "location",
+        value
+      );
+    },
+
+    /*
+     * Lot remains live-edit only for this pass.
+     * Its permanent mutation does not exist yet.
+     */
+    lotNumberValue:
+      draft.lotNumber !== undefined
+        ? draft.lotNumber
+        : (
+            listing?.lotNumber ??
+            listing?.publicData
+              ?.lotNumber ??
+            ""
+          ),
+
+    onLotNumberChange: value => {
+      updateField(
+        "lotNumber",
         value
       );
     }
