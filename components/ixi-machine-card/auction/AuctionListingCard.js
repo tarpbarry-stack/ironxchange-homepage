@@ -401,7 +401,18 @@ function handlePhotoLoad(e, photoUrl) {
     </a>
 
   <div className="card-body">
-  <div className="card-board-zone">
+  <div
+    className="card-board-zone"
+    {...(dragHandleProps || {})}
+    {...(!dragHandleProps
+      ? {
+          onPointerDown: startBoardDrag,
+          onPointerMove: moveBoardDrag,
+          onPointerUp: endBoardDrag,
+          onPointerCancel: endBoardDrag
+        }
+      : {})}
+  >
     <IXIAuctionObjectFace1
       listing={listing}
       from={from}
