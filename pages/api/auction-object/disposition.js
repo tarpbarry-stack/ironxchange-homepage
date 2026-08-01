@@ -50,11 +50,18 @@ function getOrigin(req) {
 }
 
 function getIXCoreBase() {
-  return (
+  const baseUrl =
     process.env.IX_CORE_INTERNAL_URL ||
-    process.env.IX_CORE_BASE_URL ||
-    "http://127.0.0.1:4100"
-  ).replace(/\/+$/, "");
+    process.env.IX_CORE_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error(
+      "Missing IX_CORE_BASE_URL"
+    );
+  }
+
+  return String(baseUrl)
+    .replace(/\/+$/, "");
 }
 
 function createIntegrationSdk() {
@@ -620,17 +627,20 @@ async function callExistingDeleteRoute({
       }
     );
 
-  const result =
-    await readJsonResponse(
-      response
-    );
+ const result =
+  await response.json();
 
-  if (!response.ok) {
-    throw new Error(
-      result?.error ||
-      "Existing listing delete route failed"
-    );
-  }
+if (!response.ok) {
+  const message =
+    result?.error ||
+    "Auction disposition failed";
+
+  throw new Error(
+    result?.stage
+      ? `${result.stage}: ${message}`
+      : message
+  );
+}
 
   return result;
 }
