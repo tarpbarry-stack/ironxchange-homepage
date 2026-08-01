@@ -48,6 +48,7 @@ import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine"
 import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
 import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
 import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
+import IXIObjectCreateCard from "../../components/ixi-mos/IXIObjectCreateCard";
 import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
 import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
@@ -82,6 +83,13 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
+  createMosObject,
+  createMosCommandId,
+  fetchMosObjects,
+  placeMosObject
+} from "../../lib/mos/ixiMosClient";
+
+import {
   getNextCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
 
@@ -107,6 +115,18 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
+function createEmptyAosObjectForm() {
+  return {
+    objectType: "job",
+    displayName: "",
+    customerCategory: "",
+    customerAssetId: "",
+    factualTitle: "",
+    value: "",
+    location: ""
+  };
+}
+
 export default function IXIAosPage() {
   console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
   
@@ -114,6 +134,22 @@ export default function IXIAosPage() {
 
   const [aosEntity, setAosEntity] = useState(null);
 const [aosObjects, setAosObjects] = useState([]);
+
+const [showObjectCreator, setShowObjectCreator] =
+  useState(false);
+
+const [objectCreateForm, setObjectCreateForm] =
+  useState(createEmptyAosObjectForm());
+
+const [objectCreateWorking, setObjectCreateWorking] =
+  useState(false);
+
+const [objectCreateError, setObjectCreateError] =
+  useState("");
+
+const aosEntityId =
+  aosEntity?.entityId || "";
+
 const [systemIndexes, setSystemIndexes] = useState([]);
 const [aosLoading, setAosLoading] = useState(true);
 const [aosError, setAosError] = useState("");
