@@ -54,11 +54,12 @@ export default function AuctionListingCard({
 
   lotNumberValue,
   onLotNumberChange,
+  onLotNumberKeyDown,
 
   hoursValue,
   onHoursChange,
   onHoursKeyDown,
-
+  
   locationValue,
   onLocationChange,
   onLocationKeyDown,
@@ -309,8 +310,9 @@ function handlePhotoLoad(e, photoUrl) {
     sellerMode={true}
 
     lotNumberValue={lotNumberValue}
-    onLotNumberChange={onLotNumberChange}
-
+  onLotNumberChange={onLotNumberChange}
+  onLotNumberKeyDown={onLotNumberKeyDown}
+ 
     hoursValue={hoursValue}
     onHoursChange={onHoursChange}
     onHoursKeyDown={onHoursKeyDown}
@@ -421,7 +423,8 @@ function handlePhotoLoad(e, photoUrl) {
       sellerMode={true}
 
       lotNumberValue={lotNumberValue}
-      onLotNumberChange={onLotNumberChange}
+  onLotNumberChange={onLotNumberChange}
+  onLotNumberKeyDown={onLotNumberKeyDown}
 
       hoursValue={hoursValue}
       onHoursChange={onHoursChange}
