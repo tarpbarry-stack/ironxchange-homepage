@@ -556,25 +556,6 @@ const sellerListings = useMemo(() => {
 const workspaceListings = useMemo(() => {
   return sellerListings;
 }, [sellerListings]);
-
-const boardItems = useMemo(() => {
-  const items = [];
-
-  if (showObjectCreator) {
-    items.push({
-      id: "__aos_create__",
-      type: "AOS CREATE OBJECT",
-      creationMode: true
-    });
-  }
-
-  items.push(...visibleSavedListings);
-
-  return items;
-}, [
-  showObjectCreator,
-  visibleSavedListings
-]);
   
   const aosScoreboard = useMemo(() => {
   const jobsIndex =
@@ -818,11 +799,40 @@ return [...filtered].sort((a, b) => {
     workspaceFilters,
     machineContainers,
     ixiCardState,
-    ixiColorFilters,
+        ixiColorFilters,
     ixiOutlineFilter
   ]);
 
-  function updateIxiCardState(listingId, patch) {
+const boardItems = useMemo(() => {
+  const items = [];
+
+  if (showObjectCreator) {
+    items.push({
+      id: "__aos_create__",
+      type: "AOS CREATE OBJECT",
+      creationMode: true
+    });
+  }
+
+  items.push(...visibleSavedListings);
+
+  return items;
+}, [
+  showObjectCreator,
+  visibleSavedListings
+]);
+
+function updateObjectCreateForm(
+  field,
+  value
+) {
+  setObjectCreateForm(current => ({
+    ...current,
+    [field]: value
+  }));
+}
+
+function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
 
   setIxiCardState(current => {
