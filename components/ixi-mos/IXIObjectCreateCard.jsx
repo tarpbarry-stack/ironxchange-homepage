@@ -75,11 +75,35 @@ onPriceChange,
 onPriceKeyDown,
 savingPrice = false,
 
-hoursValue,
-onHoursChange,
-onHoursKeyDown,
+assetNameValue = "",
+onAssetNameChange,
 
-  descriptionValue,
+entityName = "",
+
+yearValue = "",
+onYearChange,
+
+makeValue = "",
+onMakeChange,
+
+modelValue = "",
+onModelChange,
+
+milesValue = "",
+onMilesChange,
+
+vinValue = "",
+onVinChange,
+
+currentValueEstimate = "",
+onCurrentValueEstimateChange,
+
+currentOperator = "",
+currentCrew = "",
+currentJob = "",
+currentLocation = "",
+
+descriptionValue,
   onDescriptionChange,
   onDescriptionKeyDown,
   savingDescription = false,
@@ -265,6 +289,73 @@ function endBoardDrag(e) {
   listing.publicData ||
   listing.attributes?.publicData ||
   {};
+
+  const resolvedAssetName =
+  assetNameValue ||
+  publicData.assetName ||
+  publicData.customerAssetId ||
+  listing.title ||
+  "";
+
+const resolvedEntityName =
+  entityName ||
+  publicData.entityName ||
+  "YOUR ENTITY";
+
+const resolvedYear =
+  yearValue ||
+  publicData.year ||
+  listing.year ||
+  "";
+
+const resolvedMake =
+  makeValue ||
+  publicData.make ||
+  listing.make ||
+  "";
+
+const resolvedModel =
+  modelValue ||
+  publicData.model ||
+  listing.model ||
+  "";
+
+const resolvedMiles =
+  milesValue ||
+  publicData.miles ||
+  publicData.mileage ||
+  "";
+
+const resolvedVin =
+  vinValue ||
+  publicData.vin ||
+  "";
+
+const resolvedCurrentValue =
+  currentValueEstimate ||
+  publicData.currentValueEstimate ||
+  listing.price ||
+  "";
+
+const resolvedOperator =
+  currentOperator ||
+  publicData.currentOperator ||
+  "UNASSIGNED";
+
+const resolvedCrew =
+  currentCrew ||
+  publicData.currentCrew ||
+  "NO CREW";
+
+const resolvedJob =
+  currentJob ||
+  publicData.currentJob ||
+  "NO JOB";
+
+const resolvedCurrentLocation =
+  currentLocation ||
+  publicData.currentLocation ||
+  "LOCATION UNKNOWN";
 
 const sellerPlacementLabel = "PRIV";
 const sellerPlacementClass = "private";
@@ -494,235 +585,315 @@ style={getFrameStyle(currentImageObject, "card")}
   </div>
 </a>
 
-<div className="card-body">
-  <>
-    <a
-    href={getListingHref(listing, from)}
-    className="title-click-zone"
-    onClick={handleCardClick}
+<div className="card-body vehicle-face-one">
+  <div
+    className="card-board-zone"
+    {...(dragHandleProps || {})}
+    {...(!dragHandleProps
+      ? {
+          onPointerDown: startBoardDrag,
+          onPointerMove: moveBoardDrag,
+          onPointerUp: endBoardDrag,
+          onPointerCancel: endBoardDrag
+        }
+      : {})}
   >
-    <div className="title-row">
-      <h3>{cleanMachineTitle(listing.title)}</h3>
+    <div className="vehicle-identity-row">
+      <label className="vehicle-field vehicle-field-asset">
+        <span>ASSET NAME / ID #</span>
 
-     {presentation === "seller" ? (
-  <input
-    className="hours-inline hours-input"
-  {...(onHoursChange
-    ? {
-        value:
-          hoursValue ??
-          String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, ""),
-        onChange: e => onHoursChange(e.target.value, listing)
-      }
-    : {
-        defaultValue: String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, "")
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onHoursKeyDown?.(e, listing)}
-  inputMode="numeric"
-  maxLength={5}
-/>
-) : (
-  <h3 className="hours-inline">
-    {formatHours(listing.hours)}
-  </h3>
-)}
-    </div>
-  </a>
-
-                             <div
-  className="card-board-zone"
-  {...(dragHandleProps || {})}
-  {...(!dragHandleProps
-    ? {
-        onPointerDown: startBoardDrag,
-        onPointerMove: moveBoardDrag,
-        onPointerUp: endBoardDrag,
-        onPointerCancel: endBoardDrag
-      }
-    : {})}
->
-
-        <div className="keyword-row">
-          <MachineBadges
-            keywords={normalizedKeywords}
-            variant="card"
-          />
-        </div>
-
-        <div className="price-row">
-          {sellerMode ? (
         <input
-  className="price-input seller-inline-input"
-  {...(onPriceChange
-    ? {
-        value: priceValue ?? listing.price ?? "",
-        onChange: e => onPriceChange(e.target.value, listing)
-      }
-    : {
-        defaultValue: priceValue ?? listing.price ?? ""
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onPriceKeyDown?.(e, listing)}
-/>
-          ) : (
-            <strong>{listing.price || "Call for price"}</strong>
-          )}
-
-
-          <div className="meta">
-            
-
-            {presentation === "seller" ? (
-  <div className="location-row">
-<input
-  className="city-input location-input"
-  {...(onLocationChange
-    ? {
-        value: locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity(),
-        onChange: e => {
-          const state =
-            locationValue && String(locationValue).includes(",")
-              ? String(locationValue).split(",")[1]?.trim()
-              : getSellerState();
-
-          onLocationChange(`${e.target.value}, ${state}`.trim(), listing);
-        }
-      }
-    : {
-        defaultValue: getSellerCity()
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onLocationKeyDown?.(e, listing)}
-  maxLength={18}
-/>
- <input
-  className="state-input location-input"
-  {...(onLocationChange
-    ? {
-        value:
-          locationValue && String(locationValue).includes(",")
-            ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
-            : getSellerState(),
-        onChange: e => {
-          const city =
-            locationValue && String(locationValue).includes(",")
-              ? String(locationValue).split(",")[0]?.trim()
-              : getSellerCity();
-
-          onLocationChange(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
-        }
-      }
-    : {
-        defaultValue: getSellerState()
-      })}
-  onClick={stopCardClick}
-  onKeyDown={e => onLocationKeyDown?.(e, listing)}
-  maxLength={2}
-/>
-</div>
-            ) : (
-              <span>⌖ {listing.location || "Location not listed"}</span>
-            )}
-          </div>
-        </div>
-
-       {presentation === "seller" && !creationMode ? (
-  <div className="seller-actions">
-            <button
-  type="button"
-  onClick={e => {
-    stopCardClick(e);
-    window.open(getListingHref(listing, from), "_blank", "noopener,noreferrer");
-  }}
->
-  {launchMode ? "PUBLIC" : "LAUNCH"}
-</button>
-
-<button
-  type="button"
-  onClick={e => {
-    stopCardClick(e);
-    if (launchMode) {
-      window.location.href = "/yard";
-      return;
-    }
-    window.location.href = getListingHref(listing, "account");
-  }}
->
-  {launchMode ? "YARD" : "VIEW"}
-</button>
-
-            {isPaused ? (
-              <button
-                type="button"
-                onClick={e => {
-                  stopCardClick(e);
-                  onReactivate?.(listing);
-                }}
-              >
-                REACTIVATE
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={e => {
-                  stopCardClick(e);
-                  onPause?.(listing);
-                }}
-              >
-                PAUSE
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="danger-action"
-              onClick={e => {
-                stopCardClick(e);
-                onDelete?.(listing);
-              }}
-            >
-              DELETE
-            </button>
-          </div>
-        ) : null}
-
-                        {presentation === "seller" ? (
-  <div className="seller-meta-row">
-    {presentation === "seller" &&
-!creationMode &&
-onMachinePlacementChange ? (
-      <div className="seller-placement-control">
-        <IXIMachinePlacementControl
-          machineAccess={machineAccess}
-          machineChannel={machineChannel}
-          disabled={machinePlacementBusy}
-          onChange={nextPlacement =>
-            onMachinePlacementChange(
-              listing,
-              nextPlacement
+          value={resolvedAssetName}
+          onChange={event =>
+            onAssetNameChange?.(
+              event.target.value,
+              listing
             )
           }
+          onClick={stopCardClick}
+          placeholder="SERVICE TRUCK 18"
+          maxLength={34}
         />
-      </div>
-    ) : null}
+      </label>
 
-    <div className="seller-stats">
-      <span>Age: {listing.age ?? "—"}</span>
-      <span>Views: {listing.views || "—"}</span>
-      <span>States: {listing.states || listing.saves || "—"}</span>
+      <div className="vehicle-entity">
+        <span>ENTITY</span>
+        <strong>{resolvedEntityName}</strong>
+      </div>
+    </div>
+
+    <div className="vehicle-spec-row">
+      <label className="vehicle-field vehicle-field-year">
+        <span>YEAR</span>
+
+        <input
+          value={resolvedYear}
+          onChange={event =>
+            onYearChange?.(
+              event.target.value,
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          inputMode="numeric"
+          placeholder="2018"
+          maxLength={4}
+        />
+      </label>
+
+      <label className="vehicle-field vehicle-field-make">
+        <span>MAKE</span>
+
+        <input
+          value={resolvedMake}
+          onChange={event =>
+            onMakeChange?.(
+              event.target.value,
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          placeholder="FORD"
+          maxLength={18}
+        />
+      </label>
+
+      <label className="vehicle-field vehicle-field-model">
+        <span>MODEL</span>
+
+        <input
+          value={resolvedModel}
+          onChange={event =>
+            onModelChange?.(
+              event.target.value,
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          placeholder="F-350"
+          maxLength={20}
+        />
+      </label>
+
+      <label className="vehicle-field vehicle-field-miles">
+        <span>MILES</span>
+
+        <input
+          value={resolvedMiles}
+          onChange={event =>
+            onMilesChange?.(
+              event.target.value,
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          inputMode="numeric"
+          placeholder="150,000"
+          maxLength={7}
+        />
+      </label>
+    </div>
+
+    <div className="vehicle-current-block">
+      <span className="vehicle-current-label">
+        CURRENT
+      </span>
+
+      <strong className="vehicle-current-operator">
+        {resolvedOperator}
+      </strong>
+
+      <div className="vehicle-current-relationship">
+        <span>{resolvedCrew}</span>
+        <i aria-hidden="true">·</i>
+        <span>{resolvedJob}</span>
+      </div>
+
+      <div className="vehicle-current-location">
+        {resolvedCurrentLocation}
+      </div>
+    </div>
+
+    <div className="vehicle-vin-row">
+      <label className="vehicle-field vehicle-field-vin">
+        <span>VIN</span>
+
+        <input
+          value={resolvedVin}
+          onChange={event =>
+            onVinChange?.(
+              event.target.value.toUpperCase(),
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          placeholder="1FT8W3BT8JEC12345"
+          maxLength={17}
+        />
+      </label>
+    </div>
+
+    <div className="vehicle-value-location-row">
+      <label className="vehicle-field vehicle-field-value">
+        <span>CURRENT VALUE EST.</span>
+
+        <input
+          value={resolvedCurrentValue}
+          onChange={event =>
+            onCurrentValueEstimateChange?.(
+              event.target.value,
+              listing
+            )
+          }
+          onClick={stopCardClick}
+          inputMode="numeric"
+          placeholder="48,500"
+          maxLength={11}
+        />
+      </label>
+
+      <div className="vehicle-home-location">
+        <span>BASE LOCATION</span>
+
+        <div className="location-row">
+          <input
+            className="city-input location-input"
+            {...(onLocationChange
+              ? {
+                  value:
+                    locationValue &&
+                    String(locationValue).includes(",")
+                      ? String(locationValue)
+                          .split(",")[0]
+                          ?.trim()
+                      : getSellerCity(),
+
+                  onChange: event => {
+                    const state =
+                      locationValue &&
+                      String(locationValue).includes(",")
+                        ? String(locationValue)
+                            .split(",")[1]
+                            ?.trim()
+                        : getSellerState();
+
+                    onLocationChange(
+                      `${event.target.value}, ${state}`.trim(),
+                      listing
+                    );
+                  }
+                }
+              : {
+                  defaultValue: getSellerCity()
+                })}
+            onClick={stopCardClick}
+            onKeyDown={event =>
+              onLocationKeyDown?.(
+                event,
+                listing
+              )
+            }
+            placeholder="ODESSA"
+            maxLength={18}
+          />
+
+          <input
+            className="state-input location-input"
+            {...(onLocationChange
+              ? {
+                  value:
+                    locationValue &&
+                    String(locationValue).includes(",")
+                      ? String(locationValue)
+                          .split(",")[1]
+                          ?.trim()
+                          .slice(0, 2)
+                          .toUpperCase()
+                      : getSellerState(),
+
+                  onChange: event => {
+                    const city =
+                      locationValue &&
+                      String(locationValue).includes(",")
+                        ? String(locationValue)
+                            .split(",")[0]
+                            ?.trim()
+                        : getSellerCity();
+
+                    onLocationChange(
+                      `${city}, ${event.target.value.toUpperCase()}`.trim(),
+                      listing
+                    );
+                  }
+                }
+              : {
+                  defaultValue: getSellerState()
+                })}
+            onClick={stopCardClick}
+            onKeyDown={event =>
+              onLocationKeyDown?.(
+                event,
+                listing
+              )
+            }
+            placeholder="TX"
+            maxLength={2}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div className="vehicle-bottom-row">
+      <div className="vehicle-placement-control">
+        {onMachinePlacementChange ? (
+          <IXIMachinePlacementControl
+            machineAccess={machineAccess}
+            machineChannel={machineChannel}
+            disabled={machinePlacementBusy}
+            onChange={nextPlacement =>
+              onMachinePlacementChange(
+                listing,
+                nextPlacement
+              )
+            }
+          />
+        ) : null}
+      </div>
+
+      <div className="vehicle-actions">
+        <button
+          type="button"
+          disabled
+          title="Additional data coming later"
+        >
+          DATA
+        </button>
+
+        <button
+          type="button"
+          className="save-action"
+          onClick={event => {
+            stopCardClick(event);
+            onEdit?.(listing);
+          }}
+        >
+          SAVE
+        </button>
+
+        <button
+          type="button"
+          className="danger-action"
+          onClick={event => {
+            stopCardClick(event);
+            onDelete?.(listing);
+          }}
+        >
+          DELETE
+        </button>
+      </div>
     </div>
   </div>
-) : null}
-
-                     </div>
-
-            </>
 </div>
-
-  </>
-)}
          
 <IXIMachineRail
   listing={listing}
@@ -1556,6 +1727,305 @@ text-align: right;
   font-weight: 850;
 
   white-space: nowrap;
+}
+
+.vehicle-face-one {
+  padding: 9px 11px 10px;
+}
+
+.vehicle-face-one .card-board-zone {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  cursor: grab;
+}
+
+.vehicle-identity-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    92px;
+
+  align-items: end;
+  gap: 8px;
+}
+
+.vehicle-field {
+  display: block;
+  min-width: 0;
+}
+
+.vehicle-field > span,
+.vehicle-entity > span,
+.vehicle-home-location > span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: rgba(255,255,255,.31);
+
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: .48px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.vehicle-field input {
+  width: 100%;
+  height: 22px;
+
+  padding: 0 5px;
+
+  border: 1px solid rgba(255,255,255,.105);
+  border-radius: 4px;
+
+  background: rgba(9,9,9,.82);
+  color: rgba(255,255,255,.73);
+
+  outline: none;
+
+  font-size: 8.5px;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.vehicle-field input:focus {
+  border-color: rgba(255,196,0,.42);
+
+  box-shadow:
+    0 0 0 1px rgba(255,196,0,.08);
+}
+
+.vehicle-entity {
+  min-width: 0;
+
+  padding-bottom: 3px;
+
+  text-align: right;
+}
+
+.vehicle-entity strong {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.62);
+
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+
+.vehicle-spec-row {
+  display: grid;
+  grid-template-columns:
+    42px
+    minmax(0, .85fr)
+    minmax(0, 1fr)
+    58px;
+
+  gap: 5px;
+
+  margin-top: 6px;
+}
+
+.vehicle-field-year input,
+.vehicle-field-miles input {
+  text-align: right;
+}
+
+.vehicle-current-block {
+  min-height: 53px;
+
+  margin-top: 7px;
+  padding: 5px 8px;
+
+  position: relative;
+
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,194,255,.035),
+      transparent 72%
+    );
+}
+
+.vehicle-current-label {
+  position: absolute;
+  right: 7px;
+  top: 5px;
+
+  color: rgba(0,194,255,.43);
+
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: .58px;
+}
+
+.vehicle-current-operator {
+  display: block;
+
+  margin: 0 42px 2px 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.87);
+
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1.08;
+  letter-spacing: .1px;
+  text-transform: uppercase;
+}
+
+.vehicle-current-relationship {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: rgba(255,255,255,.55);
+
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+}
+
+.vehicle-current-relationship i {
+  color: rgba(255,255,255,.18);
+  font-style: normal;
+}
+
+.vehicle-current-location {
+  margin-top: 3px;
+
+  color: rgba(255,196,0,.67);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.vehicle-vin-row {
+  margin-top: 6px;
+}
+
+.vehicle-field-vin input {
+  letter-spacing: .45px;
+}
+
+.vehicle-value-location-row {
+  display: grid;
+  grid-template-columns:
+    82px
+    minmax(0, 1fr);
+
+  align-items: end;
+  gap: 8px;
+
+  margin-top: 6px;
+}
+
+.vehicle-field-value input {
+  text-align: right;
+}
+
+.vehicle-home-location {
+  min-width: 0;
+}
+
+.vehicle-home-location .location-row {
+  justify-content: flex-end;
+}
+
+.vehicle-home-location .city-input {
+  width: 76px;
+}
+
+.vehicle-home-location .state-input {
+  width: 27px;
+}
+
+.vehicle-bottom-row {
+  display: grid;
+  grid-template-columns:
+    132px
+    minmax(0, 1fr);
+
+  align-items: center;
+  gap: 7px;
+
+  margin-top: auto;
+  padding-top: 6px;
+
+  border-top:
+    1px solid rgba(255,255,255,.045);
+}
+
+.vehicle-placement-control {
+  width: 132px;
+  min-width: 132px;
+}
+
+.vehicle-actions {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 5px;
+}
+
+.vehicle-actions button {
+  height: 24px;
+  padding: 0 4px;
+
+  border: 1px solid #343434;
+  border-radius: 5px;
+
+  background: #101010;
+  color: rgba(255,255,255,.62);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .28px;
+
+  cursor: pointer;
+}
+
+.vehicle-actions button:disabled {
+  opacity: .28;
+  cursor: default;
+}
+
+.vehicle-actions .save-action {
+  border-color: rgba(0,194,255,.42);
+  color: rgba(0,194,255,.92);
+
+  background:
+    rgba(0,194,255,.045);
+}
+
+.vehicle-actions .save-action:hover {
+  border-color: rgba(0,194,255,.72);
+  color: #6fe8ff;
+}
+
+.vehicle-actions .danger-action:hover {
+  border-color: rgba(229,62,62,.45);
+  color: #e53e3e;
 }
 
                @media (max-width: 850px) {
