@@ -231,6 +231,66 @@ const DIRECT_CONTAINER_TARGETS = [
     })
 });
 
+function getAuctionWorkCardProps(
+  listing = {}
+) {
+  const listingId = String(
+    getListingId(listing) || ""
+  );
+
+  const auctionEditProps =
+    getAuctionListingCardProps(
+      listing
+    );
+
+  const dealerBidPack =
+    ixiCardState?.[listingId]
+      ?.dealerBidPack ||
+    {};
+
+  function saveDealerBidPack(
+    nextBidPack = {}
+  ) {
+    if (!listingId) return;
+
+    const savedBidPack = {
+      ...dealerBidPack,
+      ...nextBidPack,
+      updatedAt: Date.now()
+    };
+
+    updateIxiCardState(
+      listingId,
+      {
+        dealerBidPack:
+          savedBidPack
+      }
+    );
+
+    setIXIActionNotice({
+      setState:
+        setIxiCardState,
+
+      listingId,
+
+      message:
+        "DEALER BID PACK SAVED",
+
+      tone:
+        "success"
+    });
+  }
+
+  return {
+    ...auctionEditProps,
+
+    dealerBidPack,
+
+    onSaveDealerBidPack:
+      saveDealerBidPack
+  };
+}
+  
 const handleWorkspaceDragStart =
   createWorkspaceDragStartHandler({
     setActiveDndId
@@ -1534,7 +1594,7 @@ rowGap: `${cardScaleMetrics.gap + 90}px`
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
  getSellerListingCardProps={
-  getAuctionListingCardProps
+  getAuctionWorkCardProps
 }
 />
         </section>
