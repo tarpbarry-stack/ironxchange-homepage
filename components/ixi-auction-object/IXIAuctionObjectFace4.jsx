@@ -229,6 +229,9 @@ max-height: 470px;
 
           padding: 10px 10px 30px;
 
+          border-radius: 13px;
+overflow: hidden;
+
           display: flex;
           flex-direction: column;
           gap: 7px;
