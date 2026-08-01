@@ -19,6 +19,9 @@ import IXIAuctionObjectFace2
 import IXIAuctionObjectFace3
   from "../../ixi-auction-object/IXIAuctionObjectFace3";
 
+import IXIAuctionObjectFace4
+  from "../../ixi-auction-object/IXIAuctionObjectFace4";
+
 import {
   getFrameClass,
   getFrameStyle
@@ -72,6 +75,9 @@ export default function AuctionListingCard({
 
   dealerBidPack = {},
   onSaveDealerBidPack,
+
+  auctionDispositionBusy = "",
+  onAuctionDisposition,
 
   onSendFront,
   onSendBack,
@@ -214,15 +220,17 @@ function endBoardDrag(e) {
 
   const id = String(getListingId(listing));
 
- const requestedAuctionFace =
+const requestedAuctionFace =
   Number(machineFace);
 
 const auctionFace =
-  requestedAuctionFace === 3
-    ? 3
-    : requestedAuctionFace === 2
-      ? 2
-      : 1;
+  requestedAuctionFace === 4
+    ? 4
+    : requestedAuctionFace === 3
+      ? 3
+      : requestedAuctionFace === 2
+        ? 2
+        : 1;
   
   const sharetribeImages = getCardImages(listing);
   const bulkImages = getBulkImageUrls(listing);
@@ -314,22 +322,38 @@ function handlePhotoLoad(e, photoUrl) {
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-{auctionFace === 3 ? (
+{auctionFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={listing}
+
+    dispositionBusy={
+      auctionDispositionBusy
+    }
+
+    onAuctionDisposition={
+      onAuctionDisposition
+    }
+
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : auctionFace === 3 ? (
   <IXIAuctionObjectFace3
-  listing={listing}
+    listing={listing}
 
-  dealerBidPack={
-    dealerBidPack
-  }
+    dealerBidPack={
+      dealerBidPack
+    }
 
-  onSaveDealerBidPack={
-    onSaveDealerBidPack
-  }
+    onSaveDealerBidPack={
+      onSaveDealerBidPack
+    }
 
-  dragHandleProps={
-    dragHandleProps
-  }
-/>
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
 ) : auctionFace === 2 ? (
   <IXIAuctionObjectFace2
     listing={listing}
