@@ -1142,9 +1142,9 @@ const feeLines = [
   width: 100%;
   max-width: 100%;
 
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
+  height: 472px;
+  min-height: 472px;
+  max-height: 472px;
   
   position: relative;
 
