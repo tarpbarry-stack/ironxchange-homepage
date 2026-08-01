@@ -50,15 +50,12 @@ function getOrigin(req) {
 }
 
 function getIXCoreBase() {
-  const baseUrl =
+  return (
     process.env.IX_CORE_INTERNAL_URL ||
-    process.env.IX_CORE_BASE_URL;
-
-  if (!baseUrl) {
-    throw new Error(
-      "Missing IX_CORE_BASE_URL"
-    );
-  }
+    process.env.IX_CORE_BASE_URL ||
+    "http://127.0.0.1:4100"
+  ).replace(/\/+$/, "");
+}
 
   return String(baseUrl)
     .replace(/\/+$/, "");
