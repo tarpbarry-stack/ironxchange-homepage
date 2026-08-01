@@ -86,6 +86,22 @@ export default function AuctionListingCard({
   dragHandleProps
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
+  console.log("AUCTION DRAG HANDLE RECEIVED", {
+  listingId:
+    listing?.id?.uuid ||
+    listing?.id ||
+    "",
+
+  hasDragHandleProps:
+    Boolean(dragHandleProps),
+
+  hasPointerDown:
+    typeof dragHandleProps?.onPointerDown ===
+    "function",
+
+  hasActivatorRef:
+    Boolean(dragHandleProps?.ref)
+});
 
   const [localBoardColor, setLocalBoardColor] = useState("none");
 const [localBoardOutline, setLocalBoardOutline] = useState(1);
