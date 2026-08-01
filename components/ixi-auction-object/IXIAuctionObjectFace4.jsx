@@ -221,9 +221,9 @@ export default function IXIAuctionObjectFace4({
           width: 100%;
           max-width: 100%;
 
-          height: 378px;
-          min-height: 378px;
-          max-height: 378px;
+          height: 470px;
+min-height: 470px;
+max-height: 470px;
 
           position: relative;
 
