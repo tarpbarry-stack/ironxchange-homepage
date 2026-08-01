@@ -413,56 +413,7 @@ function handlePhotoLoad(e, photoUrl) {
   }));
 }
 
-function renderAuctionConsolePanel({
-  face
-}) {
-  const panelFace =
-    Number(face) === 4
-      ? 4
-      : Number(face) === 3
-        ? 3
-        : Number(face) === 2
-          ? 2
-          : 1;
 
-  if (panelFace !== 1) {
-    return (
-      <div className="auction-console-full-face">
-        {renderAuctionPanel({
-          face: panelFace,
-
-          listing,
-          sourceListingUrl,
-          from,
-
-          handleCardClick,
-          dragHandleProps,
-
-          lotNumberValue,
-          onLotNumberChange,
-          onLotNumberKeyDown,
-
-          hoursValue,
-          onHoursChange,
-          onHoursKeyDown,
-
-          priceValue,
-          onPriceChange,
-          onPriceKeyDown,
-
-          locationValue,
-          onLocationChange,
-          onLocationKeyDown,
-
-          dealerBidPack,
-          onSaveDealerBidPack,
-
-          auctionDispositionBusy,
-          onAuctionDisposition
-        })}
-      </div>
-    );
-  }
 
   return (
     <>
@@ -646,32 +597,248 @@ function renderAuctionConsolePanel({
     {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
   </div>
 ) : null}
-<IXIObjectConsoleShell
-  slots={consoleSlots}
-  panelWidth={300}
-  panelGap={0}
-  maxSlots={4}
+{auctionFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={listing}
+    dispositionBusy={
+      auctionDispositionBusy
+    }
+    onAuctionDisposition={
+      onAuctionDisposition
+    }
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : auctionFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={listing}
+    dealerBidPack={
+      dealerBidPack
+    }
+    onSaveDealerBidPack={
+      onSaveDealerBidPack
+    }
+    dragHandleProps={
+      dragHandleProps
+    }
+  />
+) : auctionFace === 2 ? (
+  <IXIAuctionObjectFace2
+    listing={listing}
+    sourceListingUrl={
+      sourceListingUrl
+    }
+    dragHandleProps={
+      dragHandleProps
+    }
 
-  renderPanel={({
-    face
-  }) =>
-    renderAuctionConsolePanel({
-      face
-    })
-  }
+    sellerMode={true}
 
-  onInsertAfter={
-    insertConsolePanelAfter
-  }
+    lotNumberValue={
+      lotNumberValue
+    }
+    onLotNumberChange={
+      onLotNumberChange
+    }
+    onLotNumberKeyDown={
+      onLotNumberKeyDown
+    }
 
-  onRemoveSlot={
-    removeConsolePanel
-  }
+    hoursValue={
+      hoursValue
+    }
+    onHoursChange={
+      onHoursChange
+    }
+    onHoursKeyDown={
+      onHoursKeyDown
+    }
 
-  onCycleSlotFace={
-    cycleConsolePanelFace
-  }
-/>
+    openingBidValue={
+      priceValue
+    }
+    onOpeningBidChange={
+      onPriceChange
+    }
+    onOpeningBidKeyDown={
+      onPriceKeyDown
+    }
+  />
+) : (
+  <>
+    <a
+      href={getListingHref(
+        listing,
+        from
+      )}
+      className="photo-click-zone"
+      onClick={handleCardClick}
+    >
+      <div
+        className="card-photo"
+        {...(dragHandleProps || {})}
+        {...(!dragHandleProps
+          ? {
+              onPointerDown:
+                startBoardDrag,
+
+              onPointerMove:
+                moveBoardDrag,
+
+              onPointerUp:
+                endBoardDrag,
+
+              onPointerCancel:
+                endBoardDrag
+            }
+          : {})}
+      >
+        <img
+          src={
+            currentPhoto ||
+            "/images/hero-equipment-yard.jpg"
+          }
+          alt={
+            listing.title ||
+            "Machine"
+          }
+          draggable={false}
+          className={`card-photo-img photo-fit-${getSmartPhotoFit(
+            currentPhoto
+          )} ${getFrameClass(
+            currentImageObject,
+            "card"
+          )}`}
+          style={getFrameStyle(
+            currentImageObject,
+            "card"
+          )}
+          onLoad={event =>
+            handlePhotoLoad(
+              event,
+              currentPhoto
+            )
+          }
+          loading="lazy"
+        />
+
+        <div className="status-photo-pill auction">
+          AUCT
+        </div>
+
+        {images.length > 1 ? (
+          <>
+            <button
+              type="button"
+              className="card-photo-nav left"
+              onClick={event =>
+                changePhoto(
+                  event,
+                  -1
+                )
+              }
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              className="card-photo-nav right"
+              onClick={event =>
+                changePhoto(
+                  event,
+                  1
+                )
+              }
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+
+            <span className="photo-count">
+              {photoIndex + 1}/
+              {images.length}
+            </span>
+          </>
+        ) : null}
+      </div>
+    </a>
+
+    <div className="card-body">
+      <div
+        className="card-board-zone"
+        {...(dragHandleProps || {})}
+        {...(!dragHandleProps
+          ? {
+              onPointerDown:
+                startBoardDrag,
+
+              onPointerMove:
+                moveBoardDrag,
+
+              onPointerUp:
+                endBoardDrag,
+
+              onPointerCancel:
+                endBoardDrag
+            }
+          : {})}
+      >
+        <IXIAuctionObjectFace1
+          listing={listing}
+          from={from}
+          onListingClick={
+            handleCardClick
+          }
+
+          sellerMode={true}
+
+          lotNumberValue={
+            lotNumberValue
+          }
+          onLotNumberChange={
+            onLotNumberChange
+          }
+          onLotNumberKeyDown={
+            onLotNumberKeyDown
+          }
+
+          hoursValue={
+            hoursValue
+          }
+          onHoursChange={
+            onHoursChange
+          }
+          onHoursKeyDown={
+            onHoursKeyDown
+          }
+
+          priceValue={
+            priceValue
+          }
+          onPriceChange={
+            onPriceChange
+          }
+          onPriceKeyDown={
+            onPriceKeyDown
+          }
+
+          locationValue={
+            locationValue
+          }
+          onLocationChange={
+            onLocationChange
+          }
+          onLocationKeyDown={
+            onLocationKeyDown
+          }
+        />
+      </div>
+    </div>
+  </>
+)}
          
 <IXIMachineRail
   listing={listing}
@@ -730,17 +897,6 @@ max-height: 470px;
 
           contain: layout paint;
         }
-
-        .auction-console-full-face {
-  width: 100%;
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
-
-  position: relative;
-
-  overflow: hidden;
-}
 
 .ixi-action-card-notice {
   position: absolute;
