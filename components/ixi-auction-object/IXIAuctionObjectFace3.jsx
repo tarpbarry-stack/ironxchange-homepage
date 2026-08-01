@@ -775,6 +775,9 @@ max-height: 470px;
           display: flex;
           flex-direction: column;
 
+          border-radius: 13px;
+overflow: hidden;
+
           gap: 6px;
 
           background: transparent;
