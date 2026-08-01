@@ -56,10 +56,6 @@ function getIXCoreBase() {
   ).replace(/\/+$/, "");
 }
 
-  return String(baseUrl)
-    .replace(/\/+$/, "");
-}
-
 function createIntegrationSdk() {
   const clientId =
     process.env.SHARETRIBE_CLIENT_ID;
