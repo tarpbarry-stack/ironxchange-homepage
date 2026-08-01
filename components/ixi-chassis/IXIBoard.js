@@ -6,7 +6,7 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
 import IXIAuctionObjectFace2
-  from "../ixi-machine-card/ixi-auction-object/IXIAuctionObjectFace2";
+  from "../ixi-auction-object/IXIAuctionObjectFace2";
 
 import {
   getMachineCardFamily
@@ -230,121 +230,118 @@ function toggleConsoleWidth(event) {
       onSendToArmedDestination={sendMachineToArmedDestination}
       onCycleSellerFace={() => cycleMachineFace?.(id)}
     />
-  </IXIScaledCardShell>
 ) : enableCardScaling ? (
   <div className="ixi-console-test-chassis">
-  <IXIScaledCardShell size={cardScaleMode}>
-    <IXIMachineCard
-  listing={item}
-  cardContext={cardContext}
-  consoleDepth={consoleDepth}
-      saved={savedIds.includes(id)}
-      onToggleSaved={() => toggleSave(item)}
-      from="saved"
-      {...sellerCardProps}
-      ixiState={
-        ixiCardState[id] || {
-          color: "none",
-          outline: 1
+    <IXIScaledCardShell size={cardScaleMode}>
+      <IXIMachineCard
+        listing={item}
+        cardContext={cardContext}
+        consoleDepth={consoleDepth}
+        saved={savedIds.includes(id)}
+        onToggleSaved={() => toggleSave(item)}
+        from="saved"
+        {...sellerCardProps}
+        ixiState={
+          ixiCardState[id] || {
+            color: "none",
+            outline: 1
+          }
         }
-      }
-      onIxiStateChange={updateIxiCardState}
-      machineFace={ixiCardState[id]?.face || 1}
-      onCycleMachineFace={() => cycleMachineFace?.(id)}
-      onSendFront={sendListingToFront}
-      onSendBack={sendListingToBack}
-      armedDestination={armedDestination}
-      onSendToArmedDestination={sendMachineToArmedDestination}
-      isBoardDraggingCard={
-        String(id) === String(draggingListingId)
-      }
-      isGhostTarget={
-        String(id) === String(ghostListingId)
-      }
-      useDndDrag={false}
-      dragHandleProps={dragHandleProps}
-        />
-  </IXIScaledCardShell>
+        onIxiStateChange={updateIxiCardState}
+        machineFace={ixiCardState[id]?.face || 1}
+        onCycleMachineFace={() =>
+          cycleMachineFace?.(id)
+        }
+        onSendFront={sendListingToFront}
+        onSendBack={sendListingToBack}
+        armedDestination={armedDestination}
+        onSendToArmedDestination={
+          sendMachineToArmedDestination
+        }
+        isBoardDraggingCard={
+          String(id) ===
+          String(draggingListingId)
+        }
+        isGhostTarget={
+          String(id) ===
+          String(ghostListingId)
+        }
+        useDndDrag={false}
+        dragHandleProps={dragHandleProps}
+      />
+    </IXIScaledCardShell>
 
-{consoleIsOpen && isAuctionCard ? (
-  <div className="ixi-console-empty-panel">
-    <IXIAuctionObjectFace2
-      listing={item}
+    {consoleIsOpen && isAuctionCard ? (
+      <div className="ixi-console-child-wrap">
+        <IXIScaledCardShell size={cardScaleMode}>
+          <div className="ixi-console-child-card">
+            <IXIAuctionObjectFace2
+              listing={item}
+              sourceListingUrl={
+                sellerCardProps.sourceListingUrl ||
+                ""
+              }
+              dragHandleProps={
+                dragHandleProps
+              }
+              sellerMode={true}
+              lotNumberValue={
+                sellerCardProps.lotNumberValue
+              }
+              onLotNumberChange={
+                sellerCardProps.onLotNumberChange
+              }
+              onLotNumberKeyDown={
+                sellerCardProps.onLotNumberKeyDown
+              }
+              hoursValue={
+                sellerCardProps.hoursValue
+              }
+              onHoursChange={
+                sellerCardProps.onHoursChange
+              }
+              onHoursKeyDown={
+                sellerCardProps.onHoursKeyDown
+              }
+              openingBidValue={
+                sellerCardProps.priceValue
+              }
+              onOpeningBidChange={
+                sellerCardProps.onPriceChange
+              }
+              onOpeningBidKeyDown={
+                sellerCardProps.onPriceKeyDown
+              }
+            />
+          </div>
+        </IXIScaledCardShell>
+      </div>
+    ) : null}
 
-      sourceListingUrl={
-        sellerCardProps.sourceListingUrl ||
-        ""
+    <button
+      type="button"
+      className={`ixi-console-test-actuator ${
+        consoleIsOpen
+          ? "is-open"
+          : ""
+      }`}
+      aria-label={
+        consoleIsOpen
+          ? "Close object console"
+          : "Open object console"
       }
-
-      dragHandleProps={
-        dragHandleProps
+      title={
+        consoleIsOpen
+          ? "Close console"
+          : "Open console"
       }
-
-      sellerMode={true}
-
-      lotNumberValue={
-        sellerCardProps.lotNumberValue
-      }
-
-      onLotNumberChange={
-        sellerCardProps.onLotNumberChange
-      }
-
-      onLotNumberKeyDown={
-        sellerCardProps.onLotNumberKeyDown
-      }
-
-      hoursValue={
-        sellerCardProps.hoursValue
-      }
-
-      onHoursChange={
-        sellerCardProps.onHoursChange
-      }
-
-      onHoursKeyDown={
-        sellerCardProps.onHoursKeyDown
-      }
-
-      openingBidValue={
-        sellerCardProps.priceValue
-      }
-
-      onOpeningBidChange={
-        sellerCardProps.onPriceChange
-      }
-
-      onOpeningBidKeyDown={
-        sellerCardProps.onPriceKeyDown
-      }
+      onPointerDown={event => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onClick={toggleConsoleWidth}
     />
   </div>
-) : null}
-        
-  <button
-    type="button"
-    className={`ixi-console-test-actuator ${
-      consoleIsOpen
-        ? "is-open"
-        : ""
-    }`}
-    aria-label={
-      consoleIsOpen
-        ? "Close object console"
-        : "Open object console"
-    }
-    title={
-      consoleIsOpen
-        ? "Close console"
-        : "Open console"
-    }
-    onPointerDown={event => {
-      event.preventDefault();
-      event.stopPropagation();
-    }}
-    onClick={toggleConsoleWidth}
-  />
-</div>
 ) : (
   <div className="ixi-console-test-chassis">
   <IXIMachineCard
