@@ -1316,11 +1316,70 @@ if (armedDestination === "stackTop") {
 }
 
 
-function getAuctionSellerCardProps(listing) {
-  console.log("GET SELLER CARD PROPS", listing);
+function getAuctionSellerCardProps(listing = {}) {
+  const listingId = String(
+    getListingId(listing)
+  );
+
+  const draft =
+    auctionCardDrafts[listingId] || {};
+
+  function updateField(field, value) {
+    setAuctionCardDrafts(current => ({
+      ...current,
+
+      [listingId]: {
+        ...(current[listingId] || {}),
+        [field]: value
+      }
+    }));
+  }
 
   return {
-    sellerMode: true
+    sellerMode: true,
+
+    priceValue:
+      draft.price,
+
+    onPriceChange: value => {
+      updateField(
+        "price",
+        value
+      );
+    },
+
+    lotNumberValue:
+      draft.lotNumber,
+
+    onLotNumberChange: value => {
+      updateField(
+        "lotNumber",
+        value
+      );
+    },
+
+    hoursValue:
+      draft.hours,
+
+    onHoursChange: value => {
+      updateField(
+        "hours",
+        String(value).replace(
+          /[^0-9]/g,
+          ""
+        )
+      );
+    },
+
+    locationValue:
+      draft.location,
+
+    onLocationChange: value => {
+      updateField(
+        "location",
+        value
+      );
+    }
   };
 }
     
