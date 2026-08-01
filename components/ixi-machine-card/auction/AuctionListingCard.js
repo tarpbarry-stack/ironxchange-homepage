@@ -384,40 +384,29 @@ function handlePhotoLoad(e, photoUrl) {
       </div>
     </a>
 
-    <div className="card-body">
-  <div
-    className="card-board-zone"
-    {...(dragHandleProps || {})}
-    {...(!dragHandleProps
-      ? {
-          onPointerDown: startBoardDrag,
-          onPointerMove: moveBoardDrag,
-          onPointerUp: endBoardDrag,
-          onPointerCancel: endBoardDrag
-        }
-      : {})}
-  >
+  <div className="card-body">
+  <div className="card-board-zone">
     <IXIAuctionObjectFace1
-        listing={listing}
-        from={from}
-        onListingClick={handleCardClick}
+      listing={listing}
+      from={from}
+      onListingClick={handleCardClick}
 
-        sellerMode={true}
+      sellerMode={true}
 
-        lotNumberValue={lotNumberValue}
-        onLotNumberChange={onLotNumberChange}
+      lotNumberValue={lotNumberValue}
+      onLotNumberChange={onLotNumberChange}
 
-        hoursValue={hoursValue}
-        onHoursChange={onHoursChange}
-        onHoursKeyDown={onHoursKeyDown}
+      hoursValue={hoursValue}
+      onHoursChange={onHoursChange}
+      onHoursKeyDown={onHoursKeyDown}
 
-        priceValue={priceValue}
-        onPriceChange={onPriceChange}
-        onPriceKeyDown={onPriceKeyDown}
+      priceValue={priceValue}
+      onPriceChange={onPriceChange}
+      onPriceKeyDown={onPriceKeyDown}
 
-        locationValue={locationValue}
-        onLocationChange={onLocationChange}
-              onLocationKeyDown={onLocationKeyDown}
+      locationValue={locationValue}
+      onLocationChange={onLocationChange}
+      onLocationKeyDown={onLocationKeyDown}
     />
   </div>
 </div>
