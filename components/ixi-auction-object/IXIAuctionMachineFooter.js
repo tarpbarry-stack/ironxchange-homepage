@@ -83,9 +83,9 @@ const currentPrice =
       )}
 
       {sellerMode ? (
-        <div className="auction-location-editor">
+        <div className="auction-location-editor location-row">
           <input
-            className="auction-city-input"
+            className="auction-city-input city-input"
             value={machineCity}
             onChange={event =>
               onLocationChange?.(
@@ -105,7 +105,7 @@ const currentPrice =
           />
 
           <input
-            className="auction-state-input"
+            className="auction-state-input state-input"
             value={machineState}
             onChange={event =>
               onLocationChange?.(
