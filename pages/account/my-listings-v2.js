@@ -442,12 +442,52 @@ setListings(hydratedListings);
 
 const sellerListings = useMemo(() => {
   return listings.filter(item => {
+    const publicData =
+      item.publicData ||
+      item.attributes?.publicData ||
+      {};
+
     const listingStatus =
       item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus;
+      publicData.listingStatus;
 
-    return listingStatus !== "archived";
+    const machineChannel =
+      publicData.machineChannel ||
+      "";
+
+    const ownershipRole =
+      publicData.ownershipRole ||
+      "";
+
+    if (listingStatus === "archived") {
+      return false;
+    }
+
+    /* Never show auction work objects */
+
+    if (
+      machineChannel === "auction"
+    ) {
+      return false;
+    }
+
+    if (
+      machineChannel ===
+      "auction-archive"
+    ) {
+      return false;
+    }
+
+    /* Never show research/private work */
+
+    if (
+      ownershipRole ===
+      "non-owner"
+    ) {
+      return false;
+    }
+
+    return true;
   });
 }, [listings]);
 
