@@ -26,25 +26,46 @@ export default function IXIBoard({
   enableCardScaling = false,
   cardScaleMode = "xl",
   cardScaleMetrics,
-  onRecoverSellerObject,
+   onRecoverSellerObject,
   onCheckoutObject,
+
+  getCustomItemId,
+  renderCustomItem,
 }) {
-  
+  function resolveBoardItemId(item) {
+    if (
+      typeof getCustomItemId === "function"
+    ) {
+      const customId =
+        getCustomItemId(item);
+
+      if (customId) {
+        return String(customId);
+      }
+    }
+
+    if (
+      item?.type === "SELLER OBJECT"
+    ) {
+      return String(item.id);
+    }
+
+    return String(
+      getListingId(item)
+    );
+  }
+
   return (
 <SortableContext
   id="board"
   items={items.map(item =>
-    item?.type === "SELLER OBJECT"
-      ? String(item.id)
-      : String(getListingId(item))
-  )}
+  resolveBoardItemId(item)
+)}
   strategy={rectSortingStrategy}
 >
     {items.map(item => {
         const id =
-          item?.type === "SELLER OBJECT"
-            ? String(item.id)
-            : String(getListingId(item));
+  resolveBoardItemId(item);
         const sellerCardProps =
           typeof getSellerListingCardProps === "function"
             ? getSellerListingCardProps(item)
@@ -59,9 +80,20 @@ export default function IXIBoard({
     item?.type === "SELLER OBJECT" ? "ixi-seller-object-sortable-card" : ""
   }`}
 >
-           {({ dragHandleProps }) => (
-             
-   item?.type === "SELLER OBJECT" && SellerObjectCard ? (
+          {({ dragHandleProps }) => (
+  typeof renderCustomItem === "function" &&
+  renderCustomItem({
+    item,
+    id,
+    dragHandleProps
+  }) ? (
+    renderCustomItem({
+      item,
+      id,
+      dragHandleProps
+    })
+  ) : item?.type === "SELLER OBJECT" &&
+    SellerObjectCard ? (
   <IXIScaledCardShell size={cardScaleMode}>
     <SellerObjectCard
   sellerObject={item}
