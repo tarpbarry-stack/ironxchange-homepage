@@ -910,8 +910,10 @@ style={getFrameStyle(currentImageObject, "card")}
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
 />
+  </>
+)}
 
-      <style jsx>{`
+<style jsx>{`
 
         .card {
           position: relative;
