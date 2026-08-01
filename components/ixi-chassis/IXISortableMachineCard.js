@@ -25,17 +25,12 @@ export default function IXISortableMachineCard({
   });
 
   const style = {
-  ...(externalStyle || {}),
-  transform: CSS.Transform.toString(transform),
-  transition,
-  opacity: 1,
-  zIndex: isDragging
-    ? 9999
-    : externalStyle?.zIndex,
-  position: isDragging
-    ? "relative"
-    : externalStyle?.position
-};
+    ...(externalStyle || {}),
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+    zIndex: isDragging ? 9999 : externalStyle?.zIndex
+  };
 
   return (
     <div
