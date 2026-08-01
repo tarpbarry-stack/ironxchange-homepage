@@ -1153,6 +1153,9 @@ const feeLines = [
   display: flex;
   flex-direction: column;
 
+  border-radius: 13px;
+  overflow: hidden;
+
   background:
     radial-gradient(
       circle at top,
