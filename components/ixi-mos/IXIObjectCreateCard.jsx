@@ -1,545 +1,1572 @@
-import { useMemo } from "react";
+import { useState, useRef } from "react";
+// DnD is owned by IXISortableMachineCard wrapper.
 
-const OBJECT_TYPE_OPTIONS = [
-  {
-    value: "job",
-    label: "JOB"
-  },
-  {
-    value: "location",
-    label: "LOCATION / YARD"
-  },
-  {
-    value: "real-estate",
-    label: "REAL ESTATE"
-  },
-  {
-    value: "building",
-    label: "BUILDING / SHOP"
-  },
-  {
-    value: "room",
-    label: "ROOM / BAY"
-  },
-  {
-    value: "person",
-    label: "PERSON"
-  },
-  {
-    value: "vehicle",
-    label: "VEHICLE"
-  },
-  {
-    value: "tool",
-    label: "TOOL"
-  },
-  {
-    value: "generic",
-    label: "OTHER"
+import { captureIXEvent } from "../../lib/posthog";
+
+import {
+  cleanMachineTitle,
+  formatHours,
+  getCardImages,
+  getListingHref,
+  getListingId,
+} from "../../lib/listingFormatters";
+
+import MachineBadges from "../MachineBadges";
+
+import IXIMachineRail from "../IXIMachineRail";
+
+import IXIMachinePlacementControl
+from "../ixi-machine-placement/IXIMachinePlacementControl";
+
+import IXIMachineObjectFace2
+from "../ixi-machine-object/IXIMachineObjectFace2";
+
+import IXISellerMachineObjectFace2
+from "../ixi-machine-object/IXISellerMachineObjectFace2";
+
+import IXIMachineObjectFace3
+from "../ixi-machine-object/IXIMachineObjectFace3";
+
+import IXIMachineObjectFace4
+from "../ixi-machine-object/IXIMachineObjectFace4";
+
+import {
+  getFrameClass,
+  getFrameStyle
+} from "../../lib/ixvision/frameEngine";
+
+
+function getBulkImageUrls(listing = {}) {
+  const raw =
+    listing?.imageUrls ||
+    listing?.publicData?.imageUrls ||
+    listing?.attributes?.publicData?.imageUrls ||
+    [];
+
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+
+  if (typeof raw === "string") {
+    return raw
+      .split(",")
+      .map(url => url.trim())
+      .filter(Boolean);
   }
-];
 
-function getTypeLabel(objectType) {
-  return (
-    OBJECT_TYPE_OPTIONS.find(
-      option =>
-        option.value === objectType
-    )?.label || "OBJECT"
-  );
+  return [];
 }
 
 export default function IXIObjectCreateCard({
-  form,
-  working = false,
-  error = "",
-  onChange,
-  onSubmit,
-  onCancel
+  listing = {},
+  cardContext = "inventory",
+  presentation: transportedPresentation,
+  sourceListingUrl = "",
+  saved = false,
+  onToggleSaved,
+  showSave = true,
+  from = "browse",
+
+  sellerMode = false,
+  launchMode = false,
+  creationMode = false,
+  workflowValue = "good-listing",
+  onWorkflowChange,
+  priceValue,
+onPriceChange,
+onPriceKeyDown,
+savingPrice = false,
+
+hoursValue,
+onHoursChange,
+onHoursKeyDown,
+
+  descriptionValue,
+  onDescriptionChange,
+  onDescriptionKeyDown,
+  savingDescription = false,
+
+    isPaused = false,
+
+  machineAccess = "public",
+  machineChannel = "marketplace",
+  machinePlacementBusy = false,
+  onMachinePlacementChange,
+
+  locationValue,
+  onLocationChange,
+  onLocationKeyDown,
+  
+  onEdit,
+  onPause,
+  onReactivate,
+  onDelete,
+
+  machineFace = 1,
+  onCycleMachineFace,
+
+  onSendFront,
+  onSendBack,
+
+armedDestination,
+onSendToArmedDestination,
+
+ixiState,
+actionNotice,
+onIxiStateChange,
+
+isBoardDraggingCard = false,
+isGhostTarget = false,
+onBoardDragStart,
+onBoardDragOver,
+onBoardDragEnd,
+useDndDrag = false,
+dragHandleProps,
 }) {
-  const typeLabel = useMemo(
-    () =>
-      getTypeLabel(
-        form?.objectType
-      ),
-    [form?.objectType]
+  const [photoIndex, setPhotoIndex] = useState(0);
+
+  const [localBoardColor, setLocalBoardColor] = useState("none");
+const [localBoardOutline, setLocalBoardOutline] = useState(1);
+
+ const boardColor = ixiState?.color || localBoardColor;
+const boardOutline = ixiState?.outline || localBoardOutline;
+
+const boardColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
+
+function cycleBoardColor(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const currentIndex = boardColors.indexOf(boardColor);
+  const nextColor = boardColors[(currentIndex + 1) % boardColors.length];
+
+  if (onIxiStateChange) {
+    onIxiStateChange(id, { color: nextColor });
+  } else {
+    setLocalBoardColor(nextColor);
+  }
+}
+
+  function cycleBoardOutline(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const nextOutline =
+    boardOutline === 1 ? 3 :
+    boardOutline === 3 ? 5 :
+    boardOutline === 5 ? 0 :
+    1;
+
+  if (onIxiStateChange) {
+    onIxiStateChange(id, { outline: nextOutline });
+  } else {
+    setLocalBoardOutline(nextOutline);
+  }
+}
+
+function endIxiRelationship(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (onIxiStateChange) {
+    onIxiStateChange(id, {
+      color: "none",
+      outline: 1
+    });
+  } else {
+    setLocalBoardColor("none");
+    setLocalBoardOutline(1);
+  }
+}  
+ const boardDragStart = useRef(null);
+const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+const [isBoardDragging, setIsBoardDragging] = useState(false);
+
+function startBoardDrag(e) {
+  if (e.target.closest("button, input, select, a")) return;
+
+  boardDragStart.current = {
+    x: e.clientX,
+    y: e.clientY
+  };
+
+  setIsBoardDragging(true);
+  setDragOffset({ x: 0, y: 0 });
+
+  onBoardDragStart?.(listing, e);
+
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+}
+
+function moveBoardDrag(e) {
+  if (!boardDragStart.current) return;
+
+  setDragOffset({
+    x: e.clientX - boardDragStart.current.x,
+    y: e.clientY - boardDragStart.current.y
+  });
+
+  const elementsBelow = document.elementsFromPoint(
+    e.clientX,
+    e.clientY
   );
 
-  function update(field, value) {
-    onChange?.(field, value);
+  const targetCard = elementsBelow
+    .map(el => el.closest?.("[data-listing-card-id]"))
+    .find(card => {
+      const targetId = card?.getAttribute("data-listing-card-id");
+      return targetId && targetId !== id;
+    });
+
+  if (!targetCard) return;
+
+  const targetId = targetCard.getAttribute("data-listing-card-id");
+
+  onBoardDragOver?.({
+    id: targetId
+  });
+}
+  
+
+function endBoardDrag(e) {
+  if (!boardDragStart.current) return;
+
+  const dx = e.clientX - boardDragStart.current.x;
+  const dy = e.clientY - boardDragStart.current.y;
+
+  boardDragStart.current = null;
+
+ onBoardDragEnd?.(e);
+
+ 
+  setTimeout(() => {
+    setIsBoardDragging(false);
+    setDragOffset({ x: 0, y: 0 });
+  }, 180);
+}
+
+  const id = String(getListingId(listing));
+
+  const isWorkspaceContext =
+  cardContext === "workspace";
+
+  const isInventoryContext =
+  cardContext === "inventory" ||
+  cardContext === "enterprise";
+
+  const useSellerPresentation =
+  sellerMode || isInventoryContext;
+
+  const presentation =
+  transportedPresentation ||
+  (useSellerPresentation
+    ? "seller"
+    : "comparison");
+  
+  const publicData =
+  listing.publicData ||
+  listing.attributes?.publicData ||
+  {};
+
+const sellerPlacementLabel = "PRIV";
+const sellerPlacementClass = "private";
+  
+const rawLocation =
+  locationValue ||
+  listing.location ||
+  publicData.location ||
+  publicData.loc?.address ||
+  publicData.loc ||
+  "";
+
+function getSellerCity() {
+  const loc = String(rawLocation || "").trim();
+  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[0].length === 2 ? parts[1] : parts[0];
   }
 
-  function submit(event) {
-    event.preventDefault();
-    onSubmit?.(event);
+  return "";
+}
+
+function getSellerState() {
+  const loc = String(rawLocation || "").trim();
+  const parts = loc.split(",").map(x => x.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[0].length === 2
+      ? parts[0].toUpperCase()
+      : parts[1].slice(0, 2).toUpperCase();
   }
 
+  return loc.length === 2 ? loc.toUpperCase() : "";
+}
+
+  const sharetribeImages = getCardImages(listing);
+  const bulkImages = getBulkImageUrls(listing);
+
+  const images =
+    bulkImages.length > 0
+      ? bulkImages
+      : sharetribeImages;
+
+  const currentPhoto = images[photoIndex];
+  const [photoFitMap, setPhotoFitMap] = useState({});
+
+  const currentImageObject =
+  sharetribeImages[photoIndex] ||
+  { url: currentPhoto };
+
+  const keywords = Array.isArray(listing?.keywords)
+    ? listing.keywords
+    : Array.isArray(listing?.publicData?.keywords)
+      ? listing.publicData.keywords
+      : [];
+
+  const normalizedKeywords = keywords
+    .filter(Boolean)
+    .map(k => String(k).trim().toLowerCase())
+    .slice(0, 6);
+
+  function changePhoto(e, direction) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (images.length < 2) return;
+
+    setPhotoIndex(current =>
+      (current + direction + images.length) % images.length
+    );
+  }
+
+  function toggleSave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    onToggleSaved?.(id, listing);
+  }
+
+  function stopCardClick(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+function handleCardClick() {
+  captureIXEvent("private_listing_card_clicked", {
+    listingId: id,
+    title: listing.title,
+    category: listing.category || listing.type,
+    make: listing.make,
+    model: listing.model,
+    price: listing.price,
+    location: listing.location,
+    from,
+cardContext
+  });
+}
+
+  function getSmartPhotoFit(photoUrl) {
+  return photoFitMap[photoUrl] || "soft-cover";
+}
+
+function handlePhotoLoad(e, photoUrl) {
+  const img = e.currentTarget;
+
+  const ratio = img.naturalWidth / img.naturalHeight;
+
+  let fit = "soft-cover";
+
+  if (ratio >= 1.65) {
+    fit = "contain-wide";
+  } else if (ratio <= 1.15) {
+    fit = "contain-tall";
+  } else if (ratio >= 1.35 && ratio < 1.65) {
+    fit = "soft-cover";
+  }
+
+  setPhotoFitMap(current => ({
+    ...current,
+    [photoUrl]: fit
+  }));
+}
+  
   return (
-    <form
-      className="ixi-object-create-card"
-      onSubmit={submit}
-    >
-      <div className="ixi-object-create-card__top">
-        <div>
-          <span className="ixi-object-create-card__eyebrow">
-            CREATE
-          </span>
+  <div
+    data-listing-card-id={id}
+    className={`card private-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
+      isBoardDragging ? "board-dragging" : ""
+    } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
+      isGhostTarget ? "grid-ghost-target" : ""
+    } ${presentation === "seller" ? "seller-mode" : ""} ${isPaused ? "paused-card" : ""}`}
+    style={{
+      transform: isBoardDragging
+        ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
+        : undefined,
+      zIndex: isBoardDragging ? 50 : undefined
+    }}
+  >
+{actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
+  <div className={`ixi-action-card-notice ${
+    actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
+  }`}>
+    {actionNotice?.message || ixiState?.actionNotice?.message || ixiState.theaterNotice}
+  </div>
+) : null}
+{Number(machineFace || 1) === 2 ? (
+presentation === "seller" ? (
+  <IXISellerMachineObjectFace2
+      listing={listing}
+      dragHandleProps={dragHandleProps}
+      descriptionValue={descriptionValue}
+      onDescriptionChange={onDescriptionChange}
+      onDescriptionKeyDown={onDescriptionKeyDown}
+      savingDescription={savingDescription}
+    />
+  ) : (
+    <IXIMachineObjectFace2
+      listing={listing}
+      dragHandleProps={dragHandleProps}
+    />
+  )
+) : Number(machineFace || 1) === 3 ? (
+  <IXIMachineObjectFace3
+    listing={listing}
+    dragHandleProps={dragHandleProps}
+  />
+) : Number(machineFace || 1) === 4 ? (
+  <IXIMachineObjectFace4
+    listing={listing}
+    dragHandleProps={dragHandleProps}
+  />
+) : (
+  <>
+    
+<a
+  href={getListingHref(listing, from)}
+  className={`photo-click-zone ${
+  Number(machineFace || 1) === 1 ? "" : "mof-hidden"
+}`}
+  onClick={handleCardClick}
+>
+  <div className="card-photo">
+    <img
+  src={currentPhoto || "/images/hero-equipment-yard.jpg"}
+  alt={listing.title || "Machine"}
+  draggable={false}
+ className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
+style={getFrameStyle(currentImageObject, "card")}
+  onLoad={e => handlePhotoLoad(e, currentPhoto)}
+  loading="lazy"
+/>
 
-          <strong>
-            {typeLabel}
-          </strong>
-        </div>
+   {presentation === "seller" ? (
+  <div
+    className={`status-photo-pill ${sellerPlacementClass}`}
+  >
+    {sellerPlacementLabel}
+  </div>
+) : null}
+
+    {images.length > 1 ? (
+      <>
+        <button
+          type="button"
+          className="card-photo-nav left"
+          onClick={e => changePhoto(e, -1)}
+          aria-label="Previous photo"
+        >
+          ‹
+        </button>
 
         <button
           type="button"
-          className="ixi-object-create-card__close"
-          onClick={onCancel}
-          disabled={working}
-          aria-label="Close object creator"
+          className="card-photo-nav right"
+          onClick={e => changePhoto(e, 1)}
+          aria-label="Next photo"
         >
-          ×
+          ›
         </button>
-      </div>
 
-      <label>
-        <span>TYPE</span>
+        <span className="photo-count">
+          {photoIndex + 1}/{images.length}
+        </span>
+      </>
+    ) : null}
+  </div>
+</a>
 
-        <select
-          value={
-            form?.objectType ||
-            "job"
-          }
-          onChange={event =>
-            update(
-              "objectType",
-              event.target.value
-            )
-          }
-          disabled={working}
-        >
-          {OBJECT_TYPE_OPTIONS.map(
-            option => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            )
-          )}
-        </select>
-      </label>
+<div className="card-body">
+  <>
+    <a
+    href={getListingHref(listing, from)}
+    className="title-click-zone"
+    onClick={handleCardClick}
+  >
+    <div className="title-row">
+      <h3>{cleanMachineTitle(listing.title)}</h3>
 
-      <label>
-        <span>NAME</span>
+     {presentation === "seller" ? (
+  <input
+    className="hours-inline hours-input"
+  {...(onHoursChange
+    ? {
+        value:
+          hoursValue ??
+          String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, ""),
+        onChange: e => onHoursChange(e.target.value, listing)
+      }
+    : {
+        defaultValue: String(listing.hours || publicData.hours || "").replace(/[^0-9]/g, "")
+      })}
+  onClick={stopCardClick}
+  onKeyDown={e => onHoursKeyDown?.(e, listing)}
+  inputMode="numeric"
+  maxLength={5}
+/>
+) : (
+  <h3 className="hours-inline">
+    {formatHours(listing.hours)}
+  </h3>
+)}
+    </div>
+  </a>
 
-        <input
-          value={
-            form?.displayName || ""
-          }
-          onChange={event =>
-            update(
-              "displayName",
-              event.target.value
-            )
-          }
-          placeholder="JOB 41"
-          disabled={working}
-          autoFocus
-          required
-        />
-      </label>
+                             <div
+  className="card-board-zone"
+  {...(dragHandleProps || {})}
+  {...(!dragHandleProps
+    ? {
+        onPointerDown: startBoardDrag,
+        onPointerMove: moveBoardDrag,
+        onPointerUp: endBoardDrag,
+        onPointerCancel: endBoardDrag
+      }
+    : {})}
+>
 
-      <label>
-        <span>CATEGORY</span>
-
-        <input
-          value={
-            form?.customerCategory ||
-            ""
-          }
-          onChange={event =>
-            update(
-              "customerCategory",
-              event.target.value
-            )
-          }
-          placeholder="CUSTOMER CATEGORY"
-          disabled={working}
-        />
-      </label>
-
-      <label>
-        <span>ASSET / UNIT ID</span>
-
-        <input
-          value={
-            form?.customerAssetId ||
-            ""
-          }
-          onChange={event =>
-            update(
-              "customerAssetId",
-              event.target.value
-            )
-          }
-          placeholder="UNIT 18"
-          disabled={working}
-        />
-      </label>
-
-      <label>
-        <span>FACTUAL TITLE</span>
-
-        <input
-          value={
-            form?.factualTitle || ""
-          }
-          onChange={event =>
-            update(
-              "factualTitle",
-              event.target.value
-            )
-          }
-          placeholder="2018 FORD F-350 SERVICE TRUCK"
-          disabled={working}
-        />
-      </label>
-
-      <div className="ixi-object-create-card__split">
-        <label>
-          <span>VALUE</span>
-
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={
-              form?.value || ""
-            }
-            onChange={event =>
-              update(
-                "value",
-                event.target.value
-              )
-            }
-            placeholder="48500"
-            disabled={working}
+        <div className="keyword-row">
+          <MachineBadges
+            keywords={normalizedKeywords}
+            variant="card"
           />
-        </label>
-
-        <label>
-          <span>LOCATION</span>
-
-          <input
-            value={
-              form?.location || ""
-            }
-            onChange={event =>
-              update(
-                "location",
-                event.target.value
-              )
-            }
-            placeholder="ODESSA, TX"
-            disabled={working}
-          />
-        </label>
-      </div>
-
-      {error ? (
-        <div className="ixi-object-create-card__error">
-          {error}
         </div>
-      ) : null}
 
-      <button
-        type="submit"
-        className="ixi-object-create-card__submit"
-        disabled={working}
-      >
-        {working
-          ? "CREATING..."
-          : `CREATE ${typeLabel}`}
-      </button>
+        <div className="price-row">
+          {sellerMode ? (
+        <input
+  className="price-input seller-inline-input"
+  {...(onPriceChange
+    ? {
+        value: priceValue ?? listing.price ?? "",
+        onChange: e => onPriceChange(e.target.value, listing)
+      }
+    : {
+        defaultValue: priceValue ?? listing.price ?? ""
+      })}
+  onClick={stopCardClick}
+  onKeyDown={e => onPriceKeyDown?.(e, listing)}
+/>
+          ) : (
+            <strong>{listing.price || "Call for price"}</strong>
+          )}
+
+
+          <div className="meta">
+            
+
+            {presentation === "seller" ? (
+  <div className="location-row">
+<input
+  className="city-input location-input"
+  {...(onLocationChange
+    ? {
+        value: locationValue ? String(locationValue).split(",")[0]?.trim() : getSellerCity(),
+        onChange: e => {
+          const state =
+            locationValue && String(locationValue).includes(",")
+              ? String(locationValue).split(",")[1]?.trim()
+              : getSellerState();
+
+          onLocationChange(`${e.target.value}, ${state}`.trim(), listing);
+        }
+      }
+    : {
+        defaultValue: getSellerCity()
+      })}
+  onClick={stopCardClick}
+  onKeyDown={e => onLocationKeyDown?.(e, listing)}
+  maxLength={18}
+/>
+ <input
+  className="state-input location-input"
+  {...(onLocationChange
+    ? {
+        value:
+          locationValue && String(locationValue).includes(",")
+            ? String(locationValue).split(",")[1]?.trim().slice(0, 2).toUpperCase()
+            : getSellerState(),
+        onChange: e => {
+          const city =
+            locationValue && String(locationValue).includes(",")
+              ? String(locationValue).split(",")[0]?.trim()
+              : getSellerCity();
+
+          onLocationChange(`${city}, ${e.target.value.toUpperCase()}`.trim(), listing);
+        }
+      }
+    : {
+        defaultValue: getSellerState()
+      })}
+  onClick={stopCardClick}
+  onKeyDown={e => onLocationKeyDown?.(e, listing)}
+  maxLength={2}
+/>
+</div>
+            ) : (
+              <span>⌖ {listing.location || "Location not listed"}</span>
+            )}
+          </div>
+        </div>
+
+       {presentation === "seller" && !creationMode ? (
+  <div className="seller-actions">
+            <button
+  type="button"
+  onClick={e => {
+    stopCardClick(e);
+    window.open(getListingHref(listing, from), "_blank", "noopener,noreferrer");
+  }}
+>
+  {launchMode ? "PUBLIC" : "LAUNCH"}
+</button>
+
+<button
+  type="button"
+  onClick={e => {
+    stopCardClick(e);
+    if (launchMode) {
+      window.location.href = "/yard";
+      return;
+    }
+    window.location.href = getListingHref(listing, "account");
+  }}
+>
+  {launchMode ? "YARD" : "VIEW"}
+</button>
+
+            {isPaused ? (
+              <button
+                type="button"
+                onClick={e => {
+                  stopCardClick(e);
+                  onReactivate?.(listing);
+                }}
+              >
+                REACTIVATE
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={e => {
+                  stopCardClick(e);
+                  onPause?.(listing);
+                }}
+              >
+                PAUSE
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="danger-action"
+              onClick={e => {
+                stopCardClick(e);
+                onDelete?.(listing);
+              }}
+            >
+              DELETE
+            </button>
+          </div>
+        ) : null}
+
+                        {presentation === "seller" ? (
+  <div className="seller-meta-row">
+    {presentation === "seller" &&
+!creationMode &&
+onMachinePlacementChange ? (
+      <div className="seller-placement-control">
+        <IXIMachinePlacementControl
+          machineAccess={machineAccess}
+          machineChannel={machineChannel}
+          disabled={machinePlacementBusy}
+          onChange={nextPlacement =>
+            onMachinePlacementChange(
+              listing,
+              nextPlacement
+            )
+          }
+        />
+      </div>
+    ) : null}
+
+    <div className="seller-stats">
+      <span>Age: {listing.age ?? "—"}</span>
+      <span>Views: {listing.views || "—"}</span>
+      <span>States: {listing.states || listing.saves || "—"}</span>
+    </div>
+  </div>
+) : null}
+
+                     </div>
+
+            </>
+</div>
+
+  </>
+)}
+         
+<IXIMachineRail
+  listing={listing}
+  saved={saved}
+  boardColor={boardColor}
+  boardOutline={boardOutline}
+  machineFace={machineFace}
+  onCycleMachineFace={onCycleMachineFace}
+  onSendFront={onSendFront}
+  onSendBack={onSendBack}
+  onCycleColor={cycleBoardColor}
+  onCycleOutline={cycleBoardOutline}
+  onToggleSaved={onToggleSaved}
+  armedDestination={armedDestination}
+  onSendToArmedDestination={onSendToArmedDestination}
+/>
 
       <style jsx>{`
-        .ixi-object-create-card {
-  position: relative;
 
-  text-decoration: none;
+        .card {
+          position: relative;
+          text-decoration: none;
+          color: inherit;
+
+          font-family: 'Inter', sans-serif;
+          font-size: initial;
+          line-height: normal;
+          isolation: isolate;
+
+          height: 391px;
+          min-height: 391px;
+          max-height: 391px;
+
+          border: 1px solid rgba(255,255,255,.06);
+          outline: 1px solid rgba(255,255,255,.018);
+
+          border-radius: 13px;
+          overflow: hidden;
+
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
+            #141414;
+
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.045) inset,
+            0 18px 44px rgba(0,0,0,.22);
+
+         transition:
+  transform .22s cubic-bezier(.22,.61,.36,1),
+  border-color .16s ease,
+  background .16s ease,
+  box-shadow .16s ease;
+
+          contain: layout paint;
+        }
+
+.ixi-action-card-notice {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 80;
+  pointer-events: none;
+
+  background: rgba(0,0,0,.74);
+  color: rgba(0,194,255,.96);
+
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .9px;
+  text-align: center;
+
+  border: 2px solid rgba(0,194,255,.78);
+  border-radius: inherit;
+
+  box-shadow:
+    0 0 18px rgba(0,194,255,.34),
+    inset 0 0 22px rgba(0,194,255,.10);
+
+  animation: ixiTheaterNoticePulse .22s ease-out;
+}
+
+@keyframes ixiTheaterNoticePulse {
+  from {
+    transform: scale(.96);
+    opacity: .35;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+.machine-face-test {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  z-index: 999;
+
+  padding: 4px 8px;
+
+  background: rgba(0,194,255,.9);
+  color: #00141a;
+
+  border-radius: 4px;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+
+.mof-hidden {
+  display: none !important;
+}
+
+        .title-click-zone {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        }
+
+.photo-click-zone {
+  display: block;
   color: inherit;
+  text-decoration: none;
+}
 
-  font-family: 'Inter', sans-serif;
-  font-size: initial;
-  line-height: normal;
+.card-board-zone {
+  cursor: grab;
+}
 
-  isolation: isolate;
+.card.board-dragging {
+  cursor: grabbing;
+  opacity: 1;
 
-  height: 391px;
-  min-height: 391px;
-  max-height: 391px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 30px 80px rgba(0,0,0,.48);
 
-  border: 1px solid rgba(255,255,255,.06);
-  outline: 1px solid rgba(255,255,255,.018);
+  transition: none;
+}
 
-  border-radius: 13px;
+.card.grid-drag-source {
+  opacity: 1;
+}
+
+.card.grid-ghost-target {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 0 0 2px rgba(0,194,255,.44),
+    0 22px 52px rgba(0,0,0,.30);
+}
+
+.card.grid-ghost-target::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgba(0,194,255,.42);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+
+
+.card.board-color-none .rail-color::after {
+  background: rgba(255,255,255,.14);
+}
+
+.card.board-color-green .rail-color::after {
+  background: rgba(56,161,105,.66);
+}
+
+.card.board-color-yellow .rail-color::after {
+  background: rgba(255,196,0,.70);
+}
+
+.card.board-color-red .rail-color::after {
+  background: rgba(229,62,62,.70);
+}
+
+.card.board-color-cyan .rail-color::after {
+  background: rgba(0,194,255,.68);
+}
+
+.card.board-color-white .rail-color::after {
+  background: rgba(255,255,255,.58);
+}
+
+.card.board-color-blue .rail-color::after {
+  background: rgba(49,130,206,.70);
+}
+
+.card.board-color-orange .rail-color::after {
+  background: rgba(249,133,18,.72);
+}
+
+
+.card.board-outline-1 {
+  outline-width: 1px;
+}
+
+.card.board-outline-3 {
+  outline-width: 3px;
+}
+
+.card.board-outline-5 {
+  outline-width: 5px;
+}
+
+.card.board-outline-0 {
+  outline-width: 0;
+}
+
+.card.board-color-none {
+  outline-color: rgba(255,255,255,.018);
+}
+
+.card.board-color-green {
+  outline-color: rgba(56,161,105,.95);
+}
+
+.card.board-color-yellow {
+  outline-color: rgba(255,196,0,.95);
+}
+
+.card.board-color-red {
+  outline-color: rgba(229,62,62,.95);
+}
+
+.card.board-color-cyan {
+  outline-color: rgba(0,194,255,.95);
+}
+
+.card.board-color-white {
+  outline-color: rgba(255,255,255,.85);
+}
+
+.card.board-color-blue {
+  outline-color: rgba(49,130,206,.95);
+}
+
+.card.board-color-orange {
+  outline-color: rgba(249,133,18,.95);
+}
+
+        .card:hover {
+          transform: translateY(-2px) scale(1.003);
+          border-color: rgba(255,196,0,.14);
+
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,0)),
+            #171717;
+
+          box-shadow:
+            0 1px 0 rgba(255,255,255,.06) inset,
+            0 22px 52px rgba(0,0,0,.30);
+        }
+
+      .card.seller-mode {
+  height: 470px;
+  min-height: 470px;
+  max-height: 470px;
+}
+
+.card.seller-mode .card-body {
+  height: 268px;
+  min-height: 268px;
+  max-height: 268px;
+}
+        .card.paused-card {
+          opacity: .58;
+          filter: grayscale(.42);
+        }
+
+        .card-photo {
+          position: relative;
+          height: 220px;
+          overflow: hidden;
+
+          border-bottom: 1px solid rgba(255,255,255,.065);
+          background:
+    radial-gradient(circle at center, rgba(255,255,255,.045), transparent 58%),
+    linear-gradient(180deg, #101010, #070707);
+
+          box-shadow:
+            inset 0 -40px 70px rgba(0,0,0,.10);
+        }
+
+        .card-photo-img {
+  width: 100%;
+  height: 100%;
+  object-position: center center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transition:
+    filter .18s ease,
+    transform .28s ease;
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform-origin: center center;
+}
+
+       .card-photo-img.photo-fit-contain-wide,
+.card-photo-img.photo-fit-contain-tall {
+  filter:
+    contrast(1.035)
+    saturate(1.035)
+    brightness(1.02);
+}
+
+.card-photo-img.photo-fit-soft-cover {
+  object-fit: cover;
+  transform: scale(.96);
+}
+
+.card-photo-img.photo-fit-contain-wide {
+  object-fit: cover;
+  transform: scale(.94);
+}
+
+.card-photo-img.photo-fit-contain-tall {
+  object-fit: cover;
+  transform: scale(.92);
+}
+
+        .card-photo-nav {
+          position: absolute;
+          top: 92%;
+          transform: translateY(-50%);
+
+          width: 22px;
+          height: 92px;
+
+          border: none;
+          background: rgba(0,0,0,.06);
+          color: rgba(255,255,255,.42);
+
+          font-size: 28px;
+          font-weight: 300;
+          cursor: pointer;
+          z-index: 5;
+          opacity: 0;
+
+          transition:
+            opacity .18s ease,
+            background .18s ease,
+            color .18s ease;
+        }
+
+        .card:hover .card-photo-nav {
+          opacity: 1;
+        }
+
+        .card-photo-nav.left {
+          left: 0;
+          border-radius: 0 10px 10px 0;
+        }
+
+        .card-photo-nav.right {
+          right: 0;
+          border-radius: 10px 0 0 10px;
+        }
+
+        .card-photo-nav:hover {
+          background: rgba(0,0,0,.14);
+          color: rgba(255,255,255,.68);
+        }
+
+        .photo-count {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          z-index: 5;
+
+          padding: 3px 6px;
+          border-radius: 999px;
+
+          background: rgba(0,0,0,.18);
+          color: rgba(255,255,255,.44);
+
+          backdrop-filter: blur(2px);
+
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: .25px;
+        }
+
+        .card-body {
+  padding: 13px 13px 14px;
+  display: flex;
+  flex-direction: column;
+
+  height: 171px;
+  min-height: 171px;
+  max-height: 171px;
+}
+
+     .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+
   overflow: hidden;
+  position: relative;
+}
+
+       .card .title-row h3 {
+          margin: 0;
+          color: #f2f2f2;
+
+          font-size: 15.5px;
+          font-weight: 900;
+          line-height: 1.12;
+          max-width: calc(100% - 58px);
+          letter-spacing: -0.28px;
+          text-rendering: geometricPrecision;
+          display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+        }
+
+        .hours-inline {
+          color: rgba(255,255,255,.54) !important;
+          font-family: 'Inter', sans-serif !important;
+          font-size: 12.75px !important;
+          font-weight: 500 !important;
+          letter-spacing: .18px;
+          line-height: 1;
+          white-space: nowrap;
+          position: absolute;
+top: 1px;
+right: 0;
+width: 54px;
+text-align: right;
+        }
+
+ .hours-input {
+  width: 54px;
+  height: 32px;
+
+  border: 1px solid #343434;
+  border-radius: 8px;
+
+  background: #101010;
+  color: rgba(255,255,255,.62);
+
+  padding: 0 8px;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  text-align: right;
+  outline: none;
+}
+
+.hours-input:focus {
+  border-color: rgba(255,196,0,.42);
+  box-shadow: 0 0 0 1px rgba(255,196,0,.10);
+}
+
+     .keyword-row {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  margin: 5px 0 4px;
+  overflow: hidden;
+}
+
+        .keyword-row :global(.machine-badges.card) {
+          max-height: 60px;
+          overflow: hidden;
+        }
+
+     .price-row {
+  position: relative;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+   margin-top: 10px;
+  padding-top: 4px;
+
+  gap: 10px;
+}
+        .price-row::before {
+  content: "";
+  position: absolute;
+
+  top: 4px;
+  z-index: 2;
+  
+  left: 0;
+
+  width: 34%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,196,0,.22),
+      transparent
+    );
+}
+
+.price-row::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background: rgba(255,255,255,.045);
+
+  z-index: 1;
+}
+
+       .price-row strong {
+  position: relative;
+  top: 5px;
+          color: #f2f2f2;
+          font-size: 17.25px;
+          font-weight: 850;
+          letter-spacing: -0.12px;
+          white-space: nowrap;
+        }
+
+       .meta {
+  position: relative;
+  top: 2px;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          color: #9a9a9a;
+          flex-wrap: nowrap;
+          justify-content: flex-end;
+          text-align: right;
+          margin-left: auto;
+          min-width: 0;
+        }
+
+        .meta span {
+          color: rgba(255,255,255,.48);
+          font-size: 10.5px;
+          font-weight: 850;
+          letter-spacing: .42px;
+          white-space: nowrap;
+          text-transform: uppercase;
+        }
+
+        
+
+.status-photo-pill {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 6;
+
+  height: 24px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: rgba(0,194,255,.12);
+  border: 1px solid rgba(0,194,255,.42);
+  color: rgba(210,250,255,.86);
+
+  font-size: 8.5px;
+  font-weight: 950;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 0 0 1px rgba(0,194,255,.05),
+    0 8px 20px rgba(0,0,0,.28);
+}
+
+.status-photo-pill.private {
+  background: rgba(120,120,120,.16);
+  border-color: rgba(190,190,190,.34);
+  color: rgba(255,255,255,.66);
+}
+
+        .workflow-photo-pill {
+          position: absolute;
+          left: 10px;
+          top: 10px;
+          z-index: 6;
+        }
+
+        .workflow-photo-pill select {
+          height: 24px;
+          max-width: 132px;
+
+          border: 1px solid rgba(255,255,255,.18);
+          border-radius: 999px;
+
+          background:
+            linear-gradient(45deg, transparent 50%, #FFC400 50%),
+            linear-gradient(135deg, #FFC400 50%, transparent 50%),
+            rgba(0,0,0,.72);
+
+          background-position:
+            calc(100% - 13px) 50%,
+            calc(100% - 8px) 50%;
+
+          background-size: 5px 5px, 5px 5px;
+          background-repeat: no-repeat;
+
+          color: #f2f2f2;
+          padding: 0 24px 0 9px;
+
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .35px;
+          text-transform: uppercase;
+
+          outline: none;
+          appearance: none;
+          cursor: pointer;
+        }
+
+        .price-input,
+        .location-input {
+          height: 32px;
+          border: 1px solid #343434;
+          border-radius: 8px;
+          background: #101010;
+          color: #F2F2F2;
+          padding: 0 10px;
+          font-size: 11px;
+          font-weight: 900;
+          outline: none;
+        }
+
+        .price-input {
+          width: 62px;
+        }
+
+        .location-input {
+          width: 72px;
+          text-align: right;
+          color: rgba(255,255,255,.62);
+          text-transform: uppercase;
+          letter-spacing: .28px;
+        }
+
+       .location-row {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  order: 2;
+}
+
+.city-input {
+  width: 72px;
+}
+
+.state-input {
+  width: 30px;
+  text-transform: uppercase;
+}
+
+        .price-input:focus,
+        .location-input:focus {
+          border-color: rgba(255,196,0,.42);
+          box-shadow: 0 0 0 1px rgba(255,196,0,.10);
+        }
+
+        .status-pill {
+          height: 28px;
+          padding: 0 10px;
+          border-radius: 999px;
+
+          background: rgba(56,161,105,.12);
+          border: 1px solid rgba(56,161,105,.35);
+          color: #38A169;
+
+          font-size: 9px;
+          font-weight: 900;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          white-space: nowrap;
+        }
+
+        .status-pill.paused {
+          background: rgba(120,120,120,.14);
+          border-color: rgba(160,160,160,.35);
+          color: #A0A0A0;
+        }
+
+        .seller-actions {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-top: 9px;
+        }
+
+        .seller-actions button {
+          height: 32px;
+          border-radius: 8px;
+          border: 1px solid #343434;
+          background: #101010;
+          color: #D6D6D6;
+
+          font-size: 10px;
+          font-weight: 900;
+
+          cursor: pointer;
+
+          position: relative;
+          top: -5px;
+
+          transition:
+            border-color .14s ease,
+            color .14s ease,
+            background .14s ease,
+            transform .14s ease;
+        }
+
+.launch-action {
+  border-color: rgba(0,194,255,.42) !important;
+  color: rgba(0,194,255,.92) !important;
 
   background:
     linear-gradient(
       180deg,
-      rgba(255,255,255,.028),
-      rgba(255,255,255,0)
-    ),
-    #141414;
+      rgba(0,194,255,.09),
+      rgba(0,194,255,.03)
+    ) !important;
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.045) inset,
-    0 18px 44px rgba(0,0,0,.22);
-
-  transition:
-    transform .22s cubic-bezier(.22,.61,.36,1),
-    border-color .16s ease,
-    background .16s ease,
-    box-shadow .16s ease;
-
-  contain: layout paint;
-
-  display: flex;
-  flex-direction: column;
-
-  padding: 13px 13px 14px;
-
-  box-sizing: border-box;
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 0 0 1px rgba(0,194,255,.04);
 }
-        .ixi-object-create-card__top {
-          display: flex;
-          align-items: center;
-          justify-content:
-            space-between;
 
-          padding-bottom: 9px;
+.launch-action:hover {
+  border-color: rgba(0,194,255,.72) !important;
+  color: #6FE8FF !important;
 
-          border-bottom:
-            1px solid
-              rgba(
-                255,
-                255,
-                255,
-                0.06
-              );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,194,255,.14),
+      rgba(0,194,255,.05)
+    ) !important;
+}
+       .seller-actions button:hover:not(.launch-action) {
+  transform: translateY(-1px);
+  border-color: rgba(255,196,0,.45);
+  color: #FFC400;
+}
+
+        .danger-action:hover {
+          border-color: rgba(229,62,62,.45) !important;
+          color: #E53E3E !important;
         }
 
-        .ixi-object-create-card__eyebrow {
-          display: block;
-          margin-bottom: 3px;
+        .seller-placement-control {
+  width: 132px;
+  flex: 0 0 132px;
+}
+        
+        .seller-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              0.82
-            );
+  gap: 10px;
 
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: 0.7px;
-        }
+  margin-top: 1px;
+  padding-top: 5px;
 
-        .ixi-object-create-card__top
-          strong {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.86
-            );
+  border-top: 1px solid rgba(255,255,255,.045);
+}
 
-          font-size: 13px;
-          font-weight: 950;
-          letter-spacing: 0.4px;
-        }
+.seller-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 
-        .ixi-object-create-card__close {
-          width: 24px;
-          height: 24px;
-          padding: 0;
+  gap: 9px;
 
-          display: grid;
-          place-items: center;
+  min-width: 0;
+  margin-left: auto;
 
-          border: 0;
-          border-radius: 4px;
+  color: rgba(255,255,255,.38);
 
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.025
-            );
+  font-size: 8.5px;
+  font-weight: 850;
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.42
-            );
+  white-space: nowrap;
+}
 
-          font-size: 17px;
-          line-height: 1;
+               @media (max-width: 850px) {
+          .card.seller-mode {
+            min-height: 450px;
+          }
 
-          cursor: pointer;
-        }
+          .seller-actions {
+            grid-template-columns: 1fr 1fr;
+          }
 
-        label {
-          display: block;
-        }
+          .price-row {
+            flex-wrap: wrap;
+          }
 
-        label span {
-          display: block;
-          margin-bottom: 5px;
+          .meta {
+            width: 100%;
+          }
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.34
-            );
-
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: 0.45px;
-        }
-
-        input,
-        select {
-          width: 100%;
-          height: 36px;
-          padding: 0 10px;
-
-          border:
-            1px solid
-              rgba(
-                255,
-                255,
-                255,
-                0.09
-              );
-
-          border-radius: 6px;
-
-          background: #0b0b0b;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.74
-            );
-
-          outline: none;
-
-          font-size: 9px;
-          font-weight: 850;
-        }
-
-        input:focus,
-        select:focus {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              0.44
-            );
-        }
-
-        .ixi-object-create-card__split {
-          display: grid;
-          grid-template-columns:
-            1fr 1fr;
-          gap: 9px;
-        }
-
-        .ixi-object-create-card__error {
-          padding: 8px;
-
-          border:
-            1px solid
-              rgba(
-                229,
-                62,
-                62,
-                0.28
-              );
-
-          border-radius: 6px;
-
-          background:
-            rgba(
-              229,
-              62,
-              62,
-              0.05
-            );
-
-          color:
-            rgba(
-              255,
-              130,
-              130,
-              0.86
-            );
-
-          font-size: 8px;
-          font-weight: 850;
-        }
-
-        .ixi-object-create-card__submit {
-          height: 36px;
-          margin-top: auto;
-
-          border:
-            1px solid
-              rgba(
-                255,
-                196,
-                0,
-                0.42
-              );
-
-          border-radius: 7px;
-
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              0.035
-            );
-
-          color: #ffc400;
-
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: 0.55px;
-
-          cursor: pointer;
-        }
-
-        button:disabled,
-        input:disabled,
-        select:disabled {
-          opacity: 0.5;
-          cursor: default;
+                   .location-input {
+            width: 100%;
+            text-align: left;
+          }
         }
       `}</style>
-    </form>
+    </div>
   );
 }
