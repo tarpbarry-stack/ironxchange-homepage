@@ -12,10 +12,6 @@ import {
   getMachineCardFamily
 } from "../ixi-machine-card/getMachineCardFamily";
 
-import {
-  getConsoleGridSpan
-} from "./IXIObjectConsoleEngine";
-
 export default function IXIBoard({
   items = [],
   cardContext = "workspace",  
@@ -118,39 +114,7 @@ const consoleDepth =
   (consoleLeftOpen ? 1 : 0) +
   (consoleRightOpen ? 1 : 0);
 
-const consoleSpan =
-  getConsoleGridSpan(
-    consoleDepth
-  );
 
-const resolvedConsoleScale =
-  enableCardScaling
-    ? (
-        Number(
-          cardScaleMetrics?.scale
-        ) || 1
-      )
-    : 1;
-
-const consoleNativePanelWidth =
-  298;
-
-const consoleNativeWidth =
-  (
-    consoleDepth *
-    consoleNativePanelWidth
-  ) -
-  Math.max(
-    consoleDepth - 1,
-    0
-  );
-
-const consoleWidth =
-  consoleNativeWidth *
-  resolvedConsoleScale;
-      
-        return (
-          
   <IXISortableMachineCard
   key={id}
   id={id}
@@ -167,20 +131,21 @@ const consoleWidth =
   }`}
 
   style={{
-    gridColumn:
-      `span ${consoleSpan}`,
+  flex:
+    "0 0 auto",
 
-    width:
-      `${consoleWidth}px`,
+  width:
+    "max-content",
 
-    maxWidth:
-      consoleDepth > 1
-        ? "none"
-        : `${resolvedConsolePanelWidth}px`,
+  maxWidth:
+    "none",
 
-    justifySelf:
-      "start"
-  }}
+  minWidth:
+    0,
+
+  alignSelf:
+    "flex-start"
+}}
 >
          {({ dragHandleProps }) => {
   const customItem =
