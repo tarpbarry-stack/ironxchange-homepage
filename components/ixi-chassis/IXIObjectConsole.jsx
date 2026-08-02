@@ -334,7 +334,6 @@ export default function IXIObjectConsole({
   );
 
   return (
-   return (
   <div
     className={`ixi-console-child-wrap ${
       isLeft
