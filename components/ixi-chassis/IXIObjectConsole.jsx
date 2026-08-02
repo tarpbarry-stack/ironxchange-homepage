@@ -407,7 +407,7 @@ export default function IXIObjectConsole({
           )
         : null}
 
-      <style jsx>{`
+      <style jsx global>{`
         .ixi-object-console {
           position: relative;
 
