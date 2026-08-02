@@ -294,15 +294,12 @@ const consoleDepth =
         dragHandleProps={
           dragHandleProps
         }
-      />
-    )}
-  />
-)
-
-}}
+           />
+    )
+  }}
 </IXISortableMachineCard>
         );
-            })}
+      })}
 
 
 </SortableContext>
