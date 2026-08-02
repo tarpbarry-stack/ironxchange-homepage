@@ -147,6 +147,11 @@ const isAuctionCard =
 const consoleIsOpen =
   consoleDepth > 1;
 
+const consoleSide =
+  ixiCardState?.[id]?.consoleSide === "left"
+    ? "left"
+    : "right";
+
 const savedConsoleSlots =
   ixiCardState?.[id]
     ?.consoleSlots;
@@ -184,7 +189,10 @@ const childConsoleFace =
     childConsoleSlot.face
   ) || 2;
 
-function openObjectConsole(event) {
+function openObjectConsole(
+  side,
+  event
+) {
   event?.preventDefault?.();
   event?.stopPropagation?.();
 
@@ -193,6 +201,10 @@ function openObjectConsole(event) {
     {
       consoleDepth: 2,
       consoleOpen: true,
+      consoleSide:
+        side === "left"
+          ? "left"
+          : "right",
       consoleUpdatedAt:
         Date.now()
     }
@@ -314,16 +326,30 @@ function cycleChildConsoleFace(
     />
   </IXIScaledCardShell>
 ) : enableCardScaling ? (
-  <div className="ixi-console-test-chassis">
+  <div
+  className={`ixi-console-test-chassis opens-${consoleSide}`}
+>
     <IXIScaledCardShell size={cardScaleMode}>
       <IXIMachineCard
   listing={item}
   cardContext={cardContext}
   consoleDepth={consoleDepth}
 
-  onExpandConsole={
-    openObjectConsole
-  }
+ onExpandConsoleLeft={
+  event =>
+    openObjectConsole(
+      "left",
+      event
+    )
+}
+
+onExpandConsoleRight={
+  event =>
+    openObjectConsole(
+      "right",
+      event
+    )
+}
 
   consoleIsOpen={
     consoleIsOpen
@@ -368,8 +394,11 @@ function cycleChildConsoleFace(
         <IXIScaledCardShell size={cardScaleMode}>
           <div className="ixi-console-child-card">
       <IXIObjectCardActuator
-  side="left"
-  position="price-row"
+  side={
+    consoleSide === "left"
+      ? "right"
+      : "left"
+  }
   label="Close object console"
   title="Close console"
   onClick={closeObjectConsole}
@@ -464,16 +493,29 @@ function cycleChildConsoleFace(
 
   </div>
 ) : (
-  <div className="ixi-console-test-chassis">
+  <div
+  className={`ixi-console-test-chassis opens-${consoleSide}`}
+>
   <IXIMachineCard
   listing={item}
   cardContext={cardContext}
   consoleDepth={consoleDepth}
 
-  onExpandConsole={
-    openObjectConsole
-  }
+  onExpandConsoleLeft={
+  event =>
+    openObjectConsole(
+      "left",
+      event
+    )
+}
 
+onExpandConsoleRight={
+  event =>
+    openObjectConsole(
+      "right",
+      event
+    )
+}
   consoleIsOpen={
     consoleIsOpen
   }
@@ -508,10 +550,13 @@ function cycleChildConsoleFace(
 {consoleIsOpen && isAuctionCard ? (
    <div className="ixi-console-child-card">
       <IXIObjectCardActuator
-  side="left"
+  side={
+    consoleSide === "left"
+      ? "right"
+      : "left"
+  }
   label="Close object console"
   title="Close console"
-  active={consoleIsOpen}
   onClick={closeObjectConsole}
 />
     {childConsoleFace === 3 ? (
@@ -625,7 +670,26 @@ function cycleChildConsoleFace(
 .ixi-console-child-wrap {
   position: relative;
   flex: 0 0 auto;
+}
+
+.ixi-console-test-chassis.opens-right
+  .ixi-console-child-wrap {
   margin-left: -1px;
+  margin-right: 0;
+}
+
+.ixi-console-test-chassis.opens-left
+  .ixi-console-child-wrap {
+  margin-left: 0;
+  margin-right: -1px;
+}
+
+.ixi-console-test-chassis.opens-right {
+  flex-direction: row;
+}
+
+.ixi-console-test-chassis.opens-left {
+  flex-direction: row-reverse;
 }
 
 .ixi-console-child-card {
