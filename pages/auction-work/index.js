@@ -1744,11 +1744,8 @@ if (armedDestination === "stackTop") {
   cardScaleMode={cardScaleMode}
 />
               
-     <IXIBoardSurface
+   <IXIBoardSurface
   scaleMode={cardScaleMode}
-  rowGap={
-    cardScaleMetrics.gap + 90
-  }
 >
   <IXIBoard
     items={visibleSavedListings}
