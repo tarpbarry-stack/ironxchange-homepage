@@ -5,17 +5,8 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
-import IXIObjectCardActuator
-  from "./IXIObjectCardActuator";
-
-import IXIAuctionObjectFace2
-  from "../ixi-auction-object/IXIAuctionObjectFace2";
-
-import IXIAuctionObjectFace3
-  from "../ixi-auction-object/IXIAuctionObjectFace3";
-
-import IXIAuctionObjectFace4
-  from "../ixi-auction-object/IXIAuctionObjectFace4";
+import IXIObjectConsole
+  from "./IXIObjectConsole";
 
 import {
   getMachineCardFamily
@@ -145,126 +136,8 @@ const consoleWidth =
     resolvedConsolePanelGap
   );
       
-const consoleLeftFace =
-  [2, 3, 4].includes(
-    Number(
-      ixiCardState?.[id]
-        ?.consoleLeftFace
-    )
-  )
-    ? Number(
-        ixiCardState[id]
-          .consoleLeftFace
-      )
-    : 2;
-
-const consoleRightFace =
-  [2, 3, 4].includes(
-    Number(
-      ixiCardState?.[id]
-        ?.consoleRightFace
-    )
-  )
-    ? Number(
-        ixiCardState[id]
-          .consoleRightFace
-      )
-    : 2;
-function toggleObjectConsoleSide(
-  side,
-  event
-) {
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
-
-  const nextLeftOpen =
-    side === "left"
-      ? !consoleLeftOpen
-      : consoleLeftOpen;
-
-  const nextRightOpen =
-    side === "right"
-      ? !consoleRightOpen
-      : consoleRightOpen;
-
-  const nextDepth =
-    1 +
-    (nextLeftOpen ? 1 : 0) +
-    (nextRightOpen ? 1 : 0);
-
-  updateIxiCardState?.(
-    id,
-    {
-      consoleLeftOpen:
-        nextLeftOpen,
-
-      consoleRightOpen:
-        nextRightOpen,
-
-      consoleDepth:
-        nextDepth,
-
-      consoleOpen:
-        nextDepth > 1,
-
-      consoleUpdatedAt:
-        Date.now()
-    }
-  );
-}
-
-function getNextConsoleFace(
-  currentFace
-) {
-  const current =
-    Number(currentFace) || 2;
-
-  return current >= 4
-    ? 2
-    : current + 1;
-}
-
-function cycleLeftConsoleFace(
-  event
-) {
-  event.preventDefault();
-  event.stopPropagation();
-
-  updateIxiCardState?.(
-    id,
-    {
-      consoleLeftFace:
-        getNextConsoleFace(
-          consoleLeftFace
-        ),
-
-      consoleUpdatedAt:
-        Date.now()
-    }
-  );
-}
-
-function cycleRightConsoleFace(
-  event
-) {
-  event.preventDefault();
-  event.stopPropagation();
-
-  updateIxiCardState?.(
-    id,
-    {
-      consoleRightFace:
-        getNextConsoleFace(
-          consoleRightFace
-        ),
-
-      consoleUpdatedAt:
-        Date.now()
-    }
-  );
-}
-      
         return (
+          
   <IXISortableMachineCard
   key={id}
   id={id}
@@ -340,560 +213,120 @@ function cycleRightConsoleFace(
     />
   </IXIScaledCardShell>
 
-  ) : enableCardScaling ? (
-  <div className="ixi-console-test-chassis">
-    {consoleLeftOpen && isAuctionCard ? (
-      <div className="ixi-console-child-wrap left-child">
-        <IXIScaledCardShell size={cardScaleMode}>
-          <div className="ixi-console-child-card">
-            <IXIObjectCardActuator
-              side="right"
-              label="Close console left"
-              title="Close console left"
-              onClick={event =>
-                toggleObjectConsoleSide(
-                  "left",
-                  event
-                )
-              }
-            />
+ ) : (
+  <IXIObjectConsole
+    objectId={id}
+    item={item}
+    cardFamily={cardFamily}
+    sellerCardProps={sellerCardProps}
 
-            {consoleLeftFace === 3 ? (
-              <IXIAuctionObjectFace3
-                listing={item}
-                dragHandleProps={dragHandleProps}
-              />
-            ) : consoleLeftFace === 4? (
-              <IXIAuctionObjectFace4
-                listing={item}
-                dragHandleProps={dragHandleProps}
-                auctionDispositionBusy={
-                  sellerCardProps.auctionDispositionBusy
-                }
-                onAuctionDisposition={
-                  sellerCardProps.onAuctionDisposition
-                }
-              />
-            ) : (
-              <IXIAuctionObjectFace2
-                listing={item}
-                sourceListingUrl={
-                  sellerCardProps.sourceListingUrl ||
-                  ""
-                }
-                dragHandleProps={dragHandleProps}
-                sellerMode={true}
-                lotNumberValue={
-                  sellerCardProps.lotNumberValue
-                }
-                onLotNumberChange={
-                  sellerCardProps.onLotNumberChange
-                }
-                onLotNumberKeyDown={
-                  sellerCardProps.onLotNumberKeyDown
-                }
-                hoursValue={
-                  sellerCardProps.hoursValue
-                }
-                onHoursChange={
-                  sellerCardProps.onHoursChange
-                }
-                onHoursKeyDown={
-                  sellerCardProps.onHoursKeyDown
-                }
-                openingBidValue={
-                  sellerCardProps.priceValue
-                }
-                onOpeningBidChange={
-                  sellerCardProps.onPriceChange
-                }
-                onOpeningBidKeyDown={
-                  sellerCardProps.onPriceKeyDown
-                }
-              />
-            )}
+    ixiCardState={ixiCardState}
+    updateIxiCardState={updateIxiCardState}
 
-            <button
-              type="button"
-              className="ixi-console-child-face-button"
-              aria-label="Change left auction face"
-              title={`Auction face ${consoleLeftFace}`}
-              onPointerDown={event => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={cycleLeftConsoleFace}
-            />
-          </div>
-        </IXIScaledCardShell>
-      </div>
-    ) : null}
+    enableCardScaling={enableCardScaling}
+    cardScaleMode={cardScaleMode}
 
-    <IXIScaledCardShell size={cardScaleMode}>
+    dragHandleProps={dragHandleProps}
+
+    renderParentCard={({
+      consoleDepth: activeConsoleDepth,
+      consoleLeftOpen: activeConsoleLeftOpen,
+      consoleRightOpen: activeConsoleRightOpen,
+      onExpandConsoleLeft,
+      onExpandConsoleRight
+    }) => (
       <IXIMachineCard
         listing={item}
         cardContext={cardContext}
-        consoleDepth={consoleDepth}
-        onExpandConsoleLeft={event =>
-          toggleObjectConsoleSide(
-            "left",
-            event
-          )
+        consoleDepth={activeConsoleDepth}
+
+        onExpandConsoleLeft={
+          onExpandConsoleLeft
         }
-        onExpandConsoleRight={event =>
-          toggleObjectConsoleSide(
-            "right",
-            event
-          )
+
+        onExpandConsoleRight={
+          onExpandConsoleRight
         }
-        consoleLeftOpen={consoleLeftOpen}
-        consoleRightOpen={consoleRightOpen}
+
+        consoleLeftOpen={
+          activeConsoleLeftOpen
+        }
+
+        consoleRightOpen={
+          activeConsoleRightOpen
+        }
+
         saved={savedIds.includes(id)}
-        onToggleSaved={() => toggleSave(item)}
+
+        onToggleSaved={() =>
+          toggleSave(item)
+        }
+
         from="saved"
+
         {...sellerCardProps}
+
         ixiState={
           ixiCardState[id] || {
             color: "none",
             outline: 1
           }
         }
-        onIxiStateChange={updateIxiCardState}
+
+        onIxiStateChange={
+          updateIxiCardState
+        }
+
         machineFace={
           ixiCardState[id]?.face || 1
         }
+
         onCycleMachineFace={() =>
           cycleMachineFace?.(id)
         }
-        onSendFront={sendListingToFront}
-        onSendBack={sendListingToBack}
-        armedDestination={armedDestination}
+
+        onSendFront={
+          sendListingToFront
+        }
+
+        onSendBack={
+          sendListingToBack
+        }
+
+        armedDestination={
+          armedDestination
+        }
+
         onSendToArmedDestination={
           sendMachineToArmedDestination
         }
+
         isBoardDraggingCard={
           String(id) ===
           String(draggingListingId)
         }
+
         isGhostTarget={
           String(id) ===
           String(ghostListingId)
         }
+
         useDndDrag={false}
-        dragHandleProps={dragHandleProps}
-      />
-    </IXIScaledCardShell>
 
-    {consoleRightOpen && isAuctionCard ? (
-      <div className="ixi-console-child-wrap right-child">
-        <IXIScaledCardShell size={cardScaleMode}>
-          <div className="ixi-console-child-card">
-            <IXIObjectCardActuator
-              side="left"
-              label="Close console right"
-              title="Close console right"
-              onClick={event =>
-                toggleObjectConsoleSide(
-                  "right",
-                  event
-                )
-              }
-            />
-
-           {consoleRightFace === 3 ? (
-  <IXIAuctionObjectFace3
-    listing={item}
-    dragHandleProps={dragHandleProps}
-  />
-) : consoleRightFace === 4 ? (
-  <IXIAuctionObjectFace4
-    listing={item}
-    dragHandleProps={dragHandleProps}
-    auctionDispositionBusy={
-      sellerCardProps.auctionDispositionBusy
-    }
-    onAuctionDisposition={
-      sellerCardProps.onAuctionDisposition
-    }
-  />
-) : (
-  <IXIAuctionObjectFace2
-    listing={item}
-    sourceListingUrl={
-      sellerCardProps.sourceListingUrl || ""
-    }
-    dragHandleProps={dragHandleProps}
-    sellerMode={true}
-    lotNumberValue={
-      sellerCardProps.lotNumberValue
-    }
-    onLotNumberChange={
-      sellerCardProps.onLotNumberChange
-    }
-    onLotNumberKeyDown={
-      sellerCardProps.onLotNumberKeyDown
-    }
-    hoursValue={
-      sellerCardProps.hoursValue
-    }
-    onHoursChange={
-      sellerCardProps.onHoursChange
-    }
-    onHoursKeyDown={
-      sellerCardProps.onHoursKeyDown
-    }
-    openingBidValue={
-      sellerCardProps.priceValue
-    }
-    onOpeningBidChange={
-      sellerCardProps.onPriceChange
-    }
-    onOpeningBidKeyDown={
-      sellerCardProps.onPriceKeyDown
-    }
-  />
-)}
-
-<button
-  type="button"
-  className="ixi-console-child-face-button"
-  aria-label="Change right auction face"
-  title={`Auction face ${consoleRightFace}`}
-  onPointerDown={event => {
-    event.preventDefault();
-    event.stopPropagation();
-  }}
-  onClick={cycleRightConsoleFace}
-/>
-          </div>
-        </IXIScaledCardShell>
-      </div>
-    ) : null}
-  </div>
-) : (
-  <div className="ixi-console-test-chassis">
-    {consoleLeftOpen && isAuctionCard ? (
-      <div className="ixi-console-child-wrap left-child">
-        <div className="ixi-console-child-card">
-          <IXIObjectCardActuator
-            side="right"
-            label="Close console left"
-            title="Close console left"
-            onClick={event =>
-              toggleObjectConsoleSide(
-                "left",
-                event
-              )
-            }
-          />
-
-          {consoleLeftFace === 3 ? (
-  <IXIAuctionObjectFace3
-    listing={item}
-    dragHandleProps={dragHandleProps}
-  />
-) : consoleLeftFace === 4 ? (
-  <IXIAuctionObjectFace4
-    listing={item}
-    dragHandleProps={dragHandleProps}
-    auctionDispositionBusy={
-      sellerCardProps.auctionDispositionBusy
-    }
-    onAuctionDisposition={
-      sellerCardProps.onAuctionDisposition
-    }
-  />
-) : (
-  <IXIAuctionObjectFace2
-    listing={item}
-    sourceListingUrl={
-      sellerCardProps.sourceListingUrl || ""
-    }
-    dragHandleProps={dragHandleProps}
-    sellerMode={true}
-    lotNumberValue={
-      sellerCardProps.lotNumberValue
-    }
-    onLotNumberChange={
-      sellerCardProps.onLotNumberChange
-    }
-    onLotNumberKeyDown={
-      sellerCardProps.onLotNumberKeyDown
-    }
-    hoursValue={
-      sellerCardProps.hoursValue
-    }
-    onHoursChange={
-      sellerCardProps.onHoursChange
-    }
-    onHoursKeyDown={
-      sellerCardProps.onHoursKeyDown
-    }
-    openingBidValue={
-      sellerCardProps.priceValue
-    }
-    onOpeningBidChange={
-      sellerCardProps.onPriceChange
-    }
-    onOpeningBidKeyDown={
-      sellerCardProps.onPriceKeyDown
-    }
-  />
-)}
-
-<button
-  type="button"
-  className="ixi-console-child-face-button"
-  aria-label="Change left auction face"
-  title={`Auction face ${consoleLeftFace}`}
-  onPointerDown={event => {
-    event.preventDefault();
-    event.stopPropagation();
-  }}
-  onClick={cycleLeftConsoleFace}
-/>
-        </div>
-      </div>
-    ) : null}
-
-    <IXIMachineCard
-      listing={item}
-      cardContext={cardContext}
-      consoleDepth={consoleDepth}
-      onExpandConsoleLeft={event =>
-        toggleObjectConsoleSide(
-          "left",
-          event
-        )
-      }
-      onExpandConsoleRight={event =>
-        toggleObjectConsoleSide(
-          "right",
-          event
-        )
-      }
-      consoleLeftOpen={consoleLeftOpen}
-      consoleRightOpen={consoleRightOpen}
-      saved={savedIds.includes(id)}
-      onToggleSaved={() => toggleSave(item)}
-      from="saved"
-      {...sellerCardProps}
-      ixiState={
-        ixiCardState[id] || {
-          color: "none",
-          outline: 1
+        dragHandleProps={
+          dragHandleProps
         }
-      }
-      onIxiStateChange={updateIxiCardState}
-      machineFace={
-        ixiCardState[id]?.face || 1
-      }
-      onCycleMachineFace={() =>
-        cycleMachineFace?.(id)
-      }
-      onSendFront={sendListingToFront}
-      onSendBack={sendListingToBack}
-      armedDestination={armedDestination}
-      onSendToArmedDestination={
-        sendMachineToArmedDestination
-      }
-      isBoardDraggingCard={
-        String(id) ===
-        String(draggingListingId)
-      }
-      isGhostTarget={
-        String(id) ===
-        String(ghostListingId)
-      }
-      useDndDrag={false}
-      dragHandleProps={dragHandleProps}
-    />
-
-    {consoleRightOpen && isAuctionCard ? (
-      <div className="ixi-console-child-wrap right-child">
-        <div className="ixi-console-child-card">
-          <IXIObjectCardActuator
-            side="left"
-            label="Close console right"
-            title="Close console right"
-            onClick={event =>
-              toggleObjectConsoleSide(
-                "right",
-                event
-              )
-            }
-          />
-
-          {consoleRightFace === 3 ? (
-            <IXIAuctionObjectFace3
-              listing={item}
-              dragHandleProps={dragHandleProps}
-            />
-          ) : consoleRightFace === 4 ? (
-            <IXIAuctionObjectFace4
-              listing={item}
-              dragHandleProps={dragHandleProps}
-              auctionDispositionBusy={
-                sellerCardProps.auctionDispositionBusy
-              }
-              onAuctionDisposition={
-                sellerCardProps.onAuctionDisposition
-              }
-            />
-          ) : (
-            <IXIAuctionObjectFace2
-              listing={item}
-              sourceListingUrl={
-                sellerCardProps.sourceListingUrl ||
-                ""
-              }
-              dragHandleProps={dragHandleProps}
-              sellerMode={true}
-              lotNumberValue={
-                sellerCardProps.lotNumberValue
-              }
-              onLotNumberChange={
-                sellerCardProps.onLotNumberChange
-              }
-              onLotNumberKeyDown={
-                sellerCardProps.onLotNumberKeyDown
-              }
-              hoursValue={
-                sellerCardProps.hoursValue
-              }
-              onHoursChange={
-                sellerCardProps.onHoursChange
-              }
-              onHoursKeyDown={
-                sellerCardProps.onHoursKeyDown
-              }
-              openingBidValue={
-                sellerCardProps.priceValue
-              }
-              onOpeningBidChange={
-                sellerCardProps.onPriceChange
-              }
-              onOpeningBidKeyDown={
-                sellerCardProps.onPriceKeyDown
-              }
-            />
-          )}
-
-          <button
-            type="button"
-            className="ixi-console-child-face-button"
-            aria-label="Change right auction face"
-            title={`Auction face ${consoleRightFace}`}
-            onPointerDown={event => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
-            onClick={cycleRightConsoleFace}
-          />
-        </div>
-      </div>
-    ) : null}
-  </div>
-);
+      />
+    )}
+  />
+)
 
 }}
 </IXISortableMachineCard>
         );
             })}
 
-<style jsx>{`
-  .ixi-console-test-chassis {
-  position: relative;
 
-  width: 100%;
-
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 0;
-
-  overflow: visible;
-}
-
-.ixi-console-child-wrap {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.ixi-console-child-wrap.left-child {
-  margin-right: -1px;
-}
-
-.ixi-console-child-wrap.right-child {
-  margin-left: -1px;
-}
-
-.ixi-console-child-card {
-  box-sizing: border-box;
-
-  width: 100%;
-
-  height: 471px;
-  min-height: 471px;
-  max-height: 471px;
-
-  position: relative;
-
-  border: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 13px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(28, 31, 36, .98),
-      rgba(15, 17, 20, .98)
-    );
-
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, .34),
-    inset 0 1px 0 rgba(255, 255, 255, .04);
-
-  overflow: visible;
-}
-
-  
-.ixi-console-child-face-button {
-  position: absolute;
-
-  left: 50%;
-  right: auto;
-  bottom: -1px;
-
-  width: 34px;
-  height: 5px;
-
-  transform: translateX(-50%);
-
-  border: 0;
-  border-radius: 3px 3px 1px 1px;
-
-  background: rgba(255,255,255,.18);
-
-  padding: 0;
-  cursor: pointer;
-
-  z-index: 120;
-  pointer-events: auto;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    0 1px 3px rgba(0,0,0,.32);
-}
-
-.ixi-console-child-face-button:hover {
-  background: rgba(255,196,0,.95);
-
-  box-shadow:
-    0 0 8px rgba(255,196,0,.38);
-}
-
- 
-`}</style>
 </SortableContext>
   );
 }
