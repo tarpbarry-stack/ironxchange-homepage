@@ -22,10 +22,7 @@ import {
 } from "../ixi-machine-card/getMachineCardFamily";
 
 import {
-  getConsoleGridSpan,
-  normalizeConsoleSlots,
-  cycleConsoleSlotFace,
-  createConsoleSlotsPatch
+  getConsoleGridSpan
 } from "./IXIObjectConsoleEngine";
 
 export default function IXIBoard({
@@ -148,43 +145,31 @@ const consoleWidth =
     resolvedConsolePanelGap
   );
       
-const savedConsoleSlots =
-  ixiCardState?.[id]
-    ?.consoleSlots;
-
-const consoleSlots =
-  Array.isArray(savedConsoleSlots) &&
-  savedConsoleSlots.length >= 2
-    ? normalizeConsoleSlots(
-        savedConsoleSlots,
-        {
-          maxSlots: 4
-        }
+const consoleLeftFace =
+  [2, 3, 4].includes(
+    Number(
+      ixiCardState?.[id]
+        ?.consoleLeftFace
+    )
+  )
+    ? Number(
+        ixiCardState[id]
+          .consoleLeftFace
       )
-    : [
-        {
-          slotId: "slot-1",
-          face:
-            ixiCardState[id]?.face ||
-            1
-        },
-        {
-          slotId: "slot-2",
-          face: 2
-        }
-      ];
+    : 2;
 
-const childConsoleSlot =
-  consoleSlots[1] || {
-    slotId: "slot-2",
-    face: 2
-  };
-
-const childConsoleFace =
-  Number(
-    childConsoleSlot.face
-  ) || 2;
-
+const consoleRightFace =
+  [2, 3, 4].includes(
+    Number(
+      ixiCardState?.[id]
+        ?.consoleRightFace
+    )
+  )
+    ? Number(
+        ixiCardState[id]
+          .consoleRightFace
+      )
+    : 2;
 function toggleObjectConsoleSide(
   side,
   event
@@ -228,28 +213,54 @@ function toggleObjectConsoleSide(
   );
 }
 
-function cycleChildConsoleFace(
+function getNextConsoleFace(
+  currentFace
+) {
+  const current =
+    Number(currentFace) || 2;
+
+  return current >= 4
+    ? 2
+    : current + 1;
+}
+
+function cycleLeftConsoleFace(
   event
 ) {
   event.preventDefault();
   event.stopPropagation();
 
-  const nextSlots =
-    cycleConsoleSlotFace({
-      slots:
-        consoleSlots,
+  updateIxiCardState?.(
+    id,
+    {
+      consoleLeftFace:
+        getNextConsoleFace(
+          consoleLeftFace
+        ),
 
-      slotId:
-        childConsoleSlot.slotId,
+      consoleUpdatedAt:
+        Date.now()
+    }
+  );
+}
 
-      maxFace: 4
-    });
+function cycleRightConsoleFace(
+  event
+) {
+  event.preventDefault();
+  event.stopPropagation();
 
   updateIxiCardState?.(
     id,
-    createConsoleSlotsPatch(
-      nextSlots
-    )
+    {
+      consoleRightFace:
+        getNextConsoleFace(
+          consoleRightFace
+        ),
+
+      consoleUpdatedAt:
+        Date.now()
+    }
   );
 }
       
@@ -347,12 +358,12 @@ function cycleChildConsoleFace(
               }
             />
 
-            {childConsoleFace === 3 ? (
+            {consoleLeftFace === 3 ? (
               <IXIAuctionObjectFace3
                 listing={item}
                 dragHandleProps={dragHandleProps}
               />
-            ) : childConsoleFace === 4 ? (
+            ) : consoleLeftFace === 4? (
               <IXIAuctionObjectFace4
                 listing={item}
                 dragHandleProps={dragHandleProps}
@@ -406,12 +417,12 @@ function cycleChildConsoleFace(
               type="button"
               className="ixi-console-child-face-button"
               aria-label="Change left auction face"
-              title={`Auction face ${childConsoleFace}`}
+              title={`Auction face ${consoleLeftFace}`}
               onPointerDown={event => {
                 event.preventDefault();
                 event.stopPropagation();
               }}
-              onClick={cycleChildConsoleFace}
+              onClick={cycleLeftConsoleFace}
             />
           </div>
         </IXIScaledCardShell>
@@ -489,12 +500,12 @@ function cycleChildConsoleFace(
               }
             />
 
-            {childConsoleFace === 3 ? (
+            {consoleLeftFace === 3 ? (
               <IXIAuctionObjectFace3
                 listing={item}
                 dragHandleProps={dragHandleProps}
               />
-            ) : childConsoleFace === 4 ? (
+            ) : consoleLeftFace === 4 ? (
               <IXIAuctionObjectFace4
                 listing={item}
                 dragHandleProps={dragHandleProps}
@@ -548,12 +559,12 @@ function cycleChildConsoleFace(
               type="button"
               className="ixi-console-child-face-button"
               aria-label="Change right auction face"
-              title={`Auction face ${childConsoleFace}`}
+              title={`Auction face ${consoleLeftFace}`}
               onPointerDown={event => {
                 event.preventDefault();
                 event.stopPropagation();
               }}
-              onClick={cycleChildConsoleFace}
+              onClick={cycleLeftConsoleFace}
             />
           </div>
         </IXIScaledCardShell>
@@ -577,12 +588,12 @@ function cycleChildConsoleFace(
             }
           />
 
-          {childConsoleFace === 3 ? (
+          {consoleRightFace === 3 ? (
             <IXIAuctionObjectFace3
               listing={item}
               dragHandleProps={dragHandleProps}
             />
-          ) : childConsoleFace === 4 ? (
+          ) : consoleRightFace === 4 ? (
             <IXIAuctionObjectFace4
               listing={item}
               dragHandleProps={dragHandleProps}
@@ -636,12 +647,12 @@ function cycleChildConsoleFace(
             type="button"
             className="ixi-console-child-face-button"
             aria-label="Change left auction face"
-            title={`Auction face ${childConsoleFace}`}
+            title={`Auction face ${consoleRightFace}`}
             onPointerDown={event => {
               event.preventDefault();
               event.stopPropagation();
             }}
-            onClick={cycleChildConsoleFace}
+            onClick={cycleRightConsoleFace}
           />
         </div>
       </div>
@@ -715,12 +726,12 @@ function cycleChildConsoleFace(
             }
           />
 
-          {childConsoleFace === 3 ? (
+          {consoleRightFace === 3 ? (
             <IXIAuctionObjectFace3
               listing={item}
               dragHandleProps={dragHandleProps}
             />
-          ) : childConsoleFace === 4 ? (
+          ) : consoleRightFace === 4 ? (
             <IXIAuctionObjectFace4
               listing={item}
               dragHandleProps={dragHandleProps}
@@ -774,12 +785,12 @@ function cycleChildConsoleFace(
             type="button"
             className="ixi-console-child-face-button"
             aria-label="Change right auction face"
-            title={`Auction face ${childConsoleFace}`}
+            title={`Auction face ${consoleRightFace}`}
             onPointerDown={event => {
               event.preventDefault();
               event.stopPropagation();
             }}
-            onClick={cycleChildConsoleFace}
+            onClick={cycleRightConsoleFace}
           />
         </div>
       </div>
