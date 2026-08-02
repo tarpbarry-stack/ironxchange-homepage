@@ -1,11 +1,10 @@
 export default function IXIObjectCardActuator({
   side = "right",
-  position = "price-row",
   label = "",
   title = "",
   onClick
 }) {
-  function stopAndRun(event) {
+  function handleClick(event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -15,61 +14,70 @@ export default function IXIObjectCardActuator({
   return (
     <button
       type="button"
-      className={`ixi-object-card-actuator ${side} ${position}`}
+      className={`ixi-object-card-actuator ${side}`}
       aria-label={label || title}
       title={title || label}
       onPointerDown={event => {
         event.preventDefault();
         event.stopPropagation();
       }}
-      onClick={stopAndRun}
+      onClick={handleClick}
     >
       <style jsx>{`
-  .ixi-object-card-actuator {
-    position: absolute;
+        .ixi-object-card-actuator {
+          position: absolute;
 
-    width: 5px;
-    height: 34px;
+          /*
+           * Listing-card control level:
+           * aligned with the price/state area,
+           * below the photo and away from drag controls.
+           */
+          top: 356px;
 
-    padding: 0;
-    border: 0;
+          width: 5px;
+          height: 34px;
 
-    background: rgba(255,255,255,.18);
+          padding: 0;
+          border: 0;
 
-    cursor: pointer;
-    z-index: 999;
-    pointer-events: auto;
+          background:
+            rgba(255,255,255,.18);
 
-    box-shadow:
-      inset 1px 0 0 rgba(255,255,255,.12),
-      1px 0 3px rgba(0,0,0,.32);
-  }
+          cursor: pointer;
 
-  .ixi-object-card-actuator.right {
-    right: -1px;
-    border-radius: 3px 1px 1px 3px;
-  }
+          z-index: 120;
+          pointer-events: auto;
 
-  .ixi-object-card-actuator.left {
-    left: -1px;
-    border-radius: 1px 3px 3px 1px;
-  }
+          box-shadow:
+            inset 1px 0 0
+              rgba(255,255,255,.12),
+            1px 0 3px
+              rgba(0,0,0,.32);
+        }
 
-  .ixi-object-card-actuator.state-row {
-    top: 414px;
-  }
+        .ixi-object-card-actuator.right {
+          right: -1px;
 
-  .ixi-object-card-actuator.price-row {
-    top: 414px;
-  }
+          border-radius:
+            3px 1px 1px 3px;
+        }
 
-  .ixi-object-card-actuator:hover {
-    background: rgba(255,196,0,.95);
+        .ixi-object-card-actuator.left {
+          left: -1px;
 
-    box-shadow:
-      0 0 8px rgba(255,196,0,.38);
-  }
-`}</style>
+          border-radius:
+            1px 3px 3px 1px;
+        }
+
+        .ixi-object-card-actuator:hover {
+          background:
+            rgba(255,196,0,.95);
+
+          box-shadow:
+            0 0 8px
+            rgba(255,196,0,.38);
+        }
+      `}</style>
     </button>
   );
 }
