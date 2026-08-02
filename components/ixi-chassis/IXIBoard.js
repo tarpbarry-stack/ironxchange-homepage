@@ -109,17 +109,6 @@ const resolvedConsolePanelGap =
         const id =
   resolveBoardItemId(item);
 
-const consoleDepth =
-  getConsoleDepth(
-    ixiCardState,
-    id
-  );
-
-const consoleSpan =
-  getConsoleGridSpan(
-    consoleDepth
-  );
-
 const consoleWidth =
   (
     consoleDepth *
@@ -144,9 +133,6 @@ const cardFamily =
 const isAuctionCard =
   cardFamily === "auction";
 
-const consoleIsOpen =
-  consoleDepth > 1;
-
 const consoleLeftOpen =
   ixiCardState?.[id]?.consoleLeftOpen === true;
 
@@ -158,9 +144,10 @@ const consoleDepth =
   (consoleLeftOpen ? 1 : 0) +
   (consoleRightOpen ? 1 : 0);
 
-const consoleIsOpen =
-  consoleLeftOpen ||
-  consoleRightOpen;
+const consoleSpan =
+  getConsoleGridSpan(
+    consoleDepth
+  );
 
 const savedConsoleSlots =
   ixiCardState?.[id]
@@ -242,20 +229,6 @@ function toggleObjectConsoleSide(
   );
 }
 
-function closeObjectConsole(event) {
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
-
-  updateIxiCardState?.(
-    id,
-    {
-      consoleDepth: 1,
-      consoleOpen: false,
-      consoleUpdatedAt:
-        Date.now()
-    }
-  );
-}
 function cycleChildConsoleFace(
   event
 ) {
@@ -827,39 +800,24 @@ function cycleChildConsoleFace(
   width: 100%;
 
   display: flex;
-  align-items: flex-start;
-  gap: 0;
-
-  overflow: visible;
-}
-.ixi-console-child-wrap {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.ixi-console-test-chassis.opens-right
-  .ixi-console-child-wrap {
-  margin-left: -1px;
-  margin-right: 0;
-}
-
-.ixi-console-test-chassis.opens-left
-  .ixi-console-child-wrap {
-  margin-left: 0;
-  margin-right: -1px;
-}
-
-.ixi-console-test-chassis {
-  position: relative;
-
-  width: 100%;
-
-  display: flex;
   flex-direction: row;
   align-items: flex-start;
   gap: 0;
 
   overflow: visible;
+}
+
+.ixi-console-child-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.ixi-console-child-wrap.left-child {
+  margin-right: -1px;
+}
+
+.ixi-console-child-wrap.right-child {
+  margin-left: -1px;
 }
 
 .ixi-console-child-card {
