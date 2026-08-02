@@ -1,8 +1,8 @@
 export default function IXIObjectCardActuator({
   side = "right",
+  position = "price-row",
   label = "",
   title = "",
-  active = false,
   onClick
 }) {
   function stopAndRun(event) {
@@ -15,9 +15,7 @@ export default function IXIObjectCardActuator({
   return (
     <button
       type="button"
-      className={`ixi-object-card-actuator ${side} ${
-        active ? "is-active" : ""
-      }`}
+      className={`ixi-object-card-actuator ${side} ${position}`}
       aria-label={label || title}
       title={title || label}
       onPointerDown={event => {
@@ -30,12 +28,8 @@ export default function IXIObjectCardActuator({
         .ixi-object-card-actuator {
           position: absolute;
 
-          top: 50%;
-
           width: 4px;
-          height: 34px;
-
-          transform: translateY(-50%);
+          height: 14px;
 
           padding: 0;
 
@@ -53,11 +47,22 @@ export default function IXIObjectCardActuator({
           z-index: 999;
           pointer-events: auto;
 
-          box-shadow:
-            inset 1px 0 0
-              rgba(255, 255, 255, .10),
-            1px 0 3px
-              rgba(0, 0, 0, .32);
+          box-shadow: none;
+        }
+
+        /*
+         * Same vertical level as the auction
+         * price and state fields.
+         *
+         * Adjust this one value only if the
+         * actual row is a pixel or two off.
+         */
+        .ixi-object-card-actuator.price-row {
+          top: 319px;
+        }
+
+        .ixi-object-card-actuator.state-row {
+          top: 319px;
         }
 
         .ixi-object-card-actuator.right {
@@ -68,8 +73,7 @@ export default function IXIObjectCardActuator({
           left: -2px;
         }
 
-        .ixi-object-card-actuator:hover,
-        .ixi-object-card-actuator.is-active {
+        .ixi-object-card-actuator:hover {
           border-color:
             rgba(255, 196, 0, .62);
 
@@ -78,7 +82,7 @@ export default function IXIObjectCardActuator({
 
           box-shadow:
             0 0 8px
-            rgba(255, 196, 0, .28);
+            rgba(255, 196, 0, .20);
         }
       `}</style>
     </button>
