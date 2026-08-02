@@ -506,7 +506,7 @@ function cycleChildConsoleFace(
   />
 
 {consoleIsOpen && isAuctionCard ? (
-  <div className="ixi-console-empty-panel">
+   <div className="ixi-console-child-card">
       <IXIObjectCardActuator
   side="left"
   label="Close object console"
@@ -598,6 +598,7 @@ function cycleChildConsoleFace(
   }}
   onClick={cycleChildConsoleFace}
 />
+    </div>
 ) : null}
       
 </div>
@@ -608,6 +609,7 @@ function cycleChildConsoleFace(
 </IXISortableMachineCard>
         );
             })}
+
 <style jsx>{`
   .ixi-console-test-chassis {
   position: relative;
