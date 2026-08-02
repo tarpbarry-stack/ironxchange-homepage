@@ -25,66 +25,51 @@ export default function IXIObjectCardActuator({
       onClick={stopAndRun}
     >
       <style jsx>{`
-        .ixi-object-card-actuator {
-          position: absolute;
+  .ixi-object-card-actuator {
+    position: absolute;
 
-          width: 4px;
-          height: 14px;
+    width: 5px;
+    height: 34px;
 
-          padding: 0;
+    padding: 0;
+    border: 0;
 
-          border:
-            1px solid
-            rgba(255, 255, 255, .22);
+    background: rgba(255,255,255,.18);
 
-          border-radius: 1px;
+    cursor: pointer;
+    z-index: 999;
+    pointer-events: auto;
 
-          background:
-            rgba(255, 255, 255, .12);
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,.12),
+      1px 0 3px rgba(0,0,0,.32);
+  }
 
-          cursor: pointer;
+  .ixi-object-card-actuator.right {
+    right: -1px;
+    border-radius: 3px 1px 1px 3px;
+  }
 
-          z-index: 999;
-          pointer-events: auto;
+  .ixi-object-card-actuator.left {
+    left: -1px;
+    border-radius: 1px 3px 3px 1px;
+  }
 
-          box-shadow: none;
-        }
+  .ixi-object-card-actuator.state-row {
+    top: 414px;
+  }
 
-        /*
-         * Same vertical level as the auction
-         * price and state fields.
-         *
-         * Adjust this one value only if the
-         * actual row is a pixel or two off.
-         */
-        .ixi-object-card-actuator.price-row {
-          top: 319px;
-        }
+  .ixi-object-card-actuator.price-row {
+    top: 414px;
+  }
 
-        .ixi-object-card-actuator.state-row {
-          top: 319px;
-        }
+  .ixi-object-card-actuator:hover {
+    background: rgba(255,196,0,.95);
 
-        .ixi-object-card-actuator.right {
-          right: -2px;
-        }
-
-        .ixi-object-card-actuator.left {
-          left: -2px;
-        }
-
-        .ixi-object-card-actuator:hover {
-          border-color:
-            rgba(255, 196, 0, .62);
-
-          background:
-            rgba(255, 196, 0, .72);
-
-          box-shadow:
-            0 0 8px
-            rgba(255, 196, 0, .20);
-        }
-      `}</style>
+    box-shadow:
+      0 0 8px rgba(255,196,0,.38);
+  }
+`}</style>
     </button>
   );
 }
