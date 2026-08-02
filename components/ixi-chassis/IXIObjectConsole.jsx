@@ -370,8 +370,7 @@ export default function IXIObjectConsole({
               )
         })
       : null;
-
-  return (
+  
     const consoleNativePanelWidth =
   298;
 
