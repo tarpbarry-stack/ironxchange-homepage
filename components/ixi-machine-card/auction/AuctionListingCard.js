@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 
 import { captureIXEvent } from "../../../lib/posthog";
 
+import IXIObjectCardActuator
+  from "../../ixi-chassis/IXIObjectCardActuator";
+
 import {
   getCardImages,
   getListingHref,
@@ -305,7 +308,7 @@ function handlePhotoLoad(e, photoUrl) {
 }
   
   return (
- <div
+<div
   data-listing-card-id={id}
   className={`card auction-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
     isBoardDragging ? "board-dragging" : ""
@@ -319,8 +322,19 @@ function handlePhotoLoad(e, photoUrl) {
     zIndex: isBoardDragging ? 50 : undefined
   }}
 >
+  {!consoleIsOpen &&
+  typeof onExpandConsole === "function" ? (
+    <IXIObjectCardActuator
+      side="right"
+      label="Open object console"
+      title="Open console"
+      onClick={onExpandConsole}
+    />
+  ) : null}
 
-{actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
+  {actionNotice?.message ||
+  ixiState?.actionNotice?.message ||
+  ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
   }`}>
@@ -495,9 +509,6 @@ function handlePhotoLoad(e, photoUrl) {
   locationValue={locationValue}
   onLocationChange={onLocationChange}
   onLocationKeyDown={onLocationKeyDown}
-
-  consoleIsOpen={consoleIsOpen}
-  onExpandConsole={onExpandConsole}
 />
   </div>
 </div>
