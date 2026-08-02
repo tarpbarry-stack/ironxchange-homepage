@@ -421,118 +421,116 @@ const assembledConsole = (
       : null}
 
     <style jsx global>{`
-        .ixi-object-console {
-          position: relative;
+      .ixi-object-console {
+        position: relative;
 
-          width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
 
-          display: flex;
-          flex-direction: row;
-          align-items: flex-start;
+        gap: 0;
 
-          gap: 0;
+        overflow: visible;
+      }
 
-          overflow: visible;
-        }
+      .ixi-object-console-parent {
+        position: relative;
+        flex: 0 0 auto;
+        min-width: 0;
+      }
 
-        .ixi-object-console-parent {
-          position: relative;
-          flex: 0 0 auto;
-          min-width: 0;
-        }
+      .ixi-console-child-wrap {
+        position: relative;
+        flex: 0 0 auto;
+        min-width: 0;
 
-        .ixi-console-child-wrap {
-  position: relative;
-  flex: 0 0 auto;
-  min-width: 0;
+        overflow: visible;
+      }
 
-  overflow: visible;
-}
+      .ixi-console-child-wrap.left-child {
+        margin-right: -1px;
+      }
 
-.ixi-console-child-wrap.left-child {
-  margin-right: -1px;
-}
+      .ixi-console-child-wrap.right-child {
+        margin-left: -1px;
+      }
 
-.ixi-console-child-wrap.right-child {
-  margin-left: -1px;
-}
+      .ixi-console-child-card {
+        box-sizing: border-box;
 
-.ixi-console-child-card {
-  box-sizing: border-box;
+        width: 100%;
 
-  width: 100%;
+        height: 471px;
+        min-height: 471px;
+        max-height: 471px;
 
-  height: 471px;
-  min-height: 471px;
-  max-height: 471px;
+        position: relative;
 
-  position: relative;
+        border:
+          1px solid
+          rgba(255, 255, 255, .10);
 
-  border:
-    1px solid
-    rgba(255, 255, 255, .10);
+        border-radius: 13px;
 
-  border-radius: 13px;
+        background:
+          linear-gradient(
+            180deg,
+            rgba(28, 31, 36, .98),
+            rgba(15, 17, 20, .98)
+          );
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(28, 31, 36, .98),
-      rgba(15, 17, 20, .98)
-    );
+        box-shadow:
+          0 10px 28px
+            rgba(0, 0, 0, .34),
+          inset 0 1px 0
+            rgba(255, 255, 255, .04);
 
-  box-shadow:
-    0 10px 28px
-      rgba(0, 0, 0, .34),
-    inset 0 1px 0
-      rgba(255, 255, 255, .04);
+        overflow: visible;
+      }
 
-  overflow: visible;
-}
+      .ixi-console-child-face-button {
+        position: absolute;
 
-.ixi-console-child-face-button {
-  position: absolute;
+        left: 50%;
+        right: auto;
+        bottom: -1px;
 
-  left: 50%;
-  right: auto;
-  bottom: -1px;
+        width: 34px;
+        height: 5px;
 
-  width: 34px;
-  height: 5px;
+        transform: translateX(-50%);
 
-  transform: translateX(-50%);
+        padding: 0;
+        border: 0;
 
-  padding: 0;
-  border: 0;
+        border-radius:
+          3px 3px 1px 1px;
 
-  border-radius:
-    3px 3px 1px 1px;
+        background:
+          rgba(255, 255, 255, .18);
 
-  background:
-    rgba(255, 255, 255, .18);
+        cursor: pointer;
 
-  cursor: pointer;
+        z-index: 120;
+        pointer-events: auto;
 
-  z-index: 120;
-  pointer-events: auto;
+        box-shadow:
+          inset 0 1px 0
+            rgba(255, 255, 255, .12),
+          0 1px 3px
+            rgba(0, 0, 0, .32);
+      }
 
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, .12),
-    0 1px 3px
-      rgba(0, 0, 0, .32);
-}
+      .ixi-console-child-face-button:hover {
+        background:
+          rgba(255, 196, 0, .95);
 
-.ixi-console-child-face-button:hover {
-  background:
-    rgba(255, 196, 0, .95);
-
-  box-shadow:
-    0 0 8px
-      rgba(255, 196, 0, .38);
-}
-            `}</style>
-    </div>
+        box-shadow:
+          0 0 8px
+            rgba(255, 196, 0, .38);
+      }
+    `}</style>
+  </div>
 );
 
 return enableCardScaling ? (
