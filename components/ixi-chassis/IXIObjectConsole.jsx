@@ -334,24 +334,17 @@ export default function IXIObjectConsole({
   );
 
   return (
-    <div
-      className={`ixi-console-child-wrap ${
-        isLeft
-          ? "left-child"
-          : "right-child"
-      }`}
-    >
-      {enableCardScaling ? (
-        <IXIScaledCardShell
-          size={cardScaleMode}
-        >
-          {childCard}
-        </IXIScaledCardShell>
-      ) : (
-        childCard
-      )}
-    </div>
-  );
+   return (
+  <div
+    className={`ixi-console-child-wrap ${
+      isLeft
+        ? "left-child"
+        : "right-child"
+    }`}
+  >
+    {childCard}
+  </div>
+);
 }
 
   const parentCard =
@@ -380,34 +373,55 @@ export default function IXIObjectConsole({
       : null;
 
   return (
-    <div className="ixi-object-console">
-      {consoleLeftOpen &&
-      isAuctionCard
-        ? renderConsolePanel(
-            "left"
-          )
-        : null}
+    const consoleNativePanelWidth =
+  298;
 
-      <div className="ixi-object-console-parent">
-        {enableCardScaling ? (
-          <IXIScaledCardShell
-            size={cardScaleMode}
-          >
-            {parentCard}
-          </IXIScaledCardShell>
-        ) : (
-          parentCard
-        )}
-      </div>
+const consoleOverlap =
+  1;
 
-      {consoleRightOpen &&
-      isAuctionCard
-        ? renderConsolePanel(
-            "right"
-          )
-        : null}
+const consoleNativeWidth =
+  (
+    consoleDepth *
+    consoleNativePanelWidth
+  ) -
+  (
+    Math.max(
+      consoleDepth - 1,
+      0
+    ) *
+    consoleOverlap
+  );
 
-      <style jsx global>{`
+const consoleNativeHeight =
+  471;
+
+const assembledConsole = (
+  <div
+    className="ixi-object-console"
+    style={{
+      width:
+        `${consoleNativeWidth}px`
+    }}
+  >
+    {consoleLeftOpen &&
+    isAuctionCard
+      ? renderConsolePanel(
+          "left"
+        )
+      : null}
+
+    <div className="ixi-object-console-parent">
+      {parentCard}
+    </div>
+
+    {consoleRightOpen &&
+    isAuctionCard
+      ? renderConsolePanel(
+          "right"
+        )
+      : null}
+
+    <style jsx global>{`
         .ixi-object-console {
           position: relative;
 
@@ -518,7 +532,24 @@ export default function IXIObjectConsole({
     0 0 8px
       rgba(255, 196, 0, .38);
 }
-      `}</style>
+            `}</style>
     </div>
-  );
+);
+
+return enableCardScaling ? (
+  <IXIScaledCardShell
+    size={cardScaleMode}
+    nativeWidth={
+      consoleNativeWidth
+    }
+    nativeHeight={
+      consoleNativeHeight
+    }
+    tight={true}
+  >
+    {assembledConsole}
+  </IXIScaledCardShell>
+) : (
+  assembledConsole
+);
 }
