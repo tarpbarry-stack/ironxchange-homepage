@@ -22,7 +22,6 @@ import {
 } from "../ixi-machine-card/getMachineCardFamily";
 
 import {
-  getConsoleDepth,
   getConsoleGridSpan,
   normalizeConsoleSlots,
   cycleConsoleSlotFace,
@@ -109,19 +108,6 @@ const resolvedConsolePanelGap =
         const id =
   resolveBoardItemId(item);
 
-const consoleWidth =
-  (
-    consoleDepth *
-    resolvedConsolePanelWidth
-  ) +
-  (
-    Math.max(
-      consoleDepth - 1,
-      0
-    ) *
-    resolvedConsolePanelGap
-  );
-
 const sellerCardProps =
   typeof getSellerListingCardProps === "function"
     ? getSellerListingCardProps(item)
@@ -149,6 +135,19 @@ const consoleSpan =
     consoleDepth
   );
 
+const consoleWidth =
+  (
+    consoleDepth *
+    resolvedConsolePanelWidth
+  ) +
+  (
+    Math.max(
+      consoleDepth - 1,
+      0
+    ) *
+    resolvedConsolePanelGap
+  );
+      
 const savedConsoleSlots =
   ixiCardState?.[id]
     ?.consoleSlots;
