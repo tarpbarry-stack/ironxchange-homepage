@@ -34,6 +34,8 @@ import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
+import IXIBoardSurface
+  from "../components/ixi-chassis/IXIBoardSurface";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
@@ -41,7 +43,6 @@ import IXIPocketR1 from "../components/ixi-chassis/IXIPocketR1";
 import IXIPocketR2 from "../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../components/ixi-chassis/IXIWorkspaceEngine";
-import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 import IXIActiveStackZone from "../components/ixi-chassis/IXIActiveStackZone";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
 import WorkspaceDropZone from "../components/ixi-chassis/WorkspaceDropZone";
@@ -181,9 +182,11 @@ const POCKET_TARGETS = [
 
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
-  const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
-
+const [
+  cardScaleMode,
+  setCardScaleMode
+] = useState("xl");
+  
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
@@ -1332,20 +1335,11 @@ if (armedDestination === "stackBottom") {
   cardScaleMode={cardScaleMode}
 />
               
-    <section
-  data-board-target="board"
-  className={`cards ${
-    visibleBrowseListings.length === 1 ? "single-card" : ""
-  }`}
-  style={{
-    gridTemplateColumns:
-      visibleBrowseListings.length === 1
-        ? `${cardScaleMetrics.width}px`
-        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-    gap: `${cardScaleMetrics.gap}px`
-  }}
+    <IXIBoardSurface
+  scaleMode={cardScaleMode}
 >
 <IXIBoard
+  cardContext="marketplace"
   items={visibleBrowseListings}
   getListingId={getListingId}
   savedIds={savedIds}
@@ -1363,7 +1357,7 @@ if (armedDestination === "stackBottom") {
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
     />
-        </section>
+        </IXIBoardSurface>
 
 <button
   type="button"
@@ -2802,24 +2796,6 @@ outline: none;
   transform: translateX(8px);
 }
 
-        .cards {
-          max-width: 1920px;
-          margin: 0 auto;
-
-          min-height: 260px;
-
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-          gap: 22px;
-          align-items: start;
-          justify-content: center;
-        }
-
-        .cards.single-card {
-          grid-template-columns: minmax(250px, 300px);
-          justify-content: center;
-        }
-
         :global(.ixi-drag-overlay-card) {
   width: 300px;
   max-width: 300px;
@@ -2827,37 +2803,6 @@ outline: none;
   z-index: 999999;
 }
 
-:global(.ixi-board-sortable-card) {
-  width: 100%;
-  max-width: 300px;
-  min-width: 250px;
-
-  justify-self: center;
-  align-self: start;
-
-  touch-action: none;
-}
-
-:global(.ixi-board-sortable-card > *) {
-  width: 100%;
-}
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
-
-          text-align: center;
-
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
-
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
-
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
-        }
 
         .empty h3 {
           margin: 0 0 8px;
@@ -2956,14 +2901,6 @@ outline: none;
     margin-top: 6px;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .cards.single-card {
-    grid-template-columns: 1fr;
-  }
 }
        
       `}</style>
