@@ -101,7 +101,8 @@ onBoardDragEnd,
 
 onExpandConsoleLeft,
 onExpandConsoleRight,
-consoleIsOpen = false,
+consoleLeftOpen = false,
+consoleRightOpen = false,
   
 dragHandleProps
 }) {
@@ -325,24 +326,46 @@ function handlePhotoLoad(e, photoUrl) {
 >
  {!consoleIsOpen ? (
   <>
-    {typeof onExpandConsoleLeft === "function" ? (
-      <IXIObjectCardActuator
-        side="left"
-        label="Open console left"
-        title="Open console left"
-        onClick={onExpandConsoleLeft}
-      />
-    ) : null}
+  {typeof onExpandConsoleLeft ===
+  "function" ? (
+    <IXIObjectCardActuator
+      side="left"
+      label={
+        consoleLeftOpen
+          ? "Close console left"
+          : "Open console left"
+      }
+      title={
+        consoleLeftOpen
+          ? "Close console left"
+          : "Open console left"
+      }
+      onClick={
+        onExpandConsoleLeft
+      }
+    />
+  ) : null}
 
-    {typeof onExpandConsoleRight === "function" ? (
-      <IXIObjectCardActuator
-        side="right"
-        label="Open console right"
-        title="Open console right"
-        onClick={onExpandConsoleRight}
-      />
-    ) : null}
-  </>
+  {typeof onExpandConsoleRight ===
+  "function" ? (
+    <IXIObjectCardActuator
+      side="right"
+      label={
+        consoleRightOpen
+          ? "Close console right"
+          : "Open console right"
+      }
+      title={
+        consoleRightOpen
+          ? "Close console right"
+          : "Open console right"
+      }
+      onClick={
+        onExpandConsoleRight
+      }
+    />
+  ) : null}
+</>
 ) : null}
 
   {actionNotice?.message ||
