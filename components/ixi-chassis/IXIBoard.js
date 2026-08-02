@@ -114,194 +114,256 @@ const consoleDepth =
   (consoleLeftOpen ? 1 : 0) +
   (consoleRightOpen ? 1 : 0);
 
-
+return (
   <IXISortableMachineCard
-  key={id}
-  id={id}
-  containerId="board"
+    key={id}
+    id={id}
+    containerId="board"
 
-  className={`ixi-board-sortable-card ${
-    item?.type === "SELLER OBJECT"
-      ? "ixi-seller-object-sortable-card"
-      : ""
-  } ${
-    consoleDepth > 1
-      ? "ixi-console-expanded"
-      : ""
-  }`}
+    className={`ixi-board-sortable-card ${
+      item?.type === "SELLER OBJECT"
+        ? "ixi-seller-object-sortable-card"
+        : ""
+    } ${
+      consoleDepth > 1
+        ? "ixi-console-expanded"
+        : ""
+    }`}
 
-  style={{
-  flex:
-    "0 0 auto",
+    style={{
+      flex: "0 0 auto",
+      width: "max-content",
+      maxWidth: "none",
+      minWidth: 0,
+      alignSelf: "flex-start"
+    }}
+  >
+    {({ dragHandleProps }) => {
+      const customItem =
+        typeof renderCustomItem === "function"
+          ? renderCustomItem({
+              item,
+              id,
+              dragHandleProps
+            })
+          : null;
 
-  width:
-    "max-content",
+      return customItem ? (
+        enableCardScaling ? (
+          <IXIScaledCardShell
+            size={cardScaleMode}
+          >
+            {customItem}
+          </IXIScaledCardShell>
+        ) : (
+          customItem
+        )
+      ) : item?.type === "SELLER OBJECT" &&
+        SellerObjectCard ? (
+        <IXIScaledCardShell
+          size={cardScaleMode}
+        >
+          <SellerObjectCard
+            sellerObject={item}
+            objectId={id}
+            dragHandleProps={
+              dragHandleProps
+            }
 
-  maxWidth:
-    "none",
+            ixiState={
+              ixiCardState[id] || {
+                color: "none",
+                outline: 1
+              }
+            }
 
-  minWidth:
-    0,
+            ixiCardState={
+              ixiCardState
+            }
 
-  alignSelf:
-    "flex-start"
-}}
->
-         {({ dragHandleProps }) => {
-  const customItem =
-    typeof renderCustomItem === "function"
-      ? renderCustomItem({
-          item,
-          id,
-          dragHandleProps
-        })
-      : null;
+            onIxiStateChange={
+              updateIxiCardState
+            }
 
-  return customItem ? (
-    enableCardScaling ? (
-      <IXIScaledCardShell size={cardScaleMode}>
-        {customItem}
-      </IXIScaledCardShell>
-    ) : (
-      customItem
-    )
-  ) : item?.type === "SELLER OBJECT" &&
-    SellerObjectCard ? (
-  <IXIScaledCardShell size={cardScaleMode}>
-    <SellerObjectCard
-  sellerObject={item}
-  objectId={id}
-  dragHandleProps={dragHandleProps}
-  ixiState={
-    ixiCardState[id] || {
-      color: "none",
-      outline: 1
-    }
-  }
-  ixiCardState={ixiCardState}
-  onIxiStateChange={updateIxiCardState}
-  onRecoverSellerObject={onRecoverSellerObject}
-  onCheckoutObject={onCheckoutObject}
-      saved={savedIds.includes(id)}
-      armedDestination={armedDestination}
-      onSendFront={sendListingToFront}
-      onSendBack={sendListingToBack}
-           onSendToArmedDestination={sendMachineToArmedDestination}
-      onCycleSellerFace={() => cycleMachineFace?.(id)}
-    />
-  </IXIScaledCardShell>
+            onRecoverSellerObject={
+              onRecoverSellerObject
+            }
 
- ) : (
-  <IXIObjectConsole
-    objectId={id}
-    item={item}
-    cardFamily={cardFamily}
-    sellerCardProps={sellerCardProps}
+            onCheckoutObject={
+              onCheckoutObject
+            }
 
-    ixiCardState={ixiCardState}
-    updateIxiCardState={updateIxiCardState}
+            saved={
+              savedIds.includes(id)
+            }
 
-    enableCardScaling={enableCardScaling}
-    cardScaleMode={cardScaleMode}
+            armedDestination={
+              armedDestination
+            }
 
-    dragHandleProps={dragHandleProps}
+            onSendFront={
+              sendListingToFront
+            }
 
-    renderParentCard={({
-      consoleDepth: activeConsoleDepth,
-      consoleLeftOpen: activeConsoleLeftOpen,
-      consoleRightOpen: activeConsoleRightOpen,
-      onExpandConsoleLeft,
-      onExpandConsoleRight
-    }) => (
-      <IXIMachineCard
-        listing={item}
-        cardContext={cardContext}
-        consoleDepth={activeConsoleDepth}
+            onSendBack={
+              sendListingToBack
+            }
 
-        onExpandConsoleLeft={
-          onExpandConsoleLeft
-        }
+            onSendToArmedDestination={
+              sendMachineToArmedDestination
+            }
 
-        onExpandConsoleRight={
-          onExpandConsoleRight
-        }
-
-        consoleLeftOpen={
-          activeConsoleLeftOpen
-        }
-
-        consoleRightOpen={
-          activeConsoleRightOpen
-        }
-
-        saved={savedIds.includes(id)}
-
-        onToggleSaved={() =>
-          toggleSave(item)
-        }
-
-        from="saved"
-
-        {...sellerCardProps}
-
-        ixiState={
-          ixiCardState[id] || {
-            color: "none",
-            outline: 1
+            onCycleSellerFace={() =>
+              cycleMachineFace?.(id)
+            }
+          />
+        </IXIScaledCardShell>
+      ) : (
+        <IXIObjectConsole
+          objectId={id}
+          item={item}
+          cardFamily={
+            cardFamily
           }
-        }
 
-        onIxiStateChange={
-          updateIxiCardState
-        }
+          sellerCardProps={
+            sellerCardProps
+          }
 
-        machineFace={
-          ixiCardState[id]?.face || 1
-        }
+          ixiCardState={
+            ixiCardState
+          }
 
-        onCycleMachineFace={() =>
-          cycleMachineFace?.(id)
-        }
+          updateIxiCardState={
+            updateIxiCardState
+          }
 
-        onSendFront={
-          sendListingToFront
-        }
+          enableCardScaling={
+            enableCardScaling
+          }
 
-        onSendBack={
-          sendListingToBack
-        }
+          cardScaleMode={
+            cardScaleMode
+          }
 
-        armedDestination={
-          armedDestination
-        }
+          dragHandleProps={
+            dragHandleProps
+          }
 
-        onSendToArmedDestination={
-          sendMachineToArmedDestination
-        }
+          renderParentCard={({
+            consoleDepth:
+              activeConsoleDepth,
 
-        isBoardDraggingCard={
-          String(id) ===
-          String(draggingListingId)
-        }
+            consoleLeftOpen:
+              activeConsoleLeftOpen,
 
-        isGhostTarget={
-          String(id) ===
-          String(ghostListingId)
-        }
+            consoleRightOpen:
+              activeConsoleRightOpen,
 
-        useDndDrag={false}
+            onExpandConsoleLeft,
+            onExpandConsoleRight
+          }) => (
+            <IXIMachineCard
+              listing={item}
+              cardContext={
+                cardContext
+              }
 
-        dragHandleProps={
-          dragHandleProps
-        }
-           />
-    )
-  }}
-</IXISortableMachineCard>
-        );
-      })}
+              consoleDepth={
+                activeConsoleDepth
+              }
 
+              onExpandConsoleLeft={
+                onExpandConsoleLeft
+              }
 
+              onExpandConsoleRight={
+                onExpandConsoleRight
+              }
+
+              consoleLeftOpen={
+                activeConsoleLeftOpen
+              }
+
+              consoleRightOpen={
+                activeConsoleRightOpen
+              }
+
+              saved={
+                savedIds.includes(id)
+              }
+
+              onToggleSaved={() =>
+                toggleSave(item)
+              }
+
+              from="saved"
+
+              {...sellerCardProps}
+
+              ixiState={
+                ixiCardState[id] || {
+                  color: "none",
+                  outline: 1
+                }
+              }
+
+              onIxiStateChange={
+                updateIxiCardState
+              }
+
+              machineFace={
+                ixiCardState[id]
+                  ?.face || 1
+              }
+
+              onCycleMachineFace={() =>
+                cycleMachineFace?.(id)
+              }
+
+              onSendFront={
+                sendListingToFront
+              }
+
+              onSendBack={
+                sendListingToBack
+              }
+
+              armedDestination={
+                armedDestination
+              }
+
+              onSendToArmedDestination={
+                sendMachineToArmedDestination
+              }
+
+              isBoardDraggingCard={
+                String(id) ===
+                String(
+                  draggingListingId
+                )
+              }
+
+              isGhostTarget={
+                String(id) ===
+                String(
+                  ghostListingId
+                )
+              }
+
+              useDndDrag={false}
+
+              dragHandleProps={
+                dragHandleProps
+              }
+            />
+          )}
+        />
+      );
+    }}
+  </IXISortableMachineCard>
+);
+})}
 </SortableContext>
-  );
+);
 }
