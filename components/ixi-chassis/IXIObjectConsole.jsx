@@ -546,15 +546,15 @@ const assembledConsole = (
 
 return enableCardScaling ? (
   <IXIScaledCardShell
-    size={cardScaleMode}
-    nativeWidth={
-      consoleNativeWidth
-    }
-    nativeHeight={
-      consoleNativeHeight
-    }
-    tight={true}
-  >
+  size={cardScaleMode}
+  objectFamily="auction"
+  nativeWidth={
+    consoleNativeWidth
+  }
+  nativeHeight={
+    consoleNativeHeight
+  }
+>
     {assembledConsole}
   </IXIScaledCardShell>
 ) : (
