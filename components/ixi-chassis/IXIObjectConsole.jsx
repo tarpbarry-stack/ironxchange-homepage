@@ -271,92 +271,88 @@ export default function IXIObjectConsole({
     );
   }
 
-  function renderConsolePanel(
-    side
-  ) {
-    const isLeft =
-      side === "left";
+ function renderConsolePanel(
+  side
+) {
+  const isLeft =
+    side === "left";
 
-    const face =
-      isLeft
-        ? consoleLeftFace
-        : consoleRightFace;
+  const face =
+    isLeft
+      ? consoleLeftFace
+      : consoleRightFace;
 
-    const cycleFace =
-      isLeft
-        ? cycleLeftConsoleFace
-        : cycleRightConsoleFace;
+  const cycleFace =
+    isLeft
+      ? cycleLeftConsoleFace
+      : cycleRightConsoleFace;
 
-    const closeSide =
-      event =>
-        toggleObjectConsoleSide(
-          side,
-          event
-        );
-
-    const panel = (
-      <div className="ixi-object-console-panel">
-        <IXIObjectCardActuator
-          side={
-            isLeft
-              ? "right"
-              : "left"
-          }
-          label={
-            isLeft
-              ? "Close console left"
-              : "Close console right"
-          }
-          title={
-            isLeft
-              ? "Close console left"
-              : "Close console right"
-          }
-          onClick={closeSide}
-        />
-
-        {renderAuctionFace(face)}
-
-        <button
-          type="button"
-          className="ixi-object-console-face-button"
-          aria-label={
-            isLeft
-              ? "Change left auction face"
-              : "Change right auction face"
-          }
-          title={
-            `Auction face ${face}`
-          }
-          onPointerDown={event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          onClick={cycleFace}
-        />
-      </div>
-    );
-
-    return (
-      <div
-        className={`ixi-object-console-panel-wrap ${
+  const childCard = (
+    <div className="ixi-console-child-card">
+      <IXIObjectCardActuator
+        side={
           isLeft
-            ? "left-panel"
-            : "right-panel"
-        }`}
-      >
-        {enableCardScaling ? (
-          <IXIScaledCardShell
-            size={cardScaleMode}
-          >
-            {panel}
-          </IXIScaledCardShell>
-        ) : (
-          panel
-        )}
-      </div>
-    );
-  }
+            ? "right"
+            : "left"
+        }
+        label={
+          isLeft
+            ? "Close console left"
+            : "Close console right"
+        }
+        title={
+          isLeft
+            ? "Close console left"
+            : "Close console right"
+        }
+        onClick={event =>
+          toggleObjectConsoleSide(
+            side,
+            event
+          )
+        }
+      />
+
+      {renderAuctionFace(face)}
+
+      <button
+        type="button"
+        className="ixi-console-child-face-button"
+        aria-label={
+          isLeft
+            ? "Change left auction face"
+            : "Change right auction face"
+        }
+        title={`Auction face ${face}`}
+        onPointerDown={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        onClick={cycleFace}
+      />
+    </div>
+  );
+
+  return (
+    <div
+      className={`ixi-console-child-wrap ${
+        isLeft
+          ? "left-child"
+          : "right-child"
+      }`}
+    >
+      {enableCardScaling ? (
+        <IXIScaledCardShell
+          size={cardScaleMode}
+        >
+          {childCard}
+        </IXIScaledCardShell>
+      ) : (
+        childCard
+      )}
+    </div>
+  );
+}
 
   const parentCard =
     typeof renderParentCard ===
@@ -432,161 +428,96 @@ export default function IXIObjectConsole({
           min-width: 0;
         }
 
-        .ixi-object-console-panel-wrap {
+        .ixi-console-child-wrap {
   position: relative;
-
-  width: 298px;
-  min-width: 298px;
-  max-width: 298px;
-
-  flex: 0 0 298px;
+  flex: 0 0 auto;
+  min-width: 0;
 
   overflow: visible;
 }
 
-        .ixi-object-console-panel-wrap.left-panel {
-          margin-right: -1px;
-        }
+.ixi-console-child-wrap.left-child {
+  margin-right: -1px;
+}
 
-        .ixi-object-console-panel-wrap.right-panel {
-          margin-left: -1px;
-        }
+.ixi-console-child-wrap.right-child {
+  margin-left: -1px;
+}
 
-        .ixi-object-console-panel {
+.ixi-console-child-card {
   box-sizing: border-box;
 
-  width: 298px;
-  min-width: 298px;
-  max-width: 298px;
+  width: 100%;
 
   height: 471px;
   min-height: 471px;
   max-height: 471px;
 
   position: relative;
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .10
-            );
 
-          border-radius: 13px;
+  border:
+    1px solid
+    rgba(255, 255, 255, .10);
 
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                28,
-                31,
-                36,
-                .98
-              ),
-              rgba(
-                15,
-                17,
-                20,
-                .98
-              )
-            );
+  border-radius: 13px;
 
-          box-shadow:
-            0 10px 28px
-              rgba(
-                0,
-                0,
-                0,
-                .34
-              ),
-            inset 0 1px 0
-              rgba(
-                255,
-                255,
-                255,
-                .04
-              );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28, 31, 36, .98),
+      rgba(15, 17, 20, .98)
+    );
 
-          overflow: visible;
-        }
+  box-shadow:
+    0 10px 28px
+      rgba(0, 0, 0, .34),
+    inset 0 1px 0
+      rgba(255, 255, 255, .04);
 
-        .ixi-object-console-panel
-  > :global(section) {
-  width: 100%;
-  max-width: 100%;
-
-  border-radius: inherit;
-
-  overflow: hidden;
+  overflow: visible;
 }
 
-        .ixi-object-console-face-button {
-          position: absolute;
+.ixi-console-child-face-button {
+  position: absolute;
 
-          left: 50%;
-          bottom: -1px;
+  left: 50%;
+  right: auto;
+  bottom: -1px;
 
-          width: 34px;
-          height: 5px;
+  width: 34px;
+  height: 5px;
 
-          transform:
-            translateX(-50%);
+  transform: translateX(-50%);
 
-          padding: 0;
-          border: 0;
+  padding: 0;
+  border: 0;
 
-          border-radius:
-            3px 3px 1px 1px;
+  border-radius:
+    3px 3px 1px 1px;
 
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .18
-            );
+  background:
+    rgba(255, 255, 255, .18);
 
-          cursor: pointer;
+  cursor: pointer;
 
-          z-index: 120;
-          pointer-events: auto;
+  z-index: 120;
+  pointer-events: auto;
 
-          box-shadow:
-            inset 0 1px 0
-              rgba(
-                255,
-                255,
-                255,
-                .12
-              ),
-            0 1px 3px
-              rgba(
-                0,
-                0,
-                0,
-                .32
-              );
-        }
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, .12),
+    0 1px 3px
+      rgba(0, 0, 0, .32);
+}
 
-        .ixi-object-console-face-button:hover {
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .95
-            );
+.ixi-console-child-face-button:hover {
+  background:
+    rgba(255, 196, 0, .95);
 
-          box-shadow:
-            0 0 8px
-            rgba(
-              255,
-              196,
-              0,
-              .38
-            );
-        }
+  box-shadow:
+    0 0 8px
+      rgba(255, 196, 0, .38);
+}
       `}</style>
     </div>
   );
