@@ -123,18 +123,31 @@ const consoleSpan =
     consoleDepth
   );
 
-const consoleWidth =
+const resolvedConsoleScale =
+  enableCardScaling
+    ? (
+        Number(
+          cardScaleMetrics?.scale
+        ) || 1
+      )
+    : 1;
+
+const consoleNativePanelWidth =
+  298;
+
+const consoleNativeWidth =
   (
     consoleDepth *
-    resolvedConsolePanelWidth
-  ) +
-  (
-    Math.max(
-      consoleDepth - 1,
-      0
-    ) *
-    resolvedConsolePanelGap
+    consoleNativePanelWidth
+  ) -
+  Math.max(
+    consoleDepth - 1,
+    0
   );
+
+const consoleWidth =
+  consoleNativeWidth *
+  resolvedConsoleScale;
       
         return (
           
