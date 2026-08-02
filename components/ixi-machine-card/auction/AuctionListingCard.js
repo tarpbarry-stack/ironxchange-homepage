@@ -324,10 +324,8 @@ function handlePhotoLoad(e, photoUrl) {
     zIndex: isBoardDragging ? 50 : undefined
   }}
 >
- {!consoleIsOpen ? (
-  <>
-  {typeof onExpandConsoleLeft ===
-  "function" ? (
+ <>
+  {typeof onExpandConsoleLeft === "function" ? (
     <IXIObjectCardActuator
       side="left"
       label={
@@ -340,14 +338,11 @@ function handlePhotoLoad(e, photoUrl) {
           ? "Close console left"
           : "Open console left"
       }
-      onClick={
-        onExpandConsoleLeft
-      }
+      onClick={onExpandConsoleLeft}
     />
   ) : null}
 
-  {typeof onExpandConsoleRight ===
-  "function" ? (
+  {typeof onExpandConsoleRight === "function" ? (
     <IXIObjectCardActuator
       side="right"
       label={
@@ -360,14 +355,10 @@ function handlePhotoLoad(e, photoUrl) {
           ? "Close console right"
           : "Open console right"
       }
-      onClick={
-        onExpandConsoleRight
-      }
+      onClick={onExpandConsoleRight}
     />
   ) : null}
 </>
-) : null}
-
   {actionNotice?.message ||
   ixiState?.actionNotice?.message ||
   ixiState?.theaterNotice ? (
