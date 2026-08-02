@@ -99,9 +99,10 @@ export default function AuctionListingCard({
 onBoardDragOver,
 onBoardDragEnd,
 
-onExpandConsole,
+onExpandConsoleLeft,
+onExpandConsoleRight,
 consoleIsOpen = false,
-
+  
 dragHandleProps
 }) {
 
@@ -322,15 +323,27 @@ function handlePhotoLoad(e, photoUrl) {
     zIndex: isBoardDragging ? 50 : undefined
   }}
 >
-  {!consoleIsOpen &&
-  typeof onExpandConsole === "function" ? (
-    <IXIObjectCardActuator
-      side="right"
-      label="Open object console"
-      title="Open console"
-      onClick={onExpandConsole}
-    />
-  ) : null}
+ {!consoleIsOpen ? (
+  <>
+    {typeof onExpandConsoleLeft === "function" ? (
+      <IXIObjectCardActuator
+        side="left"
+        label="Open console left"
+        title="Open console left"
+        onClick={onExpandConsoleLeft}
+      />
+    ) : null}
+
+    {typeof onExpandConsoleRight === "function" ? (
+      <IXIObjectCardActuator
+        side="right"
+        label="Open console right"
+        title="Open console right"
+        onClick={onExpandConsoleRight}
+      />
+    ) : null}
+  </>
+) : null}
 
   {actionNotice?.message ||
   ixiState?.actionNotice?.message ||
