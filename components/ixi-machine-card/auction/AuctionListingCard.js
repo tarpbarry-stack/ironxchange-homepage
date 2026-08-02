@@ -327,6 +327,7 @@ function handlePhotoLoad(e, photoUrl) {
 typeof onExpandConsole === "function" ? (
   <IXIObjectCardActuator
     side="right"
+    position="state-row"
     label="Open object console"
     title="Open console"
     onClick={onExpandConsole}
