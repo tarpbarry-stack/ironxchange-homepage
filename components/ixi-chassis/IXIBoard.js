@@ -369,9 +369,9 @@ function cycleChildConsoleFace(
           <div className="ixi-console-child-card">
       <IXIObjectCardActuator
   side="left"
+  position="price-row"
   label="Close object console"
   title="Close console"
-  active={consoleIsOpen}
   onClick={closeObjectConsole}
 />
             {childConsoleFace === 3 ? (
