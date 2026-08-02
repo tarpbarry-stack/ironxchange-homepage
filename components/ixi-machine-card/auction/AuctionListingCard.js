@@ -10,9 +10,6 @@ import {
 
 import IXIMachineRail from "../../IXIMachineRail";
 
-import IXIObjectCardActuator
-  from "../../ixi-chassis/IXIObjectCardActuator";
-
 import IXIAuctionObjectFace1
   from "../../ixi-auction-object/IXIAuctionObjectFace1";
 
@@ -323,17 +320,6 @@ function handlePhotoLoad(e, photoUrl) {
   }}
 >
 
-{!consoleIsOpen &&
-typeof onExpandConsole === "function" ? (
-  <IXIObjectCardActuator
-    side="right"
-    position="state-row"
-    label="Open object console"
-    title="Open console"
-    onClick={onExpandConsole}
-  />
-) : null}
-
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
@@ -487,29 +473,32 @@ typeof onExpandConsole === "function" ? (
         }
       : {})}
   >
-    <IXIAuctionObjectFace1
-      listing={listing}
-      from={from}
-      onListingClick={handleCardClick}
+   <IXIAuctionObjectFace1
+  listing={listing}
+  from={from}
+  onListingClick={handleCardClick}
 
-      sellerMode={true}
+  sellerMode={true}
 
-      lotNumberValue={lotNumberValue}
+  lotNumberValue={lotNumberValue}
   onLotNumberChange={onLotNumberChange}
   onLotNumberKeyDown={onLotNumberKeyDown}
 
-      hoursValue={hoursValue}
-      onHoursChange={onHoursChange}
-      onHoursKeyDown={onHoursKeyDown}
+  hoursValue={hoursValue}
+  onHoursChange={onHoursChange}
+  onHoursKeyDown={onHoursKeyDown}
 
-      priceValue={priceValue}
-      onPriceChange={onPriceChange}
-      onPriceKeyDown={onPriceKeyDown}
+  priceValue={priceValue}
+  onPriceChange={onPriceChange}
+  onPriceKeyDown={onPriceKeyDown}
 
-      locationValue={locationValue}
-      onLocationChange={onLocationChange}
-      onLocationKeyDown={onLocationKeyDown}
-    />
+  locationValue={locationValue}
+  onLocationChange={onLocationChange}
+  onLocationKeyDown={onLocationKeyDown}
+
+  consoleIsOpen={consoleIsOpen}
+  onExpandConsole={onExpandConsole}
+/>
   </div>
 </div>
   </>
