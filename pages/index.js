@@ -21,7 +21,12 @@ import {
 
 import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
-import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+
+import IXIBoardSurface
+  from "../components/ixi-chassis/IXIBoardSurface";
+
+import IXISortableMachineCard
+  from "../components/ixi-chassis/IXISortableMachineCard";
 
 import {
   fetchIxiMachineState,
@@ -34,7 +39,6 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
-import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -99,9 +103,9 @@ export default function Home() {
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
 
-  const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
-
+ const [cardScaleMode, setCardScaleMode] =
+  useState("xl");
+  
   const [activeDndId, setActiveDndId] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   
@@ -600,38 +604,60 @@ return (
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
-    <div
-      data-board-target="board"
-      className={`cards ${
-        visibleListings.length === 1 ? "single-card" : ""
-      }`}
-      style={{
-        gridTemplateColumns:
-          visibleListings.length === 1
-            ? `${cardScaleMetrics.width}px`
-            : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-        gap: `${cardScaleMetrics.gap}px`
-      }}
-    >
-      <IXIBoard
-        items={visibleListings}
-        getListingId={getListingId}
-        savedIds={savedIds}
-        ixiCardState={ixiCardState}
-        IXISortableMachineCard={IXISortableMachineCard}
-        toggleSave={toggleSave}
-        updateIxiCardState={updateIxiCardState}
-        cycleMachineFace={cycleMachineFace}
-        sendListingToFront={sendListingToFront}
-        sendListingToBack={sendListingToBack}
-        armedDestination=""
-        sendMachineToArmedDestination={() => {}}
-        draggingListingId={draggingListingId}
-        ghostListingId={ghostListingId}
-        enableCardScaling={true}
-        cardScaleMode={cardScaleMode}
-      />
-    </div>
+   <IXIBoardSurface
+  scaleMode={cardScaleMode}
+>
+  <IXIBoard
+    items={visibleListings}
+    cardContext="marketplace"
+
+    getListingId={getListingId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+
+    IXISortableMachineCard={
+      IXISortableMachineCard
+    }
+
+    toggleSave={toggleSave}
+
+    updateIxiCardState={
+      updateIxiCardState
+    }
+
+    cycleMachineFace={
+      cycleMachineFace
+    }
+
+    sendListingToFront={
+      sendListingToFront
+    }
+
+    sendListingToBack={
+      sendListingToBack
+    }
+
+    armedDestination=""
+
+    sendMachineToArmedDestination={
+      () => {}
+    }
+
+    draggingListingId={
+      draggingListingId
+    }
+
+    ghostListingId={
+      ghostListingId
+    }
+
+    enableCardScaling={true}
+
+    cardScaleMode={
+      cardScaleMode
+    }
+  />
+</IXIBoardSurface>
   </IXIDragEngine>
 </section>
 
@@ -1065,18 +1091,7 @@ min-height: 365px;
   font-weight: 400;
   letter-spacing: 1px;
 }
-      .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(292px, 1fr));
-  gap: 22px;
-  min-height: 560px;
-}
-
-.cards.single-card {
-  grid-template-columns: minmax(292px, 320px);
-  justify-content: center;
-}
-
+    
        .how {
   background:
     linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),
@@ -1289,11 +1304,7 @@ footer p {
   color: #FFC400;
 }
 
-      @media (max-width: 1100px) {
-  .cards {
-    grid-template-columns: repeat(auto-fit, minmax(292px, 1fr));
-  }
-}
+    
 
   @media (max-width: 850px) {
   .nav {
@@ -1366,12 +1377,6 @@ footer p {
     padding-top: 86px;
   }
 
-  .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 300px) !important;
-  justify-content: center;
-  gap: 22px;
-}
   .section-head,
   footer {
     flex-direction: column;
