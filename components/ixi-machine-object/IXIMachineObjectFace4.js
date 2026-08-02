@@ -54,7 +54,20 @@ export default function IXIMachineObjectFace4({
           align-items: center;
           text-align: center;
 
-          background: transparent;
+         background:
+  radial-gradient(
+    circle at top,
+    rgba(255,196,0,.05),
+    transparent 42%
+  ),
+  linear-gradient(
+    180deg,
+    rgba(255,255,255,.028),
+    rgba(255,255,255,0)
+  ),
+  #141414;
+
+color: #f2f2f2;
           color: #f2f2f2;
         }
 
