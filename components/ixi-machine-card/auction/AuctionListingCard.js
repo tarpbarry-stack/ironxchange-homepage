@@ -10,6 +10,9 @@ import {
 
 import IXIMachineRail from "../../IXIMachineRail";
 
+import IXIObjectCardActuator
+  from "../../ixi-chassis/IXIObjectCardActuator";
+
 import IXIAuctionObjectFace1
   from "../../ixi-auction-object/IXIAuctionObjectFace1";
 
@@ -93,8 +96,11 @@ export default function AuctionListingCard({
   isGhostTarget = false,
 
   onBoardDragStart,
-  onBoardDragOver,
-  onBoardDragEnd,
+onBoardDragOver,
+onBoardDragEnd,
+
+onExpandConsole,
+consoleIsOpen = false,
 
 dragHandleProps
 }) {
@@ -316,6 +322,17 @@ function handlePhotoLoad(e, photoUrl) {
     zIndex: isBoardDragging ? 50 : undefined
   }}
 >
+
+{!consoleIsOpen &&
+typeof onExpandConsole === "function" ? (
+  <IXIObjectCardActuator
+    side="right"
+    label="Open object console"
+    title="Open console"
+    onClick={onExpandConsole}
+  />
+) : null}
+
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
