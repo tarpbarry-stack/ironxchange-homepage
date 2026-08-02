@@ -147,10 +147,20 @@ const isAuctionCard =
 const consoleIsOpen =
   consoleDepth > 1;
 
-const consoleSide =
-  ixiCardState?.[id]?.consoleSide === "left"
-    ? "left"
-    : "right";
+const consoleLeftOpen =
+  ixiCardState?.[id]?.consoleLeftOpen === true;
+
+const consoleRightOpen =
+  ixiCardState?.[id]?.consoleRightOpen === true;
+
+const consoleDepth =
+  1 +
+  (consoleLeftOpen ? 1 : 0) +
+  (consoleRightOpen ? 1 : 0);
+
+const consoleIsOpen =
+  consoleLeftOpen ||
+  consoleRightOpen;
 
 const savedConsoleSlots =
   ixiCardState?.[id]
@@ -189,22 +199,43 @@ const childConsoleFace =
     childConsoleSlot.face
   ) || 2;
 
-function openObjectConsole(
+function toggleObjectConsoleSide(
   side,
   event
 ) {
   event?.preventDefault?.();
   event?.stopPropagation?.();
 
+  const nextLeftOpen =
+    side === "left"
+      ? !consoleLeftOpen
+      : consoleLeftOpen;
+
+  const nextRightOpen =
+    side === "right"
+      ? !consoleRightOpen
+      : consoleRightOpen;
+
+  const nextDepth =
+    1 +
+    (nextLeftOpen ? 1 : 0) +
+    (nextRightOpen ? 1 : 0);
+
   updateIxiCardState?.(
     id,
     {
-      consoleDepth: 2,
-      consoleOpen: true,
-      consoleSide:
-        side === "left"
-          ? "left"
-          : "right",
+      consoleLeftOpen:
+        nextLeftOpen,
+
+      consoleRightOpen:
+        nextRightOpen,
+
+      consoleDepth:
+        nextDepth,
+
+      consoleOpen:
+        nextDepth > 1,
+
       consoleUpdatedAt:
         Date.now()
     }
@@ -337,7 +368,7 @@ function cycleChildConsoleFace(
 
  onExpandConsoleLeft={
   event =>
-    openObjectConsole(
+    toggleObjectConsoleSide(
       "left",
       event
     )
@@ -345,15 +376,19 @@ function cycleChildConsoleFace(
 
 onExpandConsoleRight={
   event =>
-    openObjectConsole(
+    toggleObjectConsoleSide(
       "right",
       event
     )
 }
 
-  consoleIsOpen={
-    consoleIsOpen
-  }
+consoleLeftOpen={
+  consoleLeftOpen
+}
+
+consoleRightOpen={
+  consoleRightOpen
+}
 
         saved={savedIds.includes(id)}
         onToggleSaved={() => toggleSave(item)}
@@ -501,9 +536,9 @@ onExpandConsoleRight={
   cardContext={cardContext}
   consoleDepth={consoleDepth}
 
-  onExpandConsoleLeft={
+ onExpandConsoleLeft={
   event =>
-    openObjectConsole(
+    toggleObjectConsoleSide(
       "left",
       event
     )
@@ -511,14 +546,19 @@ onExpandConsoleRight={
 
 onExpandConsoleRight={
   event =>
-    openObjectConsole(
+    toggleObjectConsoleSide(
       "right",
       event
     )
 }
-  consoleIsOpen={
-    consoleIsOpen
-  }
+
+consoleLeftOpen={
+  consoleLeftOpen
+}
+
+consoleRightOpen={
+  consoleRightOpen
+}
 
   saved={savedIds.includes(id)}
     onToggleSaved={() => toggleSave(item)}
