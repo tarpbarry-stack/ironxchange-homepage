@@ -432,19 +432,29 @@ const assembledConsole = (
         overflow: visible;
       }
 
-      .ixi-object-console-parent {
-        position: relative;
-        flex: 0 0 auto;
-        min-width: 0;
-      }
+     .ixi-object-console-parent {
+  position: relative;
+
+  flex: 0 0 298px;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  overflow: visible;
+}
 
       .ixi-console-child-wrap {
-        position: relative;
-        flex: 0 0 auto;
-        min-width: 0;
+  position: relative;
 
-        overflow: visible;
-      }
+  flex: 0 0 298px;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  overflow: visible;
+}
 
       .ixi-console-child-wrap.left-child {
         margin-right: -1px;
@@ -455,13 +465,15 @@ const assembledConsole = (
       }
 
       .ixi-console-child-card {
-        box-sizing: border-box;
+  box-sizing: border-box;
 
-        width: 100%;
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
 
-        height: 471px;
-        min-height: 471px;
-        max-height: 471px;
+  height: 471px;
+  min-height: 471px;
+  max-height: 471px;
 
         position: relative;
 
