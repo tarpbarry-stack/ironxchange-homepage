@@ -1,6 +1,9 @@
 import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import IXIBoardSurface
+  from "../../components/ixi-chassis/IXIBoardSurface";
+
 import useIXIAuctionObjectOps
   from "../../components/ixi-auction-object/useIXIAuctionObjectOps";
 
@@ -1741,43 +1744,55 @@ if (armedDestination === "stackTop") {
   cardScaleMode={cardScaleMode}
 />
               
-     <section
-  data-board-target="board"
-  className={`cards ${
-    visibleSavedListings.length === 1 ? "single-card" : ""
-  }`}
-  style={{
-    gridTemplateColumns:
-      visibleSavedListings.length === 1
-        ? `${cardScaleMetrics.width}px`
-        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-   columnGap: `${cardScaleMetrics.gap}px`,
-rowGap: `${cardScaleMetrics.gap + 90}px`
-  }}
+     <IXIBoardSurface
+  scaleMode={cardScaleMode}
+  rowGap={
+    cardScaleMetrics.gap + 90
+  }
 >
-<IXIBoard
-  items={visibleSavedListings}
-  cardContext="auction-work"
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
-  toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  armedDestination={armedDestination}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
-  draggingListingId={draggingListingId}
-  ghostListingId={ghostListingId}
-  enableCardScaling={true}
-  cardScaleMode={cardScaleMode}
- getSellerListingCardProps={
-  getAuctionWorkCardProps
-}
-/>
-        </section>
+  <IXIBoard
+    items={visibleSavedListings}
+    cardContext="auction-work"
+    getListingId={getListingId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+    IXISortableMachineCard={
+      IXISortableMachineCard
+    }
+    toggleSave={toggleSave}
+    updateIxiCardState={
+      updateIxiCardState
+    }
+    cycleMachineFace={
+      cycleMachineFace
+    }
+    sendListingToFront={
+      sendListingToFront
+    }
+    sendListingToBack={
+      sendListingToBack
+    }
+    armedDestination={
+      armedDestination
+    }
+    sendMachineToArmedDestination={
+      sendMachineToArmedDestination
+    }
+    draggingListingId={
+      draggingListingId
+    }
+    ghostListingId={
+      ghostListingId
+    }
+    enableCardScaling={true}
+    cardScaleMode={
+      cardScaleMode
+    }
+    getSellerListingCardProps={
+      getAuctionWorkCardProps
+    }
+  />
+</IXIBoardSurface>
 
 <button
   type="button"
@@ -3215,25 +3230,7 @@ outline: none;
 :global(.active-stack-card.stack-ghost-target) {
   transform: translateX(8px);
 }
-
-        .cards {
-          max-width: 1920px;
-          margin: 0 auto;
-
-          min-height: 260px;
-
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-          gap: 22px;
-          align-items: start;
-          justify-content: center;
-        }
-
-        .cards.single-card {
-          grid-template-columns: minmax(250px, 300px);
-          justify-content: center;
-        }
-
+    
         :global(.ixi-drag-overlay-card) {
   width: 300px;
   max-width: 300px;
@@ -3241,20 +3238,6 @@ outline: none;
   z-index: 999999;
 }
 
-:global(.ixi-board-sortable-card) {
-  width: 100%;
-  max-width: 300px;
-  min-width: 250px;
-
-  justify-self: center;
-  align-self: start;
-
-  touch-action: none;
-}
-
-:global(.ixi-board-sortable-card > *) {
-  width: 100%;
-}
         .empty {
           max-width: 520px;
           margin: 38px auto 0;
@@ -3370,14 +3353,6 @@ outline: none;
     margin-top: 6px;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .cards.single-card {
-    grid-template-columns: 1fr;
-  }
 }
        
       `}</style>
