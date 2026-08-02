@@ -500,72 +500,71 @@ function cycleRightConsoleFace(
               }
             />
 
-            {consoleLeftFace === 3 ? (
-              <IXIAuctionObjectFace3
-                listing={item}
-                dragHandleProps={dragHandleProps}
-              />
-            ) : consoleLeftFace === 4 ? (
-              <IXIAuctionObjectFace4
-                listing={item}
-                dragHandleProps={dragHandleProps}
-                auctionDispositionBusy={
-                  sellerCardProps.auctionDispositionBusy
-                }
-                onAuctionDisposition={
-                  sellerCardProps.onAuctionDisposition
-                }
-              />
-            ) : (
-              <IXIAuctionObjectFace2
-                listing={item}
-                sourceListingUrl={
-                  sellerCardProps.sourceListingUrl ||
-                  ""
-                }
-                dragHandleProps={dragHandleProps}
-                sellerMode={true}
-                lotNumberValue={
-                  sellerCardProps.lotNumberValue
-                }
-                onLotNumberChange={
-                  sellerCardProps.onLotNumberChange
-                }
-                onLotNumberKeyDown={
-                  sellerCardProps.onLotNumberKeyDown
-                }
-                hoursValue={
-                  sellerCardProps.hoursValue
-                }
-                onHoursChange={
-                  sellerCardProps.onHoursChange
-                }
-                onHoursKeyDown={
-                  sellerCardProps.onHoursKeyDown
-                }
-                openingBidValue={
-                  sellerCardProps.priceValue
-                }
-                onOpeningBidChange={
-                  sellerCardProps.onPriceChange
-                }
-                onOpeningBidKeyDown={
-                  sellerCardProps.onPriceKeyDown
-                }
-              />
-            )}
+           {consoleRightFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={item}
+    dragHandleProps={dragHandleProps}
+  />
+) : consoleRightFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={item}
+    dragHandleProps={dragHandleProps}
+    auctionDispositionBusy={
+      sellerCardProps.auctionDispositionBusy
+    }
+    onAuctionDisposition={
+      sellerCardProps.onAuctionDisposition
+    }
+  />
+) : (
+  <IXIAuctionObjectFace2
+    listing={item}
+    sourceListingUrl={
+      sellerCardProps.sourceListingUrl || ""
+    }
+    dragHandleProps={dragHandleProps}
+    sellerMode={true}
+    lotNumberValue={
+      sellerCardProps.lotNumberValue
+    }
+    onLotNumberChange={
+      sellerCardProps.onLotNumberChange
+    }
+    onLotNumberKeyDown={
+      sellerCardProps.onLotNumberKeyDown
+    }
+    hoursValue={
+      sellerCardProps.hoursValue
+    }
+    onHoursChange={
+      sellerCardProps.onHoursChange
+    }
+    onHoursKeyDown={
+      sellerCardProps.onHoursKeyDown
+    }
+    openingBidValue={
+      sellerCardProps.priceValue
+    }
+    onOpeningBidChange={
+      sellerCardProps.onPriceChange
+    }
+    onOpeningBidKeyDown={
+      sellerCardProps.onPriceKeyDown
+    }
+  />
+)}
 
-            <button
-              type="button"
-              className="ixi-console-child-face-button"
-              aria-label="Change right auction face"
-              title={`Auction face ${consoleLeftFace}`}
-              onPointerDown={event => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={cycleLeftConsoleFace}
-            />
+<button
+  type="button"
+  className="ixi-console-child-face-button"
+  aria-label="Change right auction face"
+  title={`Auction face ${consoleRightFace}`}
+  onPointerDown={event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }}
+  onClick={cycleRightConsoleFace}
+/>
           </div>
         </IXIScaledCardShell>
       </div>
@@ -588,72 +587,71 @@ function cycleRightConsoleFace(
             }
           />
 
-          {consoleRightFace === 3 ? (
-            <IXIAuctionObjectFace3
-              listing={item}
-              dragHandleProps={dragHandleProps}
-            />
-          ) : consoleRightFace === 4 ? (
-            <IXIAuctionObjectFace4
-              listing={item}
-              dragHandleProps={dragHandleProps}
-              auctionDispositionBusy={
-                sellerCardProps.auctionDispositionBusy
-              }
-              onAuctionDisposition={
-                sellerCardProps.onAuctionDisposition
-              }
-            />
-          ) : (
-            <IXIAuctionObjectFace2
-              listing={item}
-              sourceListingUrl={
-                sellerCardProps.sourceListingUrl ||
-                ""
-              }
-              dragHandleProps={dragHandleProps}
-              sellerMode={true}
-              lotNumberValue={
-                sellerCardProps.lotNumberValue
-              }
-              onLotNumberChange={
-                sellerCardProps.onLotNumberChange
-              }
-              onLotNumberKeyDown={
-                sellerCardProps.onLotNumberKeyDown
-              }
-              hoursValue={
-                sellerCardProps.hoursValue
-              }
-              onHoursChange={
-                sellerCardProps.onHoursChange
-              }
-              onHoursKeyDown={
-                sellerCardProps.onHoursKeyDown
-              }
-              openingBidValue={
-                sellerCardProps.priceValue
-              }
-              onOpeningBidChange={
-                sellerCardProps.onPriceChange
-              }
-              onOpeningBidKeyDown={
-                sellerCardProps.onPriceKeyDown
-              }
-            />
-          )}
+          {consoleLeftFace === 3 ? (
+  <IXIAuctionObjectFace3
+    listing={item}
+    dragHandleProps={dragHandleProps}
+  />
+) : consoleLeftFace === 4 ? (
+  <IXIAuctionObjectFace4
+    listing={item}
+    dragHandleProps={dragHandleProps}
+    auctionDispositionBusy={
+      sellerCardProps.auctionDispositionBusy
+    }
+    onAuctionDisposition={
+      sellerCardProps.onAuctionDisposition
+    }
+  />
+) : (
+  <IXIAuctionObjectFace2
+    listing={item}
+    sourceListingUrl={
+      sellerCardProps.sourceListingUrl || ""
+    }
+    dragHandleProps={dragHandleProps}
+    sellerMode={true}
+    lotNumberValue={
+      sellerCardProps.lotNumberValue
+    }
+    onLotNumberChange={
+      sellerCardProps.onLotNumberChange
+    }
+    onLotNumberKeyDown={
+      sellerCardProps.onLotNumberKeyDown
+    }
+    hoursValue={
+      sellerCardProps.hoursValue
+    }
+    onHoursChange={
+      sellerCardProps.onHoursChange
+    }
+    onHoursKeyDown={
+      sellerCardProps.onHoursKeyDown
+    }
+    openingBidValue={
+      sellerCardProps.priceValue
+    }
+    onOpeningBidChange={
+      sellerCardProps.onPriceChange
+    }
+    onOpeningBidKeyDown={
+      sellerCardProps.onPriceKeyDown
+    }
+  />
+)}
 
-          <button
-            type="button"
-            className="ixi-console-child-face-button"
-            aria-label="Change left auction face"
-            title={`Auction face ${consoleRightFace}`}
-            onPointerDown={event => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
-            onClick={cycleRightConsoleFace}
-          />
+<button
+  type="button"
+  className="ixi-console-child-face-button"
+  aria-label="Change left auction face"
+  title={`Auction face ${consoleLeftFace}`}
+  onPointerDown={event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }}
+  onClick={cycleLeftConsoleFace}
+/>
         </div>
       </div>
     ) : null}
