@@ -429,9 +429,7 @@ function cycleChildConsoleFace(
     event.stopPropagation();
   }}
   onClick={cycleChildConsoleFace}
->
-  <span />
-</button>
+/>
        </div>
         </IXIScaledCardShell>
       </div>
@@ -579,10 +577,7 @@ function cycleChildConsoleFace(
     event.stopPropagation();
   }}
   onClick={cycleChildConsoleFace}
->
-  <span />
-</button>  
-  </div>
+/>
 ) : null}
       
  <button
@@ -628,24 +623,22 @@ function cycleChildConsoleFace(
 
   overflow: visible;
 }
-.ixi-console-empty-panel {
-  width: 298px;
-  min-width: 298px;
+.ixi-console-child-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: -1px;
+}
 
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
+.ixi-console-child-card {
+  box-sizing: border-box;
+
+  width: 100%;
+
+  height: 471px;
+  min-height: 471px;
+  max-height: 471px;
 
   position: relative;
-
-  flex: 0 0 298px;
-
-  /*
-   * The child belongs to the parent object.
-   * Overlap the two borders by one pixel so
-   * there is one shared seam and no space.
-   */
-  margin-left: -1px;
 
   border: 1px solid rgba(255, 255, 255, .10);
   border-radius: 13px;
@@ -661,7 +654,7 @@ function cycleChildConsoleFace(
     0 10px 28px rgba(0, 0, 0, .34),
     inset 0 1px 0 rgba(255, 255, 255, .04);
 
-  overflow: hidden;
+  overflow: visible;
 }
 
   .ixi-console-test-actuator {
@@ -696,45 +689,35 @@ function cycleChildConsoleFace(
   position: absolute;
 
   left: 50%;
-  bottom: 3px;
+  right: auto;
+  bottom: -1px;
 
-  width: 46px;
-  height: 9px;
+  width: 34px;
+  height: 5px;
 
   transform: translateX(-50%);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 0;
+  border-radius: 3px 3px 1px 1px;
+
+  background: rgba(255,255,255,.18);
 
   padding: 0;
-
-  border: 0;
-  border-radius: 5px 5px 2px 2px;
-
-  background: rgba(0, 0, 0, .30);
-
   cursor: pointer;
-  z-index: 400;
-}
 
-.ixi-console-child-face-button span {
-  width: 18px;
-  height: 3px;
-
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, .22);
+  z-index: 120;
+  pointer-events: auto;
 
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, .025);
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 1px 3px rgba(0,0,0,.32);
 }
 
-.ixi-console-child-face-button:hover span {
-  background: rgba(255, 196, 0, .78);
+.ixi-console-child-face-button:hover {
+  background: rgba(255,196,0,.95);
 
   box-shadow:
-    0 0 8px rgba(255, 196, 0, .20);
+    0 0 8px rgba(255,196,0,.38);
 }
 
   .ixi-console-test-actuator:hover,
