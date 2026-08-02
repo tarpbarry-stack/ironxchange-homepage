@@ -419,7 +419,20 @@ function cycleChildConsoleFace(
     }
   />
 )}
-          </div>
+             <button
+  type="button"
+  className="ixi-console-child-face-button"
+  aria-label="Change child auction face"
+  title={`Auction face ${childConsoleFace}`}
+  onPointerDown={event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }}
+  onClick={cycleChildConsoleFace}
+>
+  <span />
+</button>
+       </div>
         </IXIScaledCardShell>
       </div>
     ) : null}
@@ -555,6 +568,20 @@ function cycleChildConsoleFace(
     }
   />
 )}
+
+<button
+  type="button"
+  className="ixi-console-child-face-button"
+  aria-label="Change child auction face"
+  title={`Auction face ${childConsoleFace}`}
+  onPointerDown={event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }}
+  onClick={cycleChildConsoleFace}
+>
+  <span />
+</button>  
   </div>
 ) : null}
       
@@ -664,6 +691,51 @@ function cycleChildConsoleFace(
 
     z-index: 300;
   }
+
+.ixi-console-child-face-button {
+  position: absolute;
+
+  left: 50%;
+  bottom: 3px;
+
+  width: 46px;
+  height: 9px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 5px 5px 2px 2px;
+
+  background: rgba(0, 0, 0, .30);
+
+  cursor: pointer;
+  z-index: 400;
+}
+
+.ixi-console-child-face-button span {
+  width: 18px;
+  height: 3px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, .22);
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .025);
+}
+
+.ixi-console-child-face-button:hover span {
+  background: rgba(255, 196, 0, .78);
+
+  box-shadow:
+    0 0 8px rgba(255, 196, 0, .20);
+}
 
   .ixi-console-test-actuator:hover,
   .ixi-console-test-actuator.is-open {
