@@ -433,10 +433,16 @@ export default function IXIObjectConsole({
         }
 
         .ixi-object-console-panel-wrap {
-          position: relative;
-          flex: 0 0 auto;
-          min-width: 0;
-        }
+  position: relative;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  flex: 0 0 298px;
+
+  overflow: visible;
+}
 
         .ixi-object-console-panel-wrap.left-panel {
           margin-right: -1px;
@@ -447,16 +453,17 @@ export default function IXIObjectConsole({
         }
 
         .ixi-object-console-panel {
-          box-sizing: border-box;
+  box-sizing: border-box;
 
-          width: 100%;
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
 
-          height: 471px;
-          min-height: 471px;
-          max-height: 471px;
+  height: 471px;
+  min-height: 471px;
+  max-height: 471px;
 
-          position: relative;
-
+  position: relative;
           border:
             1px solid
             rgba(
@@ -503,6 +510,16 @@ export default function IXIObjectConsole({
 
           overflow: visible;
         }
+
+        .ixi-object-console-panel
+  > :global(section) {
+  width: 100%;
+  max-width: 100%;
+
+  border-radius: inherit;
+
+  overflow: hidden;
+}
 
         .ixi-object-console-face-button {
           position: absolute;
