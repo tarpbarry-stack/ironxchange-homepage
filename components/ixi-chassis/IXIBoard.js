@@ -5,6 +5,9 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
+import IXIObjectCardActuator
+  from "./IXIObjectCardActuator";
+
 import IXIAuctionObjectFace2
   from "../ixi-auction-object/IXIAuctionObjectFace2";
 
@@ -181,27 +184,35 @@ const childConsoleFace =
     childConsoleSlot.face
   ) || 2;
 
-function toggleConsoleWidth(event) {
-  event.preventDefault();
-  event.stopPropagation();
+function openObjectConsole(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
 
   updateIxiCardState?.(
     id,
     {
-      consoleDepth:
-        consoleIsOpen
-          ? 1
-          : 2,
-
-      consoleOpen:
-        !consoleIsOpen,
-
+      consoleDepth: 2,
+      consoleOpen: true,
       consoleUpdatedAt:
         Date.now()
     }
   );
 }
 
+function closeObjectConsole(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+  updateIxiCardState?.(
+    id,
+    {
+      consoleDepth: 1,
+      consoleOpen: false,
+      consoleUpdatedAt:
+        Date.now()
+    }
+  );
+}
 function cycleChildConsoleFace(
   event
 ) {
@@ -306,9 +317,18 @@ function cycleChildConsoleFace(
   <div className="ixi-console-test-chassis">
     <IXIScaledCardShell size={cardScaleMode}>
       <IXIMachineCard
-        listing={item}
-        cardContext={cardContext}
-        consoleDepth={consoleDepth}
+  listing={item}
+  cardContext={cardContext}
+  consoleDepth={consoleDepth}
+
+  onExpandConsole={
+    openObjectConsole
+  }
+
+  consoleIsOpen={
+    consoleIsOpen
+  }
+
         saved={savedIds.includes(id)}
         onToggleSaved={() => toggleSave(item)}
         from="saved"
@@ -347,6 +367,13 @@ function cycleChildConsoleFace(
       <div className="ixi-console-child-wrap">
         <IXIScaledCardShell size={cardScaleMode}>
           <div className="ixi-console-child-card">
+      <IXIObjectCardActuator
+  side="left"
+  label="Close object console"
+  title="Close console"
+  active={consoleIsOpen}
+  onClick={closeObjectConsole}
+/>
             {childConsoleFace === 3 ? (
   <IXIAuctionObjectFace3
     listing={item}
@@ -435,29 +462,6 @@ function cycleChildConsoleFace(
       </div>
     ) : null}
 
-    <button
-      type="button"
-      className={`ixi-console-test-actuator ${
-        consoleIsOpen
-          ? "is-open"
-          : ""
-      }`}
-      aria-label={
-        consoleIsOpen
-          ? "Close object console"
-          : "Open object console"
-      }
-      title={
-        consoleIsOpen
-          ? "Close console"
-          : "Open console"
-      }
-      onPointerDown={event => {
-        event.preventDefault();
-        event.stopPropagation();
-      }}
-      onClick={toggleConsoleWidth}
-    />
   </div>
 ) : (
   <div className="ixi-console-test-chassis">
@@ -465,7 +469,16 @@ function cycleChildConsoleFace(
   listing={item}
   cardContext={cardContext}
   consoleDepth={consoleDepth}
-    saved={savedIds.includes(id)}
+
+  onExpandConsole={
+    openObjectConsole
+  }
+
+  consoleIsOpen={
+    consoleIsOpen
+  }
+
+  saved={savedIds.includes(id)}
     onToggleSaved={() => toggleSave(item)}
     from="saved"
     {...sellerCardProps}
@@ -494,6 +507,13 @@ function cycleChildConsoleFace(
 
 {consoleIsOpen && isAuctionCard ? (
   <div className="ixi-console-empty-panel">
+      <IXIObjectCardActuator
+  side="left"
+  label="Close object console"
+  title="Close console"
+  active={consoleIsOpen}
+  onClick={closeObjectConsole}
+/>
     {childConsoleFace === 3 ? (
   <IXIAuctionObjectFace3
     listing={item}
@@ -580,29 +600,6 @@ function cycleChildConsoleFace(
 />
 ) : null}
       
- <button
-    type="button"
-    className={`ixi-console-test-actuator ${
-      consoleIsOpen
-        ? "is-open"
-        : ""
-    }`}
-    aria-label={
-      consoleIsOpen
-        ? "Close object console"
-        : "Open object console"
-    }
-    title={
-      consoleIsOpen
-        ? "Close console"
-        : "Open console"
-    }
-    onPointerDown={event => {
-      event.preventDefault();
-      event.stopPropagation();
-    }}
-    onClick={toggleConsoleWidth}
-  />
 </div>
 
 );
@@ -657,34 +654,7 @@ function cycleChildConsoleFace(
   overflow: visible;
 }
 
-  .ixi-console-test-actuator {
-    position: absolute;
-
-    top: 50%;
-    right: -8px;
-
-    width: 8px;
-    height: 58px;
-
-    transform: translateY(-50%);
-
-    padding: 0;
-
-    border:
-      1px solid
-      rgba(255, 196, 0, .46);
-
-    border-radius:
-      3px 0 0 3px;
-
-    background:
-      rgba(255, 196, 0, .22);
-
-    cursor: pointer;
-
-    z-index: 300;
-  }
-
+  
 .ixi-console-child-face-button {
   position: absolute;
 
@@ -720,15 +690,7 @@ function cycleChildConsoleFace(
     0 0 8px rgba(255,196,0,.38);
 }
 
-  .ixi-console-test-actuator:hover,
-  .ixi-console-test-actuator.is-open {
-    background:
-      rgba(255, 196, 0, .88);
-
-    box-shadow:
-      0 0 10px
-      rgba(255, 196, 0, .30);
-  }
+ 
 `}</style>
 </SortableContext>
   );
