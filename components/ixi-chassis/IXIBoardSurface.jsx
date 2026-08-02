@@ -18,18 +18,18 @@ export default function IXIBoardSurface({
     );
 
   const resolvedColumnGap =
-    Number.isFinite(
-      Number(columnGap)
-    )
-      ? Number(columnGap)
-      : preset.gap;
+  Number.isFinite(
+    Number(columnGap)
+  )
+    ? Number(columnGap)
+    : preset.columnGap;
 
-  const resolvedRowGap =
-    Number.isFinite(
-      Number(rowGap)
-    )
-      ? Number(rowGap)
-      : preset.gap;
+const resolvedRowGap =
+  Number.isFinite(
+    Number(rowGap)
+  )
+    ? Number(rowGap)
+    : preset.rowGap;
 
   return (
     <section
