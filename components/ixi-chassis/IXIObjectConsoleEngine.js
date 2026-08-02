@@ -1,5 +1,29 @@
-export const IXI_CONSOLE_MIN_DEPTH = 1;
-export const IXI_CONSOLE_MAX_DEPTH = 4;
+export const IXI_CONSOLE_MIN_DEPTH =
+  1;
+
+export const IXI_CONSOLE_MAX_DEPTH =
+  5;
+
+export const IXI_CONSOLE_DEFAULT_FACE =
+  2;
+
+export const IXI_CONSOLE_SLOT_TYPES = {
+  LISTING: "listing",
+  MODULE: "module"
+};
+
+export const IXI_CONSOLE_LISTING_SLOT_ID =
+  "listing";
+
+export const IXI_CONSOLE_MODULE_FACES = [
+  2,
+  3,
+  4
+];
+
+/* ===================================== */
+/* LEGACY DEPTH COMPATIBILITY            */
+/* ===================================== */
 
 export function normalizeConsoleDepth(
   value,
@@ -8,7 +32,8 @@ export function normalizeConsoleDepth(
     max = IXI_CONSOLE_MAX_DEPTH
   } = {}
 ) {
-  const number = Number(value);
+  const number =
+    Number(value);
 
   if (!Number.isFinite(number)) {
     return min;
@@ -28,9 +53,8 @@ export function getConsoleDepth(
   objectId,
   options = {}
 ) {
-  const id = String(
-    objectId || ""
-  );
+  const id =
+    String(objectId || "");
 
   if (!id) {
     return normalizeConsoleDepth(
@@ -83,9 +107,8 @@ export function expandConsoleRight({
   objectId,
   max = IXI_CONSOLE_MAX_DEPTH
 }) {
-  const id = String(
-    objectId || ""
-  );
+  const id =
+    String(objectId || "");
 
   if (!id) {
     return null;
@@ -130,9 +153,8 @@ export function collapseConsoleLeft({
   objectId,
   min = IXI_CONSOLE_MIN_DEPTH
 }) {
-  const id = String(
-    objectId || ""
-  );
+  const id =
+    String(objectId || "");
 
   if (!id) {
     return null;
@@ -172,13 +194,20 @@ export function collapseConsoleLeft({
 export function closeConsole({
   objectId
 }) {
-  const id = String(
-    objectId || ""
-  );
+  const id =
+    String(objectId || "");
 
   if (!id) {
     return null;
   }
+
+  const slots = [
+    createConsoleSlot({
+      type:
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+    })
+  ];
 
   return {
     objectId: id,
@@ -186,10 +215,11 @@ export function closeConsole({
     nextDepth: 1,
 
     patch: {
-      consoleDepth: 1,
-      consoleOpen: false,
-      consoleUpdatedAt:
-        Date.now()
+      ...createConsoleSlotsPatch(
+        slots
+      ),
+
+      consoleOpen: false
     }
   };
 }
@@ -210,78 +240,229 @@ export function getConsoleGridSpan(
   );
 }
 
-export const IXI_CONSOLE_DEFAULT_FACE = 1;
+/* ===================================== */
+/* SLOT IDENTITY                         */
+/* ===================================== */
+
+function createModuleSlotId() {
+  return [
+    "module",
+    Date.now(),
+    Math.random()
+      .toString(36)
+      .slice(2, 9)
+  ].join("-");
+}
+
+function normalizeModuleFace(
+  value,
+  fallback =
+    IXI_CONSOLE_DEFAULT_FACE
+) {
+  const face =
+    Number(value);
+
+  return IXI_CONSOLE_MODULE_FACES
+    .includes(face)
+      ? face
+      : fallback;
+}
 
 export function createConsoleSlot({
   slotId,
-  face = IXI_CONSOLE_DEFAULT_FACE
+  type =
+    IXI_CONSOLE_SLOT_TYPES.MODULE,
+  face =
+    IXI_CONSOLE_DEFAULT_FACE
 } = {}) {
+  const normalizedType =
+    type ===
+    IXI_CONSOLE_SLOT_TYPES.LISTING
+      ? IXI_CONSOLE_SLOT_TYPES.LISTING
+      : IXI_CONSOLE_SLOT_TYPES.MODULE;
+
+  if (
+    normalizedType ===
+    IXI_CONSOLE_SLOT_TYPES.LISTING
+  ) {
+    return {
+      slotId:
+        IXI_CONSOLE_LISTING_SLOT_ID,
+
+      type:
+        IXI_CONSOLE_SLOT_TYPES.LISTING,
+
+      face: 1
+    };
+  }
+
   return {
     slotId:
       String(
         slotId ||
-        `slot-${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2, 8)}`
+        createModuleSlotId()
       ),
 
+    type:
+      IXI_CONSOLE_SLOT_TYPES.MODULE,
+
     face:
-      Math.max(
-        1,
-        Number(face) || 1
-      )
+      normalizeModuleFace(face)
   };
 }
+
+/* ===================================== */
+/* SLOT NORMALIZATION + LEGACY MIGRATION */
+/* ===================================== */
 
 export function normalizeConsoleSlots(
   slots = [],
   {
-    maxSlots = IXI_CONSOLE_MAX_DEPTH,
+    maxSlots =
+      IXI_CONSOLE_MAX_DEPTH,
     defaultFace =
       IXI_CONSOLE_DEFAULT_FACE
   } = {}
 ) {
-  const normalized =
+  const normalizedMaxSlots =
+    Math.max(
+      1,
+      Math.floor(
+        Number(maxSlots) ||
+        IXI_CONSOLE_MAX_DEPTH
+      )
+    );
+
+  const source =
     Array.isArray(slots)
-      ? slots
-          .slice(0, maxSlots)
-          .map((slot, index) => {
-            if (
-              slot &&
-              typeof slot === "object"
-            ) {
-              return createConsoleSlot({
-                slotId:
-                  slot.slotId ||
-                  `slot-${index + 1}`,
-
-                face:
-                  slot.face ||
-                  defaultFace
-              });
-            }
-
-            return createConsoleSlot({
-              slotId:
-                `slot-${index + 1}`,
-
-              face:
-                Number(slot) ||
-                defaultFace
-            });
-          })
+      ? slots.slice(
+          0,
+          normalizedMaxSlots
+        )
       : [];
 
-  if (normalized.length) {
-    return normalized;
+  const normalized = [];
+
+  let hasListingSlot =
+    false;
+
+  source.forEach(
+    (
+      slot,
+      index
+    ) => {
+      if (
+        slot === null ||
+        slot === undefined
+      ) {
+        return;
+      }
+
+      const rawSlot =
+        typeof slot === "object"
+          ? slot
+          : {
+              face:
+                Number(slot)
+            };
+
+      /*
+       * Legacy slot data did not contain
+       * a type. A face-1 slot represented
+       * the Listing Card.
+       */
+      const isListingSlot =
+        rawSlot.type ===
+          IXI_CONSOLE_SLOT_TYPES
+            .LISTING ||
+        String(
+          rawSlot.slotId || ""
+        ) ===
+          IXI_CONSOLE_LISTING_SLOT_ID ||
+        (
+          !rawSlot.type &&
+          Number(rawSlot.face) === 1 &&
+          !hasListingSlot
+        );
+
+      if (
+        isListingSlot &&
+        !hasListingSlot
+      ) {
+        normalized.push(
+          createConsoleSlot({
+            type:
+              IXI_CONSOLE_SLOT_TYPES
+                .LISTING
+          })
+        );
+
+        hasListingSlot =
+          true;
+
+        return;
+      }
+
+      normalized.push(
+        createConsoleSlot({
+          slotId:
+            rawSlot.slotId ||
+            `module-${index + 1}`,
+
+          type:
+            IXI_CONSOLE_SLOT_TYPES
+              .MODULE,
+
+          face:
+            normalizeModuleFace(
+              rawSlot.face,
+              defaultFace
+            )
+        })
+      );
+    }
+  );
+
+  if (!hasListingSlot) {
+    normalized.unshift(
+      createConsoleSlot({
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .LISTING
+      })
+    );
   }
 
-  return [
-    createConsoleSlot({
-      slotId: "slot-1",
-      face: defaultFace
-    })
-  ];
+  /*
+   * Defensive guarantee:
+   * one Listing Card only.
+   */
+  let listingSeen =
+    false;
+
+  const uniqueSlots =
+    normalized.filter(slot => {
+      if (
+        slot.type !==
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+      ) {
+        return true;
+      }
+
+      if (listingSeen) {
+        return false;
+      }
+
+      listingSeen = true;
+
+      return true;
+    });
+
+  return uniqueSlots.slice(
+    0,
+    normalizedMaxSlots
+  );
 }
 
 export function getConsoleSlots(
@@ -302,10 +483,57 @@ export function getConsoleSlots(
   );
 }
 
+/* ===================================== */
+/* DEFAULT FACE SEQUENCE                 */
+/* ===================================== */
+
+export function getNextConsoleDefaultFace(
+  slots = [],
+  {
+    faces =
+      IXI_CONSOLE_MODULE_FACES
+  } = {}
+) {
+  const validFaces =
+    Array.isArray(faces) &&
+    faces.length
+      ? faces
+      : IXI_CONSOLE_MODULE_FACES;
+
+  const current =
+    normalizeConsoleSlots(
+      slots
+    );
+
+  const moduleCount =
+    current.filter(
+      slot =>
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .MODULE
+    ).length;
+
+  return normalizeModuleFace(
+    validFaces[
+      moduleCount %
+      validFaces.length
+    ]
+  );
+}
+
+/* ===================================== */
+/* SLOT INSERTION                        */
+/* ===================================== */
+
 export function insertConsoleSlot({
   slots = [],
+
+  side,
+
   afterSlotId,
-  face = IXI_CONSOLE_DEFAULT_FACE,
+
+  face,
+
   maxSlots =
     IXI_CONSOLE_MAX_DEPTH
 }) {
@@ -318,37 +546,86 @@ export function insertConsoleSlot({
     );
 
   if (
-    current.length >= maxSlots
+    current.length >=
+    maxSlots
   ) {
     return current;
   }
 
-  const index =
-    current.findIndex(
-      slot =>
-        String(slot.slotId) ===
-        String(afterSlotId)
+  const resolvedFace =
+    normalizeModuleFace(
+      face,
+      getNextConsoleDefaultFace(
+        current
+      )
     );
 
-  const insertIndex =
-    index === -1
-      ? current.length
-      : index + 1;
-
-  const next = [
-    ...current
-  ];
-
-  next.splice(
-    insertIndex,
-    0,
+  const nextSlot =
     createConsoleSlot({
-      face
-    })
-  );
+      type:
+        IXI_CONSOLE_SLOT_TYPES
+          .MODULE,
 
-  return next;
+      face:
+        resolvedFace
+    });
+
+  /*
+   * New outside-edge API.
+   */
+  if (side === "left") {
+    return [
+      nextSlot,
+      ...current
+    ];
+  }
+
+  if (side === "right") {
+    return [
+      ...current,
+      nextSlot
+    ];
+  }
+
+  /*
+   * Compatibility with the previous
+   * afterSlotId insertion API.
+   */
+  if (afterSlotId) {
+    const index =
+      current.findIndex(
+        slot =>
+          String(slot.slotId) ===
+          String(afterSlotId)
+      );
+
+    const insertIndex =
+      index === -1
+        ? current.length
+        : index + 1;
+
+    const next = [
+      ...current
+    ];
+
+    next.splice(
+      insertIndex,
+      0,
+      nextSlot
+    );
+
+    return next;
+  }
+
+  return [
+    ...current,
+    nextSlot
+  ];
 }
+
+/* ===================================== */
+/* SLOT REMOVAL                          */
+/* ===================================== */
 
 export function removeConsoleSlot({
   slots = [],
@@ -359,33 +636,54 @@ export function removeConsoleSlot({
       slots
     );
 
+  const target =
+    current.find(
+      slot =>
+        String(slot.slotId) ===
+        String(slotId)
+    );
+
+  if (!target) {
+    return current;
+  }
+
+  /*
+   * The Listing Card is permanent.
+   */
   if (
-    current.length <= 1
+    target.type ===
+    IXI_CONSOLE_SLOT_TYPES.LISTING
   ) {
     return current;
   }
 
-  const next =
-    current.filter(
-      slot =>
-        String(slot.slotId) !==
-        String(slotId)
-    );
-
-  return next.length
-    ? next
-    : current;
+  return current.filter(
+    slot =>
+      String(slot.slotId) !==
+      String(slotId)
+  );
 }
+
+/* ===================================== */
+/* MODULE FACE CYCLING                   */
+/* ===================================== */
 
 export function cycleConsoleSlotFace({
   slots = [],
   slotId,
-  maxFace = 4
+  faces =
+    IXI_CONSOLE_MODULE_FACES
 }) {
   const current =
     normalizeConsoleSlots(
       slots
     );
+
+  const validFaces =
+    Array.isArray(faces) &&
+    faces.length
+      ? faces
+      : IXI_CONSOLE_MODULE_FACES;
 
   return current.map(slot => {
     if (
@@ -395,23 +693,43 @@ export function cycleConsoleSlotFace({
       return slot;
     }
 
-    const currentFace =
-      Math.max(
-        1,
-        Number(slot.face) || 1
+    /*
+     * The Listing Card does not cycle
+     * through module faces here.
+     */
+    if (
+      slot.type ===
+      IXI_CONSOLE_SLOT_TYPES.LISTING
+    ) {
+      return slot;
+    }
+
+    const currentIndex =
+      validFaces.findIndex(
+        face =>
+          Number(face) ===
+          Number(slot.face)
       );
 
-    const nextFace =
-      currentFace >= maxFace
-        ? 1
-        : currentFace + 1;
+    const nextIndex =
+      currentIndex === -1 ||
+      currentIndex >=
+        validFaces.length - 1
+        ? 0
+        : currentIndex + 1;
 
     return {
       ...slot,
-      face: nextFace
+
+      face:
+        validFaces[nextIndex]
     };
   });
 }
+
+/* ===================================== */
+/* PERSISTENCE PATCH                     */
+/* ===================================== */
 
 export function createConsoleSlotsPatch(
   slots = []
@@ -435,4 +753,3 @@ export function createConsoleSlotsPatch(
       Date.now()
   };
 }
-
