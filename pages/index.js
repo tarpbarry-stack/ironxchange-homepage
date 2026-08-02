@@ -103,8 +103,7 @@ export default function Home() {
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
 
- const [cardScaleMode, setCardScaleMode] =
-  useState("xl");
+ const cardScaleMode = "xl";
   
   const [activeDndId, setActiveDndId] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -605,8 +604,11 @@ return (
     cardScaleMode={cardScaleMode}
   >
    <IXIBoardSurface
-  scaleMode={cardScaleMode}
+  scaleMode="xl"
+  columnGap={22}
+  rowGap={22}
 >
+    
   <IXIBoard
     items={visibleListings}
     cardContext="marketplace"
