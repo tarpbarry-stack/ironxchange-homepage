@@ -391,7 +391,9 @@ const consoleNativeWidth =
   );
 
 const consoleNativeHeight =
-  471;
+  isAuctionCard
+    ? 471
+    : 391;
 
 const assembledConsole = (
   <div
@@ -545,9 +547,13 @@ const assembledConsole = (
 );
 
 return enableCardScaling ? (
-  <IXIScaledCardShell
+ <IXIScaledCardShell
   size={cardScaleMode}
-  objectFamily="auction"
+  objectFamily={
+    isAuctionCard
+      ? "auction"
+      : "marketplace"
+  }
   nativeWidth={
     consoleNativeWidth
   }
