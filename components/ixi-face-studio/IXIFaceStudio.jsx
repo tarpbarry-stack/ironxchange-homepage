@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import IXIFacePreview
+  from "./IXIFacePreview";
+
 const FACE_TREE = [
   {
     title: "AUCTION",
@@ -79,12 +82,11 @@ export default function IXIFaceStudio() {
 
         <div className="preview-stage">
 
-  <div className="preview-shell">
-
-    {/* LIVE FACE GOES HERE */}
-
-  </div>
-
+ <div className="preview-shell">
+  <IXIFacePreview
+    face={selectedFace}
+  />
+</div>
 </div>
 
       </section>
