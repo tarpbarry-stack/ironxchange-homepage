@@ -1,67 +1,52 @@
-import IXIAuctionObjectFace1
-  from "./IXIAuctionObjectFace1";
+import IXISellerMachineObjectFace2
+  from "../ixi-machine-object/IXISellerMachineObjectFace2";
 
-import IXIAuctionObjectFace2
-  from "./IXIAuctionObjectFace2";
+import IXIMachineObjectFace3
+  from "../ixi-machine-object/IXIMachineObjectFace3";
 
-import IXIAuctionObjectFace3
-  from "./IXIAuctionObjectFace3";
+import IXIMachineObjectFace4
+  from "../ixi-machine-object/IXIMachineObjectFace4";
 
-import IXIAuctionObjectFace4
-  from "./IXIAuctionObjectFace4";
+function normalizePrivateFace(
+  value,
+  fallback = 2
+) {
+  const face =
+    Number(value);
 
-export function renderAuctionPanel({
-  face = 1,
+  return [
+    2,
+    3,
+    4
+  ].includes(face)
+    ? face
+    : fallback;
+}
 
+export function renderPrivatePanel({
+  face,
   listing = {},
-  sourceListingUrl = "",
-  from = "browse",
-
-  handleCardClick,
-
   dragHandleProps,
 
-  lotNumberValue,
-  onLotNumberChange,
-  onLotNumberKeyDown,
-
-  hoursValue,
-  onHoursChange,
-  onHoursKeyDown,
-
-  priceValue,
-  onPriceChange,
-  onPriceKeyDown,
-
-  locationValue,
-  onLocationChange,
-  onLocationKeyDown,
-
-  dealerBidPack = {},
-  onSaveDealerBidPack,
-
-  auctionDispositionBusy = "",
-  onAuctionDisposition
+  descriptionValue,
+  onDescriptionChange,
+  onDescriptionKeyDown,
+  savingDescription = false
 }) {
   const normalizedFace =
-    Number(face) === 4
-      ? 4
-      : Number(face) === 3
-        ? 3
-        : Number(face) === 2
-          ? 2
-          : 1;
+    normalizePrivateFace(
+      face
+    );
 
-  if (normalizedFace === 4) {
+  if (
+    normalizedFace === 3
+  ) {
     return (
-      <IXIAuctionObjectFace4
-        listing={listing}
-        dispositionBusy={
-          auctionDispositionBusy
+      <IXIMachineObjectFace3
+        listing={
+          listing
         }
-        onAuctionDisposition={
-          onAuctionDisposition
-        }
+
         dragHandleProps={
           dragHandleProps
         }
@@ -69,117 +54,46 @@ export function renderAuctionPanel({
     );
   }
 
-  if (normalizedFace === 3) {
+  if (
+    normalizedFace === 4
+  ) {
     return (
-      <IXIAuctionObjectFace3
-        listing={listing}
-        dealerBidPack={
-          dealerBidPack
+      <IXIMachineObjectFace4
+        listing={
+          listing
         }
-        onSaveDealerBidPack={
-          onSaveDealerBidPack
-        }
+
         dragHandleProps={
           dragHandleProps
-        }
-      />
-    );
-  }
-
-  if (normalizedFace === 2) {
-    return (
-      <IXIAuctionObjectFace2
-        listing={listing}
-        sourceListingUrl={
-          sourceListingUrl
-        }
-        dragHandleProps={
-          dragHandleProps
-        }
-
-        sellerMode={true}
-
-        lotNumberValue={
-          lotNumberValue
-        }
-        onLotNumberChange={
-          onLotNumberChange
-        }
-        onLotNumberKeyDown={
-          onLotNumberKeyDown
-        }
-
-        hoursValue={
-          hoursValue
-        }
-        onHoursChange={
-          onHoursChange
-        }
-        onHoursKeyDown={
-          onHoursKeyDown
-        }
-
-        openingBidValue={
-          priceValue
-        }
-        onOpeningBidChange={
-          onPriceChange
-        }
-        onOpeningBidKeyDown={
-          onPriceKeyDown
         }
       />
     );
   }
 
   return (
-    <IXIAuctionObjectFace1
-      listing={listing}
-      from={from}
-      onListingClick={
-        handleCardClick
+    <IXISellerMachineObjectFace2
+      listing={
+        listing
       }
 
-      sellerMode={true}
-
-      lotNumberValue={
-        lotNumberValue
-      }
-      onLotNumberChange={
-        onLotNumberChange
-      }
-      onLotNumberKeyDown={
-        onLotNumberKeyDown
+      dragHandleProps={
+        dragHandleProps
       }
 
-      hoursValue={
-        hoursValue
-      }
-      onHoursChange={
-        onHoursChange
-      }
-      onHoursKeyDown={
-        onHoursKeyDown
+      descriptionValue={
+        descriptionValue
       }
 
-      priceValue={
-        priceValue
-      }
-      onPriceChange={
-        onPriceChange
-      }
-      onPriceKeyDown={
-        onPriceKeyDown
+      onDescriptionChange={
+        onDescriptionChange
       }
 
-      locationValue={
-        locationValue
+      onDescriptionKeyDown={
+        onDescriptionKeyDown
       }
-      onLocationChange={
-        onLocationChange
-      }
-      onLocationKeyDown={
-        onLocationKeyDown
+
+      savingDescription={
+        savingDescription
       }
     />
   );
