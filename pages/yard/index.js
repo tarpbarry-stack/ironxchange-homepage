@@ -39,6 +39,8 @@ import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
+import IXIBoardSurface
+  from "../../components/ixi-chassis/IXIBoardSurface";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
@@ -1981,26 +1983,16 @@ if (
   cardScaleMode={cardScaleMode}
 />
               
-    <section
-  data-board-target="board"
-  className={`cards ${
-    visibleSellerListings.length === 1 ? "single-card" : ""
-  }`}
-  style={{
-  gridTemplateColumns:
-    visibleSellerListings.length === 1
-      ? `${cardScaleMetrics.width}px`
-      : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-  gap: `${cardScaleMetrics.gap}px`
-}}
+   <IXIBoardSurface
+  scaleMode={cardScaleMode}
 >
-
 {console.log(
   "VISIBLE SELLER OBJECT",
   visibleSellerListings[0]
 )}
   
   <IXIBoard
+  cardContext="marketplace"
   items={visibleSellerListings}
   onRecoverSellerObject={recoverSellerObject}
   onCheckoutObject={checkoutObjectToContainer}
@@ -2022,7 +2014,7 @@ if (
   cardScaleMode={cardScaleMode}
   cardScaleMetrics={cardScaleMetrics}
     />
-        </section>
+        </IXIBoardSurface>
 
 <button
   type="button"
@@ -3559,24 +3551,6 @@ outline: none;
   transform: translateX(8px);
 }
 
-        .cards {
-          max-width: 1920px;
-          margin: 0 auto;
-
-          min-height: 260px;
-
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-          gap: 22px;
-          align-items: start;
-          justify-content: center;
-        }
-
-        .cards.single-card {
-          grid-template-columns: minmax(250px, 300px);
-          justify-content: center;
-        }
-
         :global(.ixi-drag-overlay-card) {
   width: 300px;
   max-width: 300px;
@@ -3713,14 +3687,6 @@ outline: none;
     margin-top: 6px;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .cards.single-card {
-    grid-template-columns: 1fr;
-  }
 }
        
       `}</style>
