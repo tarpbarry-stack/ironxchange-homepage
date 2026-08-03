@@ -5,8 +5,8 @@ import IXIObjectCardActuator
   from "../ixi-chassis/IXIObjectCardActuator";
 
 import {
-  renderAuctionPanel
-} from "./IXIAuctionConsolePanels";
+  renderPrivatePanel
+} from "./IXIPrivateConsolePanels";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
@@ -20,13 +20,13 @@ import {
   createConsoleSlotsPatch
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 
-const AUCTION_NATIVE_PANEL_WIDTH =
+const PRIVATE_NATIVE_PANEL_WIDTH =
   298;
 
-const AUCTION_NATIVE_HEIGHT =
+const PRIVATE_NATIVE_HEIGHT =
   471;
 
-const AUCTION_SEAM_OVERLAP =
+const PRIVATE_SEAM_OVERLAP =
   0;
 
 function getLegacyConsoleSlots(
@@ -81,7 +81,7 @@ function getLegacyConsoleSlots(
   );
 }
 
-export default function IXIAuctionObjectConsole({
+export default function IXIPrivateObjectConsole({
   objectId,
   item,
 
@@ -143,20 +143,22 @@ export default function IXIAuctionObjectConsole({
   const consoleNativeWidth =
     (
       consoleDepth *
-      AUCTION_NATIVE_PANEL_WIDTH
+      PRIVATE_NATIVE_PANEL_WIDTH
     ) -
     (
       Math.max(
         consoleDepth - 1,
         0
       ) *
-      AUCTION_SEAM_OVERLAP
+      PRIVATE_SEAM_OVERLAP
     );
 
   function patchObjectState(
     patch = {}
   ) {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     updateIxiCardState?.(
       id,
@@ -186,7 +188,9 @@ export default function IXIAuctionObjectConsole({
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    if (atCapacity) return;
+    if (atCapacity) {
+      return;
+    }
 
     const face =
       getNextConsoleDefaultFace(
@@ -251,7 +255,6 @@ export default function IXIAuctionObjectConsole({
     );
   }
 
-
   function renderModuleSlot(
     slot,
     slotIndex
@@ -283,20 +286,21 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
+
         className="
-          ixi-auction-console-slot
-          ixi-auction-console-module-slot
+          ixi-private-console-slot
+          ixi-private-console-module-slot
         "
       >
-        <div className="ixi-auction-console-module-card">
+        <div className="ixi-private-console-module-card">
           <IXIObjectCardActuator
             side={
               closeActuatorSide
             }
 
-            label="Close auction module"
+            label="Close private module"
 
-            title="Close auction module"
+            title="Close private module"
 
             onClick={event =>
               removeConsoleModule(
@@ -310,9 +314,9 @@ export default function IXIAuctionObjectConsole({
             <IXIObjectCardActuator
               side="left"
 
-              label="Add auction module left"
+              label="Add private module left"
 
-              title="Add auction module left"
+              title="Add private module left"
 
               onClick={event =>
                 addConsoleModule(
@@ -327,9 +331,9 @@ export default function IXIAuctionObjectConsole({
             <IXIObjectCardActuator
               side="right"
 
-              label="Add auction module right"
+              label="Add private module right"
 
-              title="Add auction module right"
+              title="Add private module right"
 
               onClick={event =>
                 addConsoleModule(
@@ -340,100 +344,128 @@ export default function IXIAuctionObjectConsole({
             />
           ) : null}
 
-         {renderAuctionPanel({
-  face:
-    slot.face,
+          {renderPrivatePanel({
+            face:
+              slot.face,
 
-  listing:
-    item,
+            listing:
+              item,
 
-  sourceListingUrl:
-    sellerCardProps
-      .sourceListingUrl ||
-    "",
+            dragHandleProps,
 
-  dragHandleProps,
+            sellerCardProps,
 
-  lotNumberValue:
-    sellerCardProps
-      .lotNumberValue,
+            sourceListingUrl:
+              sellerCardProps
+                .sourceListingUrl ||
+              "",
 
-  onLotNumberChange:
-    sellerCardProps
-      .onLotNumberChange,
+            priceValue:
+              sellerCardProps
+                .priceValue,
 
-  onLotNumberKeyDown:
-    sellerCardProps
-      .onLotNumberKeyDown,
+            onPriceChange:
+              sellerCardProps
+                .onPriceChange,
 
-  hoursValue:
-    sellerCardProps
-      .hoursValue,
+            onPriceKeyDown:
+              sellerCardProps
+                .onPriceKeyDown,
 
-  onHoursChange:
-    sellerCardProps
-      .onHoursChange,
+            savingPrice:
+              sellerCardProps
+                .savingPrice,
 
-  onHoursKeyDown:
-    sellerCardProps
-      .onHoursKeyDown,
+            hoursValue:
+              sellerCardProps
+                .hoursValue,
 
-  priceValue:
-    sellerCardProps
-      .priceValue,
+            onHoursChange:
+              sellerCardProps
+                .onHoursChange,
 
-  onPriceChange:
-    sellerCardProps
-      .onPriceChange,
+            onHoursKeyDown:
+              sellerCardProps
+                .onHoursKeyDown,
 
-  onPriceKeyDown:
-    sellerCardProps
-      .onPriceKeyDown,
+            descriptionValue:
+              sellerCardProps
+                .descriptionValue,
 
-  locationValue:
-    sellerCardProps
-      .locationValue,
+            onDescriptionChange:
+              sellerCardProps
+                .onDescriptionChange,
 
-  onLocationChange:
-    sellerCardProps
-      .onLocationChange,
+            onDescriptionKeyDown:
+              sellerCardProps
+                .onDescriptionKeyDown,
 
-  onLocationKeyDown:
-    sellerCardProps
-      .onLocationKeyDown,
+            savingDescription:
+              sellerCardProps
+                .savingDescription,
 
-  dealerBidPack:
-    sellerCardProps
-      .dealerBidPack ||
-    {},
+            locationValue:
+              sellerCardProps
+                .locationValue,
 
-  onSaveDealerBidPack:
-    sellerCardProps
-      .onSaveDealerBidPack,
+            onLocationChange:
+              sellerCardProps
+                .onLocationChange,
 
-  auctionDispositionBusy:
-    sellerCardProps
-      .auctionDispositionBusy ||
-    "",
+            onLocationKeyDown:
+              sellerCardProps
+                .onLocationKeyDown,
 
-  onAuctionDisposition:
-    sellerCardProps
-      .onAuctionDisposition
-})}
+            machineAccess:
+              sellerCardProps
+                .machineAccess,
+
+            machineChannel:
+              sellerCardProps
+                .machineChannel,
+
+            machinePlacementBusy:
+              sellerCardProps
+                .machinePlacementBusy,
+
+            onMachinePlacementChange:
+              sellerCardProps
+                .onMachinePlacementChange,
+
+            isPaused:
+              sellerCardProps
+                .isPaused,
+
+            onEdit:
+              sellerCardProps
+                .onEdit,
+
+            onPause:
+              sellerCardProps
+                .onPause,
+
+            onReactivate:
+              sellerCardProps
+                .onReactivate,
+
+            onDelete:
+              sellerCardProps
+                .onDelete
+          })}
 
           <button
             type="button"
 
             className="
-              ixi-auction-console-face-button
+              ixi-private-console-face-button
             "
 
             aria-label={
-              `Change auction face ${slot.face}`
+              `Change private face ${slot.face}`
             }
 
             title={
-              `Auction face ${slot.face}`
+              `Private face ${slot.face}`
             }
 
             onPointerDown={event => {
@@ -473,9 +505,10 @@ export default function IXIAuctionObjectConsole({
       isLastSlot;
 
     /*
-     * At capacity, both parent actuators
-     * must disappear even when the Listing
-     * Card occupies an outside position.
+     * When the console reaches capacity,
+     * both parent expansion actuators must
+     * disappear regardless of the Listing
+     * Card's current slot position.
      */
     const parentConsoleLeftOpen =
       consoleLeftOpen ||
@@ -520,9 +553,10 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
+
         className="
-          ixi-auction-console-slot
-          ixi-auction-console-listing-slot
+          ixi-private-console-slot
+          ixi-private-console-listing-slot
         "
       >
         {parentCard}
@@ -533,7 +567,7 @@ export default function IXIAuctionObjectConsole({
   const assembledConsole = (
     <div
       className="
-        ixi-auction-object-console
+        ixi-private-object-console
       "
 
       style={{
@@ -575,7 +609,7 @@ export default function IXIAuctionObjectConsole({
       )}
 
       <style jsx global>{`
-        .ixi-auction-object-console {
+        .ixi-private-object-console {
           position: relative;
 
           display: flex;
@@ -587,70 +621,70 @@ export default function IXIAuctionObjectConsole({
           overflow: visible;
         }
 
-        .ixi-auction-console-slot {
+        .ixi-private-console-slot {
           position: relative;
 
           flex:
             0 0
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           overflow: visible;
         }
 
-        .ixi-auction-console-slot +
-        .ixi-auction-console-slot {
+        .ixi-private-console-slot +
+        .ixi-private-console-slot {
           margin-left:
-            -${AUCTION_SEAM_OVERLAP}px;
+            -${PRIVATE_SEAM_OVERLAP}px;
         }
 
-        .ixi-auction-console-listing-slot {
+        .ixi-private-console-listing-slot {
           z-index: 5;
         }
 
-        .ixi-auction-console-module-slot {
+        .ixi-private-console-module-slot {
           z-index: 4;
         }
 
-        .ixi-auction-console-module-card {
+        .ixi-private-console-module-card {
           box-sizing: border-box;
 
           position: relative;
 
           width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${PRIVATE_NATIVE_PANEL_WIDTH}px;
 
           height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${PRIVATE_NATIVE_HEIGHT}px;
 
           border:
             1px solid
@@ -700,7 +734,7 @@ export default function IXIAuctionObjectConsole({
           overflow: visible;
         }
 
-        .ixi-auction-console-face-button {
+        .ixi-private-console-face-button {
           position: absolute;
 
           left: 50%;
@@ -749,7 +783,7 @@ export default function IXIAuctionObjectConsole({
               );
         }
 
-        .ixi-auction-console-face-button:hover {
+        .ixi-private-console-face-button:hover {
           background:
             rgba(
               255,
@@ -773,16 +807,18 @@ export default function IXIAuctionObjectConsole({
 
   return enableCardScaling ? (
     <IXIScaledCardShell
-      size={cardScaleMode}
+      size={
+        cardScaleMode
+      }
 
-      objectFamily="auction"
+      objectFamily="private"
 
       nativeWidth={
         consoleNativeWidth
       }
 
       nativeHeight={
-        AUCTION_NATIVE_HEIGHT
+        PRIVATE_NATIVE_HEIGHT
       }
     >
       {assembledConsole}
