@@ -289,55 +289,58 @@ export default function IXIAuctionObjectConsole({
         "
       >
         <div className="ixi-auction-console-module-card">
-          <IXIObjectCardActuator
-            side={
-              closeActuatorSide
-            }
+         <IXIObjectCardActuator
+  side={
+    closeActuatorSide
+  }
 
-            label="Close auction module"
+  variant="tall"
 
-            title="Close auction module"
+  label="Close auction module"
+  title="Close auction module"
 
-            onClick={event =>
-              removeConsoleModule(
-                slot.slotId,
-                event
-              )
-            }
-          />
+  onClick={event =>
+    removeConsoleModule(
+      slot.slotId,
+      event
+    )
+  }
+/>
 
           {showLeftExpansion ? (
             <IXIObjectCardActuator
-              side="left"
+  side="left"
 
-              label="Add auction module left"
+  variant="tall"
 
-              title="Add auction module left"
+  label="Add auction module left"
+  title="Add auction module left"
 
-              onClick={event =>
-                addConsoleModule(
-                  "left",
-                  event
-                )
-              }
-            />
+  onClick={event =>
+    addConsoleModule(
+      "left",
+      event
+    )
+  }
+/>
           ) : null}
 
           {showRightExpansion ? (
-            <IXIObjectCardActuator
-              side="right"
+           <IXIObjectCardActuator
+  side="right"
 
-              label="Add auction module right"
+  variant="tall"
 
-              title="Add auction module right"
+  label="Add auction module right"
+  title="Add auction module right"
 
-              onClick={event =>
-                addConsoleModule(
-                  "right",
-                  event
-                )
-              }
-            />
+  onClick={event =>
+    addConsoleModule(
+      "right",
+      event
+    )
+  }
+/>
           ) : null}
 
          {renderAuctionPanel({
