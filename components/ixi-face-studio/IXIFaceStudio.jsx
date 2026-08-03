@@ -3,6 +3,9 @@ import { useState } from "react";
 import IXIFacePreview
   from "./IXIFacePreview";
 
+import IXIFaceReferenceOverlay
+  from "./IXIFaceReferenceOverlay";
+
 const FACE_TREE = [
   {
     title: "AUCTION",
@@ -37,6 +40,11 @@ export default function IXIFaceStudio() {
     previewSize,
     setPreviewSize
   ] = useState("tall");
+
+  const [
+  referenceOverlayVisible,
+  setReferenceOverlayVisible
+] = useState(true);
 
   function cycleSelectedFace() {
     const activeGroup =
@@ -143,6 +151,21 @@ export default function IXIFaceStudio() {
       onClick={() =>
         setPreviewSize("tall")
       }
+<button
+  type="button"
+  className={
+    referenceOverlayVisible
+      ? "active"
+      : ""
+  }
+  onClick={() =>
+    setReferenceOverlayVisible(
+      current => !current
+    )
+  }
+>
+  GRID
+</button>      
     >
       TALL
     </button>
@@ -152,11 +175,18 @@ export default function IXIFaceStudio() {
         <div className="preview-stage">
 
  <div className="preview-shell">
- <IXIFacePreview
-  face={selectedFace}
-  previewSize={previewSize}
-  onCycleFace={cycleSelectedFace}
-/>
+  <IXIFacePreview
+    face={selectedFace}
+    previewSize={previewSize}
+    onCycleFace={cycleSelectedFace}
+  />
+
+  {referenceOverlayVisible ? (
+    <IXIFaceReferenceOverlay
+      previewSize={previewSize}
+      railHeight={19}
+    />
+  ) : null}
 </div>
 </div>
 
@@ -305,6 +335,7 @@ export default function IXIFaceStudio() {
         }
 
 .preview-shell{
+ position: relative;
 
 width: 298px;
   min-height: 0;
@@ -316,7 +347,7 @@ width: 298px;
 
   border-radius:13px;
 
-  overflow:hidden;
+overflow: visible;
 
   background:#141414;
 
