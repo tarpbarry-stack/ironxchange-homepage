@@ -810,7 +810,7 @@ style={getFrameStyle(currentImageObject, "card")}
           outline: 1px solid rgba(255,255,255,.018);
 
           border-radius: 13px;
-          overflow: hidden;
+          overflow: visible;
 
           background:
             linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
@@ -826,7 +826,7 @@ style={getFrameStyle(currentImageObject, "card")}
   background .16s ease,
   box-shadow .16s ease;
 
-          contain: layout paint;
+          contain: layout;
         }
 
 .ixi-action-card-notice {
