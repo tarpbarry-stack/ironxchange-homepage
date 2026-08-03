@@ -2907,24 +2907,6 @@ outline: none;
   transform: translateX(8px);
 }
 
-        .cards {
-          max-width: 1920px;
-          margin: 0 auto;
-
-          min-height: 260px;
-
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-          gap: 22px;
-          align-items: start;
-          justify-content: center;
-        }
-
-        .cards.single-card {
-          grid-template-columns: minmax(250px, 300px);
-          justify-content: center;
-        }
-
         :global(.ixi-drag-overlay-card) {
   width: 300px;
   max-width: 300px;
@@ -3061,14 +3043,6 @@ outline: none;
     margin-top: 6px;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .cards.single-card {
-    grid-template-columns: 1fr;
-  }
 }
        
       `}</style>
