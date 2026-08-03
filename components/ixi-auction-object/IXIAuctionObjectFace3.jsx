@@ -3,8 +3,11 @@ import {
   useState
 } from "react";
 
-import IXIMachineObjectActions
-  from "../ixi-machine-object/IXIMachineObjectActions";
+import IXIFaceFrame
+  from "../ixi-face-studio/IXIFaceFrame";
+
+import IXIFaceActionFooter
+  from "../ixi-face-studio/IXIFaceActionFooter";
 
 import {
   getAuctionData,
@@ -540,10 +543,16 @@ function saveBidPack() {
     );
 
   return (
-    <section
-      className="aof3"
-      {...(dragHandleProps || {})}
-    >
+  <IXIFaceFrame
+    className="aof3"
+    size="tall"
+    dragHandleProps={
+      dragHandleProps
+    }
+    footer={
+      <IXIFaceActionFooter />
+    }
+  >
       <header className="aof3-head">
         <span>
           PRIVATE DEALER WORKSHEET
@@ -750,11 +759,7 @@ function saveBidPack() {
             )
           )}
         </div>
-     </section>
-
-<div className="aof3-actions-footer">
-  <IXIMachineObjectActions />
-</div>
+</section>
 
 <style jsx>{`
         .aof3,
@@ -1733,6 +1738,6 @@ function BidScenario({
   height: 26px;
 }
       `}</style>
-    </div>
+    </IXIFaceFrame>
   );
 }
