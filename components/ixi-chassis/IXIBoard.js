@@ -280,6 +280,13 @@ return (
                 cardContext
               }
 
+consoleActuatorVariant={
+  cardContext === "inventory" ||
+  cardContext === "enterprise"
+    ? "tall"
+    : "compact"
+}
+
               consoleDepth={
                 activeConsoleDepth
               }
