@@ -1457,14 +1457,18 @@ toggleSearchSurfaceRevealed
   sendListingToFront={sendListingToFront}
   sendListingToBack={sendListingToBack}
   armedDestination={armedDestination}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
+  sendMachineToArmedDestination={
+    sendMachineToArmedDestination
+  }
   draggingListingId={draggingListingId}
   ghostListingId={ghostListingId}
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
-  getSellerListingCardProps={getSellerListingCardProps}
-    
-    </IXIBoardSurface>
+  getSellerListingCardProps={
+    getSellerListingCardProps
+  }
+/>
+</IXIBoardSurface>
     
 <button
   type="button"
