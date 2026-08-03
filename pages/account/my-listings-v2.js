@@ -38,6 +38,8 @@ import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
 import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
+import IXIBoardSurface
+  from "../../components/ixi-chassis/IXIBoardSurface";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
@@ -1439,19 +1441,8 @@ toggleSearchSurfaceRevealed
   getSellerListingCardProps={getSellerListingCardProps}
 />
               
-     <section
-  data-board-target="board"
-  className={`cards ${
-    visibleSavedListings.length === 1 ? "single-card" : ""
-  }`}
- style={{
-  gridTemplateColumns:
-    visibleSavedListings.length === 1
-      ? `${cardScaleMetrics.width}px`
-      : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-  columnGap: `${cardScaleMetrics.gap}px`,
-  rowGap: `${cardScaleMetrics.gap + 90}px`
-}}
+     <IXIBoardSurface
+  scaleMode={cardScaleMode}
 >
 <IXIBoard
   items={visibleSavedListings}
@@ -1472,9 +1463,9 @@ toggleSearchSurfaceRevealed
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
   getSellerListingCardProps={getSellerListingCardProps}
-    />
-        </section>
-
+    
+    </IXIBoardSurface>
+    
 <button
   type="button"
   onClick={cycleCardScaleMode}
