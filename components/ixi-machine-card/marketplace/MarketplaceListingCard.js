@@ -435,27 +435,39 @@ function handlePhotoLoad(e, photoUrl) {
 {typeof onExpandConsoleLeft ===
   "function" &&
 !consoleLeftOpen ? (
-  <IXIObjectCardActuator
-    side="left"
-    label="Open marketplace console left"
-    title="Open marketplace console left"
-    onClick={
-      onExpandConsoleLeft
-    }
-  />
+ <IXIObjectCardActuator
+  side="left"
+
+  variant={
+    consoleActuatorVariant
+  }
+
+  label="Open marketplace console left"
+  title="Open marketplace console left"
+
+  onClick={
+    onExpandConsoleLeft
+  }
+/>
 ) : null}
 
 {typeof onExpandConsoleRight ===
   "function" &&
 !consoleRightOpen ? (
-  <IXIObjectCardActuator
-    side="right"
-    label="Open marketplace console right"
-    title="Open marketplace console right"
-    onClick={
-      onExpandConsoleRight
-    }
-  />
+ <IXIObjectCardActuator
+  side="right"
+
+  variant={
+    consoleActuatorVariant
+  }
+
+  label="Open marketplace console right"
+  title="Open marketplace console right"
+
+  onClick={
+    onExpandConsoleRight
+  }
+/>
 ) : null}
 
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
@@ -830,11 +842,6 @@ style={getFrameStyle(currentImageObject, "card")}
 
           contain: layout;
         }
-
-  .card.console-actuator-tall
-  :global(.ixi-object-card-actuator) {
-  top: 402px;
-}
 
 .ixi-action-card-notice {
   position: absolute;
