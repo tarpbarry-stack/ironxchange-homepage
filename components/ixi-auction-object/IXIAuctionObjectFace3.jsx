@@ -18,6 +18,9 @@ import IXIFaceSummaryCard
 import IXIFaceSection
   from "../ixi-face-studio/IXIFaceSection";
 
+import IXIFaceRow
+  from "../ixi-face-studio/IXIFaceRow";
+
 import {
   getAuctionData,
   getAuctionTermsData,
@@ -983,152 +986,21 @@ function saveBidPack() {
   min-width: 0;
 }
 
-        :global(.aof3-row) {
-          min-height: 17px;
-
-          display: grid;
-
-          grid-template-columns:
-            61px
-            minmax(0, 1fr);
-
-          align-items: center;
-
-          gap: 4px;
-
-          border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .035
-            );
-        }
-
-        :global(.aof3-row:last-child) {
-          border-bottom: 0;
-        }
-
-        :global(.aof3-label) {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .42
-            );
-
-          font-size: 6.8px;
-          font-weight: 950;
-          letter-spacing: .3px;
-
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        :global(.aof3-value) {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .84
-            );
-
-          font-size: 7.8px;
-          font-weight: 950;
-
-          text-align: right;
-          white-space: nowrap;
-        }
-
-        :global(.aof3-value.muted) {
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .84
-            );
-        }
-
-        :global(.aof3-input) {
-          width: 58px;
-          min-width: 58px;
-          max-width: 58px;
-
-          height: 14px;
-
-          justify-self: end;
-
-          border: 0;
-
-          border-bottom:
-            2px solid
-            rgba(
-              255,
-              255,
-              255,
-              .16
-            );
-
-          border-radius: 0;
-
-          background: transparent;
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .88
-            );
-
-          padding: 0 2px;
-
-          font-size: 7.8px;
-          font-weight: 950;
-
-          text-align: right;
-          outline: none;
-        }
-
-        :global(.aof3-input.emphasized) {
-          color: #ffc400;
-
-          border-bottom-color:
-            rgba(
-              255,
-              196,
-              0,
-              .48
-            );
-        }
-
-        :global(.aof3-input:focus) {
-          border-bottom-color:
-            rgba(
-              255,
-              196,
-              0,
-              .78
-            );
-
-          box-shadow:
-            0 3px 8px
-            rgba(
-              255,
-              196,
-              0,
-              .10
-            );
-        }
-
-        
+       
 
        
 
-      
+       :global(.aof3-input) {
+  width: 58px !important;
+  min-width: 58px;
+  max-width: 58px;
+
+  height: 16px;
+
+  justify-self: end;
+
+  padding: 0 2px !important;
+}
 
      
        :global(.aof3-total-grid) {
@@ -1334,40 +1206,35 @@ function Row({
   onSave
 }) {
   return (
-    <div className="aof3-row">
-      <span className="aof3-label">
-        {label}
-      </span>
-
+    <IXIFaceRow
+      label={label}
+      value={
+        input
+          ? ""
+          : value
+      }
+      muted={muted}
+      emphasized={emphasized}
+      editable={input}
+      className="aof3-row"
+    >
       {input ? (
-       <MoneyInput
-  value={value}
-  onChange={onChange}
-  onSave={onSave}
-  className={[
-    "aof3-input",
-    emphasized
-      ? "emphasized"
-      : ""
-  ]
-    .filter(Boolean)
-    .join(" ")}
-/>
-      ) : (
-        <strong
+        <MoneyInput
+          value={value}
+          onChange={onChange}
+          onSave={onSave}
           className={[
-            "aof3-value",
-            muted
-              ? "muted"
+            "aof3-input",
+
+            emphasized
+              ? "emphasized"
               : ""
           ]
             .filter(Boolean)
             .join(" ")}
-        >
-          {value}
-        </strong>
-      )}
-    </div>
+        />
+      ) : null}
+    </IXIFaceRow>
   );
 }
 
