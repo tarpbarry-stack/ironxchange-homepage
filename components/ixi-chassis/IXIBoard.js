@@ -5,8 +5,8 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
-import IXIObjectConsole
-  from "./IXIObjectConsole";
+import IXIAuctionObjectConsole
+  from "../ixi-auction-object/IXIAuctionObjectConsole";
 
 import {
   getMachineCardFamily
@@ -219,12 +219,9 @@ return (
           />
         </IXIScaledCardShell>
       ) : (
-        <IXIObjectConsole
+        <IXIAuctionObjectConsole
           objectId={id}
           item={item}
-          cardFamily={
-            cardFamily
-          }
 
           sellerCardProps={
             sellerCardProps
