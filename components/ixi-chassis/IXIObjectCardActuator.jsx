@@ -2,8 +2,23 @@ export default function IXIObjectCardActuator({
   side = "right",
   label = "",
   title = "",
-  onClick
+  onClick,
+
+  variant = "compact"
 }) {
+  const isTall =
+    variant === "tall";
+
+  const actuatorTop =
+    isTall
+      ? 402
+      : 352;
+
+  const actuatorHeight =
+    isTall
+      ? 34
+      : 17;
+
   function handleClick(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -14,34 +29,48 @@ export default function IXIObjectCardActuator({
   return (
     <button
       type="button"
+
       className={`ixi-object-card-actuator ${side}`}
-      aria-label={label || title}
-      title={title || label}
+
+      aria-label={
+        label || title
+      }
+
+      title={
+        title || label
+      }
+
       onPointerDown={event => {
         event.preventDefault();
         event.stopPropagation();
       }}
-      onClick={handleClick}
+
+      onClick={
+        handleClick
+      }
     >
       <style jsx>{`
         .ixi-object-card-actuator {
           position: absolute;
 
-          /*
-           * Listing-card control level:
-           * aligned with the price/state area,
-           * below the photo and away from drag controls.
-           */
-          top: 352px;
+          top:
+            ${actuatorTop}px;
 
           width: 5px;
-          height: 17px;
+
+          height:
+            ${actuatorHeight}px;
 
           padding: 0;
           border: 0;
 
           background:
-            rgba(255,255,255,.18);
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            );
 
           cursor: pointer;
 
@@ -50,9 +79,19 @@ export default function IXIObjectCardActuator({
 
           box-shadow:
             inset 1px 0 0
-              rgba(255,255,255,.12),
+              rgba(
+                255,
+                255,
+                255,
+                .12
+              ),
             1px 0 3px
-              rgba(0,0,0,.32);
+              rgba(
+                0,
+                0,
+                0,
+                .32
+              );
         }
 
         .ixi-object-card-actuator.right {
@@ -71,11 +110,21 @@ export default function IXIObjectCardActuator({
 
         .ixi-object-card-actuator:hover {
           background:
-            rgba(255,196,0,.95);
+            rgba(
+              255,
+              196,
+              0,
+              .95
+            );
 
           box-shadow:
             0 0 8px
-            rgba(255,196,0,.38);
+              rgba(
+                255,
+                196,
+                0,
+                .38
+              );
         }
       `}</style>
     </button>
