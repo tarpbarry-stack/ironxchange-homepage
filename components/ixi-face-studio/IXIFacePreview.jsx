@@ -480,39 +480,43 @@ export default function IXIFacePreview({
     if (face === "AOF2") {
       return (
         <IXIAuctionObjectFace2
-          listing={
-            previewListing
-          }
+  listing={
+    previewListing
+  }
 
-          sourceListingUrl={
-            "https://example.com/auction-listing"
-          }
+  faceSize={
+    previewSize
+  }
 
-          sellerMode={
-            true
-          }
+  sourceListingUrl={
+    "https://example.com/auction-listing"
+  }
 
-          lotNumberValue={
-            "1842"
-          }
+  sellerMode={
+    true
+  }
 
-          onLotNumberChange={() => {}}
-          onLotNumberKeyDown={() => {}}
+  lotNumberValue={
+    "1842"
+  }
 
-          hoursValue={
-            "2485"
-          }
+  onLotNumberChange={() => {}}
+  onLotNumberKeyDown={() => {}}
 
-          onHoursChange={() => {}}
-          onHoursKeyDown={() => {}}
+  hoursValue={
+    "2485"
+  }
 
-          openingBidValue={
-            "125000"
-          }
+  onHoursChange={() => {}}
+  onHoursKeyDown={() => {}}
 
-          onOpeningBidChange={() => {}}
-          onOpeningBidKeyDown={() => {}}
-        />
+  openingBidValue={
+    "125000"
+  }
+
+  onOpeningBidChange={() => {}}
+  onOpeningBidKeyDown={() => {}}
+/>
       );
     }
 
