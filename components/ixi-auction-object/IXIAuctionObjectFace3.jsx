@@ -319,6 +319,8 @@ export default function IXIAuctionObjectFace3({
   dealerBidPack = {},
   onSaveDealerBidPack,
 
+  faceSize = "tall",
+
   dragHandleProps
 }) {
   const publicData =
@@ -546,7 +548,7 @@ function saveBidPack() {
  <IXIFaceFrame
   className="aof3"
   contentClassName="aof3-content"
-  size="tall"
+  size={faceSize}
   dragHandleProps={
     dragHandleProps
   }
