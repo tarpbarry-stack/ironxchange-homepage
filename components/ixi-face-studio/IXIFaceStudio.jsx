@@ -16,12 +16,14 @@ const FACE_TREE = [
       "AOF4"
     ]
   },
-  {
-    title: "MACHINE",
-    faces: [
-      "MOF2"
-    ]
-  },
+ {
+  title: "MACHINE",
+  faces: [
+    "MOF2",
+    "MOF3",
+    "MOF4"
+  ]
+},
   {
     title: "PRIVATE",
     faces: [
