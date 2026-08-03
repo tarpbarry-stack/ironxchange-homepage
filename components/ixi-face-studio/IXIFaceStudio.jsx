@@ -33,14 +33,46 @@ export default function IXIFaceStudio() {
     setSelectedFace
   ] = useState("AOF2");
 
-const [
-  previewSize,
-  setPreviewSize
-] = useState("tall");
-  
+  const [
+    previewSize,
+    setPreviewSize
+  ] = useState("tall");
+
+  function cycleSelectedFace() {
+    const activeGroup =
+      FACE_TREE.find(group =>
+        group.faces.includes(
+          selectedFace
+        )
+      );
+
+    if (
+      !activeGroup ||
+      activeGroup.faces.length < 2
+    ) {
+      return;
+    }
+
+    const currentIndex =
+      activeGroup.faces.indexOf(
+        selectedFace
+      );
+
+    const nextIndex =
+      (
+        currentIndex + 1
+      ) %
+      activeGroup.faces.length;
+
+    setSelectedFace(
+      activeGroup.faces[
+        nextIndex
+      ]
+    );
+  }
+
   return (
     <div className="face-lab">
-
       <aside className="face-tree">
 
         <div className="studio-title">
@@ -123,6 +155,7 @@ const [
  <IXIFacePreview
   face={selectedFace}
   previewSize={previewSize}
+  onCycleFace={cycleSelectedFace}
 />
 </div>
 </div>
