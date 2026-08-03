@@ -224,18 +224,22 @@ export default function IXIMachineObjectFace2({
 }
 
         .mof2-logo-wrap {
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 8px;
-        }
+  height: 38px;
 
-        .mof2-logo-wrap img {
-          max-height: 42px;
-          max-width: 150px;
-          object-fit: contain;
-        }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: -3px;
+  margin-bottom: 3px;
+}
+
+.mof2-logo-wrap img {
+  max-height: 34px;
+  max-width: 145px;
+
+  object-fit: contain;
+}
 
         .mof2-logo-fallback {
           color: rgba(255,255,255,.68);
@@ -247,25 +251,35 @@ export default function IXIMachineObjectFace2({
 
      .mof2-plate {
   width: 100%;
-  min-height: 52px;
+  min-height: 34px;
 
-  padding: 8px 10px;
-  margin-bottom: 13px;
+  margin-top: -2px;
+  margin-bottom: 7px;
+  padding: 4px 7px;
 
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
   align-items: center;
+  gap: 12px;
 
-  gap: 26px;
-          border: 1px solid rgba(255,255,255,.12);
-          border-radius: 5px;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,.10), rgba(255,255,255,.025)),
-            #1b1b1b;
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.12),
-            inset 0 -1px 0 rgba(0,0,0,.38);
-        }
+  border:
+    1px solid
+    rgba(255,255,255,.065);
+
+  border-radius: 5px;
+
+  background:
+    rgba(255,255,255,.018);
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,.025);
+
+  overflow: hidden;
+}
 
         .mof2-plate span {
           color: rgba(255,255,255,.64);
@@ -278,40 +292,58 @@ export default function IXIMachineObjectFace2({
         }
 
           .mof2-tag {
-  flex: 1;
   min-width: 0;
-  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  text-align: left;
+}
+
+.mof2-tag + .mof2-tag {
+  align-items: flex-end;
+
+  text-align: right;
 }
 
 .mof2-tag-label {
-   font-size: 9px;
+  width: 100%;
+
+  margin-bottom: 3px;
+
+  color:
+    rgba(255,255,255,.3);
+
+  font-size: 6.2px;
   font-weight: 950;
-
-  letter-spacing: .22em;
-
-  color: rgba(255,255,255,.48);
+  line-height: 1;
+  letter-spacing: .48px;
 
   text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 6px;
 }
 
 .mof2-tag-value {
-  font-size: 15px;
-  font-weight: 950;
+  width: 100%;
+  min-width: 0;
 
-  letter-spacing: .16em;
-
-  color: rgba(255,255,255,.94);
+  color:
+    rgba(255,255,255,.76);
 
   font-family:
     "Roboto Condensed",
     "Arial Narrow",
     sans-serif;
 
-  white-space: nowrap;
+  font-size: 9.5px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: .28px;
+
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
@@ -369,20 +401,63 @@ export default function IXIMachineObjectFace2({
           letter-spacing: -.25px;
         }
 
-        .mof2-bio {
-          width: 100%;
-          flex: 1;
-          margin: 12px 0 12px;
-          padding: 12px 10px;
-          overflow: hidden;
-          color: rgba(255,255,255,.70);
-          font-size: 11px;
-          font-weight: 700;
-          line-height: 1.38;
-          text-align: left;
-          border-top: 1px solid rgba(255,255,255,.055);
-          border-bottom: 1px solid rgba(255,255,255,.055);
-        }
+       .mof2-bio {
+  width: 100%;
+  min-height: 0;
+
+  flex: 1 1 auto;
+
+  margin: 8px 0 4px;
+  padding: 9px 9px 10px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  color:
+    rgba(255,255,255,.72);
+
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.42;
+
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.05);
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.05);
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(255,196,0,.34)
+    rgba(255,255,255,.025);
+}
+
+.mof2-bio::-webkit-scrollbar {
+  width: 5px;
+}
+
+.mof2-bio::-webkit-scrollbar-track {
+  background:
+    rgba(255,255,255,.018);
+}
+
+.mof2-bio::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+
+  background:
+    rgba(255,196,0,.28);
+}
+
+.mof2-bio::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(255,196,0,.46);
+}
 
 
       `}</style>
