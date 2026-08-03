@@ -810,7 +810,7 @@ style={getFrameStyle(currentImageObject, "card")}
           outline: 1px solid rgba(255,255,255,.018);
 
           border-radius: 13px;
-          overflow: visible;
+          overflow: hidden;
 
           background:
             linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0)),
