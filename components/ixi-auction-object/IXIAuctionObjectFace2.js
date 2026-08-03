@@ -1805,15 +1805,16 @@ line-height: 1.18;
   color: #ffc400;
 }
 
-       .aof2-actions-footer {
-  position: static;
+      .aof2-actions-footer {
+  position: relative;
+  top: -10px;
 
   width: 100%;
   height: 34px;
   min-height: 34px;
 
   margin-top: auto;
-  padding-top: 7px;
+  padding-top: 0;
 
   display: flex;
   align-items: center;
