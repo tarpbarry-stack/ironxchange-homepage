@@ -293,58 +293,61 @@ export default function IXIPrivateObjectConsole({
         "
       >
         <div className="ixi-private-console-module-card">
-          <IXIObjectCardActuator
-  side={closeActuatorSide}
+         <IXIObjectCardActuator
+  side={
+    closeActuatorSide
+  }
+
   variant="tall"
-  ...
+
+  label="Close private module"
+
+  title="Close private module"
+
+  onClick={event =>
+    removeConsoleModule(
+      slot.slotId,
+      event
+    )
+  }
 />
-
-            label="Close private module"
-
-            title="Close private module"
-
-            onClick={event =>
-              removeConsoleModule(
-                slot.slotId,
-                event
-              )
-            }
-          />
-
+          
           {showLeftExpansion ? (
             <IXIObjectCardActuator
   side="left"
+
   variant="tall"
-              
-              label="Add private module left"
 
-              title="Add private module left"
+  label="Add private module left"
 
-              onClick={event =>
-                addConsoleModule(
-                  "left",
-                  event
-                )
-              }
-            />
+  title="Add private module left"
+
+  onClick={event =>
+    addConsoleModule(
+      "left",
+      event
+    )
+  }
+/>
           ) : null}
 
           {showRightExpansion ? (
             <IXIObjectCardActuator
   side="right"
+
   variant="tall"
 
-              label="Add private module right"
+  label="Add private module right"
 
-              title="Add private module right"
+  title="Add private module right"
 
-              onClick={event =>
-                addConsoleModule(
-                  "right",
-                  event
-                )
-              }
-            />
+  onClick={event =>
+    addConsoleModule(
+      "right",
+      event
+    )
+  }
+/>
           ) : null}
 
           {renderPrivatePanel({
