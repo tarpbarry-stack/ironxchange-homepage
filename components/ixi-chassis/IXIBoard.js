@@ -5,8 +5,8 @@ import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
-import IXIAuctionObjectConsole
-  from "../ixi-auction-object/IXIAuctionObjectConsole";
+import IXIObjectConsoleRouter
+  from "./IXIObjectConsoleRouter";
 
 import {
   getMachineCardFamily
@@ -99,9 +99,6 @@ const sellerCardProps =
 
 const cardFamily =
   getMachineCardFamily(item);
-
-const isAuctionCard =
-  cardFamily === "auction";
 
 const consoleLeftOpen =
   ixiCardState?.[id]?.consoleLeftOpen === true;
@@ -219,9 +216,10 @@ return (
           />
         </IXIScaledCardShell>
       ) : (
-        <IXIAuctionObjectConsole
-          objectId={id}
-          item={item}
+        <IXIObjectConsoleRouter
+  cardFamily={cardFamily}
+  objectId={id}
+  item={item}
 
           sellerCardProps={
             sellerCardProps
