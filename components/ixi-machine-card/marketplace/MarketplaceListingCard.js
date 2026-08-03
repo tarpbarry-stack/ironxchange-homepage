@@ -19,6 +19,9 @@ import IXIMachineRail from "../../IXIMachineRail";
 import IXIMachinePlacementControl
   from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
+import IXIObjectCardActuator
+  from "../../ixi-chassis/IXIObjectCardActuator";
+
 import IXIMachineObjectFace2
   from "../../ixi-machine-object/IXIMachineObjectFace2";
 
@@ -119,6 +122,12 @@ onBoardDragOver,
 onBoardDragEnd,
 useDndDrag = false,
 dragHandleProps,
+
+consoleDepth = 1,
+consoleLeftOpen = false,
+consoleRightOpen = false,
+onExpandConsoleLeft,
+onExpandConsoleRight
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -420,6 +429,33 @@ function handlePhotoLoad(e, photoUrl) {
       zIndex: isBoardDragging ? 50 : undefined
     }}
   >
+
+{typeof onExpandConsoleLeft ===
+  "function" &&
+!consoleLeftOpen ? (
+  <IXIObjectCardActuator
+    side="left"
+    label="Open marketplace console left"
+    title="Open marketplace console left"
+    onClick={
+      onExpandConsoleLeft
+    }
+  />
+) : null}
+
+{typeof onExpandConsoleRight ===
+  "function" &&
+!consoleRightOpen ? (
+  <IXIObjectCardActuator
+    side="right"
+    label="Open marketplace console right"
+    title="Open marketplace console right"
+    onClick={
+      onExpandConsoleRight
+    }
+  />
+) : null}
+
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
