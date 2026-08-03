@@ -294,9 +294,10 @@ export default function IXIPrivateObjectConsole({
       >
         <div className="ixi-private-console-module-card">
           <IXIObjectCardActuator
-            side={
-              closeActuatorSide
-            }
+  side={closeActuatorSide}
+  variant="tall"
+  ...
+/>
 
             label="Close private module"
 
@@ -312,8 +313,9 @@ export default function IXIPrivateObjectConsole({
 
           {showLeftExpansion ? (
             <IXIObjectCardActuator
-              side="left"
-
+  side="left"
+  variant="tall"
+              
               label="Add private module left"
 
               title="Add private module left"
@@ -329,7 +331,8 @@ export default function IXIPrivateObjectConsole({
 
           {showRightExpansion ? (
             <IXIObjectCardActuator
-              side="right"
+  side="right"
+  variant="tall"
 
               label="Add private module right"
 
