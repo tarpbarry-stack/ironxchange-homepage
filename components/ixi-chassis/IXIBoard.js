@@ -100,17 +100,32 @@ const sellerCardProps =
 const cardFamily =
   getMachineCardFamily(item);
 
-const consoleLeftOpen =
-  ixiCardState?.[id]?.consoleLeftOpen === true;
+const savedConsoleSlots =
+  ixiCardState?.[id]
+    ?.consoleSlots;
 
-const consoleRightOpen =
-  ixiCardState?.[id]?.consoleRightOpen === true;
+const legacyConsoleDepth =
+  1 +
+  (
+    ixiCardState?.[id]
+      ?.consoleLeftOpen === true
+      ? 1
+      : 0
+  ) +
+  (
+    ixiCardState?.[id]
+      ?.consoleRightOpen === true
+      ? 1
+      : 0
+  );
 
 const consoleDepth =
-  1 +
-  (consoleLeftOpen ? 1 : 0) +
-  (consoleRightOpen ? 1 : 0);
-
+  Array.isArray(
+    savedConsoleSlots
+  ) &&
+  savedConsoleSlots.length > 0
+    ? savedConsoleSlots.length
+    : legacyConsoleDepth;
 return (
   <IXISortableMachineCard
     key={id}
