@@ -16,6 +16,12 @@ import IXIMachineObjectFace2
 import IXISellerMachineObjectFace2
   from "../ixi-machine-object/IXISellerMachineObjectFace2";
 
+import IXIMachineObjectFace3
+  from "../ixi-machine-object/IXIMachineObjectFace3";
+
+import IXIMachineObjectFace4
+  from "../ixi-machine-object/IXIMachineObjectFace4";
+
 import IXIMachineRail
   from "../IXIMachineRail";
 
@@ -582,6 +588,27 @@ export default function IXIFacePreview({
       );
     }
 
+if (face === "MOF3") {
+  return (
+    <IXIMachineObjectFace3
+      listing={
+        previewListing
+      }
+    />
+  );
+}
+
+if (face === "MOF4") {
+  return (
+    <IXIMachineObjectFace4
+      listing={
+        previewListing
+      }
+    />
+  );
+}
+
+    
     if (face === "PMOF2") {
       return (
         <IXISellerMachineObjectFace2
