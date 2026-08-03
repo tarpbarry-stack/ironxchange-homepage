@@ -734,7 +734,7 @@ function saveBidPack() {
             )}
           </em>
         </div>
-      </section>
+</IXIFaceFrame>
 
       <section className="aof3-bid-pack">
         <div className="aof3-bid-pack-title">
@@ -1738,6 +1738,6 @@ function BidScenario({
   height: 26px;
 }
       `}</style>
-    </IXIFaceFrame>
+    </div>
   );
 }
