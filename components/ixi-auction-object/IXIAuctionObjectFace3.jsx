@@ -750,11 +750,13 @@ function saveBidPack() {
             )
           )}
         </div>
-      </section>
+     </section>
 
-      <IXIMachineObjectActions />
+<div className="aof3-actions-footer">
+  <IXIMachineObjectActions />
+</div>
 
-      <style jsx>{`
+<style jsx>{`
         .aof3,
         .aof3 * {
           box-sizing: border-box;
@@ -771,7 +773,7 @@ max-height: 472px;
 
           position: relative;
 
-          padding: 10px 10px 30px;
+          padding: 10px 10px 8px;
 
           display: flex;
           flex-direction: column;
@@ -1692,6 +1694,44 @@ function BidScenario({
           font-weight: 950;
           font-style: normal;
         }
+
+        .aof3-actions-footer {
+  width: 100%;
+  height: 34px;
+  min-height: 34px;
+
+  margin-top: auto;
+
+  position: relative;
+  top: -10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-top: 1px solid rgba(255,255,255,.065);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,20,20,0),
+      #141414 24%
+    );
+}
+
+.aof3-actions-footer :global(.mof-actions) {
+  position: static;
+  top: auto;
+
+  width: 100%;
+  margin-top: 0;
+
+  gap: 10px;
+}
+
+.aof3-actions-footer :global(.mof-actions button) {
+  height: 26px;
+}
       `}</style>
     </div>
   );
