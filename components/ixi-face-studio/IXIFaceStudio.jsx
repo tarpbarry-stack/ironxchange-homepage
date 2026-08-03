@@ -33,6 +33,11 @@ export default function IXIFaceStudio() {
     setSelectedFace
   ] = useState("AOF2");
 
+const [
+  previewSize,
+  setPreviewSize
+] = useState("tall");
+  
   return (
     <div className="face-lab">
 
@@ -77,15 +82,48 @@ export default function IXIFaceStudio() {
       <section className="face-preview">
 
         <div className="preview-title">
-          {selectedFace}
-        </div>
+  <span>
+    {selectedFace}
+  </span>
+
+  <div className="preview-size-controls">
+    <button
+      type="button"
+      className={
+        previewSize === "compact"
+          ? "active"
+          : ""
+      }
+      onClick={() =>
+        setPreviewSize("compact")
+      }
+    >
+      COMPACT
+    </button>
+
+    <button
+      type="button"
+      className={
+        previewSize === "tall"
+          ? "active"
+          : ""
+      }
+      onClick={() =>
+        setPreviewSize("tall")
+      }
+    >
+      TALL
+    </button>
+  </div>
+</div>
 
         <div className="preview-stage">
 
  <div className="preview-shell">
-  <IXIFacePreview
-    face={selectedFace}
-  />
+ <IXIFacePreview
+  face={selectedFace}
+  previewSize={previewSize}
+/>
 </div>
 </div>
 
@@ -235,9 +273,10 @@ export default function IXIFaceStudio() {
 
 .preview-shell{
 
-  width:298px;
-  height:472px;
-
+width: 298px;
+  min-height: 0;
+  height: auto;
+  
   display:flex;
   align-items:flex-start;
   justify-content:center;
@@ -252,6 +291,44 @@ export default function IXIFaceStudio() {
     0 18px 40px
     rgba(0,0,0,.42);
 }
+
+.preview-title {
+  justify-content: space-between;
+}
+
+.preview-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-size-controls button {
+  height: 22px;
+
+  padding: 0 8px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 4px;
+
+  background: rgba(255,255,255,.025);
+  color: rgba(255,255,255,.42);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .5px;
+
+  cursor: pointer;
+}
+
+.preview-size-controls button.active {
+  border-color: rgba(255,196,0,.28);
+
+  background: rgba(255,196,0,.09);
+  color: #ffc400;
+}
+
+
+
       `}</style>
 
     </div>
