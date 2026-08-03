@@ -15,6 +15,9 @@ import IXIFaceGrid
 import IXIFaceSummaryCard
   from "../ixi-face-studio/IXIFaceSummaryCard";
 
+import IXIFaceSection
+  from "../ixi-face-studio/IXIFaceSection";
+
 import {
   getAuctionData,
   getAuctionTermsData,
@@ -635,9 +638,12 @@ function saveBidPack() {
       </section>
 
       <div className="aof3-grid">
-        <div className="aof3-panel">
-          <Row
-            label="MY BID"
+  <IXIFaceSection
+    dense
+    className="aof3-cost-panel"
+  >
+    <Row
+      label="MY BID"
             input
             value={myBid}
             onChange={setMyBid}
@@ -668,10 +674,13 @@ function saveBidPack() {
             value={freight2}
             onChange={setFreight2}
             onSave={saveBidPack}
-          />
-        </div>
+             />
+  </IXIFaceSection>
 
-        <div className="aof3-panel">
+  <IXIFaceSection
+    dense
+    className="aof3-cost-panel"
+  >
           <Row
             label="TECH"
             input
@@ -710,9 +719,9 @@ function saveBidPack() {
             value={preDelivery}
             onChange={setPreDelivery}
             onSave={saveBidPack}
-          />
-        </div>
-      </div>
+             />
+  </IXIFaceSection>
+</div>
 
       <IXIFaceGrid
   columns={2}
@@ -970,54 +979,9 @@ function saveBidPack() {
           gap: 7px;
         }
 
-        .aof3-panel {
-          min-width: 0;
-
-          padding: 6px 7px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .07
-            );
-
-          border-radius: 7px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                255,
-                255,
-                .025
-              ),
-              rgba(
-                255,
-                255,
-                255,
-                0
-              )
-            ),
-            rgba(
-              10,
-              10,
-              10,
-              .46
-            );
-
-          box-shadow:
-            inset 0 1px 0
-            rgba(
-              255,
-              255,
-              255,
-              .035
-            );
-        }
+       :global(.aof3-cost-panel) {
+  min-width: 0;
+}
 
         :global(.aof3-row) {
           min-height: 17px;
