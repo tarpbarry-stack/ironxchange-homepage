@@ -2,16 +2,16 @@ import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
 import IXIObjectCardActuator
-  from "./IXIObjectCardActuator";
+  from "../ixi-chassis/IXIObjectCardActuator";
 
 import IXIAuctionObjectFace2
-  from "../ixi-auction-object/IXIAuctionObjectFace2";
+  from "./IXIAuctionObjectFace2";
 
 import IXIAuctionObjectFace3
-  from "../ixi-auction-object/IXIAuctionObjectFace3";
+  from "./IXIAuctionObjectFace3";
 
 import IXIAuctionObjectFace4
-  from "../ixi-auction-object/IXIAuctionObjectFace4";
+  from "./IXIAuctionObjectFace4";
 
 const AUCTION_FACE_MIN = 2;
 const AUCTION_FACE_MAX = 4;
@@ -44,11 +44,11 @@ function getNextAuctionFace(
     : current + 1;
 }
 
-export default function IXIAuctionObjectConsole(
+export default function IXIAuctionObjectConsole({
+  objectId,
   objectId,
   item,
 
-  cardFamily = "marketplace",
   sellerCardProps = {},
 
   ixiCardState = {},
@@ -66,9 +66,6 @@ export default function IXIAuctionObjectConsole(
 
   const objectState =
     ixiCardState?.[id] || {};
-
-  const isAuctionCard =
-    cardFamily === "auction";
 
   const consoleLeftOpen =
     objectState.consoleLeftOpen ===
@@ -391,9 +388,7 @@ const consoleNativeWidth =
   );
 
 const consoleNativeHeight =
-  isAuctionCard
-    ? 471
-    : 391;
+  471;
 
 const assembledConsole = (
   <div
@@ -403,23 +398,17 @@ const assembledConsole = (
         `${consoleNativeWidth}px`
     }}
   >
-    {consoleLeftOpen &&
-    isAuctionCard
-      ? renderConsolePanel(
-          "left"
-        )
-      : null}
+    {consoleLeftOpen
+  ? renderConsolePanel("left")
+  : null}
 
     <div className="ixi-object-console-parent">
       {parentCard}
     </div>
 
-    {consoleRightOpen &&
-    isAuctionCard
-      ? renderConsolePanel(
-          "right"
-        )
-      : null}
+   {consoleRightOpen
+  ? renderConsolePanel("right")
+  : null}
 
     <style jsx global>{`
       .ixi-object-console {
@@ -549,11 +538,7 @@ const assembledConsole = (
 return enableCardScaling ? (
  <IXIScaledCardShell
   size={cardScaleMode}
-  objectFamily={
-    isAuctionCard
-      ? "auction"
-      : "marketplace"
-  }
+ objectFamily="auction"
   nativeWidth={
     consoleNativeWidth
   }
