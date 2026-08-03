@@ -543,16 +543,17 @@ function saveBidPack() {
     );
 
   return (
-  <IXIFaceFrame
-    className="aof3"
-    size="tall"
-    dragHandleProps={
-      dragHandleProps
-    }
-    footer={
-      <IXIFaceActionFooter />
-    }
-  >
+ <IXIFaceFrame
+  className="aof3"
+  contentClassName="aof3-content"
+  size="tall"
+  dragHandleProps={
+    dragHandleProps
+  }
+  footer={
+    <IXIFaceActionFooter />
+  }
+>
       <header className="aof3-head">
         <span>
           PRIVATE DEALER WORKSHEET
@@ -762,35 +763,14 @@ function saveBidPack() {
 </section>
 
 <style jsx>{`
-        .aof3,
-        .aof3 * {
-          box-sizing: border-box;
-        }
+        :global(.aof3-content) {
+  display: flex;
+  flex-direction: column;
 
-        .aof3 {
-          width: 100%;
-min-width: 0;
-max-width: 100%;
+  gap: 6px;
 
-         height: 472px;
-min-height: 472px;
-max-height: 472px;
-
-          position: relative;
-
-          padding: 10px 10px 8px;
-
-          display: flex;
-          flex-direction: column;
-
-          border-radius: 13px;
-overflow: hidden;
-
-          gap: 6px;
-
-          background: transparent;
-        }
-
+  overflow: hidden;
+}
         .aof3-head {
           height: 16px;
 
@@ -1700,43 +1680,7 @@ function BidScenario({
           font-style: normal;
         }
 
-        .aof3-actions-footer {
-  width: 100%;
-  height: 34px;
-  min-height: 34px;
-
-  margin-top: auto;
-
-  position: relative;
-  top: -10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-top: 1px solid rgba(255,255,255,.065);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(20,20,20,0),
-      #141414 24%
-    );
-}
-
-.aof3-actions-footer :global(.mof-actions) {
-  position: static;
-  top: auto;
-
-  width: 100%;
-  margin-top: 0;
-
-  gap: 10px;
-}
-
-.aof3-actions-footer :global(.mof-actions button) {
-  height: 26px;
-}
+      
       `}</style>
     </div>
   );
