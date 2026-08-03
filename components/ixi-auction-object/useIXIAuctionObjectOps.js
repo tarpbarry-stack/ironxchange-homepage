@@ -12,22 +12,33 @@ import {
   updateMachineFacts
 } from "../ixi-object-system/IXIMachineMutationEngine";
 
-function cleanNumber(value = "") {
+function cleanNumber(
+  value = ""
+) {
   return String(value)
-    .replace(/[^0-9]/g, "")
+    .replace(
+      /[^0-9]/g,
+      ""
+    )
     .trim();
 }
 
-function getPublicData(listing = {}) {
+function getPublicData(
+  listing = {}
+) {
   return (
     listing?.publicData ||
-    listing?.attributes?.publicData ||
+    listing?.attributes
+      ?.publicData ||
     {}
   );
 }
 
-function getExistingFacts(listing = {}) {
-  const publicData = getPublicData(listing);
+function getExistingFacts(
+  listing = {}
+) {
+  const publicData =
+    getPublicData(listing);
 
   return {
     price:
@@ -47,6 +58,15 @@ function getExistingFacts(listing = {}) {
       publicData?.city ??
       "",
 
+    lotNumber:
+      listing?.lotNumber ??
+      publicData?.lotNumber ??
+      listing?.auction
+        ?.lot?.lotNumber ??
+      publicData?.auction
+        ?.lot?.lotNumber ??
+      "",
+
     description:
       listing?.description ??
       publicData?.description ??
@@ -58,6 +78,31 @@ function getExistingFacts(listing = {}) {
       publicData?.keywords ??
       []
   };
+}
+
+function getNoticeMessage({
+  field,
+  mutation
+}) {
+  const noticeMap = {
+    price:
+      "AUCTION PRICE UPDATED",
+
+    hours:
+      "AUCTION HOURS UPDATED",
+
+    location:
+      "MACHINE LOCATION UPDATED",
+
+    lotNumber:
+      "AUCTION LOT NUMBER UPDATED"
+  };
+
+  return (
+    mutation?.notices?.[0] ||
+    noticeMap[field] ||
+    "AUCTION OBJECT UPDATED"
+  );
 }
 
 export default function useIXIAuctionObjectOps({
@@ -74,16 +119,142 @@ export default function useIXIAuctionObjectOps({
     setSavingField
   ] = useState({
     listingId: "",
+    slotId: "",
+    face: 0,
     field: ""
   });
 
-  function getDraft(listing = {}) {
-    const listingId = String(
-      getListingId(listing) || ""
+  const [
+    panelNotifications,
+    setPanelNotifications
+  ] = useState({});
+
+  function getPanelNotificationKey({
+    listingId,
+    slotId
+  }) {
+    return [
+      String(
+        listingId || ""
+      ),
+
+      String(
+        slotId || "listing"
+      )
+    ].join("::");
+  }
+
+  function setPanelNotification({
+    listingId,
+    slotId,
+    face,
+    field,
+    status,
+    message
+  }) {
+    const key =
+      getPanelNotificationKey({
+        listingId,
+        slotId
+      });
+
+    setPanelNotifications(
+      current => ({
+        ...current,
+
+        [key]: {
+          listingId:
+            String(
+              listingId || ""
+            ),
+
+          slotId:
+            String(
+              slotId ||
+              "listing"
+            ),
+
+          face:
+            Number(face) || 1,
+
+          field:
+            String(
+              field || ""
+            ),
+
+          status:
+            String(
+              status || ""
+            ),
+
+          message:
+            String(
+              message || ""
+            ),
+
+          updatedAt:
+            Date.now()
+        }
+      })
     );
+  }
+
+  function clearPanelNotification({
+    listingId,
+    slotId
+  }) {
+    const key =
+      getPanelNotificationKey({
+        listingId,
+        slotId
+      });
+
+    setPanelNotifications(
+      current => {
+        if (!current[key]) {
+          return current;
+        }
+
+        const next = {
+          ...current
+        };
+
+        delete next[key];
+
+        return next;
+      }
+    );
+  }
+
+  function getPanelNotification(
+    listingId,
+    slotId
+  ) {
+    const key =
+      getPanelNotificationKey({
+        listingId,
+        slotId
+      });
 
     return (
-      auctionDrafts[listingId] ||
+      panelNotifications[key] ||
+      null
+    );
+  }
+
+  function getDraft(
+    listing = {}
+  ) {
+    const listingId =
+      String(
+        getListingId(listing) ||
+        ""
+      );
+
+    return (
+      auctionDrafts[
+        listingId
+      ] ||
       {}
     );
   }
@@ -93,58 +264,82 @@ export default function useIXIAuctionObjectOps({
     field,
     value
   ) {
-    const listingId = String(
-      getListingId(listing) || ""
+    const listingId =
+      String(
+        getListingId(listing) ||
+        ""
+      );
+
+    if (!listingId) {
+      return;
+    }
+
+    setAuctionDrafts(
+      current => ({
+        ...current,
+
+        [listingId]: {
+          ...(
+            current[
+              listingId
+            ] ||
+            {}
+          ),
+
+          [field]:
+            value
+        }
+      })
     );
-
-    if (!listingId) return;
-
-    setAuctionDrafts(current => ({
-      ...current,
-
-      [listingId]: {
-        ...(current[listingId] || {}),
-        [field]: value
-      }
-    }));
   }
 
   function clearDraftField(
     listingId,
     field
   ) {
-    setAuctionDrafts(current => {
-      const existing =
-        current[listingId];
+    setAuctionDrafts(
+      current => {
+        const existing =
+          current[
+            listingId
+          ];
 
-      if (!existing) {
-        return current;
-      }
+        if (!existing) {
+          return current;
+        }
 
-      const nextRecord = {
-        ...existing
-      };
-
-      delete nextRecord[field];
-
-      if (
-        Object.keys(nextRecord)
-          .length === 0
-      ) {
-        const nextState = {
-          ...current
+        const nextRecord = {
+          ...existing
         };
 
-        delete nextState[listingId];
+        delete nextRecord[
+          field
+        ];
 
-        return nextState;
+        if (
+          Object.keys(
+            nextRecord
+          ).length === 0
+        ) {
+          const nextState = {
+            ...current
+          };
+
+          delete nextState[
+            listingId
+          ];
+
+          return nextState;
+        }
+
+        return {
+          ...current,
+
+          [listingId]:
+            nextRecord
+        };
       }
-
-      return {
-        ...current,
-        [listingId]: nextRecord
-      };
-    });
+    );
   }
 
   async function persistAuctionField({
@@ -152,9 +347,11 @@ export default function useIXIAuctionObjectOps({
     field,
     value
   }) {
-    const listingId = String(
-      getListingId(listing) || ""
-    );
+    const listingId =
+      String(
+        getListingId(listing) ||
+        ""
+      );
 
     if (!listingId) {
       throw new Error(
@@ -163,11 +360,15 @@ export default function useIXIAuctionObjectOps({
     }
 
     const before =
-      getExistingFacts(listing);
+      getExistingFacts(
+        listing
+      );
 
     const after = {
       ...before,
-      [field]: value
+
+      [field]:
+        value
     };
 
     return updateMachineFacts({
@@ -175,8 +376,10 @@ export default function useIXIAuctionObjectOps({
         IXI_MACHINE_MUTATION_COMMANDS,
 
       listingId,
+
       title:
-        listing?.title || "",
+        listing?.title ||
+        "",
 
       before,
       after,
@@ -186,28 +389,238 @@ export default function useIXIAuctionObjectOps({
     });
   }
 
+  function updateListingAfterSave({
+    listingId,
+    field,
+    value,
+    mutation
+  }) {
+    if (
+      typeof setListings !==
+      "function"
+    ) {
+      return;
+    }
+
+    setListings(
+      current =>
+        current.map(item => {
+          const itemId =
+            String(
+              getListingId(
+                item
+              ) ||
+              ""
+            );
+
+          if (
+            itemId !==
+            listingId
+          ) {
+            return item;
+          }
+
+          const publicData =
+            getPublicData(
+              item
+            );
+
+          if (
+            field ===
+            "price"
+          ) {
+            return {
+              ...item,
+
+              price:
+                value,
+
+              publicData: {
+                ...publicData,
+
+                price:
+                  Number(
+                    value
+                  )
+              },
+
+              _machineMutation:
+                mutation
+            };
+          }
+
+          if (
+            field ===
+            "hours"
+          ) {
+            return {
+              ...item,
+
+              hours:
+                value,
+
+              publicData: {
+                ...publicData,
+
+                hours:
+                  Number(
+                    value
+                  )
+              },
+
+              _machineMutation:
+                mutation
+            };
+          }
+
+          if (
+            field ===
+            "location"
+          ) {
+            return {
+              ...item,
+
+              location:
+                value,
+
+              publicData: {
+                ...publicData,
+
+                location:
+                  value,
+
+                city:
+                  value,
+
+                cityState:
+                  value
+              },
+
+              _machineMutation:
+                mutation
+            };
+          }
+
+          if (
+            field ===
+            "lotNumber"
+          ) {
+            const auction =
+              item?.auction &&
+              typeof item.auction ===
+                "object"
+                ? item.auction
+                : {};
+
+            const auctionLot =
+              auction?.lot &&
+              typeof auction.lot ===
+                "object"
+                ? auction.lot
+                : {};
+
+            const publicAuction =
+              publicData?.auction &&
+              typeof publicData.auction ===
+                "object"
+                ? publicData.auction
+                : {};
+
+            const publicAuctionLot =
+              publicAuction?.lot &&
+              typeof publicAuction.lot ===
+                "object"
+                ? publicAuction.lot
+                : {};
+
+            return {
+              ...item,
+
+              lotNumber:
+                value,
+
+              auction: {
+                ...auction,
+
+                lot: {
+                  ...auctionLot,
+
+                  lotNumber:
+                    value
+                }
+              },
+
+              publicData: {
+                ...publicData,
+
+                lotNumber:
+                  value,
+
+                auction: {
+                  ...publicAuction,
+
+                  lot: {
+                    ...publicAuctionLot,
+
+                    lotNumber:
+                      value
+                  }
+                }
+              },
+
+              _machineMutation:
+                mutation
+            };
+          }
+
+          return item;
+        })
+    );
+  }
+
   function createEnterHandler(
     listing,
-    field
+    field,
+    panelContext = {}
   ) {
     return async event => {
-      if (event.key !== "Enter") {
+      if (
+        event.key !==
+        "Enter"
+      ) {
         return;
       }
 
       event.preventDefault();
       event.stopPropagation();
 
-      const listingId = String(
-        getListingId(listing) || ""
-      );
+      const listingId =
+        String(
+          getListingId(
+            listing
+          ) ||
+          ""
+        );
 
       if (!listingId) {
         return;
       }
 
+      const slotId =
+        String(
+          panelContext.slotId ||
+          "listing"
+        );
+
+      const face =
+        Number(
+          panelContext.face
+        ) || 1;
+
       const draft =
-        getDraft(listing);
+        getDraft(
+          listing
+        );
 
       let value =
         draft[field];
@@ -216,7 +629,9 @@ export default function useIXIAuctionObjectOps({
         value === undefined
       ) {
         value =
-          event.currentTarget?.value ??
+          event
+            .currentTarget
+            ?.value ??
           "";
       }
 
@@ -225,19 +640,37 @@ export default function useIXIAuctionObjectOps({
         field === "hours"
       ) {
         value =
-          cleanNumber(value);
+          cleanNumber(
+            value
+          );
       } else {
         value =
-          String(value || "")
-            .trim();
+          String(
+            value || ""
+          ).trim();
       }
 
       if (!value) {
         return;
       }
 
+      setPanelNotification({
+        listingId,
+        slotId,
+        face,
+        field,
+
+        status:
+          "saving",
+
+        message:
+          "SAVING..."
+      });
+
       setSavingField({
         listingId,
+        slotId,
+        face,
         field
       });
 
@@ -256,95 +689,12 @@ export default function useIXIAuctionObjectOps({
             value
           });
 
-        setListings(current =>
-          current.map(item => {
-            const itemId = String(
-              getListingId(item) || ""
-            );
-
-            if (
-              itemId !== listingId
-            ) {
-              return item;
-            }
-
-            const publicData =
-              getPublicData(item);
-
-            if (
-              field === "price"
-            ) {
-              return {
-                ...item,
-
-                price: value,
-
-                publicData: {
-                  ...publicData,
-                  price: Number(value)
-                },
-
-                _machineMutation:
-                  mutation
-              };
-            }
-
-            if (
-              field === "hours"
-            ) {
-              return {
-                ...item,
-
-                hours: value,
-
-                publicData: {
-                  ...publicData,
-                  hours: Number(value)
-                },
-
-                _machineMutation:
-                  mutation
-              };
-            }
-
-            if (
-              field === "location"
-            ) {
-              return {
-                ...item,
-
-                location: value,
-
-                publicData: {
-                  ...publicData,
-                  location: value,
-                  city: value,
-                  cityState: value
-                },
-
-                _machineMutation:
-                  mutation
-              };
-            }
-
-if (field === "lotNumber") {
-  return {
-    ...item,
-
-    lotNumber: value,
-
-    publicData: {
-      ...publicData,
-      lotNumber: value
-    },
-
-    _machineMutation:
-      mutation
-  };
-}            
-            return item;
-          })
-        );
+        updateListingAfterSave({
+          listingId,
+          field,
+          value,
+          mutation
+        });
 
         clearDraftField(
           listingId,
@@ -353,37 +703,62 @@ if (field === "lotNumber") {
 
         event.currentTarget
           ?.classList
-          ?.add("saved");
+          ?.add(
+            "saved"
+          );
 
-        const noticeMap = {
-  price:
-    "AUCTION PRICE UPDATED",
+        const successMessage =
+          getNoticeMessage({
+            field,
+            mutation
+          });
 
-  hours:
-    "AUCTION HOURS UPDATED",
+        setPanelNotification({
+          listingId,
+          slotId,
+          face,
+          field,
 
-  location:
-    "MACHINE LOCATION UPDATED",
+          status:
+            "success",
 
-  lotNumber:
-    "AUCTION LOT NUMBER UPDATED"
-};
+          message:
+            successMessage
+        });
 
         showActionNotice?.({
           listingId,
+          slotId,
+          face,
+          field,
 
           message:
-            mutation?.notices?.[0] ||
-            noticeMap[field] ||
-            "AUCTION OBJECT UPDATED",
+            successMessage,
 
-          tone: "success"
+          tone:
+            "success"
         });
+
+        return {
+          ok: true,
+
+          listingId,
+          slotId,
+          face,
+          field,
+          value,
+          mutation,
+
+          message:
+            successMessage
+        };
       } catch (error) {
         console.error(
           "AUCTION OBJECT UPDATE FAILED:",
           {
             listingId,
+            slotId,
+            face,
             field,
             error
           }
@@ -391,15 +766,39 @@ if (field === "lotNumber") {
 
         event.currentTarget
           ?.classList
-          ?.add("error");
+          ?.add(
+            "error"
+          );
+
+        const failureMessage =
+          `${
+            field.toUpperCase()
+          } UPDATE FAILED`;
+
+        setPanelNotification({
+          listingId,
+          slotId,
+          face,
+          field,
+
+          status:
+            "error",
+
+          message:
+            failureMessage
+        });
 
         showActionNotice?.({
           listingId,
+          slotId,
+          face,
+          field,
 
           message:
-            `${field.toUpperCase()} UPDATE FAILED`,
+            failureMessage,
 
-          tone: "error"
+          tone:
+            "error"
         });
 
         window.alert(
@@ -408,9 +807,25 @@ if (field === "lotNumber") {
             "Unknown error"
           }`
         );
+
+        return {
+          ok: false,
+
+          listingId,
+          slotId,
+          face,
+          field,
+          value,
+          error,
+
+          message:
+            failureMessage
+        };
       } finally {
         setSavingField({
           listingId: "",
+          slotId: "",
+          face: 0,
           field: ""
         });
       }
@@ -418,27 +833,60 @@ if (field === "lotNumber") {
   }
 
   function getAuctionListingCardProps(
-    listing = {}
+    listing = {},
+    panelContext = {}
   ) {
-    const listingId = String(
-      getListingId(listing) || ""
-    );
+    const listingId =
+      String(
+        getListingId(
+          listing
+        ) ||
+        ""
+      );
 
     const publicData =
-      getPublicData(listing);
+      getPublicData(
+        listing
+      );
 
     const draft =
-      getDraft(listing);
+      getDraft(
+        listing
+      );
+
+    const normalizedPanelContext = {
+      slotId:
+        String(
+          panelContext.slotId ||
+          "listing"
+        ),
+
+      face:
+        Number(
+          panelContext.face
+        ) || 1
+    };
 
     const existingLocation =
       listing?.location ??
       publicData?.location ??
       publicData?.cityState ??
+      publicData?.city ??
+      "";
+
+    const existingLotNumber =
+      listing?.lotNumber ??
+      publicData?.lotNumber ??
+      listing?.auction
+        ?.lot?.lotNumber ??
+      publicData?.auction
+        ?.lot?.lotNumber ??
       "";
 
     return {
       priceValue:
-        draft.price !== undefined
+        draft.price !==
+        undefined
           ? draft.price
           : (
               listing?.price ??
@@ -446,22 +894,27 @@ if (field === "lotNumber") {
               ""
             ),
 
-      onPriceChange: value => {
-        updateDraft(
-          listing,
-          "price",
-          value
-        );
-      },
+      onPriceChange:
+        value => {
+          updateDraft(
+            listing,
+            "price",
+            cleanNumber(
+              value
+            )
+          );
+        },
 
       onPriceKeyDown:
         createEnterHandler(
           listing,
-          "price"
+          "price",
+          normalizedPanelContext
         ),
 
       hoursValue:
-        draft.hours !== undefined
+        draft.hours !==
+        undefined
           ? draft.hours
           : String(
               listing?.hours ??
@@ -472,90 +925,107 @@ if (field === "lotNumber") {
               ""
             ),
 
-      onHoursChange: value => {
-        updateDraft(
-          listing,
-          "hours",
-          cleanNumber(value)
-        );
-      },
+      onHoursChange:
+        value => {
+          updateDraft(
+            listing,
+            "hours",
+            cleanNumber(
+              value
+            )
+          );
+        },
 
       onHoursKeyDown:
         createEnterHandler(
           listing,
-          "hours"
+          "hours",
+          normalizedPanelContext
         ),
 
       locationValue:
-        draft.location !== undefined
+        draft.location !==
+        undefined
           ? draft.location
           : existingLocation,
 
-      onLocationChange: value => {
-        updateDraft(
-          listing,
-          "location",
-          value
-        );
-      },
+      onLocationChange:
+        value => {
+          updateDraft(
+            listing,
+            "location",
+            value
+          );
+        },
 
       onLocationKeyDown:
         createEnterHandler(
           listing,
-          "location"
+          "location",
+          normalizedPanelContext
         ),
 
       lotNumberValue:
-        draft.lotNumber !== undefined
+        draft.lotNumber !==
+        undefined
           ? draft.lotNumber
-          : (
-              listing?.lotNumber ??
-              publicData?.lotNumber ??
-              ""
-            ),
+          : existingLotNumber,
 
-      onLotNumberChange: value => {
-        updateDraft(
+      onLotNumberChange:
+        value => {
+          updateDraft(
+            listing,
+            "lotNumber",
+            value
+          );
+        },
+
+      onLotNumberKeyDown:
+        createEnterHandler(
           listing,
           "lotNumber",
-          value
-        );
-      },
+          normalizedPanelContext
+        ),
 
-lotNumberValue:
-  draft.lotNumber !== undefined
-    ? draft.lotNumber
-    : (
-        listing?.lotNumber ??
-        publicData?.lotNumber ??
-        ""
-      ),
-
-onLotNumberChange: value => {
-  updateDraft(
-    listing,
-    "lotNumber",
-    value
-  );
-},
-
-onLotNumberKeyDown:
-  createEnterHandler(
-    listing,
-    "lotNumber"
-  ),
-      
       savingAuctionField:
-        savingField.listingId ===
-        listingId
+        (
+          savingField
+            .listingId ===
+          listingId
+        ) &&
+        (
+          savingField
+            .slotId ===
+          normalizedPanelContext
+            .slotId
+        )
           ? savingField.field
-          : ""
+          : "",
+
+      panelNotification:
+        getPanelNotification(
+          listingId,
+          normalizedPanelContext
+            .slotId
+        )
     };
   }
 
   return {
     auctionDrafts,
     savingField,
+    panelNotifications,
+
+    getDraft,
+    updateDraft,
+
+    getPanelNotification,
+    setPanelNotification,
+    clearPanelNotification,
+
+    persistAuctionField,
+    createEnterHandler,
+
     getAuctionListingCardProps
   };
 }
