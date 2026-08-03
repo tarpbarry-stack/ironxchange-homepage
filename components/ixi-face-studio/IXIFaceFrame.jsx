@@ -9,14 +9,21 @@ export default function IXIFaceFrame({
 
   contentClassName = "",
 
-  footerClassName = ""
+  footerClassName = "",
+
+  dragHandleProps,
+
+  ...sectionProps
 }) {
   const isCompact =
     size === "compact";
 
   return (
     <section
-      className={[
+  {...sectionProps}
+  {...(dragHandleProps || {})}
+
+  className={[
         "ixi-face-frame",
 
         isCompact
