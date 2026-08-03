@@ -27,7 +27,7 @@ const AUCTION_NATIVE_HEIGHT =
   471;
 
 const AUCTION_SEAM_OVERLAP =
-  1;
+  0;
 
 function getLegacyConsoleSlots(
   objectState = {}
