@@ -549,12 +549,27 @@ useEffect(() => {
 
 const sellerListings = useMemo(() => {
   return listings.filter(item => {
+    const publicData =
+      item.publicData ||
+      item.attributes?.publicData ||
+      {};
+
     const listingStatus =
       item.listingStatus ||
-      item.publicData?.listingStatus ||
-      item.attributes?.publicData?.listingStatus;
+      publicData.listingStatus;
 
-    return listingStatus !== "archived";
+    if (listingStatus === "archived") {
+      return false;
+    }
+
+    const machineChannel =
+      String(
+        item.machineChannel ||
+        publicData.machineChannel ||
+        ""
+      ).toLowerCase();
+
+    return machineChannel !== "auction";
   });
 }, [listings]);
 
