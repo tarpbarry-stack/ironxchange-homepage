@@ -219,7 +219,9 @@ const DIRECT_CONTAINER_TARGETS = [
   setAuctionDispositionBusy
 ] = useState({});
   const {
-  getAuctionListingCardProps
+  getAuctionListingCardProps,
+  getDraft,
+  updateDraft
 } = useIXIAuctionObjectOps({
   setListings,
 
@@ -250,6 +252,23 @@ function getAuctionWorkCardProps(
       listing
     );
 
+const auctionDraft =
+  getDraft(listing);
+
+const savedAuctionLotNumber =
+  ixiCardState?.[listingId]
+    ?.auctionLotNumber;
+
+const resolvedLotNumber =
+  auctionDraft?.lotNumber !==
+  undefined
+    ? auctionDraft.lotNumber
+    : (
+        savedAuctionLotNumber ??
+        auctionEditProps
+          .lotNumberValue ??
+        ""
+      );  
   const dealerBidPack =
     ixiCardState?.[listingId]
       ?.dealerBidPack ||
@@ -289,9 +308,52 @@ function getAuctionWorkCardProps(
   }
 
   return {
-    ...auctionEditProps,
+  ...auctionEditProps,
 
-    dealerBidPack,
+  lotNumberValue:
+    resolvedLotNumber,
+
+  onLotNumberChange:
+    value => {
+      updateDraft(
+        listing,
+        "lotNumber",
+        value
+      );
+    },
+
+  onLotNumberKeyDown:
+    event => {
+      if (
+        event.key !==
+        "Enter"
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      updateAuctionLotNumber(
+        listing,
+        event.currentTarget
+          ?.value ??
+        resolvedLotNumber
+      );
+
+      event.currentTarget
+        ?.classList
+        ?.remove("error");
+
+      event.currentTarget
+        ?.classList
+        ?.add("saved");
+
+      event.currentTarget
+        ?.blur?.();
+    },
+
+  dealerBidPack,
 
     onSaveDealerBidPack:
       saveDealerBidPack,
@@ -745,6 +807,49 @@ return [...filtered].sort((a, b) => {
   });
 }
 
+function updateAuctionLotNumber(
+  listing,
+  value
+) {
+  const listingId =
+    String(
+      getListingId(listing) ||
+      ""
+    );
+
+  if (!listingId) {
+    return;
+  }
+
+  const nextLotNumber =
+    String(value || "")
+      .trim();
+
+  updateIxiCardState(
+    listingId,
+    {
+      auctionLotNumber:
+        nextLotNumber,
+
+      auctionLotNumberUpdatedAt:
+        Date.now()
+    }
+  );
+
+  setIXIActionNotice({
+    setState:
+      setIxiCardState,
+
+    listingId,
+
+    message:
+      "LOT NUMBER SAVED",
+
+    tone:
+      "success"
+  });
+}
+  
 function cycleMachineFace(listingOrId) {
   const id =
     typeof listingOrId === "object"
