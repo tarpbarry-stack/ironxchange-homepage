@@ -5,7 +5,6 @@ export const IXI_MACHINE_MUTATION_COMMANDS = {
     price = "",
     hours = "",
     location = "",
-    lotNumber = "",
     description = "",
     keywords = []
   }) {
@@ -16,46 +15,30 @@ export const IXI_MACHINE_MUTATION_COMMANDS = {
       };
     }
 
-    const response =
-      await fetch(
-        "/api/update-machine-facts",
-        {
-          method: "POST",
+    const response = await fetch("/api/update-machine-facts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        listingId,
+        title,
+        price,
+        hours,
+        location,
+        description,
+        keywords
+      })
+    });
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+    const data = await response.json().catch(() => ({}));
 
-          body:
-            JSON.stringify({
-              listingId,
-              title,
-              price,
-              hours,
-              location,
-              lotNumber,
-              description,
-              keywords
-            })
-        }
-      );
-
-    const data =
-      await response
-        .json()
-        .catch(() => ({}));
-
-    if (
-      !response.ok ||
-      data?.ok === false
-    ) {
-      throw new Error(
-        data?.error ||
-        "Machine facts update failed"
-      );
+    if (!response.ok || data?.ok === false) {
+      throw new Error(data?.error || "Machine facts update failed");
     }
 
     return data;
+  }
+};
   }
 };
