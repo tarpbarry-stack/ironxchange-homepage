@@ -119,143 +119,139 @@ export default function IXIFaceStudio() {
 
       </aside>
 
-      <section className="face-preview">
+     <section className="face-preview">
+  <div className="preview-title">
+    <span>
+      {selectedFace}
+    </span>
 
-        <div className="preview-title">
-  <span>
-    {selectedFace}
-  </span>
+    <div className="preview-size-controls">
+      <button
+        type="button"
+        className={
+          previewSize === "both"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("both")
+        }
+      >
+        BOTH
+      </button>
 
-          
-  <div className="preview-size-controls">
-  <button
-    type="button"
-    className={
-      previewSize === "both"
-        ? "active"
-        : ""
-    }
-    onClick={() =>
-      setPreviewSize("both")
-    }
-  >
-    BOTH
-  </button>
+      <button
+        type="button"
+        className={
+          previewSize === "compact"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("compact")
+        }
+      >
+        COMPACT
+      </button>
 
-  <button
-    type="button"
-    className={
-      previewSize === "compact"
-        ? "active"
-        : ""
-    }
-    onClick={() =>
-      setPreviewSize("compact")
-    }
-  >
-    COMPACT
-  </button>
+      <button
+        type="button"
+        className={
+          previewSize === "tall"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("tall")
+        }
+      >
+        TALL
+      </button>
 
-  <button
-    type="button"
-    className={
-      previewSize === "tall"
-        ? "active"
-        : ""
-    }
-    onClick={() =>
-      setPreviewSize("tall")
-    }
-  >
-    TALL
-  </button>
-
-  <button
-    type="button"
-    className={
-      referenceOverlayVisible
-        ? "active"
-        : ""
-    }
-    onClick={() =>
-      setReferenceOverlayVisible(
-        current => !current
-      )
-    }
-  >
-    GRID
-  </button>
-</div>
-
-        <div className="preview-stage">
-
-<div
-  className={[
-    "preview-shells",
-
-    previewSize === "both"
-      ? "show-both"
-      : "show-single"
-  ]
-    .filter(Boolean)
-    .join(" ")}
->
-  {previewSize === "both" ||
-  previewSize === "compact" ? (
-    <div className="preview-unit">
-      <div className="preview-unit-label">
-        COMPACT · 298 × 391
-      </div>
-
-      <div className="preview-shell">
-        <IXIFacePreview
-          face={selectedFace}
-          previewSize="compact"
-          onCycleFace={
-            cycleSelectedFace
-          }
-        />
-
-        {referenceOverlayVisible ? (
-          <IXIFaceReferenceOverlay
-            previewSize="compact"
-            railHeight={19}
-          />
-        ) : null}
-      </div>
+      <button
+        type="button"
+        className={
+          referenceOverlayVisible
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setReferenceOverlayVisible(
+            current => !current
+          )
+        }
+      >
+        GRID
+      </button>
     </div>
-  ) : null}
+  </div>
 
-  {previewSize === "both" ||
-  previewSize === "tall" ? (
-    <div className="preview-unit">
-      <div className="preview-unit-label">
-        TALL · 298 × 470
-      </div>
+  <div className="preview-stage">
+    <div
+      className={[
+        "preview-shells",
 
-      <div className="preview-shell">
-        <IXIFacePreview
-          face={selectedFace}
-          previewSize="tall"
-          onCycleFace={
-            cycleSelectedFace
-          }
-        />
+        previewSize === "both"
+          ? "show-both"
+          : "show-single"
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {previewSize === "both" ||
+      previewSize === "compact" ? (
+        <div className="preview-unit">
+          <div className="preview-unit-label">
+            COMPACT · 298 × 391
+          </div>
 
-        {referenceOverlayVisible ? (
-          <IXIFaceReferenceOverlay
-            previewSize="tall"
-            railHeight={19}
-          />
-        ) : null}
-      </div>
+          <div className="preview-shell">
+            <IXIFacePreview
+              face={selectedFace}
+              previewSize="compact"
+              onCycleFace={
+                cycleSelectedFace
+              }
+            />
+
+            {referenceOverlayVisible ? (
+              <IXIFaceReferenceOverlay
+                previewSize="compact"
+                railHeight={19}
+              />
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {previewSize === "both" ||
+      previewSize === "tall" ? (
+        <div className="preview-unit">
+          <div className="preview-unit-label">
+            TALL · 298 × 470
+          </div>
+
+          <div className="preview-shell">
+            <IXIFacePreview
+              face={selectedFace}
+              previewSize="tall"
+              onCycleFace={
+                cycleSelectedFace
+              }
+            />
+
+            {referenceOverlayVisible ? (
+              <IXIFaceReferenceOverlay
+                previewSize="tall"
+                railHeight={19}
+              />
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
-  ) : null}
-</div>
-</div>
-
-      </section>
-
+  </div>
+</section>
       <aside className="face-inspector">
 
         <div className="inspector-title">
