@@ -127,7 +127,9 @@ consoleDepth = 1,
 consoleLeftOpen = false,
 consoleRightOpen = false,
 onExpandConsoleLeft,
-onExpandConsoleRight
+onExpandConsoleRight,
+
+consoleActuatorVariant = "compact"
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -417,7 +419,7 @@ function handlePhotoLoad(e, photoUrl) {
   return (
   <div
     data-listing-card-id={id}
-    className={`card marketplace-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
+    className={`card marketplace-listing-card console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
@@ -828,6 +830,11 @@ style={getFrameStyle(currentImageObject, "card")}
 
           contain: layout;
         }
+
+  .card.console-actuator-tall
+  :global(.ixi-object-card-actuator) {
+  top: 402px;
+}
 
 .ixi-action-card-notice {
   position: absolute;
