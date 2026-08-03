@@ -9,6 +9,12 @@ import IXIFaceFrame
 import IXIFaceActionFooter
   from "../ixi-face-studio/IXIFaceActionFooter";
 
+import IXIFaceGrid
+  from "../ixi-face-studio/IXIFaceGrid";
+
+import IXIFaceSummaryCard
+  from "../ixi-face-studio/IXIFaceSummaryCard";
+
 import {
   getAuctionData,
   getAuctionTermsData,
@@ -708,36 +714,44 @@ function saveBidPack() {
         </div>
       </div>
 
-      <section className="aof3-total">
-        <div>
-          <span>TOTAL COST</span>
+      <IXIFaceGrid
+  columns={2}
+  gap="sm"
+  className="aof3-total-grid"
+>
+  <IXIFaceSummaryCard
+    label="TOTAL COST"
+    value={
+      money(
+        mainScenario
+          .totalCost
+      )
+    }
+    compact
+  />
 
-          <strong>
-            {money(
-              mainScenario
-                .totalCost
-            )}
-          </strong>
-        </div>
-
-        <div className="primary">
-          <span>TOTAL PROFIT</span>
-
-          <strong>
-            {money(
-              mainScenario
-                .totalProfit
-            )}
-          </strong>
-
-          <em>
-            {percentage(
-              mainScenario
-                .profitPercent
-            )}
-          </em>
-        </div>
-      </section>
+  <IXIFaceSummaryCard
+    label="TOTAL PROFIT"
+    value={
+      money(
+        mainScenario
+          .totalProfit
+      )
+    }
+    detail={
+      percentage(
+        mainScenario
+          .profitPercent
+      )
+    }
+    tone={
+      mainScenario.totalProfit < 0
+        ? "negative"
+        : "accent"
+    }
+    compact
+  />
+</IXIFaceGrid>
 
       <section className="aof3-bid-pack">
         <div className="aof3-bid-pack-title">
@@ -1146,130 +1160,16 @@ function saveBidPack() {
             );
         }
 
-        .aof3-total {
-          min-height: 38px;
+        
 
-          display: grid;
+       
 
-          grid-template-columns:
-            minmax(0, .85fr)
-            minmax(0, 1.15fr);
+      
 
-          gap: 7px;
-        }
-
-        .aof3-total > div {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .07
-            );
-
-          border-radius: 7px;
-
-          background:
-            rgba(
-              9,
-              9,
-              9,
-              .5
-            );
-        }
-
-        .aof3-total > div.primary {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .18
-            );
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                196,
-                0,
-                .07
-              ),
-              rgba(
-                255,
-                196,
-                0,
-                .015
-              )
-            ),
-            rgba(
-              0,
-              0,
-              0,
-              .34
-            );
-        }
-
-        .aof3-total span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .42
-            );
-
-          font-size: 6.6px;
-          font-weight: 950;
-          letter-spacing: .44px;
-
-          text-transform: uppercase;
-        }
-
-        .aof3-total strong {
-          margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .9
-            );
-
-          font-size: 10px;
-          font-weight: 950;
-          line-height: 1;
-        }
-
-        .aof3-total .primary strong {
-          color: #ffc400;
-
-          font-size: 14px;
-        }
-
-        .aof3-total em {
-          margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .68
-            );
-
-          font-size: 7.6px;
-          font-weight: 950;
-          font-style: normal;
-        }
+     
+       :global(.aof3-total-grid) {
+  min-height: 46px;
+}
 
         .aof3-bid-pack {
           min-height: 66px;
