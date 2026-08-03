@@ -37,10 +37,10 @@ export default function IXIFaceStudio() {
   ] = useState("AOF2");
 
   const [
-    previewSize,
-    setPreviewSize
-  ] = useState("tall");
-
+  previewSize,
+  setPreviewSize
+] = useState("both");
+  
   const [
   referenceOverlayVisible,
   setReferenceOverlayVisible
@@ -126,66 +126,130 @@ export default function IXIFaceStudio() {
     {selectedFace}
   </span>
 
+          
   <div className="preview-size-controls">
-    <button
-      type="button"
-      className={
-        previewSize === "compact"
-          ? "active"
-          : ""
-      }
-      onClick={() =>
-        setPreviewSize("compact")
-      }
-    >
-      COMPACT
-    </button>
+  <button
+    type="button"
+    className={
+      previewSize === "both"
+        ? "active"
+        : ""
+    }
+    onClick={() =>
+      setPreviewSize("both")
+    }
+  >
+    BOTH
+  </button>
 
-    <button
-      type="button"
-      className={
-        previewSize === "tall"
-          ? "active"
-          : ""
-      }
-      onClick={() =>
-        setPreviewSize("tall")
-      }
-<button
-  type="button"
-  className={
-    referenceOverlayVisible
-      ? "active"
-      : ""
-  }
-  onClick={() =>
-    setReferenceOverlayVisible(
-      current => !current
-    )
-  }
->
-  GRID
-</button>      
-    >
-      TALL
-    </button>
-  </div>
+  <button
+    type="button"
+    className={
+      previewSize === "compact"
+        ? "active"
+        : ""
+    }
+    onClick={() =>
+      setPreviewSize("compact")
+    }
+  >
+    COMPACT
+  </button>
+
+  <button
+    type="button"
+    className={
+      previewSize === "tall"
+        ? "active"
+        : ""
+    }
+    onClick={() =>
+      setPreviewSize("tall")
+    }
+  >
+    TALL
+  </button>
+
+  <button
+    type="button"
+    className={
+      referenceOverlayVisible
+        ? "active"
+        : ""
+    }
+    onClick={() =>
+      setReferenceOverlayVisible(
+        current => !current
+      )
+    }
+  >
+    GRID
+  </button>
 </div>
 
         <div className="preview-stage">
 
- <div className="preview-shell">
-  <IXIFacePreview
-    face={selectedFace}
-    previewSize={previewSize}
-    onCycleFace={cycleSelectedFace}
-  />
+<div
+  className={[
+    "preview-shells",
 
-  {referenceOverlayVisible ? (
-    <IXIFaceReferenceOverlay
-      previewSize={previewSize}
-      railHeight={19}
-    />
+    previewSize === "both"
+      ? "show-both"
+      : "show-single"
+  ]
+    .filter(Boolean)
+    .join(" ")}
+>
+  {previewSize === "both" ||
+  previewSize === "compact" ? (
+    <div className="preview-unit">
+      <div className="preview-unit-label">
+        COMPACT · 298 × 391
+      </div>
+
+      <div className="preview-shell">
+        <IXIFacePreview
+          face={selectedFace}
+          previewSize="compact"
+          onCycleFace={
+            cycleSelectedFace
+          }
+        />
+
+        {referenceOverlayVisible ? (
+          <IXIFaceReferenceOverlay
+            previewSize="compact"
+            railHeight={19}
+          />
+        ) : null}
+      </div>
+    </div>
+  ) : null}
+
+  {previewSize === "both" ||
+  previewSize === "tall" ? (
+    <div className="preview-unit">
+      <div className="preview-unit-label">
+        TALL · 298 × 470
+      </div>
+
+      <div className="preview-shell">
+        <IXIFacePreview
+          face={selectedFace}
+          previewSize="tall"
+          onCycleFace={
+            cycleSelectedFace
+          }
+        />
+
+        {referenceOverlayVisible ? (
+          <IXIFaceReferenceOverlay
+            previewSize="tall"
+            railHeight={19}
+          />
+        ) : null}
+      </div>
+    </div>
   ) : null}
 </div>
 </div>
@@ -307,15 +371,13 @@ export default function IXIFaceStudio() {
           color:#FFC400;
         }
 
-        .preview-stage{
+       .preview-stage {
+  height:
+    calc(100% - 42px);
 
-          height:
-            calc(100% - 42px);
+  display: block;
 
-          display:flex;
-
-          align-items:center;
-          justify-content:center;
+  overflow: auto;
 
           color:
             rgba(255,255,255,.28);
@@ -333,6 +395,50 @@ export default function IXIFaceStudio() {
           color:
             rgba(255,255,255,.42);
         }
+
+.preview-shells {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  gap: 52px;
+
+  padding: 34px 24px 60px;
+
+  overflow: auto;
+}
+
+.preview-shells.show-single {
+  justify-content: center;
+}
+
+.preview-unit {
+  flex: 0 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.preview-unit-label {
+  color: rgba(255,255,255,.34);
+
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .58px;
+
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+
+
+        
 
 .preview-shell{
  position: relative;
