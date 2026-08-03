@@ -233,9 +233,10 @@ return (
       ) : (
         <IXIObjectConsoleRouter
   cardFamily={cardFamily}
+  cardContext={cardContext}
+
   objectId={id}
   item={item}
-
           sellerCardProps={
             sellerCardProps
           }
