@@ -18,32 +18,89 @@ export default function IXIMachineObjectActions({
         {labels[2]}
       </button>
 
-      <style jsx>{`
-       .mof-actions {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+     <style jsx>{`
+  .mof-actions {
+    width: 100%;
 
-  margin-top: auto;
+    display: grid;
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
 
-  position: relative;
-  top: 15px;
-}
-        .mof-actions button {
-          height: 27px;
-          border: 1px solid rgba(255,196,0,.22);
-          border-radius: 7px;
-          background:
-            linear-gradient(180deg, rgba(255,196,0,.055), rgba(255,196,0,0)),
-            #101010;
-          color: #FFC400;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .5px;
-          cursor: pointer;
-        }
-      `}</style>
+    gap: 8px;
+
+    margin-top: auto;
+
+    position: relative;
+    top: 6px;
+  }
+
+  .mof-actions button {
+    height: 20px;
+    min-height: 20px;
+
+    padding: 0 12px;
+
+    border:
+      1px solid
+      rgba(255,255,255,.10);
+
+    border-radius: 3px;
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,255,255,.035),
+        rgba(255,255,255,.012)
+      ),
+      rgba(8,8,8,.90);
+
+    color:
+      rgba(255,255,255,.60);
+
+    font-size: 6.7px;
+    font-weight: 950;
+    line-height: 1;
+    letter-spacing: .55px;
+
+    text-transform: uppercase;
+
+    box-shadow:
+      inset 0 1px 0
+      rgba(255,255,255,.03);
+
+    transition:
+      border-color .12s ease,
+      background .12s ease,
+      color .12s ease,
+      transform .08s ease;
+
+    cursor: pointer;
+  }
+
+  .mof-actions button:hover {
+    border-color:
+      rgba(255,196,0,.42);
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,196,0,.08),
+        rgba(255,196,0,.02)
+      ),
+      rgba(10,10,10,.95);
+
+    color: #FFC400;
+  }
+
+  .mof-actions button:active {
+    transform: translateY(1px);
+  }
+
+  .mof-actions button:disabled {
+    opacity: .35;
+    cursor: default;
+  }
+`}</style>
     </footer>
   );
 }
