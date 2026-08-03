@@ -327,12 +327,15 @@ function handlePhotoLoad(e, photoUrl) {
  <>
   {typeof onExpandConsoleLeft === "function" ? (
     <IXIObjectCardActuator
-      side="left"
-      label={
-        consoleLeftOpen
-          ? "Close console left"
-          : "Open console left"
-      }
+  side="left"
+
+  variant="tall"
+
+  label={
+    consoleLeftOpen
+      ? "Close console left"
+      : "Open console left"
+  }
       title={
         consoleLeftOpen
           ? "Close console left"
@@ -344,12 +347,15 @@ function handlePhotoLoad(e, photoUrl) {
 
   {typeof onExpandConsoleRight === "function" ? (
     <IXIObjectCardActuator
-      side="right"
-      label={
-        consoleRightOpen
-          ? "Close console right"
-          : "Open console right"
-      }
+  side="right"
+
+  variant="tall"
+
+  label={
+    consoleRightOpen
+      ? "Close console right"
+      : "Open console right"
+  }
       title={
         consoleRightOpen
           ? "Close console right"
