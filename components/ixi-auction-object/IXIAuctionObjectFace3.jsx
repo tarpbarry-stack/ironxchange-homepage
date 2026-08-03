@@ -734,7 +734,7 @@ function saveBidPack() {
             )}
           </em>
         </div>
-</IXIFaceFrame>
+      </section>
 
       <section className="aof3-bid-pack">
         <div className="aof3-bid-pack-title">
@@ -1348,7 +1348,7 @@ overflow: hidden;
           gap: 4px;
         }
       `}</style>
-    </section>
+  </IXIFaceFrame>
   );
 }
 
