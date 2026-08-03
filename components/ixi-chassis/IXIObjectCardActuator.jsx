@@ -32,10 +32,10 @@ export default function IXIObjectCardActuator({
            * aligned with the price/state area,
            * below the photo and away from drag controls.
            */
-          top: 402px;
+          top: 362px;
 
-          width: 5px;
-          height: 34px;
+          width: 3px;
+          height: 17px;
 
           padding: 0;
           border: 0;
