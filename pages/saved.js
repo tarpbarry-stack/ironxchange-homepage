@@ -1426,39 +1426,50 @@ if (armedDestination === "stackTop") {
   cardScaleMode={cardScaleMode}
 />
               
-     <IXIBoardSurface
+    <IXIBoardSurface
   scaleMode={cardScaleMode}
 >
-    visibleSavedListings.length === 1 ? "single-card" : ""
-  }`}
-  style={{
-    gridTemplateColumns:
-      visibleSavedListings.length === 1
-        ? `${cardScaleMetrics.width}px`
-        : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-    gap: `${cardScaleMetrics.gap}px`
-  }}
->
-<IXIBoard
-  items={visibleSavedListings}
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
-  toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  armedDestination={armedDestination}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
-  draggingListingId={draggingListingId}
-  ghostListingId={ghostListingId}
-  enableCardScaling={true}
-  cardScaleMode={cardScaleMode}
-    />
-        </IXIBoardSurface>
-
+  <IXIBoard
+    items={visibleSavedListings}
+    cardContext="workspace"
+    getListingId={getListingId}
+    savedIds={savedIds}
+    ixiCardState={ixiCardState}
+    IXISortableMachineCard={
+      IXISortableMachineCard
+    }
+    toggleSave={toggleSave}
+    updateIxiCardState={
+      updateIxiCardState
+    }
+    cycleMachineFace={
+      cycleMachineFace
+    }
+    sendListingToFront={
+      sendListingToFront
+    }
+    sendListingToBack={
+      sendListingToBack
+    }
+    armedDestination={
+      armedDestination
+    }
+    sendMachineToArmedDestination={
+      sendMachineToArmedDestination
+    }
+    draggingListingId={
+      draggingListingId
+    }
+    ghostListingId={
+      ghostListingId
+    }
+    enableCardScaling={true}
+    cardScaleMode={
+      cardScaleMode
+    }
+  />
+</IXIBoardSurface>
+      
 <button
   type="button"
   onClick={cycleCardScaleMode}
