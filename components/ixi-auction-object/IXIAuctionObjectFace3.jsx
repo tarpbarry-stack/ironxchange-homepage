@@ -12,14 +12,14 @@ import IXIFaceActionFooter
 import IXIFaceGrid
   from "../ixi-face-studio/IXIFaceGrid";
 
-import IXIFaceSummaryCard
-  from "../ixi-face-studio/IXIFaceSummaryCard";
-
 import IXIFaceSection
   from "../ixi-face-studio/IXIFaceSection";
 
 import IXIFaceRow
   from "../ixi-face-studio/IXIFaceRow";
+
+import IXIFaceSummaryCard
+  from "../ixi-face-studio/IXIFaceSummaryCard";
 
 import {
   getAuctionData,
@@ -557,109 +557,86 @@ function saveBidPack() {
     );
 
   return (
- <IXIFaceFrame
-  className="aof3"
-  contentClassName="aof3-content"
-  size={faceSize}
-  dragHandleProps={
-    dragHandleProps
-  }
-  footer={
-    <IXIFaceActionFooter />
-  }
->
+    <IXIFaceFrame
+      className="aof3"
+      contentClassName="aof3-content"
+      size={faceSize}
+      dragHandleProps={dragHandleProps}
+      footer={
+        <IXIFaceActionFooter />
+      }
+    >
       <header className="aof3-head">
-        <span>
-          PRIVATE DEALER WORKSHEET
-        </span>
-
-        <strong>
-          IXI DEALER BID PACK™
-        </strong>
+        <span>PRIVATE DEALER WORKSHEET</span>
+        <strong>IXI DEALER BID PACK™</strong>
       </header>
 
       <div className="aof3-machine-line">
-        {[
-          year,
-          make,
-          model
-        ]
+        {[year, make, model]
           .filter(Boolean)
           .join(" ")}
 
         {hours
-          ? (
-              ` • ${String(hours)
-                .replace(
-                  /hrs|hours/gi,
-                  ""
-                )
-                .trim()} HRS`
-            )
+          ? ` • ${String(hours)
+              .replace(/hrs|hours/gi, "")
+              .trim()} HRS`
           : ""}
       </div>
 
-      <section className="aof3-sale-value">
-        <span>
-          EST SALE PRICE
-        </span>
+      <IXIFaceSection
+        accent
+        dense
+        className="aof3-sale-section"
+      >
+        <div className="aof3-sale-value">
+          <span>EST SALE PRICE</span>
 
-        <MoneyInput
-          className="aof3-sale-input"
-          value={
-            estimatedSalePrice
-          }
-          onChange={
-            setEstimatedSalePrice
-          }
-          onSave={saveBidPack}
-        />
-
-        <div className="aof3-advertised-row">
-          <MiniValue
-            label="LOW ADV"
-            value={
-              lowAdvertised
-            }
-            onChange={
-              setLowAdvertised
-            }
+          <MoneyInput
+            className="aof3-sale-input"
+            value={estimatedSalePrice}
+            onChange={setEstimatedSalePrice}
             onSave={saveBidPack}
           />
 
-          <MiniValue
-            label="AVG ADV"
-            value={
-              averageAdvertised
-            }
-            onChange={
-              setAverageAdvertised
-            }
-            onSave={saveBidPack}            
-          />
-        </div>
-      </section>
+          <div className="aof3-advertised-row">
+            <MiniValue
+              label="LOW ADV"
+              value={lowAdvertised}
+              onChange={setLowAdvertised}
+              onSave={saveBidPack}
+            />
 
-      <div className="aof3-grid">
-  <IXIFaceSection
-    dense
-    className="aof3-cost-panel"
-  >
-    <Row
-      label="MY BID"
+            <MiniValue
+              label="AVG ADV"
+              value={averageAdvertised}
+              onChange={setAverageAdvertised}
+              onSave={saveBidPack}
+            />
+          </div>
+        </div>
+      </IXIFaceSection>
+
+      <IXIFaceGrid
+        columns={2}
+        gap="sm"
+        className="aof3-cost-grid"
+      >
+        <IXIFaceSection
+          dense
+          className="aof3-cost-panel"
+        >
+          <Row
+            label="MY BID"
             input
             value={myBid}
             onChange={setMyBid}
-            onSave={saveBidPack}            
+            onSave={saveBidPack}
             emphasized
           />
 
           <Row
             label="COMM."
-            value={money(
-              mainScenario
-                .commission
-            )}
+            value={money(mainScenario.commission)}
             muted
           />
 
@@ -677,13 +654,13 @@ function saveBidPack() {
             value={freight2}
             onChange={setFreight2}
             onSave={saveBidPack}
-             />
-  </IXIFaceSection>
+          />
+        </IXIFaceSection>
 
-  <IXIFaceSection
-    dense
-    className="aof3-cost-panel"
-  >
+        <IXIFaceSection
+          dense
+          className="aof3-cost-panel"
+        >
           <Row
             label="TECH"
             input
@@ -722,351 +699,182 @@ function saveBidPack() {
             value={preDelivery}
             onChange={setPreDelivery}
             onSave={saveBidPack}
-             />
-  </IXIFaceSection>
-</div>
+          />
+        </IXIFaceSection>
+      </IXIFaceGrid>
 
       <IXIFaceGrid
-  columns={2}
-  gap="sm"
-  className="aof3-total-grid"
->
-  <IXIFaceSummaryCard
-    label="TOTAL COST"
-    value={
-      money(
-        mainScenario
-          .totalCost
-      )
-    }
-    compact
-  />
+        columns={2}
+        gap="sm"
+        className="aof3-total-grid"
+      >
+        <IXIFaceSummaryCard
+          label="TOTAL COST"
+          value={money(mainScenario.totalCost)}
+          compact
+        />
 
-  <IXIFaceSummaryCard
-    label="TOTAL PROFIT"
-    value={
-      money(
-        mainScenario
-          .totalProfit
-      )
-    }
-    detail={
-      percentage(
-        mainScenario
-          .profitPercent
-      )
-    }
-    tone={
-      mainScenario.totalProfit < 0
-        ? "negative"
-        : "accent"
-    }
-    compact
-  />
-</IXIFaceGrid>
+        <IXIFaceSummaryCard
+          label="TOTAL PROFIT"
+          value={money(mainScenario.totalProfit)}
+          detail={percentage(mainScenario.profitPercent)}
+          tone={
+            mainScenario.totalProfit < 0
+              ? "negative"
+              : "accent"
+          }
+          compact
+        />
+      </IXIFaceGrid>
 
-      <section className="aof3-bid-pack">
+      <IXIFaceSection
+        dense
+        className="aof3-bid-pack"
+      >
         <div className="aof3-bid-pack-title">
           BID PACK ANALYSIS
         </div>
 
-        <div className="aof3-bid-pack-grid">
-          {bidScenarios.map(
-            (
-              scenario,
-              index
-            ) => (
-              <BidScenario
-                key={`${scenario.bid}-${index}`}
-                scenario={
-                  scenario
-                }
-                active={
-                  index === 2
-                }
-              />
-            )
-          )}
-        </div>
-</section>
+        <IXIFaceGrid
+          columns={5}
+          gap="xs"
+          className="aof3-bid-pack-grid"
+        >
+          {bidScenarios.map((scenario, index) => (
+            <BidScenario
+              key={`${scenario.bid}-${index}`}
+              scenario={scenario}
+              active={index === 2}
+            />
+          ))}
+        </IXIFaceGrid>
+      </IXIFaceSection>
 
-<style jsx>{`
+      <style jsx>{`
         :global(.aof3-content) {
-  display: flex;
-  flex-direction: column;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          overflow: hidden;
+        }
 
-  gap: 6px;
-
-  overflow: hidden;
-}
         .aof3-head {
-          height: 16px;
-
-          position: relative;
-          top: -2px;
-
+          min-height: 16px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-
           gap: 8px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .48
-            );
-
-          font-size: 7.2px;
+          color: rgba(255,255,255,.5);
+          font-size: var(--ixi-face-font-label, 7px);
           font-weight: 950;
           letter-spacing: .44px;
-
           text-transform: uppercase;
         }
 
         .aof3-head strong {
           color: #ffc400;
-
-          font-size: 7.7px;
+          font-size: var(--ixi-face-font-label, 7px);
           font-weight: 950;
           letter-spacing: .52px;
         }
 
         .aof3-machine-line {
           min-height: 15px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .56
-            );
-
-          font-size: 7.2px;
+          color: rgba(255,255,255,.6);
+          font-size: var(--ixi-face-font-label, 7px);
           font-weight: 950;
           line-height: 1.15;
           letter-spacing: .28px;
-
           text-align: center;
           text-transform: uppercase;
-
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .aof3-sale-value {
-          min-height: 66px;
+        :global(.aof3-sale-section) {
+          flex: 0 0 auto;
+        }
 
+        .aof3-sale-value {
+          min-height: 58px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-
-          padding: 6px 10px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              196,
-              0,
-              .16
-            );
-
-          border-radius: 8px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                196,
-                0,
-                .065
-              ),
-              rgba(
-                255,
-                196,
-                0,
-                .012
-              )
-            ),
-            rgba(
-              0,
-              0,
-              0,
-              .32
-            );
-
-          box-shadow:
-            inset 0 1px 0
-            rgba(
-              255,
-              255,
-              255,
-              .03
-            );
         }
 
         .aof3-sale-value > span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .46
-            );
-
-          font-size: 7.4px;
+          color: rgba(255,255,255,.48);
+          font-size: var(--ixi-face-font-label, 7px);
           font-weight: 950;
           letter-spacing: .58px;
-
           text-transform: uppercase;
         }
 
         :global(.aof3-sale-input) {
-          width: 104px;
-          height: 23px;
-
+          width: 112px;
+          height: 25px;
           margin-top: 2px;
-
           border: 0;
-          border-bottom:
-            2px solid
-            rgba(
-              255,
-              196,
-              0,
-              .48
-            );
-
+          border-bottom: 2px solid rgba(255,196,0,.48);
           border-radius: 0;
-
           background: transparent;
           color: #ffc400;
-
           padding: 0 3px;
-
-          font-size: 16px;
+          font-size: var(--ixi-face-font-display, 18px);
           font-weight: 950;
           line-height: 1;
-
           text-align: center;
           outline: none;
         }
 
         .aof3-advertised-row {
           width: 100%;
-
           display: grid;
-          grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-          gap: 20px;
-
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 18px;
           margin-top: 4px;
         }
 
-        .aof3-grid {
-          display: grid;
-
-          grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-          gap: 7px;
+        :global(.aof3-cost-grid),
+        :global(.aof3-total-grid),
+        :global(.aof3-bid-pack-grid) {
+          min-width: 0;
         }
 
-       :global(.aof3-cost-panel) {
-  min-width: 0;
-}
+        :global(.aof3-cost-panel) {
+          min-width: 0;
+        }
 
-       
+        :global(.aof3-input) {
+          width: 58px !important;
+          min-width: 58px;
+          max-width: 58px;
+          height: 17px;
+          justify-self: end;
+          padding: 0 2px !important;
+        }
 
-       
+        :global(.aof3-total-grid) {
+          min-height: 46px;
+        }
 
-       :global(.aof3-input) {
-  width: 58px !important;
-  min-width: 58px;
-  max-width: 58px;
-
-  height: 16px;
-
-  justify-self: end;
-
-  padding: 0 2px !important;
-}
-
-     
-       :global(.aof3-total-grid) {
-  min-height: 46px;
-}
-
-        .aof3-bid-pack {
-          min-height: 66px;
-
-          padding: 5px 5px 6px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .065
-            );
-
-          border-radius: 7px;
-
-          background:
-            rgba(
-              8,
-              8,
-              8,
-              .48
-            );
+        :global(.aof3-bid-pack) {
+          min-height: 64px;
         }
 
         .aof3-bid-pack-title {
           margin-bottom: 4px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .38
-            );
-
-          font-size: 6.3px;
+          color: rgba(255,255,255,.4);
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 950;
           letter-spacing: .5px;
-
           text-align: center;
           text-transform: uppercase;
         }
-
-        .aof3-bid-pack-grid {
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              5,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-          gap: 4px;
-        }
       `}</style>
-  </IXIFaceFrame>
+    </IXIFaceFrame>
   );
 }
 
@@ -1085,21 +893,17 @@ function MoneyInput({
           : ""
       }
       inputMode="numeric"
-
       onPointerDown={event => {
         event.stopPropagation();
       }}
-
       onChange={event => {
         onChange?.(
           cleanNumber(event.target.value)
         );
       }}
-
       onBlur={() => {
         onSave?.();
       }}
-
       onKeyDown={event => {
         if (event.key !== "Enter") return;
 
@@ -1107,12 +911,12 @@ function MoneyInput({
         event.stopPropagation();
 
         onSave?.();
-
         event.currentTarget.blur();
       }}
     />
   );
 }
+
 function MiniValue({
   label,
   value,
@@ -1124,70 +928,40 @@ function MiniValue({
       <span>{label}</span>
 
       <MoneyInput
-  value={value}
-  onChange={onChange}
-  onSave={onSave}
-  className="aof3-mini-input"
-/>
+        value={value}
+        onChange={onChange}
+        onSave={onSave}
+        className="aof3-mini-input"
+      />
 
       <style jsx>{`
         .aof3-mini-value {
           min-width: 0;
-
           display: flex;
           align-items: center;
           justify-content: center;
-
-          gap: 5px;
+          gap: 6px;
         }
 
         .aof3-mini-value span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .34
-            );
-
-          font-size: 6.2px;
+          color: rgba(255,255,255,.38);
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 950;
           letter-spacing: .38px;
-
           text-transform: uppercase;
           white-space: nowrap;
         }
 
         :global(.aof3-mini-input) {
-          width: 60px;
-          height: 13px;
-
+          width: 66px;
+          height: 15px;
           border: 0;
-
-          border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .18
-            );
-
+          border-bottom: 1px solid rgba(255,255,255,.2);
           background: transparent;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .72
-            );
-
+          color: rgba(255,255,255,.78);
           padding: 0 2px;
-
-          font-size: 7.5px;
+          font-size: var(--ixi-face-font-value, 9px);
           font-weight: 950;
-
           text-align: right;
           outline: none;
         }
@@ -1208,11 +982,7 @@ function Row({
   return (
     <IXIFaceRow
       label={label}
-      value={
-        input
-          ? ""
-          : value
-      }
+      value={input ? "" : value}
       muted={muted}
       emphasized={emphasized}
       editable={input}
@@ -1223,15 +993,7 @@ function Row({
           value={value}
           onChange={onChange}
           onSave={onSave}
-          className={[
-            "aof3-input",
-
-            emphasized
-              ? "emphasized"
-              : ""
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          className="aof3-input"
         />
       ) : null}
     </IXIFaceRow>
@@ -1246,114 +1008,49 @@ function BidScenario({
     <div
       className={[
         "aof3-bid-scenario",
-        active
-          ? "active"
-          : ""
+        active ? "active" : ""
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <strong>
-        {money(
-          scenario.bid
-        )}
-      </strong>
-
-      <span>
-        PROFIT
-      </span>
-
-      <b>
-        {money(
-          scenario.totalProfit
-        )}
-      </b>
-
-      <em>
-        {percentage(
-          scenario.profitPercent
-        )}
-      </em>
+      <strong>{money(scenario.bid)}</strong>
+      <span>PROFIT</span>
+      <b>{money(scenario.totalProfit)}</b>
+      <em>{percentage(scenario.profitPercent)}</em>
 
       <style jsx>{`
         .aof3-bid-scenario {
           min-width: 0;
-
           min-height: 43px;
-
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-
           padding: 3px 2px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .055
-            );
-
+          border: 1px solid rgba(255,255,255,.055);
           border-radius: 5px;
-
-          background:
-            rgba(
-              12,
-              12,
-              12,
-              .62
-            );
-
+          background: rgba(12,12,12,.62);
           overflow: hidden;
         }
 
         .aof3-bid-scenario.active {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .28
-            );
-
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .045
-            );
-
-          box-shadow:
-            0 0 8px
-            rgba(
-              255,
-              196,
-              0,
-              .07
-            );
+          border-color: rgba(255,196,0,.28);
+          background: rgba(255,196,0,.045);
+          box-shadow: 0 0 8px rgba(255,196,0,.07);
         }
 
-        .aof3-bid-scenario strong {
+        .aof3-bid-scenario strong,
+        .aof3-bid-scenario b {
           max-width: 100%;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .88
-            );
-
-          font-size: 7px;
-          font-weight: 950;
-
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+
+        .aof3-bid-scenario strong {
+          color: rgba(255,255,255,.9);
+          font-size: var(--ixi-face-font-label, 7px);
+          font-weight: 950;
         }
 
         .aof3-bid-scenario.active strong {
@@ -1362,58 +1059,26 @@ function BidScenario({
 
         .aof3-bid-scenario span {
           margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .28
-            );
-
-          font-size: 5.1px;
+          color: rgba(255,255,255,.3);
+          font-size: 5.5px;
           font-weight: 950;
           letter-spacing: .24px;
-
           text-transform: uppercase;
         }
 
         .aof3-bid-scenario b {
-          max-width: 100%;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .68
-            );
-
-          font-size: 6.3px;
+          color: rgba(255,255,255,.72);
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 950;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
 
         .aof3-bid-scenario em {
           margin-top: 1px;
-
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .72
-            );
-
-          font-size: 6.1px;
+          color: rgba(255,196,0,.76);
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 950;
           font-style: normal;
         }
-
-      
       `}</style>
     </div>
   );
