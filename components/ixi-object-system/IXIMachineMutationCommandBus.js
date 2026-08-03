@@ -15,30 +15,45 @@ export const IXI_MACHINE_MUTATION_COMMANDS = {
       };
     }
 
-    const response = await fetch("/api/update-machine-facts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        listingId,
-        title,
-        price,
-        hours,
-        location,
-        description,
-        keywords
-      })
-    });
+    const response =
+      await fetch(
+        "/api/update-machine-facts",
+        {
+          method: "POST",
 
-    const data = await response.json().catch(() => ({}));
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-    if (!response.ok || data?.ok === false) {
-      throw new Error(data?.error || "Machine facts update failed");
+          body:
+            JSON.stringify({
+              listingId,
+              title,
+              price,
+              hours,
+              location,
+              description,
+              keywords
+            })
+        }
+      );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if (
+      !response.ok ||
+      data?.ok === false
+    ) {
+      throw new Error(
+        data?.error ||
+        "Machine facts update failed"
+      );
     }
 
     return data;
-  }
-};
   }
 };
