@@ -1,12 +1,20 @@
 import IXIScaledCardShell
-  from "../ixi-machine-object/IXIScaledCardShell";
+  from "./IXIScaledCardShell";
 
 import IXIObjectCardActuator
   from "../ixi-chassis/IXIObjectCardActuator";
 
-import {
-  renderAuctionPanel
-} from "./IXIAuctionConsolePanels";
+import IXIMachineObjectFace2
+  from "./IXIMachineObjectFace2";
+
+import IXISellerMachineObjectFace2
+  from "./IXISellerMachineObjectFace2";
+
+import IXIMachineObjectFace3
+  from "./IXIMachineObjectFace3";
+
+import IXIMachineObjectFace4
+  from "./IXIMachineObjectFace4";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
@@ -20,13 +28,13 @@ import {
   createConsoleSlotsPatch
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 
-const AUCTION_NATIVE_PANEL_WIDTH =
+const MARKETPLACE_NATIVE_PANEL_WIDTH =
   298;
 
-const AUCTION_NATIVE_HEIGHT =
-  471;
+const MARKETPLACE_NATIVE_HEIGHT =
+  391;
 
-const AUCTION_SEAM_OVERLAP =
+const MARKETPLACE_SEAM_OVERLAP =
   0;
 
 function getLegacyConsoleSlots(
@@ -46,7 +54,8 @@ function getLegacyConsoleSlots(
 
         face:
           objectState
-            .consoleLeftFace || 2
+            .consoleLeftFace ||
+          2
       })
     );
   }
@@ -71,7 +80,8 @@ function getLegacyConsoleSlots(
 
         face:
           objectState
-            .consoleRightFace || 3
+            .consoleRightFace ||
+          3
       })
     );
   }
@@ -81,7 +91,23 @@ function getLegacyConsoleSlots(
   );
 }
 
-export default function IXIAuctionObjectConsole({
+function normalizeMarketplaceFace(
+  value
+) {
+  const face =
+    Number(value);
+
+  if (
+    face === 3 ||
+    face === 4
+  ) {
+    return face;
+  }
+
+  return 2;
+}
+
+export default function IXIMarketplaceObjectConsole({
   objectId,
   item,
 
@@ -107,7 +133,8 @@ export default function IXIAuctionObjectConsole({
     Array.isArray(
       objectState.consoleSlots
     ) &&
-    objectState.consoleSlots.length > 0;
+    objectState.consoleSlots.length >
+      0;
 
   const consoleSlots =
     hasSavedSlotModel
@@ -143,14 +170,14 @@ export default function IXIAuctionObjectConsole({
   const consoleNativeWidth =
     (
       consoleDepth *
-      AUCTION_NATIVE_PANEL_WIDTH
+      MARKETPLACE_NATIVE_PANEL_WIDTH
     ) -
     (
       Math.max(
         consoleDepth - 1,
         0
       ) *
-      AUCTION_SEAM_OVERLAP
+      MARKETPLACE_SEAM_OVERLAP
     );
 
   function patchObjectState(
@@ -186,7 +213,9 @@ export default function IXIAuctionObjectConsole({
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    if (atCapacity) return;
+    if (atCapacity) {
+      return;
+    }
 
     const face =
       getNextConsoleDefaultFace(
@@ -251,6 +280,89 @@ export default function IXIAuctionObjectConsole({
     );
   }
 
+  function renderMarketplacePanel(
+    face
+  ) {
+    const resolvedFace =
+      normalizeMarketplaceFace(
+        face
+      );
+
+    if (resolvedFace === 3) {
+      return (
+        <IXIMachineObjectFace3
+          listing={item}
+
+          dragHandleProps={
+            dragHandleProps
+          }
+        />
+      );
+    }
+
+    if (resolvedFace === 4) {
+      return (
+        <IXIMachineObjectFace4
+          listing={item}
+
+          dragHandleProps={
+            dragHandleProps
+          }
+        />
+      );
+    }
+
+    /*
+     * Seller environments may provide
+     * sellerMode through the normal card
+     * prop contract. Public Marketplace
+     * environments use the buyer MOF2.
+     */
+    if (
+      sellerCardProps
+        ?.sellerMode === true
+    ) {
+      return (
+        <IXISellerMachineObjectFace2
+          listing={item}
+
+          dragHandleProps={
+            dragHandleProps
+          }
+
+          descriptionValue={
+            sellerCardProps
+              .descriptionValue
+          }
+
+          onDescriptionChange={
+            sellerCardProps
+              .onDescriptionChange
+          }
+
+          onDescriptionKeyDown={
+            sellerCardProps
+              .onDescriptionKeyDown
+          }
+
+          savingDescription={
+            sellerCardProps
+              .savingDescription
+          }
+        />
+      );
+    }
+
+    return (
+      <IXIMachineObjectFace2
+        listing={item}
+
+        dragHandleProps={
+          dragHandleProps
+        }
+      />
+    );
+  }
 
   function renderModuleSlot(
     slot,
@@ -283,20 +395,29 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
+
         className="
-          ixi-auction-console-slot
-          ixi-auction-console-module-slot
+          ixi-marketplace-console-slot
+          ixi-marketplace-console-module-slot
         "
       >
-        <div className="ixi-auction-console-module-card">
+        <div
+          className="
+            ixi-marketplace-console-module-card
+          "
+        >
           <IXIObjectCardActuator
             side={
               closeActuatorSide
             }
 
-            label="Close auction module"
+            label="
+              Close marketplace module
+            "
 
-            title="Close auction module"
+            title="
+              Close marketplace module
+            "
 
             onClick={event =>
               removeConsoleModule(
@@ -310,9 +431,13 @@ export default function IXIAuctionObjectConsole({
             <IXIObjectCardActuator
               side="left"
 
-              label="Add auction module left"
+              label="
+                Add marketplace module left
+              "
 
-              title="Add auction module left"
+              title="
+                Add marketplace module left
+              "
 
               onClick={event =>
                 addConsoleModule(
@@ -327,9 +452,13 @@ export default function IXIAuctionObjectConsole({
             <IXIObjectCardActuator
               side="right"
 
-              label="Add auction module right"
+              label="
+                Add marketplace module right
+              "
 
-              title="Add auction module right"
+              title="
+                Add marketplace module right
+              "
 
               onClick={event =>
                 addConsoleModule(
@@ -340,100 +469,23 @@ export default function IXIAuctionObjectConsole({
             />
           ) : null}
 
-         {renderAuctionPanel({
-  face:
-    slot.face,
-
-  listing:
-    item,
-
-  sourceListingUrl:
-    sellerCardProps
-      .sourceListingUrl ||
-    "",
-
-  dragHandleProps,
-
-  lotNumberValue:
-    sellerCardProps
-      .lotNumberValue,
-
-  onLotNumberChange:
-    sellerCardProps
-      .onLotNumberChange,
-
-  onLotNumberKeyDown:
-    sellerCardProps
-      .onLotNumberKeyDown,
-
-  hoursValue:
-    sellerCardProps
-      .hoursValue,
-
-  onHoursChange:
-    sellerCardProps
-      .onHoursChange,
-
-  onHoursKeyDown:
-    sellerCardProps
-      .onHoursKeyDown,
-
-  priceValue:
-    sellerCardProps
-      .priceValue,
-
-  onPriceChange:
-    sellerCardProps
-      .onPriceChange,
-
-  onPriceKeyDown:
-    sellerCardProps
-      .onPriceKeyDown,
-
-  locationValue:
-    sellerCardProps
-      .locationValue,
-
-  onLocationChange:
-    sellerCardProps
-      .onLocationChange,
-
-  onLocationKeyDown:
-    sellerCardProps
-      .onLocationKeyDown,
-
-  dealerBidPack:
-    sellerCardProps
-      .dealerBidPack ||
-    {},
-
-  onSaveDealerBidPack:
-    sellerCardProps
-      .onSaveDealerBidPack,
-
-  auctionDispositionBusy:
-    sellerCardProps
-      .auctionDispositionBusy ||
-    "",
-
-  onAuctionDisposition:
-    sellerCardProps
-      .onAuctionDisposition
-})}
+          {renderMarketplacePanel(
+            slot.face
+          )}
 
           <button
             type="button"
 
             className="
-              ixi-auction-console-face-button
+              ixi-marketplace-console-face-button
             "
 
             aria-label={
-              `Change auction face ${slot.face}`
+              `Change marketplace face ${slot.face}`
             }
 
             title={
-              `Auction face ${slot.face}`
+              `Marketplace face ${slot.face}`
             }
 
             onPointerDown={event => {
@@ -473,9 +525,13 @@ export default function IXIAuctionObjectConsole({
       isLastSlot;
 
     /*
-     * At capacity, both parent actuators
-     * must disappear even when the Listing
-     * Card occupies an outside position.
+     * MarketplaceListingCard uses the
+     * console-open booleans to determine
+     * whether its outside actuator should
+     * remain visible.
+     *
+     * At full capacity both parent
+     * actuators must disappear.
      */
     const parentConsoleLeftOpen =
       consoleLeftOpen ||
@@ -520,9 +576,10 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
+
         className="
-          ixi-auction-console-slot
-          ixi-auction-console-listing-slot
+          ixi-marketplace-console-slot
+          ixi-marketplace-console-listing-slot
         "
       >
         {parentCard}
@@ -533,7 +590,7 @@ export default function IXIAuctionObjectConsole({
   const assembledConsole = (
     <div
       className="
-        ixi-auction-object-console
+        ixi-marketplace-object-console
       "
 
       style={{
@@ -575,7 +632,7 @@ export default function IXIAuctionObjectConsole({
       )}
 
       <style jsx global>{`
-        .ixi-auction-object-console {
+        .ixi-marketplace-object-console {
           position: relative;
 
           display: flex;
@@ -587,70 +644,70 @@ export default function IXIAuctionObjectConsole({
           overflow: visible;
         }
 
-        .ixi-auction-console-slot {
+        .ixi-marketplace-console-slot {
           position: relative;
 
           flex:
             0 0
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           overflow: visible;
         }
 
-        .ixi-auction-console-slot +
-        .ixi-auction-console-slot {
+        .ixi-marketplace-console-slot +
+        .ixi-marketplace-console-slot {
           margin-left:
-            -${AUCTION_SEAM_OVERLAP}px;
+            -${MARKETPLACE_SEAM_OVERLAP}px;
         }
 
-        .ixi-auction-console-listing-slot {
+        .ixi-marketplace-console-listing-slot {
           z-index: 5;
         }
 
-        .ixi-auction-console-module-slot {
+        .ixi-marketplace-console-module-slot {
           z-index: 4;
         }
 
-        .ixi-auction-console-module-card {
+        .ixi-marketplace-console-module-card {
           box-sizing: border-box;
 
           position: relative;
 
           width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
+            ${MARKETPLACE_NATIVE_PANEL_WIDTH}px;
 
           height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
+            ${MARKETPLACE_NATIVE_HEIGHT}px;
 
           border:
             1px solid
@@ -700,7 +757,7 @@ export default function IXIAuctionObjectConsole({
           overflow: visible;
         }
 
-        .ixi-auction-console-face-button {
+        .ixi-marketplace-console-face-button {
           position: absolute;
 
           left: 50%;
@@ -749,7 +806,7 @@ export default function IXIAuctionObjectConsole({
               );
         }
 
-        .ixi-auction-console-face-button:hover {
+        .ixi-marketplace-console-face-button:hover {
           background:
             rgba(
               255,
@@ -770,24 +827,20 @@ export default function IXIAuctionObjectConsole({
       `}</style>
     </div>
   );
-
-  return enableCardScaling ? (
-    <IXIScaledCardShell
-      size={cardScaleMode}
-
-      objectFamily="auction"
-
-      nativeWidth={
-        consoleNativeWidth
-      }
-
-      nativeHeight={
-        AUCTION_NATIVE_HEIGHT
-      }
-    >
-      {assembledConsole}
-    </IXIScaledCardShell>
-  ) : (
-    assembledConsole
-  );
+return enableCardScaling ? (
+  <IXIScaledCardShell
+    size={cardScaleMode}
+    objectFamily="marketplace"
+    nativeWidth={
+      consoleNativeWidth
+    }
+    nativeHeight={
+      MARKETPLACE_NATIVE_HEIGHT
+    }
+  >
+    {assembledConsole}
+  </IXIScaledCardShell>
+) : (
+  assembledConsole
+);
 }
