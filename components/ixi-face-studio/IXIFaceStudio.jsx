@@ -79,11 +79,13 @@ export default function IXIFaceStudio() {
 
         <div className="preview-stage">
 
-          LIVE FACE
-          <br />
-          COMING NEXT
+  <div className="preview-shell">
 
-        </div>
+    {/* LIVE FACE GOES HERE */}
+
+  </div>
+
+</div>
 
       </section>
 
@@ -228,6 +230,26 @@ export default function IXIFaceStudio() {
           color:
             rgba(255,255,255,.42);
         }
+
+.preview-shell{
+
+  width:298px;
+  height:472px;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+
+  border-radius:13px;
+
+  overflow:hidden;
+
+  background:#141414;
+
+  box-shadow:
+    0 18px 40px
+    rgba(0,0,0,.42);
+}
       `}</style>
 
     </div>
