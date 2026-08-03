@@ -4,14 +4,9 @@ import IXIScaledCardShell
 import IXIObjectCardActuator
   from "../ixi-chassis/IXIObjectCardActuator";
 
-import IXIAuctionObjectFace2
-  from "./IXIAuctionObjectFace2";
-
-import IXIAuctionObjectFace3
-  from "./IXIAuctionObjectFace3";
-
-import IXIAuctionObjectFace4
-  from "./IXIAuctionObjectFace4";
+import {
+  renderAuctionPanel
+} from "./IXIAuctionConsolePanels";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
@@ -256,106 +251,6 @@ export default function IXIAuctionObjectConsole({
     );
   }
 
-  function renderAuctionFace(
-    face
-  ) {
-    if (Number(face) === 3) {
-      return (
-        <IXIAuctionObjectFace3
-          listing={item}
-
-          dragHandleProps={
-            dragHandleProps
-          }
-        />
-      );
-    }
-
-    if (Number(face) === 4) {
-      return (
-        <IXIAuctionObjectFace4
-          listing={item}
-
-          dragHandleProps={
-            dragHandleProps
-          }
-
-          auctionDispositionBusy={
-            sellerCardProps
-              .auctionDispositionBusy
-          }
-
-          onAuctionDisposition={
-            sellerCardProps
-              .onAuctionDisposition
-          }
-        />
-      );
-    }
-
-    return (
-      <IXIAuctionObjectFace2
-        listing={item}
-
-        sourceListingUrl={
-          sellerCardProps
-            .sourceListingUrl ||
-          ""
-        }
-
-        dragHandleProps={
-          dragHandleProps
-        }
-
-        sellerMode={true}
-
-        lotNumberValue={
-          sellerCardProps
-            .lotNumberValue
-        }
-
-        onLotNumberChange={
-          sellerCardProps
-            .onLotNumberChange
-        }
-
-        onLotNumberKeyDown={
-          sellerCardProps
-            .onLotNumberKeyDown
-        }
-
-        hoursValue={
-          sellerCardProps
-            .hoursValue
-        }
-
-        onHoursChange={
-          sellerCardProps
-            .onHoursChange
-        }
-
-        onHoursKeyDown={
-          sellerCardProps
-            .onHoursKeyDown
-        }
-
-        openingBidValue={
-          sellerCardProps
-            .priceValue
-        }
-
-        onOpeningBidChange={
-          sellerCardProps
-            .onPriceChange
-        }
-
-        onOpeningBidKeyDown={
-          sellerCardProps
-            .onPriceKeyDown
-        }
-      />
-    );
-  }
 
   function renderModuleSlot(
     slot,
@@ -445,9 +340,86 @@ export default function IXIAuctionObjectConsole({
             />
           ) : null}
 
-          {renderAuctionFace(
-            slot.face
-          )}
+         {renderAuctionPanel({
+  face:
+    slot.face,
+
+  listing:
+    item,
+
+  sourceListingUrl:
+    sellerCardProps
+      .sourceListingUrl ||
+    "",
+
+  dragHandleProps,
+
+  lotNumberValue:
+    sellerCardProps
+      .lotNumberValue,
+
+  onLotNumberChange:
+    sellerCardProps
+      .onLotNumberChange,
+
+  onLotNumberKeyDown:
+    sellerCardProps
+      .onLotNumberKeyDown,
+
+  hoursValue:
+    sellerCardProps
+      .hoursValue,
+
+  onHoursChange:
+    sellerCardProps
+      .onHoursChange,
+
+  onHoursKeyDown:
+    sellerCardProps
+      .onHoursKeyDown,
+
+  priceValue:
+    sellerCardProps
+      .priceValue,
+
+  onPriceChange:
+    sellerCardProps
+      .onPriceChange,
+
+  onPriceKeyDown:
+    sellerCardProps
+      .onPriceKeyDown,
+
+  locationValue:
+    sellerCardProps
+      .locationValue,
+
+  onLocationChange:
+    sellerCardProps
+      .onLocationChange,
+
+  onLocationKeyDown:
+    sellerCardProps
+      .onLocationKeyDown,
+
+  dealerBidPack:
+    sellerCardProps
+      .dealerBidPack ||
+    {},
+
+  onSaveDealerBidPack:
+    sellerCardProps
+      .onSaveDealerBidPack,
+
+  auctionDispositionBusy:
+    sellerCardProps
+      .auctionDispositionBusy ||
+    "",
+
+  onAuctionDisposition:
+    sellerCardProps
+      .onAuctionDisposition
+})}
 
           <button
             type="button"
