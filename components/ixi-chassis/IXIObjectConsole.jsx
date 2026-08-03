@@ -2,94 +2,53 @@ import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
 import IXIObjectCardActuator
-  from "../ixi-chassis/IXIObjectCardActuator";
+  from "./IXIObjectCardActuator";
 
 import IXIAuctionObjectFace2
-  from "./IXIAuctionObjectFace2";
+  from "../ixi-auction-object/IXIAuctionObjectFace2";
 
 import IXIAuctionObjectFace3
-  from "./IXIAuctionObjectFace3";
+  from "../ixi-auction-object/IXIAuctionObjectFace3";
 
 import IXIAuctionObjectFace4
-  from "./IXIAuctionObjectFace4";
+  from "../ixi-auction-object/IXIAuctionObjectFace4";
 
-import {
-  IXI_CONSOLE_MAX_DEPTH,
-  IXI_CONSOLE_SLOT_TYPES,
-  createConsoleSlot,
-  normalizeConsoleSlots,
-  insertConsoleSlot,
-  removeConsoleSlot,
-  cycleConsoleSlotFace,
-  getNextConsoleDefaultFace,
-  createConsoleSlotsPatch
-} from "../ixi-chassis/IXIObjectConsoleEngine";
+const AUCTION_FACE_MIN = 2;
+const AUCTION_FACE_MAX = 4;
 
-const AUCTION_NATIVE_PANEL_WIDTH =
-  298;
-
-const AUCTION_NATIVE_HEIGHT =
-  471;
-
-const AUCTION_SEAM_OVERLAP =
-  1;
-
-function getLegacyConsoleSlots(
-  objectState = {}
+function normalizeAuctionFace(
+  value,
+  fallback = AUCTION_FACE_MIN
 ) {
-  const slots = [];
+  const face = Number(value);
 
-  if (
-    objectState.consoleLeftOpen ===
-    true
-  ) {
-    slots.push(
-      createConsoleSlot({
-        type:
-          IXI_CONSOLE_SLOT_TYPES
-            .MODULE,
-
-        face:
-          objectState
-            .consoleLeftFace || 2
-      })
-    );
-  }
-
-  slots.push(
-    createConsoleSlot({
-      type:
-        IXI_CONSOLE_SLOT_TYPES
-          .LISTING
-    })
-  );
-
-  if (
-    objectState.consoleRightOpen ===
-    true
-  ) {
-    slots.push(
-      createConsoleSlot({
-        type:
-          IXI_CONSOLE_SLOT_TYPES
-            .MODULE,
-
-        face:
-          objectState
-            .consoleRightFace || 3
-      })
-    );
-  }
-
-  return normalizeConsoleSlots(
-    slots
-  );
+  return [
+    2,
+    3,
+    4
+  ].includes(face)
+    ? face
+    : fallback;
 }
 
-export default function IXIAuctionObjectConsole({
+function getNextAuctionFace(
+  currentFace
+) {
+  const current =
+    normalizeAuctionFace(
+      currentFace
+    );
+
+  return current >= AUCTION_FACE_MAX
+    ? AUCTION_FACE_MIN
+    : current + 1;
+}
+
+export default function IXIObjectConsole({
   objectId,
   item,
 
+  cardFamily = "marketplace",
   sellerCardProps = {},
 
   ixiCardState = {},
@@ -108,55 +67,31 @@ export default function IXIAuctionObjectConsole({
   const objectState =
     ixiCardState?.[id] || {};
 
-  const hasSavedSlotModel =
-    Array.isArray(
-      objectState.consoleSlots
-    ) &&
-    objectState.consoleSlots.length > 0;
-
-  const consoleSlots =
-    hasSavedSlotModel
-      ? normalizeConsoleSlots(
-          objectState.consoleSlots
-        )
-      : getLegacyConsoleSlots(
-          objectState
-        );
-
-  const consoleDepth =
-    consoleSlots.length;
-
-  const listingSlotIndex =
-    consoleSlots.findIndex(
-      slot =>
-        slot.type ===
-        IXI_CONSOLE_SLOT_TYPES
-          .LISTING
-    );
+  const isAuctionCard =
+    cardFamily === "auction";
 
   const consoleLeftOpen =
-    listingSlotIndex > 0;
+    objectState.consoleLeftOpen ===
+    true;
 
   const consoleRightOpen =
-    listingSlotIndex <
-    consoleSlots.length - 1;
+    objectState.consoleRightOpen ===
+    true;
 
-  const atCapacity =
-    consoleDepth >=
-    IXI_CONSOLE_MAX_DEPTH;
-
-  const consoleNativeWidth =
-    (
-      consoleDepth *
-      AUCTION_NATIVE_PANEL_WIDTH
-    ) -
-    (
-      Math.max(
-        consoleDepth - 1,
-        0
-      ) *
-      AUCTION_SEAM_OVERLAP
+  const consoleLeftFace =
+    normalizeAuctionFace(
+      objectState.consoleLeftFace
     );
+
+  const consoleRightFace =
+    normalizeAuctionFace(
+      objectState.consoleRightFace
+    );
+
+  const consoleDepth =
+    1 +
+    (consoleLeftOpen ? 1 : 0) +
+    (consoleRightOpen ? 1 : 0);
 
   function patchObjectState(
     patch = {}
@@ -174,96 +109,78 @@ export default function IXIAuctionObjectConsole({
     );
   }
 
-  function saveConsoleSlots(
-    nextSlots
-  ) {
-    patchObjectState(
-      createConsoleSlotsPatch(
-        nextSlots
-      )
-    );
-  }
-
-  function addConsoleModule(
+  function toggleObjectConsoleSide(
     side,
     event
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    if (atCapacity) return;
+    const nextLeftOpen =
+      side === "left"
+        ? !consoleLeftOpen
+        : consoleLeftOpen;
 
-    const face =
-      getNextConsoleDefaultFace(
-        consoleSlots
-      );
+    const nextRightOpen =
+      side === "right"
+        ? !consoleRightOpen
+        : consoleRightOpen;
 
-    const nextSlots =
-      insertConsoleSlot({
-        slots:
-          consoleSlots,
+    const nextDepth =
+      1 +
+      (nextLeftOpen ? 1 : 0) +
+      (nextRightOpen ? 1 : 0);
 
-        side,
+    patchObjectState({
+      consoleLeftOpen:
+        nextLeftOpen,
 
-        face,
+      consoleRightOpen:
+        nextRightOpen,
 
-        maxSlots:
-          IXI_CONSOLE_MAX_DEPTH
-      });
+      consoleDepth:
+        nextDepth,
 
-    saveConsoleSlots(
-      nextSlots
-    );
+      consoleOpen:
+        nextDepth > 1
+    });
   }
 
-  function removeConsoleModule(
-    slotId,
+  function cycleLeftConsoleFace(
     event
   ) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    event.preventDefault();
+    event.stopPropagation();
 
-    const nextSlots =
-      removeConsoleSlot({
-        slots:
-          consoleSlots,
-
-        slotId
-      });
-
-    saveConsoleSlots(
-      nextSlots
-    );
+    patchObjectState({
+      consoleLeftFace:
+        getNextAuctionFace(
+          consoleLeftFace
+        )
+    });
   }
 
-  function cycleModuleFace(
-    slotId,
+  function cycleRightConsoleFace(
     event
   ) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    event.preventDefault();
+    event.stopPropagation();
 
-    const nextSlots =
-      cycleConsoleSlotFace({
-        slots:
-          consoleSlots,
-
-        slotId
-      });
-
-    saveConsoleSlots(
-      nextSlots
-    );
+    patchObjectState({
+      consoleRightFace:
+        getNextAuctionFace(
+          consoleRightFace
+        )
+    });
   }
 
   function renderAuctionFace(
     face
   ) {
-    if (Number(face) === 3) {
+    if (face === 3) {
       return (
         <IXIAuctionObjectFace3
           listing={item}
-
           dragHandleProps={
             dragHandleProps
           }
@@ -271,20 +188,17 @@ export default function IXIAuctionObjectConsole({
       );
     }
 
-    if (Number(face) === 4) {
+    if (face === 4) {
       return (
         <IXIAuctionObjectFace4
           listing={item}
-
           dragHandleProps={
             dragHandleProps
           }
-
           auctionDispositionBusy={
             sellerCardProps
               .auctionDispositionBusy
           }
-
           onAuctionDisposition={
             sellerCardProps
               .onAuctionDisposition
@@ -357,465 +271,299 @@ export default function IXIAuctionObjectConsole({
     );
   }
 
-  function renderModuleSlot(
-    slot,
-    slotIndex
-  ) {
-    const isLeftOfListing =
-      slotIndex <
-      listingSlotIndex;
+ function renderConsolePanel(
+  side
+) {
+  const isLeft =
+    side === "left";
 
-    const closeActuatorSide =
-      isLeftOfListing
-        ? "right"
-        : "left";
+  const face =
+    isLeft
+      ? consoleLeftFace
+      : consoleRightFace;
 
-    const isFirstSlot =
-      slotIndex === 0;
+  const cycleFace =
+    isLeft
+      ? cycleLeftConsoleFace
+      : cycleRightConsoleFace;
 
-    const isLastSlot =
-      slotIndex ===
-      consoleSlots.length - 1;
-
-    const showLeftExpansion =
-      !atCapacity &&
-      isFirstSlot;
-
-    const showRightExpansion =
-      !atCapacity &&
-      isLastSlot;
-
-    return (
-      <div
-        key={slot.slotId}
-        className="
-          ixi-auction-console-slot
-          ixi-auction-console-module-slot
-        "
-      >
-        <div className="ixi-auction-console-module-card">
-          <IXIObjectCardActuator
-            side={
-              closeActuatorSide
-            }
-
-            label="Close auction module"
-
-            title="Close auction module"
-
-            onClick={event =>
-              removeConsoleModule(
-                slot.slotId,
-                event
-              )
-            }
-          />
-
-          {showLeftExpansion ? (
-            <IXIObjectCardActuator
-              side="left"
-
-              label="Add auction module left"
-
-              title="Add auction module left"
-
-              onClick={event =>
-                addConsoleModule(
-                  "left",
-                  event
-                )
-              }
-            />
-          ) : null}
-
-          {showRightExpansion ? (
-            <IXIObjectCardActuator
-              side="right"
-
-              label="Add auction module right"
-
-              title="Add auction module right"
-
-              onClick={event =>
-                addConsoleModule(
-                  "right",
-                  event
-                )
-              }
-            />
-          ) : null}
-
-          {renderAuctionFace(
-            slot.face
-          )}
-
-          <button
-            type="button"
-
-            className="
-              ixi-auction-console-face-button
-            "
-
-            aria-label={
-              `Change auction face ${slot.face}`
-            }
-
-            title={
-              `Auction face ${slot.face}`
-            }
-
-            onPointerDown={event => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
-
-            onClick={event =>
-              cycleModuleFace(
-                slot.slotId,
-                event
-              )
-            }
-          />
-        </div>
-      </div>
-    );
-  }
-
-  function renderListingSlot(
-    slot,
-    slotIndex
-  ) {
-    const isFirstSlot =
-      slotIndex === 0;
-
-    const isLastSlot =
-      slotIndex ===
-      consoleSlots.length - 1;
-
-    const canExpandLeft =
-      !atCapacity &&
-      isFirstSlot;
-
-    const canExpandRight =
-      !atCapacity &&
-      isLastSlot;
-
-    /*
-     * At capacity, both parent actuators
-     * must disappear even when the Listing
-     * Card occupies an outside position.
-     */
-    const parentConsoleLeftOpen =
-      consoleLeftOpen ||
-      atCapacity;
-
-    const parentConsoleRightOpen =
-      consoleRightOpen ||
-      atCapacity;
-
-    const parentCard =
-      typeof renderParentCard ===
-      "function"
-        ? renderParentCard({
-            consoleDepth,
-
-            consoleLeftOpen:
-              parentConsoleLeftOpen,
-
-            consoleRightOpen:
-              parentConsoleRightOpen,
-
-            onExpandConsoleLeft:
-              canExpandLeft
-                ? event =>
-                    addConsoleModule(
-                      "left",
-                      event
-                    )
-                : undefined,
-
-            onExpandConsoleRight:
-              canExpandRight
-                ? event =>
-                    addConsoleModule(
-                      "right",
-                      event
-                    )
-                : undefined
-          })
-        : null;
-
-    return (
-      <div
-        key={slot.slotId}
-        className="
-          ixi-auction-console-slot
-          ixi-auction-console-listing-slot
-        "
-      >
-        {parentCard}
-      </div>
-    );
-  }
-
-  const assembledConsole = (
-    <div
-      className="
-        ixi-auction-object-console
-      "
-
-      style={{
-        width:
-          `${consoleNativeWidth}px`
-      }}
-
-      data-console-depth={
-        consoleDepth
-      }
-
-      data-console-capacity={
-        atCapacity
-          ? "full"
-          : "available"
-      }
-    >
-      {consoleSlots.map(
-        (
-          slot,
-          slotIndex
-        ) => {
-          if (
-            slot.type ===
-            IXI_CONSOLE_SLOT_TYPES
-              .LISTING
-          ) {
-            return renderListingSlot(
-              slot,
-              slotIndex
-            );
-          }
-
-          return renderModuleSlot(
-            slot,
-            slotIndex
-          );
+  const childCard = (
+    <div className="ixi-console-child-card">
+      <IXIObjectCardActuator
+        side={
+          isLeft
+            ? "right"
+            : "left"
         }
-      )}
-
-      <style jsx global>{`
-        .ixi-auction-object-console {
-          position: relative;
-
-          display: flex;
-          flex-direction: row;
-          align-items: flex-start;
-
-          gap: 0;
-
-          overflow: visible;
+        label={
+          isLeft
+            ? "Close console left"
+            : "Close console right"
         }
-
-        .ixi-auction-console-slot {
-          position: relative;
-
-          flex:
-            0 0
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          overflow: visible;
+        title={
+          isLeft
+            ? "Close console left"
+            : "Close console right"
         }
-
-        .ixi-auction-console-slot +
-        .ixi-auction-console-slot {
-          margin-left:
-            -${AUCTION_SEAM_OVERLAP}px;
+        onClick={event =>
+          toggleObjectConsoleSide(
+            side,
+            event
+          )
         }
+      />
 
-        .ixi-auction-console-listing-slot {
-          z-index: 5;
+      {renderAuctionFace(face)}
+
+      <button
+        type="button"
+        className="ixi-console-child-face-button"
+        aria-label={
+          isLeft
+            ? "Change left auction face"
+            : "Change right auction face"
         }
-
-        .ixi-auction-console-module-slot {
-          z-index: 4;
-        }
-
-        .ixi-auction-console-module-card {
-          box-sizing: border-box;
-
-          position: relative;
-
-          width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          min-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          max-width:
-            ${AUCTION_NATIVE_PANEL_WIDTH}px;
-
-          height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          min-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          max-height:
-            ${AUCTION_NATIVE_HEIGHT}px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .10
-            );
-
-          border-radius:
-            13px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(
-                28,
-                31,
-                36,
-                .98
-              ),
-              rgba(
-                15,
-                17,
-                20,
-                .98
-              )
-            );
-
-          box-shadow:
-            0 10px 28px
-              rgba(
-                0,
-                0,
-                0,
-                .34
-              ),
-            inset 0 1px 0
-              rgba(
-                255,
-                255,
-                255,
-                .04
-              );
-
-          overflow: visible;
-        }
-
-        .ixi-auction-console-face-button {
-          position: absolute;
-
-          left: 50%;
-          right: auto;
-          bottom: -1px;
-
-          width: 34px;
-          height: 5px;
-
-          transform:
-            translateX(-50%);
-
-          padding: 0;
-          border: 0;
-
-          border-radius:
-            3px 3px 1px 1px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .18
-            );
-
-          cursor: pointer;
-
-          z-index: 120;
-          pointer-events: auto;
-
-          box-shadow:
-            inset 0 1px 0
-              rgba(
-                255,
-                255,
-                255,
-                .12
-              ),
-            0 1px 3px
-              rgba(
-                0,
-                0,
-                0,
-                .32
-              );
-        }
-
-        .ixi-auction-console-face-button:hover {
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .95
-            );
-
-          box-shadow:
-            0 0 8px
-              rgba(
-                255,
-                196,
-                0,
-                .38
-              );
-        }
-      `}</style>
+        title={`Auction face ${face}`}
+        onPointerDown={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        onClick={cycleFace}
+      />
     </div>
   );
 
-  return enableCardScaling ? (
-    <IXIScaledCardShell
-      size={cardScaleMode}
+  return (
+  <div
+    className={`ixi-console-child-wrap ${
+      isLeft
+        ? "left-child"
+        : "right-child"
+    }`}
+  >
+    {childCard}
+  </div>
+);
+}
 
-      objectFamily="auction"
+  const parentCard =
+    typeof renderParentCard ===
+    "function"
+      ? renderParentCard({
+          consoleDepth,
 
-      nativeWidth={
-        consoleNativeWidth
-      }
+          consoleLeftOpen,
+          consoleRightOpen,
 
-      nativeHeight={
-        AUCTION_NATIVE_HEIGHT
-      }
-    >
-      {assembledConsole}
-    </IXIScaledCardShell>
-  ) : (
-    assembledConsole
+          onExpandConsoleLeft:
+            event =>
+              toggleObjectConsoleSide(
+                "left",
+                event
+              ),
+
+          onExpandConsoleRight:
+            event =>
+              toggleObjectConsoleSide(
+                "right",
+                event
+              )
+        })
+      : null;
+  
+    const consoleNativePanelWidth =
+  298;
+
+const consoleOverlap =
+  1;
+
+const consoleNativeWidth =
+  (
+    consoleDepth *
+    consoleNativePanelWidth
+  ) -
+  (
+    Math.max(
+      consoleDepth - 1,
+      0
+    ) *
+    consoleOverlap
   );
+
+const consoleNativeHeight =
+  isAuctionCard
+    ? 471
+    : 391;
+
+const assembledConsole = (
+  <div
+    className="ixi-object-console"
+    style={{
+      width:
+        `${consoleNativeWidth}px`
+    }}
+  >
+    {consoleLeftOpen &&
+    isAuctionCard
+      ? renderConsolePanel(
+          "left"
+        )
+      : null}
+
+    <div className="ixi-object-console-parent">
+      {parentCard}
+    </div>
+
+    {consoleRightOpen &&
+    isAuctionCard
+      ? renderConsolePanel(
+          "right"
+        )
+      : null}
+
+    <style jsx global>{`
+      .ixi-object-console {
+        position: relative;
+
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+
+        gap: 0;
+
+        overflow: visible;
+      }
+
+     .ixi-object-console-parent {
+  position: relative;
+
+  flex: 0 0 298px;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  overflow: visible;
+}
+
+      .ixi-console-child-wrap {
+  position: relative;
+
+  flex: 0 0 298px;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  overflow: visible;
+}
+
+      .ixi-console-child-wrap.left-child {
+        margin-right: -1px;
+      }
+
+      .ixi-console-child-wrap.right-child {
+        margin-left: -1px;
+      }
+
+      .ixi-console-child-card {
+  box-sizing: border-box;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  height: 471px;
+  min-height: 471px;
+  max-height: 471px;
+
+        position: relative;
+
+        border:
+          1px solid
+          rgba(255, 255, 255, .10);
+
+        border-radius: 13px;
+
+        background:
+          linear-gradient(
+            180deg,
+            rgba(28, 31, 36, .98),
+            rgba(15, 17, 20, .98)
+          );
+
+        box-shadow:
+          0 10px 28px
+            rgba(0, 0, 0, .34),
+          inset 0 1px 0
+            rgba(255, 255, 255, .04);
+
+        overflow: visible;
+      }
+
+      .ixi-console-child-face-button {
+        position: absolute;
+
+        left: 50%;
+        right: auto;
+        bottom: -1px;
+
+        width: 34px;
+        height: 5px;
+
+        transform: translateX(-50%);
+
+        padding: 0;
+        border: 0;
+
+        border-radius:
+          3px 3px 1px 1px;
+
+        background:
+          rgba(255, 255, 255, .18);
+
+        cursor: pointer;
+
+        z-index: 120;
+        pointer-events: auto;
+
+        box-shadow:
+          inset 0 1px 0
+            rgba(255, 255, 255, .12),
+          0 1px 3px
+            rgba(0, 0, 0, .32);
+      }
+
+      .ixi-console-child-face-button:hover {
+        background:
+          rgba(255, 196, 0, .95);
+
+        box-shadow:
+          0 0 8px
+            rgba(255, 196, 0, .38);
+      }
+    `}</style>
+  </div>
+);
+
+return enableCardScaling ? (
+ <IXIScaledCardShell
+  size={cardScaleMode}
+  objectFamily={
+    isAuctionCard
+      ? "auction"
+      : "marketplace"
+  }
+  nativeWidth={
+    consoleNativeWidth
+  }
+  nativeHeight={
+    consoleNativeHeight
+  }
+>
+    {assembledConsole}
+  </IXIScaledCardShell>
+) : (
+  assembledConsole
+);
 }
