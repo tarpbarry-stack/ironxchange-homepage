@@ -22,6 +22,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ListingCard from "../components/ListingCard";
 
+import IXIBoardSurface
+  from "../components/ixi-chassis/IXIBoardSurface";
+
 import { getListingId } from "../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -1423,9 +1426,9 @@ if (armedDestination === "stackTop") {
   cardScaleMode={cardScaleMode}
 />
               
-     <section
-  data-board-target="board"
-  className={`cards ${
+     <IXIBoardSurface
+  scaleMode={cardScaleMode}
+>
     visibleSavedListings.length === 1 ? "single-card" : ""
   }`}
   style={{
@@ -1454,7 +1457,7 @@ if (armedDestination === "stackTop") {
   enableCardScaling={true}
   cardScaleMode={cardScaleMode}
     />
-        </section>
+        </IXIBoardSurface>
 
 <button
   type="button"
