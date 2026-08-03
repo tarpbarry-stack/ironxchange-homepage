@@ -519,23 +519,27 @@ export default function IXIFacePreview({
     if (face === "AOF3") {
       return (
         <IXIAuctionObjectFace3
-          listing={
-            previewListing
-          }
+  listing={
+    previewListing
+  }
 
-          dealerBidPack={
-            previewDealerBidPack
-          }
+  faceSize={
+    previewSize
+  }
 
-          onSaveDealerBidPack={
-            nextBidPack => {
-              console.log(
-                "FACE LAB BID PACK",
-                nextBidPack
-              );
-            }
-          }
-        />
+  dealerBidPack={
+    previewDealerBidPack
+  }
+
+  onSaveDealerBidPack={
+    nextBidPack => {
+      console.log(
+        "FACE LAB BID PACK",
+        nextBidPack
+      );
+    }
+  }
+/>
       );
     }
 
