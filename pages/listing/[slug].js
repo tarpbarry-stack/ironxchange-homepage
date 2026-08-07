@@ -4,6 +4,15 @@ import { useRouter } from "next/router";
 import featureKeywords from "../../lib/featureKeywords";
 import { getListingId } from "../../lib/listingFormatters";
 
+import {
+  parseMachineSlug,
+  getMachineFilePath
+} from "../../lib/machines/IXIMachineRouteEngine";
+
+import {
+  adaptMachineFilePayload
+} from "../../lib/machines/IXIMachineFileAdapter";
+
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import Navbar from "../../components/Navbar";
@@ -159,7 +168,23 @@ export default function ListingPage() {
   const { slug, from } = router.query;
 
   const [listings, setListings] = useState([]);
-  const [savedIds, setSavedIds] = useState([]);
+
+const [
+  machineFileListing,
+  setMachineFileListing
+] = useState(null);
+
+const [
+  machineFileError,
+  setMachineFileError
+] = useState("");
+
+const [
+  machineFileLoading,
+  setMachineFileLoading
+] = useState(true);
+
+const [savedIds, setSavedIds] = useState([]);
   const [saveBusy, setSaveBusy] = useState(false);
   const [sdkInstance, setSdkInstance] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -175,38 +200,229 @@ export default function ListingPage() {
   initPostHog();
 }, []);
   
-  useEffect(() => {
-    async function loadPage() {
-      try {
-        const SharetribeSdk = await import("sharetribe-flex-sdk");
+ useEffect(() => {
+  if (!router.isReady) return;
 
-        const sdk = SharetribeSdk.createInstance({
-          clientId: process.env.NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+  let cancelled = false;
+
+  async function loadPage() {
+    try {
+      setMachineFileError("");
+      setMachineFileLoading(true);
+
+      const SharetribeSdk =
+        await import(
+          "sharetribe-flex-sdk"
+        );
+
+      const sdk =
+        SharetribeSdk.createInstance({
+          clientId:
+            process.env
+              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
         });
 
-        setSdkInstance(sdk);
+      setSdkInstance(sdk);
 
-        try {
-          const currentUser = await fetchCurrentUserWithSavedListings(sdk);
-          setSavedIds(getSavedListingIdsFromUser(currentUser));
-        } catch {
+      try {
+        const currentUser =
+          await fetchCurrentUserWithSavedListings(
+            sdk
+          );
+
+        if (!cancelled) {
+          setSavedIds(
+            getSavedListingIdsFromUser(
+              currentUser
+            )
+          );
+        }
+      } catch {
+        if (!cancelled) {
           setSavedIds([]);
         }
+      }
 
-        const res = await fetch("/api/listings");
-        const data = await res.json();
+      const parsed =
+        parseMachineSlug(
+          String(slug || "")
+        );
 
-        if (Array.isArray(data)) {
-          setListings(data);
+      /*
+       * CANONICAL MACHINE FILE
+       *
+       * Identity comes from Passport.
+       * Marketplace collection is irrelevant.
+       */
+      if (
+        parsed.isCanonical &&
+        parsed.passportId
+      ) {
+        const response =
+          await fetch(
+            `/api/machines/by-passport/${encodeURIComponent(
+              parsed.passportId
+            )}`
+          );
+
+        const payload =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !payload?.ok
+        ) {
+          throw new Error(
+            payload?.error ||
+            "Machine File could not be loaded"
+          );
         }
-      } catch (err) {
-        console.error("Listing page load failed:", err);
+
+        const resolvedListing =
+          adaptMachineFilePayload(
+            payload
+          );
+
+        if (!cancelled) {
+          setMachineFileListing(
+            resolvedListing
+          );
+        }
+
+        /*
+         * Public collection remains optional
+         * navigation context only.
+         */
+        try {
+          const listingsResponse =
+            await fetch(
+              "/api/listings"
+            );
+
+          const listingsPayload =
+            await listingsResponse.json();
+
+          if (
+            !cancelled &&
+            Array.isArray(
+              listingsPayload
+            )
+          ) {
+            setListings(
+              listingsPayload
+            );
+          }
+        } catch {
+          // Machine File still works.
+        }
+
+        return;
+      }
+
+      /*
+       * LEGACY URL
+       *
+       * Temporary compatibility path:
+       * /listing/2019-deere-844k-iii
+       */
+      const listingsResponse =
+        await fetch(
+          "/api/listings"
+        );
+
+      const listingsPayload =
+        await listingsResponse.json();
+
+      if (
+        !Array.isArray(
+          listingsPayload
+        )
+      ) {
+        throw new Error(
+          "Legacy listings could not be loaded"
+        );
+      }
+
+      if (!cancelled) {
+        setListings(
+          listingsPayload
+        );
+      }
+
+      const legacyListing =
+        listingsPayload.find(
+          item =>
+            slugify(
+              item.title
+            ) === slug
+        );
+
+      if (!legacyListing) {
+        throw new Error(
+          "Machine could not be found"
+        );
+      }
+
+      if (!cancelled) {
+        setMachineFileListing(
+          legacyListing
+        );
+      }
+
+      /*
+       * If this old listing already has
+       * permanent identity, upgrade URL.
+       */
+      const canonicalPath =
+        getMachineFilePath(
+          legacyListing
+        );
+
+      if (
+        canonicalPath &&
+        canonicalPath !==
+          router.asPath.split("?")[0]
+      ) {
+        router.replace(
+          `${canonicalPath}${
+            from
+              ? `?from=${encodeURIComponent(
+                  from
+                )}`
+              : ""
+          }`
+        );
+      }
+    } catch (err) {
+      console.error(
+        "Machine File load failed:",
+        err
+      );
+
+      if (!cancelled) {
+        setMachineFileError(
+          err?.message ||
+          "Machine File could not be loaded"
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setMachineFileLoading(
+          false
+        );
       }
     }
+  }
 
-    loadPage();
-  }, []);
+  loadPage();
 
+  return () => {
+    cancelled = true;
+  };
+}, [
+  router.isReady,
+  slug
+]);
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -226,10 +442,8 @@ export default function ListingPage() {
     checkAuth();
   }, []);
 
-  const listing = useMemo(() => {
-    if (!slug || listings.length === 0) return null;
-    return listings.find(item => slugify(item.title) === slug);
-  }, [slug, listings]);
+const listing =
+  machineFileListing;
 
 useEffect(() => {
   if (!listing) return;
@@ -260,10 +474,35 @@ useEffect(() => {
 
   
 
-  const currentIndex = useMemo(() => {
-    if (!slug || listings.length === 0) return -1;
-    return listings.findIndex(item => slugify(item.title) === slug);
-  }, [slug, listings]);
+ const currentIndex =
+  useMemo(() => {
+    if (
+      !listing ||
+      listings.length === 0
+    ) {
+      return -1;
+    }
+
+    const listingId =
+      String(
+        getListingId(listing) ||
+        ""
+      );
+
+    if (!listingId) {
+      return -1;
+    }
+
+    return listings.findIndex(
+      item =>
+        String(
+          getListingId(item)
+        ) === listingId
+    );
+  }, [
+    listing,
+    listings
+  ]);
 
   const prevListing = currentIndex > 0 ? listings[currentIndex - 1] : null;
 
@@ -272,22 +511,47 @@ useEffect(() => {
       ? listings[currentIndex + 1]
       : null;
 
-  if (!listing) {
-    return (
-      <main className="loading">
-        Loading listing...
-        <style jsx>{`
-          .loading {
-            min-height: 100vh;
-            background: #0b0b0b;
-            color: #d6d6d6;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-          }
-        `}</style>
-      </main>
-    );
-  }
+if (
+  machineFileLoading
+) {
+  return (
+    <main className="loading">
+      Loading Machine File...
+
+      <style jsx>{`
+        .loading {
+          min-height: 100vh;
+          background: #0b0b0b;
+          color: #d6d6d6;
+          padding: 40px;
+          font-family: Arial, sans-serif;
+        }
+      `}</style>
+    </main>
+  );
+}
+
+if (
+  machineFileError ||
+  !listing
+) {
+  return (
+    <main className="loading">
+      {machineFileError ||
+        "Machine File not found."}
+
+      <style jsx>{`
+        .loading {
+          min-height: 100vh;
+          background: #0b0b0b;
+          color: #d6d6d6;
+          padding: 40px;
+          font-family: Arial, sans-serif;
+        }
+      `}</style>
+    </main>
+  );
+}
 
   const imageObjects = Array.isArray(listing?.imageObjects)
   ? listing.imageObjects
@@ -383,10 +647,19 @@ const heroImage =
   const listingId = getListingId(listing);
   const isSaved = savedIds.includes(String(listingId));
 
-  const listingUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : `https://www.ironxchange.com/listing/${slugify(title)}`;
+ const canonicalMachinePath =
+  getMachineFilePath(listing);
+
+const listingUrl =
+  typeof window !== "undefined"
+    ? `${window.location.origin}${
+        canonicalMachinePath ||
+        window.location.pathname
+      }`
+    : `https://www.ironxchange.com${
+        canonicalMachinePath ||
+        `/listing/${slug}`
+      }`;
 
   const buyerShareCopy = buildBuyerShareCopy(
     listing,
@@ -741,7 +1014,7 @@ function cycleSlugOutline(e) {
 
   {prevListing ? (
     <a
-      href={`/listing/${slugify(prevListing.title)}?from=browser`}
+      href={`${getMachineFilePath(prevListing) || `/listing/${slugify(prevListing.title)}`}?from=browser`}
       className="slug-rail-zone"
     />
   ) : (
@@ -754,7 +1027,7 @@ function cycleSlugOutline(e) {
 
   {nextListing ? (
     <a
-      href={`/listing/${slugify(nextListing.title)}?from=browser`}
+      href={`${getMachineFilePath(nextListing) || `/listing/${slugify(nextListing.title)}`}?from=browser`}
       className="slug-rail-zone rail-half"
     />
   ) : (
