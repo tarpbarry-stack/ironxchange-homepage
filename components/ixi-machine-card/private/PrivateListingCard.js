@@ -120,6 +120,13 @@ onBoardDragOver,
 onBoardDragEnd,
 useDndDrag = false,
 dragHandleProps,
+
+consoleDepth = 1,
+consoleLeftOpen = false,
+consoleRightOpen = false,
+onExpandConsoleLeft,
+onExpandConsoleRight,
+consoleActuatorVariant = "compact",
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -738,6 +745,13 @@ onMachinePlacementChange ? (
   onToggleSaved={onToggleSaved}
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
+
+  consoleDepth={consoleDepth}
+  consoleLeftOpen={consoleLeftOpen}
+  consoleRightOpen={consoleRightOpen}
+  onExpandConsoleLeft={onExpandConsoleLeft}
+  onExpandConsoleRight={onExpandConsoleRight}
+  consoleActuatorVariant={consoleActuatorVariant}
 />
 
       <style jsx>{`
