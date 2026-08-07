@@ -24,12 +24,10 @@ function getIXCoreBase() {
 
 function createIntegrationSdk() {
   const clientId =
-    process.env
-      .SHARETRIBE_INTEGRATION_CLIENT_ID;
+    process.env.SHARETRIBE_CLIENT_ID;
 
   const clientSecret =
-    process.env
-      .SHARETRIBE_INTEGRATION_CLIENT_SECRET;
+    process.env.SHARETRIBE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
     throw new Error(
