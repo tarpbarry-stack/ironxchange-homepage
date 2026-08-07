@@ -15,6 +15,9 @@ import MachineBadges from "../../MachineBadges";
 
 import IXIMachineRail from "../../IXIMachineRail";
 
+import IXIObjectCardActuator
+from "../../ixi-chassis/IXIObjectCardActuator";
+
 import IXIMachinePlacementControl
 from "../../ixi-machine-placement/IXIMachinePlacementControl";
 
@@ -399,7 +402,7 @@ function handlePhotoLoad(e, photoUrl) {
   return (
   <div
     data-listing-card-id={id}
-    className={`card private-listing-card board-color-${boardColor} board-outline-${boardOutline} ${
+    className={`card private-listing-card console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
@@ -408,9 +411,32 @@ function handlePhotoLoad(e, photoUrl) {
       transform: isBoardDragging
         ? `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(1.015)`
         : undefined,
-      zIndex: isBoardDragging ? 50 : undefined
+            zIndex: isBoardDragging ? 50 : undefined
     }}
   >
+
+{typeof onExpandConsoleLeft === "function" &&
+!consoleLeftOpen ? (
+  <IXIObjectCardActuator
+    side="left"
+    variant={consoleActuatorVariant}
+    label="Open private console left"
+    title="Open private console left"
+    onClick={onExpandConsoleLeft}
+  />
+) : null}
+
+{typeof onExpandConsoleRight === "function" &&
+!consoleRightOpen ? (
+  <IXIObjectCardActuator
+    side="right"
+    variant={consoleActuatorVariant}
+    label="Open private console right"
+    title="Open private console right"
+    onClick={onExpandConsoleRight}
+  />
+) : null}
+
 {actionNotice?.message || ixiState?.actionNotice?.message || ixiState?.theaterNotice ? (
   <div className={`ixi-action-card-notice ${
     actionNotice?.tone || ixiState?.actionNotice?.tone || "success"
