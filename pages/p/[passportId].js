@@ -8,6 +8,10 @@ import {
   loadIXIListingsEnvironment
 } from "../../lib/listings/IXIListingsEngine";
 
+import {
+  loadIXIOwnedListings
+} from "../../lib/listings/loadIXIOwnedListings";
+
 import SellerLogoDecal from "../../components/SellerLogoDecal";
 
 import Navbar from "../../components/Navbar";
@@ -231,20 +235,70 @@ export default function ListingPage() {
        * This preserves the same normalized listing object that the slug page
        * already uses. We are only changing how the correct machine is selected.
        */
-     const environment =
+    const environment =
   await loadIXIListingsEnvironment({
     includePrivateState: true
   });
 
-const hydratedListings =
+let hydratedListings =
   Array.isArray(environment.listings)
     ? environment.listings
     : [];
 
+/*
+ * Passport may point to a Private or Auction
+ * machine owned by the authenticated user.
+ *
+ * The normal IXI listing environment does not
+ * represent the complete owner Inventory.
+ */
+if (
+  environment.isAuthenticated &&
+  environment.userId
+) {
+  try {
+    const ownedListings =
+      await loadIXIOwnedListings(
+        environment.userId
+      );
+
+    const listingsById = new Map();
+
+    [
+      ...hydratedListings,
+      ...(Array.isArray(ownedListings)
+        ? ownedListings
+        : [])
+    ].forEach(item => {
+      const id = String(
+        getListingId(item) ||
+        item?.id?.uuid ||
+        item?.id ||
+        ""
+      );
+
+      if (id) {
+        listingsById.set(id, item);
+      }
+    });
+
+    hydratedListings =
+      Array.from(
+        listingsById.values()
+      );
+  } catch (ownedListingsError) {
+    console.error(
+      "PASSPORT OWNED LISTINGS LOAD FAILED:",
+      ownedListingsError
+    );
+  }
+}
+
 setListings(hydratedListings);
-      if (environment.errors?.publicListings) {
+
+if (environment.errors?.publicListings) {
   console.error(
-    "PASSPORT LISTINGS LOAD FAILED:",
+    "PASSPORT PUBLIC LISTINGS LOAD FAILED:",
     environment.errors.publicListings
   );
 }
