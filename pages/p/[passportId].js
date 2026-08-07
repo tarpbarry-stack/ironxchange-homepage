@@ -233,7 +233,7 @@ export default function ListingPage() {
        */
      const environment =
   await loadIXIListingsEnvironment({
-    includePrivateState: false
+    includePrivateState: true
   });
 
 const hydratedListings =
