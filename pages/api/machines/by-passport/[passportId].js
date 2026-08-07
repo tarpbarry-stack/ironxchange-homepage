@@ -17,9 +17,8 @@ function normalizePassportId(value = "") {
 
 function getIXCoreBase() {
   return (
-    process.env.IX_CORE_INTERNAL_URL ||
     process.env.IX_CORE_BASE_URL ||
-    "http://127.0.0.1:4100"
+    "http://3.131.46.49:4100"
   ).replace(/\/+$/, "");
 }
 
