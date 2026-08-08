@@ -683,34 +683,34 @@ if (face === "EOF1") {
     <IXIEntityObjectFace1
       entity={previewEntity}
 
-      snapshotItems={[
-        {
-          key: "equipment",
-          type: "relationship",
-          label: "Equipment",
-          value: 19
-        },
-        {
-          key: "ytd-sales",
-          type: "metric",
-          label: "YTD Sales",
-          value: 8420000,
-          format: "currency"
-        },
-        {
-          key: "ytd-gp",
-          type: "metric",
-          label: "YTD GP",
-          value: 1684000,
-          format: "currency"
-        },
-        {
-          key: "ytd-gp-percent",
-          type: "metric",
-          label: "YTD GP %",
-          value: 20,
-          format: "percent"
-        },
+     snapshotItems={[
+  {
+    key: "ytd-sales",
+    type: "metric",
+    label: "YTD Sales",
+    value: 8420000,
+    format: "currency"
+  },
+  {
+    key: "ytd-gp",
+    type: "metric",
+    label: "YTD GP",
+    value: 1684000,
+    format: "currency"
+  },
+  {
+    key: "ytd-gp-percent",
+    type: "metric",
+    label: "YTD GP %",
+    value: 20,
+    format: "percent"
+  },
+  {
+    key: "equipment",
+    type: "relationship",
+    label: "Equipment",
+    value: 19
+  },
         {
           key: "people",
           type: "relationship",
