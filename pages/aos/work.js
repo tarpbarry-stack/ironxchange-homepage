@@ -830,6 +830,55 @@ const equipmentIndex =
       }) || null
     );
   }, [systemIndexes]);
+
+  const equipmentWorkspaceIndex =
+  useMemo(() => {
+    if (!equipmentIndex) {
+      return null;
+    }
+
+    const tuckedIds =
+      new Set(
+        (
+          machineContainers
+            .indexEquipment ||
+          []
+        ).map(String)
+      );
+
+    const tuckedItems =
+      (
+        equipmentIndex.items ||
+        []
+      ).filter(item => {
+        const machineId =
+          String(
+            getListingId(item) ||
+            ""
+          );
+
+        return tuckedIds.has(
+          machineId
+        );
+      });
+
+    return {
+      ...equipmentIndex,
+
+      /*
+       * Canonical membership remains
+       * represented by itemCount.
+       *
+       * items is the current visible
+       * workspace deck only.
+       */
+      items:
+        tuckedItems
+    };
+  }, [
+    equipmentIndex,
+    machineContainers
+  ]);
   /* ---------- AOS BOARD ITEMS ---------- */
 
 /* ---------- AOS BOARD ITEMS ---------- */
@@ -850,8 +899,8 @@ const aosBoardItems =
 
     return items;
   }, [
-    equipmentIndex,
-    visibleSavedListings
+    equipmentWorkspaceIndex,
+visibleSavedListings
   ]);
 
 
@@ -2057,15 +2106,9 @@ function handleWorkspaceDragEnd(event) {
     child
   );
 }}
-
-      onOpenConsole={
-        index => {
-          console.log(
-            "AOS SYSTEM INDEX CONSOLE",
-            index
-          );
-        }
-      }
+onOpenConsole={() => {
+  returnAllEquipmentHome();
+}}
     />
   );
 }}
