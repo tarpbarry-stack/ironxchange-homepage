@@ -908,53 +908,6 @@ const equipmentIndex =
     );
   }, [systemIndexes]);
 
-  const aosWorkspaceObjectRegistry =
-  useMemo(() => {
-    const registry =
-      new Map();
-
-    /*
-     * Machine/listing objects
-     */
-    workspaceListings.forEach(
-      item => {
-        const id =
-          String(
-            getListingId(item) ||
-            ""
-          );
-
-        if (!id) {
-          return;
-        }
-
-        registry.set(
-          id,
-          item
-        );
-      }
-    );
-
-    /*
-     * Equipment System Index object
-     */
-    if (equipmentIndex) {
-      registry.set(
-        IXI_EQUIPMENT_INDEX_OBJECT_ID,
-        {
-          ...equipmentIndex,
-
-          objectId:
-            IXI_EQUIPMENT_INDEX_OBJECT_ID
-        }
-      );
-    }
-
-    return registry;
-  }, [
-    workspaceListings,
-    equipmentIndex
-  ]);
 
   const equipmentWorkspaceIndex =
   useMemo(() => {
@@ -1003,6 +956,61 @@ const equipmentIndex =
   }, [
     equipmentIndex,
     machineContainers
+  ]);
+
+  const aosWorkspaceObjectRegistry =
+  useMemo(() => {
+    const registry =
+      new Map();
+
+    /*
+     * Machine/listing objects
+     */
+    workspaceListings.forEach(
+      item => {
+        const id =
+          String(
+            getListingId(item) ||
+            ""
+          );
+
+        if (!id) {
+          return;
+        }
+
+        registry.set(
+          id,
+          item
+        );
+      }
+    );
+
+    /*
+     * Equipment System Index
+     *
+     * IMPORTANT:
+     * Register the WORKSPACE projection,
+     * not the canonical full index.
+     *
+     * Canonical Equipment membership
+     * remains untouched.
+     */
+    if (equipmentWorkspaceIndex) {
+      registry.set(
+        IXI_EQUIPMENT_INDEX_OBJECT_ID,
+        {
+          ...equipmentWorkspaceIndex,
+
+          objectId:
+            IXI_EQUIPMENT_INDEX_OBJECT_ID
+        }
+      );
+    }
+
+    return registry;
+  }, [
+    workspaceListings,
+    equipmentWorkspaceIndex
   ]);
   /* ---------- AOS BOARD ITEMS ---------- */
 
