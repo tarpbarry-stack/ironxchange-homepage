@@ -91,7 +91,10 @@ import {
 import {
   createEmptyWorkspacePlacements,
   sanitizeWorkspacePlacements,
+  getObjectWorkspaceSurface,
   moveObjectToWorkspaceSurface,
+  moveObjectToWorkspacePosition,
+  reorderObjectWithinWorkspaceSurface,
   resolveWorkspaceObjects,
   validateWorkspacePlacements
 } from "../../components/ixi-chassis/IXIWorkspacePlacementEngine";
@@ -2050,9 +2053,226 @@ function handleWorkspaceDragEnd(event) {
    * pocket / stack behavior remains
    * on the proven chassis path.
    */
-  return handleBaseWorkspaceDragEnd(
-    event
+ const dragId =
+  String(
+    active?.id || ""
   );
+
+const overId =
+  String(
+    over?.id || ""
+  );
+
+if (!dragId) {
+  setActiveDndId(null);
+  clearMachineDragState?.();
+  return;
+}
+
+const knownWorkspaceSurfaces =
+  new Set([
+    "board",
+    "stackTop",
+    "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ]);
+
+const sourceSurface =
+  String(
+    active?.data?.current
+      ?.containerId ||
+    getObjectWorkspaceSurface({
+      placements:
+        workspacePlacements,
+
+      objectId:
+        dragId
+    }) ||
+    ""
+  );
+
+const overData =
+  over?.data?.current || {};
+
+const overSurface =
+  String(
+    overData.containerId ||
+    overData.targetContainer ||
+    ""
+  );
+
+let nextPlacements =
+  workspacePlacements;
+
+/*
+ * Dropped directly onto a workspace
+ * surface such as Board/Pocket/Stack.
+ */
+if (
+  knownWorkspaceSurfaces.has(
+    overId
+  )
+) {
+  nextPlacements =
+    moveObjectToWorkspaceSurface({
+      placements:
+        workspacePlacements,
+
+      objectId:
+        dragId,
+
+      targetSurface:
+        overId
+    });
+}
+
+/*
+ * Dropped onto another sortable object.
+ */
+else if (
+  overId &&
+  overId !== dragId
+) {
+  const targetSurface =
+    knownWorkspaceSurfaces.has(
+      overSurface
+    )
+      ? overSurface
+      : getObjectWorkspaceSurface({
+          placements:
+            workspacePlacements,
+
+          objectId:
+            overId
+        }) ||
+        "board";
+
+  if (
+    sourceSurface ===
+    targetSurface
+  ) {
+    const ids =
+      workspacePlacements[
+        sourceSurface
+      ] || [];
+
+    const fromIndex =
+      ids.findIndex(
+        id =>
+          String(id) ===
+          dragId
+      );
+
+    const toIndex =
+      ids.findIndex(
+        id =>
+          String(id) ===
+          overId
+      );
+
+    nextPlacements =
+      reorderObjectWithinWorkspaceSurface({
+        placements:
+          workspacePlacements,
+
+        surfaceId:
+          sourceSurface,
+
+        objectId:
+          dragId,
+
+        targetObjectId:
+          overId,
+
+        insertAfter:
+          fromIndex < toIndex
+      });
+  } else {
+    nextPlacements =
+      moveObjectToWorkspacePosition({
+        placements:
+          workspacePlacements,
+
+        objectId:
+          dragId,
+
+        targetSurface,
+
+        targetObjectId:
+          overId,
+
+        insertAfter:
+          false
+      });
+  }
+}
+
+/*
+ * Empty / ambiguous space means Board.
+ */
+else {
+  nextPlacements =
+    moveObjectToWorkspaceSurface({
+      placements:
+        workspacePlacements,
+
+      objectId:
+        dragId,
+
+      targetSurface:
+        "board"
+    });
+}
+
+setWorkspacePlacements(
+  nextPlacements
+);
+
+saveWorkspaceLayout(
+  nextPlacements
+);
+
+if (
+  getObjectWorkspaceSurface({
+    placements:
+      nextPlacements,
+
+    objectId:
+      dragId
+  }) === "stackTop"
+) {
+  setActiveStacksOpen(
+    current => ({
+      ...current,
+      top: true
+    })
+  );
+}
+
+if (
+  getObjectWorkspaceSurface({
+    placements:
+      nextPlacements,
+
+    objectId:
+      dragId
+  }) === "stackBottom"
+) {
+  setActiveStacksOpen(
+    current => ({
+      ...current,
+      bottom: true
+    })
+  );
+}
+
+setActiveDndId(null);
+clearMachineDragState?.();
+
+return;
 }
 
   
