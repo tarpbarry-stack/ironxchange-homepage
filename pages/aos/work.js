@@ -34,6 +34,9 @@ import {
 
 import ListingCard from "../../components/ListingCard";
 
+import IXIMosObjectCard
+  from "../../components/ixi-mos/IXIMosObjectCard";
+
 import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -900,16 +903,61 @@ return [...filtered].sort((a, b) => {
 
   return 0;
 });
-     }, [
-    searchQuery,
-    savedBoardMode,
-    savedBoardListings,
-    workspaceListings,
-    workspaceFilters,
-    machineContainers,
-    ixiCardState,
-    ixiColorFilters,
-    ixiOutlineFilter
+    }, [
+  searchQuery,
+  savedBoardMode,
+  savedBoardListings,
+  workspaceListings,
+  workspaceFilters,
+  machineContainers,
+  ixiCardState,
+  ixiColorFilters,
+  ixiOutlineFilter
+]);
+
+
+/* ---------- AOS EQUIPMENT CONTAINER ---------- */
+
+const equipmentContainer =
+  useMemo(() => {
+    return (
+      aosObjects.find(object => {
+        return (
+          String(
+            object?.objectType || ""
+          ).toLowerCase() ===
+            "equipment" &&
+
+          object?.capabilities
+            ?.canContain === true &&
+
+          object?.status ===
+            "active"
+        );
+      }) || null
+    );
+  }, [aosObjects]);
+
+  /* ---------- AOS BOARD ITEMS ---------- */
+
+const aosBoardItems =
+  useMemo(() => {
+    const items = [];
+
+    if (equipmentContainer) {
+      items.push(
+        equipmentContainer
+      );
+    }
+
+    items.push(
+      ...visibleSavedListings
+    );
+
+    return items;
+  }, [
+    equipmentContainer,
+    visibleSavedListings
   ]);
 
   function updateIxiCardState(listingId, patch) {
@@ -1678,28 +1726,83 @@ toggleSearchSurfaceRevealed
   scaleMode={cardScaleMode}
 >
 <IXIBoard
-  items={visibleSavedListings}
+  items={aosBoardItems}
   cardContext="inventory"
   getListingId={getListingId}
   savedIds={savedIds}
   ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
+  IXISortableMachineCard={
+    IXISortableMachineCard
+  }
   toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  armedDestination={armedDestination}
+  updateIxiCardState={
+    updateIxiCardState
+  }
+  cycleMachineFace={
+    cycleMachineFace
+  }
+  sendListingToFront={
+    sendListingToFront
+  }
+  sendListingToBack={
+    sendListingToBack
+  }
+  armedDestination={
+    armedDestination
+  }
   sendMachineToArmedDestination={
     sendMachineToArmedDestination
   }
-  draggingListingId={draggingListingId}
-  ghostListingId={ghostListingId}
+  draggingListingId={
+    draggingListingId
+  }
+  ghostListingId={
+    ghostListingId
+  }
   enableCardScaling={true}
-  cardScaleMode={cardScaleMode}
+  cardScaleMode={
+    cardScaleMode
+  }
+  cardScaleMetrics={
+    cardScaleMetrics
+  }
   getSellerListingCardProps={
     getSellerListingCardProps
   }
+
+  getCustomItemId={item => {
+    if (item?.objectId) {
+      return String(
+        item.objectId
+      );
+    }
+
+    return null;
+  }}
+
+  renderCustomItem={({
+    item,
+    dragHandleProps
+  }) => {
+    if (!item?.objectId) {
+      return null;
+    }
+
+    return (
+      <IXIMosObjectCard
+        object={item}
+        dragHandleProps={
+          dragHandleProps
+        }
+        onOpen={object => {
+          console.log(
+            "AOS CONTAINER OPEN",
+            object
+          );
+        }}
+      />
+    );
+  }}
 />
 </IXIBoardSurface>
     
