@@ -342,6 +342,39 @@ const previewEntity = {
     "ABILENE, TX"
 };
 
+const previewEntityRelationships = [
+  {
+    id: "equipment",
+    label: "EQUIPMENT",
+    count: 19
+  },
+  {
+    id: "people",
+    label: "PEOPLE",
+    count: 0
+  },
+  {
+    id: "locations",
+    label: "LOCATIONS",
+    count: 3
+  },
+  {
+    id: "attachments",
+    label: "ATTACHMENTS",
+    count: 6
+  },
+  {
+    id: "jobs",
+    label: "JOBS",
+    count: 0
+  },
+  {
+    id: "loans",
+    label: "LOANS",
+    count: 0
+  }
+];
+
 const previewDealerBidPack = {
   estimatedSalePrice:
     195000,
@@ -647,10 +680,26 @@ if (face === "MOF4") {
 
 if (face === "EOF1") {
   return (
-   <IXIEntityObjectFace1
-  entity={previewEntity}
-  faceSize={previewSize}
-/>
+    <IXIEntityObjectFace1
+      entity={previewEntity}
+
+      relationships={
+        previewEntityRelationships
+      }
+
+      faceSize={
+        previewSize
+      }
+
+      onRelationshipOpen={
+        relationship => {
+          console.log(
+            "FACE LAB ENTITY RELATIONSHIP",
+            relationship
+          );
+        }
+      }
+    />
   );
 }
     
