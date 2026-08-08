@@ -4044,10 +4044,14 @@ outline: none;
   transform: translateX(8px);
 }
 
-        :global(.ixi-drag-overlay-card) {
-  width: 300px;
-  max-width: 300px;
+      :global(.ixi-drag-overlay-card) {
+  width: auto;
+  max-width: none;
+
+  position: relative;
+
   pointer-events: none;
+
   z-index: 999999;
 }
 
