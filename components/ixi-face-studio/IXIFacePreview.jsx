@@ -691,7 +691,94 @@ if (face === "EOF1") {
           value: 19
         },
         {
-          key:
+          key: "ytd-sales",
+          type: "metric",
+          label: "YTD Sales",
+          value: 8420000,
+          format: "currency"
+        },
+        {
+          key: "ytd-gp",
+          type: "metric",
+          label: "YTD GP",
+          value: 1684000,
+          format: "currency"
+        },
+        {
+          key: "ytd-gp-percent",
+          type: "metric",
+          label: "YTD GP %",
+          value: 20,
+          format: "percent"
+        },
+        {
+          key: "people",
+          type: "relationship",
+          label: "People",
+          value: 12
+        },
+        {
+          key: "yards",
+          type: "relationship",
+          label: "Yards",
+          value: 3
+        },
+        {
+          key: "machine-locations",
+          type: "relationship",
+          label: "Machine Locations",
+          value: 7
+        },
+        {
+          key: "attachments",
+          type: "relationship",
+          label: "Attachments",
+          value: 14
+        },
+        {
+          key: "jobs",
+          type: "relationship",
+          label: "Jobs",
+          value: 8
+        },
+        {
+          key: "work-orders",
+          type: "metric",
+          label: "Open Work Orders",
+          value: 4
+        },
+        {
+          key: "loans",
+          type: "relationship",
+          label: "Loans",
+          value: 6
+        }
+      ]}
+
+      faceSize={previewSize}
+
+      onAddSnapshot={() => {
+        console.log(
+          "FACE LAB ADD SNAPSHOT"
+        );
+      }}
+
+      onRemoveSnapshot={item => {
+        console.log(
+          "FACE LAB REMOVE SNAPSHOT",
+          item
+        );
+      }}
+
+      onSnapshotOpen={item => {
+        console.log(
+          "FACE LAB OPEN SNAPSHOT",
+          item
+        );
+      }}
+    />
+  );
+}
     
     return (
       <FaceNotRegistered
