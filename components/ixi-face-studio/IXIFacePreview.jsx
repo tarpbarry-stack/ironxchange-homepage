@@ -683,25 +683,15 @@ if (face === "EOF1") {
     <IXIEntityObjectFace1
       entity={previewEntity}
 
-      relationships={
-        previewEntityRelationships
-      }
-
-      faceSize={
-        previewSize
-      }
-
-      onRelationshipOpen={
-        relationship => {
-          console.log(
-            "FACE LAB ENTITY RELATIONSHIP",
-            relationship
-          );
-        }
-      }
-    />
-  );
-}
+      snapshotItems={[
+        {
+          key: "equipment",
+          type: "relationship",
+          label: "Equipment",
+          value: 19
+        },
+        {
+          key:
     
     return (
       <FaceNotRegistered
