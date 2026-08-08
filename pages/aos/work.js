@@ -1985,17 +1985,11 @@ function handleWorkspaceDragEnd(event) {
     getSellerListingCardProps
   }
 
-  getCustomItemId={item => {
+ getCustomItemId={item => {
   if (
     item?.objectType ===
     "system-index"
   ) {
-    return String(
-      item.objectId
-    );
-  }
-
-  if (item?.objectId) {
     return String(
       item.objectId
     );
