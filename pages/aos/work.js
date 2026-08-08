@@ -33,6 +33,9 @@ import ListingCard from "../../components/ListingCard";
 import IXIMosObjectCard
   from "../../components/ixi-mos/IXIMosObjectCard";
 
+import IXISystemIndexCard
+  from "../../components/ixi-mos/IXISystemIndexCard";
+
 import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -1656,37 +1659,31 @@ toggleSearchSurfaceRevealed
   }
 
   return (
-    <IXIMosObjectCard
-      object={{
-        ...item,
-
-        capabilities: {
-          ...item.capabilities,
-          canContain: false
-        },
-
-        factualTitle:
-          `${item.itemCount || 0} ITEMS`
-      }}
-
-      projection={{
-        descendantObjectCount:
-          item.itemCount || 0,
-
-        descendantContainerCount:
-          0,
-
-        branchValue:
-          item.value || 0
-      }}
+    <IXISystemIndexCard
+      index={item}
 
       dragHandleProps={
         dragHandleProps
       }
 
-      onOpen={index => {
+      onExposeMember={(
+        member,
+        index
+      ) => {
         console.log(
-          "AOS SYSTEM INDEX OPEN",
+          "AOS INDEX MEMBER PULL",
+          {
+            indexId:
+              index?.indexId,
+            memberId:
+              getListingId(member)
+          }
+        );
+      }}
+
+      onOpenConsole={index => {
+        console.log(
+          "AOS SYSTEM INDEX CONSOLE",
           index
         );
       }}
