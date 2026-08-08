@@ -223,6 +223,34 @@ export default function IXIAosPage() {
           return;
         }
 
+
+const SharetribeSdk =
+  await import(
+    "sharetribe-flex-sdk"
+  );
+
+const sdk =
+  SharetribeSdk.createInstance({
+    clientId:
+      process.env
+        .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+  });
+
+const currentUserResponse =
+  await sdk.currentUser.show({
+    include: ["profileImage"]
+  });
+
+const hydratedCurrentUser = {
+  ...currentUserResponse.data.data,
+
+  included:
+    currentUserResponse
+      .data
+      .included || []
+};
+
+        
         if (!environment?.isAuthenticated) {
           window.location.href =
             `/login?returnTo=${encodeURIComponent(
@@ -260,12 +288,9 @@ export default function IXIAosPage() {
           ownedActiveMachines
         );
 
-        setCurrentUser(
-          environment
-            ?.listingEnvironment
-            ?.currentUser ||
-          null
-        );
+       setCurrentUser(
+  hydratedCurrentUser
+);
       } catch (err) {
         if (cancelled) {
           return;
@@ -388,7 +413,56 @@ export default function IXIAosPage() {
       .join("")
       .toUpperCase();
 
+const imageId =
+  currentUser
+    ?.relationships
+    ?.profileImage
+    ?.data
+    ?.id
+    ?.uuid ||
+  null;
 
+const profileImage =
+  currentUser
+    ?.included
+    ?.find(
+      item =>
+        item?.type === "image" &&
+        item?.id?.uuid ===
+          imageId
+    );
+
+const variants =
+  profileImage
+    ?.attributes
+    ?.variants ||
+  {};
+
+const nonSquareVariant =
+  Object.entries(
+    variants
+  ).find(
+    ([key, value]) =>
+      value?.url &&
+      !key
+        .toLowerCase()
+        .includes("square")
+  );
+
+const logoUrl =
+  variants?.default?.url ||
+  variants?.["landscape-crop"]?.url ||
+  variants?.["landscape-crop2x"]?.url ||
+  variants?.["scaled-large"]?.url ||
+  variants?.["scaled-medium"]?.url ||
+  variants?.["scaled-small"]?.url ||
+  nonSquareVariant?.[1]?.url ||
+  Object.values(
+    variants
+  ).find(
+    value => value?.url
+  )?.url ||
+  null;
   return (
     <>
       <Head>
