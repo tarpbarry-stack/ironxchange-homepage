@@ -1,51 +1,42 @@
 import {
-  useMemo,
-  useRef,
-  useState
-} from "react";
+  useDraggable
+} from "@dnd-kit/core";
+
+import ListingCard
+  from "../ListingCard";
+
+import IXIMachineRail
+  from "../IXIMachineRail";
+
+import IXICollectionThumbRail
+  from "../ixi-object-system/IXICollectionThumbRail";
+
+import {
+  getCollectionDeckState,
+  getNextCollectionFace,
+  getPreviousCollectionFace,
+  getFirstCollectionFace,
+  getLastCollectionFace,
+  getCollectionFaceForItemIndex
+} from "../ixi-object-system/IXICollectionDeckEngine";
 
 import {
   getListingId
 } from "../../lib/listingFormatters";
 
+
 function clean(value) {
-  return String(value || "").trim();
+  return String(
+    value || ""
+  ).trim();
 }
 
-function getListingTitle(item = {}) {
-  return (
-    clean(item.title) ||
-    clean(
-      item.attributes?.title
-    ) ||
-    [
-      item.year,
-      item.make,
-      item.model
-    ]
-      .filter(Boolean)
-      .join(" ") ||
-    "UNTITLED"
-  );
-}
 
-function getListingImage(item = {}) {
-  return (
-    item.imageUrls?.[0] ||
-    item.images?.[0]?.url ||
-    item.images?.[0]
-      ?.attributes
-      ?.variants
-      ?.default
-      ?.url ||
-    item.imageObjects?.[0]?.url ||
-    ""
-  );
-}
-
-function formatMoney(value) {
+function formatMoney(
+  value
+) {
   const amount =
-    Number(value);
+    Number(value || 0);
 
   if (!Number.isFinite(amount)) {
     return "$0";
@@ -61,769 +52,750 @@ function formatMoney(value) {
   );
 }
 
+
+function getMachineImage(
+  machine = {}
+) {
+  return (
+    machine.imageUrls?.[0] ||
+
+    machine.images?.[0]?.url ||
+
+    machine.images?.[0]
+      ?.attributes
+      ?.variants
+      ?.default
+      ?.url ||
+
+    machine.imageObjects?.[0]
+      ?.url ||
+
+    ""
+  );
+}
+
+
+function getMachineLabel(
+  machine = {}
+) {
+  return (
+    clean(machine.title) ||
+
+    clean(
+      machine.attributes
+        ?.title
+    ) ||
+
+    [
+      machine.year,
+      machine.make,
+      machine.model
+    ]
+      .filter(Boolean)
+      .join(" ") ||
+
+    "MACHINE"
+  );
+}
+
+
 export default function IXISystemIndexCard({
-  index = {},
-  dragHandleProps = null,
+  index,
 
-  onOpenConsole = null,
-  onExposeMember = null,
+  objectId,
 
-  armed = false
+  dragHandleProps,
+
+  ixiState = {},
+  ixiCardState = {},
+
+  onIxiStateChange,
+
+  saved = false,
+
+  armedDestination,
+
+  onSendFront,
+  onSendBack,
+
+  onCycleColor,
+  onCycleOutline,
+
+  onSendToArmedDestination,
+
+  onExposeObject
 }) {
-  const memberRailRef =
-    useRef(null);
-
-  const [memberIndex, setMemberIndex] =
-    useState(0);
-
-  const members =
-    useMemo(
-      () =>
-        Array.isArray(index.items)
-          ? index.items
-          : [],
-      [index.items]
+  const id =
+    String(
+      objectId ||
+      index?.objectId ||
+      ""
     );
 
-  const activeMember =
-    members[memberIndex] || null;
+  const items =
+    Array.isArray(
+      index?.items
+    )
+      ? index.items
+      : [];
 
-  function stop(event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
+  const face =
+    Number(
+      ixiState?.face || 1
+    );
 
-  function moveMember(
-    direction,
-    event
-  ) {
-    stop(event);
-
-    if (!members.length) {
-      return;
-    }
-
-    setMemberIndex(current => {
-      const next =
-        current + direction;
-
-      if (next < 0) {
-        return (
-          members.length - 1
-        );
-      }
-
-      if (
-        next >= members.length
-      ) {
-        return 0;
-      }
-
-      return next;
+  const {
+    endDeckFace,
+    isIdentityFace,
+    isEndDeckFace,
+    activeItemIndex,
+    activeItem
+  } =
+    getCollectionDeckState({
+      face,
+      items
     });
-  }
 
-  function openConsole(event) {
-    stop(event);
+  const activeItemId =
+    activeItem
+      ? String(
+          getListingId(
+            activeItem
+          )
+        )
+      : "";
 
-    onOpenConsole?.(index);
-  }
+  const activeItemIxiState =
+    activeItemId
+      ? ixiCardState[
+          activeItemId
+        ] || {}
+      : {};
 
-  function exposeMember(event) {
-    stop(event);
+  const {
+    attributes:
+      childDragAttributes,
 
-    if (!activeMember) {
-      return;
-    }
+    listeners:
+      childDragListeners,
 
-    onExposeMember?.(
-      activeMember,
-      index
+    setNodeRef:
+      setChildDragNodeRef,
+
+    isDragging:
+      isChildDragging
+  } =
+    useDraggable({
+      id:
+        activeItemId ||
+        `${id}-inactive-child`,
+
+      disabled:
+        isIdentityFace ||
+        isEndDeckFace ||
+        !activeItemId,
+
+      data: {
+        type:
+          "collection-child",
+
+        objectId:
+          activeItemId,
+
+        sourceContainer:
+          "system-index",
+
+        sourceParentId:
+          id,
+
+        sourceParentType:
+          "system-index",
+
+        action:
+          "expose"
+      }
+    });
+
+
+  function setFace(
+    nextFace
+  ) {
+    onIxiStateChange?.(
+      id,
+      {
+        face: nextFace
+      }
     );
   }
+
+
+  function nextFace() {
+    setFace(
+      getNextCollectionFace({
+        face,
+        items
+      })
+    );
+  }
+
+
+  function previousFace() {
+    setFace(
+      getPreviousCollectionFace({
+        face,
+        items
+      })
+    );
+  }
+
+
+  function firstFace() {
+    setFace(
+      getFirstCollectionFace()
+    );
+  }
+
+
+  function lastFace() {
+    setFace(
+      getLastCollectionFace({
+        items
+      })
+    );
+  }
+
+
+  function selectItem(
+    item,
+    itemIndex
+  ) {
+    setFace(
+      getCollectionFaceForItemIndex(
+        itemIndex
+      )
+    );
+  }
+
 
   return (
-    <article
-      className={[
-        "ixi-system-index-card",
-        armed
-          ? "destination-armed"
-          : ""
-      ]
-        .filter(Boolean)
-        .join(" ")}
+    <section
+      className="system-index-card card"
 
-      data-system-index-id={
-        index.indexId || ""
-      }
+      {...(
+        isIdentityFace
+          ? dragHandleProps ||
+            {}
+          : {}
+      )}
     >
-      {/* ---------- HEADER ---------- */}
+      <div className="system-index-face">
+        {isIdentityFace ? (
+          <div className="system-index-identity">
+            <div className="index-kicker">
+              SYSTEM INDEX
+            </div>
 
-      <header
-        className="index-header"
-        {...(dragHandleProps || {})}
-      >
-        <div className="index-kicker">
-          SYSTEM INDEX
-        </div>
+            <h3>
+              {index?.displayName ||
+                index?.label ||
+                "INDEX"}
+            </h3>
 
-        <div className="index-title">
-          {index.displayName ||
-            index.label ||
-            "INDEX"}
-        </div>
+            <div className="index-stats">
+              <div>
+                <strong>
+                  {items.length}
+                </strong>
 
-        <div className="index-count">
-          {members.length}
-        </div>
-      </header>
+                <span>
+                  Objects
+                </span>
+              </div>
 
-      {/* ---------- SNAPSHOT ---------- */}
-
-      <section className="index-snapshot">
-        <div>
-          <span>OBJECTS</span>
-          <strong>
-            {members.length}
-          </strong>
-        </div>
-
-        <div>
-          <span>VALUE</span>
-          <strong>
-            {formatMoney(
-              index.value
-            )}
-          </strong>
-        </div>
-      </section>
-
-      {/* ---------- ACTIVE MEMBER ---------- */}
-
-      <section className="member-stage">
-        {activeMember ? (
-          <>
-            <div className="member-image">
-              {getListingImage(
-                activeMember
-              ) ? (
-                <img
-                  src={getListingImage(
-                    activeMember
+              <div>
+                <strong>
+                  {formatMoney(
+                    index?.value
                   )}
-                  alt={
-                    getListingTitle(
-                      activeMember
-                    )
-                  }
-                  draggable={false}
-                />
-              ) : (
-                <div className="member-image-empty">
-                  EQUIPMENT
-                </div>
-              )}
+                </strong>
+
+                <span>
+                  Value
+                </span>
+              </div>
             </div>
 
-            <div className="member-copy">
-              <div className="member-position">
-                {memberIndex + 1}
-                {" / "}
-                {members.length}
-              </div>
-
-              <div className="member-title">
-                {getListingTitle(
-                  activeMember
-                )}
-              </div>
-
-              <button
-                type="button"
-                className="member-expose"
-                onPointerDown={stop}
-                onClick={exposeMember}
-              >
-                PULL TO BOARD
-              </button>
+            <div className="index-hint">
+              BROWSE BELOW
             </div>
-          </>
+          </div>
+        ) : activeItem ? (
+          <div
+            ref={
+              setChildDragNodeRef
+            }
+
+            className={`system-index-child ${
+              isChildDragging
+                ? "is-dragging"
+                : ""
+            }`}
+
+            {...childDragAttributes}
+            {...childDragListeners}
+          >
+            <ListingCard
+              listing={
+                activeItem
+              }
+
+              saved={false}
+
+              showSave={false}
+
+              machineFace={1}
+
+              useDndDrag={false}
+
+              ixiState={
+                activeItemIxiState
+              }
+            />
+          </div>
         ) : (
-          <div className="member-empty">
-            EMPTY
+          <div className="system-index-end">
+            <span>
+              END DECK
+            </span>
+
+            <strong>
+              {items.length}
+            </strong>
+
+            <p>
+              OBJECTS REVIEWED
+            </p>
           </div>
         )}
-      </section>
+      </div>
 
-      {/* ---------- MEMBER STRIP ---------- */}
 
-      <section
-        ref={memberRailRef}
-        className="member-strip"
-      >
-        {members.map(
-          (member, indexNumber) => {
-            const memberId =
-              String(
-                getListingId(member) ||
-                indexNumber
-              );
+      <IXICollectionThumbRail
+        items={items}
 
-            const active =
-              indexNumber ===
-              memberIndex;
-
-            return (
-              <button
-                key={memberId}
-                type="button"
-                className={[
-                  "member-thumb",
-                  active
-                    ? "active"
-                    : ""
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onPointerDown={
-                  stop
-                }
-                onClick={event => {
-                  stop(event);
-
-                  setMemberIndex(
-                    indexNumber
-                  );
-                }}
-              >
-                {getListingImage(
-                  member
-                ) ? (
-                  <img
-                    src={getListingImage(
-                      member
-                    )}
-                    alt=""
-                    draggable={
-                      false
-                    }
-                  />
-                ) : (
-                  <span>
-                    {indexNumber + 1}
-                  </span>
-                )}
-              </button>
-            );
-          }
-        )}
-      </section>
-
-      {/* ---------- STANDARD CARD RAIL ---------- */}
-
-      <footer className="index-card-rail">
-        <button
-          type="button"
-          className="rail-action"
-          data-label="PREVIOUS"
-          onPointerDown={stop}
-          onClick={event =>
-            moveMember(
-              -1,
-              event
-            )
-          }
-        />
-
-        <button
-          type="button"
-          className="rail-action rail-open"
-          data-label="OPEN CONSOLE"
-          onPointerDown={stop}
-          onClick={openConsole}
-        />
-
-        <button
-          type="button"
-          className="rail-action"
-          data-label="NEXT"
-          onPointerDown={stop}
-          onClick={event =>
-            moveMember(
-              1,
-              event
-            )
-          }
-        />
-
-        <span className="rail-status">
-          {members.length
-            ? `${memberIndex + 1}/${members.length}`
-            : "0/0"}
-        </span>
-      </footer>
-
-      <style jsx>{`
-        .ixi-system-index-card,
-        .ixi-system-index-card * {
-          box-sizing: border-box;
+        activeItemIndex={
+          activeItemIndex
         }
 
-        .ixi-system-index-card {
+        getItemId={item =>
+          String(
+            getListingId(
+              item
+            )
+          )
+        }
+
+        getItemImage={
+          getMachineImage
+        }
+
+        getItemLabel={
+          getMachineLabel
+        }
+
+        onSelectItem={
+          selectItem
+        }
+      />
+
+
+      <IXIMachineRail
+        listing={index}
+
+        saved={saved}
+
+        machineFace={face}
+
+        railMode={
+          isIdentityFace
+            ? "next-lit"
+            : "home-lit next-lit prev-lit end-lit"
+        }
+
+        onCycleMachineFace={
+          nextFace
+        }
+
+        onRailSend={
+          previousFace
+        }
+
+        onSendFront={
+          isIdentityFace
+            ? onSendFront
+            : firstFace
+        }
+
+        onSendBack={
+          isIdentityFace
+            ? onSendBack
+            : lastFace
+        }
+
+        onCycleColor={
+          onCycleColor
+        }
+
+        onCycleOutline={
+          onCycleOutline
+        }
+
+        armedDestination={
+          armedDestination
+        }
+
+        onSendToArmedDestination={() => {
+          if (!activeItem) {
+            return;
+          }
+
+          onSendToArmedDestination?.(
+            activeItem
+          );
+
+          onExposeObject?.(
+            activeItem,
+            index
+          );
+        }}
+      />
+
+
+      <style jsx>{`
+        .system-index-card,
+        .system-index-card * {
+          box-sizing:
+            border-box;
+        }
+
+        .system-index-card {
           position: relative;
 
           width: 298px;
           min-width: 298px;
           max-width: 298px;
 
-          height: 470px;
-          min-height: 470px;
-          max-height: 470px;
+          height: 391px;
+          min-height: 391px;
+          max-height: 391px;
+
+          overflow: hidden;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
+
+          outline:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
+
+          border-radius:
+            14px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .035
+              ),
+              rgba(
+                255,
+                255,
+                255,
+                .006
+              )
+            ),
+            radial-gradient(
+              circle
+              at top left,
+              rgba(
+                255,
+                196,
+                0,
+                .055
+              ),
+              transparent
+                55%
+            ),
+            #101010;
+
+          box-shadow:
+            inset
+              0 1px 0
+              rgba(
+                255,
+                255,
+                255,
+                .04
+              ),
+            0 18px 34px
+              rgba(
+                0,
+                0,
+                0,
+                .42
+              );
+        }
+
+        .system-index-face {
+          position: absolute;
+
+          left: 0;
+          right: 0;
+          top: 0;
+
+          bottom: 64px;
+
+          overflow: hidden;
+        }
+
+        .system-index-identity {
+          width: 100%;
+          height: 100%;
+
+          padding:
+            18px 16px;
+
+          display: flex;
+          flex-direction: column;
+        }
+
+        .index-kicker {
+          color: #ffc400;
+
+          font-size: 8px;
+          font-weight: 950;
+          letter-spacing:
+            .08em;
+        }
+
+        .system-index-identity h3 {
+          margin:
+            7px 0 0;
+
+          color: #f4f4f4;
+
+          font-size: 22px;
+          font-weight: 950;
+
+          line-height: 1;
+
+          text-transform:
+            uppercase;
+        }
+
+        .index-stats {
+          margin-top: 30px;
+
+          display: grid;
+
+          grid-template-columns:
+            1fr;
+
+          gap: 12px;
+        }
+
+        .index-stats div {
+          padding:
+            14px 12px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .06
+            );
+
+          border-radius:
+            10px;
+
+          background:
+            rgba(
+              0,
+              0,
+              0,
+              .26
+            );
+        }
+
+        .index-stats strong {
+          display: block;
+
+          color: #f2f2f2;
+
+          font-size: 23px;
+          font-weight: 950;
+
+          line-height: 1;
+        }
+
+        .index-stats span {
+          display: block;
+
+          margin-top: 6px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .38
+            );
+
+          font-size: 8px;
+          font-weight: 950;
+
+          letter-spacing:
+            .08em;
+
+          text-transform:
+            uppercase;
+        }
+
+        .index-hint {
+          margin-top: auto;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .20
+            );
+
+          font-size: 7px;
+          font-weight: 950;
+
+          letter-spacing:
+            .10em;
+        }
+
+        .system-index-child {
+          width: 100%;
+          height: 100%;
+
+          overflow: hidden;
+
+          cursor: grab;
+
+          touch-action:
+            none;
+        }
+
+        .system-index-child.is-dragging {
+          opacity: .42;
+        }
+
+        .system-index-end {
+          width: 100%;
+          height: 100%;
 
           display: flex;
           flex-direction: column;
 
-          overflow: hidden;
+          align-items:
+            center;
 
-          border:
-            1px solid
-            rgba(255,255,255,.08);
-
-          border-radius: 13px;
-
-          background:
-            radial-gradient(
-              circle at top,
-              rgba(255,196,0,.055),
-              transparent 42%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.025),
-              rgba(255,255,255,0)
-            ),
-            #141414;
-
-          box-shadow:
-            0 18px 40px
-            rgba(0,0,0,.32);
-
-          color: #f2f2f2;
-        }
-
-        .ixi-system-index-card
-          .index-header {
-          min-height: 82px;
-
-          padding:
-            12px 13px 10px;
-
-          position: relative;
-
-          cursor: grab;
-
-          border-bottom:
-            1px solid
-            rgba(255,255,255,.055);
-        }
-
-        .index-kicker {
-          color:
-            rgba(255,196,0,.68);
-
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: .72px;
-        }
-
-        .index-title {
-          margin-top: 7px;
-
-          color: #f3f3f3;
-
-          font-size: 24px;
-          font-weight: 950;
-          line-height: 1;
-          letter-spacing: -.55px;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .index-count {
-          position: absolute;
-
-          right: 13px;
-          top: 11px;
-
-          color:
-            rgba(255,255,255,.24);
-
-          font-size: 10px;
-          font-weight: 950;
-        }
-
-        .index-snapshot {
-          height: 62px;
-
-          padding: 9px 13px;
-
-          display: grid;
-          grid-template-columns:
-            1fr 1fr;
+          justify-content:
+            center;
 
           gap: 8px;
 
-          border-bottom:
-            1px solid
-            rgba(255,255,255,.045);
-        }
-
-        .index-snapshot div {
-          min-width: 0;
-
-          padding: 7px 8px;
-
-          border:
-            1px solid
-            rgba(255,255,255,.05);
-
-          border-radius: 6px;
-
           background:
-            rgba(255,255,255,.018);
+            radial-gradient(
+              circle
+              at center,
+              rgba(
+                255,
+                196,
+                0,
+                .08
+              ),
+              transparent
+                55%
+            ),
+            #101010;
+
+          text-align:
+            center;
         }
 
-        .index-snapshot span {
-          display: block;
-
-          color:
-            rgba(255,255,255,.28);
-
-          font-size: 6.5px;
-          font-weight: 950;
-          letter-spacing: .55px;
-        }
-
-        .index-snapshot strong {
-          display: block;
-
-          margin-top: 4px;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-
-          color:
-            rgba(255,255,255,.78);
-
-          font-size: 11px;
-          font-weight: 950;
-        }
-
-        .member-stage {
-          height: 216px;
-
-          margin: 10px 11px 0;
-
-          position: relative;
-
-          overflow: hidden;
-
-          border:
-            1px solid
-            rgba(255,255,255,.055);
-
-          border-radius: 9px;
-
-          background:
-            rgba(8,8,8,.78);
-        }
-
-        .member-image {
-          width: 100%;
-          height: 138px;
-
-          overflow: hidden;
-
-          background: #0b0b0b;
-        }
-
-        .member-image img {
-          width: 100%;
-          height: 100%;
-
-          display: block;
-
-          object-fit: cover;
-        }
-
-        .member-image-empty {
-          width: 100%;
-          height: 100%;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          color:
-            rgba(255,255,255,.12);
+        .system-index-end span {
+          color: #ffc400;
 
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: .8px;
+
+          letter-spacing:
+            .12em;
         }
 
-        .member-copy {
-          height: 76px;
+        .system-index-end strong {
+          color: #f4f4f4;
 
-          padding: 8px 9px;
-
-          position: relative;
-        }
-
-        .member-position {
-          color:
-            rgba(255,196,0,.50);
-
-          font-size: 6.5px;
+          font-size: 44px;
           font-weight: 950;
-          letter-spacing: .5px;
+
+          line-height: 1;
         }
 
-        .member-title {
-          width: calc(100% - 78px);
-
-          margin-top: 5px;
-
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+        .system-index-end p {
+          margin: 0;
 
           color:
-            rgba(255,255,255,.78);
+            rgba(
+              255,
+              255,
+              255,
+              .38
+            );
 
           font-size: 9px;
           font-weight: 950;
+
+          letter-spacing:
+            .08em;
         }
 
-        .member-expose {
+        :global(
+          .system-index-card
+          .ixi-collection-thumb-rail
+        ) {
           position: absolute;
 
-          right: 8px;
-          bottom: 10px;
+          left: 0;
+          right: 0;
 
-          height: 22px;
+          bottom: 16px;
 
-          padding: 0 8px;
-
-          border:
-            1px solid
-            rgba(255,255,255,.08);
-
-          border-radius: 4px;
-
-          background:
-            rgba(255,255,255,.025);
-
-          color:
-            rgba(255,255,255,.42);
-
-          font-size: 6px;
-          font-weight: 950;
-          letter-spacing: .42px;
-
-          cursor: pointer;
-        }
-
-        .member-expose:hover {
-          border-color:
-            rgba(255,196,0,.34);
-
-          color: #ffc400;
-        }
-
-        .member-empty {
-          height: 100%;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          color:
-            rgba(255,255,255,.18);
-
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .7px;
-        }
-
-        .member-strip {
-          height: 48px;
-
-          margin:
-            8px 11px 0;
-
-          padding:
-            4px 2px;
-
-          display: flex;
-          align-items: center;
-
-          gap: 5px;
-
-          overflow-x: auto;
-          overflow-y: hidden;
-
-          scrollbar-width: none;
-        }
-
-        .member-strip::-webkit-scrollbar {
-          display: none;
-        }
-
-        .member-thumb {
-          width: 50px;
-          min-width: 50px;
-          height: 36px;
-
-          padding: 0;
-
-          overflow: hidden;
-
-          border:
-            1px solid
-            rgba(255,255,255,.07);
-
-          border-radius: 4px;
-
-          background:
-            rgba(255,255,255,.025);
-
-          cursor: pointer;
-        }
-
-        .member-thumb.active {
-          border-color:
-            rgba(255,196,0,.58);
-
-          box-shadow:
-            0 0 8px
-            rgba(255,196,0,.11);
-        }
-
-        .member-thumb img {
-          width: 100%;
-          height: 100%;
-
-          display: block;
-          object-fit: cover;
-        }
-
-        .member-thumb span {
-          color:
-            rgba(255,255,255,.28);
-
-          font-size: 7px;
-          font-weight: 950;
-        }
-
-        .index-card-rail {
-          height: 19px;
-          min-height: 19px;
-
-          margin-top: auto;
-
-          padding: 0 10px;
-
-          display: flex;
-          align-items: center;
-
-          gap: 10px;
-
-          border-top:
-            1px solid
-            rgba(255,255,255,.065);
-
-          background: #0d0d0d;
-        }
-
-        .rail-action {
-          position: relative;
-
-          width: 32px;
-          height: 4px;
-
-          padding: 0;
-
-          border: 0;
-          border-radius: 2px;
-
-          background:
-            rgba(255,255,255,.16);
-
-          cursor: pointer;
-        }
-
-        .rail-action:hover,
-        .rail-open:hover {
-          background: #ffc400;
-
-          box-shadow:
-            0 0 8px
-            rgba(255,196,0,.26);
-        }
-
-        .rail-open {
-          background:
-            rgba(255,196,0,.32);
-        }
-
-        .rail-action:hover::after {
-          content:
-            attr(data-label);
-
-          position: absolute;
-
-          left: 50%;
-          bottom: 11px;
-
-          transform:
-            translateX(-50%);
-
-          white-space: nowrap;
-
-          color:
-            rgba(255,255,255,.72);
-
-          font-size: 6px;
-          font-weight: 950;
-          letter-spacing: .48px;
-
-          pointer-events: none;
-        }
-
-        .rail-status {
-          margin-left: auto;
-
-          color:
-            rgba(255,255,255,.25);
-
-          font-size: 6.5px;
-          font-weight: 950;
-          letter-spacing: .45px;
-        }
-
-        .destination-armed {
-          border-color:
-            rgba(0,194,255,.72);
-
-          box-shadow:
-            0 0 18px
-            rgba(0,194,255,.18);
+          z-index: 25;
         }
       `}</style>
-    </article>
+    </section>
   );
 }
