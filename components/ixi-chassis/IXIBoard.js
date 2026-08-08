@@ -65,7 +65,59 @@ consolePanelGap,
       getListingId(item)
     );
   }
+function resolveBoardItemType(
+  item
+) {
+  if (
+    item?.objectType
+  ) {
+    return String(
+      item.objectType
+    );
+  }
 
+  if (
+    item?.type ===
+    "SELLER OBJECT"
+  ) {
+    return "seller";
+  }
+
+  /*
+   * Ordinary IronXchange
+   * listing/machine object.
+   */
+  return "machine";
+}
+
+function resolveBoardItemFamily(
+  item
+) {
+  if (
+    item?.objectFamily
+  ) {
+    return String(
+      item.objectFamily
+    );
+  }
+
+  if (
+    item?.objectType ===
+    "system-index"
+  ) {
+    return "container";
+  }
+
+  if (
+    item?.type ===
+    "SELLER OBJECT"
+  ) {
+    return "seller";
+  }
+
+  return "machine";
+}
+  
 const resolvedConsolePanelWidth =
   Number(
     consolePanelWidth ??
@@ -91,6 +143,16 @@ const resolvedConsolePanelGap =
     {items.map(item => {
         const id =
   resolveBoardItemId(item);
+
+      const objectType =
+  resolveBoardItemType(
+    item
+  );
+
+const objectFamily =
+  resolveBoardItemFamily(
+    item
+  );
 
 const sellerCardProps =
   typeof getSellerListingCardProps === "function"
@@ -127,10 +189,28 @@ const consoleDepth =
     ? savedConsoleSlots.length
     : legacyConsoleDepth;
 return (
-  <IXISortableMachineCard
-    key={id}
-    id={id}
-    containerId="board"
+ <IXISortableMachineCard
+  key={id}
+
+  id={id}
+
+  containerId="board"
+
+  objectType={
+    objectType
+  }
+
+  objectFamily={
+    objectFamily
+  }
+
+  dragData={{
+    workspaceSurface:
+      "board",
+
+    sourceContainerId:
+      "board"
+  }}
 
     className={`ixi-board-sortable-card ${
       item?.type === "SELLER OBJECT"
