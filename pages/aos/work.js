@@ -123,6 +123,15 @@ export default function IXIAosWorkPage() {
   console.log("IXI AOS WORK PAGE IS RUNNING");
   
   const [listings, setListings] = useState([]);
+
+  const [aosEntity, setAosEntity] =
+  useState(null);
+
+const [aosObjects, setAosObjects] =
+  useState([]);
+
+const [aosCurrentUser, setAosCurrentUser] =
+  useState(null);
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -328,6 +337,76 @@ const sensors = useSensors(
   "guest";
 
 setIxiUserId(String(userId));
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadAosScoreboardEnvironment() {
+    try {
+      const environment =
+        await loadIXIMosEnvironment({
+          includeObjects: true
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      setAosEntity(
+        environment?.entity || null
+      );
+
+      setAosObjects(
+        Array.isArray(
+          environment?.objects
+        )
+          ? environment.objects
+          : []
+      );
+
+      const SharetribeSdk =
+        await import(
+          "sharetribe-flex-sdk"
+        );
+
+      const aosSdk =
+        SharetribeSdk.createInstance({
+          clientId:
+            process.env
+              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+      const currentUserResponse =
+        await aosSdk.currentUser.show({
+          include: ["profileImage"]
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      setAosCurrentUser({
+        ...currentUserResponse.data.data,
+
+        included:
+          currentUserResponse
+            .data
+            .included || []
+      });
+    } catch (error) {
+      console.error(
+        "IXI AOS WORK SCOREBOARD LOAD FAILED:",
+        error
+      );
+    }
+  }
+
+  loadAosScoreboardEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
 const remoteIxiResponse =
   await fetchIxiMachineState(String(userId));
@@ -1316,10 +1395,34 @@ toggleSearchSurfaceRevealed
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
-    <main>
+   <main>
   <section className="saved-environment-shell">
-   <IXIEnvironmentRail
-  activeEnvironment="INVENTORY"
+    <IXIEnvironmentRail
+      activeEnvironment="AOS"
+      hasAccount={!!aosEntity}
+      hasRelationship={!!aosEntity}
+      hasInventory={workspaceListings.length > 0}
+      armedDestination={armedDestination}
+      toggleArmedDestination={toggleArmedDestination}
+    />
+  </section>
+
+  <IXIAosScoreboard
+    entity={aosEntity}
+    currentUser={aosCurrentUser}
+    ownedListings={workspaceListings}
+    aosObjects={aosObjects}
+    onAdd={() => {
+      console.log(
+        "AOS WORK ADD"
+      );
+    }}
+    onMore={() => {
+      console.log(
+        "AOS WORK MORE"
+      );
+    }}
+  />
   hasAccount={!!sdk}
   hasRelationship={true}
   hasInventory={!!sdk}
