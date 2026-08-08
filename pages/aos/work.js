@@ -1649,6 +1649,7 @@ toggleSearchSurfaceRevealed
 
   renderCustomItem={({
   item,
+  id,
   dragHandleProps
 }) => {
   if (
@@ -1662,31 +1663,68 @@ toggleSearchSurfaceRevealed
     <IXISystemIndexCard
       index={item}
 
+      objectId={id}
+
       dragHandleProps={
         dragHandleProps
       }
 
-      onExposeMember={(
-        member,
-        index
+      ixiState={
+        ixiCardState[id] || {
+          color: "none",
+          outline: 1,
+          face: 1
+        }
+      }
+
+      ixiCardState={
+        ixiCardState
+      }
+
+      onIxiStateChange={
+        updateIxiCardState
+      }
+
+      armedDestination={
+        armedDestination
+      }
+
+      onSendFront={
+        sendListingToFront
+      }
+
+      onSendBack={
+        sendListingToBack
+      }
+
+      onSendToArmedDestination={
+        sendMachineToArmedDestination
+      }
+
+      onExposeObject={(
+        child,
+        parentIndex
       ) => {
         console.log(
-          "AOS INDEX MEMBER PULL",
+          "AOS INDEX CHILD EXPOSE",
           {
-            indexId:
-              index?.indexId,
-            memberId:
-              getListingId(member)
+            parentIndexId:
+              parentIndex?.indexId,
+
+            childId:
+              getListingId(child)
           }
         );
       }}
 
-      onOpenConsole={index => {
-        console.log(
-          "AOS SYSTEM INDEX CONSOLE",
-          index
-        );
-      }}
+      onOpenConsole={
+        index => {
+          console.log(
+            "AOS SYSTEM INDEX CONSOLE",
+            index
+          );
+        }
+      }
     />
   );
 }}
