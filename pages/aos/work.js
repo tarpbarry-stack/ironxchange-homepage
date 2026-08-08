@@ -461,14 +461,19 @@ useEffect(() => {
 
   async function loadAosScoreboardEnvironment() {
     try {
-      const environment =
-        await loadIXIMosEnvironment({
-          includeObjects: true
-        });
+     const environment =
+  await loadIXIMosEnvironment({
+    includeObjects: true
+  });
 
-      if (cancelled) {
-        return;
-      }
+console.log(
+  "AOS OBJECTS AFTER LOAD",
+  environment?.objects
+);
+
+if (cancelled) {
+  return;
+}
 
       setAosEntity(
         environment?.entity || null
