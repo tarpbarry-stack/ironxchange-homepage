@@ -2277,7 +2277,72 @@ return;
     handleWorkspaceDragStart={handleWorkspaceDragStart}
     handleWorkspaceDragEnd={handleWorkspaceDragEnd}
     handleWorkspaceDragCancel={handleWorkspaceDragCancel}
-    getActiveDndListing={getActiveDndListing}
+    getActiveDndObject={
+  getActiveDndListing
+}
+    renderActiveDndObject={({
+  object,
+  objectId
+}) => {
+  /*
+   * SYSTEM INDEX / CONTAINER
+   */
+  if (
+    object?.objectType ===
+    "system-index"
+  ) {
+    return (
+      <IXISystemIndexCard
+        index={
+          object
+        }
+
+        objectId={
+          objectId
+        }
+
+        /*
+         * Overlay is presentation only.
+         * Never install another drag
+         * activator inside the overlay.
+         */
+        dragHandleProps={{}}
+
+        ixiState={
+          ixiCardState[
+            objectId
+          ] || {
+            color: "none",
+            outline: 1,
+            face: 1
+          }
+        }
+
+        ixiCardState={
+          ixiCardState
+        }
+
+        onIxiStateChange={() => {}}
+
+        armedDestination=""
+        onSendFront={() => {}}
+        onSendBack={() => {}}
+        onSendToArmedDestination={() => {}}
+
+        onExposeObject={() => {}}
+        onOpenConsole={() => {}}
+      />
+    );
+  }
+
+  /*
+   * Return null for normal listings.
+   *
+   * IXIDragEngine then uses its
+   * existing ListingCard fallback.
+   */
+  return null;
+}}
     activeDndId={activeDndId}
     savedIds={savedIds}
     ixiCardState={ixiCardState}
