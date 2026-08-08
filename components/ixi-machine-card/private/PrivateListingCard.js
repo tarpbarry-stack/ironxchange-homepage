@@ -130,6 +130,8 @@ consoleRightOpen = false,
 onExpandConsoleLeft,
 onExpandConsoleRight,
 consoleActuatorVariant = "compact",
+
+showMachineRail = true,
 }) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -757,28 +759,30 @@ onMachinePlacementChange ? (
   </>
 )}
          
-<IXIMachineRail
-  listing={listing}
-  saved={saved}
-  boardColor={boardColor}
-  boardOutline={boardOutline}
-  machineFace={machineFace}
-  onCycleMachineFace={onCycleMachineFace}
-  onSendFront={onSendFront}
-  onSendBack={onSendBack}
-  onCycleColor={cycleBoardColor}
-  onCycleOutline={cycleBoardOutline}
-  onToggleSaved={onToggleSaved}
-  armedDestination={armedDestination}
-  onSendToArmedDestination={onSendToArmedDestination}
+{showMachineRail ? (
+  <IXIMachineRail
+    listing={listing}
+    saved={saved}
+    boardColor={boardColor}
+    boardOutline={boardOutline}
+    machineFace={machineFace}
+    onCycleMachineFace={onCycleMachineFace}
+    onSendFront={onSendFront}
+    onSendBack={onSendBack}
+    onCycleColor={cycleBoardColor}
+    onCycleOutline={cycleBoardOutline}
+    onToggleSaved={onToggleSaved}
+    armedDestination={armedDestination}
+    onSendToArmedDestination={onSendToArmedDestination}
 
-  consoleDepth={consoleDepth}
-  consoleLeftOpen={consoleLeftOpen}
-  consoleRightOpen={consoleRightOpen}
-  onExpandConsoleLeft={onExpandConsoleLeft}
-  onExpandConsoleRight={onExpandConsoleRight}
-  consoleActuatorVariant={consoleActuatorVariant}
-/>
+    consoleDepth={consoleDepth}
+    consoleLeftOpen={consoleLeftOpen}
+    consoleRightOpen={consoleRightOpen}
+    onExpandConsoleLeft={onExpandConsoleLeft}
+    onExpandConsoleRight={onExpandConsoleRight}
+    consoleActuatorVariant={consoleActuatorVariant}
+  />
+) : null}
 
       <style jsx>{`
 
