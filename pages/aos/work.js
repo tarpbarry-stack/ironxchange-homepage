@@ -1395,7 +1395,7 @@ toggleSearchSurfaceRevealed
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
-   <main>
+ <main>
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
       activeEnvironment="AOS"
@@ -1423,13 +1423,6 @@ toggleSearchSurfaceRevealed
       );
     }}
   />
-  hasAccount={!!sdk}
-  hasRelationship={true}
-  hasInventory={!!sdk}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
-/>
-  </section>
       
 
 <IXIChassis>
