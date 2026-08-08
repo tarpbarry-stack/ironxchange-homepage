@@ -78,12 +78,23 @@ const IXI_AOS_WORK_SETTINGS_ID =
 const IXI_AOS_WORK_LAYOUT_ID =
   "__ixi_aos_work_layout__";
 
+const IXI_EQUIPMENT_INDEX_OBJECT_ID =
+  "system-index:equipment";
+
 import {
   getMachineContainerFromContainers,
   reorderMachineWithinContainerState,
   moveMachineToContainerAtPositionState,
   moveMachineToContainerState
 } from "../../components/ixi-chassis/IXIMachineContainerEngine";
+
+import {
+  createEmptyWorkspacePlacements,
+  sanitizeWorkspacePlacements,
+  moveObjectToWorkspaceSurface,
+  resolveWorkspaceObjects,
+  validateWorkspacePlacements
+} from "../../components/ixi-chassis/IXIWorkspacePlacementEngine";
 
 import {
   getStackContainerKey,
@@ -170,13 +181,35 @@ const [activeStacksOpen, setActiveStacksOpen] = useState({
 });
 
 const [
-  machineContainers,
-  setMachineContainers
+  workspacePlacements,
+  setWorkspacePlacements
 ] = useState(() => ({
-  ...createEmptyWorkspaceContainers(),
+  ...createEmptyWorkspacePlacements(),
 
+  /*
+   * AOS working deck for Equipment.
+   *
+   * This is UI placement only.
+   * It is NOT canonical Equipment
+   * membership.
+   */
   indexEquipment: []
 }));
+
+/*
+ * TEMPORARY COMPATIBILITY BRIDGE
+ *
+ * Existing chassis helpers still receive
+ * machineContainers while we migrate them
+ * to universal object terminology.
+ *
+ * There is ONE state object, not two.
+ */
+const machineContainers =
+  workspacePlacements;
+
+const setMachineContainers =
+  setWorkspacePlacements;
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
@@ -615,68 +648,173 @@ const containerStateKey = useMemo(() => {
 }, [workspaceListings, ixiCardState]);
    
 useEffect(() => {
-  if (!workspaceListings.length) return;
-
-  const validMachineIds = workspaceListings.map(item =>
-    String(getListingId(item))
-  );
-
- const savedLayout =
-  ixiCardState?.[IXI_AOS_WORK_LAYOUT_ID];
-
-  if (
-    savedLayout?.machineContainers &&
-    !hasAppliedRemoteLayoutRef.current
-  ) {
-    setMachineContainers(
-  sanitizeWorkspaceContainers(
-    savedLayout.machineContainers,
-    validMachineIds,
-    {
-      defaultContainer:
-        "indexEquipment"
-    }
-  )
-);
-
-    hasAppliedRemoteLayoutRef.current = true;
+  if (!workspaceListings.length) {
     return;
   }
 
-  if (hasAppliedRemoteLayoutRef.current) {
-  return;
-}
+  const validMachineIds =
+    workspaceListings
+      .map(item =>
+        String(
+          getListingId(item) ||
+          ""
+        )
+      )
+      .filter(Boolean);
 
- const nextContainers = {
-  ...createEmptyWorkspaceContainers(),
+  /*
+   * Universal AOS workspace identities.
+   *
+   * Equipment itself is a Board object,
+   * alongside machines and eventually
+   * Jobs, Locations, People, Containers,
+   * etc.
+   */
+  const validWorkspaceObjectIds = [
+    IXI_EQUIPMENT_INDEX_OBJECT_ID,
+    ...validMachineIds
+  ];
 
-  indexEquipment: []
-};
-workspaceListings.forEach(item => {
-  const id =
-    String(
-      getListingId(item)
+  const savedLayout =
+    ixiCardState?.[
+      IXI_AOS_WORK_LAYOUT_ID
+    ];
+
+const savedPlacements =
+  savedLayout?.workspacePlacements ||
+  savedLayout?.machineContainers;
+  
+  if (
+  savedPlacements &&
+  !hasAppliedRemoteLayoutRef.current
+) {
+    /*
+     * MIGRATE EXISTING AOS LAYOUT
+     *
+     * Do NOT automatically place missing
+     * objects yet. We decide where they
+     * belong below.
+     */
+    let nextPlacements =
+      sanitizeWorkspacePlacements({
+placements:
+  savedPlacements,
+
+        validObjectIds:
+          validWorkspaceObjectIds,
+
+        includeUnplacedObjects:
+          false
+      });
+
+    /*
+     * Equipment System Index itself must
+     * live on the Board.
+     */
+    nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          nextPlacements,
+
+        objectId:
+          IXI_EQUIPMENT_INDEX_OBJECT_ID,
+
+        targetSurface:
+          "board",
+
+        /*
+         * Preserve the visual behavior
+         * we already have: Equipment
+         * begins at the front.
+         */
+        position:
+          "start"
+      });
+
+    /*
+     * Any owned machine that has no saved
+     * workspace location begins tucked
+     * inside Equipment.
+     */
+    validMachineIds.forEach(
+      machineId => {
+        const alreadyPlaced =
+          Object.values(
+            nextPlacements
+          ).some(ids =>
+            Array.isArray(ids) &&
+            ids
+              .map(String)
+              .includes(machineId)
+          );
+
+        if (!alreadyPlaced) {
+          nextPlacements =
+            moveObjectToWorkspaceSurface({
+              placements:
+                nextPlacements,
+
+              objectId:
+                machineId,
+
+              targetSurface:
+                "indexEquipment"
+            });
+        }
+      }
     );
 
-  const savedContainer =
-    ixiCardState[id]
-      ?.container;
+    const validation =
+      validateWorkspacePlacements(
+        nextPlacements
+      );
 
-  const targetContainer =
-    nextContainers[
-      savedContainer
-    ]
-      ? savedContainer
-      : "indexEquipment";
+    if (!validation.ok) {
+      console.error(
+        "IXI AOS WORKSPACE PLACEMENT INVALID",
+        validation
+      );
+    }
 
-  nextContainers[
-    targetContainer
-  ].push(id);
-});
+    setWorkspacePlacements(
+      nextPlacements
+    );
 
-setMachineContainers(
-  nextContainers
-);
+    hasAppliedRemoteLayoutRef.current =
+      true;
+
+    return;
+  }
+
+  if (
+    hasAppliedRemoteLayoutRef.current
+  ) {
+    return;
+  }
+
+  /*
+   * FIRST AOS LAYOUT
+   *
+   * Equipment itself lives on Board.
+   * Owned machines begin tucked inside it.
+   */
+  const nextPlacements = {
+    ...createEmptyWorkspacePlacements(),
+
+    board: [
+      IXI_EQUIPMENT_INDEX_OBJECT_ID
+    ],
+
+    indexEquipment:
+      [...validMachineIds]
+  };
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  hasAppliedRemoteLayoutRef.current =
+    true;
 }, [containerStateKey]);
   
   const visibleSavedListings = useMemo(() => {
@@ -831,6 +969,54 @@ const equipmentIndex =
     );
   }, [systemIndexes]);
 
+  const aosWorkspaceObjectRegistry =
+  useMemo(() => {
+    const registry =
+      new Map();
+
+    /*
+     * Machine/listing objects
+     */
+    workspaceListings.forEach(
+      item => {
+        const id =
+          String(
+            getListingId(item) ||
+            ""
+          );
+
+        if (!id) {
+          return;
+        }
+
+        registry.set(
+          id,
+          item
+        );
+      }
+    );
+
+    /*
+     * Equipment System Index object
+     */
+    if (equipmentIndex) {
+      registry.set(
+        IXI_EQUIPMENT_INDEX_OBJECT_ID,
+        {
+          ...equipmentIndex,
+
+          objectId:
+            IXI_EQUIPMENT_INDEX_OBJECT_ID
+        }
+      );
+    }
+
+    return registry;
+  }, [
+    workspaceListings,
+    equipmentIndex
+  ]);
+
   const equipmentWorkspaceIndex =
   useMemo(() => {
     if (!equipmentIndex) {
@@ -885,24 +1071,59 @@ const equipmentIndex =
 
 const aosBoardItems =
   useMemo(() => {
-    const items = [];
+    const orderedObjects =
+      resolveWorkspaceObjects({
+        placements:
+          workspacePlacements,
 
-    if (equipmentIndex) {
-      items.push(
-        equipmentIndex
+        surfaceId:
+          "board",
+
+        objectRegistry:
+          aosWorkspaceObjectRegistry
+      });
+
+    /*
+     * Machine filtering/search remains
+     * respected without removing
+     * structural Board objects such as
+     * Equipment.
+     */
+    const visibleMachineIds =
+      new Set(
+        visibleSavedListings
+          .map(item =>
+            String(
+              getListingId(item) ||
+              ""
+            )
+          )
+          .filter(Boolean)
       );
-    }
 
-    items.push(
-      ...visibleSavedListings
+    return orderedObjects.filter(
+      item => {
+        if (
+          item?.objectType ===
+          "system-index"
+        ) {
+          return true;
+        }
+
+        const id =
+          String(
+            getListingId(item) ||
+            ""
+          );
+
+        return visibleMachineIds.has(id);
+      }
     );
-
-    return items;
   }, [
-    equipmentWorkspaceIndex,
-visibleSavedListings
+    workspacePlacements,
+    aosWorkspaceObjectRegistry,
+    visibleSavedListings
   ]);
-
 
   function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
@@ -1545,12 +1766,30 @@ function saveWorkspaceSettings(patch = {}) {
 }
   
 function saveWorkspaceLayout(
-  nextContainers = machineContainers
+  nextContainers = workspacePlacements
 ) {
   return saveIxiMachinePatch({
     userId: ixiUserId,
     listingId: IXI_AOS_WORK_LAYOUT_ID,
+
     patch: {
+      /*
+       * New canonical universal
+       * workspace placement contract.
+       */
+      workspacePlacements:
+        nextContainers,
+
+      /*
+       * Compatibility copy.
+       *
+       * Existing chassis code and older
+       * saved layouts still understand
+       * machineContainers.
+       *
+       * Both point to the same placement
+       * state during migration.
+       */
       machineContainers:
         nextContainers,
 
