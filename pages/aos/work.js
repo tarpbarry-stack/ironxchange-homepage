@@ -28,10 +28,6 @@ import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
 
-import {
-  createMosObject,
-} from "../../lib/mos/ixiMosClient";
-
 import ListingCard from "../../components/ListingCard";
 
 import IXIMosObjectCard
@@ -141,12 +137,6 @@ const [systemIndexes, setSystemIndexes] =
 
 const [aosCurrentUser, setAosCurrentUser] =
   useState(null);
-
-  const [aosContainerWorking, setAosContainerWorking] =
-  useState(false);
-
-const [aosContainerError, setAosContainerError] =
-  useState("");
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -544,129 +534,6 @@ setSystemIndexes(
     cancelled = true;
   };
 }, []);
-
-
-async function createEquipmentContainer() {
-  if (aosContainerWorking) {
-    return;
-  }
-
-  const entityId =
-    aosEntity?.entityId || "";
-
-  if (!entityId) {
-    setAosContainerError(
-      "AOS Entity is not available."
-    );
-
-    return;
-  }
-
-  setAosContainerWorking(true);
-  setAosContainerError("");
-
-  try {
-    const response =
-      await createMosObject({
-        entityId,
-
-        objectType:
-          "equipment",
-
-        displayName:
-          "EQUIPMENT",
-
-        factualTitle:
-          "Equipment",
-
-        fields: {
-          containerRole:
-            "equipment",
-
-          containerScope:
-            "entity"
-        },
-
-        source:
-          "aos-work",
-
-        actorId:
-          ixiUserId,
-
-        metadata: {
-          createdFrom:
-            "aos-work",
-
-          purpose:
-            "entity-equipment-container"
-        }
-      });
-
-    const createdObject =
-      response?.object || null;
-
-    if (!createdObject?.objectId) {
-      throw new Error(
-        "Equipment creation did not return an AOS object."
-      );
-    }
-
-    console.log(
-      "AOS EQUIPMENT CREATED",
-      createdObject
-    );
-
-    /*
-     * Reload the canonical MOS environment
-     * so we use exactly what the server persisted,
-     * including capabilities.canContain.
-     */
-    const refreshedEnvironment =
-      await loadIXIMosEnvironment({
-        includeObjects: true
-      });
-
-    setAosEntity(
-      refreshedEnvironment?.entity ||
-      aosEntity
-    );
-
-    setAosObjects(
-      Array.isArray(
-        refreshedEnvironment?.objects
-      )
-        ? refreshedEnvironment.objects
-        : []
-    );
-
-    console.log(
-      "AOS EQUIPMENT CAPABILITY",
-      {
-        objectId:
-          createdObject.objectId,
-
-        objectType:
-          createdObject.objectType,
-
-        capabilities:
-          createdObject.capabilities
-      }
-    );
-  } catch (error) {
-    console.error(
-      "AOS EQUIPMENT CREATE FAILED:",
-      error
-    );
-
-    setAosContainerError(
-      error?.message ||
-      "Equipment container could not be created."
-    );
-  } finally {
-    setAosContainerWorking(false);
-  }
-}
-  
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
@@ -1599,13 +1466,15 @@ toggleSearchSurfaceRevealed
     />
   </section>
 
- <IXIAosScoreboard
+<IXIAosScoreboard
   entity={aosEntity}
   currentUser={aosCurrentUser}
   ownedListings={workspaceListings}
   aosObjects={aosObjects}
   onAdd={() => {
-    createEquipmentContainer();
+    console.log(
+      "AOS WORK ADD"
+    );
   }}
   onMore={() => {
     console.log(
@@ -1613,20 +1482,6 @@ toggleSearchSurfaceRevealed
     );
   }}
 />
-
-    {aosContainerError ? (
-  <div
-    style={{
-      width: "min(100%, 1320px)",
-      margin: "0 auto 12px",
-      color: "rgba(255,110,110,.9)",
-      fontSize: "11px",
-      fontWeight: 800
-    }}
-  >
-    {aosContainerError}
-  </div>
-) : null}
 
 <IXIChassis>
   <aside className="ixi-command-left">
