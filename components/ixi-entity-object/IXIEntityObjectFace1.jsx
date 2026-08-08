@@ -1,11 +1,70 @@
 import IXIFaceFrame
   from "../ixi-face-studio/IXIFaceFrame";
 
+function formatSnapshotValue(
+  value,
+  format = ""
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "—";
+  }
+
+  if (format === "currency") {
+    const amount = Number(value);
+
+    if (!Number.isFinite(amount)) {
+      return String(value);
+    }
+
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }
+    ).format(amount);
+  }
+
+  if (format === "percent") {
+    const amount = Number(value);
+
+    if (!Number.isFinite(amount)) {
+      return String(value);
+    }
+
+    return `${amount.toLocaleString(
+      "en-US",
+      {
+        maximumFractionDigits: 1
+      }
+    )}%`;
+  }
+
+  if (typeof value === "number") {
+    return value.toLocaleString();
+  }
+
+  return String(value);
+}
+
+
 export default function IXIEntityObjectFace1({
   entity = {},
-  relationships = [],
+
+  snapshotItems = [],
+
   faceSize = "tall",
-  onRelationshipOpen = null
+
+  onAddSnapshot = null,
+
+  onRemoveSnapshot = null,
+
+  onSnapshotOpen = null
 }) {
   const displayName =
     entity?.displayName ||
@@ -22,14 +81,23 @@ export default function IXIEntityObjectFace1({
     entity?.id ||
     "";
 
-  const visibleRelationships =
-    Array.isArray(relationships)
-      ? relationships.slice(
-          0,
-          faceSize === "compact"
-            ? 5
-            : 7
-        )
+  const logoUrl =
+    entity?.logoUrl ||
+    entity?.imageUrl ||
+    "";
+
+  const initials =
+    displayName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0])
+      .join("")
+      .toUpperCase();
+
+  const items =
+    Array.isArray(snapshotItems)
+      ? snapshotItems
       : [];
 
   return (
@@ -40,125 +108,184 @@ export default function IXIEntityObjectFace1({
       <div className="entity-face">
 
         {/* =========================
-            OBJECT IDENTITY
+            FIXED ENTITY IDENTITY
             ========================= */}
 
         <header className="entity-header">
-          <div className="entity-kicker">
-            IXI ENTITY OBJECT
+          <div className="entity-logo">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt=""
+              />
+            ) : (
+              <span>
+                {initials || "IXI"}
+              </span>
+            )}
           </div>
 
-          <h2>
-            {displayName}
-          </h2>
-
-          {officeLocation ? (
-            <div className="entity-location">
-              <i className="fa-solid fa-location-dot" />
-
-              <span>
-                {officeLocation}
-              </span>
+          <div className="entity-identity">
+            <div className="entity-type">
+              ENTITY
             </div>
-          ) : null}
+
+            <div className="entity-name">
+              {displayName}
+            </div>
+
+            {officeLocation ? (
+              <div className="entity-location">
+                <i className="fa-solid fa-location-dot" />
+
+                <span>
+                  {officeLocation}
+                </span>
+              </div>
+            ) : null}
+
+            {entityId ? (
+              <div className="entity-id">
+                {entityId}
+              </div>
+            ) : null}
+          </div>
         </header>
 
 
         {/* =========================
-            ENTITY DATUM
+            FIXED SNAPSHOT HEADER
             ========================= */}
 
-        <div className="entity-datum">
+        <div className="snapshot-header">
           <span>
-            ENTITY
+            SNAPSHOT
           </span>
 
-          <strong>
-            {entityId || "ACTIVE"}
-          </strong>
+          <button
+            type="button"
+            className="snapshot-add"
+            aria-label="Add snapshot item"
+            title="Add snapshot item"
+            onClick={() => {
+              if (
+                typeof onAddSnapshot ===
+                "function"
+              ) {
+                onAddSnapshot();
+              }
+            }}
+          >
+            <i className="fa-solid fa-plus" />
+          </button>
         </div>
 
 
         {/* =========================
-            RELATIONSHIP FIELD
+            SCROLLING SNAPSHOT BODY
             ========================= */}
 
-        <section className="relationship-section">
-          <div className="relationship-heading">
-            <span>
-              RELATIONSHIPS
-            </span>
+        <div className="snapshot-scroll">
+          {items.length ? (
+            items.map(
+              (
+                item,
+                index
+              ) => {
+                const key =
+                  item?.id ||
+                  item?.key ||
+                  `${item?.label || "snapshot"}-${index}`;
 
-            <i>
-              {visibleRelationships.length}
-            </i>
-          </div>
+                const label =
+                  item?.label ||
+                  item?.name ||
+                  item?.key ||
+                  "SNAPSHOT";
 
-          <div className="relationship-list">
-            {visibleRelationships.length ? (
-              visibleRelationships.map(
-                relationship => {
-                  const id =
-                    relationship?.id ||
-                    relationship?.relationshipId ||
-                    relationship?.type ||
-                    relationship?.label;
+                const value =
+                  formatSnapshotValue(
+                    item?.value ??
+                    item?.count,
+                    item?.format
+                  );
 
-                  const label =
-                    relationship?.label ||
-                    relationship?.name ||
-                    relationship?.type ||
-                    "RELATED OBJECT";
+                const canOpen =
+                  item?.clickable !== false &&
+                  typeof onSnapshotOpen ===
+                    "function";
 
-                  const value =
-                    relationship?.value ??
-                    relationship?.count ??
-                    "";
-
-                  return (
+                return (
+                  <div
+                    key={String(key)}
+                    className="snapshot-row"
+                  >
                     <button
-                      key={String(id)}
                       type="button"
-                      className="relationship-row"
+                      className="snapshot-main"
+                      disabled={!canOpen}
                       onClick={() => {
-                        if (
-                          typeof onRelationshipOpen ===
-                          "function"
-                        ) {
-                          onRelationshipOpen(
-                            relationship
+                        if (canOpen) {
+                          onSnapshotOpen(
+                            item
                           );
                         }
                       }}
                     >
-                      <span>
+                      <span className="snapshot-label">
                         {label}
                       </span>
 
-                      <div>
-                        {value !== "" ? (
-                          <strong>
-                            {value}
-                          </strong>
-                        ) : null}
-
-                        <i className="fa-solid fa-chevron-right" />
-                      </div>
+                      <strong className="snapshot-value">
+                        {value}
+                      </strong>
                     </button>
-                  );
+
+                    <button
+                      type="button"
+                      className="snapshot-remove"
+                      aria-label={`Remove ${label} from snapshot`}
+                      title="Remove from snapshot"
+                      onClick={() => {
+                        if (
+                          typeof onRemoveSnapshot ===
+                          "function"
+                        ) {
+                          onRemoveSnapshot(
+                            item
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                );
+              }
+            )
+          ) : (
+            <button
+              type="button"
+              className="snapshot-empty"
+              onClick={() => {
+                if (
+                  typeof onAddSnapshot ===
+                  "function"
+                ) {
+                  onAddSnapshot();
                 }
-              )
-            ) : (
-              <div className="relationship-empty">
-                NO RELATED OBJECTS YET
-              </div>
-            )}
-          </div>
-        </section>
+              }}
+            >
+              <i className="fa-solid fa-plus" />
+
+              <span>
+                ADD TO SNAPSHOT
+              </span>
+            </button>
+          )}
+        </div>
 
 
         {/* =========================
-            OBJECT MARK
+            SMALL FIXED OBJECT MARK
             ========================= */}
 
         <div className="entity-mark">
@@ -166,9 +293,9 @@ export default function IXIEntityObjectFace1({
             IXI AOS
           </span>
 
-          <i>
+          <span>
             ENTITY
-          </i>
+          </span>
         </div>
       </div>
 
@@ -182,6 +309,7 @@ export default function IXIEntityObjectFace1({
         .entity-face {
           width: 100%;
           height: 100%;
+          min-height: 0;
 
           display: flex;
           flex-direction: column;
@@ -191,92 +319,191 @@ export default function IXIEntityObjectFace1({
 
 
         /* =========================
-           IDENTITY
+           ENTITY IDENTITY
            ========================= */
 
         .entity-header {
+          flex: 0 0 auto;
+
+          min-height: 76px;
+
+          display: grid;
+
+          grid-template-columns:
+            58px
+            minmax(0, 1fr);
+
+          gap: 10px;
+
+          align-items: center;
+
           padding:
-            7px
-            2px
-            11px;
+            3px
+            1px
+            10px;
 
           border-bottom:
             1px solid
             rgba(255,255,255,.06);
         }
 
-        .entity-kicker {
-          margin-bottom: 8px;
+        .entity-logo {
+          width: 58px;
+          height: 58px;
+
+          display: grid;
+          place-items: center;
+
+          overflow: hidden;
+
+          border:
+            1px solid
+            rgba(255,255,255,.08);
+
+          border-radius: 7px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.025),
+              rgba(255,255,255,0)
+            ),
+            #101010;
 
           color:
-            rgba(255,196,0,.70);
+            rgba(255,196,0,.72);
+
+          font-size: 11px;
+          font-weight: 950;
+
+          letter-spacing: .08em;
+        }
+
+        .entity-logo img {
+          width: 100%;
+          height: 100%;
+
+          display: block;
+
+          object-fit: contain;
+          object-position: center;
+        }
+
+        .entity-identity {
+          min-width: 0;
+
+          display: flex;
+          flex-direction: column;
+
+          align-items: flex-start;
+        }
+
+        .entity-type {
+          margin-bottom: 5px;
+
+          color:
+            rgba(255,196,0,.62);
 
           font-size:
             var(--ixi-face-font-micro);
 
           font-weight: 950;
 
-          letter-spacing: .13em;
+          letter-spacing: .12em;
 
           text-transform: uppercase;
         }
 
-        h2 {
-          margin: 0;
+        .entity-name {
+          width: 100%;
 
-          color: #f2f2f2;
+          overflow: hidden;
 
-          font-size:
-            var(--ixi-face-font-display);
+          color:
+            rgba(255,255,255,.88);
 
+          font-size: 12px;
           font-weight: 950;
 
-          line-height: 1.02;
+          line-height: 1.08;
 
-          letter-spacing: -.45px;
+          letter-spacing: -.12px;
 
           text-transform: uppercase;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .entity-location {
-          margin-top: 9px;
+          max-width: 100%;
+
+          margin-top: 5px;
 
           display: flex;
           align-items: center;
 
-          gap: 6px;
+          gap: 5px;
 
           color:
-            rgba(255,255,255,.42);
+            rgba(255,255,255,.38);
 
-          font-size:
-            var(--ixi-face-font-value);
+          font-size: 7px;
+          font-weight: 850;
 
-          font-weight: 800;
+          letter-spacing: .025em;
 
-          letter-spacing: .02em;
+          text-transform: uppercase;
         }
 
         .entity-location i {
           color:
-            rgba(255,196,0,.52);
+            rgba(255,196,0,.48);
 
-          font-size: 7px;
+          font-size: 6px;
+        }
+
+        .entity-location span {
+          overflow: hidden;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .entity-id {
+          max-width: 100%;
+
+          margin-top: 4px;
+
+          overflow: hidden;
+
+          color:
+            rgba(255,255,255,.18);
+
+          font-size: 6px;
+          font-weight: 900;
+
+          letter-spacing: .055em;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          text-transform: uppercase;
         }
 
 
         /* =========================
-           ENTITY DATUM
+           SNAPSHOT HEADER
            ========================= */
 
-        .entity-datum {
-          min-height: 34px;
+        .snapshot-header {
+          flex: 0 0 28px;
+
+          height: 28px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
-
-          gap: 10px;
 
           padding:
             0
@@ -287,162 +514,186 @@ export default function IXIEntityObjectFace1({
             rgba(255,255,255,.045);
         }
 
-        .entity-datum span {
+        .snapshot-header > span {
           color:
-            rgba(255,255,255,.28);
+            rgba(255,255,255,.31);
 
-          font-size:
-            var(--ixi-face-font-label);
-
+          font-size: 6.5px;
           font-weight: 950;
 
-          letter-spacing: .10em;
+          letter-spacing: .12em;
 
           text-transform: uppercase;
         }
 
-        .entity-datum strong {
-          min-width: 0;
-
-          overflow: hidden;
-
-          color:
-            rgba(255,255,255,.58);
-
-          font-size:
-            var(--ixi-face-font-label);
-
-          font-weight: 900;
-
-          letter-spacing: .05em;
-
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        /* =========================
-           RELATIONSHIPS
-           ========================= */
-
-        .relationship-section {
-          min-height: 0;
-
-          flex: 1 1 auto;
-
-          display: flex;
-          flex-direction: column;
-
-          padding-top: 10px;
-
-          overflow: hidden;
-        }
-
-        .relationship-heading {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          margin-bottom: 7px;
-
-          padding: 0 2px;
-        }
-
-        .relationship-heading span {
-          color:
-            rgba(255,255,255,.32);
-
-          font-size:
-            var(--ixi-face-font-label);
-
-          font-weight: 950;
-
-          letter-spacing: .10em;
-
-          text-transform: uppercase;
-        }
-
-        .relationship-heading i {
-          min-width: 17px;
-
-          height: 14px;
+        .snapshot-add {
+          width: 18px;
+          height: 18px;
 
           display: grid;
           place-items: center;
+
+          padding: 0;
 
           border:
             1px solid
             rgba(255,255,255,.06);
 
-          border-radius: 4px;
+          border-radius: 3px;
 
           background:
-            rgba(255,255,255,.025);
+            rgba(255,255,255,.018);
 
           color:
-            rgba(255,196,0,.60);
+            rgba(255,196,0,.64);
 
-          font-size:
-            var(--ixi-face-font-micro);
-
-          font-style: normal;
-
-          font-weight: 950;
-        }
-
-        .relationship-list {
-          min-height: 0;
-
-          display: grid;
-          gap: 4px;
-
-          overflow: hidden;
-        }
-
-        .relationship-row {
-          width: 100%;
-          min-height: 29px;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          gap: 8px;
-
-          padding:
-            0
-            9px;
-
-          appearance: none;
-
-          border:
-            1px solid
-            rgba(255,255,255,.045);
-
-          border-radius: 5px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.016),
-              rgba(255,255,255,0)
-            ),
-            rgba(255,255,255,.012);
-
-          color:
-            rgba(255,255,255,.60);
+          font-size: 6px;
 
           cursor: pointer;
         }
 
-        .relationship-row > span {
+        .snapshot-add:hover {
+          border-color:
+            rgba(255,196,0,.25);
+
+          background:
+            rgba(255,196,0,.06);
+
+          color: #ffc400;
+        }
+
+
+        /* =========================
+           SNAPSHOT SCROLLER
+           ========================= */
+
+        .snapshot-scroll {
+          min-height: 0;
+
+          flex: 1 1 auto;
+
+          padding:
+            6px
+            1px
+            5px;
+
+          display: flex;
+          flex-direction: column;
+
+          gap: 3px;
+
+          overflow-x: hidden;
+          overflow-y: auto;
+
+          scrollbar-width: thin;
+
+          scrollbar-color:
+            rgba(255,255,255,.10)
+            transparent;
+        }
+
+        .snapshot-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .snapshot-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .snapshot-scroll::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+
+          background:
+            rgba(255,255,255,.10);
+        }
+
+        .snapshot-scroll::-webkit-scrollbar-thumb:hover {
+          background:
+            rgba(255,196,0,.22);
+        }
+
+
+        /* =========================
+           SNAPSHOT ROW
+           ========================= */
+
+        .snapshot-row {
+          flex: 0 0 23px;
+
+          height: 23px;
+
+          display: grid;
+
+          grid-template-columns:
+            minmax(0, 1fr)
+            8px;
+
+          gap: 4px;
+
+          align-items: center;
+        }
+
+        .snapshot-main {
+          width: 100%;
+          height: 23px;
+
+          min-width: 0;
+
+          display: grid;
+
+          grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+
+          gap: 8px;
+
+          align-items: center;
+
+          padding:
+            0
+            7px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.04);
+
+          border-radius: 4px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.014),
+              rgba(255,255,255,0)
+            ),
+            rgba(255,255,255,.01);
+
+          color:
+            rgba(255,255,255,.58);
+
+          cursor: pointer;
+        }
+
+        .snapshot-main:disabled {
+          cursor: default;
+        }
+
+        .snapshot-main:not(:disabled):hover {
+          border-color:
+            rgba(255,196,0,.17);
+
+          background:
+            rgba(255,196,0,.035);
+        }
+
+        .snapshot-label {
           min-width: 0;
 
           overflow: hidden;
 
-          font-size:
-            var(--ixi-face-font-value);
+          color:
+            rgba(255,255,255,.48);
 
+          font-size: 7px;
           font-weight: 900;
 
           letter-spacing: .035em;
@@ -455,67 +706,102 @@ export default function IXIEntityObjectFace1({
           text-transform: uppercase;
         }
 
-        .relationship-row > div {
-          display: flex;
-          align-items: center;
-
-          gap: 8px;
-        }
-
-        .relationship-row strong {
+        .snapshot-value {
           color:
-            rgba(255,255,255,.74);
+            rgba(255,255,255,.78);
 
-          font-size:
-            var(--ixi-face-font-value);
-
+          font-size: 7.5px;
           font-weight: 950;
+
+          line-height: 1;
+
+          white-space: nowrap;
         }
 
-        .relationship-row i {
-          color:
-            rgba(255,196,0,.38);
 
-          font-size: 6px;
-        }
+        /* =========================
+           REMOVE SQUARE
+           ========================= */
 
-        .relationship-row:hover {
-          border-color:
-            rgba(255,196,0,.18);
+        .snapshot-remove {
+          width: 6px;
+          height: 6px;
+
+          justify-self: center;
+
+          padding: 0;
+
+          border: 0;
+          border-radius: 1px;
 
           background:
-            rgba(255,196,0,.045);
+            rgba(229,62,62,.34);
 
-          color: #f2f2f2;
+          cursor: pointer;
+
+          box-shadow:
+            0 0 0 1px
+            rgba(229,62,62,.08);
         }
 
-        .relationship-row:hover i {
-          color: #ffc400;
+        .snapshot-remove:hover {
+          background:
+            rgba(229,62,62,.92);
+
+          box-shadow:
+            0 0 7px
+            rgba(229,62,62,.28);
         }
 
-        .relationship-empty {
-          min-height: 70px;
 
-          display: grid;
-          place-items: center;
+        /* =========================
+           EMPTY SNAPSHOT
+           ========================= */
+
+        .snapshot-empty {
+          width: 100%;
+          min-height: 48px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          gap: 7px;
 
           border:
             1px dashed
             rgba(255,255,255,.055);
 
-          border-radius: 6px;
+          border-radius: 5px;
+
+          background: transparent;
 
           color:
-            rgba(255,255,255,.18);
+            rgba(255,255,255,.20);
 
-          font-size:
-            var(--ixi-face-font-micro);
-
+          font-size: 6.5px;
           font-weight: 950;
 
-          letter-spacing: .09em;
+          letter-spacing: .08em;
+
+          cursor: pointer;
 
           text-transform: uppercase;
+        }
+
+        .snapshot-empty i {
+          color:
+            rgba(255,196,0,.46);
+
+          font-size: 6px;
+        }
+
+        .snapshot-empty:hover {
+          border-color:
+            rgba(255,196,0,.18);
+
+          color:
+            rgba(255,255,255,.46);
         }
 
 
@@ -524,25 +810,27 @@ export default function IXIEntityObjectFace1({
            ========================= */
 
         .entity-mark {
-          min-height: 22px;
+          flex: 0 0 20px;
 
-          margin-top: auto;
+          height: 20px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
           padding:
-            5px
-            2px
-            0;
+            0
+            2px;
+
+          border-top:
+            1px solid
+            rgba(255,255,255,.035);
 
           color:
-            rgba(255,255,255,.17);
+            rgba(255,255,255,.14);
 
           font-size:
-            var(--ixi-face-font-micro);
-
+            5.8px;
           font-weight: 950;
 
           letter-spacing: .12em;
@@ -550,11 +838,45 @@ export default function IXIEntityObjectFace1({
           text-transform: uppercase;
         }
 
-        .entity-mark i {
+        .entity-mark span:last-child {
           color:
-            rgba(255,196,0,.28);
+            rgba(255,196,0,.24);
+        }
 
-          font-style: normal;
+
+        /* =========================
+           COMPACT
+           ========================= */
+
+        :global(.ixi-face-frame-compact)
+          .entity-header {
+          min-height: 68px;
+
+          grid-template-columns:
+            50px
+            minmax(0, 1fr);
+        }
+
+        :global(.ixi-face-frame-compact)
+          .entity-logo {
+          width: 50px;
+          height: 50px;
+        }
+
+        :global(.ixi-face-frame-compact)
+          .entity-name {
+          font-size: 11px;
+        }
+
+        :global(.ixi-face-frame-compact)
+          .snapshot-row {
+          flex-basis: 22px;
+          height: 22px;
+        }
+
+        :global(.ixi-face-frame-compact)
+          .snapshot-main {
+          height: 22px;
         }
       `}</style>
     </IXIFaceFrame>
