@@ -6,9 +6,6 @@ import {
 import ListingCard
   from "../ListingCard";
 
-import IXIScaledCardShell
-  from "../ixi-machine-object/IXIScaledCardShell";
-
 
 export default function IXIDragEngine({
   sensors,
