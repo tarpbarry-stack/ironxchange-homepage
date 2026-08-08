@@ -918,35 +918,30 @@ return [...filtered].sort((a, b) => {
 
 /* ---------- AOS EQUIPMENT CONTAINER ---------- */
 
-const equipmentContainer =
+/* ---------- AOS EQUIPMENT SYSTEM INDEX ---------- */
+
+const equipmentIndex =
   useMemo(() => {
     return (
-      aosObjects.find(object => {
+      systemIndexes.find(index => {
         return (
-          String(
-            object?.objectType || ""
-          ).toLowerCase() ===
-            "equipment" &&
-
-          object?.capabilities
-            ?.canContain === true &&
-
-          object?.status ===
-            "active"
+          index?.indexId ===
+          "equipment"
         );
       }) || null
     );
-  }, [aosObjects]);
-
+  }, [systemIndexes]);
   /* ---------- AOS BOARD ITEMS ---------- */
+
+/* ---------- AOS BOARD ITEMS ---------- */
 
 const aosBoardItems =
   useMemo(() => {
     const items = [];
 
-    if (equipmentContainer) {
+    if (equipmentIndex) {
       items.push(
-        equipmentContainer
+        equipmentIndex
       );
     }
 
@@ -956,9 +951,10 @@ const aosBoardItems =
 
     return items;
   }, [
-    equipmentContainer,
+    equipmentIndex,
     visibleSavedListings
   ]);
+
 
   function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
@@ -1771,38 +1767,73 @@ toggleSearchSurfaceRevealed
   }
 
   getCustomItemId={item => {
-    if (item?.objectId) {
-      return String(
-        item.objectId
-      );
-    }
+  if (
+    item?.objectType ===
+    "system-index"
+  ) {
+    return String(
+      item.objectId
+    );
+  }
 
-    return null;
-  }}
+  if (item?.objectId) {
+    return String(
+      item.objectId
+    );
+  }
+
+  return null;
+}}
 
   renderCustomItem={({
-    item,
-    dragHandleProps
-  }) => {
-    if (!item?.objectId) {
-      return null;
-    }
+  item,
+  dragHandleProps
+}) => {
+  if (
+    item?.objectType !==
+    "system-index"
+  ) {
+    return null;
+  }
 
-    return (
-      <IXIMosObjectCard
-        object={item}
-        dragHandleProps={
-          dragHandleProps
-        }
-        onOpen={object => {
-          console.log(
-            "AOS CONTAINER OPEN",
-            object
-          );
-        }}
-      />
-    );
-  }}
+  return (
+    <IXIMosObjectCard
+      object={{
+        ...item,
+
+        capabilities: {
+          ...item.capabilities,
+          canContain: false
+        },
+
+        factualTitle:
+          `${item.itemCount || 0} ITEMS`
+      }}
+
+      projection={{
+        descendantObjectCount:
+          item.itemCount || 0,
+
+        descendantContainerCount:
+          0,
+
+        branchValue:
+          item.value || 0
+      }}
+
+      dragHandleProps={
+        dragHandleProps
+      }
+
+      onOpen={index => {
+        console.log(
+          "AOS SYSTEM INDEX OPEN",
+          index
+        );
+      }}
+    />
+  );
+}}
 />
 </IXIBoardSurface>
     
