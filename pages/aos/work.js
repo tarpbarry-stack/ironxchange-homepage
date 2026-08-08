@@ -55,13 +55,15 @@ import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
 import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
 
 import {
-  IXI_WORKSPACE_SETTINGS_ID,
-  IXI_WORKSPACE_LAYOUT_ID,
   createEmptyWorkspaceContainers,
-  sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord,
-  saveWorkspaceSettingsRecord
+  sanitizeWorkspaceContainers
 } from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
+
+const IXI_AOS_WORK_SETTINGS_ID =
+  "__ixi_aos_work_settings__";
+
+const IXI_AOS_WORK_LAYOUT_ID =
+  "__ixi_aos_work_layout__";
 
 import {
   getMachineContainerFromContainers,
@@ -326,13 +328,12 @@ const remoteIxiState =
   remoteIxiResponse?.state || remoteIxiResponse || {};
 
 const workspaceSettings =
-  remoteIxiState?.[IXI_WORKSPACE_SETTINGS_ID] || {};
+  remoteIxiState?.[IXI_AOS_WORK_SETTINGS_ID] || {};
 
 setWorkspaceSettings(workspaceSettings);
 
 const workspaceLayout =
-  remoteIxiState?.[IXI_WORKSPACE_LAYOUT_ID] || {};
-
+  remoteIxiState?.[IXI_AOS_WORK_LAYOUT_ID] || {};
 console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
 
 setIxiCardState(remoteIxiState);
@@ -513,8 +514,8 @@ useEffect(() => {
     String(getListingId(item))
   );
 
-  const savedLayout =
-    ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
+ const savedLayout =
+  ixiCardState?.[IXI_AOS_WORK_LAYOUT_ID];
 
   if (
     savedLayout?.machineContainers &&
@@ -984,7 +985,7 @@ function toggleActiveStack(stackKey) {
 
     saveIxiMachinePatch({
       userId: ixiUserId,
-      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      listingId: IXI_AOS_WORK_LAYOUT_ID,
       patch: {
         machineContainers,
         activeStackLayouts,
@@ -1006,7 +1007,7 @@ function toggleActiveStackLayout(stackKey) {
 
     saveIxiMachinePatch({
       userId: ixiUserId,
-      listingId: IXI_WORKSPACE_LAYOUT_ID,
+      listingId: IXI_AOS_WORK_LAYOUT_ID,
       patch: {
         machineContainers,
         activeStackLayouts: nextLayouts,
@@ -1172,20 +1173,30 @@ function saveWorkspaceSettings(patch = {}) {
 
   setWorkspaceSettings(nextSettings);
 
-  return saveWorkspaceSettingsRecord({
-    saveIxiMachinePatch,
+  return saveIxiMachinePatch({
     userId: ixiUserId,
-    settings: nextSettings
+    listingId: IXI_AOS_WORK_SETTINGS_ID,
+    patch: nextSettings
   });
 }
   
-function saveWorkspaceLayout(nextContainers = machineContainers) {
-  saveWorkspaceLayoutRecord({
-    saveIxiMachinePatch,
+function saveWorkspaceLayout(
+  nextContainers = machineContainers
+) {
+  return saveIxiMachinePatch({
     userId: ixiUserId,
-    machineContainers: nextContainers,
-    activeStackLayouts,
-    activeStacksOpen
+    listingId: IXI_AOS_WORK_LAYOUT_ID,
+    patch: {
+      machineContainers:
+        nextContainers,
+
+      activeStackLayouts,
+
+      activeStacksOpen,
+
+      updatedAt:
+        Date.now()
+    }
   });
 }
   
@@ -1195,7 +1206,7 @@ function cycleCardScaleMode() {
 
     saveIxiMachinePatch({
       userId: ixiUserId,
-      listingId: IXI_WORKSPACE_SETTINGS_ID,
+      listingId: IXI_AOS_WORK_SETTINGS_ID,
       patch: {
         cardScaleMode: next,
         updatedAt: Date.now()
