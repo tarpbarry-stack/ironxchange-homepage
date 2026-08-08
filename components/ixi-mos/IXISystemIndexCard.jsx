@@ -1060,15 +1060,15 @@ export default function IXISystemIndexCard({
            =============================================== */
 
         .system-index-card {
-          position: relative;
+  position: relative;
 
-          width: 298px;
-          min-width: 298px;
-          max-width: 298px;
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
 
-          height: 391px;
-          min-height: 391px;
-          max-height: 391px;
+  height: 471px;
+  min-height: 471px;
+  max-height: 471px;
 
           overflow: hidden;
 
