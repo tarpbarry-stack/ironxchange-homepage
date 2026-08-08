@@ -11,6 +11,12 @@ import Footer from "../../components/Footer";
 import IXIEnvironmentRail
   from "../../components/IXIEnvironmentRail";
 
+import IXIEntityObjectFace1
+  from "../../components/ixi-entity-object/IXIEntityObjectFace1";
+
+import IXIMachineRail
+  from "../../components/IXIMachineRail";
+
 import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
@@ -201,6 +207,15 @@ export default function IXIAosPage() {
   const [error, setError] =
     useState("");
 
+const [entityFace, setEntityFace] =
+  useState(1);
+
+const [entityBoardColor, setEntityBoardColor] =
+  useState("none");
+
+const [entityBoardOutline, setEntityBoardOutline] =
+  useState(1);
+  
 
   /* =========================================
      LOAD CANONICAL AOS ENVIRONMENT
@@ -460,6 +475,89 @@ const logoUrl =
     value => value?.url
   )?.url ||
   null;
+
+  const entitySnapshotItems = [
+  {
+    key: "ytd-sales",
+    type: "metric",
+    label: "YTD Sales",
+    value: 0,
+    format: "currency"
+  },
+  {
+    key: "ytd-gp",
+    type: "metric",
+    label: "YTD GP",
+    value: 0,
+    format: "currency"
+  },
+  {
+    key: "ytd-gp-percent",
+    type: "metric",
+    label: "YTD GP %",
+    value: 0,
+    format: "percent"
+  },
+  {
+    key: "equipment",
+    type: "relationship",
+    label: "Equipment",
+    value: scoreboard.totalAssets
+  },
+  {
+    key: "people",
+    type: "relationship",
+    label: "People",
+    value: scoreboard.people
+  },
+  {
+    key: "yards",
+    type: "relationship",
+    label: "Yards",
+    value: scoreboard.yards
+  },
+  {
+    key: "machine-locations",
+    type: "relationship",
+    label: "Machine Locations",
+    value: scoreboard.machineLocations
+  }
+];
+
+  function cycleEntityColor() {
+  const colors = [
+    "none",
+    "green",
+    "yellow",
+    "red",
+    "cyan",
+    "white",
+    "blue",
+    "orange"
+  ];
+
+  setEntityBoardColor(current => {
+    const index =
+      colors.indexOf(current);
+
+    return colors[
+      (index + 1) %
+      colors.length
+    ];
+  });
+}
+
+function cycleEntityOutline() {
+  setEntityBoardOutline(current =>
+    current === 1
+      ? 3
+      : current === 3
+        ? 5
+        : current === 5
+          ? 0
+          : 1
+  );
+}
   return (
     <>
       <Head>
@@ -620,21 +718,118 @@ const logoUrl =
             </div>
           ) : null}
 
-          {!loading &&
-          !error &&
-          aosEntity ? (
-            <div
-              className="aos-entity-face-mount"
-              data-entity-id={
-                aosEntity?.entityId || ""
-              }
-            >
-              {/*
-                IXIAosEntityCard
-                gets mounted here next.
-              */}
-            </div>
-          ) : null}
+         {!loading &&
+!error &&
+aosEntity ? (
+  <div
+    className="aos-entity-face-mount"
+    data-entity-id={
+      aosEntity?.entityId || ""
+    }
+  >
+    <div
+  className={[
+    "aos-entity-card",
+    `board-color-${entityBoardColor}`,
+    `board-outline-${entityBoardOutline}`
+  ].join(" ")}
+>
+  <IXIEntityObjectFace1
+    entity={{
+      ...aosEntity,
+
+      displayName:
+        entityName,
+
+      officeLocation:
+        officeLocation,
+
+      logoUrl:
+        logoUrl
+    }}
+
+    snapshotItems={
+      entitySnapshotItems
+    }
+
+    faceSize="tall"
+
+    onAddSnapshot={() => {
+      console.log(
+        "AOS ADD ENTITY SNAPSHOT"
+      );
+    }}
+
+    onRemoveSnapshot={item => {
+      console.log(
+        "AOS REMOVE ENTITY SNAPSHOT",
+        item
+      );
+    }}
+
+    onSnapshotOpen={item => {
+      console.log(
+        "AOS OPEN ENTITY SNAPSHOT",
+        item
+      );
+    }}
+  />
+
+  <IXIMachineRail
+    listing={{
+      id: {
+        uuid:
+          aosEntity?.entityId ||
+          "ixi-entity"
+      },
+
+      title:
+        entityName
+    }}
+
+    saved={false}
+
+    boardColor={
+      entityBoardColor
+    }
+
+    boardOutline={
+      entityBoardOutline
+    }
+
+    machineFace={
+      entityFace
+    }
+
+    onCycleMachineFace={() => {
+      setEntityFace(current =>
+        current === 1
+          ? 1
+          : 1
+      );
+    }}
+
+    onSendFront={() => {}}
+
+    onSendBack={() => {}}
+
+    onCycleColor={
+      cycleEntityColor
+    }
+
+    onCycleOutline={
+      cycleEntityOutline
+    }
+
+    onToggleSaved={() => {}}
+
+    armedDestination=""
+
+    onSendToArmedDestination={() => {}}
+  />
+</div>
+  </div>
+) : null}
         </section>
       </main>
 
@@ -964,15 +1159,109 @@ const logoUrl =
 
 
         .aos-entity-face-mount {
-          width: 100%;
+  width: 100%;
 
-          display: flex;
+  display: flex;
 
-          justify-content: center;
-          align-items: flex-start;
-        }
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.aos-entity-card {
+  position: relative;
+
+  width: 298px;
+  min-width: 298px;
+  max-width: 298px;
+
+  height: 470px;
+  min-height: 470px;
+  max-height: 470px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.06);
+
+  outline:
+    1px solid
+    rgba(255,255,255,.018);
+
+  border-radius: 13px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(255,255,255,0)
+    ),
+    #141414;
+
+  box-shadow:
+    0 1px 0
+      rgba(255,255,255,.045)
+      inset,
+    0 18px 44px
+      rgba(0,0,0,.22);
+}
 
 
+.aos-entity-card.board-outline-1 {
+  outline-width: 1px;
+}
+
+.aos-entity-card.board-outline-3 {
+  outline-width: 3px;
+}
+
+.aos-entity-card.board-outline-5 {
+  outline-width: 5px;
+}
+
+.aos-entity-card.board-outline-0 {
+  outline-width: 0;
+}
+
+.aos-entity-card.board-color-none {
+  outline-color:
+    rgba(255,255,255,.018);
+}
+
+.aos-entity-card.board-color-green {
+  outline-color:
+    rgba(56,161,105,.95);
+}
+
+.aos-entity-card.board-color-yellow {
+  outline-color:
+    rgba(255,196,0,.95);
+}
+
+.aos-entity-card.board-color-red {
+  outline-color:
+    rgba(229,62,62,.95);
+}
+
+.aos-entity-card.board-color-cyan {
+  outline-color:
+    rgba(0,194,255,.95);
+}
+
+.aos-entity-card.board-color-white {
+  outline-color:
+    rgba(255,255,255,.85);
+}
+
+.aos-entity-card.board-color-blue {
+  outline-color:
+    rgba(49,130,206,.95);
+}
+
+.aos-entity-card.board-color-orange {
+  outline-color:
+    rgba(249,133,18,.95);
+}
         .aos-status {
           padding: 40px 20px;
 
