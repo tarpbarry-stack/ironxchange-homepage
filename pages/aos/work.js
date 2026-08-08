@@ -109,8 +109,8 @@ import {
   setIXIActionNotice
 } from "../../components/ixi-object-system/IXIActionNoticeEngine";
 
-export default function MyListingsV2() {
-  console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
+export default function IXIAosWorkPage() {
+  console.log("IXI AOS WORK PAGE IS RUNNING");
   
   const [listings, setListings] = useState([]);
   
@@ -1209,7 +1209,7 @@ function cycleCardScaleMode() {
   return (
     <>
       <Head>
-        <title>My Listings V2 | IronXchange</title>
+        <title>IXI AOS Work | IronXchange</title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
