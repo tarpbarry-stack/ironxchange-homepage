@@ -815,22 +815,15 @@ const equipmentIndex =
 
 const aosBoardItems =
   useMemo(() => {
-    const items = [];
-
-    if (equipmentIndex) {
-      items.push(
-        equipmentIndex
-      );
+    if (!equipmentIndex) {
+      return [];
     }
 
-    items.push(
-      ...visibleSavedListings
-    );
-
-    return items;
+    return [
+      equipmentIndex
+    ];
   }, [
-    equipmentIndex,
-    visibleSavedListings
+    equipmentIndex
   ]);
 
 
