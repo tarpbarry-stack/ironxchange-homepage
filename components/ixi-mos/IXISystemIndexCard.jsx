@@ -837,23 +837,20 @@ export default function IXISystemIndexCard({
           >
 
             <ListingCard
-              listing={
-                activeItem
-              }
+  listing={activeItem}
+  saved={false}
+  showSave={false}
 
-              saved={false}
+  machineFace={1}
 
-              showSave={false}
+  showMachineRail={false}
 
-              machineFace={1}
+  useDndDrag={false}
 
-              useDndDrag={false}
-
-              ixiState={
-                activeItemIxiState
-              }
-            />
-
+  ixiState={
+    activeItemIxiState
+  }
+/>
           </div>
 
 
