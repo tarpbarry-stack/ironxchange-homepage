@@ -132,6 +132,41 @@ function createEmptyAosObjectForm() {
   };
 }
 
+
+const AOS_ENTITY_CONTEXTS = [
+  {
+    id: "partners",
+    label: "PARTNERS",
+    description: "Ownership & principals"
+  },
+  {
+    id: "employees",
+    label: "EMPLOYEES",
+    description: "People & assignments"
+  },
+  {
+    id: "equipment",
+    label: "EQUIPMENT",
+    description: "Machines & inventory"
+  },
+  {
+    id: "attachments",
+    label: "ATTACHMENTS",
+    description: "Attachments & implements"
+  },
+  {
+    id: "whole-goods",
+    label: "WHOLE GOOD PARTS",
+    description: "Whole goods & major parts"
+  },
+  {
+    id: "locations",
+    label: "LOCATIONS",
+    description: "Yards & machine locations"
+  }
+];
+
+
 export default function IXIAosPage() {
   console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
   
@@ -139,6 +174,9 @@ export default function IXIAosPage() {
 
   const [aosEntity, setAosEntity] = useState(null);
 const [aosObjects, setAosObjects] = useState([]);
+
+  const [aosContext, setAosContext] =
+  useState("entity");
 
 const [showObjectCreator, setShowObjectCreator] =
   useState(false);
@@ -619,6 +657,30 @@ const workspaceListings = useMemo(() => {
   systemIndexes,
   listings.length
 ]);
+
+  const aosEntityContexts =
+  useMemo(() => {
+    return AOS_ENTITY_CONTEXTS.map(
+      context => {
+        if (context.id === "equipment") {
+          return {
+            ...context,
+            count:
+              Number(
+                aosScoreboard.assets
+              ) || 0,
+            enabled: true
+          };
+        }
+
+        return {
+          ...context,
+          count: 0,
+          enabled: false
+        };
+      }
+    );
+  }, [aosScoreboard.assets]);
 
 function formatAosValue(value) {
   const amount = Number(value) || 0;
@@ -1532,7 +1594,114 @@ toggleSearchSurfaceRevealed
 </div>
 </section>
    
+{aosContext === "entity" ? (
+  <section className="aos-entity-gateway">
+    <div className="aos-entity-card">
+      <div className="aos-entity-card-eyebrow">
+        ENTITY
+      </div>
 
+      <strong className="aos-entity-card-name">
+        {aosEntity?.displayName ||
+          "IXI ENTITY"}
+      </strong>
+
+      <div className="aos-entity-card-summary">
+        <span>
+          {aosScoreboard.assets} Assets
+        </span>
+
+        <span>
+          {aosScoreboard.jobs} Jobs
+        </span>
+
+        <span>
+          {aosScoreboard.forSale} For Sale
+        </span>
+
+        <span>
+          {formatAosValue(
+            aosScoreboard.value
+          )} Value
+        </span>
+      </div>
+    </div>
+
+    <div className="aos-context-grid">
+      {aosEntityContexts.map(
+        context => (
+          <button
+            key={context.id}
+            type="button"
+            className={`aos-context-card ${
+              context.enabled
+                ? "is-enabled"
+                : "is-disabled"
+            }`}
+            onClick={() => {
+              if (!context.enabled) {
+                return;
+              }
+
+              setAosContext(
+                context.id
+              );
+            }}
+          >
+            <span className="aos-context-label">
+              {context.label}
+            </span>
+
+            <strong className="aos-context-count">
+              {context.count}
+            </strong>
+
+            <span className="aos-context-description">
+              {context.description}
+            </span>
+
+            <span className="aos-context-open">
+              {context.enabled
+                ? "OPEN →"
+                : "COMING"}
+            </span>
+          </button>
+        )
+      )}
+    </div>
+  </section>
+) : null}
+
+{aosContext === "equipment" ? (
+  <section className="aos-context-header">
+    <button
+      type="button"
+      className="aos-context-back"
+      onClick={() =>
+        setAosContext("entity")
+      }
+    >
+      ← {aosEntity?.displayName ||
+        "ENTITY"}
+    </button>
+
+    <span className="aos-context-divider">
+      /
+    </span>
+
+    <strong>
+      EQUIPMENT
+    </strong>
+
+    <span className="aos-context-total">
+      {aosScoreboard.assets} MACHINES
+    </span>
+  </section>
+) : null}
+
+{aosContext === "equipment" ? (
+  <>
+      
 <IXIChassis>
   <aside className="ixi-command-left">
     <section className="ixi-pocket-row">
@@ -2335,6 +2504,156 @@ renderCustomItem={({
     display: none !important;
   }
 }
+
+
+.aos-entity-gateway {
+  width: 100%;
+  padding: 28px 34px 40px;
+  box-sizing: border-box;
+}
+
+.aos-entity-card {
+  width: 100%;
+  min-height: 118px;
+  padding: 22px 26px;
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  background: #111;
+
+  margin-bottom: 22px;
+}
+
+.aos-entity-card-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  opacity: 0.55;
+  margin-bottom: 7px;
+}
+
+.aos-entity-card-name {
+  display: block;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.aos-entity-card-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 14px;
+
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.aos-context-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.aos-context-card {
+  position: relative;
+
+  min-height: 150px;
+  padding: 20px;
+
+  text-align: left;
+  color: inherit;
+
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
+  background: #101010;
+
+  cursor: pointer;
+}
+
+.aos-context-card.is-enabled:hover {
+  border-color: rgba(255,255,255,0.42);
+  transform: translateY(-1px);
+}
+
+.aos-context-card.is-disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.aos-context-label {
+  display: block;
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.aos-context-count {
+  display: block;
+
+  margin-top: 14px;
+
+  font-size: 34px;
+  line-height: 1;
+}
+
+.aos-context-description {
+  display: block;
+
+  margin-top: 10px;
+
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.aos-context-open {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0.65;
+}
+
+.aos-context-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 42px;
+  padding: 0 34px;
+
+  border-bottom: 1px solid
+    rgba(255,255,255,0.12);
+}
+
+.aos-context-back {
+  border: 0;
+  padding: 0;
+
+  background: transparent;
+  color: inherit;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.aos-context-divider {
+  opacity: 0.35;
+}
+
+.aos-context-total {
+  margin-left: auto;
+
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+}
+
+
 
        .workspace-controls {
   margin: 0 auto;
