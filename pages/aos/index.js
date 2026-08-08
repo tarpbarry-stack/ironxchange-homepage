@@ -1,711 +1,129 @@
 import Head from "next/head";
-import { useEffect, useMemo, useRef, useState } from "react";
-
 import {
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  useDroppable
-} from "@dnd-kit/core";
-
-import {
-  useSortable,
-  sortableKeyboardCoordinates
-} from "@dnd-kit/sortable";
-
-import {
-  CSS
-} from "@dnd-kit/utilities";
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import ListingCard from "../../components/ListingCard";
 
-import { getListingId } from "../../lib/listingFormatters";
-import {
-  fetchIxiMachineState,
-  saveIxiMachinePatch,
-} from "../../lib/ixiMachineStateClient";
+import IXIEnvironmentRail
+  from "../../components/IXIEnvironmentRail";
 
 import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
 
-import { captureIXEvent } from "../../lib/posthog";
 
-import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
-import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
-import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
-import IXIBoard from "../../components/ixi-chassis/IXIBoard";
-import IXIBoardSurface
-  from "../../components/ixi-chassis/IXIBoardSurface";
-import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
-import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
-import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
-import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
-import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
-import IXIChassis from "../../components/ixi-chassis/IXIChassis";
-import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
-import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
-import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
-import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
-import IXIObjectCreateCard from "../../components/ixi-mos/IXIObjectCreateCard";
-import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
-import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
-import useIXISellerMachineOps from "../../components/ixi-chassis/useIXISellerMachineOps";
+/* =========================================
+   IXI AOS ROOT HELPERS
+   ========================================= */
 
-import {
-  IXI_WORKSPACE_SETTINGS_ID,
-  IXI_WORKSPACE_LAYOUT_ID,
-  createEmptyWorkspaceContainers,
-  sanitizeWorkspaceContainers,
-  saveWorkspaceLayoutRecord,
-  saveWorkspaceSettingsRecord
-} from "../../components/ixi-chassis/IXIWorkspacePersistenceEngine";
-
-import {
-  getMachineContainerFromContainers,
-  reorderMachineWithinContainerState,
-  moveMachineToContainerAtPositionState,
-  moveMachineToContainerState
-} from "../../components/ixi-chassis/IXIMachineContainerEngine";
-
-import {
-  getStackContainerKey,
-  toggleStackOpenState,
-  openStackState,
-  toggleStackLayoutState,
-  getMachineIdsForStack
-} from "../../components/ixi-chassis/IXIStackEngine";
-
-import {
-  rotatePocketState,
-  movePocketToContainerState
-} from "../../components/ixi-chassis/IXIPocketEngine";
-
-import {
-  createMosObject,
-  createMosCommandId,
-  fetchMosObjects,
-  placeMosObject
-} from "../../lib/mos/ixiMosClient";
-
-import {
-  getNextCardScaleMode
-} from "../../components/ixi-chassis/IXIScaleEngine";
-
-import {
-  workspaceCollisionDetection,
-  createWorkspaceDragStartHandler,
-  createWorkspaceDragCancelHandler,
-  createWorkspaceDragEndHandler
-} from "../../components/ixi-chassis/IXIDndEngineHelpers";
-
-import {
-  fetchCurrentUserWithSavedListings,
-  getSavedListingIdsFromUser,
-  filterSavedListings,
-  toggleSavedListing
-} from "../../lib/savedListings";
-
-import {
-  IXI_COMMANDS
-} from "../../components/ixi-object-system/IXICommandBus";
-
-import {
-  setIXIActionNotice
-} from "../../components/ixi-object-system/IXIActionNoticeEngine";
-
-function createEmptyAosObjectForm() {
-  return {
-    objectType: "job",
-    displayName: "",
-    customerCategory: "",
-    customerAssetId: "",
-    factualTitle: "",
-    value: "",
-    location: "",
-
-    machineAccess: "private",
-    machineChannel: "private"
-  };
+function getPublicData(item = {}) {
+  return (
+    item?.publicData ||
+    item?.attributes?.publicData ||
+    {}
+  );
 }
 
 
-const AOS_ENTITY_CONTEXTS = [
-  {
-    id: "partners",
-    label: "PARTNERS",
-    description: "Ownership & principals"
-  },
-  {
-    id: "employees",
-    label: "EMPLOYEES",
-    description: "People & assignments"
-  },
-  {
-    id: "equipment",
-    label: "EQUIPMENT",
-    description: "Machines & inventory"
-  },
-  {
-    id: "attachments",
-    label: "ATTACHMENTS",
-    description: "Attachments & implements"
-  },
-  {
-    id: "whole-goods",
-    label: "WHOLE GOOD PARTS",
-    description: "Whole goods & major parts"
-  },
-  {
-    id: "locations",
-    label: "LOCATIONS",
-    description: "Yards & machine locations"
-  }
-];
+function getListingStatus(item = {}) {
+  const publicData = getPublicData(item);
 
-
-export default function IXIAosPage() {
-  console.log("MY LISTINGS V2 NEW CODE IS RUNNING");
-  
-  const [listings, setListings] = useState([]);
-
-  const [aosEntity, setAosEntity] = useState(null);
-const [aosObjects, setAosObjects] = useState([]);
-
-  const [aosContext, setAosContext] =
-  useState("entity");
-
-const [showObjectCreator, setShowObjectCreator] =
-  useState(false);
-
-const [objectCreateForm, setObjectCreateForm] =
-  useState(createEmptyAosObjectForm());
-
-const [objectCreateWorking, setObjectCreateWorking] =
-  useState(false);
-
-const [objectCreateError, setObjectCreateError] =
-  useState("");
-
-const aosEntityId =
-  aosEntity?.entityId || "";
-
-const [systemIndexes, setSystemIndexes] = useState([]);
-const [aosLoading, setAosLoading] = useState(true);
-const [aosError, setAosError] = useState("");
-  
-  const [savedIds, setSavedIds] = useState([]);
-  const [sdk, setSdk] = useState(null);
-
-  const [searchQuery, setSearchQuery] = useState("");
-const [workspaceFilters, setWorkspaceFilters] = useState({
-  category: "ALL CATEGORIES",
-  make: "ALL MAKES",
-  model: "ALL MODELS",
-
-  yearMin: "",
-  yearMax: "",
-  priceMin: "",
-  priceMax: "",
-  hoursMin: "",
-  hoursMax: ""
-});
-
-  const [savedBoardMode, setSavedBoardMode] = useState("saved");
-  const [savedBoardListings, setSavedBoardListings] = useState([]);
-
-  const [draggingListingId, setDraggingListingId] = useState("");
-const [ghostListingId, setGhostListingId] = useState("");
-
-const [activeStacksOpen, setActiveStacksOpen] = useState({
-  top: false,
-  bottom: false
-});
-
-const [machineContainers, setMachineContainers] = useState({
-  board: [],
-  stackTop: [],
-  stackBottom: [],
-  pocketLeft: [],
-  pocketRight: [],
-  pocketLeft2: [],
-  pocketRight2: []
-});
-
-const [activeStackLayouts, setActiveStackLayouts] = useState({
-  top: "horizontal",
-  bottom: "horizontal"
-});
-
-const [leftPocketOpen, setLeftPocketOpen] = useState(false);
-const [rightPocketOpen, setRightPocketOpen] = useState(false);
-  
-const [topRailMode, setTopRailMode] = useState("off");
-
-const [activeStackSendMenu, setActiveStackSendMenu] =
-  useState("");
-
-const POCKET_TARGETS = [
-  "pocketLeft",
-  "pocketLeft2",
-  "pocketRight",
-  "pocketRight2"
-];
-
-  const DIRECT_CONTAINER_TARGETS = [
-  ...POCKET_TARGETS,
-  "stackTop"
-];
-
-  const [activeStackHover, setActiveStackHover] = useState("");
-  const [ixiCardState, setIxiCardState] = useState({});
-  const [ixiUserId, setIxiUserId] = useState("guest");
-  const [workspaceSettings, setWorkspaceSettings] =
-  useState({});
-  const [ixiColorFilters, setIxiColorFilters] = useState([]);
-  const [ixiOutlineFilter, setIxiOutlineFilter] = useState("all");
-
-  const [pocketThumbSize, setPocketThumbSize] = useState("medium");
-
-  const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
-
-  const hasAppliedRemoteLayoutRef = useRef(false);
-  
-  const [activeDndId, setActiveDndId] = useState("");
-  const {
-  getSellerListingCardProps
-} = useIXISellerMachineOps({
-  setSellerListings: setListings,
-  showActionNotice: ({ listingId, message, tone }) =>
-    setIXIActionNotice({
-      setState: setIxiCardState,
-      listingId,
-      message,
-      tone
-    })
-});
-
-const handleWorkspaceDragStart =
-  createWorkspaceDragStartHandler({
-    setActiveDndId
-  });
-
-const handleWorkspaceDragCancel =
-  createWorkspaceDragCancelHandler({
-    setActiveDndId,
-    clearMachineDragState
-  });
-
-function handleWorkspaceDragEnd(event) {
-  const dragId = String(event?.active?.id || "");
-  const overId = String(event?.over?.id || "");
-
-  const activeSortable =
-    event?.active?.data?.current?.sortable;
-
-  const overSortable =
-    event?.over?.data?.current?.sortable;
-
-  const knownContainers = [
-    "board",
-    "stackTop",
-    "stackBottom",
-    "pocketLeft",
-    "pocketRight",
-    "pocketLeft2",
-    "pocketRight2"
-  ];
-
-  const sourceContainer =
-    event?.active?.data?.current?.containerId ||
-    (knownContainers.includes(activeSortable?.containerId)
-      ? activeSortable.containerId
-      : getMachineContainer(dragId));
-
-  const targetContainer =
-    overSortable?.containerId ||
-    event?.over?.data?.current?.containerId ||
-    (knownContainers.includes(overId)
-      ? overId
-      : getMachineContainer(overId));
-
-  const result = IXI_COMMANDS.handleRelationshipDrop({
-    dragId,
-    overId,
-    sourceContainer,
-    targetContainer,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-
-  if (targetContainer === "stackTop") {
-    setActiveStacksOpen(current => ({
-      ...current,
-      top: true
-    }));
-  }
-
-  if (targetContainer === "stackBottom") {
-    setActiveStacksOpen(current => ({
-      ...current,
-      bottom: true
-    }));
-  }
-
-  setActiveDndId("");
-  clearMachineDragState();
+  return String(
+    item?.listingStatus ||
+    publicData?.listingStatus ||
+    item?.attributes?.state ||
+    ""
+  ).toLowerCase();
 }
 
 
-  
-const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 6
-    }
-  }),
-  useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates
-  })
-);
+function isOwnedActiveMachine(item = {}) {
+  if (!item) return false;
 
-  useEffect(() => {
-    captureIXEvent("saved_workspace_viewed", {
-      page: "saved"
-    });
-  }, []);
-useEffect(() => {
-  let cancelled = false;
+  const status = getListingStatus(item);
 
-  async function loadAosPage() {
-    try {
-      setAosLoading(true);
-      setAosError("");
+  const deleted =
+    item?.deleted === true ||
+    item?.attributes?.deleted === true;
 
-      const environment =
-        await loadIXIMosEnvironment({
-          includeObjects: true
-        });
-
-      if (cancelled) {
-        return;
-      }
-
-      if (!environment?.isAuthenticated) {
-        setListings([]);
-        setAosEntity(null);
-        setAosObjects([]);
-        setSystemIndexes([]);
-        setSavedIds([]);
-        setAosError(
-          "Authenticated user required."
-        );
-        setAosLoading(false);
-
-        window.location.href =
-          `/login?returnTo=${encodeURIComponent(
-            "/aos"
-          )}`;
-
-        return;
-      }
-
-      const userId =
-        String(
-          environment.userId ||
-          "guest"
-        );
-
-      setIxiUserId(userId);
-
-      setListings(
-        Array.isArray(
-          environment.ownedListings
-        )
-          ? environment.ownedListings
-          : []
-      );
-
-      setAosEntity(
-        environment.entity || null
-      );
-
-      setAosObjects(
-        Array.isArray(
-          environment.objects
-        )
-          ? environment.objects
-          : []
-      );
-
-      setSystemIndexes(
-        Array.isArray(
-          environment.systemIndexes
-        )
-          ? environment.systemIndexes
-          : []
-      );
-
-      const listingEnvironment =
-        environment.listingEnvironment ||
-        {};
-
-      const currentUser =
-        listingEnvironment.currentUser ||
-        null;
-
-      const savedListingIds =
-        currentUser
-          ? getSavedListingIdsFromUser(
-              currentUser
-            )
-          : [];
-
-      setSavedIds(savedListingIds);
-
-      const remoteIxiResponse =
-        await fetchIxiMachineState(
-          userId
-        );
-
-      if (cancelled) {
-        return;
-      }
-
-      const remoteIxiState =
-        remoteIxiResponse?.state ||
-        remoteIxiResponse ||
-        {};
-
-      const loadedWorkspaceSettings =
-        remoteIxiState?.[
-          IXI_WORKSPACE_SETTINGS_ID
-        ] || {};
-
-      const loadedWorkspaceLayout =
-        remoteIxiState?.[
-          IXI_WORKSPACE_LAYOUT_ID
-        ] || {};
-
-      setWorkspaceSettings(
-        loadedWorkspaceSettings
-      );
-
-      setIxiCardState(
-        remoteIxiState
-      );
-
-      if (
-        loadedWorkspaceSettings
-          .cardScaleMode
-      ) {
-        setCardScaleMode(
-          loadedWorkspaceSettings
-            .cardScaleMode
-        );
-      }
-
-      if (
-        loadedWorkspaceLayout
-          ?.machineContainers
-      ) {
-        const validMachineIds =
-          (
-            Array.isArray(
-              environment.ownedListings
-            )
-              ? environment.ownedListings
-              : []
-          ).map(item =>
-            String(
-              getListingId(item)
-            )
-          );
-
-        setMachineContainers(
-          sanitizeWorkspaceContainers(
-            loadedWorkspaceLayout
-              .machineContainers,
-            validMachineIds
-          )
-        );
-
-        hasAppliedRemoteLayoutRef.current =
-          true;
-      }
-
-      setAosLoading(false);
-    } catch (error) {
-      if (cancelled) {
-        return;
-      }
-
-      console.error(
-        "IXI AOS page load failed:",
-        error
-      );
-
-      setListings([]);
-      setAosEntity(null);
-      setAosObjects([]);
-      setSystemIndexes([]);
-
-      setAosError(
-        error?.message ||
-        "IXI AOS failed to load."
-      );
-
-      setAosLoading(false);
-    }
+  if (deleted) {
+    return false;
   }
 
-  loadAosPage();
+  if (
+    status === "archived" ||
+    status === "deleted"
+  ) {
+    return false;
+  }
 
-  return () => {
-    cancelled = true;
-  };
-}, []);  
-  
-  const savedListings = useMemo(() => {
-    const activeListings = listings.filter(item => {
-      const listingStatus =
-        item.listingStatus ||
-        item.publicData?.listingStatus ||
-        item.attributes?.publicData?.listingStatus;
+  /*
+    IMPORTANT:
 
-      return listingStatus !== "archived";
-    });
+    We DO NOT filter on machineAccess here.
 
-    return filterSavedListings(activeListings, savedIds);
-  }, [listings, savedIds]);
+    ownedListings is already the ownership universe.
 
-const sellerListings = useMemo(() => {
-  return listings.filter(item => {
-    const publicData =
-      item.publicData ||
-      item.attributes?.publicData ||
-      {};
+    Therefore both of these remain in AOS:
 
-    const listingStatus =
-      item.listingStatus ||
-      publicData.listingStatus;
+      LIVE owned machine
+      PRIVATE owned machine
 
-    if (listingStatus === "archived") {
-      return false;
+    Channel / visibility does not determine
+    whether the Entity owns the machine.
+  */
+
+  return true;
+}
+
+
+function getMachinePrice(item = {}) {
+  const publicData = getPublicData(item);
+
+  const rawPrice =
+    item?.price ??
+    item?.attributes?.price ??
+    publicData?.price ??
+    0;
+
+  /*
+    Sharetribe Money object:
+    {
+      amount: 14500000,
+      currency: "USD"
     }
 
-    const machineChannel =
-      String(
-        item.machineChannel ||
-        publicData.machineChannel ||
-        ""
-      ).toLowerCase();
+    amount is cents.
+  */
+  if (
+    rawPrice &&
+    typeof rawPrice === "object" &&
+    Number.isFinite(Number(rawPrice.amount))
+  ) {
+    return Number(rawPrice.amount) / 100;
+  }
 
-    return machineChannel !== "auction";
-  });
-}, [listings]);
+  if (typeof rawPrice === "number") {
+    return rawPrice;
+  }
 
-const workspaceListings = useMemo(() => {
-  return sellerListings;
-}, [sellerListings]);
-  
-  const aosScoreboard = useMemo(() => {
-  const jobsIndex =
-    systemIndexes.find(
-      item => item.indexId === "jobs"
-    );
-
-  const forSaleIndex =
-    systemIndexes.find(
-      item => item.indexId === "for-sale"
-    );
-
-  const equipmentIndex =
-    systemIndexes.find(
-      item => item.indexId === "equipment"
-    );
-
-  return {
-  assets:
+  const numeric =
     Number(
-      equipmentIndex?.itemCount ??
-      listings.length
-    ) || 0,
-
-  jobs:
-    Number(
-      jobsIndex?.itemCount
-    ) || 0,
-
-  forSale:
-    Number(
-      forSaleIndex?.itemCount
-    ) || 0,
-
-  value:
-    listings.reduce(
-      (total, item) => {
-        const rawPrice =
-          item?.price ??
-          item?.publicData?.price ??
-          item?.attributes
-            ?.publicData
-            ?.price ??
-          0;
-
-        const numericPrice =
-          Number(
-            String(rawPrice)
-              .replace(/[^0-9.]/g, "")
-          ) || 0;
-
-        return total + numericPrice;
-      },
-      0
-    ),
-
-    people: 0,
-  yards: 0,
-  machineLocations: 0
-  };
-}, [
-  systemIndexes,
-  listings
-]);
-
-const aosEntityContexts =
-  useMemo(() => {
-    return AOS_ENTITY_CONTEXTS.map(
-      context => {
-        if (context.id === "equipment") {
-          return {
-            ...context,
-            count:
-              Number(
-                aosScoreboard.assets
-              ) || 0,
-            enabled: true
-          };
-        }
-
-        return {
-          ...context,
-          count: 0,
-          enabled: false
-        };
-      }
+      String(rawPrice || "")
+        .replace(/[^0-9.-]/g, "")
     );
-  }, [aosScoreboard.assets]);
 
-function formatAosValue(value) {
-  const amount = Number(value) || 0;
+  return Number.isFinite(numeric)
+    ? numeric
+    : 0;
+}
 
+
+function formatCurrency(value) {
   return new Intl.NumberFormat(
     "en-US",
     {
@@ -713,751 +131,334 @@ function formatAosValue(value) {
       currency: "USD",
       maximumFractionDigits: 0
     }
-  ).format(amount);
+  ).format(Number(value) || 0);
 }
 
-const containerStateKey = useMemo(() => {
-  return workspaceListings
-    .map(item => {
-      const id = String(getListingId(item));
-      return `${id}:${ixiCardState[id]?.container || "board"}`;
-    })
-    .join("|");
-}, [workspaceListings, ixiCardState]);
-   
-useEffect(() => {
-  if (!workspaceListings.length) return;
 
-  const validMachineIds = workspaceListings.map(item =>
-    String(getListingId(item))
-  );
+function normalizeObjectType(item = {}) {
+  return String(
+    item?.objectType ||
+    item?.type ||
+    item?.publicData?.objectType ||
+    item?.attributes?.publicData?.objectType ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+}
 
-  const savedLayout =
-    ixiCardState?.[IXI_WORKSPACE_LAYOUT_ID];
 
-  if (
-    savedLayout?.machineContainers &&
-    !hasAppliedRemoteLayoutRef.current
-  ) {
-    setMachineContainers(
-      sanitizeWorkspaceContainers(
-        savedLayout.machineContainers,
-        validMachineIds
-      )
+function getObjectCount(
+  objects = [],
+  acceptedTypes = []
+) {
+  const accepted =
+    acceptedTypes.map(value =>
+      String(value).toLowerCase()
     );
 
-    hasAppliedRemoteLayoutRef.current = true;
-    return;
-  }
-
-  if (hasAppliedRemoteLayoutRef.current) {
-  return;
-}
-
-  const nextContainers = createEmptyWorkspaceContainers();
-
-  workspaceListings.forEach(item => {
-    const id = String(getListingId(item));
-    const savedContainer = ixiCardState[id]?.container;
-
-    const targetContainer =
-      nextContainers[savedContainer]
-        ? savedContainer
-        : "board";
-
-    nextContainers[targetContainer].push(id);
-  });
-
-  setMachineContainers(nextContainers);
-}, [containerStateKey]);
-
-  const visibleSavedListings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-
-    const source =
-      savedBoardMode === "custom" && savedBoardListings.length
-        ? savedBoardListings
-        : workspaceListings;
-
-const orderedSource =
-  (machineContainers.board || [])
-    .map(id =>
-      source.find(item =>
-        String(getListingId(item)) === String(id)
-      )
+  return objects.filter(item =>
+    accepted.includes(
+      normalizeObjectType(item)
     )
-    .filter(Boolean);
-    
-   const filtered = orderedSource.filter(item => {
-  const id = String(getListingId(item));
-
-  if (getMachineContainer(id) !== "board") {
-    return false;
-  }
-
-  const searchableText = [
-        item.title,
-        item.type,
-        item.category,
-        item.make,
-        item.model,
-        item.location,
-        item.hours,
-        item.price,
-        item.year,
-        item.description,
-        item.publicData?.description,
-        item.publicData?.details
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const ixState = ixiCardState[id] || {
-        color: "none",
-        outline: 1
-      };
-
-      const matchesSearch =
-        !q || searchableText.includes(q);
-
-    const itemCategory =
-  String(item.type || item.category || "")
-    .toUpperCase();
-
-const itemMake =
-  String(item.make || "")
-    .toUpperCase();
-
-const itemModel =
-  String(item.model || "")
-    .toUpperCase();
-
-const matchesCategory =
-  workspaceFilters.category === "ALL CATEGORIES" ||
-  itemCategory === String(workspaceFilters.category).toUpperCase();
-
-const matchesMake =
-  workspaceFilters.make === "ALL MAKES" ||
-  itemMake === String(workspaceFilters.make).toUpperCase();
-
-const matchesModel =
-  workspaceFilters.model === "ALL MODELS" ||
-  itemModel === String(workspaceFilters.model).toUpperCase();
-
-const matchesIxiColor =
-  ixiColorFilters.length === 0 ||
-  ixiColorFilters.includes(ixState.color);
-
-const yearValue = Number(item.year || item.publicData?.year || 0);
-const priceValue = Number(String(item.price || "").replace(/[^0-9]/g, ""));
-const hoursValue = Number(String(item.hours || "").replace(/[^0-9]/g, ""));
-const matchesWorkspaceRanges =
-  (!workspaceFilters.yearMin || yearValue >= Number(workspaceFilters.yearMin)) &&
-  (!workspaceFilters.yearMax || yearValue <= Number(workspaceFilters.yearMax)) &&
-  (!workspaceFilters.priceMin || priceValue >= Number(workspaceFilters.priceMin)) &&
-  (!workspaceFilters.priceMax || priceValue <= Number(workspaceFilters.priceMax)) &&
-  (!workspaceFilters.hoursMin || hoursValue >= Number(workspaceFilters.hoursMin)) &&
-  (!workspaceFilters.hoursMax || hoursValue <= Number(workspaceFilters.hoursMax));
-
-const matchesIxiOutline =
-  ixiOutlineFilter === "all" ||
-  String(ixState.outline) === String(ixiOutlineFilter);
-
-return (
-  matchesSearch &&
-  matchesCategory &&
-  matchesMake &&
-  matchesModel &&
-  matchesWorkspaceRanges &&
-  matchesIxiColor &&
-  matchesIxiOutline
-);
-    });
-
-return [...filtered].sort((a, b) => {
-  const priceA = Number(String(a.price || a.publicData?.price || "").replace(/[^0-9]/g, ""));
-  const priceB = Number(String(b.price || b.publicData?.price || "").replace(/[^0-9]/g, ""));
-
-  const hoursA = Number(String(a.hours || a.publicData?.hours || "").replace(/[^0-9]/g, ""));
-  const hoursB = Number(String(b.hours || b.publicData?.hours || "").replace(/[^0-9]/g, ""));
-
-  const yearA = Number(a.year || a.publicData?.year || 0);
-  const yearB = Number(b.year || b.publicData?.year || 0);
-
-  if (savedBoardMode === "price-low") return priceA - priceB;
-  if (savedBoardMode === "price-high") return priceB - priceA;
-  if (savedBoardMode === "hours-low") return hoursA - hoursB;
-  if (savedBoardMode === "hours-high") return hoursB - hoursA;
-  if (savedBoardMode === "year-new") return yearB - yearA;
-  if (savedBoardMode === "year-old") return yearA - yearB;
-
-  return 0;
-});
-     }, [
-    searchQuery,
-    savedBoardMode,
-    savedBoardListings,
-    workspaceListings,
-    workspaceFilters,
-    machineContainers,
-    ixiCardState,
-        ixiColorFilters,
-    ixiOutlineFilter
-  ]);
-
-const boardItems = useMemo(() => {
-  const items = [];
-
-  if (showObjectCreator) {
-    items.push({
-      id: "__aos_create__",
-      type: "AOS CREATE OBJECT",
-      creationMode: true
-    });
-  }
-
-  items.push(...visibleSavedListings);
-
-  return items;
-}, [
-  showObjectCreator,
-  visibleSavedListings
-]);
-
-function updateObjectCreateForm(
-  field,
-  value
-) {
-  setObjectCreateForm(current => ({
-    ...current,
-    [field]: value
-  }));
+  ).length;
 }
 
-function updateIxiCardState(listingId, patch) {
-  const id = String(listingId);
 
-  setIxiCardState(current => {
-    const nextRecord = {
-      color: "none",
-      outline: 1,
+function getMachineLocation(item = {}) {
+  const publicData = getPublicData(item);
 
-      ...(current[id] || {}),
+  return String(
+    item?.location ||
+    publicData?.location ||
+    publicData?.machineLocation ||
+    ""
+  ).trim();
+}
 
-      ...patch,
 
-      touched: true,
-      updatedAt: Date.now()
+function getEntityLogoUrl(
+  entity = {},
+  currentUser = {}
+) {
+  return (
+    entity?.logoUrl ||
+    entity?.dealerLogoUrl ||
+    entity?.profileImageUrl ||
+    entity?.imageUrl ||
+
+    currentUser
+      ?.profileImage
+      ?.attributes
+      ?.variants
+      ?.default
+      ?.url ||
+
+    currentUser
+      ?.relationships
+      ?.profileImage
+      ?.data
+      ?.attributes
+      ?.variants
+      ?.default
+      ?.url ||
+
+    ""
+  );
+}
+
+
+function getEntityOfficeLocation(
+  entity = {},
+  currentUser = {}
+) {
+  const publicData =
+    currentUser
+      ?.attributes
+      ?.profile
+      ?.publicData ||
+    currentUser
+      ?.profile
+      ?.publicData ||
+    {};
+
+  return (
+    entity?.officeLocation ||
+    entity?.location ||
+    entity?.cityState ||
+    publicData?.sellerLocation ||
+    publicData?.location ||
+    publicData?.cityState ||
+    ""
+  );
+}
+
+
+/* =========================================
+   IXI AOS
+   ========================================= */
+
+export default function IXIAosPage() {
+  const [aosEntity, setAosEntity] =
+    useState(null);
+
+  const [aosObjects, setAosObjects] =
+    useState([]);
+
+  const [ownedListings, setOwnedListings] =
+    useState([]);
+
+  const [currentUser, setCurrentUser] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+
+  /* =========================================
+     LOAD CANONICAL AOS ENVIRONMENT
+     ========================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAos() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const environment =
+          await loadIXIMosEnvironment({
+            includeObjects: true
+          });
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!environment?.isAuthenticated) {
+          window.location.href =
+            `/login?returnTo=${encodeURIComponent(
+              "/aos"
+            )}`;
+
+          return;
+        }
+
+        const listings =
+          Array.isArray(
+            environment?.ownedListings
+          )
+            ? environment.ownedListings
+            : [];
+
+        const ownedActiveMachines =
+          listings.filter(
+            isOwnedActiveMachine
+          );
+
+        setAosEntity(
+          environment?.entity || null
+        );
+
+        setAosObjects(
+          Array.isArray(
+            environment?.objects
+          )
+            ? environment.objects
+            : []
+        );
+
+        setOwnedListings(
+          ownedActiveMachines
+        );
+
+        setCurrentUser(
+          environment
+            ?.listingEnvironment
+            ?.currentUser ||
+          null
+        );
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(
+          "IXI AOS load failed:",
+          err
+        );
+
+        setAosEntity(null);
+        setAosObjects([]);
+        setOwnedListings([]);
+        setCurrentUser(null);
+
+        setError(
+          err?.message ||
+          "IXI AOS failed to load."
+        );
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAos();
+
+    return () => {
+      cancelled = true;
     };
+  }, []);
 
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: id,
-      patch: nextRecord
-    });
+
+  /* =========================================
+     ENTITY SCORECARD
+     ========================================= */
+
+  const scoreboard = useMemo(() => {
+    const totalAssets =
+      ownedListings.length;
+
+    const assetValue =
+      ownedListings.reduce(
+        (total, item) =>
+          total + getMachinePrice(item),
+        0
+      );
+
+    const people =
+      getObjectCount(
+        aosObjects,
+        [
+          "person",
+          "employee"
+        ]
+      );
+
+    const yards =
+      getObjectCount(
+        aosObjects,
+        [
+          "yard"
+        ]
+      );
+
+    /*
+      MACHINE LOCATIONS:
+      actual distinct locations represented
+      by the Entity's owned machine universe.
+    */
+
+    const machineLocations =
+      new Set(
+        ownedListings
+          .map(getMachineLocation)
+          .filter(Boolean)
+          .map(value =>
+            value.toUpperCase()
+          )
+      ).size;
 
     return {
-      ...current,
-      [id]: nextRecord
+      totalAssets,
+      assetValue,
+      people,
+      yards,
+      machineLocations
     };
-  });
-}
+  }, [
+    ownedListings,
+    aosObjects
+  ]);
 
-function cycleMachineFace(listingOrId) {
-  const id =
-    typeof listingOrId === "object"
-      ? String(getListingId(listingOrId))
-      : String(listingOrId);
 
-  const currentFace =
-    Number(ixiCardState[id]?.face || 1);
+  const entityName =
+    aosEntity?.displayName ||
+    currentUser
+      ?.attributes
+      ?.profile
+      ?.displayName ||
+    currentUser
+      ?.profile
+      ?.displayName ||
+    "IXI ENTITY";
 
-  const nextFace =
-    currentFace === 1 ? 2 :
-    currentFace === 2 ? 3 :
-    currentFace === 3 ? 4 :
-    1;
 
-  updateIxiCardState(id, {
-    face: nextFace
-  });
-}
-  
- function toggleColorFilter(color) {
-  setIxiColorFilters(current => {
-    if (current.includes(color)) {
-      return current.filter(item => item !== color);
-    }
-
-    return [...current, color];
-  });
-}
-  
-  function toggleOutlineFilter(outline) {
-  setIxiOutlineFilter(current =>
-    String(current) === String(outline)
-      ? "all"
-      : String(outline)
-  );
-}
-
-function getMachineContainer(machineId) {
-  return getMachineContainerFromContainers(
-    machineContainers,
-    machineId
-  );
-}
-
-  function executeIXITransaction(result) {
-  if (!result) return;
-
-  const nextIxiCardState =
-    result.nextIxiCardState || ixiCardState;
-
-  const nextMachineContainers =
-    result.nextMachineContainers || machineContainers;
-
-  setIxiCardState(nextIxiCardState);
-  setMachineContainers(nextMachineContainers);
-
-  const patches = Array.isArray(result.patchesToPersist)
-    ? result.patchesToPersist
-    : [];
-
-  patches.forEach(item => {
-    if (!item?.listingId) return;
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: item.listingId,
-      patch: item.patch || {}
-    });
-  });
-
-  saveWorkspaceLayout(nextMachineContainers);
-}
-  
-function moveMachineToContainer(machineId, targetContainer) {
-  if (!machineId || !targetContainer) return;
-
-  const result = IXI_COMMANDS.moveObject({
-    objectId: machineId,
-    targetContainer,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-
-function moveMachineToContainerAtPosition(
-  machineId,
-  targetContainer,
-  targetId,
-  insertAfter = false
-) {
-  if (!machineId || !targetContainer || !targetId) return;
-
-  const result = IXI_COMMANDS.moveObjectToPosition({
-    objectId: machineId,
-    targetContainer,
-    targetId,
-    insertAfter,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-  
- function moveMachineWithinContainer(containerKey, dragId, targetId, insertAfter = false) {
-  if (!containerKey || !dragId || !targetId) return;
-
-  const result = IXI_COMMANDS.reorderWithinContainer({
-    containerKey,
-    objectId: dragId,
-    targetId,
-    insertAfter,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-  
-function moveMachineBackToBoard(machineId) {
-  moveMachineToContainer(machineId, "board");
-}
-
-function getListingById(machineId) {
-  return listings.find(
-    item => String(getListingId(item)) === String(machineId)
-  );
-}
-
-  function getActiveDndListing() {
-  if (!activeDndId) return null;
-
-  return getListingById(activeDndId);
-}
-
-  function getPocketContainerKey(side) {
-  return side === "right"
-    ? "pocketRight"
-    : "pocketLeft";
-}
-
-  function moveListingToSlot(dragId, targetId) {
-    if (!dragId || !targetId || dragId === targetId) return;
-
-    setSavedBoardMode("custom");
-
-    setSavedBoardListings(current => {
-      const source = current.length
-  ? current
-  : workspaceListings;
-
-      const fromIndex = source.findIndex(
-        item => String(getListingId(item)) === String(dragId)
-      );
-
-      const toIndex = source.findIndex(
-        item => String(getListingId(item)) === String(targetId)
-      );
-
-      if (fromIndex === -1 || toIndex === -1) return source;
-
-      const next = [...source];
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-
-      return next;
-    });
-  }
-
-  function clearMachineDragState() {
-  setDraggingListingId("");
-  setGhostListingId("");
-  setActiveStackHover("");
-}
-  
-function rotatePocket(pocketKey) {
-  setMachineContainers(current => {
-    const finalContainers = rotatePocketState(
-      current,
-      pocketKey
+  const officeLocation =
+    getEntityOfficeLocation(
+      aosEntity,
+      currentUser
     );
 
-    if (finalContainers !== current) {
-      saveWorkspaceLayout(finalContainers);
-    }
 
-    return finalContainers;
-  });
-}
-
-function cyclePocketMode(side) {
-  const cycle = setter => {
-    setter(current => {
-      if (current === "closed") return "peek";
-      if (current === "peek") return "open";
-      return "closed";
-    });
-  };
-
-  if (side === "left") return cycle(setLeftPocketMode);
-  if (side === "right") return cycle(setRightPocketMode);
-  if (side === "left2") return cycle(setLeftPocket2Mode);
-  if (side === "right2") return cycle(setRightPocket2Mode);
-}
-
-function sendListingToFront(listing) {
-  const listingId = String(getListingId(listing));
-
-  const result = IXI_COMMANDS.moveObjectToContainerStart({
-    objectId: listingId,
-    containerKey: "board",
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-
-function sendListingToBack(listing) {
-  const listingId = String(getListingId(listing));
-
-  const result = IXI_COMMANDS.moveObjectToContainerEnd({
-    objectId: listingId,
-    containerKey: "board",
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-  async function toggleSave(listing) {
-    if (!sdk) {
-      window.location.href = "/login";
-      return;
-    }
-
-    try {
-      const result = await toggleSavedListing({
-        sdk,
-        listing
-      });
-
-      setSavedIds(result.savedIds);
-
-      setSavedBoardListings(current =>
-        current.filter(
-          item =>
-            String(getListingId(item)) !==
-            String(getListingId(listing))
-        )
-      );
-    } catch (err) {
-      console.error("Save failed", err);
-    }
-  }
-
-function toggleActiveStack(stackKey) {
-  setActiveStacksOpen(current => {
-    const nextOpen = toggleStackOpenState(
-  current,
-  stackKey
-);
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: IXI_WORKSPACE_LAYOUT_ID,
-      patch: {
-        machineContainers,
-        activeStackLayouts,
-        activeStacksOpen: nextOpen,
-        updatedAt: Date.now()
-      }
-    });
-
-    return nextOpen;
-  });
-}
-  
-function toggleActiveStackLayout(stackKey) {
-  setActiveStackLayouts(current => {
-    const nextLayouts = toggleStackLayoutState(
-  current,
-  stackKey
-);
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: IXI_WORKSPACE_LAYOUT_ID,
-      patch: {
-        machineContainers,
-        activeStackLayouts: nextLayouts,
-        activeStacksOpen,
-        updatedAt: Date.now()
-      }
-    });
-
-    return nextLayouts;
-  });
-}
-
-function moveActiveStackToContainer(stackKey, targetContainer) {
-  const sourceContainer = getStackContainerKey(stackKey);
-
-  const stackIds = Array.isArray(machineContainers[sourceContainer])
-    ? machineContainers[sourceContainer].map(String)
-    : [];
-
-  const result = IXI_COMMANDS.bulkMoveObjects({
-    objectIds: stackIds,
-    targetContainer,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: false
-  }));
-}
-
- function sendActiveStackToTheater(stackKey) {
-  const sourceContainer = getStackContainerKey(stackKey);
-  const stackIds = machineContainers[sourceContainer] || [];
-
-  console.log("IXI THEATER STACK", {
-    stackKey,
-    machineIds: stackIds
-  });
-} 
-  
-function addListingToActiveStack(stackKey, listingId) {
-  if (!listingId) return;
-
- const targetContainer = getStackContainerKey(stackKey);
-
- setActiveStacksOpen(current =>
-  openStackState(current, stackKey)
-);
-
-  moveMachineToContainer(
-    listingId,
-    targetContainer
-  );
-}
-  
-function addListingToLeftPocket(listingId) {
-  if (!listingId) return;
-
-  moveMachineToContainer(
-    listingId,
-    "pocketLeft"
-  );
-}
-
-function movePocketToContainer(pocketKey, targetContainer) {
-  const pocketIds = Array.isArray(machineContainers[pocketKey])
-    ? machineContainers[pocketKey].map(String)
-    : [];
-
-  const result = IXI_COMMANDS.bulkMoveObjects({
-    objectIds: pocketIds,
-    targetContainer,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-}
-
-function movePocketToStack(pocketKey, stackKey) {
-  const targetContainer = getStackContainerKey(stackKey);
-
-  movePocketToContainer(
-    pocketKey,
-    targetContainer
-  );
-
- setActiveStacksOpen(current =>
-  openStackState(current, stackKey)
-);
-}
-
-function recallPocketToBoard(pocketKey) {
-  movePocketToContainer(
-    pocketKey,
-    "board"
-  );
-}
-
-  
-function recallPocketMachineToBoard(machineId, pocketKey) {
-  if (!machineId || !pocketKey) return;
-
-  setMachineContainers(current => {
-    const id = String(machineId);
-
-    const pocketIds = current[pocketKey] || [];
-    const boardIds = current.board || [];
-
-        const finalContainers = {
-      ...current,
-      [pocketKey]: pocketIds.filter(
-        item => String(item) !== id
-      ),
-      board: boardIds.includes(id)
-        ? boardIds
-        : [...boardIds, id]
-    };
-
-    saveWorkspaceLayout(finalContainers);
-
-    return finalContainers;
-  });
-}
-
-function cycleTopRailMode() {
-  setTopRailMode(current => {
-    if (current === "off") return "dim";
-    if (current === "dim") return "bright";
-    return "off";
-  });
-}
+  const logoUrl =
+    getEntityLogoUrl(
+      aosEntity,
+      currentUser
+    );
 
 
-function getIxiColorValue(color) {
-  const colors = {
-    green: "rgba(56,161,105,.82)",
-    yellow: "rgba(255,196,0,.86)",
-    red: "rgba(229,62,62,.86)",
-    cyan: "rgba(0,194,255,.82)",
-    white: "rgba(255,255,255,.74)",
-    blue: "rgba(49,130,206,.82)",
-    orange: "rgba(249,133,18,.82)"
-  };
+  const initials =
+    entityName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0])
+      .join("")
+      .toUpperCase();
 
-  return colors[color] || "rgba(255,255,255,.12)";
-}
 
-function saveWorkspaceSettings(patch = {}) {
-  if (!ixiUserId) {
-    return null;
-  }
-
-  const nextSettings = {
-    ...workspaceSettings,
-    ...patch,
-    updatedAt: Date.now()
-  };
-
-  setWorkspaceSettings(nextSettings);
-
-  return saveWorkspaceSettingsRecord({
-    saveIxiMachinePatch,
-    userId: ixiUserId,
-    settings: nextSettings
-  });
-}
-  
-function saveWorkspaceLayout(nextContainers = machineContainers) {
-  saveWorkspaceLayoutRecord({
-    saveIxiMachinePatch,
-    userId: ixiUserId,
-    machineContainers: nextContainers,
-    activeStackLayouts,
-    activeStacksOpen
-  });
-}
-  
-function cycleCardScaleMode() {
-  setCardScaleMode(current => {
-    const next = getNextCardScaleMode(current);
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: IXI_WORKSPACE_SETTINGS_ID,
-      patch: {
-        cardScaleMode: next,
-        updatedAt: Date.now()
-      }
-    });
-
-    return next;
-  });
-}
-  
   return (
     <>
       <Head>
-        <title>IXI AOS | IronXchange</title>
+        <title>
+          IXI AOS | IronXchange
+        </title>
 
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -1465,667 +466,174 @@ function cycleCardScaleMode() {
         />
       </Head>
 
-            <Navbar />
+      <Navbar />
 
-   
-<IXIWorkspaceEngine
-  workspaceSettings={workspaceSettings}
-  onSaveWorkspaceSettings={saveWorkspaceSettings}
->
-  {({
-    leftPocketMode,
-    setLeftPocketMode,
-    rightPocketMode,
-    setRightPocketMode,
-    leftPocket2Mode,
-    setLeftPocket2Mode,
-    rightPocket2Mode,
-    setRightPocket2Mode,
-    armedDestination,
-setArmedDestination,
-toggleArmedDestination,
+      <main>
+        <section className="aos-environment">
+          <IXIEnvironmentRail
+            activeEnvironment="AOS"
+            hasAccount={!!aosEntity}
+            hasRelationship={!!aosEntity}
+            hasInventory={
+              ownedListings.length > 0
+            }
+          />
+        </section>
 
-railRevealed,
-toggleRailRevealed,
 
-searchSurfaceRevealed,
-toggleSearchSurfaceRevealed
-  }) => {
-          const handleWorkspaceDragEnd =
-  createWorkspaceDragEndHandler({
-    getMachineContainer,
-    machineContainers,
-    moveMachineWithinContainer,
-    moveMachineToContainerAtPosition,
-    moveMachineToContainer,
-    setActiveStacksOpen,
-    setLeftPocketMode,
-    setLeftPocket2Mode,
-    setRightPocketMode,
-    setRightPocket2Mode,
-    setActiveDndId,
-    clearMachineDragState
-  });  
-    function sendMachineToArmedDestination(listing) {
-  if (!armedDestination) return;
+        {/* ===================================
+            ENTITY SCORECARD
+            =================================== */}
 
-  const id = String(getListingId(listing));
+        <section className="aos-scorecard">
+          <div className="aos-scorecard-identity">
+            <div className="aos-scorecard-logo">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt=""
+                />
+              ) : (
+                <span>
+                  {initials || "IXI"}
+                </span>
+              )}
+            </div>
 
-  if (
-    !DIRECT_CONTAINER_TARGETS.includes(
-      armedDestination
-    )
-  ) {
-    return;
-  }
+            <div className="aos-scorecard-name">
+              <strong>
+                {entityName}
+              </strong>
 
-  moveMachineToContainer(
-    id,
-    armedDestination
-  );
+              <span>
+                {officeLocation ||
+                  "Office Location"}
+              </span>
+            </div>
+          </div>
 
-  if (armedDestination === "stackTop") {
-    setActiveStacksOpen(current => ({
-      ...current,
-      top: true
-    }));
-  }
-}
 
-    return (
-  <IXIDragEngine
-    sensors={sensors}
-    workspaceCollisionDetection={workspaceCollisionDetection}
-    handleWorkspaceDragStart={handleWorkspaceDragStart}
-    handleWorkspaceDragEnd={handleWorkspaceDragEnd}
-    handleWorkspaceDragCancel={handleWorkspaceDragCancel}
-    getActiveDndListing={getActiveDndListing}
-    activeDndId={activeDndId}
-    savedIds={savedIds}
-    ixiCardState={ixiCardState}
-    cardScaleMode={cardScaleMode}
-  >
-    <main>
+          <div className="aos-scorecard-metrics">
+            <div className="aos-metric">
+              <span>
+                TOTAL ASSETS
+              </span>
 
-  <section className="saved-environment-shell">
-   <IXIEnvironmentRail
-  activeEnvironment="AOS"
-  hasAccount={!!aosEntity}
-  hasRelationship={!!aosEntity}
-  hasInventory={listings.length > 0}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
-/>
-  </section>
+              <strong>
+                {scoreboard.totalAssets}
+              </strong>
+            </div>
 
- <section className="aos-scoreboard">
-  <div className="aos-scoreboard-identity">
-    <div className="aos-scoreboard-logo">
-      {aosEntity?.logoUrl ? (
-        <img
-          src={aosEntity.logoUrl}
-          alt=""
-        />
-      ) : (
-        <span>
-          {(aosEntity?.displayName || "IXI")
-            .slice(0, 2)
-            .toUpperCase()}
-        </span>
-      )}
-    </div>
+            <div className="aos-metric">
+              <span>
+                ASSET VALUE
+              </span>
 
-    <div className="aos-scoreboard-company">
-      <strong>
-        {aosEntity?.displayName ||
-          "IXI ENTITY"}
-      </strong>
+              <strong>
+                {formatCurrency(
+                  scoreboard.assetValue
+                )}
+              </strong>
+            </div>
 
-      <span>
-        {aosEntity?.officeLocation ||
-          aosEntity?.location ||
-          "Office Location"}
-      </span>
-    </div>
-  </div>
+            <div className="aos-metric">
+              <span>
+                PEOPLE
+              </span>
 
-  <div className="aos-scoreboard-metrics">
-    <div>
-      <span>TOTAL ASSETS</span>
-      <strong>
-        {aosScoreboard.assets}
-      </strong>
-    </div>
+              <strong>
+                {scoreboard.people}
+              </strong>
+            </div>
 
-    <div>
-      <span>ASSET VALUE</span>
-      <strong>
-        {formatAosValue(
-          aosScoreboard.value
-        )}
-      </strong>
-    </div>
+            <div className="aos-metric">
+              <span>
+                YARDS
+              </span>
 
-    <div>
-      <span>PEOPLE</span>
-      <strong>
-        {aosScoreboard.people || 0}
-      </strong>
-    </div>
+              <strong>
+                {scoreboard.yards}
+              </strong>
+            </div>
 
-    <div>
-      <span>YARDS</span>
-      <strong>
-        {aosScoreboard.yards || 0}
-      </strong>
-    </div>
+            <div className="aos-metric">
+              <span>
+                MACHINE LOCATIONS
+              </span>
 
-    <div>
-      <span>MACHINE LOCATIONS</span>
-      <strong>
-        {aosScoreboard.machineLocations || 0}
-      </strong>
-    </div>
-  </div>
+              <strong>
+                {
+                  scoreboard
+                    .machineLocations
+                }
+              </strong>
+            </div>
+          </div>
 
-  <div className="aos-scoreboard-actions">
-    <button
-      type="button"
-      className="aos-scoreboard-action"
-      aria-label="Add"
-      title="Add"
-      onClick={() => {
-        setObjectCreateError("");
-        setShowObjectCreator(true);
-      }}
-    >
-      +
-    </button>
 
-    <button
-      type="button"
-      className="aos-scoreboard-action"
-      aria-label="More actions"
-      title="More actions"
-    >
-      ⋯
-    </button>
-  </div>
-</section>
-   
-{aosContext === "entity" ? (
-  <section className="aos-entity-gateway">
-    <div className="aos-entity-card">
-      <div className="aos-entity-card-eyebrow">
-        ENTITY
-      </div>
+          <div className="aos-scorecard-actions">
+            <button
+              type="button"
+              className="aos-scorecard-action"
+              aria-label="Add"
+              title="Add"
+            >
+              <i className="fa-solid fa-plus" />
+            </button>
 
-      <strong className="aos-entity-card-name">
-        {aosEntity?.displayName ||
-          "IXI ENTITY"}
-      </strong>
+            <button
+              type="button"
+              className="aos-scorecard-action"
+              aria-label="More"
+              title="More"
+            >
+              <i className="fa-solid fa-ellipsis" />
+            </button>
+          </div>
+        </section>
 
-      <div className="aos-entity-card-summary">
-        <span>
-          {aosScoreboard.assets} Assets
-        </span>
 
-        <span>
-          {aosScoreboard.jobs} Jobs
-        </span>
+        {/* ===================================
+            AOS OBJECT FIELD
 
-        <span>
-          {aosScoreboard.forSale} For Sale
-        </span>
+            ENTITY FACE GOES HERE NEXT.
+            NO CHASSIS ON ROOT.
+            =================================== */}
 
-        <span>
-          {formatAosValue(
-            aosScoreboard.value
-          )} Value
-        </span>
-      </div>
-    </div>
+        <section className="aos-object-field">
+          {loading ? (
+            <div className="aos-status">
+              Loading AOS...
+            </div>
+          ) : null}
 
-    <div className="aos-context-grid">
-      {aosEntityContexts.map(
-        context => (
-          <button
-            key={context.id}
-            type="button"
-            className={`aos-context-card ${
-              context.enabled
-                ? "is-enabled"
-                : "is-disabled"
-            }`}
-            onClick={() => {
-              if (!context.enabled) {
-                return;
+          {!loading && error ? (
+            <div className="aos-status error">
+              {error}
+            </div>
+          ) : null}
+
+          {!loading &&
+          !error &&
+          aosEntity ? (
+            <div
+              className="aos-entity-face-mount"
+              data-entity-id={
+                aosEntity?.entityId || ""
               }
-
-              setAosContext(
-                context.id
-              );
-            }}
-          >
-            <span className="aos-context-label">
-              {context.label}
-            </span>
-
-            <strong className="aos-context-count">
-              {context.count}
-            </strong>
-
-            <span className="aos-context-description">
-              {context.description}
-            </span>
-
-            <span className="aos-context-open">
-              {context.enabled
-                ? "OPEN →"
-                : "COMING"}
-            </span>
-          </button>
-        )
-      )}
-    </div>
-  </section>
-) : null}
-
-{aosContext === "equipment" ? (
-  <section className="aos-context-header">
-    <button
-      type="button"
-      className="aos-context-back"
-      onClick={() =>
-        setAosContext("entity")
-      }
-    >
-      ← {aosEntity?.displayName ||
-        "ENTITY"}
-    </button>
-
-    <span className="aos-context-divider">
-      /
-    </span>
-
-    <strong>
-      EQUIPMENT
-    </strong>
-
-    <span className="aos-context-total">
-      {aosScoreboard.assets} MACHINES
-    </span>
-  </section>
-) : null}
-
-{aosContext === "equipment" ? (
-  <>
-      
-<IXIChassis>
-  <aside className="ixi-command-left">
-    <section className="ixi-pocket-row">
- 
- <IXIPocketL1
-  leftPocketMode={leftPocketMode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-
-<IXIPocketL2
-  leftPocket2Mode={leftPocket2Mode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-</section>
-  </aside>
-
-   <div className="ixi-command-center">
-  
-       <IXIChassisControls
-  listings={workspaceListings}  
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-  workspaceFilters={workspaceFilters}
-  setWorkspaceFilters={setWorkspaceFilters}
-  savedBoardMode={savedBoardMode}
-  setSavedBoardMode={setSavedBoardMode}
-  pocketThumbSize={pocketThumbSize}
-  setPocketThumbSize={setPocketThumbSize}
-  ixiCardState={ixiCardState}
-  ixiColorFilters={ixiColorFilters}
-  toggleColorFilter={toggleColorFilter}
-  ixiOutlineFilter={ixiOutlineFilter}
-  toggleOutlineFilter={toggleOutlineFilter}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
-  railRevealed={railRevealed}
-  toggleRailRevealed={toggleRailRevealed}
-
-  searchSurfaceRevealed={searchSurfaceRevealed}
-  toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}/>
-                </div>
-
-  <aside className="ixi-command-right">
-  <section className="ixi-pocket-row">
-    <IXIPocketR1
-  rightPocketMode={rightPocketMode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
-
-<IXIPocketR2
-  rightPocket2Mode={rightPocket2Mode}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  WorkspaceDropPad={WorkspaceDropPad}
-  movePocketToStack={movePocketToStack}
-  recallPocketToBoard={recallPocketToBoard}
-  rotatePocket={rotatePocket}
-  toggleArmedDestination={toggleArmedDestination}
-  pocketThumbSize={pocketThumbSize}
-  getListingById={getListingById}
-  IXISortableMachineCard={IXISortableMachineCard}
-  getIxiColorValue={getIxiColorValue}
-  ixiCardState={ixiCardState}
-/>
- </section>
-  </aside>
-    </IXIChassis>
-
-              
-<IXIActiveStackZone
-  WorkspaceDropZone={WorkspaceDropZone}
-  activeStacksOpen={activeStacksOpen}
-  activeStackHover={activeStackHover}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
-  toggleActiveStack={toggleActiveStack}
-  toggleActiveStackLayout={toggleActiveStackLayout}
-  moveActiveStackToContainer={moveActiveStackToContainer}
-  sendActiveStackToTheater={sendActiveStackToTheater}
-  activeStackSendMenu={activeStackSendMenu}
-  setActiveStackSendMenu={setActiveStackSendMenu}
-  activeStackLayouts={activeStackLayouts}
-  getListingById={getListingById}
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
-  toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
-  cardScaleMode={cardScaleMode}
-  getSellerListingCardProps={getSellerListingCardProps}
-/>
-              
-   <IXIBoardSurface
-  scaleMode={cardScaleMode}
->
-    
-<IXIBoard
-  items={boardItems}
-  cardContext="inventory"
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
-  toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  armedDestination={armedDestination}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
-  draggingListingId={draggingListingId}
-  ghostListingId={ghostListingId}
-  enableCardScaling={true}
-  cardScaleMode={cardScaleMode}
-  cardScaleMetrics={cardScaleMetrics}
-  getSellerListingCardProps={getSellerListingCardProps}
-
-  getCustomItemId={item =>
-  item?.type === "AOS CREATE OBJECT"
-    ? item.id
-    : null
-}
-
-renderCustomItem={({
-  item,
-  id,
-  dragHandleProps
-}) => {
-  if (
-    item?.type !== "AOS CREATE OBJECT"
-  ) {
-    return null;
-  }
-
-  const temporaryObjectListing = {
-    id: {
-      uuid: "__aos_create__"
-    },
-
-    title:
-      objectCreateForm.displayName ||
-      "NEW OBJECT",
-
-    type:
-      objectCreateForm.objectType ||
-      "job",
-
-    category:
-      objectCreateForm.customerCategory ||
-      "OBJECT",
-
-    price:
-      objectCreateForm.value ||
-      "",
-
-    location:
-      objectCreateForm.location ||
-      "",
-
-    hours: "",
-
-    age: "—",
-    views: "—",
-    states: "—",
-
-    imageUrls: [],
-
-    publicData: {
-      objectType:
-        objectCreateForm.objectType ||
-        "job",
-
-      customerCategory:
-        objectCreateForm.customerCategory ||
-        "",
-
-      customerAssetId:
-        objectCreateForm.customerAssetId ||
-        "",
-
-      factualTitle:
-        objectCreateForm.factualTitle ||
-        "",
-
-      location:
-        objectCreateForm.location ||
-        ""
-    }
-  };
-
-  return (
-    <IXIObjectCreateCard
-      listing={temporaryObjectListing}
-      dragHandleProps={dragHandleProps}
-
-      cardContext="enterprise"
-      presentation="seller"
-      sellerMode={true}
-      creationMode={false}
-
-      priceValue={
-        objectCreateForm.value
-      }
-
-      onPriceChange={value =>
-        updateObjectCreateForm(
-          "value",
-          value
-        )
-      }
-
-      locationValue={
-        objectCreateForm.location
-      }
-
-      onLocationChange={value =>
-        updateObjectCreateForm(
-          "location",
-          value
-        )
-      }
-
-      machineAccess={
-        objectCreateForm.machineAccess
-      }
-
-      machineChannel={
-        objectCreateForm.machineChannel
-      }
-
-      machinePlacementBusy={
-        objectCreateWorking
-      }
-
-      onMachinePlacementChange={(
-        listing,
-        nextPlacement
-      ) => {
-        updateObjectCreateForm(
-          "machineAccess",
-          nextPlacement?.machineAccess ||
-            nextPlacement?.access ||
-            "private"
-        );
-
-        updateObjectCreateForm(
-          "machineChannel",
-          nextPlacement?.machineChannel ||
-            nextPlacement?.channel ||
-            "private"
-        );
-      }}
-
-      machineFace={1}
-      onCycleMachineFace={() => {}}
-
-      saved={false}
-      onToggleSaved={() => {}}
-
-      armedDestination={
-        armedDestination
-      }
-
-      onSendFront={() => {}}
-      onSendBack={() => {}}
-      onSendToArmedDestination={() => {}}
-
-      onPause={() => {}}
-      onReactivate={() => {}}
-
-      onDelete={() => {
-        setObjectCreateError("");
-        setObjectCreateForm(
-          createEmptyAosObjectForm()
-        );
-        setShowObjectCreator(false);
-      }}
-    />
-  );
-}}
-    
-    />
-        </IXIBoardSurface>
-
-<button
-  type="button"
-  onClick={cycleCardScaleMode}
-  style={{
-    position: "fixed",
-    right: "24px",
-    bottom: "24px",
-    zIndex: 9999,
-    background: "#111",
-    color: "#FFC400",
-    border: "1px solid rgba(255,196,0,.55)",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    fontSize: "11px",
-    fontWeight: 900,
-    letterSpacing: ".08em",
-    cursor: "pointer"
-  }}
->
-  SCALE: {cardScaleMode.toUpperCase()}
-</button>
-
-        {visibleSavedListings.length === 0 && (
-  <div className="empty">
-    <h3>HELP US BUILD OUR MARKETPLACE</h3>
-    <p>
-      Touch a machine. Create a relationship. Machines will appear here.
-    </p>
-  </div>
-)}
-
-  </>
-) : null}
-
-</main>
-</IXIDragEngine>
-);
-}}
-</IXIWorkspaceEngine>
+            >
+              {/*
+                IXIAosEntityCard
+                gets mounted here next.
+              */}
+            </div>
+          ) : null}
+        </section>
+      </main>
 
       <Footer />
-                
+
+
       <style jsx>{`
         * {
           box-sizing: border-box;
@@ -2133,1851 +641,441 @@ renderCustomItem={({
 
         :global(body) {
           margin: 0;
-          font-family: Arial, sans-serif;
+
+          font-family:
+            Arial,
+            sans-serif;
+
           background: #0b0b0b;
           color: #d6d6d6;
         }
 
-      main {
-  min-height: 72vh;
-  padding: 14px 5% 160px;
+
+        main {
+          min-height: 72vh;
+
+          padding:
+            14px
+            5%
+            160px;
+
           background:
-            radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
-            linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
+            radial-gradient(
+              circle at 50% 0%,
+              rgba(255,196,0,.05),
+              transparent 34%
+            ),
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.014),
+              rgba(255,255,255,0)
+            ),
             #0b0b0b;
         }
 
 
+        .aos-environment {
+          width: 100%;
+          margin: 0 auto;
+        }
 
-       .saved-environment-shell {
-  width: 100%;
-  margin: 0 auto;
-}
 
-.aos-scoreboard {
-  width: min(100%, 1320px);
-  height: 30px;
+        /* ===================================
+           ENTITY SCORECARD
+           =================================== */
 
-  margin: 2px auto 8px;
-  padding: 0 8px 0 12px;
+        .aos-scorecard {
+          width: min(
+            100%,
+            1320px
+          );
 
-  display: grid;
-  grid-template-columns:
-    minmax(180px, auto)
-    1fr
-    auto;
+          min-height: 92px;
 
-  align-items: center;
-  gap: 18px;
+          margin:
+            2px
+            auto
+            26px;
 
-  border-top:
-    1px solid rgba(255,255,255,.045);
+          padding:
+            14px
+            18px;
 
-  border-bottom:
-    1px solid rgba(255,255,255,.055);
+          display: grid;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.012),
-      rgba(255,255,255,0)
-    );
+          grid-template-columns:
+            minmax(260px, 1.25fr)
+            minmax(620px, 3fr)
+            auto;
 
-  white-space: nowrap;
-}
+          align-items: center;
 
-.aos-scoreboard-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+          gap: 30px;
 
-  color: rgba(255,255,255,.78);
+          border-top:
+            1px solid
+            rgba(255,255,255,.055);
 
-  font-size: 9px;
-  font-weight: 950;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-}
+          border-bottom:
+            1px solid
+            rgba(255,255,255,.07);
 
-.aos-scoreboard-metrics {
-  min-width: 0;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.018),
+              rgba(255,255,255,.004)
+            );
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
+          box-shadow:
+            inset 0 1px 0
+            rgba(255,255,255,.018);
+        }
 
-  overflow: hidden;
-}
 
-.aos-scoreboard-metrics span {
-  color: rgba(255,255,255,.43);
+        .aos-scorecard-identity {
+          min-width: 0;
 
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .42px;
-  text-transform: uppercase;
-}
+          display: flex;
+          align-items: center;
 
-.aos-scoreboard-metrics i {
-  color: rgba(255,255,255,.12);
+          gap: 14px;
+        }
 
-  font-size: 8px;
-  font-style: normal;
-  font-weight: 700;
-}
 
-.aos-scoreboard-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 7px;
-}
+        .aos-scorecard-logo {
+          width: 54px;
+          height: 54px;
 
-.aos-scoreboard-action {
-  width: 22px;
-  height: 18px;
+          flex:
+            0
+            0
+            54px;
 
-  padding: 0;
+          display: grid;
+          place-items: center;
 
-  display: grid;
-  place-items: center;
+          overflow: hidden;
 
-  border: 0;
-  border-radius: 3px;
+          border:
+            1px solid
+            rgba(255,255,255,.08);
 
-  background: rgba(255,255,255,.025);
+          border-radius: 6px;
 
-  color: rgba(255,196,0,.72);
+          background:
+            rgba(255,255,255,.025);
 
-  font-size: 11px;
-  font-weight: 950;
-  line-height: 1;
+          color:
+            rgba(255,196,0,.78);
 
-  cursor: pointer;
-}
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: .8px;
+        }
 
-.aos-scoreboard-action:hover {
-  background: rgba(255,196,0,.07);
-  color: #FFC400;
 
-  box-shadow:
-    0 0 8px rgba(255,196,0,.09);
-}
+        .aos-scorecard-logo img {
+          width: 100%;
+          height: 100%;
 
-       
+          object-fit: contain;
 
-/* =============================== */
-/* IXI POCKET STATION CHASSIS V12  */
-/* =============================== */
+          display: block;
+        }
 
-.ixi-command-chassis {
-  --station-w: 150px;
-  --station-h: 102px;
-  --control-half: 320px;
-  --station-gap: clamp(24px, 2.1vw, 40px);
 
-  width: 100%;
-  margin: -14 auto 20px;
+        .aos-scorecard-name {
+          min-width: 0;
 
-  position: relative;
+          display: flex;
+          flex-direction: column;
 
-  display: block;
-}
+          gap: 6px;
+        }
 
-.ixi-command-center {
-  position: relative;
-  z-index: 5;
 
-  width: min(100%, 680px);
-  min-width: 0;
+        .aos-scorecard-name strong {
+          overflow: hidden;
 
-  margin: 0 auto;
+          color:
+            rgba(255,255,255,.9);
 
-  display: flex;
-  justify-content: center;
-}
+          font-size: 13px;
+          font-weight: 950;
 
-.ixi-command-left,
-.ixi-command-right {
-  position: absolute;
-  top: 56px;
+          letter-spacing: .25px;
 
-  width: calc((var(--station-w) * 2) + var(--station-gap));
-  height: var(--station-h);
+          text-transform: uppercase;
 
-  pointer-events: none;
-  z-index: 3;
-}
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
 
-.ixi-command-left {
-  right: calc(50% + var(--control-half) + var(--station-gap));
-  left: auto;
-}
 
-.ixi-command-right {
-  left: calc(50% + var(--control-half) + var(--station-gap));
-  right: auto;
-}
+        .aos-scorecard-name span {
+          color:
+            rgba(255,255,255,.38);
 
-.ixi-pocket-row {
-  width: 100%;
-  height: var(--station-h);
+          font-size: 9px;
+          font-weight: 800;
 
-  margin: 0;
+          letter-spacing: .22px;
 
-  display: grid;
-  grid-template-columns: var(--station-w) var(--station-w);
-  gap: var(--station-gap);
+          text-transform: uppercase;
+        }
 
-  position: relative;
-  z-index: 2;
 
-  pointer-events: none;
-}
+        .aos-scorecard-metrics {
+          min-width: 0;
 
-/* Base station shell */
-.ixi-pocket-left,
-.ixi-pocket-right {
-  width: var(--station-w);
-  max-width: var(--station-w);
-  height: var(--station-h);
+          display: grid;
 
-  margin: 0;
-  padding: 8px;
+          grid-template-columns:
+            repeat(
+              5,
+              minmax(90px, 1fr)
+            );
 
-  position: relative;
-  top: auto;
+          gap: 24px;
 
-  cursor: default !important;
-
-  border: 1px solid rgba(255,255,255,.055);
-  border-radius: 16px 10px 16px 10px;
+          align-items: center;
+        }
 
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.024), rgba(255,255,255,0)),
-    radial-gradient(circle at top left, rgba(255,196,0,.035), transparent 60%),
-    rgba(7,7,7,.76);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.028),
-    0 8px 18px rgba(0,0,0,.20);
-
-  overflow: visible;
-
-  pointer-events: auto;
-  z-index: 8;
-}
-
-.ixi-pocket-left::before,
-.ixi-pocket-right::before {
-  content: "";
-
-  position: absolute;
-  left: 9px;
-  right: 9px;
-  top: 8px;
-
-  height: 1px;
-
-  background: rgba(255,196,0,.16);
-  pointer-events: none;
-}
-
-/* Wide order:
-   III | I | SEARCH | II | IV
-*/
-.ixi-pocket-l2 {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.ixi-pocket-r2 {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-/* =============================== */
-/* IXI DESTINATION STATES          */
-/* =============================== */
-
-.ixi-pocket-left.occupied,
-.ixi-pocket-right.occupied {
-  border-color: rgba(255,196,0,.24);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.028),
-    0 8px 18px rgba(0,0,0,.20),
-    0 0 12px rgba(255,196,0,.08);
-}
-
-.ixi-pocket-left.destination-armed,
-.ixi-pocket-right.destination-armed {
-  border-color: rgba(0,194,255,.72);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 18px rgba(0,0,0,.20),
-    0 0 18px rgba(0,194,255,.22);
-}
-
-.ixi-pocket-left.destination-armed::before,
-.ixi-pocket-right.destination-armed::before {
-  background: rgba(0,194,255,.82);
-}
-
-/* Roman numerals + loop actuator follow pocket state */
-
-/* empty / dormant */
-.ixi-pocket-left .ixi-pocket-topline span,
-.ixi-pocket-right .ixi-pocket-topline span {
-  color: rgba(255,255,255,.18);
-  text-shadow: none;
-}
-
-.ixi-pocket-left .ixi-pocket-loop-square,
-.ixi-pocket-right .ixi-pocket-loop-square {
-  border-color: rgba(255,255,255,.18);
-  background: rgba(255,255,255,.10);
-  box-shadow: none;
-}
-
-/* occupied = yellow */
-.ixi-pocket-left.occupied .ixi-pocket-topline span,
-.ixi-pocket-right.occupied .ixi-pocket-topline span {
-  color: rgba(255,196,0,.86);
-  text-shadow:
-    0 0 8px rgba(255,196,0,.18),
-    0 0 14px rgba(255,196,0,.08);
-}
-
-.ixi-pocket-left.occupied .ixi-pocket-loop-square,
-.ixi-pocket-right.occupied .ixi-pocket-loop-square {
-  border-color: rgba(255,196,0,.42);
-  background: rgba(255,196,0,.34);
-  box-shadow: 0 0 8px rgba(255,196,0,.16);
-}
-
-/* armed = cyan, overrides occupied */
-.ixi-pocket-left.destination-armed .ixi-pocket-topline span,
-.ixi-pocket-right.destination-armed .ixi-pocket-topline span {
-  color: rgba(0,194,255,.92);
-  text-shadow:
-    0 0 8px rgba(0,194,255,.26),
-    0 0 16px rgba(0,194,255,.12);
-}
-
-.ixi-pocket-left.destination-armed .ixi-pocket-loop-square,
-.ixi-pocket-right.destination-armed .ixi-pocket-loop-square {
-  border-color: rgba(0,194,255,.72);
-  background: rgba(0,194,255,.76);
-  box-shadow:
-    0 0 8px rgba(0,194,255,.28),
-    0 0 16px rgba(0,194,255,.12);
-}
-/* Armed destination action rail */
-
-.ixi-pocket-left.destination-armed .ixi-pocket-rail-action,
-.ixi-pocket-right.destination-armed .ixi-pocket-rail-action {
-  background: rgba(0,194,255,.38) !important;
-
-  box-shadow:
-    0 0 6px rgba(0,194,255,.18),
-    0 0 12px rgba(0,194,255,.08);
-}
-
-.ixi-pocket-left.destination-armed .ixi-pocket-action-rail,
-.ixi-pocket-right.destination-armed .ixi-pocket-action-rail {
-  filter: drop-shadow(0 0 6px rgba(0,194,255,.22));
-}
-
-/* =============================== */
-/* 1250px → 851px STACKED MODE     */
-/* =============================== */
-
-@media (max-width: 1250px) and (min-width: 851px) {
-  .ixi-command-chassis {
-    --control-half: 210px;
-    --station-gap: 20px;
-  }
-
-  .ixi-command-left,
-  .ixi-command-right {
-    top: -5px;
-
-    width: var(--station-w);
-    height: calc((var(--station-h) * 2) + 34px);
-  }
-
-  .ixi-command-left {
-    right: calc(50% + var(--control-half) + 20px);
-  }
-
-  .ixi-command-right {
-    left: calc(50% + var(--control-half) + 20px);
-  }
-
-  .ixi-pocket-row {
-    grid-template-columns: var(--station-w);
-    grid-template-rows: var(--station-h) var(--station-h);
-    gap: 20px;
-  }
-
-  .ixi-command-left .ixi-pocket-left:not(.ixi-pocket-l2) {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .ixi-command-right .ixi-pocket-right:not(.ixi-pocket-r2) {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .ixi-pocket-l2 {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .ixi-pocket-r2 {
-    grid-column: 1;
-    grid-row: 2;
-  }
-}
-
-/* =============================== */
-/* MOBILE — NO VISIBLE STATIONS    */
-/* =============================== */
-
-@media (max-width: 850px) {
-  .ixi-command-left,
-  .ixi-command-right,
-  .ixi-pocket-row,
-  .ixi-pocket-left,
-  .ixi-pocket-right {
-    display: none !important;
-  }
-}
-
-
-.aos-entity-gateway {
-  width: 100%;
-  padding: 28px 34px 40px;
-  box-sizing: border-box;
-}
-
-.aos-entity-card {
-  width: 100%;
-  min-height: 118px;
-  padding: 22px 26px;
-  box-sizing: border-box;
-
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 10px;
-  background: #111;
-
-  margin-bottom: 22px;
-}
-
-.aos-entity-card-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  opacity: 0.55;
-  margin-bottom: 7px;
-}
-
-.aos-entity-card-name {
-  display: block;
-  font-size: 24px;
-  line-height: 1.1;
-}
-
-.aos-entity-card-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 14px;
-
-  font-size: 12px;
-  opacity: 0.72;
-}
-
-.aos-context-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(3, minmax(220px, 1fr));
-  gap: 14px;
-}
-
-.aos-context-card {
-  position: relative;
-
-  min-height: 150px;
-  padding: 20px;
-
-  text-align: left;
-  color: inherit;
-
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 10px;
-  background: #101010;
-
-  cursor: pointer;
-}
-
-.aos-context-card.is-enabled:hover {
-  border-color: rgba(255,255,255,0.42);
-  transform: translateY(-1px);
-}
-
-.aos-context-card.is-disabled {
-  opacity: 0.38;
-  cursor: default;
-}
-
-.aos-context-label {
-  display: block;
-
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.aos-context-count {
-  display: block;
-
-  margin-top: 14px;
-
-  font-size: 34px;
-  line-height: 1;
-}
-
-.aos-context-description {
-  display: block;
-
-  margin-top: 10px;
-
-  font-size: 12px;
-  opacity: 0.6;
-}
-
-.aos-context-open {
-  position: absolute;
-  right: 18px;
-  bottom: 16px;
-
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  opacity: 0.65;
-}
-
-.aos-context-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  min-height: 42px;
-  padding: 0 34px;
-
-  border-bottom: 1px solid
-    rgba(255,255,255,0.12);
-}
-
-.aos-context-back {
-  border: 0;
-  padding: 0;
-
-  background: transparent;
-  color: inherit;
-
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.aos-context-divider {
-  opacity: 0.35;
-}
-
-.aos-context-total {
-  margin-left: auto;
-
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  opacity: 0.55;
-}
-
-
-
-       .workspace-controls {
-  margin: 0 auto;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-    .ixi-toolbar {
-  width: 600px;
-  max-width: 100%;
-
-  margin: 18px auto 0;
-  position: relative;
-  left: 10px;
-  
-  padding: 0;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(8, 1fr)
-    repeat(3, 1fr);
-
-  justify-content: center;
-  align-items: center;
-
-  gap: 4px;
-}
-
-        .ixi-toolbar button {
-          border: none;
-          background: transparent;
+
+        .aos-metric {
+          min-width: 0;
+
+          display: flex;
+          flex-direction: column;
+
+          gap: 7px;
+        }
+
+
+        .aos-metric span {
+          color:
+            rgba(255,255,255,.32);
+
+          font-size: 7px;
+          font-weight: 950;
+
+          letter-spacing: .58px;
+
+          text-transform: uppercase;
+
+          white-space: nowrap;
+        }
+
+
+        .aos-metric strong {
+          overflow: hidden;
+
+          color:
+            rgba(255,255,255,.84);
+
+          font-size: 14px;
+          font-weight: 950;
+
+          line-height: 1;
+
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+
+        .aos-scorecard-actions {
+          display: flex;
+
+          align-items: center;
+          justify-content: flex-end;
+
+          gap: 8px;
+        }
+
+
+        .aos-scorecard-action {
+          width: 30px;
+          height: 26px;
+
+          display: grid;
+          place-items: center;
+
           padding: 0;
+
+          border:
+            1px solid
+            rgba(255,255,255,.055);
+
+          border-radius: 4px;
+
+          background:
+            rgba(255,255,255,.022);
+
+          color:
+            rgba(255,196,0,.72);
+
+          font-size: 10px;
+
           cursor: pointer;
         }
 
-        .ixi-toolbar button:hover {
-          transform: translateY(-1px);
+
+        .aos-scorecard-action:hover {
+          border-color:
+            rgba(255,196,0,.18);
+
+          background:
+            rgba(255,196,0,.055);
+
+          color: #FFC400;
 
           box-shadow:
-            0 0 0 1px rgba(255,255,255,.03),
-            0 0 8px rgba(255,196,0,.10);
-        }
-
-        .ixi-color-filter.active,
-        .ixi-thickness-filter.active {
-          box-shadow:
-            0 0 0 1px rgba(255,196,0,.08),
-            0 0 12px rgba(255,196,0,.18);
-
-          border-color: rgba(255,196,0,.24) !important;
-        }
-
-        .ixi-color-filter {
-          width: 20px !important;
-          height: 8px !important;
-          border: 1px solid rgba(255,255,255,.055) !important;
-          border-radius: 1px !important;
-          padding: 0 !important;
-
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.025),
-            inset 0 -1px 0 rgba(0,0,0,.32);
-        }
-
-        .ixi-color-filter.color-none {
-          background: rgba(255,255,255,.035) !important;
-        }
-
-        .ixi-color-filter.color-green {
-          background: rgba(56,161,105,.42) !important;
-        }
-
-        .ixi-color-filter.color-yellow {
-          background: rgba(255,196,0,.42) !important;
-        }
-
-        .ixi-color-filter.color-red {
-          background: rgba(229,62,62,.42) !important;
-        }
-
-        .ixi-color-filter.color-cyan {
-          background: rgba(0,194,255,.42) !important;
-        }
-
-        .ixi-color-filter.color-white {
-          background: rgba(255,255,255,.34) !important;
-        }
-
-        .ixi-color-filter.color-blue {
-          background: rgba(49,130,206,.42) !important;
-        }
-
-        .ixi-color-filter.color-orange {
-          background: rgba(249,133,18,.42) !important;
-        }
-
-        .ixi-thickness-filter {
-  width: 24px;
-  height: 14px;
-  border: 1px solid rgba(255,255,255,.055) !important;
-  border-radius: 3px;
-  background: rgba(255,255,255,.018) !important;
-  position: relative;
-
-  margin-left: -2px;
-  margin-right: -2px;
-}
-        .ixi-thickness-filter::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 15px;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,.28);
-}
-
-        .ixi-thickness-filter.thin::after {
-          height: 1px;
-        }
-
-        .ixi-thickness-filter.medium::after {
-          height: 3px;
-        }
-
-        .ixi-thickness-filter.thick::after {
-          height: 5px;
+            0 0 10px
+            rgba(255,196,0,.08);
         }
 
 
-@keyframes ixiPocketPulse {
-  0%, 100% {
-    opacity: .48;
-    transform: translateX(-50%) scale(.82);
-  }
+        /* ===================================
+           ROOT OBJECT FIELD
+           =================================== */
 
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.08);
-  }
-}
+        .aos-object-field {
+          width: min(
+            100%,
+            1600px
+          );
 
+          min-height: 520px;
 
-/* =============================== */
-/* IXI POCKET CATCH ZONE DEBUG     */
-/* =============================== */
-
-/* Base catch pad is inert unless explicitly assigned */
-.ixi-pocket-catch-pad {
-  position: absolute;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* L1 local catch only */
-.ixi-pocket-catch-pad.catch-l1 {
-  left: 0;
-  right: auto;
-  top: 92px;
-
-  width: 360px;
-  height: 140px;
-
-  pointer-events: auto;
-
-  background: transparent;
-outline: none;
-}
-
-/* R1 local catch only */
-.ixi-pocket-catch-pad.catch-r1 {
-  right: 20;
-  left: auto;
-  top: 92px;
-
-  width: 340px;
-  height: 140px;
-
-  pointer-events: auto;
-
-  background: transparent;
-outline: none;
-}
-
-/* L2 screen-left lower catch lane only */
-.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
-  position: fixed;
-
-  left: 0;
-  right: auto;
-  top: 405px;
-
-  width: 150px;
-  height: calc(100vh - 405px);
-
-  pointer-events: auto;
-  z-index: 999;
-
- background: transparent;
-outline: none;
-}
-
-/* R2 screen-right lower catch lane only */
-.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
-  position: fixed;
-
-  right: 0;
-  left: auto;
-  top: 420px;
-
-  width: 150px;
-  height: calc(100vh - 420px);
-
-  pointer-events: auto;
-  z-index: 999;
-
-  background: transparent;
-outline: none;
-}
-
-.ixi-pocket-thumbs.thumb-size-small {
-  --pocket-thumb-w: 72px;
-  --pocket-thumb-h: 48px;
-  --pocket-thumbs-top: 30px;
-}
-
-.ixi-pocket-thumbs.thumb-size-medium {
-  --pocket-thumb-w: 90px;
-  --pocket-thumb-h: 60px;
-  --pocket-thumbs-top: 30px;
-}
-
-.ixi-pocket-thumbs.thumb-size-large {
-  --pocket-thumb-w: 108px;
-  --pocket-thumb-h: 72px;
-  --pocket-thumbs-top: 23px;
-}
-
-.ixi-pocket-right .ixi-pocket-thumbs {
-  left: 50%;
-  right: auto;
-}
-
-.ixi-pocket-right .ixi-pocket-thumbs.r1-thumbs {
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-}
-/* PEEK POCKET COVER */
-
-
-.ixi-pocket-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ixi-pocket-thumb span {
-  display: block;
-  padding: 5px;
-
-  color: rgba(255,255,255,.62);
-
-  font-size: 7px;
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-/* Station states — no accordion fan */
-.ixi-pocket-left.pocket-mode-closed .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-closed .ixi-pocket-thumbs {
-  opacity: .28;
-}
-
-.ixi-pocket-left.pocket-mode-peek .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-peek .ixi-pocket-thumbs,
-.ixi-pocket-left.pocket-mode-open .ixi-pocket-thumbs,
-.ixi-pocket-right.pocket-mode-open .ixi-pocket-thumbs {
-  opacity: 1;
-}
-
-.ixi-pocket-left.occupied .ixi-pocket-thumb,
-.ixi-pocket-right.occupied .ixi-pocket-thumb {
-  border-color: rgba(255,196,0,.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 8px 16px rgba(0,0,0,.30),
-    0 0 12px rgba(255,196,0,.055);
-}
-
-/* =============================== */
-/* IXI POCKET STATION INNER GUTS   */
-/* =============================== */
-
-.ixi-pocket-thumb {
-  width: var(--pocket-thumb-w, 90px) !important;
-  height: var(--pocket-thumb-h, 60px) !important;
-
-  position: absolute !important;
-  left: 50% !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: 0 !important;
-
-  transform: translateX(-50%) !important;
-
-  overflow: hidden !important;
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 7px 7px 0 0;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 34%),
-    linear-gradient(135deg, rgba(255,255,255,.018), transparent 45%),
-    rgba(18,18,18,.94);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.04),
-    0 8px 16px rgba(0,0,0,.30);
-
-  z-index: 34;
-}
-
-.ixi-pocket-thumbs {
-  position: absolute;
-  left: 50%;
-  top: var(--pocket-thumbs-top, 30px);
-  width: calc(100% - 14px);
-  height: var(--pocket-thumb-h, 60px);
-
-  transform: translateX(-50%);
-  overflow: visible;
-
-  border: 0;
-  background: transparent;
-
-  border: 1px dashed rgba(255,255,255,.08);
-  border-radius: 11px 7px 11px 7px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0) 20%
-    ),
-    linear-gradient(
-      0deg,
-      rgba(255,255,255,.02),
-      transparent 30%
-    ),
-    rgba(10,10,10,.44);
-
-  pointer-events: auto;
-  z-index: 30;
-}
-
-.ixi-pocket-thumb::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: rgba(255,255,255,.12);
-  z-index: 2;
-  pointer-events: none;
-}
-
-.ixi-pocket-left::after,
-.ixi-pocket-right::after {
-  content: "3";
-
-  position: absolute;
-  left: 7px;
-  right: 7px;
-  top: 25px;
-  bottom: 7px;
-
-  border: 1px dashed rgba(255,255,255,.08);
-  border-radius: 11px 7px 11px 7px;
-
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0) 20%),
-    rgba(10,10,10,.38);
-
-  color: rgba(255,255,255,.22);
-  font-size: 5.8px;
-  font-weight: 950;
-  letter-spacing: .55px;
-
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-
-  padding: 0 0 6px 8px;
-
-  pointer-events: none;
-  z-index: 12;
-}
-
-
-.ixi-pocket-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ixi-pocket-thumb span {
-  display: block;
-  padding: 5px;
-
-  color: rgba(255,255,255,.62);
-
-  font-size: 7px;
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-.ixi-pocket-topline {
-  position: absolute;
-  left: 9px;
-  top: 10px;
-
-  display: flex;
-  align-items: center;
-  gap: 5px;
-
-  pointer-events: none;
-}
-
-.ixi-pocket-topline span {
-  color: rgba(255,196,0,.86);
-
-  font-size: 7.5px;
-  font-weight: 950;
-  letter-spacing: .72px;
-  text-transform: uppercase;
-}
-
-.ixi-pocket-topline strong {
-  color: rgba(255,255,255,.12);
-
-  font-size: 5px;
-  font-weight: 950;
-  letter-spacing: .58px;
-  text-transform: uppercase;
-}
-
-:global(.ixi-pocket-thumb) {
-  width: var(--pocket-thumb-w, 90px) !important;
-  height: var(--pocket-thumb-h, 60px) !important;
-  overflow: hidden !important;
-}
-
-:global(.ixi-pocket-thumb > div) {
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-
-:global(.ixi-pocket-thumb img) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
-}
-
-/* =============================== */
-/* IXI POCKET STATION BUTTONS V12  */
-/* existing buttons, new shell home */
-/* =============================== */
-
-.ixi-pocket-action-rail {
-  position: absolute;
-  top: 13px;
-  right: 9px;
-  
-  width: 82px;
-  height: 4px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: transparent;
-
-  z-index: 80;
-  pointer-events: auto;
-}
-
-.ixi-pocket-action-rail.left,
-.ixi-pocket-action-rail.right {
-  right: 9px;
-  left: auto;
-}
-
-.ixi-pocket-rail-action {
-  position: relative;
-
-  width: 15px;
-  height: 4px;
-
-  border: 0;
-  border-radius: 2px;
-
-  background: rgba(255,255,255,.12);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-.ixi-pocket-action-rail.is-empty {
-  background: transparent;
-}
-
-.ixi-pocket-action-rail.is-empty .ixi-pocket-rail-action {
-  opacity: .28;
-  pointer-events: auto;
-}
-
-.ixi-pocket-action-rail.has-machines.pocket-mode-closed {
-  background: transparent;
-}
-
-.ixi-pocket-action-rail.has-machines.pocket-mode-closed .ixi-pocket-rail-action {
-  opacity: .48;
-  pointer-events: auto;
-  background: rgba(255,196,0,.20);
-}
-
-.ixi-pocket-action-rail.has-machines.pocket-mode-peek .ixi-pocket-rail-action,
-.ixi-pocket-action-rail.has-machines.pocket-mode-open .ixi-pocket-rail-action {
-  opacity: 1;
-  pointer-events: auto;
-  background: rgba(255,255,255,.14);
-}
-
-.ixi-pocket-rail-action:hover {
-  background: rgba(255,196,0,.86) !important;
-  box-shadow: 0 0 8px rgba(255,196,0,.22);
-}
-
-.ixi-pocket-rail-action:hover::after {
-  content: attr(data-label);
-
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  white-space: nowrap;
-
-  color: rgba(255,255,255,.72);
-  font-size: 6.5px;
-  font-weight: 950;
-  letter-spacing: .55px;
-  text-transform: uppercase;
-
-  pointer-events: none;
-}
-
-/* LOADED + STAGED/OPEN = four row-2 search-surface dashes */
-.ixi-pocket-action-rail.has-machines.pocket-mode-peek,
-.ixi-pocket-action-rail.has-machines.pocket-mode-open {
-  background: transparent;
-}
-
-/* ACTUAL BUTTON — real click target */
-.ixi-pocket-direct-button {
-  position: absolute;
-
-  left: 50%;
-  bottom: -1px;
-
-  width: 34px;
-  height: 5px;
-
-  transform: translateX(-50%);
-
-  border: 0;
-  border-radius: 3px 3px 1px 1px;
-
-  background: rgba(255,255,255,.18);
-
-  padding: 0;
-  cursor: pointer;
-
-  z-index: 120;
-  pointer-events: auto;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    0 1px 3px rgba(0,0,0,.32);
-}
-
-.ixi-pocket-direct-button.left,
-.ixi-pocket-direct-button.right {
-  left: 50%;
-  right: auto;
-  bottom: -1px;
-  transform: translateX(-50%);
-}
-
-.ixi-pocket-direct-button:hover,
-.ixi-pocket-direct-button.is-live {
-  background: rgba(255,196,0,.95);
-  box-shadow: 0 0 8px rgba(255,196,0,.38);
-}
-
-.ixi-pocket-direct-button.has-load {
-  background: rgba(255,196,0,.34);
-}
-
-/* square thumb-loop actuator, rides above the power dash */
-.ixi-pocket-loop-square {
-  position: absolute;
-
-  width: 4px;
-  height: 14px;
-
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 1px;
-
-  background: rgba(255,255,255,.12);
-
-  padding: 0;
-
-  cursor: pointer;
-
-  z-index: 99999;
-  pointer-events: auto;
-
-  opacity: 0;
-}
-
-.ixi-pocket-loop-square.is-visible {
-  opacity: 1;
-}
-
-.ixi-pocket-loop-square.left {
-  top: 68px;
-  right: -2px;
-}
-
-.ixi-pocket-loop-square.right {
-  top: 68px;
-  left: -2px;
-}
-
-.ixi-pocket-loop-square:hover {
-  border-color: rgba(255,196,0,.62);
-  background: rgba(255,196,0,.72);
-}
-/* Roll-top cover: fixed dash/lip, cover moves behind it *
-
-
-/* =============================== */
-/* IXI ACTIVE STACK COMMAND PAD    */
-/* GLOBAL — SAVED MASTER CHASSIS   */
-/* =============================== */
-
-:global(.active-stack-zone) {
-  width: min(100%, 1320px);
-  max-width: 1320px;
-
-  margin: 10px auto 24px;
-
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-
-  align-items: center;
-  justify-items: center;
-
-  position: relative;
-  z-index: 20;
-}
-
-:global(.active-stack) {
-  width: 100%;
-  position: relative;
-
-  display: grid;
-  justify-items: center;
-}
-
-:global(.active-stack-dash) {
-  width: 34px;
-  height: 8px;
-
-  display: block;
-
-  border: 0;
-  border-bottom: 3px solid rgba(255,255,255,.14);
-
-  background: transparent;
-
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
-
-  position: relative;
-  z-index: 8;
-}
-
-:global(.active-stack-dash:hover) {
-  border-bottom-color: rgba(255,196,0,.48);
-  box-shadow: 0 3px 8px rgba(255,196,0,.12);
-}
-
-:global(.active-stack.open .active-stack-dash) {
-  border-bottom-color: rgba(255,196,0,.58);
-  box-shadow: 0 3px 10px rgba(255,196,0,.14);
-}
-
-:global(.active-stack.has-machines .active-stack-dash) {
-  border-bottom-color: rgba(255,196,0,.78);
-  box-shadow: 0 3px 12px rgba(255,196,0,.24);
-}
-
-:global(.active-stack.has-machines .active-stack-dash::after) {
-  content: "";
-
-  position: absolute;
-  left: 50%;
-  top: 8px;
-
-  width: 5px;
-  height: 5px;
-
-  transform: translateX(-50%);
-
-  background: rgba(255,196,0,.92);
-  box-shadow: 0 0 8px rgba(255,196,0,.38);
-}
-
-/* tray surface */
-:global(.active-stack-tray) {
-  width: min(100%, 1180px);
-  min-height: 230px;
-
-  margin: 8px auto 0;
-  padding: 42px 46px 18px;
-
-  position: relative;
-  display: block;
-  overflow: visible;
-  isolation: isolate;
-
-  border: 1px dashed rgba(255,196,0,.14);
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.035),
-      rgba(255,196,0,.008) 48%,
-      rgba(255,255,255,.010)
-    ),
-    rgba(8,8,8,.86);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.025),
-    0 0 18px rgba(255,196,0,.045);
-}
-
-:global(.active-stack-tray.stack-armed) {
-  border-color: rgba(255,196,0,.58);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.065),
-      rgba(255,196,0,.014)
-    ),
-    rgba(8,8,8,.90);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,196,0,.10),
-    0 0 24px rgba(255,196,0,.16);
-}
-
-:global(.active-stack-tray::before) {
-  content: "ACTIVE STACK DROP ZONE";
-
-  position: absolute;
-  left: 14px;
-  top: 12px;
-
-  color: rgba(255,255,255,.30);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .72px;
-  text-transform: uppercase;
-
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* corner destination dashes */
-:global(.active-stack-pocket-corners) {
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-  z-index: 42;
-}
-
-:global(.stack-pocket-power) {
-  position: absolute;
-
-  width: 18px;
-  height: 4px;
-
-  border: 0;
-  border-radius: 2px;
-
-  background: rgba(0,194,255,.42);
-
-  padding: 0;
-  cursor: pointer;
-  pointer-events: auto;
-
-  box-shadow: none;
-}
-
-:global(.stack-pocket-power:hover) {
-  background: rgba(0,194,255,.92);
-  box-shadow: 0 0 8px rgba(0,194,255,.30);
-}
-
-:global(.stack-pocket-power.top-left) {
-  top: 27px;
-  left: 14px;
-}
-
-:global(.stack-pocket-power.top-right) {
-  top: 27px;
-  right: 14px;
-}
-
-:global(.stack-pocket-power.bottom-left) {
-  bottom: 12px;
-  left: 14px;
-}
-
-:global(.stack-pocket-power.bottom-right) {
-  bottom: 12px;
-  right: 14px;
-}
-
-/* center action rail */
-:global(.active-stack-command-pad) {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-
-  width: 150px;
-  height: 4px;
-
-  transform: translateX(-50%);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: transparent;
-
-  z-index: 46;
-  pointer-events: auto;
-}
-
-:global(.stack-rail-action) {
-  position: relative;
-
-  width: 28px;
-  height: 4px;
-
-  border: 0;
-  border-radius: 0;
-
-  background: rgba(255,255,255,.13);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-:global(.stack-rail-action:hover) {
-  background: rgba(255,196,0,.86);
-  box-shadow: 0 0 8px rgba(255,196,0,.22);
-}
-
-:global(.stack-rail-action:hover::after) {
-  content: attr(data-label);
-
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  white-space: nowrap;
-
-  color: rgba(255,255,255,.72);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-
-  pointer-events: none;
-}
-
-:global(.active-stack-send-menu) {
-  position: absolute;
-  top: 28px;
-  left: 50%;
-
-  width: 190px;
-  height: 4px;
-
-  transform: translateX(-50%);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  z-index: 47;
-  pointer-events: auto;
-}
-
-:global(.stack-send-option) {
-  position: relative;
-
-  width: 28px;
-  height: 4px;
-
-  border: 0;
-  border-radius: 0;
-
-  background: rgba(255,255,255,.13);
-
-  padding: 0;
-  cursor: pointer;
-}
-
-:global(.stack-send-option:hover) {
-  background: rgba(0,194,255,.86);
-  box-shadow: 0 0 8px rgba(0,194,255,.22);
-}
-
-:global(.stack-send-option:hover::after) {
-  content: attr(data-label);
-
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  white-space: nowrap;
-
-  color: rgba(255,255,255,.72);
-
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-
-  pointer-events: none;
-}
-
-/* card field */
-:global(.active-stack-dropzone) {
-  min-height: 175px;
-
-  position: relative;
-  z-index: 2;
-
-  align-items: start;
-
-  border: 1px dashed rgba(255,255,255,.08);
-  border-radius: 9px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.018),
-      rgba(255,255,255,0)
-    ),
-    rgba(10,10,10,.42);
-}
-
-:global(.active-stack-dropzone.stack-horizontal) {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-
-  gap: 18px;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  padding: 10px 8px 12px;
-
-  scrollbar-width: thin;
-}
-
-:global(.active-stack-dropzone.stack-vertical) {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fill, minmax(250px, 300px));
-
-  gap: 18px;
-
-  justify-content: center;
-
-  padding: 10px 8px 12px;
-}
-
-:global(.active-stack-dropzone.stack-horizontal .active-stack-card) {
-  flex: 0 0 285px;
-  width: 285px;
-  min-width: 285px;
-}
-
-:global(.active-stack-dropzone.stack-vertical .active-stack-card) {
-  width: 100%;
-}
-
-:global(.active-stack-card) {
-  position: relative;
-  z-index: 3;
-
-  transition:
-    transform .15s ease,
-    opacity .15s ease,
-    box-shadow .15s ease;
-}
-
-:global(.active-stack-card:hover) {
-  transform: translateY(-2px);
-}
-
-:global(.active-stack-card.stack-dragging) {
-  z-index: 9999;
-  opacity: .96;
-
-  transform: translateY(-4px) scale(1.015);
-
-  box-shadow:
-    0 18px 36px rgba(0,0,0,.42),
-    0 0 0 1px rgba(255,196,0,.18);
-}
-
-:global(.active-stack-card.stack-ghost-target) {
-  transform: translateX(8px);
-}
-
-        .cards {
-          max-width: 1920px;
           margin: 0 auto;
 
-          min-height: 260px;
+          padding-top: 20px;
 
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
-          gap: 22px;
-          align-items: start;
-          justify-content: center;
+          position: relative;
         }
 
-        .cards.single-card {
-          grid-template-columns: minmax(250px, 300px);
+
+        .aos-entity-face-mount {
+          width: 100%;
+
+          display: flex;
+
           justify-content: center;
+          align-items: flex-start;
         }
 
-        :global(.ixi-drag-overlay-card) {
-  width: 300px;
-  max-width: 300px;
-  pointer-events: none;
-  z-index: 999999;
-}
 
-:global(.ixi-board-sortable-card) {
-  width: 100%;
-  max-width: 300px;
-  min-width: 250px;
-
-  justify-self: center;
-  align-self: start;
-
-  touch-action: none;
-}
-
-:global(.ixi-board-sortable-card > *) {
-  width: 100%;
-}
-        .empty {
-          max-width: 520px;
-          margin: 38px auto 0;
-          padding: 38px 28px;
+        .aos-status {
+          padding: 40px 20px;
 
           text-align: center;
 
-          border: 1px solid rgba(255,255,255,.06);
-          border-radius: 14px;
+          color:
+            rgba(255,255,255,.38);
 
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-            #111;
+          font-size: 10px;
+          font-weight: 800;
 
-          box-shadow:
-            0 14px 34px rgba(0,0,0,.18);
+          letter-spacing: .4px;
+
+          text-transform: uppercase;
         }
 
-        .empty h3 {
-          margin: 0 0 8px;
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
+
+        .aos-status.error {
+          color:
+            rgba(255,110,110,.8);
         }
 
-        .empty p {
-          margin: 0;
-          color: rgba(255,255,255,.42);
-          font-size: 12px;
+
+        @media (
+          max-width: 1100px
+        ) {
+          .aos-scorecard {
+            grid-template-columns:
+              1fr
+              auto;
+
+            gap:
+              16px
+              20px;
+          }
+
+          .aos-scorecard-metrics {
+            grid-column:
+              1 / -1;
+
+            grid-row: 2;
+
+            grid-template-columns:
+              repeat(
+                5,
+                minmax(80px, 1fr)
+              );
+          }
+
+          .aos-scorecard-actions {
+            grid-column: 2;
+            grid-row: 1;
+          }
         }
-.mobile-search-surface {
-  display: none;
-}
 
-.desktop-search-surface {
-  display: block;
-}
-@media (max-width: 850px) {
-  main {
-    padding: 18px 4% 48px;
-  }
 
-.aos-scoreboard {
-  height: auto;
-  min-height: 30px;
+        @media (
+          max-width: 850px
+        ) {
+          main {
+            padding:
+              18px
+              4%
+              60px;
+          }
 
-  padding: 6px 7px;
+          .aos-scorecard {
+            grid-template-columns:
+              1fr
+              auto;
 
-  grid-template-columns: 1fr auto;
-  gap: 5px 10px;
-}
+            padding:
+              12px;
 
-.aos-scoreboard-name {
-  font-size: 8px;
-}
+            gap:
+              14px;
+          }
 
-.aos-scoreboard-metrics {
-  grid-column: 1 / -1;
+          .aos-scorecard-logo {
+            width: 46px;
+            height: 46px;
 
-  justify-content: flex-start;
-  gap: 6px;
+            flex-basis: 46px;
+          }
 
-  overflow-x: auto;
-}
+          .aos-scorecard-name strong {
+            font-size: 11px;
+          }
 
-.aos-scoreboard-metrics span {
-  font-size: 6px;
-}
+          .aos-scorecard-metrics {
+            grid-template-columns:
+              repeat(
+                2,
+                minmax(0, 1fr)
+              );
 
-.aos-scoreboard-actions {
-  grid-column: 2;
-  grid-row: 1;
-}
+            gap:
+              16px
+              22px;
+          }
 
-  .desktop-search-surface {
-  display: none;
-}
+          .aos-metric:last-child {
+            grid-column:
+              1 / -1;
+          }
 
-.mobile-search-surface {
-  display: block;
-}
-
-  .workspace-head {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 14px;
-}
-
-  .workspace-head h1 {
-    font-size: 25px;
-  }
-
-  .ixi-command-chassis {
-    display: block;
-    max-width: 100%;
-    margin: 0 auto 18px;
-  }
-
-  .ixi-command-center {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .workspace-controls {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 18px;
-  }
-
-  .ixi-command-left,
-  .ixi-command-right,
-  .ixi-pocket-row,
-  .ixi-pocket-left,
-  .ixi-pocket-right,
-  .active-stack-zone {
-    display: none !important;
-  }
-
- .ixi-toolbar {
-  width: max-content;
-  max-width: 100%;
-
-  margin: 12px auto 0;
-  left: 0;
-
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-
-  gap: 16px;
-}
-.ixi-color-filter {
-  flex: 0 0 20px;
-}
-
-.ixi-thickness-filter {
-  flex: 0 0 24px;
-  margin-top: 0;
-}
-  .ixi-thickness-filter {
-    margin-top: 6px;
-  }
-
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .cards.single-card {
-    grid-template-columns: 1fr;
-  }
-}
-       
+          .aos-object-field {
+            min-height: 400px;
+          }
+        }
       `}</style>
     </>
   );
