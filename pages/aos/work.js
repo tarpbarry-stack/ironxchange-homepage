@@ -136,6 +136,9 @@ export default function IXIAosWorkPage() {
 const [aosObjects, setAosObjects] =
   useState([]);
 
+const [systemIndexes, setSystemIndexes] =
+  useState([]);
+
 const [aosCurrentUser, setAosCurrentUser] =
   useState(null);
 
@@ -490,6 +493,14 @@ if (cancelled) {
           : []
       );
 
+setSystemIndexes(
+  Array.isArray(
+    environment?.systemIndexes
+  )
+    ? environment.systemIndexes
+    : []
+);
+      
       const SharetribeSdk =
         await import(
           "sharetribe-flex-sdk"
