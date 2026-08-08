@@ -649,13 +649,30 @@ const workspaceListings = useMemo(() => {
       ) || 0,
 
     value:
-      Number(
-        equipmentIndex?.value
-      ) || 0
+  listings.reduce(
+    (total, item) => {
+      const rawPrice =
+        item?.price ??
+        item?.publicData?.price ??
+        item?.attributes
+          ?.publicData
+          ?.price ??
+        0;
+
+      const numericPrice =
+        Number(
+          String(rawPrice)
+            .replace(/[^0-9.]/g, "")
+        ) || 0;
+
+      return total + numericPrice;
+    },
+    0
+  )
   };
 }, [
   systemIndexes,
-  listings.length
+  listings
 ]);
 
   const aosEntityContexts =
