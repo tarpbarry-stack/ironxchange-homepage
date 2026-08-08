@@ -140,6 +140,13 @@ const [localBoardOutline, setLocalBoardOutline] = useState(1);
 
  const boardColor = ixiState?.color || localBoardColor;
 const boardOutline = ixiState?.outline || localBoardOutline;
+  console.log(
+  "PRIVATE CARD RAIL MODE",
+  {
+    id,
+    showMachineRail
+  }
+);
 
 const boardColors = ["none", "green", "yellow", "red", "cyan", "white", "blue", "orange"];
 
