@@ -44,7 +44,6 @@ import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
-import IXIActiveStack from "../../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
   from "../../components/ixi-chassis/IXIBoardSurface";
@@ -1525,36 +1524,6 @@ toggleSearchSurfaceRevealed
  </section>
   </aside>
     </IXIChassis>
-
-              
-<IXIActiveStackZone
-  WorkspaceDropZone={WorkspaceDropZone}
-  activeStacksOpen={activeStacksOpen}
-  activeStackHover={activeStackHover}
-  machineContainers={machineContainers}
-  armedDestination={armedDestination}
-  toggleArmedDestination={toggleArmedDestination}
-  toggleActiveStack={toggleActiveStack}
-  toggleActiveStackLayout={toggleActiveStackLayout}
-  moveActiveStackToContainer={moveActiveStackToContainer}
-  sendActiveStackToTheater={sendActiveStackToTheater}
-  activeStackSendMenu={activeStackSendMenu}
-  setActiveStackSendMenu={setActiveStackSendMenu}
-  activeStackLayouts={activeStackLayouts}
-  getListingById={getListingById}
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={IXISortableMachineCard}
-  toggleSave={toggleSave}
-  updateIxiCardState={updateIxiCardState}
-  cycleMachineFace={cycleMachineFace}
-  sendListingToFront={sendListingToFront}
-  sendListingToBack={sendListingToBack}
-  sendMachineToArmedDestination={sendMachineToArmedDestination}
-  cardScaleMode={cardScaleMode}
-  getSellerListingCardProps={getSellerListingCardProps}
-/>
               
      <IXIBoardSurface
   scaleMode={cardScaleMode}
