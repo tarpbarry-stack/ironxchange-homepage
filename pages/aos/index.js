@@ -177,62 +177,6 @@ function getMachineLocation(item = {}) {
 }
 
 
-function getEntityLogoUrl(
-  entity = {},
-  currentUser = {}
-) {
-  return (
-    entity?.logoUrl ||
-    entity?.dealerLogoUrl ||
-    entity?.profileImageUrl ||
-    entity?.imageUrl ||
-
-    currentUser
-      ?.profileImage
-      ?.attributes
-      ?.variants
-      ?.default
-      ?.url ||
-
-    currentUser
-      ?.relationships
-      ?.profileImage
-      ?.data
-      ?.attributes
-      ?.variants
-      ?.default
-      ?.url ||
-
-    ""
-  );
-}
-
-
-function getEntityOfficeLocation(
-  entity = {},
-  currentUser = {}
-) {
-  const publicData =
-    currentUser
-      ?.attributes
-      ?.profile
-      ?.publicData ||
-    currentUser
-      ?.profile
-      ?.publicData ||
-    {};
-
-  return (
-    entity?.officeLocation ||
-    entity?.location ||
-    entity?.cityState ||
-    publicData?.sellerLocation ||
-    publicData?.location ||
-    publicData?.cityState ||
-    ""
-  );
-}
-
 
 /* =========================================
    IXI AOS
@@ -429,19 +373,11 @@ export default function IXIAosPage() {
     "IXI ENTITY";
 
 
-  const officeLocation =
-    getEntityOfficeLocation(
-      aosEntity,
-      currentUser
-    );
-
+ const officeLocation =
+  aosEntity?.officeLocation || "";
 
   const logoUrl =
-    getEntityLogoUrl(
-      aosEntity,
-      currentUser
-    );
-
+  aosEntity?.logoUrl || "";
 
   const initials =
     entityName
