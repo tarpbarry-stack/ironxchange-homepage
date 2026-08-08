@@ -36,7 +36,7 @@ export default function IXIPocketL2({
     top: "420px",
     width: "150px",
     height: "calc(100vh - 420px)",
-    pointerEvents: "auto",
+    pointerEvents: "none",
     zIndex: 999,
     background: "transparent",
     outline: "none"
@@ -727,7 +727,7 @@ outline: none;
   width: 150px;
   height: calc(100vh - 405px);
 
-  pointer-events: auto;
+ pointer-events: none;
   z-index: 999;
 
  background: transparent;
