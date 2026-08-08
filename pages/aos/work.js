@@ -1374,9 +1374,41 @@ function getListingById(machineId) {
 }
 
   function getActiveDndListing() {
-  if (!activeDndId) return null;
+  if (!activeDndId) {
+    return null;
+  }
 
-  return getListingById(activeDndId);
+  const id =
+    String(activeDndId);
+
+  /*
+   * Universal workspace registry first.
+   *
+   * This can resolve:
+   * machine
+   * system index
+   * job
+   * location
+   * person
+   * custom container
+   * etc.
+   */
+  if (
+    aosWorkspaceObjectRegistry?.has(id)
+  ) {
+    return (
+      aosWorkspaceObjectRegistry.get(id) ||
+      null
+    );
+  }
+
+  /*
+   * Legacy fallback.
+   */
+  return (
+    getListingById(id) ||
+    null
+  );
 }
 
   function getPocketContainerKey(side) {
