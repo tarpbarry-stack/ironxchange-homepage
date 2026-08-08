@@ -632,48 +632,48 @@ const workspaceListings = useMemo(() => {
     );
 
   return {
-    assets:
-      Number(
-        equipmentIndex?.itemCount ??
-        listings.length
-      ) || 0,
+  assets:
+    Number(
+      equipmentIndex?.itemCount ??
+      listings.length
+    ) || 0,
 
-    jobs:
-      Number(
-        jobsIndex?.itemCount
-      ) || 0,
+  jobs:
+    Number(
+      jobsIndex?.itemCount
+    ) || 0,
 
-    forSale:
-      Number(
-        forSaleIndex?.itemCount
-      ) || 0,
+  forSale:
+    Number(
+      forSaleIndex?.itemCount
+    ) || 0,
 
-    value:
-  listings.reduce(
-    (total, item) => {
-      const rawPrice =
-        item?.price ??
-        item?.publicData?.price ??
-        item?.attributes
-          ?.publicData
-          ?.price ??
-        0;
+  value:
+    listings.reduce(
+      (total, item) => {
+        const rawPrice =
+          item?.price ??
+          item?.publicData?.price ??
+          item?.attributes
+            ?.publicData
+            ?.price ??
+          0;
 
-      const numericPrice =
-        Number(
-          String(rawPrice)
-            .replace(/[^0-9.]/g, "")
-        ) || 0;
+        const numericPrice =
+          Number(
+            String(rawPrice)
+              .replace(/[^0-9.]/g, "")
+          ) || 0;
 
-      return total + numericPrice;
-    },
-    0
-  )
-  };
-}, [
-  systemIndexes,
-  listings
-]);
+        return total + numericPrice;
+      },
+      0
+    ),
+
+  people: 0,
+  yards: 0,
+  machineLocations: 0
+};
 
   const aosEntityContexts =
   useMemo(() => {
@@ -1555,60 +1555,98 @@ toggleSearchSurfaceRevealed
   </section>
 
  <section className="aos-scoreboard">
-  <strong className="aos-scoreboard-name">
-    {aosEntity?.displayName ||
-      "IXI ENTITY"}
-  </strong>
+  <div className="aos-scoreboard-identity">
+    <div className="aos-scoreboard-logo">
+      {aosEntity?.logoUrl ? (
+        <img
+          src={aosEntity.logoUrl}
+          alt=""
+        />
+      ) : (
+        <span>
+          {(aosEntity?.displayName || "IXI")
+            .slice(0, 2)
+            .toUpperCase()}
+        </span>
+      )}
+    </div>
+
+    <div className="aos-scoreboard-company">
+      <strong>
+        {aosEntity?.displayName ||
+          "IXI ENTITY"}
+      </strong>
+
+      <span>
+        {aosEntity?.officeLocation ||
+          aosEntity?.location ||
+          "Office Location"}
+      </span>
+    </div>
+  </div>
 
   <div className="aos-scoreboard-metrics">
-    <span>
-      {aosScoreboard.assets} Assets
-    </span>
+    <div>
+      <span>TOTAL ASSETS</span>
+      <strong>
+        {aosScoreboard.assets}
+      </strong>
+    </div>
 
-    <i aria-hidden="true">|</i>
+    <div>
+      <span>ASSET VALUE</span>
+      <strong>
+        {formatAosValue(
+          aosScoreboard.value
+        )}
+      </strong>
+    </div>
 
-    <span>
-      {aosScoreboard.jobs} Jobs
-    </span>
+    <div>
+      <span>PEOPLE</span>
+      <strong>
+        {aosScoreboard.people || 0}
+      </strong>
+    </div>
 
-    <i aria-hidden="true">|</i>
+    <div>
+      <span>YARDS</span>
+      <strong>
+        {aosScoreboard.yards || 0}
+      </strong>
+    </div>
 
-    <span>
-      {aosScoreboard.forSale} For Sale
-    </span>
-
-    <i aria-hidden="true">|</i>
-
-    <span>
-      {formatAosValue(
-        aosScoreboard.value
-      )} Value
-    </span>
+    <div>
+      <span>MACHINE LOCATIONS</span>
+      <strong>
+        {aosScoreboard.machineLocations || 0}
+      </strong>
+    </div>
   </div>
 
   <div className="aos-scoreboard-actions">
-  <button
-    type="button"
-    className="aos-scoreboard-action"
-    aria-label="Add object"
-    title="Add object"
-    onClick={() => {
-      setObjectCreateError("");
-      setShowObjectCreator(true);
-    }}
-  >
-    +
-  </button>
+    <button
+      type="button"
+      className="aos-scoreboard-action"
+      aria-label="Add"
+      title="Add"
+      onClick={() => {
+        setObjectCreateError("");
+        setShowObjectCreator(true);
+      }}
+    >
+      +
+    </button>
 
-  <button
-    type="button"
-    className="aos-scoreboard-action"
-    aria-label="More actions"
-    title="More actions"
-  >
-    ⋯
-  </button>
-</div>
+    <button
+      type="button"
+      className="aos-scoreboard-action"
+      aria-label="More actions"
+      title="More actions"
+    >
+      ⋯
+    </button>
+  </div>
 </section>
    
 {aosContext === "entity" ? (
