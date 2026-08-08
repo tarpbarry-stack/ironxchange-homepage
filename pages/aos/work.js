@@ -630,11 +630,15 @@ useEffect(() => {
     !hasAppliedRemoteLayoutRef.current
   ) {
     setMachineContainers(
-      sanitizeWorkspaceContainers(
-        savedLayout.machineContainers,
-        validMachineIds
-      )
-    );
+  sanitizeWorkspaceContainers(
+    savedLayout.machineContainers,
+    validMachineIds,
+    {
+      defaultContainer:
+        "indexEquipment"
+    }
+  )
+);
 
     hasAppliedRemoteLayoutRef.current = true;
     return;
@@ -644,20 +648,34 @@ useEffect(() => {
   return;
 }
 
-  const nextContainers = createEmptyWorkspaceContainers();
+  const nextContainers =
+  createEmptyWorkspaceContainers();
 
-  workspaceListings.forEach(item => {
-    const id = String(getListingId(item));
-    const savedContainer = ixiCardState[id]?.container;
+workspaceListings.forEach(item => {
+  const id =
+    String(
+      getListingId(item)
+    );
 
-    const targetContainer =
-      nextContainers[savedContainer]
-        ? savedContainer
-        : "board";
+  const savedContainer =
+    ixiCardState[id]
+      ?.container;
 
-    nextContainers[targetContainer].push(id);
-  });
+  const targetContainer =
+    nextContainers[
+      savedContainer
+    ]
+      ? savedContainer
+      : "indexEquipment";
 
+  nextContainers[
+    targetContainer
+  ].push(id);
+});
+
+setMachineContainers(
+  nextContainers
+);
   setMachineContainers(nextContainers);
 }, [containerStateKey]);
 
@@ -946,6 +964,154 @@ function moveMachineToContainer(machineId, targetContainer) {
   executeIXITransaction(result);
 }
 
+function exposeEquipmentMachineToBoard(
+  machine
+) {
+  const machineId =
+    String(
+      getListingId(machine) ||
+      ""
+    );
+
+  if (!machineId) {
+    return;
+  }
+
+  moveMachineToContainer(
+    machineId,
+    "board"
+  );
+}
+
+
+function returnMachineToEquipment(
+  machineOrId
+) {
+  const machineId =
+    typeof machineOrId ===
+    "object"
+      ? String(
+          getListingId(
+            machineOrId
+          ) || ""
+        )
+      : String(
+          machineOrId || ""
+        );
+
+  if (!machineId) {
+    return;
+  }
+
+  moveMachineToContainer(
+    machineId,
+    "indexEquipment"
+  );
+}
+
+
+function exposeAllEquipmentToBoard() {
+  const equipmentIds =
+    Array.isArray(
+      machineContainers
+        .indexEquipment
+    )
+      ? machineContainers
+          .indexEquipment
+          .map(String)
+      : [];
+
+  if (!equipmentIds.length) {
+    return;
+  }
+
+  const result =
+    IXI_COMMANDS
+      .bulkMoveObjects({
+        objectIds:
+          equipmentIds,
+
+        targetContainer:
+          "board",
+
+        ixiCardState,
+
+        machineContainers
+      });
+
+  executeIXITransaction(
+    result
+  );
+}
+
+
+function returnAllEquipmentHome() {
+  const equipmentMachineIds =
+    new Set(
+      (
+        equipmentIndex?.items ||
+        []
+      )
+        .map(item =>
+          String(
+            getListingId(item) ||
+            ""
+          )
+        )
+        .filter(Boolean)
+    );
+
+  if (
+    !equipmentMachineIds.size
+  ) {
+    return;
+  }
+
+  const exposedIds =
+    Object.entries(
+      machineContainers
+    )
+      .filter(
+        ([containerKey]) =>
+          containerKey !==
+          "indexEquipment"
+      )
+      .flatMap(
+        ([, ids]) =>
+          Array.isArray(ids)
+            ? ids
+            : []
+      )
+      .map(String)
+      .filter(id =>
+        equipmentMachineIds.has(
+          id
+        )
+      );
+
+  if (!exposedIds.length) {
+    return;
+  }
+
+  const result =
+    IXI_COMMANDS
+      .bulkMoveObjects({
+        objectIds:
+          exposedIds,
+
+        targetContainer:
+          "indexEquipment",
+
+        ixiCardState,
+
+        machineContainers
+      });
+
+  executeIXITransaction(
+    result
+  );
+}
+  
 function moveMachineToContainerAtPosition(
   machineId,
   targetContainer,
@@ -1701,21 +1867,11 @@ toggleSearchSurfaceRevealed
         sendMachineToArmedDestination
       }
 
-      onExposeObject={(
-        child,
-        parentIndex
-      ) => {
-        console.log(
-          "AOS INDEX CHILD EXPOSE",
-          {
-            parentIndexId:
-              parentIndex?.indexId,
-
-            childId:
-              getListingId(child)
-          }
-        );
-      }}
+      onExposeObject={child => {
+  exposeEquipmentMachineToBoard(
+    child
+  );
+}}
 
       onOpenConsole={
         index => {
