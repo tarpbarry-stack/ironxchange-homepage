@@ -1539,24 +1539,20 @@ toggleSearchSurfaceRevealed
     />
   </section>
 
-  <IXIAosScoreboard
-    entity={aosEntity}
-    currentUser={aosCurrentUser}
-    ownedListings={workspaceListings}
-    aosObjects={aosObjects}
-   onAdd={() => {
-  createEquipmentContainer();
-}}
-      console.log(
-        "AOS WORK ADD"
-      );
-    }}
-    onMore={() => {
-      console.log(
-        "AOS WORK MORE"
-      );
-    }}
-  />
+ <IXIAosScoreboard
+  entity={aosEntity}
+  currentUser={aosCurrentUser}
+  ownedListings={workspaceListings}
+  aosObjects={aosObjects}
+  onAdd={() => {
+    createEquipmentContainer();
+  }}
+  onMore={() => {
+    console.log(
+      "AOS WORK MORE"
+    );
+  }}
+/>
 
     {aosContainerError ? (
   <div
