@@ -670,12 +670,16 @@ const workspaceListings = useMemo(() => {
       0
     ),
 
-  people: 0,
+    people: 0,
   yards: 0,
   machineLocations: 0
-};
+  };
+}, [
+  systemIndexes,
+  listings
+]);
 
-  const aosEntityContexts =
+const aosEntityContexts =
   useMemo(() => {
     return AOS_ENTITY_CONTEXTS.map(
       context => {
