@@ -3,8 +3,7 @@ import IXIFaceFrame
 
 export default function IXIEntityObjectFace1({
   entity = {},
-  faceSize = "tall",
-  onOpen = null
+  faceSize = "tall"
 }) {
   const displayName =
     entity?.displayName ||
@@ -44,14 +43,7 @@ export default function IXIEntityObjectFace1({
           IXI AOS
         </div>
 
-        <button
-          type="button"
-          className="entity-open"
-          onClick={onOpen || undefined}
-        >
-          OPEN ENTITY
-          <i className="fa-solid fa-arrow-right" />
-        </button>
+      
       </div>
 
       <style jsx>{`
@@ -157,53 +149,6 @@ export default function IXIEntityObjectFace1({
           text-transform: uppercase;
         }
 
-        .entity-open {
-          width: 100%;
-          height: 30px;
-
-          margin-top: auto;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          padding: 0 10px;
-
-          border:
-            1px solid
-            rgba(255,255,255,.07);
-
-          border-radius: 6px;
-
-          background:
-            rgba(255,255,255,.025);
-
-          color:
-            rgba(255,255,255,.62);
-
-          font-size:
-            7px;
-
-          font-weight: 950;
-
-          letter-spacing: .08em;
-
-          cursor: pointer;
-        }
-
-        .entity-open:hover {
-          border-color:
-            rgba(255,196,0,.26);
-
-          background:
-            rgba(255,196,0,.06);
-
-          color: #ffc400;
-        }
-
-        .entity-open i {
-          font-size: 8px;
-        }
       `}</style>
     </IXIFaceFrame>
   );
