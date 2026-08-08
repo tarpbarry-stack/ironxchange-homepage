@@ -2055,12 +2055,15 @@ renderCustomItem={({
     </p>
   </div>
 )}
-</main>
-  </IXIDragEngine>
-);
-  }}
-</IXIWorkspaceEngine>
 
+  </>
+) : null}
+
+</main>
+</IXIDragEngine>
+);
+}}
+</IXIWorkspaceEngine>
 
       <Footer />
                 
