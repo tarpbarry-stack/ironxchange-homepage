@@ -6,9 +6,17 @@ import {
 import ListingCard
   from "../ListingCard";
 
+import IXIScaledCardShell
+  from "../ixi-machine-object/IXIScaledCardShell";
+
+
+const IXI_DRAG_NATIVE_WIDTH = 298;
+const IXI_DRAG_NATIVE_HEIGHT = 471;
+
 
 export default function IXIDragEngine({
   sensors,
+
   workspaceCollisionDetection,
 
   handleWorkspaceDragStart,
@@ -18,55 +26,73 @@ export default function IXIDragEngine({
   children,
 
   /*
-   * Universal object resolver.
+   * UNIVERSAL OBJECT RESOLVER
+   *
+   * Preferred path for AOS and future
+   * universal IXI object environments.
    */
   getActiveDndObject,
 
   /*
-   * Legacy resolver.
-   * Keep during migration.
+   * LEGACY RESOLVER
+   *
+   * Marketplace / Saved / existing
+   * environments may still provide this.
    */
   getActiveDndListing,
 
   /*
-   * UNIVERSAL OVERLAY RENDER CONTRACT.
+   * UNIVERSAL OVERLAY RENDER CONTRACT
    *
-   * Environment decides how its
-   * object should look while dragging.
+   * The environment decides how a
+   * non-listing object looks.
+   *
+   * Examples:
+   * system index
+   * container
+   * job
+   * location
+   * person
+   * tool
    */
   renderActiveDndObject,
 
   /*
-   * Legacy Seller compatibility.
+   * LEGACY SELLER COMPATIBILITY
    */
   SellerObjectCard,
 
   activeDndId,
 
   savedIds = [],
+
   ixiCardState = {},
 
   cardScaleMode = "xl"
 }) {
   const activeDndObject =
-    typeof getActiveDndObject ===
-    "function"
+    typeof getActiveDndObject === "function"
       ? getActiveDndObject()
-      : typeof getActiveDndListing ===
-        "function"
+      : typeof getActiveDndListing === "function"
         ? getActiveDndListing()
         : null;
+
 
   function renderOverlayObject() {
     if (!activeDndObject) {
       return null;
     }
 
+
     /*
-     * UNIVERSAL PATH
+     * UNIVERSAL OBJECT RENDER PATH
      *
-     * AOS and future object environments
-     * should render through this contract.
+     * AOS currently uses this for
+     * System Index / Equipment.
+     *
+     * Future object families can use
+     * the same contract without making
+     * IXIDragEngine understand them.
      */
     if (
       typeof renderActiveDndObject ===
@@ -90,8 +116,9 @@ export default function IXIDragEngine({
       }
     }
 
+
     /*
-     * LEGACY SELLER COMPATIBILITY
+     * LEGACY SELLER OBJECT FALLBACK
      */
     if (
       activeDndObject?.type ===
@@ -113,7 +140,7 @@ export default function IXIDragEngine({
           ixiState={
             ixiCardState[
               String(
-                activeDndId
+                activeDndId || ""
               )
             ] || {
               color: "none",
@@ -124,12 +151,14 @@ export default function IXIDragEngine({
       );
     }
 
+
     /*
      * LEGACY MACHINE / LISTING FALLBACK
      *
-     * Marketplace, Saved, Inventory,
-     * Auction, etc. remain intact while
-     * environments migrate.
+     * Keeps Marketplace, Saved,
+     * Inventory, Auction, etc.
+     * functioning while the universal
+     * object contract rolls outward.
      */
     return (
       <ListingCard
@@ -140,7 +169,7 @@ export default function IXIDragEngine({
         saved={
           savedIds.includes(
             String(
-              activeDndId
+              activeDndId || ""
             )
           )
         }
@@ -152,7 +181,7 @@ export default function IXIDragEngine({
         ixiState={
           ixiCardState[
             String(
-              activeDndId
+              activeDndId || ""
             )
           ] || {
             color: "none",
@@ -163,6 +192,7 @@ export default function IXIDragEngine({
         onIxiStateChange={() => {}}
 
         onSendFront={() => {}}
+
         onSendBack={() => {}}
 
         isBoardDraggingCard={
@@ -174,7 +204,9 @@ export default function IXIDragEngine({
         }
 
         onBoardDragStart={() => {}}
+
         onBoardDragOver={() => {}}
+
         onBoardDragEnd={() => {}}
 
         useDndDrag={
@@ -183,6 +215,7 @@ export default function IXIDragEngine({
       />
     );
   }
+
 
   return (
     <DndContext
@@ -208,10 +241,33 @@ export default function IXIDragEngine({
     >
       {children}
 
-      <DragOverlay>
+
+      <DragOverlay
+        dropAnimation={null}
+      >
         {activeDndObject ? (
-          <div className="ixi-drag-overlay-card">
-            {renderOverlayObject()}
+          <div
+            className="
+              ixi-drag-overlay-card
+            "
+          >
+            <IXIScaledCardShell
+              size={
+                cardScaleMode
+              }
+
+              nativeWidth={
+                IXI_DRAG_NATIVE_WIDTH
+              }
+
+              nativeHeight={
+                IXI_DRAG_NATIVE_HEIGHT
+              }
+
+              tight
+            >
+              {renderOverlayObject()}
+            </IXIScaledCardShell>
           </div>
         ) : null}
       </DragOverlay>
