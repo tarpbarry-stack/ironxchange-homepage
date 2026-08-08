@@ -338,76 +338,6 @@ const sensors = useSensors(
 
 setIxiUserId(String(userId));
 
-useEffect(() => {
-  let cancelled = false;
-
-  async function loadAosScoreboardEnvironment() {
-    try {
-      const environment =
-        await loadIXIMosEnvironment({
-          includeObjects: true
-        });
-
-      if (cancelled) {
-        return;
-      }
-
-      setAosEntity(
-        environment?.entity || null
-      );
-
-      setAosObjects(
-        Array.isArray(
-          environment?.objects
-        )
-          ? environment.objects
-          : []
-      );
-
-      const SharetribeSdk =
-        await import(
-          "sharetribe-flex-sdk"
-        );
-
-      const aosSdk =
-        SharetribeSdk.createInstance({
-          clientId:
-            process.env
-              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
-        });
-
-      const currentUserResponse =
-        await aosSdk.currentUser.show({
-          include: ["profileImage"]
-        });
-
-      if (cancelled) {
-        return;
-      }
-
-      setAosCurrentUser({
-        ...currentUserResponse.data.data,
-
-        included:
-          currentUserResponse
-            .data
-            .included || []
-      });
-    } catch (error) {
-      console.error(
-        "IXI AOS WORK SCOREBOARD LOAD FAILED:",
-        error
-      );
-    }
-  }
-
-  loadAosScoreboardEnvironment();
-
-  return () => {
-    cancelled = true;
-  };
-}, []);
-
 const remoteIxiResponse =
   await fetchIxiMachineState(String(userId));
 
@@ -516,6 +446,76 @@ setListings(hydratedListings);
 
     loadSavedPage();
   }, []);
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadAosScoreboardEnvironment() {
+    try {
+      const environment =
+        await loadIXIMosEnvironment({
+          includeObjects: true
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      setAosEntity(
+        environment?.entity || null
+      );
+
+      setAosObjects(
+        Array.isArray(
+          environment?.objects
+        )
+          ? environment.objects
+          : []
+      );
+
+      const SharetribeSdk =
+        await import(
+          "sharetribe-flex-sdk"
+        );
+
+      const aosSdk =
+        SharetribeSdk.createInstance({
+          clientId:
+            process.env
+              .NEXT_PUBLIC_SHARETRIBE_CLIENT_ID
+        });
+
+      const currentUserResponse =
+        await aosSdk.currentUser.show({
+          include: ["profileImage"]
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      setAosCurrentUser({
+        ...currentUserResponse.data.data,
+
+        included:
+          currentUserResponse
+            .data
+            .included || []
+      });
+    } catch (error) {
+      console.error(
+        "IXI AOS WORK SCOREBOARD LOAD FAILED:",
+        error
+      );
+    }
+  }
+
+  loadAosScoreboardEnvironment();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   
   const savedListings = useMemo(() => {
     const activeListings = listings.filter(item => {
