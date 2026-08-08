@@ -836,8 +836,11 @@ export default function IXISystemIndexCard({
             {...childDragListeners}
           >
 
-            <ListingCard
+          <ListingCard
   listing={activeItem}
+
+  cardContext="workspace"
+
   saved={false}
   showSave={false}
 
