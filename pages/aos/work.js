@@ -172,9 +172,11 @@ const [activeStacksOpen, setActiveStacksOpen] = useState({
 const [
   machineContainers,
   setMachineContainers
-] = useState(() =>
-  createEmptyWorkspaceContainers()
-);
+] = useState(() => ({
+  ...createEmptyWorkspaceContainers(),
+
+  indexEquipment: []
+}));
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
@@ -645,9 +647,11 @@ useEffect(() => {
   return;
 }
 
-  const nextContainers =
-  createEmptyWorkspaceContainers();
+ const nextContainers = {
+  ...createEmptyWorkspaceContainers(),
 
+  indexEquipment: []
+};
 workspaceListings.forEach(item => {
   const id =
     String(
