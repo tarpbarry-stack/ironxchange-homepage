@@ -647,16 +647,10 @@ if (face === "MOF4") {
 
 if (face === "EOF1") {
   return (
-    <IXIEntityObjectFace1
-      entity={previewEntity}
-      faceSize={previewSize}
-      onOpen={() => {
-        console.log(
-          "FACE LAB ENTITY OPEN",
-          previewEntity
-        );
-      }}
-    />
+   <IXIEntityObjectFace1
+  entity={previewEntity}
+  faceSize={previewSize}
+/>
   );
 }
     
