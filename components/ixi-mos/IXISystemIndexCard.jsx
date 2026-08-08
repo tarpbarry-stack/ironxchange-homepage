@@ -709,7 +709,29 @@ export default function IXISystemIndexCard({
                           </span>
                         ) : null}
                       </div>
+<button
+  type="button"
+  className="preview-pull"
+  onPointerDown={event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }}
+  onClick={event => {
+    event.preventDefault();
+    event.stopPropagation();
 
+    if (!previewItem) {
+      return;
+    }
+
+    onExposeObject?.(
+      previewItem,
+      index
+    );
+  }}
+>
+  OUT
+</button>
                     </div>
 
 
@@ -1478,10 +1500,10 @@ export default function IXISystemIndexCard({
 
           display: grid;
 
-          grid-template-columns:
-            20px
-            minmax(0, 1fr)
-            20px;
+          20px
+  minmax(0, 1fr)
+  30px
+  20px;
 
           align-items: center;
 
@@ -1499,7 +1521,39 @@ export default function IXISystemIndexCard({
             #101010;
         }
 
+.preview-pull {
+  height: 24px;
 
+  padding: 0;
+
+  border:
+    1px solid
+    rgba(0,194,255,.18);
+
+  border-radius: 4px;
+
+  background:
+    rgba(0,194,255,.035);
+
+  color:
+    rgba(0,194,255,.62);
+
+  font-size: 5.5px;
+  font-weight: 950;
+
+  cursor: pointer;
+}
+
+.preview-pull:hover {
+  border-color:
+    rgba(0,194,255,.46);
+
+  background:
+    rgba(0,194,255,.08);
+
+  color:
+    rgba(0,194,255,.95);
+}
         .preview-copy {
           min-width: 0;
 
