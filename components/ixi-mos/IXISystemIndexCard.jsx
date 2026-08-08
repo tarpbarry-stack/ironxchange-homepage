@@ -836,7 +836,11 @@ export default function IXISystemIndexCard({
             {...childDragListeners}
           >
 
-          <ListingCard
+         <ListingCard
+  key={String(
+    getListingId(activeItem)
+  )}
+
   listing={activeItem}
 
   cardContext="workspace"
