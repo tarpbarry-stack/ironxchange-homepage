@@ -1,75 +1,223 @@
-import { DndContext, DragOverlay } from "@dnd-kit/core";
-import ListingCard from "../ListingCard";
+import {
+  DndContext,
+  DragOverlay
+} from "@dnd-kit/core";
 
-import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
+import ListingCard
+  from "../ListingCard";
+
+import IXIScaledCardShell
+  from "../ixi-machine-object/IXIScaledCardShell";
+
 
 export default function IXIDragEngine({
   sensors,
   workspaceCollisionDetection,
+
   handleWorkspaceDragStart,
   handleWorkspaceDragEnd,
   handleWorkspaceDragCancel,
+
   children,
-  getActiveDndListing,
+
+  /*
+   * Universal object resolver.
+   */
   getActiveDndObject,
+
+  /*
+   * Legacy resolver.
+   * Keep during migration.
+   */
+  getActiveDndListing,
+
+  /*
+   * UNIVERSAL OVERLAY RENDER CONTRACT.
+   *
+   * Environment decides how its
+   * object should look while dragging.
+   */
+  renderActiveDndObject,
+
+  /*
+   * Legacy Seller compatibility.
+   */
   SellerObjectCard,
+
   activeDndId,
-  savedIds,
-  ixiCardState,
+
+  savedIds = [],
+  ixiCardState = {},
+
   cardScaleMode = "xl"
 }) {
   const activeDndObject =
-    typeof getActiveDndObject === "function"
+    typeof getActiveDndObject ===
+    "function"
       ? getActiveDndObject()
-      : typeof getActiveDndListing === "function"
+      : typeof getActiveDndListing ===
+        "function"
         ? getActiveDndListing()
         : null;
 
+  function renderOverlayObject() {
+    if (!activeDndObject) {
+      return null;
+    }
+
+    /*
+     * UNIVERSAL PATH
+     *
+     * AOS and future object environments
+     * should render through this contract.
+     */
+    if (
+      typeof renderActiveDndObject ===
+      "function"
+    ) {
+      const rendered =
+        renderActiveDndObject({
+          object:
+            activeDndObject,
+
+          objectId:
+            String(
+              activeDndId || ""
+            ),
+
+          cardScaleMode
+        });
+
+      if (rendered) {
+        return rendered;
+      }
+    }
+
+    /*
+     * LEGACY SELLER COMPATIBILITY
+     */
+    if (
+      activeDndObject?.type ===
+        "SELLER OBJECT" &&
+      SellerObjectCard
+    ) {
+      return (
+        <SellerObjectCard
+          sellerObject={
+            activeDndObject
+          }
+
+          objectId={
+            String(
+              activeDndId || ""
+            )
+          }
+
+          ixiState={
+            ixiCardState[
+              String(
+                activeDndId
+              )
+            ] || {
+              color: "none",
+              outline: 1
+            }
+          }
+        />
+      );
+    }
+
+    /*
+     * LEGACY MACHINE / LISTING FALLBACK
+     *
+     * Marketplace, Saved, Inventory,
+     * Auction, etc. remain intact while
+     * environments migrate.
+     */
+    return (
+      <ListingCard
+        listing={
+          activeDndObject
+        }
+
+        saved={
+          savedIds.includes(
+            String(
+              activeDndId
+            )
+          )
+        }
+
+        onToggleSaved={() => {}}
+
+        from="saved"
+
+        ixiState={
+          ixiCardState[
+            String(
+              activeDndId
+            )
+          ] || {
+            color: "none",
+            outline: 1
+          }
+        }
+
+        onIxiStateChange={() => {}}
+
+        onSendFront={() => {}}
+        onSendBack={() => {}}
+
+        isBoardDraggingCard={
+          false
+        }
+
+        isGhostTarget={
+          false
+        }
+
+        onBoardDragStart={() => {}}
+        onBoardDragOver={() => {}}
+        onBoardDragEnd={() => {}}
+
+        useDndDrag={
+          false
+        }
+      />
+    );
+  }
+
   return (
     <DndContext
-      sensors={sensors}
-      collisionDetection={workspaceCollisionDetection}
-      onDragStart={handleWorkspaceDragStart}
-      onDragEnd={handleWorkspaceDragEnd}
-      onDragCancel={handleWorkspaceDragCancel}
+      sensors={
+        sensors
+      }
+
+      collisionDetection={
+        workspaceCollisionDetection
+      }
+
+      onDragStart={
+        handleWorkspaceDragStart
+      }
+
+      onDragEnd={
+        handleWorkspaceDragEnd
+      }
+
+      onDragCancel={
+        handleWorkspaceDragCancel
+      }
     >
       {children}
 
-     <DragOverlay>
-  {activeDndObject ? (
-    <div className="ixi-drag-overlay-card">
-      {activeDndObject?.type === "SELLER OBJECT" && SellerObjectCard ? (
-        <SellerObjectCard
-          sellerObject={activeDndObject}
-        />
-      ) : (
-        <IXIScaledCardShell size={cardScaleMode}>
-          <ListingCard
-            listing={activeDndObject}
-            saved={savedIds.includes(String(activeDndId))}
-            onToggleSaved={() => {}}
-            from="saved"
-            ixiState={
-              ixiCardState[String(activeDndId)] || {
-                color: "none",
-                outline: 1
-              }
-            }
-            onIxiStateChange={() => {}}
-            onSendFront={() => {}}
-            onSendBack={() => {}}
-            isBoardDraggingCard={false}
-            isGhostTarget={false}
-            onBoardDragStart={() => {}}
-            onBoardDragOver={() => {}}
-            onBoardDragEnd={() => {}}
-            useDndDrag={false}
-          />
-        </IXIScaledCardShell>
-      )}
-    </div>
-  ) : null}
-</DragOverlay>
+      <DragOverlay>
+        {activeDndObject ? (
+          <div className="ixi-drag-overlay-card">
+            {renderOverlayObject()}
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }
