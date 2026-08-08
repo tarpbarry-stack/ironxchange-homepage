@@ -169,15 +169,12 @@ const [activeStacksOpen, setActiveStacksOpen] = useState({
   bottom: false
 });
 
-const [machineContainers, setMachineContainers] = useState({
-  board: [],
-  stackTop: [],
-  stackBottom: [],
-  pocketLeft: [],
-  pocketRight: [],
-  pocketLeft2: [],
-  pocketRight2: []
-});
+const [
+  machineContainers,
+  setMachineContainers
+] = useState(() =>
+  createEmptyWorkspaceContainers()
+);
 
 const [activeStackLayouts, setActiveStackLayouts] = useState({
   top: "horizontal",
@@ -676,9 +673,8 @@ workspaceListings.forEach(item => {
 setMachineContainers(
   nextContainers
 );
-  setMachineContainers(nextContainers);
 }, [containerStateKey]);
-
+  
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
@@ -836,15 +832,22 @@ const equipmentIndex =
 
 const aosBoardItems =
   useMemo(() => {
-    if (!equipmentIndex) {
-      return [];
+    const items = [];
+
+    if (equipmentIndex) {
+      items.push(
+        equipmentIndex
+      );
     }
 
-    return [
-      equipmentIndex
-    ];
+    items.push(
+      ...visibleSavedListings
+    );
+
+    return items;
   }, [
-    equipmentIndex
+    equipmentIndex,
+    visibleSavedListings
   ]);
 
 
@@ -1562,7 +1565,7 @@ toggleRailRevealed,
 searchSurfaceRevealed,
 toggleSearchSurfaceRevealed
   }) => {
-          const handleWorkspaceDragEnd =
+          const handleBaseWorkspaceDragEnd =
   createWorkspaceDragEndHandler({
     getMachineContainer,
     machineContainers,
@@ -1576,7 +1579,191 @@ toggleSearchSurfaceRevealed
     setRightPocket2Mode,
     setActiveDndId,
     clearMachineDragState
-  });  
+  });
+
+function handleWorkspaceDragEnd(event) {
+  const active =
+    event?.active;
+
+  const over =
+    event?.over;
+
+  const dragData =
+    active?.data?.current || {};
+
+  const dragType =
+    String(
+      dragData.type || ""
+    );
+
+  /*
+   * AOS COLLECTION CHILD
+   *
+   * This is a machine being dragged
+   * OUT of Equipment / another
+   * collection viewer.
+   *
+   * Do not send this through the
+   * normal sortable dispatcher.
+   */
+  if (
+    dragType ===
+    "collection-child"
+  ) {
+    const machineId =
+      String(
+        dragData.objectId ||
+        active?.id ||
+        ""
+      );
+
+    if (!machineId) {
+      setActiveDndId(null);
+      clearMachineDragState?.();
+      return;
+    }
+
+    const overId =
+      String(
+        over?.id || ""
+      );
+
+    const overData =
+      over?.data?.current || {};
+
+    const overContainer =
+      String(
+        overData.containerId ||
+        overData.targetContainer ||
+        ""
+      );
+
+    const validWorkspaceTargets =
+      new Set([
+        "board",
+
+        "stackTop",
+        "stackBottom",
+
+        "pocketLeft",
+        "pocketRight",
+        "pocketLeft2",
+        "pocketRight2"
+      ]);
+
+    /*
+     * SPECIFIC WORKSPACE TARGET WINS.
+     *
+     * If we are over a known pocket/
+     * stack target, use it.
+     */
+    let targetContainer =
+      validWorkspaceTargets.has(
+        overContainer
+      )
+        ? overContainer
+        : validWorkspaceTargets.has(
+            overId
+          )
+          ? overId
+          : "board";
+
+    /*
+     * Critical rule:
+     *
+     * A collection child dropped over
+     * ordinary board space OR another
+     * board card becomes BOARD.
+     *
+     * Board is no longer a geometric
+     * fallback from closestCenter.
+     * It is our explicit default for
+     * an extracted child.
+     */
+    moveMachineToContainer(
+      machineId,
+      targetContainer
+    );
+
+    if (
+      targetContainer ===
+      "stackTop"
+    ) {
+      setActiveStacksOpen(
+        current => ({
+          ...current,
+          top: true
+        })
+      );
+    }
+
+    if (
+      targetContainer ===
+      "stackBottom"
+    ) {
+      setActiveStacksOpen(
+        current => ({
+          ...current,
+          bottom: true
+        })
+      );
+    }
+
+    if (
+      targetContainer ===
+      "pocketLeft"
+    ) {
+      setLeftPocketMode?.(
+        "peek"
+      );
+    }
+
+    if (
+      targetContainer ===
+      "pocketRight"
+    ) {
+      setRightPocketMode?.(
+        "peek"
+      );
+    }
+
+    if (
+      targetContainer ===
+      "pocketLeft2"
+    ) {
+      setLeftPocket2Mode?.(
+        "peek"
+      );
+    }
+
+    if (
+      targetContainer ===
+      "pocketRight2"
+    ) {
+      setRightPocket2Mode?.(
+        "peek"
+      );
+    }
+
+    setActiveDndId(null);
+    clearMachineDragState?.();
+
+    return;
+  }
+
+  /*
+   * EVERYTHING ELSE
+   *
+   * Existing Marketplace / Board /
+   * pocket / stack behavior remains
+   * on the proven chassis path.
+   */
+  return handleBaseWorkspaceDragEnd(
+    event
+  );
+}
+
+  
     function sendMachineToArmedDestination(listing) {
   if (!armedDestination) return;
 
