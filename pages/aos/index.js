@@ -401,9 +401,6 @@ const hydratedCurrentUser = {
  const officeLocation =
   aosEntity?.officeLocation || "";
 
-  const logoUrl =
-  aosEntity?.logoUrl || "";
-
   const initials =
     entityName
       .split(/\s+/)
