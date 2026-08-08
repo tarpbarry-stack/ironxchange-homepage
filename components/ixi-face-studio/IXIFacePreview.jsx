@@ -22,6 +22,9 @@ import IXIMachineObjectFace3
 import IXIMachineObjectFace4
   from "../ixi-machine-object/IXIMachineObjectFace4";
 
+import IXIEntityObjectFace1
+  from "../ixi-entity-object/IXIEntityObjectFace1";
+
 import IXIMachineRail
   from "../IXIMachineRail";
 
@@ -328,6 +331,17 @@ const previewListing = {
   }
 };
 
+const previewEntity = {
+  entityId:
+    "ixi-entity-preview",
+
+  displayName:
+    "STAR & SONS UNLIMITED LLC",
+
+  officeLocation:
+    "ABILENE, TX"
+};
+
 const previewDealerBidPack = {
   estimatedSalePrice:
     195000,
@@ -380,6 +394,7 @@ function getFaceNumber(
     ? value
     : 1;
 }
+
 
 function FaceNotRegistered({
   face
@@ -630,6 +645,21 @@ if (face === "MOF4") {
       );
     }
 
+if (face === "EOF1") {
+  return (
+    <IXIEntityObjectFace1
+      entity={previewEntity}
+      faceSize={previewSize}
+      onOpen={() => {
+        console.log(
+          "FACE LAB ENTITY OPEN",
+          previewEntity
+        );
+      }}
+    />
+  );
+}
+    
     return (
       <FaceNotRegistered
         face={
