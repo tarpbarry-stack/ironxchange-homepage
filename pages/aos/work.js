@@ -20,6 +20,14 @@ import {
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+
+import IXIAosScoreboard
+  from "../../components/ixi-mos/IXIAosScoreboard";
+
+import {
+  loadIXIMosEnvironment
+} from "../../lib/mos/loadIXIMosEnvironment";
+
 import ListingCard from "../../components/ListingCard";
 
 import { getListingId } from "../../lib/listingFormatters";
