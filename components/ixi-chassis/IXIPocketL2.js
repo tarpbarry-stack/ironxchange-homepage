@@ -38,8 +38,8 @@ export default function IXIPocketL2({
     height: "calc(100vh - 420px)",
     pointerEvents: "none",
     zIndex: 999,
-    background: "transparent",
-    outline: "none"
+    background: "rgba(0, 120, 255, .45)",
+    outline: "3px solid #0078ff"
   }}
 />
 
