@@ -591,41 +591,33 @@ const [
      RENDER
      ========================================================= */
 
-  return (
-    <section
-     className={[
-  "system-index-card",
-  "card",
+ return (
+  <section
+    className={[
+      "system-index-card",
+      "card",
 
-  isDropAccepting
-    ? "ixi-container-drop-accepting"
-    : "",
+      isDropAccepting
+        ? "ixi-container-drop-accepting"
+        : "",
 
-  `board-color-${
-    boardColor || "none"
-  }`,
+      `board-color-${
+        boardColor || "none"
+      }`,
 
-  `board-outline-${
-    boardOutline || 1
-  }`
-]
-  .filter(Boolean)
-  .join(" ")}
-        `board-color-${
-          boardColor || "none"
-        }`,
-        `board-outline-${
-          boardOutline || 1
-        }`
-      ].join(" ")}
+      `board-outline-${
+        boardOutline || 1
+      }`
+    ]
+      .filter(Boolean)
+      .join(" ")}
 
-      {...(
-        isIdentityFace
-          ? dragHandleProps ||
-            {}
-          : {}
-      )}
-    >
+    {...(
+      isIdentityFace
+        ? dragHandleProps || {}
+        : {}
+    )}
+  >
 
       {/* =====================================================
           MAIN FACE
