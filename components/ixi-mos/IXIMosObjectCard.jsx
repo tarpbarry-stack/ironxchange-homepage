@@ -69,10 +69,11 @@ export default function IXIMosObjectCard({
 
   onOpen = null,
 
-  onAddChild = null,
-  onSaveName = null,
+onAddChild = null,
+onSaveName = null,
+onDelete = null,
 
-  onAddMedia = null,
+onAddMedia = null,
   onCreateWorkOrder = null,
   onAddExpense = null,
   onScanQr = null
@@ -283,6 +284,48 @@ const dropTargetObject =
     );
   }
 
+async function deleteObject(
+  event
+) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (
+    typeof onDelete !==
+    "function"
+  ) {
+    return;
+  }
+
+  const confirmed =
+    window.confirm(
+      `Delete ${
+        object?.displayName ||
+        getObjectLabel(object)
+      }?`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await onDelete(
+      object
+    );
+  } catch (error) {
+    console.error(
+      "MOS OBJECT DELETE FAILED:",
+      error
+    );
+
+    window.alert(
+      error?.message ||
+      "Could not delete object."
+    );
+  }
+}
+  
 
   function cycleFace(event) {
     stop(event);
@@ -463,34 +506,51 @@ const dropTargetObject =
 
               <div className="mos-name-actions">
 
-                {isContainer &&
-                typeof onAddChild ===
-                  "function" ? (
-                  <button
-                    type="button"
-                    className="mos-add-child"
+  {isContainer &&
+  typeof onAddChild ===
+    "function" ? (
+    <button
+      type="button"
+      className="mos-add-child"
+      title="Add child object"
+      onPointerDown={
+        event =>
+          event.stopPropagation()
+      }
+      onClick={
+        addChild
+      }
+    >
+      +
+    </button>
+  ) : null}
 
-                    title="Add child object"
 
-                    onPointerDown={
-                      event =>
-                        event.stopPropagation()
-                    }
+  {typeof onDelete ===
+    "function" ? (
+    <button
+      type="button"
+      className="mos-delete-object"
+      title="Delete object"
+      onPointerDown={
+        event =>
+          event.stopPropagation()
+      }
+      onClick={
+        deleteObject
+      }
+    >
+      ×
+    </button>
+  ) : null}
 
-                    onClick={
-                      addChild
-                    }
-                  >
-                    +
-                  </button>
-                ) : null}
 
-                <span className="mos-status">
-                  {clean(object.status) ||
-                    "active"}
-                </span>
+  <span className="mos-status">
+    {clean(object.status) ||
+      "active"}
+  </span>
 
-              </div>
+</div>
             </div>
 
 
@@ -939,6 +999,42 @@ const dropTargetObject =
           line-height: 1;
         }
 
+.mos-delete-object {
+  width: 24px;
+  height: 24px;
+
+  padding: 0;
+
+  border:
+    1px solid
+    rgba(229,62,62,.28);
+
+  border-radius: 5px;
+
+  background:
+    rgba(229,62,62,.045);
+
+  color:
+    rgba(229,62,62,.72);
+
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+
+.mos-delete-object:hover {
+  border-color:
+    rgba(229,62,62,.62);
+
+  background:
+    rgba(229,62,62,.10);
+
+  color:
+    rgba(255,90,90,.96);
+}
 
         .mos-name-error {
           margin-top: 6px;
