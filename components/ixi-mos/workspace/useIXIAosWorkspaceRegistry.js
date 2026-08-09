@@ -215,42 +215,63 @@ export default function useIXIAosWorkspaceRegistry({
        * be expanded here after this extraction
        * passes regression testing.
        */
-      const visibleMachineIds =
-        new Set(
-          (
-            visibleSavedListings ||
-            []
-          )
-            .map(item =>
-              String(
-                getListingId(item) ||
-                ""
-              )
-            )
-            .filter(Boolean)
-        );
+    const visibleMachineIds =
+  new Set(
+    (
+      visibleSavedListings ||
+      []
+    )
+      .map(item =>
+        String(
+          getListingId(item) ||
+          ""
+        )
+      )
+      .filter(Boolean)
+  );
 
+return orderedObjects.filter(
+  item => {
+    const objectType =
+      String(
+        item?.objectType ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
 
-      return orderedObjects.filter(
-        item => {
-          if (
-            item?.objectType ===
-            "system-index"
-          ) {
-            return true;
-          }
+    /*
+     * Structural and durable MOS
+     * objects are workspace objects
+     * in their own right.
+     *
+     * Their Board visibility is
+     * determined by workspace placement,
+     * not by machine search/filter state.
+     */
+    if (
+      objectType &&
+      objectType !== "machine"
+    ) {
+      return true;
+    }
 
-          const id =
-            String(
-              getListingId(item) ||
-              ""
-            );
-
-          return (
-            visibleMachineIds.has(id)
-          );
-        }
+    /*
+     * Existing IronXchange machines
+     * retain their proven Marketplace /
+     * inventory filtering behavior.
+     */
+    const id =
+      String(
+        getListingId(item) ||
+        ""
       );
+
+    return (
+      visibleMachineIds.has(id)
+    );
+  }
+);
     }, [
       workspacePlacements,
       objectRegistry,
