@@ -2104,11 +2104,11 @@ const [
 :global(.system-index-drop-on-zone) {
   position: absolute;
 
-  left: 12%;
-  right: 12%;
+  left: 4%;
+  right: 4%;
 
-  top: 14%;
-  bottom: 22%;
+  top: 8%;
+  bottom: 8%;
 
   z-index: 18;
 
