@@ -294,6 +294,17 @@ onDeleteObject
     item
   }
 
+ixiState={
+  ixiCardState[
+    id
+  ] || {
+    color: "none",
+    outline: 1,
+    face: 1,
+    actionNotice: null
+  }
+}
+            
   dragHandleProps={
     dragHandleProps
   }
