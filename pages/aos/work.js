@@ -2413,13 +2413,13 @@ workspaceDropSurface={
     createObjectInsideSystemIndex
   }
 
-  onCreateLocationChild={
-    createLocationInContainer
-  }
+ onCreateObjectChild={
+  createLocationInContainer
+}
 
-  onSaveObjectName={
-    saveMosObjectName
-  }
+onSaveObjectName={
+  saveMosObjectName
+}
 />
     
 <button
