@@ -182,13 +182,16 @@ export default function IXISystemIndexCard({
 
   onSendToArmedDestination,
 
-    onExposeObject,
+   onExposeObject,
 
-  onOpenConsole,
+onOpenConsole,
 
-  onAddObject,
-  
-  workspaceDropPolicy = null,
+onExposeContents,
+onGatherContents,
+
+onAddObject,
+
+workspaceDropPolicy = null,
   workspaceDropSurface = ""
 }) {
 
@@ -588,6 +591,28 @@ const [
     );
   }
 
+  function exposeContents(
+  event
+) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+  onExposeContents?.(
+    index
+  );
+}
+
+
+function gatherContents(
+  event
+) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+  onGatherContents?.(
+    index
+  );
+}
 
   /* =========================================================
      RENDER
@@ -857,46 +882,62 @@ const [
 
             <div className="index-snapshot">
 
-              <div>
-                <span>
-                  OBJECTS
-                </span>
+  <div className="index-stat">
+    <span>
+      OBJECTS
+    </span>
 
-                <strong>
-                  {items.length}
-                </strong>
-              </div>
+    <strong>
+      {items.length}
+    </strong>
+  </div>
 
-              <div>
-                <span>
-                  VALUE
-                </span>
+  <div className="index-stat">
+    <span>
+      VALUE
+    </span>
 
-                <strong>
-                  {formatMoney(
-                    index?.value
-                  )}
-                </strong>
-              </div>
+    <strong>
+      {formatMoney(
+        index?.value
+      )}
+    </strong>
+  </div>
 
 
-              <button
-                type="button"
-                className="index-console-button"
-                onPointerDown={
-                  event =>
-                    event.stopPropagation()
-                }
-                onClick={
-                  openConsole
-                }
-              >
-                OPEN
-              </button>
+  <div className="index-content-actions">
 
-            </div>
+    <button
+      type="button"
+      onPointerDown={
+        event =>
+          event.stopPropagation()
+      }
+      onClick={
+        exposeContents
+      }
+      title="Show direct contents on Board"
+    >
+      BOARD
+    </button>
 
-          </div>
+    <button
+      type="button"
+      onPointerDown={
+        event =>
+          event.stopPropagation()
+      }
+      onClick={
+        gatherContents
+      }
+      title="Gather direct contents into container"
+    >
+      RECALL
+    </button>
+
+  </div>
+
+</div>
 
 
         /* ---------------------------------------------------
@@ -1800,150 +1841,116 @@ const [
            =============================================== */
 
         .index-snapshot {
-          min-height: 50px;
+  display: grid;
 
-          margin-top: 7px;
+  grid-template-columns:
+    62px
+    82px
+    minmax(0, 1fr);
 
-          display: grid;
+  align-items: stretch;
 
-          grid-template-columns:
-            1fr
-            1.3fr
-            42px;
+  gap: 6px;
 
-          gap: 5px;
-        }
-
-
-        .index-snapshot > div {
-          min-width: 0;
-
-          padding:
-            6px 7px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .045
-            );
-
-          border-radius: 5px;
-
-          background:
-            rgba(
-              0,
-              0,
-              0,
-              .20
-            );
-        }
+  margin-top: 8px;
+}
 
 
-        .index-snapshot span {
-          display: block;
+.index-stat {
+  min-width: 0;
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .24
-            );
+  height: 34px;
 
-          font-size: 5.5px;
-          font-weight: 950;
+  padding: 5px 7px;
 
-          letter-spacing:
-            .06em;
-        }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
+  border:
+    1px solid
+    rgba(255,255,255,.055);
 
-        .index-snapshot strong {
-          display: block;
+  border-radius: 5px;
 
-          margin-top: 4px;
-
-          overflow: hidden;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .70
-            );
-
-          font-size: 8px;
-          font-weight: 950;
-
-          text-overflow:
-            ellipsis;
-
-          white-space: nowrap;
-        }
+  background:
+    rgba(255,255,255,.018);
+}
 
 
-        .index-console-button {
-          border:
-            1px solid
-            rgba(
-              255,
-              196,
-              0,
-              .14
-            );
+.index-stat span {
+  color:
+    rgba(255,255,255,.28);
 
-          border-radius: 5px;
+  font-size: 6px;
+  font-weight: 900;
 
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .035
-            );
-
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .58
-            );
-
-          font-size: 5.5px;
-          font-weight: 950;
-
-          letter-spacing:
-            .06em;
-
-          cursor: pointer;
-        }
+  letter-spacing: .55px;
+}
 
 
-        .index-console-button:hover {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .38
-            );
+.index-stat strong {
+  margin-top: 2px;
 
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .08
-            );
+  color:
+    rgba(255,255,255,.78);
 
-          color: #ffc400;
-        }
+  font-size: 10px;
+  font-weight: 950;
 
+  line-height: 1;
+}
+
+
+.index-content-actions {
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 5px;
+}
+
+
+.index-content-actions button {
+  min-width: 0;
+  height: 34px;
+
+  padding: 0 5px;
+
+  border:
+    1px solid
+    rgba(0,194,255,.12);
+
+  border-radius: 5px;
+
+  background:
+    rgba(0,194,255,.022);
+
+  color:
+    rgba(255,255,255,.48);
+
+  font-size: 6.5px;
+  font-weight: 950;
+
+  letter-spacing: .4px;
+
+  cursor: pointer;
+}
+
+
+.index-content-actions button:hover {
+  border-color:
+    rgba(0,194,255,.42);
+
+  background:
+    rgba(0,194,255,.07);
+
+  color:
+    rgba(0,194,255,.92);
+}
 
         /* ===============================================
            EMPTY
