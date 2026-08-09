@@ -47,8 +47,9 @@ export default function IXIAosWorkspaceBoard({
 
   onAddObject,
 
-  onCreateObjectChild,
-  onSaveObjectName
+onCreateObjectChild,
+onSaveObjectName,
+onDeleteObject
 }) {
   return (
     <IXIBoardSurface
@@ -289,21 +290,26 @@ export default function IXIAosWorkspaceBoard({
       ) {
         return (
           <IXIMosObjectCard
-            object={
-              item
-            }
+  object={
+    item
+  }
 
-            dragHandleProps={
-              dragHandleProps
-            }
+  dragHandleProps={
+    dragHandleProps
+  }
 
-            onAddChild={
-  onCreateObjectChild
-}
-            onSaveName={
-              onSaveObjectName
-            }
-          />
+  onAddChild={
+    onCreateObjectChild
+  }
+
+  onSaveName={
+    onSaveObjectName
+  }
+
+  onDelete={
+    onDeleteObject
+  }
+/>
         );
       }
 
