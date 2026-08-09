@@ -47,7 +47,7 @@ export default function IXIAosWorkspaceBoard({
 
   onAddObject,
 
-  onCreateLocationChild,
+  onCreateObjectChild,
   onSaveObjectName
 }) {
   return (
@@ -298,9 +298,8 @@ export default function IXIAosWorkspaceBoard({
             }
 
             onAddChild={
-              onCreateLocationChild
-            }
-
+  onCreateObjectChild
+}
             onSaveName={
               onSaveObjectName
             }
