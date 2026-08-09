@@ -38,15 +38,15 @@ export default function IXISortableObject({
   const sortableId =
     clean(id);
 
-  const {
-  active
+ const {
+  active: contextActive
 } = useDndContext();
 
 const activeId =
   clean(
-    active?.id
+    contextActive?.id
   );
-
+  
 const isSelfDragging =
   Boolean(
     activeId &&
