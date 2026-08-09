@@ -1931,6 +1931,78 @@ async function createRootSystemIndex() {
     return;
   }
 
+  /*
+   * FIRST:
+   * See whether this persisted Index
+   * already exists.
+   *
+   * If it does, simply put it back
+   * on the Board instead of creating
+   * a duplicate MOS object.
+   */
+  const existingIndex =
+    workspaceSystemIndexes.find(
+      index => {
+        const existingName =
+          String(
+            index?.displayName ||
+            index?.label ||
+            ""
+          )
+            .trim()
+            .toLowerCase();
+
+        const requestedName =
+          displayName
+            .toLowerCase();
+
+        return (
+          existingName ===
+            requestedName &&
+          index?.metadata
+            ?.persisted === true
+        );
+      }
+    );
+
+  if (existingIndex) {
+    const existingObjectId =
+      String(
+        existingIndex?.objectId ||
+        ""
+      );
+
+    if (!existingObjectId) {
+      return;
+    }
+
+    const nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          workspacePlacements,
+
+        objectId:
+          existingObjectId,
+
+        targetSurface:
+          "board"
+      });
+
+    setWorkspacePlacements(
+      nextPlacements
+    );
+
+    await saveWorkspaceLayout(
+      nextPlacements
+    );
+
+    return;
+  }
+
+  /*
+   * No existing persisted Index.
+   * Create a new one.
+   */
   const entityId =
     String(
       aosEntity?.entityId ||
@@ -1990,12 +2062,6 @@ async function createRootSystemIndex() {
       );
     }
 
-    /*
-     * Reload canonical AOS/MOS environment.
-     *
-     * Do NOT manufacture the new object
-     * locally.
-     */
     const environment =
       await loadIXIMosEnvironment({
         includeObjects:
@@ -2018,13 +2084,6 @@ async function createRootSystemIndex() {
         : []
     );
 
-    /*
-     * Workspace placement is separate
-     * from structural object identity.
-     *
-     * Creation puts this new Index on
-     * the user's current Board.
-     */
     const nextPlacements =
       moveObjectToWorkspaceSurface({
         placements:
@@ -2041,7 +2100,7 @@ async function createRootSystemIndex() {
       nextPlacements
     );
 
-    saveWorkspaceLayout(
+    await saveWorkspaceLayout(
       nextPlacements
     );
   } catch (error) {
