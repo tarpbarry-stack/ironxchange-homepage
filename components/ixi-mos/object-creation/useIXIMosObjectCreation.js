@@ -511,32 +511,32 @@ export default function useIXIMosObjectCreation({
 
 
     /*
-     * STEP 3
-     *
-     * Reload canonical MOS truth.
-     */
-    const environment =
-      await reloadMosEnvironment();
+ * STEP 3
+ *
+ * Expose the newly-created real
+ * object to this user's workspace
+ * immediately.
+ *
+ * Do this BEFORE reloading MOS truth.
+ */
+if (exposeToBoard) {
+  await exposeObjectToBoard(
+    createdObjectId
+  );
+}
 
 
-    /*
-     * STEP 4
-     *
-     * Optional workspace exposure.
-     *
-     * Newly created objects currently
-     * appear on this user's Board so
-     * they can immediately work with them.
-     *
-     * This does NOT remove them from
-     * their canonical MOS parent.
-     */
-    if (exposeToBoard) {
-      await exposeObjectToBoard(
-        createdObjectId
-      );
-    }
-
+/*
+ * STEP 4
+ *
+ * Now reload canonical MOS truth.
+ *
+ * The created object already has
+ * workspace placement, so this refresh
+ * only updates object/container truth.
+ */
+const environment =
+  await reloadMosEnvironment();
 
     return {
       object:
