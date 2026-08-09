@@ -69,40 +69,45 @@ export default function IXIObjectDropTarget({
       acceptance.accepted
     );
 
-  /*
-   * Keep this droppable registered
-   * continuously.
-   *
-   * Do NOT dynamically disable it.
-   */
+ /*
+ * A container participates in collision
+ * detection only when it can actually
+ * accept the active draggable.
+ *
+ * Rejected targets must not be allowed
+ * to shadow Board / Pocket / Stack
+ * droppables underneath them.
+ */
   const {
-    setNodeRef,
-    isOver
-  } =
-    useDroppable({
-      id:
-        dropTargetId,
+  setNodeRef,
+  isOver
+} =
+  useDroppable({
+    id:
+      dropTargetId,
 
-      data: {
-        type:
-          "ixi-drop-target",
+    disabled:
+      !canAccept,
 
-        dropIntent:
-          IXI_DROP_INTENTS.ON,
+    data: {
+      type:
+        "ixi-drop-target",
 
-        targetRole:
-          IXI_DROP_TARGET_ROLES
-            .CONTAINER,
+      dropIntent:
+        IXI_DROP_INTENTS.ON,
 
-        targetObjectId:
-          objectId,
+      targetRole:
+        IXI_DROP_TARGET_ROLES.CONTAINER,
 
-        targetSurface,
+      targetObjectId:
+        objectId,
 
-        accepted:
-          canAccept
-      }
-    });
+      targetSurface,
+
+      accepted:
+        canAccept
+    }
+  });
 
   const accepting =
     Boolean(
