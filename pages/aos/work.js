@@ -3309,72 +3309,53 @@ onOpenConsole={() => {
   z-index: 1;
 }
 
-/* L1 local catch only */
 .ixi-pocket-catch-pad.catch-l1 {
   left: 0;
   right: auto;
   top: 92px;
-
   width: 360px;
   height: 140px;
-
   pointer-events: auto;
-
-background: rgba(255, 0, 0, .35) !important;
-outline: 2px solid red !important;
+  background: rgba(255, 0, 0, .35) !important;
+  outline: 2px solid red !important;
 }
 
-/* R1 local catch only */
 .ixi-pocket-catch-pad.catch-r1 {
   right: 20;
   left: auto;
   top: 92px;
-
   width: 340px;
   height: 140px;
-
   pointer-events: auto;
-
- background: rgba(0, 255, 0, .35) !important;
-outline: 2px solid lime !important;
+  background: rgba(0, 255, 0, .35) !important;
+  outline: 2px solid lime !important;
 }
 
-/* L2 screen-left lower catch lane only */
 .ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
   position: fixed;
-
   left: 0;
   right: auto;
   top: 405px;
-
   width: 150px;
   height: calc(100vh - 405px);
-
   pointer-events: auto;
   z-index: 999;
-
- background: rgba(0, 100, 255, .35) !important;
-outline: 2px solid blue !important;
+  background: rgba(0, 100, 255, .35) !important;
+  outline: 2px solid blue !important;
 }
 
-/* R2 screen-right lower catch lane only */
 .ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
   position: fixed;
-
   right: 0;
   left: auto;
   top: 420px;
-
   width: 150px;
   height: calc(100vh - 420px);
-
   pointer-events: auto;
   z-index: 999;
-
   background: rgba(255, 0, 255, .35) !important;
-outline: 2px solid magenta !important;
+  outline: 2px solid magenta !important;
 }
-
 .ixi-pocket-thumbs.thumb-size-small {
   --pocket-thumb-w: 72px;
   --pocket-thumb-h: 48px;
