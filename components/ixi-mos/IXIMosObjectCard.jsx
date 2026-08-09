@@ -1,4 +1,9 @@
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 
 function clean(value) {
   return String(value || "").trim();
@@ -58,13 +63,47 @@ export default function IXIMosObjectCard({
   object = {},
   projection = null,
   dragHandleProps = null,
+
   onOpen = null,
+
+  onAddChild = null,
+  onSaveName = null,
+
   onAddMedia = null,
   onCreateWorkOrder = null,
   onAddExpense = null,
   onScanQr = null
 }) {
-  const [face, setFace] = useState(1);
+  const [face, setFace] =
+    useState(1);
+
+  const inputRef =
+    useRef(null);
+
+  const creationState =
+    clean(
+      object?.metadata
+        ?.creationState
+    );
+
+  const isNaming =
+    creationState ===
+    "naming";
+
+  const [draftName, setDraftName] =
+    useState(
+      isNaming
+        ? ""
+        : clean(
+            object?.displayName
+          )
+    );
+
+  const [savingName, setSavingName] =
+    useState(false);
+
+  const [nameError, setNameError] =
+    useState("");
 
   const imageUrl = useMemo(
     () => getPrimaryImage(object),
@@ -106,10 +145,113 @@ export default function IXIMosObjectCard({
   const customerAssetId =
     clean(object.customerAssetId);
 
+
+  useEffect(() => {
+    if (
+      isNaming &&
+      inputRef.current
+    ) {
+      inputRef.current.focus();
+    }
+  }, [
+    isNaming,
+    object?.objectId
+  ]);
+
+
+  useEffect(() => {
+    if (!isNaming) {
+      setDraftName(
+        clean(
+          object?.displayName
+        )
+      );
+    }
+  }, [
+    isNaming,
+    object?.displayName
+  ]);
+
+
   function stop(event) {
     event.preventDefault();
     event.stopPropagation();
   }
+
+
+  async function saveName(
+    event = null
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    const nextName =
+      clean(draftName);
+
+    if (!nextName) {
+      setNameError(
+        "Name is required."
+      );
+
+      inputRef.current?.focus();
+
+      return;
+    }
+
+    if (
+      !object?.objectId ||
+      savingName
+    ) {
+      return;
+    }
+
+    setSavingName(true);
+    setNameError("");
+
+    try {
+      await onSaveName?.({
+        objectId:
+          object.objectId,
+
+        displayName:
+          nextName
+      });
+    } catch (error) {
+      console.error(
+        "MOS OBJECT NAME SAVE FAILED:",
+        error
+      );
+
+      setNameError(
+        error?.message ||
+        "Could not save object."
+      );
+    } finally {
+      setSavingName(false);
+    }
+  }
+
+
+  function handleNameKeyDown(
+    event
+  ) {
+    if (
+      event.key === "Enter"
+    ) {
+      saveName(event);
+    }
+  }
+
+
+  function addChild(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    onAddChild?.(
+      object
+    );
+  }
+
 
   function cycleFace(event) {
     stop(event);
@@ -169,21 +311,129 @@ export default function IXIMosObjectCard({
             ) : null}
           </div>
 
-          <div
+                    <div
             className="mos-body"
             {...(dragHandleProps || {})}
           >
             <div className="mos-name-row">
-              <h3>
-                {object.displayName ||
-                  "Unnamed Object"}
-              </h3>
 
-              <span className="mos-status">
-                {clean(object.status) ||
-                  "active"}
-              </span>
+              {isNaming ? (
+                <div
+                  className="mos-name-editor"
+                  onPointerDown={
+                    event =>
+                      event.stopPropagation()
+                  }
+                >
+                  <input
+                    ref={
+                      inputRef
+                    }
+
+                    value={
+                      draftName
+                    }
+
+                    placeholder={`Name this ${
+                      getObjectLabel(
+                        object
+                      )
+                        .toLowerCase()
+                    }`}
+
+                    disabled={
+                      savingName
+                    }
+
+                    onChange={
+                      event => {
+                        setDraftName(
+                          event.target.value
+                        );
+
+                        if (nameError) {
+                          setNameError("");
+                        }
+                      }
+                    }
+
+                    onKeyDown={
+                      handleNameKeyDown
+                    }
+
+                    spellCheck={
+                      false
+                    }
+                  />
+
+                  <button
+                    type="button"
+
+                    disabled={
+                      savingName
+                    }
+
+                    onPointerDown={
+                      event =>
+                        event.stopPropagation()
+                    }
+
+                    onClick={
+                      saveName
+                    }
+                  >
+                    {savingName
+                      ? "..."
+                      : "SAVE"}
+                  </button>
+                </div>
+              ) : (
+                <h3>
+                  {object.displayName ||
+                    "Unnamed Object"}
+                </h3>
+              )}
+
+
+              <div className="mos-name-actions">
+
+                {isContainer &&
+                typeof onAddChild ===
+                  "function" ? (
+                  <button
+                    type="button"
+                    className="mos-add-child"
+
+                    title="Add child object"
+
+                    onPointerDown={
+                      event =>
+                        event.stopPropagation()
+                    }
+
+                    onClick={
+                      addChild
+                    }
+                  >
+                    +
+                  </button>
+                ) : null}
+
+                <span className="mos-status">
+                  {clean(object.status) ||
+                    "active"}
+                </span>
+
+              </div>
             </div>
+
+
+            {nameError ? (
+              <div className="mos-name-error">
+                {nameError}
+              </div>
+            ) : null}
+
 
             {factualTitle ? (
               <div className="mos-factual-title">
@@ -474,20 +724,130 @@ export default function IXIMosObjectCard({
           cursor: grab;
         }
 
-        .mos-name-row {
+                .mos-name-row {
           display: flex;
+          align-items: flex-start;
           justify-content: space-between;
           gap: 10px;
         }
 
+
         .mos-name-row h3 {
           margin: 0;
+
+          min-width: 0;
 
           color: #f2f2f2;
           font-size: 16px;
           font-weight: 950;
           line-height: 1.08;
         }
+
+
+        .mos-name-editor {
+          min-width: 0;
+          flex: 1;
+
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+
+        .mos-name-editor input {
+          min-width: 0;
+          flex: 1;
+
+          height: 30px;
+
+          padding: 0 8px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.12);
+
+          border-radius: 5px;
+
+          outline: none;
+
+          background:
+            rgba(0,0,0,.32);
+
+          color: #f2f2f2;
+
+          font-size: 11px;
+          font-weight: 850;
+        }
+
+
+        .mos-name-editor input:focus {
+          border-color:
+            rgba(0,194,255,.60);
+
+          box-shadow:
+            0 0 0 1px
+            rgba(0,194,255,.12);
+        }
+
+
+        .mos-name-editor button,
+        .mos-add-child {
+          border:
+            1px solid
+            rgba(255,196,0,.30);
+
+          border-radius: 5px;
+
+          background:
+            rgba(255,196,0,.055);
+
+          color: #ffc400;
+
+          font-weight: 950;
+
+          cursor: pointer;
+        }
+
+
+        .mos-name-editor button {
+          height: 30px;
+          padding: 0 8px;
+
+          font-size: 7px;
+          letter-spacing: .5px;
+        }
+
+
+        .mos-name-actions {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+
+          flex: 0 0 auto;
+        }
+
+
+        .mos-add-child {
+          width: 24px;
+          height: 24px;
+
+          padding: 0;
+
+          font-size: 16px;
+          line-height: 1;
+        }
+
+
+        .mos-name-error {
+          margin-top: 6px;
+
+          color:
+            rgba(255,90,90,.88);
+
+          font-size: 8px;
+          font-weight: 850;
+        }
+
 
         .mos-status {
           color: rgba(56,161,105,.86);
