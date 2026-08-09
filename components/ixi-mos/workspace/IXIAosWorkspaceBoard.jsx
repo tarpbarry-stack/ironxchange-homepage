@@ -13,6 +13,9 @@ import IXISystemIndexCard
 import IXIMosObjectCard
   from "../IXIMosObjectCard";
 
+import IXILocationObjectCard
+  from "../location/IXILocationObjectCard";
+
 import {
   getListingId
 } from "../../../lib/listingFormatters";
@@ -42,10 +45,13 @@ export default function IXIAosWorkspaceBoard({
   sendListingToBack,
   sendMachineToArmedDestination,
 
-  exposeEquipmentMachineToBoard,
+    exposeEquipmentMachineToBoard,
   returnAllEquipmentHome,
 
-  onAddObject
+  onAddObject,
+
+  onCreateLocationChild,
+  onSaveObjectName
 }) {
   return (
     <IXIBoardSurface
@@ -272,6 +278,40 @@ export default function IXIAosWorkspaceBoard({
           }
 
 
+/*
+ * LOCATION OBJECT
+ *
+ * Location has its own card family.
+ *
+ * It remains a normal durable MOS
+ * object and a normal workspace item.
+ */
+if (
+  item?.objectId &&
+  objectType ===
+    "location"
+) {
+  return (
+    <IXILocationObjectCard
+      object={
+        item
+      }
+
+      dragHandleProps={
+        dragHandleProps
+      }
+
+      onAddChild={
+        onCreateLocationChild
+      }
+
+      onSaveName={
+        onSaveObjectName
+      }
+    />
+  );
+}
+          
           /*
            * DURABLE MOS OBJECT
            *
