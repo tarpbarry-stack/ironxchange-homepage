@@ -1,4 +1,8 @@
 import {
+  useDndContext
+} from "@dnd-kit/core";
+
+import {
   useSortable
 } from "@dnd-kit/sortable";
 
@@ -24,6 +28,8 @@ export default function IXISortableObject({
 
   disabled = false,
 
+  reorderBehavior = "normal",
+
   className,
   style: externalStyle,
 
@@ -31,6 +37,28 @@ export default function IXISortableObject({
 }) {
   const sortableId =
     clean(id);
+
+  const {
+  active
+} = useDndContext();
+
+const activeId =
+  clean(
+    active?.id
+  );
+
+const isSelfDragging =
+  Boolean(
+    activeId &&
+    activeId === sortableId
+  );
+
+const suppressForeignTransform =
+  Boolean(
+    reorderBehavior === "self-only" &&
+    activeId &&
+    !isSelfDragging
+  );
 
   const resolvedObjectType =
     clean(objectType) ||
@@ -97,16 +125,21 @@ export default function IXISortableObject({
       }
     });
 
+const effectiveTransform =
+  suppressForeignTransform
+    ? null
+    : transform;
+  
   const style = {
     ...(
       externalStyle ||
       {}
     ),
 
-    transform:
-      CSS.Transform.toString(
-        transform
-      ),
+   transform:
+  CSS.Transform.toString(
+    effectiveTransform
+  ),
 
     transition,
 
