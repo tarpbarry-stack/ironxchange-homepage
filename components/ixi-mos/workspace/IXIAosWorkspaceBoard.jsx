@@ -13,9 +13,6 @@ import IXISystemIndexCard
 import IXIMosObjectCard
   from "../IXIMosObjectCard";
 
-import IXILocationObjectCard
-  from "../location/IXILocationObjectCard";
-
 import {
   getListingId
 } from "../../../lib/listingFormatters";
@@ -277,40 +274,6 @@ export default function IXIAosWorkspaceBoard({
             );
           }
 
-
-/*
- * LOCATION OBJECT
- *
- * Location has its own card family.
- *
- * It remains a normal durable MOS
- * object and a normal workspace item.
- */
-if (
-  item?.objectId &&
-  objectType ===
-    "location"
-) {
-  return (
-    <IXILocationObjectCard
-      object={
-        item
-      }
-
-      dragHandleProps={
-        dragHandleProps
-      }
-
-      onAddChild={
-        onCreateLocationChild
-      }
-
-      onSaveName={
-        onSaveObjectName
-      }
-    />
-  );
-}
           
           /*
            * DURABLE MOS OBJECT
@@ -318,27 +281,35 @@ if (
            * Machines remain on their
            * existing IronXchange path.
            */
-          if (
-            item?.objectId &&
-            objectType &&
-            objectType !==
-              "machine"
-          ) {
-            return (
-              <IXIMosObjectCard
-                object={
-                  item
-                }
+               if (
+        item?.objectId &&
+        objectType &&
+        objectType !==
+          "machine"
+      ) {
+        return (
+          <IXIMosObjectCard
+            object={
+              item
+            }
 
-                dragHandleProps={
-                  dragHandleProps
-                }
-              />
-            );
-          }
+            dragHandleProps={
+              dragHandleProps
+            }
+
+            onAddChild={
+              onCreateLocationChild
+            }
+
+            onSaveName={
+              onSaveObjectName
+            }
+          />
+        );
+      }
 
 
-          return null;
+      return null;
         }}
       />
     </IXIBoardSurface>
