@@ -1276,7 +1276,7 @@ text-align: right;
   content: "";
   position: absolute;
 
-  top: 4px;
+  top: 8px;
   z-index: 2;
   
   left: 0;
