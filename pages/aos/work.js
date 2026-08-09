@@ -36,6 +36,9 @@ import ListingCard from "../../components/ListingCard";
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
+import IXIMosObjectCard
+  from "../../components/ixi-mos/IXIMosObjectCard";
+
 import useIXIMosObjectCreation
   from "../../components/ixi-mos/object-creation/useIXIMosObjectCreation";
 
