@@ -1265,27 +1265,40 @@ function getDirectContainerChildIds(
    * Equipment is still backed by
    * IronXchange listings.
    */
-  if (
-    container?.indexId ===
-      "equipment" ||
-    String(
-      container?.displayName || ""
-    )
-      .trim()
-      .toLowerCase() ===
-      "equipment"
-  ) {
-    return (
-      container?.items || []
-    )
-      .map(item =>
-        String(
-          getListingId(item) ||
-          ""
-        )
+ if (
+  container?.indexId ===
+    "equipment" ||
+  String(
+    container?.displayName || ""
+  )
+    .trim()
+    .toLowerCase() ===
+    "equipment"
+) {
+  /*
+   * EQUIPMENT CANONICAL MEMBERSHIP
+   *
+   * NEVER use container.items here.
+   *
+   * The card's items array is the
+   * current tucked/deck projection.
+   * After BOARD it intentionally
+   * becomes empty.
+   *
+   * equipmentIndex.items remains
+   * the canonical owned-machine set.
+   */
+  return (
+    equipmentIndex?.items || []
+  )
+    .map(item =>
+      String(
+        getListingId(item) ||
+        ""
       )
-      .filter(Boolean);
-  }
+    )
+    .filter(Boolean);
+}
 
   /*
    * MOS CONTAINERS
@@ -1364,6 +1377,21 @@ async function boardContainerChildren(
 async function recallContainerChildren(
   container
 ) {
+
+const isEquipment =
+  container?.indexId ===
+    "equipment" ||
+  String(
+    container?.displayName || ""
+  )
+    .trim()
+    .toLowerCase() ===
+    "equipment";
+
+if (isEquipment) {
+  returnAllEquipmentHome?.();
+  return;
+}  
   const childIds =
     new Set(
       getDirectContainerChildIds(
