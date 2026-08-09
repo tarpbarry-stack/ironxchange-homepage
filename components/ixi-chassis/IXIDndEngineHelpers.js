@@ -22,13 +22,30 @@ export function universalWorkspaceCollisionDetection(
    * parent underneath it.
    */
   const onTargetHits =
-    pointerHits.filter(
-      collision =>
-        isIXIDropOnTargetId(
+  pointerHits.filter(
+    collision => {
+      if (
+        !isIXIDropOnTargetId(
           collision?.id
         )
-    );
+      ) {
+        return false;
+      }
 
+      const container =
+        args.droppableContainers
+          ?.get?.(
+            collision?.id
+          );
+
+      return (
+        container
+          ?.data
+          ?.current
+          ?.accepted === true
+      );
+    }
+  );
   if (
     onTargetHits.length
   ) {
