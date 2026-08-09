@@ -1,7 +1,8 @@
 import {
   createMosObject,
   placeMosObject,
-  createMosCommandId
+  createMosCommandId,
+  updateMosObject
 } from "../../../lib/mos/ixiMosClient";
 
 import {
@@ -551,14 +552,101 @@ export default function useIXIMosObjectCreation({
     };
   }
 
+  async function createLocationInContainer(
+  container
+) {
+  return createObjectInContainer({
+    container,
+
+    objectType:
+      "location",
+
+    displayName:
+      "NEW LOCATION",
+
+    metadata: {
+      creationState:
+        "naming",
+
+      createdFrom:
+        "location-card-plus"
+    },
+
+    exposeToBoard:
+      true
+  });
+}
+
+async function saveMosObjectName({
+  objectId,
+  displayName
+}) {
+  const id =
+    clean(objectId);
+
+  const name =
+    clean(displayName);
+
+  if (!id) {
+    throw new Error(
+      "Object ID is required."
+    );
+  }
+
+  if (!name) {
+    throw new Error(
+      "Object name is required."
+    );
+  }
+
+  const response =
+    await updateMosObject({
+      objectId:
+        id,
+
+      displayName:
+        name,
+
+      actorId:
+        userId || null,
+
+      metadata: {
+        creationState:
+          "complete"
+      }
+    });
+
+  const updatedObject =
+    response?.object ||
+    response?.data ||
+    response;
+
+  /*
+   * Reload canonical MOS truth so every
+   * projection/card sees the new name.
+   */
+  await reloadMosEnvironment();
 
   return {
-    reloadMosEnvironment,
+    object:
+      updatedObject,
 
-    exposeObjectToBoard,
-
-    createRootSystemIndexByName,
-
-    createObjectInContainer
+    objectId:
+      id
   };
+}
+
+  return {
+  reloadMosEnvironment,
+
+  exposeObjectToBoard,
+
+  createRootSystemIndexByName,
+
+  createObjectInContainer,
+
+  createLocationInContainer,
+
+  saveMosObjectName
+};
 }
