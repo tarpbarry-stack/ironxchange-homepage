@@ -2112,7 +2112,7 @@ const [
 
   z-index: 18;
 
-  pointer-events: auto;
+  pointer-events: none;
 
   background: transparent;
 }
