@@ -1084,6 +1084,25 @@ const equipmentIndex =
   visibleSavedListings
 });
 
+  function getAosWorkspaceObjectById(
+  objectId
+) {
+  const id =
+    String(
+      objectId || ""
+    );
+
+  if (!id) {
+    return null;
+  }
+
+  return (
+    aosWorkspaceObjectRegistry
+      ?.get(id) ||
+    null
+  );
+}
+
   function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
 
@@ -2367,6 +2386,10 @@ workspaceDropSurface={
   items={
     aosBoardItems
   }
+
+getWorkspaceObjectById={
+  getAosWorkspaceObjectById
+}
 
   savedIds={
     savedIds
