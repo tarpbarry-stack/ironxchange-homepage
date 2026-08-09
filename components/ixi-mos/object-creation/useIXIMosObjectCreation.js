@@ -2,7 +2,8 @@ import {
   createMosObject,
   placeMosObject,
   createMosCommandId,
-  updateMosObject
+  updateMosObject,
+  deleteMosObject
 } from "../../../lib/mos/ixiMosClient";
 
 import {
@@ -636,7 +637,87 @@ async function saveMosObjectName({
   };
 }
 
+async function deleteMosWorkspaceObject(
+  object
+) {
+  const objectId =
+    getMosObjectId(
+      object
+    );
+
+  if (!objectId) {
+    throw new Error(
+      "Object ID is required."
+    );
+  }
+
+  /*
+   * Delete canonical MOS object first.
+   */
+  await deleteMosObject({
+    objectId,
+
+    actorId:
+      userId || null
+  });
+
+
+  /*
+   * Remove the deleted object's card
+   * from this user's workspace.
+   *
+   * We deliberately use the universal
+   * placement engine rather than
+   * assuming it currently lives on Board.
+   */
+  const nextPlacements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      nextPlacements[
+        surfaceId
+      ] =
+        Array.isArray(objectIds)
+          ? objectIds.filter(
+              id =>
+                String(id) !==
+                objectId
+            )
+          : [];
+    }
+  );
+
+
+  setWorkspacePlacements?.(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout?.(
+    nextPlacements
+  );
+
+
+  /*
+   * Reload active MOS truth.
+   *
+   * Soft-deleted objects disappear
+   * from the normal active-object
+   * environment.
+   */
+  await reloadMosEnvironment();
+
   return {
+    deleted: true,
+    objectId
+  };
+}
+
+ return {
   reloadMosEnvironment,
 
   exposeObjectToBoard,
@@ -647,6 +728,8 @@ async function saveMosObjectName({
 
   createLocationInContainer,
 
-  saveMosObjectName
+  saveMosObjectName,
+
+  deleteMosWorkspaceObject
 };
 }
