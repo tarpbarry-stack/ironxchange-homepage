@@ -1227,5 +1227,5 @@ async function deleteObject(
 
   </IXIAosObjectCardShell>
 );
-  );
+
 }
