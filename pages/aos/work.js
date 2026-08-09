@@ -2105,8 +2105,10 @@ async function createObjectInsideSystemIndex(
     );
   }
 }
-    <>
-      <Head>
+
+return (
+  <>
+    <Head>
         <title>IXI AOS Work | IronXchange</title>
 
         <link
