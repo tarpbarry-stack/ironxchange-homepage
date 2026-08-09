@@ -3,6 +3,57 @@ import {
   pointerWithin
 } from "@dnd-kit/core";
 
+import {
+  pointerWithin,
+  closestCenter
+} from "@dnd-kit/core";
+
+import {
+  isIXIDropOnTargetId
+} from "./IXIDropIntentEngine";
+
+export function universalWorkspaceCollisionDetection(
+  args
+) {
+  const pointerHits =
+    pointerWithin(args);
+
+  /*
+   * ENTER / ON target has priority.
+   *
+   * Once the pointer enters a valid
+   * nested container target, that
+   * target wins over the sortable
+   * parent underneath it.
+   */
+  const onTargetHits =
+    pointerHits.filter(
+      collision =>
+        isIXIDropOnTargetId(
+          collision?.id
+        )
+    );
+
+  if (
+    onTargetHits.length
+  ) {
+    return onTargetHits;
+  }
+
+  /*
+   * Normal IXI behavior remains.
+   */
+  if (
+    pointerHits.length
+  ) {
+    return pointerHits;
+  }
+
+  return closestCenter(
+    args
+  );
+}
+
 export function workspaceCollisionDetection(args) {
   const pointerHits = pointerWithin(args);
 
