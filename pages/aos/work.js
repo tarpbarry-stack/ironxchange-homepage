@@ -1640,9 +1640,20 @@ async function createRootSystemIndex() {
 async function createObjectInsideSystemIndex(
   systemIndex
 ) {
+  window.alert(
+    `LOCATION + FIRED: ${
+      systemIndex?.objectId ||
+      "NO OBJECT ID"
+    }`
+  );
+
   try {
     await createLocationInContainer(
       systemIndex
+    );
+
+    window.alert(
+      "CREATE LOCATION RETURNED"
     );
   } catch (error) {
     console.error(
@@ -1651,8 +1662,10 @@ async function createObjectInsideSystemIndex(
     );
 
     window.alert(
-      error?.message ||
-      "Could not create Location."
+      `CREATE FAILED: ${
+        error?.message ||
+        "Could not create Location."
+      }`
     );
   }
 }
