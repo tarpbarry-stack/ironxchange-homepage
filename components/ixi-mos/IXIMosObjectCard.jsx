@@ -141,14 +141,6 @@ const [
 
 const resolvedParentLabel =
   clean(parentLabel) ||
-  clean(
-    object?.metadata
-      ?.parentDisplayName
-  ) ||
-  clean(
-    object?.metadata
-      ?.parentName
-  ) ||
   (
     object?.directContainerId
       ? "CONTAINER"
