@@ -3301,6 +3301,23 @@ onOpenConsole={() => {
 /* IXI POCKET CATCH ZONE DEBUG     */
 /* =============================== */
 
+.ixi-pocket-catch-pad.catch-l1 {
+  background: rgba(255, 0, 0, .16);
+}
+
+.ixi-pocket-catch-pad.catch-r1 {
+  background: rgba(0, 255, 0, .16);
+}
+
+.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
+  background: rgba(0, 100, 255, .14);
+}
+
+.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
+  background: rgba(255, 0, 255, .14);
+}
+
+
 /* Base catch pad is inert unless explicitly assigned */
 .ixi-pocket-catch-pad {
   position: absolute;
