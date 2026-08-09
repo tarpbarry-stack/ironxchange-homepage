@@ -2690,8 +2690,8 @@ onGatherContainerChildren={
 }
 
    onCreateObjectChild={
-    createLocationInContainer
-  }
+  createObjectInsideSystemIndex
+}
 
   onSaveObjectName={
     saveMosObjectName
