@@ -49,6 +49,9 @@ export default function IXIAosWorkspaceBoard({
 
   onAddObject,
 
+onExposeContainerChildren,
+onGatherContainerChildren,
+
 onCreateObjectChild,
 onSaveObjectName,
 onDeleteObject
@@ -265,14 +268,22 @@ onDeleteObject
                 }
 
                 onOpenConsole={
-                  () => {
-                    returnAllEquipmentHome?.();
-                  }
-                }
+  () => {
+    returnAllEquipmentHome?.();
+  }
+}
 
-                onAddObject={
-                  onAddObject
-                }
+onExposeContents={
+  onExposeContainerChildren
+}
+
+onGatherContents={
+  onGatherContainerChildren
+}
+
+onAddObject={
+  onAddObject
+}
               />
             );
           }
