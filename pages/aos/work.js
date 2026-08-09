@@ -1593,7 +1593,10 @@ const {
 
   setAosObjects,
 
-  setSystemIndexes
+  setSystemIndexes,
+
+  onObjectNotice:
+    showAosObjectNotice
 });
 
   
