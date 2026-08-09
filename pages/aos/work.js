@@ -629,8 +629,34 @@ useEffect(() => {
     )
     .filter(Boolean);
 
+const validMosObjectIds =
+  (aosObjects || [])
+    .filter(object => {
+      const objectType =
+        String(
+          object?.objectType || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      return (
+        objectType &&
+        objectType !== "system-index" &&
+        objectType !== "machine"
+      );
+    })
+    .map(object =>
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      )
+    )
+    .filter(Boolean);
+
 const validWorkspaceObjectIds = [
   ...validSystemIndexIds,
+  ...validMosObjectIds,
   ...validMachineIds
 ];
 
@@ -776,7 +802,8 @@ placements:
     true;
 }, [
   containerStateKey,
-  systemIndexes
+  systemIndexes,
+  aosObjects
 ]);
   
   const visibleSavedListings = useMemo(() => {
@@ -1063,6 +1090,47 @@ const equipmentIndex =
       new Map();
 
     /*
+ * Durable MOS workspace objects.
+ *
+ * Machine listings stay on their existing
+ * proven IronXchange path.
+ */
+(aosObjects || []).forEach(
+  object => {
+    const objectType =
+      String(
+        object?.objectType || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if (
+      !objectType ||
+      objectType === "system-index" ||
+      objectType === "machine"
+    ) {
+      return;
+    }
+
+    const objectId =
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      );
+
+    if (!objectId) {
+      return;
+    }
+
+    registry.set(
+      objectId,
+      object
+    );
+  }
+);
+
+    /*
      * Machine/listing objects
      */
     workspaceListings.forEach(
@@ -1124,8 +1192,9 @@ const equipmentIndex =
 );
 
     return registry;
- }, [
+}, [
   workspaceListings,
+  aosObjects,
   workspaceSystemIndexes,
   equipmentWorkspaceIndex
 ]);
@@ -2272,33 +2341,62 @@ async function createRootSystemIndex() {
       }
     });
 
-    /*
-     * STEP 3
-     * Reload canonical AOS state.
-     *
-     * No local fake child.
-     */
-    const environment =
-      await loadIXIMosEnvironment({
-        includeObjects:
-          true
-      });
+/*
+ * STEP 3
+ * Reload canonical AOS state.
+ *
+ * No local fake child.
+ */
+const environment =
+  await loadIXIMosEnvironment({
+    includeObjects:
+      true
+  });
 
-    setAosObjects(
-      Array.isArray(
-        environment?.objects
-      )
-        ? environment.objects
-        : []
-    );
+setAosObjects(
+  Array.isArray(
+    environment?.objects
+  )
+    ? environment.objects
+    : []
+);
 
-    setSystemIndexes(
-      Array.isArray(
-        environment?.systemIndexes
-      )
-        ? environment.systemIndexes
-        : []
-    );
+setSystemIndexes(
+  Array.isArray(
+    environment?.systemIndexes
+  )
+    ? environment.systemIndexes
+    : []
+);
+
+/*
+ * STEP 4
+ *
+ * The object remains canonically inside
+ * the System Index in MOS.
+ *
+ * This is only this user's workspace
+ * exposure of its card.
+ */
+const nextPlacements =
+  moveObjectToWorkspaceSurface({
+    placements:
+      workspacePlacements,
+
+    objectId:
+      createdObjectId,
+
+    targetSurface:
+      "board"
+  });
+
+setWorkspacePlacements(
+  nextPlacements
+);
+
+await saveWorkspaceLayout(
+  nextPlacements
+);
   } catch (error) {
     console.error(
       "AOS SYSTEM INDEX CHILD CREATE FAILED:",
@@ -3120,10 +3218,22 @@ getItemReorderBehavior={item => {
   return "normal";
 }}
 
- getCustomItemId={item => {
+getCustomItemId={item => {
+  const objectType =
+    String(
+      item?.objectType || ""
+    )
+      .trim()
+      .toLowerCase();
+
   if (
-    item?.objectType ===
-    "system-index"
+    objectType ===
+      "system-index" ||
+    (
+      item?.objectId &&
+      objectType &&
+      objectType !== "machine"
+    )
   ) {
     return String(
       item.objectId
@@ -3132,41 +3242,36 @@ getItemReorderBehavior={item => {
 
   return null;
 }}
-
   renderCustomItem={({
   item,
   id,
   dragHandleProps
 }) => {
   if (
-    item?.objectType !==
-    "system-index"
-  ) {
-    return null;
-  }
-
+  item?.objectType ===
+  "system-index"
+) {
   return (
     <IXISystemIndexCard
       index={item}
-
       objectId={id}
 
       dragHandleProps={
         dragHandleProps
       }
 
-    workspaceDropPolicy={
-  item?.workspace
-    ?.dropPolicy ||
-  null
-}
+      workspaceDropPolicy={
+        item?.workspace
+          ?.dropPolicy ||
+        null
+      }
 
-workspaceDropSurface={
-  item?.workspace
-    ?.surfaceId ||
-  ""
-}
-    
+      workspaceDropSurface={
+        item?.workspace
+          ?.surfaceId ||
+        ""
+      }
+
       ixiState={
         ixiCardState[id] || {
           color: "none",
@@ -3200,21 +3305,50 @@ workspaceDropSurface={
       }
 
       onExposeObject={child => {
-  exposeEquipmentMachineToBoard(
-    child
+        exposeEquipmentMachineToBoard(
+          child
+        );
+      }}
+
+      onOpenConsole={() => {
+        returnAllEquipmentHome();
+      }}
+
+      onAddObject={
+        createObjectInsideSystemIndex
+      }
+    />
   );
-}}
-
-onOpenConsole={() => {
-  returnAllEquipmentHome();
-}}
-
-onAddObject={
-  createObjectInsideSystemIndex
 }
-/>
+
+/*
+ * Real durable MOS object.
+ *
+ * For this first proof:
+ * location → IXIMosObjectCard
+ */
+if (
+  item?.objectId &&
+  String(
+    item?.objectType || ""
+  )
+    .trim()
+    .toLowerCase() !==
+    "machine"
+) {
+  return (
+    <IXIMosObjectCard
+      object={item}
+
+      dragHandleProps={
+        dragHandleProps
+      }
+    />
   );
-}}
+}
+
+return null;
+}
 />
 </IXIBoardSurface>
     
