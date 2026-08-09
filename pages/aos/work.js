@@ -28,6 +28,10 @@ import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
 
+import {
+  createMosObject
+} from "../../lib/mos/ixiMosClient";
+
 import ListingCard from "../../components/ListingCard";
 
 import IXIMosObjectCard
@@ -610,10 +614,20 @@ useEffect(() => {
    * Jobs, Locations, People, Containers,
    * etc.
    */
-  const validWorkspaceObjectIds = [
-    IXI_EQUIPMENT_INDEX_OBJECT_ID,
-    ...validMachineIds
-  ];
+  const validSystemIndexIds =
+  workspaceSystemIndexes
+    .map(index =>
+      String(
+        index?.objectId ||
+        ""
+      )
+    )
+    .filter(Boolean);
+
+const validWorkspaceObjectIds = [
+  ...validSystemIndexIds,
+  ...validMachineIds
+];
 
   const savedLayout =
     ixiCardState?.[
@@ -1072,23 +1086,41 @@ const equipmentIndex =
      * Canonical Equipment membership
      * remains untouched.
      */
-    if (equipmentWorkspaceIndex) {
-      registry.set(
-        IXI_EQUIPMENT_INDEX_OBJECT_ID,
-        {
-          ...equipmentWorkspaceIndex,
-
-          objectId:
-            IXI_EQUIPMENT_INDEX_OBJECT_ID
-        }
+    workspaceSystemIndexes.forEach(
+  index => {
+    const objectId =
+      String(
+        index?.objectId ||
+        ""
       );
+
+    if (!objectId) {
+      return;
     }
 
+    const workspaceIndex =
+      index?.indexId ===
+        "equipment" &&
+      equipmentWorkspaceIndex
+        ? equipmentWorkspaceIndex
+        : index;
+
+    registry.set(
+      objectId,
+      {
+        ...workspaceIndex,
+        objectId
+      }
+    );
+  }
+);
+
     return registry;
-  }, [
-    workspaceListings,
-    equipmentWorkspaceIndex
-  ]);
+ }, [
+  workspaceListings,
+  workspaceSystemIndexes,
+  equipmentWorkspaceIndex
+]);
   /* ---------- AOS BOARD ITEMS ---------- */
 
 /* ---------- AOS BOARD ITEMS ---------- */
@@ -1875,6 +1907,147 @@ function cycleCardScaleMode() {
     return next;
   });
 }
+
+async function createRootSystemIndex() {
+  const rawName =
+    window.prompt(
+      "Name this index"
+    );
+
+  const displayName =
+    String(
+      rawName || ""
+    ).trim();
+
+  if (!displayName) {
+    return;
+  }
+
+  const entityId =
+    String(
+      aosEntity?.entityId ||
+      ""
+    );
+
+  if (!entityId) {
+    console.error(
+      "AOS SYSTEM INDEX CREATE: entityId missing"
+    );
+
+    return;
+  }
+
+  try {
+    const response =
+      await createMosObject({
+        entityId,
+
+        objectType:
+          "system-index",
+
+        displayName,
+
+        fields: {
+          parentSystemIndexId:
+            null
+        },
+
+        source:
+          "manual",
+
+        metadata: {
+          createdFrom:
+            "aos-work",
+
+          hierarchyRole:
+            "index"
+        }
+      });
+
+    const createdObject =
+      response?.object ||
+      response?.data ||
+      response;
+
+    const createdObjectId =
+      String(
+        createdObject?.objectId ||
+        createdObject?.id ||
+        ""
+      );
+
+    if (!createdObjectId) {
+      throw new Error(
+        "MOS created the index but returned no objectId."
+      );
+    }
+
+    /*
+     * Reload canonical AOS/MOS environment.
+     *
+     * Do NOT manufacture the new object
+     * locally.
+     */
+    const environment =
+      await loadIXIMosEnvironment({
+        includeObjects:
+          true
+      });
+
+    setAosObjects(
+      Array.isArray(
+        environment?.objects
+      )
+        ? environment.objects
+        : []
+    );
+
+    setSystemIndexes(
+      Array.isArray(
+        environment?.systemIndexes
+      )
+        ? environment.systemIndexes
+        : []
+    );
+
+    /*
+     * Workspace placement is separate
+     * from structural object identity.
+     *
+     * Creation puts this new Index on
+     * the user's current Board.
+     */
+    const nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          workspacePlacements,
+
+        objectId:
+          createdObjectId,
+
+        targetSurface:
+          "board"
+      });
+
+    setWorkspacePlacements(
+      nextPlacements
+    );
+
+    saveWorkspaceLayout(
+      nextPlacements
+    );
+  } catch (error) {
+    console.error(
+      "AOS SYSTEM INDEX CREATE FAILED:",
+      error
+    );
+
+    window.alert(
+      error?.message ||
+      "Could not create index."
+    );
+  }
+}
   
   return (
     <>
@@ -2514,11 +2687,9 @@ workspaceDropSurface={
   currentUser={aosCurrentUser}
   ownedListings={workspaceListings}
   aosObjects={aosObjects}
-  onAdd={() => {
-    console.log(
-      "AOS WORK ADD"
-    );
-  }}
+  onAdd={
+  createRootSystemIndex
+}
   onMore={() => {
     console.log(
       "AOS WORK MORE"
