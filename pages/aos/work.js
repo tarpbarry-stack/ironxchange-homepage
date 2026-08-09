@@ -2857,6 +2857,9 @@ workspaceDropSurface={
 
         onExposeObject={() => {}}
         onOpenConsole={() => {}}
+        onAddObject={
+  createObjectInsideSystemIndex
+}
       />
     );
   }
