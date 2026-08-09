@@ -897,18 +897,94 @@ return [...filtered].sort((a, b) => {
 
 /* ---------- AOS EQUIPMENT SYSTEM INDEX ---------- */
 
+const workspaceSystemIndexes =
+  useMemo(() => {
+    return (
+      systemIndexes || []
+    )
+      .filter(Boolean)
+      .map(index => {
+        const indexId =
+          String(
+            index?.indexId ||
+            ""
+          ).trim();
+
+        if (!indexId) {
+          return null;
+        }
+
+        const objectId =
+          String(
+            index?.objectId ||
+            `system-index:${indexId}`
+          );
+
+        const legacySurfaceId =
+  indexId === "equipment"
+    ? "indexEquipment"
+    : "";
+
+const surfaceId =
+  String(
+    index?.workspace?.surfaceId ||
+    legacySurfaceId ||
+    `index:${indexId}`
+  );
+
+        return {
+          ...index,
+
+          objectType:
+            "system-index",
+
+          objectId,
+
+          workspace: {
+            ...(index?.workspace || {}),
+
+            surfaceId,
+
+            dropPolicy: {
+              enabled:
+                index?.workspace
+                  ?.dropPolicy
+                  ?.enabled !== false,
+
+              acceptedObjectTypes:
+  Array.isArray(
+    index?.workspace
+      ?.dropPolicy
+      ?.acceptedObjectTypes
+  )
+    ? index.workspace
+        .dropPolicy
+        .acceptedObjectTypes
+    : indexId === "equipment"
+      ? ["machine"]
+      : []
+            }
+          }
+        };
+      })
+      .filter(Boolean);
+  }, [systemIndexes]);
+
+  
 const equipmentIndex =
   useMemo(() => {
     return (
-      systemIndexes.find(index => {
-        return (
-          index?.indexId ===
-          "equipment"
-        );
-      }) || null
+      workspaceSystemIndexes.find(
+        index =>
+          String(
+            index?.indexId ||
+            ""
+          ) === "equipment"
+      ) || null
     );
-  }, [systemIndexes]);
-
+  }, [
+    workspaceSystemIndexes
+  ]);
 
   const equipmentWorkspaceIndex =
   useMemo(() => {
@@ -1900,46 +1976,48 @@ function handleWorkspaceDragEnd(event) {
         over?.id || ""
       );
 
-    const overData =
-      over?.data?.current || {};
+   const overData =
+  over?.data?.current || {};
 
-    const overContainer =
-      String(
-        overData.containerId ||
-        overData.targetContainer ||
-        ""
-      );
+const overContainer =
+  String(
+    overData.containerId ||
+    overData.targetContainer ||
+    ""
+  );
 
-    const validWorkspaceTargets =
-      new Set([
-        "board",
+const validDirectTargets =
+  new Set([
+    "stackTop",
+    "stackBottom",
 
-        "stackTop",
-        "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ]);
 
-        "pocketLeft",
-        "pocketRight",
-        "pocketLeft2",
-        "pocketRight2"
-      ]);
-
-    /*
-     * SPECIFIC WORKSPACE TARGET WINS.
-     *
-     * If we are over a known pocket/
-     * stack target, use it.
-     */
-    let targetContainer =
-      validWorkspaceTargets.has(
-        overContainer
+/*
+ * COLLECTION CHILD EXTRACTION
+ *
+ * A machine leaving an Index is going
+ * to BOARD unless the user explicitly
+ * enters a pocket or stack destination.
+ *
+ * System Index ON-targets do not get
+ * to accidentally capture this outbound
+ * extraction path.
+ */
+let targetContainer =
+  validDirectTargets.has(
+    overContainer
+  )
+    ? overContainer
+    : validDirectTargets.has(
+        overId
       )
-        ? overContainer
-        : validWorkspaceTargets.has(
-            overId
-          )
-          ? overId
-          : "board";
-
+      ? overId
+      : "board";
     /*
      * Critical rule:
      *
@@ -2367,16 +2445,16 @@ return;
          */
         dragHandleProps={{}}
 
-workspaceDropPolicy={{
-  enabled: true,
-
-  acceptedObjectTypes: [
-    "machine"
-  ]
-}}
+workspaceDropPolicy={
+  object?.workspace
+    ?.dropPolicy ||
+  null
+}
 
 workspaceDropSurface={
-  "indexEquipment"
+  object?.workspace
+    ?.surfaceId ||
+  ""
 }
       
         ixiState={
@@ -2643,17 +2721,17 @@ getItemReorderBehavior={item => {
         dragHandleProps
       }
 
-    workspaceDropPolicy={{
-      enabled: true,
+    workspaceDropPolicy={
+  item?.workspace
+    ?.dropPolicy ||
+  null
+}
 
-      acceptedObjectTypes: [
-        "machine"
-      ]
-    }}
-
-    workspaceDropSurface={
-      "indexEquipment"
-    }
+workspaceDropSurface={
+  item?.workspace
+    ?.surfaceId ||
+  ""
+}
     
       ixiState={
         ixiCardState[id] || {
