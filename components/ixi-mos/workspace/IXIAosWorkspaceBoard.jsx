@@ -138,17 +138,45 @@ onDeleteObject
         }
 
         getItemReorderBehavior={
-          item => {
-            if (
-              item?.objectType ===
-              "system-index"
-            ) {
-              return "self-only";
-            }
+  item => {
+    const objectType =
+      String(
+        item?.objectType ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
 
-            return "normal";
-          }
-        }
+    const isSystemIndex =
+      objectType ===
+      "system-index";
+
+    const isAosContainer =
+      Boolean(
+        item?.objectId &&
+        objectType !==
+          "machine"
+      );
+
+    /*
+     * CONTAINERS MUST STAY PUT
+     * while another object is being
+     * dragged across the Board.
+     *
+     * They remain draggable themselves,
+     * but foreign drags do not cause
+     * sortable displacement.
+     */
+    if (
+      isSystemIndex ||
+      isAosContainer
+    ) {
+      return "self-only";
+    }
+
+    return "normal";
+  }
+}
 
         getCustomItemId={
           item => {
