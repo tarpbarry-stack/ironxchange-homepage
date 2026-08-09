@@ -29,7 +29,9 @@ import {
 } from "../../lib/mos/loadIXIMosEnvironment";
 
 import {
-  createMosObject
+  createMosObject,
+  placeMosObject,
+  createMosCommandId
 } from "../../lib/mos/ixiMosClient";
 
 import ListingCard from "../../components/ListingCard";
@@ -2051,6 +2053,202 @@ async function createRootSystemIndex() {
     window.alert(
       error?.message ||
       "Could not create index."
+    );
+  }
+}
+
+  async function createObjectInsideSystemIndex(
+  systemIndex
+) {
+  const destinationContainerId =
+    String(
+      systemIndex?.objectId ||
+      ""
+    ).trim();
+
+  if (!destinationContainerId) {
+    return;
+  }
+
+  /*
+   * Legacy projected indexes such as
+   * system-index:equipment are not yet
+   * real MOS container objects.
+   *
+   * Only persisted System Index objects
+   * can own durable MOS children.
+   */
+  const isPersistedIndex =
+    destinationContainerId.startsWith(
+      "object_"
+    );
+
+  if (!isPersistedIndex) {
+    window.alert(
+      "This Index has not yet been migrated to the persisted AOS container model."
+    );
+
+    return;
+  }
+
+  const rawObjectType =
+    window.prompt(
+      "Object type",
+      "location"
+    );
+
+  const objectType =
+    String(
+      rawObjectType || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (!objectType) {
+    return;
+  }
+
+  const rawName =
+    window.prompt(
+      `Name this ${objectType}`
+    );
+
+  const displayName =
+    String(
+      rawName || ""
+    ).trim();
+
+  if (!displayName) {
+    return;
+  }
+
+  const entityId =
+    String(
+      aosEntity?.entityId ||
+      ""
+    );
+
+  if (!entityId) {
+    window.alert(
+      "AOS Entity is not available."
+    );
+
+    return;
+  }
+
+  try {
+    /*
+     * STEP 1
+     * Create the actual durable object.
+     */
+    const createResponse =
+      await createMosObject({
+        entityId,
+
+        objectType,
+
+        displayName,
+
+        source:
+          "manual",
+
+        actorId:
+          ixiUserId || null,
+
+        metadata: {
+          createdFrom:
+            "aos-system-index",
+
+          parentSystemIndexId:
+            destinationContainerId
+        }
+      });
+
+    const createdObject =
+      createResponse?.object ||
+      createResponse?.data ||
+      createResponse;
+
+    const createdObjectId =
+      String(
+        createdObject?.objectId ||
+        createdObject?.id ||
+        ""
+      );
+
+    if (!createdObjectId) {
+      throw new Error(
+        "MOS created the object but returned no objectId."
+      );
+    }
+
+    /*
+     * STEP 2
+     * Put the new object INSIDE this
+     * System Index using canonical MOS
+     * containment.
+     */
+    await placeMosObject({
+      objectId:
+        createdObjectId,
+
+      destinationContainerId,
+
+      actorId:
+        ixiUserId || null,
+
+      commandId:
+        createMosCommandId(
+          "system-index-add"
+        ),
+
+      metadata: {
+        source:
+          "aos-system-index-card",
+
+        indexName:
+          systemIndex?.displayName ||
+          systemIndex?.label ||
+          ""
+      }
+    });
+
+    /*
+     * STEP 3
+     * Reload canonical AOS state.
+     *
+     * No local fake child.
+     */
+    const environment =
+      await loadIXIMosEnvironment({
+        includeObjects:
+          true
+      });
+
+    setAosObjects(
+      Array.isArray(
+        environment?.objects
+      )
+        ? environment.objects
+        : []
+    );
+
+    setSystemIndexes(
+      Array.isArray(
+        environment?.systemIndexes
+      )
+        ? environment.systemIndexes
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "AOS SYSTEM INDEX CHILD CREATE FAILED:",
+      error
+    );
+
+    window.alert(
+      error?.message ||
+      "Could not create object in Index."
     );
   }
 }
