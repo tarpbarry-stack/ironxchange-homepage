@@ -1555,7 +1555,8 @@ const {
   createRootSystemIndexByName,
   createObjectInContainer,
   createLocationInContainer,
-  saveMosObjectName
+  saveMosObjectName,
+  deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
   entityId:
     aosEntity?.entityId || "",
@@ -2413,13 +2414,17 @@ workspaceDropSurface={
     createObjectInsideSystemIndex
   }
 
- onCreateObjectChild={
-  createLocationInContainer
-}
+   onCreateObjectChild={
+    createLocationInContainer
+  }
 
-onSaveObjectName={
-  saveMosObjectName
-}
+  onSaveObjectName={
+    saveMosObjectName
+  }
+
+  onDeleteObject={
+    deleteMosWorkspaceObject
+  }
 />
     
 <button
