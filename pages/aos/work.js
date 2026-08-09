@@ -39,6 +39,9 @@ import IXISystemIndexCard
 import useIXIMosObjectCreation
   from "../../components/ixi-mos/object-creation/useIXIMosObjectCreation";
 
+import useIXIAosWorkspaceRegistry
+  from "../../components/ixi-mos/workspace/useIXIAosWorkspaceRegistry";
+
 import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -1081,179 +1084,25 @@ const equipmentIndex =
     machineContainers
   ]);
 
-  const aosWorkspaceObjectRegistry =
-  useMemo(() => {
-    const registry =
-      new Map();
-
-    /*
- * Durable MOS workspace objects.
- *
- * Machine listings stay on their existing
- * proven IronXchange path.
- */
-(aosObjects || []).forEach(
-  object => {
-    const objectType =
-      String(
-        object?.objectType || ""
-      )
-        .trim()
-        .toLowerCase();
-
-    if (
-      !objectType ||
-      objectType === "system-index" ||
-      objectType === "machine"
-    ) {
-      return;
-    }
-
-    const objectId =
-      String(
-        object?.objectId ||
-        object?.id ||
-        ""
-      );
-
-    if (!objectId) {
-      return;
-    }
-
-    registry.set(
-      objectId,
-      object
-    );
-  }
-);
-
-    /*
-     * Machine/listing objects
-     */
-    workspaceListings.forEach(
-      item => {
-        const id =
-          String(
-            getListingId(item) ||
-            ""
-          );
-
-        if (!id) {
-          return;
-        }
-
-        registry.set(
-          id,
-          item
-        );
-      }
-    );
-
-    /*
-     * Equipment System Index
-     *
-     * IMPORTANT:
-     * Register the WORKSPACE projection,
-     * not the canonical full index.
-     *
-     * Canonical Equipment membership
-     * remains untouched.
-     */
-    workspaceSystemIndexes.forEach(
-  index => {
-    const objectId =
-      String(
-        index?.objectId ||
-        ""
-      );
-
-    if (!objectId) {
-      return;
-    }
-
-    const workspaceIndex =
-      index?.indexId ===
-        "equipment" &&
-      equipmentWorkspaceIndex
-        ? equipmentWorkspaceIndex
-        : index;
-
-    registry.set(
-      objectId,
-      {
-        ...workspaceIndex,
-        objectId
-      }
-    );
-  }
-);
-
-    return registry;
-}, [
-  workspaceListings,
-  aosObjects,
-  workspaceSystemIndexes,
-  equipmentWorkspaceIndex
-]);
-  /* ---------- AOS BOARD ITEMS ---------- */
-
-/* ---------- AOS BOARD ITEMS ---------- */
-
-const aosBoardItems =
-  useMemo(() => {
-    const orderedObjects =
-      resolveWorkspaceObjects({
-        placements:
-          workspacePlacements,
-
-        surfaceId:
-          "board",
-
-        objectRegistry:
-          aosWorkspaceObjectRegistry
-      });
-
-    /*
-     * Machine filtering/search remains
-     * respected without removing
-     * structural Board objects such as
-     * Equipment.
-     */
-    const visibleMachineIds =
-      new Set(
-        visibleSavedListings
-          .map(item =>
-            String(
-              getListingId(item) ||
-              ""
-            )
-          )
-          .filter(Boolean)
-      );
-
-    return orderedObjects.filter(
-      item => {
-        if (
-          item?.objectType ===
-          "system-index"
-        ) {
-          return true;
-        }
-
-        const id =
-          String(
-            getListingId(item) ||
-            ""
-          );
-
-        return visibleMachineIds.has(id);
-      }
-    );
-  }, [
-    workspacePlacements,
+  const {
+  objectRegistry:
     aosWorkspaceObjectRegistry,
-    visibleSavedListings
-  ]);
+
+  boardItems:
+    aosBoardItems
+} = useIXIAosWorkspaceRegistry({
+  workspaceListings,
+
+  aosObjects,
+
+  workspaceSystemIndexes,
+
+  equipmentWorkspaceIndex,
+
+  workspacePlacements,
+
+  visibleSavedListings
+});
 
   function updateIxiCardState(listingId, patch) {
   const id = String(listingId);
