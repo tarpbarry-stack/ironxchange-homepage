@@ -592,7 +592,10 @@ const containerStateKey = useMemo(() => {
 }, [workspaceListings, ixiCardState]);
    
 useEffect(() => {
-  if (!workspaceListings.length) {
+  if (
+    !workspaceListings.length ||
+    !workspaceSystemIndexes.length
+  ) {
     return;
   }
 
@@ -769,7 +772,10 @@ placements:
 
   hasAppliedRemoteLayoutRef.current =
     true;
-}, [containerStateKey]);
+}, [
+  containerStateKey,
+  workspaceSystemIndexes
+]);
   
   const visibleSavedListings = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
