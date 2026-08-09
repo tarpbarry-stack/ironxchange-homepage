@@ -2624,11 +2624,11 @@ getWorkspaceObjectById={
   }
 
 onExposeContainerChildren={
-  exposeContainerChildrenToBoard
+  boardContainerChildren
 }
 
 onGatherContainerChildren={
-  gatherContainerChildren
+  recallContainerChildren
 }
 
    onCreateObjectChild={
