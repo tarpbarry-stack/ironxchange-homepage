@@ -3207,10 +3207,15 @@ workspaceDropSurface={
     child
   );
 }}
+
 onOpenConsole={() => {
   returnAllEquipmentHome();
 }}
-    />
+
+onAddObject={
+  createObjectInsideSystemIndex
+}
+/>
   );
 }}
 />
