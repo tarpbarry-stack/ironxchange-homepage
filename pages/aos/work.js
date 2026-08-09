@@ -2549,6 +2549,17 @@ workspaceDropSurface={
     getSellerListingCardProps
   }
 
+getItemReorderBehavior={item => {
+  if (
+    item?.objectType ===
+    "system-index"
+  ) {
+    return "self-only";
+  }
+
+  return "normal";
+}}
+
  getCustomItemId={item => {
   if (
     item?.objectType ===
