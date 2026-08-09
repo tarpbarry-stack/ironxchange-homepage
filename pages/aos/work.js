@@ -2584,6 +2584,18 @@ workspaceDropSurface={
         dragHandleProps
       }
 
+    workspaceDropPolicy={{
+      enabled: true,
+
+      acceptedObjectTypes: [
+        "machine"
+      ]
+    }}
+
+    workspaceDropSurface={
+      "indexEquipment"
+    }
+    
       ixiState={
         ixiCardState[id] || {
           color: "none",
