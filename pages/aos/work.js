@@ -120,7 +120,8 @@ import {
   workspaceCollisionDetection,
   createWorkspaceDragStartHandler,
   createWorkspaceDragCancelHandler,
-  createWorkspaceDragEndHandler
+  createWorkspaceDragEndHandler,
+  universalWorkspaceCollisionDetection
 } from "../../components/ixi-chassis/IXIDndEngineHelpers";
 
 import {
@@ -2281,7 +2282,9 @@ return;
     return (
   <IXIDragEngine
     sensors={sensors}
-    workspaceCollisionDetection={workspaceCollisionDetection}
+   workspaceCollisionDetection={
+  universalWorkspaceCollisionDetection
+}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
     handleWorkspaceDragEnd={handleWorkspaceDragEnd}
     handleWorkspaceDragCancel={handleWorkspaceDragCancel}
