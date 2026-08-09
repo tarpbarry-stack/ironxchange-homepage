@@ -3348,7 +3348,7 @@ if (
 }
 
 return null;
-}
+}}
 />
 </IXIBoardSurface>
     
