@@ -4,11 +4,6 @@ import {
 } from "@dnd-kit/core";
 
 import {
-  pointerWithin,
-  closestCenter
-} from "@dnd-kit/core";
-
-import {
   isIXIDropOnTargetId
 } from "./IXIDropIntentEngine";
 
