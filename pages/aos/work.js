@@ -30,9 +30,6 @@ import {
 
 import ListingCard from "../../components/ListingCard";
 
-import IXIMosObjectCard
-  from "../../components/ixi-mos/IXIMosObjectCard";
-
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
@@ -44,6 +41,9 @@ import useIXIAosWorkspaceRegistry
 
 import useIXIEquipmentWorkspace
   from "../../components/ixi-mos/equipment/useIXIEquipmentWorkspace";
+
+import IXIAosWorkspaceBoard
+  from "../../components/ixi-mos/workspace/IXIAosWorkspaceBoard";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {
@@ -59,9 +59,6 @@ import { captureIXEvent } from "../../lib/posthog";
 
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
-import IXIBoard from "../../components/ixi-chassis/IXIBoard";
-import IXIBoardSurface
-  from "../../components/ixi-chassis/IXIBoardSurface";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
@@ -2578,198 +2575,79 @@ workspaceDropSurface={
   </aside>
     </IXIChassis>
               
-     <IXIBoardSurface
-  scaleMode={cardScaleMode}
->
-<IXIBoard
-  items={aosBoardItems}
-  cardContext="inventory"
-  getListingId={getListingId}
-  savedIds={savedIds}
-  ixiCardState={ixiCardState}
-  IXISortableMachineCard={
-    IXISortableMachineCard
+<IXIAosWorkspaceBoard
+  items={
+    aosBoardItems
   }
-  toggleSave={toggleSave}
-  updateIxiCardState={
-    updateIxiCardState
+
+  savedIds={
+    savedIds
   }
-  cycleMachineFace={
-    cycleMachineFace
+
+  ixiCardState={
+    ixiCardState
   }
-  sendListingToFront={
-    sendListingToFront
-  }
-  sendListingToBack={
-    sendListingToBack
-  }
-  armedDestination={
-    armedDestination
-  }
-  sendMachineToArmedDestination={
-    sendMachineToArmedDestination
-  }
-  draggingListingId={
-    draggingListingId
-  }
-  ghostListingId={
-    ghostListingId
-  }
-  enableCardScaling={true}
+
   cardScaleMode={
     cardScaleMode
   }
+
   cardScaleMetrics={
     cardScaleMetrics
   }
+
+  armedDestination={
+    armedDestination
+  }
+
+  draggingListingId={
+    draggingListingId
+  }
+
+  ghostListingId={
+    ghostListingId
+  }
+
   getSellerListingCardProps={
     getSellerListingCardProps
   }
 
-getItemReorderBehavior={item => {
-  if (
-    item?.objectType ===
-    "system-index"
-  ) {
-    return "self-only";
+  toggleSave={
+    toggleSave
   }
 
-  return "normal";
-}}
-
-getCustomItemId={item => {
-  const objectType =
-    String(
-      item?.objectType || ""
-    )
-      .trim()
-      .toLowerCase();
-
-  if (
-    objectType ===
-      "system-index" ||
-    (
-      item?.objectId &&
-      objectType &&
-      objectType !== "machine"
-    )
-  ) {
-    return String(
-      item.objectId
-    );
+  updateIxiCardState={
+    updateIxiCardState
   }
 
-  return null;
-}}
-  renderCustomItem={({
-  item,
-  id,
-  dragHandleProps
-}) => {
-  if (
-  item?.objectType ===
-  "system-index"
-) {
-  return (
-    <IXISystemIndexCard
-      index={item}
-      objectId={id}
+  cycleMachineFace={
+    cycleMachineFace
+  }
 
-      dragHandleProps={
-        dragHandleProps
-      }
+  sendListingToFront={
+    sendListingToFront
+  }
 
-      workspaceDropPolicy={
-        item?.workspace
-          ?.dropPolicy ||
-        null
-      }
+  sendListingToBack={
+    sendListingToBack
+  }
 
-      workspaceDropSurface={
-        item?.workspace
-          ?.surfaceId ||
-        ""
-      }
+  sendMachineToArmedDestination={
+    sendMachineToArmedDestination
+  }
 
-      ixiState={
-        ixiCardState[id] || {
-          color: "none",
-          outline: 1,
-          face: 1
-        }
-      }
+  exposeEquipmentMachineToBoard={
+    exposeEquipmentMachineToBoard
+  }
 
-      ixiCardState={
-        ixiCardState
-      }
+  returnAllEquipmentHome={
+    returnAllEquipmentHome
+  }
 
-      onIxiStateChange={
-        updateIxiCardState
-      }
-
-      armedDestination={
-        armedDestination
-      }
-
-      onSendFront={
-        sendListingToFront
-      }
-
-      onSendBack={
-        sendListingToBack
-      }
-
-      onSendToArmedDestination={
-        sendMachineToArmedDestination
-      }
-
-      onExposeObject={child => {
-        exposeEquipmentMachineToBoard(
-          child
-        );
-      }}
-
-      onOpenConsole={() => {
-        returnAllEquipmentHome();
-      }}
-
-      onAddObject={
-        createObjectInsideSystemIndex
-      }
-    />
-  );
-}
-
-/*
- * Real durable MOS object.
- *
- * For this first proof:
- * location → IXIMosObjectCard
- */
-if (
-  item?.objectId &&
-  String(
-    item?.objectType || ""
-  )
-    .trim()
-    .toLowerCase() !==
-    "machine"
-) {
-  return (
-    <IXIMosObjectCard
-      object={item}
-
-      dragHandleProps={
-        dragHandleProps
-      }
-    />
-  );
-}
-
-return null;
-}}
+  onAddObject={
+    createObjectInsideSystemIndex
+  }
 />
-</IXIBoardSurface>
     
 <button
   type="button"
