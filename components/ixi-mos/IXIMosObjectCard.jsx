@@ -784,49 +784,13 @@ async function deleteObject(
         </div>
       ) : null}
 
-      <footer className="mos-card-rail">
-        <button
-          type="button"
-          onClick={cycleFace}
-          aria-label="Cycle object face"
-        />
-
-        <button
-          type="button"
-          onClick={openObject}
-          aria-label="Open object"
-        />
 
         <span>
           FACE {face}
         </span>
-      </footer>
 
       <style jsx>{`
-        .mos-object-card {
-          width: 300px;
-          height: 430px;
-
-          position: relative;
-          overflow: hidden;
-
-          border: 1px solid rgba(255,255,255,.07);
-          border-radius: 13px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.028),
-              rgba(255,255,255,0)
-            ),
-            #141414;
-
-          color: #d6d6d6;
-
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.04),
-            0 18px 44px rgba(0,0,0,.24);
-        }
+        
 
         .mos-container-card {
           border-color:
@@ -1258,53 +1222,6 @@ async function deleteObject(
           color: #ffc400;
         }
 
-        .mos-card-rail {
-          height: 40px;
-
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-
-          display: flex;
-          align-items: center;
-          gap: 10px;
-
-          padding: 0 12px;
-
-          border-top:
-            1px solid rgba(255,255,255,.05);
-
-          background: #0d0d0d;
-        }
-
-        .mos-card-rail button {
-          width: 34px;
-          height: 5px;
-
-          border: 0;
-          border-radius: 3px;
-
-          background:
-            rgba(255,255,255,.18);
-
-          cursor: pointer;
-        }
-
-        .mos-card-rail button:hover {
-          background: #ffc400;
-          box-shadow:
-            0 0 8px rgba(255,196,0,.28);
-        }
-
-        .mos-card-rail span {
-          margin-left: auto;
-
-          color: rgba(255,255,255,.24);
-          font-size: 7px;
-          font-weight: 950;
-          letter-spacing: .55px;
-        }
       `}</style>
        </div>
 
