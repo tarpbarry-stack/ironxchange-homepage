@@ -39,6 +39,8 @@ export default function IXIBoard({
   getCustomItemId,
 renderCustomItem,
 
+getItemReorderBehavior,
+
 consolePanelWidth,
 consolePanelGap,
 }) {
@@ -144,6 +146,17 @@ const resolvedConsolePanelGap =
         const id =
   resolveBoardItemId(item);
 
+      const reorderBehavior =
+  typeof getItemReorderBehavior ===
+  "function"
+    ? (
+        getItemReorderBehavior(
+          item
+        ) ||
+        "normal"
+      )
+    : "normal";
+
       const objectType =
   resolveBoardItemType(
     item
@@ -195,6 +208,10 @@ return (
   id={id}
 
   containerId="board"
+
+  reorderBehavior={
+  reorderBehavior
+}
 
   objectType={
     objectType
