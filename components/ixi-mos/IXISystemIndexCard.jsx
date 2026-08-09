@@ -2101,7 +2101,7 @@ const [
           z-index: 25;
         }
 
-.system-index-drop-on-zone {
+:global(.system-index-drop-on-zone) {
   position: absolute;
 
   left: 12%;
