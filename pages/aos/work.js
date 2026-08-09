@@ -70,7 +70,6 @@ import IXIPocketR2 from "../../components/ixi-chassis/IXIPocketR2";
 import IXIChassis from "../../components/ixi-chassis/IXIChassis";
 import IXIWorkspaceEngine from "../../components/ixi-chassis/IXIWorkspaceEngine";
 import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
-import IXIActiveStackZone from "../../components/ixi-chassis/IXIActiveStackZone";
 import IXISortableMachineCard from "../../components/ixi-chassis/IXISortableMachineCard";
 import WorkspaceDropZone from "../../components/ixi-chassis/WorkspaceDropZone";
 import WorkspaceDropPad from "../../components/ixi-chassis/WorkspaceDropPad";
@@ -1338,11 +1337,11 @@ function getListingById(machineId) {
     });
   }
 
-  function clearMachineDragState() {
+ function clearMachineDragState() {
   setDraggingListingId("");
   setGhostListingId("");
-  setActiveStackHover("");
 }
+ 
   
 function rotatePocket(pocketKey) {
   setMachineContainers(current => {
@@ -1546,29 +1545,11 @@ function saveWorkspaceLayout(
     listingId: IXI_AOS_WORK_LAYOUT_ID,
 
     patch: {
-      /*
-       * New canonical universal
-       * workspace placement contract.
-       */
       workspacePlacements:
         nextContainers,
 
-      /*
-       * Compatibility copy.
-       *
-       * Existing chassis code and older
-       * saved layouts still understand
-       * machineContainers.
-       *
-       * Both point to the same placement
-       * state during migration.
-       */
       machineContainers:
         nextContainers,
-
-      activeStackLayouts,
-
-      activeStacksOpen,
 
       updatedAt:
         Date.now()
