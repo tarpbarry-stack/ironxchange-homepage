@@ -21,6 +21,8 @@ import {
 export default function IXIAosWorkspaceBoard({
   items = [],
 
+  getWorkspaceObjectById = null,
+
   savedIds = [],
   ixiCardState = {},
 
@@ -288,6 +290,23 @@ onDeleteObject
         objectType !==
           "machine"
       ) {
+
+const parentObject =
+  item?.directContainerId &&
+  typeof getWorkspaceObjectById ===
+    "function"
+    ? getWorkspaceObjectById(
+        item.directContainerId
+      )
+    : null;
+
+const parentLabel =
+  String(
+    parentObject?.displayName ||
+    parentObject?.label ||
+    ""
+  ).trim();
+                 
         return (
           <IXIMosObjectCard
   object={
