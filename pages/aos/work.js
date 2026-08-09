@@ -897,18 +897,94 @@ return [...filtered].sort((a, b) => {
 
 /* ---------- AOS EQUIPMENT SYSTEM INDEX ---------- */
 
+const workspaceSystemIndexes =
+  useMemo(() => {
+    return (
+      systemIndexes || []
+    )
+      .filter(Boolean)
+      .map(index => {
+        const indexId =
+          String(
+            index?.indexId ||
+            ""
+          ).trim();
+
+        if (!indexId) {
+          return null;
+        }
+
+        const objectId =
+          String(
+            index?.objectId ||
+            `system-index:${indexId}`
+          );
+
+        const legacySurfaceId =
+  indexId === "equipment"
+    ? "indexEquipment"
+    : "";
+
+const surfaceId =
+  String(
+    index?.workspace?.surfaceId ||
+    legacySurfaceId ||
+    `index:${indexId}`
+  );
+
+        return {
+          ...index,
+
+          objectType:
+            "system-index",
+
+          objectId,
+
+          workspace: {
+            ...(index?.workspace || {}),
+
+            surfaceId,
+
+            dropPolicy: {
+              enabled:
+                index?.workspace
+                  ?.dropPolicy
+                  ?.enabled !== false,
+
+              acceptedObjectTypes:
+  Array.isArray(
+    index?.workspace
+      ?.dropPolicy
+      ?.acceptedObjectTypes
+  )
+    ? index.workspace
+        .dropPolicy
+        .acceptedObjectTypes
+    : indexId === "equipment"
+      ? ["machine"]
+      : []
+            }
+          }
+        };
+      })
+      .filter(Boolean);
+  }, [systemIndexes]);
+
+  
 const equipmentIndex =
   useMemo(() => {
     return (
-      systemIndexes.find(index => {
-        return (
-          index?.indexId ===
-          "equipment"
-        );
-      }) || null
+      workspaceSystemIndexes.find(
+        index =>
+          String(
+            index?.indexId ||
+            ""
+          ) === "equipment"
+      ) || null
     );
-  }, [systemIndexes]);
-
+  }, [
+    workspaceSystemIndexes
+  ]);
 
   const equipmentWorkspaceIndex =
   useMemo(() => {
@@ -2367,16 +2443,16 @@ return;
          */
         dragHandleProps={{}}
 
-workspaceDropPolicy={{
-  enabled: true,
-
-  acceptedObjectTypes: [
-    "machine"
-  ]
-}}
+workspaceDropPolicy={
+  object?.workspace
+    ?.dropPolicy ||
+  null
+}
 
 workspaceDropSurface={
-  "indexEquipment"
+  object?.workspace
+    ?.surfaceId ||
+  ""
 }
       
         ixiState={
@@ -2643,17 +2719,17 @@ getItemReorderBehavior={item => {
         dragHandleProps
       }
 
-    workspaceDropPolicy={{
-      enabled: true,
+    workspaceDropPolicy={
+  item?.workspace
+    ?.dropPolicy ||
+  null
+}
 
-      acceptedObjectTypes: [
-        "machine"
-      ]
-    }}
-
-    workspaceDropSurface={
-      "indexEquipment"
-    }
+workspaceDropSurface={
+  item?.workspace
+    ?.surfaceId ||
+  ""
+}
     
       ixiState={
         ixiCardState[id] || {
