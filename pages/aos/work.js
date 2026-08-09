@@ -1113,6 +1113,25 @@ const equipmentIndex =
   });
 }
 
+function showAosObjectNotice({
+  objectId,
+  message,
+  tone = "success",
+  duration = 1600
+}) {
+  return setIXIActionNotice({
+    setState:
+      setIxiCardState,
+
+    listingId:
+      objectId,
+
+    message,
+    tone,
+    duration
+  });
+}
+  
 function cycleMachineFace(listingOrId) {
   const id =
     typeof listingOrId === "object"
