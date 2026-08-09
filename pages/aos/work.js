@@ -1976,46 +1976,48 @@ function handleWorkspaceDragEnd(event) {
         over?.id || ""
       );
 
-    const overData =
-      over?.data?.current || {};
+   const overData =
+  over?.data?.current || {};
 
-    const overContainer =
-      String(
-        overData.containerId ||
-        overData.targetContainer ||
-        ""
-      );
+const overContainer =
+  String(
+    overData.containerId ||
+    overData.targetContainer ||
+    ""
+  );
 
-    const validWorkspaceTargets =
-      new Set([
-        "board",
+const validDirectTargets =
+  new Set([
+    "stackTop",
+    "stackBottom",
 
-        "stackTop",
-        "stackBottom",
+    "pocketLeft",
+    "pocketRight",
+    "pocketLeft2",
+    "pocketRight2"
+  ]);
 
-        "pocketLeft",
-        "pocketRight",
-        "pocketLeft2",
-        "pocketRight2"
-      ]);
-
-    /*
-     * SPECIFIC WORKSPACE TARGET WINS.
-     *
-     * If we are over a known pocket/
-     * stack target, use it.
-     */
-    let targetContainer =
-      validWorkspaceTargets.has(
-        overContainer
+/*
+ * COLLECTION CHILD EXTRACTION
+ *
+ * A machine leaving an Index is going
+ * to BOARD unless the user explicitly
+ * enters a pocket or stack destination.
+ *
+ * System Index ON-targets do not get
+ * to accidentally capture this outbound
+ * extraction path.
+ */
+let targetContainer =
+  validDirectTargets.has(
+    overContainer
+  )
+    ? overContainer
+    : validDirectTargets.has(
+        overId
       )
-        ? overContainer
-        : validWorkspaceTargets.has(
-            overId
-          )
-          ? overId
-          : "board";
-
+      ? overId
+      : "board";
     /*
      * Critical rule:
      *
