@@ -1,4 +1,8 @@
 import {
+  useEffect
+} from "react";
+
+import {
   useDndContext,
   useDroppable
 } from "@dnd-kit/core";
@@ -22,6 +26,8 @@ export default function IXIObjectDropTarget({
   targetSurface = "",
 
   className = "",
+
+  onDropStateChange,
 
   children
 }) {
@@ -118,7 +124,20 @@ export default function IXIObjectDropTarget({
       isOver
     );
 
+useEffect(() => {
+  onDropStateChange?.({
+    accepting,
+    canAccept,
+    acceptance,
+    dropTargetId
+  });
+}, [
+  accepting,
+  canAccept,
+  dropTargetId
+]);
 
+  
   return (
     <div
       ref={
