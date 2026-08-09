@@ -224,8 +224,7 @@ const POCKET_TARGETS = [
 ];
 
   const DIRECT_CONTAINER_TARGETS = [
-  ...POCKET_TARGETS,
-  "stackTop"
+  ...POCKET_TARGETS
 ];
 
   const [ixiCardState, setIxiCardState] = useState({});
@@ -1448,17 +1447,11 @@ function movePocketToContainer(pocketKey, targetContainer) {
   executeIXITransaction(result);
 }
 
-function movePocketToStack(pocketKey, stackKey) {
-  const targetContainer = getStackContainerKey(stackKey);
-
-  movePocketToContainer(
-    pocketKey,
-    targetContainer
-  );
-
- setActiveStacksOpen(current =>
-  openStackState(current, stackKey)
-);
+function movePocketToStack(
+  pocketKey,
+  stackKey
+) {
+  return;
 }
 
 function recallPocketToBoard(pocketKey) {
@@ -1742,7 +1735,6 @@ toggleSearchSurfaceRevealed
     moveMachineWithinContainer,
     moveMachineToContainerAtPosition,
     moveMachineToContainer,
-    setActiveStacksOpen,
     setLeftPocketMode,
     setLeftPocket2Mode,
     setRightPocketMode,
@@ -1856,30 +1848,6 @@ let targetContainer =
       machineId,
       targetContainer
     );
-
-    if (
-      targetContainer ===
-      "stackTop"
-    ) {
-      setActiveStacksOpen(
-        current => ({
-          ...current,
-          top: true
-        })
-      );
-    }
-
-    if (
-      targetContainer ===
-      "stackBottom"
-    ) {
-      setActiveStacksOpen(
-        current => ({
-          ...current,
-          bottom: true
-        })
-      );
-    }
 
     if (
       targetContainer ===
@@ -2160,40 +2128,6 @@ saveWorkspaceLayout(
   nextPlacements
 );
 
-if (
-  getObjectWorkspaceSurface({
-    placements:
-      nextPlacements,
-
-    objectId:
-      dragId
-  }) === "stackTop"
-) {
-  setActiveStacksOpen(
-    current => ({
-      ...current,
-      top: true
-    })
-  );
-}
-
-if (
-  getObjectWorkspaceSurface({
-    placements:
-      nextPlacements,
-
-    objectId:
-      dragId
-  }) === "stackBottom"
-) {
-  setActiveStacksOpen(
-    current => ({
-      ...current,
-      bottom: true
-    })
-  );
-}
-
 setActiveDndId(null);
 clearMachineDragState?.();
 
@@ -2218,13 +2152,6 @@ return;
     id,
     armedDestination
   );
-
-  if (armedDestination === "stackTop") {
-    setActiveStacksOpen(current => ({
-      ...current,
-      top: true
-    }));
-  }
 }
 
     return (
