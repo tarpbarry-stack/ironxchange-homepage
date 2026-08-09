@@ -186,6 +186,8 @@ export default function IXISystemIndexCard({
 
   onOpenConsole,
 
+  onAddObject,
+  
   workspaceDropPolicy = null,
   workspaceDropSurface = ""
 }) {
@@ -659,23 +661,45 @@ const [
         {isIdentityFace ? (
           <div className="system-index-identity">
 
-            <div className="index-topline">
-              <div className="index-heading">
-                <span>
-                  SYSTEM INDEX
-                </span>
+           <div className="index-topline">
+  <div className="index-heading">
+    <span>
+      SYSTEM INDEX
+    </span>
 
-                <h3>
-                  {index?.displayName ||
-                    index?.label ||
-                    "INDEX"}
-                </h3>
-              </div>
+    <h3>
+      {index?.displayName ||
+        index?.label ||
+        "INDEX"}
+    </h3>
+  </div>
 
-              <div className="index-count">
-                {items.length}
-              </div>
-            </div>
+  <div className="index-top-actions">
+    {typeof onAddObject ===
+    "function" ? (
+      <button
+        type="button"
+        className="index-add-button"
+        title="Add object to this Index"
+        onPointerDown={event => {
+          event.stopPropagation();
+        }}
+        onClick={event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          onAddObject(index);
+        }}
+      >
+        +
+      </button>
+    ) : null}
+
+    <div className="index-count">
+      {items.length}
+    </div>
+  </div>
+</div>
 
 
             {/* ---------- LARGE ACTIVE PREVIEW ---------- */}
@@ -1364,6 +1388,58 @@ const [
               .045
             );
         }
+
+        .index-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.index-add-button {
+  width: 20px;
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 4px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.52);
+
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+
+  cursor: pointer;
+
+  position: relative;
+  z-index: 100;
+}
+
+.index-add-button:hover {
+  color: #ffc400;
+
+  border-color:
+    rgba(255,196,0,.38);
+
+  background:
+    rgba(255,196,0,.06);
+
+  box-shadow:
+    0 0 8px
+    rgba(255,196,0,.10);
+}
 
 
         .index-heading {
