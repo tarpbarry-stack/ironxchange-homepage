@@ -1242,6 +1242,170 @@ const {
 
   executeIXITransaction
 });
+
+/* ---------- UNIVERSAL AOS CONTAINER BOARD / RECALL ---------- */
+
+function getDirectContainerChildIds(
+  container
+) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    );
+
+  if (!containerId) {
+    return [];
+  }
+
+  /*
+   * EQUIPMENT
+   *
+   * Equipment is still backed by
+   * IronXchange listings.
+   */
+  if (
+    container?.indexId ===
+      "equipment" ||
+    String(
+      container?.displayName || ""
+    )
+      .trim()
+      .toLowerCase() ===
+      "equipment"
+  ) {
+    return (
+      container?.items || []
+    )
+      .map(item =>
+        String(
+          getListingId(item) ||
+          ""
+        )
+      )
+      .filter(Boolean);
+  }
+
+  /*
+   * MOS CONTAINERS
+   *
+   * Only direct canonical children.
+   *
+   * Example:
+   *
+   * LOCATIONS
+   *   -> Wichita Falls
+   *   -> Dallas
+   *
+   * WF SHOP does NOT come out here
+   * if WF SHOP belongs to Wichita Falls.
+   */
+  return (
+    aosObjects || []
+  )
+    .filter(object =>
+      String(
+        object?.directContainerId ||
+        ""
+      ) === containerId
+    )
+    .map(object =>
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      )
+    )
+    .filter(Boolean);
+}
+
+
+async function boardContainerChildren(
+  container
+) {
+  const childIds =
+    getDirectContainerChildIds(
+      container
+    );
+
+  if (!childIds.length) {
+    return;
+  }
+
+  let nextPlacements =
+    workspacePlacements;
+
+  childIds.forEach(
+    objectId => {
+      nextPlacements =
+        moveObjectToWorkspaceSurface({
+          placements:
+            nextPlacements,
+
+          objectId,
+
+          targetSurface:
+            "board"
+        });
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
+}
+
+
+async function recallContainerChildren(
+  container
+) {
+  const childIds =
+    new Set(
+      getDirectContainerChildIds(
+        container
+      )
+    );
+
+  if (!childIds.size) {
+    return;
+  }
+
+  const nextPlacements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      nextPlacements[
+        surfaceId
+      ] =
+        Array.isArray(objectIds)
+          ? objectIds.filter(
+              objectId =>
+                !childIds.has(
+                  String(objectId)
+                )
+            )
+          : [];
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
+}
   
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
@@ -2458,6 +2622,14 @@ getWorkspaceObjectById={
     onAddObject={
     createObjectInsideSystemIndex
   }
+
+onExposeContainerChildren={
+  exposeContainerChildrenToBoard
+}
+
+onGatherContainerChildren={
+  gatherContainerChildren
+}
 
    onCreateObjectChild={
     createLocationInContainer
