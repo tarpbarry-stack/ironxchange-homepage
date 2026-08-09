@@ -38,16 +38,19 @@ export default function IXIObjectDropTarget({
       ""
     );
 
+  const dropTargetId =
+    createIXIDropOnTargetId(
+      objectId
+    );
+
   const {
     active
   } =
     useDndContext();
 
-
   const dragData =
     active?.data?.current ||
     {};
-
 
   const acceptance =
     canIXIObjectAcceptDrop({
@@ -60,41 +63,25 @@ export default function IXIObjectDropTarget({
         objectId
     });
 
-
-  /*
-   * No active drag:
-   * keep target registered but disabled.
-   *
-   * Active incompatible drag:
-   * disabled.
-   *
-   * Active compatible drag:
-   * becomes a true ON target.
-   */
   const canAccept =
     Boolean(
       active &&
       acceptance.accepted
     );
 
-
-  const dropTargetId =
-    createIXIDropOnTargetId(
-      objectId
-    );
-
-
+  /*
+   * Keep this droppable registered
+   * continuously.
+   *
+   * Do NOT dynamically disable it.
+   */
   const {
     setNodeRef,
-
     isOver
   } =
     useDroppable({
       id:
         dropTargetId,
-
-      disabled:
-        !canAccept,
 
       data: {
         type:
@@ -117,27 +104,26 @@ export default function IXIObjectDropTarget({
       }
     });
 
-
   const accepting =
     Boolean(
+      active &&
       canAccept &&
       isOver
     );
 
-useEffect(() => {
-  onDropStateChange?.({
+  useEffect(() => {
+    onDropStateChange?.({
+      accepting,
+      canAccept,
+      acceptance,
+      dropTargetId
+    });
+  }, [
     accepting,
     canAccept,
-    acceptance,
     dropTargetId
-  });
-}, [
-  accepting,
-  canAccept,
-  dropTargetId
-]);
+  ]);
 
-  
   return (
     <div
       ref={
@@ -166,6 +152,12 @@ useEffect(() => {
 
       data-ixi-drop-accepting={
         accepting
+          ? "true"
+          : "false"
+      }
+
+      data-ixi-drop-enabled={
+        canAccept
           ? "true"
           : "false"
       }
