@@ -32,17 +32,19 @@ function getMosObjectId(object = {}) {
 
 
 export default function useIXIMosObjectCreation({
-  entityId = "",
-  userId = "",
+  entityId,
+  userId,
 
-  workspaceSystemIndexes = [],
-  workspacePlacements = {},
+  workspaceSystemIndexes,
+  workspacePlacements,
 
   setWorkspacePlacements,
   saveWorkspaceLayout,
 
   setAosObjects,
-  setSystemIndexes
+  setSystemIndexes,
+
+  onObjectNotice = null
 }) {
 
   /*
@@ -627,6 +629,17 @@ async function saveMosObjectName({
    * projection/card sees the new name.
    */
   await reloadMosEnvironment();
+
+    onObjectNotice?.({
+    objectId:
+      id,
+
+    message:
+      `${name} SAVED`,
+
+    tone:
+      "success"
+  });
 
   return {
     object:
