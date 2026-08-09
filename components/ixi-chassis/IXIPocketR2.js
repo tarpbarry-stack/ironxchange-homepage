@@ -37,8 +37,8 @@ export default function IXIPocketR2({
     height: "calc(100vh - 405px)",
     pointerEvents: "auto",
     zIndex: 999,
-    background: "transparent",
-    outline: "none"
+    background: "rgba(255, 0, 255, .45)",
+    outline: "3px solid #ff00ff"
   }}
 />
 
