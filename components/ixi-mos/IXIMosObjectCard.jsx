@@ -5,6 +5,9 @@ import {
   useState
 } from "react";
 
+import IXIObjectDropTarget
+  from "../ixi-chassis/IXIObjectDropTarget";
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -105,6 +108,11 @@ export default function IXIMosObjectCard({
   const [nameError, setNameError] =
     useState("");
 
+const [
+  isDropAccepting,
+  setIsDropAccepting
+] = useState(false);
+  
   const imageUrl = useMemo(
     () => getPrimaryImage(object),
     [object]
@@ -115,6 +123,29 @@ export default function IXIMosObjectCard({
       object?.capabilities?.canContain
     );
 
+const dropTargetObject =
+  isContainer
+    ? {
+        ...object,
+
+        workspaceDropPolicy: {
+          enabled: true,
+
+          /*
+           * Open policy.
+           *
+           * The existing universal
+           * acceptance engine interprets
+           * an empty type list as:
+           *
+           * any IXI object may be dropped
+           * on this container.
+           */
+          acceptedObjectTypes: []
+        }
+      }
+    : object;
+  
   const objectCount =
     Number(
       projection?.descendantObjectCount
@@ -269,14 +300,49 @@ export default function IXIMosObjectCard({
   }
 
   return (
-    <article
-      className={`mos-object-card ${
-        isContainer
-          ? "mos-container-card"
-          : ""
-      }`}
-      data-mos-object-id={object.objectId}
-    >
+  <article
+    className={[
+      "mos-object-card",
+
+      isContainer
+        ? "mos-container-card"
+        : "",
+
+      isDropAccepting
+        ? "mos-drop-accepting"
+        : ""
+    ]
+      .filter(Boolean)
+      .join(" ")}
+
+    data-mos-object-id={
+      object.objectId
+    }
+  >
+
+    {isContainer ? (
+      <IXIObjectDropTarget
+        targetObject={
+          dropTargetObject
+        }
+
+        targetObjectId={
+          object.objectId
+        }
+
+        className="
+          mos-object-drop-target
+        "
+
+        onDropStateChange={({
+          accepting
+        }) => {
+          setIsDropAccepting(
+            accepting
+          );
+        }}
+      />
+    ) : null}
       {face === 1 ? (
         <>
           <div
@@ -630,6 +696,42 @@ export default function IXIMosObjectCard({
           border-color:
             rgba(255,196,0,.16);
         }
+
+.mos-object-card.mos-drop-accepting {
+  border-color:
+    rgba(255,196,0,.92);
+
+  outline:
+    1px solid
+    rgba(255,196,0,.34);
+
+  box-shadow:
+    0 0 0 1px
+      rgba(255,196,0,.16),
+
+    0 0 20px
+      rgba(255,196,0,.20),
+
+    0 18px 44px
+      rgba(0,0,0,.30);
+}
+
+
+:global(.mos-object-drop-target) {
+  position: absolute;
+
+  left: 4%;
+  right: 4%;
+
+  top: 5%;
+  bottom: 12%;
+
+  z-index: 18;
+
+  pointer-events: none;
+
+  background: transparent;
+}
 
         .mos-photo {
           height: 220px;
