@@ -38,8 +38,8 @@ export default function IXIPocketR1({
     height: "140px",
     pointerEvents: "auto",
     zIndex: 1,
-    background: "rgba(0, 255, 90, .45)",
-    outline: "3px solid #00ff5a"
+    background: "transparent",
+outline: "none"
   }}
 />
 
