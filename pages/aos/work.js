@@ -594,7 +594,7 @@ const containerStateKey = useMemo(() => {
 useEffect(() => {
   if (
     !workspaceListings.length ||
-    !workspaceSystemIndexes.length
+    !systemIndexes.length
   ) {
     return;
   }
@@ -774,7 +774,7 @@ placements:
     true;
 }, [
   containerStateKey,
-  workspaceSystemIndexes
+  systemIndexes
 ]);
   
   const visibleSavedListings = useMemo(() => {
