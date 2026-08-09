@@ -2316,6 +2316,18 @@ return;
          */
         dragHandleProps={{}}
 
+workspaceDropPolicy={{
+  enabled: true,
+
+  acceptedObjectTypes: [
+    "machine"
+  ]
+}}
+
+workspaceDropSurface={
+  "indexEquipment"
+}
+      
         ixiState={
           ixiCardState[
             objectId
