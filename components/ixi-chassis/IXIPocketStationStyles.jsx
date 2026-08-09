@@ -445,13 +445,8 @@ export default function IXIPocketStationStyles() {
 
         pointer-events: auto;
 
-        background:
-          rgba(255,0,0,.35)
-          !important;
-
-        outline:
-          2px solid red
-          !important;
+        background: "transparent",
+outline: "none"
       }
 
       .ixi-pocket-catch-pad.catch-r1 {
@@ -464,13 +459,8 @@ export default function IXIPocketStationStyles() {
 
         pointer-events: auto;
 
-        background:
-          rgba(0,255,0,.35)
-          !important;
-
-        outline:
-          2px solid lime
-          !important;
+        background: "transparent",
+outline: "none"
       }
 
       .ixi-pocket-l2
@@ -490,13 +480,8 @@ export default function IXIPocketStationStyles() {
 
         z-index: 999;
 
-        background:
-          rgba(0,100,255,.35)
-          !important;
-
-        outline:
-          2px solid blue
-          !important;
+        background: "transparent",
+outline: "none"
       }
 
       .ixi-pocket-r2
@@ -516,13 +501,8 @@ export default function IXIPocketStationStyles() {
 
         z-index: 999;
 
-        background:
-          rgba(255,0,255,.35)
-          !important;
-
-        outline:
-          2px solid magenta
-          !important;
+        background: "transparent",
+outline: "none"
       }
 
       /*
