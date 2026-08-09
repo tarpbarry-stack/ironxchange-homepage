@@ -109,14 +109,6 @@ import {
 } from "../../components/ixi-chassis/IXIWorkspacePlacementEngine";
 
 import {
-  getStackContainerKey,
-  toggleStackOpenState,
-  openStackState,
-  toggleStackLayoutState,
-  getMachineIdsForStack
-} from "../../components/ixi-chassis/IXIStackEngine";
-
-import {
   rotatePocketState,
   movePocketToContainerState
 } from "../../components/ixi-chassis/IXIPocketEngine";
@@ -188,11 +180,6 @@ const [workspaceFilters, setWorkspaceFilters] = useState({
   const [draggingListingId, setDraggingListingId] = useState("");
 const [ghostListingId, setGhostListingId] = useState("");
 
-const [activeStacksOpen, setActiveStacksOpen] = useState({
-  top: false,
-  bottom: false
-});
-
 const [
   workspacePlacements,
   setWorkspacePlacements
@@ -224,18 +211,11 @@ const machineContainers =
 const setMachineContainers =
   setWorkspacePlacements;
 
-const [activeStackLayouts, setActiveStackLayouts] = useState({
-  top: "horizontal",
-  bottom: "horizontal"
-});
 
 const [leftPocketOpen, setLeftPocketOpen] = useState(false);
 const [rightPocketOpen, setRightPocketOpen] = useState(false);
   
 const [topRailMode, setTopRailMode] = useState("off");
-
-const [activeStackSendMenu, setActiveStackSendMenu] =
-  useState("");
 
 const POCKET_TARGETS = [
   "pocketLeft",
@@ -249,7 +229,6 @@ const POCKET_TARGETS = [
   "stackTop"
 ];
 
-  const [activeStackHover, setActiveStackHover] = useState("");
   const [ixiCardState, setIxiCardState] = useState({});
   const [ixiUserId, setIxiUserId] = useState("guest");
   const [workspaceSettings, setWorkspaceSettings] =
@@ -1445,97 +1424,6 @@ function sendListingToBack(listing) {
       console.error("Save failed", err);
     }
   }
-
-function toggleActiveStack(stackKey) {
-  setActiveStacksOpen(current => {
-    const nextOpen = toggleStackOpenState(
-  current,
-  stackKey
-);
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: IXI_AOS_WORK_LAYOUT_ID,
-      patch: {
-        machineContainers,
-        activeStackLayouts,
-        activeStacksOpen: nextOpen,
-        updatedAt: Date.now()
-      }
-    });
-
-    return nextOpen;
-  });
-}
-  
-function toggleActiveStackLayout(stackKey) {
-  setActiveStackLayouts(current => {
-    const nextLayouts = toggleStackLayoutState(
-  current,
-  stackKey
-);
-
-    saveIxiMachinePatch({
-      userId: ixiUserId,
-      listingId: IXI_AOS_WORK_LAYOUT_ID,
-      patch: {
-        machineContainers,
-        activeStackLayouts: nextLayouts,
-        activeStacksOpen,
-        updatedAt: Date.now()
-      }
-    });
-
-    return nextLayouts;
-  });
-}
-
-function moveActiveStackToContainer(stackKey, targetContainer) {
-  const sourceContainer = getStackContainerKey(stackKey);
-
-  const stackIds = Array.isArray(machineContainers[sourceContainer])
-    ? machineContainers[sourceContainer].map(String)
-    : [];
-
-  const result = IXI_COMMANDS.bulkMoveObjects({
-    objectIds: stackIds,
-    targetContainer,
-    ixiCardState,
-    machineContainers
-  });
-
-  executeIXITransaction(result);
-
-  setActiveStacksOpen(current => ({
-    ...current,
-    [stackKey]: false
-  }));
-}
-
- function sendActiveStackToTheater(stackKey) {
-  const sourceContainer = getStackContainerKey(stackKey);
-  const stackIds = machineContainers[sourceContainer] || [];
-
-  console.log("IXI THEATER STACK", {
-    stackKey,
-    machineIds: stackIds
-  });
-} 
-  
-function addListingToActiveStack(stackKey, listingId) {
-  if (!listingId) return;
-
- const targetContainer = getStackContainerKey(stackKey);
-
- setActiveStacksOpen(current =>
-  openStackState(current, stackKey)
-);
-
-  moveMachineToContainer(
-    listingId,
-    targetContainer
-  );
-}
   
 function addListingToLeftPocket(listingId) {
   if (!listingId) return;
