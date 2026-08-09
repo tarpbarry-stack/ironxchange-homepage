@@ -5,12 +5,19 @@ export default function IXISortableMachineCard({
   objectType = "machine",
   objectFamily = "machine",
   dragData = {},
+
+  reorderBehavior = "normal",
+
   ...props
 }) {
   return (
     <IXISortableObject
       {...props}
 
+reorderBehavior={
+  reorderBehavior
+}
+  
       objectType={
         objectType ||
         "machine"
