@@ -1784,7 +1784,6 @@ function saveWorkspaceLayout(
 const {
   createRootSystemIndexByName,
   createObjectInContainer,
-  createLocationInContainer,
   saveMosObjectName,
   deleteMosWorkspaceObject
 } = useIXIMosObjectCreation({
@@ -1872,21 +1871,52 @@ async function createRootSystemIndex() {
  * lives in work.js.
  */
 async function createObjectInsideSystemIndex(
-  systemIndex
+  parentObject
 ) {
   try {
-    await createLocationInContainer(
-      systemIndex
-    );
+    await createObjectInContainer({
+      container:
+        parentObject,
+
+      /*
+       * GENERIC AOS OBJECT
+       *
+       * The customer supplies meaning
+       * through the name and structure.
+       */
+      objectType:
+        "generic",
+
+      displayName:
+        "NEW OBJECT",
+
+      metadata: {
+        creationState:
+          "naming",
+
+        createdFrom:
+          "aos-container-plus",
+
+        parentDisplayName:
+          String(
+            parentObject?.displayName ||
+            parentObject?.label ||
+            ""
+          ).trim()
+      },
+
+      exposeToBoard:
+        true
+    });
   } catch (error) {
     console.error(
-      "AOS LOCATION CREATE FAILED:",
+      "AOS OBJECT CREATE FAILED:",
       error
     );
 
     window.alert(
       error?.message ||
-      "Could not create Location."
+      "Could not create object."
     );
   }
 }
