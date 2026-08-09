@@ -8,6 +8,9 @@ import {
 import IXIObjectDropTarget
   from "../ixi-chassis/IXIObjectDropTarget";
 
+import IXIAosObjectCardShell
+  from "./IXIAosObjectCardShell";
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -76,7 +79,19 @@ onDelete = null,
 onAddMedia = null,
   onCreateWorkOrder = null,
   onAddExpense = null,
-  onScanQr = null
+  onScanQr = null, 
+  ixiState = {},
+
+parentLabel = "",
+
+armedDestination = "",
+
+onSendFront = null,
+onSendBack = null,
+
+onRailSend = null,
+
+onSendToArmedDestination = null,
 }) {
   const [face, setFace] =
     useState(1);
@@ -124,6 +139,22 @@ const [
       object?.capabilities?.canContain
     );
 
+const resolvedParentLabel =
+  clean(parentLabel) ||
+  clean(
+    object?.metadata
+      ?.parentDisplayName
+  ) ||
+  clean(
+    object?.metadata
+      ?.parentName
+  ) ||
+  (
+    object?.directContainerId
+      ? "CONTAINER"
+      : "SYSTEM INDEX"
+  );
+  
 const dropTargetObject =
   isContainer
     ? {
@@ -342,26 +373,71 @@ async function deleteObject(
     onOpen?.(object);
   }
 
-  return (
-  <article
-    className={[
-      "mos-object-card",
+ return (
+  <IXIAosObjectCardShell
+    object={
+      object
+    }
 
+    parentLabel={
+      resolvedParentLabel
+    }
+
+    displayName={
+      isNaming
+        ? getObjectLabel(object)
+        : object?.displayName
+    }
+
+    ixiState={
+      ixiState
+    }
+
+    dragHandleProps={
+      dragHandleProps
+    }
+
+    canContain={
       isContainer
-        ? "mos-container-card"
-        : "",
+    }
 
-      isDropAccepting
-        ? "mos-drop-accepting"
-        : ""
-    ]
-      .filter(Boolean)
-      .join(" ")}
+    onAddChild={
+      onAddChild
+    }
 
-    data-mos-object-id={
-      object.objectId
+    railMode="
+      home-lit
+      next-lit
+      prev-lit
+      end-lit
+    "
+
+    onSendFront={
+      onSendFront
+    }
+
+    onSendBack={
+      onSendBack
+    }
+
+    onCycleFace={
+      cycleFace
+    }
+
+    onRailSend={
+      onRailSend
+    }
+
+    armedDestination={
+      armedDestination
+    }
+
+    onSendToArmedDestination={
+      onSendToArmedDestination
     }
   >
+
+    <div className="mos-face-studio">
 
     {isContainer ? (
       <IXIObjectDropTarget
@@ -1230,6 +1306,9 @@ async function deleteObject(
           letter-spacing: .55px;
         }
       `}</style>
-    </article>
+       </div>
+
+  </IXIAosObjectCardShell>
+);
   );
 }
