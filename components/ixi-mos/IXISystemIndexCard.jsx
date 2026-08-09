@@ -593,9 +593,24 @@ const [
 
   return (
     <section
-      className={[
-        "system-index-card",
-        "card",
+     className={[
+  "system-index-card",
+  "card",
+
+  isDropAccepting
+    ? "ixi-container-drop-accepting"
+    : "",
+
+  `board-color-${
+    boardColor || "none"
+  }`,
+
+  `board-outline-${
+    boardOutline || 1
+  }`
+]
+  .filter(Boolean)
+  .join(" ")}
         `board-color-${
           boardColor || "none"
         }`,
@@ -617,6 +632,33 @@ const [
           ===================================================== */}
 
       <div className="system-index-face">
+
+        <IXIObjectDropTarget
+    targetObject={
+      dropTargetObject
+    }
+
+    targetObjectId={
+      id
+    }
+
+    targetSurface={
+      workspaceDropSurface
+    }
+
+    className="
+      system-index-drop-on-zone
+    "
+
+    onDropStateChange={({
+      accepting
+    }) => {
+      setIsDropAccepting(
+        accepting
+      );
+    }}
+  />
+
 
         {/* ---------------------------------------------------
             FACE 1 — INDEX IDENTITY + LARGE PREVIEW
@@ -2067,6 +2109,46 @@ const [
           z-index: 25;
         }
 
+.system-index-drop-on-zone {
+  position: absolute;
+
+  left: 12%;
+  right: 12%;
+
+  top: 14%;
+  bottom: 22%;
+
+  z-index: 18;
+
+  pointer-events: none;
+
+  background: transparent;
+}
+
+.system-index-card.ixi-container-drop-accepting {
+  border-color:
+    rgba(255, 196, 0, .92);
+
+  outline:
+    1px solid
+    rgba(255, 196, 0, .36);
+
+  box-shadow:
+    0 0 0 1px
+      rgba(255, 196, 0, .20),
+
+    0 0 18px
+      rgba(255, 196, 0, .24),
+
+    0 0 36px
+      rgba(255, 196, 0, .10),
+
+    inset 0 0 18px
+      rgba(255, 196, 0, .035),
+
+    inset 0 1px 0
+      rgba(255,255,255,.05);
+}
 
         :global(
           .system-index-thumb-shell
