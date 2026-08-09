@@ -42,6 +42,9 @@ import useIXIMosObjectCreation
 import useIXIAosWorkspaceRegistry
   from "../../components/ixi-mos/workspace/useIXIAosWorkspaceRegistry";
 
+import useIXIEquipmentWorkspace
+  from "../../components/ixi-mos/equipment/useIXIEquipmentWorkspace";
+
 import { getListingId } from "../../lib/listingFormatters";
 import {
   fetchIxiMachineState,
@@ -1206,6 +1209,24 @@ function getMachineContainer(machineId) {
 
   saveWorkspaceLayout(nextMachineContainers);
 }
+
+const {
+  exposeEquipmentMachineToBoard,
+
+  returnMachineToEquipment,
+
+  exposeAllEquipmentToBoard,
+
+  returnAllEquipmentHome
+} = useIXIEquipmentWorkspace({
+  equipmentIndex,
+
+  machineContainers,
+
+  ixiCardState,
+
+  executeIXITransaction
+});
   
 function moveMachineToContainer(machineId, targetContainer) {
   if (!machineId || !targetContainer) return;
