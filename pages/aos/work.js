@@ -3301,22 +3301,6 @@ onOpenConsole={() => {
 /* IXI POCKET CATCH ZONE DEBUG     */
 /* =============================== */
 
-.ixi-pocket-catch-pad.catch-l1 {
-  background: rgba(255, 0, 0, .16);
-}
-
-.ixi-pocket-catch-pad.catch-r1 {
-  background: rgba(0, 255, 0, .16);
-}
-
-.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
-  background: rgba(0, 100, 255, .14);
-}
-
-.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
-  background: rgba(255, 0, 255, .14);
-}
-
 
 /* Base catch pad is inert unless explicitly assigned */
 .ixi-pocket-catch-pad {
@@ -3336,8 +3320,8 @@ onOpenConsole={() => {
 
   pointer-events: auto;
 
-  background: transparent;
-outline: none;
+background: rgba(255, 0, 0, .35) !important;
+outline: 2px solid red !important;
 }
 
 /* R1 local catch only */
@@ -3351,8 +3335,8 @@ outline: none;
 
   pointer-events: auto;
 
-  background: transparent;
-outline: none;
+ background: rgba(0, 255, 0, .35) !important;
+outline: 2px solid lime !important;
 }
 
 /* L2 screen-left lower catch lane only */
@@ -3369,8 +3353,8 @@ outline: none;
   pointer-events: auto;
   z-index: 999;
 
- background: transparent;
-outline: none;
+ background: rgba(0, 100, 255, .35) !important;
+outline: 2px solid blue !important;
 }
 
 /* R2 screen-right lower catch lane only */
@@ -3387,8 +3371,8 @@ outline: none;
   pointer-events: auto;
   z-index: 999;
 
-  background: transparent;
-outline: none;
+  background: rgba(255, 0, 255, .35) !important;
+outline: 2px solid magenta !important;
 }
 
 .ixi-pocket-thumbs.thumb-size-small {
