@@ -24,6 +24,9 @@ import Footer from "../../components/Footer";
 import IXIAosScoreboard
   from "../../components/ixi-mos/IXIAosScoreboard";
 
+import IXIPocketStationStyles
+  from "../../components/ixi-chassis/IXIPocketStationStyles";
+
 import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
@@ -2685,7 +2688,8 @@ workspaceDropSurface={
   }}
 </IXIWorkspaceEngine>
 
-
+<IXIPocketStationStyles />
+  
       <Footer />
                 
       <style jsx>{`
