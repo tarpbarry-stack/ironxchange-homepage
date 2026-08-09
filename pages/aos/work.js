@@ -2081,14 +2081,62 @@ const overSurface =
     ""
   );
 
+const dropIntent =
+  String(
+    overData.dropIntent ||
+    ""
+  );
+
+const dropTargetSurface =
+  String(
+    overData.targetSurface ||
+    ""
+  );
+
+const dropAccepted =
+  overData.accepted === true;
+
 let nextPlacements =
   workspacePlacements;
+
+
+/*
+ * DROP ON / INTO A CONTAINER
+ *
+ * The target advertises the surface
+ * that represents its contained deck.
+ *
+ * Equipment currently advertises:
+ *
+ * targetSurface = indexEquipment
+ *
+ * Future containers can advertise
+ * their own target surface without
+ * changing this drag-end engine.
+ */
+if (
+  dropIntent === "on" &&
+  dropAccepted &&
+  dropTargetSurface
+) {
+  nextPlacements =
+    moveObjectToWorkspaceSurface({
+      placements:
+        workspacePlacements,
+
+      objectId:
+        dragId,
+
+      targetSurface:
+        dropTargetSurface
+    });
+}
 
 /*
  * Dropped directly onto a workspace
  * surface such as Board/Pocket/Stack.
  */
-if (
+else if (
   knownWorkspaceSurfaces.has(
     overId
   )
