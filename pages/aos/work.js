@@ -1553,7 +1553,9 @@ function saveWorkspaceLayout(
 
 const {
   createRootSystemIndexByName,
-  createObjectInContainer
+  createObjectInContainer,
+  createLocationInContainer,
+  saveMosObjectName
 } = useIXIMosObjectCreation({
   entityId:
     aosEntity?.entityId || "",
@@ -1638,55 +1640,19 @@ async function createRootSystemIndex() {
 async function createObjectInsideSystemIndex(
   systemIndex
 ) {
-  const rawObjectType =
-    window.prompt(
-      "Object type",
-      "location"
-    );
-
-  const objectType =
-    String(
-      rawObjectType || ""
-    )
-      .trim()
-      .toLowerCase();
-
-  if (!objectType) {
-    return;
-  }
-
-  const rawName =
-    window.prompt(
-      `Name this ${objectType}`
-    );
-
-  const displayName =
-    String(
-      rawName || ""
-    ).trim();
-
-  if (!displayName) {
-    return;
-  }
-
   try {
-    await createObjectInContainer({
-      container:
-        systemIndex,
-
-      objectType,
-
-      displayName
-    });
+    await createLocationInContainer(
+      systemIndex
+    );
   } catch (error) {
     console.error(
-      "AOS CONTAINER CHILD CREATE FAILED:",
+      "AOS LOCATION CREATE FAILED:",
       error
     );
 
     window.alert(
       error?.message ||
-      "Could not create object."
+      "Could not create Location."
     );
   }
 }
@@ -2443,8 +2409,16 @@ workspaceDropSurface={
     returnAllEquipmentHome
   }
 
-  onAddObject={
+    onAddObject={
     createObjectInsideSystemIndex
+  }
+
+  onCreateLocationChild={
+    createLocationInContainer
+  }
+
+  onSaveObjectName={
+    saveMosObjectName
   }
 />
     
