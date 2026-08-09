@@ -1,103 +1,368 @@
 import {
   useEffect,
-  useMemo,
   useRef,
   useState
 } from "react";
 
+import {
+  useDraggable
+} from "@dnd-kit/core";
+
 import IXIObjectDropTarget
   from "../ixi-chassis/IXIObjectDropTarget";
 
-import IXIAosObjectCardShell
-  from "./IXIAosObjectCardShell";
+import IXIMachineRail
+  from "../IXIMachineRail";
+
+import IXICollectionThumbRail
+  from "../ixi-object-system/IXICollectionThumbRail";
+
+import {
+  getCollectionDeckState,
+  getNextCollectionFace,
+  getPreviousCollectionFace,
+  getFirstCollectionFace,
+  getLastCollectionFace,
+  getCollectionFaceForItemIndex
+} from "../ixi-object-system/IXICollectionDeckEngine";
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 
 function clean(value) {
-  return String(value || "").trim();
+  return String(
+    value || ""
+  ).trim();
 }
 
-function formatMoney(value, currency = "USD") {
-  const amount = Number(value);
 
-  if (!Number.isFinite(amount)) {
-    return "—";
+function formatMoney(
+  value,
+  currency = "USD"
+) {
+  const amount =
+    Number(value || 0);
+
+  if (
+    !Number.isFinite(amount)
+  ) {
+    return "$0";
   }
 
-  return amount.toLocaleString("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0
-  });
-}
-
-function getObjectLabel(object = {}) {
-  return (
-    clean(object.customerCategory) ||
-    clean(object.objectType) ||
-    "OBJECT"
-  ).toUpperCase();
-}
-
-function getPrimaryImage(object = {}) {
-  const media = Array.isArray(object.media)
-    ? object.media
-    : [];
-
-  const firstImage = media.find(item => {
-    if (typeof item === "string") {
-      return Boolean(item);
+  return amount.toLocaleString(
+    "en-US",
+    {
+      style: "currency",
+      currency:
+        currency || "USD",
+      maximumFractionDigits: 0
     }
+  );
+}
 
-    return (
-      item?.type === "image" ||
-      item?.url ||
-      item?.src
-    );
-  });
 
-  if (typeof firstImage === "string") {
-    return firstImage;
-  }
-
-  return (
-    firstImage?.url ||
-    firstImage?.src ||
+function getObjectId(
+  object = {}
+) {
+  return String(
+    object?.objectId ||
+    object?.id ||
     ""
   );
 }
 
+
+function getObjectName(
+  object = {}
+) {
+  return (
+    clean(
+      object?.displayName
+    ) ||
+    clean(
+      object?.name
+    ) ||
+    clean(
+      object?.title
+    ) ||
+    "OBJECT"
+  );
+}
+
+
+function getObjectImage(
+  object = {}
+) {
+  const media =
+    Array.isArray(
+      object?.media
+    )
+      ? object.media
+      : [];
+
+  const firstMedia =
+    media.find(item => {
+      if (
+        typeof item ===
+        "string"
+      ) {
+        return Boolean(
+          clean(item)
+        );
+      }
+
+      return Boolean(
+        item?.url ||
+        item?.src ||
+        item?.imageUrl
+      );
+    });
+
+  if (
+    typeof firstMedia ===
+    "string"
+  ) {
+    return firstMedia;
+  }
+
+  return (
+    firstMedia?.url ||
+    firstMedia?.src ||
+    firstMedia?.imageUrl ||
+
+    object?.imageUrl ||
+
+    object?.imageUrls?.[0] ||
+
+    object?.images?.[0]?.url ||
+
+    ""
+  );
+}
+
+
+function getObjectSecondaryText(
+  object = {}
+) {
+  return (
+    clean(
+      object?.factualTitle
+    ) ||
+    clean(
+      object?.customerAssetId
+    ) ||
+    clean(
+      object?.fields
+        ?.location
+    ) ||
+    clean(
+      object?.fields
+        ?.effectiveLocation
+    ) ||
+    ""
+  );
+}
+
+
+function getObjectValue(
+  object = {}
+) {
+  const value =
+    object?.value ??
+    object?.estimatedValue ??
+    object?.marketValue ??
+    0;
+
+  const numeric =
+    Number(value);
+
+  return Number.isFinite(
+    numeric
+  )
+    ? numeric
+    : 0;
+}
+
+
+/*
+ * Generic AOS objects may receive
+ * their direct children from several
+ * projections while we finish the
+ * universal AWS relationship bridge.
+ *
+ * The card itself does NOT decide
+ * canonical membership.
+ *
+ * It consumes whichever direct-child
+ * collection the workspace supplies.
+ */
+function resolveItems({
+  items,
+  object,
+  projection
+}) {
+  if (
+    Array.isArray(items)
+  ) {
+    return items;
+  }
+
+  if (
+    Array.isArray(
+      object?.items
+    )
+  ) {
+    return object.items;
+  }
+
+  if (
+    Array.isArray(
+      object?.children
+    )
+  ) {
+    return object.children;
+  }
+
+  if (
+    Array.isArray(
+      projection?.directContents
+    )
+  ) {
+    return projection.directContents;
+  }
+
+  if (
+    Array.isArray(
+      projection?.items
+    )
+  ) {
+    return projection.items;
+  }
+
+  return [];
+}
+
+
+/* =========================================================
+   UNIVERSAL AOS OBJECT / CONTAINER CARD
+   ========================================================= */
+
 export default function IXIMosObjectCard({
   object = {},
+
+  /*
+   * Direct child objects.
+   *
+   * We will wire this explicitly from
+   * the AOS workspace registry next.
+   */
+  items = null,
+
   projection = null,
+
+  parentLabel = "",
+
   dragHandleProps = null,
+
+  ixiState = {},
+  ixiCardState = {},
+
+  onIxiStateChange = null,
+
+  saved = false,
+
+  armedDestination = "",
+
+  onSendFront = null,
+  onSendBack = null,
+
+  onCycleColor = null,
+  onCycleOutline = null,
+
+  onSendToArmedDestination = null,
+
+  onExposeObject = null,
+
+  onExposeContents = null,
+  onGatherContents = null,
+
+  onAddChild = null,
+
+  onSaveName = null,
+  onDelete = null,
 
   onOpen = null,
 
-onAddChild = null,
-onSaveName = null,
-onDelete = null,
+  workspaceDropPolicy = null,
+  workspaceDropSurface = "",
 
-onAddMedia = null,
+  onOpenConsole = null,
+
+  /*
+   * Future Object Studio actions.
+   * Preserved so we do not destroy
+   * today's API surface.
+   */
+  onAddMedia = null,
   onCreateWorkOrder = null,
   onAddExpense = null,
-  onScanQr = null, 
-  ixiState = {},
-
-parentLabel = "",
-
-armedDestination = "",
-
-onSendFront = null,
-onSendBack = null,
-
-onRailSend = null,
-
-onSendToArmedDestination = null,
+  onScanQr = null
 }) {
-  const [face, setFace] =
-    useState(1);
 
-  const inputRef =
-    useRef(null);
+  /* =======================================================
+     IDENTITY
+     ======================================================= */
+
+  const id =
+    getObjectId(
+      object
+    );
+
+  const displayName =
+    getObjectName(
+      object
+    );
+
+  const resolvedParentLabel =
+    clean(
+      parentLabel
+    ) ||
+    clean(
+      object?.metadata
+        ?.parentDisplayName
+    ) ||
+    "OBJECT";
+
+
+  const isContainer =
+    Boolean(
+      object?.capabilities
+        ?.canContain
+    );
+
+
+  const directItems =
+    resolveItems({
+      items,
+      object,
+      projection
+    });
+
+
+  const totalValue =
+    directItems.reduce(
+      (total, item) =>
+        total +
+        getObjectValue(item),
+      0
+    );
+
+
+  /* =======================================================
+     NAMING
+     ======================================================= */
 
   const creationState =
     clean(
@@ -109,96 +374,34 @@ onSendToArmedDestination = null,
     creationState ===
     "naming";
 
-  const [draftName, setDraftName] =
+
+  const inputRef =
+    useRef(null);
+
+
+  const [
+    draftName,
+    setDraftName
+  ] =
     useState(
       isNaming
         ? ""
-        : clean(
-            object?.displayName
-          )
+        : displayName
     );
 
-  const [savingName, setSavingName] =
+
+  const [
+    savingName,
+    setSavingName
+  ] =
     useState(false);
 
-  const [nameError, setNameError] =
+
+  const [
+    nameError,
+    setNameError
+  ] =
     useState("");
-
-const [
-  isDropAccepting,
-  setIsDropAccepting
-] = useState(false);
-  
-  const imageUrl = useMemo(
-    () => getPrimaryImage(object),
-    [object]
-  );
-
-  const isContainer =
-    Boolean(
-      object?.capabilities?.canContain
-    );
-
-const resolvedParentLabel =
-  clean(parentLabel) ||
-  (
-    object?.directContainerId
-      ? "CONTAINER"
-      : "SYSTEM INDEX"
-  );
-  
-const dropTargetObject =
-  isContainer
-    ? {
-        ...object,
-
-        workspaceDropPolicy: {
-          enabled: true,
-
-          /*
-           * Open policy.
-           *
-           * The existing universal
-           * acceptance engine interprets
-           * an empty type list as:
-           *
-           * any IXI object may be dropped
-           * on this container.
-           */
-          acceptedObjectTypes: []
-        }
-      }
-    : object;
-  
-  const objectCount =
-    Number(
-      projection?.descendantObjectCount
-    ) || 0;
-
-  const containerCount =
-    Number(
-      projection?.descendantContainerCount
-    ) || 0;
-
-  const branchValue =
-    projection?.branchValue ??
-    object?.value ??
-    null;
-
-  const effectiveLocation =
-    clean(
-      object?.fields?.effectiveLocation
-    ) ||
-    clean(
-      object?.fields?.location
-    ) ||
-    "";
-
-  const factualTitle =
-    clean(object.factualTitle);
-
-  const customerAssetId =
-    clean(object.customerAssetId);
 
 
   useEffect(() => {
@@ -206,55 +409,54 @@ const dropTargetObject =
       isNaming &&
       inputRef.current
     ) {
-      inputRef.current.focus();
+      inputRef.current
+        .focus();
     }
   }, [
     isNaming,
-    object?.objectId
+    id
   ]);
 
 
   useEffect(() => {
     if (!isNaming) {
       setDraftName(
-        clean(
-          object?.displayName
-        )
+        displayName
       );
     }
   }, [
     isNaming,
-    object?.displayName
+    displayName
   ]);
-
-
-  function stop(event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
 
 
   async function saveName(
     event = null
   ) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    event
+      ?.preventDefault?.();
+
+    event
+      ?.stopPropagation?.();
 
     const nextName =
-      clean(draftName);
+      clean(
+        draftName
+      );
 
     if (!nextName) {
       setNameError(
         "Name is required."
       );
 
-      inputRef.current?.focus();
+      inputRef.current
+        ?.focus();
 
       return;
     }
 
     if (
-      !object?.objectId ||
+      !id ||
       savingName
     ) {
       return;
@@ -266,14 +468,14 @@ const dropTargetObject =
     try {
       await onSaveName?.({
         objectId:
-          object.objectId,
+          id,
 
         displayName:
           nextName
       });
     } catch (error) {
       console.error(
-        "MOS OBJECT NAME SAVE FAILED:",
+        "AOS OBJECT NAME SAVE FAILED:",
         error
       );
 
@@ -291,14 +493,411 @@ const dropTargetObject =
     event
   ) {
     if (
-      event.key === "Enter"
+      event.key ===
+      "Enter"
     ) {
-      saveName(event);
+      saveName(
+        event
+      );
     }
   }
 
 
-  function addChild(event) {
+  /* =======================================================
+     DELETE
+     ======================================================= */
+
+  async function deleteObject(
+    event
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (
+      typeof onDelete !==
+      "function"
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Delete ${displayName}?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await onDelete(
+        object
+      );
+    } catch (error) {
+      console.error(
+        "AOS OBJECT DELETE FAILED:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+        "Could not delete object."
+      );
+    }
+  }
+
+
+  /* =======================================================
+     DROP TARGET
+     ======================================================= */
+
+  const [
+    isDropAccepting,
+    setIsDropAccepting
+  ] =
+    useState(false);
+
+
+  const dropTargetObject =
+    isContainer
+      ? {
+          ...object,
+
+          objectId:
+            id,
+
+          workspaceDropPolicy:
+            workspaceDropPolicy ||
+            object
+              ?.workspaceDropPolicy ||
+            {
+              enabled:
+                true,
+
+              /*
+               * Universal AOS container.
+               *
+               * Empty accepted types means
+               * open acceptance through the
+               * existing IXI acceptance
+               * engine.
+               */
+              acceptedObjectTypes:
+                []
+            }
+        }
+      : object;
+
+
+  /* =======================================================
+     COLLECTION / DECK STATE
+     ======================================================= */
+
+  const face =
+    Math.max(
+      1,
+      Number(
+        ixiState?.face ||
+        1
+      )
+    );
+
+
+  const {
+    isIdentityFace,
+    isEndDeckFace,
+    activeItemIndex,
+    activeItem
+  } =
+    getCollectionDeckState({
+      face,
+      items:
+        directItems
+    });
+
+
+  const [
+    previewItemIndex,
+    setPreviewItemIndex
+  ] =
+    useState(0);
+
+
+  useEffect(() => {
+    if (
+      activeItemIndex >= 0
+    ) {
+      setPreviewItemIndex(
+        activeItemIndex
+      );
+    }
+  }, [
+    activeItemIndex
+  ]);
+
+
+  useEffect(() => {
+    if (
+      !directItems.length
+    ) {
+      setPreviewItemIndex(0);
+
+      return;
+    }
+
+    setPreviewItemIndex(
+      current =>
+        Math.min(
+          Math.max(
+            current,
+            0
+          ),
+          directItems.length - 1
+        )
+    );
+  }, [
+    directItems.length
+  ]);
+
+
+  const previewItem =
+    directItems[
+      previewItemIndex
+    ] || null;
+
+
+  const thumbActiveIndex =
+    isIdentityFace
+      ? (
+          directItems.length
+            ? previewItemIndex
+            : -1
+        )
+      : activeItemIndex;
+
+
+  /* =======================================================
+     ACTIVE CHILD DRAG
+     ======================================================= */
+
+  const activeItemId =
+    activeItem
+      ? getObjectId(
+          activeItem
+        )
+      : "";
+
+
+  const {
+    attributes:
+      childDragAttributes,
+
+    listeners:
+      childDragListeners,
+
+    setNodeRef:
+      setChildDragNodeRef,
+
+    isDragging:
+      isChildDragging
+  } =
+    useDraggable({
+      id:
+        activeItemId ||
+        `${id}-inactive-child`,
+
+      disabled:
+        isIdentityFace ||
+        isEndDeckFace ||
+        !activeItemId,
+
+      data: {
+        type:
+          "ixi-object",
+
+        objectId:
+          activeItemId,
+
+        objectType:
+          clean(
+            activeItem
+              ?.objectType
+          ) ||
+          "object",
+
+        objectFamily:
+          clean(
+            activeItem
+              ?.objectFamily
+          ) ||
+          "object",
+
+        sourceContainerId:
+          id,
+
+        sourceParentId:
+          id,
+
+        sourceParentType:
+          clean(
+            object
+              ?.objectType
+          ) ||
+          "object",
+
+        action:
+          "expose"
+      }
+    });
+
+
+  /* =======================================================
+     FACE CONTROL
+     ======================================================= */
+
+  function setFace(
+    nextFace
+  ) {
+    if (!id) {
+      return;
+    }
+
+    onIxiStateChange?.(
+      id,
+      {
+        face:
+          Number(
+            nextFace || 1
+          )
+      }
+    );
+  }
+
+
+  function goHome() {
+    setFace(
+      getFirstCollectionFace()
+    );
+  }
+
+
+  function goEnd() {
+    setFace(
+      getLastCollectionFace({
+        items:
+          directItems
+      })
+    );
+  }
+
+
+  function goForward() {
+    if (
+      isIdentityFace &&
+      directItems.length
+    ) {
+      setFace(
+        getCollectionFaceForItemIndex(
+          previewItemIndex
+        )
+      );
+
+      return;
+    }
+
+    setFace(
+      getNextCollectionFace({
+        face,
+        items:
+          directItems
+      })
+    );
+  }
+
+
+  function goBackward() {
+    setFace(
+      getPreviousCollectionFace({
+        face,
+        items:
+          directItems
+      })
+    );
+  }
+
+
+  function previewPrevious(
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (
+      !directItems.length
+    ) {
+      return;
+    }
+
+    setPreviewItemIndex(
+      current =>
+        current <= 0
+          ? directItems.length - 1
+          : current - 1
+    );
+  }
+
+
+  function previewNext(
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (
+      !directItems.length
+    ) {
+      return;
+    }
+
+    setPreviewItemIndex(
+      current =>
+        current >=
+          directItems.length - 1
+          ? 0
+          : current + 1
+    );
+  }
+
+
+  function selectThumb(
+    item,
+    itemIndex
+  ) {
+    if (
+      isIdentityFace
+    ) {
+      setPreviewItemIndex(
+        itemIndex
+      );
+
+      return;
+    }
+
+    setFace(
+      getCollectionFaceForItemIndex(
+        itemIndex
+      )
+    );
+  }
+
+
+  /* =======================================================
+     OPERATIONS
+     ======================================================= */
+
+  function addChild(
+    event
+  ) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -307,917 +906,2713 @@ const dropTargetObject =
     );
   }
 
-async function deleteObject(
-  event
-) {
-  event.preventDefault();
-  event.stopPropagation();
 
-  if (
-    typeof onDelete !==
-    "function"
+  function exposeContents(
+    event
   ) {
-    return;
-  }
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
 
-  const confirmed =
-    window.confirm(
-      `Delete ${
-        object?.displayName ||
-        getObjectLabel(object)
-      }?`
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    await onDelete(
+    onExposeContents?.(
       object
     );
-  } catch (error) {
-    console.error(
-      "MOS OBJECT DELETE FAILED:",
-      error
-    );
-
-    window.alert(
-      error?.message ||
-      "Could not delete object."
-    );
-  }
-}
-  
-
-  function cycleFace(event) {
-    stop(event);
-
-    setFace(current =>
-      current >= 3
-        ? 1
-        : current + 1
-    );
   }
 
-  function openObject(event) {
-    stop(event);
-    onOpen?.(object);
-  }
 
- return (
-  <IXIAosObjectCardShell
-    object={
+  function gatherContents(
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    onGatherContents?.(
       object
-    }
+    );
+  }
 
-    parentLabel={
-      resolvedParentLabel
-    }
 
-    displayName={
-      isNaming
-        ? getObjectLabel(object)
-        : object?.displayName
-    }
+  function openConsole(
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
 
-    ixiState={
-      ixiState
-    }
+    onOpenConsole?.(
+      object
+    );
+  }
 
-    dragHandleProps={
-      dragHandleProps
-    }
 
-    canContain={
-      isContainer
-    }
+  /* =======================================================
+     BOARD STATE
+     ======================================================= */
 
-    onAddChild={
-      onAddChild
-    }
+  const boardColor =
+    ixiState?.color ||
+    "none";
 
-    railMode="
-      home-lit
-      next-lit
-      prev-lit
-      end-lit
-    "
 
-    onSendFront={
-      onSendFront
-    }
+  const boardOutline =
+    Number(
+      ixiState?.outline ??
+      1
+    );
 
-    onSendBack={
-      onSendBack
-    }
 
-    onCycleFace={
-      cycleFace
-    }
+  const actionNotice =
+    ixiState?.actionNotice ||
+    null;
 
-    onRailSend={
-      onRailSend
-    }
 
-    armedDestination={
-      armedDestination
-    }
+  /* =======================================================
+     RENDER
+     ======================================================= */
 
-    onSendToArmedDestination={
-      onSendToArmedDestination
-    }
-  >
+  return (
+    <section
+      className={[
+        "aos-object-card",
+        "card",
 
-    <div className="mos-face-studio">
+        isContainer
+          ? "aos-container-card"
+          : "",
 
-    {isContainer ? (
-      <IXIObjectDropTarget
-        targetObject={
-          dropTargetObject
-        }
+        isDropAccepting
+          ? "ixi-container-drop-accepting"
+          : "",
 
-        targetObjectId={
-          object.objectId
-        }
+        `board-color-${
+          boardColor || "none"
+        }`,
 
-        className="
-          mos-object-drop-target
-        "
+        `board-outline-${
+          boardOutline || 1
+        }`
+      ]
+        .filter(Boolean)
+        .join(" ")}
 
-        onDropStateChange={({
-          accepting
-        }) => {
-          setIsDropAccepting(
-            accepting
-          );
-        }}
-      />
-    ) : null}
-      {face === 1 ? (
-        <>
-          <div
-            className="mos-photo"
-            onClick={openObject}
-          >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={
-                  object.displayName ||
-                  "IXI Object"
-                }
-                draggable={false}
-              />
-            ) : (
-              <div className="mos-photo-empty">
+      {...(
+        isIdentityFace
+          ? dragHandleProps || {}
+          : {}
+      )}
+
+      data-aos-object-id={
+        id
+      }
+    >
+
+      {/* ===================================================
+          ACTION NOTICE
+          =================================================== */}
+
+      {actionNotice?.message ? (
+        <div
+          className={[
+            "aos-action-notice",
+            `tone-${
+              actionNotice
+                ?.tone ||
+              "success"
+            }`
+          ].join(" ")}
+        >
+          {actionNotice.message}
+        </div>
+      ) : null}
+
+
+      {/* ===================================================
+          MAIN FACE WINDOW
+          =================================================== */}
+
+      <div className="aos-object-face">
+
+        {isContainer ? (
+          <IXIObjectDropTarget
+            targetObject={
+              dropTargetObject
+            }
+
+            targetObjectId={
+              id
+            }
+
+            targetSurface={
+              workspaceDropSurface
+            }
+
+            className="
+              aos-object-drop-on-zone
+            "
+
+            onDropStateChange={({
+              accepting
+            }) => {
+              setIsDropAccepting(
+                accepting
+              );
+            }}
+          />
+        ) : null}
+
+
+        {/* =================================================
+            IDENTITY / CONTAINER FACE
+            ================================================= */}
+
+        {isIdentityFace ? (
+          <div className="aos-object-identity">
+
+            <div className="aos-topline">
+
+              <div className="aos-heading">
+
                 <span>
-                  {getObjectLabel(object)}
+                  {resolvedParentLabel}
                 </span>
-              </div>
-            )}
 
-            <div className="mos-type-pill">
-              {getObjectLabel(object)}
-            </div>
-
-            {isContainer ? (
-              <div className="mos-container-pill">
-                CONTAINER
-              </div>
-            ) : null}
-          </div>
-
-                    <div
-            className="mos-body"
-            {...(dragHandleProps || {})}
-          >
-            <div className="mos-name-row">
-
-              {isNaming ? (
-                <div
-                  className="mos-name-editor"
-                  onPointerDown={
-                    event =>
-                      event.stopPropagation()
-                  }
-                >
-                  <input
-                    ref={
-                      inputRef
+                {isNaming ? (
+                  <div
+                    className="
+                      aos-name-editor
+                    "
+                    onPointerDown={
+                      event =>
+                        event
+                          .stopPropagation()
                     }
+                  >
+                    <input
+                      ref={
+                        inputRef
+                      }
 
-                    value={
-                      draftName
-                    }
+                      value={
+                        draftName
+                      }
 
-                    placeholder={`Name this ${
-                      getObjectLabel(
-                        object
-                      )
-                        .toLowerCase()
-                    }`}
+                      placeholder="
+                        NAME OBJECT
+                      "
 
-                    disabled={
-                      savingName
-                    }
+                      disabled={
+                        savingName
+                      }
 
-                    onChange={
-                      event => {
-                        setDraftName(
-                          event.target.value
-                        );
+                      onChange={
+                        event => {
+                          setDraftName(
+                            event
+                              .target
+                              .value
+                          );
 
-                        if (nameError) {
-                          setNameError("");
+                          if (
+                            nameError
+                          ) {
+                            setNameError(
+                              ""
+                            );
+                          }
                         }
                       }
-                    }
 
-                    onKeyDown={
-                      handleNameKeyDown
-                    }
+                      onKeyDown={
+                        handleNameKeyDown
+                      }
 
-                    spellCheck={
-                      false
-                    }
-                  />
+                      spellCheck={
+                        false
+                      }
+                    />
 
+                    <button
+                      type="button"
+
+                      disabled={
+                        savingName
+                      }
+
+                      onPointerDown={
+                        event =>
+                          event
+                            .stopPropagation()
+                      }
+
+                      onClick={
+                        saveName
+                      }
+                    >
+                      {savingName
+                        ? "..."
+                        : "SAVE"}
+                    </button>
+                  </div>
+                ) : (
+                  <h3>
+                    {displayName}
+                  </h3>
+                )}
+
+              </div>
+
+
+              <div className="aos-top-actions">
+
+                {isContainer &&
+                typeof onAddChild ===
+                  "function" ? (
                   <button
                     type="button"
 
-                    disabled={
-                      savingName
-                    }
+                    className="
+                      aos-add-button
+                    "
+
+                    title="
+                      Add child object
+                    "
 
                     onPointerDown={
                       event =>
-                        event.stopPropagation()
+                        event
+                          .stopPropagation()
                     }
 
                     onClick={
-                      saveName
+                      addChild
                     }
                   >
-                    {savingName
-                      ? "..."
-                      : "SAVE"}
+                    +
                   </button>
-                </div>
-              ) : (
-                <h3>
-                  {object.displayName ||
-                    "Unnamed Object"}
-                </h3>
-              )}
+                ) : null}
 
 
-              <div className="mos-name-actions">
+                {typeof onDelete ===
+                  "function" ? (
+                  <button
+                    type="button"
 
-  {isContainer &&
-  typeof onAddChild ===
-    "function" ? (
-    <button
-      type="button"
-      className="mos-add-child"
-      title="Add child object"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
-      onClick={
-        addChild
-      }
-    >
-      +
-    </button>
-  ) : null}
+                    className="
+                      aos-delete-button
+                    "
 
+                    title="
+                      Delete object
+                    "
 
-  {typeof onDelete ===
-    "function" ? (
-    <button
-      type="button"
-      className="mos-delete-object"
-      title="Delete object"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
-      onClick={
-        deleteObject
-      }
-    >
-      ×
-    </button>
-  ) : null}
+                    onPointerDown={
+                      event =>
+                        event
+                          .stopPropagation()
+                    }
+
+                    onClick={
+                      deleteObject
+                    }
+                  >
+                    ×
+                  </button>
+                ) : null}
 
 
-  <span className="mos-status">
-    {clean(object.status) ||
-      "active"}
-  </span>
+                {isContainer ? (
+                  <div className="aos-count">
+                    {directItems.length}
+                  </div>
+                ) : null}
 
-</div>
+              </div>
+
             </div>
 
 
             {nameError ? (
-              <div className="mos-name-error">
+              <div className="aos-name-error">
                 {nameError}
               </div>
             ) : null}
 
 
-            {factualTitle ? (
-              <div className="mos-factual-title">
-                {factualTitle}
-              </div>
-            ) : null}
+            {/* ===============================================
+                LARGE ACTIVE CHILD PREVIEW
+                =============================================== */}
 
-            <div className="mos-identity-row">
-              {customerAssetId ? (
-                <span>
-                  ASSET {customerAssetId}
-                </span>
-              ) : null}
+            <div className="aos-preview">
 
-              <span>
-                {clean(object.objectType)
-                  .replace(/-/g, " ")
-                  .toUpperCase()}
-              </span>
+              {isContainer &&
+              previewItem ? (
+                <>
+
+                  <div className="aos-preview-photo">
+
+                    {getObjectImage(
+                      previewItem
+                    ) ? (
+                      <img
+                        src={
+                          getObjectImage(
+                            previewItem
+                          )
+                        }
+
+                        alt={
+                          getObjectName(
+                            previewItem
+                          )
+                        }
+
+                        draggable={
+                          false
+                        }
+                      />
+                    ) : (
+                      <div className="
+                        aos-preview-photo-empty
+                      ">
+                        {getObjectName(
+                          previewItem
+                        )}
+                      </div>
+                    )}
+
+
+                    <div className="
+                      aos-preview-position
+                    ">
+                      {previewItemIndex + 1}
+                      {" / "}
+                      {directItems.length}
+                    </div>
+
+                  </div>
+
+
+                  <div className="aos-preview-info">
+
+                    <button
+                      type="button"
+
+                      className="
+                        aos-preview-arrow
+                      "
+
+                      onPointerDown={
+                        event =>
+                          event
+                            .stopPropagation()
+                      }
+
+                      onClick={
+                        previewPrevious
+                      }
+
+                      aria-label="
+                        Previous object
+                      "
+                    >
+                      ‹
+                    </button>
+
+
+                    <div className="aos-preview-copy">
+
+                      <strong>
+                        {getObjectName(
+                          previewItem
+                        )}
+                      </strong>
+
+                      <div className="aos-preview-meta">
+                        {getObjectSecondaryText(
+                          previewItem
+                        ) ? (
+                          <span>
+                            {getObjectSecondaryText(
+                              previewItem
+                            )}
+                          </span>
+                        ) : (
+                          <span>
+                            OBJECT
+                          </span>
+                        )}
+                      </div>
+
+                    </div>
+
+
+                    <button
+                      type="button"
+
+                      className="
+                        aos-preview-pull
+                      "
+
+                      onPointerDown={
+                        event => {
+                          event
+                            .preventDefault();
+
+                          event
+                            .stopPropagation();
+                        }
+                      }
+
+                      onClick={
+                        event => {
+                          event
+                            .preventDefault();
+
+                          event
+                            .stopPropagation();
+
+                          if (
+                            !previewItem
+                          ) {
+                            return;
+                          }
+
+                          onExposeObject?.(
+                            previewItem,
+                            object
+                          );
+                        }
+                      }
+                    >
+                      OUT
+                    </button>
+
+
+                    <button
+                      type="button"
+
+                      className="
+                        aos-preview-arrow
+                      "
+
+                      onPointerDown={
+                        event =>
+                          event
+                            .stopPropagation()
+                      }
+
+                      onClick={
+                        previewNext
+                      }
+
+                      aria-label="
+                        Next object
+                      "
+                    >
+                      ›
+                    </button>
+
+                  </div>
+
+                </>
+              ) : (
+
+                <div className="aos-empty">
+
+                  <span>
+                    {isContainer
+                      ? "EMPTY"
+                      : "OBJECT"}
+                  </span>
+
+                  <strong>
+                    {displayName}
+                  </strong>
+
+                </div>
+
+              )}
+
             </div>
 
-            <div className="mos-operating-row">
+
+            {/* ===============================================
+                SNAPSHOT / BOARD / RECALL
+                =============================================== */}
+
+            <div className="aos-snapshot">
+
+              <div className="aos-stat">
+
+                <span>
+                  OBJECTS
+                </span>
+
+                <strong>
+                  {isContainer
+                    ? directItems.length
+                    : "—"}
+                </strong>
+
+              </div>
+
+
+              <div className="aos-stat">
+
+                <span>
+                  VALUE
+                </span>
+
+                <strong>
+                  {formatMoney(
+                    isContainer
+                      ? totalValue
+                      : getObjectValue(
+                          object
+                        ),
+
+                    object?.currency ||
+                    "USD"
+                  )}
+                </strong>
+
+              </div>
+
+
+              {isContainer ? (
+                <div className="
+                  aos-content-actions
+                ">
+
+                  <button
+                    type="button"
+
+                    onPointerDown={
+                      event =>
+                        event
+                          .stopPropagation()
+                    }
+
+                    onClick={
+                      exposeContents
+                    }
+
+                    title="
+                      Send direct contents
+                      to Board
+                    "
+                  >
+                    BOARD
+                  </button>
+
+
+                  <button
+                    type="button"
+
+                    onPointerDown={
+                      event =>
+                        event
+                          .stopPropagation()
+                    }
+
+                    onClick={
+                      gatherContents
+                    }
+
+                    title="
+                      Recall direct contents
+                      to this container
+                    "
+                  >
+                    RECALL
+                  </button>
+
+                </div>
+              ) : (
+
+                <div className="
+                  aos-object-actions
+                ">
+
+                  <button
+                    type="button"
+
+                    onPointerDown={
+                      event =>
+                        event
+                          .stopPropagation()
+                    }
+
+                    onClick={
+                      event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        onOpen?.(
+                          object
+                        );
+                      }
+                    }
+                  >
+                    OPEN
+                  </button>
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+
+
+        /* =================================================
+           CHILD FACE
+           ================================================= */
+
+        ) : activeItem ? (
+
+          <div
+            ref={
+              setChildDragNodeRef
+            }
+
+            className={[
+              "aos-child-face",
+
+              isChildDragging
+                ? "is-dragging"
+                : ""
+            ]
+              .filter(Boolean)
+              .join(" ")}
+
+            {...childDragAttributes}
+            {...childDragListeners}
+          >
+
+            <div className="aos-child-header">
+
+              <span>
+                {displayName}
+              </span>
+
               <strong>
-                {formatMoney(
-                  branchValue,
-                  object.currency || "USD"
+                {getObjectName(
+                  activeItem
+                )}
+              </strong>
+
+            </div>
+
+
+            <div className="aos-child-visual">
+
+              {getObjectImage(
+                activeItem
+              ) ? (
+                <img
+                  src={
+                    getObjectImage(
+                      activeItem
+                    )
+                  }
+
+                  alt={
+                    getObjectName(
+                      activeItem
+                    )
+                  }
+
+                  draggable={
+                    false
+                  }
+                />
+              ) : (
+                <div className="
+                  aos-child-empty
+                ">
+                  {getObjectName(
+                    activeItem
+                  )}
+                </div>
+              )}
+
+            </div>
+
+
+            <div className="aos-child-info">
+
+              <strong>
+                {getObjectName(
+                  activeItem
                 )}
               </strong>
 
               <span>
-                {effectiveLocation ||
-                  "NO LOCATION"}
+                {getObjectSecondaryText(
+                  activeItem
+                ) ||
+                "AOS OBJECT"}
               </span>
+
             </div>
 
-            {isContainer ? (
-              <div className="mos-count-row">
-                <span>
-                  {objectCount} OBJECTS
-                </span>
+          </div>
 
-                <span>
-                  {containerCount} CONTAINERS
-                </span>
-              </div>
+
+        /* =================================================
+           END DECK
+           ================================================= */
+
+        ) : (
+
+          <div className="aos-end">
+
+            <span>
+              END DECK
+            </span>
+
+            <strong>
+              {directItems.length}
+            </strong>
+
+            <p>
+              OBJECTS REVIEWED
+            </p>
+
+            {typeof onOpenConsole ===
+              "function" ? (
+              <button
+                type="button"
+
+                onPointerDown={
+                  event =>
+                    event
+                      .stopPropagation()
+                }
+
+                onClick={
+                  openConsole
+                }
+              >
+                OPEN OBJECT
+              </button>
             ) : null}
-          </div>
-        </>
-      ) : null}
 
-      {face === 2 ? (
-        <div className="mos-face mos-detail-face">
-          <div className="mos-face-header">
-            <span>OBJECT DETAILS</span>
-            <strong>
-              {object.displayName}
-            </strong>
           </div>
 
-          <dl>
-            <div>
-              <dt>Object ID</dt>
-              <dd>{object.objectId}</dd>
-            </div>
+        )}
 
-            <div>
-              <dt>Entity ID</dt>
-              <dd>{object.entityId}</dd>
-            </div>
-
-            <div>
-              <dt>Category</dt>
-              <dd>
-                {object.customerCategory ||
-                  "—"}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Asset ID</dt>
-              <dd>
-                {object.customerAssetId ||
-                  "—"}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Direct Container</dt>
-              <dd>
-                {object.directContainerId ||
-                  "ROOT"}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      ) : null}
-
-      {face === 3 ? (
-        <div className="mos-face mos-action-face">
-          <div className="mos-face-header">
-            <span>OBJECT ACTIONS</span>
-            <strong>
-              {object.displayName}
-            </strong>
-          </div>
-
-          <button
-            type="button"
-            onClick={event => {
-              stop(event);
-              onAddMedia?.(object);
-            }}
-          >
-            ADD PHOTO / DOCUMENT
-          </button>
-
-          <button
-            type="button"
-            onClick={event => {
-              stop(event);
-              onCreateWorkOrder?.(object);
-            }}
-          >
-            CREATE WORK ORDER
-          </button>
-
-          <button
-            type="button"
-            onClick={event => {
-              stop(event);
-              onAddExpense?.(object);
-            }}
-          >
-            ADD EXPENSE
-          </button>
-
-          <button
-            type="button"
-            onClick={event => {
-              stop(event);
-              onScanQr?.(object);
-            }}
-          >
-            OPEN QR
-          </button>
-        </div>
-      ) : null}
+      </div>
 
 
-        <span>
-          FACE {face}
-        </span>
+      {/* ===================================================
+          CHILD THUMB RAIL
+          =================================================== */}
+
+      <div className="aos-thumb-shell">
+
+        <IXICollectionThumbRail
+          items={
+            directItems
+          }
+
+          activeItemIndex={
+            thumbActiveIndex
+          }
+
+          getItemId={
+            item =>
+              getObjectId(
+                item
+              )
+          }
+
+          getItemImage={
+            getObjectImage
+          }
+
+          getItemLabel={
+            getObjectName
+          }
+
+          onSelectItem={
+            selectThumb
+          }
+        />
+
+      </div>
+
+
+      {/* ===================================================
+          STANDARD IXI MACHINE RAIL
+          =================================================== */}
+
+      <IXIMachineRail
+        listing={
+          object
+        }
+
+        saved={
+          saved
+        }
+
+        boardColor={
+          boardColor
+        }
+
+        boardOutline={
+          boardOutline
+        }
+
+        machineFace={
+          face
+        }
+
+        railMode={
+          isIdentityFace
+            ? "next-lit"
+            : "home-lit next-lit prev-lit end-lit"
+        }
+
+        /*
+         * CENTER:
+         * enter selected object /
+         * advance deck.
+         */
+        onCycleMachineFace={
+          goForward
+        }
+
+        /*
+         * RIGHT OF CENTER:
+         * previous object.
+         */
+        onRailSend={
+          goBackward
+        }
+
+        /*
+         * LEFT END:
+         * normal board-front command
+         * while home;
+         * HOME while inside deck.
+         */
+        onSendFront={
+          isIdentityFace
+            ? onSendFront
+            : goHome
+        }
+
+        /*
+         * RIGHT END:
+         * normal board-back command
+         * while home;
+         * END DECK while browsing.
+         */
+        onSendBack={
+          isIdentityFace
+            ? onSendBack
+            : goEnd
+        }
+
+        onCycleColor={
+          onCycleColor
+        }
+
+        onCycleOutline={
+          onCycleOutline
+        }
+
+        armedDestination={
+          armedDestination
+        }
+
+        /*
+         * Armed Destination operates
+         * selected child when browsing.
+         *
+         * On home face it operates this
+         * object itself.
+         */
+        onSendToArmedDestination={() => {
+          const target =
+            activeItem ||
+            object;
+
+          onSendToArmedDestination?.(
+            target
+          );
+
+          if (activeItem) {
+            onExposeObject?.(
+              activeItem,
+              object
+            );
+          }
+        }}
+      />
+
+
+      {/* ===================================================
+          STYLE
+          =================================================== */}
 
       <style jsx>{`
-        
 
-        .mos-container-card {
-          border-color:
-            rgba(255,196,0,.16);
+        .aos-object-card,
+        .aos-object-card * {
+          box-sizing:
+            border-box;
         }
 
-.mos-object-card.mos-drop-accepting {
-  border-color:
-    rgba(255,196,0,.92);
 
-  outline:
-    1px solid
-    rgba(255,196,0,.34);
+        /* ===============================================
+           UNIVERSAL AOS CARD CHASSIS
+           =============================================== */
 
-  box-shadow:
-    0 0 0 1px
-      rgba(255,196,0,.16),
-
-    0 0 20px
-      rgba(255,196,0,.20),
-
-    0 18px 44px
-      rgba(0,0,0,.30);
-}
-
-
-:global(.mos-object-drop-target) {
-  position: absolute;
-
-  left: 4%;
-  right: 4%;
-
-  top: 5%;
-  bottom: 12%;
-
-  z-index: 18;
-
-  pointer-events: none;
-
-  background: transparent;
-}
-
-        .mos-photo {
-          height: 220px;
+        .aos-object-card {
           position: relative;
+
+          width: 298px;
+          min-width: 298px;
+          max-width: 298px;
+
+          height: 471px;
+          min-height: 471px;
+          max-height: 471px;
+
           overflow: hidden;
-          cursor: pointer;
 
-          border-bottom:
-            1px solid rgba(255,255,255,.06);
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
 
-          background:
-            radial-gradient(
-              circle at center,
-              rgba(255,255,255,.04),
-              transparent 60%
-            ),
-            #090909;
-        }
+          outline:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
 
-        .mos-photo img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
+          outline-offset: 0;
 
-        .mos-photo-empty {
-          width: 100%;
-          height: 100%;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          border-radius:
+            14px;
 
           background:
             linear-gradient(
-              135deg,
-              rgba(255,196,0,.04),
-              transparent 45%
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .035
+              ),
+              rgba(
+                255,
+                255,
+                255,
+                .006
+              )
             ),
-            #0d0d0d;
-        }
+            radial-gradient(
+              circle
+              at top left,
+              rgba(
+                255,
+                196,
+                0,
+                .055
+              ),
+              transparent
+              55%
+            ),
+            #101010;
 
-        .mos-photo-empty span {
-          color: rgba(255,255,255,.16);
-          font-size: 20px;
-          font-weight: 950;
-          letter-spacing: 1px;
-        }
+          box-shadow:
+            inset
+            0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .04
+            ),
 
-        .mos-type-pill,
-        .mos-container-pill {
-          position: absolute;
-          top: 10px;
-
-          height: 23px;
-          padding: 0 9px;
-
-          display: flex;
-          align-items: center;
-
-          border-radius: 999px;
-
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .5px;
-        }
-
-        .mos-type-pill {
-          left: 10px;
-
-          color: rgba(255,255,255,.72);
-          background: rgba(0,0,0,.54);
-          border:
-            1px solid rgba(255,255,255,.14);
-        }
-
-        .mos-container-pill {
-          right: 10px;
-
-          color: #ffc400;
-          background:
-            rgba(255,196,0,.10);
-          border:
-            1px solid rgba(255,196,0,.34);
-        }
-
-        .mos-body {
-          height: 170px;
-          padding: 14px;
+            0 18px 34px
+            rgba(
+              0,
+              0,
+              0,
+              .42
+            );
 
           cursor: grab;
         }
 
-                .mos-name-row {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 10px;
+
+        /* ===============================================
+           BOARD COLOR / OUTLINE
+           =============================================== */
+
+        .aos-object-card.board-outline-0 {
+          outline-width: 0;
+        }
+
+        .aos-object-card.board-outline-1 {
+          outline-width: 1px;
+        }
+
+        .aos-object-card.board-outline-3 {
+          outline-width: 3px;
+        }
+
+        .aos-object-card.board-outline-5 {
+          outline-width: 5px;
+        }
+
+        .aos-object-card.board-color-none {
+          outline-color:
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
+        }
+
+        .aos-object-card.board-color-green {
+          outline-color:
+            rgba(
+              56,
+              161,
+              105,
+              .95
+            );
+        }
+
+        .aos-object-card.board-color-yellow {
+          outline-color:
+            rgba(
+              255,
+              196,
+              0,
+              .95
+            );
+        }
+
+        .aos-object-card.board-color-red {
+          outline-color:
+            rgba(
+              229,
+              62,
+              62,
+              .95
+            );
+        }
+
+        .aos-object-card.board-color-cyan {
+          outline-color:
+            rgba(
+              0,
+              194,
+              255,
+              .95
+            );
+        }
+
+        .aos-object-card.board-color-white {
+          outline-color:
+            rgba(
+              255,
+              255,
+              255,
+              .85
+            );
+        }
+
+        .aos-object-card.board-color-blue {
+          outline-color:
+            rgba(
+              49,
+              130,
+              206,
+              .95
+            );
+        }
+
+        .aos-object-card.board-color-orange {
+          outline-color:
+            rgba(
+              249,
+              133,
+              18,
+              .95
+            );
         }
 
 
-        .mos-name-row h3 {
-          margin: 0;
+        /* ===============================================
+           DROP ACCEPTANCE
+           =============================================== */
 
-          min-width: 0;
+        :global(
+          .aos-object-drop-on-zone
+        ) {
+          position: absolute;
 
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-          line-height: 1.08;
-        }
+          left: 4%;
+          right: 4%;
 
+          top: 8%;
+          bottom: 8%;
 
-        .mos-name-editor {
-          min-width: 0;
-          flex: 1;
+          z-index: 18;
 
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-
-        .mos-name-editor input {
-          min-width: 0;
-          flex: 1;
-
-          height: 30px;
-
-          padding: 0 8px;
-
-          border:
-            1px solid
-            rgba(255,255,255,.12);
-
-          border-radius: 5px;
-
-          outline: none;
+          pointer-events: none;
 
           background:
-            rgba(0,0,0,.32);
-
-          color: #f2f2f2;
-
-          font-size: 11px;
-          font-weight: 850;
+            transparent;
         }
 
 
-        .mos-name-editor input:focus {
+        .aos-object-card
+        .ixi-container-drop-accepting {
           border-color:
-            rgba(0,194,255,.60);
+            rgba(
+              255,
+              196,
+              0,
+              .92
+            );
+        }
+
+
+        .aos-object-card.ixi-container-drop-accepting {
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .92
+            );
+
+          outline:
+            1px solid
+            rgba(
+              255,
+              196,
+              0,
+              .36
+            );
 
           box-shadow:
             0 0 0 1px
-            rgba(0,194,255,.12);
+            rgba(
+              255,
+              196,
+              0,
+              .20
+            ),
+
+            0 0 18px
+            rgba(
+              255,
+              196,
+              0,
+              .24
+            ),
+
+            0 0 36px
+            rgba(
+              255,
+              196,
+              0,
+              .10
+            ),
+
+            inset
+            0 0 18px
+            rgba(
+              255,
+              196,
+              0,
+              .035
+            ),
+
+            inset
+            0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .05
+            );
         }
 
 
-        .mos-name-editor button,
-        .mos-add-child {
-          border:
+        /* ===============================================
+           FACE WINDOW
+           =============================================== */
+
+        .aos-object-face {
+          position: absolute;
+
+          left: 0;
+          right: 0;
+          top: 0;
+
+          bottom: 64px;
+
+          overflow: hidden;
+        }
+
+
+        /* ===============================================
+           IDENTITY
+           =============================================== */
+
+        .aos-object-identity {
+          width: 100%;
+          height: 100%;
+
+          padding:
+            12px 12px 8px;
+
+          display: flex;
+          flex-direction: column;
+
+          min-height: 0;
+        }
+
+
+        .aos-topline {
+          height: 38px;
+          min-height: 38px;
+
+          position: relative;
+
+          display: flex;
+
+          align-items:
+            flex-start;
+
+          justify-content:
+            space-between;
+
+          gap: 8px;
+
+          border-bottom:
             1px solid
-            rgba(255,196,0,.30);
+            rgba(
+              255,
+              255,
+              255,
+              .045
+            );
+        }
 
-          border-radius: 5px;
 
-          background:
-            rgba(255,196,0,.055);
+        .aos-heading {
+          min-width: 0;
+          flex: 1;
+        }
+
+
+        .aos-heading > span {
+          display: block;
+
+          overflow: hidden;
 
           color: #ffc400;
 
+          font-size: 6.5px;
           font-weight: 950;
 
-          cursor: pointer;
+          letter-spacing:
+            .09em;
+
+          text-transform:
+            uppercase;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
         }
 
 
-        .mos-name-editor button {
-          height: 30px;
-          padding: 0 8px;
+        .aos-heading h3 {
+          margin:
+            4px 0 0;
 
-          font-size: 7px;
-          letter-spacing: .5px;
+          max-width: 200px;
+
+          overflow: hidden;
+
+          color: #f4f4f4;
+
+          font-size: 17px;
+          font-weight: 950;
+
+          line-height: 1;
+
+          text-overflow:
+            ellipsis;
+
+          white-space: nowrap;
+
+          text-transform:
+            uppercase;
         }
 
 
-        .mos-name-actions {
+        .aos-top-actions {
           display: flex;
-          align-items: center;
-          gap: 7px;
+
+          align-items:
+            center;
+
+          gap: 6px;
 
           flex: 0 0 auto;
         }
 
 
-        .mos-add-child {
-          width: 24px;
-          height: 24px;
+        .aos-add-button,
+        .aos-delete-button {
+          width: 20px;
+          height: 20px;
+
+          display:
+            inline-flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
 
           padding: 0;
 
-          font-size: 16px;
+          border-radius: 4px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .025
+            );
+
+          font-weight: 900;
+
           line-height: 1;
+
+          cursor: pointer;
+
+          position: relative;
+
+          z-index: 100;
         }
 
-.mos-delete-object {
-  width: 24px;
-  height: 24px;
 
-  padding: 0;
-
-  border:
-    1px solid
-    rgba(229,62,62,.28);
-
-  border-radius: 5px;
-
-  background:
-    rgba(229,62,62,.045);
-
-  color:
-    rgba(229,62,62,.72);
-
-  font-size: 15px;
-  font-weight: 950;
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-
-.mos-delete-object:hover {
-  border-color:
-    rgba(229,62,62,.62);
-
-  background:
-    rgba(229,62,62,.10);
-
-  color:
-    rgba(255,90,90,.96);
-}
-
-        .mos-name-error {
-          margin-top: 6px;
+        .aos-add-button {
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .10
+            );
 
           color:
-            rgba(255,90,90,.88);
+            rgba(
+              255,
+              255,
+              255,
+              .52
+            );
 
-          font-size: 8px;
-          font-weight: 850;
+          font-size: 15px;
         }
 
 
-        .mos-status {
-          color: rgba(56,161,105,.86);
-          font-size: 8px;
-          font-weight: 950;
-          text-transform: uppercase;
-        }
-
-        .mos-factual-title {
-          margin-top: 7px;
-
-          color: rgba(255,255,255,.54);
-          font-size: 11px;
-          font-weight: 800;
-        }
-
-        .mos-identity-row,
-        .mos-count-row {
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
-
-          margin-top: 10px;
-
-          color: rgba(255,255,255,.38);
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .38px;
-        }
-
-        .mos-operating-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-
-          margin-top: 18px;
-          padding-top: 10px;
-
-          border-top:
-            1px solid rgba(255,255,255,.05);
-        }
-
-        .mos-operating-row strong {
-          color: #f2f2f2;
-          font-size: 16px;
-          font-weight: 950;
-        }
-
-        .mos-operating-row span {
-          color: rgba(255,255,255,.44);
-          font-size: 9px;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-        .mos-face {
-          height: 390px;
-          padding: 18px;
-        }
-
-        .mos-face-header {
-          margin-bottom: 18px;
-        }
-
-        .mos-face-header span {
-          display: block;
-
+        .aos-add-button:hover {
           color: #ffc400;
+
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .38
+            );
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .06
+            );
+        }
+
+
+        .aos-delete-button {
+          border:
+            1px solid
+            rgba(
+              229,
+              62,
+              62,
+              .24
+            );
+
+          color:
+            rgba(
+              229,
+              62,
+              62,
+              .62
+            );
+
+          font-size: 14px;
+        }
+
+
+        .aos-delete-button:hover {
+          color:
+            rgba(
+              255,
+              90,
+              90,
+              .96
+            );
+
+          border-color:
+            rgba(
+              229,
+              62,
+              62,
+              .58
+            );
+
+          background:
+            rgba(
+              229,
+              62,
+              62,
+              .08
+            );
+        }
+
+
+        .aos-count {
+          min-width: 14px;
+
+          padding-top: 5px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .26
+            );
+
           font-size: 8px;
           font-weight: 950;
-          letter-spacing: .7px;
+
+          text-align: right;
         }
 
-        .mos-face-header strong {
-          display: block;
-          margin-top: 6px;
 
-          color: #f2f2f2;
-          font-size: 17px;
-        }
+        /* ===============================================
+           NAME EDITOR
+           =============================================== */
 
-        dl {
-          margin: 0;
-        }
+        .aos-name-editor {
+          margin-top: 3px;
 
-        dl div {
-          padding: 10px 0;
-
-          border-bottom:
-            1px solid rgba(255,255,255,.05);
-        }
-
-        dt {
-          color: rgba(255,255,255,.30);
-          font-size: 8px;
-          font-weight: 950;
-          text-transform: uppercase;
-        }
-
-        dd {
-          margin: 4px 0 0;
-
-          color: rgba(255,255,255,.72);
-          font-size: 10px;
-          overflow-wrap: anywhere;
-        }
-
-        .mos-action-face {
           display: flex;
-          flex-direction: column;
-          gap: 10px;
+
+          align-items:
+            center;
+
+          gap: 5px;
+
+          max-width: 205px;
         }
 
-        .mos-action-face button {
-          height: 42px;
+
+        .aos-name-editor input {
+          width: 154px;
+          min-width: 0;
+
+          height: 22px;
+
+          padding: 0 6px;
 
           border:
-            1px solid rgba(255,255,255,.08);
-          border-radius: 8px;
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .12
+            );
 
-          background: #101010;
-          color: rgba(255,255,255,.72);
+          border-radius: 4px;
+
+          outline: none;
+
+          background:
+            rgba(
+              0,
+              0,
+              0,
+              .32
+            );
+
+          color: #f4f4f4;
 
           font-size: 9px;
+          font-weight: 900;
+        }
+
+
+        .aos-name-editor input:focus {
+          border-color:
+            rgba(
+              0,
+              194,
+              255,
+              .56
+            );
+
+          box-shadow:
+            0 0 0 1px
+            rgba(
+              0,
+              194,
+              255,
+              .10
+            );
+        }
+
+
+        .aos-name-editor button {
+          height: 22px;
+
+          padding: 0 6px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              196,
+              0,
+              .28
+            );
+
+          border-radius: 4px;
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .05
+            );
+
+          color: #ffc400;
+
+          font-size: 6px;
           font-weight: 950;
-          letter-spacing: .4px;
 
           cursor: pointer;
         }
 
-        .mos-action-face button:hover {
-          border-color:
-            rgba(255,196,0,.42);
+
+        .aos-name-error {
+          position: absolute;
+
+          top: 50px;
+          left: 12px;
+          right: 12px;
+
+          z-index: 30;
+
+          color:
+            rgba(
+              255,
+              90,
+              90,
+              .90
+            );
+
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+
+        /* ===============================================
+           PREVIEW
+           =============================================== */
+
+        .aos-preview {
+          height: 190px;
+          min-height: 190px;
+
+          margin-top: 8px;
+
+          overflow: hidden;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .055
+            );
+
+          border-radius: 8px;
+
+          background:
+            rgba(
+              7,
+              7,
+              7,
+              .78
+            );
+        }
+
+
+        .aos-preview-photo {
+          position: relative;
+
+          width: 100%;
+          height: 137px;
+
+          overflow: hidden;
+
+          background: #090909;
+        }
+
+
+        .aos-preview-photo img {
+          width: 100%;
+          height: 100%;
+
+          display: block;
+
+          object-fit: cover;
+        }
+
+
+        .aos-preview-photo-empty {
+          width: 100%;
+          height: 100%;
+
+          padding: 18px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .16
+            );
+
+          font-size: 11px;
+          font-weight: 950;
+
+          letter-spacing:
+            .08em;
+
+          text-align: center;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .aos-preview-position {
+          position: absolute;
+
+          right: 7px;
+          top: 7px;
+
+          height: 17px;
+
+          padding: 0 6px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .12
+            );
+
+          border-radius:
+            999px;
+
+          background:
+            rgba(
+              0,
+              0,
+              0,
+              .58
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .72
+            );
+
+          font-size: 6px;
+          font-weight: 950;
+        }
+
+
+        .aos-preview-info {
+          height: 52px;
+
+          display: grid;
+
+          grid-template-columns:
+            20px
+            minmax(0, 1fr)
+            30px
+            20px;
+
+          align-items:
+            center;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .018
+              ),
+              transparent
+            ),
+            #101010;
+        }
+
+
+        .aos-preview-arrow {
+          width: 20px;
+          height: 100%;
+
+          padding: 0;
+
+          border: 0;
+
+          background:
+            transparent;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .22
+            );
+
+          font-size: 17px;
+          font-weight: 800;
+
+          cursor: pointer;
+        }
+
+
+        .aos-preview-arrow:hover {
           color: #ffc400;
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .025
+            );
+        }
+
+
+        .aos-preview-copy {
+          min-width: 0;
+
+          padding: 0 4px;
+        }
+
+
+        .aos-preview-copy strong {
+          display: block;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .82
+            );
+
+          font-size: 8.5px;
+          font-weight: 950;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+
+        .aos-preview-meta {
+          margin-top: 4px;
+
+          overflow: hidden;
+        }
+
+
+        .aos-preview-meta span {
+          display: block;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .30
+            );
+
+          font-size: 6px;
+          font-weight: 900;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+
+        .aos-preview-pull {
+          height: 24px;
+
+          padding: 0;
+
+          border:
+            1px solid
+            rgba(
+              0,
+              194,
+              255,
+              .18
+            );
+
+          border-radius: 4px;
+
+          background:
+            rgba(
+              0,
+              194,
+              255,
+              .035
+            );
+
+          color:
+            rgba(
+              0,
+              194,
+              255,
+              .62
+            );
+
+          font-size: 5.5px;
+          font-weight: 950;
+
+          cursor: pointer;
+        }
+
+
+        .aos-preview-pull:hover {
+          border-color:
+            rgba(
+              0,
+              194,
+              255,
+              .46
+            );
+
+          background:
+            rgba(
+              0,
+              194,
+              255,
+              .08
+            );
+
+          color:
+            rgba(
+              0,
+              194,
+              255,
+              .95
+            );
+        }
+
+
+        /* ===============================================
+           EMPTY
+           =============================================== */
+
+        .aos-empty {
+          width: 100%;
+          height: 100%;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          gap: 7px;
+
+          text-align: center;
+        }
+
+
+        .aos-empty span {
+          color:
+            rgba(
+              255,
+              196,
+              0,
+              .52
+            );
+
+          font-size: 7px;
+          font-weight: 950;
+        }
+
+
+        .aos-empty strong {
+          max-width: 210px;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .20
+            );
+
+          font-size: 12px;
+          font-weight: 950;
+
+          text-overflow:
+            ellipsis;
+
+          white-space: nowrap;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        /* ===============================================
+           SNAPSHOT
+           =============================================== */
+
+        .aos-snapshot {
+          display: grid;
+
+          grid-template-columns:
+            62px
+            82px
+            minmax(0, 1fr);
+
+          align-items:
+            stretch;
+
+          gap: 6px;
+
+          margin-top: 8px;
+        }
+
+
+        .aos-stat {
+          min-width: 0;
+
+          height: 34px;
+
+          padding: 5px 7px;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          justify-content:
+            center;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .055
+            );
+
+          border-radius: 5px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
+        }
+
+
+        .aos-stat span {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .28
+            );
+
+          font-size: 6px;
+          font-weight: 900;
+
+          letter-spacing:
+            .55px;
+        }
+
+
+        .aos-stat strong {
+          margin-top: 2px;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .78
+            );
+
+          font-size: 10px;
+          font-weight: 950;
+
+          line-height: 1;
+
+          text-overflow:
+            ellipsis;
+
+          white-space: nowrap;
+        }
+
+
+        .aos-content-actions {
+          min-width: 0;
+
+          display: grid;
+
+          grid-template-columns:
+            1fr 1fr;
+
+          gap: 5px;
+        }
+
+
+        .aos-content-actions button,
+        .aos-object-actions button {
+          min-width: 0;
+          height: 34px;
+
+          padding: 0 5px;
+
+          border:
+            1px solid
+            rgba(
+              0,
+              194,
+              255,
+              .12
+            );
+
+          border-radius: 5px;
+
+          background:
+            rgba(
+              0,
+              194,
+              255,
+              .022
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .48
+            );
+
+          font-size: 6.5px;
+          font-weight: 950;
+
+          letter-spacing:
+            .4px;
+
+          cursor: pointer;
+        }
+
+
+        .aos-content-actions button:hover,
+        .aos-object-actions button:hover {
+          border-color:
+            rgba(
+              0,
+              194,
+              255,
+              .42
+            );
+
+          background:
+            rgba(
+              0,
+              194,
+              255,
+              .07
+            );
+
+          color:
+            rgba(
+              0,
+              194,
+              255,
+              .92
+            );
+        }
+
+
+        .aos-object-actions {
+          display: grid;
+
+          grid-template-columns:
+            1fr;
+        }
+
+
+        /* ===============================================
+           CHILD FACE
+           =============================================== */
+
+        .aos-child-face {
+          width: 100%;
+          height: 100%;
+
+          overflow: hidden;
+
+          cursor: grab;
+
+          touch-action: none;
+        }
+
+
+        .aos-child-face.is-dragging {
+          opacity: .42;
+        }
+
+
+        .aos-child-header {
+          height: 52px;
+
+          padding:
+            12px 12px 8px;
+
+          border-bottom:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .045
+            );
+        }
+
+
+        .aos-child-header span {
+          display: block;
+
+          overflow: hidden;
+
+          color: #ffc400;
+
+          font-size: 6.5px;
+          font-weight: 950;
+
+          letter-spacing:
+            .09em;
+
+          text-transform:
+            uppercase;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+
+        .aos-child-header strong {
+          display: block;
+
+          margin-top: 4px;
+
+          overflow: hidden;
+
+          color: #f4f4f4;
+
+          font-size: 17px;
+          font-weight: 950;
+
+          line-height: 1;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .aos-child-visual {
+          width: 100%;
+          height: 245px;
+
+          overflow: hidden;
+
+          background: #090909;
+        }
+
+
+        .aos-child-visual img {
+          width: 100%;
+          height: 100%;
+
+          display: block;
+
+          object-fit: cover;
+        }
+
+
+        .aos-child-empty {
+          width: 100%;
+          height: 100%;
+
+          padding: 22px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .16
+            );
+
+          font-size: 18px;
+          font-weight: 950;
+
+          text-align: center;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .aos-child-info {
+          height: 58px;
+
+          padding:
+            10px 12px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .018
+              ),
+              transparent
+            ),
+            #101010;
+        }
+
+
+        .aos-child-info strong {
+          display: block;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .86
+            );
+
+          font-size: 11px;
+          font-weight: 950;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+
+        .aos-child-info span {
+          display: block;
+
+          margin-top: 5px;
+
+          overflow: hidden;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .32
+            );
+
+          font-size: 7px;
+          font-weight: 900;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+
+        /* ===============================================
+           END DECK
+           =============================================== */
+
+        .aos-end {
+          width: 100%;
+          height: 100%;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          gap: 8px;
+
+          background:
+            radial-gradient(
+              circle at center,
+              rgba(
+                255,
+                196,
+                0,
+                .08
+              ),
+              transparent 55%
+            ),
+            #101010;
+
+          text-align: center;
+        }
+
+
+        .aos-end span {
+          color: #ffc400;
+
+          font-size: 9px;
+          font-weight: 950;
+
+          letter-spacing:
+            .12em;
+        }
+
+
+        .aos-end strong {
+          color: #f4f4f4;
+
+          font-size: 42px;
+          font-weight: 950;
+
+          line-height: 1;
+        }
+
+
+        .aos-end p {
+          margin: 0;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .34
+            );
+
+          font-size: 7px;
+          font-weight: 950;
+
+          letter-spacing:
+            .08em;
+        }
+
+
+        .aos-end button {
+          margin-top: 8px;
+
+          height: 25px;
+
+          padding: 0 10px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              196,
+              0,
+              .18
+            );
+
+          border-radius: 5px;
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .04
+            );
+
+          color:
+            rgba(
+              255,
+              196,
+              0,
+              .62
+            );
+
+          font-size: 6px;
+          font-weight: 950;
+
+          cursor: pointer;
+        }
+
+
+        /* ===============================================
+           THUMB RAIL
+           =============================================== */
+
+        .aos-thumb-shell {
+          position: absolute;
+
+          left: 0;
+          right: 0;
+
+          bottom: 16px;
+
+          height: 48px;
+
+          overflow: hidden;
+
+          z-index: 25;
+        }
+
+
+        :global(
+          .aos-thumb-shell
+          .ixi-collection-thumb-rail
+        ) {
+          height: 48px;
+        }
+
+
+        /* ===============================================
+           ACTION NOTICE
+           =============================================== */
+
+        .aos-action-notice {
+          position: absolute;
+
+          left: 10px;
+          right: 10px;
+          top: 8px;
+
+          min-height: 24px;
+
+          padding: 6px 8px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          z-index: 500;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .10
+            );
+
+          border-radius: 5px;
+
+          background:
+            rgba(
+              7,
+              7,
+              7,
+              .94
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .82
+            );
+
+          font-size: 7px;
+          font-weight: 950;
+
+          letter-spacing:
+            .05em;
+
+          text-align: center;
+        }
+
+
+        .aos-action-notice.tone-success {
+          border-color:
+            rgba(
+              56,
+              161,
+              105,
+              .38
+            );
+        }
+
+
+        .aos-action-notice.tone-warning {
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .42
+            );
+        }
+
+
+        .aos-action-notice.tone-error {
+          border-color:
+            rgba(
+              229,
+              62,
+              62,
+              .46
+            );
         }
 
       `}</style>
-       </div>
 
-  </IXIAosObjectCardShell>
-);
-
+    </section>
+  );
 }
