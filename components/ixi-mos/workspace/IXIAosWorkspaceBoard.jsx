@@ -318,40 +318,131 @@ const parentLabel =
     ""
   ).trim();
                  
-        return (
-          <IXIMosObjectCard
-  object={
-    item
-  }
+      const directChildren =
+  typeof getWorkspaceObjectById ===
+  "function"
+    ? (
+        item?.items ||
+        item?.children ||
+        []
+      )
+    : [];
 
-ixiState={
-  ixiCardState[
-    id
-  ] || {
-    color: "none",
-    outline: 1,
-    face: 1,
-    actionNotice: null
-  }
-}
-            
-  dragHandleProps={
-    dragHandleProps
-  }
+return (
+  <IXIMosObjectCard
 
-  onAddChild={
-    onCreateObjectChild
-  }
+    object={
+      item
+    }
 
-  onSaveName={
-    onSaveObjectName
-  }
+    /*
+     * YELLOW PATH LABEL
+     *
+     * LOCATIONS
+     * WICHITA FALLS
+     *
+     * WICHITA FALLS
+     * MAIN SHOP
+     */
+    parentLabel={
+      parentLabel
+    }
 
-  onDelete={
-    onDeleteObject
-  }
-/>
-        );
+    /*
+     * DIRECT CHILD COLLECTION
+     *
+     * Right now this uses any direct
+     * child collection already carried
+     * by the object.
+     *
+     * We will replace this with the
+     * canonical workspace/AWS resolver
+     * immediately after this compiles.
+     */
+    items={
+      directChildren
+    }
+
+    ixiState={
+      ixiCardState[
+        id
+      ] || {
+        color: "none",
+        outline: 1,
+        face: 1,
+        actionNotice: null
+      }
+    }
+
+    ixiCardState={
+      ixiCardState
+    }
+
+    onIxiStateChange={
+      updateIxiCardState
+    }
+
+    dragHandleProps={
+      dragHandleProps
+    }
+
+    workspaceDropPolicy={{
+      enabled: true,
+      acceptedObjectTypes: []
+    }}
+
+    workspaceDropSurface={
+      "board"
+    }
+
+    armedDestination={
+      armedDestination
+    }
+
+    onSendFront={
+      sendListingToFront
+    }
+
+    onSendBack={
+      sendListingToBack
+    }
+
+    onSendToArmedDestination={
+      sendMachineToArmedDestination
+    }
+
+    onExposeObject={
+      child => {
+        onExposeContainerChildren?.({
+          container:
+            item,
+
+          child
+        });
+      }
+    }
+
+    onExposeContents={
+      onExposeContainerChildren
+    }
+
+    onGatherContents={
+      onGatherContainerChildren
+    }
+
+    onAddChild={
+      onCreateObjectChild
+    }
+
+    onSaveName={
+      onSaveObjectName
+    }
+
+    onDelete={
+      onDeleteObject
+    }
+  />
+);
       }
 
 
