@@ -3309,7 +3309,7 @@ onOpenConsole={() => {
   z-index: 1;
 }
 
-.ixi-pocket-catch-pad.catch-l1 {
+:global(.ixi-pocket-catch-pad.catch-l1)
   left: 0;
   right: auto;
   top: 92px;
@@ -3320,7 +3320,7 @@ onOpenConsole={() => {
   outline: 2px solid red !important;
 }
 
-.ixi-pocket-catch-pad.catch-r1 {
+:global(.ixi-pocket-catch-pad.catch-r1)
   right: 20;
   left: auto;
   top: 92px;
@@ -3331,7 +3331,7 @@ onOpenConsole={() => {
   outline: 2px solid lime !important;
 }
 
-.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left {
+:global(.ixi-pocket-l2 .ixi-pocket-catch-pad.out-left)
   position: fixed;
   left: 0;
   right: auto;
@@ -3344,7 +3344,7 @@ onOpenConsole={() => {
   outline: 2px solid blue !important;
 }
 
-.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right {
+:global(.ixi-pocket-r2 .ixi-pocket-catch-pad.out-right)
   position: fixed;
   right: 0;
   left: auto;
