@@ -2463,13 +2463,116 @@ workspaceDropSurface={
     );
   }
 
-  /*
-   * Return null for normal listings.
-   *
-   * IXIDragEngine then uses its
-   * existing ListingCard fallback.
-   */
-  return null;
+/*
+ * DURABLE AOS OBJECT
+ *
+ * Preserve the real AOS card while
+ * dragging. Do not fall back to the
+ * legacy ListingCard overlay.
+ */
+if (
+  object?.objectId &&
+  String(
+    object?.objectType || ""
+  )
+    .trim()
+    .toLowerCase() !==
+    "machine"
+) {
+  const parentObject =
+    object?.directContainerId
+      ? getAosWorkspaceObjectById?.(
+          object.directContainerId
+        )
+      : null;
+
+  const parentLabel =
+    String(
+      parentObject?.displayName ||
+      parentObject?.label ||
+      object?.metadata
+        ?.parentDisplayName ||
+      "OBJECT"
+    ).trim();
+
+  const directChildren =
+    (aosObjects || [])
+      .filter(child =>
+        String(
+          child?.directContainerId ||
+          ""
+        ) ===
+        String(
+          objectId
+        )
+      );
+
+  return (
+    <IXIMosObjectCard
+      object={
+        object
+      }
+
+      items={
+        directChildren
+      }
+
+      parentLabel={
+        parentLabel
+      }
+
+      dragHandleProps={{}}
+
+      ixiState={
+        ixiCardState[
+          objectId
+        ] || {
+          color: "none",
+          outline: 1,
+          face: 1,
+          actionNotice: null
+        }
+      }
+
+      ixiCardState={
+        ixiCardState
+      }
+
+      /*
+       * Overlay is presentation only.
+       */
+      onIxiStateChange={() => {}}
+
+      armedDestination=""
+
+      onSendFront={() => {}}
+      onSendBack={() => {}}
+
+      onSendToArmedDestination={
+        () => {}
+      }
+
+      onExposeObject={() => {}}
+      onExposeContents={() => {}}
+      onGatherContents={() => {}}
+
+      onAddChild={null}
+      onSaveName={null}
+      onDelete={null}
+
+      workspaceDropPolicy={{
+        enabled: false
+      }}
+    />
+  );
+}
+
+/*
+ * Actual IronXchange machine/listing:
+ * keep the existing ListingCard
+ * overlay fallback.
+ */
+return null;
 }}
     activeDndId={activeDndId}
     savedIds={savedIds}
