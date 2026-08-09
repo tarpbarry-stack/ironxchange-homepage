@@ -10,6 +10,9 @@ import {
 import ListingCard
   from "../ListingCard";
 
+import IXIObjectDropTarget
+  from "../ixi-chassis/IXIObjectDropTarget";
+
 import IXIMachineRail
   from "../IXIMachineRail";
 
@@ -179,10 +182,20 @@ export default function IXISystemIndexCard({
 
   onSendToArmedDestination,
 
-  onExposeObject,
+    onExposeObject,
 
-  onOpenConsole
+  onOpenConsole,
+
+  workspaceDropPolicy = null,
+  workspaceDropSurface = ""
 }) {
+
+const [
+  isDropAccepting,
+  setIsDropAccepting
+] = useState(false);
+
+  
   const id =
     String(
       objectId ||
@@ -197,6 +210,19 @@ export default function IXISystemIndexCard({
       ? index.items
       : [];
 
+
+  const dropTargetObject = {
+  ...index,
+
+  objectId:
+    id,
+
+  workspaceDropPolicy:
+    workspaceDropPolicy ||
+    index?.workspaceDropPolicy ||
+    null
+};
+  
 
   /* ---------------------------------------------------------
      NORMAL CARD / BOARD STATE
