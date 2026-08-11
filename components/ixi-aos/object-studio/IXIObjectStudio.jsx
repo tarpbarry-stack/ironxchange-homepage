@@ -214,6 +214,38 @@ export default function IXIObjectStudio() {
       "xl"
     );
 
+function cyclePreviewScaleMode() {
+
+  const order = [
+    "xl",
+    "large",
+    "medium",
+    "compact",
+    "micro"
+  ];
+
+
+  setPreviewScaleMode(
+    current => {
+
+      const index =
+        order.indexOf(
+          current
+        );
+
+
+      return order[
+        index === -1 ||
+        index ===
+          order.length - 1
+          ? 0
+          : index + 1
+      ];
+    }
+  );
+}
+
+  
   function updatePreviewCardState(
     objectId,
     patch
@@ -358,6 +390,11 @@ export default function IXIObjectStudio() {
 cardScaleMode={
   previewScaleMode
 }
+
+onCycleCardScale={
+  cyclePreviewScaleMode
+}
+            
           />
 
         </section>
