@@ -671,30 +671,30 @@ const selectedFieldValue =
       <style jsx>{`
 
         .studio-inspector {
-          min-height: 590px;
+  min-height: 100%;
 
-          padding:
-            12px;
+  padding:
+    16px 16px 24px;
 
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .05
-            );
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .05
+    );
 
-          border-radius: 9px;
+  border-radius: 9px;
 
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .01
-            );
-        }
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .01
+    );
+}
 
 
         .inspector-title {
