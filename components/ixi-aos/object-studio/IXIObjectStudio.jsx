@@ -228,10 +228,6 @@ export default function IXIObjectStudio() {
   return (
     <main className="ixi-object-studio">
 
-      {/* ===================================================
-          HEADER
-          =================================================== */}
-
       <div className="studio-header-slot">
 
         <IXIObjectStudioHeader
@@ -242,10 +238,6 @@ export default function IXIObjectStudio() {
 
       </div>
 
-
-      {/* ===================================================
-          TOP WORKBENCH
-          =================================================== */}
 
       <section className="studio-top-bench">
 
@@ -296,13 +288,7 @@ export default function IXIObjectStudio() {
       </section>
 
 
-      {/* ===================================================
-          MAIN WORK AREA
-          =================================================== */}
-
       <section className="studio-work-area">
-
-        {/* LEFT TOOLBAR */}
 
         <aside className="studio-left-toolbar">
 
@@ -314,8 +300,6 @@ export default function IXIObjectStudio() {
 
         </aside>
 
-
-        {/* CENTER — INDEPENDENT OF SIDEBAR WIDTHS */}
 
         <div className="studio-center-stage">
 
@@ -336,41 +320,31 @@ export default function IXIObjectStudio() {
         </div>
 
 
-        {/* RIGHT TOOLBAR */}
-
         <aside className="studio-right-toolbar">
 
           <IXIObjectStudioInspector
             studio={
               studio
-            />
+            }
+          />
 
         </aside>
 
       </section>
 
 
-      {/* ===================================================
-          BOTTOM STUDIO BENCH
-          =================================================== */}
-
       <footer className="studio-bottom-bench">
 
         <IXIObjectStudioFaceOrderBench
           studio={
             studio
-          />
+          }
+        />
 
       </footer>
 
 
       <style jsx>{`
-
-        /*
-         * =================================================
-         * PAGE CHASSIS
-         * =================================================
-         */
 
         .ixi-object-studio,
         .ixi-object-studio * {
@@ -387,8 +361,7 @@ export default function IXIObjectStudio() {
 
           margin: 0;
 
-          padding:
-            12px;
+          padding: 12px;
 
           display: grid;
 
@@ -427,12 +400,6 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * =================================================
-         * TOP BENCH
-         * =================================================
-         */
-
         .studio-top-bench {
           min-width: 0;
 
@@ -462,11 +429,6 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * Prevent Card Bench from adding its
-         * own exterior margin inside the new
-         * split top chassis.
-         */
         .top-bench-half :global(
           .card-bench
         ) {
@@ -477,8 +439,7 @@ export default function IXIObjectStudio() {
 
 
         .photo-bench-shell {
-          padding:
-            10px;
+          padding: 10px;
 
           border:
             1px solid
@@ -489,8 +450,7 @@ export default function IXIObjectStudio() {
               .05
             );
 
-          border-radius:
-            9px;
+          border-radius: 9px;
 
           background:
             rgba(
@@ -514,14 +474,10 @@ export default function IXIObjectStudio() {
 
 
         .photo-bench-heading strong {
-          color:
-            #ffc400;
+          color: #ffc400;
 
-          font-size:
-            7px;
-
-          font-weight:
-            950;
+          font-size: 7px;
+          font-weight: 950;
         }
 
 
@@ -534,11 +490,8 @@ export default function IXIObjectStudio() {
               .20
             );
 
-          font-size:
-            6px;
-
-          font-weight:
-            900;
+          font-size: 6px;
+          font-weight: 900;
         }
 
 
@@ -580,8 +533,7 @@ export default function IXIObjectStudio() {
               .26
             );
 
-          border-radius:
-            6px;
+          border-radius: 6px;
 
           background:
             rgba(
@@ -591,23 +543,17 @@ export default function IXIObjectStudio() {
               .02
             );
 
-          color:
-            #ffc400;
+          color: #ffc400;
 
-          font-size:
-            18px;
+          font-size: 18px;
+          font-weight: 900;
 
-          font-weight:
-            900;
-
-          cursor:
-            pointer;
+          cursor: pointer;
         }
 
 
         .photo-empty {
-          min-width:
-            130px;
+          min-width: 130px;
 
           color:
             rgba(
@@ -617,19 +563,10 @@ export default function IXIObjectStudio() {
               .16
             );
 
-          font-size:
-            6px;
-
-          font-weight:
-            900;
+          font-size: 6px;
+          font-weight: 900;
         }
 
-
-        /*
-         * =================================================
-         * MAIN WORK AREA
-         * =================================================
-         */
 
         .studio-work-area {
           position: relative;
@@ -648,18 +585,9 @@ export default function IXIObjectStudio() {
               .035
             );
 
-          border-radius:
-            10px;
+          border-radius: 10px;
         }
 
-
-        /*
-         * LEFT / RIGHT are tools laid over
-         * the work surface.
-         *
-         * They no longer participate in
-         * calculating the center point.
-         */
 
         .studio-left-toolbar,
         .studio-right-toolbar {
@@ -715,19 +643,6 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * =================================================
-         * TRUE CENTER STAGE
-         * =================================================
-         *
-         * This spans the entire work area.
-         *
-         * Card center is therefore 50% of
-         * the actual work surface — NOT the
-         * leftover space between unequal
-         * sidebars.
-         */
-
         .studio-center-stage {
           position: absolute;
 
@@ -750,9 +665,6 @@ export default function IXIObjectStudio() {
 
           align-items: stretch;
           justify-content: stretch;
-
-          pointer-events:
-            auto;
         }
 
 
@@ -766,26 +678,11 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * IMPORTANT:
-         *
-         * Canvas stage centers the Card
-         * relative to the full viewport
-         * workspace rather than allowing
-         * uneven toolbars to move it.
-         */
-
         .studio-center-stage :global(
           .canvas-stage
         ) {
-          position: absolute;
-
-          inset: 42px 0 30px;
-
+          min-width: 0;
           min-height: 0;
-
-          padding:
-            20px;
 
           display: flex;
 
@@ -795,12 +692,6 @@ export default function IXIObjectStudio() {
           overflow: auto;
         }
 
-
-        /*
-         * =================================================
-         * SIDE TOOLBAR COMPONENT OVERRIDES
-         * =================================================
-         */
 
         .studio-left-toolbar :global(
           .design-bench
@@ -817,12 +708,6 @@ export default function IXIObjectStudio() {
           border-radius: 0;
         }
 
-
-        /*
-         * =================================================
-         * BOTTOM BENCH
-         * =================================================
-         */
 
         .studio-bottom-bench {
           min-width: 0;
@@ -856,12 +741,6 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * =================================================
-         * GLOBAL OVERFLOW PROTECTION
-         * =================================================
-         */
-
         :global(html),
         :global(body) {
           max-width: 100%;
@@ -875,34 +754,23 @@ export default function IXIObjectStudio() {
         }
 
 
-        /*
-         * =================================================
-         * RESPONSIVE
-         * =================================================
-         */
-
         @media (
           max-width: 1200px
         ) {
 
           .studio-left-toolbar {
-            width:
-              205px;
+            width: 205px;
           }
 
 
           .studio-right-toolbar {
-            width:
-              280px;
+            width: 280px;
           }
 
 
           .studio-center-stage {
-            padding-left:
-              217px;
-
-            padding-right:
-              292px;
+            padding-left: 217px;
+            padding-right: 292px;
           }
 
         }
@@ -912,40 +780,19 @@ export default function IXIObjectStudio() {
           max-width: 900px
         ) {
 
-          /*
-           * At genuinely small widths,
-           * workstation mode needs a
-           * different mobile treatment.
-           *
-           * For now we allow the tools to
-           * narrow but still do NOT create
-           * body horizontal scrolling.
-           */
-
           .studio-left-toolbar {
-            width:
-              175px;
+            width: 175px;
           }
 
 
           .studio-right-toolbar {
-            width:
-              230px;
+            width: 230px;
           }
 
 
           .studio-center-stage {
-            padding-left:
-              187px;
-
-            padding-right:
-              242px;
-          }
-
-
-          .studio-top-bench {
-            grid-template-columns:
-              1fr 1fr;
+            padding-left: 187px;
+            padding-right: 242px;
           }
 
         }
