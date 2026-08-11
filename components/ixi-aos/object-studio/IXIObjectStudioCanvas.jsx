@@ -7,7 +7,10 @@ export default function IXIObjectStudioCanvas({
 
   previewCardState,
   updatePreviewCardState,
-  cyclePreviewFace
+  cyclePreviewFace,
+
+  enableCardScaling = true,
+  cardScaleMode = "xl"
 }) {
 
   const object =
@@ -115,10 +118,12 @@ export default function IXIObjectStudioCanvas({
           }}
 
           enableCardScaling={
-            false
-          }
+  enableCardScaling
+}
 
-          cardScaleMode="xl"
+cardScaleMode={
+  cardScaleMode
+}
         />
 
       </div>
