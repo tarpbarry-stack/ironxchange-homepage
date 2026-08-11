@@ -18,6 +18,9 @@ import {
 import IXIAosCardRuntime
   from "../card-runtime/IXIAosCardRuntime";
 
+import IXIAosFaceRuntime
+  from "../face-runtime/IXIAosFaceRuntime";
+
 
 const AOS_PANEL_WIDTH =
   298;
@@ -430,6 +433,60 @@ export default function IXIAosObjectConsole({
   }
 
 
+function renderSecondaryFace(
+  faceIndex
+) {
+
+  const resolvedFace =
+    normalizeAosFace(
+      faceIndex,
+      faceCount
+    );
+
+
+  return (
+    <IXIAosFaceRuntime
+      object={
+        object
+      }
+
+      cardDefinition={
+        cardDefinition
+      }
+
+      faceNumber={
+        resolvedFace
+      }
+
+      /*
+       * For this first integration proof,
+       * keep the new Face Runtime at its
+       * native XL presentation datum.
+       *
+       * We will connect presentation sizing
+       * to the Studio size control next.
+       */
+      presentationMode="xl"
+
+      renderModule={
+        renderModule
+      }
+
+      studioEditing={
+        studioEditing
+      }
+
+      selectedModuleId={
+        selectedModuleId
+      }
+
+      onSelectModule={
+        onSelectModule
+      }
+    />
+  );
+}
+  
   function renderSlot(
     slot,
     slotIndex
@@ -601,12 +658,8 @@ export default function IXIAosObjectConsole({
         ) : null}
 
 
-        {renderFace(
-  slot.face,
-  {
-    faceOnly:
-      true
-  }
+       {renderSecondaryFace(
+  slot.face
 )}
 
 
