@@ -438,28 +438,34 @@ export default function IXIObjectStudio() {
         }
 
 
-        .photo-bench-shell {
-          padding: 10px;
+       .photo-bench-shell {
+  width: 100%;
+  height: 100%;
 
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .05
-            );
+  margin: 0;
+  padding: 10px;
 
-          border-radius: 9px;
+  overflow: hidden;
 
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .01
-            );
-        }
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .05
+    );
+
+  border-radius: 9px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .01
+    );
+}
 
 
         .photo-bench-heading {
@@ -513,8 +519,15 @@ export default function IXIObjectStudio() {
           overscroll-behavior-x:
             contain;
 
-          scrollbar-width:
-            thin;
+          scrollbar-width: thin;
+scrollbar-color:
+  rgba(
+    255,
+    255,
+    255,
+    .08
+  )
+  transparent;
         }
 
 
@@ -606,8 +619,15 @@ export default function IXIObjectStudio() {
           overscroll-behavior:
             contain;
 
-          scrollbar-width:
-            thin;
+          scrollbar-width: thin;
+scrollbar-color:
+  rgba(
+    255,
+    255,
+    255,
+    .08
+  )
+  transparent;
         }
 
 
@@ -736,8 +756,15 @@ export default function IXIObjectStudio() {
           overscroll-behavior-x:
             contain;
 
-          scrollbar-width:
-            thin;
+          scrollbar-width: thin;
+scrollbar-color:
+  rgba(
+    255,
+    255,
+    255,
+    .08
+  )
+  transparent;
         }
 
 
@@ -753,6 +780,40 @@ export default function IXIObjectStudio() {
           margin: 0;
         }
 
+.studio-left-toolbar::-webkit-scrollbar,
+.studio-right-toolbar::-webkit-scrollbar,
+.card-bench-rail::-webkit-scrollbar,
+.photo-bench-rail::-webkit-scrollbar,
+.face-order-rail::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+
+.studio-left-toolbar::-webkit-scrollbar-track,
+.studio-right-toolbar::-webkit-scrollbar-track,
+.card-bench-rail::-webkit-scrollbar-track,
+.photo-bench-rail::-webkit-scrollbar-track,
+.face-order-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.studio-left-toolbar::-webkit-scrollbar-thumb,
+.studio-right-toolbar::-webkit-scrollbar-thumb,
+.card-bench-rail::-webkit-scrollbar-thumb,
+.photo-bench-rail::-webkit-scrollbar-thumb,
+.face-order-rail::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .08
+    );
+}
 
         @media (
           max-width: 1200px
