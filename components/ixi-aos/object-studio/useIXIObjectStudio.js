@@ -5,6 +5,12 @@ import {
 } from "react";
 
 import {
+  installIXIStudioCardDesign,
+  installIXIStudioFaceDesign,
+  installIXIStudioModuleDesign
+} from "./libraries/IXIStudioDraftLibraryBridge";
+
+import {
   createIXIObjectStudioDraft,
   normalizeIXIObjectStudioDraft,
 
@@ -740,7 +746,74 @@ export default function useIXIObjectStudio({
       ]
     );
 
+  /* =======================================================
+     DESIGN LIBRARY
+     ======================================================= */
 
+  const installCardDesign =
+    useCallback(
+      design => {
+
+        apply(
+          current =>
+            installIXIStudioCardDesign({
+              draft:
+                current,
+
+              design
+            })
+        );
+      },
+      [
+        apply
+      ]
+    );
+
+
+  const installFaceDesign =
+    useCallback(
+      design => {
+
+        apply(
+          current =>
+            installIXIStudioFaceDesign({
+              draft:
+                current,
+
+              design
+            })
+        );
+      },
+      [
+        apply
+      ]
+    );
+
+
+  const installModuleDesign =
+    useCallback(
+      (
+        design,
+        faceId = ""
+      ) => {
+
+        apply(
+          current =>
+            installIXIStudioModuleDesign({
+              draft:
+                current,
+
+              design,
+
+              faceId
+            })
+        );
+      },
+      [
+        apply
+      ]
+    );
+  
   /* =======================================================
      DERIVED STATE
      ======================================================= */
@@ -966,6 +1039,13 @@ export default function useIXIObjectStudio({
      * DESIGNS / TEMPLATES
      */
     applyTemplate,
+
+        /*
+     * DESIGN LIBRARY
+     */
+    installCardDesign,
+    installFaceDesign,
+    installModuleDesign,
 
 
     /*
