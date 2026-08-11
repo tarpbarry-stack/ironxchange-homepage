@@ -396,6 +396,21 @@ export default function IXIObjectStudio() {
             border-box;
         }
 
+/*
+ * Child components use separate
+ * styled-jsx scope classes.
+ *
+ * Force the workstation descendants
+ * onto the same physical sizing model.
+ */
+
+.studio-bench-shell :global(*),
+.studio-tool-column :global(*),
+.studio-center-column :global(*),
+.studio-bottom-row :global(*) {
+  box-sizing:
+    border-box !important;
+}
 
         .ixi-object-studio {
           width: 100%;
