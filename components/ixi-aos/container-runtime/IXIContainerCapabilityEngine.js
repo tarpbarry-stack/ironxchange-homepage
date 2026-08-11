@@ -668,14 +668,13 @@ export function getNextIXIContainerDeckIndex({
 
 
   const current =
-    normalizeIXIContainerDeckIndex({
-      index:
-        selectedIndex,
+  normalizeIXIContainerDeckIndex({
+    index:
+      selectedIndex,
 
-      itemCount:
-        count
-    });
-
+    itemCount:
+      count
+  });
 
   return (
     current + 1
@@ -704,14 +703,14 @@ export function getPreviousIXIContainerDeckIndex({
   }
 
 
-  const current =
-    normalizeIXIContainerDeckIndex({
-      index:
-        selectedIndex,
+ const current =
+  normalizeIXIContainerDeckIndex({
+    index:
+      selectedIndex,
 
-      itemCount:
-        count
-    );
+    itemCount:
+      count
+  });
 
 
   return (
