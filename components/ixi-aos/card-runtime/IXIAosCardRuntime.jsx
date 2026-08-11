@@ -137,6 +137,127 @@ function getDisplayFields(
     );
 }
 
+function getObjectFieldValue(
+  object = {},
+  fieldId = ""
+) {
+  const id =
+    clean(
+      fieldId
+    );
+
+  if (!id) {
+    return "";
+  }
+
+  return object?.fields?.[id] ?? "";
+}
+
+
+function getObjectFieldLabel(
+  object = {},
+  fieldId = "",
+  fallback = ""
+) {
+  const id =
+    clean(
+      fieldId
+    );
+
+  const definition =
+    Array.isArray(
+      object?.fieldDefinitions
+    )
+      ? object.fieldDefinitions.find(
+          field =>
+            field?.fieldId === id
+        )
+      : null;
+
+  return clean(
+    fallback ||
+    definition?.label ||
+    id
+  );
+}
+
+
+function formatRuntimeValue(
+  value,
+  fieldType = ""
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "—";
+  }
+
+  const type =
+    clean(
+      fieldType
+    ).toLowerCase();
+
+  const number =
+    Number(
+      value
+    );
+
+  if (
+    type === "money" &&
+    Number.isFinite(number)
+  ) {
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }
+    ).format(number);
+  }
+
+  if (
+    type === "number" &&
+    Number.isFinite(number)
+  ) {
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        maximumFractionDigits: 0
+      }
+    ).format(number);
+  }
+
+  return String(value);
+}
+
+
+function getObjectFieldType(
+  object = {},
+  fieldId = ""
+) {
+  const id =
+    clean(
+      fieldId
+    );
+
+  const definition =
+    Array.isArray(
+      object?.fieldDefinitions
+    )
+      ? object.fieldDefinitions.find(
+          field =>
+            field?.fieldId === id
+        )
+      : null;
+
+  return clean(
+    definition?.fieldType
+  );
+}
+
 
 function getNextFace(
   currentFace,
@@ -278,6 +399,149 @@ function IXIObjectFieldsModule({
   );
 }
 
+
+function IXIObjectFieldModule({
+  object,
+  moduleDefinition
+}) {
+  const fieldId =
+    clean(
+      moduleDefinition?.fieldId
+    );
+
+  const value =
+    getObjectFieldValue(
+      object,
+      fieldId
+    );
+
+  const label =
+    getObjectFieldLabel(
+      object,
+      fieldId,
+      moduleDefinition?.label
+    );
+
+  const fieldType =
+    getObjectFieldType(
+      object,
+      fieldId
+    );
+
+  return (
+    <div className="ixi-card-runtime-single-field">
+
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {formatRuntimeValue(
+          value,
+          fieldType
+        )}
+      </strong>
+
+    </div>
+  );
+}
+
+
+function IXIObjectFieldGroupModule({
+  object,
+  moduleDefinition
+}) {
+  const fieldIds =
+    Array.isArray(
+      moduleDefinition
+        ?.config
+        ?.fields
+    )
+      ? moduleDefinition
+          .config
+          .fields
+      : [];
+
+  return (
+    <div className="ixi-card-runtime-field-group">
+
+      {fieldIds.map(
+        fieldId => {
+
+          const value =
+            getObjectFieldValue(
+              object,
+              fieldId
+            );
+
+          const label =
+            getObjectFieldLabel(
+              object,
+              fieldId
+            );
+
+          const fieldType =
+            getObjectFieldType(
+              object,
+              fieldId
+            );
+
+          return (
+            <div
+              key={
+                fieldId
+              }
+            >
+              <span>
+                {label}
+              </span>
+
+              <strong>
+                {formatRuntimeValue(
+                  value,
+                  fieldType
+                )}
+              </strong>
+            </div>
+          );
+        }
+      )}
+
+    </div>
+  );
+}
+
+
+function IXIStatusModule({
+  object,
+  moduleDefinition
+}) {
+  const fieldId =
+    clean(
+      moduleDefinition?.fieldId ||
+      "status"
+    );
+
+  const value =
+    getObjectFieldValue(
+      object,
+      fieldId
+    );
+
+  return (
+    <div className="ixi-card-runtime-status">
+
+      <span>
+        {moduleDefinition?.label || "STATUS"}
+      </span>
+
+      <strong>
+        {value || "—"}
+      </strong>
+
+    </div>
+  );
+}
 
 /* =========================================================
    CARD RUNTIME
@@ -448,60 +712,118 @@ export default function IXIAosCardRuntime({
 
 
   function renderBuiltInModule(
-    moduleDefinition
+  moduleDefinition
+) {
+  const moduleType =
+    clean(
+      moduleDefinition
+        ?.moduleType
+    )
+      .toLowerCase();
+
+
+  /*
+   * Identity belongs to the Card shell.
+   *
+   * A Face may use an identity definition
+   * to configure the shell/header, but it
+   * does not render a second identity block.
+   */
+  if (
+    moduleType ===
+    "object-identity"
   ) {
-    const moduleType =
-      clean(
-        moduleDefinition
-          ?.moduleType
-      )
-        .toLowerCase();
-
-
-    if (
-      moduleType ===
-      "object-identity"
-    ) {
-      return (
-        <IXIObjectIdentityModule
-          object={
-            object
-          }
-        />
-      );
-    }
-
-
-    if (
-      moduleType ===
-      "primary-media"
-    ) {
-      return (
-        <IXIPrimaryMediaModule
-          object={
-            object
-          }
-        />
-      );
-    }
-
-
-    if (
-      moduleType ===
-      "object-fields"
-    ) {
-      return (
-        <IXIObjectFieldsModule
-          object={
-            object
-          }
-        />
-      );
-    }
-
-
     return null;
   }
+
+
+  if (
+    moduleType ===
+    "primary-media"
+  ) {
+    return (
+      <IXIPrimaryMediaModule
+        object={
+          object
+        }
+      />
+    );
+  }
+
+
+  if (
+    moduleType ===
+    "object-field"
+  ) {
+    return (
+      <IXIObjectFieldModule
+        object={
+          object
+        }
+
+        moduleDefinition={
+          moduleDefinition
+        }
+      />
+    );
+  }
+
+
+  if (
+    moduleType ===
+    "object-field-group"
+  ) {
+    return (
+      <IXIObjectFieldGroupModule
+        object={
+          object
+        }
+
+        moduleDefinition={
+          moduleDefinition
+        }
+      />
+    );
+  }
+
+
+  if (
+    moduleType ===
+    "status"
+  ) {
+    return (
+      <IXIStatusModule
+        object={
+          object
+        }
+
+        moduleDefinition={
+          moduleDefinition
+        }
+      />
+    );
+  }
+
+
+  /*
+   * Legacy generic fallback.
+   */
+  if (
+    moduleType ===
+    "object-fields"
+  ) {
+    return (
+      <IXIObjectFieldsModule
+        object={
+          object
+        }
+      />
+    );
+  }
+
+
+  return null;
+}
 
 
   function renderFaceModule(
@@ -559,6 +881,50 @@ export default function IXIAosCardRuntime({
       : [];
 
 
+const identityModule =
+  faceModules.find(
+    module =>
+      clean(
+        module?.moduleType
+      ).toLowerCase() ===
+      "object-identity"
+  ) ||
+  null;
+
+
+const headerMetricField =
+  clean(
+    identityModule
+      ?.config
+      ?.metricField
+  );
+
+
+const headerMetricValue =
+  headerMetricField
+    ? getObjectFieldValue(
+        object,
+        headerMetricField
+      )
+    : "";
+
+
+const headerMetricSuffix =
+  clean(
+    identityModule
+      ?.config
+      ?.metricSuffix
+  );
+
+
+const bodyFaceModules =
+  faceModules.filter(
+    module =>
+      clean(
+        module?.moduleType
+      ).toLowerCase() !==
+      "object-identity"
+  );  
   return (
     <section
       className={[
@@ -638,11 +1004,24 @@ export default function IXIAosCardRuntime({
         </div>
 
 
-        <div className="ixi-aos-card-face-position">
-          {currentFaceIndex}
-          /
-          {faceCount}
-        </div>
+        {headerMetricValue !== "" ? (
+  <div className="ixi-aos-card-header-metric">
+    {formatRuntimeValue(
+      headerMetricValue,
+      getObjectFieldType(
+        object,
+        headerMetricField
+      )
+    )}
+
+    {headerMetricSuffix ? (
+      <span>
+        {" "}
+        {headerMetricSuffix}
+      </span>
+    ) : null}
+  </div>
+) : null}
 
       </div>
 
@@ -653,9 +1032,9 @@ export default function IXIAosCardRuntime({
 
       <div className="ixi-aos-card-face">
 
-        {faceModules.length ? (
-
-          faceModules.map(
+        {bodyFaceModules.length ? (
+      
+          bodyFaceModules.map(
             (
               moduleDefinition,
               index
@@ -668,20 +1047,40 @@ export default function IXIAosCardRuntime({
                 }
 
                 className={[
-                  "ixi-aos-card-module",
+  "ixi-aos-card-module",
 
-                  `module-${
-                    clean(
-                      moduleDefinition
-                        ?.moduleType
-                    )
-                      .toLowerCase()
-                      .replace(
-                        /[^a-z0-9-]/g,
-                        "-"
-                      )
-                  }`
-                ].join(" ")}
+  `module-${
+    clean(
+      moduleDefinition
+        ?.moduleType
+    )
+      .toLowerCase()
+      .replace(
+        /[^a-z0-9-]/g,
+        "-"
+      )
+  }`,
+
+  `role-${
+    clean(
+      moduleDefinition
+        ?.presentation
+        ?.role ||
+      "auto"
+    )
+      .toLowerCase()
+  }`,
+
+  `width-${
+    clean(
+      moduleDefinition
+        ?.presentation
+        ?.width ||
+      "full"
+    )
+      .toLowerCase()
+  }`
+].join(" ")}
               >
                 {renderFaceModule(
                   moduleDefinition,
@@ -711,56 +1110,7 @@ export default function IXIAosCardRuntime({
       </div>
 
 
-      {/* ===================================================
-          FACE / CONSOLE STRIP
-          =================================================== */}
-
-      <div className="ixi-aos-card-runtime-strip">
-
-        <button
-          type="button"
-
-          onPointerDown={
-            event =>
-              event
-                .stopPropagation()
-          }
-
-          onClick={
-            cycleFace
-          }
-        >
-          FACE
-        </button>
-
-
-        {capabilities.hasConsole ? (
-          <button
-            type="button"
-
-            onPointerDown={
-              event =>
-                event
-                  .stopPropagation()
-            }
-
-            onClick={
-              event => {
-                event.preventDefault();
-                event.stopPropagation();
-
-                onOpenConsole?.(
-                  object,
-                  resolvedDefinition
-                );
-              }
-            }
-          >
-            CONSOLE
-          </button>
-        ) : null}
-
-      </div>
+    
 
 
       {/* ===================================================
@@ -1110,30 +1460,312 @@ export default function IXIAosCardRuntime({
           text-align: right;
         }
 
+.ixi-aos-card-header-metric {
+  flex: none;
+
+  padding-top: 15px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .46
+    );
+
+  font-size: 8px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+
+.ixi-aos-card-header-metric span {
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .28
+    );
+
+  font-size: 6px;
+}
+
+
+:global(
+  .ixi-card-runtime-single-field
+) {
+  width: 100%;
+  min-width: 0;
+
+  min-height: 29px;
+
+  padding:
+    5px 6px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .04
+    );
+
+  border-radius: 4px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .012
+    );
+}
+
+
+:global(
+  .ixi-card-runtime-single-field
+  span
+),
+:global(
+  .ixi-card-runtime-field-group
+  span
+),
+:global(
+  .ixi-card-runtime-status
+  span
+) {
+  overflow: hidden;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .23
+    );
+
+  font-size: 5px;
+  font-weight: 900;
+
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+:global(
+  .ixi-card-runtime-single-field
+  strong
+),
+:global(
+  .ixi-card-runtime-field-group
+  strong
+),
+:global(
+  .ixi-card-runtime-status
+  strong
+) {
+  margin-top: 2px;
+
+  overflow: hidden;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .72
+    );
+
+  font-size: 7px;
+  font-weight: 950;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+:global(
+  .ixi-card-runtime-field-group
+) {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 5px;
+}
+
+
+:global(
+  .ixi-card-runtime-field-group
+  > div
+) {
+  min-width: 0;
+
+  min-height: 29px;
+
+  padding:
+    5px 6px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .04
+    );
+
+  border-radius: 4px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .012
+    );
+}
+
+
+:global(
+  .ixi-card-runtime-status
+) {
+  min-height: 29px;
+
+  padding:
+    5px 6px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      196,
+      0,
+      .12
+    );
+
+  border-radius: 4px;
+
+  background:
+    rgba(
+      255,
+      196,
+      0,
+      .018
+    );
+}
+
+
+/*
+ * PRESENTATION ROLES
+ */
+
+.ixi-aos-card-module.role-hero {
+  grid-column:
+    span 6;
+}
+
+
+.ixi-aos-card-module.role-compact,
+.ixi-aos-card-module.role-inline {
+  align-self: start;
+}
+
+
+.ixi-aos-card-module.role-summary {
+  align-self: start;
+}
+
 
         /* ===============================================
            FACE
            =============================================== */
 
-        .ixi-aos-card-face {
-          position: absolute;
+       .ixi-aos-card-face {
+  position: absolute;
 
-          left: 0;
-          right: 0;
+  left: 0;
+  right: 0;
 
-          top: 52px;
-          bottom: 58px;
+  top: 52px;
+  bottom: 22px;
 
-          padding:
-            8px 12px;
+  padding:
+    8px 12px;
 
-          overflow: hidden;
-        }
+  overflow: hidden;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      6,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  grid-auto-rows:
+    min-content;
+
+  gap: 5px;
+
+  align-content:
+    start;
+}
+
+       .ixi-aos-card-module {
+  min-width: 0;
+
+  grid-column:
+    span 6;
+}
 
 
-        .ixi-aos-card-module {
-          width: 100%;
-        }
+.ixi-aos-card-module.width-full {
+  grid-column:
+    span 6;
+}
+
+
+.ixi-aos-card-module.width-half {
+  grid-column:
+    span 3;
+}
+
+
+.ixi-aos-card-module.width-third {
+  grid-column:
+    span 2;
+}
+
+
+.ixi-aos-card-module.width-auto {
+  grid-column:
+    span 6;
+}
 
 
         /* ===============================================
@@ -1194,7 +1826,7 @@ export default function IXIAosCardRuntime({
           .ixi-card-runtime-media
         ) {
           width: 100%;
-          height: 190px;
+          height: 205px;
 
           margin-top: 7px;
 
