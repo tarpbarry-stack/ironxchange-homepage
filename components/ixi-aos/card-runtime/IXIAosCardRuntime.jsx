@@ -579,11 +579,23 @@ export default function IXIAosCardRuntime({
    */
   renderModule = null,
 
-  /*
-   * Later:
-   * universal console controller
-   */
-  onOpenConsole = null
+/*
+ * OPTIONAL STUDIO EDIT CONTRACT
+ *
+ * Normal Board/Card use does not need
+ * these props.
+ */
+studioEditing = false,
+
+selectedModuleId = "",
+
+onSelectModule = null,
+
+/*
+ * Existing console entry point.
+ * Console physics remain external.
+ */
+onOpenConsole = null
 }) {
 
   const objectId =
@@ -880,6 +892,20 @@ export default function IXIAosCardRuntime({
       ? activeFace.layout
       : [];
 
+function getRuntimeModuleId(
+  moduleDefinition,
+  index
+) {
+  return clean(
+    moduleDefinition
+      ?.moduleId ||
+
+    moduleDefinition
+      ?.slotId ||
+
+    `${activeFace?.faceId || "face"}-${index}`
+  );
+}  
 
 const identityModule =
   faceModules.find(
@@ -1030,84 +1056,151 @@ const bodyFaceModules =
           ACTIVE FACE
           =================================================== */}
 
-      <div className="ixi-aos-card-face">
+     {bodyFaceModules.length ? (
 
-        {bodyFaceModules.length ? (
-      
-          bodyFaceModules.map(
-            (
-              moduleDefinition,
-              index
-            ) => (
-              <div
-                key={
-                  moduleDefinition
-                    ?.slotId ||
-                  `${activeFace?.faceId || "face"}-${index}`
-                }
+  bodyFaceModules.map(
+    (
+      moduleDefinition,
+      index
+    ) => {
 
-                className={[
-  "ixi-aos-card-module",
+      const runtimeModuleId =
+        getRuntimeModuleId(
+          moduleDefinition,
+          index
+        );
 
-  `module-${
-    clean(
-      moduleDefinition
-        ?.moduleType
-    )
-      .toLowerCase()
-      .replace(
-        /[^a-z0-9-]/g,
-        "-"
-      )
-  }`,
 
-  `role-${
-    clean(
-      moduleDefinition
-        ?.presentation
-        ?.role ||
-      "auto"
-    )
-      .toLowerCase()
-  }`,
+      const isSelected =
+        Boolean(
+          studioEditing &&
+          selectedModuleId &&
+          runtimeModuleId ===
+            selectedModuleId
+        );
 
-  `width-${
-    clean(
-      moduleDefinition
-        ?.presentation
-        ?.width ||
-      "full"
-    )
-      .toLowerCase()
-  }`
-].join(" ")}
-              >
-                {renderFaceModule(
-                  moduleDefinition,
-                  index
-                )}
-              </div>
+
+      return (
+        <div
+          key={
+            runtimeModuleId
+          }
+
+          data-ixi-module-id={
+            runtimeModuleId
+          }
+
+          className={[
+            "ixi-aos-card-module",
+
+            `module-${
+              clean(
+                moduleDefinition
+                  ?.moduleType
+              )
+                .toLowerCase()
+                .replace(
+                  /[^a-z0-9-]/g,
+                  "-"
+                )
+            }`,
+
+            `role-${
+              clean(
+                moduleDefinition
+                  ?.presentation
+                  ?.role ||
+                "auto"
+              ).toLowerCase()
+            }`,
+
+            `width-${
+              clean(
+                moduleDefinition
+                  ?.presentation
+                  ?.width ||
+                "full"
+              ).toLowerCase()
+            }`,
+
+            studioEditing
+              ? "studio-editable"
+              : "",
+
+            isSelected
+              ? "studio-selected"
+              : ""
+          ]
+            .filter(
+              Boolean
             )
-          )
+            .join(" ")}
 
-        ) : (
+          onPointerDown={
+            studioEditing
+              ? event => {
+                  /*
+                   * Studio is manipulating
+                   * the module, not dragging
+                   * the whole Card.
+                   */
+                  event.stopPropagation();
+                }
+              : undefined
+          }
 
-          <div className="ixi-aos-card-face-empty">
+          onClick={
+            studioEditing
+              ? event => {
+                  event.preventDefault();
+                  event.stopPropagation();
 
-            <strong>
-              {activeFace?.label ||
-              `FACE ${currentFaceIndex}`}
-            </strong>
+                  onSelectModule?.({
+                    faceId:
+                      activeFace
+                        ?.faceId ||
+                      "",
 
-            <span>
-              EMPTY FACE
-            </span>
+                    moduleId:
+                      runtimeModuleId,
 
-          </div>
+                    module:
+                      moduleDefinition,
 
-        )}
+                    moduleIndex:
+                      index
+                  });
+                }
+              : undefined
+          }
+        >
 
-      </div>
+          {renderFaceModule(
+            moduleDefinition,
+            index
+          )}
+
+        </div>
+      );
+    }
+  )
+
+) : (
+
+  <div className="ixi-aos-card-face-empty">
+
+    <strong>
+      {activeFace?.label ||
+      `FACE ${currentFaceIndex}`}
+    </strong>
+
+    <span>
+      EMPTY FACE
+    </span>
+
+  </div>
+
+)}
 
 
     
@@ -1767,6 +1860,95 @@ const bodyFaceModules =
     span 6;
 }
 
+/*
+ * OBJECT STUDIO EDIT STATE
+ *
+ * These styles only appear when the
+ * runtime is explicitly placed in
+ * Studio editing mode.
+ */
+
+.ixi-aos-card-module.studio-editable {
+  position: relative;
+
+  cursor: pointer;
+}
+
+
+.ixi-aos-card-module.studio-editable:hover {
+  outline:
+    1px solid
+    rgba(
+      0,
+      194,
+      255,
+      .34
+    );
+
+  outline-offset:
+    1px;
+}
+
+
+.ixi-aos-card-module.studio-selected {
+  outline:
+    1px solid
+    rgba(
+      255,
+      196,
+      0,
+      .82
+    );
+
+  outline-offset:
+    1px;
+
+  z-index: 20;
+}
+
+
+.ixi-aos-card-module.studio-selected::after {
+  content:
+    "EDIT";
+
+  position: absolute;
+
+  top: 3px;
+  right: 4px;
+
+  z-index: 30;
+
+  padding:
+    2px 4px;
+
+  border-radius:
+    3px;
+
+  background:
+    rgba(
+      5,
+      5,
+      5,
+      .88
+    );
+
+  color:
+    rgba(
+      255,
+      196,
+      0,
+      .78
+    );
+
+  font-size:
+    4.5px;
+
+  font-weight:
+    950;
+
+  pointer-events:
+    none;
+}
 
         /* ===============================================
            IDENTITY MODULE
