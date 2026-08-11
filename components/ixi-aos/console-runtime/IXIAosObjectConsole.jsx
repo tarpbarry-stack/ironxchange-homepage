@@ -358,9 +358,12 @@ export default function IXIAosObjectConsole({
   }
 
 
-  function renderFace(
-    faceIndex
-  ) {
+ function renderFace(
+  faceIndex,
+  {
+    faceOnly = false
+  } = {}
+) {
 
     const resolvedFace =
       normalizeAosFace(
@@ -390,6 +393,11 @@ export default function IXIAosObjectConsole({
         forcedFaceIndex={
           resolvedFace
         }
+
+        faceOnly={
+        faceOnly
+      }
+
 
         dragHandleProps={{}}
 
@@ -594,8 +602,12 @@ export default function IXIAosObjectConsole({
 
 
         {renderFace(
-          slot.face
-        )}
+  slot.face,
+  {
+    faceOnly:
+      true
+  }
+)}
 
 
         <button
