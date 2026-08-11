@@ -109,6 +109,12 @@ export default function IXIAosCardRenderer({
    */
   onOpenConsole = null,
 
+  studioEditing = false,
+
+selectedModuleId = "",
+
+onSelectModule = null,
+
   /*
    * IMPORTANT:
    *
@@ -430,6 +436,18 @@ export default function IXIAosCardRenderer({
       onOpenConsole={
         onOpenConsole
       }
+
+      studioEditing={
+  studioEditing
+}
+
+selectedModuleId={
+  selectedModuleId
+}
+
+onSelectModule={
+  onSelectModule
+}
 
       renderModule={
         renderModule
