@@ -192,10 +192,12 @@ export default function IXIObjectStudio() {
 
 
   const [
-    previewCardState,
-    setPreviewCardState
-  ] =
-    useState({
+  previewScaleMode,
+  setPreviewScaleMode
+] =
+  useState(
+    "xl"
+  );
       color:
         "none",
 
@@ -343,6 +345,14 @@ export default function IXIObjectStudio() {
             updatePreviewCardState={
               updatePreviewCardState
             }
+
+            enableCardScaling={
+  true
+}
+
+cardScaleMode={
+  previewScaleMode
+}
           />
 
         </section>
