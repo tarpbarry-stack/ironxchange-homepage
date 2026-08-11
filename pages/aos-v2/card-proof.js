@@ -47,6 +47,30 @@ const EQUIPMENT_OBJECT = {
 };
 
 
+const CHILD_OBJECT = {
+  objectId:
+    "proof:child-1",
+
+  displayName:
+    "TEST OBJECT",
+
+  directContainerId:
+    "proof:equipment",
+
+  fields: {
+    ID:
+      "ABC-001",
+
+    OWNER:
+      "TEST USER"
+  },
+
+  metadata: {
+    proof:
+      true
+  }
+};
+
 export default function IXIAosV2CardProofPage() {
 
   const [
@@ -215,9 +239,10 @@ export default function IXIAosV2CardProofPage() {
             IXISystemIndexCardTemplate
           }
 
-          objects={[
-            EQUIPMENT_OBJECT
-          ]}
+           objects={[
+    EQUIPMENT_OBJECT,
+    CHILD_OBJECT
+  ]}
 
           parentLabel={
             "SYSTEM INDEX"
