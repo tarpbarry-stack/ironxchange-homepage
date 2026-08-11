@@ -86,6 +86,30 @@ export default function IXIObjectStudioCanvas({
             () => {}
           }
 
+          studioEditing={
+  true
+}
+
+selectedModuleId={
+  studio
+    ?.selection
+    ?.moduleId ||
+  ""
+}
+
+onSelectModule={({
+  faceId,
+  moduleId
+}) => {
+
+  studio
+    ?.selectModule?.(
+      faceId,
+      moduleId
+    );
+}}
+
+          
         />
 
       </div>
