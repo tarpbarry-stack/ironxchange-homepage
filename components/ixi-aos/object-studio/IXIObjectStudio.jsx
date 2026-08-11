@@ -634,7 +634,7 @@ scrollbar-color:
         .studio-left-toolbar {
           left: 0;
 
-          width: 230px;
+          width: 200px;
 
           border-right:
             1px solid
@@ -648,9 +648,9 @@ scrollbar-color:
 
 
         .studio-right-toolbar {
-          right: 0;
+  right: 0;
 
-          width: 312px;
+  width: 250px;
 
           border-left:
             1px solid
