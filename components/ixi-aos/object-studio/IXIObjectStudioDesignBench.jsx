@@ -1,48 +1,15 @@
-const FACE_DESIGNS = [
-  "PHOTO / ID",
-  "DETAILS",
-  "RELATIONSHIPS",
-  "SERVICE",
-  "WORK ORDERS",
-  "DOCUMENTS",
-  "HISTORY",
-  "BLANK"
-];
-
-
-const MODULES = [
-  "TEXT",
-  "NUMBER",
-  "MONEY",
-  "DATE",
-  "PHOTO",
-  "ADDRESS",
-  "RELATIONSHIP",
-  "CHILD DECK"
-];
+import {
+  IXI_STUDIO_FACE_LIBRARY,
+  IXI_STUDIO_MODULE_LIBRARY
+} from "./libraries/IXIStudioDesignLibrary";
 
 
 export default function IXIObjectStudioDesignBench({
   studio
 }) {
 
-  function addBlankFace() {
-
-    studio?.addFace?.({
-      label:
-        `FACE ${
-          (
-            studio
-              ?.cardDefinitionDraft
-              ?.faces
-              ?.length ||
-            0
-          ) + 1
-        }`,
-
-      layout: []
-    });
-  }
+  const selectedFace =
+    studio?.selectedFace;
 
 
   return (
@@ -65,24 +32,50 @@ export default function IXIObjectStudioDesignBench({
 
         <div className="face-list">
 
-          {FACE_DESIGNS.map(
-            face => (
+          {IXI_STUDIO_FACE_LIBRARY.map(
+            design => (
 
               <button
                 type="button"
 
                 key={
-                  face
+                  design.designId
+                }
+
+                title={
+                  design.description ||
+                  design.name
                 }
 
                 onClick={
-                  face ===
-                  "BLANK"
-                    ? addBlankFace
-                    : undefined
+                  () =>
+                    studio
+                      ?.installFaceDesign?.(
+                        design
+                      )
                 }
               >
-                {face}
+
+                <strong>
+                  {design.name}
+                </strong>
+
+                <span>
+                  {
+                    design.modules
+                      ?.length ||
+                    0
+                  }
+                  {" "}
+                  MODULE
+                  {
+                    design.modules
+                      ?.length === 1
+                      ? ""
+                      : "S"
+                  }
+                </span>
+
               </button>
 
             )
@@ -105,7 +98,11 @@ export default function IXIObjectStudioDesignBench({
           </strong>
 
           <span>
-            BUILD A FACE
+            {
+              selectedFace
+                ? `ADD TO ${selectedFace.label || "FACE"}`
+                : "SELECT A FACE"
+            }
           </span>
 
         </div>
@@ -113,17 +110,33 @@ export default function IXIObjectStudioDesignBench({
 
         <div className="module-grid">
 
-          {MODULES.map(
+          {IXI_STUDIO_MODULE_LIBRARY.map(
             module => (
 
               <button
                 type="button"
 
                 key={
-                  module
+                  module.moduleId
+                }
+
+                disabled={
+                  !selectedFace
+                }
+
+                onClick={
+                  () =>
+                    studio
+                      ?.installModuleDesign?.(
+                        module,
+                        selectedFace
+                          ?.faceId
+                      )
                 }
               >
-                {module}
+
+                {module.label}
+
               </button>
 
             )
@@ -139,8 +152,7 @@ export default function IXIObjectStudioDesignBench({
         .design-bench {
           min-height: 590px;
 
-          padding:
-            12px;
+          padding: 12px;
 
           border:
             1px solid
@@ -173,12 +185,11 @@ export default function IXIObjectStudioDesignBench({
 
           gap: 8px;
 
-          margin-bottom:
-            9px;
+          margin-bottom: 9px;
         }
 
 
-        .bench-title strong {
+        .bench-title > strong {
           color: #ffc400;
 
           font-size: 7px;
@@ -186,7 +197,11 @@ export default function IXIObjectStudioDesignBench({
         }
 
 
-        .bench-title span {
+        .bench-title > span {
+          max-width: 110px;
+
+          overflow: hidden;
+
           color:
             rgba(
               255,
@@ -197,6 +212,9 @@ export default function IXIObjectStudioDesignBench({
 
           font-size: 5.5px;
           font-weight: 900;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
 
@@ -230,28 +248,52 @@ export default function IXIObjectStudioDesignBench({
               .014
             );
 
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .38
-            );
-
-          font-size: 6px;
-          font-weight: 950;
-
           cursor: pointer;
         }
 
 
         .face-list button {
-          height: 31px;
+          height: 38px;
 
-          text-align: left;
+          padding: 0 9px;
 
-          padding:
-            0 9px;
+          display: flex;
+
+          flex-direction: column;
+
+          align-items: flex-start;
+
+          justify-content: center;
+
+          gap: 3px;
+        }
+
+
+        .face-list button strong {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .44
+            );
+
+          font-size: 6px;
+          font-weight: 950;
+        }
+
+
+        .face-list button span {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .16
+            );
+
+          font-size: 5px;
+          font-weight: 900;
         }
 
 
@@ -264,7 +306,11 @@ export default function IXIObjectStudioDesignBench({
               255,
               .30
             );
+        }
 
+
+        .face-list button:hover strong,
+        .module-grid button:hover {
           color:
             rgba(
               0,
@@ -278,8 +324,7 @@ export default function IXIObjectStudioDesignBench({
         .divider {
           height: 1px;
 
-          margin:
-            18px 0;
+          margin: 18px 0;
 
           background:
             rgba(
@@ -302,7 +347,27 @@ export default function IXIObjectStudioDesignBench({
 
 
         .module-grid button {
-          height: 43px;
+          min-height: 37px;
+
+          padding: 5px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .38
+            );
+
+          font-size: 5.5px;
+          font-weight: 950;
+        }
+
+
+        .module-grid button:disabled {
+          opacity: .22;
+
+          cursor: default;
         }
 
       `}</style>
