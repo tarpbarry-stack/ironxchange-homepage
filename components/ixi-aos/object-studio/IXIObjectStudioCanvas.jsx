@@ -145,7 +145,13 @@ onSelectModule={({
       <style jsx>{`
 
         .studio-canvas {
-          min-height: 590px;
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
 
           display: flex;
           flex-direction: column;
@@ -227,9 +233,10 @@ onSelectModule={({
 
 
         .canvas-stage {
-          flex: 1;
+  flex: 1;
 
-          min-height: 510px;
+  min-width: 0;
+  min-height: 0;
 
           display: flex;
 
