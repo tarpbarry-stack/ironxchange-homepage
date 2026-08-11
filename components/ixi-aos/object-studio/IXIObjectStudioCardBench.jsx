@@ -1,91 +1,19 @@
-const STARTING_DESIGNS = [
-  {
-    id:
-      "blank",
-
-    label:
-      "BLANK",
-
-    lines: [
-      "START FROM ZERO"
-    ]
-  },
-
-  {
-    id:
-      "asset",
-
-    label:
-      "FLEET ASSET",
-
-    lines: [
-      "YEAR / MAKE / MODEL",
-      "ID / VALUE",
-      "LOCATION"
-    ]
-  },
-
-  {
-    id:
-      "pickup",
-
-    label:
-      "PICKUP",
-
-    lines: [
-      "VIN",
-      "MILES",
-      "VALUE"
-    ]
-  },
-
-  {
-    id:
-      "person",
-
-    label:
-      "PERSON",
-
-    lines: [
-      "PHONE",
-      "POSITION",
-      "ID"
-    ]
-  },
-
-  {
-    id:
-      "location",
-
-    label:
-      "LOCATION",
-
-    lines: [
-      "ADDRESS",
-      "MANAGER",
-      "OBJECTS"
-    ]
-  },
-
-  {
-    id:
-      "job",
-
-    label:
-      "JOB",
-
-    lines: [
-      "CUSTOMER",
-      "VALUE",
-      "STATUS"
-    ]
-  }
-];
+import {
+  IXI_STUDIO_CARD_LIBRARY
+} from "./libraries/IXIStudioDesignLibrary";
 
 
 export default function IXIObjectStudioCardBench({
   studio
 }) {
+
+  const currentSourceDesignId =
+    studio
+      ?.cardDefinitionDraft
+      ?.metadata
+      ?.sourceDesignId ||
+    "";
+
 
   return (
     <section className="card-bench">
@@ -97,7 +25,7 @@ export default function IXIObjectStudioCardBench({
         </strong>
 
         <span>
-          STARTING DESIGNS
+          STARTING DESIGNS — FORK AND CUSTOMIZE
         </span>
 
       </div>
@@ -105,43 +33,72 @@ export default function IXIObjectStudioCardBench({
 
       <div className="card-bench-rail">
 
-        {STARTING_DESIGNS.map(
-          design => (
+        {IXI_STUDIO_CARD_LIBRARY.map(
+          design => {
 
-            <button
-              type="button"
-
-              key={
-                design.id
-              }
-
-              className="design-card"
-
-              title={
-                `Use ${design.label} starting design`
-              }
-            >
-
-              <strong>
-                {design.label}
-              </strong>
+            const active =
+              currentSourceDesignId ===
+              design.designId;
 
 
-              {design.lines.map(
-                line => (
-                  <span
-                    key={
-                      line
-                    }
-                  >
-                    {line}
-                  </span>
-                )
-              )}
+            return (
+              <button
+                type="button"
 
-            </button>
+                key={
+                  design.designId
+                }
 
-          )
+                className={
+                  active
+                    ? "design-card active"
+                    : "design-card"
+                }
+
+                title={
+                  design.description ||
+                  design.name
+                }
+
+                onClick={
+                  () =>
+                    studio
+                      ?.installCardDesign?.(
+                        design
+                      )
+                }
+              >
+
+                <strong>
+                  {design.name}
+                </strong>
+
+
+                <span>
+                  {
+                    design.description ||
+                    "STARTING DESIGN"
+                  }
+                </span>
+
+
+                <small>
+                  {
+                    design.faces
+                      ?.length ||
+                    0
+                  } FACE
+                  {
+                    design.faces
+                      ?.length === 1
+                      ? ""
+                      : "S"
+                  }
+                </small>
+
+              </button>
+            );
+          }
         )}
 
 
@@ -153,6 +110,7 @@ export default function IXIObjectStudioCardBench({
             saved-design
           "
         >
+
           <strong>
             MY DESIGNS
           </strong>
@@ -160,6 +118,11 @@ export default function IXIObjectStudioCardBench({
           <span>
             SAVED CARDS
           </span>
+
+          <small>
+            COMING NEXT
+          </small>
+
         </button>
 
       </div>
@@ -170,8 +133,7 @@ export default function IXIObjectStudioCardBench({
         .card-bench {
           margin-top: 12px;
 
-          padding:
-            10px;
+          padding: 10px;
 
           border:
             1px solid
@@ -239,13 +201,12 @@ export default function IXIObjectStudioCardBench({
 
 
         .design-card {
-          width: 132px;
-          min-width: 132px;
+          width: 150px;
+          min-width: 150px;
 
-          height: 76px;
+          height: 78px;
 
-          padding:
-            9px;
+          padding: 9px;
 
           display: flex;
           flex-direction: column;
@@ -289,23 +250,40 @@ export default function IXIObjectStudioCardBench({
         .design-card:hover {
           border-color:
             rgba(
+              0,
+              194,
+              255,
+              .32
+            );
+        }
+
+
+        .design-card.active {
+          border-color:
+            rgba(
               255,
               196,
               0,
-              .34
+              .48
+            );
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .035
             );
         }
 
 
         .design-card strong {
-          margin-bottom: 2px;
-
           color:
             rgba(
               255,
               255,
               255,
-              .72
+              .74
             );
 
           font-size: 8px;
@@ -313,23 +291,50 @@ export default function IXIObjectStudioCardBench({
         }
 
 
+        .design-card.active strong {
+          color: #ffc400;
+        }
+
+
         .design-card span {
+          max-width: 100%;
+
+          overflow: hidden;
+
           color:
             rgba(
               255,
               255,
               255,
-              .25
+              .27
             );
 
           font-size: 5.5px;
           font-weight: 850;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+
+        .design-card small {
+          margin-top: auto;
+
+          color:
+            rgba(
+              0,
+              194,
+              255,
+              .34
+            );
+
+          font-size: 5px;
+          font-weight: 950;
         }
 
 
         .saved-design {
-          border-style:
-            dashed;
+          border-style: dashed;
         }
 
       `}</style>
