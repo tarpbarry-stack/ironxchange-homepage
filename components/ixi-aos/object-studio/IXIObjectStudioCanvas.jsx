@@ -10,7 +10,9 @@ export default function IXIObjectStudioCanvas({
   cyclePreviewFace,
 
   enableCardScaling = true,
-  cardScaleMode = "xl"
+  cardScaleMode = "xl",
+
+  onCycleCardScale = null
 }) {
 
   const object =
@@ -50,15 +52,36 @@ export default function IXIObjectStudioCanvas({
 
       <header>
 
-        <strong>
-          LIVE OBJECT
-        </strong>
+  <div className="canvas-header-copy">
 
-        <span>
-          ACTUAL CARD + CONSOLE RUNTIME
-        </span>
+    <strong>
+      LIVE OBJECT
+    </strong>
 
-      </header>
+    <span>
+      ACTUAL CARD + CONSOLE RUNTIME
+    </span>
+
+  </div>
+
+
+  <button
+    type="button"
+    className="canvas-scale-button"
+
+    onClick={
+      onCycleCardScale
+    }
+  >
+    SIZE — {
+      String(
+        cardScaleMode ||
+        "xl"
+      ).toUpperCase()
+    }
+  </button>
+
+</header>
 
 
       <div className="canvas-stage">
@@ -213,6 +236,9 @@ cardScaleMode={
 
           gap: 9px;
 
+justify-content:
+  space-between;
+  
           border-bottom:
             1px solid
             rgba(
@@ -223,6 +249,71 @@ cardScaleMode={
             );
         }
 
+.canvas-header-copy {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+}
+
+
+.canvas-scale-button {
+  flex: none;
+
+  height: 24px;
+
+  padding:
+    0 9px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      196,
+      0,
+      .18
+    );
+
+  border-radius: 4px;
+
+  background:
+    rgba(
+      255,
+      196,
+      0,
+      .025
+    );
+
+  color:
+    rgba(
+      255,
+      196,
+      0,
+      .66
+    );
+
+  font-size: 6px;
+  font-weight: 950;
+
+  cursor: pointer;
+}
+
+
+.canvas-scale-button:hover {
+  border-color:
+    rgba(
+      255,
+      196,
+      0,
+      .42
+    );
+
+  color:
+    #ffc400;
+}
 
         header strong {
           color: #ffc400;
