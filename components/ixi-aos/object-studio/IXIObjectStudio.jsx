@@ -23,6 +23,18 @@ import IXIObjectStudioInspector
 import IXIObjectStudioFaceOrderBench
   from "./IXIObjectStudioFaceOrderBench";
 
+import {
+  createIXIObjectStudioDraft
+} from "./IXIObjectStudioDraftEngine";
+
+import {
+  installIXIStudioCardDesign
+} from "./libraries/IXIStudioDraftLibraryBridge";
+
+import {
+  getIXIStudioCardDesign
+} from "./libraries/IXIStudioDesignLibrary";
+
 
 const PROOF_OBJECT = {
   objectId:
@@ -135,10 +147,16 @@ const PROOF_OBJECT = {
 };
 
 
-export default function IXIObjectStudio() {
+const DEFAULT_VEHICLE_DESIGN =
+  getIXIStudioCardDesign(
+    "ixi:card:vehicle"
+  );
 
-  const studio =
-    useIXIObjectStudio({
+
+function createDefaultStudioDraft() {
+
+  const baseDraft =
+    createIXIObjectStudioDraft({
       object:
         PROOF_OBJECT,
 
@@ -147,13 +165,32 @@ export default function IXIObjectStudio() {
     });
 
 
-  /*
-   * LIVE CARD PRESENTATION STATE
-   *
-   * This is workspace/presentation state.
-   * It is NOT Object truth and it is NOT
-   * Card Definition truth.
-   */
+  if (
+    !DEFAULT_VEHICLE_DESIGN
+  ) {
+    return baseDraft;
+  }
+
+
+  return installIXIStudioCardDesign({
+    draft:
+      baseDraft,
+
+    design:
+      DEFAULT_VEHICLE_DESIGN
+  });
+}
+
+
+export default function IXIObjectStudio() {
+
+  const studio =
+    useIXIObjectStudio({
+      initialDraft:
+        createDefaultStudioDraft()
+    });
+
+
   const [
     previewCardState,
     setPreviewCardState
@@ -188,116 +225,185 @@ export default function IXIObjectStudio() {
   }
 
 
-  function cyclePreviewFace() {
-
-    const faceCount =
-      Math.max(
-        1,
-
-        studio
-          ?.previewCardDefinition
-          ?.faces
-          ?.length ||
-        1
-      );
-
-
-    setPreviewCardState(
-      current => {
-
-        const currentFace =
-          Math.max(
-            1,
-
-            Number(
-              current.face ||
-              1
-            )
-          );
-
-
-        return {
-          ...current,
-
-          face:
-            currentFace >=
-              faceCount
-              ? 1
-              : currentFace + 1
-        };
-      }
-    );
-  }
-
-
   return (
     <main className="ixi-object-studio">
 
-      <IXIObjectStudioHeader
-        studio={
-          studio
-        }
-      />
+      {/* ===================================================
+          HEADER
+          =================================================== */}
 
+      <div className="studio-header-slot">
 
-      <IXIObjectStudioCardBench
-        studio={
-          studio
-        }
-      />
-
-
-      <section className="ixi-object-studio-workspace">
-
-        <IXIObjectStudioDesignBench
+        <IXIObjectStudioHeader
           studio={
             studio
           }
         />
 
-
-        <IXIObjectStudioCanvas
-          studio={
-            studio
-          }
-
-          previewCardState={
-            previewCardState
-          }
-
-          updatePreviewCardState={
-            updatePreviewCardState
-          }
-
-          cyclePreviewFace={
-            cyclePreviewFace
-          }
-        />
+      </div>
 
 
-        <IXIObjectStudioInspector
-          studio={
-            studio
-          }
-        />
+      {/* ===================================================
+          TOP WORKBENCH
+          =================================================== */}
+
+      <section className="studio-top-bench">
+
+        <div className="top-bench-half">
+
+          <IXIObjectStudioCardBench
+            studio={
+              studio
+            }
+          />
+
+        </div>
+
+
+        <div className="top-bench-half photo-bench-shell">
+
+          <div className="photo-bench-heading">
+
+            <strong>
+              PHOTO BENCH
+            </strong>
+
+            <span>
+              OBJECT MEDIA
+            </span>
+
+          </div>
+
+
+          <div className="photo-bench-rail">
+
+            <button
+              type="button"
+              className="photo-add"
+            >
+              +
+            </button>
+
+
+            <div className="photo-empty">
+              DROP OR ADD PHOTOS
+            </div>
+
+          </div>
+
+        </div>
 
       </section>
 
 
-      <IXIObjectStudioFaceOrderBench
-        studio={
-          studio
-        }
-      />
+      {/* ===================================================
+          MAIN WORK AREA
+          =================================================== */}
+
+      <section className="studio-work-area">
+
+        {/* LEFT TOOLBAR */}
+
+        <aside className="studio-left-toolbar">
+
+          <IXIObjectStudioDesignBench
+            studio={
+              studio
+            }
+          />
+
+        </aside>
+
+
+        {/* CENTER — INDEPENDENT OF SIDEBAR WIDTHS */}
+
+        <div className="studio-center-stage">
+
+          <IXIObjectStudioCanvas
+            studio={
+              studio
+            }
+
+            previewCardState={
+              previewCardState
+            }
+
+            updatePreviewCardState={
+              updatePreviewCardState
+            }
+          />
+
+        </div>
+
+
+        {/* RIGHT TOOLBAR */}
+
+        <aside className="studio-right-toolbar">
+
+          <IXIObjectStudioInspector
+            studio={
+              studio
+            />
+
+        </aside>
+
+      </section>
+
+
+      {/* ===================================================
+          BOTTOM STUDIO BENCH
+          =================================================== */}
+
+      <footer className="studio-bottom-bench">
+
+        <IXIObjectStudioFaceOrderBench
+          studio={
+            studio
+          />
+
+      </footer>
 
 
       <style jsx>{`
+
+        /*
+         * =================================================
+         * PAGE CHASSIS
+         * =================================================
+         */
+
+        .ixi-object-studio,
+        .ixi-object-studio * {
+          box-sizing:
+            border-box;
+        }
+
+
         .ixi-object-studio {
           width: 100%;
-          min-height: 100vh;
+
+          height: 100vh;
+          min-height: 720px;
+
+          margin: 0;
 
           padding:
-            20px 24px 80px;
+            12px;
+
+          display: grid;
+
+          grid-template-rows:
+            auto
+            102px
+            minmax(
+              0,
+              1fr
+            )
+            92px;
+
+          gap: 10px;
+
+          overflow: hidden;
 
           background:
             radial-gradient(
@@ -306,58 +412,544 @@ export default function IXIObjectStudio() {
                 0,
                 194,
                 255,
-                0.035
+                .028
               ),
-              transparent 34%
+              transparent 36%
             ),
             #090909;
 
           color: white;
         }
 
-        .ixi-object-studio-workspace {
-          width: 100%;
-          min-height: 590px;
 
-          margin-top: 12px;
+        .studio-header-slot {
+          min-width: 0;
+        }
+
+
+        /*
+         * =================================================
+         * TOP BENCH
+         * =================================================
+         */
+
+        .studio-top-bench {
+          min-width: 0;
 
           display: grid;
 
           grid-template-columns:
-            230px
             minmax(
-              400px,
+              0,
               1fr
             )
-            312px;
+            minmax(
+              0,
+              1fr
+            );
 
-          gap: 12px;
+          gap: 10px;
+
+          overflow: hidden;
+        }
+
+
+        .top-bench-half {
+          min-width: 0;
+          height: 100%;
+
+          overflow: hidden;
+        }
+
+
+        /*
+         * Prevent Card Bench from adding its
+         * own exterior margin inside the new
+         * split top chassis.
+         */
+        .top-bench-half :global(
+          .card-bench
+        ) {
+          height: 100%;
+
+          margin-top: 0;
+        }
+
+
+        .photo-bench-shell {
+          padding:
+            10px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .05
+            );
+
+          border-radius:
+            9px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .01
+            );
+        }
+
+
+        .photo-bench-heading {
+          height: 16px;
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 9px;
+        }
+
+
+        .photo-bench-heading strong {
+          color:
+            #ffc400;
+
+          font-size:
+            7px;
+
+          font-weight:
+            950;
+        }
+
+
+        .photo-bench-heading span {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .20
+            );
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+        }
+
+
+        .photo-bench-rail {
+          height:
+            calc(
+              100% - 16px
+            );
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 7px;
+
+          overflow-x: auto;
+          overflow-y: hidden;
+
+          overscroll-behavior-x:
+            contain;
+
+          scrollbar-width:
+            thin;
+        }
+
+
+        .photo-add {
+          width: 66px;
+          min-width: 66px;
+
+          height: 58px;
+
+          border:
+            1px dashed
+            rgba(
+              255,
+              196,
+              0,
+              .26
+            );
+
+          border-radius:
+            6px;
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .02
+            );
+
+          color:
+            #ffc400;
+
+          font-size:
+            18px;
+
+          font-weight:
+            900;
+
+          cursor:
+            pointer;
+        }
+
+
+        .photo-empty {
+          min-width:
+            130px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .16
+            );
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+        }
+
+
+        /*
+         * =================================================
+         * MAIN WORK AREA
+         * =================================================
+         */
+
+        .studio-work-area {
+          position: relative;
+
+          min-width: 0;
+          min-height: 0;
+
+          overflow: hidden;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .035
+            );
+
+          border-radius:
+            10px;
+        }
+
+
+        /*
+         * LEFT / RIGHT are tools laid over
+         * the work surface.
+         *
+         * They no longer participate in
+         * calculating the center point.
+         */
+
+        .studio-left-toolbar,
+        .studio-right-toolbar {
+          position: absolute;
+
+          top: 0;
+          bottom: 0;
+
+          z-index: 30;
+
+          min-height: 0;
+
+          overflow-x: hidden;
+          overflow-y: auto;
+
+          overscroll-behavior:
+            contain;
+
+          scrollbar-width:
+            thin;
+        }
+
+
+        .studio-left-toolbar {
+          left: 0;
+
+          width: 230px;
+
+          border-right:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .035
+            );
+        }
+
+
+        .studio-right-toolbar {
+          right: 0;
+
+          width: 312px;
+
+          border-left:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .035
+            );
+        }
+
+
+        /*
+         * =================================================
+         * TRUE CENTER STAGE
+         * =================================================
+         *
+         * This spans the entire work area.
+         *
+         * Card center is therefore 50% of
+         * the actual work surface — NOT the
+         * leftover space between unequal
+         * sidebars.
+         */
+
+        .studio-center-stage {
+          position: absolute;
+
+          inset: 0;
+
+          z-index: 10;
+
+          min-width: 0;
+          min-height: 0;
+
+          overflow: hidden;
+
+          padding:
+            12px
+            324px
+            12px
+            242px;
+
+          display: flex;
 
           align-items: stretch;
+          justify-content: stretch;
+
+          pointer-events:
+            auto;
         }
 
-        @media (max-width: 1100px) {
-          .ixi-object-studio-workspace {
-            grid-template-columns:
-              210px
-              minmax(
-                360px,
-                1fr
-              )
+
+        .studio-center-stage :global(
+          .studio-canvas
+        ) {
+          width: 100%;
+          height: 100%;
+
+          min-height: 0;
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Canvas stage centers the Card
+         * relative to the full viewport
+         * workspace rather than allowing
+         * uneven toolbars to move it.
+         */
+
+        .studio-center-stage :global(
+          .canvas-stage
+        ) {
+          position: absolute;
+
+          inset: 42px 0 30px;
+
+          min-height: 0;
+
+          padding:
+            20px;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: center;
+
+          overflow: auto;
+        }
+
+
+        /*
+         * =================================================
+         * SIDE TOOLBAR COMPONENT OVERRIDES
+         * =================================================
+         */
+
+        .studio-left-toolbar :global(
+          .design-bench
+        ),
+        .studio-right-toolbar :global(
+          .studio-inspector
+        ) {
+          width: 100%;
+
+          min-height: 100%;
+
+          border: 0;
+
+          border-radius: 0;
+        }
+
+
+        /*
+         * =================================================
+         * BOTTOM BENCH
+         * =================================================
+         */
+
+        .studio-bottom-bench {
+          min-width: 0;
+
+          overflow: hidden;
+        }
+
+
+        .studio-bottom-bench :global(
+          .face-order-bench
+        ) {
+          height: 100%;
+
+          margin-top: 0;
+
+          overflow: hidden;
+        }
+
+
+        .studio-bottom-bench :global(
+          .face-order-rail
+        ) {
+          overflow-x: auto;
+          overflow-y: hidden;
+
+          overscroll-behavior-x:
+            contain;
+
+          scrollbar-width:
+            thin;
+        }
+
+
+        /*
+         * =================================================
+         * GLOBAL OVERFLOW PROTECTION
+         * =================================================
+         */
+
+        :global(html),
+        :global(body) {
+          max-width: 100%;
+
+          overflow-x: hidden;
+        }
+
+
+        :global(body) {
+          margin: 0;
+        }
+
+
+        /*
+         * =================================================
+         * RESPONSIVE
+         * =================================================
+         */
+
+        @media (
+          max-width: 1200px
+        ) {
+
+          .studio-left-toolbar {
+            width:
+              205px;
+          }
+
+
+          .studio-right-toolbar {
+            width:
               280px;
           }
-        }
 
-        @media (max-width: 850px) {
-          .ixi-object-studio {
-            padding: 12px;
+
+          .studio-center-stage {
+            padding-left:
+              217px;
+
+            padding-right:
+              292px;
           }
 
-          .ixi-object-studio-workspace {
+        }
+
+
+        @media (
+          max-width: 900px
+        ) {
+
+          /*
+           * At genuinely small widths,
+           * workstation mode needs a
+           * different mobile treatment.
+           *
+           * For now we allow the tools to
+           * narrow but still do NOT create
+           * body horizontal scrolling.
+           */
+
+          .studio-left-toolbar {
+            width:
+              175px;
+          }
+
+
+          .studio-right-toolbar {
+            width:
+              230px;
+          }
+
+
+          .studio-center-stage {
+            padding-left:
+              187px;
+
+            padding-right:
+              242px;
+          }
+
+
+          .studio-top-bench {
             grid-template-columns:
-              1fr;
+              1fr 1fr;
           }
+
         }
+
       `}</style>
 
     </main>
