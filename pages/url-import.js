@@ -1249,9 +1249,15 @@ console.log("POST STAGE:", stage);
 let imageIds = [];
 let ixiManifest = null;
 
+const finalPhotoUrls =
+  getMachineMediaPreviewUrls(
+    photoItems
+  )
+    .filter(Boolean);
+
+
 if (
-  Array.isArray(importResult?.media) &&
-  importResult.media.length > 0
+  finalPhotoUrls.length > 0
 ) {
   const mediaResult =
     await processURLImportMedia({
@@ -1268,7 +1274,7 @@ if (
         importUrl,
 
       imageUrls:
-        importResult.media,
+  finalPhotoUrls,
 
      onProgress(job) {
   const processedCount =
