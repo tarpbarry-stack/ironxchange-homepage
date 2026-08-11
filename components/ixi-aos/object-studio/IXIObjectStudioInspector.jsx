@@ -14,6 +14,48 @@ export default function IXIObjectStudioInspector({
   const selectedModule =
     studio?.selectedModule;
 
+  const selectedFaceId =
+  studio
+    ?.selection
+    ?.faceId ||
+  "";
+
+
+const selectedModuleId =
+  studio
+    ?.selection
+    ?.moduleId ||
+  "";
+
+
+const selectedFieldId =
+  selectedModule
+    ?.fieldId ||
+  "";
+
+
+const selectedField =
+  selectedFieldId
+    ? (
+        object
+          ?.fieldDefinitions ||
+        []
+      ).find(
+        field =>
+          field.fieldId ===
+          selectedFieldId
+      ) || null
+    : null;
+
+
+const selectedFieldValue =
+  selectedFieldId
+    ? object
+        ?.fields?.[
+          selectedFieldId
+        ] ?? ""
+    : "";
+
 
   const selectionType =
     studio
@@ -281,21 +323,349 @@ export default function IXIObjectStudioInspector({
 
 
       {selectedModule ? (
-        <section>
+  <section className="module-editor">
 
-          <label>
-            SELECTED MODULE
-          </label>
+    <div className="section-heading">
 
-          <div className="selected-module">
-            {
+      <label>
+        SELECTED MODULE
+      </label>
+
+      <button
+        type="button"
+
+        className="remove-module"
+
+        onClick={
+          () =>
+            studio
+              ?.removeModule?.(
+                selectedFaceId,
+                selectedModuleId
+              )
+        }
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div className="module-type">
+      {
+        selectedModule
+          .moduleType
+      }
+    </div>
+
+
+    <label>
+      LABEL
+    </label>
+
+    <input
+      value={
+        selectedField
+          ?.label ??
+        selectedModule
+          ?.label ??
+        ""
+      }
+
+      onChange={
+        event => {
+
+          const value =
+            event.target.value;
+
+
+          if (
+            selectedFieldId
+          ) {
+            studio
+              ?.updateField?.(
+                selectedFieldId,
+                {
+                  label:
+                    value
+                }
+              );
+          }
+
+
+          studio
+            ?.updateModule?.(
+              selectedFaceId,
+              selectedModuleId,
+              {
+                label:
+                  value
+              }
+            );
+        }
+      }
+    />
+
+
+    {selectedFieldId ? (
+      <>
+        <label>
+          VALUE
+        </label>
+
+        <input
+          value={
+            selectedFieldValue
+          }
+
+          onChange={
+            event =>
+              studio
+                ?.setFieldValue?.(
+                  selectedFieldId,
+                  event
+                    .target
+                    .value
+                )
+          }
+        />
+
+
+        <label>
+          DATA TYPE
+        </label>
+
+        <select
+          value={
+            selectedField
+              ?.fieldType ||
+            "text"
+          }
+
+          onChange={
+            event =>
+              studio
+                ?.updateField?.(
+                  selectedFieldId,
+                  {
+                    fieldType:
+                      event
+                        .target
+                        .value
+                  }
+                )
+          }
+        >
+          <option value="text">
+            TEXT
+          </option>
+
+          <option value="number">
+            NUMBER
+          </option>
+
+          <option value="money">
+            MONEY
+          </option>
+
+          <option value="date">
+            DATE
+          </option>
+
+          <option value="datetime">
+            DATE / TIME
+          </option>
+
+          <option value="boolean">
+            YES / NO
+          </option>
+
+          <option value="address">
+            ADDRESS
+          </option>
+
+          <option value="phone">
+            PHONE
+          </option>
+
+          <option value="email">
+            EMAIL
+          </option>
+
+          <option value="url">
+            URL
+          </option>
+
+          <option value="id">
+            ID
+          </option>
+        </select>
+      </>
+    ) : null}
+
+
+    <label>
+      PRESENTATION
+    </label>
+
+    <select
+      value={
+        selectedModule
+          ?.presentation
+          ?.role ||
+        "auto"
+      }
+
+      onChange={
+        event =>
+          studio
+            ?.updateModule?.(
+              selectedFaceId,
+              selectedModuleId,
+              {
+                presentation: {
+                  ...(
+                    selectedModule
+                      ?.presentation ||
+                    {}
+                  ),
+
+                  role:
+                    event
+                      .target
+                      .value
+                }
+              }
+            )
+      }
+    >
+
+      <option value="auto">
+        AUTO
+      </option>
+
+      <option value="hero">
+        HERO
+      </option>
+
+      <option value="header">
+        HEADER
+      </option>
+
+      <option value="header-metric">
+        HEADER METRIC
+      </option>
+
+      <option value="primary">
+        PRIMARY
+      </option>
+
+      <option value="compact">
+        COMPACT
+      </option>
+
+      <option value="inline">
+        INLINE
+      </option>
+
+      <option value="summary">
+        SUMMARY
+      </option>
+
+      <option value="footer">
+        FOOTER
+      </option>
+
+    </select>
+
+
+    <label>
+      WIDTH
+    </label>
+
+    <div className="width-controls">
+
+      {[
+        [
+          "full",
+          "FULL"
+        ],
+
+        [
+          "half",
+          "HALF"
+        ],
+
+        [
+          "third",
+          "THIRD"
+        ],
+
+        [
+          "auto",
+          "AUTO"
+        ]
+      ].map(
+        ([
+          value,
+          label
+        ]) => {
+
+          const active =
+            (
               selectedModule
-                .moduleType
-            }
-          </div>
+                ?.presentation
+                ?.width ||
+              "full"
+            ) ===
+            value;
 
-        </section>
-      ) : null}
+
+          return (
+            <button
+              type="button"
+
+              key={
+                value
+              }
+
+              className={
+                active
+                  ? "width-button active"
+                  : "width-button"
+              }
+
+              onClick={
+                () =>
+                  studio
+                    ?.updateModule?.(
+                      selectedFaceId,
+                      selectedModuleId,
+                      {
+                        presentation: {
+                          ...(
+                            selectedModule
+                              ?.presentation ||
+                            {}
+                          ),
+
+                          width:
+                            value
+                        }
+                      }
+                    )
+              }
+            >
+              {label}
+            </button>
+          );
+        }
+      )}
+
+    </div>
+
+  </section>
+) : null}
 
 
       <style jsx>{`
@@ -530,6 +900,193 @@ export default function IXIObjectStudioInspector({
           font-size: 7px;
           font-weight: 900;
         }
+
+select {
+  box-sizing:
+    border-box;
+
+  width: 100%;
+  height: 29px;
+
+  margin-bottom:
+    9px;
+
+  padding:
+    0 7px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .055
+    );
+
+  border-radius:
+    4px;
+
+  outline:
+    none;
+
+  background:
+    #111;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .62
+    );
+
+  font-size:
+    6px;
+
+  font-weight:
+    900;
+}
+
+
+.module-editor label {
+  margin-top:
+    9px;
+}
+
+
+.module-type {
+  margin-bottom:
+    10px;
+
+  padding:
+    6px 7px;
+
+  border:
+    1px solid
+    rgba(
+      0,
+      194,
+      255,
+      .10
+    );
+
+  border-radius:
+    4px;
+
+  color:
+    rgba(
+      0,
+      194,
+      255,
+      .52
+    );
+
+  font-size:
+    5.5px;
+
+  font-weight:
+    950;
+
+  text-transform:
+    uppercase;
+}
+
+
+.remove-module {
+  width:
+    25px !important;
+
+  height:
+    22px !important;
+
+  border-color:
+    rgba(
+      229,
+      62,
+      62,
+      .20
+    ) !important;
+
+  color:
+    rgba(
+      229,
+      62,
+      62,
+      .72
+    ) !important;
+}
+
+
+.width-controls {
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      1fr
+    );
+
+  gap:
+    4px;
+}
+
+
+.width-button {
+  height:
+    27px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .045
+    );
+
+  border-radius:
+    4px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .012
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .26
+    );
+
+  font-size:
+    5px;
+
+  font-weight:
+    950;
+
+  cursor:
+    pointer;
+}
+
+
+.width-button.active {
+  border-color:
+    rgba(
+      255,
+      196,
+      0,
+      .34
+    );
+
+  color:
+    #ffc400;
+}
 
       `}</style>
 
