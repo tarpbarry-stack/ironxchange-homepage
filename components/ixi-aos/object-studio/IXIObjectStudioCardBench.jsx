@@ -131,29 +131,33 @@ export default function IXIObjectStudioCardBench({
       <style jsx>{`
 
         .card-bench {
-          margin-top: 12px;
+  width: 100%;
+  height: 100%;
 
-          padding: 10px;
+  margin: 0;
+  padding: 10px;
 
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .05
-            );
+  overflow: hidden;
 
-          border-radius: 9px;
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .05
+    );
 
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .01
-            );
-        }
+  border-radius: 9px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .01
+    );
+}
 
 
         .bench-heading {
