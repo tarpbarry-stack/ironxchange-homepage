@@ -997,12 +997,65 @@ const isAuctionWorkflow =
   useEffect(() => {
     if (!listing) return;
 
-    setEdit({
-      price: clean(listing.price),
-      hours: clean(listing.hours),
-      location: clean(listing.location),
-      description: clean(listing.description || listing.publicData?.description)
-    });
+   const listingPublicData =
+  listing?.publicData ||
+  listing?.attributes?.publicData ||
+  {};
+
+const listingPrice =
+  listing?.price?.amount != null
+    ? String(
+        Number(
+          listing.price.amount
+        ) / 100
+      )
+    : listing?.attributes?.price?.amount != null
+      ? String(
+          Number(
+            listing.attributes.price.amount
+          ) / 100
+        )
+      : clean(
+          listing?.price
+        );
+
+const listingHours =
+  listing?.hours ??
+  listingPublicData?.hours ??
+  "";
+
+const listingLocation =
+  listing?.location ||
+  listingPublicData?.location ||
+  "";
+
+const listingDescription =
+  listing?.description ||
+  listing?.attributes?.description ||
+  listingPublicData?.description ||
+  "";
+
+setEdit({
+  price:
+    clean(
+      listingPrice
+    ),
+
+  hours:
+    clean(
+      listingHours
+    ),
+
+  location:
+    clean(
+      listingLocation
+    ),
+
+  description:
+    clean(
+      listingDescription
+    )
+});
 
     setSelectedKeywords(getListingKeywords(listing));
     setWorkflowStatus(getWorkflowStatus(listing));
