@@ -1598,7 +1598,89 @@ listingStatus:
 
       images: imageIds
     };
+    const publicDataJson =
+  JSON.stringify(
+    listingPayload.publicData ||
+    {}
+  );
 
+const payloadJson =
+  JSON.stringify(
+    listingPayload
+  );
+
+
+console.log(
+  "SHARETRIBE PAYLOAD SIZE:",
+  {
+    publicDataBytes:
+      new Blob([
+        publicDataJson
+      ]).size,
+
+    totalPayloadBytes:
+      new Blob([
+        payloadJson
+      ]).size,
+
+    descriptionChars:
+      String(
+        listingPayload.description ||
+        ""
+      ).length,
+
+    auctionBytes:
+      new Blob([
+        JSON.stringify(
+          listingPayload
+            ?.publicData
+            ?.auction ||
+          {}
+        )
+      ]).size,
+
+    auctionDataBytes:
+      new Blob([
+        JSON.stringify(
+          listingPayload
+            ?.publicData
+            ?.auctionData ||
+          {}
+        )
+      ]).size,
+
+    auctionEventBytes:
+      new Blob([
+        JSON.stringify(
+          listingPayload
+            ?.publicData
+            ?.auctionEvent ||
+          {}
+        )
+      ]).size,
+
+    auctionLotBytes:
+      new Blob([
+        JSON.stringify(
+          listingPayload
+            ?.publicData
+            ?.auctionLot ||
+          {}
+        )
+      ]).size,
+
+    auctionTermsBytes:
+      new Blob([
+        JSON.stringify(
+          listingPayload
+            ?.publicData
+            ?.auctionTerms ||
+          {}
+        )
+      ]).size
+  }
+);    
+    
     console.log("LISTING PAYLOAD READY:", listingPayload);
 
     /*
