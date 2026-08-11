@@ -5,6 +5,9 @@ import {
 import IXIMachineRail
   from "../../IXIMachineRail";
 
+import IXIObjectCardActuator
+  from "../../ixi-chassis/IXIObjectCardActuator";
+
 import {
   getIXIAosObjectId,
   getIXIAosObjectName,
@@ -597,6 +600,12 @@ onSelectModule = null,
  */
 onOpenConsole = null,
 
+onExpandConsoleLeft = null,
+onExpandConsoleRight = null,
+
+consoleLeftOpen = false,
+consoleRightOpen = false,
+
 forcedFaceIndex = null,
 }) {
 
@@ -966,63 +975,103 @@ const bodyFaceModules =
       "object-identity"
   );  
   return (
-    <section
+   <section
+  className={[
+    "ixi-aos-card-runtime",
+    "card",
+
+    `board-color-${
+      boardColor
+    }`,
+
+    `board-outline-${
+      boardOutline
+    }`
+  ].join(" ")}
+
+  data-ixi-object-id={
+    objectId
+  }
+
+  data-ixi-card-definition-id={
+    resolvedDefinition
+      ?.cardDefinitionId ||
+    ""
+  }
+
+  {...(
+    capabilities.draggable
+      ? dragHandleProps || {}
+      : {}
+  )}
+>
+
+  {/* ===================================================
+      CONSOLE ACTUATORS
+      =================================================== */}
+
+  {typeof onExpandConsoleLeft ===
+  "function" ? (
+    <IXIObjectCardActuator
+      side="left"
+
+      variant="tall"
+
+      label="Open console left"
+
+      title="Open console left"
+
+      onClick={
+        onExpandConsoleLeft
+      }
+    />
+  ) : null}
+
+
+  {typeof onExpandConsoleRight ===
+  "function" ? (
+    <IXIObjectCardActuator
+      side="right"
+
+      variant="tall"
+
+      label="Open console right"
+
+      title="Open console right"
+
+      onClick={
+        onExpandConsoleRight
+      }
+    />
+  ) : null}
+
+
+  {/* ===================================================
+      ACTION NOTICE
+      =================================================== */}
+
+  {capabilities.hasNotices &&
+  actionNotice?.message ? (
+    <div
       className={[
-        "ixi-aos-card-runtime",
-        "card",
+        "ixi-aos-card-notice",
 
-        `board-color-${
-          boardColor
-        }`,
-
-        `board-outline-${
-          boardOutline
+        `tone-${
+          actionNotice?.tone ||
+          "success"
         }`
       ].join(" ")}
-
-      data-ixi-object-id={
-        objectId
-      }
-
-      data-ixi-card-definition-id={
-        resolvedDefinition
-          ?.cardDefinitionId ||
-        ""
-      }
-
-      {...(
-        capabilities.draggable
-          ? dragHandleProps || {}
-          : {}
-      )}
     >
-
-      {/* ===================================================
-          ACTION NOTICE
-          =================================================== */}
-
-      {capabilities.hasNotices &&
-      actionNotice?.message ? (
-        <div
-          className={[
-            "ixi-aos-card-notice",
-
-            `tone-${
-              actionNotice?.tone ||
-              "success"
-            }`
-          ].join(" ")}
-        >
-          {actionNotice.message}
-        </div>
-      ) : null}
+      {actionNotice.message}
+    </div>
+  ) : null}
 
 
-      {/* ===================================================
-          FACE HEADER
-          =================================================== */}
+  {/* ===================================================
+      FACE HEADER
+      =================================================== */}
 
-      <div className="ixi-aos-card-header">
+  <div className="ixi-aos-card-header">
 
         <div className="ixi-aos-card-heading">
 
