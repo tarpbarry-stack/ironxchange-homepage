@@ -190,9 +190,6 @@ export default function IXIObjectStudio() {
         createDefaultStudioDraft()
     });
 
-
-  export default function IXIObjectStudio() {
-
     const [
     previewCardState,
     setPreviewCardState
