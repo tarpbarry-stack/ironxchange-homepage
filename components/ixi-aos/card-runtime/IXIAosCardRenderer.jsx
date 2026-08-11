@@ -3,23 +3,12 @@ import {
   useState
 } from "react";
 
-import IXIAosCardConsole
-  from "./IXIAosCardConsole";
-
-import {
-  getIXIAosConsoleState,
-  toggleIXIAosConsole
-} from "./IXIAosConsoleStateEngine";
-
-import {
-  resolveIXICardDefinition,
-  getIXIAosObjectId,
-  getIXICardFaceCount,
-  getIXICardCapabilities
-} from "./IXICardDefinitionEngine";
-
 import IXIAosCardRuntime
   from "./IXIAosCardRuntime";
+
+import {
+  resolveIXICardDefinition
+} from "./IXICardDefinitionEngine";
 
 import {
   renderIXIAosContainerModule
@@ -32,6 +21,7 @@ import {
  * This is NOT a taxonomy registry.
  *
  * It does not ask:
+ *
  * - location?
  * - employee?
  * - job?
@@ -44,6 +34,19 @@ import {
  * 3. What modules does the active Face request?
  *
  * Placement never changes Card identity.
+ *
+ *
+ * IMPORTANT
+ * ---------
+ *
+ * This renderer does NOT own console physics.
+ *
+ * The existing IXI console system remains
+ * responsible for console slots, expansion,
+ * persistence, face swapping, and layout.
+ *
+ * Object Studio / AOS will plug into that
+ * system separately.
  */
 
 
@@ -63,8 +66,8 @@ export default function IXIAosCardRenderer({
   /*
    * All AOS Objects currently loaded.
    *
-   * Needed for container relationships,
-   * children, ancestry, etc.
+   * Needed for containment and relationship
+   * projection inside container modules.
    */
   objects = [],
 
@@ -96,7 +99,13 @@ export default function IXIAosCardRenderer({
   onExposeObject = null,
 
   /*
-   * CONSOLE
+   * CONSOLE ENTRY POINT
+   *
+   * The caller may connect this to the
+   * existing IXI console system.
+   *
+   * This renderer itself does not create
+   * or manage console state.
    */
   onOpenConsole = null,
 
@@ -111,6 +120,10 @@ export default function IXIAosCardRenderer({
    */
   renderCard = null
 }) {
+
+  /* =======================================================
+     CARD DEFINITION
+     ======================================================= */
 
   const resolvedDefinition =
     useMemo(
@@ -127,38 +140,14 @@ export default function IXIAosCardRenderer({
       ]
     );
 
-const objectId =
-  getIXIAosObjectId(
-    object
-  );
 
+  /* =======================================================
+     CONTAINER DECK STATE
+     ======================================================= */
 
-const capabilities =
-  getIXICardCapabilities(
-    resolvedDefinition
-  );
-
-
-const faceCount =
-  Math.max(
-    1,
-    getIXICardFaceCount(
-      resolvedDefinition
-    )
-  );
-
-
-const consoleState =
-  getIXIAosConsoleState(
-    ixiState
-  );
-
-
-  
   /*
-   * Container deck selection belongs
-   * to this Card instance's workspace
-   * presentation.
+   * Container deck selection belongs to
+   * workspace presentation.
    *
    * It is NOT durable containment truth.
    */
@@ -169,13 +158,19 @@ const consoleState =
     useState(0);
 
 
+  /* =======================================================
+     CONTAINED CARD RENDERER
+     ======================================================= */
+
   /*
-   * Recursive Card renderer.
+   * If the caller supplies a Card renderer,
+   * use it.
    *
-   * If caller supplies one, use it.
+   * Otherwise recurse through this same
+   * renderer.
    *
-   * Otherwise this component can render
-   * contained Cards through itself.
+   * The container NEVER substitutes another
+   * Card family for the child Object.
    */
   function renderContainedCard({
     object:
@@ -203,6 +198,7 @@ const consoleState =
 
     return (
       <IXIAosCardRenderer
+
         object={
           childObject
         }
@@ -218,9 +214,11 @@ const consoleState =
         }
 
         /*
-         * Preview Card is presentation
-         * only. Do not install another
-         * Board drag activator inside it.
+         * Container preview is presentation
+         * only.
+         *
+         * Do not install another Board drag
+         * activator inside the preview.
          */
         dragHandleProps={{}}
 
@@ -230,10 +228,27 @@ const consoleState =
           () => {}
         }
 
+        saved={
+          false
+        }
+
         armedDestination=""
 
-        onSendFront={() => {}}
-        onSendBack={() => {}}
+        onSendFront={
+          () => {}
+        }
+
+        onSendBack={
+          () => {}
+        }
+
+        onCycleColor={
+          () => {}
+        }
+
+        onCycleOutline={
+          () => {}
+        }
 
         onSendToArmedDestination={
           () => {}
@@ -262,10 +277,15 @@ const consoleState =
         renderCard={
           renderCard
         }
+
       />
     );
   }
 
+
+  /* =======================================================
+     MODULE DISPATCH
+     ======================================================= */
 
   function renderModule({
     object:
@@ -286,12 +306,13 @@ const consoleState =
 
 
     /*
-     * Container module pack.
+     * CONTAINER MODULE PACK
      *
-     * If the requested module does not
-     * belong to this pack, it returns null
-     * and IXIAosCardRuntime can fall back
-     * to its built-in generic modules.
+     * This renderer only delegates the
+     * module request.
+     *
+     * It does NOT decide that the Object
+     * "is" a container type.
      */
     const containerModule =
       renderIXIAosContainerModule({
@@ -337,76 +358,37 @@ const consoleState =
     /*
      * Returning null means:
      *
-     * "I do not own this module."
+     * "This dispatcher does not own this
+     * module."
      *
-     * IXIAosCardRuntime will then try
-     * its generic built-in modules:
-     *
-     * object-identity
-     * primary-media
-     * object-fields
+     * IXIAosCardRuntime may then use its
+     * own generic module renderer.
      */
     return null;
   }
 
-function toggleConsole() {
 
-  if (
-    !capabilities.hasConsole ||
-    !objectId
-  ) {
-    return;
-  }
+  /* =======================================================
+     CARD RUNTIME
+     ======================================================= */
 
-
-  const nextConsoleState =
-    toggleIXIAosConsole(
-      consoleState,
-      faceCount
-    );
-
-
-  onIxiStateChange?.(
-    objectId,
-    {
-      console:
-        nextConsoleState
-    }
-  );
-
-
-  onOpenConsole?.(
-    object,
-    resolvedDefinition,
-    nextConsoleState
-  );
-}
-  
-  if (
-  capabilities.hasConsole &&
-  consoleState.open
-) {
   return (
-    <IXIAosCardConsole
+    <IXIAosCardRuntime
 
       object={
         object
-      }
-
-      objectId={
-        objectId
       }
 
       cardDefinition={
         resolvedDefinition
       }
 
-      faceCount={
-        faceCount
-      }
-
       parentLabel={
         parentLabel
+      }
+
+      dragHandleProps={
+        dragHandleProps
       }
 
       ixiState={
@@ -445,78 +427,14 @@ function toggleConsole() {
         onSendToArmedDestination
       }
 
+      onOpenConsole={
+        onOpenConsole
+      }
+
       renderModule={
         renderModule
       }
 
     />
   );
-}
-
-
-return (
-  <IXIAosCardRuntime
-
-    object={
-      object
-    }
-
-    cardDefinition={
-      resolvedDefinition
-    }
-
-    parentLabel={
-      parentLabel
-    }
-
-    dragHandleProps={
-      dragHandleProps
-    }
-
-    ixiState={
-      ixiState
-    }
-
-    onIxiStateChange={
-      onIxiStateChange
-    }
-
-    saved={
-      saved
-    }
-
-    armedDestination={
-      armedDestination
-    }
-
-    onSendFront={
-      onSendFront
-    }
-
-    onSendBack={
-      onSendBack
-    }
-
-    onCycleColor={
-      onCycleColor
-    }
-
-    onCycleOutline={
-      onCycleOutline
-    }
-
-    onSendToArmedDestination={
-      onSendToArmedDestination
-    }
-
-    onOpenConsole={
-      toggleConsole
-    }
-
-    renderModule={
-      renderModule
-    }
-
-  />
-);
 }
