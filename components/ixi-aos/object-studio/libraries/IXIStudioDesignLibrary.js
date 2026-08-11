@@ -1039,87 +1039,95 @@ export const IXI_STUDIO_CARD_LIBRARY = [
     description:
       "Vehicle operating card.",
 
-    fields: [
-      {
-        fieldId:
-          "year",
+   fields: [
+  {
+    fieldId:
+      "year",
 
-        label:
-          "YEAR",
+    label:
+      "YEAR",
 
-        fieldType:
-          "number"
-      },
+    fieldType:
+      "number"
+  },
 
-      {
-        fieldId:
-          "make",
+  {
+    fieldId:
+      "make",
 
-        label:
-          "MAKE",
+    label:
+      "MAKE",
 
-        fieldType:
-          "text"
-      },
+    fieldType:
+      "text"
+  },
 
-      {
-        fieldId:
-          "model",
-               {
-        fieldId:
-          "vin",
+  {
+    fieldId:
+      "model",
 
-        label:
-          "VIN",
+    label:
+      "MODEL",
 
-        fieldType:
-          "text"
-      },
+    fieldType:
+      "text"
+  },
 
-      {
-        fieldId:
-          "miles",
+  {
+    fieldId:
+      "vin",
 
-        label:
-          "MILES",
+    label:
+      "VIN",
 
-        fieldType:
-          "number"
-      },
+    fieldType:
+      "text"
+  },
 
-      {
-        fieldId:
-          "value",
+  {
+    fieldId:
+      "miles",
 
-        label:
-          "VALUE",
+    label:
+      "MILES",
 
-        fieldType:
-          "money"
-      },
+    fieldType:
+      "number"
+  },
 
-      {
-        fieldId:
-          "location",
+  {
+    fieldId:
+      "value",
 
-        label:
-          "LOCATION",
+    label:
+      "VALUE",
 
-        fieldType:
-          "text"
-      },
+    fieldType:
+      "money"
+  },
 
-      {
-        fieldId:
-          "status",
+  {
+    fieldId:
+      "location",
 
-        label:
-          "STATUS",
+    label:
+      "LOCATION",
 
-        fieldType:
-          "text"
-      }
-    ],
+    fieldType:
+      "text"
+  },
+
+  {
+    fieldId:
+      "status",
+
+    label:
+      "STATUS",
+
+    fieldType:
+      "text"
+  }
+],
 
     faces: [
       {
