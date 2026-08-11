@@ -191,13 +191,20 @@ export default function IXIObjectStudio() {
     });
 
 
+  export default function IXIObjectStudio() {
+
+  const studio =
+    useIXIObjectStudio({
+      initialDraft:
+        createDefaultStudioDraft()
+    });
+
+
   const [
-  previewScaleMode,
-  setPreviewScaleMode
-] =
-  useState(
-    "xl"
-  );
+    previewCardState,
+    setPreviewCardState
+  ] =
+    useState({
       color:
         "none",
 
@@ -207,6 +214,15 @@ export default function IXIObjectStudio() {
       face:
         1
     });
+
+
+  const [
+    previewScaleMode,
+    setPreviewScaleMode
+  ] =
+    useState(
+      "xl"
+    );
 
 
   function updatePreviewCardState(
