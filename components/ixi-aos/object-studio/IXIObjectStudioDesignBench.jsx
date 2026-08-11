@@ -150,9 +150,10 @@ export default function IXIObjectStudioDesignBench({
       <style jsx>{`
 
         .design-bench {
-          min-height: 590px;
+  min-height: 100%;
 
-          padding: 12px;
+  padding:
+    16px 14px 22px;
 
           border:
             1px solid
@@ -185,9 +186,24 @@ export default function IXIObjectStudioDesignBench({
 
           gap: 8px;
 
-          margin-bottom: 9px;
-        }
+           margin-bottom: 12px;
+}
 
+
+.face-list {
+  gap: 7px;
+}
+
+
+.module-grid {
+  gap: 7px;
+}
+
+
+.divider {
+  margin:
+    22px 0;
+}
 
         .bench-title > strong {
           color: #ffc400;
