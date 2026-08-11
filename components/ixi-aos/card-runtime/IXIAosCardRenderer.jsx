@@ -3,6 +3,21 @@ import {
   useState
 } from "react";
 
+import IXIAosCardConsole
+  from "./IXIAosCardConsole";
+
+import {
+  getIXIAosConsoleState,
+  toggleIXIAosConsole
+} from "./IXIAosConsoleStateEngine";
+
+import {
+  resolveIXICardDefinition,
+  getIXIAosObjectId,
+  getIXICardFaceCount,
+  getIXICardCapabilities
+} from "./IXICardDefinitionEngine";
+
 import IXIAosCardRuntime
   from "./IXIAosCardRuntime";
 
@@ -116,7 +131,34 @@ export default function IXIAosCardRenderer({
       ]
     );
 
+const objectId =
+  getIXIAosObjectId(
+    object
+  );
 
+
+const capabilities =
+  getIXICardCapabilities(
+    resolvedDefinition
+  );
+
+
+const faceCount =
+  Math.max(
+    1,
+    getIXICardFaceCount(
+      resolvedDefinition
+    )
+  );
+
+
+const consoleState =
+  getIXIAosConsoleState(
+    ixiState
+  );
+
+
+  
   /*
    * Container deck selection belongs
    * to this Card instance's workspace
@@ -311,24 +353,64 @@ export default function IXIAosCardRenderer({
     return null;
   }
 
+function toggleConsole() {
 
+  if (
+    !capabilities.hasConsole ||
+    !objectId
+  ) {
+    return;
+  }
+
+
+  const nextConsoleState =
+    toggleIXIAosConsole(
+      consoleState,
+      faceCount
+    );
+
+
+  onIxiStateChange?.(
+    objectId,
+    {
+      console:
+        nextConsoleState
+    }
+  );
+
+
+  onOpenConsole?.(
+    object,
+    resolvedDefinition,
+    nextConsoleState
+  );
+}
+  
+  if (
+  capabilities.hasConsole &&
+  consoleState.open
+) {
   return (
-    <IXIAosCardRuntime
+    <IXIAosCardConsole
 
       object={
         object
+      }
+
+      objectId={
+        objectId
       }
 
       cardDefinition={
         resolvedDefinition
       }
 
-      parentLabel={
-        parentLabel
+      faceCount={
+        faceCount
       }
 
-      dragHandleProps={
-        dragHandleProps
+      parentLabel={
+        parentLabel
       }
 
       ixiState={
@@ -367,14 +449,78 @@ export default function IXIAosCardRenderer({
         onSendToArmedDestination
       }
 
-      onOpenConsole={
-        onOpenConsole
-      }
-
       renderModule={
         renderModule
       }
 
     />
   );
+}
+
+
+return (
+  <IXIAosCardRuntime
+
+    object={
+      object
+    }
+
+    cardDefinition={
+      resolvedDefinition
+    }
+
+    parentLabel={
+      parentLabel
+    }
+
+    dragHandleProps={
+      dragHandleProps
+    }
+
+    ixiState={
+      ixiState
+    }
+
+    onIxiStateChange={
+      onIxiStateChange
+    }
+
+    saved={
+      saved
+    }
+
+    armedDestination={
+      armedDestination
+    }
+
+    onSendFront={
+      onSendFront
+    }
+
+    onSendBack={
+      onSendBack
+    }
+
+    onCycleColor={
+      onCycleColor
+    }
+
+    onCycleOutline={
+      onCycleOutline
+    }
+
+    onSendToArmedDestination={
+      onSendToArmedDestination
+    }
+
+    onOpenConsole={
+      toggleConsole
+    }
+
+    renderModule={
+      renderModule
+    }
+
+  />
+);
 }
