@@ -1,5 +1,5 @@
-import IXIAosCardRenderer
-  from "../card-runtime/IXIAosCardRenderer";
+import IXIAosObjectConsole
+  from "../console-runtime/IXIAosObjectConsole";
 
 
 export default function IXIObjectStudioCanvas({
@@ -21,6 +21,27 @@ export default function IXIObjectStudioCanvas({
     );
 
 
+  const cardDefinition =
+    studio
+      ?.previewCardDefinition ||
+    {};
+
+
+  /*
+   * Console state uses the same Object
+   * state contract as the rest of IXI.
+   *
+   * The Canvas owns the local Studio
+   * preview state. The console simply
+   * consumes it.
+   */
+  const ixiCardState = {
+    [objectId]:
+      previewCardState ||
+      {}
+  };
+
+
   return (
     <section className="studio-canvas">
 
@@ -31,7 +52,7 @@ export default function IXIObjectStudioCanvas({
         </strong>
 
         <span>
-          ACTUAL CARD RUNTIME
+          ACTUAL CARD + CONSOLE RUNTIME
         </span>
 
       </header>
@@ -39,77 +60,65 @@ export default function IXIObjectStudioCanvas({
 
       <div className="canvas-stage">
 
-        <IXIAosCardRenderer
-
+        <IXIAosObjectConsole
           object={
             object
           }
 
+          objectId={
+            objectId
+          }
+
           cardDefinition={
-            studio
-              ?.previewCardDefinition
+            cardDefinition
           }
 
-          objects={[
-            object
-          ]}
+          parentLabel=""
 
-          ixiState={
-            previewCardState
+          ixiCardState={
+            ixiCardState
           }
 
-          onIxiStateChange={
+          updateIxiCardState={
             updatePreviewCardState
           }
 
-          onCycleColor={
-            () => {}
+          previewCardState={
+            previewCardState
           }
 
-          onCycleOutline={
-            () => {}
-          }
-
-          onSendFront={
-            () => {}
-          }
-
-          onSendBack={
-            () => {}
-          }
-
-          onSendToArmedDestination={
-            () => {}
-          }
-
-          onOpenConsole={
-            () => {}
+          updatePreviewCardState={
+            updatePreviewCardState
           }
 
           studioEditing={
-  true
-}
+            true
+          }
 
-selectedModuleId={
-  studio
-    ?.selection
-    ?.moduleId ||
-  ""
-}
+          selectedModuleId={
+            studio
+              ?.selection
+              ?.moduleId ||
+            ""
+          }
 
-onSelectModule={({
-  faceId,
-  moduleId
-}) => {
+          onSelectModule={({
+            faceId,
+            moduleId
+          }) => {
 
-  studio
-    ?.selectModule?.(
-      faceId,
-      moduleId
-    );
-}}
+            studio
+              ?.selectModule?.(
+                faceId,
+                moduleId
+              );
+          }}
 
-          
+          enableCardScaling={
+            false
+          }
+
+          cardScaleMode="xl"
         />
 
       </div>
@@ -127,8 +136,7 @@ onSelectModule={({
 
         <span>
           {
-            studio
-              ?.previewCardDefinition
+            cardDefinition
               ?.faces
               ?.length ||
             1
@@ -145,13 +153,13 @@ onSelectModule={({
       <style jsx>{`
 
         .studio-canvas {
-  position: relative;
+          position: relative;
 
-  width: 100%;
-  height: 100%;
+          width: 100%;
+          height: 100%;
 
-  min-width: 0;
-  min-height: 0;
+          min-width: 0;
+          min-height: 0;
 
           display: flex;
           flex-direction: column;
@@ -189,6 +197,7 @@ onSelectModule={({
 
         header {
           height: 42px;
+          flex: 0 0 42px;
 
           padding:
             0 12px;
@@ -232,11 +241,19 @@ onSelectModule={({
         }
 
 
+        /*
+         * Console assembly is centered as
+         * one physical object.
+         *
+         * When it exceeds the available
+         * work surface, THIS surface scrolls.
+         * The page does not.
+         */
         .canvas-stage {
-  flex: 1;
+          flex: 1;
 
-  min-width: 0;
-  min-height: 0;
+          min-width: 0;
+          min-height: 0;
 
           display: flex;
 
@@ -247,11 +264,50 @@ onSelectModule={({
 
           padding:
             28px;
+
+          scrollbar-width:
+            thin;
+
+          scrollbar-color:
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            )
+            transparent;
+        }
+
+
+        .canvas-stage::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
+        }
+
+
+        .canvas-stage::-webkit-scrollbar-track {
+          background:
+            transparent;
+        }
+
+
+        .canvas-stage::-webkit-scrollbar-thumb {
+          border-radius:
+            999px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
         }
 
 
         .canvas-status {
           height: 30px;
+          flex: 0 0 30px;
 
           display: flex;
 
