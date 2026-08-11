@@ -607,6 +607,8 @@ consoleLeftOpen = false,
 consoleRightOpen = false,
 
 forcedFaceIndex = null,
+
+faceOnly = false,
 }) {
 
   const objectId =
@@ -1010,8 +1012,9 @@ const bodyFaceModules =
       CONSOLE ACTUATORS
       =================================================== */}
 
-  {typeof onExpandConsoleLeft ===
-  "function" ? (
+  {!faceOnly &&
+typeof onExpandConsoleLeft ===
+"function" ? (
     <IXIObjectCardActuator
       side="left"
 
@@ -1028,8 +1031,9 @@ const bodyFaceModules =
   ) : null}
 
 
-  {typeof onExpandConsoleRight ===
-  "function" ? (
+  {!faceOnly &&
+typeof onExpandConsoleRight ===
+"function" ? (
     <IXIObjectCardActuator
       side="right"
 
@@ -1273,11 +1277,12 @@ const bodyFaceModules =
           STANDARD IXI RAIL
           =================================================== */}
 
-      {capabilities.hasRail ? (
-        <IXIMachineRail
-          listing={
-            object
-          }
+      {capabilities.hasRail &&
+!faceOnly ? (
+  <IXIMachineRail
+    listing={
+      object
+    }
 
           saved={
             saved
