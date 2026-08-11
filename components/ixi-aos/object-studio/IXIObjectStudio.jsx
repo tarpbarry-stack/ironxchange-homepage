@@ -148,12 +148,11 @@ export default function IXIObjectStudio() {
 
 
   /*
-   * Preview card workspace state.
+   * LIVE CARD PRESENTATION STATE
    *
-   * This is NOT Object Studio draft truth.
-   *
-   * It is normal IXI card presentation state:
-   * face, color, outline, rail behavior, etc.
+   * This is workspace/presentation state.
+   * It is NOT Object truth and it is NOT
+   * Card Definition truth.
    */
   const [
     previewCardState,
@@ -179,6 +178,7 @@ export default function IXIObjectStudio() {
     setPreviewCardState(
       current => ({
         ...current,
+
         ...(
           patch ||
           {}
@@ -193,8 +193,9 @@ export default function IXIObjectStudio() {
     const faceCount =
       Math.max(
         1,
+
         studio
-          .previewCardDefinition
+          ?.previewCardDefinition
           ?.faces
           ?.length ||
         1
@@ -207,6 +208,7 @@ export default function IXIObjectStudio() {
         const currentFace =
           Math.max(
             1,
+
             Number(
               current.face ||
               1
@@ -285,11 +287,11 @@ export default function IXIObjectStudio() {
       <IXIObjectStudioFaceOrderBench
         studio={
           studio
-        />
+        }
+      />
 
 
       <style jsx>{`
-
         .ixi-object-studio {
           width: 100%;
           min-height: 100vh;
@@ -304,7 +306,7 @@ export default function IXIObjectStudio() {
                 0,
                 194,
                 255,
-                .035
+                0.035
               ),
               transparent 34%
             ),
@@ -313,10 +315,8 @@ export default function IXIObjectStudio() {
           color: white;
         }
 
-
         .ixi-object-studio-workspace {
           width: 100%;
-
           min-height: 590px;
 
           margin-top: 12px;
@@ -333,15 +333,10 @@ export default function IXIObjectStudio() {
 
           gap: 12px;
 
-          align-items:
-            stretch;
+          align-items: stretch;
         }
 
-
-        @media (
-          max-width: 1100px
-        ) {
-
+        @media (max-width: 1100px) {
           .ixi-object-studio-workspace {
             grid-template-columns:
               210px
@@ -353,23 +348,16 @@ export default function IXIObjectStudio() {
           }
         }
 
-
-        @media (
-          max-width: 850px
-        ) {
-
+        @media (max-width: 850px) {
           .ixi-object-studio {
-            padding:
-              12px;
+            padding: 12px;
           }
-
 
           .ixi-object-studio-workspace {
             grid-template-columns:
               1fr;
           }
         }
-
       `}</style>
 
     </main>
