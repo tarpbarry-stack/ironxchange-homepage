@@ -1065,3 +1065,1034 @@ export const IXI_STUDIO_CARD_LIBRARY = [
       {
         fieldId:
           "model",
+               {
+        fieldId:
+          "vin",
+
+        label:
+          "VIN",
+
+        fieldType:
+          "text"
+      },
+
+      {
+        fieldId:
+          "miles",
+
+        label:
+          "MILES",
+
+        fieldType:
+          "number"
+      },
+
+      {
+        fieldId:
+          "value",
+
+        label:
+          "VALUE",
+
+        fieldType:
+          "money"
+      },
+
+      {
+        fieldId:
+          "location",
+
+        label:
+          "LOCATION",
+
+        fieldType:
+          "text"
+      },
+
+      {
+        fieldId:
+          "status",
+
+        label:
+          "STATUS",
+
+        fieldType:
+          "text"
+      }
+    ],
+
+    faces: [
+      {
+        designId:
+          "ixi:card:vehicle:face-1",
+
+        name:
+          "VEHICLE",
+
+        modules: [
+          {
+            moduleId:
+              "vehicle:identity",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.IDENTITY,
+
+            label:
+              "VEHICLE",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.HEADER,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL,
+
+            config: {
+              identityFields: [
+                "year",
+                "make",
+                "model"
+              ],
+
+              metricField:
+                "miles",
+
+              metricSuffix:
+                "MI"
+            }
+          },
+
+          {
+            moduleId:
+              "vehicle:photo",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.MEDIA,
+
+            label:
+              "PHOTO",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.HERO,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          },
+
+          {
+            moduleId:
+              "vehicle:vin",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.FIELD,
+
+            label:
+              "VIN",
+
+            fieldId:
+              "vin",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.COMPACT,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL,
+
+            config: {
+              showLabel:
+                true
+            }
+          },
+
+          {
+            moduleId:
+              "vehicle:value",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.FIELD,
+
+            label:
+              "VALUE",
+
+            fieldId:
+              "value",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.INLINE,
+
+            width:
+              IXI_STUDIO_WIDTHS.HALF
+          },
+
+          {
+            moduleId:
+              "vehicle:location",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.FIELD,
+
+            label:
+              "LOCATION",
+
+            fieldId:
+              "location",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.INLINE,
+
+            width:
+              IXI_STUDIO_WIDTHS.HALF
+          },
+
+          {
+            moduleId:
+              "vehicle:status",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.STATUS,
+
+            label:
+              "STATUS",
+
+            fieldId:
+              "status",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.INLINE,
+
+            width:
+              IXI_STUDIO_WIDTHS.HALF
+          },
+
+          {
+            moduleId:
+              "vehicle:relationships",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.RELATIONSHIP_SUMMARY,
+
+            label:
+              "RELATIONSHIPS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.SUMMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.HALF
+          }
+        ]
+      },
+
+      {
+        designId:
+          "ixi:card:vehicle:face-2",
+
+        name:
+          "DETAILS",
+
+        modules: [
+          {
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.FIELD_GROUP,
+
+            label:
+              "VEHICLE DETAILS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.PRIMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL,
+
+            config: {
+              fields: [
+                "year",
+                "make",
+                "model",
+                "vin",
+                "miles",
+                "value",
+                "location",
+                "status"
+              ]
+            }
+          }
+        ]
+      },
+
+      {
+        designId:
+          "ixi:card:vehicle:face-3",
+
+        name:
+          "RELATIONSHIPS",
+
+        modules: [
+          {
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.RELATIONSHIP_SUMMARY,
+
+            label:
+              "RELATIONSHIPS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.SUMMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          }
+        ]
+      }
+    ],
+
+    capabilities: {
+      canContain:
+        false,
+
+      canReceiveDrop:
+        false,
+
+      hasConsole:
+        true
+    }
+  }),
+
+
+  /*
+   * CONTAINER
+   *
+   * Not "Location Container."
+   * Not "Job Container."
+   *
+   * Just a reusable Card design with
+   * containment capabilities.
+   */
+  createIXIStudioCardDesign({
+    designId:
+      "ixi:card:container",
+
+    name:
+      "CONTAINER",
+
+    description:
+      "Generic recursive Object container.",
+
+    fields: [],
+
+    faces: [
+      {
+        designId:
+          "ixi:card:container:face-1",
+
+        name:
+          "CONTAINER",
+
+        modules: [
+          {
+            moduleId:
+              "container:identity",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.IDENTITY,
+
+            label:
+              "IDENTITY",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.HEADER,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          },
+
+          {
+            moduleId:
+              "container:deck",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.CHILD_DECK,
+
+            label:
+              "OBJECTS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.HERO,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          },
+
+          {
+            moduleId:
+              "container:summary",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.CONTAINER_SUMMARY,
+
+            label:
+              "SUMMARY",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.SUMMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          },
+
+          {
+            moduleId:
+              "container:actions",
+
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.CONTAINER_ACTIONS,
+
+            label:
+              "ACTIONS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.FOOTER,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          }
+        ]
+      },
+
+      {
+        designId:
+          "ixi:card:container:face-2",
+
+        name:
+          "RELATIONSHIPS",
+
+        modules: [
+          {
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.RELATIONSHIP_SUMMARY,
+
+            label:
+              "RELATIONSHIPS",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.SUMMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          }
+        ]
+      },
+
+      {
+        designId:
+          "ixi:card:container:face-3",
+
+        name:
+          "HISTORY",
+
+        modules: [
+          {
+            moduleType:
+              IXI_STUDIO_MODULE_TYPES.HISTORY,
+
+            label:
+              "HISTORY",
+
+            presentationRole:
+              IXI_STUDIO_PRESENTATION_ROLES.SUMMARY,
+
+            width:
+              IXI_STUDIO_WIDTHS.FULL
+          }
+        ]
+      }
+    ],
+
+    capabilities: {
+      canContain:
+        true,
+
+      canReceiveDrop:
+        true,
+
+      hasConsole:
+        true
+    }
+  }),
+
+
+  /*
+   * BLANK
+   *
+   * Maximum freedom.
+   */
+  createIXIStudioCardDesign({
+    designId:
+      "ixi:card:blank",
+
+    name:
+      "BLANK",
+
+    description:
+      "Blank Object Card.",
+
+    fields: [],
+
+    faces: [
+      {
+        designId:
+          "ixi:card:blank:face-1",
+
+        name:
+          "FACE 1",
+
+        modules: []
+      }
+    ],
+
+    capabilities: {
+      canContain:
+        false,
+
+      canReceiveDrop:
+        false,
+
+      hasConsole:
+        true
+    }
+  })
+];
+
+
+/* =========================================================
+   COMPLETE LIBRARY
+   ========================================================= */
+
+export const IXI_STUDIO_DESIGN_LIBRARY = {
+  cards:
+    IXI_STUDIO_CARD_LIBRARY,
+
+  faces:
+    IXI_STUDIO_FACE_LIBRARY,
+
+  modules:
+    IXI_STUDIO_MODULE_LIBRARY,
+
+  moduleGroups:
+    []
+};
+
+
+/* =========================================================
+   LOOKUP
+   ========================================================= */
+
+export function getIXIStudioCardDesign(
+  designId
+) {
+
+  const id =
+    clean(
+      designId
+    );
+
+
+  return (
+    IXI_STUDIO_CARD_LIBRARY
+      .find(
+        design =>
+          design.designId ===
+          id
+      ) ||
+    null
+  );
+}
+
+
+export function getIXIStudioFaceDesign(
+  designId
+) {
+
+  const id =
+    clean(
+      designId
+    );
+
+
+  return (
+    IXI_STUDIO_FACE_LIBRARY
+      .find(
+        design =>
+          design.designId ===
+          id
+      ) ||
+    null
+  );
+}
+
+
+export function getIXIStudioModuleDesign(
+  moduleId
+) {
+
+  const id =
+    clean(
+      moduleId
+    );
+
+
+  return (
+    IXI_STUDIO_MODULE_LIBRARY
+      .find(
+        module =>
+          module.moduleId ===
+          id
+      ) ||
+    null
+  );
+}
+
+
+/* =========================================================
+   FILTER BY SCOPE
+   ========================================================= */
+
+export function getIXIStudioDesignsByScope({
+  kind,
+  scope
+} = {}) {
+
+  const resolvedKind =
+    cleanLower(
+      kind
+    );
+
+
+  const resolvedScope =
+    cleanLower(
+      scope
+    );
+
+
+  let source =
+    [];
+
+
+  if (
+    resolvedKind ===
+    IXI_STUDIO_LIBRARY_KINDS.CARD
+  ) {
+    source =
+      IXI_STUDIO_CARD_LIBRARY;
+  }
+
+
+  if (
+    resolvedKind ===
+    IXI_STUDIO_LIBRARY_KINDS.FACE
+  ) {
+    source =
+      IXI_STUDIO_FACE_LIBRARY;
+  }
+
+
+  if (
+    resolvedKind ===
+    IXI_STUDIO_LIBRARY_KINDS.MODULE
+  ) {
+    source =
+      IXI_STUDIO_MODULE_LIBRARY;
+  }
+
+
+  return source.filter(
+    design =>
+      !resolvedScope ||
+      design.scope ===
+        resolvedScope
+  );
+}
+
+
+/* =========================================================
+   FORK HELPERS
+   ========================================================= */
+
+/*
+ * Library designs are never directly
+ * installed into an Object.
+ *
+ * They are FORKED.
+ *
+ * The created Object owns its copy.
+ */
+
+
+export function forkIXIStudioLibraryModule(
+  sourceModule = {}
+) {
+
+  const source =
+    createIXIStudioLibraryModule(
+      sourceModule
+    );
+
+
+  return {
+    ...clone(
+      source
+    ),
+
+    moduleId:
+      makeLibraryId(
+        "module"
+      ),
+
+    metadata: {
+      ...safeObject(
+        source.metadata
+      ),
+
+      forkedFromModuleId:
+        source.moduleId
+    }
+  };
+}
+
+
+export function forkIXIStudioFaceDesign(
+  sourceFace = {}
+) {
+
+  const source =
+    createIXIStudioFaceDesign(
+      sourceFace
+    );
+
+
+  return {
+    faceId:
+      makeLibraryId(
+        "face"
+      ),
+
+    label:
+      source.name,
+
+    faceType:
+      "custom",
+
+    layout:
+      source.modules.map(
+        module =>
+          forkIXIStudioLibraryModule(
+            module
+          )
+      ),
+
+    metadata: {
+      ...safeObject(
+        source.metadata
+      ),
+
+      forkedFromDesignId:
+        source.designId,
+
+      sourceScope:
+        source.scope
+    }
+  };
+}
+
+
+/* =========================================================
+   CARD FORK
+   ========================================================= */
+
+export function forkIXIStudioCardDesign(
+  sourceDesign = {}
+) {
+
+  const source =
+    createIXIStudioCardDesign(
+      sourceDesign
+    );
+
+
+  return {
+    sourceDesignId:
+      source.designId,
+
+    sourceScope:
+      source.scope,
+
+    fieldDefinitions:
+      clone(
+        source.fields
+      ),
+
+    faces:
+      source.faces.map(
+        (
+          face,
+          index
+        ) => {
+
+          const forked =
+            forkIXIStudioFaceDesign(
+              face
+            );
+
+
+          return {
+            ...forked,
+
+            faceIndex:
+              index + 1,
+
+            faceType:
+              index === 0
+                ? "primary"
+                : "custom"
+          };
+        }
+      ),
+
+    capabilities:
+      clone(
+        source.capabilities
+      )
+  };
+}
+
+
+/* =========================================================
+   SAVE DESIGN CONTRACT
+   ========================================================= */
+
+/*
+ * This is the shape the future persistence
+ * adapter will save.
+ *
+ * It does not call AWS.
+ */
+
+export function createIXIStudioSavedDesign({
+  kind,
+  scope =
+    IXI_STUDIO_LIBRARY_SCOPES.USER,
+
+  name,
+  description = "",
+
+  definition,
+
+  ownerUserId = "",
+  ownerEntityId = "",
+
+  sourceDesignId = "",
+
+  metadata = {}
+} = {}) {
+
+  const resolvedKind =
+    cleanLower(
+      kind
+    );
+
+
+  return {
+    savedDesignId:
+      makeLibraryId(
+        "saved-design"
+      ),
+
+    kind:
+      resolvedKind,
+
+    scope:
+      cleanLower(
+        scope
+      ) ||
+      IXI_STUDIO_LIBRARY_SCOPES.USER,
+
+    name:
+      clean(
+        name
+      ) ||
+      "UNTITLED DESIGN",
+
+    description:
+      clean(
+        description
+      ),
+
+    definition:
+      clone(
+        definition
+      ),
+
+    ownership: {
+      userId:
+        clean(
+          ownerUserId
+        ),
+
+      entityId:
+        clean(
+          ownerEntityId
+        )
+    },
+
+    provenance: {
+      sourceDesignId:
+        clean(
+          sourceDesignId
+        )
+    },
+
+    metadata:
+      clone(
+        safeObject(
+          metadata
+        )
+      ),
+
+    createdAt:
+      new Date()
+        .toISOString(),
+
+    updatedAt:
+      new Date()
+        .toISOString()
+  };
+}
+
+
+/* =========================================================
+   SAVE CURRENT CARD AS DESIGN
+   ========================================================= */
+
+export function buildIXIStudioSavedCardDesign({
+  name,
+
+  objectDraft = {},
+
+  cardDefinition = {},
+
+  scope =
+    IXI_STUDIO_LIBRARY_SCOPES.USER,
+
+  ownerUserId = "",
+  ownerEntityId = ""
+} = {}) {
+
+  return createIXIStudioSavedDesign({
+    kind:
+      IXI_STUDIO_LIBRARY_KINDS.CARD,
+
+    scope,
+
+    name:
+      name ||
+      objectDraft.displayName ||
+      "CARD DESIGN",
+
+    ownerUserId,
+
+    ownerEntityId,
+
+    definition: {
+      fieldDefinitions:
+        clone(
+          safeArray(
+            objectDraft
+              .fieldDefinitions
+          )
+        ),
+
+      cardDefinition:
+        clone(
+          cardDefinition
+        )
+    }
+  });
+}
+
+
+/* =========================================================
+   SAVE CURRENT FACE AS DESIGN
+   ========================================================= */
+
+export function buildIXIStudioSavedFaceDesign({
+  name,
+
+  face = {},
+
+  scope =
+    IXI_STUDIO_LIBRARY_SCOPES.USER,
+
+  ownerUserId = "",
+  ownerEntityId = ""
+} = {}) {
+
+  return createIXIStudioSavedDesign({
+    kind:
+      IXI_STUDIO_LIBRARY_KINDS.FACE,
+
+    scope,
+
+    name:
+      name ||
+      face.label ||
+      "FACE DESIGN",
+
+    ownerUserId,
+
+    ownerEntityId,
+
+    definition:
+      clone(
+        face
+      )
+  });
+}
+
+
+/* =========================================================
+   DEFAULT EXPORT
+   ========================================================= */
+
+export default {
+  IXI_STUDIO_LIBRARY_KINDS,
+  IXI_STUDIO_LIBRARY_SCOPES,
+
+  IXI_STUDIO_MODULE_TYPES,
+
+  IXI_STUDIO_PRESENTATION_ROLES,
+  IXI_STUDIO_WIDTHS,
+
+  IXI_STUDIO_MODULE_LIBRARY,
+  IXI_STUDIO_FACE_LIBRARY,
+  IXI_STUDIO_CARD_LIBRARY,
+
+  IXI_STUDIO_DESIGN_LIBRARY,
+
+  createIXIStudioLibraryModule,
+  createIXIStudioFaceDesign,
+  createIXIStudioCardDesign,
+  createIXIStudioModuleGroupDesign,
+
+  getIXIStudioCardDesign,
+  getIXIStudioFaceDesign,
+  getIXIStudioModuleDesign,
+
+  getIXIStudioDesignsByScope,
+
+  forkIXIStudioLibraryModule,
+  forkIXIStudioFaceDesign,
+  forkIXIStudioCardDesign,
+
+  createIXIStudioSavedDesign,
+
+  buildIXIStudioSavedCardDesign,
+  buildIXIStudioSavedFaceDesign
+};
