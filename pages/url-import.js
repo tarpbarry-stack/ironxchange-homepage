@@ -1534,38 +1534,6 @@ auction:
     ? importResult?.auction || null
     : null,
 
-auctionData:
-  postingAuction
-    ? importResult?.auction || null
-    : null,
-
-auctionEvent:
-  postingAuction
-    ? (
-        importResult?.auctionEvent ||
-        importResult?.auction?.event ||
-        null
-      )
-    : null,
-
-auctionLot:
-  postingAuction
-    ? (
-        importResult?.auctionLot ||
-        importResult?.auction?.lot ||
-        null
-      )
-    : null,
-
-auctionTerms:
-  postingAuction
-    ? (
-        importResult?.auctionTerms ||
-        importResult?.auction?.terms ||
-        null
-      )
-    : null,
-
 launchPolicy:
   postingAuction
     ? importResult?.launchPolicy || null
@@ -1682,6 +1650,41 @@ console.log(
 );    
     
     console.log("LISTING PAYLOAD READY:", listingPayload);
+
+    const sharetribePayloadBytes =
+  new TextEncoder().encode(
+    JSON.stringify(
+      listingPayload
+    )
+  ).length;
+
+const sharetribePublicDataBytes =
+  new TextEncoder().encode(
+    JSON.stringify(
+      listingPayload.publicData || {}
+    )
+  ).length;
+
+const sharetribeAuctionBytes =
+  new TextEncoder().encode(
+    JSON.stringify(
+      listingPayload.publicData?.auction || {}
+    )
+  ).length;
+
+console.log(
+  "SHARETRIBE CREATE SIZE:",
+  {
+    totalBytes:
+      sharetribePayloadBytes,
+
+    publicDataBytes:
+      sharetribePublicDataBytes,
+
+    auctionBytes:
+      sharetribeAuctionBytes
+  }
+);
 
     /*
      * STAGE 3 — CREATE SHARETRIBE LISTING
