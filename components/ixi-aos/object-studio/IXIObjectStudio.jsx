@@ -193,14 +193,7 @@ export default function IXIObjectStudio() {
 
   export default function IXIObjectStudio() {
 
-  const studio =
-    useIXIObjectStudio({
-      initialDraft:
-        createDefaultStudioDraft()
-    });
-
-
-  const [
+    const [
     previewCardState,
     setPreviewCardState
   ] =
@@ -223,7 +216,6 @@ export default function IXIObjectStudio() {
     useState(
       "xl"
     );
-
 
   function updatePreviewCardState(
     objectId,
