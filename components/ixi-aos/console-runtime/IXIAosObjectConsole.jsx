@@ -466,7 +466,9 @@ function renderSecondaryFace(
        * We will connect presentation sizing
        * to the Studio size control next.
        */
-      presentationMode="xl"
+      presentationMode={
+  cardScaleMode
+}
 
       renderModule={
         renderModule
