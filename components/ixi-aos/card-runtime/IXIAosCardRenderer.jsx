@@ -22,10 +22,6 @@ import IXIAosCardRuntime
   from "./IXIAosCardRuntime";
 
 import {
-  resolveIXICardDefinition
-} from "./IXICardDefinitionEngine";
-
-import {
   renderIXIAosContainerModule
 } from "../container-runtime/IXIAosContainerModules";
 
