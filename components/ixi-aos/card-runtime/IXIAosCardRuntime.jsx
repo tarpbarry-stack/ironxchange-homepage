@@ -595,7 +595,9 @@ onSelectModule = null,
  * Existing console entry point.
  * Console physics remain external.
  */
-onOpenConsole = null
+onOpenConsole = null,
+
+forcedFaceIndex = null,
 }) {
 
   const objectId =
@@ -649,17 +651,29 @@ onOpenConsole = null
     );
 
 
-  const currentFaceIndex =
-    Math.min(
-      faceCount,
-      Math.max(
-        1,
-        Number(
-          ixiState?.face ||
-          1
+ const currentFaceIndex =
+  forcedFaceIndex !== null &&
+  forcedFaceIndex !== undefined
+    ? Math.min(
+        faceCount,
+        Math.max(
+          1,
+          Number(
+            forcedFaceIndex ||
+            1
+          )
         )
       )
-    );
+    : Math.min(
+        faceCount,
+        Math.max(
+          1,
+          Number(
+            ixiState?.face ||
+            1
+          )
+        )
+      );
 
 
   const activeFace =
