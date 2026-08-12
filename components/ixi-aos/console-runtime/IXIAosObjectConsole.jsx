@@ -482,6 +482,138 @@ function renderSecondaryFace(
       slotIndex ===
       consoleSlots.length - 1;
 
+    const isEmpty =
+  slot.type ===
+  IXI_CONSOLE_SLOT_TYPES
+    .EMPTY;
+
+    if (
+  isEmpty
+) {
+
+  const isLeftOfPrimary =
+    slotIndex <
+    listingSlotIndex;
+
+
+  return (
+    <section
+      key={
+        slot.slotId
+      }
+
+      className="
+        ixi-aos-console-slot
+        empty-slot
+      "
+    >
+
+      <IXIObjectCardActuator
+        side={
+          isLeftOfPrimary
+            ? "right"
+            : "left"
+        }
+
+        variant="tall"
+
+        label="Close empty console slot"
+
+        title="Close empty console slot"
+
+        onClick={
+          event =>
+            removePanel(
+              slot.slotId,
+              event
+            )
+        }
+      />
+
+
+      {!atCapacity &&
+      isFirst ? (
+        <IXIObjectCardActuator
+          side="left"
+
+          variant="tall"
+
+          label="Add console face left"
+
+          title="Add console face left"
+
+          onClick={
+            event =>
+              addPanel(
+                "left",
+                event
+              )
+          }
+        />
+      ) : null}
+
+
+      {!atCapacity &&
+      isLast ? (
+        <IXIObjectCardActuator
+          side="right"
+
+          variant="tall"
+
+          label="Add console face right"
+
+          title="Add console face right"
+
+          onClick={
+            event =>
+              addPanel(
+                "right",
+                event
+              )
+          }
+        />
+      ) : null}
+
+
+      <button
+        type="button"
+
+        className="
+          ixi-aos-empty-face-create
+        "
+
+        onPointerDown={
+          event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }
+
+        onClick={
+          event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            console.log(
+              "AOS EMPTY FACE CREATE:",
+              slot.slotId
+            );
+          }
+        }
+      >
+        <strong>
+          +
+        </strong>
+
+        <span>
+          ADD / CREATE FACE
+        </span>
+      </button>
+
+    </section>
+  );
+}
+
 
     if (
       isListing
@@ -807,6 +939,140 @@ function renderSecondaryFace(
               .95
             );
         }
+
+        .ixi-aos-console-slot.empty-slot {
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .08
+    );
+
+  border-radius:
+    13px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(
+        255,
+        255,
+        255,
+        .018
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0
+      )
+    ),
+    #141414;
+
+  overflow:
+    hidden;
+}
+
+
+.ixi-aos-empty-face-create {
+  box-sizing:
+    border-box;
+
+  width:
+    100%;
+
+  height:
+    100%;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    10px;
+
+  border:
+    0;
+
+  background:
+    transparent;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .34
+    );
+
+  cursor:
+    pointer;
+}
+
+
+.ixi-aos-empty-face-create strong {
+  font-size:
+    42px;
+
+  font-weight:
+    300;
+
+  line-height:
+    1;
+
+  color:
+    rgba(
+      255,
+      196,
+      0,
+      .82
+    );
+}
+
+
+.ixi-aos-empty-face-create span {
+  font-size:
+    8px;
+
+  font-weight:
+    950;
+
+  letter-spacing:
+    .7px;
+
+  text-transform:
+    uppercase;
+}
+
+
+.ixi-aos-empty-face-create:hover {
+  background:
+    rgba(
+      255,
+      196,
+      0,
+      .025
+    );
+
+  color:
+    #ffc400;
+}
+
+
+.ixi-aos-empty-face-create:hover strong {
+  color:
+    #ffc400;
+}
 
       `}</style>
 
