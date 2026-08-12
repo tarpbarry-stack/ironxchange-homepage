@@ -432,23 +432,32 @@ export function normalizeConsoleSlots(
         return;
       }
 
-      normalized.push(
-        createConsoleSlot({
-          slotId:
-            rawSlot.slotId ||
-            `module-${index + 1}`,
+      const isEmptySlot =
+  rawSlot.type ===
+  IXI_CONSOLE_SLOT_TYPES
+    .EMPTY;
 
-          type:
-            IXI_CONSOLE_SLOT_TYPES
-              .MODULE,
 
-          face:
-            normalizeModuleFace(
-              rawSlot.face,
-              defaultFace
-            )
-        })
-      );
+normalized.push(
+  createConsoleSlot({
+    slotId:
+      rawSlot.slotId ||
+      `module-${index + 1}`,
+
+    type:
+      isEmptySlot
+        ? IXI_CONSOLE_SLOT_TYPES.EMPTY
+        : IXI_CONSOLE_SLOT_TYPES.MODULE,
+
+    face:
+      isEmptySlot
+        ? null
+        : normalizeModuleFace(
+            rawSlot.face,
+            defaultFace
+          )
+  })
+);
     }
   );
 
