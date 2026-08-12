@@ -229,67 +229,41 @@ export default function IXIAosObjectConsole({
 
 
   function addPanel(
-    side,
-    event
+  side,
+  event
+) {
+
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+
+  if (
+    atCapacity
   ) {
-
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-
-
-    if (
-      atCapacity ||
-      faceCount <= 1
-    ) {
-      return;
-    }
-
-
-    /*
-     * Choose a useful next Face based on
-     * how many secondary panels exist.
-     */
-    const moduleCount =
-      consoleSlots.filter(
-        slot =>
-          slot.type ===
-          IXI_CONSOLE_SLOT_TYPES
-            .MODULE
-      ).length;
-
-
-    const nextFace =
-      (
-        moduleCount %
-        Math.max(
-          faceCount - 1,
-          1
-        )
-      ) + 2;
-
-
-    const nextSlots =
-      insertConsoleSlot({
-        slots:
-          consoleSlots,
-
-        side,
-
-        face:
-          normalizeAosFace(
-            nextFace,
-            faceCount
-          ),
-
-        maxSlots:
-          IXI_CONSOLE_MAX_DEPTH
-      });
-
-
-    saveSlots(
-      nextSlots
-    );
+    return;
   }
+
+
+  const nextSlots =
+    insertConsoleSlot({
+      slots:
+        consoleSlots,
+
+      side,
+
+      type:
+        IXI_CONSOLE_SLOT_TYPES
+          .EMPTY,
+
+      maxSlots:
+        IXI_CONSOLE_MAX_DEPTH
+    });
+
+
+  saveSlots(
+    nextSlots
+  );
+}
 
 
   function removePanel(
