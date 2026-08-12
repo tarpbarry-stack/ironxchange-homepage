@@ -96,6 +96,8 @@ export default function IXIAosObjectConsole({
 
   cardDefinition = {},
 
+  onCreateFace = null,
+
   parentLabel = "",
 
   ixiCardState = {},
@@ -665,10 +667,16 @@ String(
           event.preventDefault();
           event.stopPropagation();
 
-          console.log(
-            "AOS CREATE NEW FACE:",
-            slot.slotId
-          );
+        const created =
+  onCreateFace?.(
+    slot.slotId
+  );
+
+
+console.log(
+  "AOS CREATED FACE:",
+  created
+);
         }
       }
     >
