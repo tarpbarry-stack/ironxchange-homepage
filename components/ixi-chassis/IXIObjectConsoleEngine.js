@@ -572,6 +572,9 @@ export function insertConsoleSlot({
 
   face,
 
+  type =
+    IXI_CONSOLE_SLOT_TYPES.MODULE,
+
   maxSlots =
     IXI_CONSOLE_MAX_DEPTH
 }) {
@@ -590,23 +593,32 @@ export function insertConsoleSlot({
     return current;
   }
 
-  const resolvedFace =
-    normalizeModuleFace(
-      face,
-      getNextConsoleDefaultFace(
-        current
-      )
-    );
+  const isEmptySlot =
+  type ===
+  IXI_CONSOLE_SLOT_TYPES.EMPTY;
 
-  const nextSlot =
-    createConsoleSlot({
-      type:
-        IXI_CONSOLE_SLOT_TYPES
-          .MODULE,
 
-      face:
-        resolvedFace
-    });
+const resolvedFace =
+  isEmptySlot
+    ? null
+    : normalizeModuleFace(
+        face,
+        getNextConsoleDefaultFace(
+          current
+        )
+      );
+
+
+const nextSlot =
+  createConsoleSlot({
+    type:
+      isEmptySlot
+        ? IXI_CONSOLE_SLOT_TYPES.EMPTY
+        : IXI_CONSOLE_SLOT_TYPES.MODULE,
+
+    face:
+      resolvedFace
+  });
 
   /*
    * New outside-edge API.
