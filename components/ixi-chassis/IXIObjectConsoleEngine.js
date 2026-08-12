@@ -9,7 +9,8 @@ export const IXI_CONSOLE_DEFAULT_FACE =
 
 export const IXI_CONSOLE_SLOT_TYPES = {
   LISTING: "listing",
-  MODULE: "module"
+  MODULE: "module",
+  EMPTY: "empty"
 };
 
 export const IXI_CONSOLE_LISTING_SLOT_ID =
@@ -270,16 +271,23 @@ function normalizeModuleFace(
 
 export function createConsoleSlot({
   slotId,
+
   type =
     IXI_CONSOLE_SLOT_TYPES.MODULE,
+
   face =
     IXI_CONSOLE_DEFAULT_FACE
 } = {}) {
+
   const normalizedType =
     type ===
     IXI_CONSOLE_SLOT_TYPES.LISTING
       ? IXI_CONSOLE_SLOT_TYPES.LISTING
-      : IXI_CONSOLE_SLOT_TYPES.MODULE;
+      : type ===
+        IXI_CONSOLE_SLOT_TYPES.EMPTY
+        ? IXI_CONSOLE_SLOT_TYPES.EMPTY
+        : IXI_CONSOLE_SLOT_TYPES.MODULE;
+
 
   if (
     normalizedType ===
@@ -296,6 +304,26 @@ export function createConsoleSlot({
     };
   }
 
+
+  if (
+    normalizedType ===
+    IXI_CONSOLE_SLOT_TYPES.EMPTY
+  ) {
+    return {
+      slotId:
+        String(
+          slotId ||
+          createModuleSlotId()
+        ),
+
+      type:
+        IXI_CONSOLE_SLOT_TYPES.EMPTY,
+
+      face: null
+    };
+  }
+
+
   return {
     slotId:
       String(
@@ -307,10 +335,11 @@ export function createConsoleSlot({
       IXI_CONSOLE_SLOT_TYPES.MODULE,
 
     face:
-      normalizeModuleFace(face)
+      normalizeModuleFace(
+        face
+      )
   };
 }
-
 /* ===================================== */
 /* SLOT NORMALIZATION + LEGACY MIGRATION */
 /* ===================================== */
