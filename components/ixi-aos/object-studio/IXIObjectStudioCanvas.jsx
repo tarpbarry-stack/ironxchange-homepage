@@ -99,6 +99,54 @@ export default function IXIObjectStudioCanvas({
             cardDefinition
           }
 
+          onCreateFace={
+  slotId => {
+
+    const currentFaces =
+      Array.isArray(
+        cardDefinition?.faces
+      )
+        ? cardDefinition.faces
+        : [];
+
+
+    const nextFaceNumber =
+      currentFaces.length + 1;
+
+
+    const faceId =
+      `face-${nextFaceNumber}`;
+
+
+    studio?.addFace?.({
+      faceId,
+
+      name:
+        `FACE ${nextFaceNumber}`,
+
+      label:
+        `FACE ${nextFaceNumber}`,
+
+      modules: []
+    });
+
+
+    studio?.selectFace?.(
+      faceId
+    );
+
+
+    return {
+      faceId,
+
+      faceIndex:
+        nextFaceNumber,
+
+      slotId
+    };
+  }
+}
+
           parentLabel=""
 
           ixiCardState={
