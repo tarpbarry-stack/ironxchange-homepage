@@ -1,3 +1,7 @@
+import {
+  useState
+} from "react";
+
 import IXIScaledCardShell
   from "../../ixi-machine-object/IXIScaledCardShell";
 
@@ -114,6 +118,11 @@ export default function IXIAosObjectConsole({
 
   cardScaleMode = "xl"
 }) {
+
+  const [
+    faceCreatorSlotId,
+    setFaceCreatorSlotId
+  ] = useState("");
 
   const id =
     String(
@@ -594,10 +603,11 @@ function renderSecondaryFace(
             event.preventDefault();
             event.stopPropagation();
 
-            console.log(
-              "AOS EMPTY FACE CREATE:",
-              slot.slotId
-            );
+           setFaceCreatorSlotId(
+  String(
+    slot.slotId
+  )
+);
           }
         }
       >
@@ -610,6 +620,85 @@ function renderSecondaryFace(
         </span>
       </button>
 
+      {String(
+  faceCreatorSlotId
+) ===
+String(
+  slot.slotId
+) ? (
+  <div
+    className="
+      ixi-aos-face-create-menu
+    "
+    onPointerDown={
+      event =>
+        event.stopPropagation()
+    }
+  >
+    <strong>
+      ADD FACE
+    </strong>
+
+    <button
+      type="button"
+
+      onClick={
+        event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          console.log(
+            "AOS USE FACE TEMPLATE:",
+            slot.slotId
+          );
+        }
+      }
+    >
+      USE TEMPLATE
+    </button>
+
+    <button
+      type="button"
+
+      onClick={
+        event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          console.log(
+            "AOS CREATE NEW FACE:",
+            slot.slotId
+          );
+        }
+      }
+    >
+      CREATE NEW
+    </button>
+
+    <button
+      type="button"
+
+      className="
+        cancel
+      "
+
+      onClick={
+        event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          setFaceCreatorSlotId(
+            ""
+          );
+        }
+      }
+    >
+      CANCEL
+    </button>
+  </div>
+) : null}
+
+      
     </section>
   );
 }
@@ -1072,6 +1161,134 @@ function renderSecondaryFace(
 .ixi-aos-empty-face-create:hover strong {
   color:
     #ffc400;
+}
+
+.ixi-aos-face-create-menu {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  z-index: 300;
+
+  width: 176px;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 12px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      196,
+      0,
+      .22
+    );
+
+  border-radius: 8px;
+
+  background:
+    rgba(
+      8,
+      8,
+      8,
+      .98
+    );
+
+  box-shadow:
+    0 18px 40px
+    rgba(
+      0,
+      0,
+      0,
+      .55
+    );
+}
+
+
+.ixi-aos-face-create-menu > strong {
+  margin-bottom: 3px;
+
+  color: #ffc400;
+
+  font-size: 8px;
+  font-weight: 950;
+
+  letter-spacing: .6px;
+}
+
+
+.ixi-aos-face-create-menu > button {
+  width: 100%;
+  height: 28px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .08
+    );
+
+  border-radius: 5px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .025
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .72
+    );
+
+  font-size: 7px;
+  font-weight: 950;
+
+  letter-spacing: .45px;
+
+  cursor: pointer;
+}
+
+
+.ixi-aos-face-create-menu > button:hover {
+  border-color:
+    rgba(
+      255,
+      196,
+      0,
+      .35
+    );
+
+  color: #ffc400;
+}
+
+
+.ixi-aos-face-create-menu > button.cancel {
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .34
+    );
 }
 
       `}</style>
