@@ -1,6 +1,9 @@
 import IXIAosObjectConsole
   from "../console-runtime/IXIAosObjectConsole";
 
+import IXIAosSkinRuntime
+  from "../skin-runtime/IXIAosSkinRuntime";
+
 
 export default function IXIObjectStudioCanvas({
   studio,
@@ -12,7 +15,10 @@ export default function IXIObjectStudioCanvas({
   enableCardScaling = true,
   cardScaleMode = "xl",
 
-  onCycleCardScale = null
+  onCycleCardScale = null,
+
+  skinId =
+    "ixi:skin:default"
 }) {
 
   const object =
@@ -52,188 +58,238 @@ export default function IXIObjectStudioCanvas({
 
       <header>
 
-  <div className="canvas-header-copy">
+        <div className="canvas-header-copy">
 
-    <strong>
-      LIVE OBJECT
-    </strong>
+          <strong>
+            LIVE OBJECT
+          </strong>
 
-    <span>
-      ACTUAL CARD + CONSOLE RUNTIME
-    </span>
+          <span>
+            ACTUAL CARD + CONSOLE RUNTIME
+          </span>
 
-  </div>
+        </div>
 
 
-  <button
-    type="button"
-    className="canvas-scale-button"
+        <div className="canvas-header-controls">
 
-    onClick={
-      onCycleCardScale
-    }
-  >
-    SIZE — {
-      String(
-        cardScaleMode ||
-        "xl"
-      ).toUpperCase()
-    }
-  </button>
+          <span className="canvas-skin-label">
+            {
+              String(
+                skinId ||
+                "ixi:skin:default"
+              )
+                .replace(
+                  "ixi:skin:",
+                  ""
+                )
+                .toUpperCase()
+            }
+          </span>
 
-</header>
+
+          <button
+            type="button"
+            className="canvas-scale-button"
+
+            onClick={
+              onCycleCardScale
+            }
+          >
+            SIZE — {
+              String(
+                cardScaleMode ||
+                "xl"
+              ).toUpperCase()
+            }
+          </button>
+
+        </div>
+
+      </header>
 
 
       <div className="canvas-stage">
 
-        <IXIAosObjectConsole
-          object={
-            object
+        {/*
+         * =================================================
+         * SKIN RUNTIME BOUNDARY
+         * =================================================
+         *
+         * This wrapper owns APPEARANCE ONLY.
+         *
+         * It does not own:
+         *
+         * - 298 × 471 geometry
+         * - Console slot dimensions
+         * - Card scaling
+         * - Face structure
+         * - Module layout
+         * - IXI Rail behavior
+         *
+         * The actual AOS Object Console remains the
+         * production renderer underneath it.
+         */}
+
+        <IXIAosSkinRuntime
+          skinId={
+            skinId
           }
 
-          objectId={
-            objectId
-          }
+          className="
+            studio-canvas-skin-runtime
+          "
+        >
 
-          cardDefinition={
-            cardDefinition
-          }
+          <IXIAosObjectConsole
+            object={
+              object
+            }
 
-          onCreateFace={
-  slotId => {
+            objectId={
+              objectId
+            }
 
-    const currentFaces =
-      Array.isArray(
-        cardDefinition?.faces
-      )
-        ? cardDefinition.faces
-        : [];
+            cardDefinition={
+              cardDefinition
+            }
 
+            onCreateFace={
+              slotId => {
 
- const highestExistingFaceNumber =
-  currentFaces.reduce(
-    (
-      highest,
-      face,
-      index
-    ) => {
-
-      const faceNumber =
-        Number(
-          face?.faceNumber ||
-          index + 1
-        );
+                const currentFaces =
+                  Array.isArray(
+                    cardDefinition?.faces
+                  )
+                    ? cardDefinition.faces
+                    : [];
 
 
-      return Math.max(
-        highest,
-        faceNumber
-      );
-    },
-    0
-  );
+                const highestExistingFaceNumber =
+                  currentFaces.reduce(
+                    (
+                      highest,
+                      face,
+                      index
+                    ) => {
+
+                      const faceNumber =
+                        Number(
+                          face?.faceNumber ||
+                          index + 1
+                        );
 
 
-const nextFaceNumber =
-  Math.max(
-    3,
-    highestExistingFaceNumber + 1
-  );
-
-    const faceId =
-      `face-${nextFaceNumber}`;
-
-
-    studio?.addFace?.({
-      faceId,
-
-      name:
-        `FACE ${nextFaceNumber}`,
-
-      label:
-        `FACE ${nextFaceNumber}`,
-
-      modules: []
-    });
+                      return Math.max(
+                        highest,
+                        faceNumber
+                      );
+                    },
+                    0
+                  );
 
 
-    studio?.selectFace?.(
-      faceId
-    );
+                const nextFaceNumber =
+                  Math.max(
+                    3,
+                    highestExistingFaceNumber + 1
+                  );
 
 
-    return {
-      faceId,
-
-      faceIndex:
-        nextFaceNumber,
-
-      slotId
-    };
-  }
-}
-
-          parentLabel=""
-
-          ixiCardState={
-            ixiCardState
-          }
-
-          updateIxiCardState={
-            updatePreviewCardState
-          }
-
-          previewCardState={
-            previewCardState
-          }
-
-          updatePreviewCardState={
-            updatePreviewCardState
-          }
-
-          studioEditing={
-            true
-          }
-
-          selectedModuleId={
-            studio
-              ?.selection
-              ?.moduleId ||
-            ""
-          }
-
-          onSelectModule={({
-            faceId,
-            moduleId
-          }) => {
-
-            studio
-              ?.selectModule?.(
-                faceId,
-                moduleId
-              );
-          }}
+                const faceId =
+                  `face-${nextFaceNumber}`;
 
 
-onSelectFace={({
-  faceId
-}) => {
+                studio?.addFace?.({
+                  faceId,
 
-  studio
-    ?.selectFace?.(
-      faceId
-    );
-}}
-          
-          
-          enableCardScaling={
-  enableCardScaling
-}
+                  name:
+                    `FACE ${nextFaceNumber}`,
 
-cardScaleMode={
-  cardScaleMode
-}
-        />
+                  label:
+                    `FACE ${nextFaceNumber}`,
+
+                  modules: []
+                });
+
+
+                studio?.selectFace?.(
+                  faceId
+                );
+
+
+                return {
+                  faceId,
+
+                  faceIndex:
+                    nextFaceNumber,
+
+                  slotId
+                };
+              }
+            }
+
+            parentLabel=""
+
+            ixiCardState={
+              ixiCardState
+            }
+
+            updateIxiCardState={
+              updatePreviewCardState
+            }
+
+            previewCardState={
+              previewCardState
+            }
+
+            updatePreviewCardState={
+              updatePreviewCardState
+            }
+
+            studioEditing={
+              true
+            }
+
+            selectedModuleId={
+              studio
+                ?.selection
+                ?.moduleId ||
+              ""
+            }
+
+            onSelectModule={({
+              faceId,
+              moduleId
+            }) => {
+
+              studio
+                ?.selectModule?.(
+                  faceId,
+                  moduleId
+                );
+            }}
+
+            onSelectFace={({
+              faceId
+            }) => {
+
+              studio
+                ?.selectFace?.(
+                  faceId
+                );
+            }}
+
+            enableCardScaling={
+              enableCardScaling
+            }
+
+            cardScaleMode={
+              cardScaleMode
+            }
+          />
+
+        </IXIAosSkinRuntime>
 
       </div>
 
@@ -258,6 +314,20 @@ cardScaleMode={
         </span>
 
         <span>
+          SKIN {
+            String(
+              skinId ||
+              "ixi:skin:default"
+            )
+              .replace(
+                "ixi:skin:",
+                ""
+              )
+              .toUpperCase()
+          }
+        </span>
+
+        <span>
           OBJECT {objectId}
         </span>
 
@@ -267,16 +337,26 @@ cardScaleMode={
       <style jsx>{`
 
         .studio-canvas {
-          position: relative;
+          position:
+            relative;
 
-          width: 100%;
-          height: 100%;
+          width:
+            100%;
 
-          min-width: 0;
-          min-height: 0;
+          height:
+            100%;
 
-          display: flex;
-          flex-direction: column;
+          min-width:
+            0;
+
+          min-height:
+            0;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
 
           border:
             1px solid
@@ -287,7 +367,8 @@ cardScaleMode={
               .05
             );
 
-          border-radius: 9px;
+          border-radius:
+            9px;
 
           background:
             radial-gradient(
@@ -310,21 +391,27 @@ cardScaleMode={
 
 
         header {
-          height: 42px;
-          flex: 0 0 42px;
+          height:
+            42px;
+
+          flex:
+            0 0 42px;
 
           padding:
             0 12px;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          gap: 9px;
+          gap:
+            9px;
 
-justify-content:
-  space-between;
-  
+          justify-content:
+            space-between;
+
           border-bottom:
             1px solid
             rgba(
@@ -335,81 +422,174 @@ justify-content:
             );
         }
 
-.canvas-header-copy {
-  min-width: 0;
 
-  display: flex;
+        .canvas-header-copy {
+          min-width:
+            0;
 
-  align-items: center;
+          display:
+            flex;
 
-  gap: 9px;
-}
+          align-items:
+            center;
 
-
-.canvas-scale-button {
-  flex: none;
-
-  height: 24px;
-
-  padding:
-    0 9px;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      196,
-      0,
-      .18
-    );
-
-  border-radius: 4px;
-
-  background:
-    rgba(
-      255,
-      196,
-      0,
-      .025
-    );
-
-  color:
-    rgba(
-      255,
-      196,
-      0,
-      .66
-    );
-
-  font-size: 6px;
-  font-weight: 950;
-
-  cursor: pointer;
-}
+          gap:
+            9px;
+        }
 
 
-.canvas-scale-button:hover {
-  border-color:
-    rgba(
-      255,
-      196,
-      0,
-      .42
-    );
+        .canvas-header-controls {
+          flex:
+            none;
 
-  color:
-    #ffc400;
-}
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            7px;
+        }
+
+
+        .canvas-skin-label {
+          height:
+            24px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          padding:
+            0 8px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .055
+            );
+
+          border-radius:
+            4px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .018
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .32
+            );
+
+          font-size:
+            6px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .42px;
+        }
+
+
+        .canvas-scale-button {
+          flex:
+            none;
+
+          height:
+            24px;
+
+          padding:
+            0 9px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              196,
+              0,
+              .18
+            );
+
+          border-radius:
+            4px;
+
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .025
+            );
+
+          color:
+            rgba(
+              255,
+              196,
+              0,
+              .66
+            );
+
+          font-size:
+            6px;
+
+          font-weight:
+            950;
+
+          cursor:
+            pointer;
+        }
+
+
+        .canvas-scale-button:hover {
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .42
+            );
+
+          color:
+            #ffc400;
+        }
+
 
         header strong {
-          color: #ffc400;
+          color:
+            #ffc400;
 
-          font-size: 7px;
-          font-weight: 950;
+          font-size:
+            7px;
+
+          font-weight:
+            950;
         }
 
 
         header span {
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+        }
+
+
+        .canvas-header-copy span {
           color:
             rgba(
               255,
@@ -417,9 +597,6 @@ justify-content:
               255,
               .20
             );
-
-          font-size: 6px;
-          font-weight: 900;
         }
 
 
@@ -432,17 +609,26 @@ justify-content:
          * The page does not.
          */
         .canvas-stage {
-          flex: 1;
+          flex:
+            1;
 
-          min-width: 0;
-          min-height: 0;
+          min-width:
+            0;
 
-          display: flex;
+          min-height:
+            0;
 
-          align-items: center;
-          justify-content: center;
+          display:
+            flex;
 
-          overflow: auto;
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          overflow:
+            auto;
 
           padding:
             28px;
@@ -461,9 +647,32 @@ justify-content:
         }
 
 
+        /*
+         * Skin Runtime is deliberately
+         * geometry-neutral.
+         *
+         * The console remains responsible
+         * for its exact physical width,
+         * height and scaling.
+         */
+        .canvas-stage
+          :global(
+            .studio-canvas-skin-runtime
+          ) {
+          flex:
+            0 0 auto;
+
+          min-width:
+            0;
+        }
+
+
         .canvas-stage::-webkit-scrollbar {
-          width: 4px;
-          height: 4px;
+          width:
+            4px;
+
+          height:
+            4px;
         }
 
 
@@ -488,16 +697,23 @@ justify-content:
 
 
         .canvas-status {
-          height: 30px;
-          flex: 0 0 30px;
+          height:
+            30px;
 
-          display: flex;
+          flex:
+            0 0 30px;
 
-          align-items: center;
+          display:
+            flex;
 
-          justify-content: center;
+          align-items:
+            center;
 
-          gap: 16px;
+          justify-content:
+            center;
+
+          gap:
+            16px;
 
           border-top:
             1px solid
@@ -516,8 +732,11 @@ justify-content:
               .19
             );
 
-          font-size: 5.5px;
-          font-weight: 900;
+          font-size:
+            5.5px;
+
+          font-weight:
+            900;
         }
 
       `}</style>
