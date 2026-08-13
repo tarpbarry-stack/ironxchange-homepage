@@ -14,6 +14,11 @@ import IXIAosSkinRuntime
 import IXIAosFinancialFace2
   from "../financial-runtime/IXIAosFinancialFace2";
 
+import {
+  createEmptyAosFinancialFace2Model,
+  createAosFinancialFace2Props
+} from "../financial-runtime/IXIAosFinancialFace2Adapter";
+
 import IXIAosFinancialFace3
   from "../financial-runtime/IXIAosFinancialFace3";
 
@@ -564,7 +569,9 @@ return (
      * this console slot owns.
      */
     forcedFaceIndex={
-  resolvedFace
+  faceOnly
+    ? resolvedFace
+    : null
 }
         faceOnly={
         faceOnly
@@ -1136,9 +1143,7 @@ String(
           ) : null}
 
 
-          {renderFace(
-  activeStudioFace
-)}
+          {renderFace(1)}
 
         </section>
       );
