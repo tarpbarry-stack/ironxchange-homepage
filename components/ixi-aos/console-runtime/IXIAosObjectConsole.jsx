@@ -106,8 +106,11 @@ export default function IXIAosObjectConsole({
 
   cardDefinition = {},
 
-  onCreateFace = null,
+  skinId =
+    "ixi:skin:default",
 
+  onCreateFace = null,
+  
   parentLabel = "",
 
   ixiCardState = {},
