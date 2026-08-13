@@ -15,9 +15,6 @@ import IXIAosFinancialFace2
   from "../financial-runtime/IXIAosFinancialFace2";
 
 import IXIAosFinancialFace3
-  from "../financial-runtime/IXIAosFinancialFace3";
-
-import IXIAosFinancialFace3
   from "../financial-runtime/IXIAosFinancialFace3.jsx";
 
 import {
