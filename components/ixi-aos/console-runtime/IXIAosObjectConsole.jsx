@@ -774,35 +774,15 @@ String(
           event.stopPropagation();
 
         const created =
-  const highestExistingFaceNumber =
-  currentFaces.reduce(
-    (
-      highest,
-      face,
-      index
-    ) => {
-
-      const faceNumber =
-        Number(
-          face?.faceNumber ||
-          index + 1
-        );
-
-
-      return Math.max(
-        highest,
-        faceNumber
-      );
-    },
-    0
+  const created =
+  onCreateFace?.(
+    slot.slotId
   );
 
 
-const nextFaceNumber =
-  Math.max(
-    3,
-    highestExistingFaceNumber + 1
-  );
+if (
+  created?.faceIndex
+) {
 
 
 if (
