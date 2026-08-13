@@ -965,21 +965,21 @@ export default function IXIAosFinancialFace2({
      PHYSICAL CARD SHELL
      ===================================================== */
 
-  .ixi-aos-financial-face2-shell {
-    --ixi-aof2-native-width: ${FACE_WIDTH}px;
-    --ixi-aof2-native-height: ${FACE_HEIGHT}px;
+ .ixi-aos-financial-face2-shell {
+  --ixi-aof2-native-width: ${FACE_WIDTH}px;
+  --ixi-aof2-native-height: ${FACE_HEIGHT}px;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    position: relative;
+  position: relative;
 
-    width: 100%;
-    min-width: 100%;
-    max-width: 100%;
+  width: ${FACE_WIDTH}px;
+  min-width: ${FACE_WIDTH}px;
+  max-width: ${FACE_WIDTH}px;
 
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
+  height: ${FACE_HEIGHT}px;
+  min-height: ${FACE_HEIGHT}px;
+  max-height: ${FACE_HEIGHT}px;
 
     margin: 0;
     padding: 0;
