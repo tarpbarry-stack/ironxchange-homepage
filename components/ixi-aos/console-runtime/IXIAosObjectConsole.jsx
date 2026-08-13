@@ -526,7 +526,30 @@ const financialFace2Props =
       );
     }
 
+    if (
+      Number(
+        resolvedFace
+      ) === 3
+    ) {
+      return (
+        <IXIAosFinancialFace3
+          object={
+            object
+          }
 
+          passportId={
+            object?.passportId ||
+            object?.ixiPassportId ||
+            object?.passport?.passportId ||
+            object?.passport?.id ||
+            ""
+          }
+
+          {...financialFace2Props}
+        />
+      );
+    }
+    
 return (
   <IXIAosCardRuntime
     object={
@@ -593,30 +616,6 @@ return (
         faceIndex,
         faceCount
       );
-
-    if (
-      Number(
-        resolvedFace
-      ) === 3
-    ) {
-      return (
-        <IXIAosFinancialFace3
-          object={
-            object
-          }
-
-          passportId={
-            object?.passportId ||
-            object?.ixiPassportId ||
-            object?.passport?.passportId ||
-            object?.passport?.id ||
-            ""
-          }
-
-          {...financialFace2Props}
-        />
-      );
-    }
     
     return (
       <IXIAosSkinRuntime
