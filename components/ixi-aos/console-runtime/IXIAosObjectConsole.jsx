@@ -17,10 +17,8 @@ import IXIAosFinancialFace2
 import IXIAosFinancialFace3
   from "../financial-runtime/IXIAosFinancialFace3";
 
-import {
-  createEmptyAosFinancialFace2Model,
-  createAosFinancialFace2Props
-} from "../financial-runtime/IXIAosFinancialFace2Adapter";
+import IXIAosFinancialFace3
+  from "../financial-runtime/IXIAosFinancialFace3.jsx";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
