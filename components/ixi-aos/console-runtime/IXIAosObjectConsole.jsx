@@ -564,9 +564,7 @@ return (
      * this console slot owns.
      */
     forcedFaceIndex={
-  faceOnly
-    ? resolvedFace
-    : null
+  resolvedFace
 }
         faceOnly={
         faceOnly
@@ -1138,7 +1136,9 @@ String(
           ) : null}
 
 
-          {renderFace(1)}
+          {renderFace(
+  activeStudioFace
+)}
 
         </section>
       );
