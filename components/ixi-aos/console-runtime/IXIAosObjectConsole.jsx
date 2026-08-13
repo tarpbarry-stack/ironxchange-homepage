@@ -774,7 +774,6 @@ String(
           event.stopPropagation();
 
         const created =
-  const created =
   onCreateFace?.(
     slot.slotId
   );
