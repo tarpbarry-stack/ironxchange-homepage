@@ -1,61 +1,76 @@
 /*
  * IXI AOS FINANCIAL FACE 2
  *
- * STANDARD AOS FACE
- * -----------------
+ * STANDARD AOS FINANCIAL FACE
+ * ---------------------------
  *
  * FACE 1
- * Identity / presentation
+ * Identity / presentation.
  *
  * FACE 2
- * Financial
+ * Financial.
  *
  * FACE 3+
- * User / business defined
+ * User / business defined.
  *
  *
- * PURPOSE
- * -------
+ * FACE LAB DOCTRINE
+ * -----------------
  *
- * AOF2 is the standard financial snapshot
- * of the Passport-bearing Object or
- * Container currently being viewed.
+ * This component owns a real physical Face
+ * chassis:
+ *
+ * 298px native panel width
+ * 471px native panel height
+ * 1px shell border
+ * 13px shell radius
+ * clipped internal surface
+ * physical card shadow
  *
  *
- * AOF2 DOES NOT OWN FINANCIAL DATA.
+ * AOF2 DATA DOCTRINE
+ * ------------------
  *
- * It consumes the Financial Engine snapshot.
+ * AOF2 does NOT own financial truth.
  *
+ * It consumes:
  *
- * Future data flow:
- *
- * AWS Financial Store
+ * Financial Engine
  *        ↓
- * IXI Financial Engine
+ * Passport / recursive snapshot
  *        ↓
- * Passport / Recursive Snapshot
+ * lifecycle snapshot
  *        ↓
  * AOF2
  *
  *
- * IMPORTANT
- * ---------
+ * VISUAL DOCTRINE
+ * ---------------
  *
- * This Face is standard AOS infrastructure.
+ * Financial Face uses a restrained
+ * U.S.-currency-inspired palette:
  *
- * It is NOT:
+ * deep money green
+ * engraved green-black
+ * paper/ivory white
+ * muted mint
+ * black
  *
- * - a generic Studio-created Face
- * - an accounting database
- * - a QuickBooks Face
- * - an SAP Face
- * - equipment-specific
- *
- *
- * Every Passport-bearing Object / Container
- * may use this same runtime.
+ * No photographic money imagery.
+ * No decorative image asset.
  */
 
+
+const FACE_WIDTH =
+  298;
+
+const FACE_HEIGHT =
+  471;
+
+
+/* =========================================================
+   BASIC HELPERS
+   ========================================================= */
 
 function clean(
   value
@@ -85,7 +100,9 @@ function safeObject(
     value &&
     typeof value ===
       "object" &&
-    !Array.isArray(value)
+    !Array.isArray(
+      value
+    )
   )
     ? value
     : {};
@@ -138,12 +155,16 @@ function formatMoney(
 
   } catch {
 
-    return `$${Math.round(
+    const safeAmount =
       Number.isFinite(
         amount
       )
         ? amount
-        : 0
+        : 0;
+
+
+    return `$${Math.round(
+      safeAmount
     ).toLocaleString()}`;
   }
 }
@@ -205,7 +226,7 @@ function getObjectLabel(
 
 
 /* =========================================================
-   SNAPSHOT NORMALIZATION
+   SNAPSHOT
    ========================================================= */
 
 function getCurrencySnapshot(
@@ -227,19 +248,18 @@ function getCurrencySnapshot(
       .toUpperCase();
 
 
-  return (
+  return safeObject(
     source
       ?.snapshots
       ?.[
         resolvedCurrency
-      ] ||
-    {}
+      ]
   );
 }
 
 
 /* =========================================================
-   LATEST ACTIVITY
+   RECENT ACTIVITY
    ========================================================= */
 
 function normalizeRecentActivity(
@@ -313,6 +333,48 @@ function normalizeRecentActivity(
 
 
 /* =========================================================
+   METRIC
+   ========================================================= */
+
+function FinancialMetric({
+  label,
+  value,
+  currency,
+  strong = false
+}) {
+
+  return (
+    <div
+      className={[
+        "financial-metric",
+
+        strong
+          ? "financial-metric-strong"
+          : ""
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {
+          formatMoney(
+            value,
+            currency
+          )
+        }
+      </strong>
+
+    </div>
+  );
+}
+
+
+/* =========================================================
    COMPONENT
    ========================================================= */
 
@@ -380,10 +442,6 @@ export default function IXIAosFinancialFace2({
     );
 
 
-  /*
-   * Rollup snapshot supplies broad
-   * directional economics.
-   */
   const outflow =
     Number(
       snapshot.outflow ||
@@ -398,10 +456,6 @@ export default function IXIAosFinancialFace2({
     );
 
 
-  /*
-   * Lifecycle snapshot supplies accounting
-   * progression without double counting.
-   */
   const incurredCost =
     Number(
       lifecycle.incurredCost ??
@@ -480,7 +534,7 @@ export default function IXIAosFinancialFace2({
   return (
     <section
       className={[
-        "ixi-aos-financial-face2",
+        "ixi-aos-financial-face2-shell",
 
         className
       ]
@@ -489,511 +543,750 @@ export default function IXIAosFinancialFace2({
     >
 
       {/* ===================================================
-          PERMANENT PASSPORT STRIP
-
-          This is deliberately the absolute top of Face 2.
+          ENGRAVED INNER FACE
           =================================================== */}
 
-      <div className="passport-strip">
+      <div className="financial-face">
 
-        <span>
-          IXI OBJECT PASSPORT
-        </span>
+        {/* ===============================================
+            PASSPORT STRIP
+            =============================================== */}
 
-        <strong>
-          {
-            resolvedPassportId ||
-            "UNASSIGNED"
-          }
-        </strong>
-
-      </div>
-
-
-      {/* ===================================================
-          FACE HEADER
-          =================================================== */}
-
-      <div className="financial-header">
-
-        <div>
+        <div className="passport-strip">
 
           <span>
-            FINANCIAL
-          </span>
-
-          <strong>
-            {objectLabel}
-          </strong>
-
-        </div>
-
-
-        <em>
-          {
-            clean(
-              periodLabel
-            ) ||
-            "YTD"
-          }
-        </em>
-
-      </div>
-
-
-      {/* ===================================================
-          PRIMARY ECONOMIC SNAPSHOT
-          =================================================== */}
-
-      <div className="primary-grid">
-
-        <div className="primary-cell">
-
-          <span>
-            INCURRED COST
+            IXI OBJECT PASSPORT
           </span>
 
           <strong>
             {
-              formatMoney(
-                incurredCost,
-                resolvedCurrency
-              )
+              resolvedPassportId ||
+              "UNASSIGNED"
             }
           </strong>
 
         </div>
 
 
-        <div className="primary-cell">
+        {/* ===============================================
+            HEADER
+            =============================================== */}
 
-          <span>
-            COMMITTED
-          </span>
+        <header className="financial-header">
 
-          <strong>
+          <div className="financial-header-copy">
+
+            <span>
+              FINANCIAL
+            </span>
+
+            <strong>
+              {objectLabel}
+            </strong>
+
+          </div>
+
+
+          <div className="period-badge">
             {
-              formatMoney(
-                remainingCommitment,
-                resolvedCurrency
-              )
+              clean(
+                periodLabel
+              ) ||
+              "YTD"
             }
-          </strong>
-
-        </div>
-
-
-        <div className="primary-cell">
-
-          <span>
-            PROJECTED
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                projectedOutflow,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div className="primary-cell">
-
-          <span>
-            NET
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                operatingNet,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      {/* ===================================================
-          SECONDARY FINANCIAL STATE
-          =================================================== */}
-
-      <div className="detail-grid">
-
-        <div>
-
-          <span>
-            PAID
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                paid,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            UNPAID
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                unpaid,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            REVENUE
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                revenue,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            RECEIVABLE
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                receivable,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            COLLECTED
-          </span>
-
-          <strong>
-            {
-              formatMoney(
-                collected,
-                resolvedCurrency
-              )
-            }
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            CURRENCY
-          </span>
-
-          <strong>
-            {resolvedCurrency}
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      {/* ===================================================
-          RECENT ACTIVITY
-          =================================================== */}
-
-      <div className="activity-block">
-
-        <header>
-
-          <strong>
-            RECENT
-          </strong>
-
-          <span>
-            ACTIVITY
-          </span>
+          </div>
 
         </header>
 
 
-        <div className="activity-list">
+        {/* ===============================================
+            PRIMARY ECONOMICS
+            =============================================== */}
 
-          {
-            activity.length
-              ? activity.map(
-                  item => (
+        <div className="primary-grid">
 
-                    <div
-                      key={
-                        item.id
-                      }
+          <FinancialMetric
+            label="INCURRED COST"
 
-                      className="
-                        activity-row
-                      "
-                    >
+            value={
+              incurredCost
+            }
 
-                      <div>
+            currency={
+              resolvedCurrency
+            }
 
-                        <strong>
+            strong
+          />
+
+
+          <FinancialMetric
+            label="COMMITTED"
+
+            value={
+              remainingCommitment
+            }
+
+            currency={
+              resolvedCurrency
+            }
+
+            strong
+          />
+
+
+          <FinancialMetric
+            label="PROJECTED"
+
+            value={
+              projectedOutflow
+            }
+
+            currency={
+              resolvedCurrency
+            }
+
+            strong
+          />
+
+
+          <FinancialMetric
+            label="NET"
+
+            value={
+              operatingNet
+            }
+
+            currency={
+              resolvedCurrency
+            }
+
+            strong
+          />
+
+        </div>
+
+
+        {/* ===============================================
+            SECONDARY ECONOMICS
+            =============================================== */}
+
+        <div className="secondary-grid">
+
+          <FinancialMetric
+            label="PAID"
+
+            value={
+              paid
+            }
+
+            currency={
+              resolvedCurrency
+            }
+          />
+
+
+          <FinancialMetric
+            label="UNPAID"
+
+            value={
+              unpaid
+            }
+
+            currency={
+              resolvedCurrency
+            }
+          />
+
+
+          <FinancialMetric
+            label="REVENUE"
+
+            value={
+              revenue
+            }
+
+            currency={
+              resolvedCurrency
+            }
+          />
+
+
+          <FinancialMetric
+            label="RECEIVABLE"
+
+            value={
+              receivable
+            }
+
+            currency={
+              resolvedCurrency
+            }
+          />
+
+
+          <FinancialMetric
+            label="COLLECTED"
+
+            value={
+              collected
+            }
+
+            currency={
+              resolvedCurrency
+            }
+          />
+
+
+          <div className="currency-cell">
+
+            <span>
+              CURRENCY
+            </span>
+
+            <strong>
+              {resolvedCurrency}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        {/* ===============================================
+            RECENT ACTIVITY
+            =============================================== */}
+
+        <div className="activity-block">
+
+          <div className="activity-heading">
+
+            <strong>
+              RECENT
+            </strong>
+
+            <span>
+              ACTIVITY
+            </span>
+
+          </div>
+
+
+          <div className="activity-ledger">
+
+            {
+              activity.length
+                ? activity.map(
+                    item => (
+
+                      <div
+                        key={
+                          item.id
+                        }
+
+                        className="
+                          activity-row
+                        "
+                      >
+
+                        <div className="activity-copy">
+
+                          <strong>
+                            {
+                              item.label
+                            }
+                          </strong>
+
+                          <span>
+                            {
+                              item.date
+                                ? item.date
+                                    .slice(
+                                      0,
+                                      10
+                                    )
+                                : ""
+                            }
+                          </span>
+
+                        </div>
+
+
+                        <em>
                           {
-                            item.label
+                            formatMoney(
+                              item.amount,
+                              resolvedCurrency
+                            )
                           }
-                        </strong>
-
-                        <span>
-                          {
-                            item.date
-                              ? item.date
-                                  .slice(
-                                    0,
-                                    10
-                                  )
-                              : ""
-                          }
-                        </span>
+                        </em>
 
                       </div>
 
+                    )
+                  )
 
-                      <em>
-                        {
-                          formatMoney(
-                            item.amount,
-                            resolvedCurrency
-                          )
-                        }
-                      </em>
+                : (
+                    <div className="empty-activity">
+
+                      <span />
+
+                      <strong>
+                        NO FINANCIAL ACTIVITY
+                      </strong>
+
+                      <span />
 
                     </div>
-
                   )
-                )
+            }
 
-              : (
-                  <div className="empty-activity">
+          </div>
 
-                    NO FINANCIAL ACTIVITY
+        </div>
 
-                  </div>
-                )
-          }
+
+        {/* ===============================================
+            QUICK ACTIONS
+            =============================================== */}
+
+        <div
+          className={[
+            "financial-actions",
+
+            compactActions
+              ? "compact"
+              : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+
+          <button
+            type="button"
+
+            onClick={
+              onCreateExpense
+            }
+
+            disabled={
+              typeof onCreateExpense !==
+              "function"
+            }
+          >
+            + EXPENSE
+          </button>
+
+
+          <button
+            type="button"
+
+            onClick={
+              onCreatePurchaseOrder
+            }
+
+            disabled={
+              typeof onCreatePurchaseOrder !==
+              "function"
+            }
+          >
+            + PO
+          </button>
+
+
+          <button
+            type="button"
+
+            onClick={
+              onCreateWorkOrder
+            }
+
+            disabled={
+              typeof onCreateWorkOrder !==
+              "function"
+            }
+          >
+            + WORK
+          </button>
+
+
+          <button
+            type="button"
+
+            onClick={
+              onCreateTimeEntry
+            }
+
+            disabled={
+              typeof onCreateTimeEntry !==
+              "function"
+            }
+          >
+            + TIME
+          </button>
+
+        </div>
+
+
+        {/* ===============================================
+            WORKBOOK
+            =============================================== */}
+
+        <div className="workbook-zone">
+
+          <button
+            type="button"
+
+            className="
+              workbook-button
+            "
+
+            onClick={
+              onOpenWorkbook
+            }
+
+            disabled={
+              typeof onOpenWorkbook !==
+              "function"
+            }
+          >
+            OPEN FINANCIAL WORKBOOK
+          </button>
 
         </div>
 
       </div>
 
 
-      {/* ===================================================
-          QUICK ACTIONS
-          =================================================== */}
-
-      <div
-        className={[
-          "financial-actions",
-
-          compactActions
-            ? "compact"
-            : ""
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-
-        <button
-          type="button"
-
-          onClick={
-            onCreateExpense
-          }
-
-          disabled={
-            typeof onCreateExpense !==
-            "function"
-          }
-        >
-          + EXPENSE
-        </button>
-
-
-        <button
-          type="button"
-
-          onClick={
-            onCreatePurchaseOrder
-          }
-
-          disabled={
-            typeof onCreatePurchaseOrder !==
-            "function"
-          }
-        >
-          + PO
-        </button>
-
-
-        <button
-          type="button"
-
-          onClick={
-            onCreateWorkOrder
-          }
-
-          disabled={
-            typeof onCreateWorkOrder !==
-            "function"
-          }
-        >
-          + WORK
-        </button>
-
-
-        <button
-          type="button"
-
-          onClick={
-            onCreateTimeEntry
-          }
-
-          disabled={
-            typeof onCreateTimeEntry !==
-            "function"
-          }
-        >
-          + TIME
-        </button>
-
-      </div>
-
-
-      {/* ===================================================
-          WORKBOOK ENTRY
-          =================================================== */}
-
-      <button
-        type="button"
-
-        className="
-          workbook-button
-        "
-
-        onClick={
-          onOpenWorkbook
-        }
-
-        disabled={
-          typeof onOpenWorkbook !==
-          "function"
-        }
-      >
-        OPEN FINANCIAL WORKBOOK
-      </button>
-
-
       <style jsx>{`
 
-        .ixi-aos-financial-face2 {
-          width: 100%;
-          height: 100%;
+        /*
+         * =================================================
+         * PHYSICAL FACE LAB SHELL
+         * =================================================
+         *
+         * Same physical doctrine as Face Lab:
+         *
+         * 298 native width
+         * 471 native height
+         * bordered physical object
+         * rounded shell
+         * clipped contents
+         * real card shadow
+         */
 
-          min-width: 0;
-          min-height: 0;
+        .ixi-aos-financial-face2-shell {
+          box-sizing:
+            border-box;
 
-          display: flex;
-          flex-direction: column;
+          position:
+            relative;
 
-          overflow: hidden;
+          width:
+            100%;
 
-         background:
- background:
-  linear-gradient(
-    180deg,
-    rgba(35, 52, 39, .98),
-    rgba(21, 34, 25, .99)
-  );
+          min-width:
+            100%;
 
-          color:
+          max-width:
+            100%;
+
+          height:
+            100%;
+
+          min-height:
+            100%;
+
+          max-height:
+            100%;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          border:
+            1px solid
             rgba(
-              255,
-              255,
-              255,
-              .74
+              177,
+              198,
+              168,
+              .25
+            );
+
+          border-radius:
+            13px;
+
+          overflow:
+            hidden;
+
+          background:
+            #101a13;
+
+          box-shadow:
+            0 18px 40px
+            rgba(
+              0,
+              0,
+              0,
+              .46
             );
         }
 
 
-        /* ===============================================
-           PASSPORT
-           =============================================== */
+        /*
+         * Native datum remains explicit for
+         * Face Lab / Console architecture.
+         */
+        .ixi-aos-financial-face2-shell {
+          --ixi-aof2-native-width:
+            ${FACE_WIDTH}px;
+
+          --ixi-aof2-native-height:
+            ${FACE_HEIGHT}px;
+        }
+
+
+        /*
+         * =================================================
+         * MONEY FACE
+         * =================================================
+         *
+         * Layered CSS only.
+         *
+         * No image.
+         *
+         * Fine radial/linear fields give a
+         * subtle engraved-security-print feel
+         * without becoming decorative noise.
+         */
+
+        .financial-face {
+          box-sizing:
+            border-box;
+
+          position:
+            relative;
+
+          width:
+            100%;
+
+          height:
+            100%;
+
+          min-width:
+            0;
+
+          min-height:
+            0;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          overflow:
+            hidden;
+
+          color:
+            #f2f2e8;
+
+          background:
+            radial-gradient(
+              ellipse at 82% 17%,
+              rgba(
+                143,
+                176,
+                129,
+                .10
+              ),
+              transparent 33%
+            ),
+            radial-gradient(
+              ellipse at 18% 76%,
+              rgba(
+                167,
+                192,
+                153,
+                .055
+              ),
+              transparent 38%
+            ),
+            repeating-linear-gradient(
+              118deg,
+              rgba(
+                225,
+                234,
+                215,
+                .014
+              ) 0px,
+              rgba(
+                225,
+                234,
+                215,
+                .014
+              ) 1px,
+              transparent 1px,
+              transparent 5px
+            ),
+            linear-gradient(
+              180deg,
+              #213a29 0%,
+              #172b1e 24%,
+              #102117 58%,
+              #0b1810 100%
+            );
+        }
+
+
+        /*
+         * Inner banknote-style keyline.
+         */
+
+        .financial-face::before {
+          content:
+            "";
+
+          position:
+            absolute;
+
+          inset:
+            5px;
+
+          z-index:
+            0;
+
+          pointer-events:
+            none;
+
+          border:
+            1px solid
+            rgba(
+              205,
+              219,
+              193,
+              .11
+            );
+
+          border-radius:
+            9px;
+        }
+
+
+        /*
+         * Subtle center watermark field.
+         */
+
+        .financial-face::after {
+          content:
+            "$";
+
+          position:
+            absolute;
+
+          right:
+            -9px;
+
+          top:
+            90px;
+
+          z-index:
+            0;
+
+          color:
+            rgba(
+              215,
+              226,
+              205,
+              .022
+            );
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            190px;
+
+          font-weight:
+            900;
+
+          line-height:
+            .8;
+
+          pointer-events:
+            none;
+        }
+
+
+        .financial-face
+        > * {
+          position:
+            relative;
+
+          z-index:
+            1;
+        }
+
+
+        /*
+         * =================================================
+         * PASSPORT STRIP
+         * =================================================
+         */
 
         .passport-strip {
-          height: 21px;
+          box-sizing:
+            border-box;
+
+          height:
+            25px;
 
           flex:
-            0 0 21px;
+            0 0 25px;
 
           padding:
-            0 8px;
+            0 10px;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
 
-          gap: 8px;
+          gap:
+            8px;
 
           border-bottom:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .055
+              213,
+              225,
+              202,
+              .12
             );
 
           background:
-            rgba(
-              255,
-              255,
-              255,
-              .012
+            linear-gradient(
+              180deg,
+              rgba(
+                3,
+                9,
+                5,
+                .45
+              ),
+              rgba(
+                3,
+                9,
+                5,
+                .22
+              )
             );
         }
 
@@ -1001,35 +1294,46 @@ export default function IXIAosFinancialFace2({
         .passport-strip span {
           color:
             rgba(
-              255,
-              255,
-              255,
-              .27
+              226,
+              232,
+              218,
+              .57
             );
 
-          font-size: 5px;
-          font-weight: 950;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5.2px;
+
+          font-weight:
+            900;
 
           letter-spacing:
-            .45px;
+            .75px;
         }
 
 
         .passport-strip strong {
-          min-width: 0;
+          min-width:
+            0;
 
-          overflow: hidden;
+          overflow:
+            hidden;
 
           color:
-            rgba(
-              255,
-              196,
-              0,
-              .73
-            );
+            #dce7d4;
 
-          font-size: 5px;
-          font-weight: 950;
+          font-size:
+            5px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .28px;
 
           text-overflow:
             ellipsis;
@@ -1039,108 +1343,217 @@ export default function IXIAosFinancialFace2({
         }
 
 
-        /* ===============================================
-           HEADER
-           =============================================== */
+        /*
+         * =================================================
+         * HEADER
+         * =================================================
+         */
 
         .financial-header {
-          min-height: 42px;
+          box-sizing:
+            border-box;
+
+          min-height:
+            55px;
 
           flex:
-            0 0 42px;
+            0 0 55px;
 
           padding:
-            7px 9px;
+            8px 10px 9px;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
 
-          gap: 8px;
+          gap:
+            8px;
 
           border-bottom:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .045
+              218,
+              228,
+              209,
+              .14
+            );
+
+          background:
+            linear-gradient(
+              90deg,
+              rgba(
+                4,
+                13,
+                8,
+                .34
+              ),
+              rgba(
+                101,
+                133,
+                89,
+                .035
+              )
             );
         }
 
 
-        .financial-header > div {
-          min-width: 0;
+        .financial-header-copy {
+          min-width:
+            0;
 
-          display: flex;
-          flex-direction: column;
+          display:
+            flex;
 
-          gap: 2px;
+          flex-direction:
+            column;
+
+          justify-content:
+            center;
+
+          gap:
+            3px;
         }
 
 
-        .financial-header span {
-          color: #ffc400;
+        .financial-header-copy span {
+          color:
+            #c6d6bd;
 
-          font-size: 6px;
-          font-weight: 950;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            6.5px;
+
+          font-weight:
+            900;
 
           letter-spacing:
-            .55px;
+            .9px;
         }
 
 
-        .financial-header strong {
-          overflow: hidden;
+        .financial-header-copy strong {
+          overflow:
+            hidden;
 
           color:
-            rgba(
-              255,
-              255,
-              255,
-              .72
-            );
+            #f4f2e6;
 
-          font-size: 8px;
-          font-weight: 950;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            12px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            -.15px;
+
+          line-height:
+            1.05;
 
           text-overflow:
             ellipsis;
+
+          text-shadow:
+            0 1px 0
+            rgba(
+              0,
+              0,
+              0,
+              .9
+            );
 
           white-space:
             nowrap;
         }
 
 
-        .financial-header em {
-          flex: none;
+        .period-badge {
+          flex:
+            none;
 
-          color:
+          min-width:
+            34px;
+
+          height:
+            18px;
+
+          padding:
+            0 7px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border:
+            1px solid
             rgba(
-              255,
-              255,
-              255,
-              .22
+              211,
+              224,
+              199,
+              .18
             );
 
-          font-size: 5px;
-          font-style: normal;
-          font-weight: 950;
+          border-radius:
+            3px;
+
+          background:
+            rgba(
+              3,
+              10,
+              6,
+              .32
+            );
+
+          color:
+            #d9e4d1;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5.5px;
+
+          font-weight:
+            900;
 
           letter-spacing:
-            .4px;
+            .6px;
         }
 
 
-        /* ===============================================
-           PRIMARY
-           =============================================== */
+        /*
+         * =================================================
+         * PRIMARY GRID
+         * =================================================
+         */
 
         .primary-grid {
-          display: grid;
+          box-sizing:
+            border-box;
+
+          display:
+            grid;
 
           grid-template-columns:
             1fr 1fr;
@@ -1148,51 +1561,88 @@ export default function IXIAosFinancialFace2({
           flex:
             0 0 auto;
 
-          border-bottom:
+          margin:
+            6px 7px 0;
+
+          overflow:
+            hidden;
+
+          border:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .045
+              211,
+              224,
+              199,
+              .14
+            );
+
+          border-radius:
+            5px;
+
+          background:
+            rgba(
+              2,
+              8,
+              4,
+              .24
             );
         }
 
 
-        .primary-cell {
-          min-height: 45px;
+        .financial-metric {
+          box-sizing:
+            border-box;
+
+          min-width:
+            0;
+
+          min-height:
+            37px;
 
           padding:
-            7px 8px;
+            6px 7px;
 
-          display: flex;
-          flex-direction: column;
+          display:
+            flex;
 
-          justify-content: center;
+          flex-direction:
+            column;
 
-          gap: 3px;
+          justify-content:
+            center;
+
+          gap:
+            2px;
+        }
+
+
+        .primary-grid
+        .financial-metric {
+          min-height:
+            46px;
 
           border-right:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .035
+              211,
+              224,
+              199,
+              .09
             );
 
           border-bottom:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .035
+              211,
+              224,
+              199,
+              .09
             );
         }
 
 
-        .primary-cell:nth-child(
+        .primary-grid
+        .financial-metric:nth-child(
           2n
         ) {
           border-right:
@@ -1200,43 +1650,86 @@ export default function IXIAosFinancialFace2({
         }
 
 
-        .primary-cell span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .22
-            );
-
-          font-size: 5px;
-          font-weight: 950;
+        .primary-grid
+        .financial-metric:nth-child(
+          3
+        ),
+        .primary-grid
+        .financial-metric:nth-child(
+          4
+        ) {
+          border-bottom:
+            0;
         }
 
 
-        .primary-cell strong {
+        .financial-metric span,
+        .currency-cell span {
           color:
             rgba(
-              255,
-              255,
-              255,
-              .79
+              205,
+              218,
+              195,
+              .53
             );
 
-          font-size: 11px;
-          font-weight: 950;
+          font-size:
+            4.7px;
+
+          font-weight:
+            950;
 
           letter-spacing:
-            -.15px;
+            .38px;
         }
 
 
-        /* ===============================================
-           DETAILS
-           =============================================== */
+        .financial-metric strong,
+        .currency-cell strong {
+          color:
+            #ebece2;
 
-        .detail-grid {
-          display: grid;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            7px;
+
+          font-weight:
+            900;
+
+          line-height:
+            1;
+        }
+
+
+        .financial-metric-strong strong {
+          color:
+            #ffffff;
+
+          font-size:
+            12px;
+
+          text-shadow:
+            0 1px 0
+            #000;
+        }
+
+
+        /*
+         * =================================================
+         * SECONDARY GRID
+         * =================================================
+         */
+
+        .secondary-grid {
+          box-sizing:
+            border-box;
+
+          display:
+            grid;
 
           grid-template-columns:
             1fr 1fr 1fr;
@@ -1244,219 +1737,354 @@ export default function IXIAosFinancialFace2({
           flex:
             0 0 auto;
 
-          border-bottom:
+          margin:
+            6px 7px 0;
+
+          overflow:
+            hidden;
+
+          border:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .045
+              211,
+              224,
+              199,
+              .11
+            );
+
+          border-radius:
+            5px;
+
+          background:
+            rgba(
+              2,
+              8,
+              4,
+              .17
             );
         }
 
 
-        .detail-grid > div {
-          min-height: 35px;
-
-          padding:
-            6px;
-
-          display: flex;
-          flex-direction: column;
-
-          justify-content: center;
-
-          gap: 3px;
+        .secondary-grid
+        .financial-metric,
+        .currency-cell {
+          min-height:
+            34px;
 
           border-right:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .032
+              211,
+              224,
+              199,
+              .075
             );
 
           border-bottom:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .032
+              211,
+              224,
+              199,
+              .075
             );
         }
 
 
-        .detail-grid > div:nth-child(
-          3n
-        ) {
+        .secondary-grid
+        .financial-metric:nth-child(
+          3
+        ),
+        .secondary-grid
+        .currency-cell {
           border-right:
             0;
         }
 
 
-        .detail-grid span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .18
-            );
-
-          font-size: 4.5px;
-          font-weight: 950;
+        .secondary-grid
+        .financial-metric:nth-child(
+          4
+        ),
+        .secondary-grid
+        .financial-metric:nth-child(
+          5
+        ),
+        .secondary-grid
+        .currency-cell {
+          border-bottom:
+            0;
         }
 
 
-        .detail-grid strong {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .57
-            );
-
-          font-size: 6.5px;
-          font-weight: 950;
-        }
-
-
-        /* ===============================================
-           ACTIVITY
-           =============================================== */
-
-        .activity-block {
-          flex: 1;
-
-          min-height: 0;
+        .currency-cell {
+          box-sizing:
+            border-box;
 
           padding:
-            7px 8px;
+            6px 7px;
 
-          display: flex;
-          flex-direction: column;
+          display:
+            flex;
 
-          gap: 5px;
-
-          overflow: hidden;
-        }
-
-
-        .activity-block > header {
-          flex: none;
-
-          display: flex;
-
-          align-items: baseline;
-
-          gap: 5px;
-        }
-
-
-        .activity-block > header strong {
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .72
-            );
-
-          font-size: 5px;
-          font-weight: 950;
-        }
-
-
-        .activity-block > header span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .16
-            );
-
-          font-size: 4.5px;
-          font-weight: 900;
-        }
-
-
-        .activity-list {
-          flex: 1;
-
-          min-height: 0;
-
-          display: flex;
-          flex-direction: column;
-
-          gap: 3px;
-
-          overflow: hidden;
-        }
-
-
-        .activity-row {
-          min-height: 28px;
-
-          padding:
-            4px 6px;
-
-          display: flex;
-
-          align-items: center;
+          flex-direction:
+            column;
 
           justify-content:
-            space-between;
+            center;
 
-          gap: 6px;
+          gap:
+            2px;
+        }
+
+
+        /*
+         * =================================================
+         * ACTIVITY LEDGER
+         * =================================================
+         */
+
+        .activity-block {
+          box-sizing:
+            border-box;
+
+          flex:
+            1;
+
+          min-height:
+            0;
+
+          margin:
+            6px 7px 0;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          overflow:
+            hidden;
 
           border:
             1px solid
             rgba(
-              255,
-              255,
-              255,
-              .035
+              211,
+              224,
+              199,
+              .11
             );
 
-          border-radius: 4px;
+          border-radius:
+            5px;
 
           background:
             rgba(
-              255,
-              255,
-              255,
-              .01
+              2,
+              8,
+              4,
+              .18
             );
         }
 
 
-        .activity-row > div {
-          min-width: 0;
+        .activity-heading {
+          height:
+            22px;
 
-          display: flex;
-          flex-direction: column;
+          flex:
+            0 0 22px;
 
-          gap: 1px;
+          padding:
+            0 7px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            5px;
+
+          border-bottom:
+            1px solid
+            rgba(
+              211,
+              224,
+              199,
+              .09
+            );
+
+          background:
+            rgba(
+              197,
+              214,
+              186,
+              .025
+            );
         }
 
 
-        .activity-row strong {
-          overflow: hidden;
+        .activity-heading strong {
+          color:
+            #d7e2cf;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5.5px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            .55px;
+        }
+
+
+        .activity-heading span {
+          color:
+            rgba(
+              213,
+              224,
+              204,
+              .35
+            );
+
+          font-size:
+            4.4px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .3px;
+        }
+
+
+        .activity-ledger {
+          flex:
+            1;
+
+          min-height:
+            0;
+
+          padding:
+            4px;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          gap:
+            3px;
+
+          overflow:
+            hidden;
+
+          background:
+            repeating-linear-gradient(
+              180deg,
+              transparent 0,
+              transparent 25px,
+              rgba(
+                205,
+                219,
+                195,
+                .035
+              ) 25px,
+              rgba(
+                205,
+                219,
+                195,
+                .035
+              ) 26px
+            );
+        }
+
+
+        .activity-row {
+          box-sizing:
+            border-box;
+
+          min-height:
+            29px;
+
+          padding:
+            4px 6px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap:
+            6px;
+
+          border:
+            1px solid
+            rgba(
+              205,
+              219,
+              195,
+              .065
+            );
+
+          border-radius:
+            3px;
+
+          background:
+            rgba(
+              0,
+              0,
+              0,
+              .12
+            );
+        }
+
+
+        .activity-copy {
+          min-width:
+            0;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          gap:
+            1px;
+        }
+
+
+        .activity-copy strong {
+          overflow:
+            hidden;
 
           color:
             rgba(
-              255,
-              255,
-              255,
-              .45
+              240,
+              241,
+              232,
+              .78
             );
 
-          font-size: 5px;
-          font-weight: 950;
+          font-size:
+            5px;
+
+          font-weight:
+            950;
 
           text-overflow:
             ellipsis;
@@ -1466,175 +2094,152 @@ export default function IXIAosFinancialFace2({
         }
 
 
-        .activity-row span {
+        .activity-copy span {
           color:
             rgba(
-              255,
-              255,
-              255,
-              .14
+              205,
+              219,
+              195,
+              .36
             );
 
-          font-size: 4px;
-          font-weight: 850;
+          font-size:
+            4px;
+
+          font-weight:
+            850;
         }
 
 
         .activity-row em {
-          flex: none;
+          flex:
+            none;
 
           color:
-            rgba(
-              255,
-              255,
-              255,
-              .56
-            );
+            #f0f1e8;
 
-          font-size: 5px;
-          font-style: normal;
-          font-weight: 950;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5.5px;
+
+          font-style:
+            normal;
+
+          font-weight:
+            900;
         }
 
 
         .empty-activity {
-          flex: 1;
+          flex:
+            1;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          justify-content: center;
+          justify-content:
+            center;
 
+          gap:
+            6px;
+        }
+
+
+        .empty-activity span {
+          width:
+            22px;
+
+          height:
+            1px;
+
+          background:
+            rgba(
+              205,
+              219,
+              195,
+              .22
+            );
+        }
+
+
+        .empty-activity strong {
           color:
             rgba(
-              255,
-              255,
-              255,
-              .12
+              222,
+              230,
+              214,
+              .30
             );
 
-          font-size: 5px;
-          font-weight: 950;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5px;
+
+          font-weight:
+            900;
 
           letter-spacing:
             .45px;
         }
 
 
-        /* ===============================================
-           ACTIONS
-           =============================================== */
+        /*
+         * =================================================
+         * ACTIONS
+         * =================================================
+         */
 
         .financial-actions {
-          flex: none;
+          box-sizing:
+            border-box;
+
+          flex:
+            0 0 34px;
+
+          min-height:
+            34px;
 
           padding:
-            6px 7px;
+            5px 7px 4px;
 
-          display: grid;
+          display:
+            grid;
 
           grid-template-columns:
             1fr 1fr 1fr 1fr;
 
-          gap: 4px;
-
-          border-top:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .04
-            );
+          gap:
+            4px;
         }
 
 
         .financial-actions button {
-          height: 25px;
+          min-width:
+            0;
+
+          height:
+            25px;
 
           padding:
-            0 3px;
+            0 2px;
 
           border:
             1px solid
             rgba(
-              255,
-              196,
-              0,
-              .12
-            );
-
-          border-radius:
-            4px;
-
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .018
-            );
-
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .57
-            );
-
-          font-size: 4.5px;
-          font-weight: 950;
-
-          cursor: pointer;
-        }
-
-
-        .financial-actions button:hover:not(
-          :disabled
-        ) {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .40
-            );
-
-          color:
-            #ffc400;
-        }
-
-
-        .financial-actions button:disabled {
-          opacity:
-            .26;
-
-          cursor:
-            default;
-        }
-
-
-        /* ===============================================
-           WORKBOOK
-           =============================================== */
-
-        .workbook-button {
-          height: 28px;
-
-          flex:
-            0 0 28px;
-
-          margin:
-            0 7px 7px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              196,
-              0,
+              202,
+              219,
+              191,
               .16
             );
 
@@ -1642,50 +2247,176 @@ export default function IXIAosFinancialFace2({
             4px;
 
           background:
-            rgba(
-              255,
-              196,
-              0,
-              .025
+            linear-gradient(
+              180deg,
+              rgba(
+                214,
+                227,
+                203,
+                .055
+              ),
+              rgba(
+                0,
+                0,
+                0,
+                .16
+              )
             );
 
           color:
-            rgba(
-              255,
-              196,
-              0,
-              .70
-            );
+            #d9e4d1;
 
-          font-size: 5px;
-          font-weight: 950;
+          font-size:
+            4.5px;
+
+          font-weight:
+            950;
 
           letter-spacing:
-            .35px;
+            .15px;
 
-          cursor: pointer;
+          cursor:
+            pointer;
+        }
+
+
+        .financial-actions
+        button:hover:not(
+          :disabled
+        ) {
+          border-color:
+            rgba(
+              225,
+              235,
+              216,
+              .42
+            );
+
+          background:
+            rgba(
+              213,
+              228,
+              202,
+              .10
+            );
+
+          color:
+            #ffffff;
+        }
+
+
+        .financial-actions
+        button:disabled {
+          opacity:
+            .32;
+
+          cursor:
+            default;
+        }
+
+
+        /*
+         * =================================================
+         * WORKBOOK
+         * =================================================
+         */
+
+        .workbook-zone {
+          box-sizing:
+            border-box;
+
+          flex:
+            0 0 38px;
+
+          min-height:
+            38px;
+
+          padding:
+            0 7px 7px;
+
+          display:
+            flex;
+
+          align-items:
+            flex-end;
+        }
+
+
+        .workbook-button {
+          width:
+            100%;
+
+          height:
+            30px;
+
+          border:
+            1px solid
+            rgba(
+              220,
+              231,
+              211,
+              .22
+            );
+
+          border-radius:
+            4px;
+
+          background:
+            linear-gradient(
+              180deg,
+              #d5dfcd,
+              #aebfa5
+            );
+
+          color:
+            #0b160e;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size:
+            5.5px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            .42px;
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .34
+            );
+
+          cursor:
+            pointer;
         }
 
 
         .workbook-button:hover:not(
           :disabled
         ) {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .45
+          background:
+            linear-gradient(
+              180deg,
+              #edf2e8,
+              #c3d1ba
             );
 
           color:
-            #ffc400;
+            #050a06;
         }
 
 
         .workbook-button:disabled {
           opacity:
-            .28;
+            .42;
 
           cursor:
             default;
