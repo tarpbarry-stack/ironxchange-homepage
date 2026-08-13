@@ -939,13 +939,13 @@ export default function IXIAosFinancialFace2({
 
           overflow: hidden;
 
-          background:
-            rgba(
-              8,
-              8,
-              8,
-              .98
-            );
+         background:
+ background:
+  linear-gradient(
+    180deg,
+    rgba(35, 52, 39, .98),
+    rgba(21, 34, 25, .99)
+  );
 
           color:
             rgba(
