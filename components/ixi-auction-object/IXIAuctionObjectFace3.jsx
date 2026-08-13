@@ -1321,3074 +1321,1874 @@ export default function IXIAuctionObjectFace3({
 
       <style jsx>{`
 
-        /* ================================================
-           ROOT CARD
-           ================================================ */
+  /* =======================================================
+     AOF3 — PRIVATE DEALER WORKSHEET
+     CERTIFICATE / LEDGER SKIN
 
-        :global(.aof3-certificate) {
+     IMPORTANT FACE LAB RULE:
 
-          --paper-00:
-            #fff8e9;
+     IXI SHELL OWNS:
+     - outer perimeter
+     - outer radius
+     - object rail
+     - card edge
 
-          --paper-01:
-            #faedd2;
+     THIS FACE OWNS:
+     - parchment paint
+     - internal panels
+     - typography
+     - internal ornament
+     - action presentation
 
-          --paper-02:
-            #f2dfba;
+     THE FACE BACKGROUND CONTINUES THROUGH THE
+     FINAL 19PX IXI RAIL ZONE.
 
-          --paper-03:
-            #e8cfa0;
-
-          --paper-04:
-            #d5b67f;
-
-          --ink:
-            #2c1b12;
-
-          --ink-2:
-            #4a3020;
-
-          --ink-soft:
-            #72523b;
-
-          --gold:
-            #9a630b;
-
-          --gold-2:
-            #b27b1e;
-
-          --gold-soft:
-            rgba(
-              154,
-              99,
-              11,
-              .42
-            );
-
-          --line:
-            rgba(
-              105,
-              71,
-              40,
-              .55
-            );
-
-          --line-soft:
-            rgba(
-              105,
-              71,
-              40,
-              .20
-            );
+     DO NOT DRAW A SECOND CARD SHELL HERE.
+     ======================================================= */
 
 
-          position:
-            relative;
+  /* =======================================================
+     ROOT FACE PAINT
 
+     NO BORDER.
+     NO RADIUS.
+     NO SECOND SHELL.
+     NO OUTER SHADOW.
 
-          color:
-            var(--ink);
+     The IXI shell already does all of that.
+     ======================================================= */
 
+  :global(.aof3-certificate) {
 
-          border:
-            1px solid
-            rgba(
-              83,
-              50,
-              27,
-              .84
-            ) !important;
+    --aof3-paper-00:
+      #fffaf0;
 
+    --aof3-paper-01:
+      #faeed5;
 
-          border-radius:
-            15px !important;
+    --aof3-paper-02:
+      #f2dfba;
 
+    --aof3-paper-03:
+      #ead2a7;
 
-          overflow:
-            hidden !important;
+    --aof3-paper-04:
+      #ddbf8c;
 
+    --aof3-ink:
+      #2b1a11;
 
-          background:
-            linear-gradient(
-              180deg,
-              var(--paper-00)
-                0%,
-              var(--paper-01)
-                18%,
-              var(--paper-02)
-                60%,
-              #eed9b0
-                100%
-            ) !important;
+    --aof3-ink-2:
+      #4c3120;
 
+    --aof3-ink-soft:
+      #73533c;
 
-          box-shadow:
-            inset
-            0
-            0
-            0
-            2px
-            rgba(
-              255,
-              255,
-              255,
-              .42
-            ),
+    --aof3-gold:
+      #98610a;
 
-            inset
-            0
-            0
-            0
-            4px
-            rgba(
-              132,
-              88,
-              40,
-              .20
-            ),
+    --aof3-gold-deep:
+      #754704;
 
-            0
-            8px
-            22px
-            rgba(
-              0,
-              0,
-              0,
-              .34
-            ) !important;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        /* ================================================
-           FORCE PARCHMENT THROUGH WHOLE FACE
-           ================================================ */
-
-        :global(.aof3-content) {
-
-          position:
-            relative;
-
-
-          display:
-            flex;
-
-
-          flex-direction:
-            column;
-
-
-          width:
-            100%;
-
-
-          height:
-            100%;
-
-
-          min-height:
-            0;
-
-
-          box-sizing:
-            border-box;
-
-
-          padding:
-            8px
-            9px
-            4px;
-
-
-          gap:
-            5px;
-
-
-          overflow:
-            hidden;
-
-
-          color:
-            var(--ink);
-
-
-          background:
-
-            radial-gradient(
-              circle
-                at
-                12%
-                8%,
-              rgba(
-                255,
-                255,
-                255,
-                .46
-              )
-                0%,
-              rgba(
-                255,
-                255,
-                255,
-                0
-              )
-                31%
-            ),
-
-            radial-gradient(
-              circle
-                at
-                87%
-                74%,
-              rgba(
-                125,
-                83,
-                37,
-                .055
-              )
-                0%,
-              rgba(
-                125,
-                83,
-                37,
-                0
-              )
-                34%
-            ),
-
-            repeating-linear-gradient(
-              0deg,
-              rgba(
-                89,
-                58,
-                31,
-                .012
-              )
-                0px,
-              rgba(
-                89,
-                58,
-                31,
-                .012
-              )
-                1px,
-              transparent
-                1px,
-              transparent
-                4px
-            ),
+    --aof3-line:
+      rgba(
+        120,
+        78,
+        37,
+        .49
+      );
 
-            linear-gradient(
-              180deg,
-              var(--paper-00)
-                0%,
-              var(--paper-01)
-                28%,
-              var(--paper-02)
-                68%,
-              #ecd5aa
-                100%
-            ) !important;
-        }
+    --aof3-line-soft:
+      rgba(
+        120,
+        78,
+        37,
+        .20
+      );
 
+    --aof3-rail-height:
+      19px;
 
-        :global(.aof3-content::before) {
 
-          content:
-            "";
+    position:
+      relative !important;
 
 
-          position:
-            absolute;
+    color:
+      var(
+        --aof3-ink
+      ) !important;
 
 
-          inset:
-            4px;
-
-
-          z-index:
-            0;
-
-
-          pointer-events:
-            none;
-
-
-          border:
-            1px solid
-            rgba(
-              139,
-              91,
-              35,
-              .46
-            );
-
-
-          border-radius:
-            10px;
-
-
-          box-shadow:
-            inset
-            0
-            0
-            0
-            1px
-            rgba(
-              255,
-              255,
-              255,
-              .30
-            );
-        }
-
-
-        :global(.aof3-content::after) {
-
-          content:
-            "";
-
-
-          position:
-            absolute;
-
-
-          inset:
-            7px;
-
-
-          z-index:
-            0;
-
-
-          pointer-events:
-            none;
-
-
-          border:
-            1px solid
-            rgba(
-              139,
-              91,
-              35,
-              .20
-            );
-
-
-          border-radius:
-            8px;
-        }
-
-
-        /* ================================================
-           INNER CONTENT STACK
-           ================================================ */
-
-        .aof3-certificate-inner {
-
-          position:
-            relative;
-
-
-          z-index:
-            1;
-
-
-          display:
-            flex;
-
-
-          flex:
-            1
-            1
-            auto;
-
-
-          min-height:
-            0;
-
-
-          flex-direction:
-            column;
-
-
-          gap:
-            5px;
-
-
-          padding:
-            1px
-            2px
-            0;
-        }
-
-
-        /* ================================================
-           HEADER
-           ================================================ */
-
-        .aof3-head {
-
-          min-height:
-            17px;
-
-
-          display:
-            flex;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            space-between;
-
-
-          gap:
-            8px;
-
-
-          padding:
-            0
-            3px;
-
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            7.5px;
-
-
-          font-weight:
-            900;
-
-
-          line-height:
-            1;
-
-
-          letter-spacing:
-            .26px;
-
-
-          text-transform:
-            uppercase;
-        }
-
-
-        .aof3-head strong,
-        .aof3-head span {
-
-          overflow:
-            hidden;
-
-
-          text-overflow:
-            ellipsis;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-head span {
-
-          font-weight:
-            950;
-        }
-
-
-        /* ================================================
-           TOP ORNAMENT
-           ================================================ */
-
-        .aof3-ornament {
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            30px
-            auto
-            30px;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            center;
-
-
-          gap:
-            4px;
-
-
-          height:
-            6px;
-
-
-          color:
-            var(--gold);
-        }
-
-
-        .aof3-ornament span {
-
-          height:
-            1px;
-
-
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              rgba(
-                154,
-                99,
-                11,
-                .68
-              ),
-              transparent
-            );
-        }
-
-
-        .aof3-ornament b {
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            6px;
-
-
-          font-weight:
-            400;
-        }
-
-
-        /* ================================================
-           MACHINE LINE
-           ================================================ */
-
-        .aof3-machine-line {
-
-          min-height:
-            18px;
-
-
-          display:
-            flex;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            center;
-
-
-          gap:
-            4px;
-
-
-          overflow:
-            hidden;
-
-
-          padding:
-            0
-            4px;
-
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            8.3px;
-
-
-          font-weight:
-            800;
-
-
-          line-height:
-            1.1;
-
-
-          letter-spacing:
-            .19px;
-
-
-          text-align:
-            center;
-
-
-          text-transform:
-            uppercase;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-machine-line strong {
-
-          min-width:
-            0;
-
-
-          overflow:
-            hidden;
-
-
-          text-overflow:
-            ellipsis;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-machine-line span {
-
-          color:
-            var(--gold);
-
-
-          flex:
-            0
-            0
-            auto;
-        }
-
-
-        /* ================================================
-           COMMON PANEL
-           ================================================ */
-
-        .ledger-panel {
-
-          position:
-            relative;
-
-
-          min-width:
-            0;
-
-
-          border:
-            1px solid
-            rgba(
-              151,
-              103,
-              48,
-              .57
-            );
-
-
-          border-radius:
-            6px;
-
-
-          background:
-
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                255,
-                255,
-                .28
-              ),
-              rgba(
-                255,
-                255,
-                255,
-                .06
-              )
-            ),
-
-            rgba(
-              247,
-              231,
-              198,
-              .34
-            );
-
-
-          box-shadow:
-
-            inset
-            0
-            0
-            0
-            1px
-            rgba(
-              255,
-              255,
-              255,
-              .24
-            ),
-
-            0
-            1px
-            2px
-            rgba(
-              71,
-              42,
-              20,
-              .09
-            );
-        }
-
-
-        /* ================================================
-           SALE BLOCK
-           ================================================ */
-
-        .aof3-sale-section {
-
-          flex:
-            0
-            0
-            77px;
-
-
-          padding:
-            7px
-            10px
-            6px;
-
-
-          border-color:
-            rgba(
-              158,
-              103,
-              35,
-              .66
-            );
-        }
-
-
-        .aof3-sale-title {
-
-          color:
-            var(--ink-2);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            8.2px;
-
-
-          font-weight:
-            900;
-
-
-          line-height:
-            1;
-
-
-          letter-spacing:
-            .42px;
-
-
-          text-align:
-            center;
-
-
-          text-transform:
-            uppercase;
-        }
-
-
-        .aof3-sale-money {
-
-          height:
-            32px;
-
-
-          display:
-            flex;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            center;
-
-
-          gap:
-            1px;
-
-
-          margin-top:
-            1px;
-        }
-
-
-        .aof3-sale-dollar {
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            21px;
-
-
-          font-weight:
-            700;
-
-
-          line-height:
-            1;
-        }
-
-
-        :global(.aof3-sale-input) {
-
-          width:
-            104px !important;
-
-
-          min-width:
-            104px !important;
-
-
-          max-width:
-            104px !important;
-
-
-          height:
-            31px !important;
-
-
-          margin:
-            0 !important;
-
-
-          padding:
-            0 !important;
-
-
-          border:
-            0 !important;
-
-
-          border-radius:
-            0 !important;
-
-
-          outline:
-            none !important;
-
-
-          background:
-            transparent !important;
-
-
-          color:
-            var(--ink) !important;
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif !important;
-
-
-          font-size:
-            20px !important;
-
-
-          font-weight:
-            900 !important;
-
-
-          line-height:
-            31px !important;
-
-
-          letter-spacing:
-            -.35px;
-
-
-          text-align:
-            left !important;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        .aof3-sale-rule {
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            minmax(
-              0,
-              1fr
-            )
-            auto
-            minmax(
-              0,
-              1fr
-            );
-
-
-          align-items:
-            center;
-
-
-          gap:
-            5px;
-
-
-          height:
-            5px;
-
-
-          padding:
-            0
-            13px;
-
-
-          color:
-            var(--gold);
-        }
-
-
-        .aof3-sale-rule span {
-
-          height:
-            1px;
-
-
-          background:
-            rgba(
-              151,
-              103,
-              48,
-              .53
-            );
-        }
-
-
-        .aof3-sale-rule b {
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            7px;
-
-
-          font-weight:
-            400;
-        }
-
-
-        .aof3-advertised-row {
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-
-          align-items:
-            center;
-
-
-          gap:
-            16px;
-
-
-          margin-top:
-            1px;
-        }
-
-
-        /* ================================================
-           COST PANELS
-           ================================================ */
-
-        .aof3-cost-grid {
-
-          flex:
-            0
-            0
-            91px;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-
-          gap:
-            5px;
-
-
-          min-width:
-            0;
-        }
-
-
-        .aof3-cost-panel {
-
-          min-width:
-            0;
-
-
-          padding:
-            6px
-            7px
-            5px;
-        }
-
-
-        /* ================================================
-           TOTALS
-           ================================================ */
-
-        .aof3-total-grid {
-
-          flex:
-            0
-            0
-            58px;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-
-          overflow:
-            hidden;
-
-
-          padding:
-            0;
-        }
-
-
-        .aof3-total-grid::after {
-
-          content:
-            "";
-
-
-          position:
-            absolute;
-
-
-          top:
-            8px;
-
-
-          bottom:
-            8px;
-
-
-          left:
-            50%;
-
-
-          width:
-            1px;
-
-
-          background:
-            rgba(
-              151,
-              103,
-              48,
-              .39
-            );
-        }
-
-
-        /* ================================================
-           BID PACK
-           ================================================ */
-
-        .aof3-bid-pack {
-
-          flex:
-            1
-            1
-            auto;
-
-
-          min-height:
-            78px;
-
-
-          padding:
-            6px
-            6px
-            7px;
-
-
-          display:
-            flex;
-
-
-          flex-direction:
-            column;
-        }
-
-
-        .aof3-bid-pack-title {
-
-          flex:
-            0
-            0
-            14px;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            minmax(
-              0,
-              1fr
-            )
-            auto
-            minmax(
-              0,
-              1fr
-            );
-
-
-          align-items:
-            center;
-
-
-          gap:
-            6px;
-
-
-          margin-bottom:
-            4px;
-
-
-          color:
-            var(--ink);
-        }
-
-
-        .aof3-bid-pack-title strong {
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            8px;
-
-
-          font-weight:
-            950;
-
-
-          line-height:
-            1;
-
-
-          letter-spacing:
-            .42px;
-
-
-          text-align:
-            center;
-
-
-          text-transform:
-            uppercase;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-bid-pack-title span {
-
-          height:
-            1px;
-
-
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              rgba(
-                112,
-                74,
-                39,
-                .47
-              ),
-              transparent
-            );
-        }
-
-
-        .aof3-bid-pack-grid {
-
-          flex:
-            1
-            1
-            auto;
-
-
-          min-height:
-            0;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            repeat(
-              5,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-
-          gap:
-            2px;
-        }
-
-
-        /* ================================================
-           BOTTOM ORNAMENT
-           ================================================ */
-
-        .aof3-bottom-ornament {
-
-          flex:
-            0
-            0
-            5px;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            18px
-            auto
-            18px;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            center;
-
-
-          gap:
-            3px;
-
-
-          color:
-            var(--gold);
-        }
-
-
-        .aof3-bottom-ornament span {
-
-          height:
-            1px;
-
-
-          background:
-            rgba(
-              154,
-              99,
-              11,
-              .46
-            );
-        }
-
-
-        .aof3-bottom-ornament b {
-
-          font-size:
-            5px;
-
-
-          line-height:
-            1;
-        }
-
-
-        /* ================================================
-           FULL-WIDTH FOOTER SKIN
-
-           THIS IS THE IMPORTANT FIX:
-           THE PARCHMENT DOES NOT STOP ABOVE
-           THE ACTION FOOTER ANYMORE.
-           ================================================ */
-
-        :global(.aof3-footer-skin) {
-
-          width:
-            100%;
-
-
-          height:
-            100%;
-
-
-          min-height:
-            42px;
-
-
-          display:
-            flex;
-
-
-          align-items:
-            center;
-
-
-          box-sizing:
-            border-box;
-
-
-          padding:
-            6px
-            10px
-            8px;
-
-
-          border-top:
-            1px solid
-            rgba(
-              128,
-              82,
-              36,
-              .45
-            );
-
-
-          background:
-
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                255,
-                255,
-                .16
-              )
-                0%,
-              rgba(
-                255,
-                255,
-                255,
-                .02
-              )
-                100%
-            ),
-
-            linear-gradient(
-              180deg,
-              #eed9af
-                0%,
-              #e6c995
-                100%
-            ) !important;
-
-
-          box-shadow:
-            inset
-            0
-            1px
-            0
-            rgba(
-              255,
-              255,
-              255,
-              .35
-            );
-        }
-
-
-        :global(.aof3-footer-skin > *) {
-
-          width:
-            100%;
-        }
-
-
-        :global(.aof3-footer-skin button) {
-
-          min-height:
-            28px !important;
-
-
-          color:
-            var(--ink) !important;
-
-
-          border:
-            1px solid
-            rgba(
-              126,
-              82,
-              38,
-              .46
-            ) !important;
-
-
-          border-radius:
-            4px !important;
-
-
-          background:
-
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                255,
-                255,
-                .32
-              ),
-              rgba(
-                144,
-                92,
-                34,
-                .04
-              )
-            ) !important;
-
-
-          box-shadow:
-
-            inset
-            0
-            0
-            0
-            1px
-            rgba(
-              255,
-              255,
-              255,
-              .18
-            ),
-
-            0
-            1px
-            1px
-            rgba(
-              69,
-              42,
-              20,
-              .08
-            ) !important;
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif !important;
-
-
-          font-size:
-            7px !important;
-
-
-          font-weight:
-            900 !important;
-
-
-          letter-spacing:
-            .28px !important;
-
-
-          text-transform:
-            uppercase !important;
-        }
-
-
-        :global(.aof3-footer-skin button:hover) {
-
-          border-color:
-            var(--gold) !important;
-
-
-          background:
-            rgba(
-              172,
-              111,
-              22,
-              .10
-            ) !important;
-        }
-
-
-        :global(.aof3-footer-skin button svg) {
-
-          color:
-            var(--ink) !important;
-
-
-          fill:
-            currentColor !important;
-        }
-
-
-        /* ================================================
-           GLOBAL INPUT RESET
-           ================================================ */
-
-        :global(.aof3-certificate input) {
-
-          box-sizing:
-            border-box;
-
-
-          caret-color:
-            var(--ink);
-
-
-          outline:
-            none;
-        }
-
-
-        :global(.aof3-certificate input::selection) {
-
-          background:
-            rgba(
-              165,
-              111,
-              28,
-              .20
-            );
-        }
-
-      `}</style>
-
-    </IXIFaceFrame>
-  );
-}
-
-
-/* =========================================================
-   MONEY INPUT
-   ========================================================= */
-
-function MoneyInput({
-  value,
-  onChange,
-  onSave,
-
-  className = "",
-
-  showPrefix = true
-}) {
-  const displayValue =
-    Number(
-      value
-    )
-      ? Math.min(
-          Number(
-            value
-          ),
-          MAX_INPUT_VALUE
-        ).toLocaleString(
-          "en-US"
+    /*
+     * DO NOT EDGE THE FACE.
+     * IXIFaceFrame / IXI shell owns it.
+     */
+
+    border:
+      0 !important;
+
+    border-radius:
+      0 !important;
+
+    box-shadow:
+      none !important;
+
+
+    /*
+     * THIS is what fixes the exposed black strip.
+     *
+     * The root face itself is parchment,
+     * including whatever area exists beneath
+     * the visible content/footer and behind
+     * the IXI object rail.
+     */
+
+    background:
+
+      radial-gradient(
+        circle
+          at
+          14%
+          8%,
+        rgba(
+          255,
+          255,
+          255,
+          .42
         )
-      : "";
-
-
-  return (
-    <span
-      className={[
-        "aof3-money-editor",
-        className
-          ? `${className}-shell`
-          : ""
-      ]
-        .filter(
-          Boolean
+          0%,
+        rgba(
+          255,
+          255,
+          255,
+          0
         )
-        .join(
-          " "
-        )}
-    >
+          30%
+      ),
 
-      {showPrefix
-        ? (
-          <span className="aof3-money-prefix">
-            $
-          </span>
+      radial-gradient(
+        circle
+          at
+          84%
+          72%,
+        rgba(
+          115,
+          73,
+          30,
+          .055
         )
-        : null}
-
-
-      <input
-        className={
-          className
-        }
-        value={
-          displayValue
-        }
-        inputMode="numeric"
-        autoComplete="off"
-        aria-label="Money value"
-
-        onPointerDown={
-          event => {
-            event
-              .stopPropagation();
-          }
-        }
-
-        onChange={
-          event => {
-            onChange?.(
-              clampMoneyInput(
-                event
-                  .target
-                  .value
-              )
-            );
-          }
-        }
-
-        onBlur={
-          () => {
-            onSave?.();
-          }
-        }
-
-        onKeyDown={
-          event => {
-            if (
-              event.key !==
-                "Enter"
-            ) {
-              return;
-            }
-
-
-            event
-              .preventDefault();
-
-            event
-              .stopPropagation();
-
-
-            onSave?.();
-
-            event
-              .currentTarget
-              .blur();
-          }
-        }
-      />
-
-
-      <style jsx>{`
-
-        .aof3-money-editor {
-
-          display:
-            inline-flex;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            flex-end;
-
-
-          min-width:
-            0;
-
-
-          color:
-            var(--ink);
-        }
-
-
-        .aof3-money-prefix {
-
-          flex:
-            0
-            0
-            auto;
-
-
-          margin-right:
-            1px;
-
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            8.4px;
-
-
-          font-weight:
-            800;
-
-
-          line-height:
-            1;
-        }
-
-      `}</style>
-
-    </span>
-  );
-}
-
-
-/* =========================================================
-   MINI ADVERTISED VALUE
-   ========================================================= */
-
-function MiniValue({
-  label,
-  value,
-  onChange,
-  onSave
-}) {
-  return (
-    <label className="aof3-mini-value">
-
-      <span className="aof3-mini-label">
-        {label}
-      </span>
-
-
-      <span className="aof3-mini-rule" />
-
-
-      <MoneyInput
-        value={
-          value
-        }
-        onChange={
-          onChange
-        }
-        onSave={
-          onSave
-        }
-        className="aof3-mini-input"
-      />
-
-
-      <style jsx>{`
-
-        .aof3-mini-value {
-
-          min-width:
-            0;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            auto
-            minmax(
-              6px,
-              1fr
-            )
-            54px;
-
-
-          align-items:
-            center;
-
-
-          column-gap:
-            4px;
-        }
-
-
-        .aof3-mini-label {
-
-          color:
-            var(--ink-2);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            7px;
-
-
-          font-weight:
-            900;
-
-
-          letter-spacing:
-            .18px;
-
-
-          text-transform:
-            uppercase;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-mini-rule {
-
-          height:
-            1px;
-
-
-          min-width:
-            0;
-
-
-          background:
-            rgba(
-              123,
-              81,
-              39,
-              .26
-            );
-        }
-
-
-        :global(.aof3-mini-input-shell) {
-
-          width:
-            54px;
-
-
-          min-width:
-            54px;
-
-
-          max-width:
-            54px;
-        }
-
-
-        :global(.aof3-mini-input) {
-
-          width:
-            46px !important;
-
-
-          min-width:
-            46px !important;
-
-
-          max-width:
-            46px !important;
-
-
-          height:
-            16px !important;
-
-
-          margin:
-            0 !important;
-
-
-          padding:
-            0
-            1px !important;
-
-
-          border:
-            0 !important;
-
-
-          border-bottom:
-            1px solid
-            rgba(
-              111,
-              72,
-              35,
-              .30
-            ) !important;
-
-
-          border-radius:
-            0 !important;
-
-
-          background:
-            transparent !important;
-
-
-          color:
-            var(--ink) !important;
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif !important;
-
-
-          font-size:
-            8px !important;
-
-
-          font-weight:
-            800 !important;
-
-
-          line-height:
-            16px !important;
-
-
-          text-align:
-            right !important;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        :global(.aof3-mini-input:focus) {
-
-          border-bottom-color:
-            var(--gold) !important;
-        }
-
-      `}</style>
-
-    </label>
-  );
-}
-
-
-/* =========================================================
-   LEDGER ROW
-   ========================================================= */
-
-function LedgerRow({
-  label,
-  value,
-
-  input = false,
-
-  muted = false,
-  emphasized = false,
-
-  onChange,
-  onSave
-}) {
-  return (
-    <div
-      className={[
-        "aof3-row",
-
-        muted
-          ? "muted"
-          : "",
-
-        emphasized
-          ? "emphasized"
-          : ""
-      ]
-        .filter(
-          Boolean
+          0%,
+        rgba(
+          115,
+          73,
+          30,
+          0
         )
-        .join(
-          " "
-        )}
-    >
+          34%
+      ),
 
-      <span className="aof3-row-label">
-        {label}
-      </span>
-
-
-      <span className="aof3-row-rule" />
-
-
-      {input
-        ? (
-          <MoneyInput
-            value={
-              value
-            }
-            onChange={
-              onChange
-            }
-            onSave={
-              onSave
-            }
-            className="aof3-input"
-          />
+      repeating-linear-gradient(
+        0deg,
+        rgba(
+          92,
+          58,
+          29,
+          .010
         )
-        : (
-          <strong className="aof3-row-value">
-            {value}
-          </strong>
-        )}
-
-
-      <style jsx>{`
-
-        .aof3-row {
-
-          width:
-            100%;
-
-
-          min-width:
-            0;
-
-
-          height:
-            16px;
-
-
-          display:
-            grid;
-
-
-          grid-template-columns:
-            auto
-            minmax(
-              4px,
-              1fr
-            )
-            61px;
-
-
-          align-items:
-            center;
-
-
-          column-gap:
-            3px;
-
-
-          color:
-            var(--ink);
-
-
-          overflow:
-            hidden;
-        }
-
-
-        .aof3-row +
-        .aof3-row {
-
-          border-top:
-            1px dotted
-            rgba(
-              101,
-              66,
-              34,
-              .13
-            );
-        }
-
-
-        .aof3-row-label {
-
-          min-width:
-            0;
-
-
-          color:
-            var(--ink-2);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            7.2px;
-
-
-          font-weight:
-            900;
-
-
-          line-height:
-            1;
-
-
-          letter-spacing:
-            .12px;
-
-
-          text-transform:
-            uppercase;
-
-
-          white-space:
-            nowrap;
-        }
-
-
-        .aof3-row-rule {
-
-          height:
-            1px;
-
-
-          min-width:
-            0;
-
-
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              rgba(
-                103,
-                67,
-                35,
-                .25
-              )
-            );
-        }
-
-
-        .aof3-row-value {
-
-          width:
-            61px;
-
-
-          min-width:
-            61px;
-
-
-          max-width:
-            61px;
-
-
-          overflow:
-            hidden;
-
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            8.7px;
-
-
-          font-weight:
-            800;
-
-
-          line-height:
-            1;
-
-
-          text-align:
-            right;
-
-
-          text-overflow:
-            ellipsis;
-
-
-          white-space:
-            nowrap;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        .aof3-row.muted
-        .aof3-row-label,
-        .aof3-row.muted
-        .aof3-row-value {
-
-          color:
-            rgba(
-              74,
-              48,
-              32,
-              .70
-            );
-        }
-
-
-        .aof3-row.emphasized
-        .aof3-row-label,
-        .aof3-row.emphasized
-        .aof3-row-value {
-
-          color:
-            var(--ink);
-
-
-          font-weight:
-            950;
-        }
-
-
-        :global(.aof3-input-shell) {
-
-          width:
-            61px;
-
-
-          min-width:
-            61px;
-
-
-          max-width:
-            61px;
-        }
-
-
-        :global(.aof3-input) {
-
-          width:
-            52px !important;
-
-
-          min-width:
-            52px !important;
-
-
-          max-width:
-            52px !important;
-
-
-          height:
-            15px !important;
-
-
-          margin:
-            0 !important;
-
-
-          padding:
-            0
-            1px !important;
-
-
-          border:
-            0 !important;
-
-
-          border-bottom:
-            1px solid
-            rgba(
-              103,
-              67,
-              35,
-              .24
-            ) !important;
-
-
-          border-radius:
-            0 !important;
-
-
-          background:
-            transparent !important;
-
-
-          color:
-            var(--ink) !important;
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif !important;
-
-
-          font-size:
-            8.5px !important;
-
-
-          font-weight:
-            800 !important;
-
-
-          line-height:
-            15px !important;
-
-
-          text-align:
-            right !important;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        :global(.aof3-input:focus) {
-
-          border-bottom-color:
-            var(--gold) !important;
-        }
-
-      `}</style>
-
-    </div>
-  );
-}
-
-
-/* =========================================================
-   SUMMARY
-   ========================================================= */
-
-function LedgerSummary({
-  label,
-  value,
-
-  detail = "",
-
-  accent = false,
-  negative = false
-}) {
-  return (
-    <div
-      className={[
-        "aof3-summary",
-
-        accent
-          ? "accent"
-          : "",
-
-        negative
-          ? "negative"
-          : ""
-      ]
-        .filter(
-          Boolean
+          0px,
+        rgba(
+          92,
+          58,
+          29,
+          .010
         )
-        .join(
-          " "
-        )}
-    >
+          1px,
+        transparent
+          1px,
+        transparent
+          4px
+      ),
 
-      <span>
-        {label}
-      </span>
-
-
-      <strong>
-        {value}
-      </strong>
-
-
-      {detail
-        ? (
-          <em>
-            {detail}
-          </em>
+      linear-gradient(
+        180deg,
+        var(
+          --aof3-paper-00
         )
-        : null}
-
-
-      <style jsx>{`
-
-        .aof3-summary {
-
-          position:
-            relative;
-
-
-          min-width:
-            0;
-
-
-          display:
-            flex;
-
-
-          flex-direction:
-            column;
-
-
-          align-items:
-            center;
-
-
-          justify-content:
-            center;
-
-
-          padding:
-            6px
-            4px;
-
-
-          color:
-            var(--ink);
-        }
-
-
-        .aof3-summary > span {
-
-          color:
-            var(--ink-2);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            7.2px;
-
-
-          font-weight:
-            900;
-
-
-          line-height:
-            1;
-
-
-          letter-spacing:
-            .25px;
-
-
-          text-transform:
-            uppercase;
-        }
-
-
-        .aof3-summary strong {
-
-          max-width:
-            100%;
-
-
-          margin-top:
-            2px;
-
-
-          overflow:
-            hidden;
-
-
-          color:
-            var(--ink);
-
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-
-          font-size:
-            17px;
-
-
-          font-weight:
-            900;
-
-
-          line-height:
-            .98;
-
-
-          letter-spacing:
-            -.3px;
-
-
-          text-overflow:
-            ellipsis;
-
-
-          white-space:
-            nowrap;
-
-
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
-        }
-
-
-        .aof3-summary em {
-
-          margin-top:
-            1px;
-
-
-          color:
-            var(--ink-soft);
-
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-
-          font-size:
-            7px;
-
-
-          font-weight:
-            950;
-
-
-          font-style:
-            normal;
-
-
-          line-height:
-            1;
-        }
-
-
-        .aof3-summary.accent strong,
-        .aof3-summary.accent em {
-
-          color:
-            var(--gold);
-        }
-
-
-        .aof3-summary.negative strong,
-        .aof3-summary.negative em {
-
-          color:
-            #7b2b20;
-        }
-
-      `}</style>
-
-    </div>
-  );
-}
-
-
-/* =========================================================
-   BID SCENARIO
-   ========================================================= */
-
-function BidScenario({
-  scenario,
-
-  scenarioNumber,
-
-  active = false
-}) {
-  return (
-    <div
-      className={[
-        "aof3-bid-scenario",
-
-        active
-          ? "active"
-          : ""
-      ]
-        .filter(
-          Boolean
+          0%,
+        var(
+          --aof3-paper-01
         )
-        .join(
-          " "
-        )}
-    >
+          30%,
+        var(
+          --aof3-paper-02
+        )
+          72%,
+        var(
+          --aof3-paper-03
+        )
+          100%
+      ) !important;
 
-      <span className="aof3-scenario-number">
-        SCENARIO {scenarioNumber}
-      </span>
 
+    font-variant-numeric:
+      tabular-nums
+      lining-nums;
+  }
 
-      <strong>
-        {money(
-          scenario.bid
-        )}
-      </strong>
 
 
-      <span className="aof3-profit-label">
-        PROFIT
-      </span>
+  /* =======================================================
+     FACE CONTENT
 
+     Paint reaches full width/height.
 
-      <b>
-        {money(
-          scenario
-            .totalProfit
-        )}
-      </b>
+     Bottom spacing deliberately reserves the
+     IXI 19px rail without turning that region
+     black.
+     ======================================================= */
 
+  :global(.aof3-content) {
 
-      <em>
-        {percentage(
-          scenario
-            .profitPercent
-        )}
-      </em>
+    position:
+      relative !important;
 
 
-      <style jsx>{`
+    display:
+      flex !important;
 
-        .aof3-bid-scenario {
 
-          min-width:
-            0;
+    flex-direction:
+      column !important;
+
+
+    width:
+      100% !important;
+
+
+    height:
+      100% !important;
+
+
+    min-height:
+      0 !important;
+
+
+    box-sizing:
+      border-box !important;
+
+
+    padding:
+      8px
+      9px
+      4px !important;
+
+
+    gap:
+      5px;
+
+
+    overflow:
+      hidden !important;
+
+
+    color:
+      var(
+        --aof3-ink
+      ) !important;
+
+
+    /*
+     * Same parchment recipe as root.
+     * No visual seam between content/footer.
+     */
+
+    background:
+
+      radial-gradient(
+        circle
+          at
+          12%
+          8%,
+        rgba(
+          255,
+          255,
+          255,
+          .44
+        )
+          0%,
+        rgba(
+          255,
+          255,
+          255,
+          0
+        )
+          31%
+      ),
+
+      radial-gradient(
+        circle
+          at
+          87%
+          72%,
+        rgba(
+          125,
+          83,
+          37,
+          .050
+        )
+          0%,
+        rgba(
+          125,
+          83,
+          37,
+          0
+        )
+          35%
+      ),
+
+      repeating-linear-gradient(
+        0deg,
+        rgba(
+          89,
+          58,
+          31,
+          .010
+        )
+          0px,
+        rgba(
+          89,
+          58,
+          31,
+          .010
+        )
+          1px,
+        transparent
+          1px,
+        transparent
+          4px
+      ),
+
+      linear-gradient(
+        180deg,
+        var(
+          --aof3-paper-00
+        )
+          0%,
+        var(
+          --aof3-paper-01
+        )
+          28%,
+        var(
+          --aof3-paper-02
+        )
+          69%,
+        var(
+          --aof3-paper-03
+        )
+          100%
+      ) !important;
+  }
+
+
 
+  /*
+   * NO full card perimeter here.
+   *
+   * These are only subtle INTERNAL certificate
+   * lines so it looks printed, not double-shelled.
+   */
 
-          min-height:
-            52px;
+  :global(.aof3-content::before) {
 
+    content:
+      "";
 
-          display:
-            flex;
 
+    position:
+      absolute;
 
-          flex-direction:
-            column;
 
+    inset:
+      5px
+      6px
+      3px;
 
-          align-items:
-            center;
 
+    z-index:
+      0;
 
-          justify-content:
-            center;
 
+    pointer-events:
+      none;
 
-          padding:
-            4px
-            1px
-            3px;
 
+    border:
+      1px solid
+      rgba(
+        148,
+        97,
+        38,
+        .29
+      );
 
-          border:
-            1px solid
-            rgba(
-              116,
-              75,
-              36,
-              .24
-            );
 
+    border-radius:
+      5px;
+  }
 
-          border-radius:
-            3px;
 
+  :global(.aof3-content::after) {
 
-          background:
-            rgba(
-              255,
-              250,
-              237,
-              .22
-            );
+    content:
+      "";
 
 
-          color:
-            var(--ink);
+    position:
+      absolute;
 
 
-          overflow:
-            hidden;
-        }
+    left:
+      8px;
 
+    right:
+      8px;
 
-        .aof3-bid-scenario.active {
+    top:
+      7px;
 
-          border-color:
-            rgba(
-              154,
-              99,
-              11,
-              .83
-            );
+    bottom:
+      5px;
 
 
-          background:
+    z-index:
+      0;
 
-            linear-gradient(
-              180deg,
-              rgba(
-                255,
-                255,
-                255,
-                .28
-              ),
-              rgba(
-                185,
-                126,
-                31,
-                .09
-              )
-            );
 
+    pointer-events:
+      none;
 
-          box-shadow:
 
-            inset
-            0
-            0
-            0
-            1px
-            rgba(
-              255,
-              255,
-              255,
-              .20
-            ),
+    border:
+      1px solid
+      rgba(
+        148,
+        97,
+        38,
+        .11
+      );
 
-            0
-            0
-            0
-            1px
-            rgba(
-              154,
-              99,
-              11,
-              .12
-            );
-        }
 
+    border-radius:
+      4px;
+  }
 
-        .aof3-scenario-number {
 
-          max-width:
-            100%;
 
+  /* =======================================================
+     CONTENT STACK
+     ======================================================= */
 
-          overflow:
-            hidden;
+  .aof3-certificate-inner {
 
+    position:
+      relative;
 
-          color:
-            var(--ink-2);
 
+    z-index:
+      1;
 
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
 
+    display:
+      flex;
 
-          font-size:
-            5.8px;
 
+    flex:
+      1
+      1
+      auto;
 
-          font-weight:
-            900;
 
+    min-height:
+      0;
 
-          line-height:
-            1;
 
+    flex-direction:
+      column;
 
-          letter-spacing:
-            .05px;
 
+    gap:
+      5px;
 
-          text-overflow:
-            ellipsis;
 
+    padding:
+      1px
+      2px
+      0;
+  }
 
-          text-transform:
-            uppercase;
 
 
-          white-space:
-            nowrap;
-        }
+  /* =======================================================
+     HEADER
+     ======================================================= */
 
+  .aof3-head {
 
-        .aof3-bid-scenario strong,
-        .aof3-bid-scenario b {
+    min-height:
+      17px;
 
-          max-width:
-            100%;
 
+    display:
+      flex;
 
-          overflow:
-            hidden;
 
+    align-items:
+      center;
 
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
 
+    justify-content:
+      space-between;
 
-          font-variant-numeric:
-            tabular-nums
-            lining-nums;
 
+    gap:
+      8px;
 
-          text-overflow:
-            ellipsis;
 
+    padding:
+      0
+      3px;
 
-          white-space:
-            nowrap;
-        }
 
+    color:
+      var(
+        --aof3-ink
+      );
 
-        .aof3-bid-scenario strong {
 
-          margin-top:
-            3px;
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
 
 
-          color:
-            var(--ink);
+    font-size:
+      7.5px;
 
 
-          font-size:
-            8.3px;
+    font-weight:
+      900;
 
 
-          font-weight:
-            900;
+    line-height:
+      1;
 
 
-          line-height:
-            1;
-        }
+    letter-spacing:
+      .26px;
 
 
-        .aof3-bid-scenario.active strong {
+    text-transform:
+      uppercase;
+  }
 
-          color:
-            var(--gold);
-        }
 
+  .aof3-head strong,
+  .aof3-head span {
 
-        .aof3-profit-label {
+    overflow:
+      hidden;
 
-          margin-top:
-            3px;
 
+    text-overflow:
+      ellipsis;
 
-          color:
-            var(--ink-2);
 
+    white-space:
+      nowrap;
+  }
 
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
 
+  .aof3-head span {
 
-          font-size:
-            5.6px;
+    font-weight:
+      950;
+  }
 
 
-          font-weight:
-            900;
 
+  /* =======================================================
+     ORNAMENT
+     ======================================================= */
 
-          line-height:
-            1;
+  .aof3-ornament {
 
+    display:
+      grid;
 
-          letter-spacing:
-            .14px;
 
+    grid-template-columns:
+      30px
+      auto
+      30px;
 
-          text-transform:
-            uppercase;
-        }
 
+    align-items:
+      center;
 
-        .aof3-bid-scenario b {
 
-          margin-top:
-            2px;
+    justify-content:
+      center;
 
 
-          color:
-            var(--ink);
+    gap:
+      4px;
 
 
-          font-size:
-            7.6px;
+    height:
+      6px;
 
 
-          font-weight:
-            900;
+    color:
+      var(
+        --aof3-gold
+      );
+  }
 
 
-          line-height:
-            1;
-        }
+  .aof3-ornament span {
 
+    height:
+      1px;
 
-        .aof3-bid-scenario em {
 
-          margin-top:
-            3px;
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(
+          154,
+          99,
+          11,
+          .68
+        ),
+        transparent
+      );
+  }
 
 
-          color:
-            var(--gold);
+  .aof3-ornament b {
 
+    font-family:
+      Georgia,
+      "Times New Roman",
+      serif;
 
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
 
+    font-size:
+      6px;
 
-          font-size:
-            7.1px;
 
+    font-weight:
+      400;
+  }
 
-          font-weight:
-            950;
 
 
-          font-style:
-            normal;
+  /* =======================================================
+     MACHINE
+     ======================================================= */
 
+  .aof3-machine-line {
 
-          line-height:
-            1;
-        }
+    min-height:
+      18px;
 
-      `}</style>
 
+    display:
+      flex;
+
+
+    align-items:
+      center;
+
+
+    justify-content:
+      center;
+
+
+    gap:
+      4px;
+
+
+    overflow:
+      hidden;
+
+
+    padding:
+      0
+      4px;
+
+
+    color:
+      var(
+        --aof3-ink
+      );
+
+
+    font-family:
+      Georgia,
+      "Times New Roman",
+      serif;
+
+
+    font-size:
+      8.3px;
+
+
+    font-weight:
+      800;
+
+
+    line-height:
+      1.1;
+
+
+    letter-spacing:
+      .19px;
+
+
+    text-align:
+      center;
+
+
+    text-transform:
+      uppercase;
+
+
+    white-space:
+      nowrap;
+  }
+
+
+  .aof3-machine-line strong {
+
+    min-width:
+      0;
+
+
+    overflow:
+      hidden;
+
+
+    text-overflow:
+      ellipsis;
+
+
+    white-space:
+      nowrap;
+  }
+
+
+  .aof3-machine-line span {
+
+    flex:
+      0
+      0
+      auto;
+
+
+    color:
+      var(
+        --aof3-gold
+      );
+  }
+
+
+
+  /* =======================================================
+     INTERNAL PANELS
+
+     THESE ARE MODULE PANELS — GOOD.
+     They are not card shells.
+     ======================================================= */
+
+  .ledger-panel {
+
+    position:
+      relative;
+
+
+    min-width:
+      0;
+
+
+    border:
+      1px solid
+      rgba(
+        151,
+        103,
+        48,
+        .57
+      );
+
+
+    border-radius:
+      6px;
+
+
+    background:
+
+      linear-gradient(
+        180deg,
+        rgba(
+          255,
+          255,
+          255,
+          .28
+        ),
+        rgba(
+          255,
+          255,
+          255,
+          .06
+        )
+      ),
+
+      rgba(
+        247,
+        231,
+        198,
+        .34
+      );
+
+
+    box-shadow:
+
+      inset
+      0
+      0
+      0
+      1px
+      rgba(
+        255,
+        255,
+        255,
+        .23
+      ),
+
+      0
+      1px
+      2px
+      rgba(
+        71,
+        42,
+        20,
+        .08
+      );
+  }
+
+
+
+  /* =======================================================
+     RETAIL SALE PRICE
+     ======================================================= */
+
+  .aof3-sale-section {
+
+    flex:
+      0
+      0
+      77px;
+
+
+    padding:
+      7px
+      10px
+      6px;
+
+
+    border-color:
+      rgba(
+        158,
+        103,
+        35,
+        .66
+      );
+  }
+
+
+  .aof3-sale-title {
+
+    color:
+      var(
+        --aof3-ink-2
+      );
+
+
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
+
+
+    font-size:
+      8.2px;
+
+
+    font-weight:
+      900;
+
+
+    line-height:
+      1;
+
+
+    letter-spacing:
+      .42px;
+
+
+    text-align:
+      center;
+
+
+    text-transform:
+      uppercase;
+  }
+
+
+  .aof3-sale-money {
+
+    height:
+      32px;
+
+
+    display:
+      flex;
+
+
+    align-items:
+      center;
+
+
+    justify-content:
+      center;
+
+
+    gap:
+      1px;
+
+
+    margin-top:
+      1px;
+  }
+
+
+  .aof3-sale-dollar {
+
+    color:
+      var(
+        --aof3-ink
+      );
+
+
+    font-family:
+      Georgia,
+      "Times New Roman",
+      serif;
+
+
+    font-size:
+      21px;
+
+
+    font-weight:
+      700;
+
+
+    line-height:
+      1;
+  }
+
+
+  :global(.aof3-sale-input) {
+
+    width:
+      104px !important;
+
+
+    min-width:
+      104px !important;
+
+
+    max-width:
+      104px !important;
+
+
+    height:
+      31px !important;
+
+
+    margin:
+      0 !important;
+
+
+    padding:
+      0 !important;
+
+
+    border:
+      0 !important;
+
+
+    border-radius:
+      0 !important;
+
+
+    outline:
+      none !important;
+
+
+    background:
+      transparent !important;
+
+
+    color:
+      var(
+        --aof3-ink
+      ) !important;
+
+
+    font-family:
+      Georgia,
+      "Times New Roman",
+      serif !important;
+
+
+    font-size:
+      20px !important;
+
+
+    font-weight:
+      900 !important;
+
+
+    line-height:
+      31px !important;
+
+
+    letter-spacing:
+      -.35px;
+
+
+    text-align:
+      left !important;
+  }
+
+
+  .aof3-sale-rule {
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      )
+      auto
+      minmax(
+        0,
+        1fr
+      );
+
+
+    align-items:
+      center;
+
+
+    gap:
+      5px;
+
+
+    height:
+      5px;
+
+
+    padding:
+      0
+      13px;
+
+
+    color:
+      var(
+        --aof3-gold
+      );
+  }
+
+
+  .aof3-sale-rule span {
+
+    height:
+      1px;
+
+
+    background:
+      rgba(
+        151,
+        103,
+        48,
+        .53
+      );
+  }
+
+
+  .aof3-sale-rule b {
+
+    font-size:
+      7px;
+
+
+    font-weight:
+      400;
+  }
+
+
+  .aof3-advertised-row {
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+
+    align-items:
+      center;
+
+
+    gap:
+      16px;
+
+
+    margin-top:
+      1px;
+  }
+
+
+
+  /* =======================================================
+     COST GRID
+     ======================================================= */
+
+  .aof3-cost-grid {
+
+    flex:
+      0
+      0
+      91px;
+
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+
+    gap:
+      5px;
+
+
+    min-width:
+      0;
+  }
+
+
+  .aof3-cost-panel {
+
+    min-width:
+      0;
+
+
+    padding:
+      6px
+      7px
+      5px;
+  }
+
+
+
+  /* =======================================================
+     TOTALS
+     ======================================================= */
+
+  .aof3-total-grid {
+
+    position:
+      relative;
+
+
+    flex:
+      0
+      0
+      58px;
+
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+
+    overflow:
+      hidden;
+
+
+    padding:
+      0;
+  }
+
+
+  .aof3-total-grid::after {
+
+    content:
+      "";
+
+
+    position:
+      absolute;
+
+
+    top:
+      8px;
+
+
+    bottom:
+      8px;
+
+
+    left:
+      50%;
+
+
+    width:
+      1px;
+
+
+    background:
+      rgba(
+        151,
+        103,
+        48,
+        .39
+      );
+  }
+
+
+
+  /* =======================================================
+     BID PACK ANALYSIS
+
+     LARGE / READABLE.
+     ======================================================= */
+
+  .aof3-bid-pack {
+
+    flex:
+      1
+      1
+      auto;
+
+
+    min-height:
+      78px;
+
+
+    padding:
+      6px
+      6px
+      7px;
+
+
+    display:
+      flex;
+
+
+    flex-direction:
+      column;
+  }
+
+
+  .aof3-bid-pack-title {
+
+    flex:
+      0
+      0
+      14px;
+
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      )
+      auto
+      minmax(
+        0,
+        1fr
+      );
+
+
+    align-items:
+      center;
+
+
+    gap:
+      6px;
+
+
+    margin-bottom:
+      4px;
+
+
+    color:
+      var(
+        --aof3-ink
+      );
+  }
+
+
+  .aof3-bid-pack-title strong {
+
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
+
+
+    font-size:
+      8px;
+
+
+    font-weight:
+      950;
+
+
+    line-height:
+      1;
+
+
+    letter-spacing:
+      .42px;
+
+
+    text-align:
+      center;
+
+
+    text-transform:
+      uppercase;
+
+
+    white-space:
+      nowrap;
+  }
+
+
+  .aof3-bid-pack-title span {
+
+    height:
+      1px;
+
+
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(
+          112,
+          74,
+          39,
+          .47
+        ),
+        transparent
+      );
+  }
+
+
+  .aof3-bid-pack-grid {
+
+    flex:
+      1
+      1
+      auto;
+
+
+    min-height:
+      0;
+
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+
+    gap:
+      2px;
+  }
+
+
+
+  /* =======================================================
+     BOTTOM ORNAMENT
+     ======================================================= */
+
+  .aof3-bottom-ornament {
+
+    flex:
+      0
+      0
+      5px;
+
+
+    display:
+      grid;
+
+
+    grid-template-columns:
+      18px
+      auto
+      18px;
+
+
+    align-items:
+      center;
+
+
+    justify-content:
+      center;
+
+
+    gap:
+      3px;
+
+
+    color:
+      var(
+        --aof3-gold
+      );
+  }
+
+
+  .aof3-bottom-ornament span {
+
+    height:
+      1px;
+
+
+    background:
+      rgba(
+        154,
+        99,
+        11,
+        .46
+      );
+  }
+
+
+  .aof3-bottom-ornament b {
+
+    font-size:
+      5px;
+
+
+    line-height:
+      1;
+  }
+
+
+
+  /* =======================================================
+     ACTION FOOTER
+
+     IMPORTANT:
+     BUTTONS STAY ABOVE RAIL.
+
+     WE DO NOT MOVE THE BUTTONS INTO THE FINAL
+     19PX.
+
+     THE ROOT PARCHMENT BEHIND THEM CONTINUES
+     INTO THAT ZONE INSTEAD.
+     ======================================================= */
+
+  :global(.aof3-footer-skin) {
+
+    position:
+      relative;
+
+
+    z-index:
+      2;
+
+
+    width:
+      100%;
+
+
+    min-height:
+      42px;
+
+
+    display:
+      flex;
+
+
+    align-items:
+      center;
+
+
+    box-sizing:
+      border-box;
+
+
+    padding:
+      6px
+      10px
+      8px;
+
+
+    /*
+     * NO OUTER FACE BORDER HERE.
+     */
+
+    border:
+      0 !important;
+
+
+    border-top:
+      1px solid
+      rgba(
+        128,
+        82,
+        36,
+        .34
+      ) !important;
+
+
+    /*
+     * Same parchment.
+     */
+
+    background:
+
+      linear-gradient(
+        180deg,
+        rgba(
+          255,
+          255,
+          255,
+          .14
+        ),
+        rgba(
+          255,
+          255,
+          255,
+          0
+        )
+      ),
+
+      linear-gradient(
+        180deg,
+        #f0dcba
+          0%,
+        #e8cca0
+          100%
+      ) !important;
+
+
+    box-shadow:
+      inset
+      0
+      1px
+      0
+      rgba(
+        255,
+        255,
+        255,
+        .32
+      ) !important;
+  }
+
+
+  :global(.aof3-footer-skin > *) {
+
+    width:
+      100%;
+  }
+
+
+  :global(.aof3-footer-skin button) {
+
+    min-height:
+      28px !important;
+
+
+    color:
+      var(
+        --aof3-ink
+      ) !important;
+
+
+    border:
+      1px solid
+      rgba(
+        126,
+        82,
+        38,
+        .46
+      ) !important;
+
+
+    border-radius:
+      4px !important;
+
+
+    background:
+
+      linear-gradient(
+        180deg,
+        rgba(
+          255,
+          255,
+          255,
+          .34
+        ),
+        rgba(
+          144,
+          92,
+          34,
+          .04
+        )
+      ) !important;
+
+
+    box-shadow:
+
+      inset
+      0
+      0
+      0
+      1px
+      rgba(
+        255,
+        255,
+        255,
+        .18
+      ),
+
+      0
+      1px
+      1px
+      rgba(
+        69,
+        42,
+        20,
+        .08
+      ) !important;
+
+
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif !important;
+
+
+    font-size:
+      7px !important;
+
+
+    font-weight:
+      900 !important;
+
+
+    letter-spacing:
+      .28px !important;
+
+
+    text-transform:
+      uppercase !important;
+  }
+
+
+  :global(.aof3-footer-skin button:hover) {
+
+    border-color:
+      var(
+        --aof3-gold
+      ) !important;
+
+
+    background:
+      rgba(
+        172,
+        111,
+        22,
+        .10
+      ) !important;
+  }
+
+
+  :global(.aof3-footer-skin button svg) {
+
+    color:
+      var(
+        --aof3-ink
+      ) !important;
+
+
+    fill:
+      currentColor !important;
+  }
+
+
+
+  /* =======================================================
+     THE 19PX RAIL PAINT EXTENSION
+
+     This pseudo-element paints ONLY behind
+     the IXI rail area.
+
+     It belongs to the face skin visually,
+     but the actual IXI rail remains above it.
+     ======================================================= */
+
+  :global(.aof3-certificate::after) {
+
+    content:
+      "";
+
+
+    position:
+      absolute;
+
+
+    z-index:
+      0;
+
+
+    pointer-events:
+      none;
+
+
+    left:
+      0;
+
+
+    right:
+      0;
+
+
+    bottom:
+      0;
+
+
+    height:
+      var(
+        --aof3-rail-height
+      );
+
+
+    border:
+      0;
+
+
+    border-radius:
+      0;
+
+
+    background:
+
+      linear-gradient(
+        180deg,
+        #ead0a3
+          0%,
+        #e2c28e
+          100%
+      ) !important;
+  }
+
+
+
+  /* =======================================================
+     INPUT GLOBALS
+     ======================================================= */
+
+  :global(.aof3-certificate input) {
+
+    box-sizing:
+      border-box;
+
+
+    caret-color:
+      var(
+        --aof3-ink
+      );
+
+
+    outline:
+      none;
+  }
+
+
+  :global(.aof3-certificate input::selection) {
+
+    background:
+      rgba(
+        165,
+        111,
+        28,
+        .20
+      );
+  }
+
+`}</style>
     </div>
   );
 }
