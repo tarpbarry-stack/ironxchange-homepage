@@ -188,6 +188,18 @@ export default function IXIObjectStudioCanvas({
               );
           }}
 
+
+onSelectFace={({
+  faceId
+}) => {
+
+  studio
+    ?.selectFace?.(
+      faceId
+    );
+}}
+          
+          
           enableCardScaling={
   enableCardScaling
 }
