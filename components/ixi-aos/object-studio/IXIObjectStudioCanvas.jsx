@@ -110,9 +110,35 @@ export default function IXIObjectStudioCanvas({
         : [];
 
 
-    const nextFaceNumber =
-      currentFaces.length + 1;
+ const highestExistingFaceNumber =
+  currentFaces.reduce(
+    (
+      highest,
+      face,
+      index
+    ) => {
 
+      const faceNumber =
+        Number(
+          face?.faceNumber ||
+          index + 1
+        );
+
+
+      return Math.max(
+        highest,
+        faceNumber
+      );
+    },
+    0
+  );
+
+
+const nextFaceNumber =
+  Math.max(
+    3,
+    highestExistingFaceNumber + 1
+  );
 
     const faceId =
       `face-${nextFaceNumber}`;
