@@ -1002,10 +1002,13 @@ if (
         ) : null}
 
 
-       {renderSecondaryFace(
-  slot.face
+       {renderFace(
+  slot.face,
+  {
+    faceOnly:
+      true
+  }
 )}
-
 
         <button
           type="button"
