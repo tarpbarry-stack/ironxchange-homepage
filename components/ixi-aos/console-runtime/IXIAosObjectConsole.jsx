@@ -778,12 +778,6 @@ String(
     slot.slotId
   );
 
-
-if (
-  created?.faceIndex
-) {
-
-
 if (
   created?.faceIndex
 ) {
