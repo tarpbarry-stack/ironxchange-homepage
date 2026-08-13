@@ -8,6 +8,14 @@ import IXIScaledCardShell
 import IXIObjectCardActuator
   from "../../ixi-chassis/IXIObjectCardActuator";
 
+import IXIAosFinancialFace2
+  from "../financial-runtime/IXIAosFinancialFace2";
+
+import {
+  createEmptyAosFinancialFace2Model,
+  createAosFinancialFace2Props
+} from "../financial-runtime/IXIAosFinancialFace2Adapter";
+
 import {
   IXI_CONSOLE_MAX_DEPTH,
   IXI_CONSOLE_SLOT_TYPES,
@@ -168,7 +176,21 @@ export default function IXIAosObjectConsole({
     faceCount
   );
 
+const financialFace2Model =
+  createEmptyAosFinancialFace2Model({
+    currency:
+      "USD",
 
+    periodLabel:
+      "YTD"
+  });
+
+
+const financialFace2Props =
+  createAosFinancialFace2Props(
+    financialFace2Model
+  );
+  
   /*
    * Existing engine uses Face 2/3/4 as
    * its historical module-face vocabulary.
@@ -419,27 +441,52 @@ export default function IXIAosObjectConsole({
       );
 
 
-    return (
-      <IXIAosCardRuntime
-        object={
-          object
-        }
+    if (
+  Number(
+    resolvedFace
+  ) === 2
+) {
+  return (
+    <IXIAosFinancialFace2
+      object={
+        object
+      }
 
-        cardDefinition={
-          cardDefinition
-        }
+      passportId={
+        object?.passportId ||
+        object?.ixiPassportId ||
+        object?.passport?.passportId ||
+        object?.passport?.id ||
+        ""
+      }
 
-        parentLabel={
-          parentLabel
-        }
+      {...financialFace2Props}
+    />
+  );
+}
 
-        /*
-         * Tell Runtime exactly which Face
-         * this console slot owns.
-         */
-        forcedFaceIndex={
-          resolvedFace
-        }
+
+return (
+  <IXIAosCardRuntime
+    object={
+      object
+    }
+
+    cardDefinition={
+      cardDefinition
+    }
+
+    parentLabel={
+      parentLabel
+    }
+
+    /*
+     * Tell Runtime exactly which Face
+     * this console slot owns.
+     */
+    forcedFaceIndex={
+      resolvedFace
+    }
 
         faceOnly={
         faceOnly
@@ -727,8 +774,34 @@ String(
           event.stopPropagation();
 
         const created =
-  onCreateFace?.(
-    slot.slotId
+  const highestExistingFaceNumber =
+  currentFaces.reduce(
+    (
+      highest,
+      face,
+      index
+    ) => {
+
+      const faceNumber =
+        Number(
+          face?.faceNumber ||
+          index + 1
+        );
+
+
+      return Math.max(
+        highest,
+        faceNumber
+      );
+    },
+    0
+  );
+
+
+const nextFaceNumber =
+  Math.max(
+    3,
+    highestExistingFaceNumber + 1
   );
 
 
