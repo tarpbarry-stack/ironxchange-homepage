@@ -8,6 +8,9 @@ import IXIScaledCardShell
 import IXIObjectCardActuator
   from "../../ixi-chassis/IXIObjectCardActuator";
 
+import IXIAosSkinRuntime
+  from "../skin-runtime/IXIAosSkinRuntime";
+
 import IXIAosFinancialFace2
   from "../financial-runtime/IXIAosFinancialFace2";
 
@@ -488,29 +491,37 @@ const financialFace2Props =
       );
 
 
-    if (
-  Number(
-    resolvedFace
-  ) === 2
-) {
-  return (
-    <IXIAosFinancialFace2
-      object={
-        object
-      }
+        if (
+      Number(
+        resolvedFace
+      ) === 2
+    ) {
+      return (
+        <IXIAosSkinRuntime
+          skinId={
+            skinId
+          }
+        >
 
-      passportId={
-        object?.passportId ||
-        object?.ixiPassportId ||
-        object?.passport?.passportId ||
-        object?.passport?.id ||
-        ""
-      }
+          <IXIAosFinancialFace2
+            object={
+              object
+            }
 
-      {...financialFace2Props}
-    />
-  );
-}
+            passportId={
+              object?.passportId ||
+              object?.ixiPassportId ||
+              object?.passport?.passportId ||
+              object?.passport?.id ||
+              ""
+            }
+
+            {...financialFace2Props}
+          />
+
+        </IXIAosSkinRuntime>
+      );
+    }
 
 
 return (
@@ -571,61 +582,60 @@ return (
   }
 
 
-function renderSecondaryFace(
-  faceIndex
-) {
+  function renderSecondaryFace(
+    faceIndex
+  ) {
+    const resolvedFace =
+      normalizeAosFace(
+        faceIndex,
+        faceCount
+      );
 
-  const resolvedFace =
-    normalizeAosFace(
-      faceIndex,
-      faceCount
+
+    return (
+      <IXIAosSkinRuntime
+        skinId={
+          skinId
+        }
+      >
+
+        <IXIAosFaceRuntime
+          object={
+            object
+          }
+
+          cardDefinition={
+            cardDefinition
+          }
+
+          faceNumber={
+            resolvedFace
+          }
+
+          presentationMode={
+            cardScaleMode
+          }
+
+          renderModule={
+            renderModule
+          }
+
+          studioEditing={
+            studioEditing
+          }
+
+          selectedModuleId={
+            selectedModuleId
+          }
+
+          onSelectModule={
+            onSelectModule
+          }
+        />
+
+      </IXIAosSkinRuntime>
     );
-
-
-  return (
-    <IXIAosFaceRuntime
-      object={
-        object
-      }
-
-      cardDefinition={
-        cardDefinition
-      }
-
-      faceNumber={
-        resolvedFace
-      }
-
-      /*
-       * For this first integration proof,
-       * keep the new Face Runtime at its
-       * native XL presentation datum.
-       *
-       * We will connect presentation sizing
-       * to the Studio size control next.
-       */
-      presentationMode={
-  cardScaleMode
-}
-
-      renderModule={
-        renderModule
-      }
-
-      studioEditing={
-        studioEditing
-      }
-
-      selectedModuleId={
-        selectedModuleId
-      }
-
-      onSelectModule={
-        onSelectModule
-      }
-    />
-  );
-}
+  }
   
   function renderSlot(
     slot,
