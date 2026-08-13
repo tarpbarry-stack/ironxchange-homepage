@@ -3188,11 +3188,7 @@ export default function IXIAuctionObjectFace3({
       );
   }
 
-`      <style jsx>{`
-
-        /* ALL OF THE MAIN AOF3 CSS HERE */
-
-      `}</style>
+`         `}</style>
 
     </IXIFaceFrame>
   );
