@@ -1,10 +1,6 @@
 import IXIAosObjectConsole
   from "../console-runtime/IXIAosObjectConsole";
 
-import IXIAosSkinRuntime
-  from "../skin-runtime/IXIAosSkinRuntime";
-
-
 export default function IXIObjectStudioCanvas({
   studio,
 
@@ -131,16 +127,6 @@ export default function IXIObjectStudioCanvas({
          * production renderer underneath it.
          */}
 
-        <IXIAosSkinRuntime
-          skinId={
-            skinId
-          }
-
-          className="
-            studio-canvas-skin-runtime
-          "
-        >
-
           <IXIAosObjectConsole
             object={
               object
@@ -153,6 +139,10 @@ export default function IXIObjectStudioCanvas({
             cardDefinition={
               cardDefinition
             }
+
+            skinId={
+  skinId
+}
 
             onCreateFace={
               slotId => {
@@ -288,8 +278,6 @@ export default function IXIObjectStudioCanvas({
               cardScaleMode
             }
           />
-
-        </IXIAosSkinRuntime>
 
       </div>
 
@@ -655,16 +643,7 @@ export default function IXIObjectStudioCanvas({
          * for its exact physical width,
          * height and scaling.
          */
-        .canvas-stage
-          :global(
-            .studio-canvas-skin-runtime
-          ) {
-          flex:
-            0 0 auto;
-
-          min-width:
-            0;
-        }
+       
 
 
         .canvas-stage::-webkit-scrollbar {
