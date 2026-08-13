@@ -3188,7 +3188,7 @@ export default function IXIAuctionObjectFace3({
       );
   }
 
-`         `}</style>
+      `}</style>
 
     </IXIFaceFrame>
   );
