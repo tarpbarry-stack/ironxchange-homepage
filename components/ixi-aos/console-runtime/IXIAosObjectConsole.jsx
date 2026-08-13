@@ -16,6 +16,7 @@ import {
   insertConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
+  assignConsoleSlotFace,
   createConsoleSlotsPatch
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 
@@ -673,10 +674,44 @@ String(
   );
 
 
-console.log(
-  "AOS CREATED FACE:",
-  created
-);
+if (
+  created?.faceIndex
+) {
+
+  const nextSlots =
+    assignConsoleSlotFace({
+      slots:
+        consoleSlots,
+
+      slotId:
+        slot.slotId,
+
+      face:
+        created.faceIndex
+    });
+
+
+  saveSlots(
+    nextSlots
+  );
+
+
+  updatePreviewCardState?.(
+    objectId,
+    {
+      face:
+        created.faceIndex,
+
+      activeStudioFace:
+        created.faceIndex
+    }
+  );
+
+
+  setFaceCreatorSlotId(
+    ""
+  );
+}
         }
       }
     >
