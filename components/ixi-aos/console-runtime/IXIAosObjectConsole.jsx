@@ -792,134 +792,225 @@ String(
   slot.slotId
 ) ? (
   <div
-    className="
-      ixi-aos-face-create-menu
-    "
-    onPointerDown={
-      event =>
-        event.stopPropagation()
-    }
-  >
-    <strong>
-      ADD FACE
-    </strong>
-
-    <button
-      type="button"
-
-      onClick={
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          console.log(
-            "AOS USE FACE TEMPLATE:",
-            slot.slotId
-          );
-        }
-      }
-    >
-      USE TEMPLATE
-    </button>
-
-        <button
-      type="button"
-
-      onClick={
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
+  className="
+    ixi-aos-face-create-menu
+  "
+  onPointerDown={
+    event =>
+      event.stopPropagation()
+  }
+>
+  <strong>
+    ADD FACE
+  </strong>
 
 
-          const created =
-            onCreateFace?.(
-              slot.slotId
+  <div className="ixi-aos-existing-face-list">
+
+    {availableConsoleFaces.length ? (
+      availableConsoleFaces.map(
+        faceIndex => {
+
+          const faceDefinition =
+            faces[
+              faceIndex - 1
+            ] ||
+            null;
+
+
+          const faceLabel =
+            String(
+              faceDefinition?.label ||
+              faceDefinition?.name ||
+              `FACE ${faceIndex}`
             );
 
 
-          if (
-            !created?.faceIndex
-          ) {
-            return;
-          }
+          return (
+            <button
+              key={
+                faceIndex
+              }
+
+              type="button"
+
+              onClick={
+                event => {
+                  event.preventDefault();
+                  event.stopPropagation();
 
 
-          const nextAvailableFaces =
-            normalizeConsoleFaces([
-              ...availableConsoleFaces,
-              created.faceIndex
-            ]);
+                  const nextSlots =
+                    assignConsoleSlotFace({
+                      slots:
+                        consoleSlots,
+
+                      slotId:
+                        slot.slotId,
+
+                      face:
+                        faceIndex,
+
+                      faces:
+                        availableConsoleFaces
+                    });
 
 
-          const nextSlots =
-            assignConsoleSlotFace({
-              slots:
-                consoleSlots,
-
-              slotId:
-                slot.slotId,
-
-              face:
-                created.faceIndex,
-
-              faces:
-                nextAvailableFaces
-            });
+                  saveSlots(
+                    nextSlots
+                  );
 
 
-          saveSlots(
-            nextSlots,
-            nextAvailableFaces
-          );
+                  updatePreviewCardState?.(
+                    objectId,
+                    {
+                      face:
+                        faceIndex,
+
+                      activeStudioFace:
+                        faceIndex
+                    }
+                  );
 
 
-          updatePreviewCardState?.(
-            objectId,
-            {
-              face:
-                created.faceIndex,
+                  onSelectFace?.({
+                    faceIndex,
 
-              activeStudioFace:
-                created.faceIndex
-            }
-          );
+                    faceId:
+                      faceDefinition?.faceId ||
+                      `face-${faceIndex}`
+                  });
 
 
-          setFaceCreatorSlotId(
-            ""
-          );
-        }
-      }
-    >
-      CREATE NEW
-    </button>
-
-    <button
-      type="button"
-
-      className="
-        cancel
-      "
-
-      onClick={
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          setFaceCreatorSlotId(
-            ""
+                  setFaceCreatorSlotId(
+                    ""
+                  );
+                }
+              }
+            >
+              {faceLabel}
+            </button>
           );
         }
-      }
-    >
-      CANCEL
-    </button>
+      )
+    ) : (
+      <span className="ixi-aos-no-existing-faces">
+        NO EXISTING FACES
+      </span>
+    )}
+
   </div>
+
+
+  <button
+    type="button"
+
+    onClick={
+      event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+
+        const created =
+          onCreateFace?.(
+            slot.slotId
+          );
+
+
+        if (
+          !created?.faceIndex
+        ) {
+          return;
+        }
+
+
+        const nextAvailableFaces =
+          normalizeConsoleFaces([
+            ...availableConsoleFaces,
+            created.faceIndex
+          ]);
+
+
+        const nextSlots =
+          assignConsoleSlotFace({
+            slots:
+              consoleSlots,
+
+            slotId:
+              slot.slotId,
+
+            face:
+              created.faceIndex,
+
+            faces:
+              nextAvailableFaces
+          });
+
+
+        saveSlots(
+          nextSlots,
+          nextAvailableFaces
+        );
+
+
+        updatePreviewCardState?.(
+          objectId,
+          {
+            face:
+              created.faceIndex,
+
+            activeStudioFace:
+              created.faceIndex
+          }
+        );
+
+
+        onSelectFace?.({
+          faceIndex:
+            created.faceIndex,
+
+          faceId:
+            created.faceId ||
+            `face-${created.faceIndex}`
+        });
+
+
+        setFaceCreatorSlotId(
+          ""
+        );
+      }
+    }
+  >
+    CREATE NEW
+  </button>
+
+
+  <button
+    type="button"
+
+    className="
+      cancel
+    "
+
+    onClick={
+      event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        setFaceCreatorSlotId(
+          ""
+        );
+      }
+    }
+  >
+    CANCEL
+  </button>
+</div>
 ) : null}
 
-      
-    </section>
-  );
+
+</section>
+);
 }
 
 
@@ -1479,7 +1570,110 @@ title={
   letter-spacing: .6px;
 }
 
+.ixi-aos-existing-face-list {
+  width: 100%;
 
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  max-height: 190px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: none;
+}
+
+
+.ixi-aos-existing-face-list::-webkit-scrollbar {
+  display: none;
+}
+
+
+.ixi-aos-existing-face-list > button {
+  width: 100%;
+  height: 28px;
+
+  flex: 0 0 28px;
+
+  padding: 0 8px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .08
+    );
+
+  border-radius: 5px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .025
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .72
+    );
+
+  font-size: 7px;
+  font-weight: 950;
+
+  letter-spacing: .45px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  text-transform: uppercase;
+}
+
+
+.ixi-aos-existing-face-list > button:hover {
+  border-color:
+    rgba(
+      255,
+      196,
+      0,
+      .35
+    );
+
+  color:
+    #ffc400;
+}
+
+
+.ixi-aos-no-existing-faces {
+  display: block;
+
+  padding: 8px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .28
+    );
+
+  font-size: 7px;
+  font-weight: 900;
+
+  text-align: center;
+
+  letter-spacing: .4px;
+}
 .ixi-aos-face-create-menu > button {
   width: 100%;
   height: 28px;
