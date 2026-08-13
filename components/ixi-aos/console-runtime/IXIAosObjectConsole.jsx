@@ -438,7 +438,7 @@ const financialFace2Props =
   });
 }
 
-   function cyclePanelFace(
+     function cyclePanelFace(
     slotId,
     event
   ) {
@@ -470,35 +470,8 @@ const financialFace2Props =
     );
   }
 
-          if (
-            slot.type ===
-            IXI_CONSOLE_SLOT_TYPES
-              .LISTING
-          ) {
-            return slot;
-          }
 
-
-          return {
-            ...slot,
-
-            face:
-              getNextAosFace(
-                slot.face,
-                faceCount
-              )
-          };
-        }
-      );
-
-
-    saveSlots(
-      nextSlots
-    );
-  }
-
-
- function renderFace(
+  function renderFace(
   faceIndex,
   {
     faceOnly = false
