@@ -673,6 +673,62 @@ const nextSlot =
   ];
 }
 
+export function assignConsoleSlotFace({
+  slots = [],
+  slotId,
+  face
+}) {
+
+  const current =
+    normalizeConsoleSlots(
+      slots
+    );
+
+
+  const resolvedFace =
+    normalizeModuleFace(
+      face
+    );
+
+
+  return current.map(
+    slot => {
+
+      if (
+        String(
+          slot.slotId
+        ) !==
+        String(
+          slotId
+        )
+      ) {
+        return slot;
+      }
+
+
+      if (
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+      ) {
+        return slot;
+      }
+
+
+      return createConsoleSlot({
+        slotId:
+          slot.slotId,
+
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .MODULE,
+
+        face:
+          resolvedFace
+      });
+    }
+  );
+}
 /* ===================================== */
 /* SLOT REMOVAL                          */
 /* ===================================== */
