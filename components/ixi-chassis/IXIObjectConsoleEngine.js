@@ -255,18 +255,87 @@ function createModuleSlotId() {
   ].join("-");
 }
 
+export function normalizeConsoleFaces(
+  faces =
+    IXI_CONSOLE_MODULE_FACES
+) {
+  const source =
+    Array.isArray(faces)
+      ? faces
+      : IXI_CONSOLE_MODULE_FACES;
+
+
+  const normalized =
+    source
+      .map(
+        value =>
+          Math.floor(
+            Number(value)
+          )
+      )
+      .filter(
+        face =>
+          Number.isFinite(face) &&
+          face >= 2
+      );
+
+
+  return Array.from(
+    new Set(
+      normalized
+    )
+  );
+}
+
+
 function normalizeModuleFace(
   value,
   fallback =
-    IXI_CONSOLE_DEFAULT_FACE
+    IXI_CONSOLE_DEFAULT_FACE,
+  faces =
+    IXI_CONSOLE_MODULE_FACES
 ) {
-  const face =
-    Number(value);
+  const validFaces =
+    normalizeConsoleFaces(
+      faces
+    );
 
-  return IXI_CONSOLE_MODULE_FACES
-    .includes(face)
-      ? face
-      : fallback;
+
+  const face =
+    Math.floor(
+      Number(value)
+    );
+
+
+  if (
+    validFaces.includes(
+      face
+    )
+  ) {
+    return face;
+  }
+
+
+  const fallbackFace =
+    Math.floor(
+      Number(fallback)
+    );
+
+
+  if (
+    validFaces.includes(
+      fallbackFace
+    )
+  ) {
+    return fallbackFace;
+  }
+
+
+ return (
+  validFaces.length
+    ? validFaces[0]
+    : null
+);
 }
 
 export function createConsoleSlot({
@@ -276,6 +345,12 @@ export function createConsoleSlot({
     IXI_CONSOLE_SLOT_TYPES.MODULE,
 
   face =
+    IXI_CONSOLE_DEFAULT_FACE,
+
+  faces =
+    IXI_CONSOLE_MODULE_FACES,
+
+  defaultFace =
     IXI_CONSOLE_DEFAULT_FACE
 } = {}) {
 
@@ -335,9 +410,11 @@ export function createConsoleSlot({
       IXI_CONSOLE_SLOT_TYPES.MODULE,
 
     face:
-      normalizeModuleFace(
-        face
-      )
+  normalizeModuleFace(
+    face,
+    defaultFace,
+    faces
+  )
   };
 }
 /* ===================================== */
@@ -349,10 +426,20 @@ export function normalizeConsoleSlots(
   {
     maxSlots =
       IXI_CONSOLE_MAX_DEPTH,
+
     defaultFace =
-      IXI_CONSOLE_DEFAULT_FACE
+      IXI_CONSOLE_DEFAULT_FACE,
+
+    faces =
+      IXI_CONSOLE_MODULE_FACES
   } = {}
 ) {
+
+  const validFaces =
+    normalizeConsoleFaces(
+      faces
+    );
+  
   const normalizedMaxSlots =
     Math.max(
       1,
@@ -454,8 +541,14 @@ normalized.push(
         ? null
         : normalizeModuleFace(
             rawSlot.face,
-            defaultFace
-          )
+            defaultFace,
+            validFaces
+          ),
+
+    faces:
+      validFaces,
+
+    defaultFace
   })
 );
     }
@@ -529,19 +622,41 @@ export function getNextConsoleDefaultFace(
   slots = [],
   {
     faces =
-      IXI_CONSOLE_MODULE_FACES
+      IXI_CONSOLE_MODULE_FACES,
+
+    defaultFace =
+      IXI_CONSOLE_DEFAULT_FACE
   } = {}
 ) {
   const validFaces =
-    Array.isArray(faces) &&
-    faces.length
-      ? faces
-      : IXI_CONSOLE_MODULE_FACES;
+    normalizeConsoleFaces(
+      faces
+    );
 
+  if (
+    !validFaces.length
+  ) {
+    return null;
+  }
+  
   const current =
     normalizeConsoleSlots(
-      slots
+      slots,
+      {
+        faces:
+          validFaces,
+
+        defaultFace
+      }
     );
+
+  if (
+    current.length >=
+    maxSlots
+  ) {
+    return current;
+  }
+  
 
   const moduleCount =
     current.filter(
@@ -551,11 +666,14 @@ export function getNextConsoleDefaultFace(
           .MODULE
     ).length;
 
+
   return normalizeModuleFace(
     validFaces[
       moduleCount %
       validFaces.length
-    ]
+    ],
+    defaultFace,
+    validFaces
   );
 }
 
@@ -576,37 +694,53 @@ export function insertConsoleSlot({
     IXI_CONSOLE_SLOT_TYPES.MODULE,
 
   maxSlots =
-    IXI_CONSOLE_MAX_DEPTH
+    IXI_CONSOLE_MAX_DEPTH,
+
+  faces =
+    IXI_CONSOLE_MODULE_FACES,
+
+  defaultFace =
+    IXI_CONSOLE_DEFAULT_FACE
 }) {
+    const validFaces =
+    normalizeConsoleFaces(
+      faces
+    );
+
+
   const current =
     normalizeConsoleSlots(
       slots,
       {
-        maxSlots
+        maxSlots,
+
+        faces:
+          validFaces,
+
+        defaultFace
       }
     );
-
-  if (
-    current.length >=
-    maxSlots
-  ) {
-    return current;
-  }
-
   const isEmptySlot =
   type ===
   IXI_CONSOLE_SLOT_TYPES.EMPTY;
 
 
-const resolvedFace =
-  isEmptySlot
-    ? null
-    : normalizeModuleFace(
-        face,
-        getNextConsoleDefaultFace(
-          current
-        )
-      );
+  const resolvedFace =
+    isEmptySlot
+      ? null
+      : normalizeModuleFace(
+          face,
+          getNextConsoleDefaultFace(
+            current,
+            {
+              faces:
+                validFaces,
+
+              defaultFace
+            }
+          ),
+          validFaces
+        );
 
 
 const nextSlot =
@@ -617,7 +751,12 @@ const nextSlot =
         : IXI_CONSOLE_SLOT_TYPES.MODULE,
 
     face:
-      resolvedFace
+      resolvedFace,
+
+    faces:
+      validFaces,
+
+    defaultFace
   });
 
   /*
@@ -676,18 +815,37 @@ const nextSlot =
 export function assignConsoleSlotFace({
   slots = [],
   slotId,
-  face
+  face,
+
+  faces =
+    IXI_CONSOLE_MODULE_FACES,
+
+  defaultFace =
+    IXI_CONSOLE_DEFAULT_FACE
 }) {
+  const validFaces =
+    normalizeConsoleFaces(
+      faces
+    );
+
 
   const current =
     normalizeConsoleSlots(
-      slots
+      slots,
+      {
+        faces:
+          validFaces,
+
+        defaultFace
+      }
     );
 
 
   const resolvedFace =
     normalizeModuleFace(
-      face
+      face,
+      defaultFace,
+      validFaces
     );
 
 
@@ -724,7 +882,12 @@ export function assignConsoleSlotFace({
             .MODULE,
 
         face:
-          resolvedFace
+          resolvedFace,
+
+        faces:
+          validFaces,
+
+        defaultFace
       });
     }
   );
@@ -735,11 +898,21 @@ export function assignConsoleSlotFace({
 
 export function removeConsoleSlot({
   slots = [],
-  slotId
+  slotId,
+
+  faces =
+    IXI_CONSOLE_MODULE_FACES,
+
+  defaultFace =
+    IXI_CONSOLE_DEFAULT_FACE
 }) {
   const current =
     normalizeConsoleSlots(
-      slots
+      slots,
+      {
+        faces,
+        defaultFace
+      }
     );
 
   const target =
@@ -777,60 +950,81 @@ export function removeConsoleSlot({
 export function cycleConsoleSlotFace({
   slots = [],
   slotId,
+
   faces =
-    IXI_CONSOLE_MODULE_FACES
+    IXI_CONSOLE_MODULE_FACES,
+
+  defaultFace =
+    IXI_CONSOLE_DEFAULT_FACE
 }) {
-  const current =
-    normalizeConsoleSlots(
-      slots
+  const validFaces =
+    normalizeConsoleFaces(
+      faces
     );
 
-  const validFaces =
-    Array.isArray(faces) &&
-    faces.length
-      ? faces
-      : IXI_CONSOLE_MODULE_FACES;
 
-  return current.map(slot => {
-    if (
-      String(slot.slotId) !==
-      String(slotId)
-    ) {
-      return slot;
+  const current =
+    normalizeConsoleSlots(
+      slots,
+      {
+        faces:
+          validFaces,
+
+        defaultFace
+      }
+    );
+
+
+  return current.map(
+    slot => {
+
+      if (
+        String(
+          slot.slotId
+        ) !==
+        String(
+          slotId
+        )
+      ) {
+        return slot;
+      }
+
+
+      if (
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+      ) {
+        return slot;
+      }
+
+
+      const currentIndex =
+        validFaces.findIndex(
+          face =>
+            Number(face) ===
+            Number(slot.face)
+        );
+
+
+      const nextIndex =
+        currentIndex === -1 ||
+        currentIndex >=
+          validFaces.length - 1
+          ? 0
+          : currentIndex + 1;
+
+
+      return {
+        ...slot,
+
+        face:
+          validFaces[
+            nextIndex
+          ]
+      };
     }
-
-    /*
-     * The Listing Card does not cycle
-     * through module faces here.
-     */
-    if (
-      slot.type ===
-      IXI_CONSOLE_SLOT_TYPES.LISTING
-    ) {
-      return slot;
-    }
-
-    const currentIndex =
-      validFaces.findIndex(
-        face =>
-          Number(face) ===
-          Number(slot.face)
-      );
-
-    const nextIndex =
-      currentIndex === -1 ||
-      currentIndex >=
-        validFaces.length - 1
-        ? 0
-        : currentIndex + 1;
-
-    return {
-      ...slot,
-
-      face:
-        validFaces[nextIndex]
-    };
-  });
+  );
 }
 
 /* ===================================== */
@@ -838,12 +1032,28 @@ export function cycleConsoleSlotFace({
 /* ===================================== */
 
 export function createConsoleSlotsPatch(
-  slots = []
+  slots = [],
+  {
+    faces =
+      IXI_CONSOLE_MODULE_FACES,
+
+    defaultFace =
+      IXI_CONSOLE_DEFAULT_FACE,
+
+    maxSlots =
+      IXI_CONSOLE_MAX_DEPTH
+  } = {}
 ) {
   const normalized =
     normalizeConsoleSlots(
-      slots
+      slots,
+      {
+        faces,
+        defaultFace,
+        maxSlots
+      }
     );
+
 
   return {
     consoleSlots:
