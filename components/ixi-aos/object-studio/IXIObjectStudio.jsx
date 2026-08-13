@@ -23,6 +23,13 @@ import IXIObjectStudioInspector
 import IXIObjectStudioFaceOrderBench
   from "./IXIObjectStudioFaceOrderBench";
 
+import IXIObjectStudioSkinBench
+  from "./IXIObjectStudioSkinBench";
+
+import {
+  IXI_AOS_DEFAULT_SKIN_ID
+} from "../skin-runtime/IXIAosSkinLibrary";
+
 import {
   createIXIObjectStudioDraft
 } from "./IXIObjectStudioDraftEngine";
@@ -214,6 +221,14 @@ export default function IXIObjectStudio() {
       "xl"
     );
 
+  const [
+    selectedSkinId,
+    setSelectedSkinId
+  ] =
+    useState(
+      IXI_AOS_DEFAULT_SKIN_ID
+    );
+  
 function cyclePreviewScaleMode() {
 
   const order = [
@@ -371,31 +386,34 @@ function cyclePreviewScaleMode() {
         <section className="studio-center-column">
 
           <IXIObjectStudioCanvas
-            studio={
-              studio
-            }
+  studio={
+    studio
+  }
 
-            previewCardState={
-              previewCardState
-            }
+  previewCardState={
+    previewCardState
+  }
 
-            updatePreviewCardState={
-              updatePreviewCardState
-            }
+  updatePreviewCardState={
+    updatePreviewCardState
+  }
 
-            enableCardScaling={
-  true
-}
+  enableCardScaling={
+    true
+  }
 
-cardScaleMode={
-  previewScaleMode
-}
+  cardScaleMode={
+    previewScaleMode
+  }
 
-onCycleCardScale={
-  cyclePreviewScaleMode
-}
-            
-          />
+  onCycleCardScale={
+    cyclePreviewScaleMode
+  }
+
+  skinId={
+    selectedSkinId
+  }
+/>
 
         </section>
 
@@ -404,17 +422,32 @@ onCycleCardScale={
 
         <aside className="studio-tool-column">
 
-          <div className="studio-scroll-surface">
+  <div className="studio-scroll-surface">
 
-            <IXIObjectStudioInspector
-              studio={
-                studio
-              }
-            />
+    <IXIObjectStudioDesignBench
+      studio={
+        studio
+      }
+    />
 
-          </div>
 
-        </aside>
+    <div className="studio-skin-bench-slot">
+
+      <IXIObjectStudioSkinBench
+        selectedSkinId={
+          selectedSkinId
+        }
+
+        onSelectSkin={
+          setSelectedSkinId
+        }
+      />
+
+    </div>
+
+  </div>
+
+</aside>
 
       </section>
 
@@ -948,6 +981,48 @@ onCycleCardScale={
             none;
         }
 
+/*
+ * ===============================================
+ * SKIN BENCH
+ * ===============================================
+ */
+
+.studio-skin-bench-slot {
+  width:
+    100%;
+
+  min-width:
+    0;
+
+  padding:
+    0 18px 30px;
+}
+
+
+.studio-skin-bench-slot::before {
+  content:
+    "";
+
+  display:
+    block;
+
+  width:
+    100%;
+
+  height:
+    1px;
+
+  margin:
+    0 0 18px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .055
+    );
+}
 
         /*
          * ===============================================
