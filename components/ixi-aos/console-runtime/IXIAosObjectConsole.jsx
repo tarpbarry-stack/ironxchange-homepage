@@ -15,7 +15,7 @@ import IXIAosFinancialFace2
   from "../financial-runtime/IXIAosFinancialFace2";
 
 import IXIAosFinancialFace3
-  from "../financial-runtime/IXIAosFinancialFace3.jsx";
+  from "../financial-runtime/IXIAosFinancialFace3";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
