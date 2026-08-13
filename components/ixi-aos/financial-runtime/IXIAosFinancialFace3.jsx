@@ -1,22 +1,36 @@
 /*
- * IXI AOS FINANCIAL FACE 3
- * ========================
+ * IXI AOS — FINANCIAL FACE 3
+ * IXIFF-003
  *
- * EXPERIMENTAL / PRODUCTION-CANDIDATE FINANCIAL FACE
+ * Native geometry: 298 × 471
  *
- * SKIN:
- * IXIFF-003 — ENGRAVED MONEY / CERTIFICATE
+ * FIXED:
+ * - identity header
+ * - purchase / ownership
+ * - total cost
+ * - current value
+ * - current miles
+ * - miles owned
+ * - cost / mile
+ * - cost / year
+ * - cost / month
+ * - time owned
+ * - footer actions
  *
- * NATIVE GEOMETRY:
- * 298 × 471
+ * SCROLL:
+ * - passport / VIN / location
+ * - acquisition detail
+ * - ownership detail
+ * - expenses
+ * - work orders
+ * - insurance
+ * - cost detail
+ * - position
+ * - recent activity
  *
- * IMPORTANT:
- * - This Face owns presentation only.
- * - Financial truth still comes from the Financial Engine / Object data.
- * - No image asset is required for the skin.
- * - All ornament, keylines, paper, engraving, medallions and shell depth
- *   are CSS so the Face stays lightweight.
- * - Existing Financial Face callbacks are preserved.
+ * DATA:
+ * object.fields.* FIRST
+ * Financial Engine / lifecycle data remains authoritative.
  */
 
 
@@ -27,8 +41,9 @@ const SKIN_ID = "IXIFF-003";
 
 
 /* =========================================================
-   HELPERS
+   BASIC HELPERS
    ========================================================= */
+
 
 function clean(value) {
   return String(
@@ -38,7 +53,7 @@ function clean(value) {
 }
 
 
-function safeObject(value) {
+function asObject(value) {
   return (
     value &&
     typeof value === "object" &&
@@ -49,14 +64,14 @@ function safeObject(value) {
 }
 
 
-function safeArray(value) {
+function asArray(value) {
   return Array.isArray(value)
     ? value
     : [];
 }
 
 
-function firstDefined(...values) {
+function first(...values) {
   for (const value of values) {
     if (
       value !== undefined &&
@@ -71,377 +86,339 @@ function firstDefined(...values) {
 }
 
 
-function numberOrZero(value) {
-  const number =
-    Number(value);
-
-  return Number.isFinite(number)
-    ? number
-    : 0;
-}
-
-
-function formatMoney(
+function money(
   value,
-  currency = "USD"
+  currency = "USD",
+  decimals = 0
 ) {
   const amount =
-    numberOrZero(value);
+    Number(value);
+
+  if (
+    !Number.isFinite(amount)
+  ) {
+    return "—";
+  }
 
   try {
     return new Intl.NumberFormat(
       "en-US",
       {
-        style: "currency",
+        style:
+          "currency",
+
         currency:
           clean(currency)
             .toUpperCase() ||
           "USD",
-        maximumFractionDigits: 0
+
+        minimumFractionDigits:
+          decimals,
+
+        maximumFractionDigits:
+          decimals
       }
     ).format(amount);
   } catch {
-    return `$${Math.round(
-      amount
-    ).toLocaleString()}`;
+    return `$${amount.toLocaleString()}`;
   }
 }
 
 
-function formatNumber(value) {
-  const number =
+function number(value) {
+  const amount =
     Number(value);
 
-  if (!Number.isFinite(number)) {
+  if (
+    !Number.isFinite(amount)
+  ) {
     return "—";
   }
 
-  return Math.round(number)
-    .toLocaleString("en-US");
+  return Math.round(
+    amount
+  ).toLocaleString(
+    "en-US"
+  );
 }
 
 
-function formatDate(value) {
-  const raw =
-    clean(value);
-
-  if (!raw) {
+function dateLabel(value) {
+  if (!value) {
     return "—";
   }
 
   const date =
-    new Date(raw);
+    new Date(value);
 
   if (
     Number.isNaN(
       date.getTime()
     )
   ) {
-    return raw;
+    return clean(value);
   }
 
-  try {
-    return new Intl.DateTimeFormat(
-      "en-US",
-      {
-        month: "short",
-        day: "2-digit",
-        year: "numeric"
-      }
-    )
-      .format(date)
-      .toUpperCase();
-  } catch {
-    return raw;
-  }
-}
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      month:
+        "short",
 
+      day:
+        "2-digit",
 
-function monthsBetween(
-  startValue,
-  endValue = new Date()
-) {
-  const start =
-    new Date(startValue);
-
-  const end =
-    endValue instanceof Date
-      ? endValue
-      : new Date(endValue);
-
-  if (
-    Number.isNaN(
-      start.getTime()
-    ) ||
-    Number.isNaN(
-      end.getTime()
-    ) ||
-    end <= start
-  ) {
-    return 0;
-  }
-
-  return Math.max(
-    1,
-    (
-      (
-        end.getFullYear() -
-        start.getFullYear()
-      ) * 12
-    ) +
-    (
-      end.getMonth() -
-      start.getMonth()
-    )
-  );
-}
-
-
-function getObjectLabel(object) {
-  const source =
-    safeObject(object);
-
-  const explicit =
-    clean(
-      firstDefined(
-        source.displayName,
-        source.name,
-        source.title,
-        source.label
-      )
-    );
-
-  if (explicit) {
-    return explicit;
-  }
-
-  const parts = [
-    clean(source.year),
-    clean(
-      firstDefined(
-        source.make,
-        source.manufacturer
-      )
-    ),
-    clean(source.model)
-  ].filter(Boolean);
-
-  return (
-    parts.join(" ") ||
-    "OBJECT"
-  );
-}
-
-
-function getPassportId(
-  object,
-  passportId
-) {
-  const source =
-    safeObject(object);
-
-  return clean(
-    firstDefined(
-      passportId,
-      source.passportId,
-      source.ixiPassportId,
-      source.passport?.passportId,
-      source.passport?.id
-    )
-  );
-}
-
-
-function getObjectId(object) {
-  const source =
-    safeObject(object);
-
-  return clean(
-    firstDefined(
-      source.objectId,
-      source.id,
-      source.assetId,
-      source.unitId,
-      source.stockNumber
-    )
-  );
-}
-
-
-function getVin(object) {
-  const source =
-    safeObject(object);
-
-  return clean(
-    firstDefined(
-      source.vin,
-      source.serialNumber,
-      source.serial,
-      source.sn
-    )
-  );
-}
-
-
-function getCurrentMiles(object) {
-  const source =
-    safeObject(object);
-
-  return numberOrZero(
-    firstDefined(
-      source.miles,
-      source.mileage,
-      source.odometer,
-      source.currentMiles,
-      source.meter?.miles
-    )
-  );
-}
-
-
-function normalizeRecentActivity(
-  recentActivity
-) {
-  return safeArray(
-    recentActivity
+      year:
+        "numeric"
+    }
   )
-    .slice(0, 3)
-    .map(
-      (
-        item,
-        index
-      ) => {
-        const source =
-          safeObject(item);
-
-        return {
-          id:
-            clean(
-              firstDefined(
-                source.id,
-                source.financialDocumentId,
-                source.financialLineId,
-                `activity-${index + 1}`
-              )
-            ),
-
-          date:
-            firstDefined(
-              source.date,
-              source.occurredAt,
-              source.transactionDate
-            ),
-
-          type:
-            clean(
-              firstDefined(
-                source.type,
-                source.documentType,
-                source.category,
-                "ACTIVITY"
-              )
-            ),
-
-          label:
-            clean(
-              firstDefined(
-                source.label,
-                source.title,
-                source.description,
-                source.documentType,
-                "FINANCIAL ACTIVITY"
-              )
-            ),
-
-          amount:
-            numberOrZero(
-              source.amount
-            ),
-
-          status:
-            clean(
-              firstDefined(
-                source.status,
-                source.paymentStatus,
-                ""
-              )
-            )
-        };
-      }
-    );
+    .format(date)
+    .toUpperCase();
 }
 
 
 /* =========================================================
-   SMALL PRESENTATION PARTS
+   OBJECT DATA
+
+   THIS IS THE IMPORTANT FIX.
+
+   Object Studio currently stores the proof vehicle values
+   inside:
+
+   object.fields.year
+   object.fields.make
+   object.fields.model
+   object.fields.vin
+   object.fields.miles
+   object.fields.price
+   object.fields.location
+
+   So fields[] wins before every legacy fallback.
    ========================================================= */
+
+
+function field(
+  object,
+  ...keys
+) {
+
+  const source =
+    asObject(object);
+
+  const fields =
+    asObject(
+      source.fields
+    );
+
+  const data =
+    asObject(
+      source.data
+    );
+
+  const attributes =
+    asObject(
+      source.attributes
+    );
+
+
+  for (
+    const key
+    of keys
+  ) {
+
+    const value =
+      first(
+        fields[key],
+        source[key],
+        data[key],
+        attributes[key]
+      );
+
+
+    if (
+      value !== null
+    ) {
+      return value;
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================================================
+   OWNERSHIP TIME
+   ========================================================= */
+
+
+function ownershipMonths(
+  purchaseDate
+) {
+
+  if (!purchaseDate) {
+    return 0;
+  }
+
+
+  const start =
+    new Date(
+      purchaseDate
+    );
+
+
+  if (
+    Number.isNaN(
+      start.getTime()
+    )
+  ) {
+    return 0;
+  }
+
+
+  const today =
+    new Date();
+
+
+  const months =
+    (
+      (
+        today.getFullYear() -
+        start.getFullYear()
+      ) * 12
+    ) +
+    (
+      today.getMonth() -
+      start.getMonth()
+    );
+
+
+  return Math.max(
+    1,
+    months
+  );
+}
+
+
+function ownershipTimeLabel(
+  months
+) {
+
+  if (!months) {
+    return "—";
+  }
+
+
+  const years =
+    Math.floor(
+      months / 12
+    );
+
+
+  const remainder =
+    months % 12;
+
+
+  if (
+    years &&
+    remainder
+  ) {
+    return `${years}Y ${remainder}M`;
+  }
+
+
+  if (years) {
+    return `${years}Y`;
+  }
+
+
+  return `${remainder}M`;
+}
+
+
+/* =========================================================
+   SMALL UI PARTS
+   ========================================================= */
+
 
 function LedgerRow({
   label,
   value,
   strong = false,
-  negative = false,
-  positive = false
+  positive = false,
+  negative = false
 }) {
+
   return (
     <div
       className={[
         "ff3-ledger-row",
+
         strong
           ? "strong"
           : "",
-        negative
-          ? "negative"
-          : "",
+
         positive
           ? "positive"
+          : "",
+
+        negative
+          ? "negative"
           : ""
       ]
         .filter(Boolean)
         .join(" ")}
     >
+
       <span>
         {label}
       </span>
 
+
       <i />
+
 
       <strong>
         {value || "—"}
       </strong>
+
     </div>
   );
 }
 
 
 function Seal({
-  children,
-  small = false
+  top = "IXI",
+  bottom = "AOS"
 }) {
+
   return (
-    <div
-      className={[
-        "ff3-seal",
-        small
-          ? "small"
-          : ""
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <div className="ff3-seal-inner">
-        {children}
+    <div className="ff3-seal">
+
+      <div className="ff3-seal-ring">
+
+        <strong>
+          {top}
+        </strong>
+
+        <span>
+          {bottom}
+        </span>
+
       </div>
+
     </div>
   );
 }
 
 
 /* =========================================================
-   COMPONENT
+   FACE
    ========================================================= */
 
+
 export default function IXIAosFinancialFace3({
+
   object = {},
 
   passportId = "",
@@ -468,326 +445,593 @@ export default function IXIAosFinancialFace3({
 
   onMoreActions = null,
 
-  compactActions = false,
+  dragHandleProps = null,
 
   className = ""
+
 }) {
 
-  const source =
-    safeObject(object);
-
-  const lifecycle =
-    safeObject(
-      lifecycleSnapshot
-    );
 
   const financial =
-    safeObject(
+    asObject(
       financialSnapshot
     );
 
-  const resolvedCurrency =
-    clean(currency)
-      .toUpperCase() ||
-    "USD";
 
-  const objectLabel =
-    getObjectLabel(
-      source
+  const lifecycle =
+    asObject(
+      lifecycleSnapshot
     );
 
-  const resolvedPassportId =
-    getPassportId(
-      source,
-      passportId
-    );
-
-  const resolvedObjectId =
-    getObjectId(
-      source
-    );
-
-  const vin =
-    getVin(
-      source
-    );
-
-  const currentMiles =
-    getCurrentMiles(
-      source
-    );
-
-  const purchaseDate =
-    firstDefined(
-      lifecycle.purchaseDate,
-      lifecycle.acquisitionDate,
-      lifecycle.dateAcquired,
-      source.purchaseDate,
-      source.acquisitionDate,
-      source.dateInService
-    );
-
-  const purchasePrice =
-    numberOrZero(
-      firstDefined(
-        lifecycle.purchasePrice,
-        lifecycle.acquisitionCost,
-        lifecycle.purchaseCost,
-        source.purchasePrice,
-        source.acquisitionCost,
-        financial.purchasePrice
-      )
-    );
-
-  const milesAtPurchase =
-    numberOrZero(
-      firstDefined(
-        lifecycle.milesAtPurchase,
-        lifecycle.purchaseMiles,
-        lifecycle.acquisitionMiles,
-        source.milesAtPurchase,
-        source.purchaseMiles
-      )
-    );
-
-  const milesOwned =
-    Math.max(
-      0,
-      currentMiles -
-      milesAtPurchase
-    );
-
-  const ownershipType =
-    clean(
-      firstDefined(
-        lifecycle.ownershipType,
-        lifecycle.financeType,
-        source.ownershipType,
-        source.financeType,
-        "PAID"
-      )
-    )
-      .toUpperCase();
-
-  const loanBalance =
-    numberOrZero(
-      firstDefined(
-        lifecycle.loanBalance,
-        lifecycle.currentBalance,
-        lifecycle.amountOwed,
-        lifecycle.payoffAmount
-      )
-    );
-
-  const payment =
-    numberOrZero(
-      firstDefined(
-        lifecycle.payment,
-        lifecycle.monthlyPayment,
-        lifecycle.loanPayment,
-        lifecycle.leasePayment
-      )
-    );
-
-  const interestRate =
-    firstDefined(
-      lifecycle.interestRate,
-      lifecycle.apr
-    );
-
-  const maturityDate =
-    firstDefined(
-      lifecycle.maturityDate,
-      lifecycle.loanMaturityDate,
-      lifecycle.leaseEndDate
-    );
 
   const expenses =
-    safeObject(
-      firstDefined(
+    asObject(
+      first(
         lifecycle.expenses,
         financial.expenses,
         {}
       )
     );
 
-  const fuel =
-    numberOrZero(
-      firstDefined(
-        expenses.fuel,
-        lifecycle.fuelCost
-      )
-    );
-
-  const oilLube =
-    numberOrZero(
-      firstDefined(
-        expenses.oilLube,
-        expenses.oil,
-        lifecycle.oilLubeCost
-      )
-    );
-
-  const tires =
-    numberOrZero(
-      firstDefined(
-        expenses.tires,
-        lifecycle.tireCost
-      )
-    );
-
-  const parts =
-    numberOrZero(
-      firstDefined(
-        expenses.parts,
-        lifecycle.partsCost
-      )
-    );
-
-  const registration =
-    numberOrZero(
-      firstDefined(
-        expenses.registration,
-        expenses.licensing,
-        lifecycle.registrationCost,
-        lifecycle.licensingCost
-      )
-    );
-
-  const otherExpenses =
-    numberOrZero(
-      firstDefined(
-        expenses.other,
-        lifecycle.otherExpenseCost
-      )
-    );
-
-  const explicitTotalExpenses =
-    firstDefined(
-      lifecycle.totalExpenses,
-      financial.totalExpenses,
-      expenses.total
-    );
-
-  const totalExpenses =
-    explicitTotalExpenses !== null
-      ? numberOrZero(
-          explicitTotalExpenses
-        )
-      : (
-          fuel +
-          oilLube +
-          tires +
-          parts +
-          registration +
-          otherExpenses
-        );
 
   const workOrders =
-    safeObject(
-      firstDefined(
+    asObject(
+      first(
         lifecycle.workOrders,
         financial.workOrders,
         {}
       )
     );
 
+
+  const insurance =
+    asObject(
+      first(
+        lifecycle.insurance,
+        object?.insurance,
+        {}
+      )
+    );
+
+
+  /* =======================================================
+     FACE 1 / OBJECT IDENTITY
+     ======================================================= */
+
+
+  const year =
+    clean(
+      field(
+        object,
+        "year"
+      )
+    );
+
+
+  const make =
+    clean(
+      field(
+        object,
+        "make",
+        "manufacturer"
+      )
+    );
+
+
+  const model =
+    clean(
+      field(
+        object,
+        "model"
+      )
+    );
+
+
+  const objectTitle =
+    clean(
+      first(
+        object?.displayName,
+        object?.name,
+        object?.title,
+
+        [
+          year,
+          make,
+          model
+        ]
+          .filter(Boolean)
+          .join(" ")
+      )
+    ) ||
+    "OBJECT";
+
+
+  const descriptor =
+    clean(
+      field(
+        object,
+        "trim",
+        "variant",
+        "bodyStyle",
+        "category",
+        "objectType",
+        "type"
+      )
+    ) ||
+    "VEHICLE";
+
+
+  const vin =
+    clean(
+      field(
+        object,
+        "vin",
+        "serialNumber",
+        "serial",
+        "sn"
+      )
+    );
+
+
+  const currentMiles =
+    Number(
+      field(
+        object,
+        "miles",
+        "mileage",
+        "odometer",
+        "currentMiles"
+      )
+    ) || 0;
+
+
+  const face1Price =
+    Number(
+      field(
+        object,
+        "price"
+      )
+    ) || 0;
+
+
+  const location =
+    clean(
+      field(
+        object,
+        "location"
+      )
+    );
+
+
+  const objectId =
+    clean(
+      first(
+        object?.objectId,
+
+        field(
+          object,
+          "objectId",
+          "unitId",
+          "unitNumber",
+          "assetId",
+          "stockNumber",
+          "idNumber"
+        ),
+
+        object?.id
+      )
+    );
+
+
+  const resolvedPassportId =
+    clean(
+      first(
+        passportId,
+        object?.passportId,
+        object?.ixiPassportId,
+        object?.passport?.passportId,
+        object?.passport?.id
+      )
+    );
+
+
+  const status =
+    clean(
+      field(
+        object,
+        "status"
+      ) ||
+      "ACTIVE"
+    )
+      .toUpperCase();
+
+
+  /* =======================================================
+     ACQUISITION
+     ======================================================= */
+
+
+  const purchaseDate =
+    first(
+      lifecycle.purchaseDate,
+      lifecycle.acquisitionDate,
+      lifecycle.dateAcquired,
+
+      field(
+        object,
+        "purchaseDate",
+        "acquisitionDate",
+        "dateInService"
+      )
+    );
+
+
+  /*
+   * Face 1's price is intentionally a final fallback.
+   *
+   * That means the current Studio proof truck immediately
+   * shows its existing $44,500 value instead of $0 while
+   * the proper acquisition record is not populated yet.
+   */
+
+  const purchasePrice =
+    Number(
+      first(
+        lifecycle.purchasePrice,
+        lifecycle.acquisitionCost,
+        lifecycle.purchaseCost,
+
+        financial.purchasePrice,
+
+        field(
+          object,
+          "purchasePrice",
+          "acquisitionCost"
+        ),
+
+        face1Price
+      )
+    ) || 0;
+
+
+  const milesAtPurchase =
+    Number(
+      first(
+        lifecycle.milesAtPurchase,
+        lifecycle.purchaseMiles,
+        lifecycle.acquisitionMiles,
+
+        field(
+          object,
+          "milesAtPurchase",
+          "purchaseMiles"
+        )
+      )
+    ) || 0;
+
+
+  const milesOwned =
+    (
+      currentMiles > 0 &&
+      milesAtPurchase > 0
+    )
+      ? Math.max(
+          0,
+          currentMiles -
+          milesAtPurchase
+        )
+      : 0;
+
+
+  /* =======================================================
+     OWNERSHIP
+     ======================================================= */
+
+
+  const ownershipType =
+    clean(
+      first(
+        lifecycle.ownershipType,
+        lifecycle.financeType,
+
+        field(
+          object,
+          "ownershipType",
+          "financeType"
+        ),
+
+        "PAID"
+      )
+    )
+      .toUpperCase();
+
+
+  const loanBalance =
+    Number(
+      first(
+        lifecycle.loanBalance,
+        lifecycle.currentBalance,
+        lifecycle.amountOwed,
+        lifecycle.payoffAmount
+      )
+    ) || 0;
+
+
+  const payment =
+    Number(
+      first(
+        lifecycle.payment,
+        lifecycle.monthlyPayment,
+        lifecycle.loanPayment,
+        lifecycle.leasePayment
+      )
+    ) || 0;
+
+
+  const interestRate =
+    first(
+      lifecycle.interestRate,
+      lifecycle.apr
+    );
+
+
+  const maturityDate =
+    first(
+      lifecycle.maturityDate,
+      lifecycle.loanMaturityDate,
+      lifecycle.leaseEndDate
+    );
+
+
+  const ownershipLabel =
+    (
+      ownershipType === "PAID" ||
+      ownershipType === "OWNED" ||
+      (
+        !loanBalance &&
+        ownershipType !== "LEASE"
+      )
+    )
+      ? "PAID ASSET"
+      : ownershipType === "LEASE"
+        ? "LEASE"
+        : "LOAN";
+
+
+  const isPaidAsset =
+    ownershipLabel ===
+    "PAID ASSET";
+
+
+  /* =======================================================
+     EXPENSES
+     ======================================================= */
+
+
+  const fuel =
+    Number(
+      first(
+        expenses.fuel,
+        lifecycle.fuelCost
+      )
+    ) || 0;
+
+
+  const oilLube =
+    Number(
+      first(
+        expenses.oilLube,
+        expenses.oil,
+        lifecycle.oilLubeCost
+      )
+    ) || 0;
+
+
+  const tires =
+    Number(
+      first(
+        expenses.tires,
+        lifecycle.tireCost
+      )
+    ) || 0;
+
+
+  const parts =
+    Number(
+      first(
+        expenses.parts,
+        lifecycle.partsCost
+      )
+    ) || 0;
+
+
+  const repairs =
+    Number(
+      first(
+        expenses.repairs,
+        lifecycle.repairExpense
+      )
+    ) || 0;
+
+
+  const registration =
+    Number(
+      first(
+        expenses.registration,
+        expenses.licensing,
+        lifecycle.registrationCost,
+        lifecycle.licensingCost
+      )
+    ) || 0;
+
+
+  const otherExpenses =
+    Number(
+      first(
+        expenses.other,
+        lifecycle.otherExpenseCost
+      )
+    ) || 0;
+
+
+  const calculatedExpenses =
+    fuel +
+    oilLube +
+    tires +
+    parts +
+    repairs +
+    registration +
+    otherExpenses;
+
+
+  const totalExpenses =
+    Number(
+      first(
+        lifecycle.totalExpenses,
+        financial.totalExpenses,
+        expenses.total,
+        calculatedExpenses
+      )
+    ) || 0;
+
+
+  /* =======================================================
+     WORK ORDERS
+     ======================================================= */
+
+
   const workOrderCount =
-    numberOrZero(
-      firstDefined(
+    Number(
+      first(
         workOrders.count,
         lifecycle.workOrderCount
       )
-    );
+    ) || 0;
+
 
   const workOrderCost =
-    numberOrZero(
-      firstDefined(
+    Number(
+      first(
         workOrders.totalCost,
         lifecycle.workOrderCost,
-        lifecycle.repairCost,
-        expenses.repairs
+        lifecycle.repairCost
       )
-    );
+    ) || 0;
+
 
   const lastWorkOrder =
-    safeObject(
-      firstDefined(
+    asObject(
+      first(
         workOrders.last,
         lifecycle.lastWorkOrder,
         {}
       )
     );
 
-  const insurance =
-    safeObject(
-      firstDefined(
-        lifecycle.insurance,
-        source.insurance,
-        {}
-      )
-    );
 
-  const insuranceProvider =
+  /* =======================================================
+     INSURANCE
+     ======================================================= */
+
+
+  const insuranceCarrier =
     clean(
-      firstDefined(
+      first(
         insurance.provider,
         insurance.carrier,
         lifecycle.insuranceCarrier
       )
     );
 
+
+  const insurancePolicy =
+    clean(
+      first(
+        insurance.policyNumber,
+        insurance.policy,
+        lifecycle.insurancePolicyNumber
+      )
+    );
+
+
   const insuranceRenewal =
-    firstDefined(
+    first(
       insurance.renewalDate,
       insurance.expirationDate,
       lifecycle.insuranceRenewalDate
     );
 
+
   const insuranceCost =
-    numberOrZero(
-      firstDefined(
+    Number(
+      first(
         insurance.annualPremium,
         insurance.cost,
         lifecycle.insuranceCost
       )
-    );
+    ) || 0;
+
+
+  /* =======================================================
+     OWNER INTELLIGENCE
+     ======================================================= */
+
+
+  const calculatedTotalCost =
+    purchasePrice +
+    totalExpenses +
+    workOrderCost +
+    insuranceCost;
+
 
   const totalCost =
-    numberOrZero(
-      firstDefined(
+    Number(
+      first(
         lifecycle.totalCost,
         lifecycle.totalInvested,
         financial.totalCost,
-        (
-          purchasePrice +
-          totalExpenses +
-          workOrderCost +
-          insuranceCost
-        )
+        calculatedTotalCost
       )
-    );
+    ) || 0;
+
+
+  /*
+   * Current value can come from a proper Financial /
+   * lifecycle valuation.
+   *
+   * Until that exists, the Object's existing value/price
+   * can act as the Studio proof fallback.
+   */
 
   const currentValue =
-    numberOrZero(
-      firstDefined(
+    Number(
+      first(
         lifecycle.currentValue,
         lifecycle.estimatedValue,
         financial.currentValue,
-        source.currentValue,
-        source.estimatedValue,
-        source.value
+
+        field(
+          object,
+          "currentValue",
+          "estimatedValue",
+          "value"
+        ),
+
+        face1Price
       )
-    );
+    ) || 0;
+
 
   const position =
     currentValue -
     totalCost;
 
+
   const ownedMonths =
-    monthsBetween(
+    ownershipMonths(
       purchaseDate
     );
+
 
   const costPerMile =
     milesOwned > 0
@@ -795,40 +1039,27 @@ export default function IXIAosFinancialFace3({
         milesOwned
       : 0;
 
+
   const costPerMonth =
     ownedMonths > 0
       ? totalCost /
         ownedMonths
       : 0;
 
+
   const costPerYear =
     ownedMonths > 0
-      ? (
-          totalCost /
-          ownedMonths
-        ) * 12
+      ? costPerMonth * 12
       : 0;
 
+
   const activity =
-    normalizeRecentActivity(
+    asArray(
       recentActivity
+    ).slice(
+      0,
+      12
     );
-
-  const isPaidAsset =
-    ownershipType === "PAID" ||
-    ownershipType === "OWNED" ||
-    (
-      !loanBalance &&
-      ownershipType !== "LEASE"
-    );
-
-  const ownershipLabel =
-    isPaidAsset
-      ? "PAID ASSET"
-      : ownershipType === "LEASE"
-        ? "LEASE"
-        : "LOAN";
-
 
   return (
     <section
@@ -843,250 +1074,474 @@ export default function IXIAosFinancialFace3({
       }
     >
 
-      <div className="ff3-frame">
+      <div className="ff3-metal-shell">
 
-        <div className="ff3-frame-line ff3-frame-line-1" />
-        <div className="ff3-frame-line ff3-frame-line-2" />
-
-
-        {/* ===================================================
-            TOP CARTOUCHE
-            =================================================== */}
-
-        <div className="ff3-cartouche">
-          <span>
-            IXI AOS
-          </span>
-        </div>
+        <div className="ff3-ridge ff3-ridge-a" />
+        <div className="ff3-ridge ff3-ridge-b" />
+        <div className="ff3-ridge ff3-ridge-c" />
 
 
-        {/* ===================================================
-            DOCUMENT HEADER
-            =================================================== */}
+        <div className="ff3-certificate">
 
-        <header className="ff3-document-head">
-
-          <div className="ff3-head-kicker">
-            <span>
-              FACE 3
-            </span>
-
-            <strong>
-              FINANCIAL
-            </strong>
-          </div>
+          <div className="ff3-guilloche" />
 
 
-          <div className="ff3-identity-line">
+          {/* =================================================
+              FIXED DRAG / IDENTITY HEADER
+              ================================================= */}
 
-            <div className="ff3-machine-medallion">
-              <span>
-                IXI
-              </span>
+          <div
+            className="ff3-drag-zone"
+            {...(
+              dragHandleProps ||
+              {}
+            )}
+          >
+
+            <div className="ff3-cartouche">
+              IXI AOS
             </div>
 
 
-            <div className="ff3-object-copy">
+            <header className="ff3-document-head">
 
-              <strong>
-                {objectLabel}
-              </strong>
+              <div className="ff3-kicker">
 
-              <span>
-                {
-                  clean(
-                    source.trim ||
-                    source.variant ||
-                    source.bodyStyle ||
-                    source.category ||
-                    "ASSET"
-                  )
-                }
-              </span>
+                <span>
+                  FACE 3
+                </span>
+
+                <strong>
+                  FINANCIAL
+                </strong>
+
+              </div>
+
+
+              <div className="ff3-title-row">
+
+                <Seal
+                  top="IXI"
+                  bottom="AOS"
+                />
+
+
+                <div className="ff3-object-copy">
+
+                  <strong>
+                    {objectTitle}
+                  </strong>
+
+                  <span>
+                    {descriptor}
+                  </span>
+
+                </div>
+
+
+                <Seal
+                  top="AOS"
+                  bottom="IXI"
+                />
+
+              </div>
+
+
+              <div className="ff3-id-line">
+
+                <span>
+                  {
+                    objectId
+                      ? `OBJECT ID: ${objectId}`
+                      : "OBJECT ID: —"
+                  }
+                </span>
+
+
+                <b>
+                  •
+                </b>
+
+
+                <span>
+                  STATUS: {status}
+                </span>
+
+              </div>
+
+            </header>
+
+
+            {/* ===============================================
+                FIXED ACQUISITION BAND
+                =============================================== */}
+
+            <div className="ff3-primary-band">
+
+              <div>
+
+                <span>
+                  PURCHASE DATE
+                </span>
+
+                <strong>
+                  {dateLabel(
+                    purchaseDate
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  PURCHASE PRICE
+                </span>
+
+                <strong>
+                  {money(
+                    purchasePrice,
+                    currency
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  OWNERSHIP
+                </span>
+
+                <strong>
+                  {ownershipLabel}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              FIXED OWNER INTELLIGENCE
+
+              THIS IS THE STUFF WE ALWAYS WANT TO SEE.
+              ================================================= */}
+
+          <section className="ff3-hero-intelligence">
+
+            {/* TOTAL COST / CURRENT VALUE */}
+
+            <div className="ff3-hero-row ff3-hero-money">
+
+              <div className="ff3-hero-cell">
+
+                <span>
+                  TOTAL COST
+                </span>
+
+                <strong>
+                  {money(
+                    totalCost,
+                    currency
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div className="ff3-hero-cell">
+
+                <span>
+                  CURRENT VALUE
+                </span>
+
+                <strong>
+                  {money(
+                    currentValue,
+                    currency
+                  )}
+                </strong>
+
+              </div>
 
             </div>
 
 
-            <Seal>
-              <span>AOS</span>
-            </Seal>
+            {/* CURRENT MILES / MILES OWNED / COST PER MILE / TIME */}
 
-          </div>
+            <div className="ff3-hero-row ff3-hero-usage">
 
+              <div className="ff3-hero-cell">
 
-          <div className="ff3-id-line">
+                <span>
+                  CURRENT MILES
+                </span>
 
-            <span>
-              {
-                resolvedObjectId
-                  ? `OBJECT ID: ${resolvedObjectId}`
-                  : "OBJECT ID: —"
-              }
-            </span>
+                <strong>
+                  {
+                    currentMiles
+                      ? number(
+                          currentMiles
+                        )
+                      : "—"
+                  }
+                </strong>
 
-            <b>
-              •
-            </b>
-
-            <span>
-              {
-                clean(
-                  source.status ||
-                  "ACTIVE"
-                ).toUpperCase()
-              }
-            </span>
-
-          </div>
-
-        </header>
+              </div>
 
 
-        {/* ===================================================
-            PRIMARY BAND
-            =================================================== */}
+              <div className="ff3-hero-cell">
 
-        <div className="ff3-primary-band">
+                <span>
+                  MILES OWNED
+                </span>
 
-          <div className="ff3-primary-stat">
-            <span>
-              PURCHASE DATE
-            </span>
+                <strong>
+                  {
+                    milesOwned
+                      ? number(
+                          milesOwned
+                        )
+                      : "—"
+                  }
+                </strong>
 
-            <strong>
-              {formatDate(
-                purchaseDate
-              )}
-            </strong>
-          </div>
-
-
-          <div className="ff3-primary-stat">
-            <span>
-              PURCHASE PRICE
-            </span>
-
-            <strong>
-              {formatMoney(
-                purchasePrice,
-                resolvedCurrency
-              )}
-            </strong>
-          </div>
+              </div>
 
 
-          <div className="ff3-primary-stat">
-            <span>
-              OWNERSHIP
-            </span>
+              <div className="ff3-hero-cell">
 
-            <strong>
-              {ownershipLabel}
-            </strong>
-          </div>
+                <span>
+                  COST / MILE
+                </span>
 
-        </div>
+                <strong>
+                  {
+                    milesOwned
+                      ? money(
+                          costPerMile,
+                          currency,
+                          2
+                        )
+                      : "—"
+                  }
+                </strong>
 
-
-        {/* ===================================================
-            IDENTITY LEDGER
-            =================================================== */}
-
-        <div className="ff3-paper-block ff3-identity-grid">
-
-          <div>
-            <span>
-              IXI PASSPORT
-            </span>
-
-            <strong>
-              {resolvedPassportId || "UNASSIGNED"}
-            </strong>
-          </div>
+              </div>
 
 
-          <div>
-            <span>
-              MILES
-            </span>
+              <div className="ff3-hero-cell">
 
-            <strong>
-              {
-                currentMiles
-                  ? `${formatNumber(
-                      currentMiles
-                    )} MI`
-                  : "—"
-              }
-            </strong>
-          </div>
+                <span>
+                  TIME OWNED
+                </span>
 
+                <strong>
+                  {ownershipTimeLabel(
+                    ownedMonths
+                  )}
+                </strong>
 
-          <div>
-            <span>
-              VIN
-            </span>
+              </div>
 
-            <strong>
-              {vin || "—"}
-            </strong>
-          </div>
+            </div>
 
 
-          <div>
-            <span>
-              ID NUMBER
-            </span>
+            {/* COST PER YEAR / MONTH */}
 
-            <strong>
-              {resolvedObjectId || "—"}
-            </strong>
-          </div>
+            <div className="ff3-hero-row ff3-hero-time">
 
-        </div>
+              <div className="ff3-hero-cell">
+
+                <span>
+                  COST / YEAR
+                </span>
+
+                <strong>
+                  {
+                    ownedMonths
+                      ? money(
+                          costPerYear,
+                          currency
+                        )
+                      : "—"
+                  }
+                </strong>
+
+              </div>
 
 
-        {/* ===================================================
-            BODY COLUMNS
-            =================================================== */}
+              <div className="ff3-hero-cell">
 
-        <div className="ff3-body-columns">
+                <span>
+                  COST / MONTH
+                </span>
 
-          {/* LEFT */}
+                <strong>
+                  {
+                    ownedMonths
+                      ? money(
+                          costPerMonth,
+                          currency
+                        )
+                      : "—"
+                  }
+                </strong>
 
-          <div className="ff3-body-column">
+              </div>
 
-            <section className="ff3-paper-block ff3-section">
+            </div>
 
-              <h3>
+          </section>
+
+
+          {/* =================================================
+              SCROLL START
+
+              POINTER DOWN STOPS HERE SO THIS AREA SCROLLS
+              AND DOES NOT START DRAGGING THE CARD.
+              ================================================= */}
+
+          <div
+            className="ff3-scroll-body"
+            tabIndex={0}
+            aria-label="Financial detail"
+            onPointerDown={
+              event =>
+                event.stopPropagation()
+            }
+          >
+
+            {/* ===============================================
+                IDENTITY DETAIL
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-identity-grid">
+
+              <div>
+
+                <span>
+                  IXI PASSPORT
+                </span>
+
+                <strong>
+                  {
+                    resolvedPassportId ||
+                    "UNASSIGNED"
+                  }
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  VIN
+                </span>
+
+                <strong>
+                  {vin || "—"}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  ID NUMBER
+                </span>
+
+                <strong>
+                  {objectId || "—"}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  LOCATION
+                </span>
+
+                <strong>
+                  {location || "—"}
+                </strong>
+
+              </div>
+
+            </section>
+
+
+            {/* ===============================================
+                ACQUISITION DETAIL
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-section">
+
+              <div className="ff3-section-title">
                 ACQUISITION
-              </h3>
+              </div>
+
 
               <LedgerRow
                 label="PURCHASE DATE"
                 value={
-                  formatDate(
+                  dateLabel(
                     purchaseDate
                   )
                 }
               />
 
+
               <LedgerRow
                 label="PURCHASE PRICE"
                 value={
-                  formatMoney(
+                  money(
                     purchasePrice,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
+
 
               <LedgerRow
                 label="MILES AT PURCHASE"
                 value={
                   milesAtPurchase
-                    ? `${formatNumber(
+                    ? `${number(
                         milesAtPurchase
+                      )} MI`
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="CURRENT MILES"
+                value={
+                  currentMiles
+                    ? `${number(
+                        currentMiles
+                      )} MI`
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="MILES OWNED"
+                value={
+                  milesOwned
+                    ? `${number(
+                        milesOwned
                       )} MI`
                     : "—"
                 }
@@ -1095,215 +1550,187 @@ export default function IXIAosFinancialFace3({
             </section>
 
 
-            <section className="ff3-paper-block ff3-section">
+            {/* ===============================================
+                OWNERSHIP DETAIL
+                =============================================== */}
 
-              <h3>
+            <section className="ff3-paper-card ff3-section">
+
+              <div className="ff3-section-title">
                 OWNERSHIP
-              </h3>
+              </div>
+
 
               <div className="ff3-ownership-banner">
                 {ownershipLabel}
               </div>
 
+
               {!isPaidAsset ? (
                 <>
+
                   <LedgerRow
                     label="PAYMENT"
                     value={
                       payment
-                        ? formatMoney(
+                        ? money(
                             payment,
-                            resolvedCurrency
+                            currency
                           )
                         : "—"
                     }
                   />
 
+
                   <LedgerRow
                     label={
-                      ownershipType === "LEASE"
+                      ownershipType ===
+                      "LEASE"
                         ? "LEASE BALANCE"
                         : "CURRENT BALANCE"
                     }
                     value={
                       loanBalance
-                        ? formatMoney(
+                        ? money(
                             loanBalance,
-                            resolvedCurrency
+                            currency
                           )
                         : "—"
                     }
                   />
 
+
                   <LedgerRow
                     label="INTEREST RATE"
                     value={
-                      interestRate !== null
+                      interestRate !== null &&
+                      interestRate !== undefined
                         ? `${interestRate}%`
                         : "—"
                     }
                   />
 
+
                   <LedgerRow
                     label={
-                      ownershipType === "LEASE"
+                      ownershipType ===
+                      "LEASE"
                         ? "TERM END"
-                        : "MATURITY"
+                        : "MATURITY DATE"
                     }
                     value={
-                      formatDate(
+                      dateLabel(
                         maturityDate
                       )
                     }
                   />
+
                 </>
               ) : (
-                <div className="ff3-paid-note">
+
+                <div className="ff3-paid-copy">
                   NO CURRENT LOAN OR LEASE BALANCE
                 </div>
+
               )}
 
             </section>
 
 
-            <section className="ff3-paper-block ff3-section ff3-cost-block">
+            {/* ===============================================
+                EXPENSE DETAIL
+                =============================================== */}
 
-              <h3>
-                COST
-              </h3>
+            <section className="ff3-paper-card ff3-section">
 
-              <LedgerRow
-                label="PURCHASE"
-                value={
-                  formatMoney(
-                    purchasePrice,
-                    resolvedCurrency
-                  )
-                }
-              />
+              <div className="ff3-section-title">
+                EXPENSES SINCE PURCHASE
+              </div>
 
-              <LedgerRow
-                label="EXPENSES"
-                value={
-                  formatMoney(
-                    totalExpenses,
-                    resolvedCurrency
-                  )
-                }
-              />
-
-              <LedgerRow
-                label="WORK ORDERS"
-                value={
-                  formatMoney(
-                    workOrderCost,
-                    resolvedCurrency
-                  )
-                }
-              />
-
-              <LedgerRow
-                label="INSURANCE"
-                value={
-                  formatMoney(
-                    insuranceCost,
-                    resolvedCurrency
-                  )
-                }
-              />
-
-              <LedgerRow
-                label="TOTAL COST"
-                value={
-                  formatMoney(
-                    totalCost,
-                    resolvedCurrency
-                  )
-                }
-                strong
-              />
-
-            </section>
-
-          </div>
-
-
-          {/* RIGHT */}
-
-          <div className="ff3-body-column">
-
-            <section className="ff3-paper-block ff3-section">
-
-              <h3>
-                EXPENSES
-              </h3>
 
               <LedgerRow
                 label="FUEL"
                 value={
-                  formatMoney(
+                  money(
                     fuel,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
+
 
               <LedgerRow
                 label="OIL / LUBE"
                 value={
-                  formatMoney(
+                  money(
                     oilLube,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
+
 
               <LedgerRow
                 label="TIRES"
                 value={
-                  formatMoney(
+                  money(
                     tires,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
+
 
               <LedgerRow
                 label="PARTS"
                 value={
-                  formatMoney(
+                  money(
                     parts,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
 
+
               <LedgerRow
-                label="REG / LICENSE"
+                label="REPAIRS"
                 value={
-                  formatMoney(
-                    registration,
-                    resolvedCurrency
+                  money(
+                    repairs,
+                    currency
                   )
                 }
               />
+
+
+              <LedgerRow
+                label="REGISTRATION / LICENSING"
+                value={
+                  money(
+                    registration,
+                    currency
+                  )
+                }
+              />
+
 
               <LedgerRow
                 label="OTHER"
                 value={
-                  formatMoney(
+                  money(
                     otherExpenses,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
 
+
               <LedgerRow
                 label="TOTAL EXPENSES"
                 value={
-                  formatMoney(
+                  money(
                     totalExpenses,
-                    resolvedCurrency
+                    currency
                   )
                 }
                 strong
@@ -1311,73 +1738,43 @@ export default function IXIAosFinancialFace3({
 
             </section>
 
+                         {/* ===============================================
+                WORK ORDER DETAIL
+                =============================================== */}
 
-            <section className="ff3-paper-block ff3-section">
+            <section className="ff3-paper-card ff3-section">
 
-              <h3>
-                INSURANCE
-              </h3>
+              <div className="ff3-section-title">
+                WORK ORDER HISTORY
+              </div>
+
 
               <LedgerRow
-                label="CARRIER"
+                label="TOTAL WORK ORDERS"
                 value={
-                  insuranceProvider ||
-                  "—"
-                }
-              />
-
-              <LedgerRow
-                label="RENEWAL"
-                value={
-                  formatDate(
-                    insuranceRenewal
-                  )
-                }
-              />
-
-              <LedgerRow
-                label="ANNUAL COST"
-                value={
-                  formatMoney(
-                    insuranceCost,
-                    resolvedCurrency
-                  )
-                }
-              />
-
-            </section>
-
-
-            <section className="ff3-paper-block ff3-section">
-
-              <h3>
-                WORK ORDERS
-              </h3>
-
-              <LedgerRow
-                label="TOTAL"
-                value={
-                  formatNumber(
+                  number(
                     workOrderCount
                   )
                 }
               />
 
+
               <LedgerRow
-                label="COST"
+                label="TOTAL WORK ORDER COST"
                 value={
-                  formatMoney(
+                  money(
                     workOrderCost,
-                    resolvedCurrency
+                    currency
                   )
                 }
               />
 
+
               <LedgerRow
-                label="LAST"
+                label="LAST WORK ORDER"
                 value={
                   clean(
-                    firstDefined(
+                    first(
                       lastWorkOrder.label,
                       lastWorkOrder.title,
                       lastWorkOrder.description
@@ -1387,816 +1784,1479 @@ export default function IXIAosFinancialFace3({
                 }
               />
 
+
+              <LedgerRow
+                label="LAST WORK ORDER DATE"
+                value={
+                  dateLabel(
+                    first(
+                      lastWorkOrder.date,
+                      lastWorkOrder.occurredAt,
+                      lastWorkOrder.completedAt
+                    )
+                  )
+                }
+              />
+
             </section>
 
-          </div>
 
-        </div>
+            {/* ===============================================
+                INSURANCE DETAIL
+                =============================================== */}
 
+            <section className="ff3-paper-card ff3-section">
 
-        {/* ===================================================
-            ASSET POSITION
-            =================================================== */}
-
-        <div className="ff3-position-row">
-
-          <div className="ff3-paper-block ff3-position-card">
-
-            <span>
-              TOTAL COST
-            </span>
-
-            <strong>
-              {formatMoney(
-                totalCost,
-                resolvedCurrency
-              )}
-            </strong>
-
-          </div>
-
-
-          <div className="ff3-paper-block ff3-position-card">
-
-            <span>
-              CURRENT VALUE
-            </span>
-
-            <strong>
-              {formatMoney(
-                currentValue,
-                resolvedCurrency
-              )}
-            </strong>
-
-          </div>
-
-
-          <div
-            className={[
-              "ff3-paper-block",
-              "ff3-position-card",
-              "ff3-position-result",
-              position < 0
-                ? "negative"
-                : "positive"
-            ].join(" ")}
-          >
-
-            <span>
-              POSITION
-            </span>
-
-            <strong>
-              {formatMoney(
-                position,
-                resolvedCurrency
-              )}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        {/* ===================================================
-            OWNERSHIP METRICS
-            =================================================== */}
-
-        <div className="ff3-metrics-strip">
-
-          <div>
-            <span>
-              MILES OWNED
-            </span>
-
-            <strong>
-              {
-                milesOwned
-                  ? formatNumber(
-                      milesOwned
-                    )
-                  : "—"
-              }
-            </strong>
-          </div>
-
-
-          <div>
-            <span>
-              COST / MILE
-            </span>
-
-            <strong>
-              {
-                milesOwned
-                  ? formatMoney(
-                      costPerMile,
-                      resolvedCurrency
-                    )
-                  : "—"
-              }
-            </strong>
-          </div>
-
-
-          <div>
-            <span>
-              COST / YEAR
-            </span>
-
-            <strong>
-              {
-                ownedMonths
-                  ? formatMoney(
-                      costPerYear,
-                      resolvedCurrency
-                    )
-                  : "—"
-              }
-            </strong>
-          </div>
-
-
-          <div>
-            <span>
-              COST / MONTH
-            </span>
-
-            <strong>
-              {
-                ownedMonths
-                  ? formatMoney(
-                      costPerMonth,
-                      resolvedCurrency
-                    )
-                  : "—"
-              }
-            </strong>
-          </div>
-
-        </div>
-
-
-        {/* ===================================================
-            RECENT ACTIVITY
-            =================================================== */}
-
-        <section className="ff3-paper-block ff3-activity">
-
-          <h3>
-            RECENT FINANCIAL ACTIVITY
-          </h3>
-
-          <div className="ff3-activity-head">
-            <span>DATE</span>
-            <span>TYPE</span>
-            <span>DESCRIPTION</span>
-            <span>AMOUNT</span>
-          </div>
-
-
-          <div className="ff3-activity-body">
-
-            {activity.length ? (
-              activity.map(
-                item => (
-                  <div
-                    key={
-                      item.id
-                    }
-                    className="ff3-activity-row"
-                  >
-                    <span>
-                      {formatDate(
-                        item.date
-                      )}
-                    </span>
-
-                    <span>
-                      {item.type || "—"}
-                    </span>
-
-                    <strong>
-                      {item.label}
-                    </strong>
-
-                    <em>
-                      {formatMoney(
-                        item.amount,
-                        resolvedCurrency
-                      )}
-                    </em>
-                  </div>
-                )
-              )
-            ) : (
-              <div className="ff3-empty-activity">
-                NO RECENT FINANCIAL ACTIVITY
+              <div className="ff3-section-title">
+                INSURANCE
               </div>
-            )}
+
+
+              <LedgerRow
+                label="CARRIER"
+                value={
+                  insuranceCarrier ||
+                  "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="POLICY #"
+                value={
+                  insurancePolicy ||
+                  "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="RENEWAL DATE"
+                value={
+                  dateLabel(
+                    insuranceRenewal
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="ANNUAL COST"
+                value={
+                  money(
+                    insuranceCost,
+                    currency
+                  )
+                }
+              />
+
+            </section>
+
+
+            {/* ===============================================
+                COST DETAIL
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-section">
+
+              <div className="ff3-section-title">
+                COST DETAIL
+              </div>
+
+
+              <LedgerRow
+                label="PURCHASE PRICE"
+                value={
+                  money(
+                    purchasePrice,
+                    currency
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="EXPENSES"
+                value={
+                  money(
+                    totalExpenses,
+                    currency
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="WORK ORDERS"
+                value={
+                  money(
+                    workOrderCost,
+                    currency
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="INSURANCE"
+                value={
+                  money(
+                    insuranceCost,
+                    currency
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="TOTAL COST"
+                value={
+                  money(
+                    totalCost,
+                    currency
+                  )
+                }
+                strong
+              />
+
+            </section>
+
+
+            {/* ===============================================
+                VALUE / POSITION
+
+                POSITION LIVES DOWN HERE ON PURPOSE.
+                IT IS NOT A HEADLINE OWNERSHIP METRIC.
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-section">
+
+              <div className="ff3-section-title">
+                VALUE DETAIL
+              </div>
+
+
+              <LedgerRow
+                label="CURRENT VALUE"
+                value={
+                  money(
+                    currentValue,
+                    currency
+                  )
+                }
+                strong
+              />
+
+
+              <LedgerRow
+                label="TOTAL COST"
+                value={
+                  money(
+                    totalCost,
+                    currency
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="POSITION"
+                value={
+                  money(
+                    position,
+                    currency
+                  )
+                }
+                positive={
+                  position > 0
+                }
+                negative={
+                  position < 0
+                }
+              />
+
+            </section>
+
+
+            {/* ===============================================
+                OWNERSHIP METRIC DETAIL
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-section">
+
+              <div className="ff3-section-title">
+                OWNERSHIP METRICS
+              </div>
+
+
+              <LedgerRow
+                label="CURRENT MILES"
+                value={
+                  currentMiles
+                    ? `${number(
+                        currentMiles
+                      )} MI`
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="MILES AT PURCHASE"
+                value={
+                  milesAtPurchase
+                    ? `${number(
+                        milesAtPurchase
+                      )} MI`
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="MILES OWNED"
+                value={
+                  milesOwned
+                    ? `${number(
+                        milesOwned
+                      )} MI`
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="TIME OWNED"
+                value={
+                  ownershipTimeLabel(
+                    ownedMonths
+                  )
+                }
+              />
+
+
+              <LedgerRow
+                label="COST / MILE"
+                value={
+                  milesOwned
+                    ? money(
+                        costPerMile,
+                        currency,
+                        2
+                      )
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="COST / YEAR"
+                value={
+                  ownedMonths
+                    ? money(
+                        costPerYear,
+                        currency
+                      )
+                    : "—"
+                }
+              />
+
+
+              <LedgerRow
+                label="COST / MONTH"
+                value={
+                  ownedMonths
+                    ? money(
+                        costPerMonth,
+                        currency
+                      )
+                    : "—"
+                }
+              />
+
+            </section>
+
+
+            {/* ===============================================
+                RECENT FINANCIAL ACTIVITY
+                =============================================== */}
+
+            <section className="ff3-paper-card ff3-section ff3-activity">
+
+              <div className="ff3-section-title">
+                RECENT FINANCIAL ACTIVITY
+              </div>
+
+
+              <div className="ff3-activity-head">
+
+                <span>
+                  DATE
+                </span>
+
+                <span>
+                  TYPE
+                </span>
+
+                <span>
+                  DESCRIPTION
+                </span>
+
+                <span>
+                  AMOUNT
+                </span>
+
+              </div>
+
+
+              {activity.length ? (
+
+                <div className="ff3-activity-body">
+
+                  {activity.map(
+                    (
+                      item,
+                      index
+                    ) => {
+
+                      const activityDate =
+                        first(
+                          item?.date,
+                          item?.occurredAt,
+                          item?.transactionDate
+                        );
+
+
+                      const activityType =
+                        clean(
+                          first(
+                            item?.type,
+                            item?.documentType,
+                            item?.category,
+                            "ACTIVITY"
+                          )
+                        );
+
+
+                      const activityLabel =
+                        clean(
+                          first(
+                            item?.label,
+                            item?.title,
+                            item?.description,
+                            item?.documentType,
+                            "FINANCIAL ACTIVITY"
+                          )
+                        );
+
+
+                      const activityAmount =
+                        Number(
+                          item?.amount
+                        ) || 0;
+
+
+                      const activityId =
+                        clean(
+                          first(
+                            item?.id,
+                            item?.financialDocumentId,
+                            item?.financialLineId,
+                            `activity-${index}`
+                          )
+                        );
+
+
+                      return (
+                        <div
+                          key={
+                            activityId
+                          }
+                          className="ff3-activity-row"
+                        >
+
+                          <span>
+                            {dateLabel(
+                              activityDate
+                            )}
+                          </span>
+
+
+                          <span>
+                            {
+                              activityType ||
+                              "—"
+                            }
+                          </span>
+
+
+                          <strong>
+                            {
+                              activityLabel ||
+                              "—"
+                            }
+                          </strong>
+
+
+                          <em>
+                            {money(
+                              activityAmount,
+                              currency
+                            )}
+                          </em>
+
+                        </div>
+                      );
+                    }
+                  )}
+
+                </div>
+
+              ) : (
+
+                <div className="ff3-empty-activity">
+                  NO RECENT FINANCIAL ACTIVITY
+                </div>
+
+              )}
+
+            </section>
+
+
+            {/* ===============================================
+                END OF SCROLL DOCUMENT
+                =============================================== */}
+
+            <div className="ff3-scroll-end">
+
+              <span>
+                IRONXCHANGE
+              </span>
+
+              <strong>
+                OBJECT FINANCIAL RECORD
+              </strong>
+
+              <span>
+                {
+                  clean(
+                    periodLabel
+                  ) ||
+                  "LIFE"
+                }
+              </span>
+
+            </div>
 
           </div>
 
-        </section>
 
+          {/* =================================================
+              FIXED FOOTER
 
-        {/* ===================================================
-            FOOTER ACTION BAR
-            =================================================== */}
+              POINTER DOWN STOPS HERE.
+              BUTTON CLICKS MUST NOT START CARD DRAG.
+              ================================================= */}
 
-        <footer className="ff3-footer">
-
-          <button
-            type="button"
-            onClick={
-              onOpenWorkbook
+          <footer
+            className="ff3-footer"
+            onPointerDown={
+              event =>
+                event.stopPropagation()
             }
-            disabled={
-              typeof onOpenWorkbook !==
-              "function"
-            }
-            className="ff3-workbook"
           >
+
+            <button
+              type="button"
+              className="ff3-workbook"
+              onClick={
+                onOpenWorkbook
+              }
+              disabled={
+                typeof onOpenWorkbook !==
+                "function"
+              }
+            >
+
+              <span>
+                OPEN FINANCIAL WORKBOOK
+              </span>
+
+              <small>
+                DETAILED FINANCIALS
+              </small>
+
+            </button>
+
+
+            <Seal
+              top="IXI"
+              bottom="FF-003"
+            />
+
+
+            <div className="ff3-actions">
+
+              <button
+                type="button"
+                onClick={
+                  onCreateExpense
+                }
+                disabled={
+                  typeof onCreateExpense !==
+                  "function"
+                }
+                title="Create Expense"
+              >
+                EXP
+              </button>
+
+
+              <button
+                type="button"
+                onClick={
+                  onCreatePurchaseOrder
+                }
+                disabled={
+                  typeof onCreatePurchaseOrder !==
+                  "function"
+                }
+                title="Create Purchase Order"
+              >
+                PO
+              </button>
+
+
+              <button
+                type="button"
+                onClick={
+                  onCreateWorkOrder
+                }
+                disabled={
+                  typeof onCreateWorkOrder !==
+                  "function"
+                }
+                title="Create Work Order"
+              >
+                WO
+              </button>
+
+
+              <button
+                type="button"
+                onClick={
+                  onCreateTimeEntry
+                }
+                disabled={
+                  typeof onCreateTimeEntry !==
+                  "function"
+                }
+                title="Create Time Entry"
+              >
+                TIME
+              </button>
+
+
+              <button
+                type="button"
+                className="more"
+                onClick={
+                  onMoreActions
+                }
+                disabled={
+                  typeof onMoreActions !==
+                  "function"
+                }
+                title="More Financial Actions"
+              >
+                •••
+              </button>
+
+            </div>
+
+          </footer>
+
+
+          <div className="ff3-bottom-mark">
+
             <span>
-              OPEN FINANCIAL WORKBOOK
+              IRONXCHANGE
             </span>
 
-            <small>
-              DETAILED FINANCIALS
-            </small>
-          </button>
+            <strong>
+              {SKIN_ID}
+            </strong>
 
-
-          <Seal small>
             <span>
-              IXI
+              OBJECT OPERATING SYSTEM
             </span>
 
-            <small>
-              FF-003
-            </small>
-          </Seal>
-
-
-          <div
-            className={[
-              "ff3-quick-actions",
-              compactActions
-                ? "compact"
-                : ""
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            <button
-              type="button"
-              onClick={
-                onCreateExpense
-              }
-              disabled={
-                typeof onCreateExpense !==
-                "function"
-              }
-            >
-              EXP
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                onCreatePurchaseOrder
-              }
-              disabled={
-                typeof onCreatePurchaseOrder !==
-                "function"
-              }
-            >
-              PO
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                onCreateWorkOrder
-              }
-              disabled={
-                typeof onCreateWorkOrder !==
-                "function"
-              }
-            >
-              WO
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                onCreateTimeEntry
-              }
-              disabled={
-                typeof onCreateTimeEntry !==
-                "function"
-              }
-            >
-              TIME
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                onMoreActions
-              }
-              disabled={
-                typeof onMoreActions !==
-                "function"
-              }
-              className="more"
-            >
-              •••
-            </button>
           </div>
 
-        </footer>
-
-
-        <div className="ff3-bottom-signature">
-          <span>
-            IRONXCHANGE
-          </span>
-
-          <strong>
-            {SKIN_ID}
-          </strong>
-
-          <span>
-            OBJECT OPERATING SYSTEM
-          </span>
         </div>
 
       </div>
 
 
+      {/* =====================================================
+          CSS STARTS HERE.
+
+          PART 4 CONTINUES FROM THIS EXACT POINT.
+          DO NOT ADD </section> YET.
+          ===================================================== */}
+
       <style jsx global>{`
 
-        /* =====================================================
-           PHYSICAL FACE
+              /* =====================================================
+           IXIFF-003
+           ENGRAVED CERTIFICATE / MONEY GREEN
            ===================================================== */
+
 
         .ixi-aos-financial-face3-shell,
         .ixi-aos-financial-face3-shell * {
-          box-sizing: border-box;
+          box-sizing:
+            border-box;
         }
 
 
         .ixi-aos-financial-face3-shell {
-          --ff3-green-0: #07120b;
-          --ff3-green-1: #0c1b10;
-          --ff3-green-2: #13291a;
-          --ff3-green-3: #1d3a25;
-          --ff3-green-4: #304e37;
+          --ff3-green-black:
+            #071008;
 
-          --ff3-ivory-0: #f2eddc;
-          --ff3-ivory-1: #e8dfc7;
-          --ff3-ivory-2: #d7ccb0;
+          --ff3-green-deep:
+            #0a1b10;
 
-          --ff3-ink: #152219;
-          --ff3-line: rgba(25, 46, 31, .32);
-          --ff3-gold: #c9b77a;
+          --ff3-green:
+            #17351f;
 
-          position: relative;
+          --ff3-green-mid:
+            #294b30;
 
-          width: ${FACE_WIDTH}px;
-          min-width: ${FACE_WIDTH}px;
-          max-width: ${FACE_WIDTH}px;
+          --ff3-ivory:
+            #f2eddc;
 
-          height: ${FACE_HEIGHT}px;
-          min-height: ${FACE_HEIGHT}px;
-          max-height: ${FACE_HEIGHT}px;
+          --ff3-ivory-dark:
+            #ded2b3;
 
-          margin: 0;
-          padding: 0;
+          --ff3-ink:
+            #17271c;
 
-          overflow: hidden;
+          --ff3-brass:
+            #c5b274;
 
-          border:
-            1px solid
-            rgba(236, 232, 207, .66);
 
-          border-radius: 13px;
+          position:
+            relative;
+
+
+          width:
+            ${FACE_WIDTH}px;
+
+          min-width:
+            ${FACE_WIDTH}px;
+
+          max-width:
+            ${FACE_WIDTH}px;
+
+
+          height:
+            ${FACE_HEIGHT}px;
+
+          min-height:
+            ${FACE_HEIGHT}px;
+
+          max-height:
+            ${FACE_HEIGHT}px;
+
+
+          margin:
+            0;
+
+          padding:
+            0;
+
+
+          overflow:
+            hidden;
+
+
+          border-radius:
+            13px;
+
+
+          isolation:
+            isolate;
+
 
           background:
-            linear-gradient(
-              90deg,
-              rgba(255,255,255,.28),
-              rgba(80,75,58,.26) 3px,
-              rgba(255,255,255,.12) 5px,
-              rgba(28,35,27,.88) 9px,
-              rgba(5,13,8,.98) 13px,
-              rgba(27,40,30,.96) calc(100% - 13px),
-              rgba(232,226,201,.32) calc(100% - 4px),
-              rgba(255,255,255,.26)
-            );
+            #080b08;
 
-          box-shadow:
-            0 18px 42px
-              rgba(0,0,0,.56),
-            inset 0 1px 0
-              rgba(255,255,255,.36);
 
           font-family:
             Georgia,
             "Times New Roman",
             serif;
 
-          color:
-            var(--ff3-ink);
-        }
-
-
-        .ff3-frame {
-          position: absolute;
-
-          inset: 5px;
-
-          display: flex;
-          flex-direction: column;
-
-          overflow: hidden;
-
-          border:
-            1px solid
-            rgba(210, 201, 166, .64);
-
-          border-radius: 9px;
-
-          background:
-            var(--ff3-green-0);
 
           box-shadow:
-            inset 0 0 0 2px
-              rgba(3, 10, 6, .85),
-            inset 0 0 0 3px
-              rgba(211, 199, 151, .24);
-        }
-
-
-        .ff3-frame::before {
-          content: "";
-
-          position: absolute;
-          inset: 3px;
-
-          z-index: 0;
-
-          pointer-events: none;
-
-          border:
-            1px solid
-            rgba(202, 188, 137, .18);
-
-          border-radius: 6px;
-        }
-
-
-        .ff3-frame::after {
-          content: "";
-
-          position: absolute;
-          inset: 0;
-
-          z-index: 0;
-
-          pointer-events: none;
-
-          opacity: .20;
-
-          background:
-            repeating-linear-gradient(
-              24deg,
-              transparent 0,
-              transparent 3px,
-              rgba(235, 228, 198, .14) 3px,
-              rgba(235, 228, 198, .14) 4px
-            ),
-            repeating-linear-gradient(
-              156deg,
-              transparent 0,
-              transparent 7px,
-              rgba(200, 188, 143, .10) 7px,
-              rgba(200, 188, 143, .10) 8px
+            0 18px 42px
+            rgba(
+              0,
+              0,
+              0,
+              .55
             );
         }
 
-
-        .ff3-frame > * {
-          position: relative;
-          z-index: 1;
-        }
-
-
-        .ff3-frame-line {
-          position: absolute;
-          pointer-events: none;
-          z-index: 2;
-        }
-
-
-        .ff3-frame-line-1 {
-          inset: 8px;
-
-          border:
-            1px solid
-            rgba(213, 200, 153, .22);
-
-          border-radius: 4px;
-        }
-
-
-        .ff3-frame-line-2 {
-          inset: 10px;
-
-          border:
-            1px solid
-            rgba(0, 0, 0, .38);
-
-          border-radius: 3px;
-        }
 
 
         /* =====================================================
-           CARTOUCHE
+           METAL SHELL
            ===================================================== */
 
-        .ff3-cartouche {
-          position: absolute;
 
-          top: -1px;
-          left: 50%;
+        .ff3-metal-shell {
+          position:
+            absolute;
 
-          z-index: 20;
+          inset:
+            0;
 
-          transform:
-            translateX(-50%);
 
-          width: 108px;
-          height: 27px;
+          overflow:
+            hidden;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
 
           border:
             1px solid
-            rgba(220, 209, 167, .62);
+            rgba(
+              243,
+              239,
+              220,
+              .72
+            );
+
 
           border-radius:
-            0 0 12px 12px;
+            13px;
+
 
           background:
             linear-gradient(
+              90deg,
+
+              #d9d4c6 0%,
+
+              #6d6b64 1.2%,
+
+              #f1ede0 2.2%,
+
+              #434944 3.3%,
+
+              #cbc6b7 4.2%,
+
+              #2d342e 5.3%,
+
+              #101912 7%,
+
+              #101912 93%,
+
+              #333b34 94.7%,
+
+              #cdc8b8 95.9%,
+
+              #5d5d58 97.1%,
+
+              #f0ecdf 98.2%,
+
+              #a9a69c 100%
+            );
+
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .65
+            ),
+
+            inset 0 -1px 0
+            rgba(
+              0,
+              0,
+              0,
+              .90
+            );
+        }
+
+
+        .ff3-ridge {
+          position:
+            absolute;
+
+
+          pointer-events:
+            none;
+
+
+          border-radius:
+            11px;
+        }
+
+
+        .ff3-ridge-a {
+          inset:
+            2px;
+
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .24
+            );
+        }
+
+
+        .ff3-ridge-b {
+          inset:
+            5px;
+
+
+          border:
+            1px solid
+            rgba(
+              20,
+              27,
+              22,
+              .85
+            );
+        }
+
+
+        .ff3-ridge-c {
+          inset:
+            7px;
+
+
+          border:
+            1px solid
+            rgba(
+              211,
+              201,
+              161,
+              .34
+            );
+        }
+
+
+
+        /* =====================================================
+           CERTIFICATE CHASSIS
+           ===================================================== */
+
+
+        .ff3-certificate {
+          position:
+            absolute;
+
+
+          inset:
+            8px;
+
+
+          z-index:
+            1;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          min-width:
+            0;
+
+
+          min-height:
+            0;
+
+
+          overflow:
+            hidden;
+
+
+          border:
+            1px solid
+            rgba(
+              214,
+              202,
+              157,
+              .62
+            );
+
+
+          border-radius:
+            7px;
+
+
+          background:
+            var(
+              --ff3-green-black
+            );
+
+
+          box-shadow:
+            inset 0 0 0 2px
+            rgba(
+              3,
+              9,
+              5,
+              .95
+            ),
+
+            inset 0 0 0 3px
+            rgba(
+              205,
+              191,
+              142,
+              .18
+            );
+        }
+
+
+        .ff3-certificate::before {
+          content:
+            "";
+
+
+          position:
+            absolute;
+
+
+          inset:
+            3px;
+
+
+          z-index:
+            1;
+
+
+          pointer-events:
+            none;
+
+
+          border:
+            1px solid
+            rgba(
+              205,
+              192,
+              143,
+              .18
+            );
+
+
+          border-radius:
+            4px;
+        }
+
+
+        .ff3-guilloche {
+          position:
+            absolute;
+
+
+          inset:
+            0;
+
+
+          z-index:
+            0;
+
+
+          pointer-events:
+            none;
+
+
+          opacity:
+            .35;
+
+
+          background-image:
+            repeating-radial-gradient(
+              ellipse at 0 0,
+
+              transparent 0,
+
+              transparent 5px,
+
+              rgba(
+                218,
+                204,
+                154,
+                .11
+              ) 5px,
+
+              rgba(
+                218,
+                204,
+                154,
+                .11
+              ) 6px
+            ),
+
+            repeating-linear-gradient(
+              37deg,
+
+              transparent 0,
+
+              transparent 3px,
+
+              rgba(
+                220,
+                207,
+                160,
+                .055
+              ) 3px,
+
+              rgba(
+                220,
+                207,
+                160,
+                .055
+              ) 4px
+            );
+
+
+          background-size:
+            26px 18px,
+            auto;
+        }
+
+
+        .ff3-certificate > * {
+          position:
+            relative;
+
+
+          z-index:
+            2;
+        }
+
+
+
+        /* =====================================================
+           DRAG ZONE / HEADER
+           ===================================================== */
+
+
+        .ff3-drag-zone {
+          flex:
+            0 0 auto;
+
+
+          cursor:
+            grab;
+        }
+
+
+        .ff3-drag-zone:active {
+          cursor:
+            grabbing;
+        }
+
+
+        .ff3-cartouche {
+          position:
+            absolute;
+
+
+          top:
+            -1px;
+
+
+          left:
+            50%;
+
+
+          z-index:
+            20;
+
+
+          width:
+            112px;
+
+
+          height:
+            29px;
+
+
+          transform:
+            translateX(
+              -50%
+            );
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          border:
+            1px solid
+            rgba(
+              232,
+              221,
+              180,
+              .66
+            );
+
+
+          border-top:
+            0;
+
+
+          border-radius:
+            0 0 13px 13px;
+
+
+          background:
+            radial-gradient(
+              ellipse at 50% 0%,
+
+              rgba(
+                255,
+                255,
+                255,
+                .13
+              ),
+
+              transparent 60%
+            ),
+
+            linear-gradient(
               180deg,
-              #1b3522,
+
+              #25472e,
+
               #0c1c11
             );
 
-          box-shadow:
-            0 2px 0
-              rgba(0,0,0,.58),
-            inset 0 -1px 0
-              rgba(255,255,255,.08);
-        }
 
-
-        .ff3-cartouche::before,
-        .ff3-cartouche::after {
-          content: "";
-
-          position: absolute;
-
-          top: 5px;
-
-          width: 19px;
-          height: 14px;
-
-          border-top:
-            1px solid
-            rgba(213, 201, 155, .42);
-        }
-
-
-        .ff3-cartouche::before {
-          left: -17px;
-
-          transform:
-            skewX(-25deg);
-        }
-
-
-        .ff3-cartouche::after {
-          right: -17px;
-
-          transform:
-            skewX(25deg);
-        }
-
-
-        .ff3-cartouche span {
           color:
-            #eee8d0;
+            #f1ead3;
+
 
           font-size:
             11px;
 
+
           font-weight:
             900;
+
 
           letter-spacing:
             1.45px;
 
+
           text-shadow:
             0 1px 0
             #000;
+
+
+          box-shadow:
+            0 2px 2px
+            rgba(
+              0,
+              0,
+              0,
+              .60
+            ),
+
+            inset 0 -1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
         }
 
 
-        /* =====================================================
-           DOCUMENT HEADER
-           ===================================================== */
-
         .ff3-document-head {
-          height: 88px;
-          flex: 0 0 88px;
+          height:
+            94px;
+
+
+          min-height:
+            94px;
+
 
           margin:
-            8px 8px 0;
+            7px 7px 0;
+
 
           padding:
-            14px 8px 6px;
+            15px 9px 6px;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           border:
             1px solid
-            rgba(58, 68, 44, .56);
+            rgba(
+              54,
+              67,
+              44,
+              .60
+            );
 
-          border-radius: 4px 4px 0 0;
 
-          background:
+          border-radius:
+            4px 4px 0 0;
+
+
+          background-image:
             radial-gradient(
-              circle at 50% 70%,
-              rgba(117, 101, 61, .07),
-              transparent 44%
+              ellipse at 50% 55%,
+
+              rgba(
+                72,
+                83,
+                57,
+                .06
+              ),
+
+              transparent 55%
             ),
+
             repeating-linear-gradient(
-              12deg,
-              rgba(53, 55, 39, .035) 0,
-              rgba(53, 55, 39, .035) 1px,
+              15deg,
+
+              rgba(
+                58,
+                61,
+                43,
+                .03
+              ) 0,
+
+              rgba(
+                58,
+                61,
+                43,
+                .03
+              ) 1px,
+
               transparent 1px,
-              transparent 5px
+
+              transparent 6px
             ),
-            var(--ff3-ivory-0);
+
+            repeating-linear-gradient(
+              -21deg,
+
+              transparent 0,
+
+              transparent 9px,
+
+              rgba(
+                104,
+                94,
+                59,
+                .028
+              ) 9px,
+
+              rgba(
+                104,
+                94,
+                59,
+                .028
+              ) 10px
+            ),
+
+            linear-gradient(
+              180deg,
+
+              #f6f0df,
+
+              #e9dfc4
+            );
+
 
           color:
-            var(--ff3-ink);
+            var(
+              --ff3-ink
+            );
+
 
           box-shadow:
             inset 0 0 0 2px
-              rgba(95, 84, 48, .08);
+            rgba(
+              100,
+              86,
+              47,
+              .08
+            ),
+
+            inset 0 0 18px
+            rgba(
+              89,
+              76,
+              41,
+              .055
+            );
         }
 
 
-        .ff3-head-kicker {
-          height: 12px;
+        .ff3-kicker {
+          height:
+            11px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            space-between;
+
 
           padding:
-            0 46px;
+            0 50px;
+
 
           color:
-            rgba(26, 38, 28, .78);
+            rgba(
+              25,
+              39,
+              28,
+              .78
+            );
+
 
           font-size:
-            5.5px;
+            5px;
+
 
           font-weight:
             900;
 
-          letter-spacing:
-            .6px;
-        }
-
-
-        .ff3-head-kicker strong {
-          font-weight:
-            900;
 
           letter-spacing:
             .55px;
         }
 
 
-        .ff3-identity-line {
-          height: 48px;
+        .ff3-title-row {
+          height:
+            53px;
 
-          display: grid;
+
+          display:
+            grid;
+
 
           grid-template-columns:
             42px
-            minmax(0, 1fr)
+            minmax(
+              0,
+              1fr
+            )
             42px;
 
-          align-items: center;
 
-          gap: 7px;
-        }
-
-
-        .ff3-machine-medallion {
-          width: 39px;
-          height: 39px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border:
-            1px solid
-            #304332;
-
-          border-radius:
-            50%;
-
-          background:
-            radial-gradient(
-              circle,
-              #e5dcc2 0 47%,
-              #879078 48% 51%,
-              #173021 52% 58%,
-              #d7ccb0 59% 63%,
-              #173021 64%
-            );
-
-          box-shadow:
-            inset 0 0 0 2px
-              rgba(255,255,255,.18);
-        }
+          align-items:
+            center;
 
 
-        .ff3-machine-medallion span {
-          color:
-            #163020;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            .8px;
+          gap:
+            6px;
         }
 
 
         .ff3-object-copy {
-          min-width: 0;
+          min-width:
+            0;
 
-          display: flex;
-          flex-direction: column;
 
-          align-items: center;
+          display:
+            flex;
 
-          gap: 2px;
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            3px;
         }
 
 
         .ff3-object-copy strong {
-          width: 100%;
+          width:
+            100%;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            #17261c;
+            #17271c;
+
 
           font-size:
-            15px;
+            15.4px;
+
 
           font-weight:
             900;
 
+
           line-height:
-            1;
+            .98;
+
 
           letter-spacing:
-            -.25px;
+            -.30px;
+
 
           text-align:
             center;
 
+
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
@@ -2204,369 +3264,1164 @@ export default function IXIAosFinancialFace3({
 
 
         .ff3-object-copy span {
-          width: 100%;
+          width:
+            100%;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            rgba(24, 38, 28, .76);
+            rgba(
+              24,
+              38,
+              28,
+              .70
+            );
+
 
           font-size:
-            5.4px;
+            5.2px;
+
 
           font-weight:
             900;
 
+
           letter-spacing:
-            .9px;
+            .85px;
+
 
           text-align:
             center;
 
+
           text-overflow:
             ellipsis;
 
-          white-space:
-            nowrap;
 
           text-transform:
             uppercase;
+
+
+          white-space:
+            nowrap;
         }
 
 
         .ff3-id-line {
-          height: 13px;
+          height:
+            13px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
 
-          gap: 5px;
+          display:
+            flex;
 
-          overflow: hidden;
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            5px;
+
+
+          overflow:
+            hidden;
+
 
           color:
-            rgba(24, 39, 28, .78);
+            rgba(
+              23,
+              39,
+              28,
+              .72
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            4.5px;
+            4.2px;
+
 
           font-weight:
             900;
 
+
           letter-spacing:
-            .35px;
+            .28px;
+
 
           white-space:
             nowrap;
         }
 
-
-        .ff3-id-line b {
-          font-size:
-            4px;
-        }
 
 
         /* =====================================================
            SEALS
            ===================================================== */
 
+
         .ff3-seal {
-          width: 39px;
-          height: 39px;
+          width:
+            40px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
 
-          flex: 0 0 auto;
+          height:
+            40px;
+
+
+          flex:
+            0 0 40px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           border:
             1px solid
-            #233b28;
+            #243d29;
+
 
           border-radius:
             50%;
+
 
           background:
             conic-gradient(
               from 0deg,
-              #1e3d27,
+
+              #213d29,
+
               #d3c79d,
-              #142d1c,
-              #d3c79d,
-              #1e3d27
+
+              #17301e,
+
+              #9f9160,
+
+              #1d3a26,
+
+              #d8cca1,
+
+              #213d29
             );
+
 
           box-shadow:
             inset 0 0 0 2px
-              #112417,
+            #102316,
+
             inset 0 0 0 3px
-              rgba(239,230,194,.55),
-            0 1px 2px
-              rgba(0,0,0,.45);
+            rgba(
+              239,
+              230,
+              194,
+              .52
+            ),
+
+            0 2px 3px
+            rgba(
+              0,
+              0,
+              0,
+              .36
+            );
         }
 
 
-        .ff3-seal.small {
-          width: 38px;
-          height: 38px;
-        }
+        .ff3-seal-ring {
+          width:
+            29px;
 
 
-        .ff3-seal-inner {
-          width: 30px;
-          height: 30px;
+          height:
+            29px;
 
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           border:
             1px solid
-            rgba(236, 226, 188, .52);
+            rgba(
+              236,
+              226,
+              188,
+              .55
+            );
+
 
           border-radius:
             50%;
 
+
           background:
             radial-gradient(
-              circle,
-              #29472e,
-              #0c1b10 70%
+              circle at 35% 30%,
+
+              #35573a,
+
+              #102216 68%
             );
 
+
           color:
-            #e7dec2;
+            #ede4c6;
         }
 
 
-        .ff3-seal-inner span {
+        .ff3-seal-ring strong {
           font-size:
-            10px;
+            9px;
+
 
           font-weight:
             900;
+
 
           line-height:
             1;
         }
 
 
-        .ff3-seal-inner small {
+        .ff3-seal-ring span {
           margin-top:
             2px;
+
+
+          color:
+            rgba(
+              237,
+              228,
+              198,
+              .70
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.6px;
+            3px;
+
 
           font-weight:
             900;
+
 
           line-height:
             1;
         }
 
 
+
         /* =====================================================
-           PRIMARY GREEN BAND
+           PRIMARY ACQUISITION BAND
            ===================================================== */
 
+
         .ff3-primary-band {
-          height: 46px;
-          flex: 0 0 46px;
+          height:
+            49px;
+
+
+          min-height:
+            49px;
+
 
           margin:
-            0 8px;
+            0 7px;
 
-          display: grid;
+
+          display:
+            grid;
+
 
           grid-template-columns:
             repeat(
               3,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
+
+
+          overflow:
+            hidden;
+
 
           border-left:
             1px solid
-            rgba(220, 208, 164, .20);
+            rgba(
+              221,
+              210,
+              167,
+              .20
+            );
+
 
           border-right:
             1px solid
-            rgba(220, 208, 164, .20);
+            rgba(
+              221,
+              210,
+              167,
+              .20
+            );
+
 
           border-bottom:
             1px solid
-            rgba(220, 208, 164, .34);
-
-          background:
-            linear-gradient(
-              180deg,
-              #183522,
-              #0b1d11
+            rgba(
+              221,
+              210,
+              167,
+              .38
             );
 
+
+          background:
+            repeating-linear-gradient(
+              28deg,
+
+              transparent 0,
+
+              transparent 4px,
+
+              rgba(
+                218,
+                205,
+                158,
+                .032
+              ) 4px,
+
+              rgba(
+                218,
+                205,
+                158,
+                .032
+              ) 5px
+            ),
+
+            linear-gradient(
+              180deg,
+
+              #1b3b25,
+
+              #0a1b10
+            );
+
+
           color:
-            #ece4ca;
+            #efe6cb;
         }
 
 
-        .ff3-primary-stat {
-          position: relative;
+        .ff3-primary-band > div {
+          min-width:
+            0;
 
-          min-width: 0;
 
-          display: flex;
-          flex-direction: column;
+          display:
+            flex;
 
-          align-items: center;
-          justify-content: center;
 
-          gap: 4px;
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            5px;
+
 
           padding:
             5px 6px;
 
+
           border-right:
             1px solid
-            rgba(227, 215, 174, .16);
+            rgba(
+              230,
+              218,
+              176,
+              .16
+            );
         }
 
 
-        .ff3-primary-stat:last-child {
-          border-right: 0;
+        .ff3-primary-band > div:last-child {
+          border-right:
+            0;
         }
 
 
-        .ff3-primary-stat span {
+        .ff3-primary-band span {
           color:
-            rgba(232, 225, 199, .70);
+            rgba(
+              236,
+              227,
+              197,
+              .70
+            );
+
 
           font-size:
-            4.6px;
+            4.4px;
+
 
           font-weight:
             900;
+
 
           letter-spacing:
-            .35px;
+            .32px;
         }
 
 
-        .ff3-primary-stat strong {
-          width: 100%;
+        .ff3-primary-band strong {
+          width:
+            100%;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            #f4edd7;
+            #f7efd6;
+
 
           font-size:
-            8.3px;
+            8.2px;
+
 
           font-weight:
             900;
 
-          line-height:
-            1;
 
           text-align:
             center;
 
+
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
         }
 
 
+
         /* =====================================================
-           PAPER SYSTEM
+           FIXED OWNER INTELLIGENCE
            ===================================================== */
 
-        .ff3-paper-block {
-          border:
-            1px solid
-            rgba(65, 74, 49, .42);
 
-          background:
-            repeating-linear-gradient(
-              17deg,
-              rgba(74, 68, 47, .024) 0,
-              rgba(74, 68, 47, .024) 1px,
-              transparent 1px,
-              transparent 5px
-            ),
-            linear-gradient(
-              180deg,
-              #f4efdf,
-              #e8dfc7
-            );
+        .ff3-hero-intelligence {
+          flex:
+            0 0 auto;
 
-          box-shadow:
-            inset 0 0 0 1px
-              rgba(255,255,255,.36),
-            inset 0 0 10px
-              rgba(99, 87, 51, .055);
-        }
-
-
-        .ff3-identity-grid {
-          height: 47px;
-          flex: 0 0 47px;
 
           margin:
-            5px 10px 0;
+            5px 7px 0;
 
-          display: grid;
 
-          grid-template-columns:
-            1fr 1fr;
+          overflow:
+            hidden;
 
-          grid-template-rows:
-            1fr 1fr;
+
+          border:
+            1px solid
+            rgba(
+              210,
+              198,
+              149,
+              .30
+            );
+
 
           border-radius:
             4px;
 
-          overflow: hidden;
+
+          background:
+            radial-gradient(
+              ellipse at 50% 0%,
+
+              rgba(
+                101,
+                84,
+                44,
+                .045
+              ),
+
+              transparent 60%
+            ),
+
+            repeating-linear-gradient(
+              18deg,
+
+              rgba(
+                70,
+                68,
+                47,
+                .022
+              ) 0,
+
+              rgba(
+                70,
+                68,
+                47,
+                .022
+              ) 1px,
+
+              transparent 1px,
+
+              transparent 6px
+            ),
+
+            linear-gradient(
+              180deg,
+
+              #f4efdf,
+
+              #e7dcc1
+            );
+
+
+          color:
+            var(
+              --ff3-ink
+            );
+
+
+          box-shadow:
+            inset 0 0 0 1px
+            rgba(
+              255,
+              255,
+              255,
+              .40
+            );
+        }
+
+
+        .ff3-hero-row {
+          display:
+            grid;
+        }
+
+
+        .ff3-hero-money {
+          grid-template-columns:
+            1fr 1fr;
+
+
+          min-height:
+            40px;
+        }
+
+
+        .ff3-hero-usage {
+          grid-template-columns:
+            repeat(
+              4,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+
+          min-height:
+            30px;
+
+
+          border-top:
+            1px solid
+            rgba(
+              43,
+              58,
+              44,
+              .15
+            );
+        }
+
+
+        .ff3-hero-time {
+          grid-template-columns:
+            1fr 1fr;
+
+
+          min-height:
+            29px;
+
+
+          border-top:
+            1px solid
+            rgba(
+              43,
+              58,
+              44,
+              .15
+            );
+        }
+
+
+        .ff3-hero-cell {
+          min-width:
+            0;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            3px;
+
+
+          padding:
+            4px 5px;
+
+
+          border-right:
+            1px solid
+            rgba(
+              43,
+              58,
+              44,
+              .15
+            );
+        }
+
+
+        .ff3-hero-row
+        .ff3-hero-cell:last-child {
+          border-right:
+            0;
+        }
+
+
+        .ff3-hero-cell span {
+          width:
+            100%;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            rgba(
+              22,
+              38,
+              27,
+              .62
+            );
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            3.8px;
+
+
+          font-weight:
+            900;
+
+
+          letter-spacing:
+            .22px;
+
+
+          text-align:
+            center;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
+        }
+
+
+        .ff3-hero-money strong {
+          color:
+            #15371f;
+
+
+          font-size:
+            9.6px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+        }
+
+
+        .ff3-hero-usage strong,
+        .ff3-hero-time strong {
+          width:
+            100%;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            #18301f;
+
+
+          font-size:
+            5.6px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          text-align:
+            center;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
+        }
+
+
+
+        /* =====================================================
+           SCROLL BODY
+           ===================================================== */
+
+
+        .ff3-scroll-body {
+          min-width:
+            0;
+
+
+          min-height:
+            0;
+
+
+          flex:
+            1 1 auto;
+
+
+          margin:
+            5px 5px 0 7px;
+
+
+          padding:
+            0 4px 12px 0;
+
+
+          overflow-x:
+            hidden;
+
+
+          overflow-y:
+            auto;
+
+
+          overscroll-behavior:
+            contain;
+
+
+          scrollbar-width:
+            thin;
+
+
+          scrollbar-color:
+            #b9a667
+            #102216;
+
+
+          outline:
+            none;
+        }
+
+
+        .ff3-scroll-body:focus-visible {
+          box-shadow:
+            inset 0 0 0 1px
+            rgba(
+              214,
+              199,
+              144,
+              .28
+            );
+        }
+
+
+        .ff3-scroll-body::-webkit-scrollbar {
+          width:
+            4px;
+        }
+
+
+        .ff3-scroll-body::-webkit-scrollbar-track {
+          border-radius:
+            999px;
+
+
+          background:
+            #102216;
+        }
+
+
+        .ff3-scroll-body::-webkit-scrollbar-thumb {
+          border:
+            1px solid
+            rgba(
+              51,
+              44,
+              28,
+              .55
+            );
+
+
+          border-radius:
+            999px;
+
+
+          background:
+            linear-gradient(
+              180deg,
+
+              #ded19a,
+
+              #a28d52 52%,
+
+              #6e5e37
+            );
+
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .28
+            );
+        }
+
+
+        .ff3-scroll-body::-webkit-scrollbar-thumb:hover {
+          background:
+            linear-gradient(
+              180deg,
+
+              #eee2aa,
+
+              #b49d5e 52%,
+
+              #806c3f
+            );
+        }
+
+
+
+        /* =====================================================
+           PAPER CARDS
+           ===================================================== */
+
+
+        .ff3-paper-card {
+          position:
+            relative;
+
+
+          width:
+            100%;
+
+
+          margin:
+            0 0 6px;
+
+
+          padding:
+            7px 8px;
+
+
+          overflow:
+            hidden;
+
+
+          border:
+            1px solid
+            rgba(
+              54,
+              68,
+              44,
+              .50
+            );
+
+
+          border-radius:
+            4px;
+
+
+          background:
+            radial-gradient(
+              ellipse at 20% 15%,
+
+              rgba(
+                111,
+                92,
+                51,
+                .055
+              ),
+
+              transparent 38%
+            ),
+
+            repeating-linear-gradient(
+              15deg,
+
+              rgba(
+                73,
+                72,
+                48,
+                .025
+              ) 0,
+
+              rgba(
+                73,
+                72,
+                48,
+                .025
+              ) 1px,
+
+              transparent 1px,
+
+              transparent 6px
+            ),
+
+            linear-gradient(
+              180deg,
+
+              #f5efdd,
+
+              #e6dcc2
+            );
+
+
+          color:
+            var(
+              --ff3-ink
+            );
+
+
+          box-shadow:
+            inset 0 0 0 1px
+            rgba(
+              255,
+              255,
+              255,
+              .44
+            ),
+
+            inset 0 0 14px
+            rgba(
+              80,
+              67,
+              34,
+              .055
+            ),
+
+            0 1px 0
+            rgba(
+              0,
+              0,
+              0,
+              .20
+            );
+        }
+
+
+        .ff3-paper-card::after {
+          content:
+            "";
+
+
+          position:
+            absolute;
+
+
+          inset:
+            3px;
+
+
+          pointer-events:
+            none;
+
+
+          border:
+            1px solid
+            rgba(
+              73,
+              78,
+              53,
+              .075
+            );
+
+
+          border-radius:
+            2px;
+        }
+
+
+
+        /* =====================================================
+           IDENTITY DETAIL
+           ===================================================== */
+
+
+        .ff3-identity-grid {
+          display:
+            grid;
+
+
+          grid-template-columns:
+            1fr 1fr;
+
+
+          padding:
+            0;
         }
 
 
         .ff3-identity-grid > div {
-          min-width: 0;
+          min-width:
+            0;
 
-          display: flex;
-          flex-direction: column;
 
-          align-items: center;
-          justify-content: center;
+          min-height:
+            37px;
 
-          gap: 2px;
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            3px;
+
 
           padding:
-            3px 6px;
+            5px 7px;
+
 
           border-right:
             1px solid
-            rgba(53, 66, 46, .18);
+            rgba(
+              44,
+              61,
+              43,
+              .15
+            );
+
 
           border-bottom:
             1px solid
-            rgba(53, 66, 46, .18);
+            rgba(
+              44,
+              61,
+              43,
+              .15
+            );
         }
 
 
@@ -2576,8 +4431,7 @@ export default function IXIAosFinancialFace3({
         }
 
 
-        .ff3-identity-grid > div:nth-child(3),
-        .ff3-identity-grid > div:nth-child(4) {
+        .ff3-identity-grid > div:nth-last-child(-n+2) {
           border-bottom:
             0;
         }
@@ -2585,18 +4439,27 @@ export default function IXIAosFinancialFace3({
 
         .ff3-identity-grid span {
           color:
-            rgba(22, 38, 27, .65);
+            rgba(
+              22,
+              38,
+              27,
+              .62
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            4px;
+            4.2px;
+
 
           font-weight:
             900;
+
 
           letter-spacing:
             .28px;
@@ -2604,166 +4467,155 @@ export default function IXIAosFinancialFace3({
 
 
         .ff3-identity-grid strong {
-          width: 100%;
+          width:
+            100%;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            #18291d;
+            #182b1e;
+
 
           font-size:
-            6px;
+            6.8px;
+
 
           font-weight:
             900;
 
-          line-height:
-            1;
 
           text-align:
             center;
 
+
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
         }
 
 
+
         /* =====================================================
-           BODY
+           SECTION SYSTEM
            ===================================================== */
 
-        .ff3-body-columns {
-          height: 142px;
-          flex: 0 0 142px;
+
+        .ff3-section-title {
+          min-height:
+            16px;
+
 
           margin:
-            5px 10px 0;
+            0 0 5px;
 
-          display: grid;
-
-          grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-          gap: 5px;
-        }
-
-
-        .ff3-body-column {
-          min-width: 0;
-          min-height: 0;
-
-          display: flex;
-          flex-direction: column;
-
-          gap: 4px;
-        }
-
-
-        .ff3-section {
-          min-width: 0;
 
           padding:
-            5px 6px;
-
-          border-radius:
-            4px;
-
-          overflow: hidden;
-        }
-
-
-        .ff3-section h3,
-        .ff3-activity h3 {
-          margin:
             0 0 4px;
 
-          padding:
-            0 0 3px;
 
           border-bottom:
             1px solid
-            rgba(32, 48, 35, .18);
+            rgba(
+              33,
+              50,
+              36,
+              .20
+            );
+
 
           color:
-            #1b2f21;
+            #1a3020;
+
 
           font-size:
-            5.5px;
+            6.5px;
+
 
           font-weight:
             900;
 
-          line-height:
-            1;
 
           letter-spacing:
-            .45px;
+            .42px;
+
 
           text-align:
             center;
         }
 
 
-        .ff3-body-column
-        .ff3-section:first-child {
-          flex:
-            0 0 auto;
-        }
-
-
-        .ff3-body-column
-        .ff3-section:last-child {
-          flex:
-            1 1 auto;
-        }
-
-
         .ff3-ledger-row {
-          min-width: 0;
+          min-width:
+            0;
 
-          min-height: 11px;
 
-          display: grid;
+          min-height:
+            17px;
+
+
+          display:
+            grid;
+
 
           grid-template-columns:
             auto
-            minmax(8px, 1fr)
+            minmax(
+              10px,
+              1fr
+            )
             auto;
 
-          align-items: center;
 
-          gap: 3px;
+          align-items:
+            center;
+
+
+          gap:
+            5px;
         }
 
 
         .ff3-ledger-row > span {
-          min-width: 0;
+          min-width:
+            0;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            rgba(24, 38, 28, .80);
+            rgba(
+              24,
+              38,
+              28,
+              .84
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.9px;
+            5.1px;
+
 
           font-weight:
             900;
 
-          line-height:
-            1;
 
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
@@ -2771,18 +4623,34 @@ export default function IXIAosFinancialFace3({
 
 
         .ff3-ledger-row > i {
-          min-width: 0;
+          min-width:
+            0;
 
-          height: 1px;
 
-          opacity: .42;
+          height:
+            1px;
+
 
           background:
             repeating-linear-gradient(
               90deg,
-              #425244 0,
-              #425244 1px,
+
+              rgba(
+                46,
+                62,
+                47,
+                .56
+              ) 0,
+
+              rgba(
+                46,
+                62,
+                47,
+                .56
+              ) 1px,
+
               transparent 1px,
+
               transparent 3px
             );
         }
@@ -2790,27 +4658,32 @@ export default function IXIAosFinancialFace3({
 
         .ff3-ledger-row > strong {
           max-width:
-            76px;
+            120px;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           color:
-            #18291d;
+            #162a1c;
+
 
           font-size:
-            4.4px;
+            5.9px;
+
 
           font-weight:
             900;
 
-          line-height:
-            1;
 
           text-align:
             right;
 
+
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
@@ -2819,575 +4692,545 @@ export default function IXIAosFinancialFace3({
 
         .ff3-ledger-row.strong {
           min-height:
-            14px;
+            20px;
+
 
           margin-top:
-            2px;
+            3px;
+
 
           padding-top:
-            2px;
+            3px;
+
 
           border-top:
             1px solid
-            rgba(27, 45, 32, .25);
+            rgba(
+              29,
+              47,
+              33,
+              .25
+            );
         }
 
 
         .ff3-ledger-row.strong > span,
         .ff3-ledger-row.strong > strong {
           color:
-            #173820;
+            #174326;
+
 
           font-size:
-            4.9px;
+            6.5px;
         }
 
 
-        .ff3-ledger-row.negative > strong,
-        .ff3-position-card.negative strong {
+        .ff3-ledger-row.positive > strong {
           color:
-            #802b21;
+            #17542d;
         }
 
 
-        .ff3-ledger-row.positive > strong,
-        .ff3-position-card.positive strong {
+        .ff3-ledger-row.negative > strong {
           color:
-            #174d2c;
+            #8c2f22;
         }
+
+
+
+        /* =====================================================
+           OWNERSHIP
+           ===================================================== */
 
 
         .ff3-ownership-banner {
-          height: 17px;
+          height:
+            28px;
 
-          margin-bottom:
-            4px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          margin:
+            1px 0 6px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           border:
             1px solid
-            rgba(19, 50, 29, .44);
+            rgba(
+              27,
+              63,
+              36,
+              .55
+            );
+
 
           border-radius:
             3px;
 
+
           background:
+            repeating-linear-gradient(
+              30deg,
+
+              transparent 0,
+
+              transparent 4px,
+
+              rgba(
+                232,
+                220,
+                177,
+                .032
+              ) 4px,
+
+              rgba(
+                232,
+                220,
+                177,
+                .032
+              ) 5px
+            ),
+
             linear-gradient(
               180deg,
-              #2a5334,
-              #17351f
+
+              #315b3a,
+
+              #16351f
             );
 
+
           color:
-            #efe7cd;
+            #f0e7cd;
+
 
           font-size:
-            5.4px;
+            7.4px;
+
 
           font-weight:
             900;
 
+
           letter-spacing:
-            .65px;
+            .7px;
         }
 
 
-        .ff3-paid-note {
+        .ff3-paid-copy {
           height:
-            22px;
+            24px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           color:
-            rgba(25, 41, 30, .56);
+            rgba(
+              24,
+              39,
+              28,
+              .58
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.6px;
+            4.5px;
+
 
           font-weight:
             900;
+
 
           letter-spacing:
             .25px;
 
-          text-align:
-            center;
-        }
-
-
-        /* =====================================================
-           POSITION
-           ===================================================== */
-
-        .ff3-position-row {
-          height: 43px;
-          flex: 0 0 43px;
-
-          margin:
-            5px 10px 0;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              3,
-              minmax(0, 1fr)
-            );
-
-          gap: 4px;
-        }
-
-
-        .ff3-position-card {
-          min-width: 0;
-
-          display: flex;
-          flex-direction: column;
-
-          align-items: center;
-          justify-content: center;
-
-          gap: 3px;
-
-          padding:
-            4px 5px;
-
-          border-radius:
-            4px;
-        }
-
-
-        .ff3-position-card span {
-          color:
-            rgba(22, 38, 27, .68);
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-          font-size:
-            4px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            .25px;
-        }
-
-
-        .ff3-position-card strong {
-          width: 100%;
-
-          overflow: hidden;
-
-          color:
-            #162a1c;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-
-          line-height:
-            1;
 
           text-align:
             center;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
         }
 
-
-        .ff3-position-result {
-          border-color:
-            rgba(47, 74, 49, .50);
-        }
-
-
-        /* =====================================================
-           OWNERSHIP METRICS
-           ===================================================== */
-
-        .ff3-metrics-strip {
-          height: 29px;
-          flex: 0 0 29px;
-
-          margin:
-            5px 10px 0;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              4,
-              minmax(0, 1fr)
-            );
-
-          overflow: hidden;
-
-          border:
-            1px solid
-            rgba(210, 199, 153, .26);
-
-          border-radius:
-            4px;
-
-          background:
-            linear-gradient(
-              180deg,
-              #1a3823,
-              #0c1e12
-            );
-
-          color:
-            #ece4ca;
-        }
-
-
-        .ff3-metrics-strip > div {
-          min-width: 0;
-
-          display: flex;
-          flex-direction: column;
-
-          align-items: center;
-          justify-content: center;
-
-          gap: 2px;
-
-          padding:
-            3px 3px;
-
-          border-right:
-            1px solid
-            rgba(226, 215, 174, .14);
-        }
-
-
-        .ff3-metrics-strip > div:last-child {
-          border-right: 0;
-        }
-
-
-        .ff3-metrics-strip span {
-          width: 100%;
-
-          overflow: hidden;
-
-          color:
-            rgba(229, 220, 190, .62);
-
-          font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-          font-size:
-            3.4px;
-
-          font-weight:
-            900;
-
-          line-height:
-            1;
-
-          text-align:
-            center;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
-        }
-
-
-        .ff3-metrics-strip strong {
-          width: 100%;
-
-          overflow: hidden;
-
-          color:
-            #f2ead2;
-
-          font-size:
-            4.8px;
-
-          font-weight:
-            900;
-
-          line-height:
-            1;
-
-          text-align:
-            center;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
-        }
 
 
         /* =====================================================
            ACTIVITY
            ===================================================== */
 
-        .ff3-activity {
-          height: 62px;
-          flex: 0 0 62px;
-
-          margin:
-            5px 10px 0;
-
-          padding:
-            4px 5px;
-
-          border-radius:
-            4px;
-
-          overflow:
-            hidden;
-        }
-
-
-        .ff3-activity h3 {
-          margin-bottom:
-            3px;
-
-          font-size:
-            5px;
-        }
-
 
         .ff3-activity-head,
         .ff3-activity-row {
-          display: grid;
+          display:
+            grid;
+
 
           grid-template-columns:
-            48px
-            36px
-            minmax(0, 1fr)
-            48px;
+            58px
+            42px
+            minmax(
+              0,
+              1fr
+            )
+            56px;
 
-          align-items: center;
+
+          align-items:
+            center;
         }
 
 
         .ff3-activity-head {
           height:
-            10px;
+            18px;
 
-          padding:
-            0 4px;
+
+          border:
+            1px solid
+            rgba(
+              30,
+              55,
+              34,
+              .40
+            );
+
 
           background:
             linear-gradient(
               180deg,
-              #27452d,
-              #17321f
+
+              #315538,
+
+              #173521
             );
 
+
           color:
-            #eee6cb;
+            #f0e8ce;
         }
 
 
         .ff3-activity-head span {
-          overflow: hidden;
+          overflow:
+            hidden;
+
+
+          padding:
+            0 3px;
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.2px;
+            4px;
+
 
           font-weight:
             900;
 
+
           text-align:
             center;
 
+
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
         }
 
 
-        .ff3-activity-body {
-          height:
-            37px;
-
-          overflow:
-            hidden;
-        }
-
-
         .ff3-activity-row {
-          height:
-            12px;
+          min-height:
+            19px;
 
-          padding:
-            0 4px;
 
           border-bottom:
             1px solid
-            rgba(31, 50, 35, .12);
-
-          color:
-            #192b1e;
-        }
-
-
-        .ff3-activity-row:last-child {
-          border-bottom:
-            0;
+            rgba(
+              35,
+              52,
+              39,
+              .13
+            );
         }
 
 
         .ff3-activity-row span,
         .ff3-activity-row strong,
         .ff3-activity-row em {
-          min-width: 0;
+          min-width:
+            0;
 
-          overflow: hidden;
+
+          overflow:
+            hidden;
+
 
           padding:
-            0 2px;
+            0 3px;
+
+
+          color:
+            #192d1f;
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.4px;
+            4.4px;
+
 
           font-style:
             normal;
 
-          line-height:
-            1;
 
           text-overflow:
             ellipsis;
+
 
           white-space:
             nowrap;
         }
 
 
-        .ff3-activity-row span:nth-child(1),
-        .ff3-activity-row span:nth-child(2),
+        .ff3-activity-row strong,
+        .ff3-activity-row em {
+          font-weight:
+            900;
+        }
+
+
         .ff3-activity-row em {
           text-align:
-            center;
-        }
-
-
-        .ff3-activity-row strong {
-          font-weight:
-            900;
-        }
-
-
-        .ff3-activity-row em {
-          font-weight:
-            900;
+            right;
         }
 
 
         .ff3-empty-activity {
           height:
-            37px;
+            42px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           color:
-            rgba(24, 40, 28, .45);
+            rgba(
+              25,
+              40,
+              29,
+              .45
+            );
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.8px;
+            4.5px;
+
 
           font-weight:
             900;
 
+
           letter-spacing:
-            .3px;
+            .28px;
         }
+
+
+        .ff3-scroll-end {
+          height:
+            28px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            space-between;
+
+
+          padding:
+            0 8px;
+
+
+          color:
+            rgba(
+              223,
+              213,
+              176,
+              .50
+            );
+
+
+          font-size:
+            4px;
+
+
+          font-weight:
+            900;
+
+
+          letter-spacing:
+            .45px;
+        }
+
+
+        .ff3-scroll-end strong {
+          color:
+            rgba(
+              232,
+              222,
+              185,
+              .70
+            );
+        }
+
 
 
         /* =====================================================
            FOOTER
            ===================================================== */
 
+
         .ff3-footer {
-          height: 46px;
-          flex: 0 0 46px;
+          height:
+            48px;
+
+
+          min-height:
+            48px;
+
+
+          flex:
+            0 0 48px;
+
 
           margin:
-            5px 8px 0;
+            0 7px;
 
-          display: grid;
+
+          display:
+            grid;
+
 
           grid-template-columns:
-            minmax(0, 1fr)
-            42px
-            107px;
+            minmax(
+              0,
+              1fr
+            )
+            40px
+            106px;
 
-          align-items: center;
 
-          gap: 4px;
+          align-items:
+            center;
+
+
+          gap:
+            4px;
+
 
           padding:
             4px 5px;
 
+
           border:
             1px solid
-            rgba(209, 197, 147, .30);
+            rgba(
+              210,
+              198,
+              149,
+              .31
+            );
+
 
           border-radius:
             4px;
 
+
           background:
+            repeating-linear-gradient(
+              30deg,
+
+              transparent 0,
+
+              transparent 4px,
+
+              rgba(
+                220,
+                207,
+                158,
+                .035
+              ) 4px,
+
+              rgba(
+                220,
+                207,
+                158,
+                .035
+              ) 5px
+            ),
+
             linear-gradient(
               180deg,
-              #17321f,
+
+              #193822,
+
               #07150c
             );
-
-          box-shadow:
-            inset 0 1px 0
-            rgba(255,255,255,.045);
         }
 
 
@@ -3395,52 +5238,69 @@ export default function IXIAosFinancialFace3({
           appearance:
             none;
 
+
           border:
             1px solid
-            rgba(217, 205, 162, .30);
+            rgba(
+              218,
+              205,
+              160,
+              .34
+            );
+
 
           border-radius:
             4px;
 
+
           outline:
             none;
+
 
           background:
             linear-gradient(
               180deg,
-              #1e3e28,
+
+              #25482d,
+
               #0b1d11
             );
 
+
           color:
-            #ede4ca;
+            #eee5cb;
+
 
           cursor:
             pointer;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
         }
 
 
         .ff3-footer button:hover:not(:disabled) {
           border-color:
-            rgba(238, 226, 179, .64);
+            rgba(
+              238,
+              226,
+              179,
+              .66
+            );
+
 
           background:
             linear-gradient(
               180deg,
-              #2d5235,
-              #10281a
+
+              #355d3b,
+
+              #10291a
             );
         }
 
 
         .ff3-footer button:disabled {
           opacity:
-            .38;
+            .35;
+
 
           cursor:
             default;
@@ -3449,175 +5309,233 @@ export default function IXIAosFinancialFace3({
 
         .ff3-workbook {
           height:
-            34px;
+            36px;
 
-          display: flex;
-          flex-direction: column;
 
-          align-items: center;
-          justify-content: center;
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
 
           gap:
             3px;
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
         }
 
 
         .ff3-workbook span {
           font-size:
-            5.4px;
+            5.3px;
+
 
           font-weight:
             900;
+
+
+          letter-spacing:
+            .20px;
+        }
+
+
+        .ff3-workbook small {
+          color:
+            rgba(
+              232,
+              223,
+              193,
+              .60
+            );
+
+
+          font-size:
+            3.5px;
+
+
+          font-weight:
+            900;
+
 
           letter-spacing:
             .25px;
         }
 
 
-        .ff3-workbook small {
-          color:
-            rgba(232, 223, 193, .60);
-
-          font-size:
-            3.5px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            .35px;
-        }
-
-
-        .ff3-quick-actions {
+        .ff3-actions {
           height:
-            34px;
+            36px;
 
-          display: grid;
+
+          display:
+            grid;
+
 
           grid-template-columns:
             repeat(
               5,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
+
 
           gap:
             2px;
         }
 
 
-        .ff3-quick-actions button {
+        .ff3-actions button {
           min-width:
             0;
 
+
           height:
-            34px;
+            36px;
+
 
           padding:
             0 2px;
+
 
           font-family:
             Arial,
             Helvetica,
             sans-serif;
 
+
           font-size:
-            3.8px;
+            3.9px;
+
 
           font-weight:
             900;
         }
 
 
-        .ff3-quick-actions.compact {
-          gap:
-            1px;
-        }
-
-
-        .ff3-quick-actions .more {
+        .ff3-actions button.more {
           font-size:
             7px;
-
-          letter-spacing:
-            1px;
         }
 
 
-        .ff3-bottom-signature {
-          height: 16px;
-          flex: 0 0 16px;
+        .ff3-bottom-mark {
+          height:
+            18px;
+
+
+          min-height:
+            18px;
+
+
+          flex:
+            0 0 18px;
+
 
           margin:
-            0 8px;
+            0 7px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            space-between;
+
 
           padding:
             0 8px;
 
+
           color:
-            rgba(225, 215, 178, .52);
+            rgba(
+              225,
+              214,
+              177,
+              .52
+            );
+
 
           font-size:
-            3.8px;
+            3.7px;
+
 
           font-weight:
             900;
 
+
           letter-spacing:
-            .65px;
+            .50px;
         }
 
 
-        .ff3-bottom-signature strong {
+        .ff3-bottom-mark strong {
           color:
-            rgba(239, 229, 192, .78);
+            rgba(
+              240,
+              230,
+              192,
+              .82
+            );
+
 
           font-size:
             3.6px;
         }
 
 
+
         /* =====================================================
            HARD CONTAINMENT
            ===================================================== */
 
-        .ixi-aos-financial-face3-shell
-        button,
-        .ixi-aos-financial-face3-shell
-        input,
-        .ixi-aos-financial-face3-shell
-        select,
-        .ixi-aos-financial-face3-shell
-        textarea {
-          font-synthesis:
-            none;
-        }
-
 
         .ixi-aos-financial-face3-shell
         strong,
+
         .ixi-aos-financial-face3-shell
         span,
+
         .ixi-aos-financial-face3-shell
-        small,
+        em,
+
         .ixi-aos-financial-face3-shell
-        em {
+        small {
           margin:
             0;
+
 
           padding:
             0;
         }
 
 
-        .ixi-aos-financial-face3-shell {
-          isolation:
-            isolate;
+        .ixi-aos-financial-face3-shell
+        button {
+          font-synthesis:
+            none;
         }
+
 
       `}</style>
 
