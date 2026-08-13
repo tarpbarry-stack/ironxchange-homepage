@@ -364,21 +364,36 @@ function cyclePreviewScaleMode() {
 
       <section className="studio-workstation">
 
-        {/* LEFT */}
+       {/* LEFT */}
 
-        <aside className="studio-tool-column">
+<aside className="studio-tool-column">
 
-          <div className="studio-scroll-surface">
+  <div className="studio-scroll-surface">
 
-            <IXIObjectStudioDesignBench
-              studio={
-                studio
-              }
-            />
+    <IXIObjectStudioDesignBench
+      studio={
+        studio
+      }
+    />
 
-          </div>
 
-        </aside>
+    <div className="studio-skin-bench-slot">
+
+      <IXIObjectStudioSkinBench
+        selectedSkinId={
+          selectedSkinId
+        }
+
+        onSelectSkin={
+          setSelectedSkinId
+        }
+      />
+
+    </div>
+
+  </div>
+
+</aside>
 
 
         {/* CENTER */}
@@ -418,9 +433,9 @@ function cyclePreviewScaleMode() {
         </section>
 
 
-        {/* RIGHT */}
+       {/* RIGHT */}
 
-        <aside className="studio-tool-column">
+<aside className="studio-tool-column">
 
   <div className="studio-scroll-surface">
 
@@ -430,25 +445,9 @@ function cyclePreviewScaleMode() {
       }
     />
 
-
-    <div className="studio-skin-bench-slot">
-
-      <IXIObjectStudioSkinBench
-        selectedSkinId={
-          selectedSkinId
-        }
-
-        onSelectSkin={
-          setSelectedSkinId
-        }
-      />
-
-    </div>
-
   </div>
 
 </aside>
-
       </section>
 
 
