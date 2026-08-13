@@ -20,6 +20,7 @@ import {
   IXI_CONSOLE_MAX_DEPTH,
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
+  normalizeConsoleFaces,
   normalizeConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
@@ -165,6 +166,49 @@ export default function IXIAosObjectConsole({
       faces.length
     );
 
+  /*
+   * =====================================================
+   * AVAILABLE CONSOLE FACES
+   * =====================================================
+   *
+   * Face 1 is the permanent primary Object Card.
+   *
+   * Every actual Card Face after Face 1 is eligible
+   * for a console slot.
+   *
+   * Examples:
+   *
+   * 1 Face:
+   *   []
+   *
+   * 2 Faces:
+   *   [2]
+   *
+   * 6 Faces:
+   *   [2, 3, 4, 5, 6]
+   *
+   * 25 Faces:
+   *   [2 ... 25]
+   *
+   * Console DEPTH is still independently capped at 5.
+   */
+
+  const availableConsoleFaces =
+    normalizeConsoleFaces(
+      faces
+        .map(
+          (
+            face,
+            index
+          ) =>
+            index + 1
+        )
+        .filter(
+          faceNumber =>
+            faceNumber > 1
+        )
+    );
+  
   const activeStudioFace =
   normalizeAosFace(
     previewCardState
@@ -211,15 +255,17 @@ const financialFace2Props =
       : createInitialSlots();
 
 
-  const consoleSlots =
+    const consoleSlots =
     normalizeConsoleSlots(
       storedSlots,
       {
         maxSlots:
-          IXI_CONSOLE_MAX_DEPTH
+          IXI_CONSOLE_MAX_DEPTH,
+
+        faces:
+          availableConsoleFaces
       }
     );
-
 
   const listingSlotIndex =
     consoleSlots.findIndex(
@@ -265,11 +311,20 @@ const financialFace2Props =
 
 
   function saveSlots(
-    slots
+    slots,
+    faceList =
+      availableConsoleFaces
   ) {
     patchObjectState(
       createConsoleSlotsPatch(
-        slots
+        slots,
+        {
+          faces:
+            faceList,
+
+          maxSlots:
+            IXI_CONSOLE_MAX_DEPTH
+        }
       )
     );
   }
@@ -291,7 +346,7 @@ const financialFace2Props =
   }
 
 
-  const nextSlots =
+    const nextSlots =
     insertConsoleSlot({
       slots:
         consoleSlots,
@@ -303,9 +358,11 @@ const financialFace2Props =
           .EMPTY,
 
       maxSlots:
-        IXI_CONSOLE_MAX_DEPTH
-    });
+        IXI_CONSOLE_MAX_DEPTH,
 
+      faces:
+        availableConsoleFaces
+    });
 
   saveSlots(
     nextSlots
@@ -322,14 +379,17 @@ const financialFace2Props =
     event?.stopPropagation?.();
 
 
-    saveSlots(
-      removeConsoleSlot({
-        slots:
-          consoleSlots,
+     saveSlots(
+    removeConsoleSlot({
+      slots:
+        consoleSlots,
 
-        slotId
-      })
-    );
+      slotId,
+
+      faces:
+        availableConsoleFaces
+    })
+  );
   }
 
 
@@ -378,26 +438,37 @@ const financialFace2Props =
   });
 }
 
-  function cyclePanelFace(
+   function cyclePanelFace(
     slotId,
     event
   ) {
-
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
 
+    if (
+      !availableConsoleFaces.length
+    ) {
+      return;
+    }
+
+
     const nextSlots =
-      consoleSlots.map(
-        slot => {
+      cycleConsoleSlotFace({
+        slots:
+          consoleSlots,
 
-          if (
-            String(slot.slotId) !==
-            String(slotId)
-          ) {
-            return slot;
-          }
+        slotId,
 
+        faces:
+          availableConsoleFaces
+      });
+
+
+    saveSlots(
+      nextSlots
+    );
+  }
 
           if (
             slot.type ===
@@ -765,7 +836,7 @@ String(
       USE TEMPLATE
     </button>
 
-    <button
+        <button
       type="button"
 
       onClick={
@@ -773,49 +844,64 @@ String(
           event.preventDefault();
           event.stopPropagation();
 
-        const created =
-  onCreateFace?.(
-    slot.slotId
-  );
 
-if (
-  created?.faceIndex
-) {
-
-  const nextSlots =
-    assignConsoleSlotFace({
-      slots:
-        consoleSlots,
-
-      slotId:
-        slot.slotId,
-
-      face:
-        created.faceIndex
-    });
+          const created =
+            onCreateFace?.(
+              slot.slotId
+            );
 
 
-  saveSlots(
-    nextSlots
-  );
+          if (
+            !created?.faceIndex
+          ) {
+            return;
+          }
 
 
-  updatePreviewCardState?.(
-    objectId,
-    {
-      face:
-        created.faceIndex,
-
-      activeStudioFace:
-        created.faceIndex
-    }
-  );
+          const nextAvailableFaces =
+            normalizeConsoleFaces([
+              ...availableConsoleFaces,
+              created.faceIndex
+            ]);
 
 
-  setFaceCreatorSlotId(
-    ""
-  );
-}
+          const nextSlots =
+            assignConsoleSlotFace({
+              slots:
+                consoleSlots,
+
+              slotId:
+                slot.slotId,
+
+              face:
+                created.faceIndex,
+
+              faces:
+                nextAvailableFaces
+            });
+
+
+          saveSlots(
+            nextSlots,
+            nextAvailableFaces
+          );
+
+
+          updatePreviewCardState?.(
+            objectId,
+            {
+              face:
+                created.faceIndex,
+
+              activeStudioFace:
+                created.faceIndex
+            }
+          );
+
+
+          setFaceCreatorSlotId(
+            ""
+          );
         }
       }
     >
