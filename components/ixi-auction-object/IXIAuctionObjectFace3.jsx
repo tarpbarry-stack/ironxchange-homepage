@@ -3193,3 +3193,541 @@ export default function IXIAuctionObjectFace3({
     </IXIFaceFrame>
   );
 }
+
+/* =========================================================
+   MONEY INPUT
+   ========================================================= */
+
+function MoneyInput({
+  value,
+  onChange,
+  onSave,
+  className = "",
+  showPrefix = true
+}) {
+  const displayValue =
+    Number(value)
+      ? Math.min(
+          Number(value),
+          MAX_INPUT_VALUE
+        ).toLocaleString("en-US")
+      : "";
+
+  return (
+    <span
+      className={[
+        "aof3-money-editor",
+        className ? `${className}-shell` : ""
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {showPrefix ? (
+        <span className="aof3-money-prefix">$</span>
+      ) : null}
+
+      <input
+        className={className}
+        value={displayValue}
+        inputMode="numeric"
+        autoComplete="off"
+        aria-label="Money value"
+        onPointerDown={event => {
+          event.stopPropagation();
+        }}
+        onChange={event => {
+          onChange?.(
+            clampMoneyInput(
+              event.target.value
+            )
+          );
+        }}
+        onBlur={() => {
+          onSave?.();
+        }}
+        onKeyDown={event => {
+          if (event.key !== "Enter") {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          onSave?.();
+          event.currentTarget.blur();
+        }}
+      />
+
+      <style jsx>{`
+        .aof3-money-editor {
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-end;
+          min-width: 0;
+          color: var(--aof3-ink);
+        }
+
+        .aof3-money-prefix {
+          flex: 0 0 auto;
+          margin-right: 1px;
+          color: var(--aof3-ink);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 8.4px;
+          font-weight: 800;
+          line-height: 1;
+        }
+      `}</style>
+    </span>
+  );
+}
+
+
+/* =========================================================
+   MINI VALUE
+   ========================================================= */
+
+function MiniValue({
+  label,
+  value,
+  onChange,
+  onSave
+}) {
+  return (
+    <label className="aof3-mini-value">
+      <span className="aof3-mini-label">
+        {label}
+      </span>
+
+      <span className="aof3-mini-rule" />
+
+      <MoneyInput
+        value={value}
+        onChange={onChange}
+        onSave={onSave}
+        className="aof3-mini-input"
+      />
+
+      <style jsx>{`
+        .aof3-mini-value {
+          min-width: 0;
+          display: grid;
+          grid-template-columns: auto minmax(6px, 1fr) 54px;
+          align-items: center;
+          column-gap: 4px;
+        }
+
+        .aof3-mini-label {
+          color: var(--aof3-ink-2);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .18px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .aof3-mini-rule {
+          height: 1px;
+          min-width: 0;
+          background: rgba(123, 81, 39, .26);
+        }
+
+        :global(.aof3-mini-input-shell) {
+          width: 54px;
+          min-width: 54px;
+          max-width: 54px;
+        }
+
+        :global(.aof3-mini-input) {
+          width: 46px !important;
+          min-width: 46px !important;
+          max-width: 46px !important;
+          height: 16px !important;
+          margin: 0 !important;
+          padding: 0 1px !important;
+          border: 0 !important;
+          border-bottom: 1px solid rgba(111, 72, 35, .30) !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+          color: var(--aof3-ink) !important;
+          font-family: Georgia, "Times New Roman", serif !important;
+          font-size: 8px !important;
+          font-weight: 800 !important;
+          line-height: 16px !important;
+          text-align: right !important;
+          font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        :global(.aof3-mini-input:focus) {
+          border-bottom-color: var(--aof3-gold) !important;
+        }
+      `}</style>
+    </label>
+  );
+}
+
+
+/* =========================================================
+   LEDGER ROW
+   ========================================================= */
+
+function LedgerRow({
+  label,
+  value,
+  input = false,
+  muted = false,
+  emphasized = false,
+  onChange,
+  onSave
+}) {
+  return (
+    <div
+      className={[
+        "aof3-row",
+        muted ? "muted" : "",
+        emphasized ? "emphasized" : ""
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <span className="aof3-row-label">
+        {label}
+      </span>
+
+      <span className="aof3-row-rule" />
+
+      {input ? (
+        <MoneyInput
+          value={value}
+          onChange={onChange}
+          onSave={onSave}
+          className="aof3-input"
+        />
+      ) : (
+        <strong className="aof3-row-value">
+          {value}
+        </strong>
+      )}
+
+      <style jsx>{`
+        .aof3-row {
+          width: 100%;
+          min-width: 0;
+          height: 16px;
+          display: grid;
+          grid-template-columns: auto minmax(4px, 1fr) 61px;
+          align-items: center;
+          column-gap: 3px;
+          color: var(--aof3-ink);
+          overflow: hidden;
+        }
+
+        .aof3-row + .aof3-row {
+          border-top: 1px dotted rgba(101, 66, 34, .13);
+        }
+
+        .aof3-row-label {
+          min-width: 0;
+          color: var(--aof3-ink-2);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7.2px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: .12px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .aof3-row-rule {
+          height: 1px;
+          min-width: 0;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(103, 67, 35, .25)
+          );
+        }
+
+        .aof3-row-value {
+          width: 61px;
+          min-width: 61px;
+          max-width: 61px;
+          overflow: hidden;
+          color: var(--aof3-ink);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 8.7px;
+          font-weight: 800;
+          line-height: 1;
+          text-align: right;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        .aof3-row.muted .aof3-row-label,
+        .aof3-row.muted .aof3-row-value {
+          color: rgba(74, 48, 32, .70);
+        }
+
+        .aof3-row.emphasized .aof3-row-label,
+        .aof3-row.emphasized .aof3-row-value {
+          color: var(--aof3-ink);
+          font-weight: 950;
+        }
+
+        :global(.aof3-input-shell) {
+          width: 61px;
+          min-width: 61px;
+          max-width: 61px;
+        }
+
+        :global(.aof3-input) {
+          width: 52px !important;
+          min-width: 52px !important;
+          max-width: 52px !important;
+          height: 15px !important;
+          margin: 0 !important;
+          padding: 0 1px !important;
+          border: 0 !important;
+          border-bottom: 1px solid rgba(103, 67, 35, .24) !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+          color: var(--aof3-ink) !important;
+          font-family: Georgia, "Times New Roman", serif !important;
+          font-size: 8.5px !important;
+          font-weight: 800 !important;
+          line-height: 15px !important;
+          text-align: right !important;
+          font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        :global(.aof3-input:focus) {
+          border-bottom-color: var(--aof3-gold) !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
+/* =========================================================
+   LEDGER SUMMARY
+   ========================================================= */
+
+function LedgerSummary({
+  label,
+  value,
+  detail = "",
+  accent = false,
+  negative = false
+}) {
+  return (
+    <div
+      className={[
+        "aof3-summary",
+        accent ? "accent" : "",
+        negative ? "negative" : ""
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {detail ? <em>{detail}</em> : null}
+
+      <style jsx>{`
+        .aof3-summary {
+          position: relative;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 6px 4px;
+          color: var(--aof3-ink);
+        }
+
+        .aof3-summary > span {
+          color: var(--aof3-ink-2);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7.2px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: .25px;
+          text-transform: uppercase;
+        }
+
+        .aof3-summary strong {
+          max-width: 100%;
+          margin-top: 2px;
+          overflow: hidden;
+          color: var(--aof3-ink);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 17px;
+          font-weight: 900;
+          line-height: .98;
+          letter-spacing: -.3px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        .aof3-summary em {
+          margin-top: 1px;
+          color: var(--aof3-ink-soft);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7px;
+          font-weight: 950;
+          font-style: normal;
+          line-height: 1;
+        }
+
+        .aof3-summary.accent strong,
+        .aof3-summary.accent em {
+          color: var(--aof3-gold);
+        }
+
+        .aof3-summary.negative strong,
+        .aof3-summary.negative em {
+          color: #7b2b20;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
+/* =========================================================
+   BID SCENARIO
+   ========================================================= */
+
+function BidScenario({
+  scenario,
+  scenarioNumber,
+  active = false
+}) {
+  return (
+    <div
+      className={[
+        "aof3-bid-scenario",
+        active ? "active" : ""
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <span className="aof3-scenario-number">
+        SCENARIO {scenarioNumber}
+      </span>
+
+      <strong>
+        {money(scenario.bid)}
+      </strong>
+
+      <span className="aof3-profit-label">
+        PROFIT
+      </span>
+
+      <b>
+        {money(scenario.totalProfit)}
+      </b>
+
+      <em>
+        {percentage(scenario.profitPercent)}
+      </em>
+
+      <style jsx>{`
+        .aof3-bid-scenario {
+          min-width: 0;
+          min-height: 52px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 1px 3px;
+          border: 1px solid rgba(116, 75, 36, .24);
+          border-radius: 3px;
+          background: rgba(255, 250, 237, .22);
+          color: var(--aof3-ink);
+          overflow: hidden;
+        }
+
+        .aof3-bid-scenario.active {
+          border-color: rgba(154, 99, 11, .83);
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, .28),
+            rgba(185, 126, 31, .09)
+          );
+          box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, .20),
+            0 0 0 1px rgba(154, 99, 11, .12);
+        }
+
+        .aof3-scenario-number {
+          max-width: 100%;
+          overflow: hidden;
+          color: var(--aof3-ink-2);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 5.8px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: .05px;
+          text-overflow: ellipsis;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .aof3-bid-scenario strong,
+        .aof3-bid-scenario b {
+          max-width: 100%;
+          overflow: hidden;
+          font-family: Georgia, "Times New Roman", serif;
+          font-variant-numeric: tabular-nums lining-nums;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .aof3-bid-scenario strong {
+          margin-top: 3px;
+          color: var(--aof3-ink);
+          font-size: 8.3px;
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        .aof3-bid-scenario.active strong {
+          color: var(--aof3-gold);
+        }
+
+        .aof3-profit-label {
+          margin-top: 3px;
+          color: var(--aof3-ink-2);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 5.6px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: .14px;
+          text-transform: uppercase;
+        }
+
+        .aof3-bid-scenario b {
+          margin-top: 2px;
+          color: var(--aof3-ink);
+          font-size: 7.6px;
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        .aof3-bid-scenario em {
+          margin-top: 3px;
+          color: var(--aof3-gold);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7.1px;
+          font-weight: 950;
+          font-style: normal;
+          line-height: 1;
+        }
+      `}</style>
+    </div>
+  );
+}
