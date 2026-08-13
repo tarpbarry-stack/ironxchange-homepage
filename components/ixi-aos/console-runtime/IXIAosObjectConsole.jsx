@@ -569,9 +569,10 @@ return (
      * this console slot owns.
      */
     forcedFaceIndex={
-      resolvedFace
-    }
-
+  faceOnly
+    ? resolvedFace
+    : null
+}
         faceOnly={
         faceOnly
       }
@@ -580,14 +581,57 @@ return (
         dragHandleProps={{}}
 
         ixiState={{
-          face:
-            resolvedFace
-        }}
+  ...objectState,
 
-        onIxiStateChange={
-          () => {}
-        }
+  face:
+    activeStudioFace
+}}
 
+onIxiStateChange={
+  (
+    changedObjectId,
+    patch
+  ) => {
+    const nextFace =
+      normalizeAosFace(
+        patch?.face ??
+        activeStudioFace,
+        faceCount
+      );
+
+
+    updatePreviewCardState?.(
+      changedObjectId ||
+      objectId,
+      {
+        ...patch,
+
+        face:
+          nextFace,
+
+        activeStudioFace:
+          nextFace
+      }
+    );
+
+
+    const faceDefinition =
+      faces[
+        nextFace - 1
+      ] ||
+      null;
+
+
+    onSelectFace?.({
+      faceIndex:
+        nextFace,
+
+      faceId:
+        faceDefinition?.faceId ||
+        `face-${nextFace}`
+    });
+  }
+}
         renderModule={
           renderModule
         }
