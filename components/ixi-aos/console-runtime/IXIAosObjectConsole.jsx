@@ -117,6 +117,8 @@ export default function IXIAosObjectConsole({
 
   onSelectModule = null,
 
+  onSelectFace = null,
+
   enableCardScaling = false,
 
   cardScaleMode = "xl"
@@ -154,6 +156,17 @@ export default function IXIAosObjectConsole({
       1,
       faces.length
     );
+
+  const activeStudioFace =
+  normalizeAosFace(
+    previewCardState
+      ?.activeStudioFace ||
+    previewCardState
+      ?.face ||
+    1,
+
+    faceCount
+  );
 
 
   /*
@@ -297,6 +310,51 @@ export default function IXIAosObjectConsole({
     );
   }
 
+
+  function selectStudioFace(
+  faceIndex,
+  event
+) {
+
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+
+  const resolvedFace =
+    normalizeAosFace(
+      faceIndex,
+      faceCount
+    );
+
+
+  const faceDefinition =
+    faces[
+      resolvedFace - 1
+    ] ||
+    null;
+
+
+  updatePreviewCardState?.(
+    objectId,
+    {
+      face:
+        resolvedFace,
+
+      activeStudioFace:
+        resolvedFace
+    }
+  );
+
+
+  onSelectFace?.({
+    faceIndex:
+      resolvedFace,
+
+    faceId:
+      faceDefinition?.faceId ||
+      `face-${resolvedFace}`
+  });
+}
 
   function cyclePanelFace(
     slotId,
@@ -906,17 +964,28 @@ if (
         <button
           type="button"
 
-          className="
-            ixi-aos-console-face-button
-          "
+          className={[
+  "ixi-aos-console-face-button",
+
+  Number(
+    activeStudioFace
+  ) ===
+  Number(
+    slot.face
+  )
+    ? "active"
+    : ""
+]
+  .filter(Boolean)
+  .join(" ")}
 
           aria-label={
-            `Change Face ${slot.face}`
-          }
+  `Edit Face ${slot.face}`
+}
 
-          title={
-            `Face ${slot.face}`
-          }
+title={
+  `Edit Face ${slot.face}`
+}
 
           onPointerDown={
             event => {
@@ -925,13 +994,13 @@ if (
             }
           }
 
-          onClick={
-            event =>
-              cyclePanelFace(
-                slot.slotId,
-                event
-              )
-          }
+         onClick={
+  event =>
+    selectStudioFace(
+      slot.face,
+      event
+    )
+}
         />
 
       </section>
@@ -1060,6 +1129,25 @@ if (
           z-index:
             150;
         }
+
+.ixi-aos-console-face-button.active {
+  background:
+    rgba(
+      255,
+      196,
+      0,
+      .98
+    );
+
+  box-shadow:
+    0 0 8px
+    rgba(
+      255,
+      196,
+      0,
+      .28
+    );
+}
 
 
         .ixi-aos-console-face-button:hover {
