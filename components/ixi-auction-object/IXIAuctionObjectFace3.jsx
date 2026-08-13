@@ -15,205 +15,352 @@ import {
   getPublicData
 } from "./auctionObjectSelectors";
 
-const MAX_INPUT_DIGITS = 6;
-const MAX_INPUT_VALUE = 999999;
 
-function clampMoneyInput(value = "") {
-  const digits = String(value ?? "")
-    .replace(/\D/g, "")
-    .slice(0, MAX_INPUT_DIGITS);
+/* =========================================================
+   CONSTANTS
+   ========================================================= */
 
-  if (!digits) {
+const MAX_INPUT_DIGITS =
+  6;
+
+const MAX_INPUT_VALUE =
+  999999;
+
+
+/* =========================================================
+   MONEY HELPERS
+   ========================================================= */
+
+function clampMoneyInput(
+  value = ""
+) {
+  const digits =
+    String(
+      value ??
+      ""
+    )
+      .replace(
+        /\D/g,
+        ""
+      )
+      .slice(
+        0,
+        MAX_INPUT_DIGITS
+      );
+
+
+  if (
+    !digits
+  ) {
     return 0;
   }
 
+
   return Math.min(
-    Number(digits),
+    Number(
+      digits
+    ),
     MAX_INPUT_VALUE
   );
 }
 
-function cleanNumber(value = "") {
-  const cleaned = String(
-    value ?? ""
-  ).replace(
-    /[^0-9.]/g,
-    ""
-  );
 
-  const parsed = Number(cleaned);
+function cleanNumber(
+  value = ""
+) {
+  const cleaned =
+    String(
+      value ??
+      ""
+    ).replace(
+      /[^0-9.]/g,
+      ""
+    );
 
-  return Number.isFinite(parsed)
+
+  const parsed =
+    Number(
+      cleaned
+    );
+
+
+  return Number.isFinite(
+    parsed
+  )
     ? parsed
     : 0;
 }
 
-function money(value = 0) {
+
+function money(
+  value = 0
+) {
   const amount =
-    Number.isFinite(Number(value))
-      ? Number(value)
+    Number.isFinite(
+      Number(
+        value
+      )
+    )
+      ? Number(
+          value
+        )
       : 0;
+
 
   return amount.toLocaleString(
     "en-US",
     {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0
+      style:
+        "currency",
+
+      currency:
+        "USD",
+
+      maximumFractionDigits:
+        0
     }
   );
 }
 
-function percentage(value = 0) {
+
+function percentage(
+  value = 0
+) {
   const amount =
-    Number.isFinite(Number(value))
-      ? Number(value)
+    Number.isFinite(
+      Number(
+        value
+      )
+    )
+      ? Number(
+          value
+        )
       : 0;
+
 
   return `${amount.toFixed(1)}%`;
 }
+
+
+/* =========================================================
+   BUYER PREMIUM
+   ========================================================= */
 
 function getBuyerPremiumData(
   listing = {}
 ) {
   const auction =
-    getAuctionData(listing);
+    getAuctionData(
+      listing
+    );
+
 
   const terms =
-    getAuctionTermsData(listing);
+    getAuctionTermsData(
+      listing
+    );
+
 
   const auctionRules =
-    auction?.auctionRules || {};
+    auction
+      ?.auctionRules ||
+    {};
+
 
   return (
-    auctionRules?.buyerPremium ||
-    auction?.buyerPremium ||
-    terms?.buyerPremium ||
-    terms?.buyersPremium ||
+    auctionRules
+      ?.buyerPremium ||
+    auction
+      ?.buyerPremium ||
+    terms
+      ?.buyerPremium ||
+    terms
+      ?.buyersPremium ||
     {}
   );
 }
+
 
 function getBuyerPremiumTiers(
   listing = {}
 ) {
   const premium =
-    getBuyerPremiumData(listing);
+    getBuyerPremiumData(
+      listing
+    );
+
 
   if (
     Array.isArray(
-      premium?.purchaseTiers
+      premium
+        ?.purchaseTiers
     )
   ) {
-    return premium.purchaseTiers;
+    return premium
+      .purchaseTiers;
   }
+
 
   if (
     Array.isArray(
-      premium?.tiers
+      premium
+        ?.tiers
     )
   ) {
-    return premium.tiers;
+    return premium
+      .tiers;
   }
+
 
   return [];
 }
+
+
+/* =========================================================
+   COMMISSION
+   ========================================================= */
 
 function calculateCommission(
   listing,
   bidAmount
 ) {
   const bid =
-    cleanNumber(bidAmount);
+    cleanNumber(
+      bidAmount
+    );
 
-  if (!bid) {
+
+  if (
+    !bid
+  ) {
     return 0;
   }
+
 
   const premium =
     getBuyerPremiumData(
       listing
     );
 
+
   const tiers =
     getBuyerPremiumTiers(
       listing
     );
 
+
   const matchingTier =
-    tiers.find(tier => {
-      const minimum =
-        cleanNumber(
-          tier?.minAmountExclusive ??
-          tier?.minAmount ??
-          tier?.minimumAmount ??
-          0
+    tiers.find(
+      tier => {
+        const minimum =
+          cleanNumber(
+            tier
+              ?.minAmountExclusive ??
+            tier
+              ?.minAmount ??
+            tier
+              ?.minimumAmount ??
+            0
+          );
+
+
+        const maximumRaw =
+          tier
+            ?.maxAmount ??
+          tier
+            ?.maximumAmount;
+
+
+        const maximum =
+          maximumRaw ===
+            null ||
+          maximumRaw ===
+            undefined ||
+          maximumRaw ===
+            ""
+            ? null
+            : cleanNumber(
+                maximumRaw
+              );
+
+
+        const minimumIsExclusive =
+          tier
+            ?.minAmountExclusive !==
+              null &&
+          tier
+            ?.minAmountExclusive !==
+              undefined;
+
+
+        const passesMinimum =
+          minimumIsExclusive
+            ? bid >
+                minimum
+            : bid >=
+                minimum;
+
+
+        const passesMaximum =
+          maximum ===
+            null ||
+          bid <=
+            maximum;
+
+
+        return (
+          passesMinimum &&
+          passesMaximum
         );
+      }
+    );
 
-      const maximumRaw =
-        tier?.maxAmount ??
-        tier?.maximumAmount;
 
-      const maximum =
-        maximumRaw === null ||
-        maximumRaw === undefined ||
-        maximumRaw === ""
-          ? null
-          : cleanNumber(
-              maximumRaw
-            );
-
-      const minimumIsExclusive =
-        tier?.minAmountExclusive !==
-        null &&
-        tier?.minAmountExclusive !==
-        undefined;
-
-      const passesMinimum =
-        minimumIsExclusive
-          ? bid > minimum
-          : bid >= minimum;
-
-      const passesMaximum =
-        maximum === null ||
-        bid <= maximum;
-
-      return (
-        passesMinimum &&
-        passesMaximum
-      );
-    });
-
-  if (matchingTier) {
+  if (
+    matchingTier
+  ) {
     const flatFee =
       cleanNumber(
-        matchingTier?.flatFee
+        matchingTier
+          ?.flatFee
       );
 
-    if (flatFee) {
+
+    if (
+      flatFee
+    ) {
       return flatFee;
     }
+
 
     const ratePercent =
       cleanNumber(
         matchingTier
           ?.cashCheckWireRatePercent ??
-        matchingTier?.ratePercent ??
-        matchingTier?.percent
+        matchingTier
+          ?.ratePercent ??
+        matchingTier
+          ?.percent
       );
+
 
     const minimumFee =
       cleanNumber(
-        matchingTier?.minimumFee
+        matchingTier
+          ?.minimumFee
       );
 
-    if (ratePercent) {
+
+    if (
+      ratePercent
+    ) {
       const calculated =
         bid *
         (
           ratePercent /
           100
         );
+
 
       return Math.max(
         calculated,
@@ -222,33 +369,49 @@ function calculateCommission(
     }
   }
 
+
   const flatFee =
     cleanNumber(
-      premium?.flatFee
+      premium
+        ?.flatFee
     );
 
-  if (flatFee) {
+
+  if (
+    flatFee
+  ) {
     return flatFee;
   }
 
+
   const ratePercent =
     cleanNumber(
-      premium?.ratePercent ??
-      premium?.percent ??
-      premium?.rate
+      premium
+        ?.ratePercent ??
+      premium
+        ?.percent ??
+      premium
+        ?.rate
     );
+
 
   const minimumFee =
     cleanNumber(
-      premium?.minimumFee
+      premium
+        ?.minimumFee
     );
+
 
   const capAmount =
     cleanNumber(
-      premium?.capAmount
+      premium
+        ?.capAmount
     );
 
-  if (ratePercent) {
+
+  if (
+    ratePercent
+  ) {
     let calculated =
       bid *
       (
@@ -256,7 +419,10 @@ function calculateCommission(
         100
       );
 
-    if (minimumFee) {
+
+    if (
+      minimumFee
+    ) {
       calculated =
         Math.max(
           calculated,
@@ -264,7 +430,10 @@ function calculateCommission(
         );
     }
 
-    if (capAmount) {
+
+    if (
+      capAmount
+    ) {
       calculated =
         Math.min(
           calculated,
@@ -272,11 +441,18 @@ function calculateCommission(
         );
     }
 
+
     return calculated;
   }
 
+
   return 0;
 }
+
+
+/* =========================================================
+   SCENARIO CALCULATION
+   ========================================================= */
 
 function calculateScenario({
   listing,
@@ -296,6 +472,7 @@ function calculateScenario({
       bid
     );
 
+
   const otherCosts =
     freight1 +
     freight2 +
@@ -305,22 +482,27 @@ function calculateScenario({
     labor +
     preDelivery;
 
+
   const totalCost =
     bid +
     commission +
     otherCosts;
 
+
   const totalProfit =
     estimatedSalePrice -
     totalCost;
+
 
   const profitPercent =
     totalCost
       ? (
           totalProfit /
           totalCost
-        ) * 100
+        ) *
+        100
       : 0;
+
 
   return {
     bid,
@@ -330,6 +512,11 @@ function calculateScenario({
     profitPercent
   };
 }
+
+
+/* =========================================================
+   MAIN FACE
+   ========================================================= */
 
 export default function IXIAuctionObjectFace3({
   listing = {},
@@ -342,175 +529,222 @@ export default function IXIAuctionObjectFace3({
   dragHandleProps
 }) {
   const publicData =
-    getPublicData(listing);
+    getPublicData(
+      listing
+    );
+
 
   const year =
-    listing?.year ||
-    publicData?.year ||
+    listing
+      ?.year ||
+    publicData
+      ?.year ||
     "";
+
 
   const make =
-    listing?.make ||
-    publicData?.make ||
+    listing
+      ?.make ||
+    publicData
+      ?.make ||
     "";
+
 
   const model =
-    listing?.model ||
-    publicData?.model ||
+    listing
+      ?.model ||
+    publicData
+      ?.model ||
     "";
 
+
   const hours =
-    listing?.hours ||
-    publicData?.hours ||
+    listing
+      ?.hours ||
+    publicData
+      ?.hours ||
     "";
+
 
   const openingValue =
     Math.min(
       cleanNumber(
-        listing?.price ??
-        publicData?.price ??
+        listing
+          ?.price ??
+        publicData
+          ?.price ??
         0
       ),
       MAX_INPUT_VALUE
     );
 
+
   const [
     estimatedSalePrice,
     setEstimatedSalePrice
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack
-          ?.estimatedSalePrice ??
-        openingValue
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.estimatedSalePrice ??
+          openingValue
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     lowAdvertised,
     setLowAdvertised
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack
-          ?.lowAdvertised
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.lowAdvertised
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     averageAdvertised,
     setAverageAdvertised
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack
-          ?.averageAdvertised
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.averageAdvertised
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     myBid,
     setMyBid
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.myBid ??
-        openingValue
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.myBid ??
+          openingValue
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     freight1,
     setFreight1
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.freight1
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.freight1
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     freight2,
     setFreight2
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.freight2
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.freight2
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     tech,
     setTech
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.tech
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.tech
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     clean,
     setClean
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.clean
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.clean
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     parts,
     setParts
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.parts
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.parts
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     labor,
     setLabor
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack?.labor
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.labor
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   const [
     preDelivery,
     setPreDelivery
-  ] = useState(
-    Math.min(
-      cleanNumber(
-        dealerBidPack
-          ?.preDelivery
-      ),
-      MAX_INPUT_VALUE
-    )
-  );
+  ] =
+    useState(
+      Math.min(
+        cleanNumber(
+          dealerBidPack
+            ?.preDelivery
+        ),
+        MAX_INPUT_VALUE
+      )
+    );
+
 
   function saveBidPack() {
     onSaveDealerBidPack?.({
@@ -528,15 +762,21 @@ export default function IXIAuctionObjectFace3({
     });
   }
 
+
   const mainScenario =
     useMemo(
       () =>
         calculateScenario({
           listing,
-          bid: myBid,
+
+          bid:
+            myBid,
+
           estimatedSalePrice,
+
           freight1,
           freight2,
+
           tech,
           clean,
           parts,
@@ -557,34 +797,47 @@ export default function IXIAuctionObjectFace3({
       ]
     );
 
+
   const bidScenarios =
     useMemo(
       () =>
         [
-          myBid + 5000,
-          myBid + 2500,
+          myBid +
+            5000,
+
+          myBid +
+            2500,
+
           myBid,
+
           Math.max(
-            myBid - 2500,
+            myBid -
+              2500,
             0
           ),
+
           Math.max(
-            myBid - 5000,
+            myBid -
+              5000,
             0
           )
-        ].map(bid =>
-          calculateScenario({
-            listing,
-            bid,
-            estimatedSalePrice,
-            freight1,
-            freight2,
-            tech,
-            clean,
-            parts,
-            labor,
-            preDelivery
-          })
+        ].map(
+          bid =>
+            calculateScenario({
+              listing,
+              bid,
+
+              estimatedSalePrice,
+
+              freight1,
+              freight2,
+
+              tech,
+              clean,
+              parts,
+              labor,
+              preDelivery
+            })
         ),
       [
         listing,
@@ -600,498 +853,2309 @@ export default function IXIAuctionObjectFace3({
       ]
     );
 
+
+  const machineLabel =
+    [
+      year,
+      make,
+      model
+    ]
+      .filter(
+        Boolean
+      )
+      .join(
+        " "
+      );
+
+
+  const hourLabel =
+    hours
+      ? String(
+          hours
+        )
+          .replace(
+            /hrs|hours/gi,
+            ""
+          )
+          .trim()
+      : "";
+
+
   return (
     <IXIFaceFrame
-      className="aof3 aof3-ledger"
-      contentClassName="aof3-content"
-      size={faceSize}
-      dragHandleProps={dragHandleProps}
+      className="
+        aof3
+        aof3-certificate
+      "
+      contentClassName="
+        aof3-content
+      "
+      size={
+        faceSize
+      }
+      dragHandleProps={
+        dragHandleProps
+      }
       footer={
-        <IXIFaceActionFooter />
+        <div className="aof3-footer-skin">
+          <IXIFaceActionFooter />
+        </div>
       }
     >
-      <header className="aof3-head">
-        <span>PRIVATE DEALER WORKSHEET</span>
-        <strong>IXI DEALER BID PACK™</strong>
-      </header>
 
-      <div className="aof3-machine-line">
-        {[year, make, model]
-          .filter(Boolean)
-          .join(" ")}
+      <div className="aof3-certificate-inner">
 
-        {hours
-          ? ` • ${String(hours)
-              .replace(/hrs|hours/gi, "")
-              .trim()} HRS`
-          : ""}
-      </div>
+        {/* ================================================
+            HEADER
+            ================================================ */}
 
-      <section className="aof3-sale-section ledger-panel ledger-panel-accent">
-        <div className="aof3-sale-value">
-          <span>EST RETAIL SALE PRICE</span>
+        <header className="aof3-head">
 
-          <MoneyInput
-            className="aof3-sale-input"
-            value={estimatedSalePrice}
-            onChange={setEstimatedSalePrice}
-            onSave={saveBidPack}
-          />
+          <strong>
+            PRIVATE DEALER WORKSHEET
+          </strong>
+
+          <span>
+            IXI DEALER BID PACK™
+          </span>
+
+        </header>
+
+
+        <div className="aof3-ornament aof3-ornament-top">
+          <span />
+          <b>◆</b>
+          <span />
+        </div>
+
+
+        <div className="aof3-machine-line">
+
+          <strong>
+            {machineLabel}
+          </strong>
+
+          {hourLabel
+            ? (
+              <>
+                <span>
+                  •
+                </span>
+
+                <strong>
+                  {Number(
+                    cleanNumber(
+                      hourLabel
+                    )
+                  ).toLocaleString(
+                    "en-US"
+                  )} HRS
+                </strong>
+              </>
+            )
+            : null}
+
+        </div>
+
+
+        {/* ================================================
+            ESTIMATED RETAIL
+            ================================================ */}
+
+        <section
+          className="
+            ledger-panel
+            ledger-panel-major
+            aof3-sale-section
+          "
+        >
+
+          <div className="aof3-sale-title">
+            EST RETAIL SALE PRICE
+          </div>
+
+
+          <div className="aof3-sale-money">
+
+            <span className="aof3-sale-dollar">
+              $
+            </span>
+
+            <MoneyInput
+              className="aof3-sale-input"
+              value={
+                estimatedSalePrice
+              }
+              onChange={
+                setEstimatedSalePrice
+              }
+              onSave={
+                saveBidPack
+              }
+              showPrefix={
+                false
+              }
+            />
+
+          </div>
+
+
+          <div className="aof3-sale-rule">
+            <span />
+            <b>◇</b>
+            <span />
+          </div>
+
 
           <div className="aof3-advertised-row">
+
             <MiniValue
               label="LOW ADV"
-              value={lowAdvertised}
-              onChange={setLowAdvertised}
-              onSave={saveBidPack}
+              value={
+                lowAdvertised
+              }
+              onChange={
+                setLowAdvertised
+              }
+              onSave={
+                saveBidPack
+              }
             />
+
 
             <MiniValue
               label="AVG ADV"
-              value={averageAdvertised}
-              onChange={setAverageAdvertised}
-              onSave={saveBidPack}
+              value={
+                averageAdvertised
+              }
+              onChange={
+                setAverageAdvertised
+              }
+              onSave={
+                saveBidPack
+              }
             />
+
           </div>
-        </div>
-      </section>
 
-      <div className="aof3-cost-grid">
-        <section className="aof3-cost-panel ledger-panel">
-          <LedgerRow
-            label="MY BID"
-            input
-            value={myBid}
-            onChange={setMyBid}
-            onSave={saveBidPack}
-            emphasized
-          />
-
-          <LedgerRow
-            label="COMM."
-            value={money(mainScenario.commission)}
-            muted
-          />
-
-          <LedgerRow
-            label="FREIGHT 1"
-            input
-            value={freight1}
-            onChange={setFreight1}
-            onSave={saveBidPack}
-          />
-
-          <LedgerRow
-            label="FREIGHT 2"
-            input
-            value={freight2}
-            onChange={setFreight2}
-            onSave={saveBidPack}
-          />
         </section>
 
-        <section className="aof3-cost-panel ledger-panel">
-          <LedgerRow
-            label="TECH"
-            input
-            value={tech}
-            onChange={setTech}
-            onSave={saveBidPack}
-          />
 
-          <LedgerRow
-            label="CLEAN"
-            input
-            value={clean}
-            onChange={setClean}
-            onSave={saveBidPack}
-          />
+        {/* ================================================
+            COST PANELS
+            ================================================ */}
 
-          <LedgerRow
-            label="PARTS"
-            input
-            value={parts}
-            onChange={setParts}
-            onSave={saveBidPack}
-          />
+        <div className="aof3-cost-grid">
 
-          <LedgerRow
-            label="LABOR"
-            input
-            value={labor}
-            onChange={setLabor}
-            onSave={saveBidPack}
-          />
+          <section
+            className="
+              aof3-cost-panel
+              ledger-panel
+            "
+          >
 
-          <LedgerRow
-            label="PRE DELIVERY"
-            input
-            value={preDelivery}
-            onChange={setPreDelivery}
-            onSave={saveBidPack}
-          />
-        </section>
-      </div>
-
-      <div className="aof3-total-grid">
-        <LedgerSummary
-          label="TOTAL COST"
-          value={money(mainScenario.totalCost)}
-        />
-
-        <LedgerSummary
-          label="TOTAL PROFIT"
-          value={money(mainScenario.totalProfit)}
-          detail={percentage(mainScenario.profitPercent)}
-          accent={mainScenario.totalProfit >= 0}
-          negative={mainScenario.totalProfit < 0}
-        />
-      </div>
-
-      <section className="aof3-bid-pack ledger-panel">
-        <div className="aof3-bid-pack-title">
-          <span />
-          <strong>BID PACK ANALYSIS</strong>
-          <span />
-        </div>
-
-        <div className="aof3-bid-pack-grid">
-          {bidScenarios.map((scenario, index) => (
-            <BidScenario
-              key={`${scenario.bid}-${index}`}
-              scenario={scenario}
-              active={index === 2}
+            <LedgerRow
+              label="MY BID"
+              input
+              value={
+                myBid
+              }
+              onChange={
+                setMyBid
+              }
+              onSave={
+                saveBidPack
+              }
+              emphasized
             />
-          ))}
+
+
+            <LedgerRow
+              label="COMM."
+              value={
+                money(
+                  mainScenario
+                    .commission
+                )
+              }
+              muted
+            />
+
+
+            <LedgerRow
+              label="FREIGHT 1"
+              input
+              value={
+                freight1
+              }
+              onChange={
+                setFreight1
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+
+            <LedgerRow
+              label="FREIGHT 2"
+              input
+              value={
+                freight2
+              }
+              onChange={
+                setFreight2
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+          </section>
+
+
+          <section
+            className="
+              aof3-cost-panel
+              ledger-panel
+            "
+          >
+
+            <LedgerRow
+              label="TECH"
+              input
+              value={
+                tech
+              }
+              onChange={
+                setTech
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+
+            <LedgerRow
+              label="CLEAN"
+              input
+              value={
+                clean
+              }
+              onChange={
+                setClean
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+
+            <LedgerRow
+              label="PARTS"
+              input
+              value={
+                parts
+              }
+              onChange={
+                setParts
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+
+            <LedgerRow
+              label="LABOR"
+              input
+              value={
+                labor
+              }
+              onChange={
+                setLabor
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+
+            <LedgerRow
+              label="PRE DELIVERY"
+              input
+              value={
+                preDelivery
+              }
+              onChange={
+                setPreDelivery
+              }
+              onSave={
+                saveBidPack
+              }
+            />
+
+          </section>
+
         </div>
-      </section>
+
+
+        {/* ================================================
+            TOTALS
+            ================================================ */}
+
+        <section
+          className="
+            aof3-total-grid
+            ledger-panel
+          "
+        >
+
+          <LedgerSummary
+            label="TOTAL COST"
+            value={
+              money(
+                mainScenario
+                  .totalCost
+              )
+            }
+          />
+
+
+          <LedgerSummary
+            label="TOTAL PROFIT"
+            value={
+              money(
+                mainScenario
+                  .totalProfit
+              )
+            }
+            detail={
+              percentage(
+                mainScenario
+                  .profitPercent
+              )
+            }
+            accent={
+              mainScenario
+                .totalProfit >=
+              0
+            }
+            negative={
+              mainScenario
+                .totalProfit <
+              0
+            }
+          />
+
+        </section>
+
+
+        {/* ================================================
+            BID PACK ANALYSIS
+            ================================================ */}
+
+        <section
+          className="
+            aof3-bid-pack
+            ledger-panel
+          "
+        >
+
+          <div className="aof3-bid-pack-title">
+
+            <span />
+
+            <strong>
+              BID PACK ANALYSIS
+            </strong>
+
+            <span />
+
+          </div>
+
+
+          <div className="aof3-bid-pack-grid">
+
+            {bidScenarios.map(
+              (
+                scenario,
+                index
+              ) => (
+                <BidScenario
+                  key={
+                    `${scenario.bid}-${index}`
+                  }
+                  scenario={
+                    scenario
+                  }
+                  scenarioNumber={
+                    index +
+                    1
+                  }
+                  active={
+                    index ===
+                    2
+                  }
+                />
+              )
+            )}
+
+          </div>
+
+        </section>
+
+
+        <div className="aof3-bottom-ornament">
+          <span />
+          <b>◆</b>
+          <span />
+        </div>
+
+      </div>
+
+
+      {/* ===================================================
+          COMPLETE CERTIFICATE SKIN
+          =================================================== */}
 
       <style jsx>{`
-        :global(.aof3-ledger) {
-          --ledger-paper: #e4d3b1;
-          --ledger-paper-light: #efe1c5;
-          --ledger-paper-dark: #c9b58f;
-          --ledger-ink: #432b1d;
-          --ledger-ink-soft: #6d533e;
-          --ledger-line: rgba(86, 58, 37, .48);
-          --ledger-line-soft: rgba(86, 58, 37, .22);
-          --ledger-accent: #9a6a20;
-          --ledger-accent-deep: #755018;
-          --ledger-shadow: rgba(54, 35, 20, .16);
 
-          color: var(--ledger-ink);
-          border-color: rgba(80, 54, 35, .64) !important;
+        /* ================================================
+           ROOT CARD
+           ================================================ */
+
+        :global(.aof3-certificate) {
+
+          --paper-00:
+            #fff8e9;
+
+          --paper-01:
+            #faedd2;
+
+          --paper-02:
+            #f2dfba;
+
+          --paper-03:
+            #e8cfa0;
+
+          --paper-04:
+            #d5b67f;
+
+          --ink:
+            #2c1b12;
+
+          --ink-2:
+            #4a3020;
+
+          --ink-soft:
+            #72523b;
+
+          --gold:
+            #9a630b;
+
+          --gold-2:
+            #b27b1e;
+
+          --gold-soft:
+            rgba(
+              154,
+              99,
+              11,
+              .42
+            );
+
+          --line:
+            rgba(
+              105,
+              71,
+              40,
+              .55
+            );
+
+          --line-soft:
+            rgba(
+              105,
+              71,
+              40,
+              .20
+            );
+
+
+          position:
+            relative;
+
+
+          color:
+            var(--ink);
+
+
+          border:
+            1px solid
+            rgba(
+              83,
+              50,
+              27,
+              .84
+            ) !important;
+
+
+          border-radius:
+            15px !important;
+
+
+          overflow:
+            hidden !important;
+
+
           background:
             linear-gradient(
               180deg,
-              rgba(255,255,255,.10),
-              rgba(95,62,33,.025)
-            ),
-            var(--ledger-paper) !important;
+              var(--paper-00)
+                0%,
+              var(--paper-01)
+                18%,
+              var(--paper-02)
+                60%,
+              #eed9b0
+                100%
+            ) !important;
+
+
           box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.26),
-            inset 0 0 0 2px rgba(82,55,34,.14),
-            0 5px 16px rgba(0,0,0,.20) !important;
+            inset
+            0
+            0
+            0
+            2px
+            rgba(
+              255,
+              255,
+              255,
+              .42
+            ),
+
+            inset
+            0
+            0
+            0
+            4px
+            rgba(
+              132,
+              88,
+              40,
+              .20
+            ),
+
+            0
+            8px
+            22px
+            rgba(
+              0,
+              0,
+              0,
+              .34
+            ) !important;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
 
-        :global(.aof3-ledger::before),
-        :global(.aof3-ledger::after) {
-          border-color: rgba(81, 55, 35, .32) !important;
-        }
+
+        /* ================================================
+           FORCE PARCHMENT THROUGH WHOLE FACE
+           ================================================ */
 
         :global(.aof3-content) {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          overflow: hidden;
-          color: var(--ledger-ink);
+
+          position:
+            relative;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          width:
+            100%;
+
+
+          height:
+            100%;
+
+
+          min-height:
+            0;
+
+
+          box-sizing:
+            border-box;
+
+
+          padding:
+            8px
+            9px
+            4px;
+
+
+          gap:
+            5px;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            var(--ink);
+
+
           background:
+
             radial-gradient(
-              circle at 18% 14%,
-              rgba(255,255,255,.20) 0,
-              rgba(255,255,255,0) 32%
+              circle
+                at
+                12%
+                8%,
+              rgba(
+                255,
+                255,
+                255,
+                .46
+              )
+                0%,
+              rgba(
+                255,
+                255,
+                255,
+                0
+              )
+                31%
             ),
+
             radial-gradient(
-              circle at 78% 72%,
-              rgba(105,72,40,.05) 0,
-              rgba(105,72,40,0) 34%
+              circle
+                at
+                87%
+                74%,
+              rgba(
+                125,
+                83,
+                37,
+                .055
+              )
+                0%,
+              rgba(
+                125,
+                83,
+                37,
+                0
+              )
+                34%
             ),
+
             repeating-linear-gradient(
               0deg,
-              rgba(94,61,36,.012) 0,
-              rgba(94,61,36,.012) 1px,
-              transparent 1px,
-              transparent 4px
+              rgba(
+                89,
+                58,
+                31,
+                .012
+              )
+                0px,
+              rgba(
+                89,
+                58,
+                31,
+                .012
+              )
+                1px,
+              transparent
+                1px,
+              transparent
+                4px
             ),
+
             linear-gradient(
               180deg,
-              var(--ledger-paper-light) 0%,
-              #e7d5b5 50%,
-              #dfcca8 100%
-            );
-          font-variant-numeric: tabular-nums lining-nums;
+              var(--paper-00)
+                0%,
+              var(--paper-01)
+                28%,
+              var(--paper-02)
+                68%,
+              #ecd5aa
+                100%
+            ) !important;
         }
+
+
+        :global(.aof3-content::before) {
+
+          content:
+            "";
+
+
+          position:
+            absolute;
+
+
+          inset:
+            4px;
+
+
+          z-index:
+            0;
+
+
+          pointer-events:
+            none;
+
+
+          border:
+            1px solid
+            rgba(
+              139,
+              91,
+              35,
+              .46
+            );
+
+
+          border-radius:
+            10px;
+
+
+          box-shadow:
+            inset
+            0
+            0
+            0
+            1px
+            rgba(
+              255,
+              255,
+              255,
+              .30
+            );
+        }
+
 
         :global(.aof3-content::after) {
-          content: "";
-          position: absolute;
-          inset: 2px;
-          pointer-events: none;
-          border: 1px solid rgba(91, 62, 40, .15);
-          box-shadow: inset 0 0 10px rgba(90, 58, 33, .035);
+
+          content:
+            "";
+
+
+          position:
+            absolute;
+
+
+          inset:
+            7px;
+
+
+          z-index:
+            0;
+
+
+          pointer-events:
+            none;
+
+
+          border:
+            1px solid
+            rgba(
+              139,
+              91,
+              35,
+              .20
+            );
+
+
+          border-radius:
+            8px;
         }
+
+
+        /* ================================================
+           INNER CONTENT STACK
+           ================================================ */
+
+        .aof3-certificate-inner {
+
+          position:
+            relative;
+
+
+          z-index:
+            1;
+
+
+          display:
+            flex;
+
+
+          flex:
+            1
+            1
+            auto;
+
+
+          min-height:
+            0;
+
+
+          flex-direction:
+            column;
+
+
+          gap:
+            5px;
+
+
+          padding:
+            1px
+            2px
+            0;
+        }
+
+
+        /* ================================================
+           HEADER
+           ================================================ */
 
         .aof3-head {
-          position: relative;
-          z-index: 1;
-          min-height: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-label, 7px);
-          font-weight: 900;
-          letter-spacing: .36px;
-          text-transform: uppercase;
+
+          min-height:
+            17px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            space-between;
+
+
+          gap:
+            8px;
+
+
+          padding:
+            0
+            3px;
+
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7.5px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .26px;
+
+
+          text-transform:
+            uppercase;
         }
 
-        .aof3-head strong {
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-label, 7px);
-          font-weight: 950;
-          letter-spacing: .38px;
+
+        .aof3-head strong,
+        .aof3-head span {
+
+          overflow:
+            hidden;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
         }
+
+
+        .aof3-head span {
+
+          font-weight:
+            950;
+        }
+
+
+        /* ================================================
+           TOP ORNAMENT
+           ================================================ */
+
+        .aof3-ornament {
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            30px
+            auto
+            30px;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            4px;
+
+
+          height:
+            6px;
+
+
+          color:
+            var(--gold);
+        }
+
+
+        .aof3-ornament span {
+
+          height:
+            1px;
+
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(
+                154,
+                99,
+                11,
+                .68
+              ),
+              transparent
+            );
+        }
+
+
+        .aof3-ornament b {
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            6px;
+
+
+          font-weight:
+            400;
+        }
+
+
+        /* ================================================
+           MACHINE LINE
+           ================================================ */
 
         .aof3-machine-line {
-          position: relative;
-          z-index: 1;
-          min-height: 15px;
-          color: var(--ledger-ink);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-label, 7px);
-          font-weight: 800;
-          line-height: 1.15;
-          letter-spacing: .20px;
-          text-align: center;
-          text-transform: uppercase;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+
+          min-height:
+            18px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            4px;
+
+
+          overflow:
+            hidden;
+
+
+          padding:
+            0
+            4px;
+
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            8.3px;
+
+
+          font-weight:
+            800;
+
+
+          line-height:
+            1.1;
+
+
+          letter-spacing:
+            .19px;
+
+
+          text-align:
+            center;
+
+
+          text-transform:
+            uppercase;
+
+
+          white-space:
+            nowrap;
         }
+
+
+        .aof3-machine-line strong {
+
+          min-width:
+            0;
+
+
+          overflow:
+            hidden;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
+        }
+
+
+        .aof3-machine-line span {
+
+          color:
+            var(--gold);
+
+
+          flex:
+            0
+            0
+            auto;
+        }
+
+
+        /* ================================================
+           COMMON PANEL
+           ================================================ */
 
         .ledger-panel {
-          position: relative;
-          z-index: 1;
-          min-width: 0;
-          border: 1px solid var(--ledger-line);
-          border-radius: 5px;
+
+          position:
+            relative;
+
+
+          min-width:
+            0;
+
+
+          border:
+            1px solid
+            rgba(
+              151,
+              103,
+              48,
+              .57
+            );
+
+
+          border-radius:
+            6px;
+
+
           background:
+
             linear-gradient(
               180deg,
-              rgba(255,255,255,.09),
-              rgba(100,67,38,.025)
+              rgba(
+                255,
+                255,
+                255,
+                .28
+              ),
+              rgba(
+                255,
+                255,
+                255,
+                .06
+              )
+            ),
+
+            rgba(
+              247,
+              231,
+              198,
+              .34
             );
+
+
           box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.15),
-            0 1px 1px var(--ledger-shadow);
+
+            inset
+            0
+            0
+            0
+            1px
+            rgba(
+              255,
+              255,
+              255,
+              .24
+            ),
+
+            0
+            1px
+            2px
+            rgba(
+              71,
+              42,
+              20,
+              .09
+            );
         }
 
-        .ledger-panel-accent {
-          border-color: rgba(128, 88, 29, .56);
-        }
+
+        /* ================================================
+           SALE BLOCK
+           ================================================ */
 
         .aof3-sale-section {
-          flex: 0 0 auto;
-          padding: 5px 8px 6px;
+
+          flex:
+            0
+            0
+            77px;
+
+
+          padding:
+            7px
+            10px
+            6px;
+
+
+          border-color:
+            rgba(
+              158,
+              103,
+              35,
+              .66
+            );
         }
 
-        .aof3-sale-value {
-          min-height: 58px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
+
+        .aof3-sale-title {
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            8.2px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .42px;
+
+
+          text-align:
+            center;
+
+
+          text-transform:
+            uppercase;
         }
 
-        .aof3-sale-value > span {
-          color: var(--ledger-ink-soft);
-          font-size: var(--ixi-face-font-label, 7px);
-          font-weight: 950;
-          letter-spacing: .46px;
-          text-transform: uppercase;
+
+        .aof3-sale-money {
+
+          height:
+            32px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            1px;
+
+
+          margin-top:
+            1px;
         }
+
+
+        .aof3-sale-dollar {
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            21px;
+
+
+          font-weight:
+            700;
+
+
+          line-height:
+            1;
+        }
+
 
         :global(.aof3-sale-input) {
-          width: 96px;
-          max-width: 96px;
-          height: 25px;
-          margin-top: 1px;
-          border: 0;
-          border-bottom: 1px solid rgba(103, 67, 37, .54);
-          border-radius: 0;
-          background: transparent;
-          color: var(--ledger-ink);
-          padding: 0 2px;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-display, 18px);
-          font-weight: 900;
-          line-height: 1;
-          text-align: center;
-          font-variant-numeric: tabular-nums lining-nums;
-          outline: none;
+
+          width:
+            104px !important;
+
+
+          min-width:
+            104px !important;
+
+
+          max-width:
+            104px !important;
+
+
+          height:
+            31px !important;
+
+
+          margin:
+            0 !important;
+
+
+          padding:
+            0 !important;
+
+
+          border:
+            0 !important;
+
+
+          border-radius:
+            0 !important;
+
+
+          outline:
+            none !important;
+
+
+          background:
+            transparent !important;
+
+
+          color:
+            var(--ink) !important;
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif !important;
+
+
+          font-size:
+            20px !important;
+
+
+          font-weight:
+            900 !important;
+
+
+          line-height:
+            31px !important;
+
+
+          letter-spacing:
+            -.35px;
+
+
+          text-align:
+            left !important;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
 
-        :global(.aof3-sale-input:focus) {
-          border-bottom-color: var(--ledger-accent-deep);
-          box-shadow: 0 1px 0 rgba(117, 80, 24, .12);
+
+        .aof3-sale-rule {
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            minmax(
+              0,
+              1fr
+            )
+            auto
+            minmax(
+              0,
+              1fr
+            );
+
+
+          align-items:
+            center;
+
+
+          gap:
+            5px;
+
+
+          height:
+            5px;
+
+
+          padding:
+            0
+            13px;
+
+
+          color:
+            var(--gold);
         }
+
+
+        .aof3-sale-rule span {
+
+          height:
+            1px;
+
+
+          background:
+            rgba(
+              151,
+              103,
+              48,
+              .53
+            );
+        }
+
+
+        .aof3-sale-rule b {
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            7px;
+
+
+          font-weight:
+            400;
+        }
+
 
         .aof3-advertised-row {
-          width: 100%;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 18px;
-          margin-top: 4px;
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+
+          align-items:
+            center;
+
+
+          gap:
+            16px;
+
+
+          margin-top:
+            1px;
         }
 
-        .aof3-cost-grid,
-        .aof3-total-grid {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 6px;
-          min-width: 0;
+
+        /* ================================================
+           COST PANELS
+           ================================================ */
+
+        .aof3-cost-grid {
+
+          flex:
+            0
+            0
+            91px;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+
+          gap:
+            5px;
+
+
+          min-width:
+            0;
         }
+
 
         .aof3-cost-panel {
-          min-width: 0;
-          padding: 5px 7px 4px;
+
+          min-width:
+            0;
+
+
+          padding:
+            6px
+            7px
+            5px;
         }
+
+
+        /* ================================================
+           TOTALS
+           ================================================ */
 
         .aof3-total-grid {
-          min-height: 46px;
+
+          flex:
+            0
+            0
+            58px;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+
+          overflow:
+            hidden;
+
+
+          padding:
+            0;
         }
+
+
+        .aof3-total-grid::after {
+
+          content:
+            "";
+
+
+          position:
+            absolute;
+
+
+          top:
+            8px;
+
+
+          bottom:
+            8px;
+
+
+          left:
+            50%;
+
+
+          width:
+            1px;
+
+
+          background:
+            rgba(
+              151,
+              103,
+              48,
+              .39
+            );
+        }
+
+
+        /* ================================================
+           BID PACK
+           ================================================ */
 
         .aof3-bid-pack {
-          min-height: 64px;
-          padding: 5px 6px 6px;
+
+          flex:
+            1
+            1
+            auto;
+
+
+          min-height:
+            78px;
+
+
+          padding:
+            6px
+            6px
+            7px;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
         }
+
 
         .aof3-bid-pack-title {
-          display: grid;
-          grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
-          align-items: center;
-          gap: 5px;
-          margin-bottom: 4px;
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 950;
-          letter-spacing: .36px;
-          text-align: center;
-          text-transform: uppercase;
+
+          flex:
+            0
+            0
+            14px;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            minmax(
+              0,
+              1fr
+            )
+            auto
+            minmax(
+              0,
+              1fr
+            );
+
+
+          align-items:
+            center;
+
+
+          gap:
+            6px;
+
+
+          margin-bottom:
+            4px;
+
+
+          color:
+            var(--ink);
         }
+
+
+        .aof3-bid-pack-title strong {
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            8px;
+
+
+          font-weight:
+            950;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .42px;
+
+
+          text-align:
+            center;
+
+
+          text-transform:
+            uppercase;
+
+
+          white-space:
+            nowrap;
+        }
+
 
         .aof3-bid-pack-title span {
-          height: 1px;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            var(--ledger-line),
-            transparent
-          );
-        }
 
-        .aof3-bid-pack-grid {
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 3px;
-          min-width: 0;
-        }
+          height:
+            1px;
 
-        :global(.aof3-ledger input) {
-          box-sizing: border-box;
-          caret-color: var(--ledger-ink);
-        }
 
-        :global(.aof3-ledger button) {
-          color: var(--ledger-ink) !important;
-          border-color: rgba(86, 58, 37, .40) !important;
           background:
             linear-gradient(
+              90deg,
+              transparent,
+              rgba(
+                112,
+                74,
+                39,
+                .47
+              ),
+              transparent
+            );
+        }
+
+
+        .aof3-bid-pack-grid {
+
+          flex:
+            1
+            1
+            auto;
+
+
+          min-height:
+            0;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            repeat(
+              5,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+
+          gap:
+            2px;
+        }
+
+
+        /* ================================================
+           BOTTOM ORNAMENT
+           ================================================ */
+
+        .aof3-bottom-ornament {
+
+          flex:
+            0
+            0
+            5px;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            18px
+            auto
+            18px;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          gap:
+            3px;
+
+
+          color:
+            var(--gold);
+        }
+
+
+        .aof3-bottom-ornament span {
+
+          height:
+            1px;
+
+
+          background:
+            rgba(
+              154,
+              99,
+              11,
+              .46
+            );
+        }
+
+
+        .aof3-bottom-ornament b {
+
+          font-size:
+            5px;
+
+
+          line-height:
+            1;
+        }
+
+
+        /* ================================================
+           FULL-WIDTH FOOTER SKIN
+
+           THIS IS THE IMPORTANT FIX:
+           THE PARCHMENT DOES NOT STOP ABOVE
+           THE ACTION FOOTER ANYMORE.
+           ================================================ */
+
+        :global(.aof3-footer-skin) {
+
+          width:
+            100%;
+
+
+          height:
+            100%;
+
+
+          min-height:
+            42px;
+
+
+          display:
+            flex;
+
+
+          align-items:
+            center;
+
+
+          box-sizing:
+            border-box;
+
+
+          padding:
+            6px
+            10px
+            8px;
+
+
+          border-top:
+            1px solid
+            rgba(
+              128,
+              82,
+              36,
+              .45
+            );
+
+
+          background:
+
+            linear-gradient(
               180deg,
-              rgba(255,255,255,.12),
-              rgba(89,59,34,.03)
+              rgba(
+                255,
+                255,
+                255,
+                .16
+              )
+                0%,
+              rgba(
+                255,
+                255,
+                255,
+                .02
+              )
+                100%
+            ),
+
+            linear-gradient(
+              180deg,
+              #eed9af
+                0%,
+              #e6c995
+                100%
             ) !important;
+
+
           box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.12),
-            0 1px 1px rgba(72,46,27,.08) !important;
+            inset
+            0
+            1px
+            0
+            rgba(
+              255,
+              255,
+              255,
+              .35
+            );
         }
 
-        :global(.aof3-ledger button:hover) {
-          border-color: rgba(117, 80, 24, .68) !important;
-          background: rgba(135, 91, 28, .07) !important;
+
+        :global(.aof3-footer-skin > *) {
+
+          width:
+            100%;
         }
 
-        :global(.aof3-ledger button svg) {
-          color: var(--ledger-ink) !important;
-          fill: currentColor;
+
+        :global(.aof3-footer-skin button) {
+
+          min-height:
+            28px !important;
+
+
+          color:
+            var(--ink) !important;
+
+
+          border:
+            1px solid
+            rgba(
+              126,
+              82,
+              38,
+              .46
+            ) !important;
+
+
+          border-radius:
+            4px !important;
+
+
+          background:
+
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .32
+              ),
+              rgba(
+                144,
+                92,
+                34,
+                .04
+              )
+            ) !important;
+
+
+          box-shadow:
+
+            inset
+            0
+            0
+            0
+            1px
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            ),
+
+            0
+            1px
+            1px
+            rgba(
+              69,
+              42,
+              20,
+              .08
+            ) !important;
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif !important;
+
+
+          font-size:
+            7px !important;
+
+
+          font-weight:
+            900 !important;
+
+
+          letter-spacing:
+            .28px !important;
+
+
+          text-transform:
+            uppercase !important;
         }
+
+
+        :global(.aof3-footer-skin button:hover) {
+
+          border-color:
+            var(--gold) !important;
+
+
+          background:
+            rgba(
+              172,
+              111,
+              22,
+              .10
+            ) !important;
+        }
+
+
+        :global(.aof3-footer-skin button svg) {
+
+          color:
+            var(--ink) !important;
+
+
+          fill:
+            currentColor !important;
+        }
+
+
+        /* ================================================
+           GLOBAL INPUT RESET
+           ================================================ */
+
+        :global(.aof3-certificate input) {
+
+          box-sizing:
+            border-box;
+
+
+          caret-color:
+            var(--ink);
+
+
+          outline:
+            none;
+        }
+
+
+        :global(.aof3-certificate input::selection) {
+
+          background:
+            rgba(
+              165,
+              111,
+              28,
+              .20
+            );
+        }
+
       `}</style>
+
     </IXIFaceFrame>
   );
 }
+
+
+/* =========================================================
+   MONEY INPUT
+   ========================================================= */
 
 function MoneyInput({
   value,
   onChange,
   onSave,
-  className = ""
+
+  className = "",
+
+  showPrefix = true
 }) {
   const displayValue =
-    Number(value)
+    Number(
+      value
+    )
       ? Math.min(
-          Number(value),
+          Number(
+            value
+          ),
           MAX_INPUT_VALUE
-        ).toLocaleString("en-US")
+        ).toLocaleString(
+          "en-US"
+        )
       : "";
 
+
   return (
-    <input
-      className={className}
-      value={displayValue}
-      inputMode="numeric"
-      autoComplete="off"
-      aria-label="Money value"
-      onPointerDown={event => {
-        event.stopPropagation();
-      }}
-      onChange={event => {
-        onChange?.(
-          clampMoneyInput(
-            event.target.value
-          )
-        );
-      }}
-      onBlur={() => {
-        onSave?.();
-      }}
-      onKeyDown={event => {
-        if (event.key !== "Enter") {
-          return;
+    <span
+      className={[
+        "aof3-money-editor",
+        className
+          ? `${className}-shell`
+          : ""
+      ]
+        .filter(
+          Boolean
+        )
+        .join(
+          " "
+        )}
+    >
+
+      {showPrefix
+        ? (
+          <span className="aof3-money-prefix">
+            $
+          </span>
+        )
+        : null}
+
+
+      <input
+        className={
+          className
+        }
+        value={
+          displayValue
+        }
+        inputMode="numeric"
+        autoComplete="off"
+        aria-label="Money value"
+
+        onPointerDown={
+          event => {
+            event
+              .stopPropagation();
+          }
         }
 
-        event.preventDefault();
-        event.stopPropagation();
+        onChange={
+          event => {
+            onChange?.(
+              clampMoneyInput(
+                event
+                  .target
+                  .value
+              )
+            );
+          }
+        }
 
-        onSave?.();
-        event.currentTarget.blur();
-      }}
-    />
+        onBlur={
+          () => {
+            onSave?.();
+          }
+        }
+
+        onKeyDown={
+          event => {
+            if (
+              event.key !==
+                "Enter"
+            ) {
+              return;
+            }
+
+
+            event
+              .preventDefault();
+
+            event
+              .stopPropagation();
+
+
+            onSave?.();
+
+            event
+              .currentTarget
+              .blur();
+          }
+        }
+      />
+
+
+      <style jsx>{`
+
+        .aof3-money-editor {
+
+          display:
+            inline-flex;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            flex-end;
+
+
+          min-width:
+            0;
+
+
+          color:
+            var(--ink);
+        }
+
+
+        .aof3-money-prefix {
+
+          flex:
+            0
+            0
+            auto;
+
+
+          margin-right:
+            1px;
+
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            8.4px;
+
+
+          font-weight:
+            800;
+
+
+          line-height:
+            1;
+        }
+
+      `}</style>
+
+    </span>
   );
 }
+
+
+/* =========================================================
+   MINI ADVERTISED VALUE
+   ========================================================= */
 
 function MiniValue({
   label,
@@ -1101,62 +3165,234 @@ function MiniValue({
 }) {
   return (
     <label className="aof3-mini-value">
-      <span>{label}</span>
+
+      <span className="aof3-mini-label">
+        {label}
+      </span>
+
+
+      <span className="aof3-mini-rule" />
+
 
       <MoneyInput
-        value={value}
-        onChange={onChange}
-        onSave={onSave}
+        value={
+          value
+        }
+        onChange={
+          onChange
+        }
+        onSave={
+          onSave
+        }
         className="aof3-mini-input"
       />
 
+
       <style jsx>{`
+
         .aof3-mini-value {
-          min-width: 0;
-          display: grid;
-          grid-template-columns: auto 54px;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
+
+          min-width:
+            0;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            auto
+            minmax(
+              6px,
+              1fr
+            )
+            54px;
+
+
+          align-items:
+            center;
+
+
+          column-gap:
+            4px;
         }
 
-        .aof3-mini-value span {
-          color: var(--ledger-ink-soft);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 900;
-          letter-spacing: .24px;
-          text-transform: uppercase;
-          white-space: nowrap;
+
+        .aof3-mini-label {
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7px;
+
+
+          font-weight:
+            900;
+
+
+          letter-spacing:
+            .18px;
+
+
+          text-transform:
+            uppercase;
+
+
+          white-space:
+            nowrap;
         }
+
+
+        .aof3-mini-rule {
+
+          height:
+            1px;
+
+
+          min-width:
+            0;
+
+
+          background:
+            rgba(
+              123,
+              81,
+              39,
+              .26
+            );
+        }
+
+
+        :global(.aof3-mini-input-shell) {
+
+          width:
+            54px;
+
+
+          min-width:
+            54px;
+
+
+          max-width:
+            54px;
+        }
+
 
         :global(.aof3-mini-input) {
-          width: 54px;
-          min-width: 54px;
-          max-width: 54px;
-          height: 15px;
-          border: 0;
-          border-bottom: 1px solid rgba(86, 58, 37, .28);
-          background: transparent;
-          color: var(--ledger-ink);
-          padding: 0 1px;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-value, 9px);
-          font-weight: 800;
-          text-align: right;
-          font-variant-numeric: tabular-nums lining-nums;
-          outline: none;
+
+          width:
+            46px !important;
+
+
+          min-width:
+            46px !important;
+
+
+          max-width:
+            46px !important;
+
+
+          height:
+            16px !important;
+
+
+          margin:
+            0 !important;
+
+
+          padding:
+            0
+            1px !important;
+
+
+          border:
+            0 !important;
+
+
+          border-bottom:
+            1px solid
+            rgba(
+              111,
+              72,
+              35,
+              .30
+            ) !important;
+
+
+          border-radius:
+            0 !important;
+
+
+          background:
+            transparent !important;
+
+
+          color:
+            var(--ink) !important;
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif !important;
+
+
+          font-size:
+            8px !important;
+
+
+          font-weight:
+            800 !important;
+
+
+          line-height:
+            16px !important;
+
+
+          text-align:
+            right !important;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
+
+
+        :global(.aof3-mini-input:focus) {
+
+          border-bottom-color:
+            var(--gold) !important;
+        }
+
       `}</style>
+
     </label>
   );
 }
 
+
+/* =========================================================
+   LEDGER ROW
+   ========================================================= */
+
 function LedgerRow({
   label,
   value,
+
   input = false,
+
   muted = false,
   emphasized = false,
+
   onChange,
   onSave
 }) {
@@ -1164,287 +3400,995 @@ function LedgerRow({
     <div
       className={[
         "aof3-row",
-        muted ? "muted" : "",
-        emphasized ? "emphasized" : ""
+
+        muted
+          ? "muted"
+          : "",
+
+        emphasized
+          ? "emphasized"
+          : ""
       ]
-        .filter(Boolean)
-        .join(" ")}
+        .filter(
+          Boolean
+        )
+        .join(
+          " "
+        )}
     >
+
       <span className="aof3-row-label">
         {label}
       </span>
 
+
       <span className="aof3-row-rule" />
 
-      {input ? (
-        <MoneyInput
-          value={value}
-          onChange={onChange}
-          onSave={onSave}
-          className="aof3-input"
-        />
-      ) : (
-        <strong className="aof3-row-value">
-          {value}
-        </strong>
-      )}
+
+      {input
+        ? (
+          <MoneyInput
+            value={
+              value
+            }
+            onChange={
+              onChange
+            }
+            onSave={
+              onSave
+            }
+            className="aof3-input"
+          />
+        )
+        : (
+          <strong className="aof3-row-value">
+            {value}
+          </strong>
+        )}
+
 
       <style jsx>{`
+
         .aof3-row {
-          width: 100%;
-          min-width: 0;
-          height: 19px;
-          display: grid;
-          grid-template-columns: auto minmax(6px, 1fr) 56px;
-          align-items: center;
-          column-gap: 4px;
-          color: var(--ledger-ink);
-          overflow: hidden;
+
+          width:
+            100%;
+
+
+          min-width:
+            0;
+
+
+          height:
+            16px;
+
+
+          display:
+            grid;
+
+
+          grid-template-columns:
+            auto
+            minmax(
+              4px,
+              1fr
+            )
+            61px;
+
+
+          align-items:
+            center;
+
+
+          column-gap:
+            3px;
+
+
+          color:
+            var(--ink);
+
+
+          overflow:
+            hidden;
         }
+
+
+        .aof3-row +
+        .aof3-row {
+
+          border-top:
+            1px dotted
+            rgba(
+              101,
+              66,
+              34,
+              .13
+            );
+        }
+
 
         .aof3-row-label {
-          min-width: 0;
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 900;
-          letter-spacing: .18px;
-          text-transform: uppercase;
-          white-space: nowrap;
+
+          min-width:
+            0;
+
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7.2px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .12px;
+
+
+          text-transform:
+            uppercase;
+
+
+          white-space:
+            nowrap;
         }
+
 
         .aof3-row-rule {
-          align-self: center;
-          height: 1px;
-          min-width: 0;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(86,58,37,.19)
-          );
+
+          height:
+            1px;
+
+
+          min-width:
+            0;
+
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(
+                103,
+                67,
+                35,
+                .25
+              )
+            );
         }
+
 
         .aof3-row-value {
-          width: 56px;
-          min-width: 56px;
-          max-width: 56px;
-          overflow: hidden;
-          color: var(--ledger-ink);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-value, 9px);
-          font-weight: 800;
-          text-align: right;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-variant-numeric: tabular-nums lining-nums;
+
+          width:
+            61px;
+
+
+          min-width:
+            61px;
+
+
+          max-width:
+            61px;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            8.7px;
+
+
+          font-weight:
+            800;
+
+
+          line-height:
+            1;
+
+
+          text-align:
+            right;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
 
-        .aof3-row.muted .aof3-row-label,
-        .aof3-row.muted .aof3-row-value {
-          color: rgba(67, 43, 29, .62);
+
+        .aof3-row.muted
+        .aof3-row-label,
+        .aof3-row.muted
+        .aof3-row-value {
+
+          color:
+            rgba(
+              74,
+              48,
+              32,
+              .70
+            );
         }
 
-        .aof3-row.emphasized .aof3-row-label,
-        .aof3-row.emphasized .aof3-row-value {
-          color: var(--ledger-ink);
-          font-weight: 950;
+
+        .aof3-row.emphasized
+        .aof3-row-label,
+        .aof3-row.emphasized
+        .aof3-row-value {
+
+          color:
+            var(--ink);
+
+
+          font-weight:
+            950;
         }
+
+
+        :global(.aof3-input-shell) {
+
+          width:
+            61px;
+
+
+          min-width:
+            61px;
+
+
+          max-width:
+            61px;
+        }
+
 
         :global(.aof3-input) {
-          width: 56px !important;
-          min-width: 56px !important;
-          max-width: 56px !important;
-          height: 17px;
-          margin: 0 !important;
-          border: 0;
-          border-bottom: 1px solid rgba(86, 58, 37, .24);
-          border-radius: 0;
-          background: transparent;
-          color: var(--ledger-ink);
-          padding: 0 1px !important;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-value, 9px);
-          font-weight: 800;
-          line-height: 17px;
-          text-align: right;
-          font-variant-numeric: tabular-nums lining-nums;
-          outline: none;
+
+          width:
+            52px !important;
+
+
+          min-width:
+            52px !important;
+
+
+          max-width:
+            52px !important;
+
+
+          height:
+            15px !important;
+
+
+          margin:
+            0 !important;
+
+
+          padding:
+            0
+            1px !important;
+
+
+          border:
+            0 !important;
+
+
+          border-bottom:
+            1px solid
+            rgba(
+              103,
+              67,
+              35,
+              .24
+            ) !important;
+
+
+          border-radius:
+            0 !important;
+
+
+          background:
+            transparent !important;
+
+
+          color:
+            var(--ink) !important;
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif !important;
+
+
+          font-size:
+            8.5px !important;
+
+
+          font-weight:
+            800 !important;
+
+
+          line-height:
+            15px !important;
+
+
+          text-align:
+            right !important;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
 
+
         :global(.aof3-input:focus) {
-          border-bottom-color: var(--ledger-accent-deep);
+
+          border-bottom-color:
+            var(--gold) !important;
         }
+
       `}</style>
+
     </div>
   );
 }
 
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
 function LedgerSummary({
   label,
   value,
+
   detail = "",
+
   accent = false,
   negative = false
 }) {
   return (
-    <section
+    <div
       className={[
         "aof3-summary",
-        "ledger-panel",
-        accent ? "accent" : "",
-        negative ? "negative" : ""
+
+        accent
+          ? "accent"
+          : "",
+
+        negative
+          ? "negative"
+          : ""
       ]
-        .filter(Boolean)
-        .join(" ")}
+        .filter(
+          Boolean
+        )
+        .join(
+          " "
+        )}
     >
-      <span>{label}</span>
-      <strong>{value}</strong>
-      {detail ? <em>{detail}</em> : null}
+
+      <span>
+        {label}
+      </span>
+
+
+      <strong>
+        {value}
+      </strong>
+
+
+      {detail
+        ? (
+          <em>
+            {detail}
+          </em>
+        )
+        : null}
+
 
       <style jsx>{`
+
         .aof3-summary {
-          min-width: 0;
-          min-height: 46px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 4px 5px;
-          color: var(--ledger-ink);
+
+          position:
+            relative;
+
+
+          min-width:
+            0;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          padding:
+            6px
+            4px;
+
+
+          color:
+            var(--ink);
         }
+
 
         .aof3-summary > span {
-          color: var(--ledger-ink-soft);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 900;
-          letter-spacing: .24px;
-          text-transform: uppercase;
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7.2px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .25px;
+
+
+          text-transform:
+            uppercase;
         }
+
 
         .aof3-summary strong {
-          max-width: 100%;
-          overflow: hidden;
-          color: var(--ledger-ink);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: var(--ixi-face-font-display, 15px);
-          font-weight: 900;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-variant-numeric: tabular-nums lining-nums;
+
+          max-width:
+            100%;
+
+
+          margin-top:
+            2px;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            var(--ink);
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-size:
+            17px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            .98;
+
+
+          letter-spacing:
+            -.3px;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
         }
+
 
         .aof3-summary em {
-          margin-top: -1px;
-          color: var(--ledger-ink-soft);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 900;
-          font-style: normal;
+
+          margin-top:
+            1px;
+
+
+          color:
+            var(--ink-soft);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7px;
+
+
+          font-weight:
+            950;
+
+
+          font-style:
+            normal;
+
+
+          line-height:
+            1;
         }
 
-        .aof3-summary.accent {
-          border-color: rgba(128, 88, 29, .48);
-          background: rgba(151, 102, 29, .035);
-        }
 
         .aof3-summary.accent strong,
         .aof3-summary.accent em {
-          color: var(--ledger-accent-deep);
+
+          color:
+            var(--gold);
         }
+
 
         .aof3-summary.negative strong,
         .aof3-summary.negative em {
-          color: #7c2e24;
+
+          color:
+            #7b2b20;
         }
+
       `}</style>
-    </section>
+
+    </div>
   );
 }
 
+
+/* =========================================================
+   BID SCENARIO
+   ========================================================= */
+
 function BidScenario({
   scenario,
+
+  scenarioNumber,
+
   active = false
 }) {
   return (
     <div
       className={[
         "aof3-bid-scenario",
-        active ? "active" : ""
+
+        active
+          ? "active"
+          : ""
       ]
-        .filter(Boolean)
-        .join(" ")}
+        .filter(
+          Boolean
+        )
+        .join(
+          " "
+        )}
     >
-      <strong>{money(scenario.bid)}</strong>
-      <span>PROFIT</span>
-      <b>{money(scenario.totalProfit)}</b>
-      <em>{percentage(scenario.profitPercent)}</em>
+
+      <span className="aof3-scenario-number">
+        SCENARIO {scenarioNumber}
+      </span>
+
+
+      <strong>
+        {money(
+          scenario.bid
+        )}
+      </strong>
+
+
+      <span className="aof3-profit-label">
+        PROFIT
+      </span>
+
+
+      <b>
+        {money(
+          scenario
+            .totalProfit
+        )}
+      </b>
+
+
+      <em>
+        {percentage(
+          scenario
+            .profitPercent
+        )}
+      </em>
+
 
       <style jsx>{`
+
         .aof3-bid-scenario {
-          min-width: 0;
-          min-height: 43px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3px 1px;
-          border: 1px solid rgba(86,58,37,.26);
-          border-radius: 3px;
-          background: rgba(255,255,255,.045);
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
-          color: var(--ledger-ink);
-          overflow: hidden;
+
+          min-width:
+            0;
+
+
+          min-height:
+            52px;
+
+
+          display:
+            flex;
+
+
+          flex-direction:
+            column;
+
+
+          align-items:
+            center;
+
+
+          justify-content:
+            center;
+
+
+          padding:
+            4px
+            1px
+            3px;
+
+
+          border:
+            1px solid
+            rgba(
+              116,
+              75,
+              36,
+              .24
+            );
+
+
+          border-radius:
+            3px;
+
+
+          background:
+            rgba(
+              255,
+              250,
+              237,
+              .22
+            );
+
+
+          color:
+            var(--ink);
+
+
+          overflow:
+            hidden;
         }
 
+
         .aof3-bid-scenario.active {
-          border-color: rgba(128, 88, 29, .62);
-          background: rgba(151, 102, 29, .06);
+
+          border-color:
+            rgba(
+              154,
+              99,
+              11,
+              .83
+            );
+
+
+          background:
+
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .28
+              ),
+              rgba(
+                185,
+                126,
+                31,
+                .09
+              )
+            );
+
+
           box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,.08),
-            0 0 0 1px rgba(128,88,29,.08);
+
+            inset
+            0
+            0
+            0
+            1px
+            rgba(
+              255,
+              255,
+              255,
+              .20
+            ),
+
+            0
+            0
+            0
+            1px
+            rgba(
+              154,
+              99,
+              11,
+              .12
+            );
         }
+
+
+        .aof3-scenario-number {
+
+          max-width:
+            100%;
+
+
+          overflow:
+            hidden;
+
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            5.8px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .05px;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          text-transform:
+            uppercase;
+
+
+          white-space:
+            nowrap;
+        }
+
 
         .aof3-bid-scenario strong,
         .aof3-bid-scenario b {
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-family: Georgia, "Times New Roman", serif;
-          font-variant-numeric: tabular-nums lining-nums;
+
+          max-width:
+            100%;
+
+
+          overflow:
+            hidden;
+
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+
+          font-variant-numeric:
+            tabular-nums
+            lining-nums;
+
+
+          text-overflow:
+            ellipsis;
+
+
+          white-space:
+            nowrap;
         }
+
 
         .aof3-bid-scenario strong {
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-label, 7px);
-          font-weight: 900;
+
+          margin-top:
+            3px;
+
+
+          color:
+            var(--ink);
+
+
+          font-size:
+            8.3px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
         }
+
 
         .aof3-bid-scenario.active strong {
-          color: var(--ledger-accent-deep);
+
+          color:
+            var(--gold);
         }
 
-        .aof3-bid-scenario span {
-          margin-top: 1px;
-          color: var(--ledger-ink-soft);
-          font-size: 5.2px;
-          font-weight: 900;
-          letter-spacing: .16px;
-          text-transform: uppercase;
+
+        .aof3-profit-label {
+
+          margin-top:
+            3px;
+
+
+          color:
+            var(--ink-2);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            5.6px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
+
+
+          letter-spacing:
+            .14px;
+
+
+          text-transform:
+            uppercase;
         }
+
 
         .aof3-bid-scenario b {
-          color: var(--ledger-ink);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 800;
+
+          margin-top:
+            2px;
+
+
+          color:
+            var(--ink);
+
+
+          font-size:
+            7.6px;
+
+
+          font-weight:
+            900;
+
+
+          line-height:
+            1;
         }
 
+
         .aof3-bid-scenario em {
-          margin-top: 1px;
-          color: var(--ledger-accent-deep);
-          font-size: var(--ixi-face-font-micro, 6.5px);
-          font-weight: 950;
-          font-style: normal;
+
+          margin-top:
+            3px;
+
+
+          color:
+            var(--gold);
+
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+
+          font-size:
+            7.1px;
+
+
+          font-weight:
+            950;
+
+
+          font-style:
+            normal;
+
+
+          line-height:
+            1;
         }
+
       `}</style>
+
     </div>
   );
 }
