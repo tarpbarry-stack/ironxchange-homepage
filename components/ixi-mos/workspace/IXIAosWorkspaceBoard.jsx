@@ -44,17 +44,20 @@ export default function IXIAosWorkspaceBoard({
   sendListingToBack,
   sendMachineToArmedDestination,
 
-    exposeEquipmentMachineToBoard,
+  exposeEquipmentMachineToBoard,
   returnAllEquipmentHome,
 
   onAddObject,
 
-onExposeContainerChildren,
-onGatherContainerChildren,
+  onExposeContainerChildren,
+  onGatherContainerChildren,
+  onReturnContainerChildren,
 
-onCreateObjectChild,
-onSaveObjectName,
-onDeleteObject
+  onSaveContainerPresentation,
+
+  onCreateObjectChild,
+  onSaveObjectName,
+  onDeleteObject
 }) {
   return (
     <IXIBoardSurface
@@ -138,45 +141,41 @@ onDeleteObject
         }
 
         getItemReorderBehavior={
-  item => {
-    const objectType =
-      String(
-        item?.objectType ||
-        ""
-      )
-        .trim()
-        .toLowerCase();
+          item => {
+            const objectType =
+              String(
+                item?.objectType ||
+                ""
+              )
+                .trim()
+                .toLowerCase();
 
-    const isSystemIndex =
-      objectType ===
-      "system-index";
+            const isSystemIndex =
+              objectType ===
+              "system-index";
 
-    const isAosContainer =
-      Boolean(
-        item?.objectId &&
-        objectType !==
-          "machine"
-      );
+            const isAosContainer =
+              Boolean(
+                item?.objectId &&
+                objectType !==
+                  "machine"
+              );
 
-    /*
-     * CONTAINERS MUST STAY PUT
-     * while another object is being
-     * dragged across the Board.
-     *
-     * They remain draggable themselves,
-     * but foreign drags do not cause
-     * sortable displacement.
-     */
-    if (
-      isSystemIndex ||
-      isAosContainer
-    ) {
-      return "self-only";
-    }
+            /*
+             * Containers remain draggable
+             * themselves, but foreign drags
+             * do not displace them.
+             */
+            if (
+              isSystemIndex ||
+              isAosContainer
+            ) {
+              return "self-only";
+            }
 
-    return "normal";
-  }
-}
+            return "normal";
+          }
+        }
 
         getCustomItemId={
           item => {
@@ -220,9 +219,11 @@ onDeleteObject
               .trim()
               .toLowerCase();
 
-          /*
-           * SYSTEM INDEX
-           */
+
+          /* ===============================================
+             SYSTEM INDEX SMART CONTAINER
+             =============================================== */
+
           if (
             objectType ===
             "system-index"
@@ -295,186 +296,181 @@ onDeleteObject
                   }
                 }
 
+                /*
+                 * TEMPORARY LEGACY CONSOLE SEAM.
+                 *
+                 * Do not add new behavior here.
+                 * We replace this with the generic
+                 * AOS container console after the
+                 * Smart Container Face is stable.
+                 */
                 onOpenConsole={
-  () => {
-    returnAllEquipmentHome?.();
-  }
-}
+                  () => {
+                    returnAllEquipmentHome?.();
+                  }
+                }
 
-onExposeContents={
-  onExposeContainerChildren
-}
+                onExposeContents={
+                  onExposeContainerChildren
+                }
 
-onGatherContents={
-  onGatherContainerChildren
-}
+                onGatherContents={
+                  onGatherContainerChildren
+                }
 
-onAddObject={
-  onAddObject
-}
+                onReturnContents={
+                  onReturnContainerChildren
+                }
+
+                onAddObject={
+                  onAddObject
+                }
+
+                onSavePresentation={
+                  onSaveContainerPresentation
+                }
               />
             );
           }
 
-          
-          /*
-           * DURABLE MOS OBJECT
-           *
-           * Machines remain on their
-           * existing IronXchange path.
-           */
-               if (
-        item?.objectId &&
-        objectType &&
-        objectType !==
-          "machine"
-      ) {
 
-const parentObject =
-  item?.directContainerId &&
-  typeof getWorkspaceObjectById ===
-    "function"
-    ? getWorkspaceObjectById(
-        item.directContainerId
-      )
-    : null;
+          /* ===============================================
+             DURABLE MOS OBJECT / CHILD CONTAINER
 
-const parentLabel =
-  String(
-    parentObject?.displayName ||
-    parentObject?.label ||
-    ""
-  ).trim();
-                 
-      const directChildren =
-  typeof getWorkspaceObjectById ===
-  "function"
-    ? (
-        item?.items ||
-        item?.children ||
-        []
-      )
-    : [];
+             Machines remain on their existing
+             IronXchange path.
+             =============================================== */
 
-return (
-  <IXIMosObjectCard
+          if (
+            item?.objectId &&
+            objectType &&
+            objectType !==
+              "machine"
+          ) {
+            const parentObject =
+              item?.directContainerId &&
+              typeof getWorkspaceObjectById ===
+                "function"
+                ? getWorkspaceObjectById(
+                    item.directContainerId
+                  )
+                : null;
 
-    object={
-      item
-    }
+            const parentLabel =
+              String(
+                parentObject?.displayName ||
+                parentObject?.label ||
+                ""
+              ).trim();
 
-    /*
-     * YELLOW PATH LABEL
-     *
-     * LOCATIONS
-     * WICHITA FALLS
-     *
-     * WICHITA FALLS
-     * MAIN SHOP
-     */
-    parentLabel={
-      parentLabel
-    }
+            const directChildren =
+              typeof getWorkspaceObjectById ===
+                "function"
+                ? (
+                    item?.items ||
+                    item?.children ||
+                    []
+                  )
+                : [];
 
-    /*
-     * DIRECT CHILD COLLECTION
-     *
-     * Right now this uses any direct
-     * child collection already carried
-     * by the object.
-     *
-     * We will replace this with the
-     * canonical workspace/AWS resolver
-     * immediately after this compiles.
-     */
-    items={
-      directChildren
-    }
+            return (
+              <IXIMosObjectCard
+                object={
+                  item
+                }
 
-    ixiState={
-      ixiCardState[
-        id
-      ] || {
-        color: "none",
-        outline: 1,
-        face: 1,
-        actionNotice: null
-      }
-    }
+                parentLabel={
+                  parentLabel
+                }
 
-    ixiCardState={
-      ixiCardState
-    }
+                items={
+                  directChildren
+                }
 
-    onIxiStateChange={
-      updateIxiCardState
-    }
+                ixiState={
+                  ixiCardState[
+                    id
+                  ] || {
+                    color: "none",
+                    outline: 1,
+                    face: 1,
+                    actionNotice: null
+                  }
+                }
 
-    dragHandleProps={
-      dragHandleProps
-    }
+                ixiCardState={
+                  ixiCardState
+                }
 
-    workspaceDropPolicy={{
-      enabled: true,
-      acceptedObjectTypes: []
-    }}
+                onIxiStateChange={
+                  updateIxiCardState
+                }
 
-    workspaceDropSurface={
-      "board"
-    }
+                dragHandleProps={
+                  dragHandleProps
+                }
 
-    armedDestination={
-      armedDestination
-    }
+                workspaceDropPolicy={{
+                  enabled: true,
+                  acceptedObjectTypes: []
+                }}
 
-    onSendFront={
-      sendListingToFront
-    }
+                workspaceDropSurface={
+                  "board"
+                }
 
-    onSendBack={
-      sendListingToBack
-    }
+                armedDestination={
+                  armedDestination
+                }
 
-    onSendToArmedDestination={
-      sendMachineToArmedDestination
-    }
+                onSendFront={
+                  sendListingToFront
+                }
 
-    onExposeObject={
-      child => {
-        onExposeContainerChildren?.({
-          container:
-            item,
+                onSendBack={
+                  sendListingToBack
+                }
 
-          child
-        });
-      }
-    }
+                onSendToArmedDestination={
+                  sendMachineToArmedDestination
+                }
 
-    onExposeContents={
-      onExposeContainerChildren
-    }
+                onExposeObject={
+                  child => {
+                    onExposeContainerChildren?.({
+                      container:
+                        item,
 
-    onGatherContents={
-      onGatherContainerChildren
-    }
+                      child
+                    });
+                  }
+                }
 
-    onAddChild={
-      onCreateObjectChild
-    }
+                onExposeContents={
+                  onExposeContainerChildren
+                }
 
-    onSaveName={
-      onSaveObjectName
-    }
+                onGatherContents={
+                  onGatherContainerChildren
+                }
 
-    onDelete={
-      onDeleteObject
-    }
-  />
-);
-      }
+                onAddChild={
+                  onCreateObjectChild
+                }
+
+                onSaveName={
+                  onSaveObjectName
+                }
+
+                onDelete={
+                  onDeleteObject
+                }
+              />
+            );
+          }
 
 
-      return null;
+          return null;
         }}
       />
     </IXIBoardSurface>
