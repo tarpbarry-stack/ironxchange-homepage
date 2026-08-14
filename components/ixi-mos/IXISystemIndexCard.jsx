@@ -1928,66 +1928,49 @@ function returnContents(
 
         .preview-arrow {
           position: absolute;
-          top: 50%;
+          top: 92%;
 
-          width: 28px;
-          height: 42px;
+          width: 22px;
+          height: 92px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          transform: translateY(-50%);
 
-          transform:
-            translateY(-50%);
+          border: none;
+          background: rgba(0,0,0,.06);
+          color: rgba(255,255,255,.42);
 
-          border:
-            1px solid
-            rgba(255,255,255,.12);
-
-          background:
-            rgba(0,0,0,.44);
-
-          color:
-            rgba(255,255,255,.76);
-
-          font-size: 25px;
-          font-weight: 800;
-          line-height: 1;
-
+          font-size: 28px;
+          font-weight: 300;
           cursor: pointer;
+          z-index: 5;
+          opacity: 0;
 
-          z-index: 4;
+          transition:
+            opacity .18s ease,
+            background .18s ease,
+            color .18s ease;
+        }
 
-          backdrop-filter:
-            blur(2px);
+        .system-index-card:hover
+        .preview-arrow {
+          opacity: 1;
         }
 
         .preview-prev {
-          left: 6px;
-
-          border-radius:
-            5px 9px 9px 5px;
+          left: 0;
+          border-radius: 0 10px 10px 0;
         }
 
         .preview-next {
-          right: 6px;
-
-          border-radius:
-            9px 5px 5px 9px;
+          right: 0;
+          border-radius: 10px 0 0 10px;
         }
-
 
         .preview-arrow:hover {
-          color: #ffc400;
-
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .025
-            );
+          background: rgba(0,0,0,.14);
+          color: rgba(255,255,255,.68);
         }
+
 
 
         /* ===============================================
@@ -2062,7 +2045,7 @@ function returnContents(
   left: 0;
   right: 0;
 
-  bottom: 80px;
+  bottom: 0;
 
   height: 27px;
 
