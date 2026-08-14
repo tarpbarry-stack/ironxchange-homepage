@@ -11,7 +11,7 @@ import {
   removeConsoleSlot,
   cycleConsoleSlotFace,
   createConsoleSlotsPatch
-} from "../../ixi-chassis/IXIConsoleEngine";
+} from "../../ixi-chassis/IXIObjectConsoleEngine";
 
 const PANEL_WIDTH = 298;
 const PANEL_OVERLAP = 1;
