@@ -1,3 +1,6 @@
+import IXIScaledCardShell
+  from "../../ixi-machine-object/IXIScaledCardShell";
+
 import IXIObjectCardActuator
   from "../../ixi-chassis/IXIObjectCardActuator";
 
@@ -24,6 +27,9 @@ export default function IXISystemIndexConsole({
 
   ixiCardState = {},
   updateIxiCardState,
+
+  enableCardScaling = false,
+  cardScaleMode = "xl",
 
   renderSystemIndexCard
 }) {
@@ -394,7 +400,20 @@ export default function IXISystemIndexConsole({
     );
 
 
-  return (
+  const consoleNativeWidth =
+    (
+      slots.length *
+      PANEL_WIDTH
+    ) -
+    (
+      Math.max(
+        slots.length - 1,
+        0
+      ) *
+      PANEL_OVERLAP
+    );
+
+  const assembledConsole = (
     <div
       className="system-index-console-root"
       style={{
@@ -657,6 +676,36 @@ export default function IXISystemIndexConsole({
         }
       `}</style>
     </div>
+  );
+
+  return enableCardScaling ? (
+    <IXIScaledCardShell
+      size={
+        cardScaleMode
+      }
+
+      objectFamily="container"
+
+      nativeWidth={
+        consoleNativeWidth
+      }
+
+      nativeHeight={
+        PANEL_HEIGHT
+      }
+
+      slotCount={
+        slots.length
+      }
+
+      seamOverlap={
+        PANEL_OVERLAP
+      }
+    >
+      {assembledConsole}
+    </IXIScaledCardShell>
+  ) : (
+    assembledConsole
   );
 }
 
