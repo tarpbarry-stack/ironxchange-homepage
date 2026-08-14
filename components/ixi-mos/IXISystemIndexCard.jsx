@@ -32,6 +32,14 @@ import {
   getListingId
 } from "../../lib/listingFormatters";
 
+import {
+  formatAosContainerMoney,
+  getAosObjectDisplayName,
+  getAosObjectId,
+  getAosObjectPrimaryImage,
+  getSmartContainerPresentation
+} from "./system-index/IXISystemIndexPresentationEngine";
+
 
 /* =========================================================
    HELPERS
@@ -45,111 +53,33 @@ function clean(value) {
 
 
 function formatMoney(value) {
-  const amount =
-    Number(value || 0);
+  return formatAosContainerMoney(value);
+}
 
-  if (
-    !Number.isFinite(amount)
-  ) {
-    return "$0";
-  }
-
-  return amount.toLocaleString(
-    "en-US",
-    {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0
-    }
+function getObjectId(
+  object = {}
+) {
+  return (
+    getAosObjectId(object) ||
+    String(
+      getListingId(object) || ""
+    ).trim()
   );
 }
 
-
-function getMachineTitle(
-  machine = {}
+function getObjectTitle(
+  object = {}
 ) {
-  return (
-    clean(machine.title) ||
-
-    clean(
-      machine.attributes
-        ?.title
-    ) ||
-
-    [
-      machine.year,
-      machine.make,
-      machine.model
-    ]
-      .filter(Boolean)
-      .join(" ") ||
-
-    "MACHINE"
+  return getAosObjectDisplayName(
+    object
   );
 }
 
-
-function getMachineImage(
-  machine = {}
+function getObjectImage(
+  object = {}
 ) {
-  return (
-    machine.imageUrls?.[0] ||
-
-    machine.images?.[0]?.url ||
-
-    machine.images?.[0]
-      ?.attributes
-      ?.variants
-      ?.default
-      ?.url ||
-
-    machine.imageObjects?.[0]
-      ?.url ||
-
-    machine.ixiMedia
-      ?.imageUrls?.[0] ||
-
-    ""
-  );
-}
-
-
-function getMachineLocation(
-  machine = {}
-) {
-  return (
-    clean(machine.location) ||
-
-    clean(
-      machine.publicData
-        ?.location
-    ) ||
-
-    clean(
-      machine.attributes
-        ?.publicData
-        ?.location
-    ) ||
-
-    ""
-  );
-}
-
-
-function getMachineHours(
-  machine = {}
-) {
-  return (
-    machine.hours ||
-
-    machine.publicData
-      ?.hours ||
-
-    machine.attributes
-      ?.publicData
-      ?.hours ||
-
-    ""
+  return getAosObjectPrimaryImage(
+    object
   );
 }
 
@@ -317,6 +247,51 @@ const [
     ] || null;
 
 
+  const presentation =
+    getSmartContainerPresentation({
+      container: index || {},
+      children: items,
+      selectedChildIndex:
+        previewItemIndex
+    });
+
+  const containerName =
+    presentation.containerName ||
+    index?.displayName ||
+    index?.label ||
+    "INDEX";
+
+  const heroImage =
+    presentation.heroImage || "";
+
+  const childCount =
+    presentation.directChildCount;
+
+  const childLabel =
+    presentation.directChildLabel ||
+    "CHILDREN";
+
+  const valueApplicable =
+    presentation.valueApplicable;
+
+  const aggregateValue =
+    presentation.aggregateValue;
+
+  const previewTitle =
+    presentation.selectedChildName ||
+    "";
+
+  const previewPrimary =
+    presentation
+      .selectedChildPrimaryDescriptor ||
+    "";
+
+  const previewSecondary =
+    presentation
+      .selectedChildSecondaryDescriptor ||
+    "";
+
+
   /*
    * Thumbnail rail highlights:
    *
@@ -345,10 +320,8 @@ const [
 
   const activeItemId =
     activeItem
-      ? String(
-          getListingId(
-            activeItem
-          )
+      ? getObjectId(
+          activeItem
         )
       : "";
 
@@ -614,6 +587,17 @@ function gatherContents(
   );
 }
 
+function returnContents(
+  event
+) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
+  onReturnContents?.(
+    index
+  );
+}
+
   /* =========================================================
      RENDER
      ========================================================= */
@@ -693,9 +677,7 @@ function gatherContents(
     </span>
 
     <h3>
-      {index?.displayName ||
-        index?.label ||
-        "INDEX"}
+      {containerName}
     </h3>
   </div>
 
@@ -720,9 +702,51 @@ function gatherContents(
       </button>
     ) : null}
 
-    <div className="index-count">
-      {items.length}
-    </div>
+    <button
+      type="button"
+      className="index-edit-button"
+      title="Edit Face 1 presentation"
+      onPointerDown={event => {
+        event.stopPropagation();
+      }}
+      onClick={event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        onSavePresentation?.(
+          index,
+          {
+            intent:
+              "edit-face-1"
+          }
+        );
+      }}
+    >
+      EDIT
+    </button>
+
+    <button
+      type="button"
+      className="index-more-button"
+      title="More"
+      onPointerDown={event => {
+        event.stopPropagation();
+      }}
+      onClick={event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        onSavePresentation?.(
+          index,
+          {
+            intent:
+              "more"
+          }
+        );
+      }}
+    >
+      ⋮
+    </button>
   </div>
 </div>
 
@@ -791,30 +815,19 @@ function gatherContents(
                     <div className="preview-copy">
 
                       <strong>
-                        {getMachineTitle(
-                          previewItem
-                        )}
+                        {previewTitle}
                       </strong>
 
                       <div className="preview-meta">
-                        {getMachineHours(
-                          previewItem
-                        ) ? (
+                        {previewPrimary ? (
                           <span>
-                            {getMachineHours(
-                              previewItem
-                            )}
-                            {" HRS"}
+                            {previewPrimary}
                           </span>
                         ) : null}
 
-                        {getMachineLocation(
-                          previewItem
-                        ) ? (
+                        {previewSecondary ? (
                           <span>
-                            {getMachineLocation(
-                              previewItem
-                            )}
+                            {previewSecondary}
                           </span>
                         ) : null}
                       </div>
@@ -884,28 +897,54 @@ function gatherContents(
 
   <div className="index-stat">
     <span>
-      OBJECTS
+      {childLabel}
     </span>
 
     <strong>
-      {items.length}
+      {childCount}
     </strong>
   </div>
 
-  <div className="index-stat">
-    <span>
-      VALUE
-    </span>
+  {valueApplicable ? (
+    <div className="index-stat">
+      <span>
+        VALUE
+      </span>
 
-    <strong>
-      {formatMoney(
-        index?.value
-      )}
-    </strong>
-  </div>
+      <strong>
+        {formatMoney(
+          aggregateValue
+        )}
+      </strong>
+    </div>
+  ) : (
+    <div className="index-stat index-stat-empty">
+      <span>
+        DIRECT
+      </span>
+
+      <strong>
+        {childCount}
+      </strong>
+    </div>
+  )}
 
 
   <div className="index-content-actions">
+
+    <button
+      type="button"
+      onPointerDown={
+        event =>
+          event.stopPropagation()
+      }
+      onClick={
+        gatherContents
+      }
+      title="Gather direct contents into container"
+    >
+      RECALL
+    </button>
 
     <button
       type="button"
@@ -928,11 +967,11 @@ function gatherContents(
           event.stopPropagation()
       }
       onClick={
-        gatherContents
+        returnContents
       }
-      title="Gather direct contents into container"
+      title="Restore the previous workspace arrangement"
     >
-      RECALL
+      RETURN
     </button>
 
   </div>
@@ -961,9 +1000,11 @@ function gatherContents(
           >
 
          <ListingCard
-  key={String(
-    getListingId(activeItem)
-  )}
+  key={
+    getObjectId(
+      activeItem
+    )
+  }
 
   listing={activeItem}
 
@@ -1045,11 +1086,11 @@ function gatherContents(
           }
 
           getItemImage={
-            getMachineImage
+            getObjectImage
           }
 
           getItemLabel={
-            getMachineTitle
+            getObjectTitle
           }
 
           onSelectItem={
@@ -1384,7 +1425,7 @@ function gatherContents(
           right: 0;
           top: 0;
 
-          bottom: 64px;
+          bottom: 80px;
 
           overflow: hidden;
         }
@@ -1428,9 +1469,11 @@ function gatherContents(
         }
 
         .index-top-actions {
+  margin-left: auto;
+
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 .index-add-button {
@@ -1477,6 +1520,61 @@ function gatherContents(
   box-shadow:
     0 0 8px
     rgba(255,196,0,.10);
+}
+
+
+.index-edit-button,
+.index-more-button {
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 5px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 4px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.56);
+
+  font-size: 7.5px;
+  font-weight: 950;
+  line-height: 1;
+
+  cursor: pointer;
+
+  position: relative;
+  z-index: 100;
+}
+
+.index-more-button {
+  width: 20px;
+  padding: 0;
+
+  font-size: 15px;
+}
+
+.index-edit-button:hover,
+.index-more-button:hover {
+  color: #ffc400;
+
+  border-color:
+    rgba(255,196,0,.38);
+
+  background:
+    rgba(255,196,0,.06);
+}
+
+.index-stat-empty {
+  opacity: .42;
 }
 
 
@@ -1668,7 +1766,7 @@ function gatherContents(
               .72
             );
 
-          font-size: 6px;
+          font-size: 8px;
           font-weight: 950;
         }
 
@@ -1716,7 +1814,7 @@ function gatherContents(
   color:
     rgba(0,194,255,.62);
 
-  font-size: 5.5px;
+  font-size: 8px;
   font-weight: 950;
 
   cursor: pointer;
@@ -1752,7 +1850,7 @@ function gatherContents(
               .82
             );
 
-          font-size: 8.5px;
+          font-size: 11px;
           font-weight: 950;
 
           text-overflow:
@@ -1786,7 +1884,7 @@ function gatherContents(
               .30
             );
 
-          font-size: 6px;
+          font-size: 8px;
           font-weight: 900;
 
           text-overflow:
@@ -1841,8 +1939,8 @@ function gatherContents(
   display: grid;
 
   grid-template-columns:
-    62px
-    82px
+    58px
+    76px
     minmax(0, 1fr);
 
   align-items: stretch;
@@ -1879,7 +1977,7 @@ function gatherContents(
   color:
     rgba(255,255,255,.28);
 
-  font-size: 6px;
+  font-size: 8px;
   font-weight: 900;
 
   letter-spacing: .55px;
@@ -1929,7 +2027,7 @@ function gatherContents(
   color:
     rgba(255,255,255,.48);
 
-  font-size: 6.5px;
+  font-size: 11px;
   font-weight: 950;
 
   letter-spacing: .4px;
@@ -1976,7 +2074,7 @@ function gatherContents(
               .52
             );
 
-          font-size: 7px;
+          font-size: 9px;
           font-weight: 950;
         }
 
@@ -2100,7 +2198,7 @@ function gatherContents(
               .34
             );
 
-          font-size: 7px;
+          font-size: 9px;
           font-weight: 950;
 
           letter-spacing:
@@ -2142,7 +2240,7 @@ function gatherContents(
               .62
             );
 
-          font-size: 6px;
+          font-size: 8px;
           font-weight: 950;
 
           cursor: pointer;
@@ -2174,7 +2272,7 @@ function gatherContents(
 
           bottom: 16px;
 
-          height: 48px;
+          height: 64px;
 
           overflow: hidden;
 
