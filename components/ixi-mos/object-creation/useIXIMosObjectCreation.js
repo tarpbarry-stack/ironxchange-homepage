@@ -650,6 +650,129 @@ async function saveMosObjectName({
   };
 }
 
+async function saveMosLocation({
+  objectId,
+  displayName,
+  fields = {}
+}) {
+  const id =
+    clean(objectId);
+
+  const name =
+    clean(displayName);
+
+  if (!id) {
+    throw new Error(
+      "Location ID is required."
+    );
+  }
+
+  if (!name) {
+    throw new Error(
+      "Location name is required."
+    );
+  }
+
+  const nextFields = {
+    address1:
+      clean(
+        fields?.address1
+      ),
+
+    address2:
+      clean(
+        fields?.address2
+      ),
+
+    city:
+      clean(
+        fields?.city
+      ),
+
+    state:
+      clean(
+        fields?.state
+      ),
+
+    postalCode:
+      clean(
+        fields?.postalCode
+      )
+  };
+
+  onObjectNotice?.({
+    objectId:
+      id,
+
+    message:
+      "SAVING LOCATION...",
+
+    tone:
+      "warning"
+  });
+
+  try {
+    const response =
+      await updateMosObject({
+        objectId:
+          id,
+
+        displayName:
+          name,
+
+        fields:
+          nextFields,
+
+        actorId:
+          userId || null,
+
+        metadata: {
+          creationState:
+            "complete"
+        }
+      });
+
+    const updatedObject =
+      response?.object ||
+      response?.data ||
+      response;
+
+    await reloadMosEnvironment();
+
+    onObjectNotice?.({
+      objectId:
+        id,
+
+      message:
+        `${name} SAVED`,
+
+      tone:
+        "success"
+    });
+
+    return {
+      object:
+        updatedObject,
+
+      objectId:
+        id
+    };
+  } catch (error) {
+    onObjectNotice?.({
+      objectId:
+        id,
+
+      message:
+        "LOCATION SAVE FAILED",
+
+      tone:
+        "error"
+    });
+
+    throw error;
+  }
+}
+  
 async function deleteMosWorkspaceObject(
   object
 ) {
@@ -730,7 +853,7 @@ async function deleteMosWorkspaceObject(
   };
 }
 
- return {
+return {
   reloadMosEnvironment,
 
   exposeObjectToBoard,
@@ -742,6 +865,8 @@ async function deleteMosWorkspaceObject(
   createLocationInContainer,
 
   saveMosObjectName,
+
+  saveMosLocation,
 
   deleteMosWorkspaceObject
 };
