@@ -757,41 +757,33 @@ function returnContents(
 
               {previewItem ? (
                 <>
-                  <div className="preview-photo">
-                    {getMachineImage(
-                      previewItem
-                    ) ? (
-                      <img
-                        src={
-                          getMachineImage(
-                            previewItem
-                          )
-                        }
+                 <div className="preview-photo">
+  {heroImage ? (
+    <img
+      src={
+        heroImage
+      }
 
-                        alt={
-                          getMachineTitle(
-                            previewItem
-                          )
-                        }
+      alt={
+        containerName
+      }
 
-                        draggable={
-                          false
-                        }
-                      />
-                    ) : (
-                      <div className="preview-photo-empty">
-                        {index?.displayName ||
-                          "OBJECT"}
-                      </div>
-                    )}
+      draggable={
+        false
+      }
+    />
+  ) : (
+    <div className="preview-photo-empty">
+      {containerName}
+    </div>
+  )}
 
-
-                    <div className="preview-position">
-                      {previewItemIndex + 1}
-                      {" / "}
-                      {items.length}
-                    </div>
-                  </div>
+  <div className="preview-position">
+    {previewItemIndex + 1}
+    {" / "}
+    {items.length}
+  </div>
+</div>
 
 
                   <div className="preview-info">
@@ -2324,7 +2316,7 @@ function returnContents(
           .system-index-thumb-shell
           .ixi-collection-thumb-rail
         ) {
-          height: 48px;
+          height: 64px;
         }
 
       `}</style>
