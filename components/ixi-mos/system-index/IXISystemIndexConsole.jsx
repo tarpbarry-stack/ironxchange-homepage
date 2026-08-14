@@ -1151,7 +1151,8 @@ renderSystemIndexCard
      SAME SCALING RETURN AS PRIVATE CONSOLE
      ======================================================= */
 
-  return assembledConsole;
+    return assembledConsole;
+}
 
 
 /* =========================================================
