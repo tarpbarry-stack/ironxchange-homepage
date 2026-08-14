@@ -36,8 +36,18 @@ export default function IXIBoard({
    onRecoverSellerObject,
   onCheckoutObject,
 
-  getCustomItemId,
+ getCustomItemId,
 renderCustomItem,
+
+/*
+ * Custom objects normally receive the
+ * Board's standard single-card scaler.
+ *
+ * A custom object that already owns its
+ * complete expandable console scaler can
+ * opt out of that second wrapper.
+ */
+customItemOwnsScaling,
 
 getItemReorderBehavior,
 
@@ -249,25 +259,36 @@ return (
   >
     {({ dragHandleProps }) => {
       const customItem =
-        typeof renderCustomItem === "function"
-          ? renderCustomItem({
-              item,
-              id,
-              dragHandleProps
-            })
-          : null;
+  typeof renderCustomItem === "function"
+    ? renderCustomItem({
+        item,
+        id,
+        dragHandleProps
+      })
+    : null;
 
-      return customItem ? (
-        enableCardScaling ? (
-          <IXIScaledCardShell
-            size={cardScaleMode}
-          >
-            {customItem}
-          </IXIScaledCardShell>
-        ) : (
-          customItem
-        )
-      ) : item?.type === "SELLER OBJECT" &&
+const customOwnsScaling =
+  typeof customItemOwnsScaling ===
+    "function"
+    ? customItemOwnsScaling({
+        item,
+        id
+      }) === true
+    : customItemOwnsScaling ===
+        true;
+
+return customItem ? (
+  enableCardScaling &&
+  !customOwnsScaling ? (
+    <IXIScaledCardShell
+      size={cardScaleMode}
+    >
+      {customItem}
+    </IXIScaledCardShell>
+  ) : (
+    customItem
+  )
+) : item?.type === "SELLER OBJECT" &&
         SellerObjectCard ? (
         <IXIScaledCardShell
           size={cardScaleMode}
