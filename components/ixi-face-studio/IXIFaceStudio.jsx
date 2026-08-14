@@ -6,8 +6,8 @@ import IXIFacePreview
 import IXIFaceReferenceOverlay
   from "./IXIFaceReferenceOverlay";
 
-import IXIAosCardCatalogBench
-  from "../ixi-aos-card-library/IXIAosCardCatalogBench";
+import IXILocationObjectFace1
+  from "../ixi-mos/location/IXILocationObjectFace1";
 
 const FACE_TREE = [
   {
