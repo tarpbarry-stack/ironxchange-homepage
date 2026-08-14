@@ -1,5 +1,5 @@
 import IXIObjectConsoleShell
-  from "../../ixi-object-system/IXIObjectConsoleShell";
+  from "../../ixi-chassis/IXIObjectConsoleShell";
 
 import {
   IXI_CONSOLE_MAX_DEPTH,
@@ -11,8 +11,7 @@ import {
   removeConsoleSlot,
   cycleConsoleSlotFace,
   createConsoleSlotsPatch
-} from "../../ixi-object-system/IXIConsoleEngine";
-
+} from "../../ixi-chassis/IXIConsoleEngine";
 
 const PANEL_WIDTH = 298;
 const PANEL_OVERLAP = 1;
