@@ -20,9 +20,6 @@ const SYSTEM_INDEX_NATIVE_PANEL_WIDTH =
 const SYSTEM_INDEX_NATIVE_HEIGHT =
   471;
 
-const SYSTEM_INDEX_SEAM_OVERLAP =
-  0;
-
 /*
  * COPY THE WORKING PRIVATE CONSOLE:
  * its panels meet edge-to-edge.
@@ -1154,28 +1151,7 @@ renderSystemIndexCard
      SAME SCALING RETURN AS PRIVATE CONSOLE
      ======================================================= */
 
-  return enableCardScaling ? (
-    <IXIScaledCardShell
-      size={
-        cardScaleMode
-      }
-
-      objectFamily="private"
-
-      nativeWidth={
-        consoleNativeWidth
-      }
-
-      nativeHeight={
-        SYSTEM_INDEX_NATIVE_HEIGHT
-      }
-    >
-      {assembledConsole}
-    </IXIScaledCardShell>
-  ) : (
-    assembledConsole
-  );
-}
+  return assembledConsole;
 
 
 /* =========================================================
@@ -1211,18 +1187,9 @@ export function getSystemIndexConsoleNativeWidth({
         );
 
   return (
-    (
-      consoleSlots.length *
-      SYSTEM_INDEX_NATIVE_PANEL_WIDTH
-    ) -
-    (
-      Math.max(
-        consoleSlots.length - 1,
-        0
-      ) *
-      SYSTEM_INDEX_SEAM_OVERLAP
-    )
-  );
+  consoleSlots.length *
+  SYSTEM_INDEX_NATIVE_PANEL_WIDTH
+);
 }
 
 
