@@ -10,6 +10,11 @@ import IXISortableMachineCard
 import IXISystemIndexCard
   from "../IXISystemIndexCard";
 
+import IXISystemIndexConsole, {
+  getSystemIndexConsoleNativeWidth,
+  getSystemIndexConsoleNativeHeight
+} from "../system-index/IXISystemIndexConsole";
+
 import IXIMosObjectCard
   from "../IXIMosObjectCard";
 
@@ -45,7 +50,6 @@ export default function IXIAosWorkspaceBoard({
   sendMachineToArmedDestination,
 
   exposeEquipmentMachineToBoard,
-  returnAllEquipmentHome,
 
   onAddObject,
 
@@ -140,6 +144,11 @@ export default function IXIAosWorkspaceBoard({
           getSellerListingCardProps
         }
 
+
+        /* ===============================================
+           CONTAINER SORTING BEHAVIOR
+           =============================================== */
+
         getItemReorderBehavior={
           item => {
             const objectType =
@@ -162,9 +171,8 @@ export default function IXIAosWorkspaceBoard({
               );
 
             /*
-             * Containers remain draggable
-             * themselves, but foreign drags
-             * do not displace them.
+             * Containers remain draggable themselves,
+             * but foreign drags do not displace them.
              */
             if (
               isSystemIndex ||
@@ -176,6 +184,11 @@ export default function IXIAosWorkspaceBoard({
             return "normal";
           }
         }
+
+
+        /* ===============================================
+           CUSTOM OBJECT IDENTITY
+           =============================================== */
 
         getCustomItemId={
           item => {
@@ -206,6 +219,60 @@ export default function IXIAosWorkspaceBoard({
           }
         }
 
+
+        /* ===============================================
+           CUSTOM NATIVE SIZE
+
+           System Index console width expands from:
+           298
+           595
+           892
+           1189
+           1486
+
+           Native height always remains 471.
+           =============================================== */
+
+        getCustomItemNativeSize={
+          ({
+            item,
+            id
+          }) => {
+            const objectType =
+              String(
+                item?.objectType ||
+                ""
+              )
+                .trim()
+                .toLowerCase();
+
+            if (
+              objectType !==
+              "system-index"
+            ) {
+              return null;
+            }
+
+            return {
+              width:
+                getSystemIndexConsoleNativeWidth({
+                  objectId:
+                    id,
+
+                  ixiCardState
+                }),
+
+              height:
+                getSystemIndexConsoleNativeHeight()
+            };
+          }
+        }
+
+
+        /* ===============================================
+           CUSTOM OBJECT RENDER
+           =============================================== */
+
         renderCustomItem={({
           item,
           id,
@@ -220,126 +287,153 @@ export default function IXIAosWorkspaceBoard({
               .toLowerCase();
 
 
-          /* ===============================================
+          /* =============================================
              SYSTEM INDEX SMART CONTAINER
-             =============================================== */
+
+             IMPORTANT:
+
+             The System Index now owns a real AOS console.
+
+             Face 1 remains the real System Index card.
+             Additional 298 × 471 panels are provided by
+             the existing IXI Console Engine/Shell.
+             ============================================= */
 
           if (
             objectType ===
             "system-index"
           ) {
             return (
-              <IXISystemIndexCard
-                index={
-                  item
-                }
-
+              <IXISystemIndexConsole
                 objectId={
                   id
                 }
 
-                dragHandleProps={
-                  dragHandleProps
-                }
-
-                workspaceDropPolicy={
-                  item?.workspace
-                    ?.dropPolicy ||
-                  null
-                }
-
-                workspaceDropSurface={
-                  item?.workspace
-                    ?.surfaceId ||
-                  ""
-                }
-
-                ixiState={
-                  ixiCardState[
-                    id
-                  ] || {
-                    color: "none",
-                    outline: 1,
-                    face: 1
-                  }
+                index={
+                  item
                 }
 
                 ixiCardState={
                   ixiCardState
                 }
 
-                onIxiStateChange={
+                updateIxiCardState={
                   updateIxiCardState
                 }
 
-                armedDestination={
-                  armedDestination
-                }
+                renderSystemIndexCard={({
+                  onOpenConsole
+                }) => (
+                  <IXISystemIndexCard
+                    index={
+                      item
+                    }
 
-                onSendFront={
-                  sendListingToFront
-                }
+                    objectId={
+                      id
+                    }
 
-                onSendBack={
-                  sendListingToBack
-                }
+                    dragHandleProps={
+                      dragHandleProps
+                    }
 
-                onSendToArmedDestination={
-                  sendMachineToArmedDestination
-                }
+                    workspaceDropPolicy={
+                      item?.workspace
+                        ?.dropPolicy ||
+                      null
+                    }
 
-                onExposeObject={
-                  child => {
-                    exposeEquipmentMachineToBoard?.(
-                      child
-                    );
-                  }
-                }
+                    workspaceDropSurface={
+                      item?.workspace
+                        ?.surfaceId ||
+                      ""
+                    }
 
-                /*
-                 * TEMPORARY LEGACY CONSOLE SEAM.
-                 *
-                 * Do not add new behavior here.
-                 * We replace this with the generic
-                 * AOS container console after the
-                 * Smart Container Face is stable.
-                 */
-                onOpenConsole={
-                  () => {
-                    returnAllEquipmentHome?.();
-                  }
-                }
+                    ixiState={
+                      ixiCardState[
+                        id
+                      ] || {
+                        color: "none",
+                        outline: 1,
+                        face: 1
+                      }
+                    }
 
-                onExposeContents={
-                  onExposeContainerChildren
-                }
+                    ixiCardState={
+                      ixiCardState
+                    }
 
-                onGatherContents={
-                  onGatherContainerChildren
-                }
+                    onIxiStateChange={
+                      updateIxiCardState
+                    }
 
-                onReturnContents={
-                  onReturnContainerChildren
-                }
+                    armedDestination={
+                      armedDestination
+                    }
 
-                onAddObject={
-                  onAddObject
-                }
+                    onSendFront={
+                      sendListingToFront
+                    }
 
-                onSavePresentation={
-                  onSaveContainerPresentation
-                }
+                    onSendBack={
+                      sendListingToBack
+                    }
+
+                    onSendToArmedDestination={
+                      sendMachineToArmedDestination
+                    }
+
+                    onExposeObject={
+                      child => {
+                        exposeEquipmentMachineToBoard?.(
+                          child
+                        );
+                      }
+                    }
+
+                    /*
+                     * REAL SYSTEM INDEX CONSOLE.
+                     *
+                     * No Equipment-return placeholder.
+                     * The card's ⋮ -> OPEN CONSOLE now
+                     * opens the System Index console slot.
+                     */
+                    onOpenConsole={
+                      onOpenConsole
+                    }
+
+                    onExposeContents={
+                      onExposeContainerChildren
+                    }
+
+                    onGatherContents={
+                      onGatherContainerChildren
+                    }
+
+                    onReturnContents={
+                      onReturnContainerChildren
+                    }
+
+                    onAddObject={
+                      onAddObject
+                    }
+
+                    onSavePresentation={
+                      onSaveContainerPresentation
+                    }
+                  />
+                )}
               />
             );
           }
 
 
-          /* ===============================================
+          /* =============================================
              DURABLE MOS OBJECT / CHILD CONTAINER
 
-             Machines remain on their existing
-             IronXchange path.
-             =============================================== */
+             Machines remain on the existing
+             IronXchange machine path.
+             ============================================= */
 
           if (
             item?.objectId &&
