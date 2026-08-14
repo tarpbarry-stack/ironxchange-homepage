@@ -7,19 +7,96 @@ import IXIObjectCardActuator
 import {
   IXI_CONSOLE_MAX_DEPTH,
   IXI_CONSOLE_SLOT_TYPES,
-  IXI_CONSOLE_MODULE_FACES,
-  getConsoleSlots,
+  createConsoleSlot,
+  normalizeConsoleSlots,
   insertConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
+  getNextConsoleDefaultFace,
   createConsoleSlotsPatch
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 
 
-const PANEL_WIDTH = 298;
-const PANEL_HEIGHT = 471;
-const PANEL_OVERLAP = 1;
+const SYSTEM_INDEX_NATIVE_PANEL_WIDTH =
+  298;
 
+const SYSTEM_INDEX_NATIVE_HEIGHT =
+  471;
+
+/*
+ * COPY THE WORKING PRIVATE CONSOLE:
+ * its panels meet edge-to-edge.
+ */
+const SYSTEM_INDEX_SEAM_OVERLAP =
+  0;
+
+
+/* =========================================================
+   LEGACY STATE → CURRENT SLOT MODEL
+
+   This is copied directly from the working Private console
+   architecture.
+
+   Face 1 is the permanent System Index card.
+   Module faces can exist to its left and/or right.
+   ========================================================= */
+
+function getLegacyConsoleSlots(
+  objectState = {}
+) {
+  const slots = [];
+
+  if (
+    objectState.consoleLeftOpen ===
+    true
+  ) {
+    slots.push(
+      createConsoleSlot({
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .MODULE,
+
+        face:
+          objectState
+            .consoleLeftFace || 2
+      })
+    );
+  }
+
+  slots.push(
+    createConsoleSlot({
+      type:
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
+    })
+  );
+
+  if (
+    objectState.consoleRightOpen ===
+    true
+  ) {
+    slots.push(
+      createConsoleSlot({
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .MODULE,
+
+        face:
+          objectState
+            .consoleRightFace || 3
+      })
+    );
+  }
+
+  return normalizeConsoleSlots(
+    slots
+  );
+}
+
+
+/* =========================================================
+   SYSTEM INDEX CONSOLE
+   ========================================================= */
 
 export default function IXISystemIndexConsole({
   objectId,
@@ -36,35 +113,79 @@ export default function IXISystemIndexConsole({
   const id =
     String(
       objectId || ""
-    ).trim();
-
-  const slots =
-    getConsoleSlots(
-      ixiCardState,
-      id,
-      {
-        maxSlots:
-          IXI_CONSOLE_MAX_DEPTH,
-
-        faces:
-          IXI_CONSOLE_MODULE_FACES
-      }
     );
+
+  const objectState =
+    ixiCardState?.[id] || {};
+
+
+  /* =======================================================
+     SAME SLOT RESOLUTION AS PRIVATE CONSOLE
+     ======================================================= */
+
+  const hasSavedSlotModel =
+    Array.isArray(
+      objectState.consoleSlots
+    ) &&
+    objectState.consoleSlots.length >
+      0;
+
+  const consoleSlots =
+    hasSavedSlotModel
+      ? normalizeConsoleSlots(
+          objectState.consoleSlots
+        )
+      : getLegacyConsoleSlots(
+          objectState
+        );
+
+  const consoleDepth =
+    consoleSlots.length;
 
   const listingSlotIndex =
-    slots.findIndex(
+    consoleSlots.findIndex(
       slot =>
-        slot?.type ===
-        IXI_CONSOLE_SLOT_TYPES.LISTING
+        slot.type ===
+        IXI_CONSOLE_SLOT_TYPES
+          .LISTING
     );
 
+  const consoleLeftOpen =
+    listingSlotIndex > 0;
+
+  const consoleRightOpen =
+    listingSlotIndex <
+    consoleSlots.length - 1;
+
   const atCapacity =
-    slots.length >=
+    consoleDepth >=
     IXI_CONSOLE_MAX_DEPTH;
 
 
-  function saveSlots(
-    nextSlots
+  /*
+   * EXACT SAME PHYSICAL WIDTH FORMULA
+   * AS THE WORKING PRIVATE CONSOLE.
+   */
+  const consoleNativeWidth =
+    (
+      consoleDepth *
+      SYSTEM_INDEX_NATIVE_PANEL_WIDTH
+    ) -
+    (
+      Math.max(
+        consoleDepth - 1,
+        0
+      ) *
+      SYSTEM_INDEX_SEAM_OVERLAP
+    );
+
+
+  /* =======================================================
+     STATE
+     ======================================================= */
+
+  function patchObjectState(
+    patch = {}
   ) {
     if (!id) {
       return;
@@ -72,21 +193,34 @@ export default function IXISystemIndexConsole({
 
     updateIxiCardState?.(
       id,
-      createConsoleSlotsPatch(
-        nextSlots,
-        {
-          maxSlots:
-            IXI_CONSOLE_MAX_DEPTH,
+      {
+        ...patch,
 
-          faces:
-            IXI_CONSOLE_MODULE_FACES
-        }
+        consoleUpdatedAt:
+          Date.now()
+      }
+    );
+  }
+
+
+  function saveConsoleSlots(
+    nextSlots
+  ) {
+    patchObjectState(
+      createConsoleSlotsPatch(
+        nextSlots
       )
     );
   }
 
 
-  function addPanel(
+  /* =======================================================
+     ADD MODULE
+
+     COPIED FROM PRIVATE CONSOLE.
+     ======================================================= */
+
+  function addConsoleModule(
     side,
     event
   ) {
@@ -97,26 +231,35 @@ export default function IXISystemIndexConsole({
       return;
     }
 
+    const face =
+      getNextConsoleDefaultFace(
+        consoleSlots
+      );
+
     const nextSlots =
       insertConsoleSlot({
-        slots,
+        slots:
+          consoleSlots,
+
         side,
 
-        type:
-          IXI_CONSOLE_SLOT_TYPES.MODULE,
+        face,
 
         maxSlots:
-          IXI_CONSOLE_MAX_DEPTH,
-
-        faces:
-          IXI_CONSOLE_MODULE_FACES
+          IXI_CONSOLE_MAX_DEPTH
       });
 
-    saveSlots(
+    saveConsoleSlots(
       nextSlots
     );
   }
 
+
+  /* =======================================================
+     OPEN FROM ⋮ MENU
+
+     First console module opens RIGHT.
+     ======================================================= */
 
   function openConsole(
     event
@@ -124,65 +267,78 @@ export default function IXISystemIndexConsole({
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    /*
-     * OPEN CONSOLE from the System Index
-     * More menu opens the first face on
-     * the RIGHT, matching the normal IXI
-     * console direction.
-     *
-     * If the console is already open,
-     * do not manufacture another panel.
-     */
     if (
-      slots.length > 1
+      consoleDepth > 1 ||
+      atCapacity
     ) {
       return;
     }
 
-    addPanel(
+    addConsoleModule(
       "right",
       event
     );
   }
 
 
-  function removePanel(
+  /* =======================================================
+     REMOVE MODULE
+     ======================================================= */
+
+  function removeConsoleModule(
     slotId,
     event
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    saveSlots(
+    const nextSlots =
       removeConsoleSlot({
-        slots,
-        slotId,
-        faces:
-          IXI_CONSOLE_MODULE_FACES
-      })
+        slots:
+          consoleSlots,
+
+        slotId
+      });
+
+    saveConsoleSlots(
+      nextSlots
     );
   }
 
 
-  function cyclePanelFace(
+  /* =======================================================
+     CYCLE MODULE FACE
+     ======================================================= */
+
+  function cycleModuleFace(
     slotId,
     event
   ) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    saveSlots(
+    const nextSlots =
       cycleConsoleSlotFace({
-        slots,
-        slotId,
-        faces:
-          IXI_CONSOLE_MODULE_FACES
-      })
+        slots:
+          consoleSlots,
+
+        slotId
+      });
+
+    saveConsoleSlots(
+      nextSlots
     );
   }
 
 
-  function renderModuleFace(
+  /* =======================================================
+     MODULE FACE
+
+     This is the ONLY System Index-specific face rendering
+     in the copied console architecture.
+     ======================================================= */
+
+  function renderSystemIndexModule(
     slot
   ) {
     const face =
@@ -191,9 +347,11 @@ export default function IXISystemIndexConsole({
       ) || 2;
 
     return (
-      <div className="system-index-console-face">
-        <div className="console-face-header">
-          <div className="console-face-heading">
+      <div className="system-index-module-face">
+
+        <div className="system-index-module-header">
+
+          <div className="system-index-module-heading">
             <span>
               SYSTEM INDEX
             </span>
@@ -205,58 +363,109 @@ export default function IXISystemIndexConsole({
             </h3>
           </div>
 
-          <div className="console-face-number">
+          <div className="system-index-module-number">
             FACE {face}
           </div>
+
         </div>
 
-        <div className="console-face-workspace">
-          <span>
-            EMPTY FACE
-          </span>
 
-          <strong>
-            + MODULE
-          </strong>
+        <div className="system-index-module-workspace">
+
+          <div className="system-index-module-empty">
+            <span>
+              EMPTY FACE
+            </span>
+
+            <strong>
+              + MODULE
+            </strong>
+          </div>
+
         </div>
+
       </div>
     );
   }
 
 
-  function renderSlot(
+  /* =======================================================
+     MODULE SLOT
+
+     DIRECT COPY OF PRIVATE CONSOLE STRUCTURE.
+     ======================================================= */
+
+  function renderModuleSlot(
     slot,
     slotIndex
   ) {
-    const isListing =
-      slot?.type ===
-      IXI_CONSOLE_SLOT_TYPES.LISTING;
+    const isLeftOfListing =
+      slotIndex <
+      listingSlotIndex;
 
-    const isFirst =
+    const closeActuatorSide =
+      isLeftOfListing
+        ? "right"
+        : "left";
+
+    const isFirstSlot =
       slotIndex === 0;
 
-    const isLast =
+    const isLastSlot =
       slotIndex ===
-      slots.length - 1;
+      consoleSlots.length - 1;
+
+    const showLeftExpansion =
+      !atCapacity &&
+      isFirstSlot;
+
+    const showRightExpansion =
+      !atCapacity &&
+      isLastSlot;
 
 
-    if (isListing) {
-      return (
-        <section
-          key={
-            slot.slotId
-          }
-          className="system-index-console-slot primary-slot"
-        >
-          {!atCapacity &&
-          isFirst ? (
+    return (
+      <div
+        key={
+          slot.slotId
+        }
+        className="
+          ixi-system-index-console-slot
+          ixi-system-index-console-module-slot
+        "
+      >
+        <div className="ixi-system-index-console-module-card">
+
+          <IXIObjectCardActuator
+            side={
+              closeActuatorSide
+            }
+
+            variant="tall"
+
+            label="Close System Index module"
+            title="Close System Index module"
+
+            onClick={event =>
+              removeConsoleModule(
+                slot.slotId,
+                event
+              )
+            }
+          />
+
+
+          {showLeftExpansion ? (
             <IXIObjectCardActuator
               side="left"
+
               variant="tall"
-              label="Open System Index console left"
-              title="Open System Index console left"
+
+              label="Add System Index module left"
+              title="Add System Index module left"
+
               onClick={event =>
-                addPanel(
+                addConsoleModule(
                   "left",
                   event
                 )
@@ -264,15 +473,18 @@ export default function IXISystemIndexConsole({
             />
           ) : null}
 
-          {!atCapacity &&
-          isLast ? (
+
+          {showRightExpansion ? (
             <IXIObjectCardActuator
               side="right"
+
               variant="tall"
-              label="Open System Index console right"
-              title="Open System Index console right"
+
+              label="Add System Index module right"
+              title="Add System Index module right"
+
               onClick={event =>
-                addPanel(
+                addConsoleModule(
                   "right",
                   event
                 )
@@ -280,403 +492,671 @@ export default function IXISystemIndexConsole({
             />
           ) : null}
 
-          {typeof renderSystemIndexCard ===
-          "function"
-            ? renderSystemIndexCard({
-                onOpenConsole:
-                  openConsole,
 
-                consoleDepth:
-                  slots.length
-              })
-            : null}
-        </section>
-      );
-    }
+          {renderSystemIndexModule(
+            slot
+          )}
 
 
-    const isLeftOfPrimary =
-      listingSlotIndex >= 0 &&
-      slotIndex <
-        listingSlotIndex;
+          <button
+            type="button"
 
+            className="
+              ixi-system-index-console-face-button
+            "
 
-    return (
-      <section
-        key={
-          slot.slotId
-        }
-        className="system-index-console-slot module-slot"
-      >
-        <IXIObjectCardActuator
-          side={
-            isLeftOfPrimary
-              ? "right"
-              : "left"
-          }
-          variant="tall"
-          label="Close System Index console face"
-          title="Close System Index console face"
-          onClick={event =>
-            removePanel(
-              slot.slotId,
-              event
-            )
-          }
-        />
+            aria-label={
+              `Change System Index face ${slot.face}`
+            }
 
-        {!atCapacity &&
-        isFirst ? (
-          <IXIObjectCardActuator
-            side="left"
-            variant="tall"
-            label="Open System Index console left"
-            title="Open System Index console left"
+            title={
+              `System Index face ${slot.face}`
+            }
+
+            onPointerDown={event => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+
             onClick={event =>
-              addPanel(
-                "left",
+              cycleModuleFace(
+                slot.slotId,
                 event
               )
             }
           />
-        ) : null}
 
-        {!atCapacity &&
-        isLast ? (
-          <IXIObjectCardActuator
-            side="right"
-            variant="tall"
-            label="Open System Index console right"
-            title="Open System Index console right"
-            onClick={event =>
-              addPanel(
-                "right",
-                event
-              )
-            }
-          />
-        ) : null}
-
-        {renderModuleFace(
-          slot
-        )}
-
-        <button
-          type="button"
-          className="system-index-console-face-button"
-          aria-label={
-            `Change System Index console face — current Face ${slot.face}`
-          }
-          title={
-            `Change face — current Face ${slot.face}`
-          }
-          onPointerDown={event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          onClick={event =>
-            cyclePanelFace(
-              slot.slotId,
-              event
-            )
-          }
-        />
-      </section>
+        </div>
+      </div>
     );
   }
 
 
-  const nativeWidth =
-    (
-      slots.length *
-      PANEL_WIDTH
-    ) -
-    (
-      Math.max(
-        slots.length - 1,
-        0
-      ) *
-      PANEL_OVERLAP
-    );
+  /* =======================================================
+     FACE 1 / SYSTEM INDEX SLOT
+
+     DIRECT COPY OF PRIVATE CONSOLE LISTING SLOT BEHAVIOR.
+     ======================================================= */
+
+  function renderListingSlot(
+    slot,
+    slotIndex
+  ) {
+    const isFirstSlot =
+      slotIndex === 0;
+
+    const isLastSlot =
+      slotIndex ===
+      consoleSlots.length - 1;
+
+    const canExpandLeft =
+      !atCapacity &&
+      isFirstSlot;
+
+    const canExpandRight =
+      !atCapacity &&
+      isLastSlot;
 
 
-  const consoleNativeWidth =
-    (
-      slots.length *
-      PANEL_WIDTH
-    ) -
-    (
-      Math.max(
-        slots.length - 1,
-        0
-      ) *
-      PANEL_OVERLAP
+    /*
+     * Same capacity behavior as Private.
+     *
+     * These values tell Face 1 whether its
+     * edge actuators should remain visible.
+     */
+    const parentConsoleLeftOpen =
+      consoleLeftOpen ||
+      atCapacity;
+
+    const parentConsoleRightOpen =
+      consoleRightOpen ||
+      atCapacity;
+
+
+    const parentCard =
+      typeof renderSystemIndexCard ===
+      "function"
+        ? renderSystemIndexCard({
+            consoleDepth,
+
+            consoleLeftOpen:
+              parentConsoleLeftOpen,
+
+            consoleRightOpen:
+              parentConsoleRightOpen,
+
+            onExpandConsoleLeft:
+              canExpandLeft
+                ? event =>
+                    addConsoleModule(
+                      "left",
+                      event
+                    )
+                : undefined,
+
+            onExpandConsoleRight:
+              canExpandRight
+                ? event =>
+                    addConsoleModule(
+                      "right",
+                      event
+                    )
+                : undefined,
+
+            onOpenConsole:
+              openConsole
+          })
+        : null;
+
+
+    return (
+      <div
+        key={
+          slot.slotId
+        }
+
+        className="
+          ixi-system-index-console-slot
+          ixi-system-index-console-listing-slot
+        "
+      >
+        {parentCard}
+      </div>
     );
+  }
+
+
+  /* =======================================================
+     ASSEMBLED CONSOLE
+
+     THIS IS THE SAME STRUCTURE AS PRIVATE.
+     ======================================================= */
 
   const assembledConsole = (
     <div
-      className="system-index-console-root"
+      className="
+        ixi-system-index-object-console
+      "
+
       style={{
         width:
-          `${nativeWidth}px`
+          `${consoleNativeWidth}px`
       }}
+
       data-console-depth={
-        slots.length
+        consoleDepth
+      }
+
+      data-console-capacity={
+        atCapacity
+          ? "full"
+          : "available"
       }
     >
-      {slots.map(
-        renderSlot
+
+      {consoleSlots.map(
+        (
+          slot,
+          slotIndex
+        ) => {
+          if (
+            slot.type ===
+            IXI_CONSOLE_SLOT_TYPES
+              .LISTING
+          ) {
+            return renderListingSlot(
+              slot,
+              slotIndex
+            );
+          }
+
+          return renderModuleSlot(
+            slot,
+            slotIndex
+          );
+        }
       )}
 
+
       <style jsx global>{`
-        .system-index-console-root {
+
+        /* ===============================================
+           EXACT PRIVATE-CONSOLE PHYSICS
+           =============================================== */
+
+        .ixi-system-index-object-console {
           position: relative;
 
           display: flex;
+          flex-direction: row;
           align-items: flex-start;
-          justify-content: flex-start;
 
           gap: 0;
 
-          max-width: none;
-          min-width: 0;
-
           overflow: visible;
         }
 
 
-        .system-index-console-slot {
+        .ixi-system-index-console-slot {
           position: relative;
 
-          flex: 0 0 ${PANEL_WIDTH}px;
+          flex:
+            0 0
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
 
-          width: ${PANEL_WIDTH}px;
-          min-width: ${PANEL_WIDTH}px;
-          max-width: ${PANEL_WIDTH}px;
+          width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
 
-          height: ${PANEL_HEIGHT}px;
-          min-height: ${PANEL_HEIGHT}px;
-          max-height: ${PANEL_HEIGHT}px;
+          min-width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
+
+          max-width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
+
+          height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
+
+          min-height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
+
+          max-height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
 
           overflow: visible;
         }
 
 
-        .system-index-console-slot
-        + .system-index-console-slot {
+        .ixi-system-index-console-slot +
+        .ixi-system-index-console-slot {
           margin-left:
-            -${PANEL_OVERLAP}px;
+            -${SYSTEM_INDEX_SEAM_OVERLAP}px;
         }
 
 
-        /*
-         * IMPORTANT:
-         *
-         * System Index uses the SAME proven
-         * IXIObjectCardActuator component as
-         * Inventory / Auction / Object Studio.
-         *
-         * No midpoint shell actuator CSS exists
-         * in this component.
-         */
+        .ixi-system-index-console-listing-slot {
+          z-index: 5;
+        }
 
 
-        .system-index-console-face,
-        .system-index-console-face * {
+        .ixi-system-index-console-module-slot {
+          z-index: 4;
+        }
+
+
+        /* ===============================================
+           MODULE CARD
+           =============================================== */
+
+        .ixi-system-index-console-module-card {
           box-sizing: border-box;
-        }
-
-
-        .system-index-console-face {
-          width: ${PANEL_WIDTH}px;
-          min-width: ${PANEL_WIDTH}px;
-          max-width: ${PANEL_WIDTH}px;
-
-          height: ${PANEL_HEIGHT}px;
-          min-height: ${PANEL_HEIGHT}px;
-          max-height: ${PANEL_HEIGHT}px;
-
-          padding: 12px 12px 16px;
 
           position: relative;
 
-          overflow: hidden;
+          width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
+
+          min-width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
+
+          max-width:
+            ${SYSTEM_INDEX_NATIVE_PANEL_WIDTH}px;
+
+          height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
+
+          min-height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
+
+          max-height:
+            ${SYSTEM_INDEX_NATIVE_HEIGHT}px;
 
           border:
             1px solid
-            rgba(255,255,255,.08);
+            rgba(
+              255,
+              255,
+              255,
+              .10
+            );
 
-          border-radius: 14px;
+          border-radius:
+            13px;
 
           background:
             linear-gradient(
               180deg,
-              rgba(255,255,255,.035),
-              rgba(255,255,255,.006)
-            ),
-            radial-gradient(
-              circle at top left,
-              rgba(255,196,0,.055),
-              transparent 55%
-            ),
-            #101010;
+              rgba(
+                28,
+                31,
+                36,
+                .98
+              ),
+              rgba(
+                15,
+                17,
+                20,
+                .98
+              )
+            );
 
           box-shadow:
+            0 10px 28px
+            rgba(
+              0,
+              0,
+              0,
+              .34
+            ),
             inset 0 1px 0
-              rgba(255,255,255,.04),
-            0 18px 34px
-              rgba(0,0,0,.42);
+            rgba(
+              255,
+              255,
+              255,
+              .04
+            );
+
+          overflow: visible;
         }
 
 
-        .console-face-header {
-          height: 38px;
+        /* ===============================================
+           MODULE FACE
+           =============================================== */
 
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
+        .system-index-module-face,
+        .system-index-module-face * {
+          box-sizing:
+            border-box;
+        }
 
-          gap: 8px;
+
+        .system-index-module-face {
+          position:
+            absolute;
+
+          inset:
+            0;
+
+          padding:
+            12px 12px 16px;
+
+          overflow:
+            hidden;
+        }
+
+
+        .system-index-module-header {
+          height:
+            38px;
+
+          display:
+            flex;
+
+          align-items:
+            flex-start;
+
+          justify-content:
+            space-between;
+
+          gap:
+            8px;
 
           border-bottom:
             1px solid
-            rgba(255,255,255,.045);
+            rgba(
+              255,
+              255,
+              255,
+              .045
+            );
         }
 
 
-        .console-face-heading {
-          min-width: 0;
-          flex: 1 1 auto;
+        .system-index-module-heading {
+          min-width:
+            0;
+
+          flex:
+            1 1 auto;
         }
 
 
-        .console-face-heading span {
-          display: block;
-
-          color: #ffc400;
-
-          font-size: 6.5px;
-          font-weight: 950;
-          letter-spacing: .09em;
-
-          text-transform: uppercase;
-        }
-
-
-        .console-face-heading h3 {
-          margin: 4px 0 0;
-
-          overflow: hidden;
-
-          color: #f4f4f4;
-
-          font-size: 17px;
-          font-weight: 950;
-          line-height: 1;
-
-          text-overflow: ellipsis;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-
-        .console-face-number {
-          flex: 0 0 auto;
-
-          padding-top: 2px;
+        .system-index-module-heading span {
+          display:
+            block;
 
           color:
-            rgba(255,255,255,.32);
+            #ffc400;
 
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .08em;
+          font-size:
+            6.5px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .09em;
+
+          text-transform:
+            uppercase;
         }
 
 
-        .console-face-workspace {
-          position: absolute;
+        .system-index-module-heading h3 {
+          margin:
+            4px 0 0;
 
-          left: 12px;
-          right: 12px;
-          top: 58px;
-          bottom: 28px;
+          overflow:
+            hidden;
 
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
+          color:
+            #f4f4f4;
 
-          gap: 8px;
+          font-size:
+            17px;
+
+          font-weight:
+            950;
+
+          line-height:
+            1;
+
+          text-overflow:
+            ellipsis;
+
+          text-transform:
+            uppercase;
+
+          white-space:
+            nowrap;
+        }
+
+
+        .system-index-module-number {
+          flex:
+            0 0 auto;
+
+          padding-top:
+            2px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .32
+            );
+
+          font-size:
+            8px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .08em;
+        }
+
+
+        .system-index-module-workspace {
+          position:
+            absolute;
+
+          left:
+            12px;
+
+          right:
+            12px;
+
+          top:
+            58px;
+
+          bottom:
+            28px;
+        }
+
+
+        .system-index-module-empty {
+          width:
+            100%;
+
+          height:
+            100%;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          gap:
+            8px;
 
           border:
             1px dashed
-            rgba(255,255,255,.08);
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
 
-          border-radius: 8px;
+          border-radius:
+            8px;
 
           background:
-            rgba(255,255,255,.012);
+            rgba(
+              255,
+              255,
+              255,
+              .012
+            );
         }
 
 
-        .console-face-workspace span {
+        .system-index-module-empty span {
           color:
-            rgba(255,255,255,.20);
+            rgba(
+              255,
+              255,
+              255,
+              .20
+            );
 
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: .09em;
+          font-size:
+            9px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .09em;
         }
 
 
-        .console-face-workspace strong {
+        .system-index-module-empty strong {
           color:
-            rgba(0,194,255,.72);
+            rgba(
+              0,
+              194,
+              255,
+              .72
+            );
 
-          font-size: 10px;
-          font-weight: 950;
+          font-size:
+            10px;
+
+          font-weight:
+            950;
         }
 
 
-        .system-index-console-face-button {
-          position: absolute;
+        /* ===============================================
+           FACE CYCLE ACTUATOR
 
-          left: 50%;
-          bottom: -1px;
+           Same physical control as Private console.
+           =============================================== */
 
-          width: 34px;
-          height: 5px;
+        .ixi-system-index-console-face-button {
+          position:
+            absolute;
+
+          left:
+            50%;
+
+          right:
+            auto;
+
+          bottom:
+            -1px;
+
+          width:
+            34px;
+
+          height:
+            5px;
 
           transform:
             translateX(-50%);
 
-          padding: 0;
-          border: 0;
+          padding:
+            0;
+
+          border:
+            0;
 
           border-radius:
             3px 3px 1px 1px;
 
           background:
-            rgba(255,255,255,.18);
+            rgba(
+              255,
+              255,
+              255,
+              .18
+            );
 
-          cursor: pointer;
+          cursor:
+            pointer;
 
-          z-index: 150;
+          z-index:
+            120;
+
+          pointer-events:
+            auto;
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(
+              255,
+              255,
+              255,
+              .12
+            ),
+            0 1px 3px
+            rgba(
+              0,
+              0,
+              0,
+              .32
+            );
         }
 
 
-        .system-index-console-face-button:hover {
+        .ixi-system-index-console-face-button:hover {
           background:
-            rgba(255,196,0,.95);
+            rgba(
+              255,
+              196,
+              0,
+              .95
+            );
 
           box-shadow:
             0 0 8px
-            rgba(255,196,0,.38);
+            rgba(
+              255,
+              196,
+              0,
+              .38
+            );
         }
+
       `}</style>
+
     </div>
   );
+
+
+  /* =======================================================
+     SAME SCALING RETURN AS PRIVATE CONSOLE
+     ======================================================= */
 
   return enableCardScaling ? (
     <IXIScaledCardShell
@@ -684,22 +1164,14 @@ export default function IXISystemIndexConsole({
         cardScaleMode
       }
 
-      objectFamily="container"
+      objectFamily="private"
 
       nativeWidth={
         consoleNativeWidth
       }
 
       nativeHeight={
-        PANEL_HEIGHT
-      }
-
-      slotCount={
-        slots.length
-      }
-
-      seamOverlap={
-        PANEL_OVERLAP
+        SYSTEM_INDEX_NATIVE_HEIGHT
       }
     >
       {assembledConsole}
@@ -710,39 +1182,54 @@ export default function IXISystemIndexConsole({
 }
 
 
+/* =========================================================
+   OPTIONAL GEOMETRY EXPORTS
+   ========================================================= */
+
 export function getSystemIndexConsoleNativeWidth({
   objectId,
   ixiCardState = {}
 }) {
-  const slots =
-    getConsoleSlots(
-      ixiCardState,
-      objectId,
-      {
-        maxSlots:
-          IXI_CONSOLE_MAX_DEPTH,
-
-        faces:
-          IXI_CONSOLE_MODULE_FACES
-      }
+  const id =
+    String(
+      objectId || ""
     );
+
+  const objectState =
+    ixiCardState?.[id] || {};
+
+  const hasSavedSlotModel =
+    Array.isArray(
+      objectState.consoleSlots
+    ) &&
+    objectState.consoleSlots.length >
+      0;
+
+  const consoleSlots =
+    hasSavedSlotModel
+      ? normalizeConsoleSlots(
+          objectState.consoleSlots
+        )
+      : getLegacyConsoleSlots(
+          objectState
+        );
 
   return (
     (
-      slots.length *
-      PANEL_WIDTH
+      consoleSlots.length *
+      SYSTEM_INDEX_NATIVE_PANEL_WIDTH
     ) -
     (
       Math.max(
-        slots.length - 1,
+        consoleSlots.length - 1,
         0
       ) *
-      PANEL_OVERLAP
+      SYSTEM_INDEX_SEAM_OVERLAP
     )
   );
 }
 
 
 export function getSystemIndexConsoleNativeHeight() {
-  return PANEL_HEIGHT;
+  return SYSTEM_INDEX_NATIVE_HEIGHT;
 }
