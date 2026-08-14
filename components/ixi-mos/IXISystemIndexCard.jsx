@@ -118,8 +118,11 @@ onOpenConsole,
 
 onExposeContents,
 onGatherContents,
+onReturnContents,
 
 onAddObject,
+
+onSavePresentation,
 
 workspaceDropPolicy = null,
   workspaceDropSurface = ""
@@ -128,6 +131,11 @@ workspaceDropPolicy = null,
 const [
   isDropAccepting,
   setIsDropAccepting
+] = useState(false);
+
+const [
+  moreOpen,
+  setMoreOpen
 ] = useState(false);
 
   
@@ -713,6 +721,8 @@ function returnContents(
         event.preventDefault();
         event.stopPropagation();
 
+        setMoreOpen(false);
+
         onSavePresentation?.(
           index,
           {
@@ -725,28 +735,69 @@ function returnContents(
       EDIT
     </button>
 
-    <button
-      type="button"
-      className="index-more-button"
-      title="More"
-      onPointerDown={event => {
-        event.stopPropagation();
-      }}
-      onClick={event => {
-        event.preventDefault();
-        event.stopPropagation();
+    <div className="index-more-wrap">
+      <button
+        type="button"
+        className="index-more-button"
+        title="More"
+        aria-expanded={moreOpen}
+        onPointerDown={event => {
+          event.stopPropagation();
+        }}
+        onClick={event => {
+          event.preventDefault();
+          event.stopPropagation();
 
-        onSavePresentation?.(
-          index,
-          {
-            intent:
-              "more"
-          }
-        );
-      }}
-    >
-      ⋮
-    </button>
+          setMoreOpen(
+            current => !current
+          );
+        }}
+      >
+        ⋮
+      </button>
+
+      {moreOpen ? (
+        <div
+          className="index-more-menu"
+          onPointerDown={event => {
+            event.stopPropagation();
+          }}
+        >
+          <button
+            type="button"
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              setMoreOpen(false);
+              openConsole(event);
+            }}
+          >
+            OPEN CONSOLE
+          </button>
+
+          <button
+            type="button"
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              setMoreOpen(false);
+
+              onSavePresentation?.(
+                index,
+                {
+                  intent:
+                    "open-skin-library"
+                }
+              );
+            }}
+          >
+            SKIN LIBRARY
+          </button>
+        </div>
+      ) : null}
+    </div>
   </div>
 </div>
 
@@ -757,52 +808,66 @@ function returnContents(
 
               {previewItem ? (
                 <>
-                 <div className="preview-photo">
-  {heroImage ? (
-    <img
-      src={
-        heroImage
-      }
+                  <div className="preview-photo">
+                    {heroImage ? (
+                      <img
+                        src={
+                          heroImage
+                        }
 
-      alt={
-        containerName
-      }
+                        alt={
+                          containerName
+                        }
 
-      draggable={
-        false
-      }
-    />
-  ) : (
-    <div className="preview-photo-empty">
-      {containerName}
-    </div>
-  )}
-
-  <div className="preview-position">
-    {previewItemIndex + 1}
-    {" / "}
-    {items.length}
-  </div>
-</div>
-
-
-                  <div className="preview-info">
+                        draggable={
+                          false
+                        }
+                      />
+                    ) : (
+                      <div className="preview-photo-empty">
+                        {containerName}
+                      </div>
+                    )}
 
                     <button
                       type="button"
                       className="preview-arrow preview-prev"
-                      onPointerDown={
-                        event =>
-                          event.stopPropagation()
-                      }
+                      onPointerDown={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
                       onClick={
                         previewPrevious
                       }
-                      aria-label="Previous item"
+                      aria-label="Previous child"
                     >
                       ‹
                     </button>
 
+                    <button
+                      type="button"
+                      className="preview-arrow preview-next"
+                      onPointerDown={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                      onClick={
+                        previewNext
+                      }
+                      aria-label="Next child"
+                    >
+                      ›
+                    </button>
+
+                    <div className="preview-position">
+                      {previewItemIndex + 1}
+                      {" / "}
+                      {items.length}
+                    </div>
+                  </div>
+
+
+                  <div className="preview-info">
 
                     <div className="preview-copy">
 
@@ -823,45 +888,32 @@ function returnContents(
                           </span>
                         ) : null}
                       </div>
-<button
-  type="button"
-  className="preview-pull"
-  onPointerDown={event => {
-    event.preventDefault();
-    event.stopPropagation();
-  }}
-  onClick={event => {
-    event.preventDefault();
-    event.stopPropagation();
 
-    if (!previewItem) {
-      return;
-    }
-
-    onExposeObject?.(
-      previewItem,
-      index
-    );
-  }}
->
-  OUT
-</button>
                     </div>
-
 
                     <button
                       type="button"
-                      className="preview-arrow preview-next"
-                      onPointerDown={
-                        event =>
-                          event.stopPropagation()
-                      }
-                      onClick={
-                        previewNext
-                      }
-                      aria-label="Next item"
+                      className="preview-out"
+                      title="Put this child on Board"
+                      onPointerDown={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                      onClick={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        if (!previewItem) {
+                          return;
+                        }
+
+                        onExposeObject?.(
+                          previewItem,
+                          index
+                        );
+                      }}
                     >
-                      ›
+                      OUT ↗
                     </button>
 
                   </div>
@@ -873,9 +925,7 @@ function returnContents(
                   </span>
 
                   <strong>
-                    {index?.displayName ||
-                      index?.label ||
-                      "INDEX"}
+                    {containerName}
                   </strong>
                 </div>
               )}
@@ -887,88 +937,91 @@ function returnContents(
 
             <div className="index-snapshot">
 
-  <div className="index-stat">
-    <span>
-      {childLabel}
-    </span>
+              <div className="index-stat">
+                <span>
+                  {childLabel}
+                </span>
 
-    <strong>
-      {childCount}
-    </strong>
-  </div>
+                <strong>
+                  {childCount}
+                </strong>
+              </div>
 
-  {valueApplicable ? (
-    <div className="index-stat">
-      <span>
-        VALUE
-      </span>
+              {valueApplicable ? (
+                <div className="index-stat">
+                  <span>
+                    VALUE
+                  </span>
 
-      <strong>
-        {formatMoney(
-          aggregateValue
-        )}
-      </strong>
-    </div>
-  ) : (
-    <div className="index-stat index-stat-empty">
-      <span>
-        DIRECT
-      </span>
+                  <strong>
+                    {formatMoney(
+                      aggregateValue
+                    )}
+                  </strong>
+                </div>
+              ) : null}
 
-      <strong>
-        {childCount}
-      </strong>
-    </div>
-  )}
+            </div>
 
+          </div>
 
-  <div className="index-content-actions">
+          <div className="system-index-command-strip">
+            <button
+              type="button"
+              onPointerDown={event => {
+                event.stopPropagation();
+              }}
+              onClick={
+                gatherContents
+              }
+              title="Recall direct children"
+            >
+              <span className="command-icon">
+                ↻
+              </span>
 
-    <button
-      type="button"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
-      onClick={
-        gatherContents
-      }
-      title="Gather direct contents into container"
-    >
-      RECALL
-    </button>
+              <span>
+                RECALL
+              </span>
+            </button>
 
-    <button
-      type="button"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
-      onClick={
-        exposeContents
-      }
-      title="Show direct contents on Board"
-    >
-      BOARD
-    </button>
+            <button
+              type="button"
+              onPointerDown={event => {
+                event.stopPropagation();
+              }}
+              onClick={
+                exposeContents
+              }
+              title="Put direct children on Board"
+            >
+              <span className="command-icon">
+                ▦
+              </span>
 
-    <button
-      type="button"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
-      onClick={
-        returnContents
-      }
-      title="Restore the previous workspace arrangement"
-    >
-      RETURN
-    </button>
+              <span>
+                BOARD
+              </span>
+            </button>
 
-  </div>
+            <button
+              type="button"
+              onPointerDown={event => {
+                event.stopPropagation();
+              }}
+              onClick={
+                returnContents
+              }
+              title="Restore previous workspace arrangement"
+            >
+              <span className="command-icon">
+                ↩
+              </span>
 
-</div>
+              <span>
+                RETURN
+              </span>
+            </button>
           </div>
 
                      /* ---------------------------------------------------
@@ -1070,10 +1123,8 @@ function returnContents(
           }
 
           getItemId={item =>
-            String(
-              getListingId(
-                item
-              )
+            getObjectId(
+              item
             )
           }
 
@@ -1417,7 +1468,7 @@ function returnContents(
           right: 0;
           top: 0;
 
-          bottom: 80px;
+          bottom: 107px;
 
           overflow: hidden;
         }
@@ -1640,8 +1691,8 @@ function returnContents(
            =============================================== */
 
         .index-preview {
-          height: 190px;
-          min-height: 190px;
+          height: 184px;
+          min-height: 184px;
 
           margin-top: 8px;
 
@@ -1672,7 +1723,7 @@ function returnContents(
           position: relative;
 
           width: 100%;
-          height: 137px;
+          height: 141px;
 
           overflow: hidden;
 
@@ -1764,16 +1815,14 @@ function returnContents(
 
 
         .preview-info {
-          height: 52px;
+          height: 43px;
 
-          display: grid;
-
-          20px
-  minmax(0, 1fr)
-  30px
-  20px;
-
+          display: flex;
           align-items: center;
+
+          gap: 6px;
+
+          padding: 0 8px;
 
           background:
             linear-gradient(
@@ -1789,43 +1838,34 @@ function returnContents(
             #101010;
         }
 
-.preview-pull {
-  height: 24px;
+.preview-out {
+  flex: 0 0 auto;
 
-  padding: 0;
+  border: 0;
+  background: transparent;
 
-  border:
-    1px solid
-    rgba(0,194,255,.18);
-
-  border-radius: 4px;
-
-  background:
-    rgba(0,194,255,.035);
+  padding: 4px 0 4px 6px;
 
   color:
-    rgba(0,194,255,.62);
+    rgba(0,194,255,.70);
 
   font-size: 8px;
   font-weight: 950;
+  letter-spacing: .04em;
 
   cursor: pointer;
 }
 
-.preview-pull:hover {
-  border-color:
-    rgba(0,194,255,.46);
-
-  background:
-    rgba(0,194,255,.08);
-
+.preview-out:hover {
   color:
-    rgba(0,194,255,.95);
+    rgba(0,194,255,1);
 }
+
         .preview-copy {
           min-width: 0;
+          flex: 1 1 auto;
 
-          padding: 0 4px;
+          padding: 0;
         }
 
 
@@ -1887,26 +1927,53 @@ function returnContents(
 
 
         .preview-arrow {
-          width: 20px;
-          height: 100%;
+          position: absolute;
+          top: 50%;
 
-          border: 0;
+          width: 28px;
+          height: 42px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          transform:
+            translateY(-50%);
+
+          border:
+            1px solid
+            rgba(255,255,255,.12);
 
           background:
-            transparent;
+            rgba(0,0,0,.44);
 
           color:
-            rgba(
-              255,
-              255,
-              255,
-              .22
-            );
+            rgba(255,255,255,.76);
 
-          font-size: 17px;
+          font-size: 25px;
           font-weight: 800;
+          line-height: 1;
 
           cursor: pointer;
+
+          z-index: 4;
+
+          backdrop-filter:
+            blur(2px);
+        }
+
+        .preview-prev {
+          left: 6px;
+
+          border-radius:
+            5px 9px 9px 5px;
+        }
+
+        .preview-next {
+          right: 6px;
+
+          border-radius:
+            9px 5px 5px 9px;
         }
 
 
@@ -1928,13 +1995,7 @@ function returnContents(
            =============================================== */
 
         .index-snapshot {
-  display: grid;
-
-  grid-template-columns:
-    58px
-    76px
-    minmax(0, 1fr);
-
+  display: flex;
   align-items: stretch;
 
   gap: 6px;
@@ -1944,11 +2005,11 @@ function returnContents(
 
 
 .index-stat {
-  min-width: 0;
+  min-width: 82px;
 
   height: 34px;
 
-  padding: 5px 7px;
+  padding: 5px 8px;
 
   display: flex;
   flex-direction: column;
@@ -1967,7 +2028,7 @@ function returnContents(
 
 .index-stat span {
   color:
-    rgba(255,255,255,.28);
+    rgba(255,255,255,.34);
 
   font-size: 8px;
   font-weight: 900;
@@ -1980,64 +2041,176 @@ function returnContents(
   margin-top: 2px;
 
   color:
-    rgba(255,255,255,.78);
+    rgba(255,255,255,.84);
 
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 950;
 
   line-height: 1;
 }
 
 
-.index-content-actions {
-  min-width: 0;
+/* ===============================================
+   SKINNY CONTAINER COMMAND STRIP
+
+   RECALL / BOARD / RETURN
+   =============================================== */
+
+.system-index-command-strip {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  bottom: 80px;
+
+  height: 27px;
 
   display: grid;
-
   grid-template-columns:
-    1fr 1fr;
+    repeat(3, 1fr);
 
-  gap: 5px;
-}
-
-
-.index-content-actions button {
-  min-width: 0;
-  height: 34px;
-
-  padding: 0 5px;
-
-  border:
+  border-top:
     1px solid
-    rgba(0,194,255,.12);
+    rgba(255,255,255,.045);
 
-  border-radius: 5px;
+  border-bottom:
+    1px solid
+    rgba(0,194,255,.10);
 
   background:
-    rgba(0,194,255,.022);
+    rgba(10,10,10,.96);
+
+  z-index: 31;
+}
+
+.system-index-command-strip button {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 0 4px;
+
+  border: 0;
+  border-right:
+    1px solid
+    rgba(255,255,255,.045);
+
+  background:
+    transparent;
 
   color:
-    rgba(255,255,255,.48);
+    rgba(255,255,255,.56);
 
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 950;
-
-  letter-spacing: .4px;
+  letter-spacing: .04em;
 
   cursor: pointer;
 }
 
+.system-index-command-strip button:last-child {
+  border-right: 0;
+}
 
-.index-content-actions button:hover {
-  border-color:
-    rgba(0,194,255,.42);
-
+.system-index-command-strip button:hover {
   background:
-    rgba(0,194,255,.07);
+    rgba(0,194,255,.045);
 
   color:
-    rgba(0,194,255,.92);
+    rgba(255,255,255,.92);
 }
+
+.system-index-command-strip
+.command-icon {
+  color:
+    rgba(0,194,255,.82);
+
+  font-size: 12px;
+  font-weight: 950;
+}
+
+
+/* ===============================================
+   MORE MENU
+   =============================================== */
+
+.index-more-wrap {
+  position: relative;
+
+  z-index: 140;
+}
+
+.index-more-menu {
+  position: absolute;
+
+  top: 24px;
+  right: 0;
+
+  width: 104px;
+
+  padding: 4px;
+
+  display: grid;
+  gap: 3px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 6px;
+
+  background:
+    rgba(12,12,12,.98);
+
+  box-shadow:
+    0 10px 24px
+    rgba(0,0,0,.52);
+
+  z-index: 300;
+}
+
+.index-more-menu button {
+  width: 100%;
+  height: 25px;
+
+  padding: 0 7px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius: 4px;
+
+  background:
+    transparent;
+
+  color:
+    rgba(255,255,255,.62);
+
+  font-size: 7.5px;
+  font-weight: 950;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.index-more-menu button:hover {
+  border-color:
+    rgba(0,194,255,.18);
+
+  background:
+    rgba(0,194,255,.045);
+
+  color:
+    rgba(255,255,255,.94);
+}
+
 
         /* ===============================================
            EMPTY
