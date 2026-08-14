@@ -963,8 +963,6 @@ function returnContents(
 
             </div>
 
-          </div>
-
           <div className="system-index-command-strip">
             <button
               type="button"
@@ -1022,6 +1020,8 @@ function returnContents(
                 RETURN
               </span>
             </button>
+          </div>
+
           </div>
 
                      /* ---------------------------------------------------
