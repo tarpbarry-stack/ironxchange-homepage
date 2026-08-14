@@ -211,6 +211,30 @@ const consoleDepth =
   savedConsoleSlots.length > 0
     ? savedConsoleSlots.length
     : legacyConsoleDepth;
+
+const customOwnsScalingForLayout =
+  typeof customItemOwnsScaling ===
+    "function"
+    ? customItemOwnsScaling({
+        item,
+        id
+      }) === true
+    : customItemOwnsScaling ===
+        true;
+
+const customConsoleBoardWidth =
+  (
+    consoleDepth *
+    resolvedConsolePanelWidth
+  ) +
+  (
+    Math.max(
+      consoleDepth - 1,
+      0
+    ) *
+    resolvedConsolePanelGap
+  );
+
 return (
  <IXISortableMachineCard
   key={id}
@@ -250,12 +274,17 @@ return (
     }`}
 
     style={{
-      flex: "0 0 auto",
-      width: "max-content",
-      maxWidth: "none",
-      minWidth: 0,
-      alignSelf: "flex-start"
-    }}
+  flex: "0 0 auto",
+
+  width:
+    customOwnsScalingForLayout
+      ? `${customConsoleBoardWidth}px`
+      : "max-content",
+
+  maxWidth: "none",
+  minWidth: 0,
+  alignSelf: "flex-start"
+}}
   >
     {({ dragHandleProps }) => {
       const customItem =
@@ -268,14 +297,7 @@ return (
     : null;
 
 const customOwnsScaling =
-  typeof customItemOwnsScaling ===
-    "function"
-    ? customItemOwnsScaling({
-        item,
-        id
-      }) === true
-    : customItemOwnsScaling ===
-        true;
+  customOwnsScalingForLayout;
 
 return customItem ? (
   enableCardScaling &&
