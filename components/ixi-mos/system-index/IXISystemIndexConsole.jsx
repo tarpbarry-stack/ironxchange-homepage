@@ -539,91 +539,90 @@ export default function IXISystemIndexConsole({
      ======================================================= */
 
   function renderListingSlot(
-    slot,
-    slotIndex
-  ) {
-    const isFirstSlot =
-      slotIndex === 0;
+  slot,
+  slotIndex
+) {
+  const isFirstSlot =
+    slotIndex === 0;
 
-    const isLastSlot =
-      slotIndex ===
-      consoleSlots.length - 1;
+  const isLastSlot =
+    slotIndex ===
+    consoleSlots.length - 1;
 
-    const canExpandLeft =
-      !atCapacity &&
-      isFirstSlot;
+  const canExpandLeft =
+    !atCapacity &&
+    isFirstSlot;
 
-    const canExpandRight =
-      !atCapacity &&
-      isLastSlot;
+  const canExpandRight =
+    !atCapacity &&
+    isLastSlot;
 
+  const parentCard =
+    typeof renderSystemIndexCard ===
+    "function"
+      ? renderSystemIndexCard({
+          consoleDepth,
 
-    /*
-     * Same capacity behavior as Private.
-     *
-     * These values tell Face 1 whether its
-     * edge actuators should remain visible.
-     */
-    const parentConsoleLeftOpen =
-      consoleLeftOpen ||
-      atCapacity;
+          onOpenConsole:
+            openConsole
+        })
+      : null;
 
-    const parentConsoleRightOpen =
-      consoleRightOpen ||
-      atCapacity;
+  return (
+    <div
+      key={
+        slot.slotId
+      }
 
+      className="
+        ixi-system-index-console-slot
+        ixi-system-index-console-listing-slot
+      "
+    >
 
-    const parentCard =
-      typeof renderSystemIndexCard ===
-      "function"
-        ? renderSystemIndexCard({
-            consoleDepth,
+      {canExpandLeft ? (
+        <IXIObjectCardActuator
+          side="left"
 
-            consoleLeftOpen:
-              parentConsoleLeftOpen,
+          variant="tall"
 
-            consoleRightOpen:
-              parentConsoleRightOpen,
+          label="Add System Index module left"
+          title="Add System Index module left"
 
-            onExpandConsoleLeft:
-              canExpandLeft
-                ? event =>
-                    addConsoleModule(
-                      "left",
-                      event
-                    )
-                : undefined,
-
-            onExpandConsoleRight:
-              canExpandRight
-                ? event =>
-                    addConsoleModule(
-                      "right",
-                      event
-                    )
-                : undefined,
-
-            onOpenConsole:
-              openConsole
-          })
-        : null;
+          onClick={event =>
+            addConsoleModule(
+              "left",
+              event
+            )
+          }
+        />
+      ) : null}
 
 
-    return (
-      <div
-        key={
-          slot.slotId
-        }
+      {parentCard}
 
-        className="
-          ixi-system-index-console-slot
-          ixi-system-index-console-listing-slot
-        "
-      >
-        {parentCard}
-      </div>
-    );
-  }
+
+      {canExpandRight ? (
+        <IXIObjectCardActuator
+          side="right"
+
+          variant="tall"
+
+          label="Add System Index module right"
+          title="Add System Index module right"
+
+          onClick={event =>
+            addConsoleModule(
+              "right",
+              event
+            )
+          }
+        />
+      ) : null}
+
+    </div>
+  );
+}
 
 
   /* =======================================================
