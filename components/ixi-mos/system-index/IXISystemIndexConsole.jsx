@@ -396,6 +396,19 @@ export default function IXISystemIndexConsole({
           gap: 0 !important;
         }
 
+/*
+ * SYSTEM INDEX FACE 1 ALREADY OWNS
+ * THE IXI RAIL.
+ *
+ * Do not draw the generic console
+ * face-cycle actuator over that rail.
+ */
+.system-index-console-root
+.ixi-console-slot[data-ixi-console-face="1"]
+> .ixi-console-face-button {
+  display: none !important;
+}
+
 
         .system-index-console-root
         .ixi-console-slot
