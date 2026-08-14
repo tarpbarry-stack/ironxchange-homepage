@@ -36,20 +36,8 @@ export default function IXIBoard({
    onRecoverSellerObject,
   onCheckoutObject,
 
- getCustomItemId,
+  getCustomItemId,
 renderCustomItem,
-
-/*
- * Custom objects normally receive the
- * Board's standard single-card scaler.
- *
- * A custom object that already owns its
- * complete expandable console scaler can
- * opt out of that second wrapper.
- */
-customItemOwnsScaling,
-
-getItemReorderBehavior,
 
 consolePanelWidth,
 consolePanelGap,
@@ -156,17 +144,6 @@ const resolvedConsolePanelGap =
         const id =
   resolveBoardItemId(item);
 
-      const reorderBehavior =
-  typeof getItemReorderBehavior ===
-  "function"
-    ? (
-        getItemReorderBehavior(
-          item
-        ) ||
-        "normal"
-      )
-    : "normal";
-
       const objectType =
   resolveBoardItemType(
     item
@@ -211,30 +188,6 @@ const consoleDepth =
   savedConsoleSlots.length > 0
     ? savedConsoleSlots.length
     : legacyConsoleDepth;
-
-const customOwnsScalingForLayout =
-  typeof customItemOwnsScaling ===
-    "function"
-    ? customItemOwnsScaling({
-        item,
-        id
-      }) === true
-    : customItemOwnsScaling ===
-        true;
-
-const customConsoleBoardWidth =
-  (
-    consoleDepth *
-    resolvedConsolePanelWidth
-  ) +
-  (
-    Math.max(
-      consoleDepth - 1,
-      0
-    ) *
-    resolvedConsolePanelGap
-  );
-
 return (
  <IXISortableMachineCard
   key={id}
@@ -242,10 +195,6 @@ return (
   id={id}
 
   containerId="board"
-
-  reorderBehavior={
-  reorderBehavior
-}
 
   objectType={
     objectType
@@ -274,43 +223,34 @@ return (
     }`}
 
     style={{
-  flex: "0 0 auto",
-
-  width:
-    customOwnsScalingForLayout
-      ? `${customConsoleBoardWidth}px`
-      : "max-content",
-
-  maxWidth: "none",
-  minWidth: 0,
-  alignSelf: "flex-start"
-}}
+      flex: "0 0 auto",
+      width: "max-content",
+      maxWidth: "none",
+      minWidth: 0,
+      alignSelf: "flex-start"
+    }}
   >
     {({ dragHandleProps }) => {
       const customItem =
-  typeof renderCustomItem === "function"
-    ? renderCustomItem({
-        item,
-        id,
-        dragHandleProps
-      })
-    : null;
+        typeof renderCustomItem === "function"
+          ? renderCustomItem({
+              item,
+              id,
+              dragHandleProps
+            })
+          : null;
 
-const customOwnsScaling =
-  customOwnsScalingForLayout;
-
-return customItem ? (
-  enableCardScaling &&
-  !customOwnsScaling ? (
-    <IXIScaledCardShell
-      size={cardScaleMode}
-    >
-      {customItem}
-    </IXIScaledCardShell>
-  ) : (
-    customItem
-  )
-) : item?.type === "SELLER OBJECT" &&
+      return customItem ? (
+        enableCardScaling ? (
+          <IXIScaledCardShell
+            size={cardScaleMode}
+          >
+            {customItem}
+          </IXIScaledCardShell>
+        ) : (
+          customItem
+        )
+      ) : item?.type === "SELLER OBJECT" &&
         SellerObjectCard ? (
         <IXIScaledCardShell
           size={cardScaleMode}
