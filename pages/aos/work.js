@@ -1246,8 +1246,7 @@ const {
   executeIXITransaction
 });
 
-/* ---------- UNIVERSAL AOS CONTAINER BOARD / RECALL ---------- */
-
+/* ---------- UNIVERSAL AOS CONTAINER BOARD / RECALL / RETURN ---------- */
 function getDirectContainerChildIds(
   container
 ) {
@@ -1337,6 +1336,278 @@ function getDirectContainerChildIds(
 }
 
 
+/* =========================================================
+   SMART CONTAINER TEMPORARY WORKSPACE SNAPSHOTS
+
+   PURPOSE
+
+   BOARD and RECALL are temporary workspace operations.
+
+   Before either operation changes the placement of a
+   container's direct children, remember exactly where
+   those affected children were.
+
+   RETURN restores that arrangement.
+
+   THIS DOES NOT CHANGE:
+
+   - canonical containment
+   - relationships
+   - object identity
+   - MOS truth
+
+   It is workspace presentation history only.
+   ========================================================= */
+
+const containerReturnSnapshotsRef =
+  useRef({});
+
+
+function captureContainerReturnSnapshot({
+  container,
+  childIds
+}) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
+  if (
+    !containerId ||
+    !Array.isArray(childIds) ||
+    !childIds.length
+  ) {
+    return;
+  }
+
+  const childIdSet =
+    new Set(
+      childIds.map(String)
+    );
+
+  const placements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      if (
+        !Array.isArray(
+          objectIds
+        )
+      ) {
+        return;
+      }
+
+      const affectedIds =
+        objectIds.filter(
+          objectId =>
+            childIdSet.has(
+              String(objectId)
+            )
+        );
+
+      if (
+        affectedIds.length
+      ) {
+        placements[
+          surfaceId
+        ] = [
+          ...affectedIds
+        ];
+      }
+    }
+  );
+
+  containerReturnSnapshotsRef
+    .current[
+      containerId
+    ] = {
+      containerId,
+
+      childIds: [
+        ...childIds
+      ],
+
+      placements,
+
+      capturedAt:
+        Date.now()
+    };
+}
+
+
+function hasContainerReturnSnapshot(
+  container
+) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
+  return Boolean(
+    containerId &&
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ]
+  );
+}
+
+
+async function returnContainerChildren(
+  container
+) {
+  const containerId =
+    String(
+      container?.objectId ||
+      container?.id ||
+      ""
+    ).trim();
+
+  if (!containerId) {
+    return;
+  }
+
+  const snapshot =
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ];
+
+  if (!snapshot) {
+    return;
+  }
+
+  const childIds =
+    new Set(
+      (
+        snapshot.childIds ||
+        []
+      ).map(String)
+    );
+
+  if (!childIds.size) {
+    delete (
+      containerReturnSnapshotsRef
+        .current[
+          containerId
+        ]
+    );
+
+    return;
+  }
+
+  /*
+   * First remove the affected direct
+   * children from wherever they are now.
+   */
+  const nextPlacements = {};
+
+  Object.entries(
+    workspacePlacements || {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      nextPlacements[
+        surfaceId
+      ] =
+        Array.isArray(
+          objectIds
+        )
+          ? objectIds.filter(
+              objectId =>
+                !childIds.has(
+                  String(objectId)
+                )
+            )
+          : [];
+    }
+  );
+
+  /*
+   * Then restore each child to the exact
+   * workspace surface recorded before
+   * BOARD / RECALL.
+   *
+   * Preserve the recorded ordering of the
+   * affected children on each surface.
+   */
+  Object.entries(
+    snapshot.placements ||
+    {}
+  ).forEach(
+    ([
+      surfaceId,
+      objectIds
+    ]) => {
+      if (
+        !Array.isArray(
+          objectIds
+        ) ||
+        !objectIds.length
+      ) {
+        return;
+      }
+
+      const existingIds =
+        Array.isArray(
+          nextPlacements[
+            surfaceId
+          ]
+        )
+          ? nextPlacements[
+              surfaceId
+            ]
+          : [];
+
+      nextPlacements[
+        surfaceId
+      ] = [
+        ...existingIds,
+        ...objectIds.filter(
+          objectId =>
+            !existingIds
+              .map(String)
+              .includes(
+                String(objectId)
+              )
+        )
+      ];
+    }
+  );
+
+  setWorkspacePlacements(
+    nextPlacements
+  );
+
+  await saveWorkspaceLayout(
+    nextPlacements
+  );
+
+  /*
+   * RETURN consumes the snapshot.
+   *
+   * A future BOARD / RECALL operation
+   * captures a new one.
+   */
+  delete (
+    containerReturnSnapshotsRef
+      .current[
+        containerId
+      ]
+  );
+}
+  
 async function boardContainerChildren(
   container
 ) {
@@ -1346,12 +1617,29 @@ async function boardContainerChildren(
     );
 
   if (!childIds.length) {
-    return;
-  }
+  return;
+}
 
-  let nextPlacements =
-    workspacePlacements;
+/*
+ * Only capture the starting arrangement
+ * once for this temporary operation.
+ *
+ * Repeated BOARD presses must not replace
+ * the original RETURN destination.
+ */
+if (
+  !hasContainerReturnSnapshot(
+    container
+  )
+) {
+  captureContainerReturnSnapshot({
+    container,
+    childIds
+  });
+}
 
+let nextPlacements =
+  workspacePlacements;
   childIds.forEach(
     objectId => {
       nextPlacements =
@@ -1403,11 +1691,30 @@ if (isEquipment) {
     );
 
   if (!childIds.size) {
-    return;
-  }
+  return;
+}
 
-  const nextPlacements = {};
+/*
+ * Same doctrine as BOARD:
+ *
+ * preserve the arrangement that existed
+ * before this temporary operation.
+ */
+if (
+  !hasContainerReturnSnapshot(
+    container
+  )
+) {
+  captureContainerReturnSnapshot({
+    container,
 
+    childIds: [
+      ...childIds
+    ]
+  });
+}
+
+const nextPlacements = {};
   Object.entries(
     workspacePlacements || {}
   ).forEach(
@@ -2795,7 +3102,11 @@ onGatherContainerChildren={
   recallContainerChildren
 }
 
-   onCreateObjectChild={
+onReturnContainerChildren={
+  returnContainerChildren
+}
+
+onCreateObjectChild={
   createObjectInsideSystemIndex
 }
 
