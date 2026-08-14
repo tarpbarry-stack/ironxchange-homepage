@@ -144,22 +144,7 @@ export default function IXIAosWorkspaceBoard({
           getSellerListingCardProps
         }
 
-        customItemOwnsScaling={
-  ({ item }) => {
-    const objectType =
-      String(
-        item?.objectType ||
-        ""
-      )
-        .trim()
-        .toLowerCase();
-
-    return (
-      objectType ===
-      "system-index"
-    );
-  }
-}
+  
         /* ===============================================
            CONTAINER SORTING BEHAVIOR
            =============================================== */
@@ -288,6 +273,7 @@ export default function IXIAosWorkspaceBoard({
            CUSTOM OBJECT RENDER
            =============================================== */
 
+        
         renderCustomItem={({
           item,
           id,
@@ -335,14 +321,6 @@ export default function IXIAosWorkspaceBoard({
                 updateIxiCardState={
                   updateIxiCardState
                 }
-
-                  enableCardScaling={
-    true
-  }
-
-  cardScaleMode={
-    cardScaleMode
-  }
                 
                 renderSystemIndexCard={({
                   onOpenConsole
