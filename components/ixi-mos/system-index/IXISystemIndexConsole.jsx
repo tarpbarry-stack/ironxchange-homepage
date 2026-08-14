@@ -4,9 +4,10 @@ import IXIObjectConsoleShell
 import {
   IXI_CONSOLE_MAX_DEPTH,
   IXI_CONSOLE_SLOT_TYPES,
+  IXI_CONSOLE_MODULE_FACES,
 
   getConsoleSlots,
-  insertConsoleSlot,
+  createConsoleSlot,
   removeConsoleSlot,
   cycleConsoleSlotFace,
   createConsoleSlotsPatch
@@ -14,8 +15,109 @@ import {
 
 
 const PANEL_WIDTH = 298;
-const PANEL_GAP = -1;
+const PANEL_OVERLAP = 1;
+const PANEL_GAP = -PANEL_OVERLAP;
 const NATIVE_HEIGHT = 471;
+
+
+/* =========================================================
+   IXI AOS
+   SYSTEM INDEX SMART CONTAINER CONSOLE
+
+   PURPOSE
+
+   This component owns ONLY the System Index console
+   presentation shell.
+
+   It does NOT own:
+   - canonical object data
+   - containment
+   - relationships
+   - workspace placement
+   - business nomenclature
+   - card data
+   - module calculations
+
+   Console slot/depth state remains in ixiCardState through
+   the existing IXI console-state contract.
+   ========================================================= */
+
+
+function getNextModuleFace(
+  slots = []
+) {
+  const moduleCount =
+    slots.filter(
+      slot =>
+        slot?.type ===
+        IXI_CONSOLE_SLOT_TYPES.MODULE
+    ).length;
+
+  return (
+    IXI_CONSOLE_MODULE_FACES[
+      moduleCount %
+      IXI_CONSOLE_MODULE_FACES.length
+    ] ||
+    IXI_CONSOLE_MODULE_FACES[0] ||
+    2
+  );
+}
+
+
+function insertModuleSlotAfter({
+  slots = [],
+  afterSlotId
+}) {
+  if (
+    !Array.isArray(slots) ||
+    slots.length >=
+      IXI_CONSOLE_MAX_DEPTH
+  ) {
+    return slots;
+  }
+
+  const nextSlot =
+    createConsoleSlot({
+      type:
+        IXI_CONSOLE_SLOT_TYPES.MODULE,
+
+      face:
+        getNextModuleFace(
+          slots
+        )
+    });
+
+  const targetIndex =
+    slots.findIndex(
+      slot =>
+        String(
+          slot?.slotId || ""
+        ) ===
+        String(
+          afterSlotId || ""
+        )
+    );
+
+  const insertIndex =
+    targetIndex >= 0
+      ? targetIndex + 1
+      : slots.length;
+
+  const next = [
+    ...slots
+  ];
+
+  next.splice(
+    insertIndex,
+    0,
+    nextSlot
+  );
+
+  return next.slice(
+    0,
+    IXI_CONSOLE_MAX_DEPTH
+  );
+}
 
 
 export default function IXISystemIndexConsole({
@@ -33,13 +135,6 @@ export default function IXISystemIndexConsole({
     ).trim();
 
 
-  /*
-   * Existing IXI Console Engine owns
-   * console structure/state.
-   *
-   * System Index does NOT invent another
-   * console model.
-   */
   const slots =
     getConsoleSlots(
       ixiCardState,
@@ -71,18 +166,55 @@ export default function IXISystemIndexConsole({
   }
 
 
+  /*
+   * OPEN CONSOLE
+   *
+   * The permanent Listing/System Index slot is slot 1.
+   * Opening the console means adding one module Face beside
+   * it if no second slot exists yet.
+   */
+  function openConsole(
+    event
+  ) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (
+      slots.length > 1
+    ) {
+      return;
+    }
+
+    const listingSlot =
+      slots.find(
+        slot =>
+          slot?.type ===
+          IXI_CONSOLE_SLOT_TYPES.LISTING
+      ) ||
+      slots[0];
+
+    const nextSlots =
+      insertModuleSlotAfter({
+        slots,
+
+        afterSlotId:
+          listingSlot?.slotId
+      });
+
+    saveSlots(
+      nextSlots
+    );
+  }
+
+
   function insertAfter(
     slotId
   ) {
     const nextSlots =
-      insertConsoleSlot({
+      insertModuleSlotAfter({
         slots,
-
         afterSlotId:
-          slotId,
-
-        maxSlots:
-          IXI_CONSOLE_MAX_DEPTH
+          slotId
       });
 
     saveSlots(
@@ -127,112 +259,216 @@ export default function IXISystemIndexConsole({
   }) {
     /*
      * Permanent System Index Face 1.
+     *
+     * The System Index card remains the actual parent card.
+     * We pass the real console opener back into that card.
      */
     if (
       slot?.type ===
-      IXI_CONSOLE_SLOT_TYPES
-        .LISTING
+      IXI_CONSOLE_SLOT_TYPES.LISTING
     ) {
       return (
         typeof renderSystemIndexCard ===
           "function"
-          ? renderSystemIndexCard()
+          ? renderSystemIndexCard({
+              onOpenConsole:
+                openConsole,
+
+              consoleDepth:
+                slots.length
+            })
           : null
       );
     }
 
 
     /*
-     * Console Faces 2 / 3 / 4.
+     * Module Faces are deliberately generic here.
      *
-     * These are intentionally generic
-     * today.
-     *
-     * We will plug real Face definitions,
-     * modules and AI-generated Faces into
-     * this seam.
+     * The console shell exists now.
+     * Face/module content gets plugged into this seam next.
      */
     return (
       <div className="system-index-console-face">
-        <div className="console-face-eyebrow">
-          SYSTEM INDEX
+
+        <div className="console-face-header">
+          <div className="console-face-heading">
+            <span>
+              SYSTEM INDEX
+            </span>
+
+            <h3>
+              {index?.displayName ||
+                index?.label ||
+                "INDEX"}
+            </h3>
+          </div>
+
+          <div className="console-face-number">
+            FACE {face}
+          </div>
         </div>
 
-        <div className="console-face-name">
-          {index?.displayName ||
-            index?.label ||
-            "INDEX"}
+
+        <div className="console-face-workspace">
+
+          <div className="console-face-empty">
+            <span>
+              EMPTY FACE
+            </span>
+
+            <strong>
+              + MODULE
+            </strong>
+          </div>
+
         </div>
 
-        <div className="console-face-number">
-          FACE {face}
-        </div>
-
-        <div className="console-face-empty">
-          <span>
-            EMPTY FACE
-          </span>
-
-          <strong>
-            + MODULE
-          </strong>
-        </div>
       </div>
     );
   }
 
 
   return (
-    <IXIObjectConsoleShell
-      slots={
-        slots
-      }
-
-      panelWidth={
-        PANEL_WIDTH
-      }
-
-      panelGap={
-        PANEL_GAP
-      }
-
-      maxSlots={
-        IXI_CONSOLE_MAX_DEPTH
-      }
-
-      renderPanel={
-        renderPanel
-      }
-
-      onInsertAfter={
-        insertAfter
-      }
-
-      onRemoveSlot={
-        removeSlot
-      }
-
-      onCycleSlotFace={
-        cycleSlotFace
+    <div
+      className="system-index-console-root"
+      data-console-depth={
+        slots.length
       }
     >
-      <style jsx>{`
+      <IXIObjectConsoleShell
+        slots={
+          slots
+        }
+
+        panelWidth={
+          PANEL_WIDTH
+        }
+
+        panelGap={
+          PANEL_GAP
+        }
+
+        maxSlots={
+          IXI_CONSOLE_MAX_DEPTH
+        }
+
+        renderPanel={
+          renderPanel
+        }
+
+        onInsertAfter={
+          insertAfter
+        }
+
+        onRemoveSlot={
+          removeSlot
+        }
+
+        onCycleSlotFace={
+          cycleSlotFace
+        }
+      />
+
+
+      <style jsx global>{`
+        .system-index-console-root {
+          width: max-content;
+          max-width: none;
+
+          position: relative;
+
+          overflow: visible;
+        }
+
+
+        /*
+         * Native AOS doctrine:
+         *
+         * every console panel is 298 × 471.
+         *
+         * Adjacent panels overlap their border by 1px.
+         * IXIObjectConsoleShell calculates the total native
+         * width with panelGap = -1. This margin makes the
+         * actual rendered geometry match that calculation.
+         */
+        .system-index-console-root
+        .ixi-console-panels {
+          gap: 0 !important;
+        }
+
+
+        .system-index-console-root
+        .ixi-console-slot
+        + .ixi-console-slot {
+          margin-left:
+            -${PANEL_OVERLAP}px;
+        }
+
+
+        .system-index-console-root
+        .ixi-console-slot {
+          height:
+            ${NATIVE_HEIGHT}px;
+
+          min-height:
+            ${NATIVE_HEIGHT}px;
+
+          max-height:
+            ${NATIVE_HEIGHT}px;
+        }
+
+
+        .system-index-console-root
+        .ixi-console-panel-content {
+          height:
+            ${NATIVE_HEIGHT}px;
+
+          min-height:
+            ${NATIVE_HEIGHT}px;
+
+          max-height:
+            ${NATIVE_HEIGHT}px;
+
+          overflow:
+            visible;
+        }
+
+
         .system-index-console-face,
         .system-index-console-face * {
           box-sizing:
             border-box;
         }
 
+
         .system-index-console-face {
-          width: 298px;
-          height: 471px;
+          width:
+            ${PANEL_WIDTH}px;
+
+          min-width:
+            ${PANEL_WIDTH}px;
+
+          max-width:
+            ${PANEL_WIDTH}px;
+
+          height:
+            ${NATIVE_HEIGHT}px;
+
+          min-height:
+            ${NATIVE_HEIGHT}px;
+
+          max-height:
+            ${NATIVE_HEIGHT}px;
 
           padding:
-            14px 14px 18px;
+            12px 12px 16px;
 
-          position: relative;
+          position:
+            relative;
 
-          overflow: hidden;
+          overflow:
+            hidden;
 
           border:
             1px solid
@@ -293,7 +529,46 @@ export default function IXISystemIndexConsole({
         }
 
 
-        .console-face-eyebrow {
+        .console-face-header {
+          height:
+            38px;
+
+          display:
+            flex;
+
+          align-items:
+            flex-start;
+
+          justify-content:
+            space-between;
+
+          gap:
+            8px;
+
+          border-bottom:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .045
+            );
+        }
+
+
+        .console-face-heading {
+          min-width:
+            0;
+
+          flex:
+            1 1 auto;
+        }
+
+
+        .console-face-heading span {
+          display:
+            block;
+
           color:
             #ffc400;
 
@@ -305,12 +580,18 @@ export default function IXISystemIndexConsole({
 
           letter-spacing:
             .09em;
+
+          text-transform:
+            uppercase;
         }
 
 
-        .console-face-name {
-          margin-top:
-            4px;
+        .console-face-heading h3 {
+          margin:
+            4px 0 0;
+
+          overflow:
+            hidden;
 
           color:
             #f4f4f4;
@@ -324,14 +605,11 @@ export default function IXISystemIndexConsole({
           line-height:
             1;
 
-          text-transform:
-            uppercase;
-
-          overflow:
-            hidden;
-
           text-overflow:
             ellipsis;
+
+          text-transform:
+            uppercase;
 
           white-space:
             nowrap;
@@ -339,31 +617,22 @@ export default function IXISystemIndexConsole({
 
 
         .console-face-number {
-          margin-top:
-            11px;
+          flex:
+            0 0 auto;
 
           padding-top:
-            8px;
-
-          border-top:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .045
-            );
+            2px;
 
           color:
             rgba(
               255,
               255,
               255,
-              .34
+              .32
             );
 
           font-size:
-            9px;
+            8px;
 
           font-weight:
             950;
@@ -373,21 +642,30 @@ export default function IXISystemIndexConsole({
         }
 
 
-        .console-face-empty {
+        .console-face-workspace {
           position:
             absolute;
 
           left:
-            14px;
+            12px;
 
           right:
-            14px;
+            12px;
 
           top:
-            120px;
+            58px;
 
           bottom:
-            45px;
+            28px;
+        }
+
+
+        .console-face-empty {
+          width:
+            100%;
+
+          height:
+            100%;
 
           display:
             flex;
@@ -462,7 +740,7 @@ export default function IXISystemIndexConsole({
             950;
         }
       `}</style>
-    </IXIObjectConsoleShell>
+    </div>
   );
 }
 
@@ -485,17 +763,21 @@ export function getSystemIndexConsoleNativeWidth({
     (
       slots.length *
       PANEL_WIDTH
-    ) +
+    ) -
     (
       Math.max(
         slots.length - 1,
         0
       ) *
-      PANEL_GAP
+      PANEL_OVERLAP
     )
   );
 }
 
+
+export function getSystemIndexConsoleNativeHeight() {
+  return NATIVE_HEIGHT;
+}
 
 export function getSystemIndexConsoleNativeHeight() {
   return NATIVE_HEIGHT;
