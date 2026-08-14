@@ -6,6 +6,9 @@ import IXIFacePreview
 import IXIFaceReferenceOverlay
   from "./IXIFaceReferenceOverlay";
 
+import IXIAosCardCatalogBench
+  from "../ixi-aos-card-library/IXIAosCardCatalogBench";
+
 const FACE_TREE = [
   {
     title: "AUCTION",
@@ -43,6 +46,11 @@ export default function IXIFaceStudio() {
     selectedFace,
     setSelectedFace
   ] = useState("AOF2");
+
+  const [
+  studioMode,
+  setStudioMode
+] = useState("faces");
 
   const [
   previewSize,
@@ -87,13 +95,154 @@ export default function IXIFaceStudio() {
     );
   }
 
+if (
+  studioMode === "cards"
+) {
+  return (
+    <div className="aos-card-lab-mode">
+
+      <div className="aos-card-lab-header">
+        <strong>
+          IXI FACE LAB
+        </strong>
+
+        <div className="studio-mode-controls">
+          <button
+            type="button"
+            onClick={() =>
+              setStudioMode("faces")
+            }
+          >
+            FACES
+          </button>
+
+          <button
+            type="button"
+            className="active"
+          >
+            AOS CARDS
+          </button>
+        </div>
+      </div>
+
+      <IXIAosCardCatalogBench />
+
+      <style jsx>{`
+        .aos-card-lab-mode {
+          min-height:
+            calc(100vh - 180px);
+        }
+
+        .aos-card-lab-header {
+          height: 42px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          margin-bottom: 18px;
+
+          padding: 0 14px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.08);
+
+          border-radius: 10px;
+
+          background:
+            #121212;
+        }
+
+        .aos-card-lab-header strong {
+          color: #ffc400;
+
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: .08em;
+        }
+
+        .studio-mode-controls {
+          display: flex;
+          gap: 6px;
+        }
+
+        .studio-mode-controls button {
+          height: 22px;
+
+          padding: 0 9px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.08);
+
+          border-radius: 4px;
+
+          background:
+            rgba(255,255,255,.025);
+
+          color:
+            rgba(255,255,255,.42);
+
+          font-size: 7px;
+          font-weight: 950;
+
+          cursor: pointer;
+        }
+
+        .studio-mode-controls button.active {
+          border-color:
+            rgba(255,196,0,.28);
+
+          background:
+            rgba(255,196,0,.09);
+
+          color: #ffc400;
+        }
+      `}</style>
+
+    </div>
+  );
+}  
   return (
     <div className="face-lab">
       <aside className="face-tree">
 
         <div className="studio-title">
-          IXI FACE LAB
-        </div>
+  <span>
+    IXI FACE LAB
+  </span>
+
+  <div className="studio-mode-controls">
+    <button
+      type="button"
+      className={
+        studioMode === "faces"
+          ? "active"
+          : ""
+      }
+      onClick={() =>
+        setStudioMode("faces")
+      }
+    >
+      FACES
+    </button>
+
+    <button
+      type="button"
+      className={
+        studioMode === "cards"
+          ? "active"
+          : ""
+      }
+      onClick={() =>
+        setStudioMode("cards")
+      }
+    >
+      AOS CARDS
+    </button>
+  </div>
+</div>
 
         {FACE_TREE.map(group => (
           <div
@@ -501,7 +650,47 @@ overflow: visible;
   color: #ffc400;
 }
 
+.studio-title {
+  justify-content: space-between;
+}
 
+.studio-mode-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.studio-mode-controls button {
+  height: 22px;
+
+  padding: 0 8px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius: 4px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.42);
+
+  font-size: 7px;
+  font-weight: 950;
+
+  cursor: pointer;
+}
+
+.studio-mode-controls button.active {
+  border-color:
+    rgba(255,196,0,.28);
+
+  background:
+    rgba(255,196,0,.09);
+
+  color: #ffc400;
+}
 
       `}</style>
 
