@@ -625,7 +625,10 @@ export function getNextConsoleDefaultFace(
       IXI_CONSOLE_MODULE_FACES,
 
     defaultFace =
-      IXI_CONSOLE_DEFAULT_FACE
+      IXI_CONSOLE_DEFAULT_FACE,
+
+    maxSlots =
+      IXI_CONSOLE_MAX_DEPTH
   } = {}
 ) {
   const validFaces =
