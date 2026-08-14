@@ -1,6 +1,3 @@
-import IXIScaledCardShell
-  from "../../ixi-machine-object/IXIScaledCardShell";
-
 import IXIObjectCardActuator
   from "../../ixi-chassis/IXIObjectCardActuator";
 
@@ -22,6 +19,9 @@ const SYSTEM_INDEX_NATIVE_PANEL_WIDTH =
 
 const SYSTEM_INDEX_NATIVE_HEIGHT =
   471;
+
+const SYSTEM_INDEX_SEAM_OVERLAP =
+  0;
 
 /*
  * COPY THE WORKING PRIVATE CONSOLE:
@@ -103,12 +103,9 @@ export default function IXISystemIndexConsole({
   index,
 
   ixiCardState = {},
-  updateIxiCardState,
+updateIxiCardState,
 
-  enableCardScaling = false,
-  cardScaleMode = "xl",
-
-  renderSystemIndexCard
+renderSystemIndexCard
 }) {
   const id =
     String(
