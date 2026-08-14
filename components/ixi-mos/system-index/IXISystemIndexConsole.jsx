@@ -774,11 +774,6 @@ export function getSystemIndexConsoleNativeWidth({
   );
 }
 
-
-export function getSystemIndexConsoleNativeHeight() {
-  return NATIVE_HEIGHT;
-}
-
 export function getSystemIndexConsoleNativeHeight() {
   return NATIVE_HEIGHT;
 }
