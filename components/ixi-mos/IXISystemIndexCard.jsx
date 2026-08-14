@@ -1468,7 +1468,7 @@ function returnContents(
           right: 0;
           top: 0;
 
-          bottom: 107px;
+          bottom: 80px;
 
           overflow: hidden;
         }
