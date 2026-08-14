@@ -183,6 +183,14 @@ const legacyConsoleDepth =
       : 0
   );
 
+const consoleDepth =
+  Array.isArray(
+    savedConsoleSlots
+  ) &&
+  savedConsoleSlots.length > 0
+    ? savedConsoleSlots.length
+    : legacyConsoleDepth;
+
 const customNativeSize =
   typeof getCustomItemNativeSize ===
     "function"
@@ -201,6 +209,7 @@ const customNativeHeight =
   Number(
     customNativeSize?.height
   ) || 471;
+
 return (
  <IXISortableMachineCard
   key={id}
