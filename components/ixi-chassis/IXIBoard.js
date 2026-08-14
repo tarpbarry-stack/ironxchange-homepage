@@ -39,6 +39,8 @@ export default function IXIBoard({
   getCustomItemId,
 renderCustomItem,
 
+getCustomItemNativeSize,
+
 consolePanelWidth,
 consolePanelGap,
 }) {
@@ -181,13 +183,24 @@ const legacyConsoleDepth =
       : 0
   );
 
-const consoleDepth =
-  Array.isArray(
-    savedConsoleSlots
-  ) &&
-  savedConsoleSlots.length > 0
-    ? savedConsoleSlots.length
-    : legacyConsoleDepth;
+const customNativeSize =
+  typeof getCustomItemNativeSize ===
+    "function"
+    ? getCustomItemNativeSize({
+        item,
+        id
+      })
+    : null;
+
+const customNativeWidth =
+  Number(
+    customNativeSize?.width
+  ) || 298;
+
+const customNativeHeight =
+  Number(
+    customNativeSize?.height
+  ) || 471;
 return (
  <IXISortableMachineCard
   key={id}
@@ -241,16 +254,30 @@ return (
           : null;
 
       return customItem ? (
-        enableCardScaling ? (
-          <IXIScaledCardShell
-            size={cardScaleMode}
-          >
-            {customItem}
-          </IXIScaledCardShell>
-        ) : (
-          customItem
-        )
-      ) : item?.type === "SELLER OBJECT" &&
+  enableCardScaling ? (
+    <IXIScaledCardShell
+      size={
+        cardScaleMode
+      }
+
+      objectFamily={
+        objectFamily
+      }
+
+      nativeWidth={
+        customNativeWidth
+      }
+
+      nativeHeight={
+        customNativeHeight
+      }
+    >
+      {customItem}
+    </IXIScaledCardShell>
+  ) : (
+    customItem
+  )
+) : item?.type === "SELLER OBJECT" &&
         SellerObjectCard ? (
         <IXIScaledCardShell
           size={cardScaleMode}
