@@ -30,7 +30,7 @@ export default function IXIAosInlineAddress({
         <input className="zip" value={fields.postalCode || ""} placeholder="ZIP" onPointerDown={event => event.stopPropagation()} onChange={event => onFieldChange?.("postalCode", event.target.value)} />
         <style jsx>{`
           .ixi-aos-inline-address { width:100%; height:28px; display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) 34px 54px; gap:4px; align-items:center; }
-          input { width:100%; min-width:0; height:23px; padding:0 5px; border:1px solid rgba(255,255,255,.10); border-radius:4px; background:rgba(0,0,0,.28); color:rgba(255,255,255,.88); font-size:7px; font-weight:850; outline:none; }
+          input { width:100%; min-width:0; height:23px; padding:0 5px; border:1px solid rgba(255,255,255,.10); border-radius:4px; background:rgba(0,0,0,.28); color:rgba(255,255,255,.88); font-size:9px; font-weight:850; outline:none; }
           input:focus { border-color:rgba(255,196,0,.48); }
         `}</style>
       </div>
@@ -42,7 +42,7 @@ export default function IXIAosInlineAddress({
       <strong>{displayValue || "—"}</strong>
       <style jsx>{`
         .ixi-aos-inline-address { width:100%; height:26px; min-height:26px; display:flex; align-items:center; padding:0 6px; overflow:hidden; }
-        strong { min-width:0; overflow:hidden; color:rgba(255,255,255,.86); font-size:8px; font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
+        strong { min-width:0; overflow:hidden; color:rgba(255,255,255,.86); font-size:10px; font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
       `}</style>
     </div>
   );
