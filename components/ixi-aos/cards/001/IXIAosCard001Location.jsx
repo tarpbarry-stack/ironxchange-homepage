@@ -6,14 +6,12 @@ import IXIAosInlineAddress from "../../card-runtime/modules/IXIAosInlineAddress"
 import IXIAosInlineMetricStrip from "../../card-runtime/modules/IXIAosInlineMetricStrip";
 import IXIAosEditableFieldGroup from "../../card-runtime/modules/IXIAosEditableFieldGroup";
 import IXIAosRelationshipInfrastructurePanel from "../../card-runtime/modules/IXIAosRelationshipInfrastructurePanel";
-import IXIAosContainerDeckDock from "../../card-runtime/modules/IXIAosContainerDeckDock";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 
 const NATIVE_WIDTH = 298;
 const NATIVE_HEIGHT = 471;
 const RAIL_RESERVE = 19;
 const HEADER_HEIGHT = 52;
-const DECK_HEIGHT = 88;
 
 function safeObject(value) {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -34,7 +32,6 @@ export const CARD_001_LOCATION = Object.freeze({
 export default function IXIAosCard001Location({
   object = {},
   projection = null,
-  objects = [],
   ixiState = {},
   onIxiStateChange = null,
   onSaveObject = null,
@@ -45,7 +42,6 @@ export default function IXIAosCard001Location({
   onRecall = null,
   onBoard = null,
   onReturn = null,
-  onExposeObject = null,
   onSendFront = null,
   onSendBack = null,
   onCycleColor = null,
@@ -54,7 +50,6 @@ export default function IXIAosCard001Location({
   onSendToArmedDestination = null
 }) {
   const objectId = String(object?.objectId || object?.id || "");
-  const [selectedChildIndex, setSelectedChildIndex] = useState(0);
   const [saving, setSaving] = useState(false);
 
   const editDraft = safeObject(ixiState?.editDraft);
@@ -203,17 +198,11 @@ export default function IXIAosCard001Location({
         ) : null}
       </main>
 
-      <IXIAosContainerDeckDock
-        container={runtimeObject}
-        objects={objects}
-        selectedIndex={selectedChildIndex}
-        onSelectedIndexChange={setSelectedChildIndex}
-        onExposeObject={onExposeObject}
-        onRecall={onRecall}
-        onBoard={onBoard}
-        onReturn={onReturn}
-        bottom={RAIL_RESERVE}
-      />
+      <div className="actions">
+        <button type="button" onClick={() => onRecall?.(runtimeObject)}>↻ <span>RECALL</span></button>
+        <button type="button" onClick={() => onBoard?.(runtimeObject)}>▦ <span>BOARD</span></button>
+        <button type="button" onClick={() => onReturn?.(runtimeObject)}>↩ <span>RETURN</span></button>
+      </div>
 
       <IXIMachineRail
         listing={runtimeObject}
@@ -281,7 +270,7 @@ export default function IXIAosCard001Location({
           position: absolute;
           top: ${HEADER_HEIGHT}px;
           left: 0; right: 0;
-          bottom: ${RAIL_RESERVE + DECK_HEIGHT}px;
+          bottom: 47px;
           overflow: hidden;
           padding: 5px 0 0;
         }
@@ -306,16 +295,38 @@ export default function IXIAosCard001Location({
           font-size: 6px;
           font-weight: 950;
         }
+        .actions {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: ${RAIL_RESERVE}px;
+          height: 28px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          border-top: 1px solid rgba(255,255,255,.055);
+          background: #090909;
+          z-index: 20;
+        }
+        .actions button {
+          border: 0;
+          border-right: 1px solid rgba(255,255,255,.045);
+          background: transparent;
+          color: #00c2ff;
+          font-size: 10px;
+          font-weight: 950;
+          cursor: pointer;
+        }
+        .actions button:last-child { border-right: 0; }
+        .actions span {
+          margin-left: 4px;
+          color: rgba(255,255,255,.62);
+          font-size: 7px;
+          font-weight: 950;
+        }
         :global(.card001 .ixi-aos-primary-media-panel) {
           border-left: 0;
           border-right: 0;
           border-radius: 0;
-        }
-        :global(.card001 .ixi-aos-container-deck-dock) {
-          left: 0 !important;
-          right: 0 !important;
-          width: ${NATIVE_WIDTH}px !important;
-          max-width: ${NATIVE_WIDTH}px !important;
         }
       `}</style>
     </div>
