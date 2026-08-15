@@ -133,6 +133,105 @@ function createFallbackFaceLayout(
 }
 
 
+/*
+ * CARD TEMPLATE PRESENTATION CONTRACT
+ * -----------------------------------
+ *
+ * Face layout belongs to the Card Template,
+ * not to the console and not to object type logic.
+ *
+ * Supported forms:
+ *
+ * presentation: {
+ *   faceLayouts: {
+ *     1: [...],
+ *     2: [...]
+ *   }
+ * }
+ *
+ * OR
+ *
+ * presentation: {
+ *   faceLayouts: [
+ *     { face: 1, layout: [...] },
+ *     { face: 2, layout: [...] }
+ *   ]
+ * }
+ *
+ * The legacy faceOneLayout contract remains
+ * supported for existing Card #001 work.
+ */
+function getTemplateFaceLayout({
+  template = {},
+  faceIndex = 1
+}) {
+  const presentation =
+    safeObject(
+      template?.presentation
+    );
+
+  const faceLayouts =
+    presentation?.faceLayouts;
+
+
+  if (
+    faceLayouts &&
+    typeof faceLayouts === "object" &&
+    !Array.isArray(faceLayouts)
+  ) {
+    const keyedLayout =
+      faceLayouts[
+        String(faceIndex)
+      ] ??
+      faceLayouts[
+        faceIndex
+      ];
+
+    if (
+      Array.isArray(keyedLayout)
+    ) {
+      return keyedLayout;
+    }
+  }
+
+
+  if (
+    Array.isArray(faceLayouts)
+  ) {
+    const match =
+      faceLayouts.find(
+        item =>
+          Number(
+            item?.face ||
+            item?.faceIndex
+          ) ===
+          Number(faceIndex)
+      );
+
+    if (
+      Array.isArray(
+        match?.layout
+      )
+    ) {
+      return match.layout;
+    }
+  }
+
+
+  if (
+    Number(faceIndex) === 1 &&
+    Array.isArray(
+      presentation?.faceOneLayout
+    )
+  ) {
+    return presentation.faceOneLayout;
+  }
+
+
+  return [];
+}
+
+
 function adaptFace({
   face,
   index,
@@ -147,6 +246,31 @@ function adaptFace({
         index + 1
       )
     );
+
+
+  const explicitFaceLayout =
+    safeArray(
+      face?.layout
+    );
+
+
+  const templateFaceLayout =
+    getTemplateFaceLayout({
+      template,
+      faceIndex
+    });
+
+
+  const resolvedLayout =
+    explicitFaceLayout.length
+      ? explicitFaceLayout
+      : templateFaceLayout.length
+        ? templateFaceLayout
+        : faceIndex === 1
+          ? createFallbackFaceLayout(
+              template
+            )
+          : [];
 
 
   return createIXICardFaceDefinition({
@@ -177,31 +301,7 @@ function adaptFace({
       ),
 
     layout:
-  safeArray(
-    face?.layout
-  ).length
-    ? safeArray(
-        face?.layout
-      )
-    : (
-        faceIndex === 1
-  ? (
-      safeArray(
-        template
-          ?.presentation
-          ?.faceOneLayout
-      ).length
-        ? safeArray(
-            template
-              ?.presentation
-              ?.faceOneLayout
-          )
-        : createFallbackFaceLayout(
-            template
-          )
-    )
-  : []
-      ),
+      resolvedLayout,
 
     metadata: {
       rendererSlug:
