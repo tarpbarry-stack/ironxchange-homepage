@@ -157,22 +157,13 @@ export default function IXIAosCardCatalogPreview({
           <button type="button" className={locationFace === 2 ? "active" : ""} onClick={() => setLocationFace(2)}>F2 · OPERATIONS</button>
         </div>
 
-        {locationFace === 2 ? (
-          <div className="skin-switcher">
-            {[
-              ["v12", "V12"],
-              ["steel", "STEEL"],
-              ["blueprint", "BLUE"],
-              ["industrial", "INDUSTRIAL"]
-            ].map(([id, label]) => (
-              <button key={id} type="button" className={face2Skin === id ? "active" : ""} onClick={() => setFace2Skin(id)}>{label}</button>
-            ))}
-          </div>
-        ) : null}
-
         <div className="aos-card-catalog-console">
           {locationFace === 2 ? (
-            <IXIAosLocationFace2Operations {...sharedLocationProps} skinId={face2Skin} />
+            <IXIAosLocationFace2Operations
+              {...sharedLocationProps}
+              skinId={face2Skin}
+              onSkinChange={setFace2Skin}
+            />
           ) : (
             <LocationCard {...sharedLocationProps} />
           )}
@@ -181,10 +172,8 @@ export default function IXIAosCardCatalogPreview({
         <style jsx>{`
           .aos-card-catalog-location-preview { width:298px; display:flex; flex-direction:column; align-items:stretch; gap:6px; }
           .location-face-switcher { height:22px; display:grid; grid-template-columns:1fr 1fr; gap:4px; }
-          .location-face-switcher button,.skin-switcher button { height:22px; border:1px solid rgba(255,255,255,.08); border-radius:4px; background:rgba(255,255,255,.025); color:rgba(255,255,255,.42); font-size:6.5px; font-weight:950; letter-spacing:.035em; cursor:pointer; }
-          .location-face-switcher button.active,.skin-switcher button.active { border-color:rgba(255,196,0,.34); background:rgba(255,196,0,.09); color:#ffc400; }
-          .skin-switcher { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; }
-          .skin-switcher button { height:18px; font-size:5.6px; }
+          .location-face-switcher button { height:22px; border:1px solid rgba(255,255,255,.08); border-radius:4px; background:rgba(255,255,255,.025); color:rgba(255,255,255,.42); font-size:6.5px; font-weight:950; letter-spacing:.035em; cursor:pointer; }
+          .location-face-switcher button.active { border-color:rgba(255,196,0,.34); background:rgba(255,196,0,.09); color:#ffc400; }
           .aos-card-catalog-console { position:relative; width:298px; height:471px; overflow:hidden; }
         `}</style>
       </div>
