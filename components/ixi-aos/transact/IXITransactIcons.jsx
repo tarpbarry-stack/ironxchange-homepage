@@ -1,0 +1,15 @@
+const Icon=({children,size=18,className=""})=><svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
+export const WorkOrderIcon=p=><Icon {...p}><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M8 9h5M8 13h4M15.5 14.5l4 4M18.8 13.8l-4.6 4.6"/></Icon>;
+export const LocationIcon=p=><Icon {...p}><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></Icon>;
+export const CameraIcon=p=><Icon {...p}><path d="M4 7h4l2-2h4l2 2h4v12H4Z"/><circle cx="12" cy="13" r="4"/></Icon>;
+export const MicIcon=p=><Icon {...p}><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></Icon>;
+export const RepairIcon=p=><Icon {...p}><path d="M14 6a4 4 0 0 0-5-4l2.2 2.2-3 3L6 5a4 4 0 0 0 4 5L4 16a2 2 0 0 0 3 3l6-6a4 4 0 0 0 5-5l-2.2 2.2-3-3Z"/></Icon>;
+export const PMIcon=p=><Icon {...p}><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2h6v4H9zM8 10h8M8 14h8M8 18h5"/></Icon>;
+export const InspectIcon=p=><Icon {...p}><circle cx="10" cy="10" r="6"/><path d="m14.5 14.5 5 5"/></Icon>;
+export const ReadyIcon=p=><Icon {...p}><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 8"/></Icon>;
+export const FlagIcon=p=><Icon {...p}><path d="M6 21V4M6 5h10l-2 3 2 3H6"/></Icon>;
+export const OperableIcon=p=><Icon {...p}><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 8"/></Icon>;
+export const LimitedIcon=p=><Icon {...p}><path d="M6 9h12M6 15h12"/></Icon>;
+export const DownIcon=p=><Icon {...p}><path d="M12 3v16m-6-6 6 6 6-6"/></Icon>;
+export const PersonIcon=p=><Icon {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></Icon>;
+export const CreateIcon=p=><Icon {...p}><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4M16 15v5M13.5 17.5h5"/></Icon>;
