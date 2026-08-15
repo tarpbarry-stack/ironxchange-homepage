@@ -13,27 +13,61 @@ export default function IXIFaceFrame({
 
   dragHandleProps,
 
+  height = null,
+
+  flush = false,
+
+  contentStyle = null,
+
+  footerStyle = null,
+
   ...sectionProps
 }) {
   const isCompact =
     size === "compact";
 
+  const resolvedHeight =
+    Number.isFinite(
+      Number(height)
+    )
+      ? Number(height)
+      : null;
+
   return (
     <section
-  {...sectionProps}
-  {...(dragHandleProps || {})}
+      {...sectionProps}
+      {...(dragHandleProps || {})}
 
-  className={[
+      className={[
         "ixi-face-frame",
 
         isCompact
           ? "ixi-face-frame-compact"
           : "ixi-face-frame-tall",
 
+        flush
+          ? "ixi-face-frame-flush"
+          : "",
+
         className
       ]
         .filter(Boolean)
         .join(" ")}
+
+      style={
+        resolvedHeight !== null
+          ? {
+              height:
+                `${resolvedHeight}px`,
+
+              minHeight:
+                `${resolvedHeight}px`,
+
+              maxHeight:
+                `${resolvedHeight}px`
+            }
+          : undefined
+      }
     >
       <div
         className={[
@@ -43,6 +77,11 @@ export default function IXIFaceFrame({
         ]
           .filter(Boolean)
           .join(" ")}
+
+        style={
+          contentStyle ||
+          undefined
+        }
       >
         {children}
       </div>
@@ -56,6 +95,11 @@ export default function IXIFaceFrame({
           ]
             .filter(Boolean)
             .join(" ")}
+
+          style={
+            footerStyle ||
+            undefined
+          }
         >
           {footer}
         </div>
@@ -155,6 +199,11 @@ export default function IXIFaceFrame({
             0;
 
           overflow: hidden;
+        }
+
+        .ixi-face-frame-flush
+        .ixi-face-frame-content {
+          padding: 0;
         }
 
         .ixi-face-frame-footer {
