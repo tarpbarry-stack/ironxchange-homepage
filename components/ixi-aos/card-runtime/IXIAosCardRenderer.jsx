@@ -44,6 +44,11 @@ import IXIAosContainerDeckDock
 import IXIAosPrimaryMediaPanel
   from "./modules/IXIAosPrimaryMediaPanel";
 
+import IXIAosFaceLayoutPrimitive,
+{
+  isAosFaceLayoutPrimitive
+} from "./modules/IXIAosFaceLayoutPrimitive";
+
 
 function safeObject(
   value
@@ -295,11 +300,52 @@ export default function IXIAosCardRenderer({
     }
   }
 
-  function renderModule({ module }) {
+  function renderModuleDefinition(
+    module = {},
+    nestedIndex = 0
+  ) {
     const moduleType =
       String(module?.moduleType || "")
         .trim()
         .toLowerCase();
+
+    if (
+      isAosFaceLayoutPrimitive(
+        moduleType
+      )
+    ) {
+      return (
+        <IXIAosFaceLayoutPrimitive
+          moduleDefinition={module}
+          object={runtimeObject}
+          projection={projection}
+          editing={Boolean(
+            ixiState?.editing
+          )}
+          onFieldChange={
+            patchEditDraftFields
+          }
+          renderChild={(
+            child,
+            childIndex
+          ) => (
+            <div
+              key={
+                child?.slotId ||
+                child?.moduleId ||
+                `${moduleType}-${nestedIndex}-${childIndex}`
+              }
+              className="ixi-aos-nested-face-module"
+            >
+              {renderModuleDefinition(
+                child,
+                childIndex
+              )}
+            </div>
+          )}
+        />
+      );
+    }
 
     if (
       moduleType ===
@@ -500,6 +546,13 @@ export default function IXIAosCardRenderer({
     }
 
     return null;
+  }
+
+  function renderModule({ module }) {
+    return renderModuleDefinition(
+      module,
+      0
+    );
   }
 
   return (
