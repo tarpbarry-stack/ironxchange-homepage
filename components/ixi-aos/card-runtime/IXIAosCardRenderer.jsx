@@ -35,6 +35,9 @@ import IXIAosRelationshipInfrastructurePanel
 import IXIAosContainerCommandStrip
   from "./modules/IXIAosContainerCommandStrip";
 
+import IXIAosContainerDeckDock
+  from "./modules/IXIAosContainerDeckDock";
+
 import IXIAosPrimaryMediaPanel
   from "./modules/IXIAosPrimaryMediaPanel";
 
@@ -402,6 +405,31 @@ export default function IXIAosCardRenderer({
           onRecall={onRecall}
           onBoard={onBoard}
           onReturn={onReturn}
+        />
+      );
+    }
+
+    if (
+      moduleType ===
+      "container-deck-dock"
+    ) {
+      return (
+        <IXIAosContainerDeckDock
+          container={runtimeObject}
+          objects={objects}
+          selectedIndex={
+            selectedChildIndex
+          }
+          onSelectedIndexChange={
+            setSelectedChildIndex
+          }
+          onExposeObject={onExposeObject}
+          onRecall={onRecall}
+          onBoard={onBoard}
+          onReturn={onReturn}
+          bottom={
+            module?.config?.bottom ?? 20
+          }
         />
       );
     }
