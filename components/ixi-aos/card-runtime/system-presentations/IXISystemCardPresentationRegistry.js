@@ -42,47 +42,10 @@ const LOCATION_STANDARD_PRESENTATION =
         },
 
         {
-          slotId: "address-line",
-          moduleType: "editable-field-group",
-          config: {
-            fields: [
-              {
-                fieldId: "address1",
-                label: "ADDRESS",
-                width: "1fr"
-              }
-            ]
-          },
+          slotId: "location-address",
+          moduleType: "inline-address",
           presentation: {
-            role: "summary",
-            width: "full"
-          }
-        },
-
-        {
-          slotId: "city-state-zip",
-          moduleType: "weighted-field-row",
-          config: {
-            fields: [
-              {
-                fieldId: "city",
-                label: "CITY",
-                width: "1fr"
-              },
-              {
-                fieldId: "state",
-                label: "ST",
-                width: 42
-              },
-              {
-                fieldId: "postalCode",
-                label: "ZIP",
-                width: 66
-              }
-            ]
-          },
-          presentation: {
-            role: "summary",
+            role: "compact",
             width: "full"
           }
         },
@@ -162,19 +125,13 @@ const LOCATION_STANDARD_PRESENTATION =
         },
 
         {
-          slotId: "container-command-strip",
-          moduleType: "container-command-strip",
+          slotId: "container-deck",
+          moduleType: "container-deck-dock",
+          config: {
+            bottom: 20
+          },
           presentation: {
-            role: "compact",
-            width: "full"
-          }
-        },
-
-        {
-          slotId: "container-viewer",
-          moduleType: "container-collection-preview",
-          presentation: {
-            role: "viewer-bottom",
+            role: "bottom-dock",
             width: "full"
           }
         }
