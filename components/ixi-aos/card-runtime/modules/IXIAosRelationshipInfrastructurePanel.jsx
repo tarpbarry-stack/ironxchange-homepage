@@ -1,3 +1,10 @@
+import IXIFaceSection
+  from "../../../ixi-face-studio/IXIFaceSection";
+
+import IXIFaceGrid
+  from "../../../ixi-face-studio/IXIFaceGrid";
+
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -78,7 +85,7 @@ export default function IXIAosRelationshipInfrastructurePanel({
     Math.max(
       62,
       Math.min(
-        126,
+        150,
         Number(config.height || 88)
       )
     );
@@ -91,33 +98,36 @@ export default function IXIAosRelationshipInfrastructurePanel({
         minHeight: height
       }}
     >
-      <div className="panel-title">
-        {title}
-      </div>
-
-      <div
-        className="panel-scroll"
-        style={{
-          height: Math.max(43, height - 19)
-        }}
+      <IXIFaceSection
+        title={title}
+        dense
+        className="aos-relationship-section"
       >
-        {items.length ? (
-          items.map(item => (
-            <div
-              key={item.id}
-              className="relationship-row"
+        <div className="panel-scroll">
+          {items.length ? (
+            <IXIFaceGrid
+              columns={2}
+              gap="xs"
+              align="stretch"
             >
-              <strong>{item.label}</strong>
-              <span>{item.value || "CONNECTED"}</span>
-              <b aria-hidden="true">›</b>
+              {items.map(item => (
+                <div
+                  key={item.id}
+                  className="relationship-row"
+                >
+                  <strong>{item.label}</strong>
+                  <span>{item.value || "CONNECTED"}</span>
+                  <b aria-hidden="true">›</b>
+                </div>
+              ))}
+            </IXIFaceGrid>
+          ) : (
+            <div className="panel-empty">
+              NO RELATIONSHIPS OR INFRASTRUCTURE
             </div>
-          ))
-        ) : (
-          <div className="panel-empty">
-            NO RELATIONSHIPS OR INFRASTRUCTURE
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </IXIFaceSection>
 
       <style jsx>{`
         .ixi-aos-relationship-panel,
@@ -129,37 +139,21 @@ export default function IXIAosRelationshipInfrastructurePanel({
           width: 100%;
           min-width: 0;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,.055);
-          border-radius: 6px;
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,.016),
-              rgba(255,255,255,.006)
-            );
         }
 
-        .panel-title {
-          height: 18px;
+        .ixi-aos-relationship-panel
+        :global(.aos-relationship-section) {
+          height: 100%;
+          min-height: 0;
           display: flex;
-          align-items: center;
-          padding: 0 7px;
-          border-bottom: 1px solid rgba(255,255,255,.045);
-          color: #ffc400;
-          font-size: 6px;
-          font-weight: 950;
-          letter-spacing: .055em;
-          text-transform: uppercase;
+          flex-direction: column;
         }
 
         .panel-scroll {
+          height: calc(100% - 1px);
+          min-height: 0;
           overflow-y: auto;
           overflow-x: hidden;
-          padding: 4px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4px;
-          align-content: start;
           scrollbar-width: thin;
           scrollbar-color: rgba(255,255,255,.22) transparent;
         }
@@ -170,11 +164,11 @@ export default function IXIAosRelationshipInfrastructurePanel({
           display: grid;
           grid-template-columns: minmax(0,1fr) auto 8px;
           align-items: center;
-          gap: 3px;
+          gap: 4px;
           padding: 0 6px;
           border: 1px solid rgba(255,255,255,.055);
           border-radius: 4px;
-          background: rgba(255,255,255,.014);
+          background: rgba(255,255,255,.012);
         }
 
         .relationship-row strong,
@@ -186,21 +180,21 @@ export default function IXIAosRelationshipInfrastructurePanel({
         }
 
         .relationship-row strong {
-          color: rgba(255,255,255,.80);
-          font-size: 6.2px;
+          color: rgba(255,255,255,.78);
+          font-size: var(--ixi-face-font-label, 7px);
           font-weight: 950;
           text-transform: uppercase;
         }
 
         .relationship-row span {
-          color: rgba(255,255,255,.34);
-          font-size: 5.1px;
+          color: rgba(255,255,255,.38);
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 850;
         }
 
         .relationship-row b {
           color: rgba(0,194,255,.78);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
           text-align: right;
         }
@@ -211,13 +205,12 @@ export default function IXIAosRelationshipInfrastructurePanel({
         }
 
         .panel-empty {
-          grid-column: 1 / -1;
           min-height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: rgba(255,255,255,.16);
-          font-size: 5.5px;
+          font-size: var(--ixi-face-font-micro, 6.5px);
           font-weight: 900;
           letter-spacing: .04em;
         }
