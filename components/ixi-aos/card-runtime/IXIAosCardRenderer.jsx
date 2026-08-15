@@ -17,6 +17,9 @@ import {
 import IXIAosEditableFieldGroup
   from "./modules/IXIAosEditableFieldGroup";
 
+import IXIAosCardHeaderControls
+  from "./modules/IXIAosCardHeaderControls";
+
 
 /*
  * IXI AOS CARD RENDERER
@@ -47,9 +50,6 @@ import IXIAosEditableFieldGroup
  * The existing IXI console system remains
  * responsible for console slots, expansion,
  * persistence, face swapping, and layout.
- *
- * Object Studio / AOS will plug into that
- * system separately.
  */
 
 
@@ -85,11 +85,11 @@ export default function IXIAosCardRenderer({
 
   /*
    * GENERIC OBJECT EDIT CONTRACT
-   *
-   * The renderer does not own persistence.
-   * It only forwards field edits to its caller.
    */
   onObjectFieldChange = null,
+
+  onHideObject = null,
+  onDeleteObject = null,
 
   /*
    * CONTAINER OPERATIONS
@@ -101,12 +101,6 @@ export default function IXIAosCardRenderer({
 
   /*
    * CONSOLE ENTRY POINT
-   *
-   * The caller may connect this to the
-   * existing IXI console system.
-   *
-   * This renderer itself does not create
-   * or manage console state.
    */
   onOpenConsole = null,
 
@@ -126,15 +120,6 @@ export default function IXIAosCardRenderer({
 
   onSelectModule = null,
 
-  /*
-   * IMPORTANT:
-   *
-   * This lets a contained Object render
-   * through the SAME Card Renderer.
-   *
-   * That is how Card identity survives
-   * placement inside another Card.
-   */
   renderCard = null
 }) {
 
@@ -158,16 +143,16 @@ export default function IXIAosCardRenderer({
     );
 
 
+  const capabilities =
+    resolvedDefinition
+      ?.capabilities ||
+    {};
+
+
   /* =======================================================
      CONTAINER DECK STATE
      ======================================================= */
 
-  /*
-   * Container deck selection belongs to
-   * workspace presentation.
-   *
-   * It is NOT durable containment truth.
-   */
   const [
     selectedChildIndex,
     setSelectedChildIndex
@@ -179,16 +164,6 @@ export default function IXIAosCardRenderer({
      CONTAINED CARD RENDERER
      ======================================================= */
 
-  /*
-   * If the caller supplies a Card renderer,
-   * use it.
-   *
-   * Otherwise recurse through this same
-   * renderer.
-   *
-   * The container NEVER substitutes another
-   * Card family for the child Object.
-   */
   function renderContainedCard({
     object:
       childObject,
@@ -229,13 +204,6 @@ export default function IXIAosCardRenderer({
           ""
         }
 
-        /*
-         * Container preview is presentation
-         * only.
-         *
-         * Do not install another Board drag
-         * activator inside the preview.
-         */
         dragHandleProps={{}}
 
         ixiState={{}}
@@ -299,6 +267,34 @@ export default function IXIAosCardRenderer({
 
 
   /* =======================================================
+     CARD EDIT STATE
+     ======================================================= */
+
+  function toggleEditing() {
+    const objectId =
+      String(
+        object?.objectId ||
+        object?.id ||
+        ""
+      );
+
+    if (!objectId) {
+      return;
+    }
+
+    onIxiStateChange?.(
+      objectId,
+      {
+        editing:
+          !Boolean(
+            ixiState?.editing
+          )
+      }
+    );
+  }
+
+
+  /* =======================================================
      MODULE DISPATCH
      ======================================================= */
 
@@ -306,9 +302,7 @@ export default function IXIAosCardRenderer({
     object:
       runtimeObject,
 
-    module,
-
-    face
+    module
   }) {
 
     const moduleType =
@@ -321,15 +315,61 @@ export default function IXIAosCardRenderer({
 
 
     /*
+     * GENERIC HEADER ACTIONS
+     *
+     * The Card Definition decides whether
+     * this module exists. The renderer only
+     * supplies generic behavior.
+     */
+    if (
+      moduleType ===
+      "card-header-actions"
+    ) {
+      return (
+        <IXIAosCardHeaderControls
+          canAdd={
+            Boolean(
+              capabilities?.canContain
+            )
+          }
+
+          canEdit={
+            capabilities?.editable !==
+            false
+          }
+
+          editing={
+            Boolean(
+              ixiState?.editing
+            )
+          }
+
+          onAdd={
+            onAddObject
+          }
+
+          onToggleEdit={
+            toggleEditing
+          }
+
+          onHide={
+            onHideObject
+          }
+
+          onDelete={
+            onDeleteObject
+          }
+
+          onOpenConsole={
+            onOpenConsole
+          }
+        />
+      );
+    }
+
+
+    /*
      * GENERIC EDITABLE FIELD GROUP
-     *
-     * This is deliberately object-agnostic.
-     * Location, Job, Employee, Vehicle, etc.
-     * can all use the same primitive.
-     *
-     * Width belongs to the field spec, so a
-     * two-letter state field never needs to
-     * consume half of a 298px Card.
      */
     if (
       moduleType ===
@@ -363,12 +403,6 @@ export default function IXIAosCardRenderer({
 
     /*
      * CONTAINER MODULE PACK
-     *
-     * This renderer only delegates the
-     * module request.
-     *
-     * It does NOT decide that the Object
-     * "is" a container type.
      */
     const containerModule =
       renderIXIAosContainerModule({
@@ -410,15 +444,6 @@ export default function IXIAosCardRenderer({
     }
 
 
-    /*
-     * Returning null means:
-     *
-     * "This dispatcher does not own this
-     * module."
-     *
-     * IXIAosCardRuntime may then use its
-     * own generic module renderer.
-     */
     return null;
   }
 
