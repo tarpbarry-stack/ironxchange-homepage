@@ -16,7 +16,7 @@ const THUMB_RAIL_HEIGHT = 64;
 const PREVIEW_INFO_HEIGHT = 22;
 const ACTIONS_HEIGHT = 28;
 const HEADER_HEIGHT = 42;
-const LOWER_STACK_HEIGHT = THUMB_RAIL_HEIGHT + PREVIEW_INFO_HEIGHT + ACTIONS_HEIGHT;
+const LOWER_STACK_HEIGHT = THUMB_RAIL_HEIGHT + ACTIONS_HEIGHT;
 
 function safeObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -284,6 +284,23 @@ export default function IXIAosCard001Location({
           />
         </div>
 
+        <div className="preview-info-strip">
+          <strong title={activeChildTitle}>{activeChildTitle}</strong>
+          <span className="preview-position">
+            {activeChild ? `${activeChildIndex + 1}/${childItems.length}` : "0/0"}
+          </span>
+          <button
+            type="button"
+            className="preview-out"
+            disabled={!activeChild}
+            title="Put this object on Board"
+            onPointerDown={event => event.stopPropagation()}
+            onClick={exposeSelected}
+          >
+            OUT ↗
+          </button>
+        </div>
+
         <div className="address">
           <IXIAosInlineAddress
             object={runtimeObject}
@@ -347,46 +364,10 @@ export default function IXIAosCard001Location({
 
         {childItems.length > 1 ? (
           <>
-            <button
-              type="button"
-              className="card-photo-nav left"
-              onPointerDown={event => event.stopPropagation()}
-              onClick={previewPrevious}
-              aria-label="Previous object"
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              className="card-photo-nav right"
-              onPointerDown={event => event.stopPropagation()}
-              onClick={previewNext}
-              aria-label="Next object"
-            >
-              ›
-            </button>
+            <button type="button" className="card-photo-nav left" onPointerDown={event => event.stopPropagation()} onClick={previewPrevious} aria-label="Previous object">‹</button>
+            <button type="button" className="card-photo-nav right" onPointerDown={event => event.stopPropagation()} onClick={previewNext} aria-label="Next object">›</button>
           </>
         ) : null}
-      </div>
-
-      <div className="preview-info-strip">
-        <strong title={activeChildTitle}>{activeChildTitle}</strong>
-
-        <span className="preview-position">
-          {activeChild ? `${activeChildIndex + 1}/${childItems.length}` : "0/0"}
-        </span>
-
-        <button
-          type="button"
-          className="preview-out"
-          disabled={!activeChild}
-          title="Put this object on Board"
-          onPointerDown={event => event.stopPropagation()}
-          onClick={exposeSelected}
-        >
-          OUT ↗
-        </button>
       </div>
 
       <IXIMachineRail
@@ -404,292 +385,28 @@ export default function IXIAosCard001Location({
       />
 
       <style jsx>{`
-        .card001,
-        .card001 * {
-          box-sizing: border-box;
-        }
-
-        .card001 {
-          position: relative;
-          width: ${NATIVE_WIDTH}px;
-          min-width: ${NATIVE_WIDTH}px;
-          max-width: ${NATIVE_WIDTH}px;
-          height: ${NATIVE_HEIGHT}px;
-          min-height: ${NATIVE_HEIGHT}px;
-          max-height: ${NATIVE_HEIGHT}px;
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,.10);
-          border-radius: 14px;
-          background: linear-gradient(180deg,rgba(255,255,255,.025),transparent 30%),#101010;
-          color: #f4f4f4;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.04),0 18px 34px rgba(0,0,0,.42);
-        }
-
-        .header {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: ${HEADER_HEIGHT}px;
-          padding: 7px 12px 3px;
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 8px;
-          border-bottom: 1px solid rgba(255,255,255,.045);
-          z-index: 5;
-        }
-
-        .identity {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .identity span {
-          display: block;
-          color: #ffc400;
-          font-size: 6.5px;
-          font-weight: 950;
-          letter-spacing: .08em;
-        }
-
-        .identity strong {
-          display: block;
-          margin-top: 4px;
-          overflow: hidden;
-          color: #f4f4f4;
-          font-size: 17px;
-          font-weight: 950;
-          line-height: 1;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .name-input {
-          display: block;
-          width: calc(100% - 92px);
-          max-width: 148px;
-          height: 20px;
-          margin-top: 2px;
-          padding: 0 5px;
-          border: 1px solid rgba(255,196,0,.40);
-          border-radius: 4px;
-          background: #090909;
-          color: #f4f4f4;
-          font-size: 13px;
-          font-weight: 950;
-          line-height: 1;
-          outline: none;
-          text-transform: uppercase;
-        }
-
-        .name-input:focus {
-          border-color: #ffc400;
-        }
-
-        .body {
-          position: absolute;
-          top: ${HEADER_HEIGHT}px;
-          left: 0;
-          right: 0;
-          bottom: ${RAIL_RESERVE + LOWER_STACK_HEIGHT}px;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          padding: 0;
-        }
-
-        .photo {
-          flex: none;
-          margin: 0 0 2px;
-        }
-
-        .address,
-        .facts,
-        .metrics {
-          flex: none;
-          margin: 0 6px 1px;
-        }
-
-        .relationships {
-          flex: 1;
-          min-height: 0;
-          margin: 0 6px;
-          overflow: hidden;
-        }
-
-        :global(.card001 .relationships .ixi-aos-relationship-panel) {
-          height: 100% !important;
-          min-height: 0 !important;
-        }
-
-        .edit-actions {
-          position: absolute;
-          right: 7px;
-          top: 2px;
-          display: flex;
-          gap: 4px;
-          z-index: 10;
-        }
-
-        .edit-actions button {
-          height: 20px;
-          padding: 0 7px;
-          border: 1px solid rgba(255,196,0,.22);
-          border-radius: 4px;
-          background: #0a0a0a;
-          color: #ffc400;
-          font-size: 6px;
-          font-weight: 950;
-        }
-
-        .actions {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT + PREVIEW_INFO_HEIGHT}px;
-          height: ${ACTIONS_HEIGHT}px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          border-top: 1px solid rgba(255,255,255,.055);
-          background: #090909;
-          z-index: 20;
-        }
-
-        .actions button {
-          border: 0;
-          border-right: 1px solid rgba(255,255,255,.045);
-          background: transparent;
-          color: #00c2ff;
-          font-size: 10px;
-          font-weight: 950;
-          cursor: pointer;
-        }
-
-        .actions button:last-child {
-          border-right: 0;
-        }
-
-        .actions span {
-          margin-left: 4px;
-          color: rgba(255,255,255,.62);
-          font-size: 7px;
-          font-weight: 950;
-        }
-
-        .photo-rail {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: ${RAIL_RESERVE + PREVIEW_INFO_HEIGHT}px;
-          width: ${NATIVE_WIDTH}px;
-          height: ${THUMB_RAIL_HEIGHT}px;
-          overflow: hidden;
-          margin: 0;
-          padding: 0;
-          z-index: 21;
-        }
-
-        .card-photo-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 22px;
-          height: 64px;
-          border: none;
-          background: rgba(0,0,0,.06);
-          color: rgba(255,255,255,.42);
-          font-size: 28px;
-          font-weight: 300;
-          cursor: pointer;
-          z-index: 30;
-          opacity: .72;
-          transition: opacity .18s ease, background .18s ease, color .18s ease;
-        }
-
-        .card-photo-nav.left {
-          left: 0;
-          border-radius: 0 10px 10px 0;
-        }
-
-        .card-photo-nav.right {
-          right: 0;
-          border-radius: 10px 0 0 10px;
-        }
-
-        .card-photo-nav:hover {
-          opacity: 1;
-          background: rgba(0,0,0,.14);
-          color: rgba(255,255,255,.68);
-        }
-
-        .preview-info-strip {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: ${RAIL_RESERVE}px;
-          height: ${PREVIEW_INFO_HEIGHT}px;
-          display: grid;
-          grid-template-columns: minmax(0,1fr) 32px 52px;
-          align-items: center;
-          border-top: 1px solid rgba(255,255,255,.05);
-          background: #0a0a0a;
-          z-index: 22;
-        }
-
-        .preview-info-strip strong {
-          min-width: 0;
-          overflow: hidden;
-          padding: 0 7px;
-          color: rgba(255,255,255,.86);
-          font-size: 7.5px;
-          font-weight: 950;
-          text-overflow: ellipsis;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        .preview-position {
-          color: rgba(255,255,255,.30);
-          font-size: 6.5px;
-          font-weight: 900;
-          text-align: center;
-        }
-
-        .preview-out {
-          height: 100%;
-          padding: 0;
-          border: 0;
-          border-left: 1px solid rgba(255,255,255,.045);
-          background: transparent;
-          color: #ffc400;
-          font-size: 7px;
-          font-weight: 950;
-          cursor: pointer;
-        }
-
-        .preview-out:disabled {
-          color: rgba(255,255,255,.18);
-          cursor: default;
-        }
-
-        :global(.card001 .photo-rail .ixi-collection-thumb-rail) {
-          width: ${NATIVE_WIDTH}px !important;
-          height: ${THUMB_RAIL_HEIGHT}px !important;
-          margin: 0 !important;
-        }
-
-        :global(.card001 .ixi-aos-primary-media-panel) {
-          border-left: 0;
-          border-right: 0;
-          border-radius: 0;
-        }
-
-        :global(.card001 .relationships .ixi-face-section-title) {
-          color: #ffc400 !important;
-          font-size: 6.5px !important;
-          letter-spacing: .08em !important;
-        }
+        .card001,.card001 *{box-sizing:border-box}
+        .card001{position:relative;width:${NATIVE_WIDTH}px;min-width:${NATIVE_WIDTH}px;max-width:${NATIVE_WIDTH}px;height:${NATIVE_HEIGHT}px;min-height:${NATIVE_HEIGHT}px;max-height:${NATIVE_HEIGHT}px;overflow:hidden;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 30%),#101010;color:#f4f4f4;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 34px rgba(0,0,0,.42)}
+        .header{position:absolute;top:0;left:0;right:0;height:${HEADER_HEIGHT}px;padding:7px 12px 3px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.045);z-index:5}
+        .identity{min-width:0;flex:1}.identity span{display:block;color:#ffc400;font-size:6.5px;font-weight:950;letter-spacing:.08em}.identity strong{display:block;margin-top:4px;overflow:hidden;color:#f4f4f4;font-size:17px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}
+        .name-input{display:block;width:calc(100% - 92px);max-width:148px;height:20px;margin-top:2px;padding:0 5px;border:1px solid rgba(255,196,0,.40);border-radius:4px;background:#090909;color:#f4f4f4;font-size:13px;font-weight:950;line-height:1;outline:none;text-transform:uppercase}.name-input:focus{border-color:#ffc400}
+        .body{position:absolute;top:${HEADER_HEIGHT}px;left:0;right:0;bottom:${RAIL_RESERVE + LOWER_STACK_HEIGHT}px;display:flex;flex-direction:column;overflow:hidden;padding:0}
+        .photo{flex:none;margin:0}
+        .preview-info-strip{flex:none;height:${PREVIEW_INFO_HEIGHT}px;min-height:${PREVIEW_INFO_HEIGHT}px;display:grid;grid-template-columns:minmax(0,1fr) 32px 52px;align-items:center;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.045);background:#0a0a0a;z-index:4}
+        .preview-info-strip strong{min-width:0;overflow:hidden;padding:0 7px;color:rgba(255,255,255,.86);font-size:7.5px;font-weight:950;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+        .preview-position{color:rgba(255,255,255,.30);font-size:6.5px;font-weight:900;text-align:center}
+        .preview-out{height:100%;padding:0;border:0;border-left:1px solid rgba(255,255,255,.045);background:transparent;color:#ffc400;font-size:7px;font-weight:950;cursor:pointer}.preview-out:disabled{color:rgba(255,255,255,.18);cursor:default}
+        .address,.facts,.metrics{flex:none;margin:0 6px 1px}
+        .relationships{flex:1;min-height:0;margin:0 6px;overflow:hidden}
+        :global(.card001 .relationships .ixi-aos-relationship-panel){height:100%!important;min-height:0!important}
+        .edit-actions{position:absolute;right:7px;top:2px;display:flex;gap:4px;z-index:10}.edit-actions button{height:20px;padding:0 7px;border:1px solid rgba(255,196,0,.22);border-radius:4px;background:#0a0a0a;color:#ffc400;font-size:6px;font-weight:950}
+        .actions{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;height:${ACTIONS_HEIGHT}px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.055);background:#090909;z-index:20}
+        .actions button{border:0;border-right:1px solid rgba(255,255,255,.045);background:transparent;color:#00c2ff;font-size:10px;font-weight:950;cursor:pointer}.actions button:last-child{border-right:0}.actions span{margin-left:4px;color:rgba(255,255,255,.62);font-size:7px;font-weight:950}
+        .photo-rail{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE}px;width:${NATIVE_WIDTH}px;height:${THUMB_RAIL_HEIGHT}px;overflow:hidden;margin:0;padding:0;z-index:21}
+        .card-photo-nav{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:64px;border:none;background:rgba(0,0,0,.06);color:rgba(255,255,255,.42);font-size:28px;font-weight:300;cursor:pointer;z-index:30;opacity:.72;transition:opacity .18s ease,background .18s ease,color .18s ease}.card-photo-nav.left{left:0;border-radius:0 10px 10px 0}.card-photo-nav.right{right:0;border-radius:10px 0 0 10px}.card-photo-nav:hover{opacity:1;background:rgba(0,0,0,.14);color:rgba(255,255,255,.68)}
+        :global(.card001 .photo-rail .ixi-collection-thumb-rail){width:${NATIVE_WIDTH}px!important;height:${THUMB_RAIL_HEIGHT}px!important;margin:0!important}
+        :global(.card001 .ixi-aos-primary-media-panel){border-left:0;border-right:0;border-radius:0}
+        :global(.card001 .relationships .ixi-face-section-title){color:#ffc400!important;font-size:6.5px!important;letter-spacing:.08em!important}
       `}</style>
     </div>
   );
