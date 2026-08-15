@@ -3,6 +3,9 @@ import {
   createIXIAosPayment,
   getIXIAosFinancialPassportId
 } from "./IXIAosFinancialRuntimeAdapter";
+import {
+  createIXIAosFinancialViewModel
+} from "./IXIAosFinancialSnapshotRuntime";
 
 const clean = value => String(value ?? "").trim();
 const asArray = value => Array.isArray(value) ? value : [];
@@ -55,87 +58,86 @@ export function getIXILocationObligations(object = {}) {
       autoPay: Boolean(row.autoPay),
       ytdPaid: number(row.ytdPaid),
       accountNumber: clean(row.accountNumber || row.accountNo),
-      responsibleParty: clean(row.responsibleParty || (getIXILocationOwnershipMode(object) === "leased" ? LOCATION_FINANCIAL_RESPONSIBILITY.TENANT : LOCATION_FINANCIAL_RESPONSIBILITY.OWNER)).toLowerCase(),
+      responsibleParty: clean(
+        row.responsibleParty ||
+        (getIXILocationOwnershipMode(object) === "leased"
+          ? LOCATION_FINANCIAL_RESPONSIBILITY.TENANT
+          : LOCATION_FINANCIAL_RESPONSIBILITY.OWNER)
+      ).toLowerCase(),
       relatedObjectId: clean(row.relatedObjectId),
       metadata: { ...asObject(row.metadata) }
     };
   });
 }
 
-function getSnapshotDocuments(snapshot = {}) {
-  const source = asObject(snapshot);
-  const candidates = [source.documents, source.financialDocuments, source.recentDocuments, source.activity];
-  return candidates.find(value => Array.isArray(value)) || [];
-}
-
-function getDocumentAmount(document = {}) {
-  const source = asObject(document);
-  if (Number.isFinite(Number(source.amount))) return Number(source.amount);
-  return asArray(source.lines).reduce((sum, line) => sum + number(line?.amount), 0);
-}
-
-function documentMetadata(document = {}) {
-  return asObject(document.metadata);
-}
-
-export function createIXILocationFinancialViewModel({ object = {}, financialSnapshot = {}, now = new Date() } = {}) {
+export function createIXILocationFinancialViewModel({
+  object = {},
+  financialSnapshot = {},
+  now = new Date()
+} = {}) {
   const obligations = getIXILocationObligations(object);
-  const documents = getSnapshotDocuments(financialSnapshot);
   const today = now instanceof Date ? now : new Date(now);
-  const year = Number.isNaN(today.getTime()) ? new Date().getFullYear() : today.getFullYear();
-  const startOfYear = new Date(year, 0, 1).getTime();
-  const endOfYear = new Date(year + 1, 0, 1).getTime();
-
-  const paymentByObligation = new Map();
-  for (const document of documents) {
-    const type = clean(document?.documentType || document?.type).toLowerCase();
-    if (!["payment", "bill-payment", "expense"].includes(type)) continue;
-    const metadata = documentMetadata(document);
-    const obligationId = clean(metadata.obligationId || metadata.locationObligationId);
-    if (!obligationId) continue;
-    const occurred = new Date(document?.occurredAt || document?.transactionDate || document?.paidDate || 0).getTime();
-    if (!occurred || occurred < startOfYear || occurred >= endOfYear) continue;
-    paymentByObligation.set(obligationId, (paymentByObligation.get(obligationId) || 0) + Math.abs(getDocumentAmount(document)));
-  }
-
-  const hydrated = obligations.map(item => ({
-    ...item,
-    ytdPaid: paymentByObligation.has(item.obligationId) ? paymentByObligation.get(item.obligationId) : item.ytdPaid
-  }));
-
   const nowMs = Number.isNaN(today.getTime()) ? Date.now() : today.getTime();
   const in30 = nowMs + 30 * 86400000;
-  const due = hydrated
-    .map(item => ({ ...item, dueMs: item.nextDue ? new Date(item.nextDue).getTime() : NaN }))
+
+  const due = obligations
+    .map(item => ({
+      ...item,
+      dueMs: item.nextDue ? new Date(item.nextDue).getTime() : NaN
+    }))
     .filter(item => !Number.isNaN(item.dueMs))
     .sort((a, b) => a.dueMs - b.dueMs);
 
   const unpaid = due.filter(item => item.status !== LOCATION_OBLIGATION_STATUS.PAID);
   const nextObligation = unpaid.find(item => item.dueMs >= nowMs) || unpaid[0] || null;
-  const due30Days = unpaid.filter(item => item.dueMs >= nowMs && item.dueMs <= in30).reduce((sum, item) => sum + item.amount, 0);
-  const overdue = unpaid.filter(item => item.dueMs < nowMs).reduce((sum, item) => sum + item.amount, 0);
-  const ytdPaid = hydrated.reduce((sum, item) => sum + item.ytdPaid, 0);
+  const due30Days = unpaid
+    .filter(item => item.dueMs >= nowMs && item.dueMs <= in30)
+    .reduce((sum, item) => sum + item.amount, 0);
+  const overdue = unpaid
+    .filter(item => item.dueMs < nowMs)
+    .reduce((sum, item) => sum + item.amount, 0);
 
-  const snapshot = asObject(financialSnapshot);
-  const facts = asObject(snapshot.facts || snapshot.totals || snapshot.rollup);
+  const canonical = createIXIAosFinancialViewModel({
+    source: financialSnapshot,
+    currency: clean(object.currency || object?.fields?.currency || "USD") || "USD"
+  });
+
+  const hasFinancialSnapshot = Boolean(
+    canonical.documentCount ||
+    canonical.factCount ||
+    canonical.commitment ||
+    canonical.incurredCost ||
+    canonical.paid ||
+    canonical.unpaid ||
+    canonical.revenue ||
+    canonical.inflow ||
+    canonical.outflow
+  );
+
+  const scheduledYtdPaid = obligations.reduce((sum, item) => sum + item.ytdPaid, 0);
 
   return {
     passportId: getIXIAosFinancialPassportId(object),
     ownershipMode: getIXILocationOwnershipMode(object),
-    obligations: hydrated,
+    obligations,
     nextObligation,
     due30Days,
     overdue,
-    ytdPaid,
+    ytdPaid: hasFinancialSnapshot ? canonical.paid : scheduledYtdPaid,
     financialTotals: {
-      revenueYtd: number(facts.revenue || facts.totalRevenue || facts.inflows || snapshot.revenueYtd),
-      expensesYtd: number(facts.expenses || facts.totalExpenses || facts.outflows || snapshot.expensesYtd),
-      netIncomeYtd: number(facts.net || facts.netIncome || snapshot.netIncomeYtd),
-      committed: number(facts.committed || snapshot.committed),
-      billed: number(facts.billed || snapshot.billed),
-      paid: number(facts.paid || snapshot.paid)
+      revenueYtd: canonical.revenue || canonical.inflow,
+      expensesYtd: canonical.incurredCost || canonical.outflow,
+      netIncomeYtd: canonical.operatingNet || canonical.net,
+      committed: canonical.commitment,
+      billed: canonical.incurredCost,
+      paid: canonical.paid,
+      unpaid: canonical.unpaid,
+      projectedOutflow: canonical.projectedOutflow,
+      receivable: canonical.receivable,
+      collected: canonical.collected
     },
-    hasFinancialSnapshot: Object.keys(snapshot).length > 0
+    canonicalFinancialView: canonical,
+    hasFinancialSnapshot
   };
 }
 
@@ -152,9 +154,18 @@ function createFinancialLines(obligation) {
   }];
 }
 
-export async function postIXILocationObligationBill({ object = {}, obligation = {}, apiBaseUrl = "", headers = {}, signal } = {}) {
+export async function postIXILocationObligationBill({
+  object = {},
+  obligation = {},
+  apiBaseUrl = "",
+  headers = {},
+  signal
+} = {}) {
   const row = asObject(obligation);
-  if (!getIXIAosFinancialPassportId(object)) throw new Error("Location Passport is required before posting a financial bill.");
+  if (!getIXIAosFinancialPassportId(object)) {
+    throw new Error("Location Passport is required before posting a financial bill.");
+  }
+
   return createIXIAosBill({
     object,
     input: {
@@ -178,9 +189,19 @@ export async function postIXILocationObligationBill({ object = {}, obligation = 
   });
 }
 
-export async function recordIXILocationObligationPayment({ object = {}, obligation = {}, paidAt = new Date().toISOString(), apiBaseUrl = "", headers = {}, signal } = {}) {
+export async function recordIXILocationObligationPayment({
+  object = {},
+  obligation = {},
+  paidAt = new Date().toISOString(),
+  apiBaseUrl = "",
+  headers = {},
+  signal
+} = {}) {
   const row = asObject(obligation);
-  if (!getIXIAosFinancialPassportId(object)) throw new Error("Location Passport is required before recording a financial payment.");
+  if (!getIXIAosFinancialPassportId(object)) {
+    throw new Error("Location Passport is required before recording a financial payment.");
+  }
+
   return createIXIAosPayment({
     object,
     input: {
