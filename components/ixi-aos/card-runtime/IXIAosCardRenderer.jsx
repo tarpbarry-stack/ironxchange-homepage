@@ -26,6 +26,9 @@ import IXIAosEditSessionActions
 import IXIAosInlineMetricStrip
   from "./modules/IXIAosInlineMetricStrip";
 
+import IXIAosContainerViewer
+  from "./modules/IXIAosContainerViewer";
+
 
 function safeObject(
   value
@@ -552,6 +555,36 @@ export default function IXIAosCardRenderer({
 
           moduleDefinition={
             module
+          }
+        />
+      );
+    }
+
+
+    if (
+      moduleType ===
+      "container-collection-preview"
+    ) {
+      return (
+        <IXIAosContainerViewer
+          container={
+            runtimeObject
+          }
+
+          objects={
+            objects
+          }
+
+          selectedIndex={
+            selectedChildIndex
+          }
+
+          onSelectedIndexChange={
+            setSelectedChildIndex
+          }
+
+          onExposeObject={
+            onExposeObject
           }
         />
       );
