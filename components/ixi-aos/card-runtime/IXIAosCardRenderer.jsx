@@ -17,6 +17,9 @@ import {
 import IXIAosEditableFieldGroup
   from "./modules/IXIAosEditableFieldGroup";
 
+import IXIAosInlineAddress
+  from "./modules/IXIAosInlineAddress";
+
 import IXIAosCardHeaderControls
   from "./modules/IXIAosCardHeaderControls";
 
@@ -318,6 +321,22 @@ export default function IXIAosCardRenderer({
           onHide={onHideObject}
           onDelete={onDeleteObject}
           onOpenConsole={onOpenConsole}
+        />
+      );
+    }
+
+    if (
+      moduleType === "inline-address"
+    ) {
+      return (
+        <IXIAosInlineAddress
+          object={runtimeObject}
+          editing={Boolean(
+            ixiState?.editing
+          )}
+          onFieldChange={
+            patchEditDraftFields
+          }
         />
       );
     }
