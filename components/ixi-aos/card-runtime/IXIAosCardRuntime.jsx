@@ -819,6 +819,98 @@ function getRuntimeDataValue(
     null
   );
 }  
+
+function IXIMetricGridModule({
+  moduleDefinition
+}) {
+  const metrics =
+    Array.isArray(
+      moduleDefinition
+        ?.config
+        ?.metrics
+    )
+      ? moduleDefinition
+          .config
+          .metrics
+      : [];
+
+  if (!metrics.length) {
+    return null;
+  }
+
+  return (
+    <div className="ixi-card-runtime-metric-grid">
+      {metrics.map(
+        (
+          metric,
+          index
+        ) => {
+          const label =
+            clean(
+              metric?.label
+            ) ||
+            `METRIC ${index + 1}`;
+
+          const source =
+            clean(
+              metric?.source
+            ) ||
+            "fields";
+
+          const key =
+            clean(
+              metric?.key
+            );
+
+          const type =
+            clean(
+              metric?.type
+            );
+
+          const suffix =
+            clean(
+              metric?.suffix
+            );
+
+          const value =
+            getRuntimeDataValue(
+              source,
+              key
+            );
+
+          return (
+            <div
+              key={
+                metric?.metricId ||
+                `${source}:${key}:${index}`
+              }
+              className="ixi-card-runtime-metric"
+            >
+              <span>
+                {label}
+              </span>
+
+              <strong>
+                {formatRuntimeValue(
+                  value,
+                  type
+                )}
+
+                {suffix ? (
+                  <small>
+                    {" "}
+                    {suffix}
+                  </small>
+                ) : null}
+              </strong>
+            </div>
+          );
+        }
+      )}
+    </div>
+  );
+}
+  
   function renderBuiltInModule(
   moduleDefinition
 ) {
@@ -841,6 +933,9 @@ function getRuntimeDataValue(
     moduleType ===
     "object-identity"
   ) {
+
+
+    
     return null;
   }
 
@@ -929,7 +1024,20 @@ function getRuntimeDataValue(
     );
   }
 
+if (
+  moduleType ===
+  "metric-grid"
+) {
+  return (
+    <IXIMetricGridModule
+      moduleDefinition={
+        moduleDefinition
+      }
+    />
+  );
+}
 
+    
   return null;
 }
 
@@ -1764,6 +1872,131 @@ typeof onExpandConsoleRight ===
     );
 }
 
+
+:global(
+  .ixi-card-runtime-metric-grid
+) {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 5px;
+}
+
+
+:global(
+  .ixi-card-runtime-metric
+) {
+  min-width: 0;
+
+  min-height: 38px;
+
+  padding: 6px 7px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .05
+    );
+
+  border-radius: 5px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .016
+    );
+}
+
+
+:global(
+  .ixi-card-runtime-metric
+  span
+) {
+  overflow: hidden;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .27
+    );
+
+  font-size: 5px;
+
+  font-weight: 900;
+
+  letter-spacing: .45px;
+
+  text-overflow: ellipsis;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+
+:global(
+  .ixi-card-runtime-metric
+  strong
+) {
+  margin-top: 3px;
+
+  overflow: hidden;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .80
+    );
+
+  font-size: 10px;
+
+  font-weight: 950;
+
+  line-height: 1;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+:global(
+  .ixi-card-runtime-metric
+  small
+) {
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .32
+    );
+
+  font-size: 6px;
+
+  font-weight: 900;
+}
 
 :global(
   .ixi-card-runtime-single-field
