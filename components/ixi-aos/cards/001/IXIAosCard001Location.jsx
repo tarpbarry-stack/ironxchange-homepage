@@ -5,7 +5,6 @@ import IXICollectionThumbRail from "../../../ixi-object-system/IXICollectionThum
 import IXIAosPrimaryMediaPanel from "../../card-runtime/modules/IXIAosPrimaryMediaPanel";
 import IXIAosInlineAddress from "../../card-runtime/modules/IXIAosInlineAddress";
 import IXIAosInlineMetricStrip from "../../card-runtime/modules/IXIAosInlineMetricStrip";
-import IXIAosEditableFieldGroup from "../../card-runtime/modules/IXIAosEditableFieldGroup";
 import IXIAosRelationshipInfrastructurePanel from "../../card-runtime/modules/IXIAosRelationshipInfrastructurePanel";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 
@@ -233,16 +232,6 @@ export default function IXIAosCard001Location({
     }
   };
 
-  const contactFacts = {
-    moduleType: "weighted-field-row",
-    config: {
-      fields: [
-        { fieldId: "yardContact", label: "YARD CONTACT", width: "1fr" },
-        { fieldId: "yardPhone", label: "PHONE", width: "92px" }
-      ]
-    }
-  };
-
   return (
     <div className="card001 card board-color-none board-outline-1">
       <header className="header">
@@ -307,15 +296,6 @@ export default function IXIAosCard001Location({
           />
         </div>
 
-        <div className="facts">
-          <IXIAosEditableFieldGroup
-            object={runtimeObject}
-            moduleDefinition={contactFacts}
-            editing={editing}
-            onFieldChange={patchField}
-          />
-        </div>
-
         <div className="metrics">
           <IXIAosInlineMetricStrip
             object={runtimeObject}
@@ -330,7 +310,7 @@ export default function IXIAosCard001Location({
             moduleDefinition={{
               config: {
                 title: "RELATIONSHIPS & INFRASTRUCTURE",
-                height: 150
+                height: 66
               }
             }}
           />
@@ -394,16 +374,15 @@ export default function IXIAosCard001Location({
         .preview-position{color:rgba(255,255,255,.30);font-size:6.5px;font-weight:900;text-align:center}
         .preview-out{height:100%;padding:0;border:0;border-left:1px solid rgba(255,255,255,.045);background:transparent;color:#ffc400;font-size:7px;font-weight:950}.preview-out:disabled{color:rgba(255,255,255,.18)}
         .address{flex:none;width:258px;margin:-3px auto 0;text-align:center}
-        .facts{flex:none;width:218px;margin:-4px auto 0}
-        .metrics{flex:none;width:258px;margin:-4px auto 0}
-        .relationships{flex:1;min-height:0;margin:-4px 6px 0;overflow:hidden}
+        .metrics{flex:none;width:270px;margin:-5px auto 0}
+        .relationships{flex:none;height:66px;min-height:66px;margin:5px 6px 6px;overflow:hidden}
         :global(.card001 .address .ixi-aos-inline-address){justify-content:center!important;text-align:center!important}
         :global(.card001 .address .ixi-aos-inline-address strong){width:100%!important;text-align:center!important}
-        :global(.card001 .facts .ixi-aos-editable-field-group){width:218px!important;grid-template-columns:106px 92px!important;gap:20px!important}
-        :global(.card001 .facts .ixi-aos-editable-field){align-items:center!important;text-align:center!important}
-        :global(.card001 .facts .ixi-aos-editable-field>span),:global(.card001 .facts .ixi-aos-editable-field>strong){width:100%!important;text-align:center!important}
-        :global(.card001 .metrics .ixi-aos-inline-metrics){width:258px!important;justify-content:center!important}
-        :global(.card001 .relationships .ixi-aos-relationship-panel){height:100%!important;min-height:0!important}
+        :global(.card001 .metrics .ixi-aos-inline-metrics){width:270px!important;min-height:31px!important;justify-content:center!important;gap:18px!important;padding:3px 2px!important;border-top:1px solid rgba(255,255,255,.045);border-bottom:1px solid rgba(255,255,255,.045);background:rgba(255,255,255,.012)}
+        :global(.card001 .metrics .ixi-aos-inline-metric){gap:6px!important}
+        :global(.card001 .metrics .ixi-aos-inline-metric span){font-size:7.5px!important;color:rgba(255,196,0,.68)!important;letter-spacing:.055em!important}
+        :global(.card001 .metrics .ixi-aos-inline-metric strong){font-size:12px!important;color:rgba(255,255,255,.96)!important;font-weight:950!important}
+        :global(.card001 .relationships .ixi-aos-relationship-panel){height:66px!important;min-height:66px!important}
         .edit-actions{position:absolute;right:7px;top:2px;display:flex;gap:4px;z-index:10}.edit-actions button{height:20px;padding:0 7px;border:1px solid rgba(255,196,0,.22);border-radius:4px;background:#0a0a0a;color:#ffc400;font-size:6px;font-weight:950}
         .actions{position:absolute;left:6px;right:6px;bottom:${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;height:${ACTIONS_HEIGHT}px;display:flex;align-items:center;justify-content:center;gap:6px;z-index:20}
         .actions button{height:14px;min-width:72px;padding:0 7px;border:1px solid rgba(255,255,255,.07);border-radius:4px;background:rgba(255,255,255,.018);color:#00c2ff;font-size:8px;font-weight:950;cursor:pointer}.actions span{margin-left:3px;color:rgba(255,255,255,.62);font-size:6px;font-weight:950}
