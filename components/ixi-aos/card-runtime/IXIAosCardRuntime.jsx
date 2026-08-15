@@ -553,9 +553,11 @@ function IXIStatusModule({
 export default function IXIAosCardRuntime({
   object = {},
 
+  projection = null,
+
   cardDefinition = null,
   template = null,
-
+  
   parentLabel = "",
 
   dragHandleProps = null,
@@ -748,6 +750,75 @@ faceOnly = false,
   }
 
 
+function getRuntimeDataValue(
+  source = "",
+  key = ""
+) {
+  const resolvedSource =
+    clean(
+      source
+    ).toLowerCase();
+
+  const resolvedKey =
+    clean(
+      key
+    );
+
+  if (!resolvedKey) {
+    return null;
+  }
+
+
+  if (
+    resolvedSource ===
+    "projection"
+  ) {
+    return (
+      projection?.[
+        resolvedKey
+      ] ??
+      null
+    );
+  }
+
+
+  if (
+    resolvedSource ===
+    "object"
+  ) {
+    return (
+      object?.[
+        resolvedKey
+      ] ??
+      null
+    );
+  }
+
+
+  if (
+    resolvedSource ===
+    "metadata"
+  ) {
+    return (
+      object?.metadata?.[
+        resolvedKey
+      ] ??
+      null
+    );
+  }
+
+
+  /*
+   * Default:
+   * normal durable Object field.
+   */
+  return (
+    object?.fields?.[
+      resolvedKey
+    ] ??
+    null
+  );
+}  
   function renderBuiltInModule(
   moduleDefinition
 ) {
