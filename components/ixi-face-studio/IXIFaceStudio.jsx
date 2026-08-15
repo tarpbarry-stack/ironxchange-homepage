@@ -9,6 +9,9 @@ import IXIFaceReferenceOverlay
 import IXILocationObjectFace1
   from "../ixi-mos/location/IXILocationObjectFace1";
 
+import IXIAosCardCatalogBench
+  from "../ixi-aos-card-library/IXIAosCardCatalogBench";
+
 const FACE_TREE = [
   {
     title: "AUCTION",
