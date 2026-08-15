@@ -1,58 +1,59 @@
-import {
-  useState
-} from "react";
+import { useState } from "react";
 
+const DEFAULT_SKINS = [
+  { id: "v12", label: "V12" },
+  { id: "steel", label: "STEEL" },
+  { id: "blueprint", label: "BLUE" },
+  { id: "industrial", label: "INDUSTRIAL" }
+];
 
 export default function IXIAosCardHeaderControls({
   canAdd = false,
   canEdit = false,
-
   editing = false,
-
   onAdd = null,
   onToggleEdit = null,
-
   onHide = null,
   onDelete = null,
-
   onOpenConsole = null,
-
   skinId = "",
   skinOptions = [],
   onSkinChange = null
 }) {
-  const [
-    menuOpen,
-    setMenuOpen
-  ] =
-    useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [localSkinId, setLocalSkinId] = useState("v12");
 
-
-  function stop(
-    event
-  ) {
+  function stop(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
   }
 
+  const suppliedSkinOptions = Array.isArray(skinOptions)
+    ? skinOptions.filter(option =>
+        option &&
+        typeof option === "object" &&
+        String(option.id || "").trim()
+      )
+    : [];
 
-  const resolvedSkinOptions =
-    Array.isArray(skinOptions)
-      ? skinOptions.filter(option =>
-          option &&
-          typeof option === "object" &&
-          String(option.id || "").trim()
-        )
-      : [];
+  const resolvedSkinOptions = suppliedSkinOptions.length
+    ? suppliedSkinOptions
+    : DEFAULT_SKINS;
 
+  const resolvedSkinId = String(skinId || localSkinId || "v12").trim();
+
+  function chooseSkin(event, id) {
+    stop(event);
+    setLocalSkinId(id);
+    onSkinChange?.(id);
+    setMenuOpen(false);
+  }
 
   return (
     <div
-      className="ixi-aos-card-header-controls"
-      onPointerDown={
-        event =>
-          event.stopPropagation()
-      }
+      className={`ixi-aos-card-header-controls skin-${resolvedSkinId}`}
+      data-card-skin={resolvedSkinId}
+      onPointerDown={event => event.stopPropagation()}
     >
       {canAdd ? (
         <button
@@ -60,46 +61,31 @@ export default function IXIAosCardHeaderControls({
           className="header-action add"
           aria-label="Add object"
           title="Add object"
-          onClick={
-            event => {
-              stop(event);
-              onAdd?.();
-            }
-          }
+          onClick={event => {
+            stop(event);
+            onAdd?.();
+          }}
         >
           +
         </button>
       ) : null}
 
-
       {canEdit ? (
         <button
           type="button"
-          className={[
-            "header-action",
-            "edit",
-            editing
-              ? "active"
-              : ""
-          ]
+          className={["header-action", "edit", editing ? "active" : ""]
             .filter(Boolean)
             .join(" ")}
           aria-label="Edit card"
           title="Edit card"
-          onClick={
-            event => {
-              stop(event);
-
-              if (!editing) {
-                onToggleEdit?.();
-              }
-            }
-          }
+          onClick={event => {
+            stop(event);
+            if (!editing) onToggleEdit?.();
+          }}
         >
           EDIT
         </button>
       ) : null}
-
 
       <div className="menu-shell">
         <button
@@ -107,119 +93,70 @@ export default function IXIAosCardHeaderControls({
           className="header-action menu"
           aria-label="Card menu"
           title="Card menu"
-          onClick={
-            event => {
-              stop(event);
-              setMenuOpen(
-                current =>
-                  !current
-              );
-            }
-          }
+          onClick={event => {
+            stop(event);
+            setMenuOpen(current => !current);
+          }}
         >
           ⋮
         </button>
 
-
         {menuOpen ? (
-          <div
-            className="header-menu"
-            onClick={
-              event =>
-                event.stopPropagation()
-            }
-          >
-            {resolvedSkinOptions.length &&
-            typeof onSkinChange === "function" ? (
-              <div className="skin-menu-group">
-                <div className="menu-label">
-                  SKIN
-                </div>
+          <div className="header-menu" onClick={event => event.stopPropagation()}>
+            <div className="skin-menu-group">
+              <div className="menu-label">SKIN</div>
+              {resolvedSkinOptions.map(option => {
+                const id = String(option.id || "").trim();
+                const label = String(option.label || id).trim();
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={id === resolvedSkinId ? "skin-option active" : "skin-option"}
+                    onClick={event => chooseSkin(event, id)}
+                  >
+                    {label}
+                    {id === resolvedSkinId ? <span>✓</span> : null}
+                  </button>
+                );
+              })}
+            </div>
 
-                {resolvedSkinOptions.map(option => {
-                  const id =
-                    String(option.id || "").trim();
-
-                  const label =
-                    String(
-                      option.label ||
-                      id
-                    ).trim();
-
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      className={
-                        id === skinId
-                          ? "skin-option active"
-                          : "skin-option"
-                      }
-                      onClick={
-                        event => {
-                          stop(event);
-                          onSkinChange?.(id);
-                          setMenuOpen(false);
-                        }
-                      }
-                    >
-                      {label}
-                      {id === skinId ? (
-                        <span>✓</span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-
-
-            {typeof onOpenConsole ===
-            "function" ? (
+            {typeof onOpenConsole === "function" ? (
               <button
                 type="button"
-                onClick={
-                  event => {
-                    stop(event);
-                    setMenuOpen(false);
-                    onOpenConsole?.();
-                  }
-                }
+                onClick={event => {
+                  stop(event);
+                  setMenuOpen(false);
+                  onOpenConsole?.();
+                }}
               >
                 OPEN CONSOLE
               </button>
             ) : null}
 
-
-            {typeof onHide ===
-            "function" ? (
+            {typeof onHide === "function" ? (
               <button
                 type="button"
-                onClick={
-                  event => {
-                    stop(event);
-                    setMenuOpen(false);
-                    onHide?.();
-                  }
-                }
+                onClick={event => {
+                  stop(event);
+                  setMenuOpen(false);
+                  onHide?.();
+                }}
               >
                 HIDE
               </button>
             ) : null}
 
-
-            {typeof onDelete ===
-            "function" ? (
+            {typeof onDelete === "function" ? (
               <button
                 type="button"
                 className="danger"
-                onClick={
-                  event => {
-                    stop(event);
-                    setMenuOpen(false);
-                    onDelete?.();
-                  }
-                }
+                onClick={event => {
+                  stop(event);
+                  setMenuOpen(false);
+                  onDelete?.();
+                }}
               >
                 DELETE
               </button>
@@ -227,7 +164,6 @@ export default function IXIAosCardHeaderControls({
           </div>
         ) : null}
       </div>
-
 
       <style jsx>{`
         .ixi-aos-card-header-controls {
@@ -274,9 +210,7 @@ export default function IXIAosCardHeaderControls({
           background: rgba(255,196,0,.045);
         }
 
-        .menu-shell {
-          position: relative;
-        }
+        .menu-shell { position: relative; }
 
         .header-menu {
           position: absolute;
@@ -345,6 +279,37 @@ export default function IXIAosCardHeaderControls({
         .header-menu button.danger:hover {
           border-color: rgba(229,62,62,.44);
           color: rgb(255,112,112);
+        }
+      `}</style>
+
+      <style jsx global>{`
+        .card001:has(.ixi-aos-card-header-controls.skin-steel) {
+          border-color: rgba(210,220,224,.24) !important;
+          background: linear-gradient(135deg,#1a1d1f,#0d0f10) !important;
+        }
+        .card001:has(.ixi-aos-card-header-controls.skin-steel) .identity span,
+        .card001:has(.ixi-aos-card-header-controls.skin-steel) .relationships .ixi-face-section-title {
+          color: #d9dde0 !important;
+        }
+
+        .card001:has(.ixi-aos-card-header-controls.skin-blueprint) {
+          border-color: rgba(61,184,255,.28) !important;
+          background: linear-gradient(180deg,#0a1720,#050b10) !important;
+        }
+        .card001:has(.ixi-aos-card-header-controls.skin-blueprint) .identity span,
+        .card001:has(.ixi-aos-card-header-controls.skin-blueprint) .relationships .ixi-face-section-title,
+        .card001:has(.ixi-aos-card-header-controls.skin-blueprint) .preview-out {
+          color: #54c7ff !important;
+        }
+
+        .card001:has(.ixi-aos-card-header-controls.skin-industrial) {
+          border-color: rgba(255,190,65,.28) !important;
+          background: linear-gradient(135deg,#1e170c,#0e0b07) !important;
+        }
+        .card001:has(.ixi-aos-card-header-controls.skin-industrial) .identity span,
+        .card001:has(.ixi-aos-card-header-controls.skin-industrial) .relationships .ixi-face-section-title,
+        .card001:has(.ixi-aos-card-header-controls.skin-industrial) .preview-out {
+          color: #ffc400 !important;
         }
       `}</style>
     </div>
