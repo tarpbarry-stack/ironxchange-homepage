@@ -134,6 +134,109 @@ function createFallbackFaceLayout(
 
 
 /*
+ * PRIMARY CARD CHROME
+ * -------------------
+ *
+ * These are universal Card controls, not
+ * Location/Employee/Job/etc. face logic.
+ *
+ * Every primary AOS Card gets the same
+ * operational control seam. The Card's
+ * capabilities decide what each control
+ * actually exposes.
+ */
+function withPrimaryCardControls({
+  layout = [],
+  template = {},
+  faceIndex = 1
+}) {
+  if (
+    Number(faceIndex) !== 1
+  ) {
+    return [...layout];
+  }
+
+
+  const next =
+    [...layout];
+
+
+  const hasHeaderControls =
+    next.some(
+      module =>
+        clean(
+          module?.moduleType
+        ).toLowerCase() ===
+        "card-header-actions"
+    );
+
+
+  if (!hasHeaderControls) {
+    next.unshift({
+      slotId:
+        "card-header-actions",
+
+      moduleType:
+        "card-header-actions",
+
+      presentation: {
+        role:
+          "chrome",
+
+        width:
+          "full"
+      }
+    });
+  }
+
+
+  const editable =
+    safeObject(
+      template?.capabilities
+    ).editable !== false;
+
+
+  const hasEditActions =
+    next.some(
+      module =>
+        clean(
+          module?.moduleType
+        ).toLowerCase() ===
+        "edit-session-actions"
+    );
+
+
+  if (
+    editable &&
+    !hasEditActions
+  ) {
+    next.splice(
+      1,
+      0,
+      {
+        slotId:
+          "edit-session-actions",
+
+        moduleType:
+          "edit-session-actions",
+
+        presentation: {
+          role:
+            "chrome",
+
+          width:
+            "full"
+        }
+      }
+    );
+  }
+
+
+  return next;
+}
+
+
+/*
  * CARD TEMPLATE PRESENTATION CONTRACT
  * -----------------------------------
  *
@@ -261,7 +364,7 @@ function adaptFace({
     });
 
 
-  const resolvedLayout =
+  const baseLayout =
     explicitFaceLayout.length
       ? explicitFaceLayout
       : templateFaceLayout.length
@@ -271,6 +374,17 @@ function adaptFace({
               template
             )
           : [];
+
+
+  const resolvedLayout =
+    withPrimaryCardControls({
+      layout:
+        baseLayout,
+
+      template,
+
+      faceIndex
+    });
 
 
   return createIXICardFaceDefinition({
