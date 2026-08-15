@@ -8,6 +8,8 @@ import IXIAosLocationFace2Operations from "../ixi-aos/cards/location/IXIAosLocat
 import IXIAosLocationFace3Financial from "../ixi-aos/cards/location/IXIAosLocationFace3FinancialApp";
 import IXIAosLocationFace4Obligations from "../ixi-aos/cards/location/IXIAosLocationFace4Obligations";
 import IXIAosLocationFace5Maintenance from "../ixi-aos/cards/location/IXIAosLocationFace5Maintenance";
+import IXITransactApp from "../ixi-aos/transact/IXITransactApp";
+import IXITransactConsolePanel from "../ixi-aos/transact/IXITransactConsolePanel";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 
 const clean = value => String(value || "").trim();
@@ -43,6 +45,8 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const [face, setFace] = useState(2);
   const [f2skin, setF2skin] = useState("v12");
   const [financialMode, setFinancialMode] = useState("owned");
+  const [transactOpen, setTransactOpen] = useState(false);
+  const [transactConsole, setTransactConsole] = useState(null);
 
   const object = useMemo(() => previewObject(template || {}, sampleData), [template, sampleData]);
   const definition = useMemo(() => (template ? adaptAosCardTemplate({ template, object }) : null), [template, object]);
@@ -52,6 +56,11 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   function update(id, patch = {}) {
     const key = clean(id) || object.objectId;
     setState(current => ({ ...current, [key]: { ...(current[key] || {}), ...patch } }));
+  }
+
+  function closeTransact() {
+    setTransactConsole(null);
+    setTransactOpen(false);
   }
 
   const current = state[object.objectId] || {};
@@ -79,43 +88,70 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
     const financialObject = { ...object, fields: { ...(object.fields || {}), ownershipStatus: financialMode } };
 
     return (
-      <div className="location-preview">
-        <div className="face-switch">
-          <button className={face === 1 ? "active" : ""} onClick={() => setFace(1)}>F1 · OVERVIEW</button>
-          <button className={face === 2 ? "active" : ""} onClick={() => setFace(2)}>F2 · OPERATIONS</button>
-          <button className={face === 3 ? "active" : ""} onClick={() => setFace(3)}>F3 · FINANCIAL</button>
-          <button className={face === 4 ? "active" : ""} onClick={() => setFace(4)}>F4 · EXPENSES</button>
-          <button className={face === 5 ? "active" : ""} onClick={() => setFace(5)}>F5 · MAINTENANCE</button>
-        </div>
+      <div className={transactConsole ? "location-preview console-open" : "location-preview"}>
+        {!transactOpen ? (
+          <>
+            <div className="face-switch">
+              <button className={face === 1 ? "active" : ""} onClick={() => setFace(1)}>F1 · OVERVIEW</button>
+              <button className={face === 2 ? "active" : ""} onClick={() => setFace(2)}>F2 · OPERATIONS</button>
+              <button className={face === 3 ? "active" : ""} onClick={() => setFace(3)}>F3 · FINANCIAL</button>
+              <button className={face === 4 ? "active" : ""} onClick={() => setFace(4)}>F4 · EXPENSES</button>
+              <button className={face === 5 ? "active" : ""} onClick={() => setFace(5)}>F5 · MAINTENANCE</button>
+            </div>
 
-        {face === 3 || face === 4 ? (
-          <div className="variant-switch">
-            <button className={financialMode === "owned" ? "active" : ""} onClick={() => setFinancialMode("owned")}>{face === 4 ? "F4-A · OWNED" : "F3-A · OWNED"}</button>
-            <button className={financialMode === "leased" ? "active" : ""} onClick={() => setFinancialMode("leased")}>{face === 4 ? "F4-B · LEASED" : "F3-B · LEASED"}</button>
-          </div>
+            {face === 3 || face === 4 ? (
+              <div className="variant-switch">
+                <button className={financialMode === "owned" ? "active" : ""} onClick={() => setFinancialMode("owned")}>{face === 4 ? "F4-A · OWNED" : "F3-A · OWNED"}</button>
+                <button className={financialMode === "leased" ? "active" : ""} onClick={() => setFinancialMode("leased")}>{face === 4 ? "F4-B · LEASED" : "F3-B · LEASED"}</button>
+              </div>
+            ) : null}
+          </>
         ) : null}
 
-        <div className="console">
-          {face === 5 ? (
-            <IXIAosLocationFace5Maintenance {...shared} object={financialObject} demoMode />
-          ) : face === 4 ? (
-            <IXIAosLocationFace4Obligations {...shared} object={financialObject} demoMode />
-          ) : face === 3 ? (
-            <IXIAosLocationFace3Financial {...shared} object={financialObject} />
-          ) : face === 2 ? (
-            <IXIAosLocationFace2Operations {...shared} skinId={f2skin} onSkinChange={setF2skin} />
+        <div className={transactConsole ? "console console-expanded" : "console"}>
+          {transactOpen ? (
+            <>
+              <IXITransactApp
+                object={financialObject}
+                onClose={closeTransact}
+                onOpenConsole={context => setTransactConsole(context)}
+              />
+              {transactConsole ? (
+                <IXITransactConsolePanel
+                  context={transactConsole}
+                  onClose={() => setTransactConsole(null)}
+                />
+              ) : null}
+            </>
           ) : (
-            <Card {...shared} />
+            <>
+              <button type="button" className="transact-launch" title="Open IXI TRAN$ACT" onClick={() => setTransactOpen(true)}>$</button>
+              {face === 5 ? (
+                <IXIAosLocationFace5Maintenance {...shared} object={financialObject} demoMode />
+              ) : face === 4 ? (
+                <IXIAosLocationFace4Obligations {...shared} object={financialObject} demoMode />
+              ) : face === 3 ? (
+                <IXIAosLocationFace3Financial {...shared} object={financialObject} />
+              ) : face === 2 ? (
+                <IXIAosLocationFace2Operations {...shared} skinId={f2skin} onSkinChange={setF2skin} />
+              ) : (
+                <Card {...shared} />
+              )}
+            </>
           )}
         </div>
 
         <style jsx>{`
           .location-preview{width:298px;display:flex;flex-direction:column;gap:6px}
+          .location-preview.console-open{width:601px}
           .face-switch{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
           .variant-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px}
           .face-switch button,.variant-switch button{height:22px;border:1px solid rgba(255,255,255,.08);border-radius:4px;background:#181818;color:#777;font-size:4.85px;font-weight:950}
           .face-switch button.active,.variant-switch button.active{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.08);color:#ffc400}
-          .console{position:relative;width:298px;height:471px;overflow:hidden}
+          .console{position:relative;width:298px;height:471px;overflow:visible;display:flex;gap:5px}
+          .console-expanded{width:601px}
+          .transact-launch{position:absolute;top:9px;right:91px;width:22px;height:22px;padding:0;border:1px solid rgba(255,196,0,.32);border-radius:4px;background:rgba(8,8,8,.96);color:#ffc400;font-size:12px;font-weight:950;line-height:1;z-index:250;cursor:pointer}
+          .transact-launch:hover{background:rgba(255,196,0,.08);border-color:rgba(255,196,0,.55)}
         `}</style>
       </div>
     );
