@@ -1,5 +1,5 @@
-import IXIAosCardPreview
-  from "../ixi-face-studio/IXIAosCardPreview";
+import IXIMosObjectCard
+  from "../ixi-mos/IXIMosObjectCard";
 
 import {
   getAosFaceRenderer
@@ -311,7 +311,82 @@ export default function IXIAosCardCatalogPreview({
     "AOS";
 
   return (
-    <IXIAosCardPreview>
+  <IXIMosObjectCard
+    object={
+      object
+    }
+
+    items={
+      Array.isArray(
+        directItems
+      )
+        ? directItems
+        : []
+    }
+
+    projection={
+      projection
+    }
+
+    parentLabel={
+      resolvedParentLabel
+    }
+
+    ixiState={{
+      face: 1,
+      color: "none",
+      outline: 1
+    }}
+
+    ixiCardState={{}}
+
+    onIxiStateChange={() => {}}
+
+    saved={
+      false
+    }
+
+    armedDestination=""
+
+    onSendFront={() => {}}
+    onSendBack={() => {}}
+
+    onCycleColor={() => {}}
+    onCycleOutline={() => {}}
+
+    onSendToArmedDestination={() => {}}
+
+    onExposeObject={() => {}}
+
+    onExposeContents={
+      onExposeContents
+    }
+
+    onGatherContents={
+      onGatherContents
+    }
+
+    onAddChild={
+      onAddChild
+    }
+
+    onSaveName={
+      onSaveObject
+    }
+
+    onDelete={null}
+
+    onOpen={() => {}}
+
+    onOpenConsole={
+      onOpenConsole
+    }
+
+    onAddMedia={
+      onAddMedia
+    }
+
+    renderIdentityFace={() => (
       <Renderer
         object={
           object
@@ -369,6 +444,7 @@ export default function IXIAosCardCatalogPreview({
           onOpenMenu
         }
       />
-    </IXIAosCardPreview>
-  );
+    )}
+  />
+);
 }
