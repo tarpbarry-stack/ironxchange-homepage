@@ -220,7 +220,9 @@ export function getAosCardSampleData(
     slug ===
       "location-standard" ||
     slug ===
-      "location-standard-002"
+      "location-standard-002" ||
+    slug ===
+      "location-standard-003"
   ) {
     return {
       sampleData:
