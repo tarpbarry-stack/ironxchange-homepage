@@ -27,9 +27,7 @@ function normalizeItem(item, index) {
       item.objectId ||
       item.id
     ) || `relationship-${index}`,
-
     label,
-
     value: clean(
       item.value ||
       item.summary ||
@@ -37,10 +35,7 @@ function normalizeItem(item, index) {
       item.count ||
       item.detail
     ),
-
-    status: clean(
-      item.status
-    )
+    status: clean(item.status)
   };
 }
 
@@ -59,15 +54,12 @@ export default function IXIAosRelationshipInfrastructurePanel({
     ...(Array.isArray(object?.relationships)
       ? object.relationships
       : []),
-
     ...(Array.isArray(object?.infrastructure)
       ? object.infrastructure
       : []),
-
     ...(Array.isArray(object?.metadata?.relationships)
       ? object.metadata.relationships
       : []),
-
     ...(Array.isArray(object?.metadata?.infrastructure)
       ? object.metadata.infrastructure
       : [])
@@ -95,17 +87,9 @@ export default function IXIAosRelationshipInfrastructurePanel({
               key={item.id}
               className="relationship-row"
             >
-              <strong>
-                {item.label}
-              </strong>
-
-              <span>
-                {item.value || "CONNECTED"}
-              </span>
-
-              <b aria-hidden="true">
-                ›
-              </b>
+              <strong>{item.label}</strong>
+              <span>{item.value || "CONNECTED"}</span>
+              <b aria-hidden="true">›</b>
             </div>
           ))
         ) : (
@@ -124,8 +108,8 @@ export default function IXIAosRelationshipInfrastructurePanel({
         .ixi-aos-relationship-panel {
           width: 100%;
           min-width: 0;
-          height: 92px;
-          min-height: 92px;
+          height: 62px;
+          min-height: 62px;
           overflow: hidden;
           border: 1px solid rgba(255,255,255,.055);
           border-radius: 6px;
@@ -133,26 +117,26 @@ export default function IXIAosRelationshipInfrastructurePanel({
         }
 
         .panel-title {
-          height: 20px;
+          height: 18px;
           display: flex;
           align-items: center;
           padding: 0 7px;
           border-bottom: 1px solid rgba(255,255,255,.045);
           color: #ffc400;
-          font-size: 6.5px;
+          font-size: 6px;
           font-weight: 950;
           letter-spacing: .055em;
           text-transform: uppercase;
         }
 
         .panel-scroll {
-          height: 71px;
+          height: 43px;
           overflow-y: auto;
           overflow-x: hidden;
-          padding: 4px;
+          padding: 3px;
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 4px;
+          gap: 3px;
           align-content: start;
           scrollbar-width: thin;
           scrollbar-color: rgba(255,255,255,.22) transparent;
@@ -160,14 +144,14 @@ export default function IXIAosRelationshipInfrastructurePanel({
 
         .relationship-row {
           min-width: 0;
-          height: 28px;
+          height: 18px;
           display: grid;
-          grid-template-columns: minmax(0,1fr) auto 10px;
+          grid-template-columns: minmax(0,1fr) auto 8px;
           align-items: center;
-          gap: 4px;
-          padding: 0 6px;
+          gap: 3px;
+          padding: 0 5px;
           border: 1px solid rgba(255,255,255,.045);
-          border-radius: 4px;
+          border-radius: 3px;
           background: rgba(255,255,255,.012);
         }
 
@@ -181,32 +165,32 @@ export default function IXIAosRelationshipInfrastructurePanel({
 
         .relationship-row strong {
           color: rgba(255,255,255,.76);
-          font-size: 7px;
+          font-size: 6px;
           font-weight: 950;
           text-transform: uppercase;
         }
 
         .relationship-row span {
           color: rgba(255,255,255,.32);
-          font-size: 6px;
+          font-size: 5px;
           font-weight: 850;
         }
 
         .relationship-row b {
           color: rgba(0,194,255,.70);
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 700;
           text-align: right;
         }
 
         .panel-empty {
           grid-column: 1 / -1;
-          height: 46px;
+          height: 34px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: rgba(255,255,255,.16);
-          font-size: 6px;
+          font-size: 5.5px;
           font-weight: 900;
           letter-spacing: .04em;
         }
