@@ -2,6 +2,9 @@ import {
   useMemo
 } from "react";
 
+import IXISmartContainerIdentityFace
+  from "./IXISmartContainerIdentityFace";
+
 import {
   buildIXIContainerRuntimeModel,
   getNextIXIContainerDeckIndex,
@@ -1179,32 +1182,56 @@ export function renderIXIAosContainerModule({
 
     case "container-collection-preview":
       return (
-        <IXIAosContainerCollectionPreview
-          container={
-            object
-          }
+  <IXISmartContainerIdentityFace
+    container={
+      object
+    }
 
-          objects={
-            objects
-          }
+    children={
+      Array.isArray(objects)
+        ? objects.filter(child =>
+            String(
+              child?.directContainerId ||
+              ""
+            ) ===
+            String(
+              object?.objectId ||
+              object?.id ||
+              ""
+            )
+          )
+        : []
+    }
 
-          selectedIndex={
-            selectedIndex
-          }
+    selectedChildIndex={
+      selectedIndex
+    }
 
-          onSelectedIndexChange={
-            onSelectedIndexChange
-          }
+    onSelectedChildIndexChange={
+      onSelectedIndexChange
+    }
 
-          renderCard={
-            renderCard
-          }
+    onExposeObject={
+      onExposeObject
+    }
 
-          onExposeObject={
-            onExposeObject
-          }
-        />
-      );
+    onRecall={
+      onRecall
+    }
+
+    onBoard={
+      onBoard
+    }
+
+    onReturn={
+      onRecall
+    }
+
+    showHeader={
+      false
+    }
+  />
+);
 
 
     case "container-summary":
