@@ -29,6 +29,12 @@ import IXIAosInlineMetricStrip
 import IXIAosContainerViewer
   from "./modules/IXIAosContainerViewer";
 
+import IXIAosRelationshipInfrastructurePanel
+  from "./modules/IXIAosRelationshipInfrastructurePanel";
+
+import IXIAosContainerCommandStrip
+  from "./modules/IXIAosContainerCommandStrip";
+
 
 function safeObject(
   value
@@ -82,6 +88,7 @@ export default function IXIAosCardRenderer({
   onAddObject = null,
   onBoard = null,
   onRecall = null,
+  onReturn = null,
   onExposeObject = null,
 
   onOpenConsole = null,
@@ -304,6 +311,10 @@ export default function IXIAosCardRenderer({
 
         onRecall={
           onRecall
+        }
+
+        onReturn={
+          onReturn
         }
 
         onExposeObject={
@@ -555,6 +566,50 @@ export default function IXIAosCardRenderer({
 
           moduleDefinition={
             module
+          }
+        />
+      );
+    }
+
+
+    if (
+      moduleType ===
+      "relationship-infrastructure-panel"
+    ) {
+      return (
+        <IXIAosRelationshipInfrastructurePanel
+          object={
+            runtimeObject
+          }
+
+          moduleDefinition={
+            module
+          }
+        />
+      );
+    }
+
+
+    if (
+      moduleType ===
+      "container-command-strip"
+    ) {
+      return (
+        <IXIAosContainerCommandStrip
+          object={
+            runtimeObject
+          }
+
+          onRecall={
+            onRecall
+          }
+
+          onBoard={
+            onBoard
+          }
+
+          onReturn={
+            onReturn
           }
         />
       );
