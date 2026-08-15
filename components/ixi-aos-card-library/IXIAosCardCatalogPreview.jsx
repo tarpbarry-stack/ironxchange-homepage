@@ -5,7 +5,7 @@ import IXIAosCard001Location from "../ixi-aos/cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../ixi-aos/cards/002/IXIAosCard002Location";
 import IXIAosCard003Location from "../ixi-aos/cards/003/IXIAosCard003Location";
 import IXIAosLocationFace2Operations from "../ixi-aos/cards/location/IXIAosLocationFace2Operations";
-import IXIAosLocationFace3Financial from "../ixi-aos/cards/location/IXIAosLocationFace3Financial";
+import IXIAosLocationFace3Financial from "../ixi-aos/cards/location/IXIAosLocationFace3FinancialApp";
 import IXIAosLocationFace4Obligations from "../ixi-aos/cards/location/IXIAosLocationFace4Obligations";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 
