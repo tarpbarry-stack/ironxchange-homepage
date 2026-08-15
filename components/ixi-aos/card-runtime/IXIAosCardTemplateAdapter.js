@@ -177,19 +177,58 @@ function adaptFace({
       ),
 
     layout:
-      safeArray(
+  safeArray(
+    face?.layout
+  ).length
+    ? safeArray(
         face?.layout
-      ).length
-        ? safeArray(
-            face?.layout
-          )
-        : (
-            faceIndex === 1
-              ? createFallbackFaceLayout(
-                  template
-                )
-              : []
-          ),
+      )
+    : (
+        faceIndex === 1
+          ? [
+              {
+                slotId:
+                  "media",
+
+                moduleType:
+                  "primary-media",
+
+                presentation: {
+                  role:
+                    "hero",
+
+                  width:
+                    "full"
+                }
+              },
+
+              {
+                slotId:
+                  "address",
+
+                moduleType:
+                  "object-field-group",
+
+                config: {
+                  fields: [
+                    "address1",
+                    "city",
+                    "state",
+                    "postalCode"
+                  ]
+                },
+
+                presentation: {
+                  role:
+                    "summary",
+
+                  width:
+                    "full"
+                }
+              }
+            ]
+          : []
+      ),
 
     metadata: {
       rendererSlug:
