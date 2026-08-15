@@ -15,7 +15,11 @@ export default function IXIAosCardHeaderControls({
   onHide = null,
   onDelete = null,
 
-  onOpenConsole = null
+  onOpenConsole = null,
+
+  skinId = "",
+  skinOptions = [],
+  onSkinChange = null
 }) {
   const [
     menuOpen,
@@ -30,6 +34,16 @@ export default function IXIAosCardHeaderControls({
     event?.preventDefault?.();
     event?.stopPropagation?.();
   }
+
+
+  const resolvedSkinOptions =
+    Array.isArray(skinOptions)
+      ? skinOptions.filter(option =>
+          option &&
+          typeof option === "object" &&
+          String(option.id || "").trim()
+        )
+      : [];
 
 
   return (
@@ -115,6 +129,51 @@ export default function IXIAosCardHeaderControls({
                 event.stopPropagation()
             }
           >
+            {resolvedSkinOptions.length &&
+            typeof onSkinChange === "function" ? (
+              <div className="skin-menu-group">
+                <div className="menu-label">
+                  SKIN
+                </div>
+
+                {resolvedSkinOptions.map(option => {
+                  const id =
+                    String(option.id || "").trim();
+
+                  const label =
+                    String(
+                      option.label ||
+                      id
+                    ).trim();
+
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      className={
+                        id === skinId
+                          ? "skin-option active"
+                          : "skin-option"
+                      }
+                      onClick={
+                        event => {
+                          stop(event);
+                          onSkinChange?.(id);
+                          setMenuOpen(false);
+                        }
+                      }
+                    >
+                      {label}
+                      {id === skinId ? (
+                        <span>✓</span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+
+
             {typeof onOpenConsole ===
             "function" ? (
               <button
@@ -173,70 +232,31 @@ export default function IXIAosCardHeaderControls({
       <style jsx>{`
         .ixi-aos-card-header-controls {
           position: absolute;
-
           top: 9px;
           right: 10px;
-
           display: flex;
           align-items: center;
-
           gap: 5px;
-
           z-index: 180;
         }
 
         .header-action {
           height: 22px;
-
           padding: 0 6px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .08
-            );
-
+          border: 1px solid rgba(255,255,255,.08);
           border-radius: 4px;
-
-          background:
-            rgba(
-              8,
-              8,
-              8,
-              .92
-            );
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .58
-            );
-
+          background: rgba(8,8,8,.92);
+          color: rgba(255,255,255,.58);
           font-size: 7px;
           font-weight: 950;
-
           line-height: 1;
-
           cursor: pointer;
         }
 
         .header-action.add {
           width: 22px;
           padding: 0;
-
-          color:
-            rgba(
-              255,
-              196,
-              0,
-              .90
-            );
-
+          color: rgba(255,196,0,.90);
           font-size: 14px;
           font-weight: 700;
         }
@@ -244,29 +264,14 @@ export default function IXIAosCardHeaderControls({
         .header-action.menu {
           width: 22px;
           padding: 0;
-
           font-size: 13px;
         }
 
         .header-action:hover,
         .header-action.active {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .34
-            );
-
+          border-color: rgba(255,196,0,.34);
           color: #ffc400;
-
-          background:
-            rgba(
-              255,
-              196,
-              0,
-              .045
-            );
+          background: rgba(255,196,0,.045);
         }
 
         .menu-shell {
@@ -275,118 +280,71 @@ export default function IXIAosCardHeaderControls({
 
         .header-menu {
           position: absolute;
-
           top: 27px;
           right: 0;
-
-          width: 112px;
-
+          width: 122px;
           display: flex;
           flex-direction: column;
-
           gap: 4px;
-
           padding: 6px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .10
-            );
-
+          border: 1px solid rgba(255,255,255,.10);
           border-radius: 6px;
-
-          background:
-            rgba(
-              8,
-              8,
-              8,
-              .985
-            );
-
-          box-shadow:
-            0 14px 30px
-            rgba(
-              0,
-              0,
-              0,
-              .46
-            );
-
+          background: rgba(8,8,8,.985);
+          box-shadow: 0 14px 30px rgba(0,0,0,.46);
           z-index: 200;
+        }
+
+        .skin-menu-group {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          margin-bottom: 2px;
+          padding-bottom: 5px;
+          border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .menu-label {
+          padding: 2px 6px 1px;
+          color: rgba(255,255,255,.28);
+          font-size: 5px;
+          font-weight: 950;
+          letter-spacing: .08em;
         }
 
         .header-menu button {
           width: 100%;
           height: 25px;
-
           padding: 0 7px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .06
-            );
-
+          border: 1px solid rgba(255,255,255,.06);
           border-radius: 4px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .02
-            );
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .62
-            );
-
+          background: rgba(255,255,255,.02);
+          color: rgba(255,255,255,.62);
           font-size: 6px;
           font-weight: 950;
-
           text-align: left;
-
           cursor: pointer;
         }
 
-        .header-menu button:hover {
-          border-color:
-            rgba(
-              255,
-              196,
-              0,
-              .28
-            );
-
+        .header-menu button:hover,
+        .header-menu button.skin-option.active {
+          border-color: rgba(255,196,0,.28);
           color: #ffc400;
         }
 
-        .header-menu button.danger:hover {
-          border-color:
-            rgba(
-              229,
-              62,
-              62,
-              .44
-            );
+        .header-menu button.skin-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
-          color:
-            rgb(
-              255,
-              112,
-              112
-            );
+        .header-menu button.skin-option span {
+          color: #ffc400;
+          font-size: 7px;
+        }
+
+        .header-menu button.danger:hover {
+          border-color: rgba(229,62,62,.44);
+          color: rgb(255,112,112);
         }
       `}</style>
     </div>
