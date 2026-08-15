@@ -11,17 +11,6 @@ import IXIObjectCardActuator
 import IXIAosSkinRuntime
   from "../skin-runtime/IXIAosSkinRuntime";
 
-import IXIAosFinancialFace2
-  from "../financial-runtime/IXIAosFinancialFace2";
-
-import {
-  createEmptyAosFinancialFace2Model,
-  createAosFinancialFace2Props
-} from "../financial-runtime/IXIAosFinancialFace2Adapter";
-
-import IXIAosFinancialFace3
-  from "../financial-runtime/IXIAosFinancialFace3";
-
 import {
   IXI_CONSOLE_MAX_DEPTH,
   IXI_CONSOLE_SLOT_TYPES,
@@ -184,27 +173,9 @@ export default function IXIAosObjectConsole({
    * =====================================================
    *
    * Face 1 is the permanent primary Object Card.
-   *
    * Every actual Card Face after Face 1 is eligible
    * for a console slot.
-   *
-   * Examples:
-   *
-   * 1 Face:
-   *   []
-   *
-   * 2 Faces:
-   *   [2]
-   *
-   * 6 Faces:
-   *   [2, 3, 4, 5, 6]
-   *
-   * 25 Faces:
-   *   [2 ... 25]
-   *
-   * Console DEPTH is still independently capped at 5.
    */
-
   const availableConsoleFaces =
     normalizeConsoleFaces(
       faces
@@ -222,42 +193,16 @@ export default function IXIAosObjectConsole({
     );
   
   const activeStudioFace =
-  normalizeAosFace(
-    previewCardState
-      ?.activeStudioFace ||
-    previewCardState
-      ?.face ||
-    1,
+    normalizeAosFace(
+      previewCardState
+        ?.activeStudioFace ||
+      previewCardState
+        ?.face ||
+      1,
 
-    faceCount
-  );
-
-const financialFace2Model =
-  createEmptyAosFinancialFace2Model({
-    currency:
-      "USD",
-
-    periodLabel:
-      "YTD"
-  });
-
-
-const financialFace2Props =
-  createAosFinancialFace2Props(
-    financialFace2Model
-  );
+      faceCount
+    );
   
-  /*
-   * Existing engine uses Face 2/3/4 as
-   * its historical module-face vocabulary.
-   *
-   * For AOS the slot face is simply the
-   * actual Card Face index.
-   *
-   * We therefore preserve the slot model
-   * but normalize its face against this
-   * Card Definition.
-   */
   const storedSlots =
     Array.isArray(
       objectState.consoleSlots
@@ -267,7 +212,7 @@ const financialFace2Props =
       : createInitialSlots();
 
 
-    const consoleSlots =
+  const consoleSlots =
     normalizeConsoleSlots(
       storedSlots,
       {
@@ -343,43 +288,43 @@ const financialFace2Props =
 
 
   function addPanel(
-  side,
-  event
-) {
-
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
-
-
-  if (
-    atCapacity
+    side,
+    event
   ) {
-    return;
-  }
+
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+
+    if (
+      atCapacity
+    ) {
+      return;
+    }
 
 
     const nextSlots =
-    insertConsoleSlot({
-      slots:
-        consoleSlots,
+      insertConsoleSlot({
+        slots:
+          consoleSlots,
 
-      side,
+        side,
 
-      type:
-        IXI_CONSOLE_SLOT_TYPES
-          .EMPTY,
+        type:
+          IXI_CONSOLE_SLOT_TYPES
+            .EMPTY,
 
-      maxSlots:
-        IXI_CONSOLE_MAX_DEPTH,
+        maxSlots:
+          IXI_CONSOLE_MAX_DEPTH,
 
-      faces:
-        availableConsoleFaces
-    });
+        faces:
+          availableConsoleFaces
+      });
 
-  saveSlots(
-    nextSlots
-  );
-}
+    saveSlots(
+      nextSlots
+    );
+  }
 
 
   function removePanel(
@@ -391,66 +336,67 @@ const financialFace2Props =
     event?.stopPropagation?.();
 
 
-     saveSlots(
-    removeConsoleSlot({
-      slots:
-        consoleSlots,
+    saveSlots(
+      removeConsoleSlot({
+        slots:
+          consoleSlots,
 
-      slotId,
+        slotId,
 
-      faces:
-        availableConsoleFaces
-    })
-  );
+        faces:
+          availableConsoleFaces
+      })
+    );
   }
 
 
   function selectStudioFace(
-  faceIndex,
-  event
-) {
+    faceIndex,
+    event
+  ) {
 
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
 
 
-  const resolvedFace =
-    normalizeAosFace(
-      faceIndex,
-      faceCount
+    const resolvedFace =
+      normalizeAosFace(
+        faceIndex,
+        faceCount
+      );
+
+
+    const faceDefinition =
+      faces[
+        resolvedFace - 1
+      ] ||
+      null;
+
+
+    updatePreviewCardState?.(
+      objectId,
+      {
+        face:
+          resolvedFace,
+
+        activeStudioFace:
+          resolvedFace
+      }
     );
 
 
-  const faceDefinition =
-    faces[
-      resolvedFace - 1
-    ] ||
-    null;
-
-
-  updatePreviewCardState?.(
-    objectId,
-    {
-      face:
+    onSelectFace?.({
+      faceIndex:
         resolvedFace,
 
-      activeStudioFace:
-        resolvedFace
-    }
-  );
+      faceId:
+        faceDefinition?.faceId ||
+        `face-${resolvedFace}`
+    });
+  }
 
 
-  onSelectFace?.({
-    faceIndex:
-      resolvedFace,
-
-    faceId:
-      faceDefinition?.faceId ||
-      `face-${resolvedFace}`
-  });
-}
-
-     function cyclePanelFace(
+  function cyclePanelFace(
     slotId,
     event
   ) {
@@ -484,11 +430,11 @@ const financialFace2Props =
 
 
   function renderFace(
-  faceIndex,
-  {
-    faceOnly = false
-  } = {}
-) {
+    faceIndex,
+    {
+      faceOnly = false
+    } = {}
+  ) {
 
     const resolvedFace =
       normalizeAosFace(
@@ -497,171 +443,121 @@ const financialFace2Props =
       );
 
 
-        if (
-      Number(
-        resolvedFace
-      ) === 2
-    ) {
-      return (
-        <IXIAosSkinRuntime
-          skinId={
-            skinId
-          }
-        >
-
-          <IXIAosFinancialFace2
-            object={
-              object
-            }
-
-            passportId={
-              object?.passportId ||
-              object?.ixiPassportId ||
-              object?.passport?.passportId ||
-              object?.passport?.id ||
-              ""
-            }
-
-            {...financialFace2Props}
-          />
-
-        </IXIAosSkinRuntime>
-      );
-    }
-
-    if (
-      Number(
-        resolvedFace
-      ) === 3
-    ) {
-      return (
-        <IXIAosFinancialFace3
+    return (
+      <IXIAosSkinRuntime
+        skinId={
+          skinId
+        }
+      >
+        <IXIAosCardRenderer
           object={
             object
           }
 
-          passportId={
-            object?.passportId ||
-            object?.ixiPassportId ||
-            object?.passport?.passportId ||
-            object?.passport?.id ||
-            ""
+          projection={
+            projection
           }
 
-          {...financialFace2Props}
+          objects={
+            Array.isArray(
+              objects
+            )
+              ? objects
+              : []
+          }
+
+          cardDefinition={
+            cardDefinition
+          }
+
+          parentLabel={
+            parentLabel
+          }
+
+          forcedFaceIndex={
+            faceOnly
+              ? resolvedFace
+              : null
+          }
+
+          faceOnly={
+            faceOnly
+          }
+
+          dragHandleProps={{}}
+
+          ixiState={{
+            ...objectState,
+
+            face:
+              faceOnly
+                ? resolvedFace
+                : activeStudioFace
+          }}
+
+          onIxiStateChange={
+            (
+              changedObjectId,
+              patch
+            ) => {
+              const nextFace =
+                normalizeAosFace(
+                  patch?.face ??
+                  activeStudioFace,
+                  faceCount
+                );
+
+
+              updatePreviewCardState?.(
+                changedObjectId ||
+                objectId,
+                {
+                  ...patch,
+
+                  face:
+                    nextFace,
+
+                  activeStudioFace:
+                    nextFace
+                }
+              );
+
+
+              const faceDefinition =
+                faces[
+                  nextFace - 1
+                ] ||
+                null;
+
+
+              onSelectFace?.({
+                faceIndex:
+                  nextFace,
+
+                faceId:
+                  faceDefinition?.faceId ||
+                  `face-${nextFace}`
+              });
+            }
+          }
+
+          renderModule={
+            renderModule
+          }
+
+          studioEditing={
+            studioEditing
+          }
+
+          selectedModuleId={
+            selectedModuleId
+          }
+
+          onSelectModule={
+            onSelectModule
+          }
         />
-      );
-    }
-    
-return (
-  <IXIAosCardRenderer
-    object={
-      object
-    }
-
-    projection={
-      projection
-    }
-
-    objects={
-  Array.isArray(
-    objects
-  )
-    ? objects
-    : []
-}
-
-    cardDefinition={
-      cardDefinition
-    }
-
-    parentLabel={
-      parentLabel
-    }
-    /*
-     * Tell Runtime exactly which Face
-     * this console slot owns.
-     */
-    forcedFaceIndex={
-  faceOnly
-    ? resolvedFace
-    : null
-}
-        faceOnly={
-        faceOnly
-      }
-
-
-        dragHandleProps={{}}
-
-        ixiState={{
-  ...objectState,
-
-  face:
-    activeStudioFace
-}}
-
-onIxiStateChange={
-  (
-    changedObjectId,
-    patch
-  ) => {
-    const nextFace =
-      normalizeAosFace(
-        patch?.face ??
-        activeStudioFace,
-        faceCount
-      );
-
-
-    updatePreviewCardState?.(
-      changedObjectId ||
-      objectId,
-      {
-        ...patch,
-
-        face:
-          nextFace,
-
-        activeStudioFace:
-          nextFace
-      }
-    );
-
-
-    const faceDefinition =
-      faces[
-        nextFace - 1
-      ] ||
-      null;
-
-
-    onSelectFace?.({
-      faceIndex:
-        nextFace,
-
-      faceId:
-        faceDefinition?.faceId ||
-        `face-${nextFace}`
-    });
-  }
-}
-        renderModule={
-          renderModule
-        }
-
-        studioEditing={
-          studioEditing
-        }
-
-        selectedModuleId={
-          selectedModuleId
-        }
-
-        onSelectModule={
-          onSelectModule
-        }
-      />
+      </IXIAosSkinRuntime>
     );
   }
 
@@ -740,361 +636,361 @@ onIxiStateChange={
       consoleSlots.length - 1;
 
     const isEmpty =
-  slot.type ===
-  IXI_CONSOLE_SLOT_TYPES
-    .EMPTY;
+      slot.type ===
+      IXI_CONSOLE_SLOT_TYPES
+        .EMPTY;
 
     if (
-  isEmpty
-) {
+      isEmpty
+    ) {
 
-  const isLeftOfPrimary =
-    slotIndex <
-    listingSlotIndex;
-
-
-  return (
-    <section
-      key={
-        slot.slotId
-      }
-
-      className="
-        ixi-aos-console-slot
-        empty-slot
-      "
-    >
-
-      <IXIObjectCardActuator
-        side={
-          isLeftOfPrimary
-            ? "right"
-            : "left"
-        }
-
-        variant="tall"
-
-        label="Close empty console slot"
-
-        title="Close empty console slot"
-
-        onClick={
-          event =>
-            removePanel(
-              slot.slotId,
-              event
-            )
-        }
-      />
+      const isLeftOfPrimary =
+        slotIndex <
+        listingSlotIndex;
 
 
-      {!atCapacity &&
-      isFirst ? (
-        <IXIObjectCardActuator
-          side="left"
-
-          variant="tall"
-
-          label="Add console face left"
-
-          title="Add console face left"
-
-          onClick={
-            event =>
-              addPanel(
-                "left",
-                event
-              )
+      return (
+        <section
+          key={
+            slot.slotId
           }
-        />
-      ) : null}
+
+          className="
+            ixi-aos-console-slot
+            empty-slot
+          "
+        >
+
+          <IXIObjectCardActuator
+            side={
+              isLeftOfPrimary
+                ? "right"
+                : "left"
+            }
+
+            variant="tall"
+
+            label="Close empty console slot"
+
+            title="Close empty console slot"
+
+            onClick={
+              event =>
+                removePanel(
+                  slot.slotId,
+                  event
+                )
+            }
+          />
 
 
-      {!atCapacity &&
-      isLast ? (
-        <IXIObjectCardActuator
-          side="right"
+          {!atCapacity &&
+          isFirst ? (
+            <IXIObjectCardActuator
+              side="left"
 
-          variant="tall"
+              variant="tall"
 
-          label="Add console face right"
+              label="Add console face left"
 
-          title="Add console face right"
-
-          onClick={
-            event =>
-              addPanel(
-                "right",
-                event
-              )
-          }
-        />
-      ) : null}
-
-
-      <button
-        type="button"
-
-        className="
-          ixi-aos-empty-face-create
-        "
-
-        onPointerDown={
-          event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-        }
-
-        onClick={
-          event => {
-            event.preventDefault();
-            event.stopPropagation();
-
-           setFaceCreatorSlotId(
-  String(
-    slot.slotId
-  )
-);
-          }
-        }
-      >
-        <strong>
-          +
-        </strong>
-
-        <span>
-          ADD / CREATE FACE
-        </span>
-      </button>
-
-      {String(
-  faceCreatorSlotId
-) ===
-String(
-  slot.slotId
-) ? (
-  <div
-  className="
-    ixi-aos-face-create-menu
-  "
-  onPointerDown={
-    event =>
-      event.stopPropagation()
-  }
->
-  <strong>
-    ADD FACE
-  </strong>
-
-
-  <div className="ixi-aos-existing-face-list">
-
-    {availableConsoleFaces.length ? (
-      availableConsoleFaces.map(
-        faceIndex => {
-
-          const faceDefinition =
-            faces[
-              faceIndex - 1
-            ] ||
-            null;
-
-
-          const faceLabel =
-            String(
-              faceDefinition?.label ||
-              faceDefinition?.name ||
-              `FACE ${faceIndex}`
-            );
-
-
-          return (
-            <button
-              key={
-                faceIndex
-              }
-
-              type="button"
+              title="Add console face left"
 
               onClick={
-                event => {
-                  event.preventDefault();
-                  event.stopPropagation();
+                event =>
+                  addPanel(
+                    "left",
+                    event
+                  )
+              }
+            />
+          ) : null}
 
 
-                  const nextSlots =
-                    assignConsoleSlotFace({
-                      slots:
-                        consoleSlots,
+          {!atCapacity &&
+          isLast ? (
+            <IXIObjectCardActuator
+              side="right"
 
-                      slotId:
-                        slot.slotId,
+              variant="tall"
 
-                      face:
-                        faceIndex,
+              label="Add console face right"
 
-                      faces:
-                        availableConsoleFaces
+              title="Add console face right"
+
+              onClick={
+                event =>
+                  addPanel(
+                    "right",
+                    event
+                  )
+              }
+            />
+          ) : null}
+
+
+          <button
+            type="button"
+
+            className="
+              ixi-aos-empty-face-create
+            "
+
+            onPointerDown={
+              event => {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            }
+
+            onClick={
+              event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                setFaceCreatorSlotId(
+                  String(
+                    slot.slotId
+                  )
+                );
+              }
+            }
+          >
+            <strong>
+              +
+            </strong>
+
+            <span>
+              ADD / CREATE FACE
+            </span>
+          </button>
+
+          {String(
+            faceCreatorSlotId
+          ) ===
+          String(
+            slot.slotId
+          ) ? (
+            <div
+              className="
+                ixi-aos-face-create-menu
+              "
+              onPointerDown={
+                event =>
+                  event.stopPropagation()
+              }
+            >
+              <strong>
+                ADD FACE
+              </strong>
+
+
+              <div className="ixi-aos-existing-face-list">
+
+                {availableConsoleFaces.length ? (
+                  availableConsoleFaces.map(
+                    faceIndex => {
+
+                      const faceDefinition =
+                        faces[
+                          faceIndex - 1
+                        ] ||
+                        null;
+
+
+                      const faceLabel =
+                        String(
+                          faceDefinition?.label ||
+                          faceDefinition?.name ||
+                          `FACE ${faceIndex}`
+                        );
+
+
+                      return (
+                        <button
+                          key={
+                            faceIndex
+                          }
+
+                          type="button"
+
+                          onClick={
+                            event => {
+                              event.preventDefault();
+                              event.stopPropagation();
+
+
+                              const nextSlots =
+                                assignConsoleSlotFace({
+                                  slots:
+                                    consoleSlots,
+
+                                  slotId:
+                                    slot.slotId,
+
+                                  face:
+                                    faceIndex,
+
+                                  faces:
+                                    availableConsoleFaces
+                                });
+
+
+                              saveSlots(
+                                nextSlots
+                              );
+
+
+                              updatePreviewCardState?.(
+                                objectId,
+                                {
+                                  face:
+                                    faceIndex,
+
+                                  activeStudioFace:
+                                    faceIndex
+                                }
+                              );
+
+
+                              onSelectFace?.({
+                                faceIndex,
+
+                                faceId:
+                                  faceDefinition?.faceId ||
+                                  `face-${faceIndex}`
+                              });
+
+
+                              setFaceCreatorSlotId(
+                                ""
+                              );
+                            }
+                          }
+                        >
+                          {faceLabel}
+                        </button>
+                      );
+                    }
+                  )
+                ) : (
+                  <span className="ixi-aos-no-existing-faces">
+                    NO EXISTING FACES
+                  </span>
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+
+                onClick={
+                  event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+
+                    const created =
+                      onCreateFace?.(
+                        slot.slotId
+                      );
+
+
+                    if (
+                      !created?.faceIndex
+                    ) {
+                      return;
+                    }
+
+
+                    const nextAvailableFaces =
+                      normalizeConsoleFaces([
+                        ...availableConsoleFaces,
+                        created.faceIndex
+                      ]);
+
+
+                    const nextSlots =
+                      assignConsoleSlotFace({
+                        slots:
+                          consoleSlots,
+
+                        slotId:
+                          slot.slotId,
+
+                        face:
+                          created.faceIndex,
+
+                        faces:
+                          nextAvailableFaces
+                      });
+
+
+                    saveSlots(
+                      nextSlots,
+                      nextAvailableFaces
+                    );
+
+
+                    updatePreviewCardState?.(
+                      objectId,
+                      {
+                        face:
+                          created.faceIndex,
+
+                        activeStudioFace:
+                          created.faceIndex
+                      }
+                    );
+
+
+                    onSelectFace?.({
+                      faceIndex:
+                        created.faceIndex,
+
+                      faceId:
+                        created.faceId ||
+                        `face-${created.faceIndex}`
                     });
 
 
-                  saveSlots(
-                    nextSlots
-                  );
-
-
-                  updatePreviewCardState?.(
-                    objectId,
-                    {
-                      face:
-                        faceIndex,
-
-                      activeStudioFace:
-                        faceIndex
-                    }
-                  );
-
-
-                  onSelectFace?.({
-                    faceIndex,
-
-                    faceId:
-                      faceDefinition?.faceId ||
-                      `face-${faceIndex}`
-                  });
-
-
-                  setFaceCreatorSlotId(
-                    ""
-                  );
+                    setFaceCreatorSlotId(
+                      ""
+                    );
+                  }
                 }
-              }
-            >
-              {faceLabel}
-            </button>
-          );
-        }
-      )
-    ) : (
-      <span className="ixi-aos-no-existing-faces">
-        NO EXISTING FACES
-      </span>
-    )}
-
-  </div>
+              >
+                CREATE NEW
+              </button>
 
 
-  <button
-    type="button"
+              <button
+                type="button"
 
-    onClick={
-      event => {
-        event.preventDefault();
-        event.stopPropagation();
+                className="
+                  cancel
+                "
 
+                onClick={
+                  event => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-        const created =
-          onCreateFace?.(
-            slot.slotId
-          );
-
-
-        if (
-          !created?.faceIndex
-        ) {
-          return;
-        }
-
-
-        const nextAvailableFaces =
-          normalizeConsoleFaces([
-            ...availableConsoleFaces,
-            created.faceIndex
-          ]);
+                    setFaceCreatorSlotId(
+                      ""
+                    );
+                  }
+                }
+              >
+                CANCEL
+              </button>
+            </div>
+          ) : null}
 
 
-        const nextSlots =
-          assignConsoleSlotFace({
-            slots:
-              consoleSlots,
-
-            slotId:
-              slot.slotId,
-
-            face:
-              created.faceIndex,
-
-            faces:
-              nextAvailableFaces
-          });
-
-
-        saveSlots(
-          nextSlots,
-          nextAvailableFaces
-        );
-
-
-        updatePreviewCardState?.(
-          objectId,
-          {
-            face:
-              created.faceIndex,
-
-            activeStudioFace:
-              created.faceIndex
-          }
-        );
-
-
-        onSelectFace?.({
-          faceIndex:
-            created.faceIndex,
-
-          faceId:
-            created.faceId ||
-            `face-${created.faceIndex}`
-        });
-
-
-        setFaceCreatorSlotId(
-          ""
-        );
-      }
+        </section>
+      );
     }
-  >
-    CREATE NEW
-  </button>
-
-
-  <button
-    type="button"
-
-    className="
-      cancel
-    "
-
-    onClick={
-      event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        setFaceCreatorSlotId(
-          ""
-        );
-      }
-    }
-  >
-    CANCEL
-  </button>
-</div>
-) : null}
-
-
-</section>
-);
-}
 
 
     if (
@@ -1248,39 +1144,39 @@ String(
         ) : null}
 
 
-       {renderFace(
-  slot.face,
-  {
-    faceOnly:
-      true
-  }
-)}
+        {renderFace(
+          slot.face,
+          {
+            faceOnly:
+              true
+          }
+        )}
 
         <button
           type="button"
 
           className={[
-  "ixi-aos-console-face-button",
+            "ixi-aos-console-face-button",
 
-  Number(
-    activeStudioFace
-  ) ===
-  Number(
-    slot.face
-  )
-    ? "active"
-    : ""
-]
-  .filter(Boolean)
-  .join(" ")}
+            Number(
+              activeStudioFace
+            ) ===
+            Number(
+              slot.face
+            )
+              ? "active"
+              : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
 
           aria-label={
-  `Edit Face ${slot.face}`
-}
+            `Edit Face ${slot.face}`
+          }
 
-title={
-  `Edit Face ${slot.face}`
-}
+          title={
+            `Edit Face ${slot.face}`
+          }
 
           onPointerDown={
             event => {
@@ -1289,13 +1185,13 @@ title={
             }
           }
 
-         onClick={
-  event =>
-    selectStudioFace(
-      slot.face,
-      event
-    )
-}
+          onClick={
+            event =>
+              selectStudioFace(
+                slot.face,
+                event
+              )
+          }
         />
 
       </section>
@@ -1425,24 +1321,24 @@ title={
             150;
         }
 
-.ixi-aos-console-face-button.active {
-  background:
-    rgba(
-      255,
-      196,
-      0,
-      .98
-    );
+        .ixi-aos-console-face-button.active {
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .98
+            );
 
-  box-shadow:
-    0 0 8px
-    rgba(
-      255,
-      196,
-      0,
-      .28
-    );
-}
+          box-shadow:
+            0 0 8px
+            rgba(
+              255,
+              196,
+              0,
+              .28
+            );
+        }
 
 
         .ixi-aos-console-face-button:hover {
@@ -1456,369 +1352,428 @@ title={
         }
 
         .ixi-aos-console-slot.empty-slot {
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .08
-    );
-
-  border-radius:
-    13px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(
-        255,
-        255,
-        255,
-        .018
-      ),
-      rgba(
-        255,
-        255,
-        255,
-        0
-      )
-    ),
-    #141414;
-
-  overflow:
-    hidden;
-}
-
-
-.ixi-aos-empty-face-create {
-  box-sizing:
-    border-box;
-
-  width:
-    100%;
-
-  height:
-    100%;
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
+
+          border-radius:
+            13px;
+
+          background:
+            linear-gradient(
+              180deg,
+              rgba(
+                255,
+                255,
+                255,
+                .018
+              ),
+              rgba(
+                255,
+                255,
+                255,
+                0
+              )
+            ),
+            #141414;
+
+          overflow:
+            hidden;
+        }
+
+
+        .ixi-aos-empty-face-create {
+          box-sizing:
+            border-box;
+
+          width:
+            100%;
+
+          height:
+            100%;
+
+          display:
+            flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          gap:
+            10px;
+
+          border:
+            0;
+
+          background:
+            transparent;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .34
+            );
+
+          cursor:
+            pointer;
+        }
+
+
+        .ixi-aos-empty-face-create strong {
+          font-size:
+            42px;
+
+          font-weight:
+            300;
+
+          line-height:
+            1;
+
+          color:
+            rgba(
+              255,
+              196,
+              0,
+              .82
+            );
+        }
+
+
+        .ixi-aos-empty-face-create span {
+          font-size:
+            8px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .7px;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .ixi-aos-empty-face-create:hover {
+          background:
+            rgba(
+              255,
+              196,
+              0,
+              .025
+            );
+
+          color:
+            #ffc400;
+        }
+
 
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
+        .ixi-aos-empty-face-create:hover strong {
+          color:
+            #ffc400;
+        }
 
-  gap:
-    10px;
+        .ixi-aos-face-create-menu {
+          position:
+            absolute;
 
-  border:
-    0;
-
-  background:
-    transparent;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      .34
-    );
-
-  cursor:
-    pointer;
-}
-
-
-.ixi-aos-empty-face-create strong {
-  font-size:
-    42px;
-
-  font-weight:
-    300;
-
-  line-height:
-    1;
-
-  color:
-    rgba(
-      255,
-      196,
-      0,
-      .82
-    );
-}
-
-
-.ixi-aos-empty-face-create span {
-  font-size:
-    8px;
+          left:
+            50%;
+          top:
+            50%;
 
-  font-weight:
-    950;
+          z-index:
+            300;
 
-  letter-spacing:
-    .7px;
+          width:
+            176px;
 
-  text-transform:
-    uppercase;
-}
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
 
+          display:
+            flex;
 
-.ixi-aos-empty-face-create:hover {
-  background:
-    rgba(
-      255,
-      196,
-      0,
-      .025
-    );
+          flex-direction:
+            column;
 
-  color:
-    #ffc400;
-}
+          gap:
+            7px;
 
+          padding:
+            12px;
 
-.ixi-aos-empty-face-create:hover strong {
-  color:
-    #ffc400;
-}
+          border:
+            1px solid
+            rgba(
+              255,
+              196,
+              0,
+              .22
+            );
 
-.ixi-aos-face-create-menu {
-  position: absolute;
+          border-radius:
+            8px;
 
-  left: 50%;
-  top: 50%;
+          background:
+            rgba(
+              8,
+              8,
+              8,
+              .98
+            );
+
+          box-shadow:
+            0 18px 40px
+            rgba(
+              0,
+              0,
+              0,
+              .55
+            );
+        }
 
-  z-index: 300;
 
-  width: 176px;
+        .ixi-aos-face-create-menu > strong {
+          margin-bottom:
+            3px;
 
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
+          color:
+            #ffc400;
 
-  display: flex;
-  flex-direction: column;
+          font-size:
+            8px;
 
-  gap: 7px;
+          font-weight:
+            950;
 
-  padding: 12px;
+          letter-spacing:
+            .6px;
+        }
 
-  border:
-    1px solid
-    rgba(
-      255,
-      196,
-      0,
-      .22
-    );
+        .ixi-aos-existing-face-list {
+          width:
+            100%;
 
-  border-radius: 8px;
+          display:
+            flex;
 
-  background:
-    rgba(
-      8,
-      8,
-      8,
-      .98
-    );
+          flex-direction:
+            column;
 
-  box-shadow:
-    0 18px 40px
-    rgba(
-      0,
-      0,
-      0,
-      .55
-    );
-}
+          gap:
+            5px;
 
+          max-height:
+            190px;
 
-.ixi-aos-face-create-menu > strong {
-  margin-bottom: 3px;
+          overflow-y:
+            auto;
 
-  color: #ffc400;
+          overflow-x:
+            hidden;
 
-  font-size: 8px;
-  font-weight: 950;
+          scrollbar-width:
+            none;
+        }
 
-  letter-spacing: .6px;
-}
 
-.ixi-aos-existing-face-list {
-  width: 100%;
+        .ixi-aos-existing-face-list::-webkit-scrollbar {
+          display:
+            none;
+        }
 
-  display: flex;
-  flex-direction: column;
 
-  gap: 5px;
+        .ixi-aos-existing-face-list > button {
+          width:
+            100%;
 
-  max-height: 190px;
+          height:
+            28px;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+          flex:
+            0 0 28px;
 
-  scrollbar-width: none;
-}
+          padding:
+            0 8px;
 
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
 
-.ixi-aos-existing-face-list::-webkit-scrollbar {
-  display: none;
-}
+          border-radius:
+            5px;
 
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .025
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .72
+            );
+
+          font-size:
+            7px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .45px;
+
+          text-align:
+            left;
 
-.ixi-aos-existing-face-list > button {
-  width: 100%;
-  height: 28px;
-
-  flex: 0 0 28px;
-
-  padding: 0 8px;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .08
-    );
-
-  border-radius: 5px;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      .025
-    );
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      .72
-    );
-
-  font-size: 7px;
-  font-weight: 950;
-
-  letter-spacing: .45px;
-
-  text-align: left;
-
-  cursor: pointer;
-
-  text-transform: uppercase;
-}
-
-
-.ixi-aos-existing-face-list > button:hover {
-  border-color:
-    rgba(
-      255,
-      196,
-      0,
-      .35
-    );
-
-  color:
-    #ffc400;
-}
-
-
-.ixi-aos-no-existing-faces {
-  display: block;
-
-  padding: 8px;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      .28
-    );
-
-  font-size: 7px;
-  font-weight: 900;
-
-  text-align: center;
-
-  letter-spacing: .4px;
-}
-.ixi-aos-face-create-menu > button {
-  width: 100%;
-  height: 28px;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .08
-    );
-
-  border-radius: 5px;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      .025
-    );
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      .72
-    );
-
-  font-size: 7px;
-  font-weight: 950;
-
-  letter-spacing: .45px;
-
-  cursor: pointer;
-}
-
-
-.ixi-aos-face-create-menu > button:hover {
-  border-color:
-    rgba(
-      255,
-      196,
-      0,
-      .35
-    );
-
-  color: #ffc400;
-}
-
-
-.ixi-aos-face-create-menu > button.cancel {
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      .34
-    );
-}
+          cursor:
+            pointer;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .ixi-aos-existing-face-list > button:hover {
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .35
+            );
+
+          color:
+            #ffc400;
+        }
+
+
+        .ixi-aos-no-existing-faces {
+          display:
+            block;
+
+          padding:
+            8px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .28
+            );
+
+          font-size:
+            7px;
+
+          font-weight:
+            900;
+
+          text-align:
+            center;
+
+          letter-spacing:
+            .4px;
+        }
+
+        .ixi-aos-face-create-menu > button {
+          width:
+            100%;
+
+          height:
+            28px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .08
+            );
+
+          border-radius:
+            5px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              .025
+            );
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .72
+            );
+
+          font-size:
+            7px;
+
+          font-weight:
+            950;
+
+          letter-spacing:
+            .45px;
+
+          cursor:
+            pointer;
+        }
+
+
+        .ixi-aos-face-create-menu > button:hover {
+          border-color:
+            rgba(
+              255,
+              196,
+              0,
+              .35
+            );
+
+          color:
+            #ffc400;
+        }
+
+
+        .ixi-aos-face-create-menu > button.cancel {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .34
+            );
+        }
 
       `}</style>
 
