@@ -7,7 +7,7 @@ const SAMPLE_LOCATION_OBJECT =
       "aos-card-preview-entity",
 
     displayName:
-      "MIDLAND YARD",
+      "YARD NAME",
 
     status:
       "active",
@@ -20,19 +20,19 @@ const SAMPLE_LOCATION_OBJECT =
 
     fields: {
       address1:
-        "4100 INDUSTRIAL AVE",
+        "2400 AVIATION DRIVE",
 
       address2:
         "",
 
       city:
-        "MIDLAND",
+        "DFW AIRPORT",
 
       state:
         "TX",
 
       postalCode:
-        "79701",
+        "75261",
 
       yardHours:
         "MON–SAT 6:00 AM–6:00 PM",
@@ -218,7 +218,9 @@ export function getAosCardSampleData(
 
   if (
     slug ===
-    "location-standard"
+      "location-standard" ||
+    slug ===
+      "location-standard-002"
   ) {
     return {
       sampleData:
