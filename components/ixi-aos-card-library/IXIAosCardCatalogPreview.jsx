@@ -236,6 +236,10 @@ export default function IXIAosCardCatalogPreview({
 
   sampleData = {},
 
+  projection = null,
+
+  directItems = [],
+
   parentLabel = "",
 
   skinId =
@@ -334,18 +338,30 @@ export default function IXIAosCardCatalogPreview({
   return (
     <div className="aos-card-catalog-console">
 
-      <IXIAosObjectConsole
-        object={
-          object
-        }
+     <IXIAosObjectConsole
+  object={
+    object
+  }
 
-        objectId={
-          object.objectId
-        }
+  objectId={
+    object.objectId
+  }
 
-        cardDefinition={
-          cardDefinition
-        }
+  projection={
+    projection
+  }
+
+  objects={
+    Array.isArray(
+      directItems
+    )
+      ? directItems
+      : []
+  }
+
+  cardDefinition={
+    cardDefinition
+  }
 
         skinId={
           skinId
