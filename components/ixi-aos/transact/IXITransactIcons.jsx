@@ -12,4 +12,15 @@ export const OperableIcon=p=><Icon {...p}><circle cx="12" cy="12" r="9"/><path d
 export const LimitedIcon=p=><Icon {...p}><path d="M6 9h12M6 15h12"/></Icon>;
 export const DownIcon=p=><Icon {...p}><path d="M12 3v16m-6-6 6 6 6-6"/></Icon>;
 export const PersonIcon=p=><Icon {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></Icon>;
+export const TeamIcon=p=><Icon {...p}><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14 15a5 5 0 0 1 7 5"/></Icon>;
 export const CreateIcon=p=><Icon {...p}><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4M16 15v5M13.5 17.5h5"/></Icon>;
+export const EditIcon=p=><Icon {...p}><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></Icon>;
+export const ClockIcon=p=><Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></Icon>;
+export const MaterialIcon=p=><Icon {...p}><path d="m12 2 8 4.5v11L12 22l-8-4.5v-11L12 2Z"/><path d="m4 6.5 8 4.5 8-4.5M12 11v11"/></Icon>;
+export const ServiceIcon=p=><RepairIcon {...p}/>;
+export const ExpenseIcon=p=><Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-.8-1.7-1.2-3-1.2-1.7 0-3 .8-3 2s1.1 1.8 3.2 2.2c2 .4 2.8 1.1 2.8 2.3 0 1.4-1.3 2.4-3.2 2.4-1.4 0-2.6-.5-3.4-1.4M12 5.5v13"/></Icon>;
+export const PurchaseIcon=p=><Icon {...p}><path d="M3 5h2l2 11h10l3-8H6"/><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></Icon>;
+export const DocumentIcon=p=><Icon {...p}><path d="M6 2h8l4 4v16H6Z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></Icon>;
+export const PauseIcon=p=><Icon {...p}><path d="M8 5v14M16 5v14"/></Icon>;
+export const StopIcon=p=><Icon {...p}><rect x="7" y="7" width="10" height="10"/></Icon>;
+export const RefreshIcon=p=><Icon {...p}><path d="M20 6v6h-6M4 18v-6h6"/><path d="M18 10a7 7 0 0 0-12-3M6 14a7 7 0 0 0 12 3"/></Icon>;
