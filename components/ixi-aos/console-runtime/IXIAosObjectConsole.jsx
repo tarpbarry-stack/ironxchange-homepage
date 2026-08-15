@@ -112,8 +112,9 @@ export default function IXIAosObjectConsole({
 
   projection = null,
 
-  cardDefinition = {},
+  objects = [],
 
+  cardDefinition = {},
   skinId =
     "ixi:skin:default",
 
@@ -562,9 +563,13 @@ return (
       projection
     }
 
-    objects={[
-      object
-    ]}
+    objects={
+  Array.isArray(
+    objects
+  )
+    ? objects
+    : []
+}
 
     cardDefinition={
       cardDefinition
