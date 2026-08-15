@@ -115,4 +115,14 @@ export default function IXIAosCard001Location({
         :global(.card001 .relationships .ixi-aos-relationship-panel){height:100%!important;min-height:0!important}
         .edit-actions{position:absolute;right:7px;top:2px;display:flex;gap:4px;z-index:10}.edit-actions button{height:20px;padding:0 7px;border:1px solid rgba(255,196,0,.22);border-radius:4px;background:#0a0a0a;color:#ffc400;font-size:6px;font-weight:950}
         .actions{position:absolute;left:6px;right:6px;bottom:${RAIL_RESERVE + THUMB_RAIL_HEIGHT + ACTIONS_LIFT}px;height:${ACTIONS_HEIGHT}px;display:flex;align-items:center;justify-content:center;gap:6px;z-index:20}
-        .actions button{height:19px;min-width:77px;padding:0 7px;border:1px solid rgba(255,255,255,.07);border-radius:4px;background:rgba(255,255,255,.018);color:#00c2ff;font-size:8px;font-weight
+        .actions button{height:19px;min-width:77px;padding:0 7px;border:1px solid rgba(255,255,255,.07);border-radius:4px;background:rgba(255,255,255,.018);color:#00c2ff;font-size:8px;font-weight:950;cursor:pointer}.actions span{margin-left:3px;color:rgba(255,255,255,.62);font-size:6px;font-weight:950}
+        .photo-rail{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE}px;width:${NATIVE_WIDTH}px;height:${THUMB_RAIL_HEIGHT}px;overflow:hidden;margin:0;padding:0;z-index:21}
+        .card-photo-nav{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:${THUMB_RAIL_HEIGHT}px;border:none;background:rgba(0,0,0,.06);color:rgba(255,255,255,.42);font-size:28px;font-weight:300;cursor:pointer;z-index:30;opacity:.72}.card-photo-nav.left{left:0}.card-photo-nav.right{right:0}
+        :global(.card001 .photo-rail .ixi-collection-thumb-rail){width:${NATIVE_WIDTH}px!important;height:${THUMB_RAIL_HEIGHT}px!important;margin:0!important;padding:2px 7px!important;align-items:center!important}
+        :global(.card001 .photo-rail .ixi-collection-thumb){height:53px!important}
+        :global(.card001 .ixi-aos-primary-media-panel){border-left:0;border-right:0;border-radius:0}
+        :global(.card001 .relationships .ixi-face-section-title){color:#ffc400!important;font-size:6.5px!important;letter-spacing:.08em!important}
+      `}</style>
+    </div>
+  );
+}
