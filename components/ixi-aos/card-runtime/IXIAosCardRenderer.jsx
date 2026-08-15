@@ -23,6 +23,9 @@ import IXIAosCardHeaderControls
 import IXIAosEditSessionActions
   from "./modules/IXIAosEditSessionActions";
 
+import IXIAosInlineMetricStrip
+  from "./modules/IXIAosInlineMetricStrip";
+
 
 function safeObject(
   value
@@ -402,14 +405,6 @@ export default function IXIAosCardRenderer({
         return;
       }
 
-      /*
-       * Preview / studio fallback:
-       * leave the draft in presentation state
-       * so the just-saved values remain visible,
-       * but close the edit session. Durable
-       * production callers should provide
-       * onSaveObject and commit through MOS.
-       */
       onIxiStateChange?.(
         objectId,
         {
@@ -535,6 +530,28 @@ export default function IXIAosCardRenderer({
 
           onCancel={
             cancelEditing
+          }
+        />
+      );
+    }
+
+
+    if (
+      moduleType ===
+      "inline-metric-strip"
+    ) {
+      return (
+        <IXIAosInlineMetricStrip
+          object={
+            runtimeObject
+          }
+
+          projection={
+            projection
+          }
+
+          moduleDefinition={
+            module
           }
         />
       );
