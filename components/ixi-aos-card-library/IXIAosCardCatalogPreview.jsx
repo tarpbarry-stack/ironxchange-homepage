@@ -12,6 +12,9 @@ import IXIAosCard001Location
 import IXIAosCard002Location
   from "../ixi-aos/cards/002/IXIAosCard002Location";
 
+import IXIAosCard003Location
+  from "../ixi-aos/cards/003/IXIAosCard003Location";
+
 import {
   adaptAosCardTemplate
 } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
@@ -142,10 +145,17 @@ export default function IXIAosCardCatalogPreview({
     onExposeObject: () => {}
   };
 
-  if (templateSlug === "location-standard" || templateSlug === "location-standard-002") {
-    const LocationCard = templateSlug === "location-standard-002"
-      ? IXIAosCard002Location
-      : IXIAosCard001Location;
+  if (
+    templateSlug === "location-standard" ||
+    templateSlug === "location-standard-002" ||
+    templateSlug === "location-standard-003"
+  ) {
+    const LocationCard =
+      templateSlug === "location-standard-003"
+        ? IXIAosCard003Location
+        : templateSlug === "location-standard-002"
+          ? IXIAosCard002Location
+          : IXIAosCard001Location;
 
     return (
       <div className="aos-card-catalog-console">
