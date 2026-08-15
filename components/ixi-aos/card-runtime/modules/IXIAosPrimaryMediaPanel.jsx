@@ -2,29 +2,14 @@ function clean(value) {
   return String(value || "").trim();
 }
 
-
 function getPrimaryImage(object = {}) {
-  const media =
-    Array.isArray(object?.media)
-      ? object.media
-      : [];
+  const media = Array.isArray(object?.media) ? object.media : [];
+  const first = media.find(item => {
+    if (typeof item === "string") return Boolean(clean(item));
+    return Boolean(item?.url || item?.src || item?.imageUrl);
+  });
 
-  const first =
-    media.find(item => {
-      if (typeof item === "string") {
-        return Boolean(clean(item));
-      }
-
-      return Boolean(
-        item?.url ||
-        item?.src ||
-        item?.imageUrl
-      );
-    });
-
-  if (typeof first === "string") {
-    return first;
-  }
+  if (typeof first === "string") return first;
 
   return (
     first?.url ||
@@ -37,51 +22,63 @@ function getPrimaryImage(object = {}) {
   );
 }
 
-
 export default function IXIAosPrimaryMediaPanel({
   object = {},
-  moduleDefinition = {}
+  moduleDefinition = {},
+  editing = false,
+  onAddPhoto = null
 }) {
-  const height =
-    Math.max(
-      54,
-      Math.min(
-        220,
-        Number(
-          moduleDefinition?.config?.height ||
-          108
-        )
-      )
-    );
+  const height = Math.max(
+    54,
+    Math.min(220, Number(moduleDefinition?.config?.height || 108))
+  );
 
-  const imageUrl =
-    getPrimaryImage(object);
+  const imageUrl = getPrimaryImage(object);
+
+  function handleFile(event) {
+    const file = event?.target?.files?.[0];
+    if (!file || !file.type?.startsWith("image/")) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      onAddPhoto?.({
+        file,
+        url: String(reader.result || ""),
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  }
 
   return (
-    <div
-      className="ixi-aos-primary-media-panel"
-      style={{ height }}
-    >
+    <div className="ixi-aos-primary-media-panel" style={{ height }}>
       {imageUrl ? (
         <img
           src={imageUrl}
-          alt={
-            clean(
-              object?.displayName ||
-              object?.name ||
-              object?.title
-            ) || "Object"
-          }
+          alt={clean(object?.displayName || object?.name || object?.title) || "Object"}
           draggable={false}
         />
       ) : (
-        <div className="no-media">
-          NO MEDIA
-        </div>
+        <div className="no-media">NO MEDIA</div>
       )}
+
+      {editing ? (
+        <label
+          className="media-add"
+          title="Add photo"
+          onPointerDown={event => event.stopPropagation()}
+        >
+          + PHOTO
+          <input type="file" accept="image/*" onChange={handleFile} />
+        </label>
+      ) : null}
 
       <style jsx>{`
         .ixi-aos-primary-media-panel {
+          position: relative;
           width: 100%;
           min-width: 0;
           margin-top: -10px;
@@ -108,6 +105,38 @@ export default function IXIAosPrimaryMediaPanel({
           font-size: 8px;
           font-weight: 950;
           letter-spacing: .08em;
+        }
+
+        .media-add {
+          position: absolute;
+          right: 7px;
+          bottom: 7px;
+          height: 22px;
+          padding: 0 7px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(255,196,0,.34);
+          border-radius: 4px;
+          background: rgba(7,7,7,.90);
+          color: #ffc400;
+          font-size: 7px;
+          font-weight: 950;
+          cursor: pointer;
+          z-index: 4;
+        }
+
+        .media-add:hover {
+          border-color: rgba(255,196,0,.72);
+          background: rgba(255,196,0,.06);
+        }
+
+        .media-add input {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          opacity: 0;
+          pointer-events: none;
         }
       `}</style>
     </div>
