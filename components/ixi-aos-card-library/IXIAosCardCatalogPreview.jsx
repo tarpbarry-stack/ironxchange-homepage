@@ -2,8 +2,7 @@ import { useMemo, useState } from "react";
 
 import IXIAosObjectConsole from "../ixi-aos/console-runtime/IXIAosObjectConsole";
 import IXIAosLocationObjectConsole from "../ixi-aos/console-runtime/IXIAosLocationObjectConsole";
-import IXITransactApp from "../ixi-aos/transact/IXITransactApp";
-import IXITransactConsolePanel from "../ixi-aos/transact/IXITransactConsolePanel";
+import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 
 const clean = value => String(value || "").trim();
@@ -58,7 +57,6 @@ export default function IXIAosCardCatalogPreview({
   const [f2skin, setF2skin] = useState("v12");
   const [financialMode, setFinancialMode] = useState("owned");
   const [transactOpen, setTransactOpen] = useState(false);
-  const [transactConsole, setTransactConsole] = useState(null);
 
   const object = useMemo(
     () => previewObject(template || {}, sampleData),
@@ -86,11 +84,6 @@ export default function IXIAosCardCatalogPreview({
     }));
   }
 
-  function closeTransact() {
-    setTransactConsole(null);
-    setTransactOpen(false);
-  }
-
   const current = state[object.objectId] || {};
   const slug = clean(template.templateSlug);
   const isLocation = [
@@ -109,7 +102,7 @@ export default function IXIAosCardCatalogPreview({
     };
 
     const consoleDepth = transactOpen
-      ? (transactConsole ? 2 : 1)
+      ? 5
       : Math.max(1, Number(current?.consoleDepth || 1));
 
     return (
@@ -149,20 +142,10 @@ export default function IXIAosCardCatalogPreview({
 
         <div className="console-stage">
           {transactOpen ? (
-            <>
-              <IXITransactApp
-                object={financialObject}
-                onClose={closeTransact}
-                onOpenConsole={context => setTransactConsole(context)}
-              />
-
-              {transactConsole ? (
-                <IXITransactConsolePanel
-                  context={transactConsole}
-                  onClose={() => setTransactConsole(null)}
-                />
-              ) : null}
-            </>
+            <IXITransactObjectConsole
+              object={financialObject}
+              onClose={() => setTransactOpen(false)}
+            />
           ) : (
             <IXIAosLocationObjectConsole
               templateSlug={slug}
