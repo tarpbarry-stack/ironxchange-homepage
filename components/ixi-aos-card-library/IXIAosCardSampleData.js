@@ -68,18 +68,6 @@ const SAMPLE_LOCATION_OBJECT =
         label: "RAMP",
         value: "2 RAMPS",
         status: "ACTIVE"
-      },
-      {
-        id: "rel-loading",
-        label: "LOADING AREA",
-        value: "PAVED",
-        status: "ACTIVE"
-      },
-      {
-        id: "rel-air",
-        label: "AIR",
-        value: "AVAILABLE",
-        status: "ACTIVE"
       }
     ],
 
