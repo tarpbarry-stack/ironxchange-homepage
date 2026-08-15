@@ -1,9 +1,14 @@
-import IXIMosObjectCard
-  from "../ixi-mos/IXIMosObjectCard";
+import {
+  useMemo,
+  useState
+} from "react";
+
+import IXIAosObjectConsole
+  from "../ixi-aos/object-console/IXIAosObjectConsole";
 
 import {
-  getAosFaceRenderer
-} from "../ixi-face-studio/IXIAosFaceRendererRegistry";
+  adaptAosCardTemplate
+} from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 
 
 function clean(
@@ -15,27 +20,6 @@ function clean(
 }
 
 
-function getPrimaryFace(
-  template = {}
-) {
-  const faceSchema =
-    Array.isArray(
-      template?.faceSchema
-    )
-      ? template.faceSchema
-      : [];
-
-  return (
-    faceSchema.find(
-      face =>
-        Number(face?.face) === 1
-    ) ||
-    faceSchema[0] ||
-    null
-  );
-}
-
-
 function createPreviewObject({
   template = {},
   sampleData = {}
@@ -43,9 +27,42 @@ function createPreviewObject({
   const fields =
     sampleData?.fields &&
     typeof sampleData.fields ===
-      "object"
+      "object" &&
+    !Array.isArray(
+      sampleData.fields
+    )
       ? sampleData.fields
       : {};
+
+  const fieldDefinitions =
+    Array.isArray(
+      template?.fieldSchema
+    )
+      ? template.fieldSchema
+          .map(field => ({
+            fieldId:
+              clean(
+                field?.field ||
+                field?.fieldId
+              ),
+
+            label:
+              clean(
+                field?.label
+              ),
+
+            fieldType:
+              clean(
+                field?.type
+              )
+          }))
+          .filter(
+            field =>
+              Boolean(
+                field.fieldId
+              )
+          )
+      : [];
 
   return {
     objectId:
@@ -114,6 +131,8 @@ function createPreviewObject({
 
     fields,
 
+    fieldDefinitions,
+
     media:
       Array.isArray(
         sampleData?.media
@@ -121,12 +140,17 @@ function createPreviewObject({
         ? sampleData.media
         : [],
 
-    metadata: {
-      creationState:
-        clean(
-          sampleData?.creationState
-        ),
+    capabilities: {
+      ...(
+        template?.capabilities &&
+        typeof template.capabilities ===
+          "object"
+          ? template.capabilities
+          : {}
+      )
+    },
 
+    metadata: {
       source:
         "aos-card-catalog-preview",
 
@@ -176,41 +200,30 @@ function PreviewError({
             1px solid
             rgba(255,255,255,.08);
 
-          background:
-            #101010;
+          border-radius: 14px;
+
+          background: #101010;
 
           text-align: center;
         }
 
         .aos-card-preview-error strong {
-          color:
-            #ffc400;
+          color: #ffc400;
 
-          font-size:
-            9px;
+          font-size: 9px;
+          font-weight: 950;
 
-          font-weight:
-            950;
-
-          letter-spacing:
-            .08em;
-
-          text-transform:
-            uppercase;
+          letter-spacing: .08em;
         }
 
         .aos-card-preview-error span {
           color:
             rgba(255,255,255,.42);
 
-          font-size:
-            8px;
+          font-size: 8px;
+          font-weight: 800;
 
-          font-weight:
-            800;
-
-          line-height:
-            1.45;
+          line-height: 1.45;
         }
       `}</style>
     </div>
@@ -220,231 +233,187 @@ function PreviewError({
 
 export default function IXIAosCardCatalogPreview({
   template = null,
-  sampleData = {},
 
-  projection = null,
-  directItems = [],
+  sampleData = {},
 
   parentLabel = "",
 
-  onAddChild = null,
-  onSaveObject = null,
-  onAddMedia = null,
-
-  onExposeContents = null,
-  onGatherContents = null,
-  onReturnContents = null,
-
-  onOpenConsole = null,
-  onOpenMenu = null
+  skinId =
+    "ixi:skin:default"
 }) {
+  const [
+    previewCardState,
+    setPreviewCardState
+  ] = useState({});
+
+
+  const object =
+    useMemo(
+      () =>
+        createPreviewObject({
+          template:
+            template || {},
+
+          sampleData
+        }),
+      [
+        template,
+        sampleData
+      ]
+    );
+
+
+  const cardDefinition =
+    useMemo(
+      () =>
+        template
+          ? adaptAosCardTemplate({
+              template,
+              object
+            })
+          : null,
+      [
+        template,
+        object
+      ]
+    );
+
+
   if (!template) {
     return (
       <PreviewError
-        title="No Card Selected"
-        detail="Select an AOS Card Template from the catalog."
+        title="NO CARD SELECTED"
+        detail="Select a Card Template from the AOS Card Library."
       />
     );
   }
 
-  const primaryFace =
-    getPrimaryFace(
-      template
-    );
 
-  if (!primaryFace) {
+  if (!cardDefinition) {
     return (
       <PreviewError
-        title="No Face Registered"
+        title="CARD DEFINITION FAILED"
         detail={
-          `${clean(
+          clean(
             template?.templateSlug
-          ) || "This template"} has no faceSchema entry.`
+          ) ||
+          "Unknown template"
         }
       />
     );
   }
 
-  const rendererSlug =
-    clean(
-      primaryFace?.rendererSlug
-    );
 
-  if (!rendererSlug) {
-    return (
-      <PreviewError
-        title="Renderer Missing"
-        detail="The selected face does not define rendererSlug."
-      />
-    );
-  }
+  function updatePreviewState(
+    objectId,
+    patch = {}
+  ) {
+    const id =
+      clean(
+        objectId
+      ) ||
+      object.objectId;
 
-  const Renderer =
-    getAosFaceRenderer(
-      rendererSlug
-    );
+    setPreviewCardState(
+      current => ({
+        ...current,
 
-  if (!Renderer) {
-    return (
-      <PreviewError
-        title="Renderer Not Registered"
-        detail={
-          rendererSlug
+        [id]: {
+          ...(
+            current?.[id] ||
+            {}
+          ),
+
+          ...patch
         }
-      />
+      })
     );
   }
 
-  const object =
-    createPreviewObject({
-      template,
-      sampleData
-    });
-
-  const resolvedParentLabel =
-    clean(
-      parentLabel
-    ) ||
-    clean(
-      template?.librarySection
-    ) ||
-    "AOS";
 
   return (
-  <IXIMosObjectCard
-    object={
-      object
-    }
+    <div className="aos-card-catalog-console">
 
-    items={
-      Array.isArray(
-        directItems
-      )
-        ? directItems
-        : []
-    }
-
-    projection={
-      projection
-    }
-
-    parentLabel={
-      resolvedParentLabel
-    }
-
-    ixiState={{
-      face: 1,
-      color: "none",
-      outline: 1
-    }}
-
-    ixiCardState={{}}
-
-    onIxiStateChange={() => {}}
-
-    saved={
-      false
-    }
-
-    armedDestination=""
-
-    onSendFront={() => {}}
-    onSendBack={() => {}}
-
-    onCycleColor={() => {}}
-    onCycleOutline={() => {}}
-
-    onSendToArmedDestination={() => {}}
-
-    onExposeObject={() => {}}
-
-    onExposeContents={
-      onExposeContents
-    }
-
-    onGatherContents={
-      onGatherContents
-    }
-
-    onAddChild={
-      onAddChild
-    }
-
-    onSaveName={
-      onSaveObject
-    }
-
-    onDelete={null}
-
-    onOpen={() => {}}
-
-    onOpenConsole={
-      onOpenConsole
-    }
-
-    onAddMedia={
-      onAddMedia
-    }
-
-    renderIdentityFace={() => (
-      <Renderer
+      <IXIAosObjectConsole
         object={
           object
         }
 
+        objectId={
+          object.objectId
+        }
+
+        cardDefinition={
+          cardDefinition
+        }
+
+        skinId={
+          skinId
+        }
+
         parentLabel={
-          resolvedParentLabel
+          clean(
+            parentLabel
+          ) ||
+          clean(
+            template?.librarySection
+          ) ||
+          "AOS"
         }
 
-        projection={
-          projection
+        ixiCardState={{}}
+
+        updateIxiCardState={null}
+
+        previewCardState={
+          previewCardState[
+            object.objectId
+          ] ||
+          {}
         }
 
-        directItems={
-          Array.isArray(
-            directItems
-          )
-            ? directItems
-            : []
+        updatePreviewCardState={
+          updatePreviewState
         }
 
-        onAddChild={
-          onAddChild
+        renderModule={null}
+
+        studioEditing={
+          false
         }
 
-        onSaveLocation={
-          onSaveObject
+        selectedModuleId=""
+
+        onSelectModule={null}
+
+        onSelectFace={null}
+
+        onCreateFace={null}
+
+        enableCardScaling={
+          false
         }
 
-        onSaveObject={
-          onSaveObject
-        }
-
-        onAddMedia={
-          onAddMedia
-        }
-
-        onExposeContents={
-          onExposeContents
-        }
-
-        onGatherContents={
-          onGatherContents
-        }
-
-        onReturnContents={
-          onReturnContents
-        }
-
-        onOpenConsole={
-          onOpenConsole
-        }
-
-        onOpenMenu={
-          onOpenMenu
-        }
+        cardScaleMode="xl"
       />
-    )}
-  />
-);
+
+
+      <style jsx>{`
+        .aos-card-catalog-console {
+          position: relative;
+
+          display: flex;
+
+          align-items:
+            flex-start;
+
+          justify-content:
+            center;
+
+          overflow: visible;
+        }
+      `}</style>
+
+    </div>
+  );
 }
