@@ -166,20 +166,14 @@ export default function IXIAosCard001Location({
         displayName: runtimeObject.displayName,
         fields: { ...safeObject(runtimeObject?.fields) }
       });
-      onIxiStateChange?.(objectId, {
-        editing: false,
-        editDraft: null
-      });
+      onIxiStateChange?.(objectId, { editing: false, editDraft: null });
     } finally {
       setSaving(false);
     }
   }
 
   function cancelEdit() {
-    onIxiStateChange?.(objectId, {
-      editing: false,
-      editDraft: null
-    });
+    onIxiStateChange?.(objectId, { editing: false, editDraft: null });
   }
 
   function previewPrevious(event) {
@@ -187,9 +181,7 @@ export default function IXIAosCard001Location({
     event?.stopPropagation?.();
     if (!childItems.length) return;
     setSelectedChildIndex(current =>
-      current <= 0
-        ? childItems.length - 1
-        : current - 1
+      current <= 0 ? childItems.length - 1 : current - 1
     );
   }
 
@@ -198,9 +190,7 @@ export default function IXIAosCard001Location({
     event?.stopPropagation?.();
     if (!childItems.length) return;
     setSelectedChildIndex(current =>
-      current >= childItems.length - 1
-        ? 0
-        : current + 1
+      current >= childItems.length - 1 ? 0 : current + 1
     );
   }
 
@@ -222,7 +212,7 @@ export default function IXIAosCard001Location({
     }
   };
 
-  const quickFacts = {
+  const contactFacts = {
     moduleType: "weighted-field-row",
     config: {
       fields: [
@@ -266,13 +256,22 @@ export default function IXIAosCard001Location({
         <div className="photo">
           <IXIAosPrimaryMediaPanel
             object={runtimeObject}
-            moduleDefinition={{ config: { height: 138 } }}
+            moduleDefinition={{ config: { height: 158 } }}
           />
         </div>
 
         <div className="address">
           <IXIAosInlineAddress
             object={runtimeObject}
+            editing={editing}
+            onFieldChange={patchField}
+          />
+        </div>
+
+        <div className="facts">
+          <IXIAosEditableFieldGroup
+            object={runtimeObject}
+            moduleDefinition={contactFacts}
             editing={editing}
             onFieldChange={patchField}
           />
@@ -286,22 +285,13 @@ export default function IXIAosCard001Location({
           />
         </div>
 
-        <div className="facts">
-          <IXIAosEditableFieldGroup
-            object={runtimeObject}
-            moduleDefinition={quickFacts}
-            editing={editing}
-            onFieldChange={patchField}
-          />
-        </div>
-
         <div className="relationships">
           <IXIAosRelationshipInfrastructurePanel
             object={runtimeObject}
             moduleDefinition={{
               config: {
                 title: "RELATIONSHIPS & INFRASTRUCTURE",
-                height: 66
+                height: 150
               }
             }}
           />
@@ -321,17 +311,42 @@ export default function IXIAosCard001Location({
         <button type="button" onClick={() => onReturn?.(runtimeObject)}>↩ <span>RETURN</span></button>
       </div>
 
-      <div className="preview-info-strip">
-        <button
-          type="button"
-          className="preview-side preview-prev"
-          onPointerDown={event => event.stopPropagation()}
-          onClick={previewPrevious}
-          aria-label="Previous object"
-        >
-          ‹
-        </button>
+      <div className="photo-rail">
+        <IXICollectionThumbRail
+          items={childItems}
+          activeItemIndex={activeChildIndex}
+          getItemId={getItemId}
+          getItemImage={getItemImage}
+          getItemLabel={getItemLabel}
+          onSelectItem={(item, index) => setSelectedChildIndex(index)}
+        />
 
+        {childItems.length > 1 ? (
+          <>
+            <button
+              type="button"
+              className="card-photo-nav left"
+              onPointerDown={event => event.stopPropagation()}
+              onClick={previewPrevious}
+              aria-label="Previous object"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              className="card-photo-nav right"
+              onPointerDown={event => event.stopPropagation()}
+              onClick={previewNext}
+              aria-label="Next object"
+            >
+              ›
+            </button>
+          </>
+        ) : null}
+      </div>
+
+      <div className="preview-info-strip">
         <strong title={activeChildTitle}>{activeChildTitle}</strong>
 
         <span className="preview-position">
@@ -348,27 +363,6 @@ export default function IXIAosCard001Location({
         >
           OUT ↗
         </button>
-
-        <button
-          type="button"
-          className="preview-side preview-next"
-          onPointerDown={event => event.stopPropagation()}
-          onClick={previewNext}
-          aria-label="Next object"
-        >
-          ›
-        </button>
-      </div>
-
-      <div className="photo-rail">
-        <IXICollectionThumbRail
-          items={childItems}
-          activeItemIndex={activeChildIndex}
-          getItemId={getItemId}
-          getItemImage={getItemImage}
-          getItemLabel={getItemLabel}
-          onSelectItem={(item, index) => setSelectedChildIndex(index)}
-        />
       </div>
 
       <IXIMachineRail
@@ -449,15 +443,16 @@ export default function IXIAosCard001Location({
 
         .name-input {
           display: block;
-          width: calc(100% - 78px);
-          height: 22px;
+          width: calc(100% - 92px);
+          max-width: 148px;
+          height: 20px;
           margin-top: 2px;
           padding: 0 5px;
           border: 1px solid rgba(255,196,0,.40);
           border-radius: 4px;
           background: #090909;
           color: #f4f4f4;
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 950;
           line-height: 1;
           outline: none;
@@ -474,28 +469,34 @@ export default function IXIAosCard001Location({
           left: 0;
           right: 0;
           bottom: ${RAIL_RESERVE + LOWER_STACK_HEIGHT}px;
+          display: flex;
+          flex-direction: column;
           overflow: hidden;
           padding: 0;
         }
 
         .photo {
-          margin: 0 0 5px;
+          flex: none;
+          margin: 0 0 2px;
         }
 
         .address,
-        .metrics,
         .facts,
-        .relationships {
-          margin: 0 6px 4px;
+        .metrics {
+          flex: none;
+          margin: 0 6px 1px;
         }
 
         .relationships {
-          position: absolute;
-          left: 6px;
-          right: 6px;
-          bottom: 0;
-          height: 66px;
-          margin: 0;
+          flex: 1;
+          min-height: 0;
+          margin: 0 6px;
+          overflow: hidden;
+        }
+
+        :global(.card001 .relationships .ixi-aos-relationship-panel) {
+          height: 100% !important;
+          min-height: 0 !important;
         }
 
         .edit-actions {
@@ -527,7 +528,6 @@ export default function IXIAosCard001Location({
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           border-top: 1px solid rgba(255,255,255,.055);
-          border-bottom: 0;
           background: #090909;
           z-index: 20;
         }
@@ -553,17 +553,62 @@ export default function IXIAosCard001Location({
           font-weight: 950;
         }
 
+        .photo-rail {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: ${RAIL_RESERVE + PREVIEW_INFO_HEIGHT}px;
+          width: ${NATIVE_WIDTH}px;
+          height: ${THUMB_RAIL_HEIGHT}px;
+          overflow: hidden;
+          margin: 0;
+          padding: 0;
+          z-index: 21;
+        }
+
+        .card-photo-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 22px;
+          height: 64px;
+          border: none;
+          background: rgba(0,0,0,.06);
+          color: rgba(255,255,255,.42);
+          font-size: 28px;
+          font-weight: 300;
+          cursor: pointer;
+          z-index: 30;
+          opacity: .72;
+          transition: opacity .18s ease, background .18s ease, color .18s ease;
+        }
+
+        .card-photo-nav.left {
+          left: 0;
+          border-radius: 0 10px 10px 0;
+        }
+
+        .card-photo-nav.right {
+          right: 0;
+          border-radius: 10px 0 0 10px;
+        }
+
+        .card-photo-nav:hover {
+          opacity: 1;
+          background: rgba(0,0,0,.14);
+          color: rgba(255,255,255,.68);
+        }
+
         .preview-info-strip {
           position: absolute;
           left: 0;
           right: 0;
-          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;
+          bottom: ${RAIL_RESERVE}px;
           height: ${PREVIEW_INFO_HEIGHT}px;
           display: grid;
-          grid-template-columns: 22px minmax(0,1fr) 28px 48px 22px;
+          grid-template-columns: minmax(0,1fr) 32px 52px;
           align-items: center;
           border-top: 1px solid rgba(255,255,255,.05);
-          border-bottom: 1px solid rgba(255,255,255,.045);
           background: #0a0a0a;
           z-index: 22;
         }
@@ -571,7 +616,7 @@ export default function IXIAosCard001Location({
         .preview-info-strip strong {
           min-width: 0;
           overflow: hidden;
-          padding: 0 4px;
+          padding: 0 7px;
           color: rgba(255,255,255,.86);
           font-size: 7.5px;
           font-weight: 950;
@@ -587,49 +632,21 @@ export default function IXIAosCard001Location({
           text-align: center;
         }
 
-        .preview-side,
         .preview-out {
           height: 100%;
           padding: 0;
           border: 0;
-          background: transparent;
-          cursor: pointer;
-        }
-
-        .preview-side {
-          color: #00c2ff;
-          font-size: 17px;
-          font-weight: 950;
-        }
-
-        .preview-side:hover {
-          background: rgba(0,194,255,.07);
-        }
-
-        .preview-out {
           border-left: 1px solid rgba(255,255,255,.045);
-          border-right: 1px solid rgba(255,255,255,.045);
+          background: transparent;
           color: #ffc400;
           font-size: 7px;
           font-weight: 950;
+          cursor: pointer;
         }
 
         .preview-out:disabled {
           color: rgba(255,255,255,.18);
           cursor: default;
-        }
-
-        .photo-rail {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: ${RAIL_RESERVE}px;
-          width: ${NATIVE_WIDTH}px;
-          height: ${THUMB_RAIL_HEIGHT}px;
-          overflow: hidden;
-          margin: 0;
-          padding: 0;
-          z-index: 21;
         }
 
         :global(.card001 .photo-rail .ixi-collection-thumb-rail) {
