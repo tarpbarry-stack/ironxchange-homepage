@@ -1,5 +1,5 @@
 import IXILocationObjectFace1
-  from "../ixi-aos/location/IXILocationObjectFace1";
+  from "../ixi-mos/location/IXILocationObjectFace1";
 
 
 const AOS_FACE_RENDERERS = Object.freeze({
