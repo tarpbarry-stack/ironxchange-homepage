@@ -2,364 +2,87 @@ import { useMemo, useState } from "react";
 import { createIXIWorkOrderDraft } from "./IXIWorkOrderContract";
 import { getIXIWorkOrderActuals } from "./IXIWorkOrderSelectors";
 import {
-  WorkOrderIcon,
-  LocationIcon,
-  CameraIcon,
-  MicIcon,
-  RepairIcon,
-  PMIcon,
-  InspectIcon,
-  ReadyIcon,
-  FlagIcon,
-  OperableIcon,
-  LimitedIcon,
-  DownIcon,
-  PersonIcon,
-  CreateIcon
+  WorkOrderIcon,LocationIcon,CameraIcon,MicIcon,RepairIcon,PMIcon,InspectIcon,ReadyIcon,
+  FlagIcon,OperableIcon,LimitedIcon,DownIcon,PersonIcon,TeamIcon,CreateIcon,EditIcon,
+  ClockIcon,MaterialIcon,ServiceIcon,ExpenseIcon,PurchaseIcon,DocumentIcon,PauseIcon,StopIcon,RefreshIcon
 } from "../../IXITransactIcons";
 
 const clean = value => String(value ?? "").trim();
 
 const COPY = {
   en: {
-    new: "NEW WORK ORDER",
-    sub: "Create a new work order",
-    back: "TRAN$ACT",
-    location: "LOCATION",
-    problem: "WHAT NEEDS WORK?",
-    placeholder: "Describe the work or problem...",
-    photo: "ADD PHOTO",
-    voice: "VOICE NOTE",
-    type: "TYPE",
-    repair: "REPAIR",
-    pm: "PM",
-    inspection: "INSPECTION",
-    makeReady: "MAKE READY",
-    priority: "PRIORITY",
-    normal: "NORMAL",
-    high: "HIGH",
-    critical: "CRITICAL",
-    condition: "MACHINE CONDITION",
-    operable: "OPERABLE",
-    limited: "LIMITED",
-    down: "DOWN",
-    assign: "ASSIGN TO",
-    me: "ME",
-    create: "CREATE WORK ORDER",
-    createSub: "CREATE AND START WORK",
-    work: "WORK",
-    cost: "COST",
-    activity: "ACTIVITY",
-    related: "RELATED",
-    assigned: "ASSIGNED TO",
-    status: "WORK STATUS",
-    description: "WORK DESCRIPTION",
-    add: "ADD TO WORK ORDER",
-    time: "+ TIME",
-    material: "+ MATERIAL",
-    service: "+ SERVICE",
-    expense: "+ EXPENSE",
-    purchase: "+ PURCHASE",
-    document: "+ DOCUMENT",
-    notes: "NOTES",
-    photos: "PHOTOS",
-    pause: "PAUSE WORK",
-    complete: "COMPLETE WORK",
-    inProgress: "IN PROGRESS"
+    new:"NEW WORK ORDER",sub:"Create a new work order",back:"TRAN$ACT",location:"LOCATION",problem:"WHAT NEEDS WORK?",placeholder:"Describe the work or problem...",photo:"ADD PHOTO",voice:"VOICE NOTE",type:"TYPE",repair:"REPAIR",pm:"PM",inspection:"INSPECTION",makeReady:"MAKE READY",priority:"PRIORITY",normal:"NORMAL",high:"HIGH",critical:"CRITICAL",condition:"MACHINE CONDITION",operable:"OPERABLE",limited:"LIMITED",down:"DOWN",assign:"ASSIGN TO",me:"ME",create:"CREATE WORK ORDER",createSub:"CREATE AND START WORK",work:"WORK",cost:"COST",activity:"ACTIVITY",related:"RELATED",assigned:"ASSIGNED TO",crew:"CREW / TEAM",status:"WORK STATUS",description:"WORK DESCRIPTION",add:"ADD TO WORK ORDER",time:"+ TIME",material:"+ MATERIAL",service:"+ SERVICE",expense:"+ EXPENSE",purchase:"+ PURCHASE",document:"+ DOCUMENT",notes:"NOTES",photos:"PHOTOS",pause:"PAUSE WORK",complete:"COMPLETE WORK",inProgress:"IN PROGRESS",created:"CREATED",hold:"ON HOLD",completed:"COMPLETED",timer:"TIMER",running:"RUNNING",stop:"STOP",totalWo:"TOTAL ON WO",viewAll:"VIEW ALL",addNote:"+ ADD NOTE",addPhoto:"+ ADD PHOTO",technician:"TECHNICIAN",locked:"LOCKED",actual:"ACTUAL",committed:"COMMITTED"
   },
   es: {
-    new: "NUEVA ORDEN DE TRABAJO",
-    sub: "Crea una nueva orden de trabajo",
-    back: "TRAN$ACT",
-    location: "UBICACIÓN",
-    problem: "¿QUÉ NECESITA TRABAJO?",
-    placeholder: "Describe el trabajo o problema...",
-    photo: "AGREGAR FOTO",
-    voice: "NOTA DE VOZ",
-    type: "TIPO",
-    repair: "REPARACIÓN",
-    pm: "MANTENIMIENTO",
-    inspection: "INSPECCIÓN",
-    makeReady: "PREPARACIÓN",
-    priority: "PRIORIDAD",
-    normal: "NORMAL",
-    high: "ALTA",
-    critical: "CRÍTICA",
-    condition: "CONDICIÓN DEL EQUIPO",
-    operable: "OPERABLE",
-    limited: "LIMITADA",
-    down: "FUERA DE SERVICIO",
-    assign: "ASIGNAR A",
-    me: "YO",
-    create: "CREAR ORDEN DE TRABAJO",
-    createSub: "CREAR Y COMENZAR EL TRABAJO",
-    work: "TRABAJO",
-    cost: "COSTO",
-    activity: "ACTIVIDAD",
-    related: "RELACIONADO",
-    assigned: "ASIGNADO A",
-    status: "ESTADO DEL TRABAJO",
-    description: "DESCRIPCIÓN DEL TRABAJO",
-    add: "AGREGAR A LA ORDEN",
-    time: "+ TIEMPO",
-    material: "+ MATERIAL",
-    service: "+ SERVICIO",
-    expense: "+ GASTO",
-    purchase: "+ COMPRA",
-    document: "+ DOCUMENTO",
-    notes: "NOTAS",
-    photos: "FOTOS",
-    pause: "PAUSAR TRABAJO",
-    complete: "TERMINAR TRABAJO",
-    inProgress: "EN PROGRESO"
+    new:"NUEVA ORDEN DE TRABAJO",sub:"Crea una nueva orden de trabajo",back:"TRAN$ACT",location:"UBICACIÓN",problem:"¿QUÉ NECESITA TRABAJO?",placeholder:"Describe el trabajo o problema...",photo:"AGREGAR FOTO",voice:"NOTA DE VOZ",type:"TIPO",repair:"REPARACIÓN",pm:"MANTENIMIENTO",inspection:"INSPECCIÓN",makeReady:"PREPARACIÓN",priority:"PRIORIDAD",normal:"NORMAL",high:"ALTA",critical:"CRÍTICA",condition:"CONDICIÓN DEL EQUIPO",operable:"OPERABLE",limited:"LIMITADA",down:"FUERA DE SERVICIO",assign:"ASIGNAR A",me:"YO",create:"CREAR ORDEN DE TRABAJO",createSub:"CREAR Y COMENZAR EL TRABAJO",work:"TRABAJO",cost:"COSTO",activity:"ACTIVIDAD",related:"RELACIONADO",assigned:"ASIGNADO A",crew:"CUADRILLA / EQUIPO",status:"ESTADO DEL TRABAJO",description:"DESCRIPCIÓN DEL TRABAJO",add:"AGREGAR A LA ORDEN",time:"+ TIEMPO",material:"+ MATERIAL",service:"+ SERVICIO",expense:"+ GASTO",purchase:"+ COMPRA",document:"+ DOCUMENTO",notes:"NOTAS",photos:"FOTOS",pause:"PAUSAR TRABAJO",complete:"TERMINAR TRABAJO",inProgress:"EN PROGRESO",created:"CREADA",hold:"EN ESPERA",completed:"TERMINADA",timer:"TEMPORIZADOR",running:"EN CURSO",stop:"DETENER",totalWo:"TOTAL EN ESTA OT",viewAll:"VER TODO",addNote:"+ AGREGAR NOTA",addPhoto:"+ AGREGAR FOTO",technician:"TÉCNICO",locked:"BLOQUEADO",actual:"REAL",committed:"COMPROMETIDO"
   }
 };
 
-export default function IXIWorkOrderApp({
-  context = {},
-  initialWorkOrder = null,
-  onBack = null,
-  onCreate = null,
-  onAction = null
-}) {
-  const [lang, setLang] = useState("en");
-  const t = COPY[lang];
-  const [workOrder, setWorkOrder] = useState(initialWorkOrder || null);
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("repair");
-  const [priority, setPriority] = useState("normal");
-  const [condition, setCondition] = useState("operable");
-  const actuals = useMemo(() => getIXIWorkOrderActuals(workOrder || {}), [workOrder]);
-  const label = context.primary?.label || "AOS OBJECT";
+function Money({value=0}){return <>${Number(value||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</>}
 
-  function act(id) {
-    onAction?.(id, workOrder, context);
-  }
+export default function IXIWorkOrderApp({context={},initialWorkOrder=null,onBack=null,onCreate=null,onAction=null}){
+  const [lang,setLang]=useState("en");
+  const t=COPY[lang];
+  const [workOrder,setWorkOrder]=useState(initialWorkOrder||null);
+  const [description,setDescription]=useState("");
+  const [type,setType]=useState("repair");
+  const [priority,setPriority]=useState("normal");
+  const [condition,setCondition]=useState("operable");
+  const actuals=useMemo(()=>getIXIWorkOrderActuals(workOrder||{}),[workOrder]);
+  const label=context.primary?.label||"AOS OBJECT";
+  const actorName=clean(context.actor?.displayName||context.actor?.name||context.actor?.label)||"—";
 
-  function create() {
-    if (!clean(description)) return;
-
-    const draft = createIXIWorkOrderDraft({
-      context,
-      input: {
-        title: clean(description).slice(0, 80),
-        description,
-        type,
-        priority,
-        machineCondition: condition,
-        assignedTo: [context.actor || {}]
-      }
-    });
-
-    draft.identity.number = "WO-1058";
-    draft.work.status = "in-progress";
+  function act(id){onAction?.(id,workOrder,context)}
+  function create(){
+    const draft=createIXIWorkOrderDraft({context,input:{title:clean(description).slice(0,80)||"Work order",description,type,priority,machineCondition:condition,assignedTo:[context.actor||{}]}});
+    draft.identity.number="WO-1058";
+    draft.work.status="in-progress";
     setWorkOrder(draft);
-    onCreate?.(draft, context);
+    onCreate?.(draft,context);
   }
 
-  const Lang = () => (
-    <div className="wo-lang">
-      <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
-      <i>/</i>
-      <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
-    </div>
-  );
+  const Lang=()=> <div className="wo-lang"><button className={lang==="en"?"on":""} onClick={()=>setLang("en")}>ENG</button><i>/</i><button className={lang==="es"?"on":""} onClick={()=>setLang("es")}>ESP</button></div>;
 
-  if (!workOrder) {
-    return (
-      <div className="wo-app wo-v13">
-        <Lang />
-
-        <div className="wo-title">
-          <div className="wo-icon"><WorkOrderIcon size={23} /></div>
-          <div>
-            <strong>{t.new}</strong>
-            <small>{t.sub}</small>
-          </div>
-        </div>
-
-        <button className="wo-back" onClick={() => onBack?.()}>‹ {t.back}</button>
-
-        <label>{t.location}</label>
-        <div className="wo-location">
-          <LocationIcon size={15} />
-          <b>{label}</b>
-          <span className="locked">LOCKED</span>
-        </div>
-
-        <label>{t.problem}</label>
-        <textarea
-          value={description}
-          onChange={event => setDescription(event.target.value)}
-          placeholder={t.placeholder}
-        />
-
-        <div className="wo-duo">
-          <button onClick={() => act("photo")}><CameraIcon size={15} /><b>{t.photo}</b></button>
-          <button onClick={() => act("voice")}><MicIcon size={15} /><b>{t.voice}</b></button>
-        </div>
-
-        <label>{t.type}</label>
-        <div className="wo-four">
-          <button className={type === "repair" ? "sel" : ""} onClick={() => setType("repair")}><RepairIcon size={18} /><span>{t.repair}</span></button>
-          <button className={type === "pm" ? "sel" : ""} onClick={() => setType("pm")}><PMIcon size={18} /><span>{t.pm}</span></button>
-          <button className={type === "inspection" ? "sel" : ""} onClick={() => setType("inspection")}><InspectIcon size={18} /><span>{t.inspection}</span></button>
-          <button className={type === "make-ready" ? "sel" : ""} onClick={() => setType("make-ready")}><ReadyIcon size={18} /><span>{t.makeReady}</span></button>
-        </div>
-
-        <label>{t.priority}</label>
-        <div className="wo-three priority">
-          <button className={priority === "normal" ? "sel" : ""} onClick={() => setPriority("normal")}><FlagIcon size={15} />{t.normal}</button>
-          <button className={priority === "high" ? "high sel2" : "high"} onClick={() => setPriority("high")}><FlagIcon size={15} />{t.high}</button>
-          <button className={priority === "critical" ? "critical sel2" : "critical"} onClick={() => setPriority("critical")}><FlagIcon size={15} />{t.critical}</button>
-        </div>
-
-        <label>{t.condition}</label>
-        <div className="wo-three condition">
-          <button className={condition === "operable" ? "sel" : ""} onClick={() => setCondition("operable")}><OperableIcon size={15} />{t.operable}</button>
-          <button className={condition === "limited" ? "sel2" : ""} onClick={() => setCondition("limited")}><LimitedIcon size={15} />{t.limited}</button>
-          <button className={condition === "down" ? "down sel2" : "down"} onClick={() => setCondition("down")}><DownIcon size={15} />{t.down}</button>
-        </div>
-
-        <label>{t.assign}</label>
-        <div className="wo-assign">
-          <PersonIcon size={16} />
-          <b>{t.me}</b>
-          <span>⌄</span>
-        </div>
-
-        <button className="wo-create" onClick={create}>
-          <CreateIcon size={19} />
-          <span><b>{t.create}</b><small>{t.createSub}</small></span>
-        </button>
-
-        <Styles />
-      </div>
-    );
+  if(!workOrder){
+    return <div className="wo-app wo-v13"><Lang/>
+      <div className="wo-title"><div className="wo-icon"><WorkOrderIcon size={23}/></div><div><strong>{t.new}</strong><small>{t.sub}</small></div></div>
+      <button className="wo-back" onClick={()=>onBack?.()}>‹ {t.back}</button>
+      <label>{t.location}</label><div className="wo-location"><LocationIcon size={15}/><b>{label}</b><span className="locked">{t.locked}</span></div>
+      <label>{t.problem}</label><textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder={t.placeholder}/>
+      <div className="wo-duo"><button onClick={()=>act("photo")}><CameraIcon size={15}/><b>{t.photo}</b></button><button onClick={()=>act("voice")}><MicIcon size={15}/><b>{t.voice}</b></button></div>
+      <label>{t.type}</label><div className="wo-four"><button className={type==="repair"?"sel":""} onClick={()=>setType("repair")}><RepairIcon size={18}/><span>{t.repair}</span></button><button className={type==="pm"?"sel":""} onClick={()=>setType("pm")}><PMIcon size={18}/><span>{t.pm}</span></button><button className={type==="inspection"?"sel":""} onClick={()=>setType("inspection")}><InspectIcon size={18}/><span>{t.inspection}</span></button><button className={type==="make-ready"?"sel":""} onClick={()=>setType("make-ready")}><ReadyIcon size={18}/><span>{t.makeReady}</span></button></div>
+      <label>{t.priority}</label><div className="wo-three priority"><button className={priority==="normal"?"sel":""} onClick={()=>setPriority("normal")}><FlagIcon size={15}/>{t.normal}</button><button className="high" onClick={()=>setPriority("high")}><FlagIcon size={15}/>{t.high}</button><button className="critical" onClick={()=>setPriority("critical")}><FlagIcon size={15}/>{t.critical}</button></div>
+      <label>{t.condition}</label><div className="wo-three condition"><button className={condition==="operable"?"sel":""} onClick={()=>setCondition("operable")}><OperableIcon size={15}/>{t.operable}</button><button onClick={()=>setCondition("limited")}><LimitedIcon size={15}/>{t.limited}</button><button className="down" onClick={()=>setCondition("down")}><DownIcon size={15}/>{t.down}</button></div>
+      <label>{t.assign}</label><div className="wo-assign"><PersonIcon size={16}/><b>{actorName==="—"?t.me:actorName}</b><span>⌄</span></div>
+      <button className="wo-create" onClick={create}><CreateIcon size={19}/><span><b>{t.create}</b><small>{t.createSub}</small></span></button>
+      <Styles/>
+    </div>;
   }
 
-  return (
-    <div className="wo-app wo-v13">
-      <Lang />
+  const desc=clean(workOrder.work?.description);
+  const number=workOrder.identity?.number||"WO-1058";
 
-      <div className="wo-live">
-        <div>
-          <span>IXI TRAN$ACT</span>
-          <strong>{workOrder.identity?.number || "WO-1058"}</strong>
-          <b>{t.inProgress}</b>
-        </div>
-        <h3>{label}</h3>
-        <small>{t.repair} · {t.normal} · {t.operable}</small>
-      </div>
+  return <div className="wo-app wo-v13 wo-work"><Lang/>
+    <div className="wo-work-identity"><div className="wo-work-icon"><WorkOrderIcon size={23}/></div><div className="wo-work-copy"><div className="wo-number-row"><strong>{number}</strong><span>{t.inProgress}</span></div><h3>{label}</h3><small>{t.repair}<i>•</i>{t.normal}<i>•</i>{t.operable}</small></div><button className="wo-edit" onClick={()=>act("edit-work-order")}><EditIcon size={13}/></button></div>
 
-      <div className="wo-tabs">
-        <button className="active">{t.work}</button>
-        <button onClick={() => act("cost")}>{t.cost}</button>
-        <button onClick={() => act("activity")}>{t.activity}</button>
-        <button onClick={() => act("related")}>{t.related}</button>
-      </div>
+    <div className="wo-tabs"><button className="active">{t.work}</button><button onClick={()=>act("cost")}>{t.cost}</button><button onClick={()=>act("activity")}>{t.activity}</button><button onClick={()=>act("related")}>{t.related}</button></div>
 
-      <section className="wo-assigned">
-        <label>{t.assigned}</label>
-        <b>John Carter</b>
-        <span>✎</span>
-      </section>
-
-      <section>
-        <div className="wo-status">
-          <label>{t.status}</label>
-          <button>{t.inProgress} ›</button>
-        </div>
-        <label>{t.description}</label>
-        <div className="wo-desc">
-          <p>{workOrder.work?.description}</p>
-          <div className="wo-photo"><CameraIcon size={20} /></div>
-        </div>
-        <div className="wo-duo">
-          <button onClick={() => act("photo")}><CameraIcon size={14} /><b>{t.photo}</b></button>
-          <button onClick={() => act("voice")}><MicIcon size={14} /><b>{t.voice}</b></button>
-        </div>
-      </section>
-
-      <label>{t.add}</label>
-      <div className="wo-six">
-        <button onClick={() => act("time")}>{t.time}</button>
-        <button onClick={() => act("material")}>{t.material}</button>
-        <button onClick={() => act("service")}>{t.service}</button>
-        <button onClick={() => act("expense")}>{t.expense}</button>
-        <button onClick={() => act("purchase-order")}>{t.purchase}</button>
-        <button onClick={() => act("document")}>{t.document}</button>
-      </div>
-
-      <div className="wo-lower">
-        <section>
-          <div className="head">{t.notes}<span>View All</span></div>
-          <p>Checked for leaks at connections. Found damage near cylinder.</p>
-        </section>
-        <section>
-          <div className="head">{t.photos} (3)<span>View All</span></div>
-          <div className="thumbs"><i /><i /><i /></div>
-        </section>
-      </div>
-
-      <div className="wo-costline">
-        <span>ACTUAL</span><b>${actuals.totalActual.toLocaleString()}</b>
-        <span>COMMITTED</span><b>${actuals.committed.toLocaleString()}</b>
-      </div>
-
-      <div className="wo-bottom">
-        <button onClick={() => act("pause")}>Ⅱ {t.pause}</button>
-        <button className="finish" onClick={() => act("complete")}>✓ {t.complete}</button>
-      </div>
-
-      <Styles />
+    <div className="wo-work-grid">
+      <section className="wo-description-card"><label>{t.description}</label><div className="wo-description-body"><p>{desc||"—"}</p><div className="wo-photo-preview"><CameraIcon size={15}/></div></div><div className="wo-duo compact"><button onClick={()=>act("photo")}><CameraIcon size={14}/><b>{t.photo}</b></button><button onClick={()=>act("voice")}><MicIcon size={14}/><b>{t.voice}</b></button></div></section>
+      <div className="wo-side-stack"><section className="wo-person-card"><label>{t.assigned}</label><div><PersonIcon size={15}/><span><b>{actorName}</b><small>{t.technician}</small></span><button onClick={()=>act("assign")}><EditIcon size={12}/></button></div></section><section className="wo-person-card"><label>{t.crew}</label><div><TeamIcon size={15}/><span><b>—</b><small>—</small></span><button onClick={()=>act("crew")}><EditIcon size={12}/></button></div></section></div>
     </div>
-  );
+
+    <div className="wo-middle-grid"><section className="wo-add-card"><label>{t.add}</label><div className="wo-six"><button onClick={()=>act("time")}><ClockIcon size={16}/>{t.time}</button><button onClick={()=>act("material")}><MaterialIcon size={16}/>{t.material}</button><button onClick={()=>act("service")}><ServiceIcon size={16}/>{t.service}</button><button onClick={()=>act("expense")}><ExpenseIcon size={16}/>{t.expense}</button><button onClick={()=>act("purchase-order")}><PurchaseIcon size={16}/>{t.purchase}</button><button onClick={()=>act("document")}><DocumentIcon size={16}/>{t.document}</button></div></section><div className="wo-right-stack"><section className="wo-status-card"><label>{t.status}</label><div className="wo-status-line"><span className="done"/><span className="active"/><span/><span/></div><div className="wo-status-labels"><b>{t.created}</b><b>{t.inProgress}</b><b>{t.hold}</b><b>{t.completed}</b></div></section><section className="wo-timer-card"><label>{t.timer}</label><strong>00:00:00</strong><small>{t.running}</small><button onClick={()=>act("stop-time")}><StopIcon size={11}/>{t.stop}</button><div>{t.totalWo}<b>— hr</b><i>|</i><b><Money value={actuals.totalActual}/></b></div></section></div></div>
+
+    <div className="wo-lower"><section><div className="head">{t.notes}<button>{t.viewAll}</button></div><div className="empty-note">—</div><button className="wide" onClick={()=>act("note")}>{t.addNote}</button></section><section><div className="head">{t.photos} (0)<button>{t.viewAll}</button></div><div className="thumb-row"><i/><i/><i/></div><button className="wide" onClick={()=>act("photo")}>{t.addPhoto}</button></section></div>
+
+    <div className="wo-bottom"><button onClick={()=>act("pause")}><PauseIcon size={15}/>{t.pause}</button><button className="finish" onClick={()=>act("complete")}><OperableIcon size={15}/>{t.complete}</button></div>
+    <div className="wo-audit"><span>{t.created}: —</span><i>•</i><span>Updated: —</span><RefreshIcon size={11}/></div>
+    <Styles/>
+  </div>;
 }
 
-function Styles() {
-  return (
-    <style jsx global>{`
-      .wo-app,.wo-app *{box-sizing:border-box}
-      .wo-app{position:relative;min-height:100%;padding:0 2px 10px;color:#eef0ee;font-family:"Arial Narrow","Roboto Condensed",Arial,sans-serif;font-stretch:condensed}
-      .wo-lang{position:absolute;right:2px;top:1px;display:flex;gap:2px;align-items:center;z-index:5}
-      .wo-lang button{border:0;background:none;color:#666;font-size:6.5px;font-weight:950;padding:2px}
-      .wo-lang button.on{color:#ffc400}.wo-lang i{font-size:6px;color:#444}
-      .wo-title{height:55px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #292d2a}
-      .wo-title .wo-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border:1.5px solid #ffc400;border-radius:8px;background:radial-gradient(circle at 40% 25%,rgba(255,196,0,.16),transparent 62%),linear-gradient(#16170f,#0c0e0c);color:#ffc400;box-shadow:inset 0 1px rgba(255,255,255,.08),0 0 12px rgba(255,196,0,.08)}
-      .wo-title strong{display:block;font-size:16px;line-height:.96;font-weight:950;letter-spacing:-.035em}
-      .wo-title small{display:block;margin-top:4px;color:#a5aaa6;font:700 7px Arial,sans-serif}
-      .wo-back{height:25px;margin:7px 0 1px;padding:0 9px;border:1px solid #3a3e3b;border-radius:5px;background:linear-gradient(#141615,#090b0a);color:#ffc400;font-size:6.5px;font-weight:950}
-      .wo-app label{display:block;margin:7px 2px 4px;color:#a2a7a3;font-size:6.5px;font-weight:950;letter-spacing:.04em}
-      .wo-location,.wo-assign{height:36px;display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #aa8300;border-radius:6px;background:linear-gradient(#141716,#0d0f0e);color:#ffc400;box-shadow:inset 0 1px rgba(255,255,255,.04),inset 0 -6px 14px rgba(0,0,0,.12)}
-      .wo-location b,.wo-assign b{flex:1;color:#f2f3f1;font-size:9px;letter-spacing:.01em}
-      .wo-location .locked{font-size:4.5px;color:#6f746f;letter-spacing:.08em}
-      .wo-app textarea{width:100%;height:66px;padding:10px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#121514,#0c0e0d);color:#f3f4f3;font:700 8.5px/1.4 Arial,sans-serif;resize:none;outline:none;box-shadow:inset 0 2px 8px rgba(0,0,0,.28)}
-      .wo-app textarea::placeholder{color:#858b87}
-      .wo-duo{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
-      .wo-duo button,.wo-bottom button{height:37px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #3b3f3c;border-radius:6px;background:linear-gradient(#171a18,#0d0f0e);color:#e5e7e5;font-size:7px;font-weight:950}
-      .wo-duo button svg{color:#ffc400}
-      .wo-four{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-      .wo-four button{height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#181b19,#0e100f);color:#aeb3af;box-shadow:inset 0 1px rgba(255,255,255,.04),inset 0 -8px 16px rgba(0,0,0,.12)}
-      .wo-four button span{font-size:6px;font-weight:950}
-      .wo-four button.sel{border-color:#e0ad00;background:radial-gradient(circle at 50% 25%,rgba(255,196,0,.24),transparent 62%),linear-gradient(#2a2208,#171407);color:#ffc400}
-      .wo-three{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-      .wo-three button{height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#171a18,#0e100f);color:#b8bdb9;font-size:7px;font-weight:950}
-      .priority button.sel{border-color:#e0ad00;background:linear-gradient(135deg,#2c2409,#171407);color:#ffc400}
-      .priority .high svg{color:#ff7a18}.priority .critical svg,.condition .down svg{color:#f33}
-      .condition button.sel{border-color:#5d8e25;background:linear-gradient(135deg,#17220d,#0e130a);color:#9ee548}
-      .wo-assign{border-color:#3b3f3c}.wo-assign span{color:#bbb;font-size:12px}
-      .wo-create{width:100%;height:51px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #ffd52d;border-radius:6px;background:linear-gradient(#ffd52e,#ffc20a 56%,#e8a800);color:#0b0c0b;box-shadow:inset 0 1px rgba(255,255,255,.52),0 5px 15px rgba(255,183,0,.13)}
-      .wo-create>span{display:block}.wo-create b{display:block;font-size:10px;font-weight:950}.wo-create small{display:block;margin-top:2px;font-size:6px;font-weight:900}
-      .wo-live{padding:3px 3px 7px;border-bottom:1px solid #2d302e}.wo-live div{display:flex;align-items:center;gap:7px}.wo-live span{color:#ffc400;font-size:6px;font-weight:950}.wo-live strong{font-size:17px}.wo-live b{padding:3px 5px;border-radius:3px;background:#273400;color:#a8df19;font-size:5.5px}.wo-live h3{margin:5px 0 0;font-size:9px}.wo-live small{color:#a0a4a1;font-size:6px}
-      .wo-tabs{height:31px;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #2d302e}.wo-tabs button{position:relative;border:0;background:none;color:#919692;font-size:6px;font-weight:950}.wo-tabs button.active{color:#f4f5f4}.wo-tabs button.active:after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:#ffc400}
-      .wo-app section{margin-top:6px;padding:7px;border:1px solid #313532;border-radius:5px;background:linear-gradient(180deg,#121514,#0e100f)}
-      .wo-assigned{position:relative}.wo-assigned label{margin:0}.wo-assigned b{font-size:8px}.wo-assigned span{position:absolute;right:8px;top:12px;color:#b5b8b6}
-      .wo-status{display:flex;justify-content:space-between;align-items:center}.wo-status label{margin:0}.wo-status button{height:22px;border:1px solid #3f5212;border-radius:3px;background:#172000;color:#a8df19;font-size:5.5px;font-weight:950}
-      .wo-desc{display:grid;grid-template-columns:1fr 50px;gap:5px}.wo-desc p{margin:0;padding:7px;background:#0b0d0c;border:1px solid #262927;border-radius:3px;color:#dfe1df;font-size:7px;line-height:1.45}.wo-photo{display:grid;place-items:center;border:1px solid #555;border-radius:3px;background:linear-gradient(135deg,#c28f24,#303833);color:#ffc400}
-      .wo-six{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.wo-six button{height:34px;border:1px solid #343735;border-radius:5px;background:linear-gradient(#141716,#0e100f);color:#e4e6e4;font-size:5.8px;font-weight:950}.wo-six button:first-child{color:#a7d91e}.wo-six button:nth-child(2){color:#74b9ff}.wo-six button:nth-child(3){color:#c98cff}.wo-six button:nth-child(4){color:#ffc400}
-      .wo-lower{display:grid;grid-template-columns:1fr 1fr;gap:5px}.wo-lower .head{color:#b7bbb8;font-size:5.5px;font-weight:950}.wo-lower .head span{float:right;color:#ffc400}.wo-lower p{margin:5px 0 0;font-size:6px;line-height:1.35}.thumbs{display:flex;gap:3px;margin-top:5px}.thumbs i{width:31%;height:31px;border:1px solid #4d4f4d;border-radius:3px;background:linear-gradient(135deg,#bd8c24,#252b28)}
-      .wo-costline{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:center;margin-top:6px;padding:6px;border-top:1px solid #303330;color:#8b908c;font-size:5px}.wo-costline b{color:#e7e9e7;font-size:7.5px}.wo-bottom{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}.wo-bottom .finish{border-color:#9b7800;color:#ffc400;background:rgba(255,196,0,.05)}
-    `}</style>
-  );
-}
+function Styles(){return <style jsx global>{`
+.wo-app,.wo-app *{box-sizing:border-box}.wo-app{position:relative;min-height:100%;padding:0 2px 10px;color:#eef0ee;font-family:"Arial Narrow","Roboto Condensed",Arial,sans-serif;font-stretch:condensed}.wo-lang{position:absolute;right:2px;top:1px;display:flex;gap:2px;align-items:center;z-index:5}.wo-lang button{border:0;background:none;color:#666;font-size:6.5px;font-weight:950;padding:2px}.wo-lang button.on{color:#ffc400}.wo-lang i{font-size:6px;color:#444}.wo-title{height:55px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #292d2a}.wo-title .wo-icon,.wo-work-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border:1.5px solid #ffc400;border-radius:8px;background:radial-gradient(circle at 40% 25%,rgba(255,196,0,.16),transparent 62%),linear-gradient(#16170f,#0c0e0c);color:#ffc400;box-shadow:inset 0 1px rgba(255,255,255,.08),0 0 12px rgba(255,196,0,.08)}.wo-title strong{display:block;font-size:16px;line-height:.96;font-weight:950;letter-spacing:-.035em}.wo-title small{display:block;margin-top:4px;color:#a5aaa6;font:700 7px Arial,sans-serif}.wo-back{height:25px;margin:7px 0 1px;padding:0 9px;border:1px solid #3a3e3b;border-radius:5px;background:linear-gradient(#141615,#090b0a);color:#ffc400;font-size:6.5px;font-weight:950}.wo-app label{display:block;margin:7px 2px 4px;color:#a2a7a3;font-size:6.5px;font-weight:950;letter-spacing:.04em}.wo-location,.wo-assign{height:36px;display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #aa8300;border-radius:6px;background:linear-gradient(#141716,#0d0f0e);color:#ffc400}.wo-location b,.wo-assign b{flex:1;color:#f2f3f1;font-size:9px}.wo-location .locked{font-size:4.5px;color:#6f746f;letter-spacing:.08em}.wo-app textarea{width:100%;height:66px;padding:10px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#121514,#0c0e0d);color:#f3f4f3;font:700 8.5px/1.4 Arial,sans-serif;resize:none;outline:none}.wo-app textarea::placeholder{color:#858b87}.wo-duo{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.wo-duo button,.wo-bottom button{height:37px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #3b3f3c;border-radius:6px;background:linear-gradient(#171a18,#0d0f0e);color:#e5e7e5;font-size:7px;font-weight:950}.wo-duo button svg{color:#ffc400}.wo-four{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.wo-four button{height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#181b19,#0e100f);color:#aeb3af}.wo-four button span{font-size:6px;font-weight:950}.wo-four button.sel{border-color:#e0ad00;background:radial-gradient(circle at 50% 25%,rgba(255,196,0,.24),transparent 62%),linear-gradient(#2a2208,#171407);color:#ffc400}.wo-three{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.wo-three button{height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #3a3e3b;border-radius:6px;background:linear-gradient(#171a18,#0e100f);color:#b8bdb9;font-size:7px;font-weight:950}.priority button.sel{border-color:#e0ad00;background:linear-gradient(135deg,#2c2409,#171407);color:#ffc400}.priority .high svg{color:#ff7a18}.priority .critical svg,.condition .down svg{color:#f33}.condition button.sel{border-color:#5d8e25;background:linear-gradient(135deg,#17220d,#0e130a);color:#9ee548}.wo-assign{border-color:#3b3f3c}.wo-create{width:100%;height:51px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #ffd52d;border-radius:6px;background:linear-gradient(#ffd52e,#ffc20a 56%,#e8a800);color:#0b0c0b}.wo-create b{display:block;font-size:10px;font-weight:950}.wo-create small{display:block;margin-top:2px;font-size:6px;font-weight:900}
+.wo-work{padding-bottom:0}.wo-work .wo-lang{top:2px}.wo-work-identity{min-height:63px;display:flex;align-items:center;gap:9px;padding:3px 4px 7px;border-bottom:1px solid #292d2a}.wo-work-copy{min-width:0;flex:1}.wo-number-row{display:flex;align-items:center;gap:7px}.wo-number-row strong{font-size:19px;line-height:1;font-weight:950;letter-spacing:-.03em}.wo-number-row span{padding:4px 7px;border:1px solid #5d4a00;border-radius:4px;background:#171400;color:#ffc400;font-size:5.5px;font-weight:950}.wo-work-copy h3{margin:5px 0 0;font-size:8.5px}.wo-work-copy small{display:flex;gap:6px;margin-top:3px;color:#b8bcb9;font-size:6px}.wo-work-copy small i{color:#737874;font-style:normal}.wo-edit{width:24px;height:24px;display:grid;place-items:center;border:0;background:none;color:#a8adaa}.wo-tabs{height:31px;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #303432}.wo-tabs button{position:relative;border:0;background:none;color:#929793;font-size:6.5px;font-weight:950}.wo-tabs button.active{color:#ffc400}.wo-tabs button.active:after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:#ffc400}.wo-work-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:6px;margin-top:6px}.wo-work section{margin:0;padding:7px;border:1px solid #313633;border-radius:6px;background:linear-gradient(180deg,#121514,#0d0f0e)}.wo-work section label{margin:0 0 6px;font-size:6.5px}.wo-description-body{display:grid;grid-template-columns:1fr 58px;gap:6px}.wo-description-body p{min-height:65px;margin:0;padding:8px;border:1px solid #292d2a;border-radius:5px;background:#0d0f0e;color:#e1e3e1;font:700 7px/1.45 Arial,sans-serif}.wo-photo-preview{position:relative;display:grid;place-items:end;border:1px solid #514413;border-radius:5px;background:linear-gradient(140deg,#6b5718,#202720 55%,#0b0c0b);color:#ffc400;padding:5px}.wo-duo.compact{margin-top:7px}.wo-duo.compact button{height:31px}.wo-side-stack,.wo-right-stack{display:flex;flex-direction:column;gap:6px}.wo-person-card>div{display:flex;align-items:center;gap:7px}.wo-person-card>div>svg{color:#b4b8b5}.wo-person-card span{min-width:0;flex:1}.wo-person-card b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px}.wo-person-card small{display:block;margin-top:2px;color:#858a86;font-size:5.5px}.wo-person-card button{border:0;background:none;color:#a7aca8}.wo-middle-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:6px;margin-top:6px}.wo-six{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.wo-six button{height:34px;display:flex;align-items:center;justify-content:flex-start;gap:5px;padding:0 7px;border:1px solid #343936;border-radius:5px;background:linear-gradient(#151817,#0e100f);color:#dfe2df;font-size:6px;font-weight:900}.wo-six button:nth-child(1) svg{color:#9fd629}.wo-six button:nth-child(2) svg{color:#4aa9ff}.wo-six button:nth-child(3) svg{color:#c177dc}.wo-six button:nth-child(4) svg{color:#ffc400}.wo-six button:nth-child(5) svg{color:#40beb6}.wo-six button:nth-child(6) svg{color:#e8ae00}.wo-status-line{position:relative;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;margin:8px 5px 4px}.wo-status-line:before{content:"";position:absolute;left:8px;right:8px;top:50%;height:1px;background:#6d736f}.wo-status-line span{position:relative;justify-self:center;width:9px;height:9px;border:1px solid #8a908c;border-radius:50%;background:#111}.wo-status-line span.done,.wo-status-line span.active{border-color:#ffc400}.wo-status-line span.done:after,.wo-status-line span.active:after{content:"";position:absolute;inset:2px;border-radius:50%;background:#ffc400}.wo-status-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}.wo-status-labels b{text-align:center;color:#8d928e;font-size:4.4px;font-weight:900}.wo-status-labels b:nth-child(2){color:#ffc400}.wo-timer-card{text-align:center}.wo-timer-card label{text-align:left}.wo-timer-card>strong{display:block;color:#ffc400;font-size:14px;letter-spacing:.03em}.wo-timer-card>small{display:block;margin-top:2px;color:#9ca09d;font-size:5.5px}.wo-timer-card>button{width:100%;height:25px;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #7c241d;border-radius:4px;background:linear-gradient(#a8261c,#75170f);color:#fff;font-size:6px;font-weight:950}.wo-timer-card>div{margin-top:6px;color:#8f9490;font-size:4.7px}.wo-timer-card>div b{margin-left:6px;color:#d7dad8;font-size:5.6px}.wo-timer-card>div i{margin-left:6px;color:#555;font-style:normal}.wo-lower{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.wo-lower .head{display:flex;justify-content:space-between;align-items:center;color:#a3a8a4;font-size:6.5px;font-weight:950}.wo-lower .head button{border:0;background:none;color:#ffc400;font-size:5px;font-weight:950}.empty-note{height:47px;padding-top:7px;color:#727773;font-size:6px}.thumb-row{height:47px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.thumb-row i{display:block;border:1px solid #514413;border-radius:4px;background:linear-gradient(145deg,#765f18,#202820 58%,#0b0c0b)}.wide{width:100%;height:26px;border:1px solid #343936;border-radius:4px;background:#101211;color:#b7bbb8;font-size:6px;font-weight:900}.wo-bottom{display:grid;grid-template-columns:1fr 1.15fr;gap:6px;margin-top:7px}.wo-bottom button{height:34px}.wo-bottom .finish{border-color:#e5b000;background:linear-gradient(#ffd22a,#e9aa00);color:#111}.wo-audit{height:24px;display:flex;align-items:center;gap:6px;padding:0 4px;border-top:1px solid #292d2a;color:#777d79;font-size:5.5px}.wo-audit svg{margin-left:auto}
+`}</style>}
