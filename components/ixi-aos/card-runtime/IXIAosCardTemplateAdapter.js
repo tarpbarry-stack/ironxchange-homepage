@@ -4,6 +4,10 @@ import {
   createDefaultIXICardCapabilities
 } from "./IXICardDefinitionEngine";
 
+import {
+  getSystemCardPresentation
+} from "./system-presentations/IXISystemCardPresentationRegistry";
+
 
 function clean(
   value
@@ -133,18 +137,6 @@ function createFallbackFaceLayout(
 }
 
 
-/*
- * PRIMARY CARD CHROME
- * -------------------
- *
- * These are universal Card controls, not
- * Location/Employee/Job/etc. face logic.
- *
- * Every primary AOS Card gets the same
- * operational control seam. The Card's
- * capabilities decide what each control
- * actually exposes.
- */
 function withPrimaryCardControls({
   layout = [],
   template = {},
@@ -236,41 +228,27 @@ function withPrimaryCardControls({
 }
 
 
-/*
- * CARD TEMPLATE PRESENTATION CONTRACT
- * -----------------------------------
- *
- * Face layout belongs to the Card Template,
- * not to the console and not to object type logic.
- *
- * Supported forms:
- *
- * presentation: {
- *   faceLayouts: {
- *     1: [...],
- *     2: [...]
- *   }
- * }
- *
- * OR
- *
- * presentation: {
- *   faceLayouts: [
- *     { face: 1, layout: [...] },
- *     { face: 2, layout: [...] }
- *   ]
- * }
- *
- * The legacy faceOneLayout contract remains
- * supported for existing Card #001 work.
- */
+function getTemplatePresentation(
+  template = {}
+) {
+  return (
+    getSystemCardPresentation(
+      template?.templateSlug
+    ) ||
+    safeObject(
+      template?.presentation
+    )
+  );
+}
+
+
 function getTemplateFaceLayout({
   template = {},
   faceIndex = 1
 }) {
   const presentation =
-    safeObject(
-      template?.presentation
+    getTemplatePresentation(
+      template
     );
 
   const faceLayouts =
@@ -515,8 +493,7 @@ export function adaptAosCardTemplate({
 
       templateVersion:
         Number(
-          template?.version ||
-          1
+          template?.version || 1
         ),
 
       librarySection:
