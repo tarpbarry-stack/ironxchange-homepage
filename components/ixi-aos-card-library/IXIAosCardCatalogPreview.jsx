@@ -4,7 +4,7 @@ import {
 } from "react";
 
 import IXIAosObjectConsole
-  from "../ixi-aos/object-console/IXIAosObjectConsole";
+  from "../ixi-aos/console-runtime/IXIAosObjectConsole";
 
 import {
   adaptAosCardTemplate
