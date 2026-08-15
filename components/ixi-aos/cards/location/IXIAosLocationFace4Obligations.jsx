@@ -12,7 +12,11 @@ const SKINS = [
   { id: "v12", label: "V12" },
   { id: "steel", label: "STEEL" },
   { id: "blueprint", label: "BLUE" },
-  { id: "industrial", label: "INDUSTRIAL" }
+  { id: "industrial", label: "INDUSTRIAL" },
+  { id: "stock", label: "STOCK CERTIFICATE" },
+  { id: "bond", label: "BOND CERTIFICATE" },
+  { id: "modern-money", label: "MODERN MONEY" },
+  { id: "old-currency", label: "OLD CURRENCY" }
 ];
 
 const clean = value => String(value ?? "").trim();
@@ -54,189 +58,60 @@ function demoRows(mode) {
   }));
 }
 
-function Metric({ label, value, tone = "" }) {
-  return <div className={`f4-metric ${tone}`}><span>{label}</span><b>{value}</b></div>;
-}
+function Metric({ label, value, tone = "" }) { return <div className={`f4-metric ${tone}`}><span>{label}</span><b>{value}</b></div>; }
+function Section({ title, children, tone = "" }) { return <section className={`f4-section ${tone}`}><h3>{title}</h3>{children}</section>; }
+function Status({ value }) { const status = clean(value || "open").toLowerCase(); return <span className={`f4-status s-${status}`}>{status === "auto" ? "AUTO" : status.toUpperCase()}</span>; }
 
-function Section({ title, children, tone = "" }) {
-  return <section className={`f4-section ${tone}`}><h3>{title}</h3>{children}</section>;
-}
+export const LOCATION_FACE_4_OBLIGATIONS = Object.freeze({ faceNumber: 4, faceId: "location-f4-expenses-obligations", label: "EXPENSES & OBLIGATIONS", variants: ["owned", "leased"], financialSystem: "ixi-financial-v1", skinIds: SKINS.map(item => item.id), version: 12 });
 
-function Status({ value }) {
-  const status = clean(value || "open").toLowerCase();
-  return <span className={`f4-status s-${status}`}>{status === "auto" ? "AUTO" : status.toUpperCase()}</span>;
-}
-
-export const LOCATION_FACE_4_OBLIGATIONS = Object.freeze({
-  faceNumber: 4,
-  faceId: "location-f4-expenses-obligations",
-  label: "EXPENSES & OBLIGATIONS",
-  variants: ["owned", "leased"],
-  financialSystem: "ixi-financial-v1",
-  version: 12
-});
-
-export default function IXIAosLocationFace4Obligations({
-  object = {},
-  ixiState = {},
-  financialSnapshot = {},
-  demoMode = false,
-  onIxiStateChange = null,
-  onSaveObject = null,
-  onAddObject = null,
-  onHideObject = null,
-  onDeleteObject = null,
-  onOpenConsole = null,
-  onFinancialRefresh = null,
-  skinId = "v12",
-  onSkinChange = null,
-  ...rail
-}) {
+export default function IXIAosLocationFace4Obligations({ object = {}, ixiState = {}, financialSnapshot = {}, demoMode = false, onIxiStateChange = null, onSaveObject = null, onAddObject = null, onHideObject = null, onDeleteObject = null, onOpenConsole = null, onFinancialRefresh = null, skinId = "v12", onSkinChange = null, ...rail }) {
   const objectId = clean(object.objectId || object.id);
   const ownershipMode = clean(object?.fields?.ownershipStatus).toLowerCase() === "leased" ? "leased" : "owned";
-  const savedObligations = Array.isArray(ixiState.face4Obligations)
-    ? ixiState.face4Obligations
-    : Array.isArray(object?.fields?.financialObligations)
-      ? object.fields.financialObligations
-      : demoMode ? demoRows(ownershipMode) : [];
-
+  const savedObligations = Array.isArray(ixiState.face4Obligations) ? ixiState.face4Obligations : Array.isArray(object?.fields?.financialObligations) ? object.fields.financialObligations : demoMode ? demoRows(ownershipMode) : [];
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(savedObligations);
   const [busyId, setBusyId] = useState("");
   const [message, setMessage] = useState("");
   const skin = clean(ixiState.face4Skin || skinId || "v12");
-
   const runtimeObject = useMemo(() => ({ ...object, fields: { ...(object.fields || {}), financialObligations: editing ? draft : savedObligations } }), [object, editing, draft, savedObligations]);
   const view = useMemo(() => createIXILocationFinancialViewModel({ object: runtimeObject, financialSnapshot }), [runtimeObject, financialSnapshot]);
 
-  function changeSkin(nextSkin) {
-    onIxiStateChange?.(objectId, { face4Skin: nextSkin });
-    onSkinChange?.(nextSkin, object);
-  }
-
-  function beginEdit() {
-    setDraft(savedObligations.map(item => ({ ...item })));
-    setEditing(true);
-  }
-
-  function cancelEdit() {
-    setDraft(savedObligations.map(item => ({ ...item })));
-    setEditing(false);
-  }
-
-  async function saveEdit() {
-    const next = draft.map(item => ({ ...item }));
-    onIxiStateChange?.(objectId, { face4Obligations: next });
-    await onSaveObject?.({
-      objectId,
-      object: { ...object, fields: { ...(object.fields || {}), financialObligations: next } },
-      fields: { financialObligations: next },
-      face: 4
-    });
-    setEditing(false);
-  }
-
-  function patch(index, key, value) {
-    setDraft(current => current.map((item, i) => i === index ? { ...item, [key]: value } : item));
-  }
-
+  function changeSkin(nextSkin) { onIxiStateChange?.(objectId, { face4Skin: nextSkin }); onSkinChange?.(nextSkin, object); }
+  function beginEdit() { setDraft(savedObligations.map(item => ({ ...item }))); setEditing(true); }
+  function cancelEdit() { setDraft(savedObligations.map(item => ({ ...item }))); setEditing(false); }
+  async function saveEdit() { const next = draft.map(item => ({ ...item })); onIxiStateChange?.(objectId, { face4Obligations: next }); await onSaveObject?.({ objectId, object: { ...object, fields: { ...(object.fields || {}), financialObligations: next } }, fields: { financialObligations: next }, face: 4 }); setEditing(false); }
+  function patch(index, key, value) { setDraft(current => current.map((item, i) => i === index ? { ...item, [key]: value } : item)); }
   async function runFinancialAction(kind, obligation) {
-    if (!view.passportId) {
-      setMessage("PASSPORT REQUIRED FOR FINANCIAL POSTING");
-      return;
-    }
-    const id = clean(obligation.obligationId);
-    setBusyId(`${kind}:${id}`);
-    setMessage("");
+    if (!view.passportId) { setMessage("PASSPORT REQUIRED FOR FINANCIAL POSTING"); return; }
+    const id = clean(obligation.obligationId); setBusyId(`${kind}:${id}`); setMessage("");
     try {
-      const result = kind === "pay"
-        ? await recordIXILocationObligationPayment({ object, obligation })
-        : await postIXILocationObligationBill({ object, obligation });
-      setMessage(kind === "pay" ? "PAYMENT RECORDED" : "BILL POSTED");
-      onFinancialRefresh?.(result);
-    } catch (error) {
-      setMessage(clean(error?.message) || "FINANCIAL COMMAND FAILED");
-    } finally {
-      setBusyId("");
-    }
+      const result = kind === "pay" ? await recordIXILocationObligationPayment({ object, obligation }) : await postIXILocationObligationBill({ object, obligation });
+      setMessage(kind === "pay" ? "PAYMENT RECORDED" : "BILL POSTED"); onFinancialRefresh?.(result);
+    } catch (error) { setMessage(clean(error?.message) || "FINANCIAL COMMAND FAILED"); } finally { setBusyId(""); }
   }
 
   const next = view.nextObligation;
   const leaseTone = ownershipMode === "leased" ? "lease" : "owned";
   const obligationsTitle = ownershipMode === "leased" ? "LEASE OBLIGATIONS" : "PROPERTY OBLIGATIONS";
-  const serviceRows = ownershipMode === "leased"
-    ? [
-        ["RENT ESCALATION (3.0%)", "MAR 12, 2027"],
-        ["RENEWAL NOTICE (180 DAYS)", "NOV 11, 2027"],
-        ["LEASE EXPIRATION", "MAR 11, 2028"],
-        ["OPTION PERIOD (1 × 5 YRS)", "MAR 12, 2028"],
-        ["INSURANCE CERT RENEWAL", "JAN 01, 2027"]
-      ]
-    : [
-        ["HVAC CONTRACT", "$1,250 / QTR"],
-        ["LANDSCAPING", "$850 / MO"],
-        ["PEST CONTROL", "$180 / MO"],
-        ["FIRE INSPECTION", "$650 / YR"],
-        ["GATE MAINTENANCE", "$300 / MO"]
-      ];
-
-  const responsibilityRows = [
-    ["PROPERTY TAX", "TENANT"], ["INSURANCE", "TENANT"], ["CAM / OPEX", "TENANT"], ["UTILITIES", "TENANT"], ["REPAIRS & MAINTENANCE", "TENANT"], ["STRUCTURE / ROOF", "LANDLORD"]
-  ];
+  const serviceRows = ownershipMode === "leased" ? [["RENT ESCALATION (3.0%)", "MAR 12, 2027"],["RENEWAL NOTICE (180 DAYS)", "NOV 11, 2027"],["LEASE EXPIRATION", "MAR 11, 2028"],["OPTION PERIOD (1 × 5 YRS)", "MAR 12, 2028"],["INSURANCE CERT RENEWAL", "JAN 01, 2027"]] : [["HVAC CONTRACT", "$1,250 / QTR"],["LANDSCAPING", "$850 / MO"],["PEST CONTROL", "$180 / MO"],["FIRE INSPECTION", "$650 / YR"],["GATE MAINTENANCE", "$300 / MO"]];
+  const responsibilityRows = [["PROPERTY TAX", "TENANT"],["INSURANCE", "TENANT"],["CAM / OPEX", "TENANT"],["UTILITIES", "TENANT"],["REPAIRS & MAINTENANCE", "TENANT"],["STRUCTURE / ROOF", "LANDLORD"]];
 
   return <div className={`f4-obligations skin-${skin} ${leaseTone}`}>
-    <header className="f4-header">
-      <div className="f4-ident"><span>LOCATIONS &amp; FACILITIES</span><b>{clean(object.displayName) || "YARD NAME"}</b></div>
-      {editing ? <div className="f4-save"><button onClick={saveEdit}>SAVE</button><button onClick={cancelEdit}>CANCEL</button></div> : <IXIAosCardHeaderControls canAdd canEdit onAdd={onAddObject} onToggleEdit={beginEdit} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={onOpenConsole} skinId={skin} skinOptions={SKINS} onSkinChange={changeSkin}/>} 
-    </header>
-
+    <div className="f4-paper-ornament" aria-hidden="true" />
+    <header className="f4-header"><div className="f4-ident"><span>LOCATIONS &amp; FACILITIES</span><b>{clean(object.displayName) || "YARD NAME"}</b></div>{editing ? <div className="f4-save"><button onClick={saveEdit}>SAVE</button><button onClick={cancelEdit}>CANCEL</button></div> : <IXIAosCardHeaderControls canAdd canEdit onAdd={onAddObject} onToggleEdit={beginEdit} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={onOpenConsole} skinId={skin} skinOptions={SKINS} onSkinChange={changeSkin}/>}</header>
     <main className="f4-scroll">
       <div className="f4-banner">F4 · EXPENSES &amp; OBLIGATIONS ({ownershipMode.toUpperCase()})</div>
-      <div className="f4-control">
-        <div className="f4-next"><span>NEXT OBLIGATION</span><strong>{next?.label || "NO OPEN OBLIGATION"}</strong><b>{next ? money(next.amount) : "—"}</b><small>{next ? `DUE ${dateLabel(next.nextDue)}` : "NO DUE DATE"}</small>{next ? <Status value={next.status}/> : null}</div>
-        <Metric label="DUE 30 DAYS" value={money(view.due30Days)} />
-        <Metric label="OVERDUE" value={money(view.overdue)} tone="danger" />
-        <Metric label="YTD PAID" value={money(view.ytdPaid)} />
-      </div>
-
-      <Section title={obligationsTitle} tone={leaseTone}>
-        <div className="f4-table-head"><span>OBLIGATION</span><span>AMOUNT</span><span>FREQ</span><span>NEXT DUE</span><span>STATUS</span><span>YTD PAID</span></div>
-        <div className="f4-table">
-          {view.obligations.map((item, index) => <div className="f4-row" key={item.obligationId || index}>
-            {editing ? <input value={item.label} onChange={e=>patch(index,"label",e.target.value)}/> : <strong>{item.label}</strong>}
-            {editing ? <input type="number" value={item.amount} onChange={e=>patch(index,"amount",e.target.value)}/> : <b>{money(item.amount)}</b>}
-            {editing ? <select value={item.frequency} onChange={e=>patch(index,"frequency",e.target.value)}><option>monthly</option><option>quarterly</option><option>yearly</option><option>one-time</option></select> : <span>{item.frequency.toUpperCase()}</span>}
-            {editing ? <input type="date" value={item.nextDue?.slice(0,10)||""} onChange={e=>patch(index,"nextDue",e.target.value)}/> : <span>{dateLabel(item.nextDue)}</span>}
-            {editing ? <select value={item.status} onChange={e=>patch(index,"status",e.target.value)}><option>open</option><option>scheduled</option><option>auto</option><option>active</option><option>paid</option><option>overdue</option></select> : <Status value={item.status}/>} 
-            <b>{money(item.ytdPaid)}</b>
-            {!editing ? <div className="f4-row-actions"><button disabled={!!busyId} onClick={()=>runFinancialAction("bill",item)}>{busyId===`bill:${item.obligationId}`?"…":"BILL"}</button><button disabled={!!busyId} onClick={()=>runFinancialAction("pay",item)}>{busyId===`pay:${item.obligationId}`?"…":"PAY"}</button></div> : null}
-          </div>)}
-        </div>
-      </Section>
-
-      <div className="f4-two">
-        <Section title={ownershipMode === "leased" ? "LEASE DEADLINES & EVENTS" : "UPCOMING (NEXT 60 DAYS)"} tone={leaseTone}>
-          <div className="f4-list">{ownershipMode === "leased" ? serviceRows.map(([a,b])=><div key={a}><span>{a}</span><b>{b}</b></div>) : view.obligations.filter(x=>x.nextDue).slice().sort((a,b)=>new Date(a.nextDue)-new Date(b.nextDue)).slice(0,5).map(x=><div key={x.obligationId}><span>{dateLabel(x.nextDue).replace(/, 2026$/,'')} · {x.label}</span><b>{money(x.amount)}</b></div>)}</div>
-          <button className="f4-wide-action">{ownershipMode === "leased" ? "VIEW LEASE CALENDAR" : "VIEW FULL CALENDAR"}<span>›</span></button>
-        </Section>
-        <Section title={ownershipMode === "leased" ? "TENANT RESPONSIBILITIES" : "SERVICE CONTRACTS"} tone={leaseTone}>
-          <div className="f4-list">{(ownershipMode === "leased" ? responsibilityRows : serviceRows).map(([a,b])=><div key={a}><span>{a}</span><b>{b}</b></div>)}</div>
-          <button className="f4-wide-action">{ownershipMode === "leased" ? "VIEW RESPONSIBILITY MATRIX" : "MANAGE CONTRACTS"}<span>›</span></button>
-        </Section>
-      </div>
-
-      <Section title="RELATIONSHIPS & INFRASTRUCTURE" tone={leaseTone}>
-        <div className="f4-relations">{(ownershipMode === "leased" ? ["LEASE AGREEMENT","LANDLORD / LESSOR","PROPERTY MANAGER","INSURANCE POLICY","UTILITY ACCOUNTS","SERVICE CONTRACTS"] : ["PROPERTY TAX ACCOUNT","INSURANCE POLICY","LOAN / MORTGAGE","UTILITY ACCOUNTS","SERVICE CONTRACTS","VENDORS / PAYEES"]).map(label=><button key={label}>{label}<b>›</b></button>)}</div>
-      </Section>
-
-      <Section title="NOTES" tone={leaseTone}><div className="f4-notes">{ownershipMode === "leased" ? "Triple Net lease. Tenant responsibility is stored by obligation; lease language remains authoritative." : "Recurring property obligations are schedules. Bills and payments post into IXI Financial and are attributed to this Location Passport."}</div></Section>
-      {message ? <div className="f4-message">{message}</div> : null}
+      <div className="f4-control"><div className="f4-next"><span>NEXT OBLIGATION</span><strong>{next?.label || "NO OPEN OBLIGATION"}</strong><b>{next ? money(next.amount) : "—"}</b><small>{next ? `DUE ${dateLabel(next.nextDue)}` : "NO DUE DATE"}</small>{next ? <Status value={next.status}/> : null}</div><Metric label="DUE 30 DAYS" value={money(view.due30Days)} /><Metric label="OVERDUE" value={money(view.overdue)} tone="danger" /><Metric label="YTD PAID" value={money(view.ytdPaid)} /></div>
+      <Section title={obligationsTitle} tone={leaseTone}><div className="f4-table-head"><span>OBLIGATION</span><span>AMOUNT</span><span>FREQ</span><span>NEXT DUE</span><span>STATUS</span><span>YTD PAID</span></div><div className="f4-table">{view.obligations.map((item, index) => <div className="f4-row" key={item.obligationId || index}>{editing ? <input value={item.label} onChange={e=>patch(index,"label",e.target.value)}/> : <strong>{item.label}</strong>}{editing ? <input type="number" value={item.amount} onChange={e=>patch(index,"amount",e.target.value)}/> : <b>{money(item.amount)}</b>}{editing ? <select value={item.frequency} onChange={e=>patch(index,"frequency",e.target.value)}><option>monthly</option><option>quarterly</option><option>yearly</option><option>one-time</option></select> : <span>{item.frequency.toUpperCase()}</span>}{editing ? <input type="date" value={item.nextDue?.slice(0,10)||""} onChange={e=>patch(index,"nextDue",e.target.value)}/> : <span>{dateLabel(item.nextDue)}</span>}{editing ? <select value={item.status} onChange={e=>patch(index,"status",e.target.value)}><option>open</option><option>scheduled</option><option>auto</option><option>active</option><option>paid</option><option>overdue</option></select> : <Status value={item.status}/>}<b>{money(item.ytdPaid)}</b>{!editing ? <div className="f4-row-actions"><button disabled={!!busyId} onClick={()=>runFinancialAction("bill",item)}>{busyId===`bill:${item.obligationId}`?"…":"BILL"}</button><button disabled={!!busyId} onClick={()=>runFinancialAction("pay",item)}>{busyId===`pay:${item.obligationId}`?"…":"PAY"}</button></div> : null}</div>)}</div></Section>
+      <div className="f4-two"><Section title={ownershipMode === "leased" ? "LEASE DEADLINES & EVENTS" : "UPCOMING (NEXT 60 DAYS)"} tone={leaseTone}><div className="f4-list">{ownershipMode === "leased" ? serviceRows.map(([a,b])=><div key={a}><span>{a}</span><b>{b}</b></div>) : view.obligations.filter(x=>x.nextDue).slice().sort((a,b)=>new Date(a.nextDue)-new Date(b.nextDue)).slice(0,5).map(x=><div key={x.obligationId}><span>{dateLabel(x.nextDue).replace(/, 2026$/,'')} · {x.label}</span><b>{money(x.amount)}</b></div>)}</div><button className="f4-wide-action">{ownershipMode === "leased" ? "VIEW LEASE CALENDAR" : "VIEW FULL CALENDAR"}<span>›</span></button></Section><Section title={ownershipMode === "leased" ? "TENANT RESPONSIBILITIES" : "SERVICE CONTRACTS"} tone={leaseTone}><div className="f4-list">{(ownershipMode === "leased" ? responsibilityRows : serviceRows).map(([a,b])=><div key={a}><span>{a}</span><b>{b}</b></div>)}</div><button className="f4-wide-action">{ownershipMode === "leased" ? "VIEW RESPONSIBILITY MATRIX" : "MANAGE CONTRACTS"}<span>›</span></button></Section></div>
+      <Section title="RELATIONSHIPS & INFRASTRUCTURE" tone={leaseTone}><div className="f4-relations">{(ownershipMode === "leased" ? ["LEASE AGREEMENT","LANDLORD / LESSOR","PROPERTY MANAGER","INSURANCE POLICY","UTILITY ACCOUNTS","SERVICE CONTRACTS"] : ["PROPERTY TAX ACCOUNT","INSURANCE POLICY","LOAN / MORTGAGE","UTILITY ACCOUNTS","SERVICE CONTRACTS","VENDORS / PAYEES"]).map(label=><button key={label}>{label}<b>›</b></button>)}</div></Section>
+      <Section title="NOTES" tone={leaseTone}><div className="f4-notes">{ownershipMode === "leased" ? "Triple Net lease. Tenant responsibility is stored by obligation; lease language remains authoritative." : "Recurring property obligations are schedules. Bills and payments post into IXI Financial and are attributed to this Location Passport."}</div></Section>{message ? <div className="f4-message">{message}</div> : null}
     </main>
-
     <IXIMachineRail listing={object} saved={false} boardColor="none" boardOutline={1} machineFace={4} {...rail}/>
-
     <style jsx global>{`
-      .f4-obligations,.f4-obligations *{box-sizing:border-box}.f4-obligations{--bg:#0c0e0e;--panel:#111414;--line:#292d2c;--muted:#8d9490;--text:#f0f1ef;--accent:#ffc400;--good:#87cf15;--bad:#ff3c2e;position:relative;width:298px;height:471px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;box-shadow:0 16px 32px rgba(0,0,0,.42)}.f4-obligations.lease{--accent:#b875ff}.f4-obligations.skin-steel{--bg:#111416;--panel:#191c1e;--line:#3b4245;--accent:#d9dde0}.f4-obligations.skin-blueprint{--bg:#071119;--panel:#0b1a24;--line:#17435b;--accent:#54c7ff}.f4-obligations.skin-industrial{--bg:#171108;--panel:#21190d;--line:#594321;--accent:#ffc400}.f4-obligations.skin-blueprint.lease{--accent:#9b79ff}.f4-obligations .f4-header{position:absolute;top:0;left:0;right:0;height:43px;padding:7px 10px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;z-index:6}.f4-ident span{display:block;color:#ffc400;font-size:6px;font-weight:950;letter-spacing:.04em}.f4-ident b{display:block;margin-top:4px;font-size:15px;line-height:1}.f4-save{display:flex;gap:4px}.f4-save button{height:23px;border:1px solid var(--line);border-radius:4px;background:#090a0a;color:var(--accent);font-size:6px;font-weight:950}.f4-scroll{position:absolute;top:43px;bottom:19px;left:0;right:0;overflow-y:auto;overflow-x:hidden;padding:5px 6px 10px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}.f4-scroll::-webkit-scrollbar{width:3px}.f4-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}.f4-banner{height:18px;display:flex;align-items:center;justify-content:center;margin-bottom:5px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:4px;background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent);font-size:6px;font-weight:950}.f4-control{display:grid;grid-template-columns:2.4fr repeat(3,.8fr);gap:3px;margin-bottom:5px}.f4-next,.f4-metric{min-width:0;height:57px;border:1px solid var(--line);border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent);padding:5px}.f4-next{position:relative}.f4-next>span{display:block;color:var(--accent);font-size:5.5px;font-weight:950}.f4-next strong{display:block;margin-top:4px;max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px}.f4-next>b{display:block;margin-top:2px;color:var(--good);font-size:13px}.lease .f4-next>b{color:var(--accent)}.f4-next small{position:absolute;right:5px;top:20px;color:var(--text);font-size:5px;font-weight:900}.f4-next .f4-status{position:absolute;right:5px;bottom:5px}.f4-metric{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.f4-metric span{font-size:5px;color:var(--muted);font-weight:900}.f4-metric b{margin-top:5px;font-size:10px}.f4-metric.danger b{color:var(--bad)}.f4-section{margin-bottom:5px;border:1px solid var(--line);border-radius:5px;background:var(--panel);overflow:hidden}.f4-section h3{height:19px;margin:0;padding:5px 6px;border-bottom:1px solid var(--line);color:var(--accent);font-size:6px;font-weight:950;letter-spacing:.035em}.f4-table-head,.f4-row{display:grid;grid-template-columns:1.55fr .65fr .55fr .75fr .55fr .65fr;align-items:center;gap:2px}.f4-table-head{height:18px;padding:0 5px;color:var(--muted);font-size:4.5px;font-weight:900}.f4-row{position:relative;min-height:28px;padding:3px 5px;border-top:1px solid rgba(255,255,255,.035);font-size:5.3px}.f4-row>strong,.f4-row>b,.f4-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.f4-row>strong{font-size:5.7px}.f4-row>input,.f4-row>select{width:100%;min-width:0;height:18px;border:1px solid var(--line);background:#080909;color:var(--text);font-size:5px}.f4-status{display:inline-flex;width:max-content;max-width:100%;padding:2px 4px;border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);border-radius:3px;color:var(--accent);font-size:4.6px;font-weight:950}.f4-status.s-paid,.f4-status.s-active,.f4-status.s-auto{color:var(--good);border-color:rgba(135,207,21,.35)}.lease .f4-status.s-auto{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}.f4-status.s-overdue{color:var(--bad);border-color:rgba(255,60,46,.35)}.f4-row-actions{position:absolute;right:4px;bottom:2px;display:none;gap:2px}.f4-row:hover .f4-row-actions{display:flex}.f4-row-actions button{height:13px;padding:0 4px;border:1px solid var(--line);border-radius:2px;background:#070808;color:var(--accent);font-size:4px;font-weight:950}.f4-two{display:grid;grid-template-columns:1fr 1fr;gap:4px}.f4-list{padding:4px 6px}.f4-list>div{min-height:21px;display:flex;align-items:center;justify-content:space-between;gap:4px;border-bottom:1px solid rgba(255,255,255,.035);font-size:5.2px}.f4-list>div span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.f4-list>div b{white-space:nowrap}.f4-wide-action{width:calc(100% - 8px);height:22px;margin:0 4px 4px;border:1px solid var(--line);border-radius:3px;background:#0a0b0b;color:var(--text);font-size:5px;font-weight:950}.f4-wide-action span{float:right;color:var(--accent);font-size:10px}.f4-relations{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:4px}.f4-relations button{min-width:0;height:37px;padding:4px;border:1px solid var(--line);border-radius:3px;background:#0b0c0c;color:var(--text);font-size:4.5px;font-weight:900;text-align:left}.f4-relations button b{float:right;color:var(--accent);font-size:9px}.f4-notes{padding:7px;font-size:5.4px;line-height:1.35;color:var(--muted)}.f4-message{margin:5px 0;padding:6px;border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px;color:var(--accent);font-size:5px;font-weight:950;text-align:center}
+      .f4-obligations,.f4-obligations *{box-sizing:border-box}.f4-obligations{--bg:#0c0e0e;--panel:#111414;--line:#292d2c;--muted:#8d9490;--text:#f0f1ef;--accent:#ffc400;--good:#87cf15;--bad:#ff3c2e;position:relative;width:298px;height:471px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;box-shadow:0 16px 32px rgba(0,0,0,.42)}.f4-obligations.lease{--accent:#b875ff}.f4-paper-ornament{display:none;position:absolute;inset:0;pointer-events:none;z-index:0}.f4-obligations.skin-steel{--bg:#111416;--panel:#191c1e;--line:#3b4245;--accent:#d9dde0}.f4-obligations.skin-blueprint{--bg:#071119;--panel:#0b1a24;--line:#17435b;--accent:#54c7ff}.f4-obligations.skin-industrial{--bg:#171108;--panel:#21190d;--line:#594321;--accent:#ffc400}.f4-obligations.skin-blueprint.lease{--accent:#9b79ff}
+      .f4-obligations.skin-stock,.f4-obligations.skin-bond,.f4-obligations.skin-modern-money,.f4-obligations.skin-old-currency{font-family:Georgia,"Times New Roman",serif;border-radius:8px}.f4-obligations.skin-stock{--bg:#ecebdc;--panel:#f4f1df;--line:#70806f;--muted:#5d695e;--text:#173d25;--accent:#285c35;--good:#2f6c35;--bad:#a83a2f;background:radial-gradient(circle at 18% 0%,rgba(255,255,255,.75),transparent 34%),linear-gradient(180deg,#f4f3df,#e9ecd7 52%,#dde5cb)}.f4-obligations.skin-bond{--bg:#edf0ea;--panel:#f6f6ec;--line:#7289a3;--muted:#5d6f83;--text:#173b6e;--accent:#24568b;--good:#2f6c35;--bad:#9b2d2d;background:radial-gradient(circle at 80% 5%,rgba(255,255,255,.78),transparent 32%),linear-gradient(180deg,#f4f5ec,#e8eeee 55%,#dce6e8)}.f4-obligations.skin-modern-money{--bg:#f0efe1;--panel:#f7f5e9;--line:#9aaa8e;--muted:#667361;--text:#223a22;--accent:#4b783f;--good:#3e762f;--bad:#a72f34;background:radial-gradient(circle at 50% 16%,rgba(255,255,255,.88),transparent 34%),linear-gradient(180deg,#f7f5e8,#edf1dd 60%,#e1e7d2)}.f4-obligations.skin-old-currency{--bg:#d8c08a;--panel:#d9c28f;--line:#7b6237;--muted:#6a5635;--text:#4c3515;--accent:#655023;--good:#4d6426;--bad:#8f2f24;background:radial-gradient(circle at 18% 10%,rgba(255,246,202,.35),transparent 24%),radial-gradient(circle at 90% 70%,rgba(104,67,20,.12),transparent 38%),linear-gradient(180deg,#dfc997,#d1b779 55%,#c3a667)}.f4-obligations.skin-stock .f4-paper-ornament,.f4-obligations.skin-bond .f4-paper-ornament,.f4-obligations.skin-modern-money .f4-paper-ornament,.f4-obligations.skin-old-currency .f4-paper-ornament{display:block;background-image:repeating-radial-gradient(ellipse at 10% 10%,transparent 0 6px,color-mix(in srgb,var(--line) 28%,transparent) 6.5px 7px,transparent 7.5px 13px),repeating-radial-gradient(ellipse at 90% 90%,transparent 0 7px,color-mix(in srgb,var(--line) 24%,transparent) 7.5px 8px,transparent 8.5px 14px),repeating-linear-gradient(45deg,transparent 0 8px,color-mix(in srgb,var(--line) 18%,transparent) 8.5px 9px,transparent 9.5px 17px);opacity:.24}.f4-obligations.skin-old-currency .f4-paper-ornament{opacity:.4;filter:sepia(.5)}.f4-obligations.skin-modern-money .f4-paper-ornament{opacity:.11}.f4-obligations.skin-stock::before,.f4-obligations.skin-bond::before,.f4-obligations.skin-modern-money::before,.f4-obligations.skin-old-currency::before{content:"";position:absolute;inset:3px;border:1px double var(--line);border-radius:6px;pointer-events:none;z-index:1}
+      .f4-obligations .f4-header{position:absolute;top:0;left:0;right:0;height:43px;padding:7px 10px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;z-index:6;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}.f4-obligations.skin-stock .f4-header,.f4-obligations.skin-bond .f4-header,.f4-obligations.skin-modern-money .f4-header,.f4-obligations.skin-old-currency .f4-header{background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.08))}.f4-ident span{display:block;color:var(--accent);font-size:6px;font-weight:950;letter-spacing:.04em}.f4-ident b{display:block;margin-top:4px;font-size:15px;line-height:1}.f4-save{display:flex;gap:4px}.f4-save button{height:23px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 88%,#000);color:var(--accent);font-size:6px;font-weight:950}.f4-scroll{position:absolute;top:43px;bottom:19px;left:0;right:0;overflow-y:auto;overflow-x:hidden;padding:5px 6px 10px;z-index:2;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--line) 55%,transparent) transparent}.f4-scroll::-webkit-scrollbar{width:3px}.f4-scroll::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--line) 55%,transparent);border-radius:99px}.f4-banner{height:18px;display:flex;align-items:center;justify-content:center;margin-bottom:5px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:4px;background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent);font-size:6px;font-weight:950}.skin-stock .f4-banner,.skin-bond .f4-banner,.skin-modern-money .f4-banner,.skin-old-currency .f4-banner{background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#000));color:#f6f1dc;clip-path:polygon(3% 0,97% 0,100% 50%,97% 100%,3% 100%,0 50%)}.f4-control{display:grid;grid-template-columns:2.4fr repeat(3,.8fr);gap:3px;margin-bottom:5px}.f4-next,.f4-metric{min-width:0;height:57px;border:1px solid var(--line);border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02));padding:5px}.f4-next{position:relative}.f4-next>span{display:block;color:var(--accent);font-size:5.5px;font-weight:950}.f4-next strong{display:block;margin-top:4px;max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px}.f4-next>b{display:block;margin-top:2px;color:var(--good);font-size:13px}.lease .f4-next>b{color:var(--accent)}.f4-next small{position:absolute;right:5px;top:20px;color:var(--text);font-size:5px;font-weight:900}.f4-next .f4-status{position:absolute;right:5px;bottom:5px}.f4-metric{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.f4-metric span{font-size:5px;color:var(--muted);font-weight:900}.f4-metric b{margin-top:5px;font-size:10px}.f4-metric.danger b{color:var(--bad)}.f4-section{margin-bottom:5px;border:1px solid var(--line);border-radius:5px;background:var(--panel);overflow:hidden}.f4-section h3{height:19px;margin:0;padding:5px 6px;border-bottom:1px solid var(--line);color:var(--accent);font-size:6px;font-weight:950;letter-spacing:.035em}.skin-stock .f4-section h3,.skin-bond .f4-section h3,.skin-modern-money .f4-section h3,.skin-old-currency .f4-section h3{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 14%,transparent),rgba(255,255,255,.08))}.f4-table-head,.f4-row{display:grid;grid-template-columns:1.55fr .65fr .55fr .75fr .55fr .65fr;align-items:center;gap:2px}.f4-table-head{height:18px;padding:0 5px;color:var(--muted);font-size:4.5px;font-weight:900}.f4-row{position:relative;min-height:28px;padding:3px 5px;border-top:1px solid color-mix(in srgb,var(--line) 38%,transparent);font-size:5.3px}.f4-row>strong,.f4-row>b,.f4-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.f4-row>strong{font-size:5.7px}.f4-row>input,.f4-row>select{width:100%;min-width:0;height:18px;border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 86%,#fff);color:var(--text);font-size:5px}.f4-status{display:inline-flex;width:max-content;max-width:100%;padding:2px 4px;border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);border-radius:3px;color:var(--accent);font-size:4.6px;font-weight:950}.f4-status.s-paid,.f4-status.s-active,.f4-status.s-auto{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent)}.lease .f4-status.s-auto{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}.f4-status.s-overdue{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}.f4-row-actions{position:absolute;right:4px;bottom:2px;display:none;gap:2px}.f4-row:hover .f4-row-actions{display:flex}.f4-row-actions button{height:13px;padding:0 4px;border:1px solid var(--line);border-radius:2px;background:color-mix(in srgb,var(--bg) 88%,#000);color:var(--accent);font-size:4px;font-weight:950}.f4-two{display:grid;grid-template-columns:1fr 1fr;gap:4px}.f4-list{padding:4px 6px}.f4-list>div{min-height:21px;display:flex;align-items:center;justify-content:space-between;gap:4px;border-bottom:1px solid color-mix(in srgb,var(--line) 35%,transparent);font-size:5.2px}.f4-list>div span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.f4-list>div b{white-space:nowrap}.f4-wide-action{width:calc(100% - 8px);height:22px;margin:0 4px 4px;border:1px solid var(--line);border-radius:3px;background:color-mix(in srgb,var(--bg) 88%,#000);color:var(--text);font-size:5px;font-weight:950}.f4-wide-action span{float:right;color:var(--accent);font-size:10px}.f4-relations{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:4px}.f4-relations button{min-width:0;height:37px;padding:4px;border:1px solid var(--line);border-radius:3px;background:color-mix(in srgb,var(--panel) 92%,#000);color:var(--text);font-size:4.5px;font-weight:900;text-align:left}.f4-relations button b{float:right;color:var(--accent);font-size:9px}.f4-notes{padding:7px;font-size:5.4px;line-height:1.35;color:var(--muted)}.f4-message{margin:5px 0;padding:6px;border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px;color:var(--accent);font-size:5px;font-weight:950;text-align:center}
     `}</style>
   </div>;
 }
