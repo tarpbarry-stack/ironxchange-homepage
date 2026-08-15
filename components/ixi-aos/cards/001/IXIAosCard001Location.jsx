@@ -396,18 +396,22 @@ export default function IXIAosCard001Location({
         .preview-info-strip strong{min-width:0;overflow:hidden;padding:0 7px;color:rgba(255,255,255,.86);font-size:7.5px;font-weight:950;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
         .preview-position{color:rgba(255,255,255,.30);font-size:6.5px;font-weight:900;text-align:center}
         .preview-out{height:100%;padding:0;border:0;border-left:1px solid rgba(255,255,255,.045);background:transparent;color:#ffc400;font-size:7px;font-weight:950;cursor:pointer}.preview-out:disabled{color:rgba(255,255,255,.18);cursor:default}
-        .address{flex:none;width:258px;margin:-2px auto 0;text-align:center}
-        .facts{flex:none;width:258px;margin:-4px auto 0}
+        .address{flex:none;width:258px;margin:-3px auto 0;text-align:center}
+        .facts{flex:none;width:218px;margin:-4px auto 0}
         .metrics{flex:none;width:258px;margin:-4px auto 0}
         .relationships{flex:1;min-height:0;margin:-4px 6px 0;overflow:hidden}
         :global(.card001 .address .ixi-aos-inline-address){justify-content:center!important;text-align:center!important}
         :global(.card001 .address .ixi-aos-inline-address strong){width:100%!important;text-align:center!important}
-        :global(.card001 .facts .ixi-aos-editable-field-group){width:258px!important;grid-template-columns:minmax(0,1fr) 92px!important;gap:7px!important}
+        :global(.card001 .facts .ixi-aos-editable-field-group){width:218px!important;grid-template-columns:1fr 1fr!important;gap:0!important;justify-content:center!important}
+        :global(.card001 .facts .ixi-aos-editable-field){align-items:center!important;text-align:center!important}
+        :global(.card001 .facts .ixi-aos-editable-field > span){width:100%!important;text-align:center!important}
+        :global(.card001 .facts .ixi-aos-editable-field > strong){width:100%!important;text-align:center!important}
         :global(.card001 .metrics .ixi-aos-inline-metric-strip){width:258px!important;margin:0 auto!important}
+        :global(.card001 .metrics .ixi-aos-inline-metrics){justify-content:center!important;width:100%!important}
         :global(.card001 .relationships .ixi-aos-relationship-panel){height:100%!important;min-height:0!important}
         .edit-actions{position:absolute;right:7px;top:2px;display:flex;gap:4px;z-index:10}.edit-actions button{height:20px;padding:0 7px;border:1px solid rgba(255,196,0,.22);border-radius:4px;background:#0a0a0a;color:#ffc400;font-size:6px;font-weight:950}
-        .actions{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;height:${ACTIONS_HEIGHT}px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.055);background:#090909;z-index:20}
-        .actions button{border:0;border-right:1px solid rgba(255,255,255,.045);background:transparent;color:#00c2ff;font-size:9px;font-weight:950;cursor:pointer}.actions button:last-child{border-right:0}.actions span{margin-left:4px;color:rgba(255,255,255,.62);font-size:6.5px;font-weight:950}
+        .actions{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;height:${ACTIONS_HEIGHT}px;display:flex;align-items:center;justify-content:center;gap:4px;padding:2px 7px;border:0;background:transparent;z-index:20}
+        .actions button{height:14px;min-width:0;flex:1;padding:0 5px;border:1px solid rgba(0,194,255,.20);border-radius:3px;background:rgba(0,194,255,.025);color:#00c2ff;font-size:8px;font-weight:950;line-height:1;cursor:pointer}.actions button:hover{border-color:rgba(0,194,255,.42);background:rgba(0,194,255,.055)}.actions span{margin-left:3px;color:rgba(255,255,255,.55);font-size:6px;font-weight:950}
         .photo-rail{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE}px;width:${NATIVE_WIDTH}px;height:${THUMB_RAIL_HEIGHT}px;overflow:hidden;margin:0;padding:0;z-index:21}
         .card-photo-nav{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:64px;border:none;background:rgba(0,0,0,.06);color:rgba(255,255,255,.42);font-size:28px;font-weight:300;cursor:pointer;z-index:30;opacity:.72;transition:opacity .18s ease,background .18s ease,color .18s ease}.card-photo-nav.left{left:0;border-radius:0 10px 10px 0}.card-photo-nav.right{right:0;border-radius:10px 0 0 10px}.card-photo-nav:hover{opacity:1;background:rgba(0,0,0,.14);color:rgba(255,255,255,.68)}
         :global(.card001 .photo-rail .ixi-collection-thumb-rail){width:${NATIVE_WIDTH}px!important;height:${THUMB_RAIL_HEIGHT}px!important;margin:0!important}
