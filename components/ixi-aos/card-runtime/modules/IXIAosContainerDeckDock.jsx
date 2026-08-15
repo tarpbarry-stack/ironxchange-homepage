@@ -110,6 +110,24 @@ export default function IXIAosContainerDeckDock({
         )
       : "EMPTY";
 
+  const primary =
+    clean(
+      presentation?.selectedChildPrimaryDescriptor
+    );
+
+  const secondary =
+    clean(
+      presentation?.selectedChildSecondaryDescriptor
+    );
+
+  const selectedImage =
+    selectedChild
+      ? clean(
+          presentation?.heroImage ||
+          getAosObjectPrimaryImage(selectedChild)
+        )
+      : "";
+
   return (
     <div
       className="ixi-aos-container-deck-dock"
@@ -125,10 +143,10 @@ export default function IXIAosContainerDeckDock({
         onReturn={onReturn}
       />
 
-      <div className="deck-preview-header">
+      <div className="deck-preview-row">
         <button
           type="button"
-          className="deck-arrow"
+          className="deck-arrow deck-prev"
           disabled={count < 2}
           onPointerDown={event =>
             event.stopPropagation()
@@ -139,12 +157,36 @@ export default function IXIAosContainerDeckDock({
           ‹
         </button>
 
+        <div className="deck-selected-photo">
+          {selectedImage ? (
+            <img
+              src={selectedImage}
+              alt={title}
+              draggable={false}
+            />
+          ) : (
+            <div className="deck-photo-empty">
+              {count ? "NO MEDIA" : "EMPTY"}
+            </div>
+          )}
+        </div>
+
         <div className="deck-preview-copy">
-          <strong>{title}</strong>
-          {count ? (
-            <span>
-              {activeIndex + 1}/{count}
-            </span>
+          <div className="deck-title-line">
+            <strong>{title}</strong>
+            {count ? (
+              <span>
+                {activeIndex + 1}/{count}
+              </span>
+            ) : null}
+          </div>
+
+          {(primary || secondary) ? (
+            <div className="deck-meta">
+              {[primary, secondary]
+                .filter(Boolean)
+                .join(" • ")}
+            </div>
           ) : null}
         </div>
 
@@ -173,7 +215,7 @@ export default function IXIAosContainerDeckDock({
 
         <button
           type="button"
-          className="deck-arrow"
+          className="deck-arrow deck-next"
           disabled={count < 2}
           onPointerDown={event =>
             event.stopPropagation()
@@ -221,83 +263,171 @@ export default function IXIAosContainerDeckDock({
           position: absolute;
           left: 0;
           right: 0;
-          height: 91px;
+          height: 88px;
+          overflow: hidden;
           z-index: 45;
+          border-top: 1px solid rgba(255,255,255,.035);
           background: #0c0c0c;
+          box-shadow: 0 -5px 14px rgba(0,0,0,.22);
         }
 
-        .deck-preview-header {
-          height: 20px;
+        .deck-preview-row {
+          width: 100%;
+          height: 29px;
+          min-height: 29px;
           display: grid;
-          grid-template-columns: 20px minmax(0,1fr) auto 20px;
-          align-items: center;
+          grid-template-columns:
+            18px 38px minmax(0,1fr) auto 18px;
+          align-items: stretch;
           border-bottom: 1px solid rgba(255,255,255,.04);
-          background: rgba(12,12,12,.98);
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.018),
+              rgba(255,255,255,0)
+            ),
+            #0f0f0f;
+        }
+
+        .deck-selected-photo {
+          width: 38px;
+          height: 29px;
+          overflow: hidden;
+          border-left: 1px solid rgba(255,255,255,.035);
+          border-right: 1px solid rgba(255,255,255,.045);
+          background: #080808;
+        }
+
+        .deck-selected-photo img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+        }
+
+        .deck-photo-empty {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,.14);
+          font-size: 4.5px;
+          font-weight: 950;
+          letter-spacing: .04em;
         }
 
         .deck-preview-copy {
           min-width: 0;
           display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 0 4px;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 5px;
         }
 
-        .deck-preview-copy strong {
+        .deck-title-line {
           min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .deck-title-line strong {
+          min-width: 0;
+          flex: 1 1 auto;
           overflow: hidden;
-          color: rgba(255,255,255,.82);
-          font-size: 7px;
+          color: rgba(255,255,255,.86);
+          font-size: 6.5px;
           font-weight: 950;
+          line-height: 1;
           text-overflow: ellipsis;
           white-space: nowrap;
           text-transform: uppercase;
         }
 
-        .deck-preview-copy span {
+        .deck-title-line span {
           flex: none;
-          color: rgba(255,255,255,.30);
-          font-size: 6px;
+          color: rgba(255,255,255,.34);
+          font-size: 5px;
           font-weight: 900;
+        }
+
+        .deck-meta {
+          margin-top: 3px;
+          overflow: hidden;
+          color: rgba(255,255,255,.29);
+          font-size: 4.7px;
+          font-weight: 850;
+          line-height: 1;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .deck-arrow,
         .deck-out {
-          height: 20px;
+          min-width: 0;
+          height: 29px;
           border: 0;
           background: transparent;
           cursor: pointer;
         }
 
         .deck-arrow {
-          color: rgba(255,255,255,.48);
-          font-size: 17px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,.50);
+          font-size: 18px;
+          font-weight: 300;
           line-height: 1;
         }
 
+        .deck-prev {
+          border-right: 1px solid rgba(255,255,255,.035);
+        }
+
+        .deck-next {
+          border-left: 1px solid rgba(255,255,255,.035);
+        }
+
+        .deck-arrow:not(:disabled):hover {
+          background: rgba(0,194,255,.045);
+          color: rgba(255,255,255,.90);
+        }
+
         .deck-arrow:disabled {
-          opacity: .16;
+          opacity: .14;
           cursor: default;
         }
 
         .deck-out {
-          padding: 0 5px;
-          color: rgba(0,194,255,.78);
-          font-size: 6.5px;
+          padding: 0 6px;
+          color: rgba(0,194,255,.80);
+          font-size: 6px;
           font-weight: 950;
           letter-spacing: .04em;
+          white-space: nowrap;
+        }
+
+        .deck-out:hover {
+          color: rgba(0,194,255,1);
+          background: rgba(0,194,255,.035);
         }
 
         .deck-thumb-shell {
-          height: 44px;
+          height: 32px;
+          min-height: 32px;
           overflow: hidden;
+          border-bottom: 1px solid rgba(255,255,255,.025);
         }
 
         :global(
           .deck-thumb-shell
           .ixi-collection-thumb-rail
         ) {
-          height: 44px;
+          height: 32px;
+          min-height: 32px;
+          max-height: 32px;
         }
       `}</style>
     </div>
