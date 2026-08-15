@@ -84,6 +84,7 @@ export default function IXIAosPrimaryMediaPanel({
         .ixi-aos-primary-media-panel {
           width: 100%;
           min-width: 0;
+          margin-top: -10px;
           overflow: hidden;
           border: 1px solid rgba(255,255,255,.05);
           border-radius: 7px;
