@@ -46,18 +46,30 @@ export default function IXIAosEditSessionActions({
 
       <style jsx>{`
         .ixi-aos-edit-session-actions {
-          width: 100%;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 7px;
+          position: absolute;
+
+          top: 9px;
+          right: 84px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 5px;
+
+          z-index: 190;
         }
 
         button {
-          height: 27px;
-          border-radius: 5px;
+          height: 22px;
+
+          padding: 0 7px;
+
+          border-radius: 4px;
+
           font-size: 7px;
           font-weight: 950;
-          letter-spacing: .05em;
+          letter-spacing: .04em;
+
           cursor: pointer;
         }
 
@@ -67,19 +79,19 @@ export default function IXIAosEditSessionActions({
         }
 
         .save {
-          border: 1px solid rgba(255,196,0,.30);
-          background: rgba(255,196,0,.07);
+          border: 1px solid rgba(255,196,0,.34);
+          background: rgba(8,8,8,.94);
           color: #ffc400;
         }
 
         .save:hover:not(:disabled) {
-          background: rgba(255,196,0,.12);
+          background: rgba(255,196,0,.10);
         }
 
         .cancel {
           border: 1px solid rgba(255,255,255,.08);
-          background: rgba(255,255,255,.025);
-          color: rgba(255,255,255,.54);
+          background: rgba(8,8,8,.94);
+          color: rgba(255,255,255,.58);
         }
 
         .cancel:hover:not(:disabled) {
