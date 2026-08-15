@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import IXIAosObjectConsole from "../ixi-aos/console-runtime/IXIAosObjectConsole";
+import IXIAosLocationManagementConsole from "../ixi-aos/console-runtime/IXIAosLocationManagementConsole";
 import IXIAosCard001Location from "../ixi-aos/cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../ixi-aos/cards/002/IXIAosCard002Location";
 import IXIAosCard003Location from "../ixi-aos/cards/003/IXIAosCard003Location";
@@ -45,6 +46,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const [face, setFace] = useState(2);
   const [f2skin, setF2skin] = useState("v12");
   const [financialMode, setFinancialMode] = useState("owned");
+  const [managementConsoleOpen, setManagementConsoleOpen] = useState(false);
   const [transactOpen, setTransactOpen] = useState(false);
   const [transactConsole, setTransactConsole] = useState(null);
 
@@ -63,6 +65,11 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
     setTransactOpen(false);
   }
 
+  function openTransact() {
+    setManagementConsoleOpen(false);
+    setTransactOpen(true);
+  }
+
   const current = state[object.objectId] || {};
   const slug = clean(template.templateSlug);
   const isLocation = ["location-standard", "location-standard-002", "location-standard-003"].includes(slug);
@@ -76,7 +83,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
     onAddObject: () => {},
     onHideObject: () => {},
     onDeleteObject: () => {},
-    onOpenConsole: () => {},
+    onOpenConsole: () => setManagementConsoleOpen(true),
     onRecall: () => {},
     onBoard: () => {},
     onReturn: () => {},
@@ -86,9 +93,10 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   if (isLocation) {
     const Card = slug === "location-standard-003" ? IXIAosCard003Location : slug === "location-standard-002" ? IXIAosCard002Location : IXIAosCard001Location;
     const financialObject = { ...object, fields: { ...(object.fields || {}), ownershipStatus: financialMode } };
+    const consoleExpanded = Boolean(managementConsoleOpen || transactConsole);
 
     return (
-      <div className={transactConsole ? "location-preview console-open" : "location-preview"}>
+      <div className={consoleExpanded ? "location-preview console-open" : "location-preview"}>
         {!transactOpen ? (
           <>
             <div className="face-switch">
@@ -108,7 +116,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
           </>
         ) : null}
 
-        <div className={transactConsole ? "console console-expanded" : "console"}>
+        <div className={consoleExpanded ? "console console-expanded" : "console"}>
           {transactOpen ? (
             <>
               <IXITransactApp
@@ -125,7 +133,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
             </>
           ) : (
             <>
-              <button type="button" className="transact-launch" title="Open IXI TRAN$ACT" onClick={() => setTransactOpen(true)}>$</button>
+              <button type="button" className="transact-launch" title="Open IXI TRAN$ACT" onClick={openTransact}>$</button>
               {face === 5 ? (
                 <IXIAosLocationFace5Maintenance {...shared} object={financialObject} demoMode />
               ) : face === 4 ? (
@@ -137,6 +145,19 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
               ) : (
                 <Card {...shared} />
               )}
+
+              {managementConsoleOpen ? (
+                <IXIAosLocationManagementConsole
+                  templateSlug={slug}
+                  object={financialObject}
+                  shared={shared}
+                  financialMode={financialMode}
+                  f2skin={f2skin}
+                  onF2SkinChange={setF2skin}
+                  initialFace={face === 1 ? 2 : face}
+                  onClose={() => setManagementConsoleOpen(false)}
+                />
+              ) : null}
             </>
           )}
         </div>
