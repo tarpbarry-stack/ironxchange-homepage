@@ -37,19 +37,6 @@ function withLocalCardDrafts(
         return template;
       });
 
-  const has002 =
-    source.some(
-      template =>
-        String(
-          template?.templateSlug || ""
-        ).trim() ===
-        "location-standard-002"
-    );
-
-  if (has002) {
-    return source;
-  }
-
   const baseLocation =
     source.find(
       template =>
@@ -63,21 +50,42 @@ function withLocalCardDrafts(
     return source;
   }
 
-  source.push({
-    ...baseLocation,
-    templateNumber: 2,
-    templateSlug:
-      "location-standard-002",
-    label:
-      "Location",
-    version: 12,
-    metadata: {
-      ...(baseLocation?.metadata || {}),
-      cardLocked: false,
-      localCardDraft: true,
-      derivedFrom:
-        "001-v12"
+  const drafts = [
+    {
+      templateNumber: 2,
+      templateSlug: "location-standard-002",
+      derivedFrom: "001-v12"
+    },
+    {
+      templateNumber: 3,
+      templateSlug: "location-standard-003",
+      derivedFrom: "001-v12"
     }
+  ];
+
+  drafts.forEach(draft => {
+    const exists = source.some(
+      template =>
+        String(
+          template?.templateSlug || ""
+        ).trim() === draft.templateSlug
+    );
+
+    if (exists) return;
+
+    source.push({
+      ...baseLocation,
+      templateNumber: draft.templateNumber,
+      templateSlug: draft.templateSlug,
+      label: "Location",
+      version: 12,
+      metadata: {
+        ...(baseLocation?.metadata || {}),
+        cardLocked: false,
+        localCardDraft: true,
+        derivedFrom: draft.derivedFrom
+      }
+    });
   });
 
   return source;
