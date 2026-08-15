@@ -129,7 +129,7 @@ const LOCATION_STANDARD_PRESENTATION =
           slotId: "container-deck",
           moduleType: "container-deck-dock",
           config: {
-            bottom: 20
+            bottom: 19
           },
           presentation: {
             role: "bottom-dock",
