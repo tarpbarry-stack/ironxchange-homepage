@@ -170,30 +170,6 @@ const SAMPLE_LOCATION_ITEMS =
       metadata: {}
     }
   ]);
-    {
-      objectId:
-        "preview-machine-001",
-
-      objectType:
-        "machine"
-    },
-
-    {
-      objectId:
-        "preview-vehicle-001",
-
-      objectType:
-        "vehicle"
-    },
-
-    {
-      objectId:
-        "preview-tool-001",
-
-      objectType:
-        "tool"
-    }
-  ]);
 
 
 export function getAosCardSampleData(
