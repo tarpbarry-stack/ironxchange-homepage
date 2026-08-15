@@ -110,6 +110,8 @@ export default function IXIAosObjectConsole({
 
   objectId = "",
 
+  projection = null,
+
   cardDefinition = {},
 
   skinId =
@@ -552,13 +554,17 @@ const financialFace2Props =
     
 return (
   <IXIAosCardRuntime
-    object={
-      object
-    }
+  object={
+    object
+  }
 
-    cardDefinition={
-      cardDefinition
-    }
+  projection={
+    projection
+  }
+
+  cardDefinition={
+    cardDefinition
+  }
 
     parentLabel={
       parentLabel
