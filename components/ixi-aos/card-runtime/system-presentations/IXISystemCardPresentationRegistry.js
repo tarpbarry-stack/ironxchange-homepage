@@ -31,7 +31,10 @@ const LOCATION_STANDARD_PRESENTATION =
 
         {
           slotId: "location-photo",
-          moduleType: "primary-media",
+          moduleType: "primary-media-panel",
+          config: {
+            height: 90
+          },
           presentation: {
             role: "hero",
             width: "full"
