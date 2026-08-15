@@ -97,6 +97,9 @@ export default function IXIAosCard001Location({
   const objectId = String(object?.objectId || object?.id || "");
   const [saving, setSaving] = useState(false);
   const [selectedChildIndex, setSelectedChildIndex] = useState(0);
+  const [mediaDraft, setMediaDraft] = useState(() =>
+    Array.isArray(object?.media) ? object.media : []
+  );
 
   const editDraft = safeObject(ixiState?.editDraft);
   const draftFields = safeObject(editDraft?.fields);
@@ -106,11 +109,12 @@ export default function IXIAosCard001Location({
   const runtimeObject = useMemo(() => ({
     ...object,
     displayName: draftDisplayName,
+    media: mediaDraft,
     fields: {
       ...safeObject(object?.fields),
       ...draftFields
     }
-  }), [object, draftDisplayName, draftFields]);
+  }), [object, draftDisplayName, draftFields, mediaDraft]);
 
   const childItems = Array.isArray(objects) ? objects : [];
   const activeChildIndex = childItems.length
@@ -145,6 +149,22 @@ export default function IXIAosCard001Location({
     });
   }
 
+  function addPhoto(photo) {
+    const url = clean(photo?.url);
+    if (!url) return;
+
+    setMediaDraft(current => [
+      {
+        url,
+        name: clean(photo?.name),
+        type: clean(photo?.type),
+        size: Number(photo?.size || 0),
+        source: "user-upload"
+      },
+      ...current
+    ]);
+  }
+
   function beginEdit() {
     if (!objectId) return;
     onIxiStateChange?.(objectId, {
@@ -164,7 +184,8 @@ export default function IXIAosCard001Location({
         objectId,
         object: runtimeObject,
         displayName: runtimeObject.displayName,
-        fields: { ...safeObject(runtimeObject?.fields) }
+        fields: { ...safeObject(runtimeObject?.fields) },
+        media: [...mediaDraft]
       });
       onIxiStateChange?.(objectId, { editing: false, editDraft: null });
     } finally {
@@ -173,6 +194,7 @@ export default function IXIAosCard001Location({
   }
 
   function cancelEdit() {
+    setMediaDraft(Array.isArray(object?.media) ? object.media : []);
     onIxiStateChange?.(objectId, { editing: false, editDraft: null });
   }
 
@@ -257,6 +279,8 @@ export default function IXIAosCard001Location({
           <IXIAosPrimaryMediaPanel
             object={runtimeObject}
             moduleDefinition={{ config: { height: 158 } }}
+            editing={editing}
+            onAddPhoto={addPhoto}
           />
         </div>
 
