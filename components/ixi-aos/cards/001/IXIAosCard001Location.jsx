@@ -18,12 +18,8 @@ function safeObject(value) {
 }
 
 export const CARD_001_LOCATION = Object.freeze({
-  cardNumber: 1,
-  templateSlug: "location-standard",
-  nativeWidth: NATIVE_WIDTH,
-  nativeHeight: NATIVE_HEIGHT,
-  railReserve: RAIL_RESERVE,
-  label: "Location",
+  cardNumber: 1, templateSlug: "location-standard", nativeWidth: NATIVE_WIDTH,
+  nativeHeight: NATIVE_HEIGHT, railReserve: RAIL_RESERVE, label: "Location",
   section: "LOCATIONS & FACILITIES"
 });
 
@@ -40,25 +36,31 @@ export default function IXIAosCard001Location({
   const editDraft = safeObject(ixiState?.editDraft);
   const draftFields = safeObject(editDraft?.fields);
   const editing = Boolean(ixiState?.editing);
+  const draftDisplayName = editDraft?.displayName ?? object?.displayName ?? "MIDLAND YARD";
 
   const runtimeObject = useMemo(() => ({
     ...object,
+    displayName: draftDisplayName,
     fields: { ...safeObject(object?.fields), ...draftFields }
-  }), [object, draftFields]);
+  }), [object, draftDisplayName, draftFields]);
 
   function patchField(fieldId, value) {
     if (!objectId) return;
     onIxiStateChange?.(objectId, { editDraft: { ...editDraft, fields: { ...draftFields, [fieldId]: value } } });
   }
+  function patchDisplayName(value) {
+    if (!objectId) return;
+    onIxiStateChange?.(objectId, { editDraft: { ...editDraft, displayName: value, fields: { ...draftFields } } });
+  }
   function beginEdit() {
     if (!objectId) return;
-    onIxiStateChange?.(objectId, { editing: true, editDraft: { fields: { ...safeObject(object?.fields) } } });
+    onIxiStateChange?.(objectId, { editing: true, editDraft: { displayName: object?.displayName || "MIDLAND YARD", fields: { ...safeObject(object?.fields) } } });
   }
   async function saveEdit() {
     if (!objectId || saving) return;
     setSaving(true);
     try {
-      await onSaveObject?.({ objectId, object: runtimeObject, fields: { ...safeObject(runtimeObject?.fields) } });
+      await onSaveObject?.({ objectId, object: runtimeObject, displayName: runtimeObject.displayName, fields: { ...safeObject(runtimeObject?.fields) } });
       onIxiStateChange?.(objectId, { editing: false, editDraft: null });
     } finally { setSaving(false); }
   }
@@ -78,7 +80,14 @@ export default function IXIAosCard001Location({
   return (
     <div className="card001 card board-color-none board-outline-1">
       <header className="header">
-        <div className="identity"><span>LOCATIONS &amp; FACILITIES</span><strong>{runtimeObject?.displayName || "MIDLAND YARD"}</strong></div>
+        <div className="identity">
+          <span>LOCATIONS &amp; FACILITIES</span>
+          {editing ? (
+            <input className="name-input" value={draftDisplayName} autoFocus onPointerDown={event => event.stopPropagation()} onChange={event => patchDisplayName(event.target.value)} />
+          ) : (
+            <strong>{runtimeObject.displayName}</strong>
+          )}
+        </div>
         <IXIAosCardHeaderControls canAdd canEdit editing={editing} onAdd={onAddObject} onToggleEdit={beginEdit} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={onOpenConsole} />
       </header>
 
@@ -96,16 +105,14 @@ export default function IXIAosCard001Location({
         <button type="button" onClick={() => onBoard?.(runtimeObject)}>▦ <span>BOARD</span></button>
         <button type="button" onClick={() => onReturn?.(runtimeObject)}>↩ <span>RETURN</span></button>
       </div>
-
       <IXIMachineRail listing={runtimeObject} saved={false} boardColor="none" boardOutline={1} machineFace={1} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination} />
 
       <style jsx>{`
         .card001,.card001 *{box-sizing:border-box}.card001{position:relative;width:${NATIVE_WIDTH}px;min-width:${NATIVE_WIDTH}px;max-width:${NATIVE_WIDTH}px;height:${NATIVE_HEIGHT}px;min-height:${NATIVE_HEIGHT}px;max-height:${NATIVE_HEIGHT}px;overflow:hidden;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 30%),#101010;color:#f4f4f4;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 34px rgba(0,0,0,.42)}
-        .header{position:absolute;top:0;left:0;right:0;height:${HEADER_HEIGHT}px;padding:7px 12px 3px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.045);z-index:5}.identity{min-width:0;flex:1}.identity span{display:block;color:#ffc400;font-size:6.5px;font-weight:950;letter-spacing:.08em}.identity strong{display:block;margin-top:4px;overflow:hidden;color:#f4f4f4;font-size:17px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}
+        .header{position:absolute;top:0;left:0;right:0;height:${HEADER_HEIGHT}px;padding:7px 12px 3px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.045);z-index:5}.identity{min-width:0;flex:1}.identity span{display:block;color:#ffc400;font-size:6.5px;font-weight:950;letter-spacing:.08em}.identity strong{display:block;margin-top:4px;overflow:hidden;color:#f4f4f4;font-size:17px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}.name-input{display:block;width:100%;height:22px;margin-top:2px;padding:0 5px;border:1px solid rgba(255,196,0,.40);border-radius:4px;background:#090909;color:#f4f4f4;font-size:15px;font-weight:950;line-height:1;outline:none;text-transform:uppercase}.name-input:focus{border-color:#ffc400}
         .body{position:absolute;top:${HEADER_HEIGHT}px;left:0;right:0;bottom:47px;overflow:hidden;padding:0}.photo{margin:0 0 5px}.address,.metrics,.facts,.relationships{margin:0 6px 4px}.relationships{margin-bottom:0}.edit-actions{position:absolute;right:7px;top:2px;display:flex;gap:4px;z-index:10}.edit-actions button{height:20px;padding:0 7px;border:1px solid rgba(255,196,0,.22);border-radius:4px;background:#0a0a0a;color:#ffc400;font-size:6px;font-weight:950}
         .actions{position:absolute;left:0;right:0;bottom:${RAIL_RESERVE}px;height:28px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.055);background:#090909;z-index:20}.actions button{border:0;border-right:1px solid rgba(255,255,255,.045);background:transparent;color:#00c2ff;font-size:10px;font-weight:950;cursor:pointer}.actions button:last-child{border-right:0}.actions span{margin-left:4px;color:rgba(255,255,255,.62);font-size:7px;font-weight:950}
-        :global(.card001 .ixi-aos-primary-media-panel){border-left:0;border-right:0;border-radius:0}
-        :global(.card001 .relationships .ixi-face-section-title){color:#ffc400!important;font-size:6.5px!important;letter-spacing:.08em!important}
+        :global(.card001 .ixi-aos-primary-media-panel){border-left:0;border-right:0;border-radius:0}:global(.card001 .relationships .ixi-face-section-title){color:#ffc400!important;font-size:6.5px!important;letter-spacing:.08em!important}
       `}</style>
     </div>
   );
