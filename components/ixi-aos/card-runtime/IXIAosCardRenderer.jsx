@@ -35,6 +35,9 @@ import IXIAosRelationshipInfrastructurePanel
 import IXIAosContainerCommandStrip
   from "./modules/IXIAosContainerCommandStrip";
 
+import IXIAosPrimaryMediaPanel
+  from "./modules/IXIAosPrimaryMediaPanel";
+
 
 function safeObject(
   value
@@ -51,72 +54,44 @@ function safeObject(
 
 export default function IXIAosCardRenderer({
   object = {},
-
   projection = null,
-
   cardDefinition = null,
-
   template = null,
-
   objects = [],
-
   parentLabel = "",
-
   dragHandleProps = null,
-
   ixiState = {},
   onIxiStateChange = null,
-
   saved = false,
-
   armedDestination = "",
-
   onSendFront = null,
   onSendBack = null,
-
   onCycleColor = null,
   onCycleOutline = null,
-
   onSendToArmedDestination = null,
-
   onObjectFieldChange = null,
   onSaveObject = null,
-
   onHideObject = null,
   onDeleteObject = null,
-
   onAddObject = null,
   onBoard = null,
   onRecall = null,
   onReturn = null,
   onExposeObject = null,
-
   onOpenConsole = null,
-
   onExpandConsoleLeft = null,
   onExpandConsoleRight = null,
-
   consoleLeftOpen = false,
   consoleRightOpen = false,
-
   forcedFaceIndex = null,
-
   faceOnly = false,
-
   studioEditing = false,
-
   selectedModuleId = "",
-
   onSelectModule = null,
-
   renderCard = null
 }) {
-
-  const [
-    savingEdit,
-    setSavingEdit
-  ] = useState(false);
-
+  const [savingEdit, setSavingEdit] =
+    useState(false);
 
   const objectId =
     String(
@@ -124,7 +99,6 @@ export default function IXIAosCardRenderer({
       object?.id ||
       ""
     );
-
 
   const resolvedDefinition =
     useMemo(
@@ -134,51 +108,29 @@ export default function IXIAosCardRenderer({
           object,
           template
         }),
-      [
-        object,
-        cardDefinition,
-        template
-      ]
+      [object, cardDefinition, template]
     );
-
 
   const capabilities =
-    resolvedDefinition
-      ?.capabilities ||
-    {};
-
+    resolvedDefinition?.capabilities || {};
 
   const editDraft =
-    safeObject(
-      ixiState?.editDraft
-    );
-
+    safeObject(ixiState?.editDraft);
 
   const draftFields =
-    safeObject(
-      editDraft?.fields
-    );
-
+    safeObject(editDraft?.fields);
 
   const runtimeObject =
     useMemo(
       () => ({
         ...object,
-
         fields: {
-          ...safeObject(
-            object?.fields
-          ),
-
+          ...safeObject(object?.fields),
           ...draftFields
         }
       }),
-      [
-        object,
-        draftFields
-      ]
+      [object, draftFields]
     );
-
 
   function patchEditDraftFields(
     fieldId,
@@ -188,150 +140,78 @@ export default function IXIAosCardRenderer({
       typeof onObjectFieldChange ===
       "function"
     ) {
-      onObjectFieldChange(
-        fieldId,
-        value
-      );
-
+      onObjectFieldChange(fieldId, value);
       return;
     }
-
 
     if (!objectId) {
       return;
     }
-
 
     onIxiStateChange?.(
       objectId,
       {
         editDraft: {
           ...editDraft,
-
           fields: {
             ...draftFields,
-
-            [fieldId]:
-              value
+            [fieldId]: value
           }
         }
       }
     );
   }
 
-
   const [
     selectedChildIndex,
     setSelectedChildIndex
-  ] =
-    useState(0);
-
+  ] = useState(0);
 
   function renderContainedCard({
-    object:
-      childObject,
-
+    object: childObject,
     parent,
-
     context
   }) {
-
     if (
       typeof renderCard ===
       "function"
     ) {
       return renderCard({
-        object:
-          childObject,
-
+        object: childObject,
         parent,
-
         context
       });
     }
 
-
     return (
       <IXIAosCardRenderer
-        object={
-          childObject
-        }
-
-        objects={
-          objects
-        }
-
+        object={childObject}
+        objects={objects}
         parentLabel={
           parent?.displayName ||
           parent?.name ||
           ""
         }
-
         dragHandleProps={{}}
-
         ixiState={{}}
-
-        onIxiStateChange={
-          () => {}
-        }
-
-        saved={
-          false
-        }
-
+        onIxiStateChange={() => {}}
+        saved={false}
         armedDestination=""
-
-        onSendFront={
-          () => {}
-        }
-
-        onSendBack={
-          () => {}
-        }
-
-        onCycleColor={
-          () => {}
-        }
-
-        onCycleOutline={
-          () => {}
-        }
-
-        onSendToArmedDestination={
-          () => {}
-        }
-
-        onAddObject={
-          onAddObject
-        }
-
-        onBoard={
-          onBoard
-        }
-
-        onRecall={
-          onRecall
-        }
-
-        onReturn={
-          onReturn
-        }
-
-        onExposeObject={
-          onExposeObject
-        }
-
-        onOpenConsole={
-          onOpenConsole
-        }
-
-        renderCard={
-          renderCard
-        }
+        onSendFront={() => {}}
+        onSendBack={() => {}}
+        onCycleColor={() => {}}
+        onCycleOutline={() => {}}
+        onSendToArmedDestination={() => {}}
+        onAddObject={onAddObject}
+        onBoard={onBoard}
+        onRecall={onRecall}
+        onReturn={onReturn}
+        onExposeObject={onExposeObject}
+        onOpenConsole={onOpenConsole}
+        renderCard={renderCard}
       />
     );
   }
-
 
   function beginEditing() {
     if (!objectId) {
@@ -341,47 +221,32 @@ export default function IXIAosCardRenderer({
     onIxiStateChange?.(
       objectId,
       {
-        editing:
-          true,
-
+        editing: true,
         editDraft: {
           fields: {
-            ...safeObject(
-              object?.fields
-            )
+            ...safeObject(object?.fields)
           }
         }
       }
     );
   }
 
-
   function cancelEditing() {
-    if (
-      !objectId ||
-      savingEdit
-    ) {
+    if (!objectId || savingEdit) {
       return;
     }
 
     onIxiStateChange?.(
       objectId,
       {
-        editing:
-          false,
-
-        editDraft:
-          null
+        editing: false,
+        editDraft: null
       }
     );
   }
 
-
   async function saveEditing() {
-    if (
-      !objectId ||
-      savingEdit
-    ) {
+    if (!objectId || savingEdit) {
       return;
     }
 
@@ -394,10 +259,7 @@ export default function IXIAosCardRenderer({
       ) {
         await onSaveObject({
           objectId,
-
-          object:
-            runtimeObject,
-
+          object: runtimeObject,
           fields: {
             ...safeObject(
               runtimeObject?.fields
@@ -408,11 +270,8 @@ export default function IXIAosCardRenderer({
         onIxiStateChange?.(
           objectId,
           {
-            editing:
-              false,
-
-            editDraft:
-              null
+            editing: false,
+            editDraft: null
           }
         );
 
@@ -422,8 +281,7 @@ export default function IXIAosCardRenderer({
       onIxiStateChange?.(
         objectId,
         {
-          editing:
-            false
+          editing: false
         }
       );
     } finally {
@@ -431,19 +289,11 @@ export default function IXIAosCardRenderer({
     }
   }
 
-
-  function renderModule({
-    module
-  }) {
-
+  function renderModule({ module }) {
     const moduleType =
-      String(
-        module?.moduleType ||
-        ""
-      )
+      String(module?.moduleType || "")
         .trim()
         .toLowerCase();
-
 
     if (
       moduleType ===
@@ -451,46 +301,23 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosCardHeaderControls
-          canAdd={
-            Boolean(
-              capabilities?.canContain
-            )
-          }
-
+          canAdd={Boolean(
+            capabilities?.canContain
+          )}
           canEdit={
-            capabilities?.editable !==
-            false
+            capabilities?.editable !== false
           }
-
-          editing={
-            Boolean(
-              ixiState?.editing
-            )
-          }
-
-          onAdd={
-            onAddObject
-          }
-
-          onToggleEdit={
-            beginEditing
-          }
-
-          onHide={
-            onHideObject
-          }
-
-          onDelete={
-            onDeleteObject
-          }
-
-          onOpenConsole={
-            onOpenConsole
-          }
+          editing={Boolean(
+            ixiState?.editing
+          )}
+          onAdd={onAddObject}
+          onToggleEdit={beginEditing}
+          onHide={onHideObject}
+          onDelete={onDeleteObject}
+          onOpenConsole={onOpenConsole}
         />
       );
     }
-
 
     if (
       moduleType ===
@@ -500,20 +327,11 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosEditableFieldGroup
-          object={
-            runtimeObject
-          }
-
-          moduleDefinition={
-            module
-          }
-
-          editing={
-            Boolean(
-              ixiState?.editing
-            )
-          }
-
+          object={runtimeObject}
+          moduleDefinition={module}
+          editing={Boolean(
+            ixiState?.editing
+          )}
           onFieldChange={
             patchEditDraftFields
           }
@@ -521,34 +339,21 @@ export default function IXIAosCardRenderer({
       );
     }
 
-
     if (
       moduleType ===
       "edit-session-actions"
     ) {
       return (
         <IXIAosEditSessionActions
-          editing={
-            Boolean(
-              ixiState?.editing
-            )
-          }
-
-          saving={
-            savingEdit
-          }
-
-          onSave={
-            saveEditing
-          }
-
-          onCancel={
-            cancelEditing
-          }
+          editing={Boolean(
+            ixiState?.editing
+          )}
+          saving={savingEdit}
+          onSave={saveEditing}
+          onCancel={cancelEditing}
         />
       );
     }
-
 
     if (
       moduleType ===
@@ -556,21 +361,24 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosInlineMetricStrip
-          object={
-            runtimeObject
-          }
-
-          projection={
-            projection
-          }
-
-          moduleDefinition={
-            module
-          }
+          object={runtimeObject}
+          projection={projection}
+          moduleDefinition={module}
         />
       );
     }
 
+    if (
+      moduleType ===
+      "primary-media-panel"
+    ) {
+      return (
+        <IXIAosPrimaryMediaPanel
+          object={runtimeObject}
+          moduleDefinition={module}
+        />
+      );
+    }
 
     if (
       moduleType ===
@@ -578,17 +386,11 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosRelationshipInfrastructurePanel
-          object={
-            runtimeObject
-          }
-
-          moduleDefinition={
-            module
-          }
+          object={runtimeObject}
+          moduleDefinition={module}
         />
       );
     }
-
 
     if (
       moduleType ===
@@ -596,25 +398,13 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosContainerCommandStrip
-          object={
-            runtimeObject
-          }
-
-          onRecall={
-            onRecall
-          }
-
-          onBoard={
-            onBoard
-          }
-
-          onReturn={
-            onReturn
-          }
+          object={runtimeObject}
+          onRecall={onRecall}
+          onBoard={onBoard}
+          onReturn={onReturn}
         />
       );
     }
-
 
     if (
       moduleType ===
@@ -622,22 +412,14 @@ export default function IXIAosCardRenderer({
     ) {
       return (
         <IXIAosContainerViewer
-          container={
-            runtimeObject
-          }
-
-          objects={
-            objects
-          }
-
+          container={runtimeObject}
+          objects={objects}
           selectedIndex={
             selectedChildIndex
           }
-
           onSelectedIndexChange={
             setSelectedChildIndex
           }
-
           onExposeObject={
             onExposeObject
           }
@@ -645,152 +427,71 @@ export default function IXIAosCardRenderer({
       );
     }
 
-
     const containerModule =
       renderIXIAosContainerModule({
         moduleType,
-
-        object:
-          runtimeObject,
-
+        object: runtimeObject,
         parentLabel,
-
         objects,
-
         selectedIndex:
           selectedChildIndex,
-
         onSelectedIndexChange:
           setSelectedChildIndex,
-
         renderCard:
           renderContainedCard,
-
         onAddObject,
-
         onBoard,
-
         onRecall,
-
         onExposeObject
       });
 
-
     if (
-      containerModule !==
-      null &&
-      containerModule !==
-      undefined
+      containerModule !== null &&
+      containerModule !== undefined
     ) {
       return containerModule;
     }
 
-
     return null;
   }
 
-
   return (
     <IXIAosCardRuntime
-      object={
-        runtimeObject
-      }
-
-      projection={
-        projection
-      }
-
-      cardDefinition={
-        resolvedDefinition
-      }
-
-      parentLabel={
-        parentLabel
-      }
-
-      dragHandleProps={
-        dragHandleProps
-      }
-
-      ixiState={
-        ixiState
-      }
-
+      object={runtimeObject}
+      projection={projection}
+      cardDefinition={resolvedDefinition}
+      parentLabel={parentLabel}
+      dragHandleProps={dragHandleProps}
+      ixiState={ixiState}
       onIxiStateChange={
         onIxiStateChange
       }
-
-      saved={
-        saved
-      }
-
-      armedDestination={
-        armedDestination
-      }
-
-      onSendFront={
-        onSendFront
-      }
-
-      onSendBack={
-        onSendBack
-      }
-
-      onCycleColor={
-        onCycleColor
-      }
-
-      onCycleOutline={
-        onCycleOutline
-      }
-
+      saved={saved}
+      armedDestination={armedDestination}
+      onSendFront={onSendFront}
+      onSendBack={onSendBack}
+      onCycleColor={onCycleColor}
+      onCycleOutline={onCycleOutline}
       onSendToArmedDestination={
         onSendToArmedDestination
       }
-
-      onOpenConsole={
-        onOpenConsole
-      }
-
+      onOpenConsole={onOpenConsole}
       onExpandConsoleLeft={
         onExpandConsoleLeft
       }
-
       onExpandConsoleRight={
         onExpandConsoleRight
       }
-
-      consoleLeftOpen={
-        consoleLeftOpen
-      }
-
-      consoleRightOpen={
-        consoleRightOpen
-      }
-
-      forcedFaceIndex={
-        forcedFaceIndex
-      }
-
-      faceOnly={
-        faceOnly
-      }
-
-      studioEditing={
-        studioEditing
-      }
-
+      consoleLeftOpen={consoleLeftOpen}
+      consoleRightOpen={consoleRightOpen}
+      forcedFaceIndex={forcedFaceIndex}
+      faceOnly={faceOnly}
+      studioEditing={studioEditing}
       selectedModuleId={
         selectedModuleId
       }
-
-      onSelectModule={
-        onSelectModule
-      }
-
-      renderModule={
-        renderModule
-      }
+      onSelectModule={onSelectModule}
+      renderModule={renderModule}
     />
   );
 }
