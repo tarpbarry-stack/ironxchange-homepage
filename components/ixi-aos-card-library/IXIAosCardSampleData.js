@@ -32,8 +32,56 @@ const SAMPLE_LOCATION_OBJECT =
         "TX",
 
       postalCode:
-        "79701"
+        "79701",
+
+      yardHours:
+        "MON–SAT 6:00 AM–6:00 PM",
+
+      yardContact:
+        "JOHN CARTER",
+
+      yardPhone:
+        "432-555-0186"
     },
+
+    relationships: [
+      {
+        id: "rel-equipment",
+        label: "EQUIPMENT",
+        value: "47 ASSETS",
+        status: "ACTIVE"
+      },
+      {
+        id: "rel-shop",
+        label: "SHOP",
+        value: "1 SHOP",
+        status: "ACTIVE"
+      },
+      {
+        id: "rel-employees",
+        label: "EMPLOYEES",
+        value: "18 PEOPLE",
+        status: "ACTIVE"
+      },
+      {
+        id: "rel-ramp",
+        label: "RAMP",
+        value: "2 RAMPS",
+        status: "ACTIVE"
+      },
+      {
+        id: "rel-loading",
+        label: "LOADING AREA",
+        value: "PAVED",
+        status: "ACTIVE"
+      },
+      {
+        id: "rel-air",
+        label: "AIR",
+        value: "AVAILABLE",
+        status: "ACTIVE"
+      }
+    ],
 
     media: [],
 
