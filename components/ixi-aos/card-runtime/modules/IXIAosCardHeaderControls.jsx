@@ -70,20 +70,15 @@ export default function IXIAosCardHeaderControls({
           ]
             .filter(Boolean)
             .join(" ")}
-          aria-label={
-            editing
-              ? "Finish editing"
-              : "Edit card"
-          }
-          title={
-            editing
-              ? "Finish editing"
-              : "Edit card"
-          }
+          aria-label="Edit card"
+          title="Edit card"
           onClick={
             event => {
               stop(event);
-              onToggleEdit?.();
+
+              if (!editing) {
+                onToggleEdit?.();
+              }
             }
           }
         >
@@ -177,16 +172,17 @@ export default function IXIAosCardHeaderControls({
 
       <style jsx>{`
         .ixi-aos-card-header-controls {
-          position: relative;
+          position: absolute;
 
-          flex: 0 0 auto;
+          top: 9px;
+          right: 10px;
 
           display: flex;
           align-items: center;
 
           gap: 5px;
 
-          z-index: 80;
+          z-index: 180;
         }
 
         .header-action {
@@ -207,10 +203,10 @@ export default function IXIAosCardHeaderControls({
 
           background:
             rgba(
-              255,
-              255,
-              255,
-              .025
+              8,
+              8,
+              8,
+              .92
             );
 
           color:
@@ -218,10 +214,10 @@ export default function IXIAosCardHeaderControls({
               255,
               255,
               255,
-              .48
+              .58
             );
 
-          font-size: 6.5px;
+          font-size: 7px;
           font-weight: 950;
 
           line-height: 1;
@@ -238,7 +234,7 @@ export default function IXIAosCardHeaderControls({
               255,
               196,
               0,
-              .86
+              .90
             );
 
           font-size: 14px;
