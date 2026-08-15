@@ -8,6 +8,13 @@ const H = 471;
 const RAIL = 19;
 const HEADER = 43;
 
+export const LOCATION_FACE2_SKINS = Object.freeze([
+  Object.freeze({ id: "v12", label: "V12" }),
+  Object.freeze({ id: "steel", label: "STEEL" }),
+  Object.freeze({ id: "blueprint", label: "BLUE" }),
+  Object.freeze({ id: "industrial", label: "INDUSTRIAL" })
+]);
+
 function clean(value) { return String(value ?? "").trim(); }
 function yn(value, fallback = "YES") {
   if (value === true) return "YES";
@@ -44,6 +51,7 @@ export default function IXIAosLocationFace2Operations({
   onDeleteObject = null,
   onOpenConsole = null,
   skinId = "v12",
+  onSkinChange = null,
   onSendFront = null,
   onSendBack = null,
   onCycleColor = null,
@@ -80,7 +88,7 @@ export default function IXIAosLocationFace2Operations({
   return <div className={`ixi-aos-location-f2 skin-${skinId}`}>
     <header className="ops-header">
       <div className="ops-identity"><span>LOCATIONS FACE 2 · OPERATIONS</span><strong>{displayName}</strong></div>
-      {editing ? <div className="ops-edit-actions"><button disabled={saving} onClick={saveEdit}>SAVE</button><button disabled={saving} onClick={cancelEdit}>CANCEL</button></div> : <IXIAosCardHeaderControls canAdd canEdit editing={false} onAdd={onAddObject} onToggleEdit={beginEdit} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={onOpenConsole}/>} 
+      {editing ? <div className="ops-edit-actions"><button disabled={saving} onClick={saveEdit}>SAVE</button><button disabled={saving} onClick={cancelEdit}>CANCEL</button></div> : <IXIAosCardHeaderControls canAdd canEdit editing={false} onAdd={onAddObject} onToggleEdit={beginEdit} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={onOpenConsole} skinId={skinId} skinOptions={LOCATION_FACE2_SKINS} onSkinChange={onSkinChange}/>} 
     </header>
 
     <div className="ops-scroll">
