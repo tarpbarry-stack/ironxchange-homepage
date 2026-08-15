@@ -35,8 +35,8 @@ import {
   createConsoleSlotsPatch
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 
-import IXIAosCardRuntime
-  from "../card-runtime/IXIAosCardRuntime";
+import IXIAosCardRenderer
+  from "../card-runtime/IXIAosCardRenderer";
 
 import IXIAosFaceRuntime
   from "../face-runtime/IXIAosFaceRuntime";
@@ -553,23 +553,26 @@ const financialFace2Props =
     }
     
 return (
-  <IXIAosCardRuntime
-  object={
-    object
-  }
+  <IXIAosCardRenderer
+    object={
+      object
+    }
 
-  projection={
-    projection
-  }
+    projection={
+      projection
+    }
 
-  cardDefinition={
-    cardDefinition
-  }
+    objects={[
+      object
+    ]}
+
+    cardDefinition={
+      cardDefinition
+    }
 
     parentLabel={
       parentLabel
     }
-
     /*
      * Tell Runtime exactly which Face
      * this console slot owns.
