@@ -41,7 +41,6 @@ import IXIAosCardHeaderControls
  *
  * Placement never changes Card identity.
  *
- *
  * IMPORTANT
  * ---------
  *
@@ -51,6 +50,19 @@ import IXIAosCardHeaderControls
  * responsible for console slots, expansion,
  * persistence, face swapping, and layout.
  */
+
+
+function safeObject(
+  value
+) {
+  return (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  )
+    ? value
+    : {};
+}
 
 
 export default function IXIAosCardRenderer({
@@ -85,6 +97,16 @@ export default function IXIAosCardRenderer({
 
   /*
    * GENERIC OBJECT EDIT CONTRACT
+   *
+   * If a caller provides onObjectFieldChange,
+   * field writes are delegated outward.
+   *
+   * If not, the renderer keeps an explicit
+   * edit draft in IXI presentation state.
+   * That draft is NOT durable Object truth.
+   * A later Save action may commit it through
+   * the Object service without changing this
+   * rendering contract.
    */
   onObjectFieldChange = null,
 
@@ -123,6 +145,14 @@ export default function IXIAosCardRenderer({
   renderCard = null
 }) {
 
+  const objectId =
+    String(
+      object?.objectId ||
+      object?.id ||
+      ""
+    );
+
+
   /* =======================================================
      CARD DEFINITION
      ======================================================= */
@@ -147,6 +177,82 @@ export default function IXIAosCardRenderer({
     resolvedDefinition
       ?.capabilities ||
     {};
+
+
+  /* =======================================================
+     GENERIC EDIT DRAFT
+     ======================================================= */
+
+  const editDraft =
+    safeObject(
+      ixiState?.editDraft
+    );
+
+
+  const draftFields =
+    safeObject(
+      editDraft?.fields
+    );
+
+
+  const runtimeObject =
+    useMemo(
+      () => ({
+        ...object,
+
+        fields: {
+          ...safeObject(
+            object?.fields
+          ),
+
+          ...draftFields
+        }
+      }),
+      [
+        object,
+        draftFields
+      ]
+    );
+
+
+  function patchEditDraftFields(
+    fieldId,
+    value
+  ) {
+    if (
+      typeof onObjectFieldChange ===
+      "function"
+    ) {
+      onObjectFieldChange(
+        fieldId,
+        value
+      );
+
+      return;
+    }
+
+
+    if (!objectId) {
+      return;
+    }
+
+
+    onIxiStateChange?.(
+      objectId,
+      {
+        editDraft: {
+          ...editDraft,
+
+          fields: {
+            ...draftFields,
+
+            [fieldId]:
+              value
+          }
+        }
+      }
+    );
+  }
 
 
   /* =======================================================
@@ -271,24 +377,36 @@ export default function IXIAosCardRenderer({
      ======================================================= */
 
   function toggleEditing() {
-    const objectId =
-      String(
-        object?.objectId ||
-        object?.id ||
-        ""
-      );
-
     if (!objectId) {
       return;
     }
+
+
+    const nextEditing =
+      !Boolean(
+        ixiState?.editing
+      );
+
 
     onIxiStateChange?.(
       objectId,
       {
         editing:
-          !Boolean(
-            ixiState?.editing
-          )
+          nextEditing,
+
+        ...(
+          nextEditing
+            ? {
+                editDraft: {
+                  fields: {
+                    ...safeObject(
+                      object?.fields
+                    )
+                  }
+                }
+              }
+            : {}
+        )
       }
     );
   }
@@ -299,9 +417,6 @@ export default function IXIAosCardRenderer({
      ======================================================= */
 
   function renderModule({
-    object:
-      runtimeObject,
-
     module
   }) {
 
@@ -316,10 +431,6 @@ export default function IXIAosCardRenderer({
 
     /*
      * GENERIC HEADER ACTIONS
-     *
-     * The Card Definition decides whether
-     * this module exists. The renderer only
-     * supplies generic behavior.
      */
     if (
       moduleType ===
@@ -394,7 +505,7 @@ export default function IXIAosCardRenderer({
           }
 
           onFieldChange={
-            onObjectFieldChange
+            patchEditDraftFields
           }
         />
       );
@@ -455,7 +566,7 @@ export default function IXIAosCardRenderer({
   return (
     <IXIAosCardRuntime
       object={
-        object
+        runtimeObject
       }
 
       projection={
