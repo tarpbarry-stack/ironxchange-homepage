@@ -53,22 +53,12 @@ import {
 export default function IXIAosCardRenderer({
   object = {},
 
-  /*
-   * Optional explicit definition.
-   */
+  projection = null,
+
   cardDefinition = null,
 
-  /*
-   * Optional reusable template.
-   */
   template = null,
 
-  /*
-   * All AOS Objects currently loaded.
-   *
-   * Needed for containment and relationship
-   * projection inside container modules.
-   */
   objects = [],
 
   parentLabel = "",
@@ -107,7 +97,17 @@ export default function IXIAosCardRenderer({
    * This renderer itself does not create
    * or manage console state.
    */
-  onOpenConsole = null,
+   onOpenConsole = null,
+
+  onExpandConsoleLeft = null,
+  onExpandConsoleRight = null,
+
+  consoleLeftOpen = false,
+  consoleRightOpen = false,
+
+  forcedFaceIndex = null,
+
+  faceOnly = false,
 
   studioEditing = false,
 
@@ -379,15 +379,19 @@ onSelectModule = null,
      ======================================================= */
 
   return (
-    <IXIAosCardRuntime
+   <IXIAosCardRuntime
 
-      object={
-        object
-      }
+  object={
+    object
+  }
 
-      cardDefinition={
-        resolvedDefinition
-      }
+  projection={
+    projection
+  }
+
+  cardDefinition={
+    resolvedDefinition
+  }
 
       parentLabel={
         parentLabel
@@ -433,13 +437,37 @@ onSelectModule = null,
         onSendToArmedDestination
       }
 
-      onOpenConsole={
-        onOpenConsole
-      }
+       onOpenConsole={
+    onOpenConsole
+  }
 
-      studioEditing={
-  studioEditing
-}
+  onExpandConsoleLeft={
+    onExpandConsoleLeft
+  }
+
+  onExpandConsoleRight={
+    onExpandConsoleRight
+  }
+
+  consoleLeftOpen={
+    consoleLeftOpen
+  }
+
+  consoleRightOpen={
+    consoleRightOpen
+  }
+
+  forcedFaceIndex={
+    forcedFaceIndex
+  }
+
+  faceOnly={
+    faceOnly
+  }
+
+  studioEditing={
+    studioEditing
+  }
 
 selectedModuleId={
   selectedModuleId
