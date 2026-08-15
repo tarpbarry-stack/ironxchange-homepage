@@ -300,6 +300,8 @@ export default function IXIMosObjectCard({
 
   onOpenConsole = null,
 
+  renderIdentityFace = null,
+
   /*
    * Future Object Studio actions.
    * Preserved so we do not destroy
@@ -1064,7 +1066,37 @@ export default function IXIMosObjectCard({
             ================================================= */}
 
         {isIdentityFace ? (
-          <div className="aos-object-identity">
+  typeof renderIdentityFace ===
+    "function" ? (
+    renderIdentityFace({
+      object,
+
+      parentLabel:
+        resolvedParentLabel,
+
+      projection,
+
+      items:
+        directItems,
+
+      ixiState,
+
+      ixiCardState,
+
+      onAddChild,
+
+      onSaveName,
+
+      onAddMedia,
+
+      onExposeContents,
+
+      onGatherContents,
+
+      onOpenConsole
+    })
+  ) : (
+  <div className="aos-object-identity">
 
             <div className="aos-topline">
 
@@ -1562,15 +1594,15 @@ export default function IXIMosObjectCard({
 
             </div>
 
-          </div>
+                   </div>
 
+        )
 
         /* =================================================
            CHILD FACE
            ================================================= */
 
         ) : activeItem ? (
-
           <div
             ref={
               setChildDragNodeRef
