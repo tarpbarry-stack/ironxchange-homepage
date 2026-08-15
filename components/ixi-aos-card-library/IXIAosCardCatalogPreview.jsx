@@ -9,6 +9,9 @@ import IXIAosObjectConsole
 import IXIAosCard001Location
   from "../ixi-aos/cards/001/IXIAosCard001Location";
 
+import IXIAosCard002Location
+  from "../ixi-aos/cards/002/IXIAosCard002Location";
+
 import {
   adaptAosCardTemplate
 } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
@@ -121,25 +124,32 @@ export default function IXIAosCardCatalogPreview({
   }
 
   const currentState = previewCardState[object.objectId] || {};
+  const templateSlug = clean(template?.templateSlug);
 
-  if (clean(template?.templateSlug) === "location-standard") {
+  const sharedLocationProps = {
+    object,
+    projection,
+    objects: Array.isArray(directItems) ? directItems : [],
+    ixiState: currentState,
+    onIxiStateChange: updatePreviewState,
+    onAddObject: () => {},
+    onHideObject: () => {},
+    onDeleteObject: () => {},
+    onOpenConsole: () => {},
+    onRecall: () => {},
+    onBoard: () => {},
+    onReturn: () => {},
+    onExposeObject: () => {}
+  };
+
+  if (templateSlug === "location-standard" || templateSlug === "location-standard-002") {
+    const LocationCard = templateSlug === "location-standard-002"
+      ? IXIAosCard002Location
+      : IXIAosCard001Location;
+
     return (
       <div className="aos-card-catalog-console">
-        <IXIAosCard001Location
-          object={object}
-          projection={projection}
-          objects={Array.isArray(directItems) ? directItems : []}
-          ixiState={currentState}
-          onIxiStateChange={updatePreviewState}
-          onAddObject={() => {}}
-          onHideObject={() => {}}
-          onDeleteObject={() => {}}
-          onOpenConsole={() => {}}
-          onRecall={() => {}}
-          onBoard={() => {}}
-          onReturn={() => {}}
-          onExposeObject={() => {}}
-        />
+        <LocationCard {...sharedLocationProps} />
         <style jsx>{`
           .aos-card-catalog-console {
             position: relative;
@@ -153,7 +163,7 @@ export default function IXIAosCardCatalogPreview({
   }
 
   if (!cardDefinition) {
-    return <PreviewError title="CARD DEFINITION FAILED" detail={clean(template?.templateSlug) || "Unknown template"} />;
+    return <PreviewError title="CARD DEFINITION FAILED" detail={templateSlug || "Unknown template"} />;
   }
 
   return (
