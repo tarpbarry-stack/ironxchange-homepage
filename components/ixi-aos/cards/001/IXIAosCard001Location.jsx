@@ -13,43 +13,51 @@ const NATIVE_WIDTH = 298;
 const NATIVE_HEIGHT = 471;
 const RAIL_RESERVE = 19;
 const THUMB_RAIL_HEIGHT = 64;
+const PREVIEW_INFO_HEIGHT = 22;
 const ACTIONS_HEIGHT = 28;
 const HEADER_HEIGHT = 42;
+const LOWER_STACK_HEIGHT = THUMB_RAIL_HEIGHT + PREVIEW_INFO_HEIGHT + ACTIONS_HEIGHT;
 
 function safeObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
+function clean(value) {
+  return String(value || "").trim();
+}
+
 function getItemId(item = {}, index = 0) {
-  return String(item?.objectId || item?.id || `item-${index}`);
+  return clean(item?.objectId || item?.id || item?.uuid || `item-${index}`);
 }
 
 function getItemImage(item = {}) {
   const media = Array.isArray(item?.media) ? item.media : [];
   const first = media.find(entry =>
     typeof entry === "string"
-      ? Boolean(entry)
+      ? Boolean(clean(entry))
       : Boolean(entry?.url || entry?.src || entry?.imageUrl)
   );
 
   if (typeof first === "string") return first;
 
-  return (
+  return clean(
     first?.url ||
     first?.src ||
     first?.imageUrl ||
     item?.imageUrl ||
     item?.imageUrls?.[0] ||
-    item?.images?.[0]?.url ||
-    ""
+    item?.images?.[0]?.url
   );
 }
 
 function getItemLabel(item = {}, index = 0) {
-  return String(
+  return clean(
     item?.displayName ||
     item?.name ||
     item?.title ||
+    [item?.fields?.year, item?.fields?.make, item?.fields?.model]
+      .filter(Boolean)
+      .join(" ") ||
     `OBJECT ${index + 1}`
   );
 }
@@ -78,6 +86,7 @@ export default function IXIAosCard001Location({
   onRecall = null,
   onBoard = null,
   onReturn = null,
+  onExposeObject = null,
   onSendFront = null,
   onSendBack = null,
   onCycleColor = null,
@@ -105,8 +114,12 @@ export default function IXIAosCard001Location({
 
   const childItems = Array.isArray(objects) ? objects : [];
   const activeChildIndex = childItems.length
-    ? Math.min(selectedChildIndex, childItems.length - 1)
+    ? Math.min(Math.max(selectedChildIndex, 0), childItems.length - 1)
     : -1;
+  const activeChild = activeChildIndex >= 0 ? childItems[activeChildIndex] : null;
+  const activeChildTitle = activeChild
+    ? getItemLabel(activeChild, activeChildIndex)
+    : "NO OBJECT SELECTED";
 
   function patchField(fieldId, value) {
     if (!objectId) return;
@@ -167,6 +180,35 @@ export default function IXIAosCard001Location({
       editing: false,
       editDraft: null
     });
+  }
+
+  function previewPrevious(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!childItems.length) return;
+    setSelectedChildIndex(current =>
+      current <= 0
+        ? childItems.length - 1
+        : current - 1
+    );
+  }
+
+  function previewNext(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!childItems.length) return;
+    setSelectedChildIndex(current =>
+      current >= childItems.length - 1
+        ? 0
+        : current + 1
+    );
+  }
+
+  function exposeSelected(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!activeChild) return;
+    onExposeObject?.(activeChild, runtimeObject);
   }
 
   const metrics = {
@@ -278,6 +320,45 @@ export default function IXIAosCard001Location({
         <button type="button" onClick={() => onRecall?.(runtimeObject)}>↻ <span>RECALL</span></button>
         <button type="button" onClick={() => onBoard?.(runtimeObject)}>▦ <span>BOARD</span></button>
         <button type="button" onClick={() => onReturn?.(runtimeObject)}>↩ <span>RETURN</span></button>
+      </div>
+
+      <div className="preview-info-strip">
+        <button
+          type="button"
+          className="preview-side preview-prev"
+          onPointerDown={event => event.stopPropagation()}
+          onClick={previewPrevious}
+          aria-label="Previous object"
+        >
+          ‹
+        </button>
+
+        <strong title={activeChildTitle}>{activeChildTitle}</strong>
+
+        <span className="preview-position">
+          {activeChild ? `${activeChildIndex + 1}/${childItems.length}` : "0/0"}
+        </span>
+
+        <button
+          type="button"
+          className="preview-out"
+          disabled={!activeChild}
+          title="Put this object on Board"
+          onPointerDown={event => event.stopPropagation()}
+          onClick={exposeSelected}
+        >
+          OUT ↗
+        </button>
+
+        <button
+          type="button"
+          className="preview-side preview-next"
+          onPointerDown={event => event.stopPropagation()}
+          onClick={previewNext}
+          aria-label="Next object"
+        >
+          ›
+        </button>
       </div>
 
       <div className="photo-rail">
@@ -393,7 +474,7 @@ export default function IXIAosCard001Location({
           top: ${HEADER_HEIGHT}px;
           left: 0;
           right: 0;
-          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT + ACTIONS_HEIGHT}px;
+          bottom: ${RAIL_RESERVE + LOWER_STACK_HEIGHT}px;
           overflow: hidden;
           padding: 0;
         }
@@ -437,7 +518,7 @@ export default function IXIAosCard001Location({
           position: absolute;
           left: 0;
           right: 0;
-          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;
+          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT + PREVIEW_INFO_HEIGHT}px;
           height: ${ACTIONS_HEIGHT}px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -466,6 +547,72 @@ export default function IXIAosCard001Location({
           color: rgba(255,255,255,.62);
           font-size: 7px;
           font-weight: 950;
+        }
+
+        .preview-info-strip {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: ${RAIL_RESERVE + THUMB_RAIL_HEIGHT}px;
+          height: ${PREVIEW_INFO_HEIGHT}px;
+          display: grid;
+          grid-template-columns: 22px minmax(0,1fr) 28px 48px 22px;
+          align-items: center;
+          border-top: 1px solid rgba(255,255,255,.05);
+          border-bottom: 1px solid rgba(255,255,255,.045);
+          background: #0a0a0a;
+          z-index: 22;
+        }
+
+        .preview-info-strip strong {
+          min-width: 0;
+          overflow: hidden;
+          padding: 0 4px;
+          color: rgba(255,255,255,.86);
+          font-size: 7.5px;
+          font-weight: 950;
+          text-overflow: ellipsis;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .preview-position {
+          color: rgba(255,255,255,.30);
+          font-size: 6.5px;
+          font-weight: 900;
+          text-align: center;
+        }
+
+        .preview-side,
+        .preview-out {
+          height: 100%;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .preview-side {
+          color: #00c2ff;
+          font-size: 17px;
+          font-weight: 950;
+        }
+
+        .preview-side:hover {
+          background: rgba(0,194,255,.07);
+        }
+
+        .preview-out {
+          border-left: 1px solid rgba(255,255,255,.045);
+          border-right: 1px solid rgba(255,255,255,.045);
+          color: #ffc400;
+          font-size: 7px;
+          font-weight: 950;
+        }
+
+        .preview-out:disabled {
+          color: rgba(255,255,255,.18);
+          cursor: default;
         }
 
         .photo-rail {
