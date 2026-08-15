@@ -116,7 +116,8 @@ const LOCATION_STANDARD_PRESENTATION =
           slotId: "relationships-infrastructure",
           moduleType: "relationship-infrastructure-panel",
           config: {
-            title: "RELATIONSHIPS & INFRASTRUCTURE"
+            title: "RELATIONSHIPS & INFRASTRUCTURE",
+            height: 88
           },
           presentation: {
             role: "summary",
