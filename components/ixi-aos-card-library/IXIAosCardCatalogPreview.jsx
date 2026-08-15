@@ -15,6 +15,9 @@ import IXIAosCard002Location
 import IXIAosCard003Location
   from "../ixi-aos/cards/003/IXIAosCard003Location";
 
+import IXIAosLocationFace2Operations
+  from "../ixi-aos/cards/location/IXIAosLocationFace2Operations";
+
 import {
   adaptAosCardTemplate
 } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
@@ -100,6 +103,7 @@ export default function IXIAosCardCatalogPreview({
   skinId = "ixi:skin:default"
 }) {
   const [previewCardState, setPreviewCardState] = useState({});
+  const [locationFace, setLocationFace] = useState(2);
 
   const object = useMemo(
     () => createPreviewObject({ template: template || {}, sampleData }),
@@ -158,9 +162,67 @@ export default function IXIAosCardCatalogPreview({
           : IXIAosCard001Location;
 
     return (
-      <div className="aos-card-catalog-console">
-        <LocationCard {...sharedLocationProps} />
+      <div className="aos-card-catalog-location-preview">
+        <div className="location-face-switcher">
+          <button
+            type="button"
+            className={locationFace === 1 ? "active" : ""}
+            onClick={() => setLocationFace(1)}
+          >
+            F1 · OVERVIEW
+          </button>
+          <button
+            type="button"
+            className={locationFace === 2 ? "active" : ""}
+            onClick={() => setLocationFace(2)}
+          >
+            F2 · OPERATIONS
+          </button>
+        </div>
+
+        <div className="aos-card-catalog-console">
+          {locationFace === 2 ? (
+            <IXIAosLocationFace2Operations {...sharedLocationProps} />
+          ) : (
+            <LocationCard {...sharedLocationProps} />
+          )}
+        </div>
+
         <style jsx>{`
+          .aos-card-catalog-location-preview {
+            width: 298px;
+            height: 499px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+          }
+
+          .location-face-switcher {
+            height: 22px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+          }
+
+          .location-face-switcher button {
+            height: 22px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 4px;
+            background: rgba(255,255,255,.025);
+            color: rgba(255,255,255,.42);
+            font-size: 6.5px;
+            font-weight: 950;
+            letter-spacing: .035em;
+            cursor: pointer;
+          }
+
+          .location-face-switcher button.active {
+            border-color: rgba(255,196,0,.34);
+            background: rgba(255,196,0,.09);
+            color: #ffc400;
+          }
+
           .aos-card-catalog-console {
             position: relative;
             width: 298px;
