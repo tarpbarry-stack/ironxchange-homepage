@@ -8,9 +8,34 @@ function withLocalCardDrafts(
   templates = []
 ) {
   const source =
-    Array.isArray(templates)
-      ? [...templates]
-      : [];
+    (Array.isArray(templates)
+      ? templates
+      : [])
+      .map(template => {
+        const slug =
+          String(
+            template?.templateSlug || ""
+          ).trim();
+
+        if (
+          slug ===
+          "location-standard"
+        ) {
+          return {
+            ...template,
+            templateNumber: 1,
+            version: 12,
+            metadata: {
+              ...(template?.metadata || {}),
+              cardLocked: true,
+              lockedCardId:
+                "001-v12"
+            }
+          };
+        }
+
+        return template;
+      });
 
   const has002 =
     source.some(
@@ -48,9 +73,10 @@ function withLocalCardDrafts(
     version: 12,
     metadata: {
       ...(baseLocation?.metadata || {}),
+      cardLocked: false,
       localCardDraft: true,
       derivedFrom:
-        "location-standard"
+        "001-v12"
     }
   });
 
