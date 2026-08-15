@@ -3,6 +3,7 @@ import { createIXIWorkOrderDraft } from "./IXIWorkOrderContract";
 import { getIXIWorkOrderActuals } from "./IXIWorkOrderSelectors";
 import IXIWorkOrderStyles from "./IXIWorkOrderStyles";
 import IXIExpenseApp from "../expense/IXIExpenseApp";
+import IXIMaterialApp from "../material/IXIMaterialApp";
 import { WorkOrderIcon, LocationIcon, CameraIcon, MicIcon, RepairIcon, PMIcon, InspectIcon, ReadyIcon, FlagIcon, OperableIcon, LimitedIcon, DownIcon, PersonIcon, TeamIcon, CreateIcon, EditIcon, ClockIcon, MaterialIcon, ServiceIcon, ExpenseIcon, PurchaseIcon, DocumentIcon, PauseIcon, StopIcon, RefreshIcon } from "../../IXITransactIcons";
 
 const clean = value => String(value ?? "").trim();
@@ -29,8 +30,8 @@ export default function IXIWorkOrderApp({ context = {}, initialWorkOrder = null,
   const actorName = clean(context.actor?.displayName || context.actor?.name || context.actor?.label) || "—";
 
   function act(id) {
-    if (id === "expense") {
-      setSubmodule("expense");
+    if (id === "expense" || id === "material") {
+      setSubmodule(id);
       return;
     }
     onAction?.(id,workOrder,context);
@@ -55,10 +56,25 @@ export default function IXIWorkOrderApp({ context = {}, initialWorkOrder = null,
     setSubmodule("");
   }
 
+  function saveMaterial(draft,input,response) {
+    const materialUsageId = clean(draft?.identity?.materialUsageId) || `MAT-${Date.now()}`;
+    setWorkOrder(current => ({
+      ...current,
+      references:{...(current?.references || {}),materialRecordIds:[...((current?.references || {}).materialRecordIds || []),materialUsageId]},
+      financial:{...(current?.financial || {}),materialActual:Number(current?.financial?.materialActual || 0)+Number(draft?.material?.extendedCost || 0)}
+    }));
+    onAction?.("material-save",workOrder,context,{material:{...draft,identity:{...(draft?.identity || {}),materialUsageId}},response});
+    setSubmodule("");
+  }
+
   const Lang = () => <div className="wo-lang"><button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button><i>/</i><button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button></div>;
 
   if (workOrder && submodule === "expense") {
     return <IXIExpenseApp context={context} workOrder={workOrder} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveExpense}/>;
+  }
+
+  if (workOrder && submodule === "material") {
+    return <IXIMaterialApp context={context} workOrder={workOrder} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveMaterial}/>;
   }
 
   if (!workOrder) return <div className="wo-app wo-v13"><Lang/>
