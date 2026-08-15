@@ -14,6 +14,9 @@ import {
   renderIXIAosContainerModule
 } from "../container-runtime/IXIAosContainerModules";
 
+import IXIAosEditableFieldGroup
+  from "./modules/IXIAosEditableFieldGroup";
+
 
 /*
  * IXI AOS CARD RENDERER
@@ -81,6 +84,14 @@ export default function IXIAosCardRenderer({
   onSendToArmedDestination = null,
 
   /*
+   * GENERIC OBJECT EDIT CONTRACT
+   *
+   * The renderer does not own persistence.
+   * It only forwards field edits to its caller.
+   */
+  onObjectFieldChange = null,
+
+  /*
    * CONTAINER OPERATIONS
    */
   onAddObject = null,
@@ -97,7 +108,7 @@ export default function IXIAosCardRenderer({
    * This renderer itself does not create
    * or manage console state.
    */
-   onOpenConsole = null,
+  onOpenConsole = null,
 
   onExpandConsoleLeft = null,
   onExpandConsoleRight = null,
@@ -111,9 +122,9 @@ export default function IXIAosCardRenderer({
 
   studioEditing = false,
 
-selectedModuleId = "",
+  selectedModuleId = "",
 
-onSelectModule = null,
+  onSelectModule = null,
 
   /*
    * IMPORTANT:
@@ -204,7 +215,6 @@ onSelectModule = null,
 
     return (
       <IXIAosCardRenderer
-
         object={
           childObject
         }
@@ -283,7 +293,6 @@ onSelectModule = null,
         renderCard={
           renderCard
         }
-
       />
     );
   }
@@ -312,6 +321,47 @@ onSelectModule = null,
 
 
     /*
+     * GENERIC EDITABLE FIELD GROUP
+     *
+     * This is deliberately object-agnostic.
+     * Location, Job, Employee, Vehicle, etc.
+     * can all use the same primitive.
+     *
+     * Width belongs to the field spec, so a
+     * two-letter state field never needs to
+     * consume half of a 298px Card.
+     */
+    if (
+      moduleType ===
+        "editable-field-group" ||
+      moduleType ===
+        "weighted-field-row"
+    ) {
+      return (
+        <IXIAosEditableFieldGroup
+          object={
+            runtimeObject
+          }
+
+          moduleDefinition={
+            module
+          }
+
+          editing={
+            Boolean(
+              ixiState?.editing
+            )
+          }
+
+          onFieldChange={
+            onObjectFieldChange
+          }
+        />
+      );
+    }
+
+
+    /*
      * CONTAINER MODULE PACK
      *
      * This renderer only delegates the
@@ -322,7 +372,6 @@ onSelectModule = null,
      */
     const containerModule =
       renderIXIAosContainerModule({
-
         moduleType,
 
         object:
@@ -379,19 +428,18 @@ onSelectModule = null,
      ======================================================= */
 
   return (
-   <IXIAosCardRuntime
+    <IXIAosCardRuntime
+      object={
+        object
+      }
 
-  object={
-    object
-  }
+      projection={
+        projection
+      }
 
-  projection={
-    projection
-  }
-
-  cardDefinition={
-    resolvedDefinition
-  }
+      cardDefinition={
+        resolvedDefinition
+      }
 
       parentLabel={
         parentLabel
@@ -437,50 +485,49 @@ onSelectModule = null,
         onSendToArmedDestination
       }
 
-       onOpenConsole={
-    onOpenConsole
-  }
+      onOpenConsole={
+        onOpenConsole
+      }
 
-  onExpandConsoleLeft={
-    onExpandConsoleLeft
-  }
+      onExpandConsoleLeft={
+        onExpandConsoleLeft
+      }
 
-  onExpandConsoleRight={
-    onExpandConsoleRight
-  }
+      onExpandConsoleRight={
+        onExpandConsoleRight
+      }
 
-  consoleLeftOpen={
-    consoleLeftOpen
-  }
+      consoleLeftOpen={
+        consoleLeftOpen
+      }
 
-  consoleRightOpen={
-    consoleRightOpen
-  }
+      consoleRightOpen={
+        consoleRightOpen
+      }
 
-  forcedFaceIndex={
-    forcedFaceIndex
-  }
+      forcedFaceIndex={
+        forcedFaceIndex
+      }
 
-  faceOnly={
-    faceOnly
-  }
+      faceOnly={
+        faceOnly
+      }
 
-  studioEditing={
-    studioEditing
-  }
+      studioEditing={
+        studioEditing
+      }
 
-selectedModuleId={
-  selectedModuleId
-}
+      selectedModuleId={
+        selectedModuleId
+      }
 
-onSelectModule={
-  onSelectModule
-}
+      onSelectModule={
+        onSelectModule
+      }
 
       renderModule={
         renderModule
       }
-
     />
   );
 }
