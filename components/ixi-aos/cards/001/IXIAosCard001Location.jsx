@@ -226,9 +226,8 @@ export default function IXIAosCard001Location({
     moduleType: "weighted-field-row",
     config: {
       fields: [
-        { fieldId: "yardHours", label: "YARD HOURS", width: "1fr" },
         { fieldId: "yardContact", label: "YARD CONTACT", width: "1fr" },
-        { fieldId: "yardPhone", label: "PHONE", width: 82 }
+        { fieldId: "yardPhone", label: "PHONE", width: 92 }
       ]
     }
   };
@@ -450,7 +449,7 @@ export default function IXIAosCard001Location({
 
         .name-input {
           display: block;
-          width: 100%;
+          width: calc(100% - 78px);
           height: 22px;
           margin-top: 2px;
           padding: 0 5px;
@@ -491,7 +490,12 @@ export default function IXIAosCard001Location({
         }
 
         .relationships {
-          margin-bottom: 0;
+          position: absolute;
+          left: 6px;
+          right: 6px;
+          bottom: 0;
+          height: 66px;
+          margin: 0;
         }
 
         .edit-actions {
