@@ -27,6 +27,17 @@ const LOCATION_STANDARD_PRESENTATION =
   Object.freeze({
     faceLayouts: {
       1: [
+        /* HEADER is card chrome and is injected by the adapter. */
+
+        {
+          slotId: "location-photo",
+          moduleType: "primary-media",
+          presentation: {
+            role: "hero",
+            width: "full"
+          }
+        },
+
         {
           slotId: "address-line",
           moduleType: "editable-field-group",
@@ -108,8 +119,48 @@ const LOCATION_STANDARD_PRESENTATION =
         },
 
         {
-          slotId: "container-actions",
-          moduleType: "container-actions",
+          slotId: "yard-quick-facts",
+          moduleType: "weighted-field-row",
+          config: {
+            fields: [
+              {
+                fieldId: "yardHours",
+                label: "YARD HOURS",
+                width: "1fr"
+              },
+              {
+                fieldId: "yardContact",
+                label: "YARD CONTACT",
+                width: "1fr"
+              },
+              {
+                fieldId: "yardPhone",
+                label: "PHONE",
+                width: 82
+              }
+            ]
+          },
+          presentation: {
+            role: "summary",
+            width: "full"
+          }
+        },
+
+        {
+          slotId: "relationships-infrastructure",
+          moduleType: "relationship-infrastructure-panel",
+          config: {
+            title: "RELATIONSHIPS & INFRASTRUCTURE"
+          },
+          presentation: {
+            role: "summary",
+            width: "full"
+          }
+        },
+
+        {
+          slotId: "container-command-strip",
+          moduleType: "container-command-strip",
           presentation: {
             role: "compact",
             width: "full"
@@ -120,7 +171,7 @@ const LOCATION_STANDARD_PRESENTATION =
           slotId: "container-viewer",
           moduleType: "container-collection-preview",
           presentation: {
-            role: "hero",
+            role: "viewer-bottom",
             width: "full"
           }
         }
