@@ -429,7 +429,6 @@ export default function IXISmartContainerIdentityFace({
         />
       </div>
 
-
       <style jsx>{`
         .ixi-smart-container-face,
         .ixi-smart-container-face * {
@@ -539,6 +538,9 @@ export default function IXISmartContainerIdentityFace({
           font-weight: 950;
 
           cursor: pointer;
+
+          position: relative;
+          z-index: 100;
         }
 
         .smart-top-actions
@@ -546,6 +548,24 @@ export default function IXISmartContainerIdentityFace({
           font-size: 7.5px;
         }
 
+        .smart-top-actions button:hover {
+          color:
+            var(
+              --ixi-skin-accent,
+              #ffc400
+            );
+
+          border-color:
+            rgba(255,196,0,.38);
+
+          background:
+            rgba(255,196,0,.06);
+        }
+
+
+        /* ===============================================
+           LARGE PREVIEW
+           =============================================== */
 
         .smart-preview {
           height: 184px;
@@ -664,8 +684,11 @@ export default function IXISmartContainerIdentityFace({
             rgba(255,255,255,.42);
 
           font-size: 28px;
+          font-weight: 300;
 
           cursor: pointer;
+
+          z-index: 5;
 
           opacity: 0;
 
@@ -682,11 +705,30 @@ export default function IXISmartContainerIdentityFace({
 
         .smart-prev {
           left: 0;
+
+          border-radius:
+            0 10px 10px 0;
         }
 
         .smart-next {
           right: 0;
+
+          border-radius:
+            10px 0 0 10px;
         }
+
+        .smart-arrow:hover {
+          background:
+            rgba(0,0,0,.14);
+
+          color:
+            rgba(255,255,255,.68);
+        }
+
+
+        /* ===============================================
+           PREVIEW INFO
+           =============================================== */
 
         .smart-preview-info {
           height: 43px;
@@ -711,6 +753,8 @@ export default function IXISmartContainerIdentityFace({
           min-width: 0;
 
           flex: 1 1 auto;
+
+          padding: 0;
         }
 
         .smart-preview-copy strong {
@@ -735,6 +779,8 @@ export default function IXISmartContainerIdentityFace({
           margin-top: 4px;
 
           display: flex;
+
+          align-items: center;
 
           gap: 8px;
 
@@ -774,8 +820,20 @@ export default function IXISmartContainerIdentityFace({
           font-size: 8px;
           font-weight: 950;
 
+          letter-spacing: .04em;
+
           cursor: pointer;
         }
+
+        .smart-out:hover {
+          color:
+            rgba(0,194,255,1);
+        }
+
+
+        /* ===============================================
+           EMPTY
+           =============================================== */
 
         .smart-empty {
           width: 100%;
@@ -800,6 +858,8 @@ export default function IXISmartContainerIdentityFace({
 
           font-size: 9px;
           font-weight: 950;
+
+          letter-spacing: .08em;
         }
 
         .smart-empty strong {
@@ -811,8 +871,14 @@ export default function IXISmartContainerIdentityFace({
         }
 
 
+        /* ===============================================
+           SNAPSHOT
+           =============================================== */
+
         .smart-snapshot {
           display: flex;
+
+          align-items: stretch;
 
           gap: 6px;
 
@@ -872,6 +938,10 @@ export default function IXISmartContainerIdentityFace({
         }
 
 
+        /* ===============================================
+           RECALL / BOARD / RETURN
+           =============================================== */
+
         .smart-command-strip {
           height: 27px;
           min-height: 27px;
@@ -896,6 +966,8 @@ export default function IXISmartContainerIdentityFace({
 
           background:
             rgba(10,10,10,.96);
+
+          z-index: 31;
         }
 
         .smart-command-strip button {
@@ -911,11 +983,70 @@ export default function IXISmartContainerIdentityFace({
           padding: 0 4px;
 
           border: 0;
+
           border-right:
             1px solid
             rgba(255,255,255,.045);
 
-          background: transparent;
+          background:
+            transparent;
 
           color:
             rgba(255,255,255,.56);
+
+          font-size: 8px;
+          font-weight: 950;
+
+          letter-spacing: .04em;
+
+          cursor: pointer;
+        }
+
+        .smart-command-strip
+        button:last-child {
+          border-right: 0;
+        }
+
+        .smart-command-strip
+        button:hover {
+          background:
+            rgba(0,194,255,.045);
+
+          color:
+            rgba(255,255,255,.92);
+        }
+
+        .smart-command-strip
+        .command-icon {
+          color:
+            rgba(0,194,255,.82);
+
+          font-size: 12px;
+          font-weight: 950;
+        }
+
+
+        /* ===============================================
+           THUMB FILMSTRIP
+           =============================================== */
+
+        .smart-thumb-shell {
+          height: 64px;
+          min-height: 64px;
+
+          overflow: hidden;
+
+          z-index: 25;
+        }
+
+        :global(
+          .smart-thumb-shell
+          .ixi-collection-thumb-rail
+        ) {
+          height: 64px;
+        }
+      `}</style>
+
+    </div>
+  );
+}     
