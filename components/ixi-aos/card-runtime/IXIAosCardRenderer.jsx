@@ -20,36 +20,8 @@ import IXIAosEditableFieldGroup
 import IXIAosCardHeaderControls
   from "./modules/IXIAosCardHeaderControls";
 
-
-/*
- * IXI AOS CARD RENDERER
- *
- * This is NOT a taxonomy registry.
- *
- * It does not ask:
- *
- * - location?
- * - employee?
- * - job?
- * - vehicle?
- *
- * It asks only:
- *
- * 1. What Object is this?
- * 2. What Card Definition does it use?
- * 3. What modules does the active Face request?
- *
- * Placement never changes Card identity.
- *
- * IMPORTANT
- * ---------
- *
- * This renderer does NOT own console physics.
- *
- * The existing IXI console system remains
- * responsible for console slots, expansion,
- * persistence, face swapping, and layout.
- */
+import IXIAosEditSessionActions
+  from "./modules/IXIAosEditSessionActions";
 
 
 function safeObject(
@@ -95,35 +67,17 @@ export default function IXIAosCardRenderer({
 
   onSendToArmedDestination = null,
 
-  /*
-   * GENERIC OBJECT EDIT CONTRACT
-   *
-   * If a caller provides onObjectFieldChange,
-   * field writes are delegated outward.
-   *
-   * If not, the renderer keeps an explicit
-   * edit draft in IXI presentation state.
-   * That draft is NOT durable Object truth.
-   * A later Save action may commit it through
-   * the Object service without changing this
-   * rendering contract.
-   */
   onObjectFieldChange = null,
+  onSaveObject = null,
 
   onHideObject = null,
   onDeleteObject = null,
 
-  /*
-   * CONTAINER OPERATIONS
-   */
   onAddObject = null,
   onBoard = null,
   onRecall = null,
   onExposeObject = null,
 
-  /*
-   * CONSOLE ENTRY POINT
-   */
   onOpenConsole = null,
 
   onExpandConsoleLeft = null,
@@ -145,6 +99,12 @@ export default function IXIAosCardRenderer({
   renderCard = null
 }) {
 
+  const [
+    savingEdit,
+    setSavingEdit
+  ] = useState(false);
+
+
   const objectId =
     String(
       object?.objectId ||
@@ -152,10 +112,6 @@ export default function IXIAosCardRenderer({
       ""
     );
 
-
-  /* =======================================================
-     CARD DEFINITION
-     ======================================================= */
 
   const resolvedDefinition =
     useMemo(
@@ -178,10 +134,6 @@ export default function IXIAosCardRenderer({
       ?.capabilities ||
     {};
 
-
-  /* =======================================================
-     GENERIC EDIT DRAFT
-     ======================================================= */
 
   const editDraft =
     safeObject(
@@ -255,20 +207,12 @@ export default function IXIAosCardRenderer({
   }
 
 
-  /* =======================================================
-     CONTAINER DECK STATE
-     ======================================================= */
-
   const [
     selectedChildIndex,
     setSelectedChildIndex
   ] =
     useState(0);
 
-
-  /* =======================================================
-     CONTAINED CARD RENDERER
-     ======================================================= */
 
   function renderContainedCard({
     object:
@@ -372,49 +316,112 @@ export default function IXIAosCardRenderer({
   }
 
 
-  /* =======================================================
-     CARD EDIT STATE
-     ======================================================= */
-
-  function toggleEditing() {
+  function beginEditing() {
     if (!objectId) {
       return;
     }
-
-
-    const nextEditing =
-      !Boolean(
-        ixiState?.editing
-      );
-
 
     onIxiStateChange?.(
       objectId,
       {
         editing:
-          nextEditing,
+          true,
 
-        ...(
-          nextEditing
-            ? {
-                editDraft: {
-                  fields: {
-                    ...safeObject(
-                      object?.fields
-                    )
-                  }
-                }
-              }
-            : {}
-        )
+        editDraft: {
+          fields: {
+            ...safeObject(
+              object?.fields
+            )
+          }
+        }
       }
     );
   }
 
 
-  /* =======================================================
-     MODULE DISPATCH
-     ======================================================= */
+  function cancelEditing() {
+    if (
+      !objectId ||
+      savingEdit
+    ) {
+      return;
+    }
+
+    onIxiStateChange?.(
+      objectId,
+      {
+        editing:
+          false,
+
+        editDraft:
+          null
+      }
+    );
+  }
+
+
+  async function saveEditing() {
+    if (
+      !objectId ||
+      savingEdit
+    ) {
+      return;
+    }
+
+    setSavingEdit(true);
+
+    try {
+      if (
+        typeof onSaveObject ===
+        "function"
+      ) {
+        await onSaveObject({
+          objectId,
+
+          object:
+            runtimeObject,
+
+          fields: {
+            ...safeObject(
+              runtimeObject?.fields
+            )
+          }
+        });
+
+        onIxiStateChange?.(
+          objectId,
+          {
+            editing:
+              false,
+
+            editDraft:
+              null
+          }
+        );
+
+        return;
+      }
+
+      /*
+       * Preview / studio fallback:
+       * leave the draft in presentation state
+       * so the just-saved values remain visible,
+       * but close the edit session. Durable
+       * production callers should provide
+       * onSaveObject and commit through MOS.
+       */
+      onIxiStateChange?.(
+        objectId,
+        {
+          editing:
+            false
+        }
+      );
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
 
   function renderModule({
     module
@@ -429,9 +436,6 @@ export default function IXIAosCardRenderer({
         .toLowerCase();
 
 
-    /*
-     * GENERIC HEADER ACTIONS
-     */
     if (
       moduleType ===
       "card-header-actions"
@@ -460,7 +464,7 @@ export default function IXIAosCardRenderer({
           }
 
           onToggleEdit={
-            toggleEditing
+            beginEditing
           }
 
           onHide={
@@ -479,9 +483,6 @@ export default function IXIAosCardRenderer({
     }
 
 
-    /*
-     * GENERIC EDITABLE FIELD GROUP
-     */
     if (
       moduleType ===
         "editable-field-group" ||
@@ -512,9 +513,34 @@ export default function IXIAosCardRenderer({
     }
 
 
-    /*
-     * CONTAINER MODULE PACK
-     */
+    if (
+      moduleType ===
+      "edit-session-actions"
+    ) {
+      return (
+        <IXIAosEditSessionActions
+          editing={
+            Boolean(
+              ixiState?.editing
+            )
+          }
+
+          saving={
+            savingEdit
+          }
+
+          onSave={
+            saveEditing
+          }
+
+          onCancel={
+            cancelEditing
+          }
+        />
+      );
+    }
+
+
     const containerModule =
       renderIXIAosContainerModule({
         moduleType,
@@ -558,10 +584,6 @@ export default function IXIAosCardRenderer({
     return null;
   }
 
-
-  /* =======================================================
-     CARD RUNTIME
-     ======================================================= */
 
   return (
     <IXIAosCardRuntime
