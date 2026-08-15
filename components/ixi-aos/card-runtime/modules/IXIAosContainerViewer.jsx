@@ -47,7 +47,6 @@ export default function IXIAosContainerViewer({
       [container, objects]
     );
 
-
   const presentation =
     getSmartContainerPresentation({
       container,
@@ -56,20 +55,15 @@ export default function IXIAosContainerViewer({
         selectedIndex
     });
 
-
   const selectedChild =
-    presentation?.selectedChild ||
-    null;
+    presentation?.selectedChild || null;
 
   const selectedChildIndex =
     Number(
-      presentation?.selectedChildIndex ||
-      0
+      presentation?.selectedChildIndex || 0
     );
 
-  const itemCount =
-    children.length;
-
+  const itemCount = children.length;
 
   function setIndex(nextIndex) {
     if (!itemCount) {
@@ -80,31 +74,20 @@ export default function IXIAosContainerViewer({
       ((nextIndex % itemCount) +
         itemCount) % itemCount;
 
-    onSelectedIndexChange?.(
-      normalized
-    );
+    onSelectedIndexChange?.(normalized);
   }
-
 
   function previous(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
-
-    setIndex(
-      selectedChildIndex - 1
-    );
+    setIndex(selectedChildIndex - 1);
   }
-
 
   function next(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
-
-    setIndex(
-      selectedChildIndex + 1
-    );
+    setIndex(selectedChildIndex + 1);
   }
-
 
   if (!selectedChild) {
     return (
@@ -115,21 +98,21 @@ export default function IXIAosContainerViewer({
         <style jsx>{`
           .ixi-aos-container-viewer {
             width: 100%;
-            height: 214px;
-            min-height: 214px;
+            height: 84px;
+            min-height: 84px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 4px;
             border: 1px solid rgba(255,255,255,.055);
-            border-radius: 7px;
+            border-radius: 6px;
             background: rgba(7,7,7,.78);
           }
 
           strong {
             color: rgba(255,196,0,.48);
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 950;
           }
 
@@ -143,22 +126,16 @@ export default function IXIAosContainerViewer({
     );
   }
 
-
   const imageUrl =
     clean(
       presentation?.heroImage ||
-      getAosObjectPrimaryImage(
-        selectedChild
-      )
+      getAosObjectPrimaryImage(selectedChild)
     );
 
   const title =
     clean(
-      presentation
-        ?.selectedChildName ||
-      getAosObjectDisplayName(
-        selectedChild
-      )
+      presentation?.selectedChildName ||
+      getAosObjectDisplayName(selectedChild)
     );
 
   const primary =
@@ -172,7 +149,6 @@ export default function IXIAosContainerViewer({
       presentation
         ?.selectedChildSecondaryDescriptor
     );
-
 
   return (
     <div className="ixi-aos-container-viewer">
@@ -230,7 +206,7 @@ export default function IXIAosContainerViewer({
             <span>
               {[primary, secondary]
                 .filter(Boolean)
-                .join("  •  ")}
+                .join(" • ")}
             </span>
           ) : null}
         </div>
@@ -246,7 +222,6 @@ export default function IXIAosContainerViewer({
             onClick={event => {
               event.preventDefault();
               event.stopPropagation();
-
               onExposeObject(
                 selectedChild,
                 container
@@ -261,9 +236,7 @@ export default function IXIAosContainerViewer({
       <div className="viewer-thumbs">
         <IXICollectionThumbRail
           items={children}
-          activeItemIndex={
-            selectedChildIndex
-          }
+          activeItemIndex={selectedChildIndex}
           getItemId={item =>
             getAosObjectId(item)
           }
@@ -273,13 +246,8 @@ export default function IXIAosContainerViewer({
           getItemLabel={item =>
             getAosObjectDisplayName(item)
           }
-          onSelectItem={(
-            item,
-            itemIndex
-          ) =>
-            onSelectedIndexChange?.(
-              itemIndex
-            )
+          onSelectItem={(item, itemIndex) =>
+            onSelectedIndexChange?.(itemIndex)
           }
         />
       </div>
@@ -293,16 +261,18 @@ export default function IXIAosContainerViewer({
         .ixi-aos-container-viewer {
           width: 100%;
           min-width: 0;
+          height: 84px;
+          min-height: 84px;
           overflow: hidden;
           border: 1px solid rgba(255,255,255,.055);
-          border-radius: 7px;
+          border-radius: 6px;
           background: rgba(7,7,7,.78);
         }
 
         .viewer-stage {
           position: relative;
           width: 100%;
-          height: 126px;
+          height: 38px;
           overflow: hidden;
           background: var(--ixi-skin-media-surface, #090909);
         }
@@ -321,18 +291,18 @@ export default function IXIAosContainerViewer({
           align-items: center;
           justify-content: center;
           color: rgba(255,255,255,.13);
-          font-size: 8px;
+          font-size: 6px;
           font-weight: 950;
           letter-spacing: .08em;
         }
 
         .viewer-position {
           position: absolute;
-          top: 6px;
-          right: 6px;
-          min-width: 31px;
-          height: 17px;
-          padding: 0 5px;
+          top: 4px;
+          right: 5px;
+          min-width: 28px;
+          height: 14px;
+          padding: 0 4px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -340,20 +310,20 @@ export default function IXIAosContainerViewer({
           border-radius: 999px;
           background: rgba(0,0,0,.60);
           color: rgba(255,255,255,.72);
-          font-size: 7px;
+          font-size: 6px;
           font-weight: 950;
         }
 
         .viewer-arrow {
           position: absolute;
           top: 50%;
-          width: 23px;
-          height: 74px;
+          width: 18px;
+          height: 32px;
           transform: translateY(-50%);
           border: 0;
-          background: rgba(0,0,0,.10);
+          background: rgba(0,0,0,.12);
           color: rgba(255,255,255,.48);
-          font-size: 27px;
+          font-size: 19px;
           cursor: pointer;
           opacity: 0;
           transition: opacity .16s ease;
@@ -372,11 +342,11 @@ export default function IXIAosContainerViewer({
         }
 
         .viewer-info {
-          height: 38px;
+          height: 22px;
           display: flex;
           align-items: center;
-          gap: 7px;
-          padding: 0 8px;
+          gap: 5px;
+          padding: 0 6px;
           border-top: 1px solid rgba(255,255,255,.04);
           background: #101010;
         }
@@ -396,14 +366,14 @@ export default function IXIAosContainerViewer({
 
         .viewer-copy strong {
           color: rgba(255,255,255,.84);
-          font-size: 10px;
+          font-size: 7px;
           font-weight: 950;
         }
 
         .viewer-copy span {
-          margin-top: 3px;
+          margin-top: 1px;
           color: rgba(255,255,255,.30);
-          font-size: 7px;
+          font-size: 5.5px;
           font-weight: 900;
         }
 
@@ -412,13 +382,13 @@ export default function IXIAosContainerViewer({
           border: 0;
           background: transparent;
           color: var(--ixi-skin-interactive, rgba(0,194,255,.72));
-          font-size: 7px;
+          font-size: 6px;
           font-weight: 950;
           cursor: pointer;
         }
 
         .viewer-thumbs {
-          height: 50px;
+          height: 24px;
           overflow: hidden;
           border-top: 1px solid rgba(255,255,255,.04);
         }
@@ -427,7 +397,7 @@ export default function IXIAosContainerViewer({
           .viewer-thumbs
           .ixi-collection-thumb-rail
         ) {
-          height: 50px;
+          height: 24px;
         }
       `}</style>
     </div>
