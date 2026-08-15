@@ -3,6 +3,7 @@ import IXIMachineRail from "../../IXIMachineRail";
 import {createIXITransactContext} from "./IXITransactContext";
 import {getIXITransactModules} from "./IXITransactModuleRegistry";
 import {createIXITechnologyWorkDraft} from "./modules/IXITransactTechnologyWork";
+import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 
 const clean=v=>String(v??"").trim();
 
@@ -14,10 +15,12 @@ export default function IXITransactApp({object={},actor={},entity={},activeWorkO
 
   function open(item){
     setModuleId(item.id);
-    const launchPayload=item.id==="technology-work"
-      ?{technologyWork:createIXITechnologyWorkDraft(context)}
-      :{};
+    const launchPayload=item.id==="technology-work"?{technologyWork:createIXITechnologyWorkDraft(context)}:{};
     onOpenModule?.(item,context,launchPayload);
+  }
+
+  function workOrderAction(actionId,workOrder,workContext){
+    onOpenModule?.({id:actionId,label:String(actionId||"").toUpperCase(),group:"work-order-action",documentType:actionId},workContext,{workOrder});
   }
 
   return <div className="ixi-transact-app board-color-none board-outline-1">
@@ -26,8 +29,10 @@ export default function IXITransactApp({object={},actor={},entity={},activeWorkO
       <div className="tx-tools"><button type="button" onClick={()=>onOpenConsole?.(context)}>CONSOLE</button><button type="button" onClick={()=>onClose?.()}>×</button></div>
     </header>
     <main className="tx-body">
-      {active?<div className="tx-module"><button type="button" className="tx-back" onClick={()=>setModuleId("")}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small>{active.id==="technology-work"?<p>Specialized external Work Order contract is registered: service type, diagnosis, remote/hookup work, technician notes, normalized final result, upgrades, quote, vendor invoice, actual cost and machine technology history.</p>:<p>This surface is reserved for the real {active.label.toLowerCase()} application. It receives the current AOS Passport/context and emits canonical IXI Record / IXI Financial commands.</p>}</div></div>:<>
-        {context.activeWorkOrder?<button type="button" className="tx-open-work" onClick={()=>open({id:"work-order",label:"CONTINUE WORK",group:"work",documentType:"work-order"})}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber||context.activeWorkOrder.id)||"WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title||context.activeWorkOrder.description)||"IN PROGRESS"}</small><b>CONTINUE ›</b></button>:null}
+      {active?.id==="work-order"?(
+        <IXIWorkOrderApp context={context} initialWorkOrder={context.activeWorkOrder||null} onBack={()=>setModuleId("")} onCreate={(draft,workContext)=>onOpenModule?.({id:"work-order-create",label:"CREATE WORK ORDER",group:"work",documentType:"work-order"},workContext,{workOrder:draft})} onAction={workOrderAction}/>
+      ):active?<div className="tx-module"><button type="button" className="tx-back" onClick={()=>setModuleId("")}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small>{active.id==="technology-work"?<p>Specialized external Work Order contract is registered: service type, diagnosis, remote/hookup work, technician notes, normalized final result, upgrades, quote, vendor invoice, actual cost and machine technology history.</p>:<p>This surface is reserved for the real {active.label.toLowerCase()} application. It receives the current AOS Passport/context and emits canonical IXI Record / IXI Financial commands.</p>}</div></div>:<>
+        {context.activeWorkOrder?<button type="button" className="tx-open-work" onClick={()=>open({id:"work-order",label:"CONTINUE WORK",group:"work",documentType:"work-order"})}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber||context.activeWorkOrder.number||context.activeWorkOrder.id)||"WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title||context.activeWorkOrder.description)||"IN PROGRESS"}</small><b>CONTINUE ›</b></button>:null}
         <div className="tx-label">CREATE / OPEN</div>
         <div className="tx-grid">{modules.map(item=><button type="button" key={item.id} onClick={()=>open(item)}><span>{item.group.toUpperCase()}</span><strong>{item.label}</strong><small>{item.documentType}</small></button>)}</div>
       </>}
