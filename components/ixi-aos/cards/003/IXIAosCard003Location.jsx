@@ -12,9 +12,57 @@ export const CARD_003_LOCATION = Object.freeze({
 });
 
 export default function IXIAosCard003Location(props) {
+  const contactName = String(props?.object?.fields?.yardContact || "JOHN CARTER").trim();
+  const contactPhone = String(props?.object?.fields?.yardPhone || "432-555-0186").trim();
+
   return (
     <div className="card003-variant">
       <IXIAosCard001Location {...props} />
+
+      <div className="card003-contact-overlay">
+        <strong>{contactName}</strong>
+        <span>{contactPhone}</span>
+      </div>
+
+      <style jsx>{`
+        .card003-contact-overlay {
+          position: absolute;
+          top: 95px;
+          left: 156px;
+          width: 135px;
+          height: 22px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          gap: 5px;
+          padding-top: 4px;
+          border-top: 1px solid rgba(255,255,255,.10);
+          pointer-events: none;
+          z-index: 24;
+          font-family: inherit;
+        }
+
+        .card003-contact-overlay strong,
+        .card003-contact-overlay span {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: center;
+        }
+
+        .card003-contact-overlay strong {
+          color: rgba(255,255,255,.82);
+          font-size: 8px;
+          font-weight: 950;
+        }
+
+        .card003-contact-overlay span {
+          color: rgba(255,255,255,.56);
+          font-size: 7px;
+          font-weight: 900;
+        }
+      `}</style>
 
       <style jsx global>{`
         .card003-variant {
@@ -23,7 +71,6 @@ export default function IXIAosCard003Location(props) {
           height: 471px;
         }
 
-        /* Keep 001 as the canonical implementation; 003 changes presentation only. */
         .card003-variant .card001 .body {
           display: grid !important;
           grid-template-columns: 149px 149px !important;
@@ -31,7 +78,6 @@ export default function IXIAosCard003Location(props) {
           align-content: stretch !important;
         }
 
-        /* Main Location media: half width, half height, left side. */
         .card003-variant .card001 .photo {
           grid-column: 1 !important;
           grid-row: 1 !important;
@@ -48,14 +94,13 @@ export default function IXIAosCard003Location(props) {
           margin-top: 0 !important;
         }
 
-        /* Address occupies the matching right half. Contact sits beneath it. */
         .card003-variant .card001 .address {
           grid-column: 2 !important;
           grid-row: 1 !important;
           width: 149px !important;
           height: 79px !important;
           margin: 0 !important;
-          padding: 8px 8px 27px !important;
+          padding: 5px 8px 28px !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -67,7 +112,7 @@ export default function IXIAosCard003Location(props) {
         .card003-variant .card001 .address .ixi-aos-inline-address {
           width: 100% !important;
           height: auto !important;
-          min-height: 26px !important;
+          min-height: 34px !important;
           padding: 0 2px !important;
           overflow: visible !important;
           align-items: center !important;
@@ -78,25 +123,25 @@ export default function IXIAosCard003Location(props) {
           white-space: normal !important;
           overflow: visible !important;
           text-overflow: clip !important;
-          line-height: 1.2 !important;
+          line-height: 1.18 !important;
           text-align: center !important;
         }
 
-        .card003-variant .card001 .address::after {
-          content: "CONTACT  •  JOHN CARTER  •  432-555-0186";
-          position: absolute;
-          left: 7px;
-          right: 7px;
-          bottom: 8px;
-          color: rgba(255,255,255,.52);
-          font-size: 6.5px;
-          font-weight: 900;
-          line-height: 1;
-          text-align: center;
-          white-space: nowrap;
+        /* Remove the bullet between street and city so copy/paste reads as an address. */
+        .card003-variant .card001 .address .ixi-aos-inline-address strong {
+          font-size: 0 !important;
         }
 
-        /* Selected contained-object header remains directly below the top viewer. */
+        .card003-variant .card001 .address .ixi-aos-inline-address strong::before {
+          content: "2400 AVIATION DRIVE\\A DFW AIRPORT, TX 75261";
+          white-space: pre-line;
+          color: rgba(255,255,255,.86);
+          font-size: 9px;
+          font-weight: 900;
+          font-family: inherit;
+          line-height: 1.25;
+        }
+
         .card003-variant .card001 .preview-info-strip {
           grid-column: 1 / 3 !important;
           grid-row: 2 !important;
@@ -117,7 +162,6 @@ export default function IXIAosCard003Location(props) {
           margin: 5px 6px 0 !important;
         }
 
-        /* 001 contained-object viewer stays at the bottom for this variant. */
         .card003-variant .card001 .photo-rail {
           display: block !important;
         }
