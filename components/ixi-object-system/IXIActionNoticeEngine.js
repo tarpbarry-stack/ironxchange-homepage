@@ -5,6 +5,8 @@ export const IXI_ACTION_NOTICE_TONES = Object.freeze({
   ERROR: "error"
 });
 
+export const IXI_ACTION_NOTICE_EVENT = "ixi:aos-action-notice";
+
 function clean(value) {
   return String(value || "").trim();
 }
@@ -44,6 +46,111 @@ export function createIXIActionNoticePatch(notice = null) {
   };
 }
 
+export function emitIXIActionNotice({
+  objectId = "",
+  listingId = "",
+  message = "",
+  tone = IXI_ACTION_NOTICE_TONES.SUCCESS,
+  duration = 1600,
+  blocking = false,
+  commandId = "",
+  source = ""
+} = {}) {
+  const id = resolveIXIActionNoticeObjectId({ objectId, listingId });
+
+  if (!id || !clean(message)) {
+    return null;
+  }
+
+  const detail = {
+    objectId: id,
+    message,
+    tone,
+    duration,
+    blocking,
+    commandId,
+    source
+  };
+
+  if (
+    typeof window !== "undefined" &&
+    typeof window.dispatchEvent === "function" &&
+    typeof CustomEvent === "function"
+  ) {
+    window.dispatchEvent(
+      new CustomEvent(IXI_ACTION_NOTICE_EVENT, { detail })
+    );
+  }
+
+  return detail;
+}
+
+export async function runIXIActionNoticeLifecycle({
+  objectId = "",
+  listingId = "",
+  operation,
+  savingMessage = "WORKING...",
+  successMessage = "COMPLETE",
+  errorMessage = "COMMAND FAILED",
+  commandId = "",
+  source = "ixi-command",
+  successDuration = 1800,
+  errorDuration = 2600
+} = {}) {
+  if (typeof operation !== "function") {
+    throw new Error("runIXIActionNoticeLifecycle requires an operation function.");
+  }
+
+  const id = resolveIXIActionNoticeObjectId({ objectId, listingId });
+
+  emitIXIActionNotice({
+    objectId: id,
+    message: savingMessage,
+    tone: IXI_ACTION_NOTICE_TONES.INFO,
+    duration: 0,
+    blocking: true,
+    commandId,
+    source
+  });
+
+  try {
+    const result = await operation();
+    const resolvedSuccessMessage =
+      typeof successMessage === "function"
+        ? successMessage(result)
+        : successMessage;
+
+    emitIXIActionNotice({
+      objectId: id,
+      message: resolvedSuccessMessage,
+      tone: IXI_ACTION_NOTICE_TONES.SUCCESS,
+      duration: successDuration,
+      blocking: false,
+      commandId,
+      source
+    });
+
+    return result;
+  } catch (error) {
+    const resolvedErrorMessage =
+      typeof errorMessage === "function"
+        ? errorMessage(error)
+        : errorMessage;
+
+    emitIXIActionNotice({
+      objectId: id,
+      message: resolvedErrorMessage,
+      tone: IXI_ACTION_NOTICE_TONES.ERROR,
+      duration: errorDuration,
+      blocking: false,
+      commandId,
+      source
+    });
+
+    throw error;
+  }
+}
+
 export function setIXIActionNotice({
   setState,
   objectId = "",
@@ -78,7 +185,6 @@ export function setIXIActionNotice({
     }
   }));
 
-  // duration <= 0 means the command/promise lifecycle owns clearing/replacement.
   if (notice.duration <= 0 || typeof window === "undefined") {
     return notice;
   }
