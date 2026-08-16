@@ -23,7 +23,7 @@ function validDateOnly(value) {
   return !Number.isNaN(date.getTime());
 }
 
-export const IXI_PURCHASE_SCHEMA = "ixi-purchase-v1";
+export const IXI_PURCHASE_SCHEMA = "ixi-purchase-v2";
 
 export const IXI_PURCHASE_REQUEST_TYPES = Object.freeze([
   "purchase-request",
@@ -51,8 +51,8 @@ function normalizeCurrency(value) {
 }
 
 function normalizeLine(line = {}, index = 0) {
-  // Preserve the signed numeric values in the canonical draft so validation can
-  // reject bad input. Do not silently coerce a negative price/quantity to zero.
+  // Preserve signed values so validation can reject bad input instead of
+  // silently converting invalid quantities/prices into legitimate zeroes.
   const quantity = finiteNumber(line.quantity);
   const estimatedUnitCost = money(line.estimatedUnitCost);
 
@@ -83,12 +83,21 @@ export function createIXIPurchaseDraft({
   const estimatedShipping = money(input.estimatedShipping);
   const estimatedTotal = money(subtotal + estimatedShipping);
 
-  const workOrderId = clean(workOrder.identity?.workOrderId);
+  const workOrderId = clean(
+    workOrder.identity?.workOrderId ||
+    workOrder.workOrderId ||
+    input.workOrderId
+  );
   const workOrderNumber = clean(
     workOrder.identity?.number ||
     workOrder.workOrderNumber ||
-    workOrder.number
+    workOrder.number ||
+    input.workOrderNumber
   );
+
+  const actor = context.actor || {};
+  const location = context.location || {};
+  const primary = context.primary || {};
 
   return {
     schema: IXI_PURCHASE_SCHEMA,
@@ -98,12 +107,17 @@ export function createIXIPurchaseDraft({
       clientRequestId: clean(input.clientRequestId)
     },
     context: {
-      primaryPassportId: clean(context.primary?.passportId),
-      primaryObjectId: clean(context.primary?.objectId),
+      primaryPassportId: clean(primary.passportId),
+      primaryObjectId: clean(primary.objectId || primary.id),
+      primaryObjectType: clean(primary.objectType),
+      primaryObjectLabel: clean(primary.label),
       entityPassportId: clean(context.entity?.passportId),
-      locationPassportId: clean(context.location?.passportId),
-      employeePassportId: clean(context.actor?.passportId),
-      employeeId: clean(context.actor?.employeeId || context.actor?.userId),
+      locationPassportId: clean(location.passportId),
+      locationId: clean(location.objectId || location.id),
+      locationLabel: clean(location.label),
+      employeePassportId: clean(actor.passportId),
+      employeeId: clean(actor.employeeId || actor.userId || actor.id),
+      employeeLabel: clean(actor.displayName || actor.name || actor.label),
       workOrderId,
       workOrderNumber
     },
@@ -114,7 +128,12 @@ export function createIXIPurchaseDraft({
       vendorLabel: clean(input.vendorLabel),
       neededByDate: clean(input.neededByDate),
       priority: normalizePriority(input.priority),
-      chargeTo: clean(input.chargeTo) || workOrderNumber,
+      whatNeeded: clean(input.whatNeeded || input.description) || items.map(line => line.description).filter(Boolean).join(", "),
+      businessReason: clean(input.businessReason || input.reason || input.notes),
+      shipToId: clean(input.shipToId || location.objectId || location.id),
+      shipToPassportId: clean(input.shipToPassportId || location.passportId),
+      shipToLabel: clean(input.shipToLabel || location.label),
+      chargeTo: clean(input.chargeTo) || workOrderNumber || clean(primary.label),
       costCode: clean(input.costCode),
       currency: normalizeCurrency(input.currency),
       items,
@@ -122,6 +141,7 @@ export function createIXIPurchaseDraft({
       estimatedShipping,
       estimatedTotal,
       notes: clean(input.notes),
+      quoteCount: Math.max(0, Math.floor(finiteNumber(input.quoteCount))),
       attachments: Array.isArray(input.attachments) ? input.attachments : []
     },
     reconciliation: {
@@ -133,25 +153,39 @@ export function createIXIPurchaseDraft({
     financial: {
       state: requestType === "purchase-order" ? "committed" : "requested",
       requestedAmount: estimatedTotal,
-      committedAmount: requestType === "purchase-order" ? estimatedTotal : 0
+      committedAmount: requestType === "purchase-order" ? estimatedTotal : 0,
+      billedAmount: 0,
+      paidAmount: 0
+    },
+    approval: {
+      state: requestType === "purchase-order" ? "direct-po-requested" : "pending-evaluation",
+      requiredRole: "",
+      requiredAuthority: 0,
+      approvals: []
     },
     status: "draft",
     createdAt: clean(input.createdAt) || new Date().toISOString()
   };
 }
 
-export function validateIXIPurchase(draft = {}) {
+export function validateIXIPurchase(draft = {}, options = {}) {
   const errors = {};
   const purchase = draft.purchase || {};
   const items = Array.isArray(purchase.items) ? purchase.items : [];
   const attachments = Array.isArray(purchase.attachments) ? purchase.attachments : [];
+  const requireVendor = options.requireVendor !== false;
+  const requireBusinessReason = options.requireBusinessReason !== false;
 
   if (!clean(draft.context?.primaryPassportId)) {
     errors.primary = "Originating AOS Passport is required";
   }
 
-  if (!clean(purchase.vendorLabel)) {
+  if (requireVendor && !clean(purchase.vendorLabel)) {
     errors.vendor = "required";
+  }
+
+  if (requireBusinessReason && !clean(purchase.businessReason)) {
+    errors.businessReason = "required";
   }
 
   if (!validDateOnly(purchase.neededByDate)) {
