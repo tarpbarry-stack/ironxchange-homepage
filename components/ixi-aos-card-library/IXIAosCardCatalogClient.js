@@ -45,6 +45,25 @@ function withLocalCardDrafts(templates = []) {
       };
     }
 
+    /* Existing persisted 007 profile template is now presentation recipe 008. */
+    if (slug === "employee-basic-007") {
+      return {
+        ...template,
+        templateNumber: 8,
+        label: "Profile Layout 008",
+        librarySection: "AOS OBJECT LAYOUTS",
+        baseObjectType: "customer-defined-object",
+        version: 12,
+        capabilities: genericContainerCapabilities(template?.capabilities || {}),
+        metadata: {
+          ...(template?.metadata || {}),
+          cardNumber: "008",
+          renderer: "schema-driven-generic-profile",
+          sampleUse: "personnel"
+        }
+      };
+    }
+
     return template;
   });
 
@@ -112,16 +131,16 @@ function withLocalCardDrafts(templates = []) {
     });
   });
 
-  const layout007Exists = source.some(
-    template => clean(template?.templateSlug) === "employee-basic-007"
+  const universal007Exists = source.some(
+    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 7 || clean(template?.templateSlug) === "universal-object-007"
   );
 
-  if (!layout007Exists) {
+  if (!universal007Exists) {
     source.push({
       templateNumber: 7,
-      templateSlug: "employee-basic-007",
-      label: "Object Layout 007",
-      librarySection: "AOS OBJECT LAYOUTS",
+      templateSlug: "universal-object-007",
+      label: "Universal Card 007",
+      librarySection: "AOS UNIVERSAL LAYOUTS",
       baseObjectType: "customer-defined-object",
       version: 12,
       fieldSchema: [],
@@ -130,13 +149,37 @@ function withLocalCardDrafts(templates = []) {
         localCardDraft: true,
         cardNumber: "007",
         visualLanguage: "v12",
-        renderer: "schema-driven-generic",
+        renderer: "universal-object-card",
+        defaultCard: true
+      }
+    });
+  }
+
+  const profile008Exists = source.some(
+    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 8
+  );
+
+  if (!profile008Exists) {
+    source.push({
+      templateNumber: 8,
+      templateSlug: "employee-basic-007",
+      label: "Profile Layout 008",
+      librarySection: "AOS OBJECT LAYOUTS",
+      baseObjectType: "customer-defined-object",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "008",
+        visualLanguage: "v12",
+        renderer: "schema-driven-generic-profile",
         sampleUse: "personnel"
       }
     });
   }
 
-  return source;
+  return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 
 export async function loadAosCardCatalog({
