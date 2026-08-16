@@ -11,6 +11,20 @@ import {
 } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
 
 
+function cleanId(value) {
+  return String(value ?? "").trim();
+}
+
+
+function getMosObjectId(object = {}) {
+  return cleanId(
+    object?.objectId ||
+    object?.id?.uuid ||
+    object?.id
+  );
+}
+
+
 export default function useIXIAosWorkspaceRegistry({
   workspaceListings = [],
   aosObjects = [],
@@ -21,71 +35,74 @@ export default function useIXIAosWorkspaceRegistry({
   visibleSavedListings = []
 }) {
 
-  /*
-   * =========================================================
-   * UNIVERSAL AOS WORKSPACE OBJECT REGISTRY
-   * =========================================================
-   *
-   * This registry answers:
-   *
-   * workspace objectId
-   *        ↓
-   * actual object
-   *
-   * It can contain:
-   *
-   * Sharetribe machine/listing objects
-   * persisted MOS objects
-   * System Index objects
-   *
-   * It does NOT determine canonical MOS
-   * containment or relationships.
-   */
+  const systemIndexIds =
+    useMemo(
+      () => new Set(
+        (workspaceSystemIndexes || [])
+          .map(index =>
+            cleanId(
+              index?.objectId
+            )
+          )
+          .filter(Boolean)
+      ),
+      [workspaceSystemIndexes]
+    );
+
+
+  const machineIds =
+    useMemo(
+      () => new Set(
+        (workspaceListings || [])
+          .map(item =>
+            cleanId(
+              getListingId(item)
+            )
+          )
+          .filter(Boolean)
+      ),
+      [workspaceListings]
+    );
+
+
+  /* =========================================================
+     UNIVERSAL AOS WORKSPACE OBJECT REGISTRY
+
+     Identity is source-driven:
+
+     - MOS object identity comes from objectId.
+     - IronXchange machine identity comes from listing identity.
+     - System Index presentation comes from the assembled
+       System Index collection.
+
+     We do NOT inspect business nouns or objectType to decide
+     whether something deserves to exist in the workspace.
+     ========================================================= */
   const objectRegistry =
     useMemo(() => {
       const registry =
         new Map();
 
 
-      /*
-       * Durable MOS workspace objects.
-       *
-       * Existing machines intentionally
-       * stay on their proven listing path.
-       *
-       * System Indexes are registered
-       * separately below because their
-       * workspace projection may carry
-       * additional presentation state.
-       */
+      /* Durable MOS objects. */
       (aosObjects || []).forEach(
         object => {
-          const objectType =
-            String(
-              object?.objectType ||
-              ""
-            )
-              .trim()
-              .toLowerCase();
+          const objectId =
+            getMosObjectId(object);
 
-          if (
-            !objectType ||
-            objectType ===
-              "system-index" ||
-            objectType ===
-              "machine"
-          ) {
+          if (!objectId) {
             return;
           }
 
-          const objectId =
-            String(
-              object?.objectId ||
-              object?.id ||
-              ""
-            );
-
-          if (!objectId) {
+          /*
+           * System Index presentation is registered below.
+           * Avoid two records for the same stable objectId.
+           */
+          if (
+            systemIndexIds.has(
+              objectId
+            )
+          ) {
             return;
           }
 
@@ -97,16 +114,12 @@ export default function useIXIAosWorkspaceRegistry({
       );
 
 
-      /*
-       * Existing IronXchange
-       * machine/listing objects.
-       */
+      /* IronXchange machines/listings. */
       (workspaceListings || []).forEach(
         item => {
           const id =
-            String(
-              getListingId(item) ||
-              ""
+            cleanId(
+              getListingId(item)
             );
 
           if (!id) {
@@ -122,42 +135,43 @@ export default function useIXIAosWorkspaceRegistry({
 
 
       /*
-       * System Index workspace objects.
+       * System Index presentation objects.
        *
-       * Equipment uses its working
-       * workspace projection here rather
-       * than mutating canonical Equipment
-       * membership.
+       * Equipment alone receives a workspace-deck projection;
+       * canonical Equipment membership remains owned by the
+       * IronXchange adapter.
        */
-      (
-        workspaceSystemIndexes ||
-        []
-      ).forEach(index => {
-        const objectId =
-          String(
-            index?.objectId ||
-            ""
-          );
+      (workspaceSystemIndexes || [])
+        .forEach(index => {
+          const objectId =
+            cleanId(
+              index?.objectId
+            );
 
-        if (!objectId) {
-          return;
-        }
-
-        const workspaceIndex =
-          index?.indexId ===
-            "equipment" &&
-          equipmentWorkspaceIndex
-            ? equipmentWorkspaceIndex
-            : index;
-
-        registry.set(
-          objectId,
-          {
-            ...workspaceIndex,
-            objectId
+          if (!objectId) {
+            return;
           }
-        );
-      });
+
+          const isEquipmentAdapter =
+            index?.metadata?.adapterId ===
+              "ixi-owned-equipment" ||
+            index?.indexId ===
+              "equipment";
+
+          const workspaceIndex =
+            isEquipmentAdapter &&
+            equipmentWorkspaceIndex
+              ? equipmentWorkspaceIndex
+              : index;
+
+          registry.set(
+            objectId,
+            {
+              ...workspaceIndex,
+              objectId
+            }
+          );
+        });
 
 
       return registry;
@@ -165,26 +179,19 @@ export default function useIXIAosWorkspaceRegistry({
       workspaceListings,
       aosObjects,
       workspaceSystemIndexes,
-      equipmentWorkspaceIndex
+      equipmentWorkspaceIndex,
+      systemIndexIds
     ]);
 
 
-  /*
-   * =========================================================
-   * BOARD PROJECTION
-   * =========================================================
-   *
-   * Workspace placement determines which
-   * object IDs currently belong on Board.
-   *
-   * This function resolves those IDs back
-   * into actual objects.
-   *
-   * IMPORTANT:
-   *
-   * This is workspace presentation only.
-   * It does not determine MOS containment.
-   */
+  /* =========================================================
+     BOARD PROJECTION
+
+     Placement determines Board membership.
+     Machine search/filter state applies ONLY to machines from
+     the IronXchange listing universe. MOS objects and System
+     Indexes are not accidentally hidden by machine filters.
+     ========================================================= */
   const boardItems =
     useMemo(() => {
       const orderedObjects =
@@ -195,87 +202,47 @@ export default function useIXIAosWorkspaceRegistry({
           surfaceId:
             "board",
 
-          objectRegistry:
-            objectRegistry
+          objectRegistry
         });
 
 
-      /*
-       * Existing machine filtering/search
-       * remains intact.
-       *
-       * System Indexes remain structural
-       * Board objects and are therefore not
-       * removed by machine filtering.
-       *
-       * We are intentionally preserving
-       * CURRENT behavior during extraction.
-       *
-       * Location/MOS rendering behavior can
-       * be expanded here after this extraction
-       * passes regression testing.
-       */
-    const visibleMachineIds =
-  new Set(
-    (
-      visibleSavedListings ||
-      []
-    )
-      .map(item =>
-        String(
-          getListingId(item) ||
-          ""
-        )
-      )
-      .filter(Boolean)
-  );
+      const visibleMachineIds =
+        new Set(
+          (visibleSavedListings || [])
+            .map(item =>
+              cleanId(
+                getListingId(item)
+              )
+            )
+            .filter(Boolean)
+        );
 
-return orderedObjects.filter(
-  item => {
-    const objectType =
-      String(
-        item?.objectType ||
-        ""
-      )
-        .trim()
-        .toLowerCase();
 
-    /*
-     * Structural and durable MOS
-     * objects are workspace objects
-     * in their own right.
-     *
-     * Their Board visibility is
-     * determined by workspace placement,
-     * not by machine search/filter state.
-     */
-    if (
-      objectType &&
-      objectType !== "machine"
-    ) {
-      return true;
-    }
+      return orderedObjects.filter(
+        item => {
+          const listingId =
+            cleanId(
+              getListingId(item)
+            );
 
-    /*
-     * Existing IronXchange machines
-     * retain their proven Marketplace /
-     * inventory filtering behavior.
-     */
-    const id =
-      String(
-        getListingId(item) ||
-        ""
+          const isMachine =
+            listingId &&
+            machineIds.has(listingId);
+
+          if (!isMachine) {
+            return true;
+          }
+
+          return visibleMachineIds.has(
+            listingId
+          );
+        }
       );
-
-    return (
-      visibleMachineIds.has(id)
-    );
-  }
-);
     }, [
       workspacePlacements,
       objectRegistry,
-      visibleSavedListings
+      visibleSavedListings,
+      machineIds
     ]);
 
 
