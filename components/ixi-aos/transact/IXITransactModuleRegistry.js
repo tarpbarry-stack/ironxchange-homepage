@@ -12,6 +12,7 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "material", label: "PART / MATERIAL", group: "work", documentType: "material-usage" }),
   Object.freeze({ id: "asset-acquisition", label: "ASSET ACQUISITION", group: "asset", documentType: "asset-acquisition" }),
   Object.freeze({ id: "rental-expense", label: "RENTAL EXPENSE", group: "rent", documentType: "rental" }),
+  Object.freeze({ id: "rental-income", label: "RENTAL INCOME", group: "rent", documentType: "rental" }),
   Object.freeze({ id: "bill", label: "BILL / INVOICE", group: "spend", documentType: "bill" }),
   Object.freeze({ id: "receipt", label: "RECEIPT", group: "spend", documentType: "receipt" }),
   Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order" }),
@@ -21,11 +22,11 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
 ]);
 
 const MACHINE_ORDER = Object.freeze([
-  "work-order", "expense", "technology-work", "time", "material", "asset-acquisition", "rental-expense", "purchase-order", "receipt", "bill", "quote", "invoice", "settlement"
+  "work-order", "expense", "technology-work", "time", "material", "asset-acquisition", "rental-expense", "rental-income", "purchase-order", "receipt", "bill", "quote", "invoice", "settlement"
 ]);
 
 const LOCATION_ORDER = Object.freeze([
-  "work-order", "expense", "purchase-order", "bill", "receipt", "technology-work", "time", "material", "asset-acquisition", "rental-expense", "quote", "invoice", "settlement"
+  "work-order", "expense", "purchase-order", "bill", "receipt", "technology-work", "time", "material", "asset-acquisition", "rental-expense", "rental-income", "quote", "invoice", "settlement"
 ]);
 
 function sortByOrder(items, order) {
