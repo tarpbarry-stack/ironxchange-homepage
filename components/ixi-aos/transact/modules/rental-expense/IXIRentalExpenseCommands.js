@@ -1,5 +1,5 @@
 import { createIXIAosObjectFinancialDocument, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
-import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
+import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import { createIXIRentalExpenseDraft, validateIXIRentalExpense } from "./IXIRentalExpenseContract";
 import { applyIXIRentalExpenseEconomics } from "./IXIRentalExpenseRecordEngine";
 
