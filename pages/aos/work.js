@@ -31,8 +31,6 @@ import {
   loadIXIMosEnvironment
 } from "../../lib/mos/loadIXIMosEnvironment";
 
-import ListingCard from "../../components/ListingCard";
-
 import IXISystemIndexCard
   from "../../components/ixi-mos/IXISystemIndexCard";
 
@@ -2878,9 +2876,8 @@ if (
 }
 
 /*
- * Actual IronXchange machine/listing:
- * keep the existing ListingCard
- * overlay fallback.
+ * Actual IronXchange machine/listing uses the current machine-card
+ * runtime through the Board renderer; no legacy overlay is mounted.
  */
 return null;
 }}
