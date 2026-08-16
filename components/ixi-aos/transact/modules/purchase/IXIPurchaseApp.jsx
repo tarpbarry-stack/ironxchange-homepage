@@ -2,9 +2,21 @@ import { useMemo, useRef, useState } from "react";
 
 import { createIXIPurchaseDraft, validateIXIPurchase } from "./IXIPurchaseContract";
 import { createIXIPurchase, issueIXIPurchaseOrderFromRecord } from "./IXIPurchaseCommands";
-import { applyIXIPurchaseAction, appendIXIPurchaseRelated } from "./IXIPurchaseRecordEngine";
-import { IXI_PURCHASE_ACTIONS, evaluateIXIPurchaseRuntime, resolveIXIPurchasingPolicy } from "./IXIPurchasePolicyEngine";
-import { createIXIPendingAttachment, validateIXITransactFile } from "../../IXITransactFilePolicy";
+import { matchIXIPurchaseBill } from "./IXIPurchaseBillCommands";
+import {
+  applyIXIPurchaseAction,
+  appendIXIPurchaseRelated,
+  attachIXIPurchaseFinancialDocument
+} from "./IXIPurchaseRecordEngine";
+import {
+  IXI_PURCHASE_ACTIONS,
+  evaluateIXIPurchaseRuntime,
+  resolveIXIPurchasingPolicy
+} from "./IXIPurchasePolicyEngine";
+import {
+  createIXIPendingAttachment,
+  validateIXITransactFile
+} from "../../IXITransactFilePolicy";
 import IXIPurchaseCard from "./IXIPurchaseCard";
 import IXIPurchaseStyles from "./IXIPurchaseStyles";
 
@@ -36,11 +48,19 @@ const COPY = {
 };
 
 function blankLine() {
-  return { lineId: `LINE-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, description: "", quantity: 1, unit: "EA", estimatedUnitCost: "" };
+  return {
+    lineId: `LINE-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    description: "",
+    quantity: 1,
+    unit: "EA",
+    estimatedUnitCost: ""
+  };
 }
 
 function createClientRequestId() {
-  if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) return `PUR-${globalThis.crypto.randomUUID()}`;
+  if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
+    return `PUR-${globalThis.crypto.randomUUID()}`;
+  }
   return `PUR-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -52,18 +72,60 @@ function todayPlus(days = 3) {
 
 function relatedRecords(context = {}, workOrder = {}) {
   return [
-    { id: clean(context.primary?.objectId || context.primary?.passportId), label: clean(context.primary?.label), type: clean(context.primary?.objectType || "Object") },
-    { id: clean(workOrder?.identity?.workOrderId || workOrder?.identity?.number || workOrder?.workOrderNumber), label: clean(workOrder?.identity?.number || workOrder?.workOrderNumber || workOrder?.number), type: "Work Order" },
-    { id: clean(context.location?.objectId || context.location?.passportId), label: clean(context.location?.label), type: "Location" },
-    { id: clean(context.actor?.employeeId || context.actor?.passportId || context.actor?.userId), label: clean(context.actor?.displayName || context.actor?.name || context.actor?.label), type: "Employee" }
+    {
+      id: clean(context.primary?.objectId || context.primary?.passportId),
+      label: clean(context.primary?.label),
+      type: clean(context.primary?.objectType || "Object")
+    },
+    {
+      id: clean(
+        workOrder?.identity?.workOrderId ||
+        workOrder?.identity?.number ||
+        workOrder?.workOrderNumber
+      ),
+      label: clean(
+        workOrder?.identity?.number ||
+        workOrder?.workOrderNumber ||
+        workOrder?.number
+      ),
+      type: "Work Order"
+    },
+    {
+      id: clean(context.location?.objectId || context.location?.passportId),
+      label: clean(context.location?.label),
+      type: "Location"
+    },
+    {
+      id: clean(
+        context.actor?.employeeId ||
+        context.actor?.passportId ||
+        context.actor?.userId
+      ),
+      label: clean(
+        context.actor?.displayName ||
+        context.actor?.name ||
+        context.actor?.label
+      ),
+      type: "Employee"
+    }
   ].filter(item => item.id && item.label);
 }
 
 export default function IXIPurchaseApp({
-  context = {}, workOrder = {}, initialPurchase = null, language = "en", onLanguageChange = null, onCancel = null, onSave = null,
-  onPurchaseChange = null, purchasingPolicy = null, purchasingAuthority = null
+  context = {},
+  workOrder = {},
+  initialPurchase = null,
+  language = "en",
+  onLanguageChange = null,
+  onCancel = null,
+  onSave = null,
+  onPurchaseChange = null,
+  purchasingPolicy = null,
+  purchasingAuthority = null
 }) {
-  const [localLanguage, setLocalLanguage] = useState(language === "es" ? "es" : "en");
+  const [localLanguage, setLocalLanguage] = useState(
+    language === "es" ? "es" : "en"
+  );
   const [record, setRecord] = useState(initialPurchase || null);
   const [requestType, setRequestType] = useState("purchase-request");
   const [vendorLabel, setVendorLabel] = useState("");
@@ -83,67 +145,209 @@ export default function IXIPurchaseApp({
   const requestIdRef = useRef(createClientRequestId());
   const lang = language === "es" || localLanguage === "es" ? "es" : "en";
   const t = COPY[lang];
-  const policy = useMemo(() => resolveIXIPurchasingPolicy(context, purchasingPolicy), [context, purchasingPolicy]);
+  const policy = useMemo(
+    () => resolveIXIPurchasingPolicy(context, purchasingPolicy),
+    [context, purchasingPolicy]
+  );
   const primary = context.primary || {};
   const location = context.location || {};
   const actor = context.actor || {};
-  const workOrderNumber = clean(workOrder?.identity?.number || workOrder?.workOrderNumber || workOrder?.number);
+  const workOrderNumber = clean(
+    workOrder?.identity?.number ||
+    workOrder?.workOrderNumber ||
+    workOrder?.number
+  );
   const chargeTo = workOrderNumber || clean(primary.label) || "AOS OBJECT";
 
   const pendingAttachments = useMemo(
-    () => attachments.map(item => createIXIPendingAttachment(item.file, { type: "purchase-support" })),
+    () => attachments.map(item =>
+      createIXIPendingAttachment(item.file, { type: "purchase-support" })
+    ),
     [attachments]
   );
 
-  const input = useMemo(() => ({
-    clientRequestId: requestIdRef.current, requestType, vendorLabel, neededByDate, priority, whatNeeded, businessReason, items,
-    estimatedShipping: Number(shipping || 0), shipToId: clean(location.objectId || location.id), shipToPassportId: clean(location.passportId),
-    shipToLabel: clean(location.label), chargeTo, costCode, currency: "USD", notes, quoteCount: attachments.length, attachments: pendingAttachments
-  }), [requestType, vendorLabel, neededByDate, priority, whatNeeded, businessReason, items, shipping, location, chargeTo, costCode, notes, attachments.length, pendingAttachments]);
+  const input = useMemo(
+    () => ({
+      clientRequestId: requestIdRef.current,
+      requestType,
+      vendorLabel,
+      neededByDate,
+      priority,
+      whatNeeded,
+      businessReason,
+      items,
+      estimatedShipping: Number(shipping || 0),
+      shipToId: clean(location.objectId || location.id),
+      shipToPassportId: clean(location.passportId),
+      shipToLabel: clean(location.label),
+      chargeTo,
+      costCode,
+      currency: "USD",
+      notes,
+      quoteCount: attachments.length,
+      attachments: pendingAttachments
+    }),
+    [
+      requestType,
+      vendorLabel,
+      neededByDate,
+      priority,
+      whatNeeded,
+      businessReason,
+      items,
+      shipping,
+      location,
+      chargeTo,
+      costCode,
+      notes,
+      attachments.length,
+      pendingAttachments
+    ]
+  );
 
-  const draft = useMemo(() => createIXIPurchaseDraft({ context, workOrder, input }), [context, workOrder, input]);
-  const runtime = useMemo(() => evaluateIXIPurchaseRuntime({ context, purchase: draft, policy, authority: purchasingAuthority }), [context, draft, policy, purchasingAuthority]);
+  const draft = useMemo(
+    () => createIXIPurchaseDraft({ context, workOrder, input }),
+    [context, workOrder, input]
+  );
 
-  function changeLanguage(next) { setLocalLanguage(next); onLanguageChange?.(next); }
-  function patchItem(index, key, value) { setItems(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item)); }
-  function removeItem(index) { setItems(current => { const next = current.filter((_, itemIndex) => itemIndex !== index); return next.length ? next : [blankLine()]; }); }
+  const runtime = useMemo(
+    () => evaluateIXIPurchaseRuntime({
+      context,
+      purchase: draft,
+      policy,
+      authority: purchasingAuthority
+    }),
+    [context, draft, policy, purchasingAuthority]
+  );
+
+  function changeLanguage(next) {
+    setLocalLanguage(next);
+    onLanguageChange?.(next);
+  }
+
+  function patchItem(index, key, value) {
+    setItems(current => current.map((item, itemIndex) =>
+      itemIndex === index ? { ...item, [key]: value } : item
+    ));
+  }
+
+  function removeItem(index) {
+    setItems(current => {
+      const next = current.filter((_, itemIndex) => itemIndex !== index);
+      return next.length ? next : [blankLine()];
+    });
+  }
 
   function addFiles(files) {
     const next = [];
     const rejected = [];
+
     for (const file of Array.from(files || [])) {
-      const validation = validateIXITransactFile(file, { maxBytes: MAX_ATTACHMENT_BYTES, allowedMimeTypes: PURCHASE_MIME_TYPES, allowedExtensions: [".pdf", ".jpg", ".jpeg", ".png"] });
-      if (!validation.valid) { rejected.push(validation.message); continue; }
-      next.push({ file, key: `${file.name}:${file.size}:${file.lastModified}` });
+      const validation = validateIXITransactFile(file, {
+        maxBytes: MAX_ATTACHMENT_BYTES,
+        allowedMimeTypes: PURCHASE_MIME_TYPES,
+        allowedExtensions: [".pdf", ".jpg", ".jpeg", ".png"]
+      });
+
+      if (!validation.valid) {
+        rejected.push(validation.message);
+        continue;
+      }
+
+      next.push({
+        file,
+        key: `${file.name}:${file.size}:${file.lastModified}`
+      });
     }
-    if (next.length) setAttachments(current => { const map = new Map(current.map(item => [item.key, item])); next.forEach(item => map.set(item.key, item)); return [...map.values()]; });
-    setErrors(current => ({ ...current, attachments: rejected[0] || undefined }));
+
+    if (next.length) {
+      setAttachments(current => {
+        const map = new Map(current.map(item => [item.key, item]));
+        next.forEach(item => map.set(item.key, item));
+        return [...map.values()];
+      });
+    }
+
+    setErrors(current => ({
+      ...current,
+      attachments: rejected[0] || undefined
+    }));
   }
 
   async function submit() {
     if (saving) return;
-    const validation = validateIXIPurchase(draft, { requireVendor: policy.request.requireVendor !== false, requireBusinessReason: policy.request.requireBusinessReason !== false });
+
+    const validation = validateIXIPurchase(draft, {
+      requireVendor: policy.request.requireVendor !== false,
+      requireBusinessReason: policy.request.requireBusinessReason !== false
+    });
     const nextErrors = { ...validation.errors };
-    if (runtime.quoteRequirement.requiredQuotes > attachments.length) nextErrors.attachments = `${runtime.quoteRequirement.requiredQuotes} quote(s) required by company policy.`;
-    if (requestType === "purchase-order" && !runtime.canDirectPo) nextErrors.requestType = t.directPoDenied;
+
+    if (runtime.quoteRequirement.requiredQuotes > attachments.length) {
+      nextErrors.attachments =
+        `${runtime.quoteRequirement.requiredQuotes} quote(s) required by company policy.`;
+    }
+
+    if (requestType === "purchase-order" && !runtime.canDirectPo) {
+      nextErrors.requestType = t.directPoDenied;
+    }
+
     setErrors(nextErrors);
     setSaveError("");
+
     if (Object.values(nextErrors).some(Boolean)) return;
 
     setSaving(true);
+
     try {
       const persisted = await createIXIPurchase({
-        object: { passportId: primary.passportId, objectId: primary.objectId || primary.id, objectType: primary.objectType, label: primary.label },
-        context, workOrder, input, policy, authority: purchasingAuthority,
-        metadata: { source: workOrderNumber ? "ixi-transact-work-order-purchase" : "ixi-transact-object-purchase" }
+        object: {
+          passportId: primary.passportId,
+          objectId: primary.objectId || primary.id,
+          objectType: primary.objectType,
+          label: primary.label
+        },
+        context,
+        workOrder,
+        input,
+        policy,
+        authority: purchasingAuthority,
+        metadata: {
+          source: workOrderNumber
+            ? "ixi-transact-work-order-purchase"
+            : "ixi-transact-object-purchase"
+        }
       });
 
       let nextRecord = persisted.record;
-      for (const related of relatedRecords(context, workOrder)) nextRecord = appendIXIPurchaseRelated(nextRecord, related);
-      if (vendorLabel) nextRecord = appendIXIPurchaseRelated(nextRecord, { id: clean(input.vendorId || `vendor:${vendorLabel.toLowerCase()}`), label: vendorLabel, type: "Vendor" });
 
-      await onSave?.(persisted.draft, { ...input, files: attachments.map(item => item.file), purchaseRecord: nextRecord }, persisted.response);
-      await onPurchaseChange?.(nextRecord, { action: "created", persisted });
+      for (const related of relatedRecords(context, workOrder)) {
+        nextRecord = appendIXIPurchaseRelated(nextRecord, related);
+      }
+
+      if (vendorLabel) {
+        nextRecord = appendIXIPurchaseRelated(nextRecord, {
+          id: clean(input.vendorId || `vendor:${vendorLabel.toLowerCase()}`),
+          label: vendorLabel,
+          type: "Vendor"
+        });
+      }
+
+      await onSave?.(
+        persisted.draft,
+        {
+          ...input,
+          files: attachments.map(item => item.file),
+          purchaseRecord: nextRecord
+        },
+        persisted.response
+      );
+
+      await onPurchaseChange?.(nextRecord, {
+        action: "created",
+        persisted
+      });
+
       setRecord(nextRecord);
     } catch (error) {
       setSaveError(clean(error?.message) || t.saveFailed);
@@ -154,15 +358,18 @@ export default function IXIPurchaseApp({
 
   async function purchaseAction(action, payload = {}) {
     if (!record || saving) return;
+
     setSaving(true);
     setSaveError("");
 
     try {
       let baseRecord = record;
-      let persistence = null;
+      let issuePersistence = null;
+      let billPersistence = null;
+      let actionPayload = payload;
 
       if (action === IXI_PURCHASE_ACTIONS.ISSUE_PO) {
-        persistence = await issueIXIPurchaseOrderFromRecord({
+        issuePersistence = await issueIXIPurchaseOrderFromRecord({
           object: {
             passportId: primary.passportId,
             objectId: primary.objectId || primary.id,
@@ -180,28 +387,68 @@ export default function IXIPurchaseApp({
           }
         });
 
-        baseRecord = persistence.record;
+        baseRecord = issuePersistence.record;
       }
 
-      const next = applyIXIPurchaseAction({
+      if (action === IXI_PURCHASE_ACTIONS.MATCH_BILL) {
+        billPersistence = await matchIXIPurchaseBill({
+          object: {
+            passportId: primary.passportId,
+            objectId: primary.objectId || primary.id,
+            objectType: primary.objectType,
+            label: primary.label
+          },
+          context,
+          record,
+          invoiceNumber: payload.invoiceNumber,
+          invoiceDate: payload.invoiceDate,
+          amount: payload.amount,
+          existingBillDocumentId: payload.billDocumentId,
+          metadata: {
+            source: workOrderNumber
+              ? "ixi-transact-work-order-bill-match"
+              : "ixi-transact-object-bill-match"
+          }
+        });
+
+        actionPayload = {
+          ...payload,
+          billId: billPersistence.billDocumentId,
+          billDocumentId: billPersistence.billDocumentId
+        };
+      }
+
+      let next = applyIXIPurchaseAction({
         record: baseRecord,
         action,
         context,
         policy,
         authority: purchasingAuthority,
         actor,
-        payload
+        payload: actionPayload
       });
 
-      // The parent/IX-Core integration seam is authoritative for non-financial
-      // Purchase lifecycle persistence. Do not advance visible state until that
-      // callback resolves. This gives us rollback-safe behavior even before the
-      // dedicated Purchase Record persistence service is introduced.
+      if (
+        action === IXI_PURCHASE_ACTIONS.MATCH_BILL &&
+        billPersistence?.billDocumentId
+      ) {
+        next = attachIXIPurchaseFinancialDocument(next, {
+          type: "bill",
+          documentId: billPersistence.billDocumentId
+        });
+      }
+
+      /*
+       * The parent / IX-Core integration seam is authoritative for the
+       * non-financial Purchase Record snapshot. Visible state advances only
+       * after that callback resolves, providing rollback-safe client behavior.
+       */
       await onPurchaseChange?.(next, {
         action,
-        payload,
+        payload: actionPayload,
         previous: record,
-        persistence
+        issuePersistence,
+        billPersistence
       });
 
       setRecord(next);
@@ -213,42 +460,164 @@ export default function IXIPurchaseApp({
   }
 
   if (record) {
-    return <IXIPurchaseCard record={record} context={context} policy={policy} authority={purchasingAuthority} language={lang} onLanguageChange={changeLanguage} onAction={purchaseAction} busy={saving} error={saveError} />;
+    return (
+      <IXIPurchaseCard
+        record={record}
+        context={context}
+        policy={policy}
+        authority={purchasingAuthority}
+        language={lang}
+        onLanguageChange={changeLanguage}
+        onAction={purchaseAction}
+        busy={saving}
+        error={saveError}
+      />
+    );
   }
 
   return (
     <div className="tx-purchase">
-      <div className="po-lang" aria-label="Language"><button type="button" className={lang === "en" ? "on" : ""} onClick={() => changeLanguage("en")} disabled={saving}>ENG</button><span>/</span><button type="button" className={lang === "es" ? "on" : ""} onClick={() => changeLanguage("es")} disabled={saving}>ESP</button></div>
-      <div className="po-head"><div className="po-icon" aria-hidden="true">$</div><div className="po-title"><strong>{t.title}</strong><small style={{ color: "#999", fontSize: 8 }}>{t.sub}</small><div className="po-context"><div><b>{primary.label || "—"}</b><small>{t.object}</small></div><div><b>{workOrderNumber || "—"}</b><small>{t.wo}</small></div><div><b>{location.label || "—"}</b><small>{t.location}</small></div><div><b>{actor.displayName || actor.name || actor.label || "—"}</b><small>{t.employee}</small></div></div></div></div>
+      <div className="po-lang" aria-label="Language">
+        <button type="button" className={lang === "en" ? "on" : ""} onClick={() => changeLanguage("en")} disabled={saving}>ENG</button>
+        <span>/</span>
+        <button type="button" className={lang === "es" ? "on" : ""} onClick={() => changeLanguage("es")} disabled={saving}>ESP</button>
+      </div>
+
+      <div className="po-head">
+        <div className="po-icon" aria-hidden="true">$</div>
+        <div className="po-title">
+          <strong>{t.title}</strong>
+          <small style={{ color: "#999", fontSize: 8 }}>{t.sub}</small>
+          <div className="po-context">
+            <div><b>{primary.label || "—"}</b><small>{t.object}</small></div>
+            <div><b>{workOrderNumber || "—"}</b><small>{t.wo}</small></div>
+            <div><b>{location.label || "—"}</b><small>{t.location}</small></div>
+            <div><b>{actor.displayName || actor.name || actor.label || "—"}</b><small>{t.employee}</small></div>
+          </div>
+        </div>
+      </div>
+
       <div className="po-section">{t.details}</div>
 
       <label>{t.mode} <em>*</em></label>
-      <div className="po-modes"><button type="button" className={requestType === "purchase-request" ? "on" : ""} onClick={() => setRequestType("purchase-request")} disabled={saving}>{t.request}</button><button type="button" className={requestType === "purchase-order" ? "on" : ""} onClick={() => runtime.canDirectPo && setRequestType("purchase-order")} disabled={saving || !runtime.canDirectPo} title={!runtime.canDirectPo ? t.directPoDenied : ""}>{t.directPo}</button></div>
+      <div className="po-modes">
+        <button type="button" className={requestType === "purchase-request" ? "on" : ""} onClick={() => setRequestType("purchase-request")} disabled={saving}>{t.request}</button>
+        <button type="button" className={requestType === "purchase-order" ? "on" : ""} onClick={() => runtime.canDirectPo && setRequestType("purchase-order")} disabled={saving || !runtime.canDirectPo} title={!runtime.canDirectPo ? t.directPoDenied : ""}>{t.directPo}</button>
+      </div>
       {errors.requestType ? <div className="po-errors">{errors.requestType}</div> : null}
 
-      <div className="po-two"><div><label>{t.authority}</label><div className="po-field locked-field"><input readOnly value={runtime.approval?.label || "Company policy"} /></div></div><div><label>{t.directLimit}</label><div className="po-field locked-field"><input readOnly value={runtime.directPoLimit >= Number.MAX_SAFE_INTEGER ? "UNLIMITED" : `$${Number(runtime.directPoLimit || 0).toLocaleString()}`} /></div></div></div>
+      <div className="po-two">
+        <div>
+          <label>{t.authority}</label>
+          <div className="po-field locked-field"><input readOnly value={runtime.approval?.label || "Company policy"} /></div>
+        </div>
+        <div>
+          <label>{t.directLimit}</label>
+          <div className="po-field locked-field"><input readOnly value={runtime.directPoLimit >= Number.MAX_SAFE_INTEGER ? "UNLIMITED" : `$${Number(runtime.directPoLimit || 0).toLocaleString()}`} /></div>
+        </div>
+      </div>
 
       <label>{policy.request.requireVendor === false ? t.vendorOptional : t.vendor} {policy.request.requireVendor === false ? null : <em>*</em>}</label>
-      <div className={`po-field ${errors.vendor ? "invalid" : ""}`}><span>▣</span><input value={vendorLabel} onChange={event => setVendorLabel(event.target.value)} disabled={saving} autoComplete="organization" /></div>
+      <div className={`po-field ${errors.vendor ? "invalid" : ""}`}>
+        <span>▣</span>
+        <input value={vendorLabel} onChange={event => setVendorLabel(event.target.value)} disabled={saving} autoComplete="organization" />
+      </div>
 
-      <div className="po-two"><div><label>{t.needed} <em>*</em></label><div className={`po-field ${errors.neededByDate ? "invalid" : ""}`}><input type="date" value={neededByDate} onChange={event => setNeededByDate(event.target.value)} disabled={saving} /></div></div><div><label>{t.priority}</label><div className="po-field"><select value={priority} onChange={event => setPriority(event.target.value)} disabled={saving}><option value="normal">{t.normal}</option><option value="high">{t.high}</option><option value="critical">{t.critical}</option></select></div></div></div>
+      <div className="po-two">
+        <div>
+          <label>{t.needed} <em>*</em></label>
+          <div className={`po-field ${errors.neededByDate ? "invalid" : ""}`}>
+            <input type="date" value={neededByDate} onChange={event => setNeededByDate(event.target.value)} disabled={saving} />
+          </div>
+        </div>
+        <div>
+          <label>{t.priority}</label>
+          <div className="po-field">
+            <select value={priority} onChange={event => setPriority(event.target.value)} disabled={saving}>
+              <option value="normal">{t.normal}</option>
+              <option value="high">{t.high}</option>
+              <option value="critical">{t.critical}</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <label>{t.what} <em>*</em></label><textarea className="po-notes" value={whatNeeded} onChange={event => setWhatNeeded(event.target.value)} disabled={saving} placeholder="CAT 336 hydraulic pump seal kit, filter and oil." />
-      <label>{t.why} {policy.request.requireBusinessReason !== false ? <em>*</em> : null}</label><textarea className={`po-notes ${errors.businessReason ? "invalid" : ""}`} value={businessReason} onChange={event => setBusinessReason(event.target.value)} disabled={saving} placeholder="Machine is down; parts are required to complete repair and return it to service." />
+      <label>{t.what} <em>*</em></label>
+      <textarea className="po-notes" value={whatNeeded} onChange={event => setWhatNeeded(event.target.value)} disabled={saving} placeholder="CAT 336 hydraulic pump seal kit, filter and oil." />
+
+      <label>{t.why} {policy.request.requireBusinessReason !== false ? <em>*</em> : null}</label>
+      <textarea className={`po-notes ${errors.businessReason ? "invalid" : ""}`} value={businessReason} onChange={event => setBusinessReason(event.target.value)} disabled={saving} placeholder="Machine is down; parts are required to complete repair and return it to service." />
 
       <label>{t.items} <em>*</em></label>
-      <div className={`po-lines ${errors.items || errors.itemLine ? "invalid" : ""}`}><div className="po-line-head"><span>{t.description}</span><span>{t.qty}</span><span>{t.unit}</span><span>{t.unitCost}</span><span /></div>{items.map((item, index) => <div className="po-line" key={item.lineId || index}><input value={item.description} onChange={event => patchItem(index, "description", event.target.value)} disabled={saving} /><input inputMode="decimal" value={item.quantity} onChange={event => patchItem(index, "quantity", event.target.value)} disabled={saving} /><select value={item.unit} onChange={event => patchItem(index, "unit", event.target.value)} disabled={saving}><option>EA</option><option>FT</option><option>YD</option><option>HR</option><option>GAL</option></select><input inputMode="decimal" value={item.estimatedUnitCost} onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)} disabled={saving} placeholder="$" /><button type="button" onClick={() => removeItem(index)} disabled={saving}>×</button></div>)}<button type="button" className="po-add" onClick={() => setItems(current => [...current, blankLine()])} disabled={saving}>{t.add}</button></div>
+      <div className={`po-lines ${errors.items || errors.itemLine ? "invalid" : ""}`}>
+        <div className="po-line-head">
+          <span>{t.description}</span><span>{t.qty}</span><span>{t.unit}</span><span>{t.unitCost}</span><span />
+        </div>
+        {items.map((item, index) => (
+          <div className="po-line" key={item.lineId || index}>
+            <input value={item.description} onChange={event => patchItem(index, "description", event.target.value)} disabled={saving} />
+            <input inputMode="decimal" value={item.quantity} onChange={event => patchItem(index, "quantity", event.target.value)} disabled={saving} />
+            <select value={item.unit} onChange={event => patchItem(index, "unit", event.target.value)} disabled={saving}>
+              <option>EA</option><option>FT</option><option>YD</option><option>HR</option><option>GAL</option>
+            </select>
+            <input inputMode="decimal" value={item.estimatedUnitCost} onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)} disabled={saving} placeholder="$" />
+            <button type="button" onClick={() => removeItem(index)} disabled={saving}>×</button>
+          </div>
+        ))}
+        <button type="button" className="po-add" onClick={() => setItems(current => [...current, blankLine()])} disabled={saving}>{t.add}</button>
+      </div>
 
-      <div className="po-two"><div><label>{t.shipping}</label><div className="po-field"><span>$</span><input inputMode="decimal" value={shipping} onChange={event => setShipping(event.target.value)} disabled={saving} /></div></div><div><label>{t.total}</label><div className="po-field"><span>▤</span><input className="po-total" readOnly value={`$${draft.purchase.estimatedTotal.toFixed(2)}`} /></div></div></div>
-      <div className="po-two"><div><label>{t.charge}</label><div className="po-field locked-field"><input readOnly value={chargeTo} /></div></div><div><label>{t.cost}</label><div className="po-field"><input value={costCode} onChange={event => setCostCode(event.target.value)} disabled={saving} /></div></div></div>
+      <div className="po-two">
+        <div>
+          <label>{t.shipping}</label>
+          <div className="po-field"><span>$</span><input inputMode="decimal" value={shipping} onChange={event => setShipping(event.target.value)} disabled={saving} /></div>
+        </div>
+        <div>
+          <label>{t.total}</label>
+          <div className="po-field"><span>▤</span><input className="po-total" readOnly value={`$${draft.purchase.estimatedTotal.toFixed(2)}`} /></div>
+        </div>
+      </div>
 
-      <label>{t.attachments}</label><div className={`po-attach ${errors.attachments ? "invalid" : ""}`}><label className="po-file-button"><input type="file" accept="application/pdf,image/jpeg,image/png" multiple onChange={event => addFiles(event.target.files)} disabled={saving} /><span>{t.attach}</span><small>{attachments.length ? `${attachments.length} file(s): ${attachments.map(item => item.file.name).join(", ")}` : "PDF / JPG / PNG · 25MB each"}</small></label></div>
-      <div style={{ marginTop: 4, color: runtime.quoteRequirement.requiredQuotes > attachments.length ? "#ffc400" : "#77d66d", fontSize: 7, fontWeight: 900 }}>{t.quotesRequired}: {runtime.quoteRequirement.requiredQuotes} · {attachments.length} ATTACHED</div>
+      <div className="po-two">
+        <div>
+          <label>{t.charge}</label>
+          <div className="po-field locked-field"><input readOnly value={chargeTo} /></div>
+        </div>
+        <div>
+          <label>{t.cost}</label>
+          <div className="po-field"><input value={costCode} onChange={event => setCostCode(event.target.value)} disabled={saving} /></div>
+        </div>
+      </div>
 
-      <label>{t.notes}</label><textarea className="po-notes" value={notes} onChange={event => setNotes(event.target.value)} disabled={saving} />
+      <label>{t.attachments}</label>
+      <div className={`po-attach ${errors.attachments ? "invalid" : ""}`}>
+        <label className="po-file-button">
+          <input type="file" accept="application/pdf,image/jpeg,image/png" multiple onChange={event => addFiles(event.target.files)} disabled={saving} />
+          <span>{t.attach}</span>
+          <small>{attachments.length ? `${attachments.length} file(s): ${attachments.map(item => item.file.name).join(", ")}` : "PDF / JPG / PNG · 25MB each"}</small>
+        </label>
+      </div>
+
+      <div style={{
+        marginTop: 4,
+        color: runtime.quoteRequirement.requiredQuotes > attachments.length ? "#ffc400" : "#77d66d",
+        fontSize: 7,
+        fontWeight: 900
+      }}>
+        {t.quotesRequired}: {runtime.quoteRequirement.requiredQuotes} · {attachments.length} ATTACHED
+      </div>
+
+      <label>{t.notes}</label>
+      <textarea className="po-notes" value={notes} onChange={event => setNotes(event.target.value)} disabled={saving} />
+
       {Object.values(errors).some(Boolean) ? <div className="po-errors">{t.required}</div> : null}
       {saveError ? <div className="po-errors po-save-error">{saveError}</div> : null}
-      <div className="po-actions"><button type="button" onClick={() => onCancel?.()} disabled={saving}>{t.cancel}<small>{t.cancelSub}</small></button><button type="button" className="save" onClick={submit} disabled={saving}>{saving ? t.saving : requestType === "purchase-order" ? t.savePo : t.save}<small>{t.saveSub}</small></button></div>
+
+      <div className="po-actions">
+        <button type="button" onClick={() => onCancel?.()} disabled={saving}>{t.cancel}<small>{t.cancelSub}</small></button>
+        <button type="button" className="save" onClick={submit} disabled={saving}>{saving ? t.saving : requestType === "purchase-order" ? t.savePo : t.save}<small>{t.saveSub}</small></button>
+      </div>
+
       <IXIPurchaseStyles />
     </div>
   );
