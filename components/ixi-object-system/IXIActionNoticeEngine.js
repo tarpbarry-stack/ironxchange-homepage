@@ -1,34 +1,61 @@
-export const IXI_ACTION_NOTICE_TONES = {
+export const IXI_ACTION_NOTICE_TONES = Object.freeze({
   SUCCESS: "success",
   INFO: "info",
   WARNING: "warning",
   ERROR: "error"
-};
+});
+
+function clean(value) {
+  return String(value || "").trim();
+}
+
+export function resolveIXIActionNoticeObjectId({
+  objectId = "",
+  listingId = ""
+} = {}) {
+  return clean(objectId || listingId);
+}
 
 export function createIXIActionNotice({
   message = "",
   tone = IXI_ACTION_NOTICE_TONES.SUCCESS,
   duration = 1600,
-  blocking = false
-}) {
+  blocking = false,
+  commandId = "",
+  source = ""
+} = {}) {
+  const createdAt = Date.now();
+
   return {
-    message: String(message || "").toUpperCase(),
-    tone,
-    duration: Number(duration || 0),
+    noticeId: `IXI-NOTICE-${createdAt}-${Math.random().toString(36).slice(2, 8)}`,
+    message: clean(message).toUpperCase(),
+    tone: clean(tone) || IXI_ACTION_NOTICE_TONES.SUCCESS,
+    duration: Number.isFinite(Number(duration)) ? Number(duration) : 1600,
     blocking: Boolean(blocking),
-    createdAt: Date.now()
+    commandId: clean(commandId),
+    source: clean(source),
+    createdAt
+  };
+}
+
+export function createIXIActionNoticePatch(notice = null) {
+  return {
+    actionNotice: notice || null
   };
 }
 
 export function setIXIActionNotice({
   setState,
-  listingId,
+  objectId = "",
+  listingId = "",
   message,
   tone = IXI_ACTION_NOTICE_TONES.SUCCESS,
   duration = 1600,
-  blocking = false
+  blocking = false,
+  commandId = "",
+  source = ""
 }) {
-  const id = String(listingId || "");
+  const id = resolveIXIActionNoticeObjectId({ objectId, listingId });
 
   if (!id || typeof setState !== "function") {
     return null;
@@ -38,34 +65,29 @@ export function setIXIActionNotice({
     message,
     tone,
     duration,
-    blocking
+    blocking,
+    commandId,
+    source
   });
 
   setState(current => ({
     ...(current || {}),
     [id]: {
       ...((current || {})[id] || {}),
-      actionNotice: notice
+      ...createIXIActionNoticePatch(notice)
     }
   }));
 
-  /*
-   * duration <= 0 means the notice is controlled
-   * by the actual Promise lifecycle.
-   */
-  if (notice.duration <= 0) {
+  // duration <= 0 means the command/promise lifecycle owns clearing/replacement.
+  if (notice.duration <= 0 || typeof window === "undefined") {
     return notice;
   }
 
   window.setTimeout(() => {
     setState(current => {
-      const existing =
-        current?.[id]?.actionNotice;
+      const existing = current?.[id]?.actionNotice;
 
-      if (
-        !existing ||
-        existing.createdAt !== notice.createdAt
-      ) {
+      if (!existing || existing.noticeId !== notice.noticeId) {
         return current;
       }
 
@@ -73,7 +95,7 @@ export function setIXIActionNotice({
         ...(current || {}),
         [id]: {
           ...((current || {})[id] || {}),
-          actionNotice: null
+          ...createIXIActionNoticePatch(null)
         }
       };
     });
@@ -84,19 +106,33 @@ export function setIXIActionNotice({
 
 export function clearIXIActionNotice({
   setState,
-  listingId
+  objectId = "",
+  listingId = "",
+  expectedNoticeId = ""
 }) {
-  const id = String(listingId || "");
+  const id = resolveIXIActionNoticeObjectId({ objectId, listingId });
 
   if (!id || typeof setState !== "function") {
     return;
   }
 
-  setState(current => ({
-    ...(current || {}),
-    [id]: {
-      ...((current || {})[id] || {}),
-      actionNotice: null
+  setState(current => {
+    const existing = current?.[id]?.actionNotice;
+
+    if (
+      expectedNoticeId &&
+      existing?.noticeId &&
+      existing.noticeId !== expectedNoticeId
+    ) {
+      return current;
     }
-  }));
+
+    return {
+      ...(current || {}),
+      [id]: {
+        ...((current || {})[id] || {}),
+        ...createIXIActionNoticePatch(null)
+      }
+    };
+  });
 }
