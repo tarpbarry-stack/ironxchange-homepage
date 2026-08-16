@@ -7,7 +7,7 @@ import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContract
  */
 export default function IXIAosCard007EmployeeApplication(props) {
   return (
-    <IXIAosDataContractCardAdapter {...props}>
+    <IXIAosDataContractCardAdapter {...props} minimumCustomFields={8}>
       {contractProps => <IXIAosGenericUniversalLayout007 {...contractProps} />}
     </IXIAosDataContractCardAdapter>
   );
