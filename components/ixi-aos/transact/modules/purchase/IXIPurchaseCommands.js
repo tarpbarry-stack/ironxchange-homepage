@@ -129,6 +129,8 @@ export async function createIXIPurchase({
     idempotencyKey,
     signal,
     input: {
+      workOrderId: draft.context.workOrderId,
+      workOrderNumber: draft.context.workOrderNumber,
       vendorId: purchase.vendorId,
       vendorName: purchase.vendorLabel,
       documentDate: draft.createdAt.slice(0, 10),
