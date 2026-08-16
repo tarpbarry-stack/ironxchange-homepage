@@ -9,6 +9,7 @@ import IXINoteApp from "./modules/note/IXINoteApp";
 import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
+import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -60,6 +61,7 @@ export default function IXITransactApp({
   const photoOpen = moduleId === "work-order-photo";
   const expenseOpen = moduleId === "expense";
   const purchaseOrderOpen = moduleId === "purchase-order";
+  const billOpen = moduleId === "bill";
   const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen;
   const resolvedWorkOrder = workOrderSnapshot || context.activeWorkOrder || null;
 
@@ -136,6 +138,23 @@ export default function IXITransactApp({
         purchaseOrderRecord: nextRecord,
         change,
         returnTo: "purchase-order"
+      }
+    );
+  }
+
+  async function billChanged(nextRecord, change = {}) {
+    await onOpenModule?.(
+      {
+        id: `bill-${change.action || "change"}`,
+        label: "BILL / INVOICE UPDATE",
+        group: "spend",
+        documentType: change.action === "record-payment" ? "payment" : "bill"
+      },
+      context,
+      {
+        billRecord: nextRecord,
+        change,
+        returnTo: "bill"
       }
     );
   }
@@ -253,6 +272,18 @@ export default function IXITransactApp({
       { workOrder: next, photo: storedPhoto, input, response, activity, documents }
     );
     setModuleId("work-order");
+  }
+
+  if (billOpen) {
+    return (
+      <IXIBillStandaloneApp
+        context={context}
+        object={object}
+        authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}}
+        onBack={() => setModuleId("")}
+        onRecordChange={billChanged}
+      />
+    );
   }
 
   return (
