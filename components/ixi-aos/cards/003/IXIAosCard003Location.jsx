@@ -27,16 +27,16 @@ export default function IXIAosCard003Location(props) {
       <style jsx>{`
         .card003-contact-overlay {
           position: absolute;
-          top: 95px;
+          top: 94px;
           left: 157px;
           width: 132px;
-          height: 22px;
+          height: 21px;
           display: grid;
           grid-template-columns: minmax(0,1fr) auto;
           align-items: center;
           gap: 7px;
-          padding: 4px 4px 0;
-          border-top: 1px solid rgba(255,255,255,.07);
+          padding: 3px 3px 0;
+          border-top: 1px solid rgba(255,255,255,.055);
           pointer-events: none;
           z-index: 24;
           font-family: inherit;
@@ -51,15 +51,15 @@ export default function IXIAosCard003Location(props) {
         }
 
         .card003-contact-overlay strong {
-          color: rgba(255,255,255,.76);
-          font-size: 7.6px;
-          font-weight: 780;
-          letter-spacing: .01em;
+          color: rgba(255,255,255,.84);
+          font-size: 8px;
+          font-weight: 770;
+          letter-spacing: 0;
         }
 
         .card003-contact-overlay span {
-          color: rgba(255,255,255,.38);
-          font-size: 6.5px;
+          color: rgba(255,255,255,.46);
+          font-size: 6.8px;
           font-weight: 700;
           text-align: right;
         }
@@ -74,14 +74,14 @@ export default function IXIAosCard003Location(props) {
 
         .card003-variant .card001 {
           background:
-            radial-gradient(130% 72% at 50% -9%, rgba(255,255,255,.052), transparent 44%),
-            linear-gradient(180deg,#111214 0%,#0d0e0f 58%,#0a0b0c 100%) !important;
+            radial-gradient(125% 68% at 50% -9%, rgba(255,255,255,.048), transparent 45%),
+            linear-gradient(180deg,#111214 0%,#0c0d0e 58%,#0a0b0c 100%) !important;
         }
 
         .card003-variant .card001 .body {
           display: grid !important;
           grid-template-columns: 149px 149px !important;
-          grid-template-rows: 79px 22px 31px minmax(0, 1fr) !important;
+          grid-template-rows: 79px 22px 34px minmax(0, 1fr) !important;
           align-content: stretch !important;
         }
 
@@ -91,7 +91,7 @@ export default function IXIAosCard003Location(props) {
           width: 149px !important;
           height: 79px !important;
           overflow: hidden !important;
-          border-right: 1px solid rgba(255,255,255,.055) !important;
+          border-right: 1px solid rgba(255,255,255,.045) !important;
           background: #08090a !important;
         }
 
@@ -111,13 +111,13 @@ export default function IXIAosCard003Location(props) {
           width: 149px !important;
           height: 79px !important;
           margin: 0 !important;
-          padding: 8px 10px 28px !important;
+          padding: 7px 10px 27px !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           overflow: hidden !important;
           position: relative !important;
-          background: linear-gradient(180deg,rgba(255,255,255,.012),rgba(255,255,255,0)) !important;
+          background: linear-gradient(180deg,rgba(255,255,255,.01),rgba(255,255,255,0)) !important;
         }
 
         .card003-variant .card001 .address .ixi-aos-inline-address {
@@ -137,11 +137,11 @@ export default function IXIAosCard003Location(props) {
           white-space: normal !important;
           overflow: visible !important;
           text-overflow: clip !important;
-          color: rgba(255,255,255,.82) !important;
-          font-size: 8.1px !important;
+          color: rgba(255,255,255,.88) !important;
+          font-size: 8.6px !important;
           font-weight: 760 !important;
-          line-height: 1.22 !important;
-          letter-spacing: -.005em !important;
+          line-height: 1.2 !important;
+          letter-spacing: -.01em !important;
           text-align: center !important;
         }
 
@@ -154,15 +154,19 @@ export default function IXIAosCard003Location(props) {
         .card003-variant .card001 .metrics {
           grid-column: 1 / 3 !important;
           grid-row: 3 !important;
-          width: 272px !important;
-          margin: -4px auto 0 !important;
+          width: 276px !important;
+          margin: -2px auto 0 !important;
         }
 
         .card003-variant .card001 .relationships {
           grid-column: 1 / 3 !important;
           grid-row: 4 !important;
           min-height: 0 !important;
-          margin: 7px 9px 0 !important;
+          margin: 4px 10px 0 !important;
+        }
+
+        .card003-variant .card001 .relationships .relationship-row {
+          height: 21px !important;
         }
 
         .card003-variant .card001 .photo-rail {
