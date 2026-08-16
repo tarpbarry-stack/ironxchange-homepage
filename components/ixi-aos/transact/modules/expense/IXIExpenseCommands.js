@@ -14,8 +14,6 @@ export async function createIXIExpense({object={},context={},workOrder={},input=
  if(locationRef)additionalReferences.push(locationRef);
  const employeeRef=createIXIAosFinancialObjectReference({object:context.actor||{},role:"employee"});
  if(employeeRef)additionalReferences.push(employeeRef);
- const workOrderRef=createIXIAosFinancialObjectReference({object:{passportId:workOrder?.context?.primaryPassportId||"",objectId:draft.context.workOrderId,label:draft.context.workOrderNumber,objectType:"work-order"},role:"work-order"});
- if(workOrderRef)additionalReferences.push(workOrderRef);
 
  const response=await createIXIAosExpense({
   object,
