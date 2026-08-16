@@ -1,15 +1,28 @@
 const clean = value => String(value ?? "").trim();
-const finiteNumber = value => {
+
+function finiteNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
-};
-const money = value => Math.round(finiteNumber(value) * 100) / 100;
+}
+
+function money(value) {
+  return Math.round(finiteNumber(value) * 100) / 100;
+}
+
+function validDateOnly(value) {
+  const candidate = clean(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(candidate)) return false;
+  const date = new Date(`${candidate}T00:00:00`);
+  return !Number.isNaN(date.getTime());
+}
 
 export const IXI_PURCHASE_SCHEMA = "ixi-purchase-v1";
+
 export const IXI_PURCHASE_REQUEST_TYPES = Object.freeze([
   "purchase-request",
   "purchase-order"
 ]);
+
 export const IXI_PURCHASE_PRIORITIES = Object.freeze([
   "normal",
   "high",
@@ -17,16 +30,12 @@ export const IXI_PURCHASE_PRIORITIES = Object.freeze([
 ]);
 
 function normalizeRequestType(value) {
-  return value === "purchase-order"
-    ? "purchase-order"
-    : "purchase-request";
+  return value === "purchase-order" ? "purchase-order" : "purchase-request";
 }
 
 function normalizePriority(value) {
   const candidate = clean(value).toLowerCase();
-  return IXI_PURCHASE_PRIORITIES.includes(candidate)
-    ? candidate
-    : "normal";
+  return IXI_PURCHASE_PRIORITIES.includes(candidate) ? candidate : "normal";
 }
 
 function normalizeCurrency(value) {
@@ -35,8 +44,10 @@ function normalizeCurrency(value) {
 }
 
 function normalizeLine(line = {}, index = 0) {
-  const quantity = Math.max(0, finiteNumber(line.quantity));
-  const estimatedUnitCost = Math.max(0, money(line.estimatedUnitCost));
+  // Preserve the signed numeric values in the canonical draft so validation can
+  // reject bad input. Do not silently coerce a negative price/quantity to zero.
+  const quantity = finiteNumber(line.quantity);
+  const estimatedUnitCost = money(line.estimatedUnitCost);
 
   return {
     lineId: clean(line.lineId) || `LINE-${index + 1}`,
@@ -61,13 +72,15 @@ export function createIXIPurchaseDraft({
   const subtotal = money(
     items.reduce((sum, line) => sum + line.estimatedTotal, 0)
   );
-  const estimatedShipping = Math.max(0, money(input.estimatedShipping));
+
+  const estimatedShipping = money(input.estimatedShipping);
   const estimatedTotal = money(subtotal + estimatedShipping);
+
   const workOrderId = clean(workOrder.identity?.workOrderId);
   const workOrderNumber = clean(
     workOrder.identity?.number ||
-    workOrder.workOrderNumber ||
-    workOrder.number
+      workOrder.workOrderNumber ||
+      workOrder.number
   );
 
   return {
@@ -129,41 +142,49 @@ export function validateIXIPurchase(draft = {}) {
     errors.vendor = "required";
   }
 
-  const neededByDate = clean(purchase.neededByDate);
-  if (!neededByDate) {
-    errors.neededByDate = "required";
-  } else if (Number.isNaN(new Date(`${neededByDate}T00:00:00`).getTime())) {
-    errors.neededByDate = "invalid";
+  if (!validDateOnly(purchase.neededByDate)) {
+    errors.neededByDate = clean(purchase.neededByDate) ? "invalid" : "required";
   }
 
-  const validItems = items.filter(
-    line => clean(line.description) && finiteNumber(line.quantity) > 0
-  );
-
-  if (!validItems.length) {
-    errors.items = "required";
+  if (!IXI_PURCHASE_REQUEST_TYPES.includes(clean(purchase.requestType))) {
+    errors.requestType = "invalid";
   }
 
-  const invalidLine = items.find(
-    line =>
-      (clean(line.description) || finiteNumber(line.quantity) || finiteNumber(line.estimatedUnitCost)) &&
-      (!clean(line.description) || finiteNumber(line.quantity) <= 0 || finiteNumber(line.estimatedUnitCost) < 0)
-  );
-
-  if (invalidLine) {
-    errors.itemLine = "invalid";
-  }
-
-  if (finiteNumber(purchase.estimatedShipping) < 0) {
-    errors.estimatedShipping = "invalid";
+  if (!IXI_PURCHASE_PRIORITIES.includes(clean(purchase.priority))) {
+    errors.priority = "invalid";
   }
 
   if (!/^[A-Z]{3}$/.test(clean(purchase.currency))) {
     errors.currency = "invalid";
   }
 
-  if (!IXI_PURCHASE_REQUEST_TYPES.includes(clean(purchase.requestType))) {
-    errors.requestType = "invalid";
+  if (finiteNumber(purchase.estimatedShipping) < 0) {
+    errors.estimatedShipping = "invalid";
+  }
+
+  const validItems = items.filter(line =>
+    clean(line.description) &&
+    finiteNumber(line.quantity) > 0 &&
+    finiteNumber(line.estimatedUnitCost) >= 0
+  );
+
+  if (!validItems.length) {
+    errors.items = "required";
+  }
+
+  const invalidLine = items.find(line =>
+    !clean(line.description) ||
+    finiteNumber(line.quantity) <= 0 ||
+    finiteNumber(line.estimatedUnitCost) < 0 ||
+    !clean(line.unit)
+  );
+
+  if (invalidLine) {
+    errors.itemLine = "invalid";
+  }
+
+  if (finiteNumber(purchase.subtotal) < 0 || finiteNumber(purchase.estimatedTotal) < 0) {
+    errors.total = "invalid";
   }
 
   return {
