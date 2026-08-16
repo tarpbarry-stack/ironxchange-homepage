@@ -85,7 +85,7 @@ export default function IXIAosRelationshipInfrastructurePanel({
     Math.max(
       62,
       Math.min(
-        150,
+        300,
         Number(config.height || 88)
       )
     );
