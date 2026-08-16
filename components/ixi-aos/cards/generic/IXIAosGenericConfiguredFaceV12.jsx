@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 
-import IXIMachineRail from "../../../IXIMachineRail";
+import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 import {
   asArray,
   clean,
   getFieldDefinitions,
+  getFieldValue,
   getObjectActionCapabilities,
   getObjectDisplayName,
   getObjectFields,
@@ -22,15 +23,43 @@ function getFaceConfig(object = {}, faceNumber = 2) {
 
   if (Array.isArray(faces)) {
     return safeObject(
-      faces.find(item => Number(item?.face || item?.faceNumber || item?.index) === Number(faceNumber))
+      faces.find(item =>
+        Number(item?.face || item?.faceNumber || item?.index) === Number(faceNumber)
+      )
     );
   }
 
   if (faces && typeof faces === "object") {
-    return safeObject(faces[String(faceNumber)] || faces[faceNumber]);
+    return safeObject(
+      faces[String(faceNumber)] ||
+      faces[faceNumber]
+    );
   }
 
-  return safeObject(presentation?.[`face${faceNumber}`]);
+  return safeObject(
+    presentation?.[`face${faceNumber}`]
+  );
+}
+
+function getRawFieldDefinitions(object = {}) {
+  const definition = safeObject(
+    object?.definition ||
+    object?.fields?.definition ||
+    object?.metadata?.definition
+  );
+
+  const metadata = safeObject(object?.metadata);
+
+  const sources = [
+    object?.fieldDefinitions,
+    object?.fieldSchema,
+    definition?.fieldDefinitions,
+    definition?.fieldSchema,
+    metadata?.fieldDefinitions,
+    metadata?.fieldSchema
+  ];
+
+  return sources.find(source => Array.isArray(source) && source.length) || [];
 }
 
 function getFaceDefinitions(object = {}, faceNumber = 2) {
@@ -43,6 +72,7 @@ function getFaceDefinitions(object = {}, faceNumber = 2) {
       nested?.face ||
       0
     );
+
     return configuredFace === Number(faceNumber);
   });
 }
@@ -59,15 +89,35 @@ function normalizeItem(object = {}, rawItem = {}) {
     item?.id
   );
 
-  const definition = getFieldDefinitions(object).find(entry => entry.fieldId === fieldId) || {};
+  if (!fieldId) return null;
+
+  const source = clean(item?.source || "fields").toLowerCase();
+  const visibleDefinitions = getFieldDefinitions(object);
+  const definition = visibleDefinitions.find(entry => entry.fieldId === fieldId) || null;
+
+  /*
+   * If the object declared a schema and this field disappeared from the
+   * permission-filtered schema, the face is not allowed to resurrect it
+   * just because a presentation section still names the fieldId.
+   */
+  if (source === "fields") {
+    const rawDefinitions = getRawFieldDefinitions(object);
+    const wasDeclared = rawDefinitions.some(entry =>
+      clean(entry?.fieldId || entry?.field || entry?.key || entry?.slug) === fieldId
+    );
+
+    if (wasDeclared && !definition) {
+      return null;
+    }
+  }
 
   return {
-    ...definition,
+    ...(definition || {}),
     ...item,
     fieldId,
     label: clean(item?.label || definition?.label || fieldId) || "FIELD",
     fieldType: clean(item?.fieldType || item?.type || definition?.fieldType || "text"),
-    source: clean(item?.source || "fields").toLowerCase()
+    source
   };
 }
 
@@ -75,24 +125,44 @@ function resolveValue(object = {}, item = {}, runtimeData = {}) {
   const key = clean(item?.key || item?.fieldId);
   if (!key) return null;
 
-  if (item.source === "object") return object?.[key] ?? null;
-  if (item.source === "metadata") return object?.metadata?.[key] ?? null;
-  if (item.source === "runtime" || item.source === "projection") return runtimeData?.[key] ?? null;
-  return getObjectFields(object)?.[key] ?? null;
+  if (item.source === "object") {
+    return object?.[key] ?? null;
+  }
+
+  if (item.source === "metadata") {
+    return object?.metadata?.[key] ?? null;
+  }
+
+  if (item.source === "runtime" || item.source === "projection") {
+    return runtimeData?.[key] ?? null;
+  }
+
+  return getFieldValue(object, key) ?? null;
 }
 
 function formatValue(value, type = "", currency = "USD") {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
 
   if (Array.isArray(value)) {
     return value
-      .map(item => typeof item === "string" ? clean(item) : clean(item?.label || item?.name || item?.value))
+      .map(item =>
+        typeof item === "string"
+          ? clean(item)
+          : clean(item?.label || item?.name || item?.value)
+      )
       .filter(Boolean)
       .join(" · ") || "—";
   }
 
   if (value && typeof value === "object") {
-    return clean(value?.displayName || value?.label || value?.name || value?.value) || "—";
+    return clean(
+      value?.displayName ||
+      value?.label ||
+      value?.name ||
+      value?.value
+    ) || "—";
   }
 
   const normalizedType = clean(type).toLowerCase();
@@ -107,23 +177,34 @@ function formatValue(value, type = "", currency = "USD") {
   }
 
   if (["number", "integer"].includes(normalizedType) && Number.isFinite(numeric)) {
-    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(numeric);
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2
+    }).format(numeric);
   }
 
   return String(value);
 }
 
-function FaceEditor({ object, definitions, saving, onCancel, onSave }) {
+function FaceEditor({
+  object,
+  definitions,
+  saving,
+  onCancel,
+  onSave
+}) {
   const [draft, setDraft] = useState({});
 
   useEffect(() => {
     const next = {};
+
     definitions.forEach(definition => {
-      const value = getObjectFields(object)?.[definition.fieldId];
+      const value = getFieldValue(object, definition.fieldId);
+
       next[definition.fieldId] = Array.isArray(value)
         ? value.join(", ")
         : String(value ?? "");
     });
+
     setDraft(next);
   }, [object, definitions]);
 
@@ -137,39 +218,64 @@ function FaceEditor({ object, definitions, saving, onCancel, onSave }) {
       if (["number", "integer", "money", "currency"].includes(type)) {
         const numeric = Number(raw);
         fields[definition.fieldId] = Number.isFinite(numeric) ? numeric : null;
-      } else if (["tags", "array", "list", "multi-select", "multiselect"].includes(type)) {
-        fields[definition.fieldId] = String(raw || "").split(",").map(clean).filter(Boolean);
-      } else {
-        fields[definition.fieldId] = raw;
+        return;
       }
+
+      if (["tags", "array", "list", "multi-select", "multiselect"].includes(type)) {
+        fields[definition.fieldId] = String(raw || "")
+          .split(",")
+          .map(clean)
+          .filter(Boolean);
+        return;
+      }
+
+      fields[definition.fieldId] = raw;
     });
 
-    await onSave?.({ ...object, fields });
+    await onSave?.({
+      ...object,
+      fields
+    });
   }
 
   return (
-    <div className="gfv12-editor" onPointerDown={event => event.stopPropagation()}>
+    <div
+      className="gfv12-editor"
+      onPointerDown={event => event.stopPropagation()}
+    >
       <div className="gfv12-editor-head">
-        <div><small>{getObjectLabel(object)}</small><strong>EDIT FACE</strong></div>
+        <div>
+          <small>{getObjectLabel(object)}</small>
+          <strong>EDIT FACE</strong>
+        </div>
+
         <nav>
           <button type="button" disabled={saving} onClick={save}>SAVE</button>
           <button type="button" disabled={saving} onClick={onCancel}>CANCEL</button>
         </nav>
       </div>
+
       <div className="gfv12-editor-scroll">
         {definitions.map(definition => (
           <label key={definition.fieldId}>
             <span>{definition.label}</span>
             <input
               value={draft[definition.fieldId] ?? ""}
-              onChange={event => setDraft(current => ({
-                ...current,
-                [definition.fieldId]: event.target.value
-              }))}
+              onChange={event =>
+                setDraft(current => ({
+                  ...current,
+                  [definition.fieldId]: event.target.value
+                }))
+              }
             />
           </label>
         ))}
-        {!definitions.length ? <div className="gfv12-empty">NO EDITABLE FIELDS DECLARED FOR THIS FACE</div> : null}
+
+        {!definitions.length ? (
+          <div className="gfv12-empty">
+            NO EDITABLE FIELDS DECLARED FOR THIS FACE
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -193,6 +299,8 @@ export default function IXIAosGenericConfiguredFaceV12({
   onSendBack = null,
   onCycleColor = null,
   onCycleOutline = null,
+  onCycleFace = null,
+  onRailSend = null,
   armedDestination = "",
   onSendToArmedDestination = null
 }) {
@@ -200,7 +308,9 @@ export default function IXIAosGenericConfiguredFaceV12({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => setRuntimeObject(object), [object]);
+  useEffect(() => {
+    setRuntimeObject(object);
+  }, [object]);
 
   const config = useMemo(
     () => getFaceConfig(runtimeObject, faceNumber),
@@ -214,21 +324,41 @@ export default function IXIAosGenericConfiguredFaceV12({
 
   const actions = getObjectActionCapabilities(runtimeObject);
   const relationships = getObjectRelationships(runtimeObject);
-  const currency = clean(runtimeObject?.currency || runtimeObject?.fields?.currency || "USD") || "USD";
+  const currency = clean(
+    runtimeObject?.currency ||
+    runtimeObject?.fields?.currency ||
+    "USD"
+  ) || "USD";
 
   const sections = asArray(config?.sections);
+
   const resolvedSections = sections.length
     ? sections
     : faceDefinitions.length
-      ? [{ title: clean(config?.defaultSectionTitle) || "DETAILS", layout: "rows", fields: faceDefinitions }]
+      ? [{
+          title: clean(config?.defaultSectionTitle) || "DETAILS",
+          layout: "rows",
+          fields: faceDefinitions
+        }]
       : [];
 
-  const editableDefinitions = faceDefinitions.filter(definition => definition.editable !== false);
-  const eyebrow = clean(config?.eyebrow || config?.categoryLabel) || getObjectLabel(runtimeObject);
-  const title = clean(config?.title || config?.label) || `FACE ${faceNumber}`;
+  const editableDefinitions = faceDefinitions.filter(
+    definition => definition.editable !== false
+  );
+
+  const eyebrow = clean(
+    config?.eyebrow ||
+    config?.categoryLabel
+  ) || getObjectLabel(runtimeObject);
+
+  const title = clean(
+    config?.title ||
+    config?.label
+  ) || `FACE ${faceNumber}`;
 
   async function save(nextObject) {
     setSaving(true);
+
     try {
       await onSaveObject?.({
         objectId: getObjectId(nextObject),
@@ -236,6 +366,7 @@ export default function IXIAosGenericConfiguredFaceV12({
         fields: { ...getObjectFields(nextObject) },
         face: faceNumber
       });
+
       setRuntimeObject(nextObject);
       setEditing(false);
     } finally {
@@ -244,7 +375,10 @@ export default function IXIAosGenericConfiguredFaceV12({
   }
 
   return (
-    <article className={`ixi-generic-face-v12 skin-${skinId}`} data-face-number={faceNumber}>
+    <article
+      className={`ixi-generic-face-v12 skin-${skinId}`}
+      data-face-number={faceNumber}
+    >
       <header className="gfv12-head">
         <div className="gfv12-ident">
           <span>{eyebrow}</span>
@@ -269,50 +403,106 @@ export default function IXIAosGenericConfiguredFaceV12({
       </header>
 
       <main className="gfv12-scroll">
-        <div className="gfv12-banner"><b>F{faceNumber}</b><span>{title}</span></div>
+        <div className="gfv12-banner">
+          <b>F{faceNumber}</b>
+          <span>{title}</span>
+        </div>
 
         {resolvedSections.map((section, sectionIndex) => {
-          const layout = clean(section?.layout || section?.type || "rows").toLowerCase();
-          const sectionTitle = clean(section?.title || section?.label) || `SECTION ${sectionIndex + 1}`;
+          const layout = clean(
+            section?.layout ||
+            section?.type ||
+            "rows"
+          ).toLowerCase();
+
+          const sectionTitle = clean(
+            section?.title ||
+            section?.label
+          ) || `SECTION ${sectionIndex + 1}`;
 
           if (layout === "relationships") {
             return (
-              <section className="gfv12-section" key={`${sectionTitle}-${sectionIndex}`}>
+              <section
+                className="gfv12-section"
+                key={`${sectionTitle}-${sectionIndex}`}
+              >
                 <h3>{sectionTitle}</h3>
+
                 <div className="gfv12-relations">
                   {relationships.map(relationship => (
                     <button type="button" key={relationship.id}>
                       <span>
                         <small>{relationship.label}</small>
                         <strong>{relationship.value}</strong>
-                        {relationship.secondary ? <em>{relationship.secondary}</em> : null}
+                        {relationship.secondary ? (
+                          <em>{relationship.secondary}</em>
+                        ) : null}
                       </span>
                       <b>›</b>
                     </button>
                   ))}
-                  {!relationships.length ? <div className="gfv12-empty">NO RELATIONSHIPS</div> : null}
+
+                  {!relationships.length ? (
+                    <div className="gfv12-empty">NO RELATIONSHIPS</div>
+                  ) : null}
                 </div>
               </section>
             );
           }
 
-          const configuredItems = asArray(section?.fields || section?.items || section?.metrics);
-          const items = (configuredItems.length ? configuredItems : sectionIndex === 0 ? faceDefinitions : [])
+          const configuredItems = asArray(
+            section?.fields ||
+            section?.items ||
+            section?.metrics
+          );
+
+          const items = (
+            configuredItems.length
+              ? configuredItems
+              : sectionIndex === 0
+                ? faceDefinitions
+                : []
+          )
             .map(item => normalizeItem(runtimeObject, item))
-            .filter(item => item.fieldId);
+            .filter(Boolean);
 
           return (
-            <section className="gfv12-section" key={`${sectionTitle}-${sectionIndex}`}>
+            <section
+              className="gfv12-section"
+              key={`${sectionTitle}-${sectionIndex}`}
+            >
               <h3>{sectionTitle}</h3>
-              <div className={layout === "grid" || layout === "metrics" ? "gfv12-grid" : "gfv12-rows"}>
+
+              <div
+                className={
+                  layout === "grid" || layout === "metrics"
+                    ? "gfv12-grid"
+                    : "gfv12-rows"
+                }
+              >
                 {items.map((item, index) => (
-                  <div className="gfv12-value" key={`${item.fieldId}-${index}`}>
+                  <div
+                    className="gfv12-value"
+                    key={`${item.fieldId}-${index}`}
+                  >
                     <small>{item.label}</small>
-                    <strong>{formatValue(resolveValue(runtimeObject, item, runtimeData), item.fieldType, currency)}</strong>
-                    {clean(item?.secondary) ? <em>{clean(item.secondary)}</em> : null}
+                    <strong>
+                      {formatValue(
+                        resolveValue(runtimeObject, item, runtimeData),
+                        item.fieldType,
+                        currency
+                      )}
+                    </strong>
+
+                    {clean(item?.secondary) ? (
+                      <em>{clean(item.secondary)}</em>
+                    ) : null}
                   </div>
                 ))}
-                {!items.length ? <div className="gfv12-empty">NO FIELDS DECLARED</div> : null}
+
+                {!items.length ? (
+                  <div className="gfv12-empty">NO VISIBLE FIELDS</div>
+                ) : null}
               </div>
             </section>
           );
@@ -322,21 +512,25 @@ export default function IXIAosGenericConfiguredFaceV12({
           <div className="gfv12-unconfigured">
             <b>F{faceNumber}</b>
             <strong>FACE NOT CONFIGURED</strong>
-            <span>This layout renders only schema fields explicitly assigned to this face.</span>
+            <span>
+              This layout renders only schema fields explicitly assigned to this face.
+            </span>
           </div>
         ) : null}
       </main>
 
-      <IXIMachineRail
-        listing={runtimeObject}
+      <IXIObjectRail
+        object={runtimeObject}
         saved={false}
-        boardColor={ixiState?.color || "none"}
-        boardOutline={Number(ixiState?.outline ?? 1)}
-        machineFace={faceNumber}
+        color={ixiState?.color || "none"}
+        outline={Number(ixiState?.outline ?? 1)}
+        face={faceNumber}
         onSendFront={onSendFront}
         onSendBack={onSendBack}
         onCycleColor={onCycleColor}
         onCycleOutline={onCycleOutline}
+        onCycleFace={onCycleFace}
+        onRailSend={onRailSend}
         armedDestination={armedDestination}
         onSendToArmedDestination={onSendToArmedDestination}
       />
