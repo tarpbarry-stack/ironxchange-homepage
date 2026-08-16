@@ -34,9 +34,17 @@ function previewObject(template = {}, sample = {}) {
   };
 }
 
+const FACE_SWITCHES = [
+  {face:1,icon:"▦",label:"OVERVIEW"},
+  {face:2,icon:"⚙",label:"OPERATIONS"},
+  {face:3,icon:"◔",label:"FINANCIAL"},
+  {face:4,icon:"▤",label:"EXPENSES"},
+  {face:5,icon:"⌕",label:"MAINT."}
+];
+
 export default function IXIAosCardCatalogPreview({template = null,sampleData = {},projection = null,directItems = [],parentLabel = "",skinId = "ixi:skin:default",onSaveObject = null}) {
   const [state, setState] = useState({});
-  const [face, setFace] = useState(2);
+  const [face, setFace] = useState(1);
   const [f2skin, setF2skin] = useState("v12");
   const [financialMode, setFinancialMode] = useState("owned");
   const [transactOpen, setTransactOpen] = useState(false);
@@ -58,8 +66,8 @@ export default function IXIAosCardCatalogPreview({template = null,sampleData = {
     return (
       <div className={`location-preview ${transactOpen?"transact-mode":"aos-mode"}`} style={{ width: transactOpen ? "298px" : `${consoleDepth * 298}px` }}>
         {!transactOpen ? <>
-          <div className="face-switch">
-            <button className={face === 1 ? "active" : ""} onClick={() => setFace(1)}>F1 · OVERVIEW</button><button className={face === 2 ? "active" : ""} onClick={() => setFace(2)}>F2 · OPERATIONS</button><button className={face === 3 ? "active" : ""} onClick={() => setFace(3)}>F3 · FINANCIAL</button><button className={face === 4 ? "active" : ""} onClick={() => setFace(4)}>F4 · EXPENSES</button><button className={face === 5 ? "active" : ""} onClick={() => setFace(5)}>F5 · MAINTENANCE</button>
+          <div className="face-switch" role="tablist" aria-label="Location card faces">
+            {FACE_SWITCHES.map(item=><button key={item.face} type="button" role="tab" aria-selected={face===item.face} className={face===item.face?"active":""} onClick={()=>setFace(item.face)}><span>{item.icon}</span><b>F{item.face}</b><small>{item.label}</small></button>)}
           </div>
           {face === 3 || face === 4 ? <div className="variant-switch"><button className={financialMode === "owned" ? "active" : ""} onClick={() => setFinancialMode("owned")}>{face === 4 ? "F4-A · OWNED" : "F3-A · OWNED"}</button><button className={financialMode === "leased" ? "active" : ""} onClick={() => setFinancialMode("leased")}>{face === 4 ? "F4-B · LEASED" : "F3-B · LEASED"}</button></div> : null}
         </> : null}
@@ -69,7 +77,13 @@ export default function IXIAosCardCatalogPreview({template = null,sampleData = {
         </div>
 
         <style jsx>{`
-          .location-preview{display:flex;flex-direction:column;gap:6px;overflow:visible;transition:width .12s ease}.transact-mode{transform:none!important}.face-switch{width:298px;display:grid;grid-template-columns:repeat(5,1fr);gap:3px}.variant-switch{width:298px;display:grid;grid-template-columns:1fr 1fr;gap:3px}.face-switch button,.variant-switch button{height:22px;border:1px solid rgba(255,255,255,.08);border-radius:4px;background:#181818;color:#777;font-size:4.85px;font-weight:950;cursor:pointer}.face-switch button.active,.variant-switch button.active{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.08);color:#ffc400}.console-stage{position:relative;display:flex;align-items:flex-start;width:298px;height:471px;overflow:visible;gap:0}.transact-mode .console-stage{justify-content:flex-start}
+          .location-preview{display:flex;flex-direction:column;gap:7px;overflow:visible;transition:width .12s ease}.transact-mode{transform:none!important}
+          .face-switch{width:298px;height:35px;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:linear-gradient(180deg,#141615,#0d0f0e);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+          .face-switch button{min-width:0;height:27px;display:grid;grid-template-columns:14px auto;grid-template-rows:12px 9px;align-items:center;justify-content:center;column-gap:2px;padding:2px 3px;border:1px solid transparent;border-radius:5px;background:transparent;color:rgba(255,255,255,.48);cursor:pointer}
+          .face-switch button span{grid-row:1/3;grid-column:1;display:grid;place-items:center;color:rgba(255,255,255,.54);font-size:10px;line-height:1}.face-switch button b{grid-row:1;grid-column:2;align-self:end;font-size:6px;font-weight:950;line-height:1;text-align:left}.face-switch button small{grid-row:2;grid-column:2;align-self:start;overflow:hidden;color:rgba(255,255,255,.38);font-size:3.7px;font-weight:900;line-height:1;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+          .face-switch button:hover{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.025);color:rgba(255,255,255,.75)}.face-switch button.active{border-color:rgba(255,196,0,.52);background:linear-gradient(180deg,rgba(255,196,0,.10),rgba(255,196,0,.025));color:#ffc400;box-shadow:inset 0 0 0 1px rgba(255,196,0,.04)}.face-switch button.active span,.face-switch button.active small{color:#ffc400}
+          .variant-switch{width:298px;display:grid;grid-template-columns:1fr 1fr;gap:3px}.variant-switch button{height:23px;border:1px solid rgba(255,255,255,.08);border-radius:5px;background:#131514;color:#777;font-size:5px;font-weight:950;cursor:pointer}.variant-switch button.active{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.07);color:#ffc400}
+          .console-stage{position:relative;display:flex;align-items:flex-start;width:298px;height:471px;overflow:visible;gap:0}.transact-mode .console-stage{justify-content:flex-start}
         `}</style>
       </div>
     );
