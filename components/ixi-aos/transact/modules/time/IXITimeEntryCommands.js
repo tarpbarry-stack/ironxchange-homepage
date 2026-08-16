@@ -6,6 +6,9 @@ import {
   createIXITimeEntryDraft,
   validateIXITimeEntry
 } from "./IXITimeEntryContract";
+import {
+  runIXIActionNoticeLifecycle
+} from "../../../../ixi-object-system/IXIActionNoticeEngine";
 
 const clean = value => String(value ?? "").trim();
 
@@ -56,7 +59,20 @@ export async function createIXITimeEntry({
     });
   }
 
-  const response = await createIXIAosTimeEntry({
+  const objectId = clean(
+    draft.context.primaryObjectId ||
+    draft.context.primaryPassportId ||
+    object.objectId ||
+    object.passportId
+  );
+  const commandId = clean(
+    input.clientRequestId ||
+    draft.identity.clientRequestId ||
+    metadata.commandId ||
+    `TIME-${Date.now()}`
+  );
+
+  const operation = () => createIXIAosTimeEntry({
     object: {
       ...object,
       passportId: clean(object.passportId || draft.context.primaryPassportId),
@@ -80,6 +96,8 @@ export async function createIXITimeEntry({
     additionalReferences: refs,
     metadata: {
       ...metadata,
+      commandId,
+      clientRequestId: clean(input.clientRequestId || draft.identity.clientRequestId),
       transactModule: "time",
       timeSchema: draft.schema,
       source: draft.time.source,
@@ -92,6 +110,18 @@ export async function createIXITimeEntry({
     }
   });
 
+  const response = objectId
+    ? await runIXIActionNoticeLifecycle({
+        objectId,
+        operation,
+        savingMessage: "RECORDING TIME...",
+        successMessage: "TIME RECORDED",
+        errorMessage: "TIME SAVE FAILED",
+        commandId,
+        source: "ixi-transact-time"
+      })
+    : await operation();
+
   return {
     draft: {
       ...draft,
@@ -102,7 +132,8 @@ export async function createIXITimeEntry({
           response?.document?.documentId ||
           response?.financialDocument?.documentId ||
           draft.identity.timeEntryId ||
-          draft.identity.clientRequestId
+          draft.identity.clientRequestId ||
+          commandId
         )
       },
       status: "posted"
