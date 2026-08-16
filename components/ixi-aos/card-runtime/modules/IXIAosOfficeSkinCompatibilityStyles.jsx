@@ -2,9 +2,10 @@ export default function IXIAosOfficeSkinCompatibilityStyles() {
   return (
     <style jsx global>{`
       /* ============================================================
-         IXI AOS LOCATION — EXECUTIVE / INDUSTRIAL SYSTEM
-         Approved direction: dense, readable, structured, premium.
-         Native card geometry remains 298 × 471.
+         IXI AOS LOCATION — DARK OFFICE SYSTEM V3
+         298 x 471 stays authoritative. This file only changes presentation.
+         Design doctrine: layered graphite shells, hard spatial boundaries,
+         strong readable type, restrained amber, no overlap tricks.
          ============================================================ */
 
       .card001,
@@ -12,25 +13,23 @@ export default function IXIAosOfficeSkinCompatibilityStyles() {
       .f3-financial,
       .f4-obligations,
       .f5 {
-        --ix-bg:#090b0d;
-        --ix-bg2:#0c0f12;
-        --ix-s1:#101419;
-        --ix-s2:#14191e;
-        --ix-s3:#191f25;
-        --ix-line:rgba(255,255,255,.095);
-        --ix-line-soft:rgba(255,255,255,.055);
-        --ix-white:#f6f7f8;
-        --ix-silver:#aeb6bd;
-        --ix-muted:#737d86;
-        --ix-yellow:#ffc400;
-        --ix-yellow2:#e5b100;
-        --ix-green:#8bd92f;
-        --ix-red:#ff4b3e;
-        --ix-blue:#5aa8ff;
-        color-scheme:dark;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-        -webkit-font-smoothing:antialiased;
-        text-rendering:optimizeLegibility;
+        --loc-bg-0:#07090b;
+        --loc-bg-1:#0b0e11;
+        --loc-bg-2:#101419;
+        --loc-bg-3:#151a20;
+        --loc-bg-4:#1a2027;
+        --loc-line:rgba(255,255,255,.10);
+        --loc-line-soft:rgba(255,255,255,.055);
+        --loc-line-strong:rgba(255,255,255,.15);
+        --loc-text:#f5f7f8;
+        --loc-text-2:#c7cdd2;
+        --loc-text-3:#858d95;
+        --loc-yellow:#ffc400;
+        --loc-yellow-dim:#b99400;
+        --loc-green:#89d92f;
+        --loc-red:#ff4e43;
+        --loc-radius:8px;
+        --loc-font:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
       }
 
       .card001,
@@ -38,540 +37,456 @@ export default function IXIAosOfficeSkinCompatibilityStyles() {
       .f3-financial,
       .f4-obligations,
       .f5 {
-        border:1px solid rgba(255,255,255,.10) !important;
-        border-radius:14px !important;
+        border:1px solid rgba(255,255,255,.11)!important;
+        border-radius:15px!important;
         background:
-          radial-gradient(130% 64% at 50% -12%,rgba(255,255,255,.055),transparent 45%),
-          linear-gradient(180deg,#101316 0%,#0b0e10 48%,#090b0d 100%) !important;
-        color:var(--ix-white) !important;
+          radial-gradient(120% 72% at 50% -12%,rgba(255,255,255,.055),transparent 42%),
+          linear-gradient(180deg,#111419 0%,#0b0e11 50%,#080a0c 100%)!important;
+        color:var(--loc-text)!important;
+        font-family:var(--loc-font)!important;
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.045),
-          inset 0 -1px 0 rgba(0,0,0,.72),
-          0 18px 46px rgba(0,0,0,.44) !important;
+          inset 0 1px 0 rgba(255,255,255,.055),
+          inset 0 -1px 0 rgba(0,0,0,.85),
+          0 16px 36px rgba(0,0,0,.48),
+          0 3px 10px rgba(0,0,0,.38)!important;
       }
 
-      /* ------------------------------------------------------------
-         IDENTITY + SHARED HEADER
-         ------------------------------------------------------------ */
+      .card001 .identity strong,
+      .f3-financial .f3-ident b,
+      .f4-obligations .f4-ident b,
+      .f5 .f5-head>div>b,
+      .ixi-aos-location-f2 .ops-identity strong {
+        font-family:Georgia,"Times New Roman",serif!important;
+        color:#f7f7f4!important;
+        font-weight:800!important;
+        letter-spacing:-.02em!important;
+      }
+
       .card001 .identity span,
       .ixi-aos-location-f2 .ops-identity span,
       .f3-financial .f3-ident span,
       .f4-obligations .f4-ident span,
-      .f5 .f5-head > div > span {
-        color:var(--ix-yellow) !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        font-size:6.8px !important;
-        font-weight:800 !important;
-        letter-spacing:.095em !important;
+      .f5 .f5-head>div>span {
+        color:var(--loc-yellow)!important;
+        font-family:var(--loc-font)!important;
+        font-weight:800!important;
+        letter-spacing:.10em!important;
       }
 
-      .card001 .identity strong,
-      .ixi-aos-location-f2 .ops-identity strong,
-      .f3-financial .f3-ident b,
-      .f4-obligations .f4-ident b,
-      .f5 .f5-head > div > b {
-        color:#fafafa !important;
-        font-family:Georgia,"Times New Roman",serif !important;
-        font-weight:800 !important;
-        letter-spacing:-.025em !important;
-        text-shadow:0 1px 0 rgba(0,0,0,.6) !important;
-      }
-
+      /* HEADER CONTROLS */
       .card001 .ixi-aos-card-header-controls,
       .ixi-aos-location-f2 .ixi-aos-card-header-controls,
       .f3-financial .ixi-aos-card-header-controls,
       .f4-obligations .ixi-aos-card-header-controls,
       .f5 .ixi-aos-card-header-controls {
-        border:1px solid rgba(255,255,255,.075) !important;
-        border-radius:8px !important;
-        background:linear-gradient(180deg,rgba(255,255,255,.024),rgba(255,255,255,.006)) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
+        border:1px solid rgba(255,255,255,.09)!important;
+        border-radius:8px!important;
+        background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 3px 8px rgba(0,0,0,.18)!important;
       }
-
       .card001 .ixi-aos-card-header-controls .header-action,
       .ixi-aos-location-f2 .ixi-aos-card-header-controls .header-action,
       .f3-financial .ixi-aos-card-header-controls .header-action,
       .f4-obligations .ixi-aos-card-header-controls .header-action,
       .f5 .ixi-aos-card-header-controls .header-action {
-        border-left-color:rgba(255,255,255,.055) !important;
-        background:transparent !important;
+        background:transparent!important;
+        border-left-color:rgba(255,255,255,.065)!important;
       }
 
       /* ============================================================
-         F1 — LOCATION 001 / 002 / 003
+         F1 CONTAINERS — HARD BOUNDARIES, NO OVERLAPS
          ============================================================ */
-      .card001 .header {
-        border-bottom:1px solid var(--ix-line-soft) !important;
-        background:linear-gradient(180deg,rgba(255,255,255,.018),transparent) !important;
-      }
-      .card001 .identity strong { font-size:17.5px !important; }
+      .card001 .body { overflow:hidden!important; }
+      .card001 .address,
+      .card001 .metrics,
+      .card001 .relationships { position:relative!important; z-index:2!important; }
 
-      .card001 .photo {
-        background:#07090a !important;
-        box-shadow:inset 0 -1px 0 rgba(255,255,255,.045) !important;
-      }
-      .card001 .ixi-aos-primary-media-panel {
-        background:
-          radial-gradient(circle at 50% 50%,rgba(255,255,255,.018),transparent 48%),
-          #07090a !important;
-        border:0 !important;
-        border-radius:0 !important;
-      }
-
-      .card001 .preview-info-strip {
-        border-top:1px solid var(--ix-line-soft) !important;
-        border-bottom:1px solid var(--ix-line-soft) !important;
-        background:linear-gradient(180deg,#0f1215,#0a0c0e) !important;
-      }
-      .card001 .preview-info-strip strong {
-        color:#e8ebed !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        font-size:7.7px !important;
-        font-weight:750 !important;
-      }
-      .card001 .preview-position { color:#707a82 !important; font-size:6.8px !important; }
-      .card001 .preview-out { color:var(--ix-yellow) !important; font-size:7.4px !important; font-weight:800 !important; }
-
-      /* Address is a deliberate information plate, not floating text. */
       .card001 .address {
-        width:274px !important;
-        margin:5px auto 0 !important;
-        border:1px solid rgba(255,255,255,.085) !important;
-        border-radius:6px !important;
-        background:
-          linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),
-          #101419 !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
+        width:276px!important;
+        margin:5px auto 0!important;
+        min-height:31px!important;
+        border:1px solid var(--loc-line)!important;
+        border-radius:7px!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 3px 8px rgba(0,0,0,.16)!important;
+        overflow:hidden!important;
       }
       .card001 .address .ixi-aos-inline-address {
-        min-height:28px !important;
-        padding:0 9px !important;
-        background:transparent !important;
-        border:0 !important;
+        width:100%!important;
+        min-height:29px!important;
+        height:29px!important;
+        padding:0 10px!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        background:transparent!important;
+        border:0!important;
       }
       .card001 .address .ixi-aos-inline-address strong {
-        width:100% !important;
-        color:#f0f2f3 !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        font-size:8.2px !important;
-        font-weight:720 !important;
-        line-height:1.15 !important;
-        text-align:center !important;
+        width:100%!important;
+        color:#eef1f3!important;
+        font-family:var(--loc-font)!important;
+        font-size:9.2px!important;
+        line-height:1.12!important;
+        font-weight:760!important;
+        text-align:center!important;
       }
 
-      /* Three real instruments instead of text on a blank line. */
       .card001 .metrics {
-        width:274px !important;
-        margin:5px auto 0 !important;
+        width:276px!important;
+        margin:6px auto 0!important;
       }
       .card001 .metrics .ixi-aos-inline-metrics {
-        width:274px !important;
-        min-height:43px !important;
-        display:grid !important;
-        grid-template-columns:1fr 1.25fr 1fr !important;
-        gap:4px !important;
-        padding:0 !important;
-        border:0 !important;
-        background:transparent !important;
+        width:276px!important;
+        min-height:42px!important;
+        height:42px!important;
+        display:grid!important;
+        grid-template-columns:repeat(3,1fr)!important;
+        gap:4px!important;
+        padding:0!important;
+        background:transparent!important;
+        border:0!important;
       }
       .card001 .metrics .ixi-aos-inline-metric {
-        min-width:0 !important;
-        min-height:43px !important;
-        display:flex !important;
-        flex-direction:column !important;
-        align-items:center !important;
-        justify-content:center !important;
-        gap:3px !important;
-        border:1px solid rgba(255,255,255,.08) !important;
-        border-radius:6px !important;
-        background:linear-gradient(180deg,#151a1f,#101419) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.02) !important;
+        min-width:0!important;
+        height:42px!important;
+        display:flex!important;
+        flex-direction:column!important;
+        justify-content:center!important;
+        align-items:center!important;
+        gap:4px!important;
+        border:1px solid var(--loc-line)!important;
+        border-radius:7px!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
       }
       .card001 .metrics .ixi-aos-inline-metric span {
-        color:var(--ix-yellow) !important;
-        font-size:6.5px !important;
-        font-weight:800 !important;
-        letter-spacing:.075em !important;
+        color:var(--loc-yellow-dim)!important;
+        font-size:6.6px!important;
+        font-weight:850!important;
+        letter-spacing:.11em!important;
       }
       .card001 .metrics .ixi-aos-inline-metric strong {
-        color:#fff !important;
-        font-size:12px !important;
-        font-weight:780 !important;
-        letter-spacing:-.02em !important;
-        line-height:1 !important;
+        color:#fff!important;
+        font-size:12.6px!important;
+        line-height:1!important;
+        font-weight:800!important;
+        letter-spacing:-.018em!important;
       }
 
-      /* Relationship ledger — this is the high-capacity body. */
       .card001 .relationships {
-        margin:6px 10px 0 !important;
-        border:1px solid rgba(255,255,255,.075) !important;
-        border-radius:7px !important;
-        overflow:hidden !important;
-        background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.004)) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.018) !important;
+        margin:7px 10px 0!important;
+        min-height:0!important;
+        border:1px solid var(--loc-line)!important;
+        border-radius:8px!important;
+        background:linear-gradient(180deg,rgba(21,26,32,.96),rgba(10,13,16,.98))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 4px 12px rgba(0,0,0,.18)!important;
+        overflow:hidden!important;
       }
+      .card001 .relationships .ixi-aos-relationship-panel,
       .card001 .relationships .ixi-face-section {
-        border:0 !important;
-        border-radius:0 !important;
-        background:transparent !important;
-        box-shadow:none !important;
+        width:100%!important;
+        height:100%!important;
+        min-height:0!important;
+        border:0!important;
+        border-radius:0!important;
+        background:transparent!important;
+        box-shadow:none!important;
+        overflow:hidden!important;
       }
       .card001 .relationships .ixi-face-section-title {
-        position:relative !important;
-        height:25px !important;
-        display:flex !important;
-        align-items:center !important;
-        padding:0 9px 0 12px !important;
-        border-bottom:1px solid rgba(255,255,255,.08) !important;
-        background:linear-gradient(180deg,#151a1f,#111519) !important;
-        color:var(--ix-yellow) !important;
-        font-size:7px !important;
-        font-weight:820 !important;
-        letter-spacing:.065em !important;
+        position:relative!important;
+        height:29px!important;
+        min-height:29px!important;
+        display:flex!important;
+        align-items:center!important;
+        padding:0 10px 0 14px!important;
+        margin:0!important;
+        border-bottom:1px solid var(--loc-line)!important;
+        background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.010))!important;
+        color:var(--loc-yellow)!important;
+        font-family:var(--loc-font)!important;
+        font-size:7px!important;
+        font-weight:850!important;
+        letter-spacing:.09em!important;
+        white-space:nowrap!important;
       }
       .card001 .relationships .ixi-face-section-title::before {
-        content:"";
-        position:absolute;
-        left:0;
-        top:0;
-        bottom:0;
-        width:3px;
-        background:linear-gradient(180deg,#ffd735,#d9a600) !important;
-        box-shadow:0 0 10px rgba(255,196,0,.16) !important;
+        content:""!important;
+        position:absolute!important;
+        left:0!important;
+        top:0!important;
+        bottom:0!important;
+        width:3px!important;
+        background:var(--loc-yellow)!important;
+        box-shadow:0 0 10px rgba(255,196,0,.22)!important;
       }
-      .card001 .relationships .panel-scroll { padding:0 !important; }
+      .card001 .relationships .panel-scroll {
+        height:calc(100% - 29px)!important;
+        min-height:0!important;
+        padding:3px 5px 6px!important;
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+      }
       .card001 .relationships .relationship-row {
-        height:25px !important;
-        padding:0 8px !important;
-        border:0 !important;
-        border-bottom:1px solid rgba(255,255,255,.05) !important;
-        border-radius:0 !important;
-        background:#0f1316 !important;
-        transition:background .14s ease !important;
+        height:25px!important;
+        min-height:25px!important;
+        padding:0 7px!important;
+        border:0!important;
+        border-bottom:1px solid rgba(255,255,255,.05)!important;
+        border-radius:0!important;
+        background:rgba(255,255,255,.010)!important;
+        box-shadow:none!important;
       }
-      .card001 .relationships .relationship-row:nth-child(even) { background:#12171b !important; }
-      .card001 .relationships .relationship-row:hover { background:#171d22 !important; }
+      .card001 .relationships .relationship-row:nth-child(even) {
+        background:rgba(255,255,255,.025)!important;
+      }
+      .card001 .relationships .relationship-row:hover {
+        background:linear-gradient(90deg,rgba(255,196,0,.045),rgba(255,255,255,.022))!important;
+      }
       .card001 .relationships .relationship-row strong {
-        color:#edf0f2 !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        font-size:7.4px !important;
-        font-weight:750 !important;
-        letter-spacing:.01em !important;
+        color:#f1f3f4!important;
+        font-family:var(--loc-font)!important;
+        font-size:7.6px!important;
+        font-weight:780!important;
+        letter-spacing:.018em!important;
       }
       .card001 .relationships .relationship-row span {
-        color:#919aa2 !important;
-        font-size:6.7px !important;
-        font-weight:680 !important;
+        color:#8f979e!important;
+        font-family:var(--loc-font)!important;
+        font-size:6.8px!important;
+        font-weight:720!important;
       }
       .card001 .relationships .relationship-row b {
-        color:#c8ced3 !important;
-        font-size:10px !important;
-        font-weight:500 !important;
+        color:rgba(255,196,0,.78)!important;
+        font-size:10px!important;
+        font-weight:600!important;
       }
-      .card001 .relationships .relationship-row:hover b { color:var(--ix-yellow) !important; }
 
-      /* 002 is intentionally information-first, matching approved mockup. */
-      .card002-variant .card001 .photo,
-      .card002-variant .card001 .preview-info-strip { display:none !important; }
+      /* Do not alter the good command rail or photo strip */
+      .card001 .actions,
+      .card001 .photo-rail { z-index:10!important; }
+
+      /* 002: information-first, no photo rail */
       .card002-variant .card001 .body {
-        bottom:47px !important;
-        padding:7px 0 0 !important;
+        padding:0 10px!important;
       }
+      .card002-variant .card001 .photo,
+      .card002-variant .card001 .preview-info-strip { display:none!important; }
       .card002-variant .card001 .address {
-        width:274px !important;
-        min-height:49px !important;
-        margin:0 auto !important;
-        display:flex !important;
-        align-items:center !important;
-        background:linear-gradient(180deg,#171c21,#111519) !important;
+        width:100%!important;
+        margin:8px 0 0!important;
+        min-height:48px!important;
       }
       .card002-variant .card001 .address .ixi-aos-inline-address {
-        min-height:47px !important;
-        padding:0 13px !important;
+        height:46px!important;
+        min-height:46px!important;
+        padding:0 13px!important;
+        justify-content:flex-start!important;
       }
       .card002-variant .card001 .address .ixi-aos-inline-address strong {
-        text-align:left !important;
-        font-size:8.4px !important;
-        line-height:1.3 !important;
+        font-size:8.7px!important;
+        text-align:left!important;
       }
-      .card002-variant .card001 .metrics { margin-top:5px !important; }
+      .card002-variant .card001 .metrics {
+        width:100%!important;
+        margin:7px 0 0!important;
+      }
+      .card002-variant .card001 .metrics .ixi-aos-inline-metrics { width:100%!important; }
       .card002-variant .card001 .relationships {
-        flex:1 !important;
-        min-height:0 !important;
-        margin-top:6px !important;
+        margin:8px 0 0!important;
+        flex:1!important;
       }
+      .card002-variant .card001 .actions { left:12px!important; right:12px!important; }
 
-      /* 003 split layout: media left, real physical identity right. */
+      /* 003: split media/info stays, but each half becomes a shell */
+      .card003-variant .card001 .photo {
+        border-right:1px solid var(--loc-line)!important;
+        border-bottom:1px solid var(--loc-line)!important;
+        background:#07090b!important;
+      }
       .card003-variant .card001 .address {
-        border:0 !important;
-        border-radius:0 !important;
-        margin:0 !important;
-        background:linear-gradient(180deg,#14191e,#0e1215) !important;
-        box-shadow:none !important;
+        margin:0!important;
+        width:149px!important;
+        height:79px!important;
+        min-height:79px!important;
+        border:0!important;
+        border-bottom:1px solid var(--loc-line)!important;
+        border-radius:0!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:none!important;
+      }
+      .card003-variant .card001 .address .ixi-aos-inline-address {
+        height:auto!important;
+        min-height:0!important;
+        padding:7px 9px 28px!important;
       }
       .card003-variant .card001 .address .ixi-aos-inline-address strong {
-        color:#f1f3f4 !important;
-        font-size:8.1px !important;
-        font-weight:730 !important;
-        line-height:1.25 !important;
+        font-size:7.7px!important;
+        line-height:1.22!important;
       }
       .card003-variant .card003-contact-overlay {
-        border-top:1px solid rgba(255,255,255,.09) !important;
-        background:rgba(255,255,255,.008) !important;
+        border-top:1px solid rgba(255,255,255,.09)!important;
       }
-      .card003-variant .card003-contact-overlay strong {
-        color:#f0f2f3 !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        font-size:7.5px !important;
-        font-weight:730 !important;
-      }
-      .card003-variant .card003-contact-overlay span {
-        color:#98a1a8 !important;
-        font-size:6.7px !important;
-        font-weight:650 !important;
-      }
+      .card003-variant .card003-contact-overlay strong { color:#f0f2f3!important; font-size:7.5px!important; }
+      .card003-variant .card003-contact-overlay span { color:#889198!important; font-size:6.4px!important; }
+      .card003-variant .card001 .metrics { margin-top:5px!important; }
+      .card003-variant .card001 .relationships { margin-top:6px!important; }
 
       /* ============================================================
-         F2 — OPERATIONS
+         F2 OPERATIONS — SHELLS OVER FLOATING TEXT
          ============================================================ */
       .ixi-aos-location-f2 {
-        --ops-bg:var(--ix-bg) !important;
-        --ops-panel:var(--ix-s1) !important;
-        --ops-line:var(--ix-line) !important;
-        --ops-muted:var(--ix-muted) !important;
-        --ops-text:var(--ix-white) !important;
-        --ops-accent:var(--ix-yellow) !important;
+        --ops-bg:var(--loc-bg-0)!important;
+        --ops-panel:var(--loc-bg-2)!important;
+        --ops-line:var(--loc-line)!important;
+        --ops-muted:var(--loc-text-3)!important;
+        --ops-text:var(--loc-text)!important;
+        --ops-accent:var(--loc-yellow)!important;
       }
       .ixi-aos-location-f2 .ops-header {
-        border-bottom:1px solid var(--ix-line-soft) !important;
-        background:linear-gradient(180deg,rgba(255,255,255,.02),transparent) !important;
+        border-bottom:1px solid var(--loc-line)!important;
+        background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)!important;
       }
-      .ixi-aos-location-f2 .ops-identity strong { font-size:16px !important; }
-      .ixi-aos-location-f2 .ops-scroll { background:transparent !important; }
-      .ixi-aos-location-f2 .gate-code {
-        margin:7px 7px 6px !important;
-        min-height:38px !important;
-        border:1px solid rgba(255,196,0,.30) !important;
-        border-radius:7px !important;
-        background:linear-gradient(180deg,rgba(255,196,0,.075),rgba(255,196,0,.025)),#111519 !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
-      }
-      .ixi-aos-location-f2 .gate-code span { color:var(--ix-yellow) !important; font-size:7px !important; font-weight:820 !important; }
-      .ixi-aos-location-f2 .gate-code strong { color:#fff !important; font-size:16px !important; font-weight:760 !important; }
+      .ixi-aos-location-f2 .gate-code,
       .ixi-aos-location-f2 .ops-section {
-        margin:0 7px 6px !important;
-        border:1px solid rgba(255,255,255,.08) !important;
-        border-radius:7px !important;
-        overflow:hidden !important;
-        background:linear-gradient(180deg,#11161a,#0e1215) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.018) !important;
+        border:1px solid var(--loc-line)!important;
+        border-radius:8px!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 4px 10px rgba(0,0,0,.16)!important;
       }
+      .ixi-aos-location-f2 .gate-code { margin:7px!important; }
+      .ixi-aos-location-f2 .ops-section { margin:0 7px 7px!important; overflow:hidden!important; }
       .ixi-aos-location-f2 .ops-section-title {
-        height:22px !important;
-        display:flex !important;
-        align-items:center !important;
-        padding:0 9px !important;
-        border-bottom:1px solid rgba(255,255,255,.075) !important;
-        background:#151a1f !important;
-        color:var(--ix-yellow) !important;
-        font-size:7px !important;
-        font-weight:820 !important;
-        letter-spacing:.055em !important;
+        min-height:22px!important;
+        padding:0 9px!important;
+        border-bottom:1px solid var(--loc-line)!important;
+        background:rgba(255,255,255,.018)!important;
+        color:var(--loc-yellow)!important;
+        font-size:7px!important;
+        font-weight:850!important;
       }
-      .ixi-aos-location-f2 .ops-row {
-        min-height:24px !important;
-        padding:0 8px !important;
-        border-bottom:1px solid rgba(255,255,255,.05) !important;
-        background:#0f1316 !important;
+      .ixi-aos-location-f2 .ops-row,
+      .ixi-aos-location-f2 .ops-cell,
+      .ixi-aos-location-f2 .ops-wide {
+        background:rgba(255,255,255,.008)!important;
+        border-color:var(--loc-line-soft)!important;
       }
-      .ixi-aos-location-f2 .ops-row:nth-child(even) { background:#12171b !important; }
+      .ixi-aos-location-f2 .ops-row:nth-child(even),
+      .ixi-aos-location-f2 .ops-cell:nth-child(even) { background:rgba(255,255,255,.02)!important; }
       .ixi-aos-location-f2 .ops-label,
-      .ixi-aos-location-f2 .ops-cell-label { color:#929ba3 !important; font-size:6.5px !important; font-weight:700 !important; }
+      .ixi-aos-location-f2 .ops-cell-label { color:#a6adb3!important; font-size:6.5px!important; font-weight:760!important; }
       .ixi-aos-location-f2 .ops-row strong,
-      .ixi-aos-location-f2 .ops-cell strong { color:#f0f2f3 !important; font-size:7.1px !important; font-weight:730 !important; }
-      .ixi-aos-location-f2 .ops-icon,
-      .ixi-aos-location-f2 .ops-cell-icon { color:#c9d0d5 !important; }
-      .ixi-aos-location-f2 .ops-grid.two { gap:4px !important; padding:4px !important; }
-      .ixi-aos-location-f2 .ops-cell {
-        min-height:39px !important;
-        border:1px solid rgba(255,255,255,.07) !important;
-        border-radius:5px !important;
-        background:linear-gradient(180deg,#171c21,#12171b) !important;
-      }
-      .ixi-aos-location-f2 .ops-cell.emphasis strong { color:var(--ix-green) !important; }
+      .ixi-aos-location-f2 .ops-cell strong { color:#f5f6f7!important; font-size:7.2px!important; font-weight:780!important; }
 
       /* ============================================================
-         F3 — FINANCIAL
-         Kill paper/certificate look in V12 office mode.
+         F3/F4/F5 — SAME DARK MATERIAL SYSTEM
          ============================================================ */
-      .f3-financial {
-        --paper:var(--ix-bg) !important;
-        --paper2:var(--ix-s1) !important;
-        --ink:var(--ix-white) !important;
-        --ink-soft:#89939b !important;
-        --accent:var(--ix-yellow) !important;
-        --line:rgba(255,255,255,.09) !important;
-        --line-soft:rgba(255,255,255,.05) !important;
-        --panel:var(--ix-s1) !important;
-        --money:#f5f7f8 !important;
-        --negative:var(--ix-red) !important;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-v12),
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-steel),
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-blueprint),
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-industrial) {
+        --paper:var(--loc-bg-0)!important;
+        --paper2:var(--loc-bg-1)!important;
+        --ink:var(--loc-text)!important;
+        --ink-soft:var(--loc-text-3)!important;
+        --accent:var(--loc-yellow)!important;
+        --line:var(--loc-line)!important;
+        --line-soft:var(--loc-line-soft)!important;
+        --panel:var(--loc-bg-2)!important;
+        --money:var(--loc-green)!important;
+        --negative:var(--loc-red)!important;
+        font-family:var(--loc-font)!important;
+        background:linear-gradient(180deg,#101419,#090b0d)!important;
       }
-      .f3-financial::before,.f3-financial::after,.f3-financial .currency-ornament { display:none !important; }
-      .f3-financial .f3-header {
-        border-bottom:1px solid var(--ix-line-soft) !important;
-        background:linear-gradient(180deg,rgba(255,255,255,.02),transparent) !important;
-      }
-      .f3-financial .f3-ident b { font-size:15.5px !important; }
-      .f3-financial .face-banner {
-        height:20px !important;
-        clip-path:none !important;
-        border:1px solid rgba(255,196,0,.24) !important;
-        border-radius:6px !important;
-        background:linear-gradient(180deg,rgba(255,196,0,.075),rgba(255,196,0,.02)) !important;
-        color:var(--ix-yellow) !important;
-        font:800 6.5px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-      }
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-v12)::before,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-v12)::after,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-steel)::before,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-steel)::after,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-blueprint)::before,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-blueprint)::after,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-industrial)::before,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-industrial)::after { display:none!important; }
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-v12) .currency-ornament,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-steel) .currency-ornament,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-blueprint) .currency-ornament,
+      .f3-financial:has(.ixi-aos-card-header-controls.skin-industrial) .currency-ornament { display:none!important; }
       .f3-financial .ownership,
-      .f3-financial .f3-section {
-        border:1px solid rgba(255,255,255,.08) !important;
-        border-radius:6px !important;
-        background:linear-gradient(180deg,#13181d,#0f1316) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.018) !important;
-      }
-      .f3-financial .f3-section > h3 {
-        height:20px !important;
-        display:flex !important;
-        align-items:center !important;
-        padding:0 7px !important;
-        border-bottom:1px solid rgba(255,255,255,.07) !important;
-        background:#171c21 !important;
-        color:var(--ix-yellow) !important;
-        font:800 6.4px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
-        letter-spacing:.045em !important;
-      }
-      .f3-financial .ownership-seal {
-        border-color:rgba(255,196,0,.42) !important;
-        color:var(--ix-yellow) !important;
-      }
-      .f3-financial .ownership-copy b { color:#fff !important; }
-      .f3-financial .f3-row { border-bottom-color:rgba(255,255,255,.05) !important; }
-      .f3-financial .f3-row span { color:#89939b !important; font:700 5.5px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important; }
-      .f3-financial .f3-row b { color:#eef1f3 !important; font:730 6.2px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important; }
-      .f3-financial .big-value { border-color:rgba(255,255,255,.08) !important; background:linear-gradient(180deg,#171d22,#111519) !important; }
-      .f3-financial .big-value::before { display:none !important; }
-      .f3-financial .big-value b { color:#fff !important; }
-      .f3-financial .summary-grid > b { border-color:rgba(255,255,255,.07) !important; background:#151a1f !important; color:#fff !important; }
-
-      /* ============================================================
-         F4 — EXPENSES / OBLIGATIONS
-         ============================================================ */
-      .f4-obligations {
-        --bg:var(--ix-bg) !important;
-        --panel:var(--ix-s1) !important;
-        --line:var(--ix-line) !important;
-        --text:var(--ix-white) !important;
-        --muted:var(--ix-muted) !important;
-        --accent:var(--ix-yellow) !important;
-      }
-      .f4-obligations .f4-paper-ornament { display:none !important; }
-      .f4-obligations .f4-header { background:linear-gradient(180deg,rgba(255,255,255,.02),transparent) !important; border-bottom-color:var(--ix-line-soft) !important; }
-      .f4-obligations .f4-ident b { font-size:15.5px !important; }
-      .f4-obligations .f4-banner {
-        border-color:rgba(255,196,0,.26) !important;
-        border-radius:6px !important;
-        background:linear-gradient(180deg,rgba(255,196,0,.075),rgba(255,196,0,.02)) !important;
-        color:var(--ix-yellow) !important;
-      }
-      .f4-obligations .f4-control > *,
-      .f4-obligations .f4-section {
-        border-color:rgba(255,255,255,.08) !important;
-        background:linear-gradient(180deg,#13181d,#0f1316) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.018) !important;
-      }
-      .f4-obligations .f4-section h3 {
-        background:#171c21 !important;
-        color:var(--ix-yellow) !important;
-        border-bottom-color:rgba(255,255,255,.07) !important;
-      }
-      .f4-obligations .f4-row:nth-child(even) { background:rgba(255,255,255,.014) !important; }
-      .f4-obligations .f4-row strong,
-      .f4-obligations .f4-row b { color:#eef1f3 !important; }
-      .f4-obligations .f4-row span { color:#929ba3 !important; }
-      .f4-obligations .f4-status.s-paid,
-      .f4-obligations .f4-status.s-active,
-      .f4-obligations .f4-status.s-auto { color:var(--ix-green) !important; border-color:rgba(139,217,47,.38) !important; }
-      .f4-obligations .f4-status.s-open,
-      .f4-obligations .f4-status.s-scheduled { color:var(--ix-yellow) !important; border-color:rgba(255,196,0,.35) !important; }
-
-      /* ============================================================
-         F5 — MAINTENANCE / FACILITY
-         Same family, with status color reserved for actual status.
-         ============================================================ */
-      .f5 {
-        --bg:var(--ix-bg) !important;
-        --panel:var(--ix-s1) !important;
-        --line:var(--ix-line) !important;
-        --text:var(--ix-white) !important;
-        --muted:var(--ix-muted) !important;
-        --accent:var(--ix-yellow) !important;
-        --good:var(--ix-green) !important;
-        --warn:var(--ix-yellow) !important;
-        --bad:var(--ix-red) !important;
-      }
-      .f5 .f5-head { border-bottom-color:var(--ix-line-soft) !important; background:linear-gradient(180deg,rgba(255,255,255,.02),transparent) !important; }
-      .f5 .f5-head > div > b { font-size:15.5px !important; }
-      .f5 .f5-banner {
-        border:1px solid rgba(255,196,0,.22) !important;
-        border-radius:6px !important;
-        background:linear-gradient(180deg,rgba(255,196,0,.07),rgba(255,196,0,.02)) !important;
-        color:var(--ix-yellow) !important;
-      }
+      .f3-financial .f3-section,
+      .f4-obligations .f4-section,
       .f5 .f5-sec {
-        border-color:rgba(255,255,255,.08) !important;
-        background:linear-gradient(180deg,#13181d,#0f1316) !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.018) !important;
+        border:1px solid var(--loc-line)!important;
+        border-radius:8px!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 4px 10px rgba(0,0,0,.14)!important;
+        overflow:hidden!important;
       }
-      .f5 .f5-sec > h3 {
-        background:#171c21 !important;
-        color:var(--ix-yellow) !important;
-        border-bottom-color:rgba(255,255,255,.07) !important;
+      .f3-financial .f3-section>h3,
+      .f4-obligations .f4-section>h3,
+      .f5 .f5-sec>h3 {
+        border-bottom:1px solid var(--loc-line)!important;
+        background:rgba(255,255,255,.018)!important;
+        color:var(--loc-yellow)!important;
+        font-family:var(--loc-font)!important;
+        font-weight:850!important;
+        letter-spacing:.06em!important;
       }
-      .f5 .health,
-      .f5 .nextdue,
-      .f5 .attention > div,
-      .f5 .systems > div {
-        background:#101419 !important;
+      .f3-financial .f3-row,
+      .f4-obligations .f4-row,
+      .f5 .tr,
+      .f5 .systems>div {
+        border-bottom-color:var(--loc-line-soft)!important;
       }
-      .f5 .attention > div:nth-child(even),
-      .f5 .systems > div:nth-child(even) { background:#13181d !important; }
-      .f5 .table .tr { border-bottom-color:rgba(255,255,255,.05) !important; }
-      .f5 .table .tr:nth-child(even) { background:rgba(255,255,255,.014) !important; }
+      .f3-financial .f3-row:nth-child(even),
+      .f4-obligations .f4-row:nth-child(even),
+      .f5 .systems>div:nth-child(even) { background:rgba(255,255,255,.016)!important; }
+      .f3-financial .face-banner,
+      .f4-obligations .f4-banner,
+      .f5 .f5-banner {
+        border:1px solid rgba(255,196,0,.22)!important;
+        border-radius:7px!important;
+        background:linear-gradient(180deg,rgba(255,196,0,.07),rgba(255,196,0,.025))!important;
+        color:var(--loc-yellow)!important;
+        clip-path:none!important;
+      }
 
-      /* ------------------------------------------------------------
-         Final polish: selection, scrollbars, compact interaction.
-         ------------------------------------------------------------ */
-      .card001 ::selection,
-      .ixi-aos-location-f2 ::selection,
-      .f3-financial ::selection,
-      .f4-obligations ::selection,
-      .f5 ::selection { background:rgba(255,196,0,.28); color:#fff; }
+      /* F4 top metrics */
+      .f4-obligations .f4-control { gap:5px!important; }
+      .f4-obligations .f4-next,
+      .f4-obligations .f4-metric {
+        border:1px solid var(--loc-line)!important;
+        border-radius:8px!important;
+        background:linear-gradient(180deg,var(--loc-bg-3),var(--loc-bg-2))!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+      }
 
-      .card001 *::-webkit-scrollbar,
-      .ixi-aos-location-f2 *::-webkit-scrollbar,
-      .f3-financial *::-webkit-scrollbar,
-      .f4-obligations *::-webkit-scrollbar,
-      .f5 *::-webkit-scrollbar { width:4px; height:4px; }
-      .card001 *::-webkit-scrollbar-thumb,
-      .ixi-aos-location-f2 *::-webkit-scrollbar-thumb,
-      .f3-financial *::-webkit-scrollbar-thumb,
-      .f4-obligations *::-webkit-scrollbar-thumb,
-      .f5 *::-webkit-scrollbar-thumb { background:#4b5258; border-radius:99px; }
-      .card001 *::-webkit-scrollbar-track,
-      .ixi-aos-location-f2 *::-webkit-scrollbar-track,
-      .f3-financial *::-webkit-scrollbar-track,
-      .f4-obligations *::-webkit-scrollbar-track,
-      .f5 *::-webkit-scrollbar-track { background:transparent; }
+      /* F5 keeps status colors but lives on same graphite shells */
+      .f5 { --accent:var(--loc-yellow)!important; --panel:var(--loc-bg-2)!important; --line:var(--loc-line)!important; --text:var(--loc-text)!important; --muted:var(--loc-text-3)!important; }
+      .f5 .f5-sec h3,
+      .f5 .f5-banner { color:var(--loc-yellow)!important; }
+
+      /* SCROLLBARS — compact and contained */
+      .card001 .relationships .panel-scroll,
+      .ixi-aos-location-f2 .ops-scroll,
+      .f3-financial .f3-scroll,
+      .f4-obligations .f4-scroll,
+      .f5 .f5-scroll {
+        scrollbar-width:thin!important;
+        scrollbar-color:rgba(255,255,255,.24) transparent!important;
+      }
+      .card001 .relationships .panel-scroll::-webkit-scrollbar,
+      .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar,
+      .f3-financial .f3-scroll::-webkit-scrollbar,
+      .f4-obligations .f4-scroll::-webkit-scrollbar,
+      .f5 .f5-scroll::-webkit-scrollbar { width:4px!important; }
+      .card001 .relationships .panel-scroll::-webkit-scrollbar-thumb,
+      .ixi-aos-location-f2 .ops-scroll::-webkit-scrollbar-thumb,
+      .f3-financial .f3-scroll::-webkit-scrollbar-thumb,
+      .f4-obligations .f4-scroll::-webkit-scrollbar-thumb,
+      .f5 .f5-scroll::-webkit-scrollbar-thumb {
+        background:rgba(255,255,255,.23)!important;
+        border-radius:999px!important;
+      }
     `}</style>
   );
 }
