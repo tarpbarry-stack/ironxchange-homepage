@@ -224,8 +224,9 @@ export function getIXIPurchaseApprovalRequirement(policy = DEFAULT_IXI_PURCHASIN
 
 export function getIXIPurchaseQuoteRequirement(policy = DEFAULT_IXI_PURCHASING_POLICY, amount = 0) {
   const resolvedPolicy = mergePolicy(policy);
+  // Policy language is "require quote > threshold", not ">= threshold".
   const applicable = safeArray(resolvedPolicy.request.quoteThresholds)
-    .filter(entry => Math.max(0, number(amount)) >= number(entry.amount))
+    .filter(entry => Math.max(0, number(amount)) > number(entry.amount))
     .sort((left, right) => number(right.amount) - number(left.amount))[0];
 
   return {
@@ -268,10 +269,13 @@ export function evaluateIXIPurchaseRuntime({
     resolvedAuthority.hasGrant("approve") ||
     approvalLimit >= amount ||
     roleMatches(roles, [approval.role]);
+
+  // Issuing an already-approved PO and bypassing approval are separate powers.
+  // `canIssuePo` alone never grants direct-PO authority.
   const canDirectPo =
-    resolvedAuthority.canIssuePo ||
     resolvedAuthority.hasGrant("direct-po") ||
     directPoLimit >= amount;
+
   const canReceive =
     resolvedAuthority.canReceive ||
     roleMatches(roles, resolvedPolicy.receiving.allowedRoles);
@@ -323,7 +327,7 @@ export function evaluateIXIPurchaseRuntime({
   }
 
   if (status === "approved") {
-    if (resolvedAuthority.canIssuePo || canDirectPo || canApprove) {
+    if (resolvedAuthority.canIssuePo || resolvedAuthority.hasGrant("issue-po") || canApprove) {
       actions.add(IXI_PURCHASE_ACTIONS.ISSUE_PO);
     }
   }
@@ -340,6 +344,13 @@ export function evaluateIXIPurchaseRuntime({
     if (canMatchBill) actions.add(IXI_PURCHASE_ACTIONS.MATCH_BILL);
   }
 
+  if (status === "bill-match") {
+    if (canMatchBill) actions.add(IXI_PURCHASE_ACTIONS.MATCH_BILL);
+    if (variance > 0 && canApproveVariance) {
+      actions.add(IXI_PURCHASE_ACTIONS.APPROVE_VARIANCE);
+    }
+  }
+
   if (status === "closed" && canReopen) {
     actions.add(IXI_PURCHASE_ACTIONS.REOPEN);
   }
@@ -353,6 +364,8 @@ export function evaluateIXIPurchaseRuntime({
     quoteRequirement,
     directPoLimit,
     approvalLimit,
+    variance,
+    varianceRequirement,
     canApprove,
     canDirectPo,
     canReceive,
