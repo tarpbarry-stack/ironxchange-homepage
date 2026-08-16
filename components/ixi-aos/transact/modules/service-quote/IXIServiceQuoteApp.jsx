@@ -1,11 +1,767 @@
-import{useMemo,useState}from"react";import{createIXIServiceQuote}from"./IXIServiceQuoteCommands";import{createIXIServiceQuoteDraft,validateIXIServiceQuote}from"./IXIServiceQuoteContract";import{sendIXIServiceQuote,markIXIServiceQuoteViewed,requestIXIServiceQuoteChanges,declineIXIServiceQuote,acceptIXIServiceQuote,reviseIXIServiceQuote,addIXIServiceChangeOrder,approveIXIServiceChangeOrder,convertIXIServiceQuoteToWorkOrder}from"./IXIServiceQuoteRecordEngine";import IXIServiceQuoteStyles from"./IXIServiceQuoteStyles";
-const clean=v=>String(v??"").trim(),money=v=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(v||0)),today=()=>new Date().toISOString().slice(0,10),plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};const newLine=()=>({type:"labor",description:"",quantity:1,unit:"hour",unitPrice:"",unitCost:"",taxable:true});const newOption=(label="BASE SCOPE",required=true)=>({label,description:"",required,lines:[newLine()]});
-const COPY={en:{title:"SERVICE QUOTE",customer:"CUSTOMER",problem:"SERVICE REQUEST / PROBLEM",scope:"CUSTOMER-FACING SCOPE",internal:"INTERNAL NOTES",pricing:"PRICING TYPE",terms:"TERMS / AUTHORIZATION",send:"CREATE SERVICE QUOTE",record:"SERVICE QUOTE RECORD",valid:"VALID THROUGH",assume:"ASSUMPTIONS",exclude:"EXCLUSIONS",docs:"DOCUMENTS / PHOTOS"},es:{title:"COTIZACIÓN DE SERVICIO",customer:"CLIENTE",problem:"SOLICITUD / PROBLEMA",scope:"ALCANCE PARA CLIENTE",internal:"NOTAS INTERNAS",pricing:"TIPO DE PRECIO",terms:"TÉRMINOS / AUTORIZACIÓN",send:"CREAR COTIZACIÓN",record:"REGISTRO DE COTIZACIÓN",valid:"VÁLIDA HASTA",assume:"SUPUESTOS",exclude:"EXCLUSIONES",docs:"DOCUMENTOS / FOTOS"}};
-function Field({label,children}){return <div className="sq-field"><label>{label}</label>{children}</div>};function Input({value,onChange,...p}){return <input value={value} onChange={e=>onChange(e.target.value)} {...p}/>}
-export default function IXIServiceQuoteApp({context={},object={},initialRecord=null,language="en",onBack=null,onRecordChange=null,onCreateServiceWorkOrder=null}){const primary=context.primary||{},actor=context.actor||{};const[lang,setLang]=useState(language==="es"?"es":"en"),t=COPY[lang],[record,setRecord]=useState(initialRecord),[saving,setSaving]=useState(false),[errors,setErrors]=useState({}),[customerName,setCustomerName]=useState(""),[customerContactName,setCustomerContactName]=useState(""),[customerEmail,setCustomerEmail]=useState(""),[customerPhone,setCustomerPhone]=useState(""),[problem,setProblem]=useState(""),[customerScope,setCustomerScope]=useState(""),[internalNotes,setInternalNotes]=useState(""),[pricingType,setPricingType]=useState("estimate"),[options,setOptions]=useState([newOption()]),[taxAmount,setTaxAmount]=useState(""),[quoteDate,setQuoteDate]=useState(today()),[validThrough,setValidThrough]=useState(plusDays(14)),[paymentTerms,setPaymentTerms]=useState("NET 30"),[depositType,setDepositType]=useState("none"),[depositValue,setDepositValue]=useState(""),[assumptions,setAssumptions]=useState(""),[exclusions,setExclusions]=useState(""),[documents,setDocuments]=useState([]),[customerPoNumber,setCustomerPoNumber]=useState(""),[actionText,setActionText]=useState(""),[acceptedBy,setAcceptedBy]=useState(""),[acceptMethod,setAcceptMethod]=useState("digital"),[selectedOptions,setSelectedOptions]=useState([]),[changeDescription,setChangeDescription]=useState(""),[changeAmount,setChangeAmount]=useState("");
-const input=useMemo(()=>({customerName,customerContactName,customerEmail,customerPhone,problem,customerScope,internalNotes,pricingType,options,taxAmount,quoteDate,validThrough,paymentTerms,depositType,depositValue,assumptions,exclusions,documents,customerPoNumber,assetPassportId:primary.passportId,assetObjectId:primary.objectId,assetObjectType:primary.objectType,assetLabel:primary.label}),[customerName,customerContactName,customerEmail,customerPhone,problem,customerScope,internalNotes,pricingType,options,taxAmount,quoteDate,validThrough,paymentTerms,depositType,depositValue,assumptions,exclusions,documents,customerPoNumber,primary]);const preview=useMemo(()=>createIXIServiceQuoteDraft({context,input}),[context,input]);
-function lineChange(oi,li,key,value){setOptions(xs=>xs.map((o,i)=>i!==oi?o:{...o,lines:o.lines.map((l,j)=>j!==li?l:{...l,[key]:value})}))}function addDocs(files,type){setDocuments(x=>[...x,...Array.from(files||[]).map((f,i)=>({documentId:`SQ-DOC-${Date.now()}-${i}`,type,fileName:f.name,mimeType:f.type,size:f.size,status:"local-pending-upload"}))])}
-async function create(){const c=validateIXIServiceQuote(preview);setErrors(c.errors);if(!c.valid)return;setSaving(true);try{const result=await createIXIServiceQuote({object:{...object,passportId:primary.passportId,objectId:primary.objectId,objectType:primary.objectType,label:primary.label},context,input,metadata:{source:"ixi-transact-service-quote"}});setRecord(result.record);await onRecordChange?.(result.record,{action:"create",response:result.response},context)}finally{setSaving(false)}}
-async function mutate(fn,change){const next=fn();setRecord(next);await onRecordChange?.(next,change,context)}
-if(record){const r=record,accepted=r.status==="accepted"||r.status==="converted";return <div className="ixi-sq"><div className="sq-top"><div><div className="sq-kicker">IXI TRAN$ACT</div><div className="sq-title">{t.record}</div><div className="sq-id">{r.identity?.number} · REV {r.identity?.revision}</div></div><div className="sq-lang"><button className={lang==="en"?"on":""} onClick={()=>setLang("en")}>ENG</button><button className={lang==="es"?"on":""} onClick={()=>setLang("es")}>ESP</button></div></div><div className="sq-context"><strong>{r.customer?.name} · {r.asset?.label}</strong><small>{r.request?.problem}</small></div><div className="sq-status"><div className="sq-statushead"><strong className={accepted?"sq-ok":r.status==="declined"?"sq-bad":""}>{clean(r.status).replace(/-/g," ").toUpperCase()}</strong><b>{money(r.economics?.quotedRevenue)}</b></div><small>{r.commercial?.pricingType?.toUpperCase()} · VALID {r.commercial?.validThrough}</small></div><div className="sq-section">COMMERCIAL</div><div className="sq-money"><span>QUOTED REVENUE</span><b>{money(r.economics?.quotedRevenue)}</b></div><div className="sq-money"><span>EST. INTERNAL COST</span><b>{money(r.economics?.estimatedInternalCost)}</b></div><div className="sq-money"><span>PROJECTED GROSS PROFIT</span><b>{money(r.economics?.projectedGrossProfit)}</b></div><div className="sq-money"><span>PROJECTED MARGIN</span><b>{r.economics?.projectedMarginPercent}%</b></div>{accepted?<><div className="sq-total"><span>AUTHORIZED CUSTOMER VALUE</span><strong>{money(r.economics?.authorizedRevenue)}</strong></div><div className="sq-row"><div className="sq-rowhead"><strong>ACCEPTED BY</strong><b>{r.acceptance?.acceptedBy||"—"}</b></div><small>{r.acceptance?.acceptedAt} · {r.acceptance?.method} · PO {r.acceptance?.customerPoNumber||"—"}</small></div>{r.status==="accepted"?<button className="sq-primary" onClick={async()=>{const wo=await onCreateServiceWorkOrder?.(r,context);const id=clean(wo?.identity?.workOrderId||wo?.identity?.number||wo?.workOrderId||wo?.number)||`CSWO-${Date.now()}`;await mutate(()=>convertIXIServiceQuoteToWorkOrder(r,id,actor),{action:"create-service-work-order",workOrderId:id,workOrder:wo||null})}}>CREATE CUSTOMER SERVICE WORK ORDER</button>:<div className="sq-callout">CUSTOMER SERVICE WORK ORDER · {r.related?.customerServiceWorkOrderId}</div>}<div className="sq-section">CHANGE ORDERS</div>{r.changeOrders?.map(co=><div className="sq-row" key={co.changeOrderId}><div className="sq-rowhead"><strong>{co.changeOrderId} · {co.status?.toUpperCase()}</strong><b>{money(co.amount)}</b></div><small>{co.description}</small>{co.status==="pending"?<button className="sq-secondary" onClick={()=>mutate(()=>approveIXIServiceChangeOrder(r,co.changeOrderId,{acceptedBy:acceptedBy||r.acceptance?.acceptedBy,method:acceptMethod},actor),{action:"approve-change-order",changeOrderId:co.changeOrderId})}>RECORD CUSTOMER APPROVAL</button>:null}</div>)}<Field label="NEW CHANGE ORDER"><Input value={changeDescription} onChange={setChangeDescription} placeholder="Additional pump replacement"/></Field><Field label="CUSTOMER PRICE DELTA"><Input value={changeAmount} onChange={setChangeAmount} inputMode="decimal"/></Field><button className="sq-secondary" onClick={()=>mutate(()=>addIXIServiceChangeOrder(r,{description:changeDescription,amount:changeAmount},actor),{action:"create-change-order"})}>+ CREATE CHANGE ORDER</button></>:<><div className="sq-section">CUSTOMER RESPONSE</div>{["draft","changes-requested"].includes(r.status)?<button className="sq-primary" onClick={()=>mutate(()=>sendIXIServiceQuote(r,{channel:"email",recipient:r.customer?.email},actor),{action:"send"})}>SEND / RESEND QUOTE</button>:null}{r.status==="sent"?<button className="sq-secondary" onClick={()=>mutate(()=>markIXIServiceQuoteViewed(r,actor),{action:"viewed"})}>MARK VIEWED</button>:null}<Field label="CUSTOMER RESPONSE / CHANGE REQUEST"><textarea value={actionText} onChange={e=>setActionText(e.target.value)}/></Field><div className="sq-actions"><button className="sq-secondary" onClick={()=>mutate(()=>requestIXIServiceQuoteChanges(r,{message:actionText},actor),{action:"changes-requested"})}>REQUEST CHANGES</button><button className="sq-danger" onClick={()=>mutate(()=>declineIXIServiceQuote(r,{reason:actionText},actor),{action:"decline"})}>DECLINE</button></div><Field label="ACCEPTED BY"><Input value={acceptedBy} onChange={setAcceptedBy}/></Field><div className="sq-grid2"><Field label="METHOD"><select value={acceptMethod} onChange={e=>setAcceptMethod(e.target.value)}><option value="digital">DIGITAL</option><option value="signature">SIGNATURE</option><option value="email">EMAIL</option><option value="text">TEXT</option><option value="phone">PHONE</option><option value="customer-po">CUSTOMER PO</option></select></Field><Field label="CUSTOMER PO #"><Input value={customerPoNumber} onChange={setCustomerPoNumber}/></Field></div>{r.options?.filter(o=>!o.required).map(o=><label className="sq-row" key={o.optionId}><input type="checkbox" checked={selectedOptions.includes(o.optionId)} onChange={e=>setSelectedOptions(x=>e.target.checked?[...x,o.optionId]:x.filter(id=>id!==o.optionId))}/> {o.label} · {money(o.customerTotal)}</label>)}<button className="sq-primary" onClick={()=>mutate(()=>acceptIXIServiceQuote(r,{acceptedBy,method:acceptMethod,customerPoNumber,acceptedOptionIds:selectedOptions},actor),{action:"accept"})}>RECORD CUSTOMER ACCEPTANCE</button></>}<div className="sq-section">SCOPE / OPTIONS</div><div className="sq-callout">{r.request?.customerScope}</div>{r.options?.map(o=><div className="sq-row" key={o.optionId}><div className="sq-rowhead"><strong>{o.label}{o.required?" · BASE":" · OPTIONAL"}</strong><b>{money(o.customerTotal)}</b></div>{o.lines?.map(l=><small key={l.lineId}>{l.type?.toUpperCase()} · {l.description} · {l.quantity} {l.unit} · {money(l.customerTotal)}</small>)}</div>)}<div className="sq-section">REVISION / ACTIVITY</div><div className="sq-history">{r.activity?.slice().reverse().map(e=><div className="sq-row" key={e.eventId}><div className="sq-rowhead"><strong>{clean(e.type).replace(/-/g," ").toUpperCase()}</strong><b>{e.revision?`REV ${e.revision}`:""}</b></div><small>{e.actorLabel} · {e.occurredAt}</small></div>)}</div><button className="sq-secondary" onClick={()=>onBack?.()}>‹ TRAN$ACT</button><div className="sq-foot">Accepted commercial authorization is immutable. New work after acceptance is handled by Change Order, not by rewriting the sold quote.</div><IXIServiceQuoteStyles/></div>}
-return <div className="ixi-sq"><div className="sq-top"><div><div className="sq-kicker">IXI TRAN$ACT</div><div className="sq-title">{t.title}</div></div><div className="sq-lang"><button className={lang==="en"?"on":""} onClick={()=>setLang("en")}>ENG</button><button className={lang==="es"?"on":""} onClick={()=>setLang("es")}>ESP</button></div></div><div className="sq-context"><strong>{primary.label||"CUSTOMER ASSET / AOS CONTEXT"}</strong><small>{primary.objectType||"AOS OBJECT"} · {context.location?.label||"NO LOCATION"}</small></div><div className="sq-section">CUSTOMER / REQUEST</div><Field label={t.customer}><Input value={customerName} onChange={setCustomerName}/></Field><div className="sq-grid2"><Field label="CONTACT"><Input value={customerContactName} onChange={setCustomerContactName}/></Field><Field label="EMAIL"><Input value={customerEmail} onChange={setCustomerEmail}/></Field></div><Field label={t.problem}><textarea value={problem} onChange={e=>setProblem(e.target.value)}/></Field><Field label={t.scope}><textarea value={customerScope} onChange={e=>setCustomerScope(e.target.value)}/></Field><Field label={t.internal}><textarea value={internalNotes} onChange={e=>setInternalNotes(e.target.value)}/></Field><div className="sq-section">{t.pricing}</div><div className="sq-choice">{[["estimate","ESTIMATE"],["fixed-price","FIXED PRICE"],["not-to-exceed","NOT TO EXCEED"]].map(([id,label])=><button key={id} className={pricingType===id?"on":""} onClick={()=>setPricingType(id)}>{label}</button>)}</div><div className="sq-section">SCOPE / OPTIONS</div>{options.map((o,oi)=><div className="sq-row" key={oi}><div className="sq-rowhead"><Input value={o.label} onChange={v=>setOptions(xs=>xs.map((x,i)=>i===oi?{...x,label:v}:x))}/><b>{o.required?"BASE":"OPTIONAL"}</b></div>{o.lines.map((l,li)=><div className="sq-line" key={li}><Input value={l.description} onChange={v=>lineChange(oi,li,"description",v)} placeholder="Labor / part / service"/><Input value={l.quantity} onChange={v=>lineChange(oi,li,"quantity",v)} inputMode="decimal"/><Input value={l.unitPrice} onChange={v=>lineChange(oi,li,"unitPrice",v)} inputMode="decimal"/></div>)}<div className="sq-grid2"><button className="sq-secondary" onClick={()=>setOptions(xs=>xs.map((x,i)=>i===oi?{...x,lines:[...x.lines,newLine()]}:x))
+import { useMemo, useState } from "react";
+
+import { createIXIServiceQuote } from "./IXIServiceQuoteCommands";
+import {
+  createIXIServiceQuoteDraft,
+  validateIXIServiceQuote
+} from "./IXIServiceQuoteContract";
+import {
+  sendIXIServiceQuote,
+  markIXIServiceQuoteViewed,
+  requestIXIServiceQuoteChanges,
+  declineIXIServiceQuote,
+  acceptIXIServiceQuote,
+  addIXIServiceChangeOrder,
+  approveIXIServiceChangeOrder,
+  convertIXIServiceQuoteToWorkOrder
+} from "./IXIServiceQuoteRecordEngine";
+import IXIServiceQuoteStyles from "./IXIServiceQuoteStyles";
+
+const clean = value => String(value ?? "").trim();
+const money = value =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
+  }).format(Number(value || 0));
+
+const today = () => new Date().toISOString().slice(0, 10);
+const plusDays = days => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+function blankLine() {
+  return {
+    type: "labor",
+    description: "",
+    quantity: 1,
+    unit: "hour",
+    unitPrice: "",
+    unitCost: "",
+    taxable: true
+  };
+}
+
+function blankOption(label = "BASE SCOPE", required = true) {
+  return {
+    label,
+    description: "",
+    required,
+    lines: [blankLine()]
+  };
+}
+
+const COPY = {
+  en: {
+    title: "SERVICE QUOTE",
+    record: "SERVICE QUOTE RECORD",
+    customer: "CUSTOMER",
+    request: "SERVICE REQUEST / PROBLEM",
+    scope: "CUSTOMER-FACING SCOPE",
+    internal: "INTERNAL NOTES",
+    pricing: "PRICING TYPE",
+    create: "CREATE SERVICE QUOTE"
+  },
+  es: {
+    title: "COTIZACIÓN DE SERVICIO",
+    record: "REGISTRO DE COTIZACIÓN",
+    customer: "CLIENTE",
+    request: "SOLICITUD / PROBLEMA",
+    scope: "ALCANCE PARA CLIENTE",
+    internal: "NOTAS INTERNAS",
+    pricing: "TIPO DE PRECIO",
+    create: "CREAR COTIZACIÓN"
+  }
+};
+
+function Field({ label, children }) {
+  return (
+    <div className="sq-field">
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function TextInput({ value, onChange, ...props }) {
+  return (
+    <input
+      {...props}
+      value={value}
+      onChange={event => onChange(event.target.value)}
+    />
+  );
+}
+
+export default function IXIServiceQuoteApp({
+  context = {},
+  object = {},
+  initialRecord = null,
+  language = "en",
+  onBack = null,
+  onRecordChange = null,
+  onCreateServiceWorkOrder = null
+}) {
+  const primary = context.primary || {};
+  const actor = context.actor || {};
+
+  const [lang, setLang] = useState(language === "es" ? "es" : "en");
+  const t = COPY[lang];
+  const [record, setRecord] = useState(initialRecord);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const [customerName, setCustomerName] = useState("");
+  const [customerContactName, setCustomerContactName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [problem, setProblem] = useState("");
+  const [customerScope, setCustomerScope] = useState("");
+  const [internalNotes, setInternalNotes] = useState("");
+  const [pricingType, setPricingType] = useState("estimate");
+  const [options, setOptions] = useState([blankOption()]);
+  const [taxAmount, setTaxAmount] = useState("");
+  const [quoteDate, setQuoteDate] = useState(today());
+  const [validThrough, setValidThrough] = useState(plusDays(14));
+  const [paymentTerms, setPaymentTerms] = useState("NET 30");
+  const [depositType, setDepositType] = useState("none");
+  const [depositValue, setDepositValue] = useState("");
+  const [assumptions, setAssumptions] = useState("");
+  const [exclusions, setExclusions] = useState("");
+  const [documents, setDocuments] = useState([]);
+
+  const [responseText, setResponseText] = useState("");
+  const [acceptedBy, setAcceptedBy] = useState("");
+  const [acceptMethod, setAcceptMethod] = useState("digital");
+  const [customerPoNumber, setCustomerPoNumber] = useState("");
+  const [selectedOptionIds, setSelectedOptionIds] = useState([]);
+  const [changeDescription, setChangeDescription] = useState("");
+  const [changeAmount, setChangeAmount] = useState("");
+
+  const input = useMemo(
+    () => ({
+      customerName,
+      customerContactName,
+      customerEmail,
+      customerPhone,
+      problem,
+      customerScope,
+      internalNotes,
+      pricingType,
+      options,
+      taxAmount,
+      quoteDate,
+      validThrough,
+      paymentTerms,
+      depositType,
+      depositValue,
+      assumptions,
+      exclusions,
+      documents,
+      customerPoNumber,
+      assetPassportId: primary.passportId,
+      assetObjectId: primary.objectId,
+      assetObjectType: primary.objectType,
+      assetLabel: primary.label
+    }),
+    [
+      customerName,
+      customerContactName,
+      customerEmail,
+      customerPhone,
+      problem,
+      customerScope,
+      internalNotes,
+      pricingType,
+      options,
+      taxAmount,
+      quoteDate,
+      validThrough,
+      paymentTerms,
+      depositType,
+      depositValue,
+      assumptions,
+      exclusions,
+      documents,
+      customerPoNumber,
+      primary
+    ]
+  );
+
+  const preview = useMemo(
+    () => createIXIServiceQuoteDraft({ context, input }),
+    [context, input]
+  );
+
+  function updateLine(optionIndex, lineIndex, key, value) {
+    setOptions(current =>
+      current.map((option, oi) =>
+        oi !== optionIndex
+          ? option
+          : {
+              ...option,
+              lines: option.lines.map((line, li) =>
+                li !== lineIndex ? line : { ...line, [key]: value }
+              )
+            }
+      )
+    );
+  }
+
+  function updateOption(optionIndex, patch) {
+    setOptions(current =>
+      current.map((option, index) =>
+        index === optionIndex ? { ...option, ...patch } : option
+      )
+    );
+  }
+
+  function addDocuments(fileList, type) {
+    const additions = Array.from(fileList || []).map((file, index) => ({
+      documentId: `SQ-DOC-${Date.now()}-${index}`,
+      type,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      status: "local-pending-upload"
+    }));
+    setDocuments(current => [...current, ...additions]);
+  }
+
+  async function createRecord() {
+    const validation = validateIXIServiceQuote(preview);
+    setErrors(validation.errors || {});
+    if (!validation.valid) return;
+
+    setSaving(true);
+    try {
+      const result = await createIXIServiceQuote({
+        object: {
+          ...object,
+          passportId: primary.passportId,
+          objectId: primary.objectId,
+          objectType: primary.objectType,
+          label: primary.label
+        },
+        context,
+        input,
+        metadata: { source: "ixi-transact-service-quote" }
+      });
+      setRecord(result.record);
+      await onRecordChange?.(
+        result.record,
+        { action: "create", response: result.response },
+        context
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function mutate(factory, change) {
+    const next = factory();
+    setRecord(next);
+    await onRecordChange?.(next, change, context);
+  }
+
+  if (record) {
+    const accepted = ["accepted", "converted"].includes(record.status);
+
+    return (
+      <div className="ixi-sq">
+        <div className="sq-top">
+          <div>
+            <div className="sq-kicker">IXI TRAN$ACT</div>
+            <div className="sq-title">{t.record}</div>
+            <div className="sq-id">
+              {record.identity?.number} · REV {record.identity?.revision}
+            </div>
+          </div>
+          <div className="sq-lang">
+            <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
+            <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
+          </div>
+        </div>
+
+        <div className="sq-context">
+          <strong>{record.customer?.name} · {record.asset?.label}</strong>
+          <small>{record.request?.problem}</small>
+        </div>
+
+        <div className="sq-status">
+          <div className="sq-statushead">
+            <strong className={accepted ? "sq-ok" : record.status === "declined" ? "sq-bad" : ""}>
+              {clean(record.status).replace(/-/g, " ").toUpperCase()}
+            </strong>
+            <b>{money(record.economics?.quotedRevenue)}</b>
+          </div>
+          <small>
+            {clean(record.commercial?.pricingType).toUpperCase()} · VALID {record.commercial?.validThrough}
+          </small>
+        </div>
+
+        <div className="sq-section">COMMERCIAL</div>
+        <div className="sq-money"><span>QUOTED REVENUE</span><b>{money(record.economics?.quotedRevenue)}</b></div>
+        <div className="sq-money"><span>EST. INTERNAL COST</span><b>{money(record.economics?.estimatedInternalCost)}</b></div>
+        <div className="sq-money"><span>PROJECTED GROSS PROFIT</span><b>{money(record.economics?.projectedGrossProfit)}</b></div>
+        <div className="sq-money"><span>PROJECTED MARGIN</span><b>{record.economics?.projectedMarginPercent}%</b></div>
+
+        {!accepted ? (
+          <>
+            <div className="sq-section">CUSTOMER RESPONSE</div>
+            {["draft", "changes-requested"].includes(record.status) ? (
+              <button
+                className="sq-primary"
+                onClick={() =>
+                  mutate(
+                    () => sendIXIServiceQuote(record, { channel: "email", recipient: record.customer?.email }, actor),
+                    { action: "send" }
+                  )
+                }
+              >
+                SEND / RESEND QUOTE
+              </button>
+            ) : null}
+
+            {record.status === "sent" ? (
+              <button
+                className="sq-secondary"
+                onClick={() => mutate(() => markIXIServiceQuoteViewed(record, actor), { action: "viewed" })}
+              >
+                MARK VIEWED
+              </button>
+            ) : null}
+
+            <Field label="CUSTOMER RESPONSE / CHANGE REQUEST">
+              <textarea value={responseText} onChange={event => setResponseText(event.target.value)} />
+            </Field>
+
+            <div className="sq-actions">
+              <button
+                className="sq-secondary"
+                onClick={() =>
+                  mutate(
+                    () => requestIXIServiceQuoteChanges(record, { message: responseText }, actor),
+                    { action: "changes-requested" }
+                  )
+                }
+              >
+                REQUEST CHANGES
+              </button>
+              <button
+                className="sq-danger"
+                onClick={() =>
+                  mutate(
+                    () => declineIXIServiceQuote(record, { reason: responseText }, actor),
+                    { action: "decline" }
+                  )
+                }
+              >
+                DECLINE
+              </button>
+            </div>
+
+            <Field label="ACCEPTED BY">
+              <TextInput value={acceptedBy} onChange={setAcceptedBy} />
+            </Field>
+            <div className="sq-grid2">
+              <Field label="METHOD">
+                <select value={acceptMethod} onChange={event => setAcceptMethod(event.target.value)}>
+                  <option value="digital">DIGITAL</option>
+                  <option value="signature">SIGNATURE</option>
+                  <option value="email">EMAIL</option>
+                  <option value="text">TEXT</option>
+                  <option value="phone">PHONE</option>
+                  <option value="customer-po">CUSTOMER PO</option>
+                </select>
+              </Field>
+              <Field label="CUSTOMER PO #">
+                <TextInput value={customerPoNumber} onChange={setCustomerPoNumber} />
+              </Field>
+            </div>
+
+            {record.options?.filter(option => !option.required).map(option => (
+              <label className="sq-row" key={option.optionId}>
+                <input
+                  type="checkbox"
+                  checked={selectedOptionIds.includes(option.optionId)}
+                  onChange={event =>
+                    setSelectedOptionIds(current =>
+                      event.target.checked
+                        ? [...current, option.optionId]
+                        : current.filter(id => id !== option.optionId)
+                    )
+                  }
+                />
+                {" "}{option.label} · {money(option.customerTotal)}
+              </label>
+            ))}
+
+            <button
+              className="sq-primary"
+              onClick={() =>
+                mutate(
+                  () =>
+                    acceptIXIServiceQuote(
+                      record,
+                      {
+                        acceptedBy,
+                        method: acceptMethod,
+                        customerPoNumber,
+                        acceptedOptionIds: selectedOptionIds
+                      },
+                      actor
+                    ),
+                  { action: "accept" }
+                )
+              }
+            >
+              RECORD CUSTOMER ACCEPTANCE
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="sq-total">
+              <span>AUTHORIZED CUSTOMER VALUE</span>
+              <strong>{money(record.economics?.authorizedRevenue)}</strong>
+            </div>
+            <div className="sq-row">
+              <div className="sq-rowhead">
+                <strong>ACCEPTED BY</strong>
+                <b>{record.acceptance?.acceptedBy || "—"}</b>
+              </div>
+              <small>
+                {record.acceptance?.acceptedAt} · {record.acceptance?.method} · PO {record.acceptance?.customerPoNumber || "—"}
+              </small>
+            </div>
+
+            {record.status === "accepted" ? (
+              <button
+                className="sq-primary"
+                onClick={async () => {
+                  const workOrder = await onCreateServiceWorkOrder?.(record, context);
+                  const workOrderId = clean(
+                    workOrder?.identity?.workOrderId ||
+                      workOrder?.identity?.number ||
+                      workOrder?.workOrderId ||
+                      workOrder?.number
+                  ) || `CSWO-${Date.now()}`;
+                  await mutate(
+                    () => convertIXIServiceQuoteToWorkOrder(record, workOrderId, actor),
+                    { action: "create-service-work-order", workOrderId, workOrder: workOrder || null }
+                  );
+                }}
+              >
+                CREATE CUSTOMER SERVICE WORK ORDER
+              </button>
+            ) : (
+              <div className="sq-callout">
+                CUSTOMER SERVICE WORK ORDER · {record.related?.customerServiceWorkOrderId}
+              </div>
+            )}
+
+            <div className="sq-section">CHANGE ORDERS</div>
+            {record.changeOrders?.map(changeOrder => (
+              <div className="sq-row" key={changeOrder.changeOrderId}>
+                <div className="sq-rowhead">
+                  <strong>{changeOrder.changeOrderId} · {clean(changeOrder.status).toUpperCase()}</strong>
+                  <b>{money(changeOrder.amount)}</b>
+                </div>
+                <small>{changeOrder.description}</small>
+                {changeOrder.status === "pending" ? (
+                  <button
+                    className="sq-secondary"
+                    onClick={() =>
+                      mutate(
+                        () =>
+                          approveIXIServiceChangeOrder(
+                            record,
+                            changeOrder.changeOrderId,
+                            {
+                              acceptedBy: acceptedBy || record.acceptance?.acceptedBy,
+                              method: acceptMethod
+                            },
+                            actor
+                          ),
+                        { action: "approve-change-order", changeOrderId: changeOrder.changeOrderId }
+                      )
+                    }
+                  >
+                    RECORD CUSTOMER APPROVAL
+                  </button>
+                ) : null}
+              </div>
+            ))}
+
+            <Field label="NEW CHANGE ORDER">
+              <TextInput value={changeDescription} onChange={setChangeDescription} />
+            </Field>
+            <Field label="CUSTOMER PRICE DELTA">
+              <TextInput value={changeAmount} onChange={setChangeAmount} inputMode="decimal" />
+            </Field>
+            <button
+              className="sq-secondary"
+              onClick={() =>
+                mutate(
+                  () => addIXIServiceChangeOrder(record, { description: changeDescription, amount: changeAmount }, actor),
+                  { action: "create-change-order" }
+                )
+              }
+            >
+              + CREATE CHANGE ORDER
+            </button>
+          </>
+        )}
+
+        <div className="sq-section">SCOPE / OPTIONS</div>
+        <div className="sq-callout">{record.request?.customerScope}</div>
+        {record.options?.map(option => (
+          <div className="sq-row" key={option.optionId}>
+            <div className="sq-rowhead">
+              <strong>{option.label}{option.required ? " · BASE" : " · OPTIONAL"}</strong>
+              <b>{money(option.customerTotal)}</b>
+            </div>
+            {option.lines?.map(line => (
+              <small key={line.lineId}>
+                {clean(line.type).toUpperCase()} · {line.description} · {line.quantity} {line.unit} · {money(line.customerTotal)}
+              </small>
+            ))}
+          </div>
+        ))}
+
+        <div className="sq-section">ACTIVITY</div>
+        <div className="sq-history">
+          {record.activity?.slice().reverse().map(event => (
+            <div className="sq-row" key={event.eventId}>
+              <div className="sq-rowhead">
+                <strong>{clean(event.type).replace(/-/g, " ").toUpperCase()}</strong>
+                <b>{event.revision ? `REV ${event.revision}` : ""}</b>
+              </div>
+              <small>{event.actorLabel} · {event.occurredAt}</small>
+            </div>
+          ))}
+        </div>
+
+        <button className="sq-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
+        <div className="sq-foot">
+          Accepted commercial authorization is immutable. Additional authorized work is handled by Change Order.
+        </div>
+        <IXIServiceQuoteStyles />
+      </div>
+    );
+  }
+
+  return (
+    <div className="ixi-sq">
+      <div className="sq-top">
+        <div>
+          <div className="sq-kicker">IXI TRAN$ACT</div>
+          <div className="sq-title">{t.title}</div>
+        </div>
+        <div className="sq-lang">
+          <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
+          <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
+        </div>
+      </div>
+
+      <div className="sq-context">
+        <strong>{primary.label || "CUSTOMER ASSET / AOS CONTEXT"}</strong>
+        <small>{primary.objectType || "AOS OBJECT"} · {context.location?.label || "NO LOCATION"}</small>
+      </div>
+
+      <div className="sq-section">CUSTOMER / REQUEST</div>
+      <Field label={t.customer}>
+        <TextInput value={customerName} onChange={setCustomerName} />
+      </Field>
+      <div className="sq-grid2">
+        <Field label="CONTACT">
+          <TextInput value={customerContactName} onChange={setCustomerContactName} />
+        </Field>
+        <Field label="EMAIL">
+          <TextInput value={customerEmail} onChange={setCustomerEmail} />
+        </Field>
+      </div>
+      <Field label={t.request}>
+        <textarea value={problem} onChange={event => setProblem(event.target.value)} />
+      </Field>
+      <Field label={t.scope}>
+        <textarea value={customerScope} onChange={event => setCustomerScope(event.target.value)} />
+      </Field>
+      <Field label={t.internal}>
+        <textarea value={internalNotes} onChange={event => setInternalNotes(event.target.value)} />
+      </Field>
+
+      <div className="sq-section">{t.pricing}</div>
+      <div className="sq-choice">
+        {[
+          ["estimate", "ESTIMATE"],
+          ["fixed-price", "FIXED PRICE"],
+          ["not-to-exceed", "NOT TO EXCEED"]
+        ].map(([id, label]) => (
+          <button key={id} className={pricingType === id ? "on" : ""} onClick={() => setPricingType(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="sq-section">SCOPE / OPTIONS</div>
+      {options.map((option, optionIndex) => (
+        <div className="sq-row" key={`option-${optionIndex}`}>
+          <div className="sq-rowhead">
+            <TextInput
+              value={option.label}
+              onChange={value => updateOption(optionIndex, { label: value })}
+            />
+            <b>{option.required ? "BASE" : "OPTIONAL"}</b>
+          </div>
+
+          {option.lines.map((line, lineIndex) => (
+            <div key={`line-${lineIndex}`}>
+              <div className="sq-grid2">
+                <Field label="TYPE">
+                  <select
+                    value={line.type}
+                    onChange={event => updateLine(optionIndex, lineIndex, "type", event.target.value)}
+                  >
+                    <option value="labor">LABOR</option>
+                    <option value="part-material">PART / MATERIAL</option>
+                    <option value="outside-service">OUTSIDE SERVICE</option>
+                    <option value="travel-freight">TRAVEL / FREIGHT</option>
+                    <option value="other">OTHER</option>
+                  </select>
+                </Field>
+                <Field label="DESCRIPTION">
+                  <TextInput
+                    value={line.description}
+                    onChange={value => updateLine(optionIndex, lineIndex, "description", value)}
+                  />
+                </Field>
+              </div>
+              <div className="sq-grid2">
+                <Field label="QTY">
+                  <TextInput
+                    value={line.quantity}
+                    onChange={value => updateLine(optionIndex, lineIndex, "quantity", value)}
+                    inputMode="decimal"
+                  />
+                </Field>
+                <Field label="UNIT">
+                  <TextInput
+                    value={line.unit}
+                    onChange={value => updateLine(optionIndex, lineIndex, "unit", value)}
+                  />
+                </Field>
+              </div>
+              <div className="sq-grid2">
+                <Field label="CUSTOMER UNIT PRICE">
+                  <TextInput
+                    value={line.unitPrice}
+                    onChange={value => updateLine(optionIndex, lineIndex, "unitPrice", value)}
+                    inputMode="decimal"
+                  />
+                </Field>
+                <Field label="INTERNAL UNIT COST">
+                  <TextInput
+                    value={line.unitCost}
+                    onChange={value => updateLine(optionIndex, lineIndex, "unitCost", value)}
+                    inputMode="decimal"
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+
+          <button
+            className="sq-secondary"
+            onClick={() => updateOption(optionIndex, { lines: [...option.lines, blankLine()] })}
+          >
+            + ADD LINE
+          </button>
+        </div>
+      ))}
+
+      <button
+        className="sq-secondary"
+        onClick={() => setOptions(current => [...current, blankOption(`OPTION ${current.length}`, false)])}
+      >
+        + ADD OPTIONAL / ALTERNATE SCOPE
+      </button>
+
+      <div className="sq-total">
+        <span>QUOTE TOTAL</span>
+        <strong>{money(preview.economics?.quotedRevenue)}</strong>
+      </div>
+      <div className="sq-money"><span>EST. INTERNAL COST</span><b>{money(preview.economics?.estimatedInternalCost)}</b></div>
+      <div className="sq-money"><span>PROJECTED GP</span><b>{money(preview.economics?.projectedGrossProfit)}</b></div>
+      <div className="sq-money"><span>PROJECTED MARGIN</span><b>{preview.economics?.projectedMarginPercent}%</b></div>
+
+      <div className="sq-section">TERMS / AUTHORIZATION</div>
+      <div className="sq-grid2">
+        <Field label="QUOTE DATE">
+          <TextInput type="date" value={quoteDate} onChange={setQuoteDate} />
+        </Field>
+        <Field label="VALID THROUGH">
+          <TextInput type="date" value={validThrough} onChange={setValidThrough} />
+        </Field>
+      </div>
+      <Field label="PAYMENT TERMS">
+        <TextInput value={paymentTerms} onChange={setPaymentTerms} />
+      </Field>
+      <div className="sq-grid2">
+        <Field label="DEPOSIT TYPE">
+          <select value={depositType} onChange={event => setDepositType(event.target.value)}>
+            <option value="none">NONE</option>
+            <option value="amount">DOLLAR AMOUNT</option>
+            <option value="percent">PERCENT</option>
+          </select>
+        </Field>
+        <Field label="DEPOSIT VALUE">
+          <TextInput value={depositValue} onChange={setDepositValue} inputMode="decimal" />
+        </Field>
+      </div>
+      <Field label="TAX">
+        <TextInput value={taxAmount} onChange={setTaxAmount} inputMode="decimal" />
+      </Field>
+      <Field label="ASSUMPTIONS">
+        <textarea value={assumptions} onChange={event => setAssumptions(event.target.value)} />
+      </Field>
+      <Field label="EXCLUSIONS">
+        <textarea value={exclusions} onChange={event => setExclusions(event.target.value)} />
+      </Field>
+
+      <div className="sq-section">DOCUMENTS / PHOTOS</div>
+      <div className="sq-docs">
+        <label className="sq-secondary">
+          + PHOTOS
+          <input hidden multiple type="file" accept="image/*" onChange={event => addDocuments(event.target.files, "photo")} />
+        </label>
+        <label className="sq-secondary">
+          + DOCUMENT
+          <input hidden multiple type="file" onChange={event => addDocuments(event.target.files, "document")} />
+        </label>
+      </div>
+      {documents.map(document => (
+        <div className="sq-row" key={document.documentId}>
+          <strong>{document.type.toUpperCase()}</strong>
+          <small>{document.fileName}</small>
+        </div>
+      ))}
+
+      {Object.keys(errors).length ? (
+        <div className="sq-error">
+          REQUIRED: {Object.keys(errors).join(" · ").toUpperCase()}
+        </div>
+      ) : null}
+
+      <button className="sq-primary" disabled={saving} onClick={createRecord}>
+        {saving ? "CREATING..." : t.create}
+      </button>
+      <button className="sq-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
+      <div className="sq-foot">
+        Customer pricing and internal estimated cost remain separate. Actual work does not rewrite the accepted quote.
+      </div>
+      <IXIServiceQuoteStyles />
+    </div>
+  );
+}
