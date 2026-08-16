@@ -1,12 +1,41 @@
 export default function IXIPurchaseCardStyles() {
   return (
     <style jsx global>{`
+      /*
+       * PURCHASE RECORD = THE CARD.
+       * When the canonical three-face record is open it owns the full native
+       * 298 × 471 surface instead of being nested below the generic TRAN$ACT
+       * header and rail. Other TRAN$ACT modules are unaffected.
+       */
+      .ixi-transact-app:has(.ixi-purchase-card) {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      .ixi-transact-app:has(.ixi-purchase-card) > .tx-header,
+      .ixi-transact-app:has(.ixi-purchase-card) > .board-command-rail {
+        display: none !important;
+      }
+
+      .ixi-transact-app:has(.ixi-purchase-card) > .tx-body {
+        inset: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+
       .ixi-purchase-card,
       .ixi-purchase-card * { box-sizing: border-box; }
       .ixi-purchase-card {
         position: relative;
         width: 298px;
+        min-width: 298px;
+        max-width: 298px;
         height: 471px;
+        min-height: 471px;
+        max-height: 471px;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,.16);
         border-radius: 12px;
