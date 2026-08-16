@@ -1,5 +1,5 @@
-import IXIAosObjectConsole
-  from "../console-runtime/IXIAosObjectConsole";
+import IXIAosCommandAwareObjectConsole
+  from "../console-runtime/IXIAosCommandAwareObjectConsole";
 
 export default function IXIObjectStudioCanvas({
   studio,
@@ -39,8 +39,9 @@ export default function IXIObjectStudioCanvas({
    * state contract as the rest of IXI.
    *
    * The Canvas owns the local Studio
-   * preview state. The console simply
-   * consumes it.
+   * preview state. The command-aware console
+   * supplies the same universal command/notice
+   * runtime that production AOS objects use.
    */
   const ixiCardState = {
     [objectId]:
@@ -109,25 +110,16 @@ export default function IXIObjectStudioCanvas({
 
         {/*
          * =================================================
-         * SKIN RUNTIME BOUNDARY
+         * SKIN + COMMAND RUNTIME BOUNDARY
          * =================================================
          *
-         * This wrapper owns APPEARANCE ONLY.
-         *
-         * It does not own:
-         *
-         * - 298 × 471 geometry
-         * - Console slot dimensions
-         * - Card scaling
-         * - Face structure
-         * - Module layout
-         * - IXI Rail behavior
-         *
-         * The actual AOS Object Console remains the
-         * production renderer underneath it.
+         * Skin owns appearance only.
+         * Command runtime owns object-scoped commands/notices.
+         * The production Object Console remains responsible for
+         * card/Face geometry, console slots and scaling.
          */}
 
-          <IXIAosObjectConsole
+          <IXIAosCommandAwareObjectConsole
             object={
               object
             }
@@ -141,8 +133,8 @@ export default function IXIObjectStudioCanvas({
             }
 
             skinId={
-  skinId
-}
+              skinId
+            }
 
             onCreateFace={
               slotId => {
@@ -588,14 +580,6 @@ export default function IXIObjectStudioCanvas({
         }
 
 
-        /*
-         * Console assembly is centered as
-         * one physical object.
-         *
-         * When it exceeds the available
-         * work surface, THIS surface scrolls.
-         * The page does not.
-         */
         .canvas-stage {
           flex:
             1;
@@ -633,17 +617,6 @@ export default function IXIObjectStudioCanvas({
             )
             transparent;
         }
-
-
-        /*
-         * Skin Runtime is deliberately
-         * geometry-neutral.
-         *
-         * The console remains responsible
-         * for its exact physical width,
-         * height and scaling.
-         */
-       
 
 
         .canvas-stage::-webkit-scrollbar {
