@@ -48,16 +48,39 @@ export default function IXIAosDataContractCardAdapter({
 
   async function onSaveObject(payload = {}) {
     const incomingObject = payload?.object || {};
+
     const nextObject = {
       ...object,
       ...incomingObject,
-      displayName: payload?.displayName ?? incomingObject?.displayName ?? object?.displayName,
-      fields: payload?.fields || incomingObject?.fields || object?.fields || {},
-      media: payload?.media || incomingObject?.media || object?.media || [],
+
+      displayName:
+        payload?.displayName ??
+        incomingObject?.displayName ??
+        object?.displayName,
+
+      businessIdentifiers:
+        payload?.businessIdentifiers ??
+        incomingObject?.businessIdentifiers ??
+        object?.businessIdentifiers ??
+        [],
+
+      fields:
+        payload?.fields ||
+        incomingObject?.fields ||
+        object?.fields ||
+        {},
+
+      media:
+        payload?.media ||
+        incomingObject?.media ||
+        object?.media ||
+        [],
+
       fieldDefinitions:
         payload?.fieldDefinitions ||
         incomingObject?.fieldDefinitions ||
         fieldDefinitions,
+
       metadata: {
         ...(object?.metadata || {}),
         ...(incomingObject?.metadata || {}),
