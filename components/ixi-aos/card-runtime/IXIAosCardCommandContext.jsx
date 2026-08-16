@@ -38,7 +38,8 @@ export function IXIAosCardCommandProvider({
     objectId ||
     object?.objectId ||
     object?.id ||
-    object?.uuid
+    object?.uuid ||
+    object?.passportId
   );
 
   const externalNotice = ixiState?.actionNotice || null;
@@ -96,6 +97,8 @@ export function IXIAosCardCommandProvider({
   }, [publishNotice]);
 
   const showNotice = useCallback(({
+    noticeId = "",
+    createdAt = 0,
     message = "",
     tone = IXI_ACTION_NOTICE_TONES.SUCCESS,
     duration = 1600,
@@ -104,6 +107,8 @@ export function IXIAosCardCommandProvider({
     source = "aos-card-command"
   } = {}) => {
     const notice = createIXIActionNotice({
+      noticeId,
+      createdAt,
       message,
       tone,
       duration,
@@ -145,13 +150,17 @@ export function IXIAosCardCommandProvider({
         return;
       }
 
+      const notice = detail.notice || detail;
+
       showNotice({
-        message: detail.message,
-        tone: detail.tone,
-        duration: detail.duration,
-        blocking: detail.blocking,
-        commandId: detail.commandId,
-        source: detail.source || "ixi-action-notice-event"
+        noticeId: notice.noticeId,
+        createdAt: notice.createdAt,
+        message: notice.message,
+        tone: notice.tone,
+        duration: notice.duration,
+        blocking: notice.blocking,
+        commandId: notice.commandId,
+        source: notice.source || "ixi-action-notice-event"
       });
     }
 
