@@ -1,0 +1,135 @@
+name: Final Legacy ListingCard Cleanup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cleanup-legacy-listingcard.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Migrate remaining ListingCard imports to current machine runtime
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          roots = [Path("pages"), Path("components"), Path("lib")]
+          extensions = {".js", ".jsx", ".ts", ".tsx"}
+
+          import_pattern = re.compile(
+              r'(?m)^(?P<indent>[ \t]*)import\s+ListingCard\s+from\s+["\'](?P<src>[^"\']*ListingCard)["\'];?[ \t]*\n?'
+          )
+
+          changed = []
+
+          for root in roots:
+              if not root.exists():
+                  continue
+
+              for path in root.rglob("*"):
+                  if not path.is_file() or path.suffix not in extensions:
+                      continue
+
+                  text = path.read_text()
+                  matches = list(import_pattern.finditer(text))
+
+                  if not matches:
+                      continue
+
+                  # There should only be one default ListingCard import per file.
+                  # Remove all matching imports first, then decide whether a modern
+                  # machine-card import is still required by the remaining source.
+                  sources = [m.group("src") for m in matches]
+                  remainder = import_pattern.sub("", text)
+
+                  uses_identifier = bool(
+                      re.search(r'\bListingCard\b', remainder)
+                  )
+
+                  if uses_identifier:
+                      source = sources[0]
+                      if not source.endswith("ListingCard"):
+                          raise SystemExit(
+                              f"Unsupported ListingCard import in {path}: {source}"
+                          )
+
+                      modern_source = (
+                          source[: -len("ListingCard")]
+                          + "ixi-machine-card/IXIMachineCard"
+                      )
+
+                      modern_import = (
+                          f'import IXIMachineCard from "{modern_source}";\n'
+                      )
+
+                      remainder = re.sub(
+                          r'\bListingCard\b',
+                          'IXIMachineCard',
+                          remainder
+                      )
+
+                      text = modern_import + remainder
+                  else:
+                      text = remainder
+
+                  path.write_text(text)
+                  changed.append(str(path))
+
+          print("MIGRATED FILES:")
+          for path in changed:
+              print(" -", path)
+
+          # Hard gate: no source import may target retired ListingCard paths.
+          violations = []
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob("*"):
+                  if not path.is_file() or path.suffix not in extensions:
+                      continue
+                  text = path.read_text()
+                  if re.search(
+                      r'from\s+["\'][^"\']*ListingCard(?:-1)?["\']',
+                      text
+                  ):
+                      violations.append(str(path))
+
+          if violations:
+              raise SystemExit(
+                  "RETIRED LISTINGCARD IMPORTS REMAIN: "
+                  + ", ".join(violations)
+              )
+          PY
+
+      - name: Remove temporary cleanup workflow
+        shell: bash
+        run: rm -f .github/workflows/cleanup-legacy-listingcard.yml
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No cleanup changes were required."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Eliminate remaining legacy ListingCard callers"
+          git push origin HEAD:main
