@@ -6,65 +6,121 @@ import {
   deleteMosObject
 } from "../../../lib/mos/ixiMosClient";
 
-import { loadIXIMosEnvironment } from "../../../lib/mos/loadIXIMosEnvironment";
-import { moveObjectToWorkspaceSurface } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
+import {
+  loadIXIMosEnvironment
+} from "../../../lib/mos/loadIXIMosEnvironment";
+
+import {
+  moveObjectToWorkspaceSurface
+} from "../../ixi-chassis/IXIWorkspacePlacementEngine";
+
+
+const IXI_SYSTEM_INDEX_TEMPLATE_ID =
+  "ixi-system-index-v1";
+
 
 function clean(value) {
-  return String(value || "").trim();
+  return String(value ?? "").trim();
 }
+
 
 function getMosObjectId(object = {}) {
-  return clean(object?.objectId || object?.id?.uuid || object?.id);
+  return clean(
+    object?.objectId ||
+    object?.id?.uuid ||
+    object?.id
+  );
 }
 
-function getPersistedChildDefaults(container = {}) {
-  const definition =
-    container?.definition ||
-    container?.fields?.definition ||
-    container?.metadata?.definition ||
-    {};
+
+function safeObject(value) {
+  return (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  )
+    ? value
+    : {};
+}
+
+
+/*
+ * Child-creation semantics are persisted configuration.
+ *
+ * We never derive a child definition from the parent's name.
+ * The customer can call a container anything they want.
+ */
+function getPersistedChildDefaults(
+  container = {}
+) {
+  const embeddedDefinition =
+    safeObject(
+      container?.definition ||
+      container?.fields?.definition ||
+      container?.metadata?.definition
+    );
 
   const creation =
-    definition?.childCreation ||
-    definition?.creation ||
-    container?.capabilities?.childCreation ||
-    container?.metadata?.childCreation ||
-    {};
+    safeObject(
+      embeddedDefinition?.childCreation ||
+      embeddedDefinition?.creation ||
+      container?.capabilities?.childCreation ||
+      container?.metadata?.childCreation
+    );
 
   return {
-    objectType: clean(
-      creation?.objectType ||
-      creation?.defaultObjectType ||
-      ""
-    ),
-    templateSlug: clean(
-      creation?.templateSlug ||
-      creation?.defaultTemplateSlug ||
-      ""
-    ),
-    templateVersion:
+    definitionId:
+      clean(
+        creation?.definitionId ||
+        creation?.defaultDefinitionId
+      ) || null,
+
+    definitionKey:
+      clean(
+        creation?.definitionKey ||
+        creation?.defaultDefinitionKey
+      ) || null,
+
+    cardTemplateSlug:
+      clean(
+        creation?.cardTemplateSlug ||
+        creation?.templateSlug ||
+        creation?.defaultCardTemplateSlug ||
+        creation?.defaultTemplateSlug
+      ) || null,
+
+    cardTemplateVersion:
+      creation?.cardTemplateVersion ??
       creation?.templateVersion ??
+      creation?.defaultCardTemplateVersion ??
       creation?.defaultTemplateVersion ??
       null,
-    displayName: clean(
-      creation?.defaultDisplayName ||
-      creation?.placeholderName ||
-      ""
-    ),
+
+    displayName:
+      clean(
+        creation?.defaultDisplayName ||
+        creation?.placeholderName
+      ),
+
+    businessIdentifiers:
+      Array.isArray(
+        creation?.defaultBusinessIdentifiers
+      )
+        ? creation.defaultBusinessIdentifiers
+        : [],
+
     fields:
-      creation?.defaultFields &&
-      typeof creation.defaultFields === "object" &&
-      !Array.isArray(creation.defaultFields)
-        ? creation.defaultFields
-        : {},
+      safeObject(
+        creation?.defaultFields
+      ),
+
     metadata:
-      creation?.metadata &&
-      typeof creation.metadata === "object" &&
-      !Array.isArray(creation.metadata)
-        ? creation.metadata
-        : {}
+      safeObject(
+        creation?.metadata
+      )
   };
 }
+
 
 export default function useIXIMosObjectCreation({
   entityId,
@@ -77,8 +133,12 @@ export default function useIXIMosObjectCreation({
   setSystemIndexes,
   onObjectNotice = null
 }) {
+
   async function reloadMosEnvironment() {
-    const environment = await loadIXIMosEnvironment({ includeObjects: true });
+    const environment =
+      await loadIXIMosEnvironment({
+        includeObjects: true
+      });
 
     setAosObjects?.(
       Array.isArray(environment?.objects)
@@ -95,73 +155,143 @@ export default function useIXIMosObjectCreation({
     return environment;
   }
 
-  async function exposeObjectToBoard(objectId, { position } = {}) {
-    const id = clean(objectId);
-    if (!id) return workspacePlacements;
 
-    const nextPlacements = moveObjectToWorkspaceSurface({
-      placements: workspacePlacements,
-      objectId: id,
-      targetSurface: "board",
-      ...(position ? { position } : {})
-    });
+  async function exposeObjectToBoard(
+    objectId,
+    {
+      position
+    } = {}
+  ) {
+    const id =
+      clean(objectId);
 
-    setWorkspacePlacements?.(nextPlacements);
-    await saveWorkspaceLayout?.(nextPlacements);
+    if (!id) {
+      return workspacePlacements;
+    }
+
+    const nextPlacements =
+      moveObjectToWorkspaceSurface({
+        placements:
+          workspacePlacements,
+
+        objectId:
+          id,
+
+        targetSurface:
+          "board",
+
+        ...(position
+          ? { position }
+          : {})
+      });
+
+    setWorkspacePlacements?.(
+      nextPlacements
+    );
+
+    await saveWorkspaceLayout?.(
+      nextPlacements
+    );
+
     return nextPlacements;
   }
 
-  async function createRootSystemIndexByName(rawDisplayName) {
-    const displayName = clean(rawDisplayName);
-    const resolvedEntityId = clean(entityId);
 
-    if (!displayName) throw new Error("Index name is required.");
-    if (!resolvedEntityId) throw new Error("AOS Entity is not available.");
+  /* =========================================================
+     ROOT SYSTEM INDEX CREATION
 
-    const existingIndex = (
-      Array.isArray(workspaceSystemIndexes)
-        ? workspaceSystemIndexes
-        : []
-    ).find(index => {
-      const existingName = clean(index?.displayName || index?.label).toLowerCase();
-      return existingName === displayName.toLowerCase() && index?.metadata?.persisted === true;
-    });
+     System Index is an explicit IXI technical presentation role.
+     The customer-supplied displayName remains unrestricted data.
 
-    if (existingIndex) {
-      const existingObjectId = getMosObjectId(existingIndex);
-      if (!existingObjectId) throw new Error("Persisted Index has no objectId.");
+     We intentionally DO NOT search by displayName and silently
+     reuse another container. Names are presentation, not identity.
+     ========================================================= */
+  async function createRootSystemIndexByName(
+    rawDisplayName
+  ) {
+    const displayName =
+      clean(rawDisplayName);
 
-      await exposeObjectToBoard(existingObjectId);
-      return {
-        created: false,
-        existing: true,
-        object: existingIndex,
-        objectId: existingObjectId
-      };
+    const resolvedEntityId =
+      clean(entityId);
+
+    if (!displayName) {
+      throw new Error(
+        "Index name is required."
+      );
     }
 
-    const response = await createMosObject({
-      entityId: resolvedEntityId,
-      objectType: "system-index",
-      displayName,
-      fields: { parentSystemIndexId: null },
-      source: "manual",
-      actorId: userId || null,
-      metadata: {
-        createdFrom: "aos-work",
-        hierarchyRole: "index"
-      }
-    });
+    if (!resolvedEntityId) {
+      throw new Error(
+        "AOS Entity is not available."
+      );
+    }
 
-    const createdObject = response?.object || response?.data || response;
-    const createdObjectId = getMosObjectId(createdObject);
+    const response =
+      await createMosObject({
+        entityId:
+          resolvedEntityId,
+
+        /*
+         * Technical migration path only.
+         * This does not encode customer business meaning.
+         */
+        objectType:
+          "system-index",
+
+        cardTemplateSlug:
+          IXI_SYSTEM_INDEX_TEMPLATE_ID,
+
+        displayName,
+
+        fields: {
+          parentSystemIndexId:
+            null
+        },
+
+        source:
+          "manual",
+
+        actorId:
+          userId || null,
+
+        metadata: {
+          createdFrom:
+            "aos-work",
+
+          systemIndex:
+            true,
+
+          systemIndexPresentation:
+            true,
+
+          hierarchyRole:
+            "index"
+        }
+      });
+
+    const createdObject =
+      response?.object ||
+      response?.data ||
+      response;
+
+    const createdObjectId =
+      getMosObjectId(
+        createdObject
+      );
 
     if (!createdObjectId) {
-      throw new Error("MOS created the Index but returned no objectId.");
+      throw new Error(
+        "MOS created the Index but returned no objectId."
+      );
     }
 
-    const environment = await reloadMosEnvironment();
-    await exposeObjectToBoard(createdObjectId);
+    const environment =
+      await reloadMosEnvironment();
+
+    await exposeObjectToBoard(
+      createdObjectId
+    );
 
     return {
       created: true,
@@ -172,94 +302,220 @@ export default function useIXIMosObjectCreation({
     };
   }
 
+
+  /* =========================================================
+     UNIVERSAL CHILD CREATION
+
+     Preferred path:
+       definitionId / definitionKey
+
+     Universal fallback:
+       generic technical object
+
+     Never:
+       infer child meaning from the container's name.
+     ========================================================= */
   async function createObjectInContainer({
     container,
-    objectType: rawObjectType,
-    templateSlug: rawTemplateSlug = "",
-    templateVersion = null,
-    displayName: rawDisplayName,
+
+    definitionId:
+      rawDefinitionId = null,
+
+    definitionKey:
+      rawDefinitionKey = null,
+
+    cardTemplateSlug:
+      rawCardTemplateSlug = null,
+
+    cardTemplateVersion = null,
+
+    displayName:
+      rawDisplayName,
+
+    businessIdentifiers = null,
+
     fields = {},
     metadata = {},
+
     exposeToBoard = true
   }) {
-    const destinationContainerId = getMosObjectId(container);
-    const resolvedEntityId = clean(entityId);
+    const destinationContainerId =
+      getMosObjectId(
+        container
+      );
+
+    const resolvedEntityId =
+      clean(entityId);
 
     if (!destinationContainerId) {
-      throw new Error("Destination container is missing objectId.");
-    }
-
-    if (!destinationContainerId.startsWith("object_")) {
-      throw new Error("This container has not yet been migrated to the persisted AOS container model.");
+      throw new Error(
+        "Destination container is missing objectId."
+      );
     }
 
     if (!resolvedEntityId) {
-      throw new Error("AOS Entity is not available.");
+      throw new Error(
+        "AOS Entity is not available."
+      );
     }
 
-    const defaults = getPersistedChildDefaults(container);
+    if (
+      container?.capabilities?.canContain !==
+      true
+    ) {
+      throw new Error(
+        "Destination object is not a container."
+      );
+    }
 
-    /*
-     * IMPORTANT:
-     * No noun is manufactured here. The caller or the persisted
-     * container/schema supplies objectType/template/name. If none is
-     * supplied, the durable object remains generically typed.
-     */
-    const objectType = clean(rawObjectType || defaults.objectType || "generic").toLowerCase();
-    const templateSlug = clean(rawTemplateSlug || defaults.templateSlug);
-    const displayName = clean(rawDisplayName || defaults.displayName || "NEW OBJECT");
+    const defaults =
+      getPersistedChildDefaults(
+        container
+      );
 
-    const createResponse = await createMosObject({
-      entityId: resolvedEntityId,
-      objectType,
-      templateSlug: templateSlug || null,
-      templateVersion: templateVersion ?? defaults.templateVersion ?? null,
-      displayName,
-      fields: {
-        ...defaults.fields,
-        ...(fields || {})
-      },
-      source: "manual",
-      actorId: userId || null,
-      metadata: {
-        ...defaults.metadata,
-        createdFrom: "aos-container",
-        createdInsideContainerId: destinationContainerId,
-        ...(metadata || {})
-      }
-    });
+    const definitionId =
+      clean(
+        rawDefinitionId ||
+        defaults.definitionId
+      ) || null;
 
-    const createdObject = createResponse?.object || createResponse?.data || createResponse;
-    const createdObjectId = getMosObjectId(createdObject);
+    const definitionKey =
+      clean(
+        rawDefinitionKey ||
+        defaults.definitionKey
+      ) || null;
+
+    const cardTemplateSlug =
+      clean(
+        rawCardTemplateSlug ||
+        defaults.cardTemplateSlug
+      ) || null;
+
+    const displayName =
+      clean(
+        rawDisplayName ||
+        defaults.displayName ||
+        "NEW OBJECT"
+      );
+
+    const resolvedBusinessIdentifiers =
+      Array.isArray(
+        businessIdentifiers
+      )
+        ? businessIdentifiers
+        : defaults.businessIdentifiers;
+
+    const createResponse =
+      await createMosObject({
+        entityId:
+          resolvedEntityId,
+
+        definitionId,
+        definitionKey,
+
+        /*
+         * If no definition is selected yet, this remains a
+         * technically generic MOS Object. No business meaning
+         * is attached to the word generic.
+         */
+        objectType:
+          definitionId || definitionKey
+            ? null
+            : "generic",
+
+        displayName,
+
+        businessIdentifiers:
+          resolvedBusinessIdentifiers,
+
+        cardTemplateSlug,
+
+        cardTemplateVersion:
+          cardTemplateVersion ??
+          defaults.cardTemplateVersion ??
+          null,
+
+        fields: {
+          ...defaults.fields,
+          ...safeObject(fields)
+        },
+
+        source:
+          "manual",
+
+        actorId:
+          userId || null,
+
+        metadata: {
+          ...defaults.metadata,
+
+          createdFrom:
+            "aos-container",
+
+          createdInsideContainerId:
+            destinationContainerId,
+
+          ...safeObject(metadata)
+        }
+      });
+
+    const createdObject =
+      createResponse?.object ||
+      createResponse?.data ||
+      createResponse;
+
+    const createdObjectId =
+      getMosObjectId(
+        createdObject
+      );
 
     if (!createdObjectId) {
-      throw new Error("MOS created the object but returned no objectId.");
+      throw new Error(
+        "MOS created the object but returned no objectId."
+      );
     }
 
     await placeMosObject({
-      objectId: createdObjectId,
+      objectId:
+        createdObjectId,
+
       destinationContainerId,
-      actorId: userId || null,
-      commandId: createMosCommandId("container-add"),
+
+      actorId:
+        userId || null,
+
+      commandId:
+        createMosCommandId(
+          "container-add"
+        ),
+
       metadata: {
-        source: "aos-container",
-        parentObjectId: destinationContainerId
+        source:
+          "aos-container",
+
+        parentObjectId:
+          destinationContainerId
       }
     });
 
     if (exposeToBoard) {
-      await exposeObjectToBoard(createdObjectId);
+      await exposeObjectToBoard(
+        createdObjectId
+      );
     }
 
-    const environment = await reloadMosEnvironment();
+    const environment =
+      await reloadMosEnvironment();
 
     return {
       object: createdObject,
       objectId: createdObjectId,
-      parentObjectId: destinationContainerId,
+      parentObjectId:
+        destinationContainerId,
       environment
     };
   }
+
 
   async function saveMosObjectName({
     objectId,
@@ -267,30 +523,62 @@ export default function useIXIMosObjectCreation({
     fields,
     metadata
   }) {
-    const id = clean(objectId);
-    const name = clean(displayName);
+    const id =
+      clean(objectId);
 
-    if (!id) throw new Error("Object ID is required.");
-    if (!name) throw new Error("Object name is required.");
+    const name =
+      clean(displayName);
 
-    const response = await updateMosObject({
-      objectId: id,
-      displayName: name,
-      ...(fields !== undefined ? { fields } : {}),
-      actorId: userId || null,
-      metadata: {
-        ...(metadata || {}),
-        creationState: "complete"
-      }
-    });
+    if (!id) {
+      throw new Error(
+        "Object ID is required."
+      );
+    }
 
-    const updatedObject = response?.object || response?.data || response;
+    if (!name) {
+      throw new Error(
+        "Object name is required."
+      );
+    }
+
+    const response =
+      await updateMosObject({
+        objectId:
+          id,
+
+        displayName:
+          name,
+
+        ...(fields !== undefined
+          ? { fields }
+          : {}),
+
+        actorId:
+          userId || null,
+
+        metadata: {
+          ...safeObject(metadata),
+          creationState:
+            "complete"
+        }
+      });
+
+    const updatedObject =
+      response?.object ||
+      response?.data ||
+      response;
+
     await reloadMosEnvironment();
 
     onObjectNotice?.({
-      objectId: id,
-      message: `${name} SAVED`,
-      tone: "success"
+      objectId:
+        id,
+
+      message:
+        `${name} SAVED`,
+
+      tone:
+        "success"
     });
 
     return {
@@ -299,29 +587,60 @@ export default function useIXIMosObjectCreation({
     };
   }
 
-  async function deleteMosWorkspaceObject(object) {
-    const objectId = getMosObjectId(object);
-    if (!objectId) throw new Error("Object ID is required.");
+
+  async function deleteMosWorkspaceObject(
+    object
+  ) {
+    const objectId =
+      getMosObjectId(
+        object
+      );
+
+    if (!objectId) {
+      throw new Error(
+        "Object ID is required."
+      );
+    }
 
     await deleteMosObject({
       objectId,
-      actorId: userId || null
+      actorId:
+        userId || null
     });
 
     const nextPlacements = {};
 
-    Object.entries(workspacePlacements || {}).forEach(([surfaceId, objectIds]) => {
-      nextPlacements[surfaceId] = Array.isArray(objectIds)
-        ? objectIds.filter(id => String(id) !== objectId)
-        : [];
-    });
+    Object.entries(
+      workspacePlacements || {}
+    ).forEach(
+      ([surfaceId, objectIds]) => {
+        nextPlacements[surfaceId] =
+          Array.isArray(objectIds)
+            ? objectIds.filter(
+                id =>
+                  String(id) !==
+                  objectId
+              )
+            : [];
+      }
+    );
 
-    setWorkspacePlacements?.(nextPlacements);
-    await saveWorkspaceLayout?.(nextPlacements);
+    setWorkspacePlacements?.(
+      nextPlacements
+    );
+
+    await saveWorkspaceLayout?.(
+      nextPlacements
+    );
+
     await reloadMosEnvironment();
 
-    return { deleted: true, objectId };
+    return {
+      deleted: true,
+      objectId
+    };
   }
+
 
   return {
     reloadMosEnvironment,
