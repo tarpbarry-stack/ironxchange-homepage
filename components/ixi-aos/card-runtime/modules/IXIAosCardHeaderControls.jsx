@@ -4,7 +4,6 @@ import {
   useIXIAosCardCommands
 } from "../IXIAosCardCommandContext";
 
-import IXIAosActionNotice from "./IXIAosActionNotice";
 import IXIAosOfficeSkinCompatibilityStyles from "./IXIAosOfficeSkinCompatibilityStyles";
 
 const DEFAULT_SKINS = [
@@ -207,8 +206,6 @@ export default function IXIAosCardHeaderControls({
           </div>
         ) : null}
       </div>
-
-      <IXIAosActionNotice variant="office" />
 
       <style jsx>{`
         .ixi-aos-card-header-controls {
