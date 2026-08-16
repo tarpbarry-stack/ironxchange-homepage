@@ -11,6 +11,7 @@ import IXIAosCard007EmployeeApplication from "../ixi-aos/cards/007/IXIAosCard007
 import IXIAosCard008Profile from "../ixi-aos/cards/008/IXIAosCard008Profile";
 
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
+import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
 
 function clean(value) {
   return String(value || "").trim();
@@ -34,9 +35,9 @@ function universal007Sample() {
     objectId: "preview-universal-007",
     entityId: "aos-card-preview-entity",
     objectType: "customer-defined-object",
-    singularLabel: "VENDOR",
-    pluralLabel: "VENDORS",
-    displayName: "ACME HYDRAULICS",
+    singularLabel: "OBJECT",
+    pluralLabel: "OBJECTS",
+    displayName: "WEST TEXAS OPERATIONS",
     status: "active",
     capabilities: {
       canContain: true,
@@ -49,34 +50,36 @@ function universal007Sample() {
     },
     presentation: {
       detailsTitle: "DETAILS",
-      relationshipsTitle: "RELATIONSHIPS"
+      relationshipsTitle: "RELATIONSHIPS",
+      mediaLabel: "PRIMARY MEDIA"
     },
     fieldDefinitions: [
-      { fieldId: "field_1", label: "VENDOR NUMBER", type: "text", editable: true, presentationOrder: 0 },
-      { fieldId: "field_2", label: "SERVICE AREA", type: "text", editable: true, presentationOrder: 1 },
-      { fieldId: "field_3", label: "SPECIALTY", type: "text", editable: true, presentationOrder: 2 },
-      { fieldId: "field_4", label: "ACCOUNT REP", type: "text", editable: true, presentationOrder: 3 },
-      { fieldId: "field_5", label: "PAYMENT TERMS", type: "text", editable: true, presentationOrder: 4 },
-      { fieldId: "field_6", label: "RATING", type: "text", editable: true, presentationOrder: 5 },
-      { fieldId: "field_7", label: "PHONE", type: "text", editable: true, presentationOrder: 6 },
-      { fieldId: "field_8", label: "EMAIL", type: "text", editable: true, presentationOrder: 7 }
+      { fieldId: "field_1", label: "STATUS", type: "text", editable: true, presentationOrder: 0 },
+      { fieldId: "field_2", label: "REGION", type: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "field_3", label: "OWNER", type: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "field_4", label: "PRIORITY", type: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "field_5", label: "REFERENCE", type: "text", editable: true, presentationOrder: 4 },
+      { fieldId: "field_6", label: "CATEGORY", type: "text", editable: true, presentationOrder: 5 },
+      { fieldId: "field_7", label: "CONTACT", type: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "field_8", label: "NOTES", type: "text", editable: true, presentationOrder: 7 }
     ],
     fields: {
-      field_1: "V-1048",
+      field_1: "ACTIVE",
       field_2: "WEST TEXAS",
-      field_3: "HYDRAULICS",
-      field_4: "JOE SMITH",
-      field_5: "NET 30",
-      field_6: "A+",
-      field_7: "(432) 555-0198",
-      field_8: "service@acme.example"
+      field_3: "IRONXCHANGE",
+      field_4: "HIGH",
+      field_5: "AOS-007",
+      field_6: "OPERATIONS",
+      field_7: "MAIN OFFICE",
+      field_8: "CUSTOMER DEFINED"
     },
     relationships: [
       { id: "u007-rel-1", displayLabel: "PRIMARY LOCATION", displayName: "MIDLAND" },
-      { id: "u007-rel-2", displayLabel: "SERVICE CONTRACT", displayName: "CONTRACT 18" }
+      { id: "u007-rel-2", displayLabel: "RELATED GROUP", displayName: "FIELD OPERATIONS" },
+      { id: "u007-rel-3", displayLabel: "ACTIVE PROJECT", displayName: "PROJECT 481" }
     ],
-    media: [],
-    metadata: { nomenclature: { singular: "VENDOR", plural: "VENDORS" } }
+    media: [{ url: "/images/hero-equipment-yard.jpg" }],
+    metadata: { nomenclature: { singular: "OBJECT", plural: "OBJECTS" } }
   };
 }
 
@@ -143,6 +146,13 @@ function getFaceLabel(object = {}, faceNumber = 1) {
   return clean(config?.shortLabel || config?.title || config?.label) || `FACE ${faceNumber}`;
 }
 
+function getInitialPreviewItems(template = {}, directItems = []) {
+  const items = Array.isArray(directItems) ? directItems : [];
+  if (items.length) return items;
+  if (resolveCatalogCardNumber(template) === 7) return getUniversal007PreviewItems();
+  return [];
+}
+
 export default function IXIAosCardCatalogPreview({
   template = null,
   sampleData = {},
@@ -156,7 +166,7 @@ export default function IXIAosCardCatalogPreview({
   const [face, setFace] = useState(1);
   const [transactOpen, setTransactOpen] = useState(false);
   const [previewObjectOverride, setPreviewObjectOverride] = useState(null);
-  const [previewItems, setPreviewItems] = useState(Array.isArray(directItems) ? directItems : []);
+  const [previewItems, setPreviewItems] = useState(() => getInitialPreviewItems(template || {}, directItems));
 
   const baseObject = useMemo(() => previewObject(template || {}, sampleData), [template, sampleData]);
 
@@ -164,7 +174,7 @@ export default function IXIAosCardCatalogPreview({
     setPreviewObjectOverride(null);
     setTransactOpen(false);
     setFace(1);
-    setPreviewItems(Array.isArray(directItems) ? directItems : []);
+    setPreviewItems(getInitialPreviewItems(template || {}, directItems));
   }, [template?.templateSlug, sampleData, directItems]);
 
   const object = previewObjectOverride || baseObject;
