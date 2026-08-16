@@ -1,14 +1,236 @@
-const clean=v=>String(v??"").trim();
-const num=v=>Number.isFinite(Number(v))?Number(v):0;
-const money=v=>Math.round(num(v)*100)/100;
-const arr=v=>Array.isArray(v)?v:[];
-export const IXI_SERVICE_QUOTE_SCHEMA="ixi-service-quote-v1";
-export const IXI_SERVICE_QUOTE_STATUSES=Object.freeze(["draft","sent","viewed","changes-requested","accepted","declined","expired","superseded","converted"]);
-export const IXI_SERVICE_PRICING_TYPES=Object.freeze(["estimate","fixed-price","not-to-exceed"]);
-export const IXI_SERVICE_LINE_TYPES=Object.freeze(["labor","part-material","outside-service","travel-freight","other"]);
-function line(x={},i=0){const qty=Math.max(0,num(x.quantity||1)),price=money(x.unitPrice),cost=money(x.unitCost);return{lineId:clean(x.lineId)||`LINE-${i+1}`,type:IXI_SERVICE_LINE_TYPES.includes(clean(x.type))?clean(x.type):"other",description:clean(x.description),quantity:qty,unit:clean(x.unit||"each"),unitPrice:price,unitCost:cost,customerTotal:money(qty*price),estimatedCost:money(qty*cost),taxable:x.taxable!==false,optional:Boolean(x.optional),notes:clean(x.notes)};}
-function option(x={},i=0){const lines=arr(x.lines).map(line);const customerTotal=money(lines.reduce((s,l)=>s+l.customerTotal,0)),estimatedCost=money(lines.reduce((s,l)=>s+l.estimatedCost,0));return{optionId:clean(x.optionId)||`OPT-${i+1}`,label:clean(x.label)||`OPTION ${i+1}`,description:clean(x.description),required:x.required!==false,selectionMode:clean(x.selectionMode||"included"),lines,customerTotal,estimatedCost,projectedGrossProfit:money(customerTotal-estimatedCost),projectedMarginPercent:customerTotal?money((customerTotal-estimatedCost)/customerTotal*100):0};}
-function doc(x={},i=0){return{documentId:clean(x.documentId)||`SQ-DOC-${i+1}`,type:clean(x.type||"document"),fileName:clean(x.fileName),mimeType:clean(x.mimeType),size:num(x.size),status:clean(x.status||"local-pending-upload")};}
-export function createIXIServiceQuoteDraft({context={},input={}}={}){const primary=context.primary||{},now=new Date().toISOString(),options=arr(input.options).map(option),base=options.filter(x=>x.required).reduce((s,x)=>s+x.customerTotal,0),cost=options.filter(x=>x.required).reduce((s,x)=>s+x.estimatedCost,0),tax=money(input.taxAmount),total=money(base+tax);return{schema:IXI_SERVICE_QUOTE_SCHEMA,identity:{serviceQuoteId:clean(input.serviceQuoteId),number:clean(input.number),revision:Math.max(1,num(input.revision||1)),clientRequestId:clean(input.clientRequestId)||`SQ-${Date.now()}`},context:{primaryPassportId:clean(primary.passportId),primaryObjectId:clean(primary.objectId),primaryObjectType:clean(primary.objectType),primaryLabel:clean(primary.label),entityPassportId:clean(context.entity?.passportId),entityLabel:clean(context.entity?.label),locationPassportId:clean(context.location?.passportId),locationLabel:clean(context.location?.label),actorPassportId:clean(context.actor?.passportId),actorId:clean(context.actor?.employeeId||context.actor?.userId||context.actor?.id),actorLabel:clean(context.actor?.displayName||context.actor?.name||context.actor?.label)},customer:{passportId:clean(input.customerPassportId),customerId:clean(input.customerId),name:clean(input.customerName),contactName:clean(input.customerContactName),email:clean(input.customerEmail),phone:clean(input.customerPhone),poNumber:clean(input.customerPoNumber)},asset:{passportId:clean(input.assetPassportId||primary.passportId),objectId:clean(input.assetObjectId||primary.objectId),objectType:clean(input.assetObjectType||primary.objectType),label:clean(input.assetLabel||primary.label),serialNumber:clean(input.serialNumber),locationLabel:clean(input.assetLocationLabel||context.location?.label)},request:{problem:clean(input.problem),customerScope:clean(input.customerScope),internalNotes:clean(input.internalNotes),assumptions:clean(input.assumptions),exclusions:clean(input.exclusions)},commercial:{pricingType:IXI_SERVICE_PRICING_TYPES.includes(clean(input.pricingType))?clean(input.pricingType):"estimate",quoteDate:clean(input.quoteDate),validThrough:clean(input.validThrough),paymentTerms:clean(input.paymentTerms),depositType:clean(input.depositType||"none"),depositValue:money(input.depositValue),taxAmount:tax,currency:"USD"},options,economics:{quotedRevenue:total,estimatedInternalCost:money(cost),projectedGrossProfit:money(total-cost),projectedMarginPercent:total?money((total-cost)/total*100):0,authorizedRevenue:0,changeOrderAuthorized:0,economicEvent:false},acceptance:{status:"pending",acceptedRevision:null,acceptedOptionIds:[],acceptedBy:"",acceptedAt:"",method:"",signatureDocumentId:"",customerPoNumber:""},delivery:{sentAt:"",viewedAt:"",lastSentAt:"",channel:"",recipient:""},revisions:[],changeOrders:[],related:{customerServiceWorkOrderId:"",serviceInvoiceIds:[]},documents:arr(input.documents).map(doc),status:"draft",audit:{createdAt:now,createdBy:clean(context.actor?.passportId||context.actor?.employeeId||context.actor?.id),createdByLabel:clean(context.actor?.displayName||context.actor?.name||context.actor?.label),updatedAt:now},activity:[]};}
-export function validateIXIServiceQuote(r={}){const e={};if(!clean(r.context?.primaryPassportId||r.context?.primaryObjectId))e.context="required";if(!clean(r.customer?.name))e.customer="required";if(!clean(r.request?.problem))e.problem="required";if(!clean(r.request?.customerScope))e.scope="required";if(!r.options?.length)e.options="required";if(!r.options?.some(o=>o.lines?.length))e.lines="required";if(!clean(r.commercial?.quoteDate))e.quoteDate="required";if(!clean(r.commercial?.validThrough))e.validThrough="required";return{valid:Object.keys(e).length===0,errors:e};}
-export default{IXI_SERVICE_QUOTE_SCHEMA,createIXIServiceQuoteDraft,validateIXIServiceQuote};
+const clean = value => String(value == null ? "" : value).trim();
+const arr = value => Array.isArray(value) ? value : [];
+const number = value => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+const money = value => Math.round(number(value) * 100) / 100;
+
+export const IXI_SERVICE_QUOTE_SCHEMA = "ixi-service-quote-v1";
+export const IXI_SERVICE_QUOTE_STATUSES = Object.freeze([
+  "draft",
+  "sent",
+  "viewed",
+  "changes-requested",
+  "accepted",
+  "declined",
+  "expired",
+  "superseded",
+  "converted"
+]);
+export const IXI_SERVICE_PRICING_TYPES = Object.freeze([
+  "estimate",
+  "fixed-price",
+  "not-to-exceed"
+]);
+export const IXI_SERVICE_LINE_TYPES = Object.freeze([
+  "labor",
+  "part-material",
+  "outside-service",
+  "travel-freight",
+  "other"
+]);
+
+function normalizeLine(value, index) {
+  const source = value && typeof value === "object" ? value : {};
+  const quantity = Math.max(0, number(source.quantity || 1));
+  const unitPrice = money(source.unitPrice);
+  const unitCost = money(source.unitCost);
+  const type = clean(source.type);
+
+  return {
+    lineId: clean(source.lineId) || `LINE-${index + 1}`,
+    type: IXI_SERVICE_LINE_TYPES.includes(type) ? type : "other",
+    description: clean(source.description),
+    quantity,
+    unit: clean(source.unit || "each"),
+    unitPrice,
+    unitCost,
+    customerTotal: money(quantity * unitPrice),
+    estimatedCost: money(quantity * unitCost),
+    taxable: source.taxable !== false,
+    optional: Boolean(source.optional),
+    notes: clean(source.notes)
+  };
+}
+
+function normalizeOption(value, index) {
+  const source = value && typeof value === "object" ? value : {};
+  const lines = arr(source.lines).map((line, lineIndex) => normalizeLine(line, lineIndex));
+  const customerTotal = money(lines.reduce((sum, line) => sum + line.customerTotal, 0));
+  const estimatedCost = money(lines.reduce((sum, line) => sum + line.estimatedCost, 0));
+
+  return {
+    optionId: clean(source.optionId) || `OPT-${index + 1}`,
+    label: clean(source.label) || `OPTION ${index + 1}`,
+    description: clean(source.description),
+    required: source.required !== false,
+    selectionMode: clean(source.selectionMode || "included"),
+    lines,
+    customerTotal,
+    estimatedCost,
+    projectedGrossProfit: money(customerTotal - estimatedCost),
+    projectedMarginPercent: customerTotal
+      ? money(((customerTotal - estimatedCost) / customerTotal) * 100)
+      : 0
+  };
+}
+
+function normalizeDocument(value, index) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    documentId: clean(source.documentId) || `SQ-DOC-${index + 1}`,
+    type: clean(source.type || "document"),
+    fileName: clean(source.fileName),
+    mimeType: clean(source.mimeType),
+    size: number(source.size),
+    status: clean(source.status || "local-pending-upload")
+  };
+}
+
+export function createIXIServiceQuoteDraft({ context = {}, input = {} } = {}) {
+  const primary = context.primary || {};
+  const entity = context.entity || {};
+  const location = context.location || {};
+  const actor = context.actor || {};
+  const options = arr(input.options).map((option, index) => normalizeOption(option, index));
+  const requiredOptions = options.filter(option => option.required);
+  const baseRevenue = money(requiredOptions.reduce((sum, option) => sum + option.customerTotal, 0));
+  const estimatedCost = money(requiredOptions.reduce((sum, option) => sum + option.estimatedCost, 0));
+  const taxAmount = money(input.taxAmount);
+  const quotedRevenue = money(baseRevenue + taxAmount);
+  const now = new Date().toISOString();
+  const requestedPricingType = clean(input.pricingType);
+
+  return {
+    schema: IXI_SERVICE_QUOTE_SCHEMA,
+    identity: {
+      serviceQuoteId: clean(input.serviceQuoteId),
+      number: clean(input.number),
+      revision: Math.max(1, number(input.revision || 1)),
+      clientRequestId: clean(input.clientRequestId) || `SQ-${Date.now()}`
+    },
+    context: {
+      primaryPassportId: clean(primary.passportId),
+      primaryObjectId: clean(primary.objectId),
+      primaryObjectType: clean(primary.objectType),
+      primaryLabel: clean(primary.label),
+      entityPassportId: clean(entity.passportId),
+      entityLabel: clean(entity.label),
+      locationPassportId: clean(location.passportId),
+      locationLabel: clean(location.label),
+      actorPassportId: clean(actor.passportId),
+      actorId: clean(actor.employeeId || actor.userId || actor.id),
+      actorLabel: clean(actor.displayName || actor.name || actor.label)
+    },
+    customer: {
+      passportId: clean(input.customerPassportId),
+      customerId: clean(input.customerId),
+      name: clean(input.customerName),
+      contactName: clean(input.customerContactName),
+      email: clean(input.customerEmail),
+      phone: clean(input.customerPhone),
+      poNumber: clean(input.customerPoNumber)
+    },
+    asset: {
+      passportId: clean(input.assetPassportId || primary.passportId),
+      objectId: clean(input.assetObjectId || primary.objectId),
+      objectType: clean(input.assetObjectType || primary.objectType),
+      label: clean(input.assetLabel || primary.label),
+      serialNumber: clean(input.serialNumber),
+      locationLabel: clean(input.assetLocationLabel || location.label)
+    },
+    request: {
+      problem: clean(input.problem),
+      customerScope: clean(input.customerScope),
+      internalNotes: clean(input.internalNotes),
+      assumptions: clean(input.assumptions),
+      exclusions: clean(input.exclusions)
+    },
+    commercial: {
+      pricingType: IXI_SERVICE_PRICING_TYPES.includes(requestedPricingType)
+        ? requestedPricingType
+        : "estimate",
+      quoteDate: clean(input.quoteDate),
+      validThrough: clean(input.validThrough),
+      paymentTerms: clean(input.paymentTerms),
+      depositType: clean(input.depositType || "none"),
+      depositValue: money(input.depositValue),
+      taxAmount,
+      currency: "USD"
+    },
+    options,
+    economics: {
+      quotedRevenue,
+      estimatedInternalCost: estimatedCost,
+      projectedGrossProfit: money(quotedRevenue - estimatedCost),
+      projectedMarginPercent: quotedRevenue
+        ? money(((quotedRevenue - estimatedCost) / quotedRevenue) * 100)
+        : 0,
+      authorizedRevenue: 0,
+      changeOrderAuthorized: 0,
+      economicEvent: false
+    },
+    acceptance: {
+      status: "pending",
+      acceptedRevision: null,
+      acceptedOptionIds: [],
+      acceptedBy: "",
+      acceptedAt: "",
+      method: "",
+      signatureDocumentId: "",
+      customerPoNumber: ""
+    },
+    delivery: {
+      sentAt: "",
+      viewedAt: "",
+      lastSentAt: "",
+      channel: "",
+      recipient: ""
+    },
+    revisions: [],
+    changeOrders: [],
+    related: {
+      customerServiceWorkOrderId: "",
+      serviceInvoiceIds: []
+    },
+    documents: arr(input.documents).map((document, index) => normalizeDocument(document, index)),
+    status: "draft",
+    audit: {
+      createdAt: now,
+      createdBy: clean(actor.passportId || actor.employeeId || actor.id),
+      createdByLabel: clean(actor.displayName || actor.name || actor.label),
+      updatedAt: now
+    },
+    activity: []
+  };
+}
+
+export function validateIXIServiceQuote(record = {}) {
+  const errors = {};
+  const recordContext = record.context || {};
+  const customer = record.customer || {};
+  const request = record.request || {};
+  const commercial = record.commercial || {};
+  const options = arr(record.options);
+
+  if (!clean(recordContext.primaryPassportId || recordContext.primaryObjectId)) errors.context = "required";
+  if (!clean(customer.name)) errors.customer = "required";
+  if (!clean(request.problem)) errors.problem = "required";
+  if (!clean(request.customerScope)) errors.scope = "required";
+  if (!options.length) errors.options = "required";
+  if (!options.some(option => arr(option.lines).length)) errors.lines = "required";
+  if (!clean(commercial.quoteDate)) errors.quoteDate = "required";
+  if (!clean(commercial.validThrough)) errors.validThrough = "required";
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors
+  };
+}
+
+export default {
+  IXI_SERVICE_QUOTE_SCHEMA,
+  createIXIServiceQuoteDraft,
+  validateIXIServiceQuote
+};
