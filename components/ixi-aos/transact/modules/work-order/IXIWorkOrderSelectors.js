@@ -43,6 +43,7 @@ export function getIXIWorkOrderReferenceCounts(workOrder={}){
     bills:arr(r.billIds).length,
     technology:arr(r.technologyWorkIds).length,
     attachments:arr(r.attachmentIds).length,
+    photos:arr(r.photoIds).length,
     notes:arr(r.noteIds).length
   };
 }
