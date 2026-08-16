@@ -47,6 +47,7 @@ export function createIXIWorkOrderDraft({context={},input={}}={}){
       billIds:[],
       technologyWorkIds:[],
       attachmentIds:[],
+      photoIds:[],
       noteIds:[]
     },
     financial:{
@@ -67,7 +68,7 @@ export function createIXIWorkOrderDraft({context={},input={}}={}){
 
 export function normalizeIXIWorkOrder(value={}){
   const source=obj(value),base=createIXIWorkOrderDraft({context:{},input:{}});
-  return {...base,...source,identity:{...base.identity,...obj(source.identity)},context:{...base.context,...obj(source.context)},work:{...base.work,...obj(source.work)},people:{...base.people,...obj(source.people),assignedTo:arr(source.people?.assignedTo)},dates:{...base.dates,...obj(source.dates)},result:{...base.result,...obj(source.result)},references:{...base.references,...obj(source.references),purchaseRequestIds:arr(source.references?.purchaseRequestIds),purchaseOrderIds:arr(source.references?.purchaseOrderIds)},financial:{...base.financial,...obj(source.financial)},audit:{...base.audit,...obj(source.audit)}};
+  return {...base,...source,identity:{...base.identity,...obj(source.identity)},context:{...base.context,...obj(source.context)},work:{...base.work,...obj(source.work)},people:{...base.people,...obj(source.people),assignedTo:arr(source.people?.assignedTo)},dates:{...base.dates,...obj(source.dates)},result:{...base.result,...obj(source.result)},references:{...base.references,...obj(source.references),purchaseRequestIds:arr(source.references?.purchaseRequestIds),purchaseOrderIds:arr(source.references?.purchaseOrderIds),photoIds:arr(source.references?.photoIds)},financial:{...base.financial,...obj(source.financial)},audit:{...base.audit,...obj(source.audit)}};
 }
 
 export default {createIXIWorkOrderDraft,normalizeIXIWorkOrder};
