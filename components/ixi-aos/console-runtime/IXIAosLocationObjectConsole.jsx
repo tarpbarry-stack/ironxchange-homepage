@@ -38,11 +38,7 @@ const FACE_LABELS = Object.freeze({
 const clean = value => String(value || "").trim();
 
 function initialSlots() {
-  return [
-    createConsoleSlot({
-      type: IXI_CONSOLE_SLOT_TYPES.LISTING
-    })
-  ];
+  return [createConsoleSlot({ type: IXI_CONSOLE_SLOT_TYPES.LISTING })];
 }
 
 export default function IXIAosLocationObjectConsole({
@@ -123,54 +119,44 @@ export default function IXIAosLocationObjectConsole({
     stop(event);
     if (atCapacity) return;
 
-    saveSlots(
-      insertConsoleSlot({
-        slots: consoleSlots,
-        side,
-        type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
-        maxSlots: IXI_CONSOLE_MAX_DEPTH,
-        faces: AVAILABLE_FACES
-      })
-    );
+    saveSlots(insertConsoleSlot({
+      slots: consoleSlots,
+      side,
+      type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
+      maxSlots: IXI_CONSOLE_MAX_DEPTH,
+      faces: AVAILABLE_FACES
+    }));
   }
 
   function removePanel(slotId, event) {
     stop(event);
-
-    saveSlots(
-      removeConsoleSlot({
-        slots: consoleSlots,
-        slotId,
-        faces: AVAILABLE_FACES
-      })
-    );
+    saveSlots(removeConsoleSlot({
+      slots: consoleSlots,
+      slotId,
+      faces: AVAILABLE_FACES
+    }));
   }
 
   function assignFace(slotId, face, event) {
     stop(event);
-
-    saveSlots(
-      assignConsoleSlotFace({
-        slots: consoleSlots,
-        slotId,
-        face,
-        faces: AVAILABLE_FACES
-      })
-    );
+    saveSlots(assignConsoleSlotFace({
+      slots: consoleSlots,
+      slotId,
+      face,
+      faces: AVAILABLE_FACES
+    }));
   }
 
   function openConsoleFromCard() {
     if (atCapacity) return;
 
-    saveSlots(
-      insertConsoleSlot({
-        slots: consoleSlots,
-        side: "right",
-        type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
-        maxSlots: IXI_CONSOLE_MAX_DEPTH,
-        faces: AVAILABLE_FACES
-      })
-    );
+    saveSlots(insertConsoleSlot({
+      slots: consoleSlots,
+      side: "right",
+      type: IXI_CONSOLE_SLOT_TYPES.EMPTY,
+      maxSlots: IXI_CONSOLE_MAX_DEPTH,
+      faces: AVAILABLE_FACES
+    }));
   }
 
   const shared = {
@@ -194,21 +180,11 @@ export default function IXIAosLocationObjectConsole({
     const resolved = Math.min(5, Math.max(1, Number(faceNumber) || 1));
 
     if (resolved === 5) {
-      return (
-        <IXIAosLocationFace5Maintenance
-          {...shared}
-          demoMode
-        />
-      );
+      return <IXIAosLocationFace5Maintenance {...shared} demoMode />;
     }
 
     if (resolved === 4) {
-      return (
-        <IXIAosLocationFace4Obligations
-          {...shared}
-          demoMode
-        />
-      );
+      return <IXIAosLocationFace4Obligations {...shared} demoMode />;
     }
 
     if (resolved === 3) {
@@ -264,10 +240,7 @@ export default function IXIAosLocationObjectConsole({
 
     if (isListing) {
       return (
-        <section
-          key={slot.slotId}
-          className="location-console-slot primary-slot"
-        >
+        <section key={slot.slotId} className="location-console-slot primary-slot">
           {renderOuterActuators(slotIndex)}
           {renderFace(primaryFace)}
         </section>
@@ -276,10 +249,7 @@ export default function IXIAosLocationObjectConsole({
 
     if (isEmpty) {
       return (
-        <section
-          key={slot.slotId}
-          className="location-console-slot empty-slot"
-        >
+        <section key={slot.slotId} className="location-console-slot empty-slot">
           <IXIObjectCardActuator
             side={isLeftOfPrimary ? "right" : "left"}
             variant="tall"
@@ -312,10 +282,7 @@ export default function IXIAosLocationObjectConsole({
     }
 
     return (
-      <section
-        key={slot.slotId}
-        className="location-console-slot module-slot"
-      >
+      <section key={slot.slotId} className="location-console-slot module-slot">
         <IXIObjectCardActuator
           side={isLeftOfPrimary ? "right" : "left"}
           variant="tall"
@@ -343,7 +310,13 @@ export default function IXIAosLocationObjectConsole({
   }
 
   return (
-    <IXIAosCardCommandProvider onOpenTransact={onOpenTransact}>
+    <IXIAosCardCommandProvider
+      object={financialObject}
+      objectId={objectId}
+      ixiState={ixiState}
+      onIxiStateChange={onIxiStateChange}
+      onOpenTransact={onOpenTransact}
+    >
       <div
         className="location-object-console"
         style={{ width: `${consoleSlots.length * PANEL_WIDTH}px` }}
@@ -382,9 +355,7 @@ export default function IXIAosLocationObjectConsole({
             overflow: hidden;
             border: 1px solid rgba(255,255,255,.08);
             border-radius: 13px;
-            background:
-              linear-gradient(180deg,rgba(255,255,255,.018),transparent),
-              #141414;
+            background: linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414;
           }
 
           .empty-face-picker {
