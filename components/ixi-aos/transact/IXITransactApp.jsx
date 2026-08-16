@@ -10,6 +10,7 @@ import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
 import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
+import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -62,7 +63,8 @@ export default function IXITransactApp({
   const expenseOpen = moduleId === "expense";
   const purchaseOrderOpen = moduleId === "purchase-order";
   const billOpen = moduleId === "bill";
-  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen;
+  const timeOpen = moduleId === "time";
+  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen || timeOpen;
   const resolvedWorkOrder = workOrderSnapshot || context.activeWorkOrder || null;
 
   async function open(item) {
@@ -145,6 +147,24 @@ export default function IXITransactApp({
       },
       context,
       { billRecord: nextRecord, change, returnTo: "bill" }
+    );
+  }
+
+  async function timeChanged(nextRecord, change = {}, timeContext = context) {
+    await onOpenModule?.(
+      {
+        id: `time-${change.action || "change"}`,
+        label: "TIME UPDATE",
+        group: "work",
+        documentType: "time-entry"
+      },
+      timeContext,
+      {
+        timeRecord: nextRecord,
+        change,
+        originatingObject: timeContext.primary,
+        returnTo: "time"
+      }
     );
   }
 
@@ -315,6 +335,8 @@ export default function IXITransactApp({
           <IXIExpenseApp context={context} workOrder={resolvedWorkOrder} onCancel={() => setModuleId("")} onSave={saveDirectExpense} />
         ) : purchaseOrderOpen ? (
           <IXIPurchaseOrderApp context={context} onBack={() => setModuleId("")} onRecordChange={purchaseOrderChanged} />
+        ) : timeOpen ? (
+          <IXITimeStandaloneApp context={context} object={object} onBack={() => setModuleId("")} onRecordChange={timeChanged} />
         ) : active?.id === "work-order" ? (
           <IXIWorkOrderApp
             context={context}
