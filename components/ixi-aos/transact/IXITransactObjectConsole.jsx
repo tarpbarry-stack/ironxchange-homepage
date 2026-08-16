@@ -12,6 +12,9 @@ import {
   removeConsoleSlot
 } from "../../ixi-chassis/IXIObjectConsoleEngine";
 import {
+  runIXIActionNoticeLifecycle
+} from "../../ixi-object-system/IXIActionNoticeEngine";
+import {
   IXIAosCardCommandProvider
 } from "../card-runtime/IXIAosCardCommandContext";
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
@@ -21,6 +24,53 @@ import { createIXITransactContext } from "./IXITransactContext";
 
 const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
+
+function getLifecycleCopy(moduleId = "", payload = {}) {
+  const id = String(moduleId || "").trim();
+
+  if (id === "work-order-create") {
+    return {
+      savingMessage: "CREATING WORK ORDER...",
+      successMessage: result => {
+        const number =
+          payload?.workOrder?.identity?.number ||
+          payload?.workOrder?.workOrderNumber ||
+          payload?.workOrder?.number ||
+          "";
+        return number
+          ? `WORK ORDER ${number} CREATED`
+          : "WORK ORDER CREATED";
+      },
+      errorMessage: "WORK ORDER CREATE FAILED"
+    };
+  }
+
+  if (id === "note-save") {
+    return {
+      savingMessage: "SAVING NOTE...",
+      successMessage: "NOTE SAVED",
+      errorMessage: "NOTE SAVE FAILED"
+    };
+  }
+
+  if (id === "photo-save") {
+    const count = Array.isArray(payload?.documents)
+      ? payload.documents.length
+      : 0;
+
+    return {
+      savingMessage: count > 1
+        ? `SAVING ${count} PHOTOS...`
+        : "SAVING PHOTO...",
+      successMessage: count > 1
+        ? `${count} PHOTOS ADDED`
+        : "PHOTO ADDED",
+      errorMessage: "PHOTO SAVE FAILED"
+    };
+  }
+
+  return null;
+}
 
 export default function IXITransactObjectConsole({
   object = {},
@@ -88,6 +138,32 @@ export default function IXITransactObjectConsole({
     }));
   }
 
+  async function handleOpenModule(item, moduleContext, payload = {}) {
+    const moduleId = String(item?.id || "").trim();
+    const lifecycle = getLifecycleCopy(moduleId, payload);
+
+    // Expense owns its own command lifecycle inside IXIExpenseCommands.
+    // Other module-open actions that do not represent persistence pass through.
+    if (!lifecycle || moduleId === "expense-save") {
+      return onOpenModule?.(item, moduleContext, payload);
+    }
+
+    return runIXIActionNoticeLifecycle({
+      objectId,
+      commandId:
+        payload?.commandId ||
+        payload?.note?.identity?.clientRequestId ||
+        payload?.photo?.identity?.clientRequestId ||
+        payload?.workOrder?.identity?.workOrderId ||
+        "",
+      source: `ixi-transact-${moduleId}`,
+      ...lifecycle,
+      operation: async () => {
+        return onOpenModule?.(item, moduleContext, payload);
+      }
+    });
+  }
+
   return (
     <IXIAosCardCommandProvider
       object={object}
@@ -150,7 +226,7 @@ export default function IXITransactObjectConsole({
                     activeWorkOrder={activeWorkOrder}
                     permissions={permissions}
                     onClose={onClose}
-                    onOpenModule={onOpenModule}
+                    onOpenModule={handleOpenModule}
                     onSendFront={onSendFront}
                     onSendBack={onSendBack}
                     onCycleColor={onCycleColor}
@@ -163,7 +239,7 @@ export default function IXITransactObjectConsole({
               ) : (
                 <IXITransactConsolePanel
                   context={context}
-                  onOpenModule={onOpenModule}
+                  onOpenModule={handleOpenModule}
                 />
               )}
             </section>
