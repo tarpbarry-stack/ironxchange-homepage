@@ -9,6 +9,7 @@ import {
   getIXITechWorkOrderActuals
 } from "./IXITechWorkOrderEngine";
 import IXITechWorkOrderStyles from "./IXITechWorkOrderStyles";
+import IXITechWorkOrderEvidenceSections from "./IXITechWorkOrderEvidenceSections";
 import IXIWorkOrderStyles from "../work-order/IXIWorkOrderStyles";
 import IXIExpenseApp from "../expense/IXIExpenseApp";
 import IXIMaterialApp from "../material/IXIMaterialApp";
@@ -368,8 +369,6 @@ export default function IXITechWorkOrderApp({
       note: resolvedDescription
     }];
 
-    // Match Work Order behavior: the local record becomes live immediately.
-    // The parent callback is the persistence seam, not the UI transition owner.
     setRecord(draft);
     setTab("work");
     setSubmodule("");
@@ -381,8 +380,6 @@ export default function IXITechWorkOrderApp({
     try {
       await onCreate?.(draft, context);
     } catch (err) {
-      // Creation persistence failure is surfaced, but the operator remains on
-      // the record they just created so the state is inspectable/recoverable.
       setError(clean(err?.message) || "TECHWO CREATE PERSISTENCE FAILED");
     } finally {
       setBusy(false);
@@ -421,42 +418,16 @@ export default function IXITechWorkOrderApp({
 
   async function saveExpense(draft, input, response) {
     const id = clean(draft?.identity?.expenseId || draft?.identity?.clientRequestId) || `EXP-${Date.now()}`;
-    let next = addReference(
-      record,
-      "expenseIds",
-      id,
-      "otherActual",
-      input?.amount ?? draft?.expense?.amount
-    );
-    next = addDocuments(
-      next,
-      input?.attachments || draft?.attachments,
-      "receipt",
-      id,
-      clean(input?.vendor || draft?.expense?.vendor),
-      actorName
-    );
+    let next = addReference(record, "expenseIds", id, "otherActual", input?.amount ?? draft?.expense?.amount);
+    next = addDocuments(next, input?.attachments || draft?.attachments, "receipt", id, clean(input?.vendor || draft?.expense?.vendor), actorName);
     await commit(next, { action: "expense-save", expense: draft, response });
     setSubmodule("");
   }
 
   async function saveMaterial(draft, input, response) {
     const id = clean(draft?.identity?.materialUsageId || draft?.identity?.clientRequestId) || `MAT-${Date.now()}`;
-    let next = addReference(
-      record,
-      "materialRecordIds",
-      id,
-      "materialActual",
-      draft?.material?.extendedCost
-    );
-    next = addDocuments(
-      next,
-      input?.attachments || draft?.attachments,
-      "material",
-      id,
-      clean(input?.vendorLabel || draft?.material?.vendorLabel),
-      actorName
-    );
+    let next = addReference(record, "materialRecordIds", id, "materialActual", draft?.material?.extendedCost);
+    next = addDocuments(next, input?.attachments || draft?.attachments, "material", id, clean(input?.vendorLabel || draft?.material?.vendorLabel), actorName);
     await commit(next, { action: "material-save", material: draft, response });
     setSubmodule("");
   }
@@ -464,35 +435,15 @@ export default function IXITechWorkOrderApp({
   async function saveTime(draft, input, response) {
     const id = clean(draft?.identity?.timeEntryId || draft?.identity?.clientRequestId) || `TIME-${Date.now()}`;
     let next = addReference(record, "timeEntryIds", id);
-    next = addDocuments(
-      next,
-      input?.attachments || draft?.attachments,
-      "time",
-      id,
-      actorName,
-      actorName
-    );
+    next = addDocuments(next, input?.attachments || draft?.attachments, "time", id, actorName, actorName);
     await commit(next, { action: "time-save", timeEntry: draft, response });
     setSubmodule("");
   }
 
   async function saveService(draft, input, response) {
     const id = clean(draft?.identity?.serviceRecordId || draft?.identity?.clientRequestId) || `SVC-${Date.now()}`;
-    let next = addReference(
-      record,
-      "serviceRecordIds",
-      id,
-      "serviceActual",
-      draft?.service?.amount
-    );
-    next = addDocuments(
-      next,
-      input?.attachments || draft?.attachments,
-      "invoice",
-      id,
-      clean(input?.vendorLabel || draft?.service?.vendorLabel),
-      actorName
-    );
+    let next = addReference(record, "serviceRecordIds", id, "serviceActual", draft?.service?.amount);
+    next = addDocuments(next, input?.attachments || draft?.attachments, "invoice", id, clean(input?.vendorLabel || draft?.service?.vendorLabel), actorName);
     await commit(next, { action: "service-save", service: draft, response });
     setSubmodule("");
   }
@@ -514,20 +465,8 @@ export default function IXITechWorkOrderApp({
       isOrder ? "committed" : "requested",
       amount
     );
-    next = addDocuments(
-      next,
-      input?.attachments || draft?.purchase?.attachments,
-      "quote",
-      id,
-      clean(input?.vendorLabel || draft?.purchase?.vendorLabel),
-      actorName
-    );
-    await commit(next, {
-      action: "purchase-save",
-      purchase: draft,
-      response,
-      requestType
-    });
+    next = addDocuments(next, input?.attachments || draft?.purchase?.attachments, "quote", id, clean(input?.vendorLabel || draft?.purchase?.vendorLabel), actorName);
+    await commit(next, { action: "purchase-save", purchase: draft, response, requestType });
     setSubmodule("");
   }
 
@@ -614,11 +553,7 @@ export default function IXITechWorkOrderApp({
       ]
     };
 
-    await commit(next, {
-      action: "photo-save",
-      photo: stored,
-      documents: docs
-    });
+    await commit(next, { action: "photo-save", photo: stored, documents: docs });
     setSubmodule("");
   }
 
@@ -644,10 +579,7 @@ export default function IXITechWorkOrderApp({
         attachmentIds: unique([...(record.references?.attachmentIds || []), id])
       }
     };
-    await commit(next, {
-      action: "document-general-add",
-      document
-    });
+    await commit(next, { action: "document-general-add", document });
   }
 
   async function recordTimerDelta(session, action) {
@@ -677,9 +609,7 @@ export default function IXITechWorkOrderApp({
       identity: {
         timeEntryId: `TIME-${Date.now()}`
       },
-      time: {
-        hours
-      }
+      time: { hours }
     };
     let response = null;
 
@@ -706,12 +636,7 @@ export default function IXITechWorkOrderApp({
 
     const id = clean(draft?.identity?.timeEntryId || draft?.identity?.clientRequestId) || `TIME-${Date.now()}`;
     const next = addReference(record, "timeEntryIds", id);
-    await commit(next, {
-      action: "time-save",
-      timeEntry: draft,
-      response,
-      session
-    });
+    await commit(next, { action: "time-save", timeEntry: draft, response, session });
     markIXITimeSessionRecorded(context, getIXITimeSessionElapsedMs(session));
   }
 
@@ -749,110 +674,33 @@ export default function IXITechWorkOrderApp({
 
   const Lang = () => (
     <div className="wo-lang">
-      <button
-        className={lang === "en" ? "on" : ""}
-        onClick={() => setLang("en")}
-      >
-        ENG
-      </button>
+      <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>ENG</button>
       <i>/</i>
-      <button
-        className={lang === "es" ? "on" : ""}
-        onClick={() => setLang("es")}
-      >
-        ESP
-      </button>
+      <button className={lang === "es" ? "on" : ""} onClick={() => setLang("es")}>ESP</button>
     </div>
   );
 
   if (record && submodule === "expense") {
-    return (
-      <IXIExpenseApp
-        context={context}
-        workOrder={record}
-        language={lang}
-        onLanguageChange={setLang}
-        onCancel={() => setSubmodule("")}
-        onSave={saveExpense}
-      />
-    );
+    return <IXIExpenseApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveExpense} />;
   }
-
   if (record && submodule === "material") {
-    return (
-      <IXIMaterialApp
-        context={context}
-        workOrder={record}
-        language={lang}
-        onLanguageChange={setLang}
-        onCancel={() => setSubmodule("")}
-        onSave={saveMaterial}
-      />
-    );
+    return <IXIMaterialApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveMaterial} />;
   }
-
   if (record && submodule === "time") {
-    return (
-      <IXITimeEntryApp
-        context={context}
-        workOrder={record}
-        language={lang}
-        onLanguageChange={setLang}
-        onCancel={() => setSubmodule("")}
-        onSave={saveTime}
-        onLiveStart={handleLiveStart}
-      />
-    );
+    return <IXITimeEntryApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveTime} onLiveStart={handleLiveStart} />;
   }
-
   if (record && submodule === "service") {
-    return (
-      <IXIServiceApp
-        context={context}
-        workOrder={record}
-        language={lang}
-        onLanguageChange={setLang}
-        onCancel={() => setSubmodule("")}
-        onSave={saveService}
-      />
-    );
+    return <IXIServiceApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={saveService} />;
   }
-
   if (record && submodule === "purchase") {
-    return (
-      <IXIPurchaseApp
-        context={context}
-        workOrder={record}
-        language={lang}
-        onLanguageChange={setLang}
-        onCancel={() => setSubmodule("")}
-        onSave={savePurchase}
-      />
-    );
+    return <IXIPurchaseApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={savePurchase} />;
   }
-
   if (record && submodule === "note") {
-    return (
-      <IXINoteApp
-        context={context}
-        workOrder={record}
-        onCancel={() => setSubmodule("")}
-        onSave={saveNote}
-      />
-    );
+    return <IXINoteApp context={context} workOrder={record} onCancel={() => setSubmodule("")} onSave={saveNote} />;
   }
-
   if (record && submodule === "photo") {
-    return (
-      <IXIPhotoApp
-        context={context}
-        workOrder={record}
-        onCancel={() => setSubmodule("")}
-        onSave={savePhoto}
-      />
-    );
+    return <IXIPhotoApp context={context} workOrder={record} language={lang} onLanguageChange={setLang} onCancel={() => setSubmodule("")} onSave={savePhoto} />;
   }
-
   if (record && submodule === "documents") {
     return (
       <IXIWorkOrderDocumentsApp
@@ -862,13 +710,7 @@ export default function IXITechWorkOrderApp({
         language={lang}
         onLanguageChange={setLang}
         onBack={() => setSubmodule("")}
-        onDocumentAction={(actionId, row) =>
-          onRecordChange?.(
-            record,
-            { action: `document-${actionId}`, document: row },
-            context
-          )
-        }
+        onDocumentAction={(actionId, row) => onRecordChange?.(record, { action: `document-${actionId}`, document: row }, context)}
         onAddGeneralDocument={addGeneralDocument}
       />
     );
@@ -878,169 +720,56 @@ export default function IXITechWorkOrderApp({
     return (
       <div className="wo-app wo-v13 techwo-v13">
         <Lang />
-
         <div className="wo-title">
-          <div className="wo-icon">
-            <WorkOrderIcon size={23} />
-          </div>
+          <div className="wo-icon"><WorkOrderIcon size={23} /></div>
           <div>
             <span className="techwo-titlemark">TECHWO# XXXXXX</span>
             <strong>{t.new}</strong>
             <small>{t.sub}</small>
           </div>
         </div>
-
-        <button className="wo-back" onClick={() => onBack?.()}>
-          ‹ {t.back}
-        </button>
-
+        <button className="wo-back" onClick={() => onBack?.()}>‹ {t.back}</button>
         <label>{t.location}</label>
-        <div className="wo-location">
-          <LocationIcon size={15} />
-          <b>{objectLabel}</b>
-          <span className="locked">{t.locked}</span>
-        </div>
-
+        <div className="wo-location"><LocationIcon size={15} /><b>{objectLabel}</b><span className="locked">{t.locked}</span></div>
         <label>{t.problem}</label>
-        <textarea
-          value={description}
-          onChange={event => setDescription(event.target.value)}
-          placeholder={t.placeholder}
-        />
-
+        <textarea value={description} onChange={event => setDescription(event.target.value)} placeholder={t.placeholder} />
         <div className="wo-duo">
-          <button onClick={() => setSubmodule("photo")}>
-            <CameraIcon size={15} />
-            <b>{t.photo}</b>
-          </button>
-          <button onClick={() => setSubmodule("note")}>
-            <MicIcon size={15} />
-            <b>{t.voice}</b>
-          </button>
+          <button onClick={() => setSubmodule("photo")}><CameraIcon size={15} /><b>{t.photo}</b></button>
+          <button onClick={() => setSubmodule("note")}><MicIcon size={15} /><b>{t.voice}</b></button>
         </div>
-
         <label>{t.type}</label>
         <div className="techwo-domain-grid">
-          <button
-            className={type === "incident" ? "sel" : ""}
-            onClick={() => setType("incident")}
-          >
-            {t.incident}
-          </button>
-          <button
-            className={type === "service-request" ? "sel" : ""}
-            onClick={() => setType("service-request")}
-          >
-            {t.request}
-          </button>
-          <button
-            className={type === "diagnostic" ? "sel" : ""}
-            onClick={() => setType("diagnostic")}
-          >
-            {t.diagnostic}
-          </button>
-          <button
-            className={type === "deployment-change" ? "sel" : ""}
-            onClick={() => setType("deployment-change")}
-          >
-            {t.change}
-          </button>
+          <button className={type === "incident" ? "sel" : ""} onClick={() => setType("incident")}>{t.incident}</button>
+          <button className={type === "service-request" ? "sel" : ""} onClick={() => setType("service-request")}>{t.request}</button>
+          <button className={type === "diagnostic" ? "sel" : ""} onClick={() => setType("diagnostic")}>{t.diagnostic}</button>
+          <button className={type === "deployment-change" ? "sel" : ""} onClick={() => setType("deployment-change")}>{t.change}</button>
         </div>
-
         <label>{t.priority}</label>
         <div className="wo-three priority">
-          <button
-            className={priority === "normal" ? "sel" : ""}
-            onClick={() => setPriority("normal")}
-          >
-            <FlagIcon size={15} />
-            {t.normal}
-          </button>
-          <button
-            className={priority === "high" ? "sel high" : "high"}
-            onClick={() => setPriority("high")}
-          >
-            <FlagIcon size={15} />
-            {t.high}
-          </button>
-          <button
-            className={priority === "critical" ? "sel critical" : "critical"}
-            onClick={() => setPriority("critical")}
-          >
-            <FlagIcon size={15} />
-            {t.critical}
-          </button>
+          <button className={priority === "normal" ? "sel" : ""} onClick={() => setPriority("normal")}><FlagIcon size={15} />{t.normal}</button>
+          <button className={priority === "high" ? "sel high" : "high"} onClick={() => setPriority("high")}><FlagIcon size={15} />{t.high}</button>
+          <button className={priority === "critical" ? "sel critical" : "critical"} onClick={() => setPriority("critical")}><FlagIcon size={15} />{t.critical}</button>
         </div>
-
         <label>{t.impact}</label>
         <div className="wo-three condition">
-          <button
-            className={impact === "normal" ? "sel" : ""}
-            onClick={() => setImpact("normal")}
-          >
-            <OperableIcon size={15} />
-            {t.healthy}
-          </button>
-          <button
-            className={impact === "degraded" ? "sel" : ""}
-            onClick={() => setImpact("degraded")}
-          >
-            <LimitedIcon size={15} />
-            {t.degraded}
-          </button>
-          <button
-            className={impact === "critical" ? "sel down" : "down"}
-            onClick={() => setImpact("critical")}
-          >
-            <DownIcon size={15} />
-            {t.down}
-          </button>
+          <button className={impact === "normal" ? "sel" : ""} onClick={() => setImpact("normal")}><OperableIcon size={15} />{t.healthy}</button>
+          <button className={impact === "degraded" ? "sel" : ""} onClick={() => setImpact("degraded")}><LimitedIcon size={15} />{t.degraded}</button>
+          <button className={impact === "critical" ? "sel down" : "down"} onClick={() => setImpact("critical")}><DownIcon size={15} />{t.down}</button>
         </div>
-
         <div className="techwo-tech-fields">
-          <select
-            value={environment}
-            onChange={event => setEnvironment(event.target.value)}
-            aria-label={t.environment}
-          >
+          <select value={environment} onChange={event => setEnvironment(event.target.value)} aria-label={t.environment}>
             <option value="production">PRODUCTION</option>
             <option value="test">TEST</option>
             <option value="development">DEVELOPMENT</option>
             <option value="field">FIELD</option>
           </select>
-          <input
-            value={systemName}
-            onChange={event => setSystemName(event.target.value)}
-            placeholder={t.system}
-          />
-          <input
-            value={version}
-            onChange={event => setVersion(event.target.value)}
-            placeholder={t.version}
-          />
+          <input value={systemName} onChange={event => setSystemName(event.target.value)} placeholder={t.system} />
+          <input value={version} onChange={event => setVersion(event.target.value)} placeholder={t.version} />
         </div>
-
         <label>{t.assign}</label>
-        <div className="wo-assign">
-          <PersonIcon size={16} />
-          <b>{actorName === "—" ? t.me : actorName}</b>
-          <span>⌄</span>
-        </div>
-
+        <div className="wo-assign"><PersonIcon size={16} /><b>{actorName === "—" ? t.me : actorName}</b><span>⌄</span></div>
         {error ? <div className="wo-notice">{error}</div> : null}
-
-        <button
-          className="wo-create"
-          disabled={busy}
-          onClick={create}
-        >
-          <CreateIcon size={19} />
-          <span>
-            <b>{t.create}</b>
-            <small>{t.createSub}</small>
-          </span>
-        </button>
-
+        <button className="wo-create" disabled={busy} onClick={create}><CreateIcon size={19} /><span><b>{t.create}</b><small>{t.createSub}</small></span></button>
         <IXIWorkOrderStyles />
         <IXITechWorkOrderStyles />
       </div>
@@ -1050,18 +779,10 @@ export default function IXITechWorkOrderApp({
   const status = clean(record.work?.status);
   const isPaused = status === "paused" || timerSession?.status === "paused";
   const isComplete = ["complete", "closed"].includes(status);
-  const elapsed = timerSession
-    ? getIXITimeSessionElapsedMs(timerSession, timerTick)
-    : 0;
-  const timerLabel = timerSession?.status === "running"
-    ? t.running
-    : timerSession?.status === "paused"
-      ? t.paused
-      : "—";
+  const elapsed = timerSession ? getIXITimeSessionElapsedMs(timerSession, timerTick) : 0;
+  const timerLabel = timerSession?.status === "running" ? t.running : timerSession?.status === "paused" ? t.paused : "—";
   const numberLabel = clean(record.identity?.number) || "TECHWO-XXXXXX";
-  const activity = Array.isArray(record.activityProjection)
-    ? record.activityProjection
-    : [];
+  const activity = Array.isArray(record.activityProjection) ? record.activityProjection : [];
 
   return (
     <div className={`wo-app wo-v13 wo-work techwo-v13 ${isPaused ? "paused" : ""}`}>
@@ -1070,94 +791,36 @@ export default function IXITechWorkOrderApp({
       {error ? <div className="wo-notice">{error}</div> : null}
 
       <div className="wo-work-identity">
-        <div className="wo-work-icon">
-          <WorkOrderIcon size={23} />
-        </div>
+        <div className="wo-work-icon"><WorkOrderIcon size={23} /></div>
         <div className="wo-work-copy">
           <div className="wo-number-row">
             <strong>{numberLabel}</strong>
-            <span>
-              {isComplete
-                ? t.completeState
-                : isPaused
-                  ? t.paused
-                  : status === "waiting"
-                    ? t.waiting
-                    : t.inProgress}
-            </span>
+            <span>{isComplete ? t.completeState : isPaused ? t.paused : status === "waiting" ? t.waiting : t.inProgress}</span>
           </div>
           <h3>{objectLabel}</h3>
-          <small>
-            {clean(record.work?.type).toUpperCase()}
-            <i>•</i>
-            {clean(record.technology?.environment).toUpperCase()}
-            <i>•</i>
-            {clean(record.work?.impact).toUpperCase()}
-          </small>
+          <small>{clean(record.work?.type).toUpperCase()}<i>•</i>{clean(record.technology?.environment).toUpperCase()}<i>•</i>{clean(record.work?.impact).toUpperCase()}</small>
         </div>
-        <button
-          className="wo-edit"
-          onClick={() =>
-            onRecordChange?.(
-              record,
-              { action: "edit-tech-work-order" },
-              context
-            )
-          }
-        >
-          <EditIcon size={13} />
-        </button>
+        <button className="wo-edit" onClick={() => onRecordChange?.(record, { action: "edit-tech-work-order" }, context)}><EditIcon size={13} /></button>
       </div>
 
       <div className="wo-tabs">
-        <button
-          className={tab === "work" ? "active" : ""}
-          onClick={() => setTab("work")}
-        >
-          {t.work}
-        </button>
-        <button
-          className={tab === "cost" ? "active" : ""}
-          onClick={() => setTab("cost")}
-        >
-          {t.cost}
-        </button>
-        <button
-          className={tab === "activity" ? "active" : ""}
-          onClick={() => setTab("activity")}
-        >
-          {t.activity}
-        </button>
-        <button
-          className={tab === "related" ? "active" : ""}
-          onClick={() => setTab("related")}
-        >
-          {t.related}
-        </button>
+        <button className={tab === "work" ? "active" : ""} onClick={() => setTab("work")}>{t.work}</button>
+        <button className={tab === "cost" ? "active" : ""} onClick={() => setTab("cost")}>{t.cost}</button>
+        <button className={tab === "activity" ? "active" : ""} onClick={() => setTab("activity")}>{t.activity}</button>
+        <button className={tab === "related" ? "active" : ""} onClick={() => setTab("related")}>{t.related}</button>
       </div>
 
       <div className="wo-scroll">
         {tab === "work" ? (
           <>
             <div className="techwo-summary">
-              <div>
-                <small>{t.environment}</small>
-                <strong>{clean(record.technology?.environment).toUpperCase()}</strong>
-              </div>
-              <div>
-                <small>{t.system}</small>
-                <strong>{clean(record.technology?.systemName) || objectLabel}</strong>
-              </div>
-              <div>
-                <small>{t.version}</small>
-                <strong>{clean(record.technology?.version) || "—"}</strong>
-              </div>
+              <div><small>{t.environment}</small><strong>{clean(record.technology?.environment).toUpperCase()}</strong></div>
+              <div><small>{t.system}</small><strong>{clean(record.technology?.systemName) || objectLabel}</strong></div>
+              <div><small>{t.version}</small><strong>{clean(record.technology?.version) || "—"}</strong></div>
             </div>
 
             <label>{t.description}</label>
-            <div className="wo-description">
-              {clean(record.work?.description) || "—"}
-            </div>
+            <div className="wo-description">{clean(record.work?.description) || "—"}</div>
 
             <label>{t.status}</label>
             <div className="wo-status-row">
@@ -1166,69 +829,36 @@ export default function IXITechWorkOrderApp({
             </div>
 
             <div className="wo-timer">
-              <div>
-                <ClockIcon size={16} />
-                <span>
-                  <small>{t.timer}</small>
-                  <strong>{formatIXITimeDuration(elapsed)}</strong>
-                </span>
-              </div>
+              <div><ClockIcon size={16} /><span><small>{t.timer}</small><strong>{formatIXITimeDuration(elapsed)}</strong></span></div>
               <b>{timerLabel}</b>
             </div>
 
             <label>{t.add}</label>
             <div className="wo-action-grid">
-              <button onClick={() => setSubmodule("time")}>
-                <ClockIcon size={17} />
-                <span>{t.time}</span>
-              </button>
-              <button onClick={() => setSubmodule("material")}>
-                <MaterialIcon size={17} />
-                <span>{t.material}</span>
-              </button>
-              <button onClick={() => setSubmodule("service")}>
-                <ServiceIcon size={17} />
-                <span>{t.service}</span>
-              </button>
-              <button onClick={() => setSubmodule("expense")}>
-                <ExpenseIcon size={17} />
-                <span>{t.expense}</span>
-              </button>
-              <button onClick={() => setSubmodule("purchase")}>
-                <PurchaseIcon size={17} />
-                <span>{t.purchase}</span>
-              </button>
-              <button onClick={() => setSubmodule("documents")}>
-                <DocumentIcon size={17} />
-                <span>{t.document}</span>
-              </button>
+              <button onClick={() => setSubmodule("time")}><ClockIcon size={17} /><span>{t.time}</span></button>
+              <button onClick={() => setSubmodule("material")}><MaterialIcon size={17} /><span>{t.material}</span></button>
+              <button onClick={() => setSubmodule("service")}><ServiceIcon size={17} /><span>{t.service}</span></button>
+              <button onClick={() => setSubmodule("expense")}><ExpenseIcon size={17} /><span>{t.expense}</span></button>
+              <button onClick={() => setSubmodule("purchase")}><PurchaseIcon size={17} /><span>{t.purchase}</span></button>
+              <button onClick={() => setSubmodule("documents")}><DocumentIcon size={17} /><span>{t.document}</span></button>
             </div>
 
-            <div className="wo-duo">
-              <button onClick={() => setSubmodule("note")}>
-                <MicIcon size={15} />
-                <b>{t.note}</b>
-              </button>
-              <button onClick={() => setSubmodule("photo")}>
-                <CameraIcon size={15} />
-                <b>{t.photoAction}</b>
-              </button>
-            </div>
+            <IXITechWorkOrderEvidenceSections
+              record={record}
+              language={lang}
+              onAddNote={() => setSubmodule("note")}
+              onAddPhoto={() => setSubmodule("photo")}
+              onViewNotes={() => setTab("activity")}
+              onViewPhotos={() => setSubmodule("documents")}
+            />
 
             {!isComplete ? (
               <div className="wo-bottom-actions">
                 <button onClick={isPaused ? resumeWork : pauseWork}>
-                  {isPaused
-                    ? <RefreshIcon size={15} />
-                    : <PauseIcon size={15} />}
+                  {isPaused ? <RefreshIcon size={15} /> : <PauseIcon size={15} />}
                   <span>{isPaused ? t.resume : t.pause}</span>
                 </button>
-                <button
-                  onClick={() => {
-                    setCompletionText(clean(record.technology?.resolution));
-                    setCompletionOpen(true);
-                  }}
-                >
+                <button onClick={() => { setCompletionText(clean(record.technology?.resolution)); setCompletionOpen(true); }}>
                   <span>{t.complete}</span>
                 </button>
               </div>
@@ -1237,11 +867,7 @@ export default function IXITechWorkOrderApp({
             {!isComplete && completionOpen ? (
               <div className="techwo-complete-panel">
                 <label>{t.rootCause}</label>
-                <textarea
-                  value={completionText}
-                  onChange={event => setCompletionText(event.target.value)}
-                  placeholder={t.resolutionPlaceholder}
-                />
+                <textarea value={completionText} onChange={event => setCompletionText(event.target.value)} placeholder={t.resolutionPlaceholder} />
                 <button
                   disabled={busy}
                   onClick={() => lifecycle("complete", {
@@ -1258,13 +884,7 @@ export default function IXITechWorkOrderApp({
             ) : null}
 
             {isComplete ? (
-              <button
-                className="techwo-reopen"
-                disabled={busy}
-                onClick={() => lifecycle("reopen", {
-                  reason: "Work requires additional attention"
-                })}
-              >
+              <button className="techwo-reopen" disabled={busy} onClick={() => lifecycle("reopen", { reason: "Work requires additional attention" })}>
                 {t.reopen}
               </button>
             ) : null}
@@ -1281,10 +901,7 @@ export default function IXITechWorkOrderApp({
               <div><small>REQUESTED</small><strong><Money value={actuals.requested} /></strong></div>
               <div><small>{t.total}</small><strong><Money value={actuals.totalActual} /></strong></div>
             </div>
-            <div className="wo-description">
-              TECHWO financial activity is sourced from the same canonical Time,
-              Material, Service, Expense and Purchase records used by Work Orders.
-            </div>
+            <div className="wo-description">TECHWO financial activity is sourced from the same canonical Time, Material, Service, Expense and Purchase records used by Work Orders.</div>
           </>
         ) : null}
 
@@ -1295,21 +912,10 @@ export default function IXITechWorkOrderApp({
                   <div className="techwo-activity-row" key={item.activityId}>
                     <i />
                     <span>
-                      <strong>
-                        {clean(item.type).replaceAll("-", " ").toUpperCase()}
-                      </strong>
-                      <small>
-                        {clean(item.actorLabel)}
-                        {item.note ? ` · ${item.note}` : ""}
-                      </small>
+                      <strong>{clean(item.type).replaceAll("-", " ").toUpperCase()}</strong>
+                      <small>{clean(item.actorLabel)}{item.note ? ` · ${item.note}` : ""}</small>
                     </span>
-                    <time>
-                      {item.occurredAt
-                        ? new Date(item.occurredAt).toLocaleString(
-                            lang === "es" ? "es-MX" : "en-US"
-                          )
-                        : ""}
-                    </time>
+                    <time>{item.occurredAt ? new Date(item.occurredAt).toLocaleString(lang === "es" ? "es-MX" : "en-US") : ""}</time>
                   </div>
                 ))
               : <div className="wo-description">{t.noActivity}</div>}
@@ -1324,19 +930,9 @@ export default function IXITechWorkOrderApp({
               <div><small>TECHNICIAN</small><strong>{actorName}</strong></div>
               <div><small>TIME</small><strong>{record.references?.timeEntryIds?.length || 0}</strong></div>
               <div><small>DOCUMENTS</small><strong>{record.documentProjection?.length || 0}</strong></div>
-              <div>
-                <small>PURCHASES</small>
-                <strong>
-                  {(record.references?.purchaseRequestIds?.length || 0) +
-                    (record.references?.purchaseOrderIds?.length || 0)}
-                </strong>
-              </div>
+              <div><small>PURCHASES</small><strong>{(record.references?.purchaseRequestIds?.length || 0) + (record.references?.purchaseOrderIds?.length || 0)}</strong></div>
             </div>
-            <div className="wo-description">
-              TECHWO remains related to the exact AOS object that launched TRAN$ACT.
-              Child records inherit that context; they are not duplicated into a separate
-              accounting system.
-            </div>
+            <div className="wo-description">TECHWO remains related to the exact AOS object that launched TRAN$ACT. Child records inherit that context; they are not duplicated into a separate accounting system.</div>
           </>
         ) : null}
       </div>
