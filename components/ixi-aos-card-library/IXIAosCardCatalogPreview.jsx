@@ -3,7 +3,7 @@ import {
   useState
 } from "react";
 
-import IXIAosObjectConsole from "../ixi-aos/console-runtime/IXIAosObjectConsole";
+import IXIAosCommandAwareObjectConsole from "../ixi-aos/console-runtime/IXIAosCommandAwareObjectConsole";
 import IXIAosLocationObjectConsole from "../ixi-aos/console-runtime/IXIAosLocationObjectConsole";
 import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
@@ -365,7 +365,7 @@ export default function IXIAosCardCatalogPreview({
 
   return (
     <div className="generic">
-      <IXIAosObjectConsole
+      <IXIAosCommandAwareObjectConsole
         object={object}
         objectId={object.objectId}
         projection={projection}
