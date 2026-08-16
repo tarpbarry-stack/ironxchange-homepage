@@ -7,6 +7,10 @@ import {
 } from "../../../lib/listingFormatters";
 
 import {
+  getIXIAosSystemAdapter
+} from "../../../lib/mos/IXIAosSystemAdapterRegistry";
+
+import {
   resolveWorkspaceObjects
 } from "../../ixi-chassis/IXIWorkspacePlacementEngine";
 
@@ -141,8 +145,8 @@ export default function useIXIAosWorkspaceRegistry({
 
      - MOS object identity comes from objectId.
      - IronXchange machine identity comes from listing identity.
-     - System Index presentation comes from the assembled
-       System Index collection.
+     - IXI system adapters resolve from the central adapter registry.
+     - System Index presentation comes from assembled index records.
 
      Canonical MOS child membership comes ONLY from
      directContainerId. The registry hydrates `items` as a
@@ -165,10 +169,6 @@ export default function useIXIAosWorkspaceRegistry({
             return;
           }
 
-          /*
-           * System Index presentation is registered below.
-           * Avoid two records for the same stable objectId.
-           */
           if (
             systemIndexIds.has(
               objectId
@@ -211,13 +211,7 @@ export default function useIXIAosWorkspaceRegistry({
       );
 
 
-      /*
-       * System Index presentation objects.
-       *
-       * Equipment alone receives a workspace-deck projection;
-       * canonical Equipment membership remains owned by the
-       * IronXchange adapter.
-       */
+      /* System Index presentation objects. */
       (workspaceSystemIndexes || [])
         .forEach(index => {
           const objectId =
@@ -229,14 +223,14 @@ export default function useIXIAosWorkspaceRegistry({
             return;
           }
 
-          const isEquipmentAdapter =
-            index?.metadata?.adapterId ===
-              "ixi-owned-equipment" ||
-            index?.indexId ===
-              "equipment";
+          const adapter =
+            getIXIAosSystemAdapter(
+              index
+            );
 
           const workspaceIndex =
-            isEquipmentAdapter &&
+            adapter?.adapterId ===
+              "ixi-owned-equipment" &&
             equipmentWorkspaceIndex
               ? equipmentWorkspaceIndex
               : index;
