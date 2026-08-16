@@ -6,7 +6,9 @@
    - customer labels are authoritative
    - renderers never infer business meaning from field names
    - objectType is not a business-rule switch
-   - capabilities decide available actions
+   - capabilities describe what an object can do
+   - effective permissions decide what THIS actor may do/see
+   - explicit permission denial always wins
    ========================================================= */
 
 export function clean(value) {
@@ -74,6 +76,7 @@ export function getObjectLabel(object = {}) {
   const fields = getObjectFields(object);
   const metadata = getObjectMetadata(object);
   const definition = getObjectDefinition(object);
+
   return clean(
     object?.singularLabel ||
     fields?.singularLabel ||
@@ -89,6 +92,7 @@ export function getObjectPluralLabel(object = {}) {
   const fields = getObjectFields(object);
   const metadata = getObjectMetadata(object);
   const definition = getObjectDefinition(object);
+
   return clean(
     object?.pluralLabel ||
     fields?.pluralLabel ||
@@ -100,6 +104,110 @@ export function getObjectPluralLabel(object = {}) {
   ) || "OBJECTS";
 }
 
+/* =========================================================
+   EFFECTIVE PERMISSIONS
+
+   The frontend does NOT invent roles or security policy.
+   IX-Core/AWS should resolve actor/entity policy and return
+   effective permission decisions. We only enforce those
+   persisted/resolved decisions in presentation.
+
+   Supported generic shapes during migration:
+   object.effectivePermissions
+   object.permissions
+   object.authorization.permissions
+   object.access.permissions
+   metadata.effectivePermissions
+   definition.permissions
+
+   Explicit false / deniedActions wins over capability.
+   ========================================================= */
+
+export function getObjectPermissions(object = {}) {
+  const metadata = getObjectMetadata(object);
+  const definition = getObjectDefinition(object);
+
+  return {
+    ...safeObject(definition?.permissions),
+    ...safeObject(metadata?.permissions),
+    ...safeObject(metadata?.effectivePermissions),
+    ...safeObject(object?.access?.permissions),
+    ...safeObject(object?.authorization?.permissions),
+    ...safeObject(object?.permissions),
+    ...safeObject(object?.effectivePermissions)
+  };
+}
+
+function normalizedActionSet(value) {
+  return new Set(
+    asArray(value)
+      .map(item => clean(item).toLowerCase())
+      .filter(Boolean)
+  );
+}
+
+function permissionDecision(permissions = {}, aliases = [], fallback = false) {
+  const denied = normalizedActionSet(
+    permissions?.deniedActions ||
+    permissions?.deny ||
+    permissions?.denied
+  );
+
+  const allowed = normalizedActionSet(
+    permissions?.allowedActions ||
+    permissions?.allow ||
+    permissions?.allowed
+  );
+
+  const normalizedAliases = aliases.map(alias => clean(alias).toLowerCase()).filter(Boolean);
+
+  if (normalizedAliases.some(alias => denied.has(alias))) return false;
+
+  for (const alias of aliases) {
+    if (permissions?.[alias] === false) return false;
+  }
+
+  for (const alias of aliases) {
+    if (permissions?.[alias] === true) return true;
+  }
+
+  if (normalizedAliases.some(alias => allowed.has(alias))) return true;
+
+  return Boolean(fallback);
+}
+
+function definitionVisible(definition = {}) {
+  const permissions = {
+    ...safeObject(definition?.access),
+    ...safeObject(definition?.permissions),
+    ...safeObject(definition?.effectivePermissions)
+  };
+
+  if (definition?.visible === false || definition?.hidden === true) return false;
+
+  return permissionDecision(
+    permissions,
+    ["view", "read", "canView", "canRead"],
+    true
+  );
+}
+
+function relationshipVisible(relationship = {}) {
+  const permissions = {
+    ...safeObject(relationship?.access),
+    ...safeObject(relationship?.permissions),
+    ...safeObject(relationship?.effectivePermissions)
+  };
+
+  if (relationship?.visible === false || relationship?.hidden === true) return false;
+
+  return permissionDecision(
+    permissions,
+    ["view", "read", "canView", "canRead"],
+    true
+  );
+}
+
 function normalizeFieldDefinition(definition = {}, index = 0) {
   const fieldId = clean(
     definition?.fieldId ||
@@ -108,13 +216,19 @@ function normalizeFieldDefinition(definition = {}, index = 0) {
     definition?.slug
   );
 
-  if (!fieldId) return null;
+  if (!fieldId || !definitionVisible(definition)) return null;
 
   const presentation = safeObject(definition?.presentation);
   const aggregateSource = definition?.aggregate;
   const aggregate = typeof aggregateSource === "string"
     ? { mode: clean(aggregateSource) }
     : safeObject(aggregateSource);
+
+  const fieldPermissions = {
+    ...safeObject(definition?.access),
+    ...safeObject(definition?.permissions),
+    ...safeObject(definition?.effectivePermissions)
+  };
 
   return {
     ...definition,
@@ -130,7 +244,14 @@ function normalizeFieldDefinition(definition = {}, index = 0) {
     presentationOrder: Number(
       definition?.presentationOrder ?? presentation?.order ?? index
     ),
-    editable: definition?.editable !== false && definition?.readOnly !== true,
+    editable:
+      definition?.editable !== false &&
+      definition?.readOnly !== true &&
+      permissionDecision(
+        fieldPermissions,
+        ["edit", "write", "canEdit", "canWrite"],
+        true
+      ),
     aggregate: {
       mode: clean(
         aggregate?.mode ||
@@ -174,18 +295,15 @@ export function getFieldDefinitions(object = {}) {
 
   for (const source of sources) {
     if (!Array.isArray(source) || !source.length) continue;
+
     return source
       .map(normalizeFieldDefinition)
       .filter(Boolean)
       .sort((a, b) => a.presentationOrder - b.presentationOrder);
   }
 
-  /*
-   * Compatibility fallback: expose persisted fields without assigning
-   * business meaning. Their order is persisted object order only.
-   */
   return Object.keys(getObjectFields(object))
-    .filter(fieldId => !["definition", "presentation", "capabilities"].includes(fieldId))
+    .filter(fieldId => !["definition", "presentation", "capabilities", "permissions", "effectivePermissions"].includes(fieldId))
     .map((fieldId, index) => normalizeFieldDefinition({ fieldId, label: fieldId }, index))
     .filter(Boolean);
 }
@@ -223,6 +341,7 @@ export function getFieldDisplayValue(object = {}, definition = null) {
 
 export function getObjectRelationships(object = {}) {
   return asArray(object?.relationships)
+    .filter(relationshipVisible)
     .map((relationship, index) => ({
       id: clean(relationship?.id || relationship?.relationshipId || `relationship-${index}`),
       label: clean(
@@ -257,29 +376,65 @@ export function getObjectCapabilities(object = {}) {
 
 export function getObjectActionCapabilities(object = {}) {
   const capabilities = getObjectCapabilities(object);
+  const permissions = getObjectPermissions(object);
 
-  const canCreate = Boolean(
+  const capabilityCreate = Boolean(
     capabilities?.canCreate ||
     capabilities?.canCreateChild ||
     capabilities?.canAdd ||
     capabilities?.canContain
   );
 
-  const canEdit = capabilities?.editable !== false && capabilities?.canEdit !== false;
+  const capabilityEdit =
+    capabilities?.editable !== false &&
+    capabilities?.canEdit !== false;
 
-  const canTransact = Boolean(
+  const capabilityTransact = Boolean(
     capabilities?.canTransact ||
     capabilities?.transact ||
     capabilities?.hasTransact
   );
 
-  const canOpenConsole = capabilities?.hasConsole !== false && capabilities?.canOpenConsole !== false;
+  const capabilityConsole =
+    capabilities?.hasConsole !== false &&
+    capabilities?.canOpenConsole !== false;
 
   return {
-    canCreate,
-    canEdit,
-    canTransact,
-    canOpenConsole
+    canView: permissionDecision(
+      permissions,
+      ["view", "read", "canView", "canRead"],
+      true
+    ),
+    canCreate: permissionDecision(
+      permissions,
+      ["create", "add", "contain", "canCreate", "canAdd", "canContain"],
+      capabilityCreate
+    ),
+    canEdit: permissionDecision(
+      permissions,
+      ["edit", "write", "canEdit", "canWrite"],
+      capabilityEdit
+    ),
+    canTransact: permissionDecision(
+      permissions,
+      ["transact", "financial", "canTransact", "canFinancial"],
+      capabilityTransact
+    ),
+    canOpenConsole: permissionDecision(
+      permissions,
+      ["console", "openConsole", "canOpenConsole"],
+      capabilityConsole
+    ),
+    canDelete: permissionDecision(
+      permissions,
+      ["delete", "remove", "canDelete", "canRemove"],
+      capabilities?.canDelete === true
+    ),
+    canHide: permissionDecision(
+      permissions,
+      ["hide", "canHide"],
+      capabilities?.canHide !== false
+    )
   };
 }
 
@@ -289,9 +444,20 @@ export function getPrimaryImage(object = {}) {
   const media = asArray(object?.media);
 
   for (const item of media) {
+    const permissions = {
+      ...safeObject(item?.access),
+      ...safeObject(item?.permissions),
+      ...safeObject(item?.effectivePermissions)
+    };
+
+    if (!permissionDecision(permissions, ["view", "read", "canView", "canRead"], true)) {
+      continue;
+    }
+
     const url = typeof item === "string"
       ? clean(item)
       : clean(item?.url || item?.src || item?.imageUrl);
+
     if (url) return url;
   }
 
@@ -305,10 +471,12 @@ export function getPrimaryImage(object = {}) {
 
 function normalizedAggregateValues(value, mode) {
   if (mode === "count-each-value" || mode === "counteachvalue" || mode === "count_each_value") {
-    return asArray(value).map(item => {
-      if (typeof item === "string") return clean(item);
-      return clean(item?.label || item?.name || item?.value);
-    }).filter(Boolean);
+    return asArray(value)
+      .map(item => {
+        if (typeof item === "string") return clean(item);
+        return clean(item?.label || item?.name || item?.value);
+      })
+      .filter(Boolean);
   }
 
   if (mode === "count-by-value" || mode === "countbyvalue" || mode === "count_by_value") {
@@ -322,7 +490,11 @@ function normalizedAggregateValues(value, mode) {
 }
 
 export function buildChildAggregateGroups(children = []) {
-  const resolvedChildren = asArray(children).filter(Boolean);
+  const resolvedChildren = asArray(children).filter(child => {
+    if (!child) return false;
+    return getObjectActionCapabilities(child).canView !== false;
+  });
+
   const groupMap = new Map();
 
   resolvedChildren.forEach(child => {
@@ -338,6 +510,7 @@ export function buildChildAggregateGroups(children = []) {
       if (!values.length) return;
 
       const groupId = clean(aggregate?.groupId || definition.fieldId) || definition.fieldId;
+
       if (!groupMap.has(groupId)) {
         groupMap.set(groupId, {
           groupId,
@@ -350,6 +523,7 @@ export function buildChildAggregateGroups(children = []) {
       }
 
       const group = groupMap.get(groupId);
+
       values.forEach(value => {
         const exactLabel = clean(value);
         if (!exactLabel) return;
@@ -368,6 +542,7 @@ export function buildChildAggregateGroups(children = []) {
       label: group.label,
       hero: group.hero,
       fieldId: group.fieldId,
-      entries: Array.from(group.counts.values()).sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
+      entries: Array.from(group.counts.values())
+        .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
     }));
 }
