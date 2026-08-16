@@ -1,13 +1,14 @@
 import IXIAosGenericUniversalLayout007 from "../generic/IXIAosGenericUniversalLayout007";
+import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 
 /*
  * Compatibility export for existing Face Lab/runtime imports.
- * Card 007 is the universal AOS card.
- *
- * IMPORTANT: 007 uses the media geometry defined by the universal renderer
- * itself. Do not layer a card-specific media override on top of it; the
- * universal renderer intentionally matches the full-width 001 media surface.
+ * Card 007 is the universal AOS card. The legacy filename carries no business meaning.
  */
 export default function IXIAosCard007EmployeeApplication(props) {
-  return <IXIAosGenericUniversalLayout007 {...props} />;
+  return (
+    <IXIAosDataContractCardAdapter {...props}>
+      {contractProps => <IXIAosGenericUniversalLayout007 {...contractProps} />}
+    </IXIAosDataContractCardAdapter>
+  );
 }
