@@ -4,6 +4,10 @@ import {
 } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 
 import {
+  runIXIActionNoticeLifecycle
+} from "../../../../ixi-object-system/IXIActionNoticeEngine";
+
+import {
   createIXIExpenseDraft,
   validateIXIExpense
 } from "./IXIExpenseContract";
@@ -62,6 +66,13 @@ export async function createIXIExpense({
     throw error;
   }
 
+  const originObjectId = clean(
+    object?.objectId ||
+    object?.id ||
+    context?.primary?.objectId ||
+    context?.primary?.id
+  );
+
   const additionalReferences = [];
 
   const locationReference = createIXIAosFinancialObjectReference({
@@ -80,46 +91,57 @@ export async function createIXIExpense({
     additionalReferences.push(employeeReference);
   }
 
-  const response = await createIXIAosExpense({
-    object,
-    input: {
-      currency: draft.expense.currency,
-      amount: draft.expense.amount,
-      description: draft.expense.description,
-      status: "posted",
-      vendor: draft.expense.vendor,
-      category: draft.expense.category,
-      expenseDate: draft.expense.expenseDate,
-      paymentMethod: draft.expense.paymentMethod,
-      referenceNumber: draft.expense.referenceNumber,
-      notes: draft.expense.notes,
-      attachments: draft.attachments,
-      references: additionalReferences,
-      relationships: {
+  const response = await runIXIActionNoticeLifecycle({
+    objectId: originObjectId,
+    commandId: stableId,
+    source: "ixi-transact-expense",
+    savingMessage: "RECORDING EXPENSE...",
+    successMessage: result => {
+      const id = getExpenseDocumentId(result);
+      return id ? `EXPENSE ${id} RECORDED` : "EXPENSE RECORDED";
+    },
+    errorMessage: "EXPENSE SAVE FAILED",
+    operation: () => createIXIAosExpense({
+      object,
+      input: {
+        currency: draft.expense.currency,
+        amount: draft.expense.amount,
+        description: draft.expense.description,
+        status: "posted",
+        vendor: draft.expense.vendor,
+        category: draft.expense.category,
+        expenseDate: draft.expense.expenseDate,
+        paymentMethod: draft.expense.paymentMethod,
+        referenceNumber: draft.expense.referenceNumber,
+        notes: draft.expense.notes,
+        attachments: draft.attachments,
+        references: additionalReferences,
+        relationships: {
+          workOrderId: draft.context.workOrderId,
+          workOrderNumber: draft.context.workOrderNumber,
+          reimbursementRequired: draft.reimbursement.required,
+          reimbursementEmployeePassportId: draft.reimbursement.employeePassportId,
+          reimbursementEmployeeId: draft.reimbursement.employeeId
+        }
+      },
+      additionalReferences,
+      commandId: stableId,
+      idempotencyKey: stableId,
+      metadata: {
+        ...metadata,
+        transactModule: "expense",
+        expenseSchema: draft.schema,
+        originatingPassportId: draft.context.primaryPassportId,
+        originatingObjectType: draft.context.primaryObjectType,
         workOrderId: draft.context.workOrderId,
         workOrderNumber: draft.context.workOrderNumber,
-        reimbursementRequired: draft.reimbursement.required,
-        reimbursementEmployeePassportId: draft.reimbursement.employeePassportId,
-        reimbursementEmployeeId: draft.reimbursement.employeeId
-      }
-    },
-    additionalReferences,
-    commandId: stableId,
-    idempotencyKey: stableId,
-    metadata: {
-      ...metadata,
-      transactModule: "expense",
-      expenseSchema: draft.schema,
-      originatingPassportId: draft.context.primaryPassportId,
-      originatingObjectType: draft.context.primaryObjectType,
-      workOrderId: draft.context.workOrderId,
-      workOrderNumber: draft.context.workOrderNumber,
-      reimbursement: draft.reimbursement,
-      clientRequestId: draft.identity.clientRequestId
-    },
-    apiBaseUrl,
-    headers,
-    signal
+        reimbursement: draft.reimbursement,
+        clientRequestId: draft.identity.clientRequestId
+      },
+      apiBaseUrl,
+      headers,
+      signal
+    })
   });
 
   const expenseId =
