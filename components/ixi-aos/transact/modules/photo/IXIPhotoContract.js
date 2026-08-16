@@ -6,7 +6,9 @@ export const IXI_PHOTO_TYPES = Object.freeze([
   "work-photo",
   "damage",
   "before-after",
-  "reference"
+  "reference",
+  "tech-screen",
+  "warning-fault"
 ]);
 
 const IXI_PHOTO_MIME_TYPES = Object.freeze([
@@ -48,6 +50,32 @@ function validTimestamp(value) {
   return Boolean(candidate) && !Number.isNaN(new Date(candidate).getTime());
 }
 
+function resolveLinkedWorkRecord(workOrder = {}) {
+  const isTechWorkOrder = Boolean(
+    clean(workOrder?.identity?.techWorkOrderId) ||
+    clean(workOrder?.schema).startsWith("ixi-tech-work-order")
+  );
+
+  const id = clean(
+    isTechWorkOrder
+      ? workOrder.identity?.techWorkOrderId || workOrder.identity?.workOrderId || workOrder.id
+      : workOrder.identity?.workOrderId || workOrder.workOrderId || workOrder.id
+  );
+
+  const number = clean(
+    workOrder.identity?.number ||
+    workOrder.workOrderNumber ||
+    workOrder.number
+  );
+
+  return {
+    type: isTechWorkOrder ? "tech-work-order" : "work-order",
+    id,
+    number,
+    isTechWorkOrder
+  };
+}
+
 export function createIXIPhotoDraft({
   context = {},
   workOrder = {},
@@ -55,16 +83,7 @@ export function createIXIPhotoDraft({
 } = {}) {
   const actor = context.actor || {};
   const photoId = clean(input.photoId || input.clientRequestId);
-  const workOrderId = clean(
-    workOrder.identity?.workOrderId ||
-      workOrder.workOrderId ||
-      workOrder.id
-  );
-  const workOrderNumber = clean(
-    workOrder.identity?.number ||
-      workOrder.workOrderNumber ||
-      workOrder.number
-  );
+  const linkedWork = resolveLinkedWorkRecord(workOrder);
   const occurredAt = clean(input.occurredAt) || new Date().toISOString();
 
   return {
@@ -84,19 +103,20 @@ export function createIXIPhotoDraft({
       employeePassportId: clean(actor.passportId),
       employeeId: clean(actor.employeeId || actor.userId || actor.id),
       employeeLabel: clean(actor.displayName || actor.name || actor.label),
-      workOrderId,
-      workOrderNumber
+      workOrderId: linkedWork.id,
+      workOrderNumber: linkedWork.number,
+      linkedRecordType: linkedWork.type
     },
     photo: {
       type: normalizePhotoType(input.photoType),
       title: clean(input.title),
       description: clean(input.description),
       occurredAt,
-      linkedRecordType: "work-order",
-      linkedRecordId: workOrderId || workOrderNumber,
-      linkedRecordLabel: workOrderNumber,
+      linkedRecordType: linkedWork.type,
+      linkedRecordId: linkedWork.id || linkedWork.number,
+      linkedRecordLabel: linkedWork.number,
       tags: normalizeTags(input.tags),
-      visibility: clean(input.visibility) || "work-order-team",
+      visibility: clean(input.visibility) || (linkedWork.isTechWorkOrder ? "tech-work-order-team" : "work-order-team"),
       media: normalizeMedia(input.media, photoId)
     },
     status: "draft",
@@ -117,7 +137,7 @@ export function validateIXIPhoto(draft = {}) {
   }
 
   if (!clean(draft.context?.workOrderId) && !clean(draft.context?.workOrderNumber)) {
-    errors.workOrder = "Work Order relationship is required";
+    errors.workOrder = "Work relationship is required";
   }
 
   if (!media.length) {
