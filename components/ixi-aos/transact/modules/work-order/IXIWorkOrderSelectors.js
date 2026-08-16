@@ -5,12 +5,22 @@ const num=v=>Number.isFinite(Number(v))?Number(v):0;
 export function getIXIWorkOrderActuals(workOrder={}){
   const f=obj(workOrder.financial);
   const laborActual=num(f.laborActual),materialActual=num(f.materialActual),serviceActual=num(f.serviceActual),otherActual=num(f.otherActual);
-  return {laborActual,materialActual,serviceActual,otherActual,totalActual:Math.round((laborActual+materialActual+serviceActual+otherActual)*100)/100,committed:num(f.committed),estimated:num(f.estimated)};
+  return {
+    laborActual,
+    materialActual,
+    serviceActual,
+    otherActual,
+    totalActual:Math.round((laborActual+materialActual+serviceActual+otherActual)*100)/100,
+    requested:num(f.requested),
+    committed:num(f.committed),
+    estimated:num(f.estimated)
+  };
 }
 
 export function getIXIWorkOrderOpenItems(workOrder={}){
   const refs=obj(workOrder.references),f=obj(workOrder.financial),items=[];
   if(arr(refs.billIds).length===0&&num(f.serviceActual)>0) items.push({type:"vendor-bill",label:"VENDOR BILL MAY BE PENDING"});
+  if(arr(refs.purchaseRequestIds).length>0&&num(f.requested)>0) items.push({type:"purchase-request",label:"OPEN PURCHASE REQUEST"});
   if(arr(refs.purchaseOrderIds).length>0&&num(f.committed)>0) items.push({type:"commitment",label:"OPEN COMMITMENT"});
   if(String(f.status||"").toLowerCase()!=="complete") items.push({type:"financial",label:"FINANCIAL OPEN"});
   return items;
@@ -23,7 +33,18 @@ export function getIXIWorkOrderCompletionState(workOrder={}){
 
 export function getIXIWorkOrderReferenceCounts(workOrder={}){
   const r=obj(workOrder.references);
-  return {time:arr(r.timeEntryIds).length,materials:arr(r.materialRecordIds).length,services:arr(r.serviceRecordIds).length,expenses:arr(r.expenseIds).length,purchaseOrders:arr(r.purchaseOrderIds).length,bills:arr(r.billIds).length,technology:arr(r.technologyWorkIds).length,attachments:arr(r.attachmentIds).length,notes:arr(r.noteIds).length};
+  return {
+    time:arr(r.timeEntryIds).length,
+    materials:arr(r.materialRecordIds).length,
+    services:arr(r.serviceRecordIds).length,
+    expenses:arr(r.expenseIds).length,
+    purchaseRequests:arr(r.purchaseRequestIds).length,
+    purchaseOrders:arr(r.purchaseOrderIds).length,
+    bills:arr(r.billIds).length,
+    technology:arr(r.technologyWorkIds).length,
+    attachments:arr(r.attachmentIds).length,
+    notes:arr(r.noteIds).length
+  };
 }
 
 export default {getIXIWorkOrderActuals,getIXIWorkOrderOpenItems,getIXIWorkOrderCompletionState,getIXIWorkOrderReferenceCounts};
