@@ -1,106 +1,33 @@
 export const IXI_TRANSACT_MODULES = Object.freeze([
-  Object.freeze({
-    id: "work-order",
-    label: "WORK ORDER",
-    group: "work",
-    documentType: "work-order"
-  }),
-  Object.freeze({
-    id: "expense",
-    label: "EXPENSE",
-    group: "spend",
-    documentType: "expense"
-  }),
+  Object.freeze({ id: "work-order", label: "WORK ORDER", group: "work", documentType: "work-order" }),
+  Object.freeze({ id: "expense", label: "EXPENSE", group: "spend", documentType: "expense" }),
   Object.freeze({
     id: "technology-work",
-    label: "TECHNOLOGY WORK",
+    label: "TECH WORK ORDER",
     group: "work",
     documentType: "technology-work-order",
     specializedWorkOrder: true
   }),
-  Object.freeze({
-    id: "time",
-    label: "TIME",
-    group: "work",
-    documentType: "time-entry"
-  }),
-  Object.freeze({
-    id: "material",
-    label: "PART / MATERIAL",
-    group: "work",
-    documentType: "material-usage"
-  }),
-  Object.freeze({
-    id: "bill",
-    label: "BILL / INVOICE",
-    group: "spend",
-    documentType: "bill"
-  }),
-  Object.freeze({
-    id: "receipt",
-    label: "RECEIPT",
-    group: "spend",
-    documentType: "receipt"
-  }),
-  Object.freeze({
-    id: "purchase-order",
-    label: "PURCHASE ORDER",
-    group: "buy",
-    documentType: "purchase-order"
-  }),
-  Object.freeze({
-    id: "quote",
-    label: "QUOTE",
-    group: "sell",
-    documentType: "quote"
-  }),
-  Object.freeze({
-    id: "invoice",
-    label: "INVOICE",
-    group: "sell",
-    documentType: "invoice"
-  }),
-  Object.freeze({
-    id: "settlement",
-    label: "SETTLEMENT",
-    group: "settle",
-    documentType: "settlement"
-  })
+  Object.freeze({ id: "time", label: "TIME", group: "work", documentType: "time-entry" }),
+  Object.freeze({ id: "material", label: "PART / MATERIAL", group: "work", documentType: "material-usage" }),
+  Object.freeze({ id: "bill", label: "BILL / INVOICE", group: "spend", documentType: "bill" }),
+  Object.freeze({ id: "receipt", label: "RECEIPT", group: "spend", documentType: "receipt" }),
+  Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order" }),
+  Object.freeze({ id: "quote", label: "QUOTE", group: "sell", documentType: "quote" }),
+  Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice" }),
+  Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement" })
 ]);
 
 const MACHINE_ORDER = Object.freeze([
-  "work-order",
-  "expense",
-  "technology-work",
-  "time",
-  "material",
-  "purchase-order",
-  "receipt",
-  "bill",
-  "quote",
-  "invoice",
-  "settlement"
+  "work-order", "expense", "technology-work", "time", "material", "purchase-order", "receipt", "bill", "quote", "invoice", "settlement"
 ]);
 
 const LOCATION_ORDER = Object.freeze([
-  "work-order",
-  "expense",
-  "purchase-order",
-  "bill",
-  "receipt",
-  "technology-work",
-  "time",
-  "material",
-  "quote",
-  "invoice",
-  "settlement"
+  "work-order", "expense", "purchase-order", "bill", "receipt", "technology-work", "time", "material", "quote", "invoice", "settlement"
 ]);
 
 function sortByOrder(items, order) {
-  const rank = new Map(
-    order.map((id, index) => [id, index])
-  );
-
+  const rank = new Map(order.map((id, index) => [id, index]));
   return [...items].sort((left, right) => {
     const leftRank = rank.has(left.id) ? rank.get(left.id) : 999;
     const rightRank = rank.has(right.id) ? rank.get(right.id) : 999;
@@ -118,28 +45,14 @@ function deniedModuleIds(permissions = []) {
   );
 }
 
-export function getIXITransactModules({
-  objectType = "",
-  permissions = []
-} = {}) {
+export function getIXITransactModules({ objectType = "", permissions = [] } = {}) {
   const type = String(objectType || "").trim().toLowerCase();
   const denied = deniedModuleIds(permissions);
-
   let preferred = IXI_TRANSACT_MODULES;
 
-  if ([
-    "machine",
-    "equipment",
-    "vehicle",
-    "truck",
-    "trailer"
-  ].includes(type)) {
+  if (["machine", "equipment", "vehicle", "truck", "trailer"].includes(type)) {
     preferred = sortByOrder(IXI_TRANSACT_MODULES, MACHINE_ORDER);
-  } else if ([
-    "location",
-    "yard",
-    "shop"
-  ].includes(type)) {
+  } else if (["location", "yard", "shop"].includes(type)) {
     preferred = sortByOrder(IXI_TRANSACT_MODULES, LOCATION_ORDER);
   }
 
@@ -151,7 +64,4 @@ export function getIXITransactModule(moduleId = "") {
   return IXI_TRANSACT_MODULES.find(item => item.id === id) || null;
 }
 
-export default {
-  getIXITransactModules,
-  getIXITransactModule
-};
+export default { getIXITransactModules, getIXITransactModule };
