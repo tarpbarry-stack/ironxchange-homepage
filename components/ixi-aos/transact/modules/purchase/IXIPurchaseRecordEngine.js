@@ -79,15 +79,24 @@ function timelineEntry({
 function recalcReceiving(lines = []) {
   const normalized = lines.map(normalizeLine);
   const ordered = normalized.reduce((sum, line) => sum + line.quantity, 0);
-  const received = normalized.reduce((sum, line) => sum + Math.min(line.receivedQuantity, line.quantity), 0);
-  const remaining = normalized.reduce((sum, line) => sum + Math.max(0, line.quantity - line.receivedQuantity), 0);
+  const received = normalized.reduce(
+    (sum, line) => sum + Math.min(line.receivedQuantity, line.quantity),
+    0
+  );
+  const remaining = normalized.reduce(
+    (sum, line) => sum + Math.max(0, line.quantity - line.receivedQuantity),
+    0
+  );
 
   return {
     lines: normalized,
     orderedQuantity: ordered,
     receivedQuantity: received,
     remainingQuantity: remaining,
-    percentReceived: ordered > 0 ? Math.min(100, Math.round((received / ordered) * 100)) : 0,
+    percentReceived:
+      ordered > 0
+        ? Math.min(100, Math.round((received / ordered) * 100))
+        : 0,
     complete: ordered > 0 && remaining === 0
   };
 }
@@ -97,12 +106,25 @@ function recalcCosts(record = {}) {
   const committed = money(record?.costs?.committed || 0);
   const billed = money(record?.costs?.billed || 0);
   const paid = money(record?.costs?.paid || 0);
+
   return {
     estimated,
     committed,
     billed,
     paid,
-    variance: money(billed - committed)
+    // No bill means no variance yet. A fresh PO should never display a fake
+    // negative variance simply because committed dollars exist before billing.
+    variance: billed > 0 ? money(billed - committed) : 0
+  };
+}
+
+function financialLinks(record = {}) {
+  return {
+    requestDocumentId: clean(record?.financialLinks?.requestDocumentId),
+    poDocumentId: clean(record?.financialLinks?.poDocumentId),
+    billDocumentIds: Array.isArray(record?.financialLinks?.billDocumentIds)
+      ? [...record.financialLinks.billDocumentIds]
+      : []
   };
 }
 
@@ -112,21 +134,32 @@ export function createIXIPurchaseRecord({
   actor = null,
   policy = null,
   authority = null,
-  forceDirectPo = false
+  forceDirectPo = false,
+  financialDocumentId = ""
 } = {}) {
-  const purchaseId = clean(draft?.identity?.purchaseId || draft?.identity?.clientRequestId) || createId("PUR");
+  const purchaseId =
+    clean(draft?.identity?.purchaseId || draft?.identity?.clientRequestId) ||
+    createId("PUR");
   const purchaseNumber = clean(draft?.identity?.purchaseNumber);
-  const requestType = clean(draft?.purchase?.requestType) === "purchase-order" ? "purchase-order" : "purchase-request";
+  const requestType =
+    clean(draft?.purchase?.requestType) === "purchase-order"
+      ? "purchase-order"
+      : "purchase-request";
+
   const runtime = evaluateIXIPurchaseRuntime({
     context,
     purchase: draft,
     policy,
     authority
   });
-  const directPo = requestType === "purchase-order" && (runtime.canDirectPo || forceDirectPo);
+
+  const directPo =
+    requestType === "purchase-order" &&
+    (runtime.canDirectPo || forceDirectPo);
   const status = directPo ? "po-issued" : "pending-approval";
-  const requestNumber = purchaseNumber || `PR-${purchaseId.replace(/\D/g, "").slice(-6) || Date.now().toString().slice(-6)}`;
-  const poNumber = directPo ? `PO-${purchaseId.replace(/\D/g, "").slice(-6) || Date.now().toString().slice(-6)}` : "";
+  const serial = purchaseId.replace(/\D/g, "").slice(-6) || Date.now().toString().slice(-6);
+  const requestNumber = purchaseNumber || `PR-${serial}`;
+  const poNumber = directPo ? `PO-${serial}` : "";
   const lines = (draft?.purchase?.items || []).map(normalizeLine);
   const receiving = recalcReceiving(lines);
   const createdBy = actor || context?.actor || {};
@@ -144,16 +177,33 @@ export function createIXIPurchaseRecord({
       primaryObjectType: clean(context?.primary?.objectType),
       primaryObjectLabel: clean(context?.primary?.label),
       locationLabel: clean(context?.location?.label),
-      employeeLabel: clean(context?.actor?.displayName || context?.actor?.name || context?.actor?.label)
+      employeeLabel: clean(
+        context?.actor?.displayName ||
+        context?.actor?.name ||
+        context?.actor?.label
+      )
     },
     purchase: {
       ...(draft?.purchase || {}),
       items: lines,
-      requestedById: clean(createdBy.employeeId || createdBy.userId || createdBy.id || createdBy.passportId),
-      requestedByLabel: clean(createdBy.displayName || createdBy.name || createdBy.label) || "Employee",
+      requestedById: clean(
+        createdBy.employeeId ||
+        createdBy.userId ||
+        createdBy.id ||
+        createdBy.passportId
+      ),
+      requestedByLabel:
+        clean(createdBy.displayName || createdBy.name || createdBy.label) ||
+        "Employee",
       requestedAt: nowIso(),
-      businessReason: clean(draft?.purchase?.businessReason || draft?.purchase?.notes),
-      shipToLabel: clean(draft?.purchase?.shipToLabel || context?.location?.label)
+      businessReason: clean(
+        draft?.purchase?.businessReason ||
+        draft?.purchase?.notes
+      ),
+      shipToLabel: clean(
+        draft?.purchase?.shipToLabel ||
+        context?.location?.label
+      )
     },
     approval: {
       status: directPo ? "approved" : "pending",
@@ -172,18 +222,33 @@ export function createIXIPurchaseRecord({
       committed: directPo ? money(draft?.purchase?.estimatedTotal) : 0,
       billed: 0,
       paid: 0,
-      variance: directPo ? money(0 - draft?.purchase?.estimatedTotal) : 0
+      variance: 0
+    },
+    financialControl: {
+      varianceApproved: false,
+      varianceApprovedById: "",
+      varianceApprovedByLabel: "",
+      varianceApprovedAt: ""
+    },
+    financialLinks: {
+      requestDocumentId: directPo ? "" : clean(financialDocumentId || purchaseId),
+      poDocumentId: directPo ? clean(financialDocumentId || purchaseId) : "",
+      billDocumentIds: []
     },
     bills: [],
-    documents: Array.isArray(draft?.purchase?.attachments) ? [...draft.purchase.attachments] : [],
+    documents: Array.isArray(draft?.purchase?.attachments)
+      ? [...draft.purchase.attachments]
+      : [],
     notes: [],
     related: [],
-    timeline: [timelineEntry({
-      type: "request-created",
-      label: `Purchase Request ${requestNumber} created`,
-      actor: createdBy,
-      data: { requestNumber }
-    })],
+    timeline: [
+      timelineEntry({
+        type: "request-created",
+        label: `Purchase Request ${requestNumber} created`,
+        actor: createdBy,
+        data: { requestNumber }
+      })
+    ],
     status,
     closedAt: "",
     updatedAt: nowIso(),
@@ -191,12 +256,14 @@ export function createIXIPurchaseRecord({
   };
 
   if (directPo) {
-    record.timeline.push(timelineEntry({
-      type: "po-issued",
-      label: `Purchase Order ${poNumber} issued under direct authority`,
-      actor: createdBy,
-      data: { poNumber }
-    }));
+    record.timeline.push(
+      timelineEntry({
+        type: "po-issued",
+        label: `Purchase Order ${poNumber} issued under direct authority`,
+        actor: createdBy,
+        data: { poNumber }
+      })
+    );
   }
 
   return {
@@ -206,10 +273,25 @@ export function createIXIPurchaseRecord({
 }
 
 export function appendIXIPurchaseRelated(record = {}, related = {}) {
-  const identity = clean(related.id || related.objectId || related.passportId || related.externalId);
+  const identity = clean(
+    related.id ||
+    related.objectId ||
+    related.passportId ||
+    related.externalId
+  );
   if (!identity) return record;
+
   const list = Array.isArray(record.related) ? record.related : [];
-  if (list.some(item => clean(item.id || item.objectId || item.passportId || item.externalId) === identity)) return record;
+  if (
+    list.some(
+      item =>
+        clean(item.id || item.objectId || item.passportId || item.externalId) ===
+        identity
+    )
+  ) {
+    return record;
+  }
+
   return {
     ...record,
     related: [...list, { ...related, id: identity }],
@@ -218,9 +300,37 @@ export function appendIXIPurchaseRelated(record = {}, related = {}) {
   };
 }
 
+export function attachIXIPurchaseFinancialDocument(
+  record = {},
+  { type = "", documentId = "" } = {}
+) {
+  const id = clean(documentId);
+  if (!id) return record;
+
+  const links = financialLinks(record);
+  const nextLinks = { ...links };
+
+  if (type === "request") {
+    nextLinks.requestDocumentId = id;
+  } else if (type === "po") {
+    nextLinks.poDocumentId = id;
+  } else if (type === "bill") {
+    nextLinks.billDocumentIds = [...new Set([...links.billDocumentIds, id])];
+  }
+
+  return {
+    ...record,
+    financialLinks: nextLinks,
+    updatedAt: nowIso(),
+    version: Number(record.version || 0) + 1
+  };
+}
+
 function requireAction(runtime, action) {
   if (!runtime.actions.includes(action)) {
-    const error = new Error(`Purchase action is not authorized in current state: ${action}`);
+    const error = new Error(
+      `Purchase action is not authorized in current state: ${action}`
+    );
     error.code = "IXI_PURCHASE_ACTION_NOT_AUTHORIZED";
     error.action = action;
     throw error;
@@ -236,14 +346,22 @@ export function applyIXIPurchaseAction({
   actor = null,
   payload = {}
 } = {}) {
-  const runtime = evaluateIXIPurchaseRuntime({ context, purchase: record, policy, authority });
+  const runtime = evaluateIXIPurchaseRuntime({
+    context,
+    purchase: record,
+    policy,
+    authority
+  });
   requireAction(runtime, action);
+
   const user = actor || context?.actor || {};
   const next = {
     ...record,
     approval: { ...(record.approval || {}) },
     receiving: { ...(record.receiving || {}) },
     costs: { ...(record.costs || {}) },
+    financialControl: { ...(record.financialControl || {}) },
+    financialLinks: financialLinks(record),
     bills: Array.isArray(record.bills) ? [...record.bills] : [],
     documents: Array.isArray(record.documents) ? [...record.documents] : [],
     notes: Array.isArray(record.notes) ? [...record.notes] : [],
@@ -261,85 +379,171 @@ export function applyIXIPurchaseAction({
       next.approval.approvals = [
         ...(next.approval.approvals || []),
         {
-          actorId: clean(user.employeeId || user.userId || user.id || user.passportId),
+          actorId: clean(
+            user.employeeId || user.userId || user.id || user.passportId
+          ),
           actorLabel: clean(user.displayName || user.name || user.label),
           decision: "approved",
           amount: runtime.amount,
           occurredAt: nowIso()
         }
       ];
-      next.timeline.push(timelineEntry({ type: "approved", label: "Purchase Request approved", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "approved",
+          label: "Purchase Request approved",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.RECOMMEND:
       next.approval.approvals = [
         ...(next.approval.approvals || []),
         {
-          actorId: clean(user.employeeId || user.userId || user.id || user.passportId),
+          actorId: clean(
+            user.employeeId || user.userId || user.id || user.passportId
+          ),
           actorLabel: clean(user.displayName || user.name || user.label),
           decision: "recommended",
           amount: runtime.amount,
           occurredAt: nowIso()
         }
       ];
-      next.timeline.push(timelineEntry({ type: "recommended", label: "Approval recommended", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "recommended",
+          label: "Approval recommended",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.RETURN:
       next.status = "returned";
       next.approval.status = "returned";
       next.approval.returnedReason = note;
-      next.timeline.push(timelineEntry({ type: "returned", label: "Purchase Request returned", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "returned",
+          label: "Purchase Request returned",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.DENY:
       next.status = "denied";
       next.approval.status = "denied";
       next.approval.deniedReason = note;
-      next.timeline.push(timelineEntry({ type: "denied", label: "Purchase Request denied", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "denied",
+          label: "Purchase Request denied",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.CANCEL_REQUEST:
       next.status = "cancelled";
-      next.timeline.push(timelineEntry({ type: "cancelled", label: "Purchase Request cancelled", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "cancelled",
+          label: "Purchase Request cancelled",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.ISSUE_PO: {
-      const poNumber = clean(next.identity?.poNumber) || `PO-${clean(next.identity?.requestNumber).replace(/^PR-/, "") || Date.now().toString().slice(-6)}`;
+      const poNumber =
+        clean(next.identity?.poNumber) ||
+        `PO-${
+          clean(next.identity?.requestNumber).replace(/^PR-/, "") ||
+          Date.now().toString().slice(-6)
+        }`;
       next.identity = { ...(next.identity || {}), poNumber };
       next.status = "po-issued";
-      next.costs.committed = money(next.purchase?.estimatedTotal || next.costs.estimated);
+      next.costs.committed = money(
+        next.purchase?.estimatedTotal || next.costs.estimated
+      );
       next.costs = recalcCosts(next);
-      next.timeline.push(timelineEntry({ type: "po-issued", label: `Converted to Purchase Order ${poNumber}`, actor: user, data: { poNumber } }));
+      next.timeline.push(
+        timelineEntry({
+          type: "po-issued",
+          label: `Converted to Purchase Order ${poNumber}`,
+          actor: user,
+          data: { poNumber }
+        })
+      );
       break;
     }
 
     case IXI_PURCHASE_ACTIONS.SEND_PO:
       next.status = "sent";
-      next.timeline.push(timelineEntry({ type: "po-sent", label: "Purchase Order sent to vendor", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "po-sent",
+          label: "Purchase Order sent to vendor",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.RECEIVE: {
       const receipts = Array.isArray(payload.lines) ? payload.lines : [];
-      const currentLines = Array.isArray(next.receiving?.lines) ? next.receiving.lines : [];
-      const receivedById = clean(user.employeeId || user.userId || user.id || user.passportId);
-      const receivedByLabel = clean(user.displayName || user.name || user.label);
+      const currentLines = Array.isArray(next.receiving?.lines)
+        ? next.receiving.lines
+        : [];
+      const receivedById = clean(
+        user.employeeId || user.userId || user.id || user.passportId
+      );
+      const receivedByLabel = clean(
+        user.displayName || user.name || user.label
+      );
 
       const updatedLines = currentLines.map((line, index) => {
-        const incoming = receipts.find(item => clean(item.lineId) === clean(line.lineId)) || receipts[index] || {};
-        const delta = Math.max(0, number(incoming.quantity ?? incoming.receivedQuantity));
+        const incoming =
+          receipts.find(item => clean(item.lineId) === clean(line.lineId)) ||
+          receipts[index] ||
+          {};
+        const delta = Math.max(
+          0,
+          number(incoming.quantity ?? incoming.receivedQuantity)
+        );
         const proposed = number(line.receivedQuantity) + delta;
+
         if (proposed > number(line.quantity) && !runtime.canReceiveOver) {
-          const error = new Error(`Over receipt requires additional authority for ${line.description}.`);
+          const error = new Error(
+            `Over receipt requires additional authority for ${line.description}.`
+          );
           error.code = "IXI_PURCHASE_OVER_RECEIPT_REQUIRES_APPROVAL";
           throw error;
         }
-        return normalizeLine({
-          ...line,
-          receivedQuantity: proposed,
-          damagedQuantity: number(line.damagedQuantity) + Math.max(0, number(incoming.damagedQuantity)),
-          backorderedQuantity: Math.max(0, number(incoming.backorderedQuantity ?? line.backorderedQuantity))
-        }, index);
+
+        return normalizeLine(
+          {
+            ...line,
+            receivedQuantity: proposed,
+            damagedQuantity:
+              number(line.damagedQuantity) +
+              Math.max(0, number(incoming.damagedQuantity)),
+            backorderedQuantity: Math.max(
+              0,
+              number(
+                incoming.backorderedQuantity ?? line.backorderedQuantity
+              )
+            )
+          },
+          index
+        );
       });
 
       next.receiving = {
@@ -348,16 +552,23 @@ export function applyIXIPurchaseAction({
         lastReceivedById: receivedById,
         lastReceivedByLabel: receivedByLabel
       };
-      next.status = next.receiving.complete ? "received" : "partially-received";
+      next.status = next.receiving.complete
+        ? "received"
+        : "partially-received";
 
       if (payload.document) next.documents.push(payload.document);
-      next.timeline.push(timelineEntry({
-        type: next.receiving.complete ? "received" : "partial-receipt",
-        label: next.receiving.complete ? "Purchase Order received" : "Items partially received",
-        actor: user,
-        note,
-        data: { percentReceived: next.receiving.percentReceived }
-      }));
+
+      next.timeline.push(
+        timelineEntry({
+          type: next.receiving.complete ? "received" : "partial-receipt",
+          label: next.receiving.complete
+            ? "Purchase Order received"
+            : "Items partially received",
+          actor: user,
+          note,
+          data: { percentReceived: next.receiving.percentReceived }
+        })
+      );
       break;
     }
 
@@ -370,7 +581,14 @@ export function applyIXIPurchaseAction({
         complete: true,
         closedShort: true
       };
-      next.timeline.push(timelineEntry({ type: "closed-short", label: "Remaining quantity closed", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "closed-short",
+          label: "Remaining quantity closed",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.MATCH_BILL: {
@@ -383,23 +601,70 @@ export function applyIXIPurchaseAction({
         matchedAt: nowIso(),
         matchedBy: clean(user.displayName || user.name || user.label)
       };
+
       next.bills.push(bill);
-      next.costs.billed = money(next.bills.reduce((sum, item) => sum + number(item.amount), 0));
+      next.costs.billed = money(
+        next.bills.reduce((sum, item) => sum + number(item.amount), 0)
+      );
       next.costs = recalcCosts(next);
+      next.financialControl.varianceApproved = false;
+      next.financialControl.varianceApprovedById = "";
+      next.financialControl.varianceApprovedByLabel = "";
+      next.financialControl.varianceApprovedAt = "";
       next.status = "bill-match";
-      next.timeline.push(timelineEntry({ type: "bill-matched", label: `Vendor bill ${bill.invoiceNumber || bill.billId} matched`, actor: user, data: { billId: bill.billId, amount: bill.amount } }));
+      next.timeline.push(
+        timelineEntry({
+          type: "bill-matched",
+          label: `Vendor bill ${bill.invoiceNumber || bill.billId} matched`,
+          actor: user,
+          data: { billId: bill.billId, amount: bill.amount }
+        })
+      );
       break;
     }
 
+    case IXI_PURCHASE_ACTIONS.APPROVE_VARIANCE:
+      next.financialControl.varianceApproved = true;
+      next.financialControl.varianceApprovedById = clean(
+        user.employeeId || user.userId || user.id || user.passportId
+      );
+      next.financialControl.varianceApprovedByLabel = clean(
+        user.displayName || user.name || user.label
+      );
+      next.financialControl.varianceApprovedAt = nowIso();
+      next.timeline.push(
+        timelineEntry({
+          type: "variance-approved",
+          label: `Purchase variance ${money(next.costs.variance)} approved`,
+          actor: user,
+          note
+        })
+      );
+      break;
+
     case IXI_PURCHASE_ACTIONS.VOID_PO:
       next.status = "cancelled";
-      next.timeline.push(timelineEntry({ type: "po-voided", label: "Purchase Order voided", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "po-voided",
+          label: "Purchase Order voided",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.REOPEN:
       next.status = "sent";
       next.closedAt = "";
-      next.timeline.push(timelineEntry({ type: "reopened", label: "Purchase Order reopened", actor: user, note }));
+      next.timeline.push(
+        timelineEntry({
+          type: "reopened",
+          label: "Purchase Order reopened",
+          actor: user,
+          note
+        })
+      );
       break;
 
     case IXI_PURCHASE_ACTIONS.ADD_NOTE:
@@ -409,35 +674,61 @@ export function applyIXIPurchaseAction({
         createdAt: nowIso(),
         createdBy: clean(user.displayName || user.name || user.label)
       });
-      next.timeline.push(timelineEntry({ type: "note-added", label: "Purchase note added", actor: user, note: note || clean(payload.body) }));
+      next.timeline.push(
+        timelineEntry({
+          type: "note-added",
+          label: "Purchase note added",
+          actor: user,
+          note: note || clean(payload.body)
+        })
+      );
       break;
 
     default:
       break;
   }
 
+  next.costs = recalcCosts(next);
+
+  const hasBill = next.bills.length > 0;
+  const varianceResolved =
+    Math.abs(number(next.costs?.variance)) < 0.01 ||
+    Boolean(next.financialControl?.varianceApproved);
+
   if (
     ["received", "bill-match"].includes(next.status) &&
     next.receiving?.complete &&
-    next.bills.length &&
-    Math.abs(number(next.costs?.variance)) < 0.01
+    hasBill &&
+    varianceResolved
   ) {
     next.status = "closed";
     next.closedAt = nowIso();
-    next.timeline.push(timelineEntry({ type: "closed", label: "Purchase Order closed", actor: user }));
+    next.timeline.push(
+      timelineEntry({
+        type: "closed",
+        label: "Purchase Order closed",
+        actor: user
+      })
+    );
   }
 
-  next.costs = recalcCosts(next);
   return next;
 }
 
 export function getIXIPurchaseDisplayNumber(record = {}) {
-  return clean(record?.identity?.poNumber || record?.identity?.requestNumber || record?.identity?.purchaseId) || "PURCHASE";
+  return (
+    clean(
+      record?.identity?.poNumber ||
+      record?.identity?.requestNumber ||
+      record?.identity?.purchaseId
+    ) || "PURCHASE"
+  );
 }
 
 export default {
   createIXIPurchaseRecord,
   appendIXIPurchaseRelated,
+  attachIXIPurchaseFinancialDocument,
   applyIXIPurchaseAction,
   getIXIPurchaseDisplayNumber
 };
