@@ -11,6 +11,7 @@ import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
 import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
+import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneApp";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -64,7 +65,8 @@ export default function IXITransactApp({
   const purchaseOrderOpen = moduleId === "purchase-order";
   const billOpen = moduleId === "bill";
   const timeOpen = moduleId === "time";
-  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen || timeOpen;
+  const materialOpen = moduleId === "material";
+  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen || timeOpen || materialOpen;
   const resolvedWorkOrder = workOrderSnapshot || context.activeWorkOrder || null;
 
   async function open(item) {
@@ -164,6 +166,26 @@ export default function IXITransactApp({
         change,
         originatingObject: timeContext.primary,
         returnTo: "time"
+      }
+    );
+  }
+
+  async function materialChanged(nextRecord, change = {}, materialContext = context) {
+    await onOpenModule?.(
+      {
+        id: `material-${change.action || "change"}`,
+        label: "PART / MATERIAL UPDATE",
+        group: "work",
+        documentType: "material-usage"
+      },
+      materialContext,
+      {
+        materialRecord: nextRecord,
+        change,
+        originatingObject: materialContext.primary,
+        inventoryAdjustment: nextRecord?.inventoryAdjustment || null,
+        receivingConsumption: nextRecord?.receivingConsumption || null,
+        returnTo: "material"
       }
     );
   }
@@ -337,6 +359,8 @@ export default function IXITransactApp({
           <IXIPurchaseOrderApp context={context} onBack={() => setModuleId("")} onRecordChange={purchaseOrderChanged} />
         ) : timeOpen ? (
           <IXITimeStandaloneApp context={context} object={object} onBack={() => setModuleId("")} onRecordChange={timeChanged} />
+        ) : materialOpen ? (
+          <IXIMaterialStandaloneApp context={context} object={object} onBack={() => setModuleId("")} onRecordChange={materialChanged} />
         ) : active?.id === "work-order" ? (
           <IXIWorkOrderApp
             context={context}
