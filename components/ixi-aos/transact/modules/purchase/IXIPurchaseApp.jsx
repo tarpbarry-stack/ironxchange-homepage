@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 
 import { createIXIPurchaseDraft, validateIXIPurchase } from "./IXIPurchaseContract";
-import { createIXIPurchase } from "./IXIPurchaseCommands";
+import { createIXIPurchase, issueIXIPurchaseOrderFromRecord } from "./IXIPurchaseCommands";
 import { applyIXIPurchaseAction, appendIXIPurchaseRelated } from "./IXIPurchaseRecordEngine";
-import { evaluateIXIPurchaseRuntime, resolveIXIPurchasingPolicy } from "./IXIPurchasePolicyEngine";
+import { IXI_PURCHASE_ACTIONS, evaluateIXIPurchaseRuntime, resolveIXIPurchasingPolicy } from "./IXIPurchasePolicyEngine";
 import { createIXIPendingAttachment, validateIXITransactFile } from "../../IXITransactFilePolicy";
 import IXIPurchaseCard from "./IXIPurchaseCard";
 import IXIPurchaseStyles from "./IXIPurchaseStyles";
@@ -156,10 +156,50 @@ export default function IXIPurchaseApp({
     if (!record || saving) return;
     setSaving(true);
     setSaveError("");
+
     try {
-      const next = applyIXIPurchaseAction({ record, action, context, policy, authority: purchasingAuthority, actor, payload });
+      let baseRecord = record;
+      let persistence = null;
+
+      if (action === IXI_PURCHASE_ACTIONS.ISSUE_PO) {
+        persistence = await issueIXIPurchaseOrderFromRecord({
+          object: {
+            passportId: primary.passportId,
+            objectId: primary.objectId || primary.id,
+            objectType: primary.objectType,
+            label: primary.label
+          },
+          context,
+          record,
+          policy,
+          authority: purchasingAuthority,
+          metadata: {
+            source: workOrderNumber
+              ? "ixi-transact-work-order-issue-po"
+              : "ixi-transact-object-issue-po"
+          }
+        });
+
+        baseRecord = persistence.record;
+      }
+
+      const next = applyIXIPurchaseAction({
+        record: baseRecord,
+        action,
+        context,
+        policy,
+        authority: purchasingAuthority,
+        actor,
+        payload
+      });
+
       setRecord(next);
-      await onPurchaseChange?.(next, { action, payload, previous: record });
+      await onPurchaseChange?.(next, {
+        action,
+        payload,
+        previous: record,
+        persistence
+      });
     } catch (error) {
       setSaveError(clean(error?.message) || "Purchase action failed.");
     } finally {
