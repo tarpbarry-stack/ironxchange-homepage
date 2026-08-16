@@ -148,6 +148,7 @@ export default function IXIPhotoApp({
   const inputRef = useRef(null);
   const requestIdRef = useRef(createClientRequestId());
   const objectUrlsRef = useRef(new Set());
+  const savedRef = useRef(false);
 
   const t = COPY[lang];
   const primary = context.primary || {};
@@ -189,6 +190,11 @@ export default function IXIPhotoApp({
 
   useEffect(() => {
     return () => {
+      // Once SAVE succeeds, the parent Work Order/TECHWO projection owns these
+      // local preview URLs for the current session. Unposted/cancelled media is
+      // still released here so abandoned captures do not leak browser memory.
+      if (savedRef.current) return;
+
       for (const url of objectUrlsRef.current) {
         try {
           URL.revokeObjectURL(url);
@@ -282,6 +288,8 @@ export default function IXIPhotoApp({
         },
         null
       );
+
+      savedRef.current = true;
     } catch (error) {
       setSaveError(clean(error?.message) || t.saveFailed);
     } finally {
