@@ -11,23 +11,65 @@ import {
 /*
  * IXI AOS OBJECT DATA CONTRACT
  *
- * One persisted object contract must serve every creation/read channel:
- * manual +, Object Studio, Excel/CSV bulk import, API/AWS and card editing.
+ * One persisted object contract serves manual creation, Object Studio,
+ * Excel/CSV import, API/AWS and card editing.
  *
- * Customer vocabulary is presentation truth. Stable fieldId/semanticRole values
- * are machine identity and MUST NOT be derived from the customer's label.
+ * Customer vocabulary is presentation truth. Stable identifiers and roles
+ * are machine identity and MUST NOT be derived from customer labels.
+ *
+ * MOS durable business identifiers live in object.businessIdentifiers[].
+ * businessIdentifier remains a synthetic editor field for card/UI use.
  */
 
-export const AOS_OBJECT_DATA_CONTRACT_VERSION = 1;
+export const AOS_OBJECT_DATA_CONTRACT_VERSION = 2;
 export const BUSINESS_IDENTIFIER_FIELD_ID = "businessIdentifier";
 export const BUSINESS_IDENTIFIER_ROLE = "business-identifier";
 
 function safeObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : {};
+}
+
+function getBusinessIdentifierSchema(object = {}) {
+  const definition = safeObject(object?.definition);
+
+  return safeObject(
+    object?.businessIdentifierSchema ||
+    definition?.businessIdentifierSchema ||
+    object?.metadata?.businessIdentifierSchema
+  );
+}
+
+function normalizePersistedBusinessIdentifiers(object = {}) {
+  const schema = getBusinessIdentifierSchema(object);
+
+  return asArray(object?.businessIdentifiers)
+    .map(item => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      const value = clean(item?.value);
+      if (!value) return null;
+
+      return {
+        ...item,
+        label: clean(item?.label || schema?.defaultLabel) || "ID",
+        value
+      };
+    })
+    .filter(Boolean);
 }
 
 export function normalizeImportableFieldDefinition(definition = {}, index = 0) {
-  const fieldId = clean(definition?.fieldId || definition?.field || definition?.key || definition?.slug);
+  const fieldId = clean(
+    definition?.fieldId ||
+    definition?.field ||
+    definition?.key ||
+    definition?.slug
+  );
+
   if (!fieldId) return null;
 
   return {
@@ -41,7 +83,11 @@ export function normalizeImportableFieldDefinition(definition = {}, index = 0) {
       definition?.role ||
       definition?.presentation?.role
     ).toLowerCase(),
-    presentationOrder: Number(definition?.presentationOrder ?? definition?.presentation?.order ?? index),
+    presentationOrder: Number(
+      definition?.presentationOrder ??
+      definition?.presentation?.order ??
+      index
+    ),
     editable: definition?.editable !== false && definition?.readOnly !== true,
     importable: definition?.importable !== false,
     exportable: definition?.exportable !== false,
@@ -58,6 +104,7 @@ export function getImportableFieldDefinitions(object = {}) {
 
 export function getBusinessIdentifierDefinition(object = {}) {
   const definitions = getImportableFieldDefinitions(object);
+
   return definitions.find(definition =>
     definition.presentationRole === BUSINESS_IDENTIFIER_ROLE ||
     clean(definition?.semanticRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE ||
@@ -68,7 +115,10 @@ export function getBusinessIdentifierDefinition(object = {}) {
 export function createBusinessIdentifierDefinition(object = {}, order = 0) {
   const metadata = getObjectMetadata(object);
   const presentation = getObjectPresentation(object);
+  const schema = getBusinessIdentifierSchema(object);
+
   const label = clean(
+    schema?.defaultLabel ||
     metadata?.businessIdentifierLabel ||
     presentation?.businessIdentifierLabel ||
     presentation?.identifierLabel
@@ -81,10 +131,11 @@ export function createBusinessIdentifierDefinition(object = {}, order = 0) {
     semanticRole: BUSINESS_IDENTIFIER_ROLE,
     presentationRole: BUSINESS_IDENTIFIER_ROLE,
     presentationOrder: order,
-    editable: true,
-    importable: true,
+    editable: schema?.enabled !== false,
+    importable: schema?.allowImport !== false,
     exportable: true,
     apiAddressable: true,
+    required: schema?.required === true,
     importAliases: []
   }, order);
 }
@@ -98,27 +149,71 @@ export function ensureBusinessIdentifierDefinition(object = {}, definitions = nu
     definition.presentationRole === BUSINESS_IDENTIFIER_ROLE ||
     clean(definition?.semanticRole).toLowerCase() === BUSINESS_IDENTIFIER_ROLE ||
     definition.fieldId === BUSINESS_IDENTIFIER_FIELD_ID
-  )) return source;
+  )) {
+    return source;
+  }
 
-  return [createBusinessIdentifierDefinition(object, 0), ...source.map((definition, index) => ({
-    ...definition,
-    presentationOrder: Number(definition.presentationOrder ?? index + 1)
-  }))];
+  if (getBusinessIdentifierSchema(object)?.enabled === false) {
+    return source;
+  }
+
+  return [
+    createBusinessIdentifierDefinition(object, 0),
+    ...source.map((definition, index) => ({
+      ...definition,
+      presentationOrder: Number(definition.presentationOrder ?? index + 1)
+    }))
+  ];
 }
 
 export function getBusinessIdentifierValue(object = {}) {
-  const definition = getBusinessIdentifierDefinition(object);
-  if (!definition) return "";
-  const value = getObjectFields(object)?.[definition.fieldId];
-  if (value && typeof value === "object") return clean(value?.value || value?.label || value?.name);
+  const persisted = normalizePersistedBusinessIdentifiers(object);
+
+  if (persisted.length) {
+    return persisted[0].value;
+  }
+
+  const value = getObjectFields(object)?.[BUSINESS_IDENTIFIER_FIELD_ID];
+
+  if (value && typeof value === "object") {
+    return clean(value?.value || value?.label || value?.name);
+  }
+
   return clean(value);
 }
 
+export function getBusinessIdentifiers(object = {}) {
+  const persisted = normalizePersistedBusinessIdentifiers(object);
+
+  if (persisted.length) {
+    return persisted;
+  }
+
+  const value = getBusinessIdentifierValue(object);
+  if (!value) return [];
+
+  const schema = getBusinessIdentifierSchema(object);
+  const definition = createBusinessIdentifierDefinition(object, 0);
+
+  return [{
+    label: clean(definition?.label || schema?.defaultLabel) || "ID",
+    value
+  }];
+}
+
 export function createStableCustomFieldDefinition(existingDefinitions = [], index = 0) {
-  const used = new Set(asArray(existingDefinitions).map(item => clean(item?.fieldId)).filter(Boolean));
+  const used = new Set(
+    asArray(existingDefinitions)
+      .map(item => clean(item?.fieldId))
+      .filter(Boolean)
+  );
+
   let sequence = Math.max(index + 1, 1);
   let fieldId = `custom_${sequence}`;
-  while (used.has(fieldId)) fieldId = `custom_${++sequence}`;
+
+  while (used.has(fieldId)) {
+    fieldId = `custom_${++sequence}`;
+  }
 
   return normalizeImportableFieldDefinition({
     fieldId,
@@ -142,6 +237,15 @@ export function buildAosObjectSavePayload(nextObject = {}, definitions = null) {
     presentationOrder: Number(definition?.presentationOrder ?? index)
   }));
 
+  const fields = {
+    ...getObjectFields(nextObject)
+  };
+
+  const businessIdentifiers = getBusinessIdentifiers({
+    ...nextObject,
+    fields
+  });
+
   const metadata = {
     ...safeObject(nextObject?.metadata),
     aosDataContractVersion: AOS_OBJECT_DATA_CONTRACT_VERSION,
@@ -150,7 +254,8 @@ export function buildAosObjectSavePayload(nextObject = {}, definitions = null) {
 
   const object = {
     ...nextObject,
-    fields: { ...getObjectFields(nextObject) },
+    fields,
+    businessIdentifiers,
     fieldDefinitions: normalizedDefinitions,
     metadata
   };
@@ -159,7 +264,8 @@ export function buildAosObjectSavePayload(nextObject = {}, definitions = null) {
     objectId: getObjectId(object),
     object,
     displayName: object?.displayName,
-    fields: { ...getObjectFields(object) },
+    businessIdentifiers,
+    fields,
     fieldDefinitions: normalizedDefinitions,
     metadata,
     media: asArray(object?.media),
