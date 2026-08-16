@@ -22,6 +22,10 @@ import {
   getListingId
 } from "../../../lib/listingFormatters";
 
+import {
+  getIXIAosSystemAdapter
+} from "../../../lib/mos/IXIAosSystemAdapterRegistry";
+
 
 function cleanId(value) {
   return String(value ?? "").trim();
@@ -45,18 +49,6 @@ function isSystemIndexPresentation(item = {}) {
 }
 
 
-function isEquipmentAdapter(item = {}) {
-  return Boolean(
-    item?.metadata?.adapterId ===
-      "ixi-owned-equipment" ||
-    (
-      item?.metadata?.systemAdapter === true &&
-      item?.indexId === "equipment"
-    )
-  );
-}
-
-
 function isMosWorkspaceObject(item = {}) {
   return Boolean(
     getMosObjectId(item)
@@ -73,27 +65,26 @@ function isContainerWorkspaceObject(item = {}) {
 
 
 function getSystemIndexDropPolicy(item = {}) {
-  /*
-   * Equipment is an explicit IXI adapter and retains its
-   * machine-only workspace return/drop policy.
-   */
-  if (isEquipmentAdapter(item)) {
-    return (
-      item?.workspace?.dropPolicy ||
-      {
-        enabled: true,
-        acceptedObjectTypes: [
-          "machine"
-        ]
-      }
+  const adapter =
+    getIXIAosSystemAdapter(
+      item
     );
+
+  if (adapter) {
+    return {
+      enabled:
+        adapter.canOperationalDrop ===
+        true,
+
+      acceptedObjectTypes: [
+        ...(adapter.acceptedObjectTypes || [])
+      ]
+    };
   }
 
   /*
    * Persisted customer System Indexes receive objects only
    * when their durable capabilities say they can contain.
-   * Other IXI projection adapters (for example FOR SALE)
-   * are read/projection surfaces, not accidental containers.
    */
   if (
     item?.capabilities?.canContain ===
@@ -117,21 +108,24 @@ function getSystemIndexDropPolicy(item = {}) {
 
 /*
  * Command payloads carry stable technical identity/capability,
- * not presentation names. This prevents a customer naming a
- * container "Equipment" (or anything else) from changing the
- * command path chosen by older compatibility code downstream.
+ * not presentation names. A customer name can never select an
+ * IXI adapter command path.
  */
 function getContainerCommandTarget(item = {}) {
   const objectId =
     getMosObjectId(item);
 
+  const adapter =
+    getIXIAosSystemAdapter(
+      item
+    );
+
   return {
     objectId,
 
     indexId:
-      isEquipmentAdapter(item)
-        ? "equipment"
-        : cleanId(item?.indexId),
+      adapter?.indexId ||
+      cleanId(item?.indexId),
 
     directContainerId:
       cleanId(item?.directContainerId) ||
@@ -142,7 +136,17 @@ function getContainerCommandTarget(item = {}) {
     },
 
     metadata: {
-      ...(item?.metadata || {})
+      ...(item?.metadata || {}),
+
+      ...(adapter
+        ? {
+            adapterId:
+              adapter.adapterId,
+
+            systemAdapter:
+              true
+          }
+        : {})
     }
   };
 }
@@ -270,9 +274,6 @@ export default function IXIAosWorkspaceBoard({
         }
 
 
-        /* ===============================================
-           REORDER POLICY
-           =============================================== */
         getItemReorderBehavior={
           item =>
             isContainerWorkspaceObject(item)
@@ -281,9 +282,6 @@ export default function IXIAosWorkspaceBoard({
         }
 
 
-        /* ===============================================
-           CUSTOM OBJECT IDENTITY
-           =============================================== */
         getCustomItemId={
           item => {
             const objectId =
@@ -294,9 +292,6 @@ export default function IXIAosWorkspaceBoard({
         }
 
 
-        /* ===============================================
-           CUSTOM NATIVE SIZE
-           =============================================== */
         getCustomItemNativeSize={
           ({
             item,
@@ -326,9 +321,6 @@ export default function IXIAosWorkspaceBoard({
         }
 
 
-        /* ===============================================
-           CUSTOM OBJECT RENDER
-           =============================================== */
         renderCustomItem={({
           item,
           id,
@@ -339,6 +331,11 @@ export default function IXIAosWorkspaceBoard({
               item
             );
 
+          const systemAdapter =
+            getIXIAosSystemAdapter(
+              item
+            );
+
 
           if (
             isSystemIndexPresentation(
@@ -346,9 +343,8 @@ export default function IXIAosWorkspaceBoard({
             )
           ) {
             const canCreateChild =
+              !systemAdapter &&
               item?.capabilities?.canContain ===
-                true &&
-              item?.metadata?.systemAdapter !==
                 true;
 
             return (
@@ -394,6 +390,8 @@ export default function IXIAosWorkspaceBoard({
                     workspaceDropSurface={
                       item?.workspace
                         ?.surfaceId ||
+                      systemAdapter
+                        ?.workspaceSurfaceId ||
                       ""
                     }
 
@@ -434,9 +432,9 @@ export default function IXIAosWorkspaceBoard({
                     onExposeObject={
                       child => {
                         if (
-                          isEquipmentAdapter(
-                            item
-                          )
+                          systemAdapter
+                            ?.adapterId ===
+                          "ixi-owned-equipment"
                         ) {
                           exposeEquipmentMachineToBoard?.(
                             child
