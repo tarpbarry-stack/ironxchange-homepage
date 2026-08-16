@@ -25,8 +25,8 @@ export default function IXIAosCard002Location(props) {
 
         .card002-variant .card001 {
           background:
-            radial-gradient(130% 72% at 50% -10%, rgba(255,255,255,.05), transparent 44%),
-            linear-gradient(180deg,#111214 0%,#0d0e0f 58%,#0a0b0c 100%) !important;
+            radial-gradient(125% 68% at 50% -9%, rgba(255,255,255,.048), transparent 45%),
+            linear-gradient(180deg,#111214 0%,#0c0d0e 58%,#0a0b0c 100%) !important;
         }
 
         .card002-variant .card001 .photo-rail {
@@ -44,16 +44,16 @@ export default function IXIAosCard002Location(props) {
         }
 
         .card002-variant .card001 .relationships {
-          margin: 8px 12px 0 !important;
+          margin: 5px 12px 0 !important;
           margin-bottom: 0 !important;
         }
 
         .card002-variant .card001 .relationships .ixi-face-section {
-          padding-bottom: 2px !important;
+          padding-bottom: 1px !important;
         }
 
         .card002-variant .card001 .relationships .relationship-row {
-          height: 25px !important;
+          height: 21px !important;
         }
 
         .card002-variant .card001 .metrics .ixi-aos-inline-metrics {
