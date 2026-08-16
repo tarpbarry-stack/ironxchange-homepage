@@ -8,7 +8,7 @@ import {
 } from "./IXIMaterialContract";
 import {
   runIXIActionNoticeLifecycle
-} from "../../../ixi-object-system/IXIActionNoticeEngine";
+} from "../../../../ixi-object-system/IXIActionNoticeEngine";
 
 const clean = value => String(value ?? "").trim();
 
@@ -80,22 +80,10 @@ export async function createIXIMaterialUsage({
     errorMessage: "MATERIAL SAVE FAILED",
     operation: async () => {
       const additionalReferences = [];
-      pushUniqueReference(
-        additionalReferences,
-        createIXIAosFinancialObjectReference({ object: context.primary || resolvedObject, role: "origin" })
-      );
-      pushUniqueReference(
-        additionalReferences,
-        createIXIAosFinancialObjectReference({ object: context.location || {}, role: "location" })
-      );
-      pushUniqueReference(
-        additionalReferences,
-        createIXIAosFinancialObjectReference({ object: context.actor || {}, role: "employee" })
-      );
-      pushUniqueReference(
-        additionalReferences,
-        createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" })
-      );
+      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.primary || resolvedObject, role: "origin" }));
+      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.location || {}, role: "location" }));
+      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.actor || {}, role: "employee" }));
+      pushUniqueReference(additionalReferences, createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" }));
 
       if (clean(draft.context.workOrderId || draft.context.workOrderNumber)) {
         pushUniqueReference(additionalReferences, {
@@ -179,10 +167,7 @@ export async function createIXIMaterialUsage({
       return {
         draft: {
           ...draft,
-          identity: {
-            ...draft.identity,
-            materialUsageId
-          },
+          identity: { ...draft.identity, materialUsageId },
           status: "posted"
         },
         response
