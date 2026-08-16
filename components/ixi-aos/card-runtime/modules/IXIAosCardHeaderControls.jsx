@@ -4,6 +4,7 @@ import {
   useIXIAosCardCommands
 } from "../IXIAosCardCommandContext";
 
+import IXIAosActionNotice from "./IXIAosActionNotice";
 import IXIAosOfficeSkinCompatibilityStyles from "./IXIAosOfficeSkinCompatibilityStyles";
 
 const DEFAULT_SKINS = [
@@ -40,10 +41,6 @@ export default function IXIAosCardHeaderControls({
       ? onTransact
       : runtimeCommands?.onOpenTransact;
 
-  // The owning card/console runtime is authoritative. A Face should not be able
-  // to accidentally hide TRAN$ACT just because it did not receive a duplicate
-  // local prop. `canTransact` still enables an explicitly supplied local handler
-  // when the component is rendered outside an owning command provider.
   const showTransact =
     typeof resolvedOnTransact === "function" &&
     (runtimeHasTransact || canTransact !== false);
@@ -210,6 +207,8 @@ export default function IXIAosCardHeaderControls({
           </div>
         ) : null}
       </div>
+
+      <IXIAosActionNotice variant="office" />
 
       <style jsx>{`
         .ixi-aos-card-header-controls {
