@@ -15,6 +15,7 @@ import {
 import {
   IXIAosCardCommandProvider
 } from "../card-runtime/IXIAosCardCommandContext";
+import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 
 import IXIAosCard001Location from "../cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../cards/002/IXIAosCard002Location";
@@ -243,6 +244,7 @@ export default function IXIAosLocationObjectConsole({
         <section key={slot.slotId} className="location-console-slot primary-slot">
           {renderOuterActuators(slotIndex)}
           {renderFace(primaryFace)}
+          <IXIAosActionNotice variant="office" />
         </section>
       );
     }
@@ -293,6 +295,7 @@ export default function IXIAosLocationObjectConsole({
 
         {renderOuterActuators(slotIndex)}
         {renderFace(slot.face)}
+        <IXIAosActionNotice variant="office" />
 
         <button
           type="button"
