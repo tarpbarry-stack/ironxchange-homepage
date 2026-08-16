@@ -30,6 +30,15 @@ export function getIXITimeEmployeeKey(context = {}) {
   );
 }
 
+export function getIXITimeTargetKey(context = {}, workOrder = {}) {
+  const woId = clean(workOrder.identity?.workOrderId || workOrder.identity?.techWorkOrderId || workOrder.workOrderId || workOrder.id);
+  const woNumber = clean(workOrder.identity?.number || workOrder.workOrderNumber || workOrder.number);
+  if (woId || woNumber) return `work:${woId || woNumber}`;
+
+  const primary = context.primary || {};
+  return `object:${clean(primary.passportId || primary.objectId || primary.label || "unknown")}`;
+}
+
 export function getIXIActiveTimeSession(context = {}) {
   const key = getIXITimeEmployeeKey(context);
   return readStore()[key] || null;
@@ -58,12 +67,12 @@ export function startIXITimeSession({ context = {}, workOrder = {}, workType = "
   const store = readStore();
   const key = getIXITimeEmployeeKey(context);
   const existing = store[key];
-  const woId = clean(workOrder.identity?.workOrderId);
+  const targetKey = getIXITimeTargetKey(context, workOrder);
+  const woId = clean(workOrder.identity?.workOrderId || workOrder.identity?.techWorkOrderId || workOrder.workOrderId || workOrder.id);
   const woNumber = clean(workOrder.identity?.number || workOrder.workOrderNumber || workOrder.number);
 
   if (existing && existing.status === "running") {
-    const sameWork = clean(existing.workOrderId || existing.workOrderNumber) === clean(woId || woNumber);
-    if (sameWork) return existing;
+    if (clean(existing.targetKey) === targetKey) return existing;
     const error = new Error("Employee already has an active timer");
     error.code = "IXI_ACTIVE_TIMER_EXISTS";
     error.session = existing;
@@ -71,33 +80,45 @@ export function startIXITimeSession({ context = {}, workOrder = {}, workType = "
   }
 
   const startedAt = nowIso();
-  const session = existing && clean(existing.workOrderId || existing.workOrderNumber) === clean(woId || woNumber)
-    ? { ...existing, status:"running", lastStartedAt:startedAt, resumedAt:startedAt, updatedAt:startedAt }
+  const sameTarget = existing && clean(existing.targetKey) === targetKey;
+  const session = sameTarget
+    ? {
+        ...existing,
+        status: "running",
+        lastStartedAt: startedAt,
+        resumedAt: startedAt,
+        updatedAt: startedAt,
+        workType: clean(workType || existing.workType),
+        description: clean(description || existing.description)
+      }
     : {
-        schema:"ixi-time-session-v1",
-        sessionId:`TS-${Date.now()}`,
-        employeeKey:key,
-        employeePassportId:clean(context.actor?.passportId),
-        employeeId:clean(context.actor?.employeeId || context.actor?.userId),
-        employeeLabel:clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
-        primaryPassportId:clean(context.primary?.passportId),
-        primaryObjectId:clean(context.primary?.objectId),
-        primaryLabel:clean(context.primary?.label),
-        locationPassportId:clean(context.location?.passportId),
-        locationLabel:clean(context.location?.label),
-        workOrderId:woId,
-        workOrderNumber:woNumber,
-        workType:clean(workType),
-        description:clean(description),
-        status:"running",
+        schema: "ixi-time-session-v2",
+        sessionId: `TS-${Date.now()}`,
+        targetKey,
+        employeeKey: key,
+        employeePassportId: clean(context.actor?.passportId),
+        employeeId: clean(context.actor?.employeeId || context.actor?.userId),
+        employeeLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
+        primaryPassportId: clean(context.primary?.passportId),
+        primaryObjectId: clean(context.primary?.objectId),
+        primaryObjectType: clean(context.primary?.objectType),
+        primaryLabel: clean(context.primary?.label),
+        locationPassportId: clean(context.location?.passportId),
+        locationLabel: clean(context.location?.label),
+        workOrderId: woId,
+        workOrderNumber: woNumber,
+        workType: clean(workType),
+        description: clean(description),
+        status: "running",
         startedAt,
-        lastStartedAt:startedAt,
-        accumulatedMs:0,
-        recordedMs:0,
-        pauseCount:0,
-        createdAt:startedAt,
-        updatedAt:startedAt
+        lastStartedAt: startedAt,
+        accumulatedMs: 0,
+        recordedMs: 0,
+        pauseCount: 0,
+        createdAt: startedAt,
+        updatedAt: startedAt
       };
+
   store[key] = session;
   writeStore(store);
   return session;
@@ -110,7 +131,15 @@ export function pauseIXITimeSession(context = {}) {
   if (!current || current.status !== "running") return current || null;
   const pausedAt = nowIso();
   const accumulatedMs = getIXITimeSessionElapsedMs(current, Date.now());
-  const next = { ...current, status:"paused", pausedAt, lastStartedAt:"", accumulatedMs, pauseCount:Number(current.pauseCount || 0)+1, updatedAt:pausedAt };
+  const next = {
+    ...current,
+    status: "paused",
+    pausedAt,
+    lastStartedAt: "",
+    accumulatedMs,
+    pauseCount: Number(current.pauseCount || 0) + 1,
+    updatedAt: pausedAt
+  };
   store[key] = next;
   writeStore(store);
   return next;
@@ -122,7 +151,7 @@ export function resumeIXITimeSession(context = {}) {
   const current = store[key];
   if (!current || current.status !== "paused") return current || null;
   const resumedAt = nowIso();
-  const next = { ...current, status:"running", resumedAt, lastStartedAt:resumedAt, updatedAt:resumedAt };
+  const next = { ...current, status: "running", resumedAt, lastStartedAt: resumedAt, updatedAt: resumedAt };
   store[key] = next;
   writeStore(store);
   return next;
@@ -134,7 +163,11 @@ export function markIXITimeSessionRecorded(context = {}, recordedThroughMs = nul
   const current = store[key];
   if (!current) return null;
   const elapsed = recordedThroughMs == null ? getIXITimeSessionElapsedMs(current) : Number(recordedThroughMs || 0);
-  const next = { ...current, recordedMs:Math.max(Number(current.recordedMs || 0), elapsed), updatedAt:nowIso() };
+  const next = {
+    ...current,
+    recordedMs: Math.max(Number(current.recordedMs || 0), elapsed),
+    updatedAt: nowIso()
+  };
   store[key] = next;
   writeStore(store);
   return next;
@@ -147,7 +180,14 @@ export function stopIXITimeSession(context = {}, { clear = false } = {}) {
   if (!current) return null;
   const endedAt = nowIso();
   const accumulatedMs = getIXITimeSessionElapsedMs(current);
-  const stopped = { ...current, status:"stopped", endedAt, lastStartedAt:"", accumulatedMs, updatedAt:endedAt };
+  const stopped = {
+    ...current,
+    status: "stopped",
+    endedAt,
+    lastStartedAt: "",
+    accumulatedMs,
+    updatedAt: endedAt
+  };
   if (clear) delete store[key]; else store[key] = stopped;
   writeStore(store);
   return stopped;
@@ -173,6 +213,7 @@ export function subscribeIXITimeSession(listener) {
 
 export default {
   getIXITimeEmployeeKey,
+  getIXITimeTargetKey,
   getIXIActiveTimeSession,
   getIXITimeSessionElapsedMs,
   getIXITimeSessionUnrecordedMs,
