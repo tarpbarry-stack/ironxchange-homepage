@@ -3,403 +3,52 @@ import { useEffect, useMemo, useState } from "react";
 import IXICollectionThumbRail from "../../../ixi-object-system/IXICollectionThumbRail";
 import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
+import IXIAosPrimaryMediaEditor from "../../card-runtime/modules/IXIAosPrimaryMediaEditor";
 import {
-  asArray,
-  clean,
-  getFieldDefinitions,
-  getObjectActionCapabilities,
-  getObjectDisplayName,
-  getObjectFields,
-  getObjectId,
-  getObjectLabel,
-  getObjectPresentation,
-  getObjectRelationships,
-  getPrimaryImage
+  asArray, clean, getFieldDefinitions, getObjectActionCapabilities,
+  getObjectDisplayName, getObjectFields, getObjectId, getObjectLabel,
+  getObjectPresentation, getObjectRelationships, getPrimaryImage
 } from "../../card-runtime/IXIAosSemanticObjectPresentation";
 
 const DEFAULT_VISIBLE_SLOTS = 8;
 
 function inputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
-  if (value && typeof value === "object") {
-    return clean(value?.displayName || value?.label || value?.name || value?.value);
-  }
+  if (value && typeof value === "object") return clean(value?.displayName || value?.label || value?.name || value?.value);
   return String(value ?? "");
 }
-
 function parseValue(definition, rawValue) {
   const type = clean(definition?.fieldType || definition?.type).toLowerCase();
-
-  if (["number", "integer", "money", "currency"].includes(type)) {
-    const number = Number(rawValue);
-    return Number.isFinite(number) ? number : null;
-  }
-
-  if (["tags", "array", "list", "multi-select", "multiselect"].includes(type)) {
-    return String(rawValue || "").split(",").map(clean).filter(Boolean);
-  }
-
+  if (["number","integer","money","currency"].includes(type)) { const n=Number(rawValue); return Number.isFinite(n)?n:null; }
+  if (["tags","array","list","multi-select","multiselect"].includes(type)) return String(rawValue||"").split(",").map(clean).filter(Boolean);
   return rawValue;
 }
-
-function createBlankDefinition(index) {
-  return {
-    fieldId: `field_${index + 1}`,
-    label: `FIELD ${index + 1}`,
-    type: "text",
-    fieldType: "text",
-    editable: true,
-    presentationOrder: index
-  };
+function createBlankDefinition(index){return{fieldId:`field_${index+1}`,label:`FIELD ${index+1}`,type:"text",fieldType:"text",editable:true,presentationOrder:index};}
+function editableDefinitionsFor(object={}){
+  const existing=getFieldDefinitions(object).map((definition,index)=>({...definition,fieldId:clean(definition?.fieldId||definition?.field||`field_${index+1}`),label:clean(definition?.label||definition?.displayLabel)||`FIELD ${index+1}`,fieldType:clean(definition?.fieldType||definition?.type||"text")||"text",editable:definition?.editable!==false}));
+  if(existing.length>=DEFAULT_VISIBLE_SLOTS)return existing;
+  const used=new Set(existing.map(item=>item.fieldId)); const output=[...existing]; let index=0;
+  while(output.length<DEFAULT_VISIBLE_SLOTS){const blank=createBlankDefinition(index++);if(used.has(blank.fieldId))continue;used.add(blank.fieldId);output.push(blank);} return output;
 }
 
-function editableDefinitionsFor(object = {}) {
-  const existing = getFieldDefinitions(object).map((definition, index) => ({
-    ...definition,
-    fieldId: clean(definition?.fieldId || definition?.field || `field_${index + 1}`),
-    label: clean(definition?.label || definition?.displayLabel) || `FIELD ${index + 1}`,
-    fieldType: clean(definition?.fieldType || definition?.type || "text") || "text",
-    editable: definition?.editable !== false
-  }));
-
-  if (existing.length >= DEFAULT_VISIBLE_SLOTS) return existing;
-
-  const used = new Set(existing.map(item => item.fieldId));
-  const output = [...existing];
-  let index = 0;
-
-  while (output.length < DEFAULT_VISIBLE_SLOTS) {
-    const blank = createBlankDefinition(index);
-    index += 1;
-    if (used.has(blank.fieldId)) continue;
-    used.add(blank.fieldId);
-    output.push(blank);
-  }
-
-  return output;
+function UniversalEditor({object,saving,onCancel,onSave}){
+  const [name,setName]=useState(getObjectDisplayName(object));
+  const [definitions,setDefinitions]=useState(()=>editableDefinitionsFor(object));
+  const [draft,setDraft]=useState({});
+  const [media,setMedia]=useState(asArray(object?.media));
+  useEffect(()=>{setName(getObjectDisplayName(object));setMedia(asArray(object?.media));const defs=editableDefinitionsFor(object);setDefinitions(defs);const next={};defs.forEach(def=>{next[def.fieldId]=inputValue(getObjectFields(object)?.[def.fieldId]);});setDraft(next);},[object]);
+  function addField(){setDefinitions(current=>{const used=new Set(current.map(item=>item.fieldId));let index=current.length;let blank=createBlankDefinition(index);while(used.has(blank.fieldId))blank=createBlankDefinition(++index);setDraft(values=>({...values,[blank.fieldId]:""}));return[...current,blank];});}
+  function removeField(fieldId){setDefinitions(current=>current.filter(def=>def.fieldId!==fieldId));setDraft(current=>{const next={...current};delete next[fieldId];return next;});}
+  async function save(){const nextFields={...getObjectFields(object)};const normalized=definitions.map((definition,index)=>({...definition,fieldId:clean(definition.fieldId),label:clean(definition.label)||`FIELD ${index+1}`,fieldType:clean(definition.fieldType||definition.type||"text")||"text",type:clean(definition.type||definition.fieldType||"text")||"text",editable:definition.editable!==false,presentationOrder:index})).filter(def=>def.fieldId);const retained=new Set(normalized.map(def=>def.fieldId));Object.keys(nextFields).forEach(fieldId=>{if(fieldId.startsWith("field_")&&!retained.has(fieldId))delete nextFields[fieldId];});normalized.forEach(def=>{nextFields[def.fieldId]=parseValue(def,draft[def.fieldId]);});await onSave?.({...object,displayName:clean(name)||getObjectDisplayName(object),fields:nextFields,media,fieldDefinitions:normalized,metadata:{...(object?.metadata||{}),fieldDefinitions:normalized}});}
+  return <div className="u007-editor" onPointerDown={event=>event.stopPropagation()}><div className="u007-editor-head"><div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div><nav><button type="button" disabled={saving} onClick={save}>SAVE</button><button type="button" disabled={saving} onClick={onCancel}>CANCEL</button></nav></div><div className="u007-editor-scroll"><IXIAosPrimaryMediaEditor media={media} onChange={setMedia}/><section><div className="u007-editor-title">IDENTITY</div><label className="u007-name-field"><span>OBJECT NAME</span><input value={name} onChange={event=>setName(event.target.value)}/></label></section><section><div className="u007-editor-title">DETAIL FIELDS</div><div className="u007-editor-columns"><span>LABEL</span><span>VALUE</span><i/></div>{definitions.map((definition,index)=><div className="u007-editor-row" key={definition.fieldId}><input aria-label={`Field ${index+1} label`} value={definition.label} onChange={event=>setDefinitions(current=>current.map(item=>item.fieldId===definition.fieldId?{...item,label:event.target.value}:item))}/><input aria-label={`${definition.label} value`} value={draft[definition.fieldId]??""} onChange={event=>setDraft(current=>({...current,[definition.fieldId]:event.target.value}))}/><button type="button" onClick={()=>removeField(definition.fieldId)}>×</button></div>)}<button className="u007-add-field" type="button" onClick={addField}>+ ADD FIELD</button></section></div></div>;
 }
 
-function UniversalEditor({ object, saving, onCancel, onSave }) {
-  const [name, setName] = useState(getObjectDisplayName(object));
-  const [definitions, setDefinitions] = useState(() => editableDefinitionsFor(object));
-  const [draft, setDraft] = useState({});
-
-  useEffect(() => {
-    setName(getObjectDisplayName(object));
-    const nextDefinitions = editableDefinitionsFor(object);
-    setDefinitions(nextDefinitions);
-
-    const nextDraft = {};
-    nextDefinitions.forEach(definition => {
-      nextDraft[definition.fieldId] = inputValue(getObjectFields(object)?.[definition.fieldId]);
-    });
-    setDraft(nextDraft);
-  }, [object]);
-
-  function updateLabel(fieldId, label) {
-    setDefinitions(current => current.map(definition =>
-      definition.fieldId === fieldId
-        ? { ...definition, label }
-        : definition
-    ));
-  }
-
-  function updateValue(fieldId, value) {
-    setDraft(current => ({ ...current, [fieldId]: value }));
-  }
-
-  function addField() {
-    setDefinitions(current => {
-      const used = new Set(current.map(item => item.fieldId));
-      let index = current.length;
-      let blank = createBlankDefinition(index);
-      while (used.has(blank.fieldId)) {
-        index += 1;
-        blank = createBlankDefinition(index);
-      }
-      setDraft(values => ({ ...values, [blank.fieldId]: "" }));
-      return [...current, blank];
-    });
-  }
-
-  function removeField(fieldId) {
-    setDefinitions(current => current.filter(definition => definition.fieldId !== fieldId));
-    setDraft(current => {
-      const next = { ...current };
-      delete next[fieldId];
-      return next;
-    });
-  }
-
-  async function save() {
-    const nextFields = { ...getObjectFields(object) };
-    const normalizedDefinitions = definitions
-      .map((definition, index) => ({
-        ...definition,
-        fieldId: clean(definition.fieldId),
-        label: clean(definition.label) || `FIELD ${index + 1}`,
-        fieldType: clean(definition.fieldType || definition.type || "text") || "text",
-        type: clean(definition.type || definition.fieldType || "text") || "text",
-        editable: definition.editable !== false,
-        presentationOrder: index
-      }))
-      .filter(definition => definition.fieldId);
-
-    const retainedIds = new Set(normalizedDefinitions.map(definition => definition.fieldId));
-    Object.keys(nextFields).forEach(fieldId => {
-      if (fieldId.startsWith("field_") && !retainedIds.has(fieldId)) delete nextFields[fieldId];
-    });
-
-    normalizedDefinitions.forEach(definition => {
-      nextFields[definition.fieldId] = parseValue(definition, draft[definition.fieldId]);
-    });
-
-    await onSave?.({
-      ...object,
-      displayName: clean(name) || getObjectDisplayName(object),
-      fields: nextFields,
-      fieldDefinitions: normalizedDefinitions,
-      metadata: {
-        ...(object?.metadata || {}),
-        fieldDefinitions: normalizedDefinitions
-      }
-    });
-  }
-
-  return (
-    <div className="u007-editor" onPointerDown={event => event.stopPropagation()}>
-      <div className="u007-editor-head">
-        <div>
-          <small>{getObjectLabel(object)}</small>
-          <strong>EDIT OBJECT</strong>
-        </div>
-        <nav>
-          <button type="button" disabled={saving} onClick={save}>SAVE</button>
-          <button type="button" disabled={saving} onClick={onCancel}>CANCEL</button>
-        </nav>
-      </div>
-
-      <div className="u007-editor-scroll">
-        <section>
-          <div className="u007-editor-title">IDENTITY</div>
-          <label className="u007-name-field">
-            <span>OBJECT NAME</span>
-            <input value={name} onChange={event => setName(event.target.value)} />
-          </label>
-        </section>
-
-        <section>
-          <div className="u007-editor-title">DETAIL FIELDS</div>
-          <div className="u007-editor-columns"><span>LABEL</span><span>VALUE</span><i /></div>
-          {definitions.map((definition, index) => (
-            <div className="u007-editor-row" key={definition.fieldId}>
-              <input
-                aria-label={`Field ${index + 1} label`}
-                value={definition.label}
-                onChange={event => updateLabel(definition.fieldId, event.target.value)}
-              />
-              <input
-                aria-label={`${definition.label} value`}
-                value={draft[definition.fieldId] ?? ""}
-                onChange={event => updateValue(definition.fieldId, event.target.value)}
-              />
-              <button type="button" title="Remove field" onClick={() => removeField(definition.fieldId)}>×</button>
-            </div>
-          ))}
-          <button className="u007-add-field" type="button" onClick={addField}>+ ADD FIELD</button>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-export default function IXIAosGenericUniversalLayout007({
-  object = {},
-  children = [],
-  ixiState = {},
-  onSaveObject = null,
-  onAddObject = null,
-  onHideObject = null,
-  onDeleteObject = null,
-  onOpenConsole = null,
-  onOpenTransact = null,
-  onRecall = null,
-  onBoard = null,
-  onReturn = null,
-  onExposeObject = null,
-  onSendFront = null,
-  onSendBack = null,
-  onCycleColor = null,
-  onCycleOutline = null,
-  onCycleFace = null,
-  onRailSend = null,
-  armedDestination = "",
-  onSendToArmedDestination = null,
-  skinId = "v12",
-  onSkinChange = null
-}) {
-  const [runtimeObject, setRuntimeObject] = useState(object);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [activeChildIndex, setActiveChildIndex] = useState(0);
-
-  useEffect(() => setRuntimeObject(object), [object]);
-
-  const actions = getObjectActionCapabilities(runtimeObject);
-  const presentation = getObjectPresentation(runtimeObject);
-  const relationships = getObjectRelationships(runtimeObject);
-  const items = useMemo(() => asArray(children).filter(Boolean), [children]);
-  const definitions = getFieldDefinitions(runtimeObject);
-  const fields = getObjectFields(runtimeObject);
-  const image = getPrimaryImage(runtimeObject);
-
-  const populatedFields = definitions
-    .map(definition => ({
-      definition,
-      value: inputValue(fields?.[definition.fieldId])
-    }))
-    .filter(item => clean(item.value));
-
-  const safeIndex = items.length
-    ? Math.min(activeChildIndex, items.length - 1)
-    : 0;
-
-  const detailsTitle = clean(presentation?.detailsTitle) || "DETAILS";
-  const relationshipsTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS";
-  const mediaLabel = clean(presentation?.mediaLabel) || "PRIMARY MEDIA";
-
-  async function save(nextObject) {
-    setSaving(true);
-    try {
-      await onSaveObject?.({
-        objectId: getObjectId(nextObject),
-        object: nextObject,
-        displayName: nextObject.displayName,
-        fields: { ...getObjectFields(nextObject) },
-        fieldDefinitions: asArray(nextObject.fieldDefinitions),
-        metadata: { ...(nextObject.metadata || {}) },
-        media: asArray(nextObject.media)
-      });
-      setRuntimeObject(nextObject);
-      setEditing(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function command(event, callback) {
-    event.preventDefault();
-    event.stopPropagation();
-    callback?.(runtimeObject);
-  }
-
-  return (
-    <article className="ixi-universal-card-007" data-card-number="007" data-card-skin={skinId}>
-      <header className="u007-header">
-        <div className="u007-identity">
-          <span>{getObjectLabel(runtimeObject)}</span>
-          <h2>{getObjectDisplayName(runtimeObject)}</h2>
-        </div>
-        {!editing ? (
-          <IXIAosCardHeaderControls
-            canAdd={actions.canCreate && typeof onAddObject === "function"}
-            canEdit={actions.canEdit}
-            canTransact={actions.canTransact && typeof onOpenTransact === "function"}
-            onAdd={() => onAddObject?.(runtimeObject)}
-            onToggleEdit={() => setEditing(true)}
-            onTransact={() => onOpenTransact?.(runtimeObject)}
-            onHide={onHideObject}
-            onDelete={onDeleteObject}
-            onOpenConsole={actions.canOpenConsole ? onOpenConsole : null}
-            skinId={skinId}
-            onSkinChange={onSkinChange}
-          />
-        ) : null}
-      </header>
-
-      <main className="u007-body">
-        <section className="u007-media-shell">
-          {image ? (
-            <img src={image} alt={getObjectDisplayName(runtimeObject)} />
-          ) : (
-            <div className="u007-media-empty"><b>IXI</b><span>{mediaLabel}</span></div>
-          )}
-        </section>
-
-        <section className="u007-section u007-details">
-          <div className="u007-section-title">{detailsTitle}</div>
-          <div className="u007-section-scroll">
-            {populatedFields.map(({ definition, value }) => (
-              <div className="u007-detail-row" key={definition.fieldId}>
-                <span>{definition.label}</span>
-                <strong>{value}</strong>
-              </div>
-            ))}
-            {!populatedFields.length ? <div className="u007-empty">NO DETAILS YET · EDIT TO ADD</div> : null}
-          </div>
-        </section>
-
-        <section className="u007-section u007-relationships">
-          <div className="u007-section-title">{relationshipsTitle}</div>
-          <div className="u007-section-scroll">
-            {relationships.map(relationship => (
-              <button type="button" className="u007-relationship-row" key={relationship.id} onClick={event => event.stopPropagation()}>
-                <span><small>{relationship.label}</small><strong>{relationship.value}</strong>{relationship.secondary ? <em>{relationship.secondary}</em> : null}</span><b>›</b>
-              </button>
-            ))}
-            {!relationships.length ? <div className="u007-empty">NO RELATIONSHIPS</div> : null}
-          </div>
-        </section>
-      </main>
-
-      <nav className="u007-commands">
-        <button type="button" onClick={event => command(event, onRecall)}>↻ <b>RECALL</b></button>
-        <button type="button" onClick={event => command(event, onBoard)}>▦ <b>BOARD</b></button>
-        <button type="button" onClick={event => command(event, onReturn)}>↩ <b>RETURN</b></button>
-      </nav>
-
-      <div className="u007-child-rail">
-        <IXICollectionThumbRail
-          items={items}
-          activeItemIndex={safeIndex}
-          getItemId={getObjectId}
-          getItemImage={getPrimaryImage}
-          getItemLabel={getObjectDisplayName}
-          onSelectItem={(item, index) => {
-            setActiveChildIndex(index);
-            onExposeObject?.(item, runtimeObject);
-          }}
-        />
-      </div>
-
-      <IXIObjectRail
-        object={runtimeObject}
-        saved={false}
-        color={ixiState?.color || "none"}
-        outline={Number(ixiState?.outline ?? 1)}
-        face={1}
-        onSendFront={onSendFront}
-        onSendBack={onSendBack}
-        onCycleColor={onCycleColor}
-        onCycleOutline={onCycleOutline}
-        onCycleFace={onCycleFace}
-        onRailSend={onRailSend}
-        armedDestination={armedDestination}
-        onSendToArmedDestination={onSendToArmedDestination}
-      />
-
-      {editing ? (
-        <UniversalEditor
-          object={runtimeObject}
-          saving={saving}
-          onCancel={() => setEditing(false)}
-          onSave={save}
-        />
-      ) : null}
-
-      <style jsx global>{`
-        .ixi-universal-card-007,.ixi-universal-card-007 *{box-sizing:border-box}.ixi-universal-card-007{--y:#ffc400;--line:#343a35;--soft:#252a26;position:relative;width:298px;height:471px;overflow:hidden;border:1px solid #454b47;border-radius:13px;background:linear-gradient(180deg,#101310,#080a09);color:#f4f5f4;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008}.u007-header{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#171a18,#101210);z-index:30}.u007-identity{max-width:188px}.u007-identity>span{display:block;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u007-identity h2{margin:4px 0 0;color:#f6f7f6;font-size:14px;line-height:1;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u007-body{position:absolute;top:43px;left:7px;right:7px;bottom:111px;display:flex;flex-direction:column;gap:5px;padding:5px 0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#555c57 #090b0a}.u007-media-shell{flex:0 0 68px;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0b0e0c}.u007-media-shell img{width:100%;height:100%;display:block;object-fit:cover}.u007-media-empty{height:100%;display:flex;align-items:center;justify-content:center;gap:11px}.u007-media-empty b{display:grid;place-items:center;width:35px;height:35px;border:1px solid #ffc40055;border-radius:4px;color:var(--y);font-size:10px;letter-spacing:.06em}.u007-media-empty span{color:#6f7772;font-size:6px;font-weight:950;letter-spacing:.09em}.u007-section{flex:0 0 105px;min-height:70px;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#101310}.u007-relationships{flex-basis:79px}.u007-section-title{height:20px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#151916;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.07em}.u007-section-scroll{height:calc(100% - 20px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#555c57 #101310}.u007-detail-row{min-height:23px;display:grid;grid-template-columns:minmax(0,92px) 1fr;align-items:center;gap:7px;padding:4px 7px;border-bottom:1px solid #242925}.u007-detail-row:nth-child(even){background:#ffffff08}.u007-detail-row span{overflow:hidden;color:#929a95;font-size:5.5px;font-weight:900;letter-spacing:.035em;text-overflow:ellipsis;white-space:nowrap}.u007-detail-row strong{overflow:hidden;color:#eef1ef;font-size:7.5px;font-weight:900;text-align:right;text-overflow:ellipsis;white-space:nowrap}.u007-relationship-row{width:100%;min-height:29px;display:grid;grid-template-columns:1fr 18px;align-items:center;padding:4px 6px 4px 8px;border:0;border-bottom:1px solid #242925;background:transparent;color:#fff;text-align:left}.u007-relationship-row:nth-child(even){background:#ffffff08}.u007-relationship-row small{display:block;color:#8f9792;font-size:5px;font-weight:900}.u007-relationship-row strong{display:block;margin-top:2px;font-size:7px;font-weight:900}.u007-relationship-row em{display:block;color:#6e7771;font-size:5px;font-style:normal}.u007-relationship-row>b{color:var(--y);font-size:10px;text-align:center}.u007-empty{display:grid;place-items:center;min-height:42px;padding:8px;color:#68716b;font-size:5.5px;font-weight:900;letter-spacing:.05em;text-align:center}.u007-commands{position:absolute;left:7px;right:7px;bottom:78px;height:27px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:5px;background:#0f120f;overflow:hidden;z-index:20}.u007-commands button{border:0;border-right:1px solid var(--soft);background:transparent;color:#b9c0bb;font-size:7px;font-weight:900}.u007-commands button:last-child{border-right:0}.u007-commands button:hover{color:var(--y);background:#ffffff08}.u007-commands b{margin-left:3px;font-size:6px}.u007-child-rail{position:absolute;left:0;right:0;bottom:19px;height:55px;overflow:hidden;border-top:1px solid #292e2a;background:#080a09;z-index:18}.u007-editor{position:absolute;inset:0 0 19px;background:#090c0a;z-index:220}.u007-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-bottom:1px solid #303532;background:#151916}.u007-editor-head small{display:block;color:#8c958f;font-size:5px;font-weight:900}.u007-editor-head strong{display:block;margin-top:3px;font-size:10px}.u007-editor-head nav{display:flex;gap:3px}.u007-editor-head button{height:24px;padding:0 8px;border:1px solid #3b423d;border-radius:4px;background:#101310;color:#dfe3e0;font-size:6px;font-weight:900}.u007-editor-head button:first-child{color:var(--y)}.u007-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto}.u007-editor-scroll section{margin-bottom:9px;border:1px solid #343a35;border-radius:5px;background:#101310;overflow:hidden}.u007-editor-title{height:21px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid #252a26;color:var(--y);font-size:6px;font-weight:950}.u007-name-field{display:block;padding:7px}.u007-name-field span{display:block;margin-bottom:4px;color:#929a95;font-size:5px;font-weight:900}.u007-name-field input{width:100%;height:29px;padding:0 7px;border:1px solid #3a413c;border-radius:4px;background:#0b0e0c;color:#fff;font-size:9px;font-weight:900}.u007-editor-columns,.u007-editor-row{display:grid;grid-template-columns:44% 1fr 20px;gap:4px;align-items:center;padding:0 6px}.u007-editor-columns{height:18px;color:#777f79;font-size:5px;font-weight:900}.u007-editor-row{min-height:34px;border-top:1px solid #242925}.u007-editor-row input{width:100%;height:24px;padding:0 5px;border:1px solid #343a35;border-radius:3px;background:#0b0e0c;color:#f2f4f2;font-size:7px;font-weight:850}.u007-editor-row button{width:20px;height:20px;border:1px solid #343a35;border-radius:3px;background:#111512;color:#737b76;font-size:12px}.u007-editor-row button:hover{color:#ff7777}.u007-add-field{width:calc(100% - 12px);height:26px;margin:6px;border:1px solid #ffc40055;border-radius:4px;background:#ffc4000c;color:var(--y);font-size:6px;font-weight:950}
-      `}</style>
-    </article>
-  );
+export default function IXIAosGenericUniversalLayout007({object={},children=[],ixiState={},onSaveObject=null,onAddObject=null,onHideObject=null,onDeleteObject=null,onOpenConsole=null,onOpenTransact=null,onRecall=null,onBoard=null,onReturn=null,onExposeObject=null,onSendFront=null,onSendBack=null,onCycleColor=null,onCycleOutline=null,onCycleFace=null,onRailSend=null,armedDestination="",onSendToArmedDestination=null,skinId="v12",onSkinChange=null}){
+  const [runtimeObject,setRuntimeObject]=useState(object);const [editing,setEditing]=useState(false);const [saving,setSaving]=useState(false);const [activeChildIndex,setActiveChildIndex]=useState(0);useEffect(()=>setRuntimeObject(object),[object]);
+  const actions=getObjectActionCapabilities(runtimeObject);const presentation=getObjectPresentation(runtimeObject);const relationships=getObjectRelationships(runtimeObject);const items=useMemo(()=>asArray(children).filter(Boolean),[children]);const definitions=getFieldDefinitions(runtimeObject);const fields=getObjectFields(runtimeObject);const image=getPrimaryImage(runtimeObject);const populatedFields=definitions.map(definition=>({definition,value:inputValue(fields?.[definition.fieldId])})).filter(item=>clean(item.value));const safeIndex=items.length?Math.min(activeChildIndex,items.length-1):0;const detailsTitle=clean(presentation?.detailsTitle)||"DETAILS";const relationshipsTitle=clean(presentation?.relationshipsTitle)||"RELATIONSHIPS";const mediaLabel=clean(presentation?.mediaLabel)||"PRIMARY MEDIA";
+  async function save(nextObject){setSaving(true);try{await onSaveObject?.({objectId:getObjectId(nextObject),object:nextObject,displayName:nextObject.displayName,fields:{...getObjectFields(nextObject)},fieldDefinitions:asArray(nextObject.fieldDefinitions),metadata:{...(nextObject.metadata||{})},media:asArray(nextObject.media)});setRuntimeObject(nextObject);setEditing(false);}finally{setSaving(false);}}
+  function command(event,callback){event.preventDefault();event.stopPropagation();callback?.(runtimeObject);}
+  return <article className="ixi-universal-card-007" data-card-number="007" data-card-skin={skinId}><header className="u007-header"><div className="u007-identity"><span>{getObjectLabel(runtimeObject)}</span><h2>{getObjectDisplayName(runtimeObject)}</h2></div>{!editing?<IXIAosCardHeaderControls canAdd={actions.canCreate&&typeof onAddObject==="function"} canEdit={actions.canEdit} canTransact={actions.canTransact&&typeof onOpenTransact==="function"} onAdd={()=>onAddObject?.(runtimeObject)} onToggleEdit={()=>setEditing(true)} onTransact={()=>onOpenTransact?.(runtimeObject)} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={actions.canOpenConsole?onOpenConsole:null} skinId={skinId} onSkinChange={onSkinChange}/>:null}</header><main className="u007-body"><section className="u007-media-row"><div className="u007-media-shell">{image?<img src={image} alt={getObjectDisplayName(runtimeObject)}/>:<div className="u007-media-empty"><b>IXI</b><span>{mediaLabel}</span></div>}</div><div className="u007-media-caption"><small>{getObjectLabel(runtimeObject)}</small><strong>{getObjectDisplayName(runtimeObject)}</strong><span>{populatedFields.length} DETAILS · {relationships.length} RELATIONSHIPS</span></div></section><section className="u007-section u007-details"><div className="u007-section-title">{detailsTitle}</div><div className="u007-section-scroll">{populatedFields.map(({definition,value})=><div className="u007-detail-row" key={definition.fieldId}><span>{definition.label}</span><strong>{value}</strong></div>)}{!populatedFields.length?<div className="u007-empty">NO DETAILS YET · EDIT TO ADD</div>:null}</div></section><section className="u007-section u007-relationships"><div className="u007-section-title">{relationshipsTitle}</div><div className="u007-section-scroll">{relationships.map(relationship=><button type="button" className="u007-relationship-row" key={relationship.id} onClick={event=>event.stopPropagation()}><span><small>{relationship.label}</small><strong>{relationship.value}</strong>{relationship.secondary?<em>{relationship.secondary}</em>:null}</span><b>›</b></button>)}{!relationships.length?<div className="u007-empty">NO RELATIONSHIPS</div>:null}</div></section></main><nav className="u007-commands"><button type="button" onClick={event=>command(event,onRecall)}>↻ <b>RECALL</b></button><button type="button" onClick={event=>command(event,onBoard)}>▦ <b>BOARD</b></button><button type="button" onClick={event=>command(event,onReturn)}>↩ <b>RETURN</b></button></nav><div className="u007-child-rail"><IXICollectionThumbRail items={items} activeItemIndex={safeIndex} getItemId={getObjectId} getItemImage={getPrimaryImage} getItemLabel={getObjectDisplayName} onSelectItem={(item,index)=>{setActiveChildIndex(index);onExposeObject?.(item,runtimeObject);}}/></div><IXIObjectRail object={runtimeObject} saved={false} color={ixiState?.color||"none"} outline={Number(ixiState?.outline??1)} face={1} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} onCycleFace={onCycleFace} onRailSend={onRailSend} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination}/>{editing?<UniversalEditor object={runtimeObject} saving={saving} onCancel={()=>setEditing(false)} onSave={save}/>:null}<style jsx global>{`
+.ixi-universal-card-007,.ixi-universal-card-007 *{box-sizing:border-box}.ixi-universal-card-007{--y:#ffc400;--line:#343a35;--soft:#252a26;position:relative;width:298px;height:471px;overflow:hidden;border:1px solid #454b47;border-radius:13px;background:linear-gradient(180deg,#101310,#080a09);color:#f4f5f4;font-family:Arial,Helvetica,sans-serif;box-shadow:inset 0 1px #ffffff12,0 18px 40px #0008}.u007-header{position:absolute;inset:0 0 auto;height:43px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#171a18,#101210);z-index:30}.u007-identity{max-width:188px}.u007-identity>span{display:block;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u007-identity h2{margin:4px 0 0;color:#f6f7f6;font-size:14px;line-height:1;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u007-body{position:absolute;top:43px;left:7px;right:7px;bottom:111px;display:flex;flex-direction:column;gap:5px;padding:5px 0;overflow-y:auto}.u007-media-row{flex:0 0 78px;display:grid;grid-template-columns:96px 1fr;gap:7px}.u007-media-shell{width:96px;height:72px;align-self:center;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0b0e0c}.u007-media-shell img{width:100%;height:100%;display:block;object-fit:contain;background:#090c0a}.u007-media-empty{display:flex;flex-direction:column;align-items:center;gap:4px}.u007-media-empty b{color:var(--y);font-size:14px}.u007-media-empty span{color:#6f7772;font-size:5px;font-weight:950}.u007-media-caption{min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 8px;border:1px solid var(--line);border-radius:5px;background:#111411}.u007-media-caption small{color:#969d98;font-size:5px;font-weight:900}.u007-media-caption strong{margin-top:4px;overflow:hidden;color:#f2f4f2;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.u007-media-caption span{margin-top:5px;color:#737b76;font-size:5px;font-weight:900}.u007-section{flex:0 0 101px;min-height:70px;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#101310}.u007-relationships{flex-basis:75px}.u007-section-title{height:20px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#151916;color:var(--y);font-size:6px;font-weight:950}.u007-section-scroll{height:calc(100% - 20px);overflow-y:auto}.u007-detail-row{min-height:22px;display:grid;grid-template-columns:minmax(0,92px) 1fr;align-items:center;gap:7px;padding:4px 7px;border-bottom:1px solid #242925}.u007-detail-row:nth-child(even){background:#ffffff08}.u007-detail-row span{overflow:hidden;color:#929a95;font-size:5.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.u007-detail-row strong{overflow:hidden;color:#eef1ef;font-size:7.5px;font-weight:900;text-align:right;text-overflow:ellipsis;white-space:nowrap}.u007-relationship-row{width:100%;min-height:27px;display:grid;grid-template-columns:1fr 18px;align-items:center;padding:3px 6px 3px 8px;border:0;border-bottom:1px solid #242925;background:transparent;color:#fff;text-align:left}.u007-relationship-row:nth-child(even){background:#ffffff08}.u007-relationship-row small{display:block;color:#8f9792;font-size:5px;font-weight:900}.u007-relationship-row strong{display:block;margin-top:1px;font-size:7px;font-weight:900}.u007-relationship-row em{display:block;color:#6e7771;font-size:5px;font-style:normal}.u007-relationship-row>b{color:var(--y);font-size:10px;text-align:center}.u007-empty{display:grid;place-items:center;min-height:42px;padding:8px;color:#68716b;font-size:5.5px;font-weight:900;text-align:center}.u007-commands{position:absolute;left:7px;right:7px;bottom:78px;height:27px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:5px;background:#0f120f;overflow:hidden}.u007-commands button{border:0;border-right:1px solid var(--soft);background:transparent;color:#b9c0bb;font-size:7px;font-weight:900}.u007-commands button:last-child{border-right:0}.u007-commands b{margin-left:3px;font-size:6px}.u007-child-rail{position:absolute;left:0;right:0;bottom:19px;height:55px;overflow:hidden;border-top:1px solid #292e2a;background:#080a09}.u007-editor{position:absolute;inset:0 0 19px;background:#090c0a;z-index:220}.u007-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-bottom:1px solid #303532;background:#151916}.u007-editor-head small{display:block;color:#8c958f;font-size:5px;font-weight:900}.u007-editor-head strong{display:block;margin-top:3px;font-size:10px}.u007-editor-head nav{display:flex;gap:3px}.u007-editor-head button{height:24px;padding:0 8px;border:1px solid #3b423d;border-radius:4px;background:#101310;color:#dfe3e0;font-size:6px;font-weight:900}.u007-editor-head button:first-child{color:var(--y)}.u007-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto}.u007-editor-scroll>.ixi-aos-primary-media-editor{margin-bottom:8px}.u007-editor-scroll section{margin-bottom:9px;border:1px solid #343a35;border-radius:5px;background:#101310;overflow:hidden}.u007-editor-title{height:21px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid #252a26;color:var(--y);font-size:6px;font-weight:950}.u007-name-field{display:block;padding:7px}.u007-name-field span{display:block;margin-bottom:4px;color:#929a95;font-size:5px;font-weight:900}.u007-name-field input{width:100%;height:29px;padding:0 7px;border:1px solid #3a413c;border-radius:4px;background:#0b0e0c;color:#fff;font-size:9px;font-weight:900}.u007-editor-columns,.u007-editor-row{display:grid;grid-template-columns:44% 1fr 20px;gap:4px;align-items:center;padding:0 6px}.u007-editor-columns{height:18px;color:#777f79;font-size:5px;font-weight:900}.u007-editor-row{min-height:34px;border-top:1px solid #242925}.u007-editor-row input{width:100%;height:24px;padding:0 5px;border:1px solid #343a35;border-radius:3px;background:#0b0e0c;color:#f2f4f2;font-size:7px;font-weight:850}.u007-editor-row button{width:20px;height:20px;border:1px solid #343a35;border-radius:3px;background:#111512;color:#737b76;font-size:12px}.u007-add-field{width:calc(100% - 12px);height:26px;margin:6px;border:1px solid #ffc40055;border-radius:4px;background:#ffc4000c;color:var(--y);font-size:6px;font-weight:950}
+`}</style></article>;
 }
