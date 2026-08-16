@@ -1,10 +1,9 @@
-import IXIAosGenericObjectLayout007 from "../generic/IXIAosGenericObjectLayout007";
-import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
+import IXIAosGenericUniversalLayout007 from "../generic/IXIAosGenericUniversalLayout007";
 
+/*
+ * Compatibility export: older imports still reference this file name.
+ * Card 007 itself is now the universal, noun-agnostic AOS card.
+ */
 export default function IXIAosCard007Employee(props) {
-  return (
-    <IXIAosGenericCardRailShell object={props.object} {...props} face={1}>
-      <IXIAosGenericObjectLayout007 {...props} />
-    </IXIAosGenericCardRailShell>
-  );
+  return <IXIAosGenericUniversalLayout007 {...props} />;
 }
