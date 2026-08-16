@@ -142,9 +142,9 @@ export default function IXIPurchaseApp({
       for (const related of relatedRecords(context, workOrder)) nextRecord = appendIXIPurchaseRelated(nextRecord, related);
       if (vendorLabel) nextRecord = appendIXIPurchaseRelated(nextRecord, { id: clean(input.vendorId || `vendor:${vendorLabel.toLowerCase()}`), label: vendorLabel, type: "Vendor" });
 
-      setRecord(nextRecord);
       await onSave?.(persisted.draft, { ...input, files: attachments.map(item => item.file), purchaseRecord: nextRecord }, persisted.response);
       await onPurchaseChange?.(nextRecord, { action: "created", persisted });
+      setRecord(nextRecord);
     } catch (error) {
       setSaveError(clean(error?.message) || t.saveFailed);
     } finally {
@@ -193,13 +193,18 @@ export default function IXIPurchaseApp({
         payload
       });
 
-      setRecord(next);
+      // The parent/IX-Core integration seam is authoritative for non-financial
+      // Purchase lifecycle persistence. Do not advance visible state until that
+      // callback resolves. This gives us rollback-safe behavior even before the
+      // dedicated Purchase Record persistence service is introduced.
       await onPurchaseChange?.(next, {
         action,
         payload,
         previous: record,
         persistence
       });
+
+      setRecord(next);
     } catch (error) {
       setSaveError(clean(error?.message) || "Purchase action failed.");
     } finally {
