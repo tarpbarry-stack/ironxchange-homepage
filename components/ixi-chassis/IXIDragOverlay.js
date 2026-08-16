@@ -1,5 +1,5 @@
+import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import { DragOverlay } from "@dnd-kit/core";
-import ListingCard from "../ListingCard";
 
 export default function IXIDragOverlay({
   activeListing,
@@ -11,7 +11,7 @@ export default function IXIDragOverlay({
      <DragOverlay>
         {getActiveDndListing() ? (
           <div className="ixi-drag-overlay-card">
-            <ListingCard
+            <IXIMachineCard
               listing={getActiveDndListing()}
               saved={savedIds.includes(String(activeDndId))}
               onToggleSaved={() => {}}

@@ -1,10 +1,9 @@
+import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import {
   DndContext,
   DragOverlay
 } from "@dnd-kit/core";
 
-import ListingCard
-  from "../ListingCard";
 
 import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
@@ -161,7 +160,7 @@ export default function IXIDragEngine({
      * object contract rolls outward.
      */
     return (
-      <ListingCard
+      <IXIMachineCard
         listing={
           activeDndObject
         }

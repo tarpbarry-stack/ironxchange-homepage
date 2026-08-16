@@ -1,3 +1,4 @@
+import IXIMachineCard from "../components/ixi-machine-card/IXIMachineCard";
 import Head from "next/head";
 import {
   useEffect,
@@ -10,7 +11,6 @@ import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import ListingCard from "../components/ListingCard";
 
 import IXIMachinePlacementControl
 from "../components/ixi-machine-placement/IXIMachinePlacementControl";
@@ -1704,7 +1704,7 @@ async function createListing() {
     </div>
   ) : null}
 
-  <ListingCard
+  <IXIMachineCard
   listing={previewListing}
   sellerMode={true}
   creationMode={false}

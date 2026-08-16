@@ -30,7 +30,6 @@ import {
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import ListingCard from "../../components/ListingCard";
 
 import { getListingId } from "../../lib/listingFormatters";
 import {

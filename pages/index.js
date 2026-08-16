@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import Navbar from "../components/Navbar";
-import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 import { captureIXEvent } from "../lib/posthog";
 import { getV12CategoryNames } from "../lib/v12TaxonomyAdapter";

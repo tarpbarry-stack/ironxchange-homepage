@@ -1,3 +1,4 @@
+import IXIMachineCard from "../components/ixi-machine-card/IXIMachineCard";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -11,7 +12,6 @@ import { captureIXEvent } from "../lib/posthog";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-import ListingCard from "../components/ListingCard";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 
 import {
@@ -2429,7 +2429,7 @@ onClick={async () => {
   </div>
 
   <div className="live-card-shell">
-    <ListingCard
+    <IXIMachineCard
       listing={previewListing}
       sellerMode={true}
       launchMode={true}

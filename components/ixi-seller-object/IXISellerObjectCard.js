@@ -1,8 +1,8 @@
+import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import { useDraggable } from "@dnd-kit/core";
 
 import SellerLogoDecal from "../SellerLogoDecal";
 import IXIMachineRail from "../IXIMachineRail";
-import ListingCard from "../ListingCard";
 
 import {
   createCheckoutRecord,
@@ -270,7 +270,7 @@ const {
       {...childDragAttributes}
       {...childDragListeners}
     >
-      <ListingCard
+      <IXIMachineCard
         listing={activeMachine}
         saved={false}
         showSave={false}

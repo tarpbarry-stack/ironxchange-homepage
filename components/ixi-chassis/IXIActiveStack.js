@@ -1,3 +1,4 @@
+import IXIMachineCard from "../ixi-machine-card/IXIMachineCard";
 import {
   SortableContext,
   horizontalListSortingStrategy
@@ -5,7 +6,6 @@ import {
 
 import { rectSortingStrategy } from "@dnd-kit/sortable";
 
-import ListingCard from "../ListingCard";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
@@ -71,7 +71,7 @@ export default function IXIActiveStack({
           {({ dragHandleProps }) => (
   enableCardScaling ? (
     <IXIScaledCardShell size={cardScaleMode}>
-      <ListingCard
+      <IXIMachineCard
                 listing={machine}
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(machine)}
@@ -96,7 +96,7 @@ export default function IXIActiveStack({
                    />
     </IXIScaledCardShell>
   ) : (
-    <ListingCard
+    <IXIMachineCard
       listing={machine}
       saved={savedIds.includes(id)}
       onToggleSaved={() => toggleSave(machine)}

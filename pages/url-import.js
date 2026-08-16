@@ -1,3 +1,4 @@
+import IXIMachineCard from "../components/ixi-machine-card/IXIMachineCard";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -5,7 +6,6 @@ import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import ListingCard from "../components/ListingCard";
 
 import {
   applyV12TaxonomyPath,
@@ -2417,7 +2417,7 @@ showCardNotice({
   </div>
 
   <div className="live-card-shell">
-    <ListingCard
+    <IXIMachineCard
   listing={previewListing}
   sourceListingUrl={
     previewListing.sourceListingUrl

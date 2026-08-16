@@ -1,3 +1,4 @@
+import IXIMachineCard from "../components/ixi-machine-card/IXIMachineCard";
 import Head from "next/head";
 import { useMemo, useState, useEffect } from "react";
 import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
@@ -5,7 +6,6 @@ import { createInstance, types as sdkTypes } from "sharetribe-flex-sdk";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-import ListingCard from "../components/ListingCard";
 
 import motorGradersTaxonomy from "../lib/motorGradersTaxonomy";
 import wheelLoadersTaxonomy from "../lib/wheelLoadersTaxonomy";
@@ -13049,7 +13049,7 @@ return (
 
           <aside className="preview-panel">
             <div className="preview-card-wrap">
-  <ListingCard
+  <IXIMachineCard
     listing={previewListing}
     showSave={false}
     from="preview"

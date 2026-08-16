@@ -1,3 +1,4 @@
+import IXIMachineCard from "../components/ixi-machine-card/IXIMachineCard";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,7 +16,6 @@ import {
 } from "@dnd-kit/sortable";
 
 import Navbar from "../components/Navbar";
-import ListingCard from "../components/ListingCard";
 import { getListingId } from "../lib/listingFormatters";
 
 import {
@@ -835,7 +835,7 @@ return (
                 )}
 
                 <div className="loaded-card-scale">
-                  <ListingCard
+                  <IXIMachineCard
                     listing={machine}
                     saved={false}
                     onToggleSaved={() => {}}
@@ -979,7 +979,7 @@ return (
   {activeDragMachine ? (
     <div className="theater-drag-overlay-card">
       <div className="loaded-card-scale">
-        <ListingCard
+        <IXIMachineCard
           listing={activeDragMachine}
           saved={false}
           onToggleSaved={() => {}}

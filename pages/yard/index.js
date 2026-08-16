@@ -25,7 +25,6 @@ import {
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import ListingCard from "../../components/ListingCard";
 import IXISellerObjectCard from "../../components/ixi-seller-object/IXISellerObjectCard";
 
 import { getListingId } from "../../lib/listingFormatters";
