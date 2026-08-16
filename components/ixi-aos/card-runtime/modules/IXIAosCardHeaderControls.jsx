@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useIXIAosCardCommands } from "../IXIAosCardCommandContext";
+import { getObjectActionCapabilities } from "../IXIAosSemanticObjectPresentation";
 import IXIAosOfficeSkinCompatibilityStyles from "./IXIAosOfficeSkinCompatibilityStyles";
 import IXIAosLocationVisualCorrections from "./IXIAosLocationVisualCorrections";
 import IXIAosTransactContrastPass from "./IXIAosTransactContrastPass";
@@ -25,7 +26,7 @@ export default function IXIAosCardHeaderControls({
   canEdit = false,
   canTransact = false,
   canHide = true,
-  canDelete = false,
+  canDelete = true,
   editing = false,
   onAdd = null,
   onToggleEdit = null,
@@ -38,6 +39,7 @@ export default function IXIAosCardHeaderControls({
   onSkinChange = null
 }) {
   const runtimeCommands = useIXIAosCardCommands();
+  const effective = getObjectActionCapabilities(runtimeCommands?.object || {});
   const [menuOpen, setMenuOpen] = useState(false);
   const [localSkinId, setLocalSkinId] = useState("v12");
 
@@ -46,9 +48,12 @@ export default function IXIAosCardHeaderControls({
       ? onTransact
       : runtimeCommands?.onOpenTransact;
 
-  const showTransact =
-    canTransact === true &&
-    typeof resolvedOnTransact === "function";
+  const showAdd = canAdd === true && effective.canCreate !== false && typeof onAdd === "function";
+  const showEdit = canEdit === true && effective.canEdit !== false && typeof onToggleEdit === "function";
+  const showTransact = canTransact === true && effective.canTransact !== false && typeof resolvedOnTransact === "function";
+  const showConsole = effective.canOpenConsole !== false && typeof onOpenConsole === "function";
+  const showHide = canHide !== false && effective.canHide !== false && typeof onHide === "function";
+  const showDelete = canDelete !== false && effective.canDelete === true && typeof onDelete === "function";
 
   function stop(event) {
     event?.preventDefault?.();
@@ -76,26 +81,13 @@ export default function IXIAosCardHeaderControls({
   }
 
   return (
-    <div
-      className={`ixi-aos-card-header-controls skin-${resolvedSkinId}`}
-      data-card-skin={resolvedSkinId}
-      onPointerDown={event => event.stopPropagation()}
-    >
-      {canAdd && typeof onAdd === "function" ? (
-        <button type="button" className="header-action add" onClick={event => { stop(event); onAdd(); }}>+</button>
-      ) : null}
-
-      {canEdit && typeof onToggleEdit === "function" ? (
-        <button type="button" className={`header-action edit ${editing ? "active" : ""}`} onClick={event => { stop(event); if (!editing) onToggleEdit(); }}>EDIT</button>
-      ) : null}
-
-      {showTransact ? (
-        <button type="button" className="header-action transact" onClick={event => { stop(event); resolvedOnTransact(); }}>$</button>
-      ) : null}
+    <div className={`ixi-aos-card-header-controls skin-${resolvedSkinId}`} data-card-skin={resolvedSkinId} onPointerDown={event => event.stopPropagation()}>
+      {showAdd ? <button type="button" className="header-action add" onClick={event => { stop(event); onAdd(); }}>+</button> : null}
+      {showEdit ? <button type="button" className={`header-action edit ${editing ? "active" : ""}`} onClick={event => { stop(event); if (!editing) onToggleEdit(); }}>EDIT</button> : null}
+      {showTransact ? <button type="button" className="header-action transact" onClick={event => { stop(event); resolvedOnTransact(); }}>$</button> : null}
 
       <div className="menu-shell">
         <button type="button" className="header-action menu" onClick={event => { stop(event); setMenuOpen(value => !value); }}>⋮</button>
-
         {menuOpen ? (
           <div className="header-menu" onClick={event => event.stopPropagation()}>
             <div className="skin-menu-group">
@@ -110,18 +102,9 @@ export default function IXIAosCardHeaderControls({
                 );
               })}
             </div>
-
-            {typeof onOpenConsole === "function" ? (
-              <button type="button" onClick={event => { stop(event); setMenuOpen(false); onOpenConsole(); }}>OPEN CONSOLE</button>
-            ) : null}
-
-            {canHide && typeof onHide === "function" ? (
-              <button type="button" onClick={event => { stop(event); setMenuOpen(false); onHide(); }}>HIDE</button>
-            ) : null}
-
-            {canDelete && typeof onDelete === "function" ? (
-              <button type="button" className="danger" onClick={event => { stop(event); setMenuOpen(false); onDelete(); }}>DELETE</button>
-            ) : null}
+            {showConsole ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onOpenConsole(); }}>OPEN CONSOLE</button> : null}
+            {showHide ? <button type="button" onClick={event => { stop(event); setMenuOpen(false); onHide(); }}>HIDE</button> : null}
+            {showDelete ? <button type="button" className="danger" onClick={event => { stop(event); setMenuOpen(false); onDelete(); }}>DELETE</button> : null}
           </div>
         ) : null}
       </div>
