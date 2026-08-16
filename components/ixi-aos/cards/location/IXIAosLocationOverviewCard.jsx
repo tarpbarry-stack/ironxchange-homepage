@@ -1,12 +1,24 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import IXIMachineRail from "../../../IXIMachineRail";
 import IXICollectionThumbRail from "../../../ixi-object-system/IXICollectionThumbRail";
-import IXIAosPrimaryMediaPanel from "../../card-runtime/modules/IXIAosPrimaryMediaPanel";
-import IXIAosInlineAddress from "../../card-runtime/modules/IXIAosInlineAddress";
-import IXIAosInlineMetricStrip from "../../card-runtime/modules/IXIAosInlineMetricStrip";
-import IXIAosRelationshipInfrastructurePanel from "../../card-runtime/modules/IXIAosRelationshipInfrastructurePanel";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
+import {
+  asArray,
+  buildChildAggregateGroups,
+  clean,
+  getFieldDefinitions,
+  getFieldDisplayValue,
+  getFieldsByRole,
+  getObjectActionCapabilities,
+  getObjectDisplayName,
+  getObjectFields,
+  getObjectId,
+  getObjectLabel,
+  getObjectPresentation,
+  getObjectRelationships,
+  getPrimaryImage
+} from "../../card-runtime/IXIAosSemanticObjectPresentation";
 
 const W = 298;
 const H = 471;
@@ -15,49 +27,72 @@ const HEADER = 43;
 const THUMBS = 57;
 const COMMANDS = 25;
 
-function clean(value) {
-  return String(value ?? "").trim();
+function fieldInputValue(value) {
+  if (Array.isArray(value)) return value.join(", ");
+  if (value && typeof value === "object") return clean(value?.displayName || value?.label || value?.name || value?.value);
+  return String(value ?? "");
 }
 
-function safeObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-}
-
-function itemId(item = {}, index = 0) {
-  return clean(item.objectId || item.id || item.uuid || `item-${index}`);
-}
-
-function itemImage(item = {}) {
-  const media = Array.isArray(item.media) ? item.media : [];
-  const first = media.find(entry =>
-    typeof entry === "string"
-      ? Boolean(clean(entry))
-      : Boolean(entry?.url || entry?.src || entry?.imageUrl)
-  );
-  if (typeof first === "string") return first;
-  return clean(first?.url || first?.src || first?.imageUrl || item.imageUrl || item.imageUrls?.[0] || item.images?.[0]?.url);
-}
-
-function itemLabel(item = {}, index = 0) {
-  return clean(
-    item.displayName ||
-      item.name ||
-      item.title ||
-      [item?.fields?.year, item?.fields?.make, item?.fields?.model].filter(Boolean).join(" ") ||
-      `OBJECT ${index + 1}`
-  );
-}
-
-const metricsDefinition = {
-  moduleType: "inline-metric-strip",
-  config: {
-    metrics: [
-      { metricId: "assets", label: "ASSETS", source: "projection", key: "assetCount", type: "number" },
-      { metricId: "value", label: "VALUE", source: "projection", key: "totalAssetValue", type: "money" },
-      { metricId: "employees", label: "EMPLOYEES", source: "projection", key: "employeeCount", type: "number" }
-    ]
+function parseValue(definition, rawValue) {
+  const type = clean(definition?.fieldType).toLowerCase();
+  if (["number", "integer", "money", "currency"].includes(type)) {
+    const number = Number(rawValue);
+    return Number.isFinite(number) ? number : null;
   }
-};
+  if (["tags", "array", "list", "multi-select", "multiselect"].includes(type)) {
+    return String(rawValue || "").split(",").map(clean).filter(Boolean);
+  }
+  return rawValue;
+}
+
+function firstRoleField(object, roles = []) {
+  for (const role of roles) {
+    const definition = getFieldsByRole(object, role)[0];
+    if (definition) return definition;
+  }
+  return null;
+}
+
+function GenericOverviewEditor({ object, saving, onCancel, onSave }) {
+  const definitions = getFieldDefinitions(object).filter(definition => definition.editable !== false);
+  const [name, setName] = useState(getObjectDisplayName(object));
+  const [draft, setDraft] = useState({});
+
+  useEffect(() => {
+    setName(getObjectDisplayName(object));
+    const output = {};
+    definitions.forEach(definition => {
+      output[definition.fieldId] = fieldInputValue(getObjectFields(object)?.[definition.fieldId]);
+    });
+    setDraft(output);
+  }, [object]);
+
+  async function save() {
+    const nextFields = { ...getObjectFields(object) };
+    definitions.forEach(definition => {
+      nextFields[definition.fieldId] = parseValue(definition, draft[definition.fieldId]);
+    });
+    await onSave?.({
+      ...object,
+      displayName: clean(name) || getObjectDisplayName(object),
+      fields: nextFields
+    });
+  }
+
+  return (
+    <div className="gov-editor" onPointerDown={event => event.stopPropagation()}>
+      <div className="gov-editor-head"><div><small>{getObjectLabel(object)}</small><strong>EDIT OBJECT</strong></div><nav><button type="button" disabled={saving} onClick={save}>SAVE</button><button type="button" disabled={saving} onClick={onCancel}>CANCEL</button></nav></div>
+      <div className="gov-editor-scroll">
+        <label><span>DISPLAY NAME</span><input value={name} onChange={event => setName(event.target.value)}/></label>
+        {definitions.map(definition => <label key={definition.fieldId}><span>{definition.label}</span><input value={draft[definition.fieldId] ?? ""} onChange={event => setDraft(current => ({ ...current, [definition.fieldId]: event.target.value }))}/></label>)}
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value }) {
+  return <div className="gov-metric"><span>{label}</span><strong>{value}</strong></div>;
+}
 
 export default function IXIAosLocationOverviewCard({
   variant = "001",
@@ -83,279 +118,119 @@ export default function IXIAosLocationOverviewCard({
   armedDestination = "",
   onSendToArmedDestination = null
 }) {
-  const objectId = clean(object.objectId || object.id);
+  const [runtimeObject, setRuntimeObject] = useState(object);
+  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedChildIndex, setSelectedChildIndex] = useState(0);
-  const [mediaDraft, setMediaDraft] = useState(() => Array.isArray(object.media) ? object.media : []);
 
-  const editDraft = safeObject(ixiState.editDraft);
-  const draftFields = safeObject(editDraft.fields);
-  const editing = Boolean(ixiState.editing);
-  const draftDisplayName = editDraft.displayName ?? object.displayName ?? "YARD NAME";
+  useEffect(() => setRuntimeObject(object), [object]);
 
-  const runtimeObject = useMemo(() => ({
-    ...object,
-    displayName: draftDisplayName,
-    media: mediaDraft,
-    fields: {
-      ...safeObject(object.fields),
-      ...draftFields
-    }
-  }), [object, draftDisplayName, draftFields, mediaDraft]);
+  const children = useMemo(() => asArray(objects).filter(Boolean), [objects]);
+  const aggregateGroups = useMemo(() => buildChildAggregateGroups(children), [children]);
+  const relationships = getObjectRelationships(runtimeObject);
+  const presentation = getObjectPresentation(runtimeObject);
+  const actions = getObjectActionCapabilities(runtimeObject);
+  const image = getPrimaryImage(runtimeObject);
 
-  const children = Array.isArray(objects) ? objects : [];
   const activeIndex = children.length ? Math.min(Math.max(selectedChildIndex, 0), children.length - 1) : -1;
   const activeChild = activeIndex >= 0 ? children[activeIndex] : null;
-  const activeTitle = activeChild ? itemLabel(activeChild, activeIndex) : "NO OBJECT SELECTED";
 
-  const contactName = clean(runtimeObject?.fields?.yardContact) || "JOHN CARTER";
-  const contactPhone = clean(runtimeObject?.fields?.yardPhone) || "432-555-0186";
+  const primaryDescriptorDefinition = firstRoleField(runtimeObject, ["descriptor-primary", "subtitle", "secondary"]);
+  const secondaryDescriptorDefinition = firstRoleField(runtimeObject, ["descriptor-secondary", "location", "group", "organization"]);
+  const primaryDescriptor = clean(presentation?.primaryDescriptor) || (primaryDescriptorDefinition ? getFieldDisplayValue(runtimeObject, primaryDescriptorDefinition) : "");
+  const secondaryDescriptor = clean(presentation?.secondaryDescriptor) || (secondaryDescriptorDefinition ? getFieldDisplayValue(runtimeObject, secondaryDescriptorDefinition) : "");
 
-  function patchField(fieldId, value) {
-    if (!objectId) return;
-    onIxiStateChange?.(objectId, {
-      editDraft: {
-        ...editDraft,
-        fields: { ...draftFields, [fieldId]: value }
-      }
-    });
-  }
+  const firstGroup = aggregateGroups[0] || null;
+  const metricEntries = firstGroup?.entries || [];
+  const metrics = [
+    { label: clean(presentation?.countLabel) || "OBJECTS", value: children.length },
+    ...metricEntries.slice(0, 2).map(entry => ({ label: entry.label, value: entry.value }))
+  ];
 
-  function patchDisplayName(value) {
-    if (!objectId) return;
-    onIxiStateChange?.(objectId, {
-      editDraft: {
-        ...editDraft,
-        displayName: value,
-        fields: { ...draftFields }
-      }
-    });
-  }
+  while (metrics.length < 3) metrics.push({ label: "—", value: "—" });
 
-  function addPhoto(photo) {
-    const url = clean(photo?.url);
-    if (!url) return;
-    setMediaDraft(current => [{
-      url,
-      name: clean(photo?.name),
-      type: clean(photo?.type),
-      size: Number(photo?.size || 0),
-      source: "user-upload"
-    }, ...current]);
-  }
+  const sectionTitle = clean(presentation?.relationshipsTitle) || "RELATIONSHIPS";
+  const collectionTitle = clean(presentation?.collectionTitle) || (activeChild ? getObjectDisplayName(activeChild) : "NO OBJECT SELECTED");
+  const hasThumbs = variant !== "002";
 
-  function beginEdit() {
-    if (!objectId) return;
-    onIxiStateChange?.(objectId, {
-      editing: true,
-      editDraft: {
-        displayName: object.displayName || "YARD NAME",
-        fields: { ...safeObject(object.fields) }
-      }
-    });
-  }
-
-  async function saveEdit() {
-    if (!objectId || saving) return;
+  async function save(nextObject) {
     setSaving(true);
     try {
       await onSaveObject?.({
-        objectId,
-        object: runtimeObject,
-        displayName: runtimeObject.displayName,
-        fields: { ...safeObject(runtimeObject.fields) },
-        media: [...mediaDraft]
+        objectId: getObjectId(nextObject),
+        object: nextObject,
+        displayName: nextObject.displayName,
+        fields: { ...getObjectFields(nextObject) },
+        media: asArray(nextObject.media)
       });
-      onIxiStateChange?.(objectId, { editing: false, editDraft: null });
+      setRuntimeObject(nextObject);
+      setEditing(false);
     } finally {
       setSaving(false);
     }
   }
 
-  function cancelEdit() {
-    setMediaDraft(Array.isArray(object.media) ? object.media : []);
-    onIxiStateChange?.(objectId, { editing: false, editDraft: null });
+  function command(event, callback) {
+    event.preventDefault();
+    event.stopPropagation();
+    callback?.(runtimeObject);
   }
-
-  function previousChild(event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if (!children.length) return;
-    setSelectedChildIndex(current => current <= 0 ? children.length - 1 : current - 1);
-  }
-
-  function nextChild(event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if (!children.length) return;
-    setSelectedChildIndex(current => current >= children.length - 1 ? 0 : current + 1);
-  }
-
-  function exposeSelected(event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if (!activeChild) return;
-    onExposeObject?.(activeChild, runtimeObject);
-  }
-
-  const hasThumbs = variant !== "002";
-  const relationshipHeight = variant === "002" ? 260 : variant === "003" ? 146 : 118;
 
   return (
-    <div className={`ixi-location-overview ixi-location-${variant}`}>
-      <header className="loc-head">
-        <div className="loc-identity">
-          <span>LOCATIONS &amp; FACILITIES</span>
-          {editing ? (
-            <input
-              value={draftDisplayName}
-              autoFocus
-              onPointerDown={event => event.stopPropagation()}
-              onChange={event => patchDisplayName(event.target.value)}
-            />
-          ) : (
-            <strong>{runtimeObject.displayName}</strong>
-          )}
-        </div>
-
-        {editing ? (
-          <div className="loc-edit-actions">
-            <button type="button" disabled={saving} onClick={saveEdit}>SAVE</button>
-            <button type="button" disabled={saving} onClick={cancelEdit}>CANCEL</button>
-          </div>
-        ) : (
-          <IXIAosCardHeaderControls
-            canAdd
-            canEdit
-            canTransact={typeof onOpenTransact === "function"}
-            onAdd={() => onAddObject?.(runtimeObject)}
-            onToggleEdit={beginEdit}
-            onTransact={onOpenTransact}
-            onHide={onHideObject}
-            onDelete={onDeleteObject}
-            onOpenConsole={onOpenConsole}
-          />
-        )}
+    <article className={`ixi-generic-overview gov-${variant}`} data-card-number={variant}>
+      <header className="gov-head">
+        <div className="gov-identity"><span>{getObjectLabel(runtimeObject)}</span><strong>{getObjectDisplayName(runtimeObject)}</strong></div>
+        {!editing ? <IXIAosCardHeaderControls
+          canAdd={actions.canCreate && typeof onAddObject === "function"}
+          canEdit={actions.canEdit}
+          canTransact={actions.canTransact && typeof onOpenTransact === "function"}
+          onAdd={() => onAddObject?.(runtimeObject)}
+          onToggleEdit={() => setEditing(true)}
+          onTransact={() => onOpenTransact?.(runtimeObject)}
+          onHide={onHideObject}
+          onDelete={onDeleteObject}
+          onOpenConsole={actions.canOpenConsole ? onOpenConsole : null}
+        /> : null}
       </header>
 
-      <main className="loc-body">
-        {variant === "003" ? (
-          <div className="loc-split-top">
-            <div className="loc-media split-media">
-              <IXIAosPrimaryMediaPanel
-                object={runtimeObject}
-                moduleDefinition={{ config: { height: 84 } }}
-                editing={editing}
-                onAddPhoto={addPhoto}
-              />
-            </div>
-            <div className="loc-contact-card">
-              <div className="loc-contact-address">
-                <span className="loc-pin">⌖</span>
-                <IXIAosInlineAddress object={runtimeObject} editing={editing} onFieldChange={patchField} />
-              </div>
-              <div className="loc-contact-person">
-                <strong>{contactName}</strong>
-                <span>{contactPhone}</span>
-              </div>
-            </div>
-          </div>
-        ) : variant === "001" ? (
-          <div className="loc-media">
-            <IXIAosPrimaryMediaPanel
-              object={runtimeObject}
-              moduleDefinition={{ config: { height: 112 } }}
-              editing={editing}
-              onAddPhoto={addPhoto}
-            />
+      <main className="gov-body">
+        {variant !== "002" ? (
+          <div className={`gov-media ${variant === "003" ? "compact" : ""}`}>
+            {image ? <img src={image} alt={getObjectDisplayName(runtimeObject)}/> : <div className="gov-media-empty"><b>IXI</b><span>PRIMARY MEDIA</span></div>}
           </div>
         ) : null}
+
+        <div className="gov-descriptor">
+          <span className="gov-mark">◆</span>
+          <div><strong>{primaryDescriptor || getObjectLabel(runtimeObject)}</strong><small>{secondaryDescriptor || clean(presentation?.descriptorFallback) || ""}</small></div>
+        </div>
 
         {variant !== "002" ? (
-          <div className="loc-preview">
-            <strong title={activeTitle}>{activeTitle}</strong>
-            <span>{activeChild ? `${activeIndex + 1}/${children.length}` : "0/0"}</span>
-            <button type="button" disabled={!activeChild} onPointerDown={event => event.stopPropagation()} onClick={exposeSelected}>OUT ↗</button>
-          </div>
+          <div className="gov-preview"><strong title={collectionTitle}>{collectionTitle}</strong><span>{activeChild ? `${activeIndex + 1}/${children.length}` : "0/0"}</span><button type="button" disabled={!activeChild} onClick={event => { event.stopPropagation(); if (activeChild) onExposeObject?.(activeChild, runtimeObject); }}>OUT ↗</button></div>
         ) : null}
 
-        {variant !== "003" ? (
-          <div className="loc-address-card">
-            <span className="loc-pin">⌖</span>
-            <IXIAosInlineAddress object={runtimeObject} editing={editing} onFieldChange={patchField} />
+        <div className="gov-metrics">{metrics.slice(0, 3).map((metric, index) => <Metric key={`${metric.label}-${index}`} label={metric.label} value={metric.value}/>)}</div>
+
+        <section className="gov-relations">
+          <h3>{sectionTitle}</h3>
+          <div className="gov-relation-scroll">
+            {relationships.map(relationship => <button type="button" key={relationship.id}><span><small>{relationship.label}</small><strong>{relationship.value}</strong>{relationship.secondary ? <em>{relationship.secondary}</em> : null}</span><b>›</b></button>)}
+            {!relationships.length ? <div className="gov-empty">NO RELATIONSHIPS</div> : null}
           </div>
-        ) : null}
-
-        <div className="loc-metrics">
-          <IXIAosInlineMetricStrip object={runtimeObject} projection={projection} moduleDefinition={metricsDefinition} />
-        </div>
-
-        <div className="loc-relationships">
-          <IXIAosRelationshipInfrastructurePanel
-            object={runtimeObject}
-            moduleDefinition={{ config: { title: "RELATIONSHIPS & INFRASTRUCTURE", height: relationshipHeight } }}
-          />
-        </div>
+        </section>
       </main>
 
-      <div className="loc-commands">
-        <button type="button" onClick={() => onRecall?.(runtimeObject)}>↻ <span>RECALL</span></button>
-        <button type="button" onClick={() => onBoard?.(runtimeObject)}>▦ <span>BOARD</span></button>
-        <button type="button" onClick={() => onReturn?.(runtimeObject)}>↩ <span>RETURN</span></button>
-      </div>
+      <nav className="gov-commands"><button type="button" onClick={event => command(event, onRecall)}>↻ <span>RECALL</span></button><button type="button" onClick={event => command(event, onBoard)}>▦ <span>BOARD</span></button><button type="button" onClick={event => command(event, onReturn)}>↩ <span>RETURN</span></button></nav>
 
-      {hasThumbs ? (
-        <div className="loc-thumbs">
-          <IXICollectionThumbRail
-            items={children}
-            activeItemIndex={activeIndex}
-            getItemId={itemId}
-            getItemImage={itemImage}
-            getItemLabel={itemLabel}
-            onSelectItem={(item, index) => setSelectedChildIndex(index)}
-          />
-          {children.length > 1 ? (
-            <>
-              <button type="button" className="loc-nav left" onPointerDown={event => event.stopPropagation()} onClick={previousChild}>‹</button>
-              <button type="button" className="loc-nav right" onPointerDown={event => event.stopPropagation()} onClick={nextChild}>›</button>
-            </>
-          ) : null}
-        </div>
-      ) : null}
+      {hasThumbs ? <div className="gov-thumbs"><IXICollectionThumbRail items={children} activeItemIndex={activeIndex} getItemId={getObjectId} getItemImage={getPrimaryImage} getItemLabel={getObjectDisplayName} onSelectItem={(item, index) => setSelectedChildIndex(index)}/></div> : null}
 
-      <IXIMachineRail
-        listing={runtimeObject}
-        saved={false}
-        boardColor="none"
-        boardOutline={1}
-        machineFace={1}
-        onSendFront={onSendFront}
-        onSendBack={onSendBack}
-        onCycleColor={onCycleColor}
-        onCycleOutline={onCycleOutline}
-        armedDestination={armedDestination}
-        onSendToArmedDestination={onSendToArmedDestination}
-      />
+      <IXIMachineRail listing={runtimeObject} saved={false} boardColor={ixiState?.color || "none"} boardOutline={Number(ixiState?.outline ?? 1)} machineFace={1} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination}/>
 
-      <style jsx>{`
-        .ixi-location-overview,.ixi-location-overview *{box-sizing:border-box}
-        .ixi-location-overview{--bg:#090b0d;--s1:#0f1317;--s2:#14191f;--s3:#181e25;--line:rgba(255,255,255,.095);--line2:rgba(255,255,255,.055);--text:#f4f6f7;--muted:#8d969e;--yellow:#ffc400;position:relative;width:${W}px;height:${H}px;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:15px;background:radial-gradient(130% 72% at 50% -8%,rgba(255,255,255,.052),transparent 43%),linear-gradient(180deg,#111419 0%,#0b0e11 54%,#080a0c 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 42px rgba(0,0,0,.46)}
-        .loc-head{position:absolute;inset:0 0 auto;height:${HEADER}px;padding:7px 9px 4px 10px;border-bottom:1px solid var(--line2);background:linear-gradient(180deg,rgba(255,255,255,.024),transparent);z-index:40}
-        .loc-identity{width:150px;min-width:0}.loc-identity>span{display:block;color:var(--yellow);font-size:6.6px;font-weight:850;letter-spacing:.105em}.loc-identity>strong{display:block;margin-top:4px;overflow:hidden;color:#fafafa;font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:800;line-height:1;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}.loc-identity>input{width:142px;height:22px;margin-top:3px;padding:0 6px;border:1px solid rgba(255,196,0,.42);border-radius:5px;background:#0b0d0f;color:#fff;font-size:11px;font-weight:800;outline:none;text-transform:uppercase}
-        .loc-edit-actions{position:absolute;top:9px;right:8px;display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}.loc-edit-actions button{height:22px;padding:0 8px;border:0;border-right:1px solid var(--line2);background:transparent;color:#aeb5ba;font-size:6px;font-weight:850}.loc-edit-actions button:first-child{color:var(--yellow)}.loc-edit-actions button:last-child{border-right:0}
-        .loc-body{position:absolute;top:${HEADER}px;left:0;right:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}.ixi-location-001 .loc-body,.ixi-location-003 .loc-body{bottom:${RAIL + THUMBS + COMMANDS + 7}px}.ixi-location-002 .loc-body{bottom:${RAIL + COMMANDS + 7}px;padding:8px 11px 0;gap:7px}
-        .loc-media{flex:0 0 112px;background:#060809;border-bottom:1px solid var(--line2);overflow:hidden}.split-media{flex:initial;width:149px;height:84px;border-right:1px solid var(--line);border-bottom:0}.loc-media :global(.ixi-aos-primary-media-panel){margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#060809!important}
-        .loc-split-top{flex:0 0 84px;display:grid;grid-template-columns:149px 149px;border-bottom:1px solid var(--line2)}
-        .loc-contact-card{height:84px;padding:7px 8px 6px;background:linear-gradient(180deg,var(--s2),var(--s1));display:grid;grid-template-rows:1fr 24px}.loc-contact-address{display:grid;grid-template-columns:12px minmax(0,1fr);align-items:center;gap:4px;min-height:0}.loc-contact-person{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;border-top:1px solid var(--line2);padding-top:5px}.loc-contact-person strong{overflow:hidden;color:#f2f4f5;font-size:7.4px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.loc-contact-person span{color:#89929a;font-size:6.2px;font-weight:700;white-space:nowrap}
-        .loc-preview{flex:0 0 22px;display:grid;grid-template-columns:minmax(0,1fr) 34px 52px;align-items:center;border-bottom:1px solid var(--line2);background:linear-gradient(180deg,#0d1013,#090b0d)}.loc-preview>strong{min-width:0;overflow:hidden;padding:0 8px;color:#e8ebed;font-size:7.5px;font-weight:780;text-overflow:ellipsis;white-space:nowrap}.loc-preview>span{color:#6f7880;font-size:6.5px;font-weight:700;text-align:center}.loc-preview>button{height:100%;border:0;border-left:1px solid var(--line2);background:transparent;color:var(--yellow);font-size:7.2px;font-weight:850;cursor:pointer}.loc-preview>button:disabled{opacity:.25}
-        .loc-address-card{flex:0 0 34px;margin:5px 10px 0;display:grid;grid-template-columns:18px minmax(0,1fr);align-items:center;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}.ixi-location-002 .loc-address-card{flex:0 0 53px;margin:0;padding:0 12px}.loc-pin{color:var(--yellow);font-size:10px;text-align:center}
-        .loc-address-card :global(.ixi-aos-inline-address),.loc-contact-address :global(.ixi-aos-inline-address){width:100%!important;min-height:0!important;height:auto!important;padding:0!important;border:0!important;background:transparent!important}.loc-address-card :global(.ixi-aos-inline-address strong),.loc-contact-address :global(.ixi-aos-inline-address strong){width:100%!important;color:#eef1f3!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;font-size:8.2px!important;font-weight:760!important;line-height:1.2!important;text-align:left!important;white-space:normal!important}.ixi-location-002 .loc-address-card :global(.ixi-aos-inline-address strong){font-size:8.8px!important}
-        .loc-metrics{flex:0 0 43px;margin:5px 10px 0}.ixi-location-002 .loc-metrics{margin:0;flex-basis:44px}.loc-metrics :global(.ixi-aos-inline-metrics){width:100%!important;height:100%!important;min-height:0!important;display:grid!important;grid-template-columns:1fr 1.25fr 1fr!important;gap:4px!important;padding:0!important;border:0!important;background:transparent!important}.loc-metrics :global(.ixi-aos-inline-metric){min-width:0!important;height:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;border:1px solid var(--line)!important;border-radius:7px!important;background:linear-gradient(180deg,var(--s2),var(--s1))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}.loc-metrics :global(.ixi-aos-inline-metric span){color:#c49a00!important;font-size:6.5px!important;font-weight:850!important;letter-spacing:.10em!important}.loc-metrics :global(.ixi-aos-inline-metric strong){color:#fff!important;font-size:12.2px!important;font-weight:800!important;line-height:1!important;letter-spacing:-.02em!important}
-        .loc-relationships{min-height:0;margin:6px 10px 0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,var(--s2),#0c0f12);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.ixi-location-001 .loc-relationships{flex:1}.ixi-location-003 .loc-relationships{flex:1}.ixi-location-002 .loc-relationships{margin:0;flex:1}
-        .loc-relationships :global(.ixi-aos-relationship-panel){width:100%!important;max-height:none!important}.loc-relationships :global(.aos-relationship-section){border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}.loc-relationships :global(.ixi-face-section-title){height:27px!important;min-height:27px!important;display:flex!important;align-items:center!important;padding:0 10px 0 13px!important;border-bottom:1px solid var(--line)!important;background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008))!important;color:var(--yellow)!important;font-size:6.9px!important;font-weight:850!important;letter-spacing:.08em!important;position:relative!important}.loc-relationships :global(.ixi-face-section-title::before){content:""!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:3px!important;background:var(--yellow)!important}.loc-relationships :global(.panel-scroll){height:calc(100% - 27px)!important;padding:3px 5px 5px!important}.loc-relationships :global(.relationship-row){height:24px!important;min-height:24px!important;padding:0 7px!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.05)!important;border-radius:0!important;background:rgba(255,255,255,.008)!important}.loc-relationships :global(.relationship-row:nth-child(even)){background:rgba(255,255,255,.022)!important}.loc-relationships :global(.relationship-row strong){color:#eef1f3!important;font-size:7.5px!important;font-weight:780!important}.loc-relationships :global(.relationship-row span){color:#8f979e!important;font-size:6.7px!important;font-weight:700!important}.loc-relationships :global(.relationship-row b){color:#d2a800!important;font-size:10px!important}
-        .loc-commands{position:absolute;left:10px;right:10px;height:${COMMANDS}px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);z-index:20}.ixi-location-001 .loc-commands,.ixi-location-003 .loc-commands{bottom:${RAIL + THUMBS + 4}px}.ixi-location-002 .loc-commands{bottom:${RAIL + 3}px}.loc-commands button{border:0;border-right:1px solid var(--line2);background:transparent;color:#aab0b5;font-size:6.4px;font-weight:780;cursor:pointer}.loc-commands button:last-child{border-right:0}.loc-commands button span{margin-left:3px}.loc-commands button:hover{color:#fff}
-        .loc-thumbs{position:absolute;left:0;right:0;bottom:${RAIL}px;height:${THUMBS}px;border-top:1px solid var(--line2);background:#080a0b;z-index:18;overflow:hidden}.loc-nav{position:absolute;top:0;bottom:0;width:16px;border:0;background:linear-gradient(90deg,#080a0b 55%,transparent);color:rgba(255,255,255,.35);font-size:27px;z-index:25;cursor:pointer}.loc-nav.left{left:0}.loc-nav.right{right:0;transform:none;background:linear-gradient(270deg,#080a0b 55%,transparent)}
+      {editing ? <GenericOverviewEditor object={runtimeObject} saving={saving} onCancel={() => setEditing(false)} onSave={save}/> : null}
+
+      <style jsx global>{`
+        .ixi-generic-overview,.ixi-generic-overview *{box-sizing:border-box}.ixi-generic-overview{--y:#ffc400;--line:rgba(255,255,255,.095);position:relative;width:${W}px;height:${H}px;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:15px;background:radial-gradient(130% 72% at 50% -8%,rgba(255,255,255,.052),transparent 43%),linear-gradient(180deg,#111419 0%,#0b0e11 54%,#080a0c 100%);color:#f4f6f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 42px rgba(0,0,0,.46)}.gov-head{position:absolute;inset:0 0 auto;height:${HEADER}px;padding:7px 9px 4px 10px;border-bottom:1px solid rgba(255,255,255,.055);z-index:40}.gov-identity{width:185px;min-width:0}.gov-identity>span{display:block;color:var(--y);font-size:6.6px;font-weight:850;letter-spacing:.105em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gov-identity>strong{display:block;margin-top:4px;overflow:hidden;color:#fafafa;font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:800;line-height:1;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}.gov-body{position:absolute;top:${HEADER}px;left:0;right:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}.gov-001 .gov-body,.gov-003 .gov-body{bottom:${RAIL + THUMBS + COMMANDS + 7}px}.gov-002 .gov-body{bottom:${RAIL + COMMANDS + 7}px;padding:8px 10px 0;gap:6px}.gov-media{flex:0 0 112px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.055);background:#060809}.gov-media.compact{flex-basis:84px}.gov-media img{width:100%;height:100%;object-fit:cover;display:block}.gov-media-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#60686e}.gov-media-empty b{font-size:21px;letter-spacing:.08em}.gov-media-empty span{font-size:5px;font-weight:900;letter-spacing:.12em}.gov-descriptor{flex:0 0 43px;margin:5px 10px 0;display:grid;grid-template-columns:20px 1fr;align-items:center;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:linear-gradient(180deg,#14191f,#0f1317)}.gov-002 .gov-descriptor{margin:0;flex-basis:57px}.gov-mark{color:var(--y);font-size:12px;text-align:center}.gov-descriptor strong{display:block;color:#eef1f3;font-size:8.2px;font-weight:800;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gov-descriptor small{display:block;margin-top:3px;color:#858e95;font-size:6.2px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gov-preview{flex:0 0 22px;display:grid;grid-template-columns:minmax(0,1fr) 34px 52px;align-items:center;border-bottom:1px solid rgba(255,255,255,.055);background:linear-gradient(180deg,#0d1013,#090b0d)}.gov-preview>strong{min-width:0;overflow:hidden;padding:0 8px;color:#e8ebed;font-size:7.5px;font-weight:780;text-overflow:ellipsis;white-space:nowrap}.gov-preview>span{color:#6f7880;font-size:6.5px;text-align:center}.gov-preview>button{height:100%;border:0;border-left:1px solid rgba(255,255,255,.055);background:transparent;color:var(--y);font-size:7.2px;font-weight:850}.gov-preview>button:disabled{opacity:.25}.gov-metrics{flex:0 0 43px;margin:5px 10px 0;display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:4px}.gov-002 .gov-metrics{margin:0;flex-basis:48px}.gov-metric{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid var(--line);border-radius:7px;background:linear-gradient(180deg,#14191f,#0f1317)}.gov-metric span{max-width:100%;padding:0 3px;overflow:hidden;color:#c49a00;font-size:6.2px;font-weight:850;letter-spacing:.07em;text-overflow:ellipsis;white-space:nowrap}.gov-metric strong{color:#fff;font-size:12px;font-weight:800;line-height:1}.gov-relations{min-height:0;margin:6px 10px 0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,#14191f,#0c0f12);flex:1}.gov-002 .gov-relations{margin:0}.gov-relations h3{height:27px;margin:0;display:flex;align-items:center;padding:0 10px 0 13px;border-bottom:1px solid var(--line);color:var(--y);font-size:6.9px;font-weight:850;letter-spacing:.08em}.gov-relation-scroll{height:calc(100% - 27px);overflow-y:auto}.gov-relation-scroll button{width:100%;min-height:29px;display:grid;grid-template-columns:1fr 18px;align-items:center;padding:4px 6px 4px 8px;border:0;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.008);color:#fff;text-align:left}.gov-relation-scroll button:nth-child(even){background:rgba(255,255,255,.022)}.gov-relation-scroll small{display:block;color:#8f979e;font-size:5px;font-weight:800}.gov-relation-scroll strong{display:block;margin-top:2px;font-size:7.4px;font-weight:780}.gov-relation-scroll em{display:block;color:#707981;font-size:5px;font-style:normal}.gov-relation-scroll button>b{color:#d2a800;font-size:10px;text-align:center}.gov-empty{padding:20px;color:#747d83;font-size:6px;font-weight:850;text-align:center}.gov-commands{position:absolute;left:10px;right:10px;height:${COMMANDS}px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.055);border-bottom:1px solid rgba(255,255,255,.055);z-index:20}.gov-001 .gov-commands,.gov-003 .gov-commands{bottom:${RAIL + THUMBS + 4}px}.gov-002 .gov-commands{bottom:${RAIL + 3}px}.gov-commands button{border:0;border-right:1px solid rgba(255,255,255,.055);background:transparent;color:#b6bdc2;font-size:7.1px;font-weight:800}.gov-commands button:last-child{border-right:0}.gov-commands button span{margin-left:3px}.gov-thumbs{position:absolute;left:0;right:0;bottom:${RAIL}px;height:${THUMBS}px;border-top:1px solid rgba(255,255,255,.055);background:#080a0b;z-index:18;overflow:hidden}.gov-editor{position:absolute;inset:0 0 16px;background:#0a0d0b;z-index:100}.gov-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-bottom:1px solid #303532;background:#151916}.gov-editor-head small{display:block;color:#8c958f;font-size:5px;font-weight:900}.gov-editor-head strong{display:block;margin-top:3px;font-size:10px}.gov-editor-head nav{display:flex}.gov-editor-head button{height:24px;padding:0 8px;border:1px solid #3b423d;background:#101310;color:#dfe3e0;font-size:6px;font-weight:900}.gov-editor-head button:first-child{color:var(--y)}.gov-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:9px;overflow-y:auto}.gov-editor-scroll label{display:block;margin-bottom:7px}.gov-editor-scroll label span{display:block;margin-bottom:3px;color:#8d9690;font-size:5px;font-weight:900}.gov-editor-scroll input{width:100%;height:28px;padding:0 7px;border:1px solid #363d38;border-radius:4px;background:#111512;color:#fff;font-size:8px;font-weight:800;outline:none}
       `}</style>
-    </div>
+    </article>
   );
 }
