@@ -1,5 +1,5 @@
 import {createIXIAosObjectFinancialDocument,createIXIAosFinancialObjectReference} from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
-import {runIXIActionNoticeLifecycle} from "../../../ixi-object-system/IXIActionNoticeEngine";
+import {runIXIActionNoticeLifecycle} from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import {createIXIAssetAcquisitionDraft,validateIXIAssetAcquisition} from "./IXIAssetAcquisitionContract";
 
 const clean=value=>String(value??"").trim();
@@ -32,23 +32,7 @@ export async function createIXIAssetAcquisition({object={},context={},input={},c
       const response=await createIXIAosObjectFinancialDocument({
         object:resolvedObject,
         documentType:"asset-acquisition",
-        input:{
-          currency:"USD",
-          amount:draft.acquisition.directAcquisitionCost,
-          description:`Asset Acquisition · ${draft.context.primaryLabel}`,
-          status:"posted",
-          financialState:"incurred",
-          acquisition:draft.acquisition,
-          funding:draft.funding,
-          ownership:draft.ownership,
-          title:draft.title,
-          condition:draft.condition,
-          logistics:draft.logistics,
-          makeReady:draft.makeReady,
-          settlementTerms:draft.settlementTerms,
-          attachments:draft.documents,
-          references:refs
-        },
+        input:{currency:"USD",amount:draft.acquisition.directAcquisitionCost,description:`Asset Acquisition · ${draft.context.primaryLabel}`,status:"posted",financialState:"incurred",acquisition:draft.acquisition,funding:draft.funding,ownership:draft.ownership,title:draft.title,condition:draft.condition,logistics:draft.logistics,makeReady:draft.makeReady,settlementTerms:draft.settlementTerms,attachments:draft.documents,references:refs},
         additionalReferences:refs,
         commandId:resolvedCommandId,
         idempotencyKey:clean(idempotencyKey||`ixi-asset-acquisition:${resolvedCommandId}`),
