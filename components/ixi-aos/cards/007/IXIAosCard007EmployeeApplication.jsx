@@ -1,10 +1,9 @@
-import IXIAosGenericObjectLayout007 from "../generic/IXIAosGenericObjectLayout007";
-import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
+import IXIAosGenericUniversalLayout007 from "../generic/IXIAosGenericUniversalLayout007";
 
+/*
+ * Compatibility export for existing Face Lab/runtime imports.
+ * Card 007 is now the universal AOS card.
+ */
 export default function IXIAosCard007EmployeeApplication(props) {
-  return (
-    <IXIAosGenericCardRailShell object={props.object} {...props} face={1}>
-      <IXIAosGenericObjectLayout007 {...props} />
-    </IXIAosGenericCardRailShell>
-  );
+  return <IXIAosGenericUniversalLayout007 {...props} />;
 }
