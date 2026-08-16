@@ -6,9 +6,10 @@ export const CARD_002_LOCATION = Object.freeze({
   nativeWidth: 298,
   nativeHeight: 471,
   railReserve: 19,
-  label: "Location",
-  section: "LOCATIONS & FACILITIES",
-  version: 14
+  label: "Container Layout 002",
+  section: "AOS CONTAINER LAYOUTS",
+  version: 12,
+  renderer: "schema-driven-generic"
 });
 
 export default function IXIAosCard002Location(props) {
