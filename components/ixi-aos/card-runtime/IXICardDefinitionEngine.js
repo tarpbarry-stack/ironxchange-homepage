@@ -189,6 +189,8 @@ export function getIXICardDefinitionFromObject(object = {}) {
     object.cardDefinition ||
     object.presentation?.cardDefinition ||
     object.metadata?.cardDefinition ||
+    object.definition?.cardDefinition ||
+    object.definition?.presentation?.cardDefinition ||
     null;
 
   if (embeddedDefinition && typeof embeddedDefinition === "object") {
@@ -206,7 +208,7 @@ export function getIXICardDefinitionFromObject(object = {}) {
 export function resolveIXICardDefinition({
   object = {},
   template = null,
-  fallbackCapabilities = {}
+  fallbackCapabilities = null
 } = {}) {
   const objectId = getIXIAosObjectId(object);
   const embeddedDefinition = getIXICardDefinitionFromObject(object);
@@ -229,15 +231,38 @@ export function resolveIXICardDefinition({
         template.displayName ||
         template.name ||
         templateDefinition?.templateName
-      )
+      ),
+      capabilities: {
+        ...safeObject(object?.definition?.capabilities),
+        ...safeObject(templateDefinition?.capabilities),
+        ...safeObject(object?.capabilities)
+      }
     });
   }
+
+  /*
+   * No template is a valid commercial state.
+   *
+   * The fallback Card remains generic, but it must preserve
+   * persisted operating capability. A customer-defined
+   * container cannot become non-container merely because a
+   * visual Card Template has not been assigned yet.
+   */
+  const resolvedFallbackCapabilities = {
+    ...safeObject(object?.definition?.capabilities),
+    ...safeObject(object?.capabilities),
+    ...safeObject(fallbackCapabilities)
+  };
 
   return createIXICardDefinition({
     objectId,
     faces: [createDefaultIXIFaceOne({ object })],
-    capabilities: createDefaultIXICardCapabilities(fallbackCapabilities),
-    metadata: { generatedFallback: true }
+    capabilities: resolvedFallbackCapabilities,
+    metadata: {
+      generatedFallback: true,
+      definitionId: clean(object?.definitionId),
+      definitionKey: clean(object?.definitionKey)
+    }
   });
 }
 
