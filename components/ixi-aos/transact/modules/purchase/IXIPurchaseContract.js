@@ -1,5 +1,12 @@
 const clean = value => String(value ?? "").trim();
 
+const MAX_PURCHASE_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+const PURCHASE_ATTACHMENT_MIME_TYPES = Object.freeze([
+  "application/pdf",
+  "image/jpeg",
+  "image/png"
+]);
+
 function finiteNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -79,8 +86,8 @@ export function createIXIPurchaseDraft({
   const workOrderId = clean(workOrder.identity?.workOrderId);
   const workOrderNumber = clean(
     workOrder.identity?.number ||
-      workOrder.workOrderNumber ||
-      workOrder.number
+    workOrder.workOrderNumber ||
+    workOrder.number
   );
 
   return {
@@ -137,6 +144,11 @@ export function validateIXIPurchase(draft = {}) {
   const errors = {};
   const purchase = draft.purchase || {};
   const items = Array.isArray(purchase.items) ? purchase.items : [];
+  const attachments = Array.isArray(purchase.attachments) ? purchase.attachments : [];
+
+  if (!clean(draft.context?.primaryPassportId)) {
+    errors.primary = "Originating AOS Passport is required";
+  }
 
   if (!clean(purchase.vendorLabel)) {
     errors.vendor = "required";
@@ -185,6 +197,22 @@ export function validateIXIPurchase(draft = {}) {
 
   if (finiteNumber(purchase.subtotal) < 0 || finiteNumber(purchase.estimatedTotal) < 0) {
     errors.total = "invalid";
+  }
+
+  const invalidAttachment = attachments.find(attachment => {
+    const mimeType = clean(attachment?.mimeType || attachment?.type).toLowerCase();
+    const size = Number(attachment?.size || 0);
+
+    return (
+      !clean(attachment?.fileName || attachment?.name) ||
+      !PURCHASE_ATTACHMENT_MIME_TYPES.includes(mimeType) ||
+      !(size > 0) ||
+      size > MAX_PURCHASE_ATTACHMENT_BYTES
+    );
+  });
+
+  if (invalidAttachment) {
+    errors.attachments = "invalid";
   }
 
   return {
