@@ -8,16 +8,11 @@ import IXIAosCardSkinSystemStyles from "./IXIAosCardSkinSystemStyles";
 import IXIAosExpandedSkinStyles from "./IXIAosExpandedSkinStyles";
 
 const DEFAULT_SKINS = [
-  { id: "v12", label: "V12" },
-  { id: "default", label: "DEFAULT" },
-  { id: "steel", label: "STEEL" },
-  { id: "blueprint", label: "BLUE" },
-  { id: "industrial", label: "INDUSTRIAL" },
-  { id: "ledger", label: "LEDGER" },
-  { id: "foundry", label: "FOUNDRY" },
-  { id: "stock", label: "STOCK CERTIFICATE" },
-  { id: "bond", label: "BOND CERTIFICATE" },
-  { id: "modern-money", label: "MODERN MONEY" },
+  { id: "v12", label: "V12" }, { id: "default", label: "DEFAULT" },
+  { id: "steel", label: "STEEL" }, { id: "blueprint", label: "BLUE" },
+  { id: "industrial", label: "INDUSTRIAL" }, { id: "ledger", label: "LEDGER" },
+  { id: "foundry", label: "FOUNDRY" }, { id: "stock", label: "STOCK CERTIFICATE" },
+  { id: "bond", label: "BOND CERTIFICATE" }, { id: "modern-money", label: "MODERN MONEY" },
   { id: "old-currency", label: "OLD CURRENCY" }
 ];
 
@@ -39,26 +34,26 @@ export default function IXIAosCardHeaderControls({
   onSkinChange = null
 }) {
   const runtimeCommands = useIXIAosCardCommands();
-  const effective = getObjectActionCapabilities(runtimeCommands?.object || {});
+  const runtimeObject = runtimeCommands?.object || null;
+  const hasRuntimeObject = Boolean(runtimeObject && typeof runtimeObject === "object");
+  const effective = hasRuntimeObject ? getObjectActionCapabilities(runtimeObject) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const [localSkinId, setLocalSkinId] = useState("v12");
 
-  const resolvedOnTransact =
-    typeof onTransact === "function"
-      ? onTransact
-      : runtimeCommands?.onOpenTransact;
+  const resolvedOnTransact = typeof onTransact === "function"
+    ? onTransact
+    : runtimeCommands?.onOpenTransact;
 
-  const transactRequested =
-    canTransact === null || canTransact === undefined
-      ? effective.canTransact === true
-      : canTransact === true;
+  const transactRequested = canTransact === null || canTransact === undefined
+    ? effective?.canTransact === true
+    : canTransact === true;
 
-  const showAdd = canAdd === true && effective.canCreate !== false && typeof onAdd === "function";
-  const showEdit = canEdit === true && effective.canEdit !== false && typeof onToggleEdit === "function";
-  const showTransact = transactRequested && effective.canTransact === true && typeof resolvedOnTransact === "function";
-  const showConsole = effective.canOpenConsole !== false && typeof onOpenConsole === "function";
-  const showHide = canHide !== false && effective.canHide !== false && typeof onHide === "function";
-  const showDelete = canDelete !== false && effective.canDelete === true && typeof onDelete === "function";
+  const showAdd = canAdd === true && effective?.canCreate !== false && typeof onAdd === "function";
+  const showEdit = canEdit === true && effective?.canEdit !== false && typeof onToggleEdit === "function";
+  const showTransact = transactRequested && effective?.canTransact !== false && typeof resolvedOnTransact === "function";
+  const showConsole = effective?.canOpenConsole !== false && typeof onOpenConsole === "function";
+  const showHide = canHide !== false && effective?.canHide !== false && typeof onHide === "function";
+  const showDelete = canDelete !== false && (effective ? effective.canDelete === true : true) && typeof onDelete === "function";
 
   function stop(event) {
     event?.preventDefault?.();
@@ -70,10 +65,7 @@ export default function IXIAosCardHeaderControls({
     : [];
 
   const options = Array.from(
-    new Map(
-      [...DEFAULT_SKINS, ...supplied]
-        .map(option => [String(option.id || "").trim(), option])
-    ).values()
+    new Map([...DEFAULT_SKINS, ...supplied].map(option => [String(option.id || "").trim(), option])).values()
   );
 
   const resolvedSkinId = String(skinId || localSkinId || "v12").trim();
@@ -101,8 +93,7 @@ export default function IXIAosCardHeaderControls({
                 const id = String(option.id || "").trim();
                 return (
                   <button key={id} type="button" className={id === resolvedSkinId ? "skin-option active" : "skin-option"} onClick={event => chooseSkin(event, id)}>
-                    {String(option.label || id).trim()}
-                    {id === resolvedSkinId ? <span>✓</span> : null}
+                    {String(option.label || id).trim()}{id === resolvedSkinId ? <span>✓</span> : null}
                   </button>
                 );
               })}
