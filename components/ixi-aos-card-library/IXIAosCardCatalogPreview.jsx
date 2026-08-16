@@ -190,15 +190,14 @@ export default function IXIAosCardCatalogPreview({
   }
 
   const current = state[object.objectId] || {};
-  const slug = clean(template.templateSlug);
   const cardNumber = resolveCatalogCardNumber(template);
 
   const ContainerCard =
-    cardNumber === 4 || slug === "personnel-container-004"
+    cardNumber === 4
       ? IXIAosCard004Personnel
-      : cardNumber === 5 || slug === "personnel-container-005"
+      : cardNumber === 5
         ? IXIAosCard005Personnel
-        : cardNumber === 6 || slug === "personnel-container-006"
+        : cardNumber === 6
           ? IXIAosCard006Personnel
           : null;
 
@@ -224,16 +223,8 @@ export default function IXIAosCardCatalogPreview({
           children={Array.isArray(directItems) ? directItems : []}
           ixiState={current}
           onIxiStateChange={update}
-          onAddObject={() => {}}
           onSaveObject={savePreview}
-          onHideObject={() => {}}
-          onDeleteObject={() => {}}
-          onOpenConsole={() => {}}
           onOpenTransact={() => setTransactOpen(true)}
-          onRecall={() => {}}
-          onBoard={() => {}}
-          onReturn={() => {}}
-          onExposeObject={() => {}}
           skinId="v12"
         />
         <style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style>
@@ -241,12 +232,7 @@ export default function IXIAosCardCatalogPreview({
     );
   }
 
-  const isLayout007 =
-    cardNumber === 7 ||
-    slug === "employee-basic-007" ||
-    clean(template?.metadata?.cardNumber) === "007";
-
-  if (isLayout007) {
+  if (cardNumber === 7) {
     return (
       <div className="native-card-preview">
         <IXIAosCard007EmployeeApplication
@@ -254,14 +240,7 @@ export default function IXIAosCardCatalogPreview({
           ixiState={current}
           onIxiStateChange={update}
           onSaveObject={savePreview}
-          onAddObject={() => {}}
-          onHideObject={() => {}}
-          onDeleteObject={() => {}}
-          onOpenConsole={() => {}}
           onOpenTransact={() => setTransactOpen(true)}
-          onPrimaryAction={() => {}}
-          onSecondaryAction={() => {}}
-          onRecords={() => {}}
           skinId="v12"
         />
         <style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style>
@@ -269,11 +248,7 @@ export default function IXIAosCardCatalogPreview({
     );
   }
 
-  const isNumberedContainer =
-    [1, 2, 3].includes(cardNumber) ||
-    ["location-standard", "location-standard-002", "location-standard-003"].includes(slug);
-
-  if (isNumberedContainer) {
+  if ([1, 2, 3].includes(cardNumber)) {
     const faceNumbers = [1, 2, 3, 4, 5];
     const consoleDepth = Math.max(1, Number(current?.consoleDepth || 1));
 
@@ -290,20 +265,13 @@ export default function IXIAosCardCatalogPreview({
 
         <div className="console-stage">
           <IXIAosLocationObjectConsole
-            templateSlug={slug}
+            cardNumber={cardNumber}
             object={object}
             projection={projection}
             objects={Array.isArray(directItems) ? directItems : []}
             ixiState={current}
             onIxiStateChange={update}
             onSaveObject={savePreview}
-            onAddObject={() => {}}
-            onHideObject={() => {}}
-            onDeleteObject={() => {}}
-            onRecall={() => {}}
-            onBoard={() => {}}
-            onReturn={() => {}}
-            onExposeObject={() => {}}
             primaryFace={face}
             onPrimaryFaceChange={setFace}
             onOpenTransact={() => setTransactOpen(true)}
