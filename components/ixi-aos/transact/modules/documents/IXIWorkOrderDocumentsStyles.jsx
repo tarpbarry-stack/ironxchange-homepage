@@ -1,3 +1,497 @@
-export default function IXIWorkOrderDocumentsStyles(){return <style jsx global>{`
-.tx-docs,.tx-docs *{box-sizing:border-box}.tx-docs{position:relative;width:100%;padding:5px 3px 14px;color:#eee;font-family:"Arial Narrow","Roboto Condensed",Arial,sans-serif}.tx-docs button,.tx-docs input{font:inherit}.doc-lang{position:absolute;right:3px;top:2px;z-index:6}.doc-lang button{border:0;background:none;color:#777;font-size:8px;font-weight:950}.doc-lang button.on{color:#ffc400}.doc-lang i{color:#444;font-style:normal;font-size:7px}.doc-head{display:flex;align-items:center;gap:10px;padding:9px 0 10px;border-bottom:1px solid #30322f}.doc-head-icon{width:42px;height:42px;display:grid;place-items:center;border:1.5px solid #ffc400;border-radius:5px;color:#ffc400;font-size:22px}.doc-head strong{display:block;padding-right:52px;font-size:17px;line-height:1;font-weight:950}.doc-head small{display:block;margin-top:5px;color:#aaa;font-size:8px}.doc-context{display:grid;grid-template-columns:1fr 1fr;gap:5px 7px;padding:8px 0}.doc-context div{min-width:0;padding-left:6px;border-left:1px solid #554600}.doc-context b,.doc-context small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.doc-context b{font-size:8px}.doc-context small{margin-top:2px;color:#929292;font-size:7px}.doc-doctrine{padding:6px 8px;border:1px solid rgba(255,196,0,.15);border-radius:4px;background:rgba(255,196,0,.035);color:#aaa;font-size:7px;line-height:1.3}.doc-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin:8px 0}.doc-tabs button{min-height:33px;padding:4px;border:1px solid #333;border-radius:3px;background:#0d0f0e;color:#aaa;font-size:7px;font-weight:900}.doc-tabs button span,.doc-tabs button b{display:block}.doc-tabs button b{margin-top:3px;color:#777;font-size:8px}.doc-tabs button.on{border-color:#b98f00;color:#ffc400;background:rgba(255,196,0,.06)}.doc-tabs button.on b{color:#ffc400}.doc-counts{display:grid;grid-template-columns:1.4fr repeat(5,1fr);border:1px solid #343734;border-radius:4px;background:#0b0d0c;overflow:hidden}.doc-counts>div{min-width:0;padding:7px 4px;border-right:1px solid #2d2f2d;text-align:center}.doc-counts>div:last-child{border-right:0}.doc-counts small{display:block;color:#888;font-size:5.8px;font-weight:900}.doc-counts b,.doc-counts strong{display:block;margin-top:3px;color:#e9e9e9;font-size:10px}.doc-counts .total{display:grid;grid-template-columns:26px 1fr;grid-template-rows:auto auto;text-align:left}.doc-counts .total span{grid-row:1/3;display:grid;place-items:center;color:#ffc400;font-size:18px}.doc-counts .total strong{color:#ffc400}.doc-list-head{display:grid;grid-template-columns:minmax(0,1.45fr) .8fr .72fr 18px;gap:4px;margin-top:8px;padding:5px 7px;border:1px solid #343734;border-bottom:0;border-radius:4px 4px 0 0;background:#0a0c0b;color:#888;font-size:6px;font-weight:950}.doc-list{position:relative;border:1px solid #343734;border-radius:0 0 4px 4px;background:#080a09}.doc-row{position:relative;display:grid;grid-template-columns:34px minmax(0,1.45fr) .8fr .72fr 18px;gap:5px;align-items:center;min-height:60px;padding:7px;border-bottom:1px solid #242724}.doc-row:last-child{border-bottom:0}.doc-type-icon{width:31px;height:39px;display:grid;place-items:center;border:1px solid #555;border-radius:4px;color:#ddd;background:#151716;font-size:14px;font-weight:950}.doc-type-icon.invoice{border-color:#00a8d8;color:#29caff}.doc-type-icon.receipt{border-color:#74b51d;color:#9ae53a}.doc-type-icon.quote{border-color:#b58b00;color:#ffc400}.doc-type-icon.report{border-color:#168c84;color:#3ee0d3}.doc-type-icon.photo{border-color:#6e43a1;color:#c88bff}.doc-main,.doc-related,.doc-date{min-width:0}.doc-main strong,.doc-main small,.doc-main em,.doc-related b,.doc-related small,.doc-date b,.doc-date small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.doc-main strong{font-size:8px}.doc-main small{margin-top:2px;color:#aaa;font-size:6.5px}.doc-main em{margin-top:3px;color:#ffc400;font-style:normal;font-size:6px}.doc-related b,.doc-date b{font-size:6.5px}.doc-related small,.doc-date small{margin-top:3px;color:#999;font-size:6px}.doc-more{border:0;background:none;color:#aaa;font-size:15px;cursor:pointer}.doc-menu{position:absolute;right:4px;top:48px;z-index:20;width:150px;padding:4px;border:1px solid #404440;border-radius:4px;background:#0c0f0d;box-shadow:0 12px 30px rgba(0,0,0,.55)}.doc-menu button{width:100%;min-height:28px;padding:0 7px;border:0;border-bottom:1px solid #242724;background:none;color:#ddd;text-align:left;font-size:7px}.doc-menu button:last-child{border-bottom:0}.doc-menu button.danger{color:#ff5e4a}.doc-empty{padding:26px 10px;color:#777;text-align:center;font-size:8px}.doc-general{display:grid;grid-template-columns:38px minmax(0,1fr);gap:7px;margin-top:9px;padding:9px;border:1px dashed #aa8400;border-radius:4px;background:rgba(255,196,0,.025)}.doc-upload-icon{grid-row:1/3;display:grid;place-items:center;color:#ffc400;font-size:28px}.doc-general-copy strong{display:block;color:#ffc400;font-size:9px}.doc-general-copy p{margin:4px 0;color:#bbb;font-size:7px;line-height:1.35}.doc-general-copy small{display:block;color:#888;font-size:6px}.doc-general>button{grid-column:2;min-height:33px;border:1px solid #a77f00;border-radius:3px;background:#0b0d0c;color:#ffc400;font-size:8px;font-weight:950}.doc-general>input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.doc-notice{margin-top:7px;padding:7px;border:1px solid rgba(255,99,78,.4);border-radius:4px;color:#ff725f;font-size:7px}.doc-actions{display:grid;grid-template-columns:.9fr 1.1fr;gap:7px;margin-top:10px}.doc-actions button{min-height:44px;border:1px solid #a78300;border-radius:4px;background:#090b0a;color:#ffc400;font-size:8px}.doc-actions button b,.doc-actions button small{display:block}.doc-actions button small{margin-top:3px;color:#999;font-size:6px}.doc-actions .add{background:linear-gradient(#ffd42d,#edb000);color:#111;font-weight:950}.doc-actions .add b{font-size:9px}
-`}</style>}
+export default function IXIWorkOrderDocumentsStyles() {
+  return (
+    <style jsx global>{`
+      .tx-docs,
+      .tx-docs * {
+        box-sizing: border-box;
+      }
+
+      .tx-docs {
+        position: relative;
+        width: 100%;
+        padding: 5px 3px 14px;
+        color: #eee;
+        font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+      }
+
+      .tx-docs button,
+      .tx-docs input {
+        font: inherit;
+      }
+
+      .doc-lang {
+        position: absolute;
+        right: 3px;
+        top: 2px;
+        z-index: 6;
+      }
+
+      .doc-lang button {
+        border: 0;
+        background: none;
+        color: #777;
+        font-size: 8px;
+        font-weight: 950;
+      }
+
+      .doc-lang button.on {
+        color: #ffc400;
+      }
+
+      .doc-lang i {
+        color: #444;
+        font-style: normal;
+        font-size: 7px;
+      }
+
+      .doc-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0 10px;
+        border-bottom: 1px solid #30322f;
+      }
+
+      .doc-head-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid #ffc400;
+        border-radius: 5px;
+        color: #ffc400;
+        font-size: 22px;
+      }
+
+      .doc-head strong {
+        display: block;
+        padding-right: 52px;
+        font-size: 17px;
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .doc-head small {
+        display: block;
+        margin-top: 5px;
+        color: #aaa;
+        font-size: 8px;
+      }
+
+      .doc-context {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 7px;
+        padding: 8px 0;
+      }
+
+      .doc-context div {
+        min-width: 0;
+        padding-left: 6px;
+        border-left: 1px solid #554600;
+      }
+
+      .doc-context b,
+      .doc-context small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .doc-context b {
+        font-size: 8px;
+      }
+
+      .doc-context small {
+        margin-top: 2px;
+        color: #929292;
+        font-size: 7px;
+      }
+
+      .doc-doctrine {
+        padding: 6px 8px;
+        border: 1px solid rgba(255,196,0,.15);
+        border-radius: 4px;
+        background: rgba(255,196,0,.035);
+        color: #aaa;
+        font-size: 7px;
+        line-height: 1.3;
+      }
+
+      .doc-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        margin: 8px 0;
+      }
+
+      .doc-tabs button {
+        min-height: 33px;
+        padding: 4px;
+        border: 1px solid #333;
+        border-radius: 3px;
+        background: #0d0f0e;
+        color: #aaa;
+        font-size: 7px;
+        font-weight: 900;
+      }
+
+      .doc-tabs button span,
+      .doc-tabs button b {
+        display: block;
+      }
+
+      .doc-tabs button b {
+        margin-top: 3px;
+        color: #777;
+        font-size: 8px;
+      }
+
+      .doc-tabs button.on {
+        border-color: #b98f00;
+        color: #ffc400;
+        background: rgba(255,196,0,.06);
+      }
+
+      .doc-tabs button.on b {
+        color: #ffc400;
+      }
+
+      .doc-counts {
+        display: grid;
+        grid-template-columns: 1.4fr repeat(5, 1fr);
+        border: 1px solid #343734;
+        border-radius: 4px;
+        background: #0b0d0c;
+        overflow: hidden;
+      }
+
+      .doc-counts > div {
+        min-width: 0;
+        padding: 7px 4px;
+        border-right: 1px solid #2d2f2d;
+        text-align: center;
+      }
+
+      .doc-counts > div:last-child {
+        border-right: 0;
+      }
+
+      .doc-counts small {
+        display: block;
+        color: #888;
+        font-size: 5.8px;
+        font-weight: 900;
+      }
+
+      .doc-counts b,
+      .doc-counts strong {
+        display: block;
+        margin-top: 3px;
+        color: #e9e9e9;
+        font-size: 10px;
+      }
+
+      .doc-counts .total {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        grid-template-rows: auto auto;
+        text-align: left;
+      }
+
+      .doc-counts .total span {
+        grid-row: 1 / 3;
+        display: grid;
+        place-items: center;
+        color: #ffc400;
+        font-size: 18px;
+      }
+
+      .doc-counts .total strong {
+        color: #ffc400;
+      }
+
+      .doc-list-head {
+        display: grid;
+        grid-template-columns: minmax(0,1.45fr) .8fr .72fr 18px;
+        gap: 4px;
+        margin-top: 8px;
+        padding: 5px 7px;
+        border: 1px solid #343734;
+        border-bottom: 0;
+        border-radius: 4px 4px 0 0;
+        background: #0a0c0b;
+        color: #888;
+        font-size: 6px;
+        font-weight: 950;
+      }
+
+      .doc-list {
+        position: relative;
+        border: 1px solid #343734;
+        border-radius: 0 0 4px 4px;
+        background: #080a09;
+      }
+
+      .doc-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 34px minmax(0,1.45fr) .8fr .72fr 18px;
+        gap: 5px;
+        align-items: center;
+        min-height: 60px;
+        padding: 7px;
+        border-bottom: 1px solid #242724;
+      }
+
+      .doc-row:last-child {
+        border-bottom: 0;
+      }
+
+      .doc-type-icon {
+        width: 31px;
+        height: 39px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #ddd;
+        background: #151716;
+        font-size: 14px;
+        font-weight: 950;
+      }
+
+      .doc-type-icon.invoice {
+        border-color: #00a8d8;
+        color: #29caff;
+      }
+
+      .doc-type-icon.receipt {
+        border-color: #74b51d;
+        color: #9ae53a;
+      }
+
+      .doc-type-icon.quote {
+        border-color: #b58b00;
+        color: #ffc400;
+      }
+
+      .doc-type-icon.report {
+        border-color: #168c84;
+        color: #3ee0d3;
+      }
+
+      .doc-type-icon.photo {
+        border-color: #6e43a1;
+        color: #c88bff;
+      }
+
+      .doc-main,
+      .doc-related,
+      .doc-date {
+        min-width: 0;
+      }
+
+      .doc-main strong,
+      .doc-main small,
+      .doc-main em,
+      .doc-related b,
+      .doc-related small,
+      .doc-date b,
+      .doc-date small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .doc-main strong {
+        font-size: 8px;
+      }
+
+      .doc-main small {
+        margin-top: 2px;
+        color: #aaa;
+        font-size: 6.5px;
+      }
+
+      .doc-main em {
+        margin-top: 3px;
+        color: #ffc400;
+        font-style: normal;
+        font-size: 6px;
+      }
+
+      .doc-related b,
+      .doc-date b {
+        font-size: 6.5px;
+      }
+
+      .doc-related small,
+      .doc-date small {
+        margin-top: 3px;
+        color: #999;
+        font-size: 6px;
+      }
+
+      .doc-more {
+        border: 0;
+        background: none;
+        color: #aaa;
+        font-size: 15px;
+        cursor: pointer;
+      }
+
+      .doc-menu {
+        position: absolute;
+        right: 4px;
+        top: 48px;
+        z-index: 20;
+        width: 150px;
+        padding: 4px;
+        border: 1px solid #404440;
+        border-radius: 4px;
+        background: #0c0f0d;
+        box-shadow: 0 12px 30px rgba(0,0,0,.55);
+      }
+
+      .doc-menu button {
+        width: 100%;
+        min-height: 28px;
+        padding: 0 7px;
+        border: 0;
+        border-bottom: 1px solid #242724;
+        background: none;
+        color: #ddd;
+        text-align: left;
+        font-size: 7px;
+      }
+
+      .doc-menu button:last-child {
+        border-bottom: 0;
+      }
+
+      .doc-menu button.danger {
+        color: #ff5e4a;
+      }
+
+      .doc-empty {
+        padding: 26px 10px;
+        color: #777;
+        text-align: center;
+        font-size: 8px;
+      }
+
+      .doc-general {
+        display: grid;
+        grid-template-columns: 38px minmax(0,1fr);
+        gap: 7px;
+        margin-top: 9px;
+        padding: 9px;
+        border: 1px dashed #aa8400;
+        border-radius: 4px;
+        background: rgba(255,196,0,.025);
+      }
+
+      .doc-upload-icon {
+        grid-row: 1 / 3;
+        display: grid;
+        place-items: center;
+        color: #ffc400;
+        font-size: 28px;
+      }
+
+      .doc-general-copy strong {
+        display: block;
+        color: #ffc400;
+        font-size: 9px;
+      }
+
+      .doc-general-copy p {
+        margin: 4px 0;
+        color: #bbb;
+        font-size: 7px;
+        line-height: 1.35;
+      }
+
+      .doc-general-copy small {
+        display: block;
+        color: #888;
+        font-size: 6px;
+      }
+
+      .doc-general > button {
+        grid-column: 2;
+        min-height: 33px;
+        border: 1px solid #a77f00;
+        border-radius: 3px;
+        background: #0b0d0c;
+        color: #ffc400;
+        font-size: 8px;
+        font-weight: 950;
+      }
+
+      .doc-general > input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .doc-notice {
+        margin-top: 7px;
+        padding: 7px;
+        border: 1px solid rgba(255,99,78,.4);
+        border-radius: 4px;
+        color: #ff725f;
+        font-size: 7px;
+      }
+
+      .doc-actions {
+        display: grid;
+        grid-template-columns: .9fr 1.1fr;
+        gap: 7px;
+        margin-top: 10px;
+      }
+
+      .doc-actions button {
+        min-height: 44px;
+        border: 1px solid #a78300;
+        border-radius: 4px;
+        background: #090b0a;
+        color: #ffc400;
+        font-size: 8px;
+      }
+
+      .doc-actions button:disabled,
+      .doc-general > button:disabled,
+      .doc-tabs button:disabled {
+        opacity: .48;
+        cursor: not-allowed;
+      }
+
+      .doc-actions button b,
+      .doc-actions button small {
+        display: block;
+      }
+
+      .doc-actions button small {
+        margin-top: 3px;
+        color: #999;
+        font-size: 6px;
+      }
+
+      .doc-actions .add {
+        background: linear-gradient(#ffd42d, #edb000);
+        color: #111;
+        font-weight: 950;
+      }
+
+      .doc-actions .add b {
+        font-size: 9px;
+      }
+    `}</style>
+  );
+}
