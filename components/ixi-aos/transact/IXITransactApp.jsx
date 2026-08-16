@@ -13,6 +13,7 @@ import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
 import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneApp";
 import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisitionApp";
+import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -33,7 +34,8 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   const timeOpen = moduleId === "time";
   const materialOpen = moduleId === "material";
   const assetAcquisitionOpen = moduleId === "asset-acquisition";
-  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen || timeOpen || materialOpen || assetAcquisitionOpen;
+  const rentalExpenseOpen = moduleId === "rental-expense";
+  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen || timeOpen || materialOpen || assetAcquisitionOpen || rentalExpenseOpen;
   const resolvedWorkOrder = workOrderSnapshot || context.activeWorkOrder || null;
 
   async function open(item) { if (!item?.id) return; setModuleId(item.id); await onOpenModule?.(item, context, {}); }
@@ -49,6 +51,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   async function timeChanged(nextRecord, change = {}, timeContext = context) { await onOpenModule?.({ id: `time-${change.action || "change"}`, label: "TIME UPDATE", group: "work", documentType: "time-entry" }, timeContext, { timeRecord: nextRecord, change, originatingObject: timeContext.primary, returnTo: "time" }); }
   async function materialChanged(nextRecord, change = {}, materialContext = context) { await onOpenModule?.({ id: `material-${change.action || "change"}`, label: "PART / MATERIAL UPDATE", group: "work", documentType: "material-usage" }, materialContext, { materialRecord: nextRecord, change, originatingObject: materialContext.primary, inventoryAdjustment: nextRecord?.inventoryAdjustment || null, receivingConsumption: nextRecord?.receivingConsumption || null, returnTo: "material" }); }
   async function assetAcquisitionChanged(nextRecord, change = {}, acquisitionContext = context) { await onOpenModule?.({ id: `asset-acquisition-${change.action || "change"}`, label: "ASSET ACQUISITION UPDATE", group: "asset", documentType: "asset-acquisition" }, acquisitionContext, { assetAcquisition: nextRecord, change, originatingObject: acquisitionContext.primary, ownership: nextRecord?.ownership || null, makeReady: nextRecord?.makeReady || null, settlementTerms: nextRecord?.settlementTerms || null, returnTo: "asset-acquisition" }); }
+  async function rentalExpenseChanged(nextRecord, change = {}, rentalContext = context) { await onOpenModule?.({ id: `rental-expense-${change.action || "change"}`, label: "RENTAL EXPENSE UPDATE", group: "rent", documentType: "rental" }, rentalContext, { rentalExpense: nextRecord, change, originatingObject: rentalContext.primary, rentedAsset: nextRecord?.rentedAsset || null, custody: nextRecord?.custody || null, economics: nextRecord?.economics || null, returnTo: "rental-expense" }); }
   async function techWorkOrderCreated(record, techContext) { await onOpenModule?.({ id: "tech-work-order-create", label: "CREATE TECH WORK ORDER", group: "work", documentType: "technology-work-order" }, techContext, { techWorkOrder: record, returnTo: "tech-work-order" }); }
   async function techWorkOrderChanged(nextRecord, change = {}, techContext = context) { await onOpenModule?.({ id: `tech-work-order-${change.action || "change"}`, label: "TECH WORK ORDER UPDATE", group: "work", documentType: "technology-work-order" }, techContext, { techWorkOrder: nextRecord, change, returnTo: "tech-work-order" }); }
 
@@ -84,6 +87,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
       : timeOpen ? <IXITimeStandaloneApp context={context} object={object} onBack={() => setModuleId("")} onRecordChange={timeChanged} />
       : materialOpen ? <IXIMaterialStandaloneApp context={context} object={object} onBack={() => setModuleId("")} onRecordChange={materialChanged} />
       : assetAcquisitionOpen ? <IXIAssetAcquisitionApp context={context} object={object} relatedTransactions={object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} onBack={() => setModuleId("")} onRecordChange={assetAcquisitionChanged} />
+      : rentalExpenseOpen ? <IXIRentalExpenseApp context={context} object={object} relatedTransactions={object?.rentalFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} onBack={() => setModuleId("")} onRecordChange={rentalExpenseChanged} />
       : active?.id === "work-order" ? <IXIWorkOrderApp context={context} initialWorkOrder={resolvedWorkOrder} onBack={() => setModuleId("")} onCreate={async (draft, workContext) => { setWorkOrderSnapshot(draft); await onOpenModule?.({ id: "work-order-create", label: "CREATE WORK ORDER", group: "work", documentType: "work-order" }, workContext, { workOrder: draft }); }} onAction={workOrderAction} />
       : active?.id === "technology-work" ? <IXITechWorkOrderApp context={context} onBack={() => setModuleId("")} onCreate={techWorkOrderCreated} onRecordChange={techWorkOrderChanged} />
       : active ? <div className="tx-module"><button className="tx-back" onClick={() => setModuleId("")}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div></div>
