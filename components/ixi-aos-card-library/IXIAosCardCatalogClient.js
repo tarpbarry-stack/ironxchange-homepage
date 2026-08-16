@@ -3,59 +3,43 @@ import {
   fetchMosCardTemplate
 } from "../../lib/mos/ixiMosClient";
 
-
 function clean(value) {
   return String(value || "").trim();
 }
 
-
 function withLocalCardDrafts(templates = []) {
-  const source =
-    (Array.isArray(templates) ? templates : [])
-      .map(template => {
-        const slug = clean(template?.templateSlug);
+  const source = (Array.isArray(templates) ? templates : [])
+    .map(template => {
+      const slug = clean(template?.templateSlug);
 
-        if (slug === "location-standard") {
-          return {
-            ...template,
-            templateNumber: 1,
-            version: 12,
-            metadata: {
-              ...(template?.metadata || {}),
-              cardLocked: true,
-              lockedCardId: "001-v12"
-            }
-          };
-        }
+      if (slug === "location-standard") {
+        return {
+          ...template,
+          templateNumber: 1,
+          version: 12,
+          metadata: {
+            ...(template?.metadata || {}),
+            cardLocked: true,
+            lockedCardId: "001-v12"
+          }
+        };
+      }
 
-        return template;
-      });
+      return template;
+    });
 
-
-  const baseLocation =
-    source.find(
-      template =>
-        clean(template?.templateSlug) ===
-        "location-standard"
-    );
+  const baseLocation = source.find(
+    template => clean(template?.templateSlug) === "location-standard"
+  );
 
   if (baseLocation) {
     [
-      {
-        templateNumber: 2,
-        templateSlug: "location-standard-002"
-      },
-      {
-        templateNumber: 3,
-        templateSlug: "location-standard-003"
-      }
+      { templateNumber: 2, templateSlug: "location-standard-002" },
+      { templateNumber: 3, templateSlug: "location-standard-003" }
     ].forEach(draft => {
-      const exists =
-        source.some(
-          template =>
-            clean(template?.templateSlug) ===
-            draft.templateSlug
-        );
+      const exists = source.some(
+        template => clean(template?.templateSlug) === draft.templateSlug
+      );
 
       if (exists) return;
 
@@ -75,8 +59,7 @@ function withLocalCardDrafts(templates = []) {
     });
   }
 
-
-  const personnelDrafts = [
+  const containerDrafts = [
     {
       templateNumber: 4,
       templateSlug: "personnel-container-004",
@@ -94,88 +77,85 @@ function withLocalCardDrafts(templates = []) {
     }
   ];
 
-  personnelDrafts.forEach(draft => {
-    const exists =
-      source.some(
-        template =>
-          clean(template?.templateSlug) ===
-          draft.templateSlug
-      );
+  containerDrafts.forEach(draft => {
+    const exists = source.some(
+      template => clean(template?.templateSlug) === draft.templateSlug
+    );
 
     if (exists) return;
 
     source.push({
       templateNumber: draft.templateNumber,
       templateSlug: draft.templateSlug,
-      label: "Employees / Personnel Container",
-      baseObjectType: "personnel-container",
+      label: `Container Layout ${String(draft.templateNumber).padStart(3, "0")}`,
+      librarySection: "Generic Containers · Personnel Sample",
+      baseObjectType: "customer-defined-container",
       version: 12,
       fieldSchema: [],
       capabilities: {
         canContain: true,
+        canCreate: true,
         canOpenStack: true,
-        canMoveToBoard: true
+        canMoveToBoard: true,
+        canTransact: true,
+        editable: true,
+        hasConsole: true
       },
       metadata: {
         localCardDraft: true,
         visualLanguage: "v12",
-        variant: draft.variant
+        variant: draft.variant,
+        sampleUse: "personnel"
       }
     });
   });
 
+  const layout007Exists = source.some(
+    template => clean(template?.templateSlug) === "employee-basic-007"
+  );
 
-  const employee007Exists =
-    source.some(
-      template =>
-        clean(template?.templateSlug) ===
-        "employee-basic-007"
-    );
-
-  if (!employee007Exists) {
+  if (!layout007Exists) {
     source.push({
       templateNumber: 7,
       templateSlug: "employee-basic-007",
-      label: "Employee",
-      librarySection: "Employees / Personnel",
-      baseObjectType: "employee",
+      label: "Object Layout 007",
+      librarySection: "Generic Objects · Personnel Sample",
+      baseObjectType: "customer-defined-object",
       version: 12,
       fieldSchema: [],
       capabilities: {
-        canContain: false,
-        canOpenStack: false,
+        canContain: true,
+        canCreate: true,
+        canOpenStack: true,
         canMoveToBoard: true,
-        canTransact: true
+        canTransact: true,
+        editable: true,
+        hasConsole: true
       },
       metadata: {
         localCardDraft: true,
         cardNumber: "007",
         visualLanguage: "v12",
-        accessLevel: "basic",
-        employeeCardFamily: true
+        sampleUse: "personnel"
       }
     });
   }
 
-
   return source;
 }
-
 
 export async function loadAosCardCatalog({
   entityId = null,
   signal = null
 } = {}) {
-  const payload =
-    await fetchMosCardTemplates({
-      entityId,
-      signal
-    });
+  const payload = await fetchMosCardTemplates({
+    entityId,
+    signal
+  });
 
-  const templates =
-    withLocalCardDrafts(
-      payload?.templates || []
-    );
+  const templates = withLocalCardDrafts(
+    payload?.templates || []
+  );
 
   return {
     templates,
@@ -183,20 +163,18 @@ export async function loadAosCardCatalog({
   };
 }
 
-
 export async function loadAosCardTemplate({
   templateSlug,
   version = null,
   entityId = null,
   signal = null
 }) {
-  const payload =
-    await fetchMosCardTemplate({
-      templateSlug,
-      version,
-      entityId,
-      signal
-    });
+  const payload = await fetchMosCardTemplate({
+    templateSlug,
+    version,
+    entityId,
+    signal
+  });
 
   return payload?.template || null;
 }
