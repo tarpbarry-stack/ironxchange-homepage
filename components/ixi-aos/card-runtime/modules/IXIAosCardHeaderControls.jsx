@@ -24,7 +24,7 @@ const DEFAULT_SKINS = [
 export default function IXIAosCardHeaderControls({
   canAdd = false,
   canEdit = false,
-  canTransact = false,
+  canTransact = null,
   canHide = true,
   canDelete = true,
   editing = false,
@@ -48,9 +48,14 @@ export default function IXIAosCardHeaderControls({
       ? onTransact
       : runtimeCommands?.onOpenTransact;
 
+  const transactRequested =
+    canTransact === null || canTransact === undefined
+      ? effective.canTransact === true
+      : canTransact === true;
+
   const showAdd = canAdd === true && effective.canCreate !== false && typeof onAdd === "function";
   const showEdit = canEdit === true && effective.canEdit !== false && typeof onToggleEdit === "function";
-  const showTransact = canTransact === true && effective.canTransact !== false && typeof resolvedOnTransact === "function";
+  const showTransact = transactRequested && effective.canTransact === true && typeof resolvedOnTransact === "function";
   const showConsole = effective.canOpenConsole !== false && typeof onOpenConsole === "function";
   const showHide = canHide !== false && effective.canHide !== false && typeof onHide === "function";
   const showDelete = canDelete !== false && effective.canDelete === true && typeof onDelete === "function";
