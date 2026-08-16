@@ -5,6 +5,7 @@ import {getIXITransactModules} from "./IXITransactModuleRegistry";
 import {createIXITechnologyWorkDraft} from "./modules/IXITransactTechnologyWork";
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXINoteApp from "./modules/note/IXINoteApp";
+import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
 
 const clean=value=>String(value??"").trim();
 
@@ -23,7 +24,8 @@ export default function IXITransactApp({
  const[workOrderSnapshot,setWorkOrderSnapshot]=useState(null);
  const active=modules.find(item=>item.id===moduleId)||null;
  const noteOpen=moduleId==="work-order-note";
- const compactHeader=Boolean(active)||noteOpen;
+ const photoOpen=moduleId==="work-order-photo";
+ const compactHeader=Boolean(active)||noteOpen||photoOpen;
  const resolvedWorkOrder=workOrderSnapshot||context.activeWorkOrder||null;
 
  function open(item){
@@ -38,6 +40,11 @@ export default function IXITransactApp({
    setModuleId("work-order-note");
    return;
   }
+  if(actionId==="photo"){
+   setWorkOrderSnapshot(workOrder||resolvedWorkOrder||null);
+   setModuleId("work-order-photo");
+   return;
+  }
   onOpenModule?.({id:actionId,label:String(actionId||"").toUpperCase(),group:"work-order-action",documentType:actionId},workContext,{workOrder,...payload});
  }
 
@@ -50,29 +57,10 @@ export default function IXITransactApp({
    references:{...(current.references||{}),noteIds:addUnique(current.references?.noteIds,noteId)},
    notesProjection:[...(Array.isArray(current.notesProjection)?current.notesProjection:[]),{...note,identity:{...(note.identity||{}),noteId}}],
    activityProjection:[...(Array.isArray(current.activityProjection)?current.activityProjection:[]),{
-    activityId:`ACT-${noteId}`,
-    type:"note-added",
-    noteId,
-    noteType:note?.note?.type||"work-note",
-    title:note?.note?.title||"",
-    body:note?.note?.body||"",
-    occurredAt:note?.audit?.createdAt||new Date().toISOString(),
-    actorLabel:note?.audit?.createdByLabel||clean(context.actor?.displayName||context.actor?.name||context.actor?.label)
+    activityId:`ACT-${noteId}`,type:"note-added",noteId,noteType:note?.note?.type||"work-note",title:note?.note?.title||"",body:note?.note?.body||"",occurredAt:note?.audit?.createdAt||new Date().toISOString(),actorLabel:note?.audit?.createdByLabel||clean(context.actor?.displayName||context.actor?.name||context.actor?.label)
    }],
    documentProjection:attachment?[...(Array.isArray(current.documentProjection)?current.documentProjection:[]),{
-    documentId:`NOTE-ATTACH:${noteId}:${attachment.fileName||"attachment"}`,
-    title:attachment.fileName||"Note attachment",
-    fileName:attachment.fileName||"",
-    type:attachment.mimeType?.startsWith("image/")?"photo":"other",
-    issuer:note?.audit?.createdByLabel||"",
-    relatedType:"note",
-    relatedId:noteId,
-    relatedLabel:note?.note?.title||noteId,
-    date:note?.audit?.createdAt||new Date().toISOString(),
-    addedBy:note?.audit?.createdByLabel||"",
-    mimeType:attachment.mimeType||"",
-    size:Number(attachment.size||0),
-    persistenceState:attachment.status||"local-pending-upload"
+    documentId:`NOTE-ATTACH:${noteId}:${attachment.fileName||"attachment"}`,title:attachment.fileName||"Note attachment",fileName:attachment.fileName||"",type:attachment.mimeType?.startsWith("image/")?"photo":"other",issuer:note?.audit?.createdByLabel||"",relatedType:"note",relatedId:noteId,relatedLabel:note?.note?.title||noteId,date:note?.audit?.createdAt||new Date().toISOString(),addedBy:note?.audit?.createdByLabel||"",mimeType:attachment.mimeType||"",size:Number(attachment.size||0),persistenceState:attachment.status||"local-pending-upload"
    }]:current.documentProjection
   };
   setWorkOrderSnapshot(next);
@@ -80,10 +68,47 @@ export default function IXITransactApp({
   setModuleId("work-order");
  }
 
+ async function savePhoto(photo,input,response){
+  const photoId=clean(photo?.identity?.photoId)||clean(photo?.identity?.clientRequestId)||`PHOTO-${Date.now()}`;
+  const current=resolvedWorkOrder||{};
+  const media=Array.isArray(photo?.photo?.media)?photo.photo.media:[];
+  const attachmentIds=media.reduce((ids,item)=>addUnique(ids,item.mediaId),current.references?.attachmentIds||[]);
+  const documents=media.map((item,index)=>({
+   documentId:item.mediaId||`${photoId}-MEDIA-${index+1}`,
+   title:photo?.photo?.title||item.fileName||`Photo ${index+1}`,
+   fileName:item.fileName||"",
+   type:"photo",
+   typeLabel:photo?.photo?.type==="damage"?"DAMAGE":photo?.photo?.type==="before-after"?"BEFORE / AFTER":photo?.photo?.type==="reference"?"REFERENCE":"WORK PHOTO",
+   issuer:photo?.audit?.createdByLabel||"",
+   relatedType:"photo",
+   relatedId:photoId,
+   relatedLabel:photo?.photo?.title||photoId,
+   date:photo?.photo?.occurredAt||photo?.audit?.createdAt||new Date().toISOString(),
+   addedBy:photo?.audit?.createdByLabel||"",
+   mimeType:item.mimeType||"image/jpeg",
+   size:Number(item.size||0),
+   previewUrl:item.previewUrl||"",
+   persistenceState:item.status||"local-pending-upload"
+  }));
+  const next={
+   ...current,
+   references:{...(current.references||{}),photoIds:addUnique(current.references?.photoIds,photoId),attachmentIds},
+   photoProjection:[...(Array.isArray(current.photoProjection)?current.photoProjection:[]),{...photo,identity:{...(photo.identity||{}),photoId}}],
+   documentProjection:[...(Array.isArray(current.documentProjection)?current.documentProjection:[]),...documents],
+   activityProjection:[...(Array.isArray(current.activityProjection)?current.activityProjection:[]),{
+    activityId:`ACT-${photoId}`,type:"photo-added",photoId,photoType:photo?.photo?.type||"work-photo",title:photo?.photo?.title||"",count:media.length,occurredAt:photo?.photo?.occurredAt||new Date().toISOString(),actorLabel:photo?.audit?.createdByLabel||clean(context.actor?.displayName||context.actor?.name||context.actor?.label)
+   }]
+  };
+  setWorkOrderSnapshot(next);
+  onOpenModule?.({id:"photo-save",label:"SAVE PHOTO",group:"work-order-action",documentType:"photo"},context,{workOrder:next,photo:{...photo,identity:{...(photo.identity||{}),photoId}},input,response,activity:next.activityProjection?.at?.(-1),documents});
+  setModuleId("work-order");
+ }
+
  return <div className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${compactHeader?"module-open":"home-open"}`}>
   <header className="tx-header"><div className="tx-brand"><span>IXI TRAN$ACT</span>{!compactHeader?<><strong>{context.primary.label}</strong><small>{context.primary.objectType||"AOS OBJECT"}</small></>:null}</div><button className="tx-close" type="button" onClick={()=>onClose?.()} aria-label="Close TRAN$ACT">×</button></header>
   <main className="tx-body">
    {noteOpen?<IXINoteApp context={context} workOrder={resolvedWorkOrder||{}} onCancel={()=>setModuleId("work-order")} onSave={saveNote}/>:
+   photoOpen?<IXIPhotoApp context={context} workOrder={resolvedWorkOrder||{}} onCancel={()=>setModuleId("work-order")} onSave={savePhoto}/>:
    active?.id==="work-order"?<IXIWorkOrderApp context={context} initialWorkOrder={resolvedWorkOrder} onBack={()=>setModuleId("")} onCreate={(draft,workContext)=>{setWorkOrderSnapshot(draft);onOpenModule?.({id:"work-order-create",label:"CREATE WORK ORDER",group:"work",documentType:"work-order"},workContext,{workOrder:draft})}} onAction={workOrderAction}/>:
    active?<div className="tx-module"><button className="tx-back" onClick={()=>setModuleId("")}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div></div>:
    <>{context.activeWorkOrder?<button className="tx-open-work" onClick={()=>{setWorkOrderSnapshot(context.activeWorkOrder);open({id:"work-order",label:"CONTINUE WORK",group:"work",documentType:"work-order"})}}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber||context.activeWorkOrder.number||context.activeWorkOrder.id)||"WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title||context.activeWorkOrder.description)||"IN PROGRESS"}</small><b>CONTINUE ›</b></button>:null}<div className="tx-label">CREATE / OPEN</div><div className="tx-grid">{modules.map(item=><button key={item.id} onClick={()=>open(item)}><span>{item.group.toUpperCase()}</span><strong>{item.label}</strong><small>{item.documentType}</small></button>)}</div></>}
