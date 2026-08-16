@@ -192,6 +192,8 @@ export default function IXIAosCardCatalogPreview({
           {transactOpen ? (
             <IXITransactObjectConsole
               object={financialObject}
+              ixiState={current}
+              onIxiStateChange={update}
               onClose={() => setTransactOpen(false)}
             />
           ) : (
