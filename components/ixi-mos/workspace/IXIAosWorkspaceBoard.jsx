@@ -49,9 +49,18 @@ function isSystemIndexPresentation(item = {}) {
 }
 
 
+/*
+ * Durable MOS identity is not "anything that has an id".
+ * Sharetribe listings also have ids. Requiring the persisted
+ * MOS entity/object pair prevents ordinary machines from being
+ * intercepted by the custom AOS renderer and guarantees they
+ * continue through IXIBoard -> IXIMachineCard -> the current
+ * Private / Marketplace / Auction card family.
+ */
 function isMosWorkspaceObject(item = {}) {
   return Boolean(
-    getMosObjectId(item)
+    cleanId(item?.objectId) &&
+    cleanId(item?.entityId)
   );
 }
 
@@ -59,7 +68,10 @@ function isMosWorkspaceObject(item = {}) {
 function isContainerWorkspaceObject(item = {}) {
   return Boolean(
     isSystemIndexPresentation(item) ||
-    item?.capabilities?.canContain === true
+    (
+      isMosWorkspaceObject(item) &&
+      item?.capabilities?.canContain === true
+    )
   );
 }
 
@@ -82,13 +94,9 @@ function getSystemIndexDropPolicy(item = {}) {
     };
   }
 
-  /*
-   * Persisted customer System Indexes receive objects only
-   * when their durable capabilities say they can contain.
-   */
   if (
-    item?.capabilities?.canContain ===
-    true
+    isMosWorkspaceObject(item) &&
+    item?.capabilities?.canContain === true
   ) {
     return (
       item?.workspace?.dropPolicy ||
@@ -106,11 +114,6 @@ function getSystemIndexDropPolicy(item = {}) {
 }
 
 
-/*
- * Command payloads carry stable technical identity/capability,
- * not presentation names. A customer name can never select an
- * IXI adapter command path.
- */
 function getContainerCommandTarget(item = {}) {
   const objectId =
     getMosObjectId(item);
@@ -194,85 +197,28 @@ export default function IXIAosWorkspaceBoard({
 }) {
   return (
     <IXIBoardSurface
-      scaleMode={
-        cardScaleMode
-      }
+      scaleMode={cardScaleMode}
     >
       <IXIBoard
-        items={
-          items
-        }
-
+        items={items}
         cardContext="inventory"
-
-        getListingId={
-          getListingId
-        }
-
-        savedIds={
-          savedIds
-        }
-
-        ixiCardState={
-          ixiCardState
-        }
-
-        IXISortableMachineCard={
-          IXISortableMachineCard
-        }
-
-        toggleSave={
-          toggleSave
-        }
-
-        updateIxiCardState={
-          updateIxiCardState
-        }
-
-        cycleMachineFace={
-          cycleMachineFace
-        }
-
-        sendListingToFront={
-          sendListingToFront
-        }
-
-        sendListingToBack={
-          sendListingToBack
-        }
-
-        armedDestination={
-          armedDestination
-        }
-
-        sendMachineToArmedDestination={
-          sendMachineToArmedDestination
-        }
-
-        draggingListingId={
-          draggingListingId
-        }
-
-        ghostListingId={
-          ghostListingId
-        }
-
-        enableCardScaling={
-          true
-        }
-
-        cardScaleMode={
-          cardScaleMode
-        }
-
-        cardScaleMetrics={
-          cardScaleMetrics
-        }
-
-        getSellerListingCardProps={
-          getSellerListingCardProps
-        }
-
+        getListingId={getListingId}
+        savedIds={savedIds}
+        ixiCardState={ixiCardState}
+        IXISortableMachineCard={IXISortableMachineCard}
+        toggleSave={toggleSave}
+        updateIxiCardState={updateIxiCardState}
+        cycleMachineFace={cycleMachineFace}
+        sendListingToFront={sendListingToFront}
+        sendListingToBack={sendListingToBack}
+        armedDestination={armedDestination}
+        sendMachineToArmedDestination={sendMachineToArmedDestination}
+        draggingListingId={draggingListingId}
+        ghostListingId={ghostListingId}
+        enableCardScaling={true}
+        cardScaleMode={cardScaleMode}
+        cardScaleMetrics={cardScaleMetrics}
+        getSellerListingCardProps={getSellerListingCardProps}
 
         getItemReorderBehavior={
           item =>
@@ -281,45 +227,41 @@ export default function IXIAosWorkspaceBoard({
               : "normal"
         }
 
-
         getCustomItemId={
           item => {
-            const objectId =
-              getMosObjectId(item);
-
-            return objectId || null;
-          }
-        }
-
-
-        getCustomItemNativeSize={
-          ({
-            item,
-            id
-          }) => {
+            /*
+             * Only explicit System Index presentations and durable
+             * MOS objects belong on the custom AOS renderer path.
+             * IronXchange listings deliberately return null here so
+             * IXIBoard routes them through IXIMachineCard.
+             */
             if (
-              !isSystemIndexPresentation(
-                item
-              )
+              !isSystemIndexPresentation(item) &&
+              !isMosWorkspaceObject(item)
             ) {
               return null;
             }
 
-            return {
-              width:
-                getSystemIndexConsoleNativeWidth({
-                  objectId:
-                    id,
-
-                  ixiCardState
-                }),
-
-              height:
-                getSystemIndexConsoleNativeHeight()
-            };
+            return getMosObjectId(item) || null;
           }
         }
 
+        getCustomItemNativeSize={({ item, id }) => {
+          if (!isSystemIndexPresentation(item)) {
+            return null;
+          }
+
+          return {
+            width:
+              getSystemIndexConsoleNativeWidth({
+                objectId: id,
+                ixiCardState
+              }),
+
+            height:
+              getSystemIndexConsoleNativeHeight()
+          };
+        }}
 
         renderCustomItem={({
           item,
@@ -327,154 +269,87 @@ export default function IXIAosWorkspaceBoard({
           dragHandleProps
         }) => {
           const commandTarget =
-            getContainerCommandTarget(
-              item
-            );
+            getContainerCommandTarget(item);
 
           const systemAdapter =
-            getIXIAosSystemAdapter(
-              item
-            );
+            getIXIAosSystemAdapter(item);
 
-
-          if (
-            isSystemIndexPresentation(
-              item
-            )
-          ) {
+          if (isSystemIndexPresentation(item)) {
             const canCreateChild =
               !systemAdapter &&
-              item?.capabilities?.canContain ===
-                true;
+              item?.capabilities?.canContain === true;
 
             return (
               <IXISystemIndexConsole
-                objectId={
-                  id
-                }
+                objectId={id}
+                index={item}
+                ixiCardState={ixiCardState}
+                updateIxiCardState={updateIxiCardState}
 
-                index={
-                  item
-                }
-
-                ixiCardState={
-                  ixiCardState
-                }
-
-                updateIxiCardState={
-                  updateIxiCardState
-                }
-
-                renderSystemIndexCard={({
-                  onOpenConsole
-                }) => (
+                renderSystemIndexCard={({ onOpenConsole }) => (
                   <IXISystemIndexCard
-                    index={
-                      item
-                    }
-
-                    objectId={
-                      id
-                    }
-
-                    dragHandleProps={
-                      dragHandleProps
-                    }
+                    index={item}
+                    objectId={id}
+                    dragHandleProps={dragHandleProps}
 
                     workspaceDropPolicy={
-                      getSystemIndexDropPolicy(
-                        item
-                      )
+                      getSystemIndexDropPolicy(item)
                     }
 
                     workspaceDropSurface={
-                      item?.workspace
-                        ?.surfaceId ||
-                      systemAdapter
-                        ?.workspaceSurfaceId ||
+                      item?.workspace?.surfaceId ||
+                      systemAdapter?.workspaceSurfaceId ||
                       ""
                     }
 
                     ixiState={
-                      ixiCardState[
-                        id
-                      ] || {
+                      ixiCardState[id] || {
                         color: "none",
                         outline: 1,
                         face: 1
                       }
                     }
 
-                    ixiCardState={
-                      ixiCardState
-                    }
+                    ixiCardState={ixiCardState}
+                    onIxiStateChange={updateIxiCardState}
+                    armedDestination={armedDestination}
+                    onSendFront={sendListingToFront}
+                    onSendBack={sendListingToBack}
+                    onSendToArmedDestination={sendMachineToArmedDestination}
 
-                    onIxiStateChange={
-                      updateIxiCardState
-                    }
-
-                    armedDestination={
-                      armedDestination
-                    }
-
-                    onSendFront={
-                      sendListingToFront
-                    }
-
-                    onSendBack={
-                      sendListingToBack
-                    }
-
-                    onSendToArmedDestination={
-                      sendMachineToArmedDestination
-                    }
-
-                    onExposeObject={
-                      child => {
-                        if (
-                          systemAdapter
-                            ?.adapterId ===
-                          "ixi-owned-equipment"
-                        ) {
-                          exposeEquipmentMachineToBoard?.(
-                            child
-                          );
-
-                          return;
-                        }
-
-                        onExposeContainerChildren?.({
-                          container:
-                            commandTarget,
-
-                          child
-                        });
+                    onExposeObject={child => {
+                      if (
+                        systemAdapter?.adapterId ===
+                        "ixi-owned-equipment"
+                      ) {
+                        exposeEquipmentMachineToBoard?.(child);
+                        return;
                       }
+
+                      onExposeContainerChildren?.({
+                        container: commandTarget,
+                        child
+                      });
+                    }}
+
+                    onOpenConsole={onOpenConsole}
+
+                    onExposeContents={() =>
+                      onExposeContainerChildren?.(
+                        commandTarget
+                      )
                     }
 
-                    onOpenConsole={
-                      onOpenConsole
+                    onGatherContents={() =>
+                      onGatherContainerChildren?.(
+                        commandTarget
+                      )
                     }
 
-                    onExposeContents={
-                      () =>
-                        onExposeContainerChildren?.(
-                          commandTarget
-                        )
-                    }
-
-                    onGatherContents={
-                      () =>
-                        onGatherContainerChildren?.(
-                          commandTarget
-                        )
-                    }
-
-                    onReturnContents={
-                      () =>
-                        onReturnContainerChildren?.(
-                          commandTarget
-                        )
+                    onReturnContents={() =>
+                      onReturnContainerChildren?.(
+                        commandTarget
+                      )
                     }
 
                     onAddObject={
@@ -492,16 +367,10 @@ export default function IXIAosWorkspaceBoard({
             );
           }
 
-
-          if (
-            isMosWorkspaceObject(
-              item
-            )
-          ) {
+          if (isMosWorkspaceObject(item)) {
             const parentObject =
               item?.directContainerId &&
-              typeof getWorkspaceObjectById ===
-                "function"
+              typeof getWorkspaceObjectById === "function"
                 ? getWorkspaceObjectById(
                     item.directContainerId
                   )
@@ -523,22 +392,12 @@ export default function IXIAosWorkspaceBoard({
 
             return (
               <IXIMosObjectCard
-                object={
-                  item
-                }
-
-                parentLabel={
-                  parentLabel
-                }
-
-                items={
-                  directChildren
-                }
+                object={item}
+                parentLabel={parentLabel}
+                items={directChildren}
 
                 ixiState={
-                  ixiCardState[
-                    id
-                  ] || {
+                  ixiCardState[id] || {
                     color: "none",
                     outline: 1,
                     face: 1,
@@ -546,86 +405,47 @@ export default function IXIAosWorkspaceBoard({
                   }
                 }
 
-                ixiCardState={
-                  ixiCardState
-                }
-
-                onIxiStateChange={
-                  updateIxiCardState
-                }
-
-                dragHandleProps={
-                  dragHandleProps
-                }
+                ixiCardState={ixiCardState}
+                onIxiStateChange={updateIxiCardState}
+                dragHandleProps={dragHandleProps}
 
                 workspaceDropPolicy={{
                   enabled:
-                    item?.capabilities
-                      ?.canContain === true,
-
+                    item?.capabilities?.canContain === true,
                   acceptedObjectTypes: []
                 }}
 
-                workspaceDropSurface={
-                  "board"
+                workspaceDropSurface="board"
+                armedDestination={armedDestination}
+                onSendFront={sendListingToFront}
+                onSendBack={sendListingToBack}
+                onSendToArmedDestination={sendMachineToArmedDestination}
+
+                onExposeObject={child => {
+                  onExposeContainerChildren?.({
+                    container: commandTarget,
+                    child
+                  });
+                }}
+
+                onExposeContents={() =>
+                  onExposeContainerChildren?.(
+                    commandTarget
+                  )
                 }
 
-                armedDestination={
-                  armedDestination
+                onGatherContents={() =>
+                  onGatherContainerChildren?.(
+                    commandTarget
+                  )
                 }
 
-                onSendFront={
-                  sendListingToFront
-                }
-
-                onSendBack={
-                  sendListingToBack
-                }
-
-                onSendToArmedDestination={
-                  sendMachineToArmedDestination
-                }
-
-                onExposeObject={
-                  child => {
-                    onExposeContainerChildren?.({
-                      container:
-                        commandTarget,
-
-                      child
-                    });
-                  }
-                }
-
-                onExposeContents={
-                  () =>
-                    onExposeContainerChildren?.(
-                      commandTarget
-                    )
-                }
-
-                onGatherContents={
-                  () =>
-                    onGatherContainerChildren?.(
-                      commandTarget
-                    )
-                }
-
-                onAddChild={
-                  onCreateObjectChild
-                }
-
-                onSaveName={
-                  onSaveObjectName
-                }
-
-                onDelete={
-                  onDeleteObject
-                }
+                onAddChild={onCreateObjectChild}
+                onSaveName={onSaveObjectName}
+                onDelete={onDeleteObject}
               />
             );
           }
-
 
           return null;
         }}
