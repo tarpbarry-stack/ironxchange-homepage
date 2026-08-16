@@ -8,7 +8,7 @@ import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXINoteApp from "./modules/note/IXINoteApp";
 import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
-import IXIPurchaseApp from "./modules/purchase/IXIPurchaseApp";
+import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
@@ -29,8 +29,19 @@ function appendUniqueRecord(records = [], record = {}, identityGetter = () => ""
 }
 
 export default function IXITransactApp({
-  object = {}, actor = {}, entity = {}, activeWorkOrder = null, permissions = [], onClose = null, onOpenModule = null,
-  onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null
+  object = {},
+  actor = {},
+  entity = {},
+  activeWorkOrder = null,
+  permissions = [],
+  onClose = null,
+  onOpenModule = null,
+  onSendFront = null,
+  onSendBack = null,
+  onCycleColor = null,
+  onCycleOutline = null,
+  armedDestination = "",
+  onSendToArmedDestination = null
 }) {
   const context = useMemo(
     () => createIXITransactContext({ object, actor, entity, activeWorkOrder, permissions }),
@@ -48,8 +59,8 @@ export default function IXITransactApp({
   const noteOpen = moduleId === "work-order-note";
   const photoOpen = moduleId === "work-order-photo";
   const expenseOpen = moduleId === "expense";
-  const purchaseOpen = moduleId === "purchase-order";
-  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOpen;
+  const purchaseOrderOpen = moduleId === "purchase-order";
+  const compactHeader = Boolean(active) || noteOpen || photoOpen || expenseOpen || purchaseOrderOpen;
   const resolvedWorkOrder = workOrderSnapshot || context.activeWorkOrder || null;
 
   async function open(item) {
@@ -112,22 +123,20 @@ export default function IXITransactApp({
     setModuleId("");
   }
 
-  async function saveDirectPurchase(purchase, input, response) {
-    const purchaseId = clean(purchase?.identity?.purchaseId || purchase?.identity?.clientRequestId);
-    if (!purchaseId) throw new Error("Saved Purchase did not return a stable identity.");
-
+  async function purchaseOrderChanged(nextRecord, change = {}) {
     await onOpenModule?.(
-      { id: "purchase-save", label: "SAVE PURCHASE", group: "buy", documentType: purchase?.purchase?.requestType || "purchase-request" },
+      {
+        id: `purchase-order-${change.action || "change"}`,
+        label: "PURCHASE ORDER UPDATE",
+        group: "buy",
+        documentType: "purchase-order"
+      },
       context,
-      { purchase, purchaseRecord: input?.purchaseRecord || null, input, response, returnTo: "purchase-record" }
-    );
-  }
-
-  async function purchaseChanged(nextPurchase, change = {}) {
-    await onOpenModule?.(
-      { id: `purchase-${change.action || "change"}`, label: "PURCHASE UPDATE", group: "buy", documentType: "purchase-order" },
-      context,
-      { purchaseRecord: nextPurchase, change }
+      {
+        purchaseOrderRecord: nextRecord,
+        change,
+        returnTo: "purchase-order"
+      }
     );
   }
 
@@ -263,8 +272,12 @@ export default function IXITransactApp({
           <IXIPhotoApp context={context} workOrder={resolvedWorkOrder || {}} onCancel={() => setModuleId("work-order")} onSave={savePhoto} />
         ) : expenseOpen ? (
           <IXIExpenseApp context={context} workOrder={resolvedWorkOrder} onCancel={() => setModuleId("")} onSave={saveDirectExpense} />
-        ) : purchaseOpen ? (
-          <IXIPurchaseApp context={context} workOrder={resolvedWorkOrder || {}} onCancel={() => setModuleId("")} onSave={saveDirectPurchase} onPurchaseChange={purchaseChanged} />
+        ) : purchaseOrderOpen ? (
+          <IXIPurchaseOrderApp
+            context={context}
+            onBack={() => setModuleId("")}
+            onRecordChange={purchaseOrderChanged}
+          />
         ) : active?.id === "work-order" ? (
           <IXIWorkOrderApp
             context={context}
@@ -307,7 +320,19 @@ export default function IXITransactApp({
         )}
       </main>
 
-      <IXIMachineRail listing={object} saved={false} boardColor="none" boardOutline={1} machineFace={0} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination} />
+      <IXIMachineRail
+        listing={object}
+        saved={false}
+        boardColor="none"
+        boardOutline={1}
+        machineFace={0}
+        onSendFront={onSendFront}
+        onSendBack={onSendBack}
+        onCycleColor={onCycleColor}
+        onCycleOutline={onCycleOutline}
+        armedDestination={armedDestination}
+        onSendToArmedDestination={onSendToArmedDestination}
+      />
       <IXITransactStyles />
     </div>
   );
