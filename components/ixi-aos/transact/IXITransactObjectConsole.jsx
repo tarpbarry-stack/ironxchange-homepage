@@ -14,6 +14,7 @@ import {
 import {
   IXIAosCardCommandProvider
 } from "../card-runtime/IXIAosCardCommandContext";
+import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
 import IXITransactApp from "./IXITransactApp";
 import IXITransactConsolePanel from "./IXITransactConsolePanel";
 import { createIXITransactContext } from "./IXITransactContext";
@@ -141,21 +142,24 @@ export default function IXITransactObjectConsole({
               ) : null}
 
               {isListing ? (
-                <IXITransactApp
-                  object={object}
-                  actor={actor}
-                  entity={entity}
-                  activeWorkOrder={activeWorkOrder}
-                  permissions={permissions}
-                  onClose={onClose}
-                  onOpenModule={onOpenModule}
-                  onSendFront={onSendFront}
-                  onSendBack={onSendBack}
-                  onCycleColor={onCycleColor}
-                  onCycleOutline={onCycleOutline}
-                  armedDestination={armedDestination}
-                  onSendToArmedDestination={onSendToArmedDestination}
-                />
+                <>
+                  <IXITransactApp
+                    object={object}
+                    actor={actor}
+                    entity={entity}
+                    activeWorkOrder={activeWorkOrder}
+                    permissions={permissions}
+                    onClose={onClose}
+                    onOpenModule={onOpenModule}
+                    onSendFront={onSendFront}
+                    onSendBack={onSendBack}
+                    onCycleColor={onCycleColor}
+                    onCycleOutline={onCycleOutline}
+                    armedDestination={armedDestination}
+                    onSendToArmedDestination={onSendToArmedDestination}
+                  />
+                  <IXIAosActionNotice variant="field" />
+                </>
               ) : (
                 <IXITransactConsolePanel
                   context={context}
