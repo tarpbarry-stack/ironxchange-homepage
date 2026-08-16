@@ -14,6 +14,7 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "payables", label: "PAYABLES / A/P", group: "pay", documentType: "bill" }),
   Object.freeze({ id: "treasury", label: "CASH / TREASURY", group: "cash", documentType: "payment" }),
   Object.freeze({ id: "general-ledger", label: "GENERAL LEDGER / CLOSE", group: "account", documentType: "journal-entry" }),
+  Object.freeze({ id: "financial-reporting", label: "FINANCIAL REPORTING", group: "report", documentType: "financial-report" }),
   Object.freeze({ id: "bill", label: "BILL / INVOICE", group: "spend", documentType: "bill" }),
   Object.freeze({ id: "receipt", label: "RECEIPT", group: "spend", documentType: "receipt" }),
   Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order" }),
@@ -21,8 +22,8 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice" }),
   Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement" })
 ]);
-const MACHINE_ORDER=Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","sold","collections","settlement","quote","invoice"]);
-const LOCATION_ORDER=Object.freeze(["work-order","expense","purchase-order","bill","payables","treasury","general-ledger","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice"]);
+const MACHINE_ORDER=Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","sold","collections","settlement","quote","invoice"]);
+const LOCATION_ORDER=Object.freeze(["work-order","expense","purchase-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice"]);
 function sortByOrder(items,order){const rank=new Map(order.map((id,index)=>[id,index]));return[...items].sort((l,r)=>(rank.has(l.id)?rank.get(l.id):999)-(rank.has(r.id)?rank.get(r.id):999));}
 function deniedModuleIds(permissions=[]){return new Set((Array.isArray(permissions)?permissions:[]).map(v=>String(v||"").trim()).filter(v=>v.startsWith("deny:")).map(v=>v.slice(5)).filter(Boolean));}
 export function getIXITransactModules({objectType="",permissions=[]}={}){const type=String(objectType||"").trim().toLowerCase(),denied=deniedModuleIds(permissions);let preferred=IXI_TRANSACT_MODULES;if(["machine","equipment","vehicle","truck","trailer"].includes(type))preferred=sortByOrder(IXI_TRANSACT_MODULES,MACHINE_ORDER);else if(["location","yard","shop"].includes(type))preferred=sortByOrder(IXI_TRANSACT_MODULES,LOCATION_ORDER);return preferred.filter(item=>!denied.has(item.id));}
