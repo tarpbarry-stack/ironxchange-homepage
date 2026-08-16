@@ -19,6 +19,8 @@ export function resolveIXIActionNoticeObjectId({
 }
 
 export function createIXIActionNotice({
+  noticeId = "",
+  createdAt = 0,
   message = "",
   tone = IXI_ACTION_NOTICE_TONES.SUCCESS,
   duration = 1600,
@@ -26,18 +28,22 @@ export function createIXIActionNotice({
   commandId = "",
   source = ""
 } = {}) {
-  const createdAt = Date.now();
+  const timestamp = Number(createdAt) > 0
+    ? Number(createdAt)
+    : Date.now();
 
-  return {
-    noticeId: `IXI-NOTICE-${createdAt}-${Math.random().toString(36).slice(2, 8)}`,
+  return Object.freeze({
+    noticeId:
+      clean(noticeId) ||
+      `IXI-NOTICE-${timestamp}-${Math.random().toString(36).slice(2, 8)}`,
     message: clean(message).toUpperCase(),
     tone: clean(tone) || IXI_ACTION_NOTICE_TONES.SUCCESS,
     duration: Number.isFinite(Number(duration)) ? Number(duration) : 1600,
     blocking: Boolean(blocking),
     commandId: clean(commandId),
     source: clean(source),
-    createdAt
-  };
+    createdAt: timestamp
+  });
 }
 
 export function createIXIActionNoticePatch(notice = null) {
@@ -62,15 +68,19 @@ export function emitIXIActionNotice({
     return null;
   }
 
-  const detail = {
-    objectId: id,
+  const notice = createIXIActionNotice({
     message,
     tone,
     duration,
     blocking,
     commandId,
     source
-  };
+  });
+
+  const detail = Object.freeze({
+    objectId: id,
+    notice
+  });
 
   if (
     typeof window !== "undefined" &&
