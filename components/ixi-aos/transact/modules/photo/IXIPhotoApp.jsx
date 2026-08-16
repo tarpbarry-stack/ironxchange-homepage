@@ -16,7 +16,7 @@ function localDateTime(){const d=new Date();const offset=d.getTimezoneOffset()*6
 
 export default function IXIPhotoApp({context={},workOrder={},language="en",onLanguageChange=null,onCancel=null,onSave=null}){
  const[lang,setLang]=useState(language==="es"?"es":"en"),[photoType,setPhotoType]=useState("work-photo"),[title,setTitle]=useState(""),[description,setDescription]=useState(""),[occurredAtLocal,setOccurredAtLocal]=useState(localDateTime()),[tags,setTags]=useState(""),[files,setFiles]=useState([]),[errors,setErrors]=useState({}),[saving,setSaving]=useState(false);
- const inputRef=useRef(null),requestIdRef=useRef(createClientRequestId());
+ const inputRef=useRef(null),requestIdRef=useRef(createClientRequestId()),objectUrlsRef=useRef(new Set());
  const t=COPY[lang],primary=context.primary||{},location=context.location||{},actor=context.actor||{};
  const wo=clean(workOrder.identity?.number||workOrder.workOrderNumber||workOrder.number)||"WORK ORDER";
  const occurredAt=occurredAtLocal?new Date(occurredAtLocal).toISOString():new Date().toISOString();
@@ -24,12 +24,13 @@ export default function IXIPhotoApp({context={},workOrder={},language="en",onLan
  const input=useMemo(()=>({clientRequestId:requestIdRef.current,photoType,title,description,occurredAt,tags,visibility:"work-order-team",media}),[photoType,title,description,occurredAt,tags,media]);
  const draft=useMemo(()=>createIXIPhotoDraft({context,workOrder,input}),[context,workOrder,input]);
 
- useEffect(()=>()=>{files.forEach(entry=>{try{URL.revokeObjectURL(entry.previewUrl)}catch{}})},[files]);
+ useEffect(()=>()=>{for(const url of objectUrlsRef.current){try{URL.revokeObjectURL(url)}catch{}}objectUrlsRef.current.clear()},[]);
  function choose(nextFiles){
   const accepted=Array.from(nextFiles||[]).filter(file=>file.type.startsWith("image/")&&file.size<=10*1024*1024);
-  setFiles(current=>[...current,...accepted.map(file=>({file,previewUrl:URL.createObjectURL(file)}))]);setErrors({});
+  const entries=accepted.map(file=>{const previewUrl=URL.createObjectURL(file);objectUrlsRef.current.add(previewUrl);return{file,previewUrl}});
+  setFiles(current=>[...current,...entries]);setErrors({});
  }
- function remove(index){setFiles(current=>{const target=current[index];if(target?.previewUrl)URL.revokeObjectURL(target.previewUrl);return current.filter((_,i)=>i!==index)});}
+ function remove(index){setFiles(current=>{const target=current[index];if(target?.previewUrl){URL.revokeObjectURL(target.previewUrl);objectUrlsRef.current.delete(target.previewUrl)}return current.filter((_,i)=>i!==index)});}
  async function save(){
   if(saving)return;const next=createIXIPhotoDraft({context,workOrder,input}),check=validateIXIPhoto(next);setErrors(check.errors);if(!check.valid)return;
   setSaving(true);try{await onSave?.(next,{...input,files:files.map(entry=>entry.file)},null)}finally{setSaving(false)}
