@@ -37,8 +37,29 @@ export function createIXIWorkOrderDraft({context={},input={}}={}){
     },
     dates:{requestedAt:clean(i.requestedAt||c.launchedAt||new Date().toISOString()),scheduledAt:"",startedAt:"",completedAt:"",closedAt:""},
     result:{disposition:"",finalMachineCondition:"",workPerformed:"",recommendations:""},
-    references:{timeEntryIds:[],materialRecordIds:[],serviceRecordIds:[],expenseIds:[],purchaseOrderIds:[],billIds:[],technologyWorkIds:[],attachmentIds:[],noteIds:[]},
-    financial:{laborActual:0,materialActual:0,serviceActual:0,otherActual:0,committed:0,estimated:money(i.estimated),totalActual:0,status:"open"},
+    references:{
+      timeEntryIds:[],
+      materialRecordIds:[],
+      serviceRecordIds:[],
+      expenseIds:[],
+      purchaseRequestIds:[],
+      purchaseOrderIds:[],
+      billIds:[],
+      technologyWorkIds:[],
+      attachmentIds:[],
+      noteIds:[]
+    },
+    financial:{
+      laborActual:0,
+      materialActual:0,
+      serviceActual:0,
+      otherActual:0,
+      requested:0,
+      committed:0,
+      estimated:money(i.estimated),
+      totalActual:0,
+      status:"open"
+    },
     recordStatus:"open",revision:1,
     audit:{createdBy:clean(actor.userId||actor.employeeId||actor.passportId),createdAt:clean(c.launchedAt||new Date().toISOString()),updatedAt:clean(c.launchedAt||new Date().toISOString())}
   };
@@ -46,7 +67,7 @@ export function createIXIWorkOrderDraft({context={},input={}}={}){
 
 export function normalizeIXIWorkOrder(value={}){
   const source=obj(value),base=createIXIWorkOrderDraft({context:{},input:{}});
-  return {...base,...source,identity:{...base.identity,...obj(source.identity)},context:{...base.context,...obj(source.context)},work:{...base.work,...obj(source.work)},people:{...base.people,...obj(source.people),assignedTo:arr(source.people?.assignedTo)},dates:{...base.dates,...obj(source.dates)},result:{...base.result,...obj(source.result)},references:{...base.references,...obj(source.references)},financial:{...base.financial,...obj(source.financial)},audit:{...base.audit,...obj(source.audit)}};
+  return {...base,...source,identity:{...base.identity,...obj(source.identity)},context:{...base.context,...obj(source.context)},work:{...base.work,...obj(source.work)},people:{...base.people,...obj(source.people),assignedTo:arr(source.people?.assignedTo)},dates:{...base.dates,...obj(source.dates)},result:{...base.result,...obj(source.result)},references:{...base.references,...obj(source.references),purchaseRequestIds:arr(source.references?.purchaseRequestIds),purchaseOrderIds:arr(source.references?.purchaseOrderIds)},financial:{...base.financial,...obj(source.financial)},audit:{...base.audit,...obj(source.audit)}};
 }
 
 export default {createIXIWorkOrderDraft,normalizeIXIWorkOrder};
