@@ -72,6 +72,39 @@ function isContainerWorkspaceObject(item = {}) {
 }
 
 
+/*
+ * Command payloads carry stable technical identity/capability,
+ * not presentation names. This prevents a customer naming a
+ * container "Equipment" (or anything else) from changing the
+ * command path chosen by older compatibility code downstream.
+ */
+function getContainerCommandTarget(item = {}) {
+  const objectId =
+    getMosObjectId(item);
+
+  return {
+    objectId,
+
+    indexId:
+      isEquipmentAdapter(item)
+        ? "equipment"
+        : cleanId(item?.indexId),
+
+    directContainerId:
+      cleanId(item?.directContainerId) ||
+      null,
+
+    capabilities: {
+      ...(item?.capabilities || {})
+    },
+
+    metadata: {
+      ...(item?.metadata || {})
+    }
+  };
+}
+
+
 export default function IXIAosWorkspaceBoard({
   items = [],
 
@@ -196,9 +229,6 @@ export default function IXIAosWorkspaceBoard({
 
         /* ===============================================
            REORDER POLICY
-
-           Container behavior is capability-driven.
-           A customer name never changes drag semantics.
            =============================================== */
         getItemReorderBehavior={
           item =>
@@ -210,10 +240,6 @@ export default function IXIAosWorkspaceBoard({
 
         /* ===============================================
            CUSTOM OBJECT IDENTITY
-
-           Any durable MOS object is keyed by its objectId.
-           IronXchange listings continue through the proven
-           listing-card path.
            =============================================== */
         getCustomItemId={
           item => {
@@ -227,9 +253,6 @@ export default function IXIAosWorkspaceBoard({
 
         /* ===============================================
            CUSTOM NATIVE SIZE
-
-           System Index consoles expand as a single native
-           console surface. Generic MOS cards remain 298×471.
            =============================================== */
         getCustomItemNativeSize={
           ({
@@ -268,13 +291,12 @@ export default function IXIAosWorkspaceBoard({
           id,
           dragHandleProps
         }) => {
+          const commandTarget =
+            getContainerCommandTarget(
+              item
+            );
 
-          /* =============================================
-             SYSTEM INDEX PRESENTATION
 
-             This is an explicit UI/template role.
-             It is not inferred from the customer's words.
-             ============================================= */
           if (
             isSystemIndexPresentation(
               item
@@ -376,7 +398,7 @@ export default function IXIAosWorkspaceBoard({
 
                         onExposeContainerChildren?.({
                           container:
-                            item,
+                            commandTarget,
 
                           child
                         });
@@ -388,15 +410,24 @@ export default function IXIAosWorkspaceBoard({
                     }
 
                     onExposeContents={
-                      onExposeContainerChildren
+                      () =>
+                        onExposeContainerChildren?.(
+                          commandTarget
+                        )
                     }
 
                     onGatherContents={
-                      onGatherContainerChildren
+                      () =>
+                        onGatherContainerChildren?.(
+                          commandTarget
+                        )
                     }
 
                     onReturnContents={
-                      onReturnContainerChildren
+                      () =>
+                        onReturnContainerChildren?.(
+                          commandTarget
+                        )
                     }
 
                     onAddObject={
@@ -413,13 +444,6 @@ export default function IXIAosWorkspaceBoard({
           }
 
 
-          /* =============================================
-             DURABLE MOS OBJECT / GENERIC CONTAINER
-
-             No business noun switches. A Field Rig, vendor,
-             dog, person, tool, location, or customer-defined
-             object all reach the same MOS card runtime.
-             ============================================= */
           if (
             isMosWorkspaceObject(
               item
@@ -517,7 +541,7 @@ export default function IXIAosWorkspaceBoard({
                   child => {
                     onExposeContainerChildren?.({
                       container:
-                        item,
+                        commandTarget,
 
                       child
                     });
@@ -525,11 +549,17 @@ export default function IXIAosWorkspaceBoard({
                 }
 
                 onExposeContents={
-                  onExposeContainerChildren
+                  () =>
+                    onExposeContainerChildren?.(
+                      commandTarget
+                    )
                 }
 
                 onGatherContents={
-                  onGatherContainerChildren
+                  () =>
+                    onGatherContainerChildren?.(
+                      commandTarget
+                    )
                 }
 
                 onAddChild={
