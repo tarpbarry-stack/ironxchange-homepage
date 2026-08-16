@@ -32,14 +32,21 @@ export default function IXIAosCardHeaderControls({
   const [menuOpen, setMenuOpen] = useState(false);
   const [localSkinId, setLocalSkinId] = useState("v12");
 
+  const runtimeHasTransact =
+    typeof runtimeCommands?.onOpenTransact === "function";
+
   const resolvedOnTransact =
     typeof onTransact === "function"
       ? onTransact
       : runtimeCommands?.onOpenTransact;
 
+  // The owning card/console runtime is authoritative. A Face should not be able
+  // to accidentally hide TRAN$ACT just because it did not receive a duplicate
+  // local prop. `canTransact` still enables an explicitly supplied local handler
+  // when the component is rendered outside an owning command provider.
   const showTransact =
-    canTransact === true ||
-    (canTransact !== false && typeof resolvedOnTransact === "function");
+    typeof resolvedOnTransact === "function" &&
+    (runtimeHasTransact || canTransact !== false);
 
   function stop(event) {
     event?.preventDefault?.();
@@ -110,7 +117,7 @@ export default function IXIAosCardHeaderControls({
         </button>
       ) : null}
 
-      {showTransact && typeof resolvedOnTransact === "function" ? (
+      {showTransact ? (
         <button
           type="button"
           className="header-action transact"
@@ -118,7 +125,7 @@ export default function IXIAosCardHeaderControls({
           title="Open IXI TRAN$ACT for this object"
           onClick={event => {
             stop(event);
-            resolvedOnTransact();
+            resolvedOnTransact?.();
           }}
         >
           $
