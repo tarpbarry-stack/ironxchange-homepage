@@ -1,4 +1,5 @@
 import IXIAosLocationOverviewCard from "../location/IXIAosLocationOverviewCard";
+import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 
 export const CARD_002_LOCATION = Object.freeze({
   cardNumber: 2,
@@ -13,5 +14,9 @@ export const CARD_002_LOCATION = Object.freeze({
 });
 
 export default function IXIAosCard002Location(props) {
-  return <IXIAosLocationOverviewCard {...props} variant="002" />;
+  return (
+    <IXIAosDataContractCardAdapter {...props}>
+      {contractProps => <IXIAosLocationOverviewCard {...contractProps} variant="002" />}
+    </IXIAosDataContractCardAdapter>
+  );
 }
