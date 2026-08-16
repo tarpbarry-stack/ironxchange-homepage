@@ -23,6 +23,55 @@ import {
 } from "../../../lib/listingFormatters";
 
 
+function cleanId(value) {
+  return String(value ?? "").trim();
+}
+
+
+function getMosObjectId(item = {}) {
+  return cleanId(
+    item?.objectId ||
+    item?.id?.uuid ||
+    item?.id
+  );
+}
+
+
+function isSystemIndexPresentation(item = {}) {
+  return Boolean(
+    item?.metadata?.systemIndexPresentation === true ||
+    item?.metadata?.systemAdapter === true
+  );
+}
+
+
+function isEquipmentAdapter(item = {}) {
+  return Boolean(
+    item?.metadata?.adapterId ===
+      "ixi-owned-equipment" ||
+    (
+      item?.metadata?.systemAdapter === true &&
+      item?.indexId === "equipment"
+    )
+  );
+}
+
+
+function isMosWorkspaceObject(item = {}) {
+  return Boolean(
+    getMosObjectId(item)
+  );
+}
+
+
+function isContainerWorkspaceObject(item = {}) {
+  return Boolean(
+    isSystemIndexPresentation(item) ||
+    item?.capabilities?.canContain === true
+  );
+}
+
+
 export default function IXIAosWorkspaceBoard({
   items = [],
 
@@ -144,78 +193,34 @@ export default function IXIAosWorkspaceBoard({
           getSellerListingCardProps
         }
 
-  
+
         /* ===============================================
-           CONTAINER SORTING BEHAVIOR
+           REORDER POLICY
+
+           Container behavior is capability-driven.
+           A customer name never changes drag semantics.
            =============================================== */
-
         getItemReorderBehavior={
-          item => {
-            const objectType =
-              String(
-                item?.objectType ||
-                ""
-              )
-                .trim()
-                .toLowerCase();
-
-            const isSystemIndex =
-              objectType ===
-              "system-index";
-
-            const isAosContainer =
-              Boolean(
-                item?.objectId &&
-                objectType !==
-                  "machine"
-              );
-
-            /*
-             * Containers remain draggable themselves,
-             * but foreign drags do not displace them.
-             */
-            if (
-              isSystemIndex ||
-              isAosContainer
-            ) {
-              return "self-only";
-            }
-
-            return "normal";
-          }
+          item =>
+            isContainerWorkspaceObject(item)
+              ? "self-only"
+              : "normal"
         }
 
 
         /* ===============================================
            CUSTOM OBJECT IDENTITY
-           =============================================== */
 
+           Any durable MOS object is keyed by its objectId.
+           IronXchange listings continue through the proven
+           listing-card path.
+           =============================================== */
         getCustomItemId={
           item => {
-            const objectType =
-              String(
-                item?.objectType ||
-                ""
-              )
-                .trim()
-                .toLowerCase();
+            const objectId =
+              getMosObjectId(item);
 
-            if (
-              objectType ===
-                "system-index" ||
-              (
-                item?.objectId &&
-                objectType &&
-                objectType !==
-                  "machine"
-              )
-            ) {
-              return String(
-                item.objectId
-              );
-            }
-
-            return null;
+            return objectId || null;
           }
         }
 
@@ -223,32 +228,18 @@ export default function IXIAosWorkspaceBoard({
         /* ===============================================
            CUSTOM NATIVE SIZE
 
-           System Index console width expands from:
-           298
-           595
-           892
-           1189
-           1486
-
-           Native height always remains 471.
+           System Index consoles expand as a single native
+           console surface. Generic MOS cards remain 298×471.
            =============================================== */
-
         getCustomItemNativeSize={
           ({
             item,
             id
           }) => {
-            const objectType =
-              String(
-                item?.objectType ||
-                ""
-              )
-                .trim()
-                .toLowerCase();
-
             if (
-              objectType !==
-              "system-index"
+              !isSystemIndexPresentation(
+                item
+              )
             ) {
               return null;
             }
@@ -272,37 +263,22 @@ export default function IXIAosWorkspaceBoard({
         /* ===============================================
            CUSTOM OBJECT RENDER
            =============================================== */
-
-        
         renderCustomItem={({
           item,
           id,
           dragHandleProps
         }) => {
-          const objectType =
-            String(
-              item?.objectType ||
-              ""
-            )
-              .trim()
-              .toLowerCase();
-
 
           /* =============================================
-             SYSTEM INDEX SMART CONTAINER
+             SYSTEM INDEX PRESENTATION
 
-             IMPORTANT:
-
-             The System Index now owns a real AOS console.
-
-             Face 1 remains the real System Index card.
-             Additional 298 × 471 panels are provided by
-             the existing IXI Console Engine/Shell.
+             This is an explicit UI/template role.
+             It is not inferred from the customer's words.
              ============================================= */
-
           if (
-            objectType ===
-            "system-index"
+            isSystemIndexPresentation(
+              item
+            )
           ) {
             return (
               <IXISystemIndexConsole
@@ -321,7 +297,7 @@ export default function IXIAosWorkspaceBoard({
                 updateIxiCardState={
                   updateIxiCardState
                 }
-                
+
                 renderSystemIndexCard={({
                   onOpenConsole
                 }) => (
@@ -386,19 +362,27 @@ export default function IXIAosWorkspaceBoard({
 
                     onExposeObject={
                       child => {
-                        exposeEquipmentMachineToBoard?.(
+                        if (
+                          isEquipmentAdapter(
+                            item
+                          )
+                        ) {
+                          exposeEquipmentMachineToBoard?.(
+                            child
+                          );
+
+                          return;
+                        }
+
+                        onExposeContainerChildren?.({
+                          container:
+                            item,
+
                           child
-                        );
+                        });
                       }
                     }
 
-                    /*
-                     * REAL SYSTEM INDEX CONSOLE.
-                     *
-                     * No Equipment-return placeholder.
-                     * The card's ⋮ -> OPEN CONSOLE now
-                     * opens the System Index console slot.
-                     */
                     onOpenConsole={
                       onOpenConsole
                     }
@@ -430,17 +414,16 @@ export default function IXIAosWorkspaceBoard({
 
 
           /* =============================================
-             DURABLE MOS OBJECT / CHILD CONTAINER
+             DURABLE MOS OBJECT / GENERIC CONTAINER
 
-             Machines remain on the existing
-             IronXchange machine path.
+             No business noun switches. A Field Rig, vendor,
+             dog, person, tool, location, or customer-defined
+             object all reach the same MOS card runtime.
              ============================================= */
-
           if (
-            item?.objectId &&
-            objectType &&
-            objectType !==
-              "machine"
+            isMosWorkspaceObject(
+              item
+            )
           ) {
             const parentObject =
               item?.directContainerId &&
@@ -459,14 +442,11 @@ export default function IXIAosWorkspaceBoard({
               ).trim();
 
             const directChildren =
-              typeof getWorkspaceObjectById ===
-                "function"
-                ? (
-                    item?.items ||
-                    item?.children ||
-                    []
-                  )
-                : [];
+              Array.isArray(item?.items)
+                ? item.items
+                : Array.isArray(item?.children)
+                  ? item.children
+                  : [];
 
             return (
               <IXIMosObjectCard
@@ -506,7 +486,10 @@ export default function IXIAosWorkspaceBoard({
                 }
 
                 workspaceDropPolicy={{
-                  enabled: true,
+                  enabled:
+                    item?.capabilities
+                      ?.canContain === true,
+
                   acceptedObjectTypes: []
                 }}
 
