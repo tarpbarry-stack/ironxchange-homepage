@@ -15,8 +15,192 @@ import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneAp
 import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisitionApp";
 import IXIRentalExpenseApp from "./modules/rental-expense/IXIRentalExpenseApp";
 import IXIRentalIncomeApp from "./modules/rental-income/IXIRentalIncomeApp";
+import IXIServiceQuoteApp from "./modules/service-quote/IXIServiceQuoteApp";
 import IXITransactStyles from "./IXITransactStyles";
-const clean=value=>String(value??"").trim();
-export default function IXITransactApp({object={},actor={},entity={},activeWorkOrder=null,permissions=[],onClose=null,onOpenModule=null,onSendFront=null,onSendBack=null,onCycleColor=null,onCycleOutline=null,armedDestination="",onSendToArmedDestination=null}){const context=useMemo(()=>createIXITransactContext({object,actor,entity,activeWorkOrder,permissions}),[object,actor,entity,activeWorkOrder,permissions]),modules=useMemo(()=>getIXITransactModules({objectType:context.primary.objectType,permissions:context.permissions}),[context]),[moduleId,setModuleId]=useState(""),active=modules.find(x=>x.id===moduleId)||null,back=()=>setModuleId("");async function open(item){setModuleId(item.id);await onOpenModule?.(item,context,{})}async function change(id,label,group,type,key,r,c={},ctx=context,extra={}){await onOpenModule?.({id:`${id}-${c.action||"change"}`,label,group,documentType:type},ctx,{[key]:r,change:c,originatingObject:ctx.primary,returnTo:id,...extra})}
-if(moduleId==="bill")return <IXIBillStandaloneApp context={context} object={object} authority={actor?.billAuthority||actor?.financialAuthority||actor?.purchasingAuthority||{}} onBack={back} onRecordChange={(r,c)=>change("bill","BILL / INVOICE UPDATE","spend","bill","billRecord",r,c)}/>;let body=null;if(moduleId==="expense")body=<IXIExpenseApp context={context} workOrder={activeWorkOrder} onCancel={back} onSave={async(r,input,response)=>{await onOpenModule?.({id:"expense-save",label:"SAVE EXPENSE",group:"spend",documentType:"expense"},context,{expense:r,input,response});back()}}/>;else if(moduleId==="purchase-order")body=<IXIPurchaseOrderApp context={context} onBack={back} onRecordChange={(r,c)=>change("purchase-order","PURCHASE ORDER UPDATE","buy","purchase-order","purchaseOrderRecord",r,c)}/>;else if(moduleId==="time")body=<IXITimeStandaloneApp context={context} object={object} onBack={back} onRecordChange={(r,c,ctx)=>change("time","TIME UPDATE","work","time-entry","timeRecord",r,c,ctx||context)}/>;else if(moduleId==="material")body=<IXIMaterialStandaloneApp context={context} object={object} onBack={back} onRecordChange={(r,c,ctx)=>change("material","PART / MATERIAL UPDATE","work","material-usage","materialRecord",r,c,ctx||context)}/>;else if(moduleId==="asset-acquisition")body=<IXIAssetAcquisitionApp context={context} object={object} relatedTransactions={object?.assetFinancialTransactions||object?.relatedFinancialRecords||object?.financialRecords||[]} onBack={back} onRecordChange={(r,c,ctx)=>change("asset-acquisition","ASSET ACQUISITION UPDATE","asset","asset-acquisition","assetAcquisition",r,c,ctx||context)}/>;else if(moduleId==="rental-expense")body=<IXIRentalExpenseApp context={context} object={object} relatedTransactions={object?.rentalFinancialTransactions||object?.relatedFinancialRecords||object?.financialRecords||[]} onBack={back} onRecordChange={(r,c,ctx)=>change("rental-expense","RENTAL EXPENSE UPDATE","rent","rental","rentalExpense",r,c,ctx||context)}/>;else if(moduleId==="rental-income")body=<IXIRentalIncomeApp context={context} object={object} relatedTransactions={object?.rentalIncomeTransactions||object?.relatedFinancialRecords||object?.financialRecords||[]} onBack={back} onRecordChange={(r,c,ctx)=>change("rental-income","RENTAL INCOME UPDATE","rent","rental","rentalIncome",r,c,ctx||context)}/>;else if(moduleId==="work-order")body=<IXIWorkOrderApp context={context} initialWorkOrder={activeWorkOrder} onBack={back} onCreate={async(r,ctx)=>onOpenModule?.({id:"work-order-create",label:"CREATE WORK ORDER",group:"work",documentType:"work-order"},ctx,{workOrder:r})} onAction={async(id,wo,ctx,payload={})=>onOpenModule?.({id,label:String(id).toUpperCase(),group:"work-order-action",documentType:id},ctx,{workOrder:wo,...payload})}/>;else if(moduleId==="technology-work")body=<IXITechWorkOrderApp context={context} onBack={back} onCreate={async(r,ctx)=>onOpenModule?.({id:"tech-work-order-create",label:"CREATE TECH WORK ORDER",group:"work",documentType:"technology-work-order"},ctx,{techWorkOrder:r})} onRecordChange={(r,c,ctx)=>change("tech-work-order","TECH WORK ORDER UPDATE","work","technology-work-order","techWorkOrder",r,c,ctx||context)}/>;else if(active)body=<div className="tx-module"><button className="tx-back" onClick={back}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div></div>;else body=<>{context.activeWorkOrder?<button className="tx-open-work" onClick={()=>open({id:"work-order",label:"CONTINUE WORK",group:"work",documentType:"work-order"})}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber||context.activeWorkOrder.number||context.activeWorkOrder.id)||"WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title||context.activeWorkOrder.description)||"IN PROGRESS"}</small><b>CONTINUE ›</b></button>:null}<div className="tx-label">CREATE / OPEN</div><div className="tx-grid">{modules.map(item=><button key={item.id} onClick={()=>open(item)}><span>{item.group.toUpperCase()}</span><strong>{item.label}</strong><small>{item.documentType}</small></button>)}</div></>;
-return <div className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active?"module-open":"home-open"}`}><header className="tx-header"><div className="tx-brand"><span>IXI TRAN$ACT</span>{!active?<><strong>{context.primary.label}</strong><small>{context.primary.objectType||"AOS OBJECT"}</small></>:null}</div><button className="tx-close" onClick={()=>onClose?.()}>×</button></header><main className="tx-body">{body}</main><IXIMachineRail listing={object} saved={false} boardColor="none" boardOutline={1} machineFace={0} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination}/><IXITransactStyles/></div>}
+
+const clean = value => String(value ?? "").trim();
+
+export default function IXITransactApp({ object = {}, actor = {}, entity = {}, activeWorkOrder = null, permissions = [], onClose = null, onOpenModule = null, onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null }) {
+  const context = useMemo(() => createIXITransactContext({ object, actor, entity, activeWorkOrder, permissions }), [object, actor, entity, activeWorkOrder, permissions]);
+  const modules = useMemo(() => getIXITransactModules({ objectType: context.primary.objectType, permissions: context.permissions }), [context]);
+  const [moduleId, setModuleId] = useState("");
+  const active = modules.find(item => item.id === moduleId) || null;
+  const back = () => setModuleId("");
+
+  async function open(item) {
+    setModuleId(item.id);
+    await onOpenModule?.(item, context, {});
+  }
+
+  async function change(id, label, group, documentType, key, record, changePayload = {}, sourceContext = context, extra = {}) {
+    await onOpenModule?.(
+      { id: `${id}-${changePayload.action || "change"}`, label, group, documentType },
+      sourceContext,
+      {
+        [key]: record,
+        change: changePayload,
+        originatingObject: sourceContext.primary,
+        returnTo: id,
+        ...extra
+      }
+    );
+  }
+
+  if (moduleId === "bill") {
+    return (
+      <IXIBillStandaloneApp
+        context={context}
+        object={object}
+        authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}}
+        onBack={back}
+        onRecordChange={(record, changePayload) =>
+          change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload)
+        }
+      />
+    );
+  }
+
+  let body = null;
+
+  if (moduleId === "expense") {
+    body = (
+      <IXIExpenseApp
+        context={context}
+        workOrder={activeWorkOrder}
+        onCancel={back}
+        onSave={async (record, input, response) => {
+          await onOpenModule?.(
+            { id: "expense-save", label: "SAVE EXPENSE", group: "spend", documentType: "expense" },
+            context,
+            { expense: record, input, response }
+          );
+          back();
+        }}
+      />
+    );
+  } else if (moduleId === "purchase-order") {
+    body = <IXIPurchaseOrderApp context={context} onBack={back} onRecordChange={(record, changePayload) => change("purchase-order", "PURCHASE ORDER UPDATE", "buy", "purchase-order", "purchaseOrderRecord", record, changePayload)} />;
+  } else if (moduleId === "time") {
+    body = <IXITimeStandaloneApp context={context} object={object} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("time", "TIME UPDATE", "work", "time-entry", "timeRecord", record, changePayload, sourceContext || context)} />;
+  } else if (moduleId === "material") {
+    body = <IXIMaterialStandaloneApp context={context} object={object} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("material", "PART / MATERIAL UPDATE", "work", "material-usage", "materialRecord", record, changePayload, sourceContext || context)} />;
+  } else if (moduleId === "asset-acquisition") {
+    body = <IXIAssetAcquisitionApp context={context} object={object} relatedTransactions={object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("asset-acquisition", "ASSET ACQUISITION UPDATE", "asset", "asset-acquisition", "assetAcquisition", record, changePayload, sourceContext || context)} />;
+  } else if (moduleId === "rental-expense") {
+    body = <IXIRentalExpenseApp context={context} object={object} relatedTransactions={object?.rentalFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("rental-expense", "RENTAL EXPENSE UPDATE", "rent", "rental", "rentalExpense", record, changePayload, sourceContext || context)} />;
+  } else if (moduleId === "rental-income") {
+    body = <IXIRentalIncomeApp context={context} object={object} relatedTransactions={object?.rentalIncomeTransactions || object?.relatedFinancialRecords || object?.financialRecords || []} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("rental-income", "RENTAL INCOME UPDATE", "rent", "rental", "rentalIncome", record, changePayload, sourceContext || context)} />;
+  } else if (moduleId === "service-quote") {
+    body = (
+      <IXIServiceQuoteApp
+        context={context}
+        object={object}
+        onBack={back}
+        onRecordChange={(record, changePayload, sourceContext) =>
+          change(
+            "service-quote",
+            "SERVICE QUOTE UPDATE",
+            "sell",
+            "quote",
+            "serviceQuote",
+            record,
+            changePayload,
+            sourceContext || context,
+            {
+              customer: record?.customer || null,
+              asset: record?.asset || null,
+              economics: record?.economics || null,
+              acceptance: record?.acceptance || null
+            }
+          )
+        }
+        onCreateServiceWorkOrder={async quote => {
+          const id = `CSWO-${Date.now()}`;
+          const workOrder = {
+            identity: { workOrderId: id, number: id },
+            schema: "ixi-customer-service-work-order-v1",
+            customer: quote.customer,
+            asset: quote.asset,
+            quote: {
+              serviceQuoteId: quote.identity?.serviceQuoteId,
+              number: quote.identity?.number,
+              revision: quote.identity?.revision,
+              authorizedRevenue: quote.economics?.authorizedRevenue,
+              pricingType: quote.commercial?.pricingType,
+              acceptedOptionIds: quote.acceptance?.acceptedOptionIds
+            },
+            work: {
+              type: "customer-service",
+              title: quote.request?.problem,
+              description: quote.request?.customerScope,
+              status: "open"
+            },
+            context: quote.context,
+            createdAt: new Date().toISOString()
+          };
+          await onOpenModule?.(
+            {
+              id: "customer-service-work-order-create",
+              label: "CREATE CUSTOMER SERVICE WORK ORDER",
+              group: "work",
+              documentType: "work-order"
+            },
+            context,
+            { customerServiceWorkOrder: workOrder, serviceQuote: quote, returnTo: "service-quote" }
+          );
+          return workOrder;
+        }}
+      />
+    );
+  } else if (moduleId === "work-order") {
+    body = <IXIWorkOrderApp context={context} initialWorkOrder={activeWorkOrder} onBack={back} onCreate={async (record, sourceContext) => onOpenModule?.({ id: "work-order-create", label: "CREATE WORK ORDER", group: "work", documentType: "work-order" }, sourceContext, { workOrder: record })} onAction={async (id, workOrder, sourceContext, payload = {}) => onOpenModule?.({ id, label: String(id).toUpperCase(), group: "work-order-action", documentType: id }, sourceContext, { workOrder, ...payload })} />;
+  } else if (moduleId === "technology-work") {
+    body = <IXITechWorkOrderApp context={context} onBack={back} onCreate={async (record, sourceContext) => onOpenModule?.({ id: "tech-work-order-create", label: "CREATE TECH WORK ORDER", group: "work", documentType: "technology-work-order" }, sourceContext, { techWorkOrder: record })} onRecordChange={(record, changePayload, sourceContext) => change("tech-work-order", "TECH WORK ORDER UPDATE", "work", "technology-work-order", "techWorkOrder", record, changePayload, sourceContext || context)} />;
+  } else if (active) {
+    body = (
+      <div className="tx-module">
+        <button className="tx-back" onClick={back}>‹ TRAN$ACT</button>
+        <div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div>
+        <div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div>
+      </div>
+    );
+  } else {
+    body = (
+      <>
+        {context.activeWorkOrder ? (
+          <button className="tx-open-work" onClick={() => open({ id: "work-order", label: "CONTINUE WORK", group: "work", documentType: "work-order" })}>
+            <span>OPEN WORK</span>
+            <strong>{clean(context.activeWorkOrder.workOrderNumber || context.activeWorkOrder.number || context.activeWorkOrder.id) || "WORK ORDER"}</strong>
+            <small>{clean(context.activeWorkOrder.title || context.activeWorkOrder.description) || "IN PROGRESS"}</small>
+            <b>CONTINUE ›</b>
+          </button>
+        ) : null}
+        <div className="tx-label">CREATE / OPEN</div>
+        <div className="tx-grid">
+          {modules.map(item => (
+            <button key={item.id} onClick={() => open(item)}>
+              <span>{item.group.toUpperCase()}</span>
+              <strong>{item.label}</strong>
+              <small>{item.documentType}</small>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className={`ixi-transact-app ixi-transact-v13 board-color-none board-outline-1 ${active ? "module-open" : "home-open"}`}>
+      <header className="tx-header">
+        <div className="tx-brand">
+          <span>IXI TRAN$ACT</span>
+          {!active ? <><strong>{context.primary.label}</strong><small>{context.primary.objectType || "AOS OBJECT"}</small></> : null}
+        </div>
+        <button className="tx-close" onClick={() => onClose?.()}>×</button>
+      </header>
+      <main className="tx-body">{body}</main>
+      <IXIMachineRail listing={object} saved={false} boardColor="none" boardOutline={1} machineFace={0} onSendFront={onSendFront} onSendBack={onSendBack} onCycleColor={onCycleColor} onCycleOutline={onCycleOutline} armedDestination={armedDestination} onSendToArmedDestination={onSendToArmedDestination} />
+      <IXITransactStyles />
+    </div>
+  );
+}
