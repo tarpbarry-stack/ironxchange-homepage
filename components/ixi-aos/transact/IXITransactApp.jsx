@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import IXIMachineRail from "../../IXIMachineRail";
 import { createIXITransactContext } from "./IXITransactContext";
 import { getIXITransactModules } from "./IXITransactModuleRegistry";
-import { createIXITechnologyWorkDraft } from "./modules/IXITransactTechnologyWork";
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
+import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
 import IXINoteApp from "./modules/note/IXINoteApp";
 import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
@@ -68,10 +68,7 @@ export default function IXITransactApp({
   async function open(item) {
     if (!item?.id) return;
     setModuleId(item.id);
-    const launchPayload = item.id === "technology-work"
-      ? { technologyWork: createIXITechnologyWorkDraft(context) }
-      : {};
-    await onOpenModule?.(item, context, launchPayload);
+    await onOpenModule?.(item, context, {});
   }
 
   async function workOrderAction(actionId, workOrder, workContext, payload = {}) {
@@ -134,11 +131,7 @@ export default function IXITransactApp({
         documentType: "purchase-order"
       },
       context,
-      {
-        purchaseOrderRecord: nextRecord,
-        change,
-        returnTo: "purchase-order"
-      }
+      { purchaseOrderRecord: nextRecord, change, returnTo: "purchase-order" }
     );
   }
 
@@ -151,11 +144,28 @@ export default function IXITransactApp({
         documentType: change.action === "record-payment" ? "payment" : "bill"
       },
       context,
+      { billRecord: nextRecord, change, returnTo: "bill" }
+    );
+  }
+
+  async function techWorkOrderCreated(record, techContext) {
+    await onOpenModule?.(
+      { id: "tech-work-order-create", label: "CREATE TECH WORK ORDER", group: "work", documentType: "technology-work-order" },
+      techContext,
+      { techWorkOrder: record, returnTo: "tech-work-order" }
+    );
+  }
+
+  async function techWorkOrderChanged(nextRecord, change = {}, techContext = context) {
+    await onOpenModule?.(
       {
-        billRecord: nextRecord,
-        change,
-        returnTo: "bill"
-      }
+        id: `tech-work-order-${change.action || "change"}`,
+        label: "TECH WORK ORDER UPDATE",
+        group: "work",
+        documentType: "technology-work-order"
+      },
+      techContext,
+      { techWorkOrder: nextRecord, change, returnTo: "tech-work-order" }
     );
   }
 
@@ -304,11 +314,7 @@ export default function IXITransactApp({
         ) : expenseOpen ? (
           <IXIExpenseApp context={context} workOrder={resolvedWorkOrder} onCancel={() => setModuleId("")} onSave={saveDirectExpense} />
         ) : purchaseOrderOpen ? (
-          <IXIPurchaseOrderApp
-            context={context}
-            onBack={() => setModuleId("")}
-            onRecordChange={purchaseOrderChanged}
-          />
+          <IXIPurchaseOrderApp context={context} onBack={() => setModuleId("")} onRecordChange={purchaseOrderChanged} />
         ) : active?.id === "work-order" ? (
           <IXIWorkOrderApp
             context={context}
@@ -323,6 +329,13 @@ export default function IXITransactApp({
               );
             }}
             onAction={workOrderAction}
+          />
+        ) : active?.id === "technology-work" ? (
+          <IXITechWorkOrderApp
+            context={context}
+            onBack={() => setModuleId("")}
+            onCreate={techWorkOrderCreated}
+            onRecordChange={techWorkOrderChanged}
           />
         ) : active ? (
           <div className="tx-module">
