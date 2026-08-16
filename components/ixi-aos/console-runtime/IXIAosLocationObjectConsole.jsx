@@ -35,6 +35,10 @@ function clean(value) {
   return String(value || "").trim();
 }
 
+function safeObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
 function initialSlots() {
   return [createConsoleSlot({ type: IXI_CONSOLE_SLOT_TYPES.LISTING })];
 }
@@ -64,12 +68,13 @@ export default function IXIAosLocationObjectConsole({
   const objectId = clean(object?.objectId || object?.id);
 
   const consoleSlots = useMemo(
-    () => normalizeConsoleSlots(
-      Array.isArray(ixiState?.consoleSlots) && ixiState.consoleSlots.length
-        ? ixiState.consoleSlots
-        : initialSlots(),
-      { maxSlots: IXI_CONSOLE_MAX_DEPTH, faces: AVAILABLE_FACES }
-    ),
+    () =>
+      normalizeConsoleSlots(
+        Array.isArray(ixiState?.consoleSlots) && ixiState.consoleSlots.length
+          ? ixiState.consoleSlots
+          : initialSlots(),
+        { maxSlots: IXI_CONSOLE_MAX_DEPTH, faces: AVAILABLE_FACES }
+      ),
     [ixiState?.consoleSlots]
   );
 
@@ -93,6 +98,11 @@ export default function IXIAosLocationObjectConsole({
         ? IXIAosCard002Location
         : IXIAosCard001Location;
 
+  function stop(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+  }
+
   function saveSlots(nextSlots) {
     if (!objectId) return;
     onIxiStateChange?.(
@@ -105,10 +115,8 @@ export default function IXIAosLocationObjectConsole({
   }
 
   function addPanel(side, event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    stop(event);
     if (atCapacity) return;
-
     saveSlots(
       insertConsoleSlot({
         slots: consoleSlots,
@@ -121,8 +129,7 @@ export default function IXIAosLocationObjectConsole({
   }
 
   function removePanel(slotId, event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    stop(event);
     saveSlots(
       removeConsoleSlot({
         slots: consoleSlots,
@@ -133,8 +140,7 @@ export default function IXIAosLocationObjectConsole({
   }
 
   function assignFace(slotId, face, event) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
+    stop(event);
     saveSlots(
       assignConsoleSlotFace({
         slots: consoleSlots,
@@ -158,6 +164,28 @@ export default function IXIAosLocationObjectConsole({
     );
   }
 
+  function addFromPrimary(event) {
+    stop(event);
+    onAddObject?.(financialObject);
+  }
+
+  function editPrimary(event) {
+    stop(event);
+    if (!objectId || ixiState?.editing) return;
+    onIxiStateChange?.(objectId, {
+      editing: true,
+      editDraft: {
+        displayName: object?.displayName || "",
+        fields: { ...safeObject(object?.fields) }
+      }
+    });
+  }
+
+  function openTransact(event) {
+    stop(event);
+    onOpenTransact?.();
+  }
+
   const shared = {
     object: financialObject,
     projection,
@@ -175,7 +203,7 @@ export default function IXIAosLocationObjectConsole({
     onExposeObject
   };
 
-  function renderFace(faceNumber, { primary = false } = {}) {
+  function renderFace(faceNumber) {
     const resolved = Math.min(5, Math.max(1, Number(faceNumber) || 1));
 
     if (resolved === 5) {
@@ -229,6 +257,25 @@ export default function IXIAosLocationObjectConsole({
     );
   }
 
+  function renderPrimaryCommands() {
+    return (
+      <div className="v13-primary-commands" onPointerDown={event => event.stopPropagation()}>
+        <button type="button" className="primary-command add" onClick={addFromPrimary} title="Add related object">
+          <span className="command-icon plus">+</span>
+          <small>ADD</small>
+        </button>
+        <button type="button" className={`primary-command edit ${ixiState?.editing ? "active" : ""}`} onClick={editPrimary} title="Edit this object">
+          <span className="command-icon pencil">✎</span>
+          <small>EDIT</small>
+        </button>
+        <button type="button" className="primary-command transact" onClick={openTransact} title="Open IXI TRAN$ACT">
+          <span className="command-icon dollar">$</span>
+          <small>TRAN$ACT</small>
+        </button>
+      </div>
+    );
+  }
+
   function renderSlot(slot, slotIndex) {
     const isListing = slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING;
     const isEmpty = slot.type === IXI_CONSOLE_SLOT_TYPES.EMPTY;
@@ -238,21 +285,8 @@ export default function IXIAosLocationObjectConsole({
       return (
         <section key={slot.slotId} className="location-console-slot primary-slot">
           {renderOuterActuators(slotIndex)}
-          {onOpenTransact ? (
-            <button
-              type="button"
-              className="transact-launch"
-              title="Open IXI TRAN$ACT"
-              onClick={event => {
-                event.preventDefault();
-                event.stopPropagation();
-                onOpenTransact?.();
-              }}
-            >
-              $
-            </button>
-          ) : null}
-          {renderFace(primaryFace, { primary: true })}
+          {renderFace(primaryFace)}
+          {renderPrimaryCommands()}
         </section>
       );
     }
@@ -267,9 +301,7 @@ export default function IXIAosLocationObjectConsole({
             title="Close empty console slot"
             onClick={event => removePanel(slot.slotId, event)}
           />
-
           {renderOuterActuators(slotIndex)}
-
           <div className="empty-face-picker">
             <strong>ADD FACE</strong>
             <span>LOCATION MANAGEMENT</span>
@@ -299,17 +331,14 @@ export default function IXIAosLocationObjectConsole({
           title="Close console face"
           onClick={event => removePanel(slot.slotId, event)}
         />
-
         {renderOuterActuators(slotIndex)}
         {renderFace(slot.face)}
-
         <button
           type="button"
           className="face-id"
           title={`Show F${slot.face} on primary card`}
           onClick={event => {
-            event.preventDefault();
-            event.stopPropagation();
+            stop(event);
             onPrimaryFaceChange?.(Number(slot.face));
           }}
         >
@@ -352,6 +381,145 @@ export default function IXIAosLocationObjectConsole({
           overflow: visible;
         }
 
+        /* V13 primary command doctrine: ADD → EDIT → TRAN$ACT → MORE. */
+        .primary-slot .card001 .header {
+          height: 56px !important;
+          padding: 8px 8px 4px !important;
+        }
+        .primary-slot .card001 .body {
+          top: 56px !important;
+        }
+        .primary-slot .card001 .identity {
+          max-width: 104px !important;
+          padding-top: 2px !important;
+        }
+        .primary-slot .card001 .identity span {
+          font-size: 5.5px !important;
+          letter-spacing: .065em !important;
+        }
+        .primary-slot .card001 .identity strong {
+          margin-top: 5px !important;
+          font-size: 14px !important;
+        }
+        .primary-slot .card001 .name-input {
+          width: 98px !important;
+          max-width: 98px !important;
+        }
+
+        /* Keep the existing MORE menu implementation and skin controls,
+           but turn its trigger into the fourth V13 command. */
+        .primary-slot .card001 .ixi-aos-card-header-controls {
+          top: 7px !important;
+          right: 7px !important;
+          gap: 0 !important;
+        }
+        .primary-slot .card001 .ixi-aos-card-header-controls > .header-action.add,
+        .primary-slot .card001 .ixi-aos-card-header-controls > .header-action.edit {
+          display: none !important;
+        }
+        .primary-slot .card001 .ixi-aos-card-header-controls .header-action.menu {
+          position: relative !important;
+          width: 41px !important;
+          height: 42px !important;
+          padding: 3px 0 2px !important;
+          border: 1px solid rgba(255,255,255,.13) !important;
+          border-radius: 6px !important;
+          background: linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)) !important;
+          color: rgba(255,255,255,.72) !important;
+          font-size: 0 !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+        }
+        .primary-slot .card001 .ixi-aos-card-header-controls .header-action.menu::before {
+          content: "⋮";
+          display: block;
+          height: 24px;
+          color: rgba(255,255,255,.76);
+          font-size: 21px;
+          font-weight: 900;
+          line-height: 20px;
+        }
+        .primary-slot .card001 .ixi-aos-card-header-controls .header-action.menu::after {
+          content: "MORE";
+          display: block;
+          color: rgba(255,255,255,.55);
+          font-size: 5px;
+          font-weight: 950;
+          letter-spacing: .035em;
+          line-height: 8px;
+        }
+        .primary-slot .card001 .ixi-aos-card-header-controls .header-menu {
+          top: 47px !important;
+          right: 0 !important;
+        }
+
+        .v13-primary-commands {
+          position: absolute;
+          top: 7px;
+          right: 51px;
+          height: 42px;
+          display: flex;
+          align-items: stretch;
+          gap: 4px;
+          z-index: 240;
+        }
+        .primary-command {
+          width: 41px;
+          height: 42px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1px;
+          padding: 2px 0 1px;
+          border: 1px solid rgba(255,255,255,.13);
+          border-radius: 6px;
+          background: linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+          color: rgba(255,255,255,.76);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+          cursor: pointer;
+        }
+        .primary-command:hover,
+        .primary-command.active {
+          border-color: rgba(255,196,0,.42);
+          background: linear-gradient(180deg,rgba(255,196,0,.07),rgba(255,196,0,.018));
+        }
+        .primary-command .command-icon {
+          display: grid;
+          place-items: center;
+          height: 25px;
+          color: rgba(255,255,255,.82);
+          font-family: Arial, sans-serif;
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 1;
+        }
+        .primary-command .plus,
+        .primary-command .dollar {
+          color: #ffc400;
+          font-size: 25px;
+          font-weight: 400;
+        }
+        .primary-command .pencil {
+          transform: rotate(-8deg);
+          font-size: 21px;
+        }
+        .primary-command small {
+          display: block;
+          color: rgba(255,255,255,.56);
+          font-size: 4.8px;
+          font-weight: 950;
+          letter-spacing: .025em;
+          line-height: 7px;
+          white-space: nowrap;
+        }
+        .primary-command.transact {
+          border-color: rgba(255,196,0,.20);
+        }
+        .primary-command.transact small {
+          color: rgba(255,196,0,.78);
+          font-size: 4.25px;
+        }
+
         .location-console-slot.empty-slot {
           overflow: hidden;
           border: 1px solid rgba(255,255,255,.08);
@@ -369,14 +537,12 @@ export default function IXIAosLocationObjectConsole({
           padding: 24px;
           gap: 8px;
         }
-
         .empty-face-picker > strong {
           color: #ffc400;
           font-size: 12px;
           font-weight: 950;
           letter-spacing: .08em;
         }
-
         .empty-face-picker > span {
           margin-bottom: 8px;
           color: rgba(255,255,255,.34);
@@ -384,14 +550,12 @@ export default function IXIAosLocationObjectConsole({
           font-weight: 900;
           letter-spacing: .08em;
         }
-
         .face-grid {
           width: 100%;
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 6px;
         }
-
         .face-grid button {
           height: 54px;
           display: flex;
@@ -406,18 +570,15 @@ export default function IXIAosLocationObjectConsole({
           color: rgba(255,255,255,.68);
           cursor: pointer;
         }
-
         .face-grid button:hover {
           border-color: rgba(255,196,0,.35);
           background: rgba(255,196,0,.06);
         }
-
         .face-grid b {
           color: #ffc400;
           font-size: 9px;
           font-weight: 950;
         }
-
         .face-grid span {
           font-size: 5.5px;
           font-weight: 950;
@@ -440,24 +601,6 @@ export default function IXIAosLocationObjectConsole({
           font-weight: 950;
           cursor: pointer;
           z-index: 180;
-        }
-
-        .transact-launch {
-          position: absolute;
-          top: 9px;
-          right: 91px;
-          width: 22px;
-          height: 22px;
-          padding: 0;
-          border: 1px solid rgba(255,196,0,.32);
-          border-radius: 4px;
-          background: rgba(8,8,8,.96);
-          color: #ffc400;
-          font-size: 12px;
-          font-weight: 950;
-          line-height: 1;
-          z-index: 250;
-          cursor: pointer;
         }
       `}</style>
     </div>
