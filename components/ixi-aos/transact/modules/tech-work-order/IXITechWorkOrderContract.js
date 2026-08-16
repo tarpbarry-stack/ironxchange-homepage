@@ -5,53 +5,19 @@ const arr = value => Array.isArray(value) ? value : [];
 export const IXI_TECH_WORK_ORDER_SCHEMA = "ixi-tech-work-order-v1";
 
 export const IXI_TECH_WORK_ORDER_STATUSES = Object.freeze([
-  "requested",
-  "open",
-  "scheduled",
-  "in-progress",
-  "paused",
-  "waiting",
-  "complete",
-  "closed",
-  "canceled"
+  "requested", "open", "scheduled", "in-progress", "paused", "waiting", "complete", "closed", "canceled"
 ]);
 
 export const IXI_TECH_WORK_TYPES = Object.freeze([
-  "incident",
-  "service-request",
-  "diagnostic",
-  "configuration",
-  "software-update",
-  "firmware",
-  "integration",
-  "telematics-gps",
-  "network-connectivity",
-  "device-hardware",
-  "security-access",
-  "deployment-change",
-  "other"
+  "incident", "service-request", "diagnostic", "configuration", "software-update", "firmware",
+  "integration", "telematics-gps", "network-connectivity", "device-hardware", "security-access",
+  "deployment-change", "other"
 ]);
 
-export const IXI_TECH_IMPACT_LEVELS = Object.freeze([
-  "normal",
-  "degraded",
-  "critical"
-]);
-
-export const IXI_TECH_ENVIRONMENTS = Object.freeze([
-  "production",
-  "test",
-  "development",
-  "field",
-  "unknown"
-]);
-
+export const IXI_TECH_IMPACT_LEVELS = Object.freeze(["normal", "degraded", "critical"]);
+export const IXI_TECH_ENVIRONMENTS = Object.freeze(["production", "test", "development", "field", "unknown"]);
 export const IXI_TECH_RESULTS = Object.freeze([
-  "fully-functioning",
-  "functional-with-notes",
-  "further-work-required",
-  "vendor-action-required",
-  "unresolved"
+  "fully-functioning", "functional-with-notes", "further-work-required", "vendor-action-required", "unresolved"
 ]);
 
 function money(value) {
@@ -71,11 +37,15 @@ export function createIXITechWorkOrderDraft({ context = {}, input = {} } = {}) {
   const location = obj(sourceContext.location);
   const actor = obj(sourceContext.actor);
   const now = clean(sourceContext.launchedAt) || new Date().toISOString();
+  const techWorkOrderId = clean(sourceInput.techWorkOrderId || sourceInput.workOrderId);
 
   return {
     schema: IXI_TECH_WORK_ORDER_SCHEMA,
     identity: {
-      techWorkOrderId: clean(sourceInput.techWorkOrderId),
+      techWorkOrderId,
+      // Compatibility alias consumed by the existing shared Time/Expense/Material/Service/Purchase modules.
+      // The schema remains TECHWO and no ordinary Work Order record is created by this alias.
+      workOrderId: techWorkOrderId,
       number: clean(sourceInput.number)
     },
     context: {
@@ -135,19 +105,9 @@ export function createIXITechWorkOrderDraft({ context = {}, input = {} } = {}) {
       finalImpact: ""
     },
     references: {
-      timeEntryIds: [],
-      materialRecordIds: [],
-      serviceRecordIds: [],
-      expenseIds: [],
-      purchaseRequestIds: [],
-      purchaseOrderIds: [],
-      billIds: [],
-      attachmentIds: [],
-      photoIds: [],
-      noteIds: [],
-      githubIssueIds: [],
-      githubPullRequestIds: [],
-      deploymentIds: []
+      timeEntryIds: [], materialRecordIds: [], serviceRecordIds: [], expenseIds: [],
+      purchaseRequestIds: [], purchaseOrderIds: [], billIds: [], attachmentIds: [],
+      photoIds: [], noteIds: [], githubIssueIds: [], githubPullRequestIds: [], deploymentIds: []
     },
     financial: {
       laborActual: 0,
@@ -178,11 +138,13 @@ export function normalizeIXITechWorkOrder(value = {}) {
   const source = obj(value);
   const base = createIXITechWorkOrderDraft({});
   const refs = obj(source.references);
+  const identity = { ...base.identity, ...obj(source.identity) };
+  const resolvedTechId = clean(identity.techWorkOrderId || identity.workOrderId);
 
   return {
     ...base,
     ...source,
-    identity: { ...base.identity, ...obj(source.identity) },
+    identity: { ...identity, techWorkOrderId: resolvedTechId, workOrderId: resolvedTechId },
     context: { ...base.context, ...obj(source.context) },
     work: { ...base.work, ...obj(source.work) },
     technology: { ...base.technology, ...obj(source.technology) },
@@ -192,19 +154,12 @@ export function normalizeIXITechWorkOrder(value = {}) {
     references: {
       ...base.references,
       ...refs,
-      timeEntryIds: unique(refs.timeEntryIds),
-      materialRecordIds: unique(refs.materialRecordIds),
-      serviceRecordIds: unique(refs.serviceRecordIds),
-      expenseIds: unique(refs.expenseIds),
-      purchaseRequestIds: unique(refs.purchaseRequestIds),
-      purchaseOrderIds: unique(refs.purchaseOrderIds),
-      billIds: unique(refs.billIds),
-      attachmentIds: unique(refs.attachmentIds),
-      photoIds: unique(refs.photoIds),
-      noteIds: unique(refs.noteIds),
-      githubIssueIds: unique(refs.githubIssueIds),
-      githubPullRequestIds: unique(refs.githubPullRequestIds),
-      deploymentIds: unique(refs.deploymentIds)
+      timeEntryIds: unique(refs.timeEntryIds), materialRecordIds: unique(refs.materialRecordIds),
+      serviceRecordIds: unique(refs.serviceRecordIds), expenseIds: unique(refs.expenseIds),
+      purchaseRequestIds: unique(refs.purchaseRequestIds), purchaseOrderIds: unique(refs.purchaseOrderIds),
+      billIds: unique(refs.billIds), attachmentIds: unique(refs.attachmentIds), photoIds: unique(refs.photoIds),
+      noteIds: unique(refs.noteIds), githubIssueIds: unique(refs.githubIssueIds),
+      githubPullRequestIds: unique(refs.githubPullRequestIds), deploymentIds: unique(refs.deploymentIds)
     },
     financial: { ...base.financial, ...obj(source.financial) },
     activityProjection: arr(source.activityProjection),
@@ -215,7 +170,4 @@ export function normalizeIXITechWorkOrder(value = {}) {
   };
 }
 
-export default {
-  createIXITechWorkOrderDraft,
-  normalizeIXITechWorkOrder
-};
+export default { createIXITechWorkOrderDraft, normalizeIXITechWorkOrder };
