@@ -1,6 +1,9 @@
 import {
   AOS_OBJECT_DATA_CONTRACT_VERSION,
+  BUSINESS_IDENTIFIER_FIELD_ID,
+  BUSINESS_IDENTIFIER_ROLE,
   buildAosObjectSavePayload,
+  createStableCustomFieldDefinition,
   ensureBusinessIdentifierDefinition
 } from "./IXIAosObjectDataContract";
 
@@ -11,9 +14,28 @@ import {
  * from a parent/container. It only guarantees that every card reads/writes the
  * same portable object shape used by manual create, Excel/CSV, API and AWS.
  */
-export default function IXIAosDataContractCardAdapter({ children, ...props }) {
+export default function IXIAosDataContractCardAdapter({
+  children,
+  minimumCustomFields = 0,
+  ...props
+}) {
   const sourceObject = props?.object || {};
-  const fieldDefinitions = ensureBusinessIdentifierDefinition(sourceObject);
+  let fieldDefinitions = ensureBusinessIdentifierDefinition(sourceObject);
+
+  const isBusinessIdentifier = definition =>
+    definition?.fieldId === BUSINESS_IDENTIFIER_FIELD_ID ||
+    definition?.presentationRole === BUSINESS_IDENTIFIER_ROLE ||
+    definition?.semanticRole === BUSINESS_IDENTIFIER_ROLE;
+
+  let customCount = fieldDefinitions.filter(definition => !isBusinessIdentifier(definition)).length;
+  while (customCount < minimumCustomFields) {
+    fieldDefinitions = [
+      ...fieldDefinitions,
+      createStableCustomFieldDefinition(fieldDefinitions, customCount)
+    ];
+    customCount += 1;
+  }
+
   const object = {
     ...sourceObject,
     fieldDefinitions,
