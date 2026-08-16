@@ -224,7 +224,6 @@ export function getIXIPurchaseApprovalRequirement(policy = DEFAULT_IXI_PURCHASIN
 
 export function getIXIPurchaseQuoteRequirement(policy = DEFAULT_IXI_PURCHASING_POLICY, amount = 0) {
   const resolvedPolicy = mergePolicy(policy);
-  // Policy language is "require quote > threshold", not ">= threshold".
   const applicable = safeArray(resolvedPolicy.request.quoteThresholds)
     .filter(entry => Math.max(0, number(amount)) > number(entry.amount))
     .sort((left, right) => number(right.amount) - number(left.amount))[0];
@@ -259,21 +258,39 @@ export function evaluateIXIPurchaseRuntime({
     (highest, role) => Math.max(highest, number(resolvedPolicy.directPo.roleLimits?.[normalizeRole(role)])),
     0
   );
-  const directPoLimit = Math.max(roleDirectLimit, resolvedAuthority.directPoLimit);
-  const approvalLimit = Math.max(resolvedAuthority.approvalLimit, ...roles.map(role => {
-    const matches = safeArray(resolvedPolicy.approval.thresholds).filter(entry => normalizeRole(entry.role) === normalizeRole(role));
-    return matches.reduce((highest, entry) => Math.max(highest, entry.max === Number.POSITIVE_INFINITY ? Number.MAX_SAFE_INTEGER : number(entry.max)), 0);
-  }));
 
+  const directPoLimit = Math.max(roleDirectLimit, resolvedAuthority.directPoLimit);
+
+  const approvalLimit = Math.max(
+    resolvedAuthority.approvalLimit,
+    ...roles.map(role => {
+      const matches = safeArray(resolvedPolicy.approval.thresholds).filter(
+        entry => normalizeRole(entry.role) === normalizeRole(role)
+      );
+      return matches.reduce(
+        (highest, entry) => Math.max(
+          highest,
+          entry.max === Number.POSITIVE_INFINITY
+            ? Number.MAX_SAFE_INTEGER
+            : number(entry.max)
+        ),
+        0
+      );
+    })
+  );
+
+  // A general approval permission means the employee is an approver. It does
+  // not erase that person's dollar ceiling. Only the explicit unlimited grant
+  // bypasses the threshold model.
   const canApprove =
-    resolvedAuthority.hasGrant("approve") ||
+    resolvedAuthority.hasGrant("approve-unlimited") ||
     approvalLimit >= amount ||
     roleMatches(roles, [approval.role]);
 
   // Issuing an already-approved PO and bypassing approval are separate powers.
-  // `canIssuePo` alone never grants direct-PO authority.
   const canDirectPo =
-    resolvedAuthority.hasGrant("direct-po") ||
+    resolvedAuthority.hasGrant("direct-po-unlimited") ||
+    resolvedAuthority.hasGrant("direct-po") && directPoLimit >= amount ||
     directPoLimit >= amount;
 
   const canReceive =
@@ -302,11 +319,15 @@ export function evaluateIXIPurchaseRuntime({
     roleMatches(roles, resolvedPolicy.financial.reopenRoles);
 
   const variance = Math.abs(number(purchase?.costs?.variance || 0));
-  const varianceRequirement = thresholdForAmount(resolvedPolicy.financial.varianceThresholds, variance);
+  const varianceRequirement = thresholdForAmount(
+    resolvedPolicy.financial.varianceThresholds,
+    variance
+  );
+
   const canApproveVariance =
     variance === 0 ||
     resolvedAuthority.varianceLimit >= variance ||
-    resolvedAuthority.hasGrant("approve-variance") ||
+    resolvedAuthority.hasGrant("approve-variance-unlimited") ||
     roleMatches(roles, [varianceRequirement?.role]);
 
   const actions = new Set([IXI_PURCHASE_ACTIONS.ADD_NOTE]);
@@ -327,7 +348,10 @@ export function evaluateIXIPurchaseRuntime({
   }
 
   if (status === "approved") {
-    if (resolvedAuthority.canIssuePo || resolvedAuthority.hasGrant("issue-po") || canApprove) {
+    if (
+      resolvedAuthority.canIssuePo ||
+      resolvedAuthority.hasGrant("issue-po")
+    ) {
       actions.add(IXI_PURCHASE_ACTIONS.ISSUE_PO);
     }
   }
