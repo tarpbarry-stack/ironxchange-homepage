@@ -11,6 +11,16 @@ function periodInRange(period, fromPeriod, toPeriod) {
   return true;
 }
 
+function fiscalStartPeriod(throughPeriod = "", fiscalYearStartMonth = 1) {
+  const match = /^(\d{4})-(\d{2})$/.exec(clean(throughPeriod));
+  if (!match) return "";
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const startMonth = Math.min(12, Math.max(1, Number(fiscalYearStartMonth) || 1));
+  const fiscalYear = month >= startMonth ? year : year - 1;
+  return `${fiscalYear}-${String(startMonth).padStart(2, "0")}`;
+}
+
 function isPostedJournal(journal = {}) {
   return journal.posting?.status === "posted" && !clean(journal.posting?.reversedBy);
 }
@@ -25,9 +35,7 @@ function eligibleJournals(journals = [], fromPeriod = "", toPeriod = "") {
 
 function lineNaturalAmount(line = {}, account = {}) {
   const type = clean(account.type).toLowerCase();
-  if (["liability", "equity", "revenue", "contra-asset"].includes(type)) {
-    return money(num(line.credit) - num(line.debit));
-  }
+  if (["liability", "equity", "revenue", "contra-asset"].includes(type)) return money(num(line.credit) - num(line.debit));
   return money(num(line.debit) - num(line.credit));
 }
 
@@ -61,7 +69,7 @@ export function buildIXIIncomeStatement({ journals = [], chart = {}, fromPeriod 
   return { fromPeriod, toPeriod, revenue, expenses, totalRevenue, totalExpenses, netIncome, marginPercent };
 }
 
-export function buildIXIBalanceSheet({ journals = [], chart = {}, throughPeriod = "" } = {}) {
+export function buildIXIBalanceSheet({ journals = [], chart = {}, throughPeriod = "", fiscalYearStartMonth = 1 } = {}) {
   const selected = eligibleJournals(journals, "", throughPeriod);
   const totals = accountTotals(selected, chart);
   const assets = totals.filter(row => ["asset", "contra-asset"].includes(row.type) && Math.abs(row.balance) > 0.004);
@@ -70,12 +78,13 @@ export function buildIXIBalanceSheet({ journals = [], chart = {}, throughPeriod 
   const totalAssets = money(assets.reduce((sum, row) => sum + (row.type === "contra-asset" ? -row.balance : row.balance), 0));
   const totalLiabilities = money(liabilities.reduce((sum, row) => sum + row.balance, 0));
   const ledgerEquity = money(equity.reduce((sum, row) => sum + row.balance, 0));
-  const earnings = buildIXIIncomeStatement({ journals: selected, chart, fromPeriod: "", toPeriod: throughPeriod });
+  const fiscalFromPeriod = fiscalStartPeriod(throughPeriod, fiscalYearStartMonth);
+  const earnings = buildIXIIncomeStatement({ journals, chart, fromPeriod: fiscalFromPeriod, toPeriod: throughPeriod });
   const currentEarnings = money(earnings.netIncome);
   const totalEquity = money(ledgerEquity + currentEarnings);
   const liabilitiesAndEquity = money(totalLiabilities + totalEquity);
   const difference = money(totalAssets - liabilitiesAndEquity);
-  return { throughPeriod, assets, liabilities, equity, totalAssets, totalLiabilities, ledgerEquity, currentEarnings, totalEquity, liabilitiesAndEquity, difference, balanced: Math.abs(difference) < 0.005 };
+  return { throughPeriod, fiscalFromPeriod, fiscalYearStartMonth, assets, liabilities, equity, totalAssets, totalLiabilities, ledgerEquity, currentEarnings, totalEquity, liabilitiesAndEquity, difference, balanced: Math.abs(difference) < 0.005 };
 }
 
 function counterpartCodes(journal = {}, cashCodes = new Set()) {
@@ -148,10 +157,10 @@ export function buildIXITrialBalanceReport({ journals = [], chart = {}, throughP
   return { throughPeriod, rows, debits, credits, difference, balanced: Math.abs(difference) < 0.005 };
 }
 
-export function buildIXIFinancialExecutiveSummary({ journals = [], chart = {}, fromPeriod = "", toPeriod = "", priorFromPeriod = "", priorToPeriod = "" } = {}) {
+export function buildIXIFinancialExecutiveSummary({ journals = [], chart = {}, fromPeriod = "", toPeriod = "", priorFromPeriod = "", priorToPeriod = "", fiscalYearStartMonth = 1 } = {}) {
   const income = buildIXIIncomeStatement({ journals, chart, fromPeriod, toPeriod });
   const priorIncome = priorFromPeriod || priorToPeriod ? buildIXIIncomeStatement({ journals, chart, fromPeriod: priorFromPeriod, toPeriod: priorToPeriod }) : null;
-  const balance = buildIXIBalanceSheet({ journals, chart, throughPeriod: toPeriod });
+  const balance = buildIXIBalanceSheet({ journals, chart, throughPeriod: toPeriod, fiscalYearStartMonth });
   const cashFlow = buildIXICashFlow({ journals, chart, fromPeriod, toPeriod });
   const revenueVariance = priorIncome ? money(income.totalRevenue - priorIncome.totalRevenue) : 0;
   const incomeVariance = priorIncome ? money(income.netIncome - priorIncome.netIncome) : 0;
