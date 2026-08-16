@@ -14,7 +14,12 @@ import {
 
 import { IXIAosCardCommandProvider } from "../card-runtime/IXIAosCardCommandContext";
 import IXIAosActionNotice from "../card-runtime/modules/IXIAosActionNotice";
-import { clean, getObjectPresentation, safeObject } from "../card-runtime/IXIAosSemanticObjectPresentation";
+import {
+  clean,
+  getObjectLabel,
+  getObjectPresentation,
+  safeObject
+} from "../card-runtime/IXIAosSemanticObjectPresentation";
 
 import IXIAosCard001Location from "../cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../cards/002/IXIAosCard002Location";
@@ -32,12 +37,17 @@ function initialSlots() {
 function getConfiguredFace(object = {}, faceNumber = 2) {
   const presentation = getObjectPresentation(object);
   const faces = presentation?.faces;
+
   if (Array.isArray(faces)) {
-    return safeObject(faces.find(face => Number(face?.face || face?.faceNumber || face?.index) === Number(faceNumber)));
+    return safeObject(
+      faces.find(face => Number(face?.face || face?.faceNumber || face?.index) === Number(faceNumber))
+    );
   }
+
   if (faces && typeof faces === "object") {
     return safeObject(faces[String(faceNumber)] || faces[faceNumber]);
   }
+
   return safeObject(presentation?.[`face${faceNumber}`]);
 }
 
@@ -46,8 +56,14 @@ function getFaceLabel(object = {}, faceNumber = 2) {
   return clean(config?.shortLabel || config?.title || config?.label) || `FACE ${faceNumber}`;
 }
 
+function getPrimaryCard(cardNumber = 1) {
+  if (Number(cardNumber) === 3) return IXIAosCard003Location;
+  if (Number(cardNumber) === 2) return IXIAosCard002Location;
+  return IXIAosCard001Location;
+}
+
 export default function IXIAosLocationObjectConsole({
-  templateSlug = "",
+  cardNumber = 1,
   object = {},
   projection = null,
   objects = [],
@@ -79,15 +95,11 @@ export default function IXIAosLocationObjectConsole({
     [ixiState?.consoleSlots]
   );
 
-  const listingSlotIndex = consoleSlots.findIndex(slot => slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING);
+  const listingSlotIndex = consoleSlots.findIndex(
+    slot => slot.type === IXI_CONSOLE_SLOT_TYPES.LISTING
+  );
   const atCapacity = consoleSlots.length >= IXI_CONSOLE_MAX_DEPTH;
-
-  const Card =
-    templateSlug === "location-standard-003"
-      ? IXIAosCard003Location
-      : templateSlug === "location-standard-002"
-        ? IXIAosCard002Location
-        : IXIAosCard001Location;
+  const Card = getPrimaryCard(cardNumber);
 
   function stop(event) {
     event?.preventDefault?.();
@@ -178,10 +190,15 @@ export default function IXIAosLocationObjectConsole({
   function renderOuterActuators(slotIndex) {
     const isFirst = slotIndex === 0;
     const isLast = slotIndex === consoleSlots.length - 1;
+
     return (
       <>
-        {!atCapacity && isFirst ? <IXIObjectCardActuator side="left" variant="tall" label="Add console face left" title="Add console face left" onClick={event => addPanel("left", event)} /> : null}
-        {!atCapacity && isLast ? <IXIObjectCardActuator side="right" variant="tall" label="Add console face right" title="Add console face right" onClick={event => addPanel("right", event)} /> : null}
+        {!atCapacity && isFirst ? (
+          <IXIObjectCardActuator side="left" variant="tall" label="Add console face left" title="Add console face left" onClick={event => addPanel("left", event)} />
+        ) : null}
+        {!atCapacity && isLast ? (
+          <IXIObjectCardActuator side="right" variant="tall" label="Add console face right" title="Add console face right" onClick={event => addPanel("right", event)} />
+        ) : null}
       </>
     );
   }
@@ -208,7 +225,7 @@ export default function IXIAosLocationObjectConsole({
           {renderOuterActuators(slotIndex)}
           <div className="aos-face-picker">
             <strong>ADD FACE</strong>
-            <span>{getObjectDisplayLabel(object)}</span>
+            <span>{clean(getObjectPresentation(object)?.consoleLabel) || getObjectLabel(object)}</span>
             <div className="aos-face-grid">
               {AVAILABLE_FACES.map(faceNumber => (
                 <button key={faceNumber} type="button" onClick={event => assignFace(slot.slotId, faceNumber, event)}>
@@ -242,12 +259,4 @@ export default function IXIAosLocationObjectConsole({
       </div>
     </IXIAosCardCommandProvider>
   );
-}
-
-function getObjectDisplayLabel(object = {}) {
-  return clean(getObjectPresentation(object)?.consoleLabel || getObjectLabelSafe(object)) || "OBJECT CONSOLE";
-}
-
-function getObjectLabelSafe(object = {}) {
-  return clean(object?.singularLabel || object?.fields?.singularLabel || object?.metadata?.nomenclature?.singular || object?.displayName);
 }
