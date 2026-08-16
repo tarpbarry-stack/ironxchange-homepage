@@ -72,6 +72,49 @@ function isContainerWorkspaceObject(item = {}) {
 }
 
 
+function getSystemIndexDropPolicy(item = {}) {
+  /*
+   * Equipment is an explicit IXI adapter and retains its
+   * machine-only workspace return/drop policy.
+   */
+  if (isEquipmentAdapter(item)) {
+    return (
+      item?.workspace?.dropPolicy ||
+      {
+        enabled: true,
+        acceptedObjectTypes: [
+          "machine"
+        ]
+      }
+    );
+  }
+
+  /*
+   * Persisted customer System Indexes receive objects only
+   * when their durable capabilities say they can contain.
+   * Other IXI projection adapters (for example FOR SALE)
+   * are read/projection surfaces, not accidental containers.
+   */
+  if (
+    item?.capabilities?.canContain ===
+    true
+  ) {
+    return (
+      item?.workspace?.dropPolicy ||
+      {
+        enabled: true,
+        acceptedObjectTypes: []
+      }
+    );
+  }
+
+  return {
+    enabled: false,
+    acceptedObjectTypes: []
+  };
+}
+
+
 /*
  * Command payloads carry stable technical identity/capability,
  * not presentation names. This prevents a customer naming a
@@ -302,6 +345,12 @@ export default function IXIAosWorkspaceBoard({
               item
             )
           ) {
+            const canCreateChild =
+              item?.capabilities?.canContain ===
+                true &&
+              item?.metadata?.systemAdapter !==
+                true;
+
             return (
               <IXISystemIndexConsole
                 objectId={
@@ -337,9 +386,9 @@ export default function IXIAosWorkspaceBoard({
                     }
 
                     workspaceDropPolicy={
-                      item?.workspace
-                        ?.dropPolicy ||
-                      null
+                      getSystemIndexDropPolicy(
+                        item
+                      )
                     }
 
                     workspaceDropSurface={
@@ -431,7 +480,9 @@ export default function IXIAosWorkspaceBoard({
                     }
 
                     onAddObject={
-                      onAddObject
+                      canCreateChild
+                        ? onAddObject
+                        : null
                     }
 
                     onSavePresentation={
