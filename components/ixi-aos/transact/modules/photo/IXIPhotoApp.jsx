@@ -25,12 +25,15 @@ const COPY = {
     title: "ADD PHOTO",
     machine: "Machine",
     wo: "Work Order",
+    techwo: "Tech Work Order",
     location: "Location",
     employee: "Employee",
     details: "PHOTO DETAILS",
     type: "PHOTO TYPE",
     work: "WORK PHOTO",
     damage: "DAMAGE",
+    screen: "SCREEN / CODE",
+    warning: "WARNING / FAULT",
     before: "BEFORE / AFTER",
     reference: "REFERENCE",
     titleLabel: "PHOTO TITLE (OPTIONAL)",
@@ -44,25 +47,31 @@ const COPY = {
     tags: "ADDITIONAL TAGS (OPTIONAL)",
     visibility: "VISIBILITY",
     team: "Work Order Team",
+    techTeam: "Tech Work Order Team",
     cancel: "CANCEL",
     cancelSub: "Discard changes",
     save: "SAVE PHOTO",
     saving: "SAVING…",
     saveSub: "Return to Work Order",
+    techSaveSub: "Return to Tech Work Order",
     required: "Add at least one valid photo before saving.",
     foot: "Photos are linked to this Work Order and inherited AOS context, then surfaced in Activity and Documents.",
+    techFoot: "Screenshots, warning displays, code screens, machine monitor photos and reference images are linked to this Tech Work Order and inherited AOS context, then surfaced in Activity and Documents.",
     saveFailed: "The photo entry could not be saved. Nothing was added. Try again."
   },
   es: {
     title: "AGREGAR FOTO",
     machine: "Máquina",
     wo: "Orden de Trabajo",
+    techwo: "Orden de Trabajo Técnico",
     location: "Ubicación",
     employee: "Empleado",
     details: "DETALLES DE FOTO",
     type: "TIPO DE FOTO",
     work: "FOTO DE TRABAJO",
     damage: "DAÑO",
+    screen: "PANTALLA / CÓDIGO",
+    warning: "ADVERTENCIA / FALLA",
     before: "ANTES / DESPUÉS",
     reference: "REFERENCIA",
     titleLabel: "TÍTULO DE FOTO (OPCIONAL)",
@@ -76,13 +85,16 @@ const COPY = {
     tags: "ETIQUETAS ADICIONALES (OPCIONAL)",
     visibility: "VISIBILIDAD",
     team: "Equipo de Orden de Trabajo",
+    techTeam: "Equipo de Orden de Trabajo Técnico",
     cancel: "CANCELAR",
     cancelSub: "Descartar cambios",
     save: "GUARDAR FOTO",
     saving: "GUARDANDO…",
     saveSub: "Regresar a la Orden",
+    techSaveSub: "Regresar a la Orden Técnica",
     required: "Agrega por lo menos una foto válida antes de guardar.",
     foot: "Las fotos se vinculan a esta Orden y al contexto AOS heredado, y aparecen en Actividad y Documentos.",
+    techFoot: "Las capturas de pantalla, advertencias, pantallas de código, monitores de máquina e imágenes de referencia se vinculan a esta Orden Técnica y al contexto AOS heredado, y aparecen en Actividad y Documentos.",
     saveFailed: "No se pudo guardar la foto. No se agregó nada. Intenta de nuevo."
   }
 };
@@ -116,8 +128,13 @@ export default function IXIPhotoApp({
   onCancel = null,
   onSave = null
 }) {
+  const isTechWorkOrder = Boolean(
+    clean(workOrder?.identity?.techWorkOrderId) ||
+    clean(workOrder?.schema).startsWith("ixi-tech-work-order")
+  );
+
   const [lang, setLang] = useState(language === "es" ? "es" : "en");
-  const [photoType, setPhotoType] = useState("work-photo");
+  const [photoType, setPhotoType] = useState(isTechWorkOrder ? "tech-screen" : "work-photo");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [occurredAtLocal, setOccurredAtLocal] = useState(localDateTime());
@@ -140,7 +157,7 @@ export default function IXIPhotoApp({
     workOrder.identity?.number ||
       workOrder.workOrderNumber ||
       workOrder.number
-  ) || "WORK ORDER";
+  ) || (isTechWorkOrder ? "TECHWO" : "WORK ORDER");
 
   const occurredAt = toIsoTimestamp(occurredAtLocal);
 
@@ -164,10 +181,10 @@ export default function IXIPhotoApp({
       description,
       occurredAt,
       tags,
-      visibility: "work-order-team",
+      visibility: isTechWorkOrder ? "tech-work-order-team" : "work-order-team",
       media
     }),
-    [photoType, title, description, occurredAt, tags, media]
+    [photoType, title, description, occurredAt, tags, media, isTechWorkOrder]
   );
 
   useEffect(() => {
@@ -289,7 +306,7 @@ export default function IXIPhotoApp({
           <strong>{t.title}</strong>
           <div className="ph-context">
             <div><b>{primary.label || "—"}</b><small>{t.machine}</small></div>
-            <div><b>{workOrderNumber}</b><small>{t.wo}</small></div>
+            <div><b>{workOrderNumber}</b><small>{isTechWorkOrder ? t.techwo : t.wo}</small></div>
             <div><b>{location.label || "—"}</b><small>{t.location}</small></div>
             <div><b>{actor.displayName || actor.name || actor.label || "—"}</b><small>{t.employee}</small></div>
           </div>
@@ -300,10 +317,21 @@ export default function IXIPhotoApp({
 
       <label>{t.type} <em>*</em></label>
       <div className="ph-types">
-        <button className={photoType === "work-photo" ? "on" : ""} onClick={() => setPhotoType("work-photo")} disabled={saving}>{t.work}</button>
-        <button className={photoType === "damage" ? "on" : ""} onClick={() => setPhotoType("damage")} disabled={saving}>{t.damage}</button>
-        <button className={photoType === "before-after" ? "on" : ""} onClick={() => setPhotoType("before-after")} disabled={saving}>{t.before}</button>
-        <button className={photoType === "reference" ? "on" : ""} onClick={() => setPhotoType("reference")} disabled={saving}>{t.reference}</button>
+        {isTechWorkOrder ? (
+          <>
+            <button className={photoType === "tech-screen" ? "on" : ""} onClick={() => setPhotoType("tech-screen")} disabled={saving}>{t.screen}</button>
+            <button className={photoType === "warning-fault" ? "on" : ""} onClick={() => setPhotoType("warning-fault")} disabled={saving}>{t.warning}</button>
+            <button className={photoType === "before-after" ? "on" : ""} onClick={() => setPhotoType("before-after")} disabled={saving}>{t.before}</button>
+            <button className={photoType === "reference" ? "on" : ""} onClick={() => setPhotoType("reference")} disabled={saving}>{t.reference}</button>
+          </>
+        ) : (
+          <>
+            <button className={photoType === "work-photo" ? "on" : ""} onClick={() => setPhotoType("work-photo")} disabled={saving}>{t.work}</button>
+            <button className={photoType === "damage" ? "on" : ""} onClick={() => setPhotoType("damage")} disabled={saving}>{t.damage}</button>
+            <button className={photoType === "before-after" ? "on" : ""} onClick={() => setPhotoType("before-after")} disabled={saving}>{t.before}</button>
+            <button className={photoType === "reference" ? "on" : ""} onClick={() => setPhotoType("reference")} disabled={saving}>{t.reference}</button>
+          </>
+        )}
       </div>
 
       <label>{t.titleLabel}</label>
@@ -373,21 +401,21 @@ export default function IXIPhotoApp({
       <label>{t.tags}</label>
       <div className="ph-field">
         <span>◇</span>
-        <input value={tags} onChange={event => setTags(event.target.value)} placeholder="hydraulic, leak, inspection" disabled={saving} />
+        <input value={tags} onChange={event => setTags(event.target.value)} placeholder={isTechWorkOrder ? "code, warning, screen, telematics" : "hydraulic, leak, inspection"} disabled={saving} />
       </div>
 
       <label>{t.visibility}</label>
-      <div className="ph-policy"><span>◉</span><b>{t.team}</b></div>
+      <div className="ph-policy"><span>◉</span><b>{isTechWorkOrder ? t.techTeam : t.team}</b></div>
 
       {Object.keys(errors).length ? <div className="ph-errors">{t.required}</div> : null}
       {saveError ? <div className="ph-errors">{saveError}</div> : null}
 
       <div className="ph-actions">
         <button type="button" onClick={() => onCancel?.()} disabled={saving}>{t.cancel}<small>{t.cancelSub}</small></button>
-        <button type="button" className="save" onClick={save} disabled={saving}>{saving ? t.saving : t.save}<small>{t.saveSub}</small></button>
+        <button type="button" className="save" onClick={save} disabled={saving}>{saving ? t.saving : t.save}<small>{isTechWorkOrder ? t.techSaveSub : t.saveSub}</small></button>
       </div>
 
-      <div className="ph-foot">ⓘ {t.foot}</div>
+      <div className="ph-foot">ⓘ {isTechWorkOrder ? t.techFoot : t.foot}</div>
       <IXIPhotoStyles />
     </div>
   );
