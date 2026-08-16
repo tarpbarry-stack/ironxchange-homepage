@@ -73,8 +73,7 @@ export default function IXIAosCardHeaderControls({
             onAdd?.();
           }}
         >
-          <span className="action-glyph">+</span>
-          <span className="action-label">ADD</span>
+          +
         </button>
       ) : null}
 
@@ -91,8 +90,7 @@ export default function IXIAosCardHeaderControls({
             if (!editing) onToggleEdit?.();
           }}
         >
-          <span className="action-glyph edit-glyph">✎</span>
-          <span className="action-label">EDIT</span>
+          EDIT
         </button>
       ) : null}
 
@@ -107,8 +105,7 @@ export default function IXIAosCardHeaderControls({
             onTransact?.();
           }}
         >
-          <span className="action-glyph transact-glyph">$</span>
-          <span className="action-label">TRAN$ACT</span>
+          $
         </button>
       ) : null}
 
@@ -123,8 +120,7 @@ export default function IXIAosCardHeaderControls({
             setMenuOpen(current => !current);
           }}
         >
-          <span className="action-glyph menu-glyph">⋮</span>
-          <span className="action-label">MORE</span>
+          ⋮
         </button>
 
         {menuOpen ? (
@@ -194,29 +190,31 @@ export default function IXIAosCardHeaderControls({
       <style jsx>{`
         .ixi-aos-card-header-controls {
           position: absolute;
-          top: 7px;
+          top: 9px;
           right: 8px;
-          height: 28px;
+          height: 20px;
           display: flex;
-          align-items: stretch;
+          align-items: center;
+          gap: 0;
           z-index: 180;
         }
 
         .header-action {
           position: relative;
-          min-width: 27px;
-          height: 28px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 1px;
+          height: 20px;
+          min-width: 22px;
+          display: grid;
+          place-items: center;
           padding: 0 6px;
           border: 0;
           border-left: 1px solid rgba(255,255,255,.055);
           border-radius: 0;
           background: transparent;
-          color: rgba(255,255,255,.58);
+          color: rgba(255,255,255,.48);
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 6px;
+          font-weight: 950;
+          letter-spacing: .035em;
           line-height: 1;
           cursor: pointer;
         }
@@ -225,88 +223,50 @@ export default function IXIAosCardHeaderControls({
           border-left: 0;
         }
 
-        .action-glyph {
-          height: 16px;
-          display: grid;
-          place-items: center;
-          color: rgba(255,255,255,.70);
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 13px;
-          font-weight: 700;
-          line-height: 1;
-        }
-
-        .action-label {
-          color: rgba(255,255,255,.32);
-          font-size: 4.3px;
-          font-weight: 950;
-          letter-spacing: .055em;
-          white-space: nowrap;
-        }
-
-        .header-action.add .action-glyph,
-        .header-action.transact .action-glyph {
-          color: rgba(255,196,0,.92);
-        }
-
-        .header-action.add .action-glyph {
+        .header-action.add {
+          min-width: 23px;
+          color: rgba(255,196,0,.88);
           font-size: 17px;
-          font-weight: 600;
+          font-weight: 500;
+          letter-spacing: 0;
         }
 
         .header-action.edit {
-          min-width: 32px;
-        }
-
-        .edit-glyph {
-          transform: rotate(-8deg);
-          font-size: 13px;
+          min-width: 34px;
+          color: rgba(255,255,255,.58);
         }
 
         .header-action.transact {
-          min-width: 39px;
-        }
-
-        .transact-glyph {
+          min-width: 25px;
+          color: rgba(255,196,0,.92);
           font-size: 16px;
           font-weight: 500;
-        }
-
-        .header-action.transact .action-label {
-          color: rgba(255,196,0,.58);
-          font-size: 3.8px;
+          letter-spacing: 0;
         }
 
         .header-action.menu {
-          min-width: 26px;
+          min-width: 23px;
           padding: 0 4px;
-        }
-
-        .menu-glyph {
+          color: rgba(255,255,255,.52);
           font-size: 15px;
+          letter-spacing: 0;
         }
 
         .header-action:hover,
         .header-action.active {
-          background: rgba(255,255,255,.025);
-        }
-
-        .header-action:hover .action-glyph,
-        .header-action:hover .action-label,
-        .header-action.active .action-glyph,
-        .header-action.active .action-label {
           color: #ffc400;
+          background: rgba(255,255,255,.02);
         }
 
         .menu-shell {
           position: relative;
           display: flex;
-          align-items: stretch;
+          align-items: center;
         }
 
         .header-menu {
           position: absolute;
-          top: 31px;
+          top: 24px;
           right: 0;
           width: 132px;
           max-height: 305px;
