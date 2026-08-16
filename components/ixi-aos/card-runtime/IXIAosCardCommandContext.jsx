@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import {
+  IXI_ACTION_NOTICE_EVENT,
   IXI_ACTION_NOTICE_TONES,
   createIXIActionNotice
 } from "../../ixi-object-system/IXIActionNoticeEngine";
@@ -51,6 +52,8 @@ export function IXIAosCardCommandProvider({
   }, [externalNotice]);
 
   useEffect(() => () => {
+    if (typeof window === "undefined") return;
+
     for (const timeoutId of timersRef.current.values()) {
       window.clearTimeout(timeoutId);
     }
@@ -79,7 +82,11 @@ export function IXIAosCardCommandProvider({
       return false;
     }
 
-    if (current?.noticeId && timersRef.current.has(current.noticeId)) {
+    if (
+      current?.noticeId &&
+      timersRef.current.has(current.noticeId) &&
+      typeof window !== "undefined"
+    ) {
       window.clearTimeout(timersRef.current.get(current.noticeId));
       timersRef.current.delete(current.noticeId);
     }
@@ -121,6 +128,45 @@ export function IXIAosCardCommandProvider({
 
     return notice;
   }, [publishNotice, clearNotice]);
+
+  useEffect(() => {
+    if (
+      !resolvedObjectId ||
+      typeof window === "undefined"
+    ) {
+      return undefined;
+    }
+
+    function handleNoticeEvent(event) {
+      const detail = event?.detail || {};
+      const eventObjectId = clean(detail.objectId || detail.listingId);
+
+      if (eventObjectId !== resolvedObjectId) {
+        return;
+      }
+
+      showNotice({
+        message: detail.message,
+        tone: detail.tone,
+        duration: detail.duration,
+        blocking: detail.blocking,
+        commandId: detail.commandId,
+        source: detail.source || "ixi-action-notice-event"
+      });
+    }
+
+    window.addEventListener(
+      IXI_ACTION_NOTICE_EVENT,
+      handleNoticeEvent
+    );
+
+    return () => {
+      window.removeEventListener(
+        IXI_ACTION_NOTICE_EVENT,
+        handleNoticeEvent
+      );
+    };
+  }, [resolvedObjectId, showNotice]);
 
   const runWithNotice = useCallback(async ({
     operation,
