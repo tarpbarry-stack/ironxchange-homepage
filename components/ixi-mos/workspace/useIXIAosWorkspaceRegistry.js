@@ -25,6 +25,65 @@ function getMosObjectId(object = {}) {
 }
 
 
+function isActiveMosObject(object = {}) {
+  const status =
+    String(object?.status || "")
+      .trim()
+      .toLowerCase();
+
+  return ![
+    "archived",
+    "deleted",
+    "soft-deleted"
+  ].includes(status);
+}
+
+
+function buildDirectChildrenMap(
+  aosObjects = []
+) {
+  const childrenByParent =
+    new Map();
+
+  (aosObjects || [])
+    .filter(isActiveMosObject)
+    .forEach(object => {
+      const parentId =
+        cleanId(
+          object?.directContainerId
+        );
+
+      const objectId =
+        getMosObjectId(object);
+
+      if (
+        !parentId ||
+        !objectId ||
+        parentId === objectId
+      ) {
+        return;
+      }
+
+      if (
+        !childrenByParent.has(
+          parentId
+        )
+      ) {
+        childrenByParent.set(
+          parentId,
+          []
+        );
+      }
+
+      childrenByParent
+        .get(parentId)
+        .push(object);
+    });
+
+  return childrenByParent;
+}
+
+
 export default function useIXIAosWorkspaceRegistry({
   workspaceListings = [],
   aosObjects = [],
@@ -65,6 +124,16 @@ export default function useIXIAosWorkspaceRegistry({
     );
 
 
+  const directChildrenByParent =
+    useMemo(
+      () =>
+        buildDirectChildrenMap(
+          aosObjects
+        ),
+      [aosObjects]
+    );
+
+
   /* =========================================================
      UNIVERSAL AOS WORKSPACE OBJECT REGISTRY
 
@@ -75,8 +144,9 @@ export default function useIXIAosWorkspaceRegistry({
      - System Index presentation comes from the assembled
        System Index collection.
 
-     We do NOT inspect business nouns or objectType to decide
-     whether something deserves to exist in the workspace.
+     Canonical MOS child membership comes ONLY from
+     directContainerId. The registry hydrates `items` as a
+     runtime convenience; it does not create another truth.
      ========================================================= */
   const objectRegistry =
     useMemo(() => {
@@ -85,8 +155,9 @@ export default function useIXIAosWorkspaceRegistry({
 
 
       /* Durable MOS objects. */
-      (aosObjects || []).forEach(
-        object => {
+      (aosObjects || [])
+        .filter(isActiveMosObject)
+        .forEach(object => {
           const objectId =
             getMosObjectId(object);
 
@@ -108,10 +179,16 @@ export default function useIXIAosWorkspaceRegistry({
 
           registry.set(
             objectId,
-            object
+            {
+              ...object,
+
+              items:
+                directChildrenByParent
+                  .get(objectId) ||
+                []
+            }
           );
-        }
-      );
+        });
 
 
       /* IronXchange machines/listings. */
@@ -180,7 +257,8 @@ export default function useIXIAosWorkspaceRegistry({
       aosObjects,
       workspaceSystemIndexes,
       equipmentWorkspaceIndex,
-      systemIndexIds
+      systemIndexIds,
+      directChildrenByParent
     ]);
 
 
