@@ -6,6 +6,7 @@ import {createIXITechnologyWorkDraft} from "./modules/IXITransactTechnologyWork"
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXINoteApp from "./modules/note/IXINoteApp";
 import IXIPhotoApp from "./modules/photo/IXIPhotoApp";
+import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 
 const clean=value=>String(value??"").trim();
 
@@ -25,7 +26,8 @@ export default function IXITransactApp({
  const active=modules.find(item=>item.id===moduleId)||null;
  const noteOpen=moduleId==="work-order-note";
  const photoOpen=moduleId==="work-order-photo";
- const compactHeader=Boolean(active)||noteOpen||photoOpen;
+ const expenseOpen=moduleId==="expense";
+ const compactHeader=Boolean(active)||noteOpen||photoOpen||expenseOpen;
  const resolvedWorkOrder=workOrderSnapshot||context.activeWorkOrder||null;
 
  function open(item){
@@ -46,6 +48,27 @@ export default function IXITransactApp({
    return;
   }
   onOpenModule?.({id:actionId,label:String(actionId||"").toUpperCase(),group:"work-order-action",documentType:actionId},workContext,{workOrder,...payload});
+ }
+
+ async function saveDirectExpense(expense,input,response){
+  const expenseId=clean(expense?.identity?.expenseId||expense?.identity?.number||expense?.identity?.clientRequestId)||`EXP-${Date.now()}`;
+  const activity={
+   activityId:`ACT-${expenseId}`,
+   type:"expense-recorded",
+   expenseId,
+   amount:Number(expense?.expense?.amount||0),
+   vendor:clean(expense?.expense?.vendor),
+   paymentMethod:clean(expense?.expense?.paymentMethod),
+   reimbursementRequired:Boolean(expense?.reimbursement?.required),
+   occurredAt:new Date().toISOString(),
+   actorLabel:clean(context.actor?.displayName||context.actor?.name||context.actor?.label)
+  };
+  await onOpenModule?.(
+   {id:"expense-save",label:"SAVE EXPENSE",group:"spend",documentType:"expense"},
+   context,
+   {expense:{...expense,identity:{...(expense?.identity||{}),expenseId}},input,response,activity,reimbursement:expense?.reimbursement||null,returnTo:"transact-origin"}
+  );
+  setModuleId("");
  }
 
  async function saveNote(note,input,response){
@@ -109,6 +132,7 @@ export default function IXITransactApp({
   <main className="tx-body">
    {noteOpen?<IXINoteApp context={context} workOrder={resolvedWorkOrder||{}} onCancel={()=>setModuleId("work-order")} onSave={saveNote}/>:
    photoOpen?<IXIPhotoApp context={context} workOrder={resolvedWorkOrder||{}} onCancel={()=>setModuleId("work-order")} onSave={savePhoto}/>:
+   expenseOpen?<IXIExpenseApp context={context} workOrder={resolvedWorkOrder} onCancel={()=>setModuleId("")} onSave={saveDirectExpense}/>:
    active?.id==="work-order"?<IXIWorkOrderApp context={context} initialWorkOrder={resolvedWorkOrder} onBack={()=>setModuleId("")} onCreate={(draft,workContext)=>{setWorkOrderSnapshot(draft);onOpenModule?.({id:"work-order-create",label:"CREATE WORK ORDER",group:"work",documentType:"work-order"},workContext,{workOrder:draft})}} onAction={workOrderAction}/>:
    active?<div className="tx-module"><button className="tx-back" onClick={()=>setModuleId("")}>‹ TRAN$ACT</button><div className="tx-module-title"><span>{active.group.toUpperCase()}</span><strong>{active.label}</strong></div><div className="tx-module-placeholder"><b>{active.label}</b><span>MODULE CHASSIS READY</span><small>{active.documentType} · {context.primary.label}</small></div></div>:
    <>{context.activeWorkOrder?<button className="tx-open-work" onClick={()=>{setWorkOrderSnapshot(context.activeWorkOrder);open({id:"work-order",label:"CONTINUE WORK",group:"work",documentType:"work-order"})}}><span>OPEN WORK</span><strong>{clean(context.activeWorkOrder.workOrderNumber||context.activeWorkOrder.number||context.activeWorkOrder.id)||"WORK ORDER"}</strong><small>{clean(context.activeWorkOrder.title||context.activeWorkOrder.description)||"IN PROGRESS"}</small><b>CONTINUE ›</b></button>:null}<div className="tx-label">CREATE / OPEN</div><div className="tx-grid">{modules.map(item=><button key={item.id} onClick={()=>open(item)}><span>{item.group.toUpperCase()}</span><strong>{item.label}</strong><small>{item.documentType}</small></button>)}</div></>}
