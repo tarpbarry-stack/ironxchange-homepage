@@ -28,15 +28,15 @@ export default function IXIAosCard003Location(props) {
         .card003-contact-overlay {
           position: absolute;
           top: 95px;
-          left: 156px;
-          width: 135px;
+          left: 157px;
+          width: 132px;
           height: 22px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: minmax(0,1fr) auto;
           align-items: center;
-          gap: 5px;
-          padding-top: 4px;
-          border-top: 1px solid rgba(255,255,255,.10);
+          gap: 7px;
+          padding: 4px 4px 0;
+          border-top: 1px solid rgba(255,255,255,.07);
           pointer-events: none;
           z-index: 24;
           font-family: inherit;
@@ -48,19 +48,20 @@ export default function IXIAosCard003Location(props) {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          text-align: center;
         }
 
         .card003-contact-overlay strong {
-          color: rgba(255,255,255,.82);
-          font-size: 8px;
-          font-weight: 950;
+          color: rgba(255,255,255,.76);
+          font-size: 7.6px;
+          font-weight: 780;
+          letter-spacing: .01em;
         }
 
         .card003-contact-overlay span {
-          color: rgba(255,255,255,.56);
-          font-size: 7px;
-          font-weight: 900;
+          color: rgba(255,255,255,.38);
+          font-size: 6.5px;
+          font-weight: 700;
+          text-align: right;
         }
       `}</style>
 
@@ -69,6 +70,12 @@ export default function IXIAosCard003Location(props) {
           position: relative;
           width: 298px;
           height: 471px;
+        }
+
+        .card003-variant .card001 {
+          background:
+            radial-gradient(130% 72% at 50% -9%, rgba(255,255,255,.052), transparent 44%),
+            linear-gradient(180deg,#111214 0%,#0d0e0f 58%,#0a0b0c 100%) !important;
         }
 
         .card003-variant .card001 .body {
@@ -84,6 +91,8 @@ export default function IXIAosCard003Location(props) {
           width: 149px !important;
           height: 79px !important;
           overflow: hidden !important;
+          border-right: 1px solid rgba(255,255,255,.055) !important;
+          background: #08090a !important;
         }
 
         .card003-variant .card001 .photo .ixi-aos-primary-media-panel {
@@ -92,6 +101,8 @@ export default function IXIAosCard003Location(props) {
           min-height: 79px !important;
           max-height: 79px !important;
           margin-top: 0 !important;
+          border: 0 !important;
+          box-shadow: none !important;
         }
 
         .card003-variant .card001 .address {
@@ -100,22 +111,25 @@ export default function IXIAosCard003Location(props) {
           width: 149px !important;
           height: 79px !important;
           margin: 0 !important;
-          padding: 5px 8px 28px !important;
+          padding: 8px 10px 28px !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          overflow: visible !important;
+          overflow: hidden !important;
           position: relative !important;
-          border-left: 1px solid rgba(255,255,255,.05) !important;
+          background: linear-gradient(180deg,rgba(255,255,255,.012),rgba(255,255,255,0)) !important;
         }
 
         .card003-variant .card001 .address .ixi-aos-inline-address {
           width: 100% !important;
           height: auto !important;
-          min-height: 34px !important;
+          min-height: 32px !important;
           padding: 0 2px !important;
           overflow: visible !important;
           align-items: center !important;
+          justify-content: center !important;
+          background: transparent !important;
+          border: 0 !important;
         }
 
         .card003-variant .card001 .address .ixi-aos-inline-address strong {
@@ -123,23 +137,12 @@ export default function IXIAosCard003Location(props) {
           white-space: normal !important;
           overflow: visible !important;
           text-overflow: clip !important;
-          line-height: 1.18 !important;
+          color: rgba(255,255,255,.82) !important;
+          font-size: 8.1px !important;
+          font-weight: 760 !important;
+          line-height: 1.22 !important;
+          letter-spacing: -.005em !important;
           text-align: center !important;
-        }
-
-        /* Remove the bullet between street and city so copy/paste reads as an address. */
-        .card003-variant .card001 .address .ixi-aos-inline-address strong {
-          font-size: 0 !important;
-        }
-
-        .card003-variant .card001 .address .ixi-aos-inline-address strong::before {
-          content: "2400 AVIATION DRIVE\\A DFW AIRPORT, TX 75261";
-          white-space: pre-line;
-          color: rgba(255,255,255,.86);
-          font-size: 9px;
-          font-weight: 900;
-          font-family: inherit;
-          line-height: 1.25;
         }
 
         .card003-variant .card001 .preview-info-strip {
@@ -151,15 +154,15 @@ export default function IXIAosCard003Location(props) {
         .card003-variant .card001 .metrics {
           grid-column: 1 / 3 !important;
           grid-row: 3 !important;
-          width: 270px !important;
-          margin: -5px auto 0 !important;
+          width: 272px !important;
+          margin: -4px auto 0 !important;
         }
 
         .card003-variant .card001 .relationships {
           grid-column: 1 / 3 !important;
           grid-row: 4 !important;
           min-height: 0 !important;
-          margin: 5px 6px 0 !important;
+          margin: 7px 9px 0 !important;
         }
 
         .card003-variant .card001 .photo-rail {
