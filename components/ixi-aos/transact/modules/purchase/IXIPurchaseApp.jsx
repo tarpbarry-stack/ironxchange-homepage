@@ -1,538 +1,209 @@
-import {
-  useMemo,
-  useRef,
-  useState
-} from "react";
+import { useMemo, useRef, useState } from "react";
 
-import {
-  createIXIPurchaseDraft,
-  validateIXIPurchase
-} from "./IXIPurchaseContract";
-
-import {
-  createIXIPurchase
-} from "./IXIPurchaseCommands";
-
+import { createIXIPurchaseDraft, validateIXIPurchase } from "./IXIPurchaseContract";
+import { createIXIPurchase } from "./IXIPurchaseCommands";
+import { applyIXIPurchaseAction, appendIXIPurchaseRelated } from "./IXIPurchaseRecordEngine";
+import { evaluateIXIPurchaseRuntime, resolveIXIPurchasingPolicy } from "./IXIPurchasePolicyEngine";
+import { createIXIPendingAttachment, validateIXITransactFile } from "../../IXITransactFilePolicy";
+import IXIPurchaseCard from "./IXIPurchaseCard";
 import IXIPurchaseStyles from "./IXIPurchaseStyles";
 
 const clean = value => String(value ?? "").trim();
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+const PURCHASE_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 
 const COPY = {
   en: {
-    title: "CREATE PURCHASE / PO",
-    machine: "Machine",
-    wo: "Work Order",
-    location: "Location",
-    employee: "Employee",
-    details: "PURCHASE DETAILS",
-    type: "REQUEST TYPE",
-    request: "PURCHASE REQUEST",
-    po: "PURCHASE ORDER (PO)",
-    vendor: "VENDOR",
-    needed: "REQUEST / NEEDED BY DATE",
-    priority: "PRIORITY",
-    items: "ITEMS / DESCRIPTION",
-    description: "Description",
-    qty: "Qty",
-    unit: "Unit",
-    unitCost: "Est. Unit Cost",
-    add: "+ ADD ITEM / DESCRIPTION",
-    shipping: "ESTIMATED SHIPPING",
-    total: "ESTIMATED TOTAL",
-    charge: "CHARGE TO",
-    cost: "COST CODE (OPTIONAL)",
-    notes: "NOTES (OPTIONAL)",
-    attach: "ATTACHMENTS (OPTIONAL)",
-    addAttach: "ADD ATTACHMENT",
-    attachmentQueued: "Attachment queued",
-    cancel: "CANCEL",
-    cancelSub: "Discard changes",
-    save: "CREATE REQUEST / PO",
-    saving: "SAVING…",
-    saveSub: "Return to Work Order",
-    foot: "This purchase request / PO will be related to the work order and tracked through IXI Financial.",
-    required: "Vendor, a valid needed-by date and at least one valid item are required.",
-    saveFailed: "The purchase could not be saved. Nothing was added to the Work Order. Correct the issue and retry.",
-    normal: "Normal",
-    high: "High",
-    critical: "Critical"
+    title: "NEW PURCHASE REQUEST", sub: "Request company purchasing approval", object: "Origin", wo: "Work Order", location: "Location", employee: "Requested By",
+    details: "PURCHASE REQUEST", mode: "PURCHASE PATH", request: "PURCHASE REQUEST", directPo: "DIRECT PURCHASE ORDER", directPoDenied: "Direct PO is controlled by your purchasing authority.",
+    vendor: "VENDOR / SUPPLIER", vendorOptional: "VENDOR / SUPPLIER (OPTIONAL)", needed: "NEEDED BY", priority: "PRIORITY", what: "WHAT DO YOU NEED?", why: "WHY DO YOU NEED IT?",
+    items: "ITEMS", description: "Description", qty: "Qty", unit: "Unit", unitCost: "Est. Unit Cost", add: "+ ADD ITEM", shipping: "ESTIMATED SHIPPING", total: "ESTIMATED TOTAL",
+    charge: "CHARGE TO", cost: "COST CODE (OPTIONAL)", attachments: "QUOTES / SUPPORTING DOCUMENTS", attach: "ADD PDF / JPG / PNG", notes: "ADDITIONAL NOTES (OPTIONAL)",
+    cancel: "CANCEL", cancelSub: "Return without saving", save: "SUBMIT PURCHASE REQUEST", savePo: "ISSUE PURCHASE ORDER", saving: "SAVING…", saveSub: "Create canonical Purchase record",
+    required: "Complete the required Purchase fields before submission.", saveFailed: "Purchase could not be created. Nothing was committed.", normal: "Normal", high: "High", critical: "Critical",
+    quotesRequired: "QUOTE REQUIREMENT", authority: "APPROVAL AUTHORITY", directLimit: "DIRECT PO LIMIT"
   },
   es: {
-    title: "CREAR COMPRA / OC",
-    machine: "Máquina",
-    wo: "Orden de Trabajo",
-    location: "Ubicación",
-    employee: "Empleado",
-    details: "DETALLES DE COMPRA",
-    type: "TIPO DE SOLICITUD",
-    request: "SOLICITUD DE COMPRA",
-    po: "ORDEN DE COMPRA (OC)",
-    vendor: "PROVEEDOR",
-    needed: "FECHA REQUERIDA",
-    priority: "PRIORIDAD",
-    items: "ARTÍCULOS / DESCRIPCIÓN",
-    description: "Descripción",
-    qty: "Cant.",
-    unit: "Unidad",
-    unitCost: "Costo Unit. Est.",
-    add: "+ AGREGAR ARTÍCULO / DESCRIPCIÓN",
-    shipping: "ENVÍO ESTIMADO",
-    total: "TOTAL ESTIMADO",
-    charge: "CARGAR A",
-    cost: "CÓDIGO DE COSTO (OPCIONAL)",
-    notes: "NOTAS (OPCIONAL)",
-    attach: "ARCHIVOS ADJUNTOS (OPCIONAL)",
-    addAttach: "AGREGAR ARCHIVO",
-    attachmentQueued: "Archivo preparado",
-    cancel: "CANCELAR",
-    cancelSub: "Descartar cambios",
-    save: "CREAR SOLICITUD / OC",
-    saving: "GUARDANDO…",
-    saveSub: "Regresar a la Orden de Trabajo",
-    foot: "Esta solicitud / OC se relacionará con la orden y se registrará mediante IXI Financial.",
-    required: "Proveedor, fecha válida y al menos un artículo válido son obligatorios.",
-    saveFailed: "No se pudo guardar la compra. No se agregó nada a la Orden de Trabajo. Corrige el problema e inténtalo de nuevo.",
-    normal: "Normal",
-    high: "Alta",
-    critical: "Crítica"
+    title: "NUEVA SOLICITUD DE COMPRA", sub: "Solicitar autorización de compra de la empresa", object: "Origen", wo: "Orden de Trabajo", location: "Ubicación", employee: "Solicitado Por",
+    details: "SOLICITUD DE COMPRA", mode: "RUTA DE COMPRA", request: "SOLICITUD DE COMPRA", directPo: "ORDEN DE COMPRA DIRECTA", directPoDenied: "La OC directa depende de su autoridad de compra.",
+    vendor: "PROVEEDOR", vendorOptional: "PROVEEDOR (OPCIONAL)", needed: "FECHA NECESARIA", priority: "PRIORIDAD", what: "¿QUÉ NECESITA?", why: "¿POR QUÉ LO NECESITA?",
+    items: "ARTÍCULOS", description: "Descripción", qty: "Cant.", unit: "Unidad", unitCost: "Costo Unit. Est.", add: "+ AGREGAR ARTÍCULO", shipping: "ENVÍO ESTIMADO", total: "TOTAL ESTIMADO",
+    charge: "CARGAR A", cost: "CÓDIGO DE COSTO (OPCIONAL)", attachments: "COTIZACIONES / DOCUMENTOS", attach: "AGREGAR PDF / JPG / PNG", notes: "NOTAS ADICIONALES (OPCIONAL)",
+    cancel: "CANCELAR", cancelSub: "Regresar sin guardar", save: "ENVIAR SOLICITUD", savePo: "EMITIR ORDEN DE COMPRA", saving: "GUARDANDO…", saveSub: "Crear registro canónico de Compra",
+    required: "Complete los campos requeridos antes de enviar.", saveFailed: "No se pudo crear la compra. No se comprometió ningún gasto.", normal: "Normal", high: "Alta", critical: "Crítica",
+    quotesRequired: "REQUISITO DE COTIZACIONES", authority: "AUTORIDAD DE APROBACIÓN", directLimit: "LÍMITE DE OC DIRECTA"
   }
 };
 
 function blankLine() {
-  return {
-    lineId: `LINE-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    description: "",
-    quantity: 1,
-    unit: "EA",
-    estimatedUnitCost: ""
-  };
+  return { lineId: `LINE-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, description: "", quantity: 1, unit: "EA", estimatedUnitCost: "" };
 }
 
 function createClientRequestId() {
-  if (
-    typeof globalThis !== "undefined" &&
-    globalThis.crypto?.randomUUID
-  ) {
-    return `PUR-${globalThis.crypto.randomUUID()}`;
-  }
+  if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) return `PUR-${globalThis.crypto.randomUUID()}`;
+  return `PUR-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
-  return `PUR-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+function todayPlus(days = 3) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function relatedRecords(context = {}, workOrder = {}) {
+  return [
+    { id: clean(context.primary?.objectId || context.primary?.passportId), label: clean(context.primary?.label), type: clean(context.primary?.objectType || "Object") },
+    { id: clean(workOrder?.identity?.workOrderId || workOrder?.identity?.number || workOrder?.workOrderNumber), label: clean(workOrder?.identity?.number || workOrder?.workOrderNumber || workOrder?.number), type: "Work Order" },
+    { id: clean(context.location?.objectId || context.location?.passportId), label: clean(context.location?.label), type: "Location" },
+    { id: clean(context.actor?.employeeId || context.actor?.passportId || context.actor?.userId), label: clean(context.actor?.displayName || context.actor?.name || context.actor?.label), type: "Employee" }
+  ].filter(item => item.id && item.label);
 }
 
 export default function IXIPurchaseApp({
-  context = {},
-  workOrder = {},
-  language = "en",
-  onLanguageChange = null,
-  onCancel = null,
-  onSave = null
+  context = {}, workOrder = {}, initialPurchase = null, language = "en", onLanguageChange = null, onCancel = null, onSave = null,
+  onPurchaseChange = null, purchasingPolicy = null, purchasingAuthority = null
 }) {
-  const [lang, setLangLocal] = useState(language === "es" ? "es" : "en");
+  const [localLanguage, setLocalLanguage] = useState(language === "es" ? "es" : "en");
+  const [record, setRecord] = useState(initialPurchase || null);
   const [requestType, setRequestType] = useState("purchase-request");
   const [vendorLabel, setVendorLabel] = useState("");
-  const [neededByDate, setNeededByDate] = useState("");
+  const [neededByDate, setNeededByDate] = useState(todayPlus(3));
   const [priority, setPriority] = useState("normal");
+  const [whatNeeded, setWhatNeeded] = useState("");
+  const [businessReason, setBusinessReason] = useState("");
   const [items, setItems] = useState([blankLine()]);
   const [shipping, setShipping] = useState("");
   const [costCode, setCostCode] = useState("");
   const [notes, setNotes] = useState("");
-  const [attachment, setAttachment] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const clientRequestIdRef = useRef(createClientRequestId());
+  const requestIdRef = useRef(createClientRequestId());
+  const lang = language === "es" || localLanguage === "es" ? "es" : "en";
   const t = COPY[lang];
+  const policy = useMemo(() => resolveIXIPurchasingPolicy(context, purchasingPolicy), [context, purchasingPolicy]);
   const primary = context.primary || {};
   const location = context.location || {};
   const actor = context.actor || {};
-  const workOrderNumber = clean(
-    workOrder.identity?.number ||
-    workOrder.workOrderNumber ||
-    workOrder.number
-  ) || "WORK ORDER";
-  const workOrderId = clean(workOrder.identity?.workOrderId);
+  const workOrderNumber = clean(workOrder?.identity?.number || workOrder?.workOrderNumber || workOrder?.number);
+  const chargeTo = workOrderNumber || clean(primary.label) || "AOS OBJECT";
 
-  const input = useMemo(
-    () => ({
-      clientRequestId: clientRequestIdRef.current,
-      requestType,
-      vendorLabel,
-      neededByDate,
-      priority,
-      items,
-      estimatedShipping: Number(shipping || 0),
-      chargeTo: workOrderNumber,
-      costCode,
-      currency: "USD",
-      notes,
-      attachments: attachment
-        ? [
-            {
-              type: "purchase-support",
-              fileName: attachment.name,
-              mimeType: attachment.type,
-              size: attachment.size,
-              status: "local-pending-upload"
-            }
-          ]
-        : []
-    }),
-    [
-      requestType,
-      vendorLabel,
-      neededByDate,
-      priority,
-      items,
-      shipping,
-      workOrderNumber,
-      costCode,
-      notes,
-      attachment
-    ]
+  const pendingAttachments = useMemo(
+    () => attachments.map(item => createIXIPendingAttachment(item.file, { type: "purchase-support" })),
+    [attachments]
   );
 
-  const draft = useMemo(
-    () => createIXIPurchaseDraft({ context, workOrder, input }),
-    [context, workOrder, input]
-  );
+  const input = useMemo(() => ({
+    clientRequestId: requestIdRef.current, requestType, vendorLabel, neededByDate, priority, whatNeeded, businessReason, items,
+    estimatedShipping: Number(shipping || 0), shipToId: clean(location.objectId || location.id), shipToPassportId: clean(location.passportId),
+    shipToLabel: clean(location.label), chargeTo, costCode, currency: "USD", notes, quoteCount: attachments.length, attachments: pendingAttachments
+  }), [requestType, vendorLabel, neededByDate, priority, whatNeeded, businessReason, items, shipping, location, chargeTo, costCode, notes, attachments.length, pendingAttachments]);
 
-  function setLang(nextLanguage) {
-    setLangLocal(nextLanguage);
-    onLanguageChange?.(nextLanguage);
-  }
+  const draft = useMemo(() => createIXIPurchaseDraft({ context, workOrder, input }), [context, workOrder, input]);
+  const runtime = useMemo(() => evaluateIXIPurchaseRuntime({ context, purchase: draft, policy, authority: purchasingAuthority }), [context, draft, policy, purchasingAuthority]);
 
-  function patchItem(index, key, value) {
-    setItems(current =>
-      current.map((item, itemIndex) =>
-        itemIndex === index
-          ? { ...item, [key]: value }
-          : item
-      )
-    );
-  }
+  function changeLanguage(next) { setLocalLanguage(next); onLanguageChange?.(next); }
+  function patchItem(index, key, value) { setItems(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item)); }
+  function removeItem(index) { setItems(current => { const next = current.filter((_, itemIndex) => itemIndex !== index); return next.length ? next : [blankLine()]; }); }
 
-  function removeItem(index) {
-    setItems(current => {
-      const next = current.filter((_, itemIndex) => itemIndex !== index);
-      return next.length ? next : [blankLine()];
-    });
-  }
-
-  async function save() {
-    if (saving) {
-      return;
+  function addFiles(files) {
+    const next = [];
+    const rejected = [];
+    for (const file of Array.from(files || [])) {
+      const validation = validateIXITransactFile(file, { maxBytes: MAX_ATTACHMENT_BYTES, allowedMimeTypes: PURCHASE_MIME_TYPES, allowedExtensions: [".pdf", ".jpg", ".jpeg", ".png"] });
+      if (!validation.valid) { rejected.push(validation.message); continue; }
+      next.push({ file, key: `${file.name}:${file.size}:${file.lastModified}` });
     }
+    if (next.length) setAttachments(current => { const map = new Map(current.map(item => [item.key, item])); next.forEach(item => map.set(item.key, item)); return [...map.values()]; });
+    setErrors(current => ({ ...current, attachments: rejected[0] || undefined }));
+  }
 
-    const nextDraft = createIXIPurchaseDraft({
-      context,
-      workOrder,
-      input
-    });
-    const validation = validateIXIPurchase(nextDraft);
-
-    setErrors(validation.errors);
+  async function submit() {
+    if (saving) return;
+    const validation = validateIXIPurchase(draft, { requireVendor: policy.request.requireVendor !== false, requireBusinessReason: policy.request.requireBusinessReason !== false });
+    const nextErrors = { ...validation.errors };
+    if (runtime.quoteRequirement.requiredQuotes > attachments.length) nextErrors.attachments = `${runtime.quoteRequirement.requiredQuotes} quote(s) required by company policy.`;
+    if (requestType === "purchase-order" && !runtime.canDirectPo) nextErrors.requestType = t.directPoDenied;
+    setErrors(nextErrors);
     setSaveError("");
-
-    if (!validation.valid) {
-      return;
-    }
+    if (Object.values(nextErrors).some(Boolean)) return;
 
     setSaving(true);
-
     try {
-      let persisted = null;
+      const persisted = await createIXIPurchase({
+        object: { passportId: primary.passportId, objectId: primary.objectId || primary.id, objectType: primary.objectType, label: primary.label },
+        context, workOrder, input, policy, authority: purchasingAuthority,
+        metadata: { source: workOrderNumber ? "ixi-transact-work-order-purchase" : "ixi-transact-object-purchase" }
+      });
 
-      if (clean(primary.passportId) && workOrderId) {
-        persisted = await createIXIPurchase({
-          object: {
-            passportId: primary.passportId,
-            objectType: primary.objectType,
-            label: primary.label
-          },
-          context,
-          workOrder,
-          input,
-          metadata: {
-            source: "ixi-transact-work-order-purchase"
-          }
-        });
-      }
+      let nextRecord = persisted.record;
+      for (const related of relatedRecords(context, workOrder)) nextRecord = appendIXIPurchaseRelated(nextRecord, related);
+      if (vendorLabel) nextRecord = appendIXIPurchaseRelated(nextRecord, { id: clean(input.vendorId || `vendor:${vendorLabel.toLowerCase()}`), label: vendorLabel, type: "Vendor" });
 
-      await onSave?.(
-        persisted?.draft || nextDraft,
-        input,
-        persisted?.response || null
-      );
+      setRecord(nextRecord);
+      await onSave?.(persisted.draft, { ...input, files: attachments.map(item => item.file), purchaseRecord: nextRecord }, persisted.response);
+      await onPurchaseChange?.(nextRecord, { action: "created", persisted });
     } catch (error) {
-      console.error("IXI TRAN$ACT PURCHASE SAVE FAILED", error);
       setSaveError(clean(error?.message) || t.saveFailed);
     } finally {
       setSaving(false);
     }
   }
 
+  async function purchaseAction(action, payload = {}) {
+    if (!record || saving) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      const next = applyIXIPurchaseAction({ record, action, context, policy, authority: purchasingAuthority, actor, payload });
+      setRecord(next);
+      await onPurchaseChange?.(next, { action, payload, previous: record });
+    } catch (error) {
+      setSaveError(clean(error?.message) || "Purchase action failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (record) {
+    return <IXIPurchaseCard record={record} context={context} policy={policy} authority={purchasingAuthority} language={lang} onLanguageChange={changeLanguage} onAction={purchaseAction} busy={saving} error={saveError} />;
+  }
+
   return (
     <div className="tx-purchase">
-      <div className="po-lang" aria-label="Language">
-        <button
-          type="button"
-          className={lang === "en" ? "on" : ""}
-          onClick={() => setLang("en")}
-          disabled={saving}
-        >
-          ENG
-        </button>
-        <span>/</span>
-        <button
-          type="button"
-          className={lang === "es" ? "on" : ""}
-          onClick={() => setLang("es")}
-          disabled={saving}
-        >
-          ESP
-        </button>
-      </div>
-
-      <div className="po-head">
-        <div className="po-icon" aria-hidden="true">🛒</div>
-        <div className="po-title">
-          <strong>{t.title}</strong>
-          <div className="po-context">
-            <div><b>{primary.label || "—"}</b><small>{t.machine}</small></div>
-            <div><b>{workOrderNumber}</b><small>{t.wo}</small></div>
-            <div><b>{location.label || "—"}</b><small>{t.location}</small></div>
-            <div><b>{actor.displayName || actor.name || actor.label || "—"}</b><small>{t.employee}</small></div>
-          </div>
-        </div>
-      </div>
-
+      <div className="po-lang" aria-label="Language"><button type="button" className={lang === "en" ? "on" : ""} onClick={() => changeLanguage("en")} disabled={saving}>ENG</button><span>/</span><button type="button" className={lang === "es" ? "on" : ""} onClick={() => changeLanguage("es")} disabled={saving}>ESP</button></div>
+      <div className="po-head"><div className="po-icon" aria-hidden="true">$</div><div className="po-title"><strong>{t.title}</strong><small style={{ color: "#999", fontSize: 8 }}>{t.sub}</small><div className="po-context"><div><b>{primary.label || "—"}</b><small>{t.object}</small></div><div><b>{workOrderNumber || "—"}</b><small>{t.wo}</small></div><div><b>{location.label || "—"}</b><small>{t.location}</small></div><div><b>{actor.displayName || actor.name || actor.label || "—"}</b><small>{t.employee}</small></div></div></div></div>
       <div className="po-section">{t.details}</div>
 
-      <label>{t.type} <em>*</em></label>
-      <div className="po-modes">
-        <button
-          type="button"
-          className={requestType === "purchase-request" ? "on" : ""}
-          onClick={() => setRequestType("purchase-request")}
-          disabled={saving}
-        >
-          {t.request}
-        </button>
-        <button
-          type="button"
-          className={requestType === "purchase-order" ? "on" : ""}
-          onClick={() => setRequestType("purchase-order")}
-          disabled={saving}
-        >
-          {t.po}
-        </button>
-      </div>
+      <label>{t.mode} <em>*</em></label>
+      <div className="po-modes"><button type="button" className={requestType === "purchase-request" ? "on" : ""} onClick={() => setRequestType("purchase-request")} disabled={saving}>{t.request}</button><button type="button" className={requestType === "purchase-order" ? "on" : ""} onClick={() => runtime.canDirectPo && setRequestType("purchase-order")} disabled={saving || !runtime.canDirectPo} title={!runtime.canDirectPo ? t.directPoDenied : ""}>{t.directPo}</button></div>
+      {errors.requestType ? <div className="po-errors">{errors.requestType}</div> : null}
 
-      <label>{t.vendor} <em>*</em></label>
-      <div className={`po-field ${errors.vendor ? "invalid" : ""}`}>
-        <span aria-hidden="true">▣</span>
-        <input
-          value={vendorLabel}
-          onChange={event => setVendorLabel(event.target.value)}
-          disabled={saving}
-          autoComplete="organization"
-        />
-      </div>
+      <div className="po-two"><div><label>{t.authority}</label><div className="po-field locked-field"><input readOnly value={runtime.approval?.label || "Company policy"} /></div></div><div><label>{t.directLimit}</label><div className="po-field locked-field"><input readOnly value={runtime.directPoLimit >= Number.MAX_SAFE_INTEGER ? "UNLIMITED" : `$${Number(runtime.directPoLimit || 0).toLocaleString()}`} /></div></div></div>
 
-      <div className="po-two">
-        <div>
-          <label>{t.needed} <em>*</em></label>
-          <div className={`po-field ${errors.neededByDate ? "invalid" : ""}`}>
-            <input
-              type="date"
-              value={neededByDate}
-              onChange={event => setNeededByDate(event.target.value)}
-              disabled={saving}
-            />
-          </div>
-        </div>
-        <div>
-          <label>{t.priority}</label>
-          <div className="po-field">
-            <select
-              value={priority}
-              onChange={event => setPriority(event.target.value)}
-              disabled={saving}
-            >
-              <option value="normal">{t.normal}</option>
-              <option value="high">{t.high}</option>
-              <option value="critical">{t.critical}</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <label>{policy.request.requireVendor === false ? t.vendorOptional : t.vendor} {policy.request.requireVendor === false ? null : <em>*</em>}</label>
+      <div className={`po-field ${errors.vendor ? "invalid" : ""}`}><span>▣</span><input value={vendorLabel} onChange={event => setVendorLabel(event.target.value)} disabled={saving} autoComplete="organization" /></div>
+
+      <div className="po-two"><div><label>{t.needed} <em>*</em></label><div className={`po-field ${errors.neededByDate ? "invalid" : ""}`}><input type="date" value={neededByDate} onChange={event => setNeededByDate(event.target.value)} disabled={saving} /></div></div><div><label>{t.priority}</label><div className="po-field"><select value={priority} onChange={event => setPriority(event.target.value)} disabled={saving}><option value="normal">{t.normal}</option><option value="high">{t.high}</option><option value="critical">{t.critical}</option></select></div></div></div>
+
+      <label>{t.what} <em>*</em></label><textarea className="po-notes" value={whatNeeded} onChange={event => setWhatNeeded(event.target.value)} disabled={saving} placeholder="CAT 336 hydraulic pump seal kit, filter and oil." />
+      <label>{t.why} {policy.request.requireBusinessReason !== false ? <em>*</em> : null}</label><textarea className={`po-notes ${errors.businessReason ? "invalid" : ""}`} value={businessReason} onChange={event => setBusinessReason(event.target.value)} disabled={saving} placeholder="Machine is down; parts are required to complete repair and return it to service." />
 
       <label>{t.items} <em>*</em></label>
-      <div className={`po-lines ${errors.items || errors.itemLine ? "invalid" : ""}`}>
-        <div className="po-line-head" aria-hidden="true">
-          <span>{t.description}</span>
-          <span>{t.qty}</span>
-          <span>{t.unit}</span>
-          <span>{t.unitCost}</span>
-          <span />
-        </div>
+      <div className={`po-lines ${errors.items || errors.itemLine ? "invalid" : ""}`}><div className="po-line-head"><span>{t.description}</span><span>{t.qty}</span><span>{t.unit}</span><span>{t.unitCost}</span><span /></div>{items.map((item, index) => <div className="po-line" key={item.lineId || index}><input value={item.description} onChange={event => patchItem(index, "description", event.target.value)} disabled={saving} /><input inputMode="decimal" value={item.quantity} onChange={event => patchItem(index, "quantity", event.target.value)} disabled={saving} /><select value={item.unit} onChange={event => patchItem(index, "unit", event.target.value)} disabled={saving}><option>EA</option><option>FT</option><option>YD</option><option>HR</option><option>GAL</option></select><input inputMode="decimal" value={item.estimatedUnitCost} onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)} disabled={saving} placeholder="$" /><button type="button" onClick={() => removeItem(index)} disabled={saving}>×</button></div>)}<button type="button" className="po-add" onClick={() => setItems(current => [...current, blankLine()])} disabled={saving}>{t.add}</button></div>
 
-        {items.map((item, index) => (
-          <div className="po-line" key={item.lineId || index}>
-            <input
-              aria-label={t.description}
-              value={item.description}
-              onChange={event => patchItem(index, "description", event.target.value)}
-              placeholder={t.description}
-              disabled={saving}
-            />
-            <input
-              aria-label={t.qty}
-              inputMode="decimal"
-              value={item.quantity}
-              onChange={event => patchItem(index, "quantity", event.target.value)}
-              disabled={saving}
-            />
-            <select
-              aria-label={t.unit}
-              value={item.unit}
-              onChange={event => patchItem(index, "unit", event.target.value)}
-              disabled={saving}
-            >
-              <option>EA</option>
-              <option>FT</option>
-              <option>YD</option>
-              <option>HR</option>
-              <option>GAL</option>
-            </select>
-            <input
-              aria-label={t.unitCost}
-              inputMode="decimal"
-              value={item.estimatedUnitCost}
-              onChange={event => patchItem(index, "estimatedUnitCost", event.target.value)}
-              placeholder="$"
-              disabled={saving}
-            />
-            <button
-              type="button"
-              aria-label="Remove item"
-              onClick={() => removeItem(index)}
-              disabled={saving}
-            >
-              ×
-            </button>
-          </div>
-        ))}
+      <div className="po-two"><div><label>{t.shipping}</label><div className="po-field"><span>$</span><input inputMode="decimal" value={shipping} onChange={event => setShipping(event.target.value)} disabled={saving} /></div></div><div><label>{t.total}</label><div className="po-field"><span>▤</span><input className="po-total" readOnly value={`$${draft.purchase.estimatedTotal.toFixed(2)}`} /></div></div></div>
+      <div className="po-two"><div><label>{t.charge}</label><div className="po-field locked-field"><input readOnly value={chargeTo} /></div></div><div><label>{t.cost}</label><div className="po-field"><input value={costCode} onChange={event => setCostCode(event.target.value)} disabled={saving} /></div></div></div>
 
-        <button
-          type="button"
-          className="po-add"
-          onClick={() => setItems(current => [...current, blankLine()])}
-          disabled={saving}
-        >
-          {t.add}
-        </button>
-      </div>
+      <label>{t.attachments}</label><div className={`po-attach ${errors.attachments ? "invalid" : ""}`}><label className="po-file-button"><input type="file" accept="application/pdf,image/jpeg,image/png" multiple onChange={event => addFiles(event.target.files)} disabled={saving} /><span>{t.attach}</span><small>{attachments.length ? `${attachments.length} file(s): ${attachments.map(item => item.file.name).join(", ")}` : "PDF / JPG / PNG · 25MB each"}</small></label></div>
+      <div style={{ marginTop: 4, color: runtime.quoteRequirement.requiredQuotes > attachments.length ? "#ffc400" : "#77d66d", fontSize: 7, fontWeight: 900 }}>{t.quotesRequired}: {runtime.quoteRequirement.requiredQuotes} · {attachments.length} ATTACHED</div>
 
-      <div className="po-two">
-        <div>
-          <label>{t.shipping}</label>
-          <div className="po-field">
-            <span aria-hidden="true">$</span>
-            <input
-              inputMode="decimal"
-              value={shipping}
-              onChange={event => setShipping(event.target.value)}
-              disabled={saving}
-            />
-          </div>
-        </div>
-        <div>
-          <label>{t.total}</label>
-          <div className="po-field">
-            <span aria-hidden="true">▤</span>
-            <input
-              className="po-total"
-              readOnly
-              value={`$${draft.purchase.estimatedTotal.toFixed(2)}`}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="po-two">
-        <div>
-          <label>{t.charge} <em>*</em></label>
-          <div className="po-field locked-field">
-            <input readOnly value={workOrderNumber} />
-          </div>
-        </div>
-        <div>
-          <label>{t.cost}</label>
-          <div className="po-field">
-            <input
-              value={costCode}
-              onChange={event => setCostCode(event.target.value)}
-              disabled={saving}
-            />
-          </div>
-        </div>
-      </div>
-
-      <label>{t.notes}</label>
-      <textarea
-        className="po-notes"
-        value={notes}
-        onChange={event => setNotes(event.target.value)}
-        disabled={saving}
-      />
-
-      <label>{t.attach}</label>
-      <div className="po-attach">
-        <label className="po-file-button">
-          <span>⌕ {t.addAttach}</span>
-          <small>{attachment ? `${t.attachmentQueued}: ${attachment.name}` : "PDF / JPG / PNG"}</small>
-          <input
-            type="file"
-            accept="application/pdf,image/jpeg,image/png"
-            onChange={event => setAttachment(event.target.files?.[0] || null)}
-            disabled={saving}
-          />
-        </label>
-      </div>
-
-      {Object.keys(errors).length ? (
-        <div className="po-errors" role="alert">{t.required}</div>
-      ) : null}
-
-      {saveError ? (
-        <div className="po-errors po-save-error" role="alert">
-          {saveError === t.saveFailed ? saveError : `${t.saveFailed} (${saveError})`}
-        </div>
-      ) : null}
-
-      <div className="po-actions">
-        <button
-          type="button"
-          onClick={() => onCancel?.()}
-          disabled={saving}
-        >
-          {t.cancel}
-          <small>{t.cancelSub}</small>
-        </button>
-        <button
-          type="button"
-          className="save"
-          onClick={save}
-          disabled={saving}
-        >
-          {saving ? t.saving : t.save}
-          <small>{t.saveSub}</small>
-        </button>
-      </div>
-
-      <div className="po-foot">ⓘ {t.foot}</div>
+      <label>{t.notes}</label><textarea className="po-notes" value={notes} onChange={event => setNotes(event.target.value)} disabled={saving} />
+      {Object.values(errors).some(Boolean) ? <div className="po-errors">{t.required}</div> : null}
+      {saveError ? <div className="po-errors po-save-error">{saveError}</div> : null}
+      <div className="po-actions"><button type="button" onClick={() => onCancel?.()} disabled={saving}>{t.cancel}<small>{t.cancelSub}</small></button><button type="button" className="save" onClick={submit} disabled={saving}>{saving ? t.saving : requestType === "purchase-order" ? t.savePo : t.save}<small>{t.saveSub}</small></button></div>
       <IXIPurchaseStyles />
     </div>
   );
