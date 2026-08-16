@@ -1,3 +1,479 @@
-export default function IXIExpenseStyles(){return <style jsx global>{`
-.tx-expense,.tx-expense *{box-sizing:border-box}.tx-expense{position:relative;padding:2px 1px 12px;color:#eef0ee;font-family:"Arial Narrow","Roboto Condensed",Arial,sans-serif}.ex-lang{position:absolute;right:1px;top:1px;display:flex;align-items:center;gap:2px;z-index:3}.ex-lang button{border:0;background:transparent;color:#666;font-size:7px;font-weight:950;padding:2px}.ex-lang button.on{color:#ffc400}.ex-lang i{color:#444;font-size:6px}.ex-head{display:flex;gap:8px;align-items:center;padding:5px 1px 8px}.ex-icon{width:39px;height:39px;display:grid;place-items:center;border:1.5px solid #ffc400;border-radius:6px;color:#ffc400;background:#0c0f0d;font-size:23px;font-weight:950}.ex-title{min-width:0;flex:1;padding-right:36px}.ex-title strong{display:block;font-size:16px;line-height:1;font-weight:950}.ex-title small{display:block;margin-top:4px;color:#9ba09c;font-size:6px}.ex-context-row{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-bottom:7px}.ex-context-row div{min-width:0;height:34px;padding:6px 7px;border:1px solid #323733;border-radius:5px;background:#0f1210}.ex-context-row b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eee;font-size:7px}.ex-context-row small{display:block;margin-top:2px;color:#7e8580;font-size:5.5px}.tx-expense label{display:block;margin:7px 1px 3px;color:#a8ada9;font-size:6.6px;font-weight:950}.tx-expense label em{color:#ffc400;font-style:normal}.ex-field{height:34px;display:flex;align-items:center;border:1px solid #3a403b;border-radius:4px;background:#0f1210}.ex-field.bad,.ex-paid.bad,.ex-upload.bad{border-color:#ff6856}.ex-field>span{width:28px;height:100%;display:grid;place-items:center;border-right:1px solid #2c312e;color:#969c97;font-size:11px}.ex-field input,.ex-field select{min-width:0;flex:1;height:100%;padding:0 8px;border:0;outline:0;background:transparent;color:#f3f4f3;font:700 8.5px Arial}.ex-field select{appearance:auto}.ex-field input::placeholder{color:#676d69}.field-x{width:28px;height:100%;border:0;background:transparent;color:#747a76;font-size:15px}.ex-money input{text-align:right;font-size:11px;font-weight:950}.ex-amount-pay{display:grid;grid-template-columns:.82fr 1.58fr;gap:7px}.ex-paid{height:38px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid #3a403b;border-radius:4px;background:#0d100e}.ex-paid button{min-width:0;padding:2px;border:0;border-right:1px solid #2d322e;background:transparent;color:#9a9f9b;font-size:5.5px;font-weight:950;line-height:1.15}.ex-paid button:last-child{border-right:0}.ex-paid button.on{background:rgba(255,196,0,.065);color:#ffc400;box-shadow:inset 0 0 0 1px rgba(255,196,0,.42)}.ex-reimbursement{margin-top:4px;padding:5px 7px;border:1px solid rgba(255,196,0,.24);border-radius:4px;background:rgba(255,196,0,.035);color:#ffc400;font-size:6px;font-weight:950}.ex-two{display:grid;grid-template-columns:1fr 1fr;gap:6px}.ex-locked{height:31px;display:flex;align-items:center;padding:0 8px;border:1px solid #303530;border-radius:4px;background:#0b0e0c;color:#cfd2cf;font-size:7.5px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ex-notes{width:100%;height:47px;padding:7px;border:1px solid #3a403b;border-radius:4px;background:#0f1210;color:#eee;font:700 7.5px/1.35 Arial;resize:none;outline:0}.ex-upload{display:flex;gap:5px;min-height:58px;padding:5px;border:1px dashed #826900;border-radius:4px;background:#0c0f0d}.ex-upload>input{display:none}.upload-pick{min-height:48px;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:0;background:transparent;color:#ffc400;font-size:15px}.upload-pick span{color:#b8bcb9;font-size:7px;text-align:left}.upload-pick small{display:block;margin-top:4px;color:#777d78;font-size:5px}.receipt-card{position:relative;width:83px;min-width:83px;height:58px;overflow:hidden;border:1px solid #424743;border-radius:3px;background:#151815}.receipt-card img{width:100%;height:100%;object-fit:cover}.receipt-card span{display:none}.receipt-card>button{position:absolute;right:2px;top:2px;width:17px;height:17px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(0,0,0,.82);color:#fff;font-size:12px}.pdf-receipt{height:100%;display:grid;place-items:center;color:#ffc400;font-size:13px;font-weight:950}.ex-errors{margin-top:5px;padding:5px 7px;border:1px solid rgba(255,104,86,.28);border-radius:4px;background:rgba(255,104,86,.05);color:#ff7966;font-size:6px}.ex-errors.server{color:#ff9d8f}.ex-actions{display:grid;grid-template-columns:1.55fr .75fr;gap:6px;margin-top:8px}.ex-actions>button{height:40px;border:1px solid #444944;border-radius:4px;background:#0d100e;color:#d1d4d2;font-size:8px;font-weight:950}.ex-actions .save{display:flex;align-items:center;justify-content:center;gap:7px;border-color:#ffd12b;background:linear-gradient(#ffd12b,#e9aa00);color:#111;font-size:13px}.ex-actions .save span{font-size:9px;text-align:left}.ex-actions .save small{display:block;margin-top:1px;font-size:5px}.ex-actions button:disabled{opacity:.48}.ex-success{display:grid;grid-template-columns:28px 1fr;gap:7px;margin-top:7px;padding:8px;border:1px solid rgba(100,190,75,.52);border-radius:5px;background:rgba(66,126,49,.08)}.ex-success>b{width:25px;height:25px;display:grid;place-items:center;border:1px solid #65bd4d;border-radius:50%;color:#65bd4d;font-size:12px}.ex-success strong{display:block;color:#67c750;font-size:8px}.ex-success span,.ex-success small,.ex-success em{display:block;margin-top:2px;color:#d8dbd9;font-size:6.2px;font-style:normal}.ex-success em{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.06);color:#898f8a}.ex-policy{margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);color:#757b76;font-size:5px;text-align:center}.ex-policy i{display:inline-block;height:7px;margin:0 6px;border-left:1px solid #454a46;vertical-align:middle}
-`}</style>}
+export default function IXIExpenseStyles() {
+  return (
+    <style jsx global>{`
+      .tx-expense,
+      .tx-expense * {
+        box-sizing: border-box;
+      }
+
+      .tx-expense {
+        position: relative;
+        padding: 2px 1px 12px;
+        color: #eef0ee;
+        font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+      }
+
+      .ex-lang {
+        position: absolute;
+        right: 1px;
+        top: 1px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        z-index: 3;
+      }
+
+      .ex-lang button {
+        border: 0;
+        background: transparent;
+        color: #666;
+        font-size: 7px;
+        font-weight: 950;
+        padding: 2px;
+      }
+
+      .ex-lang button.on {
+        color: #ffc400;
+      }
+
+      .ex-lang i {
+        color: #444;
+        font-size: 6px;
+      }
+
+      .ex-head {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 5px 1px 8px;
+      }
+
+      .ex-icon {
+        width: 39px;
+        height: 39px;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid #ffc400;
+        border-radius: 6px;
+        color: #ffc400;
+        background: #0c0f0d;
+        font-size: 23px;
+        font-weight: 950;
+      }
+
+      .ex-title {
+        min-width: 0;
+        flex: 1;
+        padding-right: 36px;
+      }
+
+      .ex-title strong {
+        display: block;
+        font-size: 16px;
+        line-height: 1;
+        font-weight: 950;
+      }
+
+      .ex-title small {
+        display: block;
+        margin-top: 4px;
+        color: #9ba09c;
+        font-size: 6px;
+      }
+
+      .ex-context-row {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap: 4px;
+        margin-bottom: 7px;
+      }
+
+      .ex-context-row div {
+        min-width: 0;
+        height: 34px;
+        padding: 6px 7px;
+        border: 1px solid #323733;
+        border-radius: 5px;
+        background: #0f1210;
+      }
+
+      .ex-context-row b {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #eee;
+        font-size: 7px;
+      }
+
+      .ex-context-row small {
+        display: block;
+        margin-top: 2px;
+        color: #7e8580;
+        font-size: 5.5px;
+      }
+
+      .tx-expense label {
+        display: block;
+        margin: 7px 1px 3px;
+        color: #a8ada9;
+        font-size: 6.6px;
+        font-weight: 950;
+      }
+
+      .tx-expense label em {
+        color: #ffc400;
+        font-style: normal;
+      }
+
+      .ex-field {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        border: 1px solid #3a403b;
+        border-radius: 4px;
+        background: #0f1210;
+      }
+
+      .ex-field.bad,
+      .ex-paid.bad,
+      .ex-upload.bad {
+        border-color: #ff6856;
+      }
+
+      .ex-field > span {
+        width: 28px;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        border-right: 1px solid #2c312e;
+        color: #969c97;
+        font-size: 11px;
+      }
+
+      .ex-field input,
+      .ex-field select {
+        min-width: 0;
+        flex: 1;
+        height: 100%;
+        padding: 0 8px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #f3f4f3;
+        font: 700 8.5px Arial;
+      }
+
+      .ex-field select {
+        appearance: auto;
+      }
+
+      .ex-field input::placeholder {
+        color: #676d69;
+      }
+
+      .field-x {
+        width: 28px;
+        height: 100%;
+        border: 0;
+        background: transparent;
+        color: #747a76;
+        font-size: 15px;
+      }
+
+      .ex-money input {
+        text-align: right;
+        font-size: 11px;
+        font-weight: 950;
+      }
+
+      .ex-amount-pay {
+        display: grid;
+        grid-template-columns: .82fr 1.58fr;
+        gap: 7px;
+      }
+
+      .ex-paid {
+        height: 38px;
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        overflow: hidden;
+        border: 1px solid #3a403b;
+        border-radius: 4px;
+        background: #0d100e;
+      }
+
+      .ex-paid button {
+        min-width: 0;
+        padding: 2px;
+        border: 0;
+        border-right: 1px solid #2d322e;
+        background: transparent;
+        color: #9a9f9b;
+        font-size: 5.5px;
+        font-weight: 950;
+        line-height: 1.15;
+      }
+
+      .ex-paid button:last-child {
+        border-right: 0;
+      }
+
+      .ex-paid button.on {
+        background: rgba(255,196,0,.065);
+        color: #ffc400;
+        box-shadow: inset 0 0 0 1px rgba(255,196,0,.42);
+      }
+
+      .ex-reimbursement {
+        margin-top: 4px;
+        padding: 5px 7px;
+        border: 1px solid rgba(255,196,0,.24);
+        border-radius: 4px;
+        background: rgba(255,196,0,.035);
+        color: #ffc400;
+        font-size: 6px;
+        font-weight: 950;
+      }
+
+      .ex-two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .ex-locked {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+        border: 1px solid #303530;
+        border-radius: 4px;
+        background: #0b0e0c;
+        color: #cfd2cf;
+        font-size: 7.5px;
+        font-weight: 900;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .ex-notes {
+        width: 100%;
+        height: 47px;
+        padding: 7px;
+        border: 1px solid #3a403b;
+        border-radius: 4px;
+        background: #0f1210;
+        color: #eee;
+        font: 700 7.5px/1.35 Arial;
+        resize: none;
+        outline: 0;
+      }
+
+      .ex-upload {
+        display: flex;
+        gap: 5px;
+        min-height: 58px;
+        padding: 5px;
+        border: 1px dashed #826900;
+        border-radius: 4px;
+        background: #0c0f0d;
+      }
+
+      .ex-upload > input {
+        display: none;
+      }
+
+      .upload-pick {
+        min-height: 48px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 0;
+        background: transparent;
+        color: #ffc400;
+        font-size: 15px;
+      }
+
+      .upload-pick span {
+        color: #b8bcb9;
+        font-size: 7px;
+        text-align: left;
+      }
+
+      .upload-pick small {
+        display: block;
+        margin-top: 4px;
+        color: #777d78;
+        font-size: 5px;
+      }
+
+      .receipt-card {
+        position: relative;
+        width: 83px;
+        min-width: 83px;
+        height: 58px;
+        overflow: hidden;
+        border: 1px solid #424743;
+        border-radius: 3px;
+        background: #151815;
+      }
+
+      .receipt-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .receipt-card span {
+        display: none;
+      }
+
+      .receipt-card > button {
+        position: absolute;
+        right: 2px;
+        top: 2px;
+        width: 17px;
+        height: 17px;
+        padding: 0;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 50%;
+        background: rgba(0,0,0,.82);
+        color: #fff;
+        font-size: 12px;
+      }
+
+      .pdf-receipt {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: #ffc400;
+        font-size: 13px;
+        font-weight: 950;
+      }
+
+      .ex-errors {
+        margin-top: 5px;
+        padding: 5px 7px;
+        border: 1px solid rgba(255,104,86,.28);
+        border-radius: 4px;
+        background: rgba(255,104,86,.05);
+        color: #ff7966;
+        font-size: 6px;
+      }
+
+      .ex-errors.server {
+        color: #ff9d8f;
+      }
+
+      .ex-actions {
+        display: grid;
+        grid-template-columns: 1.55fr .75fr;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .ex-actions > button {
+        height: 40px;
+        border: 1px solid #444944;
+        border-radius: 4px;
+        background: #0d100e;
+        color: #d1d4d2;
+        font-size: 8px;
+        font-weight: 950;
+      }
+
+      .ex-actions .save {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border-color: #ffd12b;
+        background: linear-gradient(#ffd12b,#e9aa00);
+        color: #111;
+        font-size: 13px;
+      }
+
+      .ex-actions .save span {
+        font-size: 9px;
+        text-align: left;
+      }
+
+      .ex-actions .save small {
+        display: block;
+        margin-top: 1px;
+        font-size: 5px;
+      }
+
+      .ex-actions button:disabled {
+        opacity: .48;
+        cursor: not-allowed;
+      }
+
+      .ex-success {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 7px;
+        margin-top: 7px;
+        padding: 8px;
+        border: 1px solid rgba(100,190,75,.52);
+        border-radius: 5px;
+        background: rgba(66,126,49,.08);
+      }
+
+      .ex-success > b {
+        width: 25px;
+        height: 25px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #65bd4d;
+        border-radius: 50%;
+        color: #65bd4d;
+        font-size: 12px;
+      }
+
+      .ex-success strong {
+        display: block;
+        color: #67c750;
+        font-size: 8px;
+      }
+
+      .ex-success span,
+      .ex-success small,
+      .ex-success em {
+        display: block;
+        margin-top: 2px;
+        color: #d8dbd9;
+        font-size: 6.2px;
+        font-style: normal;
+      }
+
+      .ex-success em {
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid rgba(255,255,255,.06);
+        color: #898f8a;
+      }
+
+      .ex-policy {
+        margin-top: 8px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(255,255,255,.06);
+        color: #757b76;
+        font-size: 5px;
+        text-align: center;
+      }
+
+      .ex-policy i {
+        display: inline-block;
+        height: 7px;
+        margin: 0 6px;
+        border-left: 1px solid #454a46;
+        vertical-align: middle;
+      }
+    `}</style>
+  );
+}
