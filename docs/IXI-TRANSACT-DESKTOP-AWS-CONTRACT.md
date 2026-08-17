@@ -12,6 +12,16 @@ Every endpoint below must resolve trusted request context through the existing I
 
 Client-supplied actor/entity/roles/permissions are never authority.
 
+## Production gate
+
+Every meaningful desktop change is held to three independent gates before being treated as production-ready:
+
+1. IXI TRAN$ACT dashboard financial-contract verification.
+2. Canonical action-execution contract verification for money-moving/record-state commands.
+3. Full Next production build.
+
+A green framework build does not substitute for semantic financial verification.
+
 ## 1. GET /financial/access-context
 
 Returns only financial entities, locations, accounting periods, and permissions available to the authenticated actor.
@@ -132,7 +142,7 @@ Before dispatch, the desktop verifies:
 
 A passing preflight dispatches into the existing Collections, Payables, or Purchase Order command modules. Those modules remain the business-rule and persistence authority. The desktop does not duplicate their accounting logic.
 
-The dispatcher itself is production-gated in CI. No desktop financial action should be exposed as executable until the resolver payload, typed input workflow, canonical command dispatch, success handling, cache invalidation, and refreshed projection path are all wired together.
+No desktop financial action should be exposed as executable until the resolver payload, typed input workflow, canonical command dispatch, success handling, cache invalidation, and refreshed projection path are all wired together.
 
 ## 4. POST /financial/search
 
