@@ -30,7 +30,9 @@ const GROUPS = [
   ] }
 ];
 
-export default function IXITransactDashboardNavigation({ activeWorkspace = "executive", onSelect }) {
+export default function IXITransactDashboardNavigation({ activeWorkspace = "executive", onSelect, financialHealth = {} }) {
+  const healthLabel = financialHealth.label || "CHECKING";
+  const healthy = financialHealth.ok === true;
   return (
     <aside className="td-nav" aria-label="IXI TRAN$ACT navigation">
       <div className="td-nav-brand">
@@ -56,8 +58,8 @@ export default function IXITransactDashboardNavigation({ activeWorkspace = "exec
           </section>
         ))}
       </div>
-      <div className="td-nav-foot">
-        <span className="td-live-dot" /> AWS IXI FINANCIAL
+      <div className={`td-nav-foot ${healthy ? "good" : "bad"}`}>
+        <span className="td-live-dot" /> AWS IXI FINANCIAL · {healthLabel}
       </div>
     </aside>
   );
