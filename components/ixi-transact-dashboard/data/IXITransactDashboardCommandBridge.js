@@ -1,6 +1,9 @@
 import {
   createIXIAosObjectFinancialDocument
 } from "../../ixi-aos/financial-runtime/IXIAosFinancialRuntimeAdapter";
+import {
+  invalidateIXITransactDashboardCache
+} from "./IXITransactDashboardCache";
 
 const clean = value => String(value ?? "").trim();
 const safeObject = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -44,7 +47,7 @@ export async function executeIXITransactDesktopFinancialCommand({
     throw new Error("IXI TRAN$ACT desktop command requires documentType.");
   }
 
-  return createIXIAosObjectFinancialDocument({
+  const result = await createIXIAosObjectFinancialDocument({
     object,
     documentType,
     input,
@@ -61,6 +64,9 @@ export async function executeIXITransactDesktopFinancialCommand({
     apiBaseUrl,
     signal
   });
+
+  invalidateIXITransactDashboardCache();
+  return result;
 }
 
 export default {
