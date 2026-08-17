@@ -27,7 +27,7 @@ on:
       - ".github/workflows/transact-dashboard-ci.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: transact-v13-${{ github.ref }}
@@ -43,6 +43,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Detect committed lockfile
+        id: dependency-lock
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Use Node 20
         uses: actions/setup-node@v4
         with:
@@ -51,12 +60,15 @@ jobs:
           cache-dependency-path: package.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Capture generated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: transact-v13-package-lock
-          path: package-lock.json
-          retention-days: 1
+      - name: Commit generated dependency lock
+        if: github.event_name == 'push' && steps.dependency-lock.outputs.exists == 'false'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Lock production npm dependencies"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Verify TRAN$ACT dashboard contracts
         run: npm run verify-transact-dashboard
       - name: Verify canonical action execution contracts
