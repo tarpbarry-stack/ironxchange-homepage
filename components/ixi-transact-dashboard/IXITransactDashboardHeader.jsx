@@ -1,3 +1,4 @@
+import IXITransactScopeStyles from "./IXITransactScopeStyles";
 const clean = value => String(value ?? "").trim();
 const arr = value => Array.isArray(value) ? value : [];
 
@@ -8,55 +9,19 @@ function ScopeSelect({label,value,displayValue,options=[],onChange,disabled=fals
 }
 
 export default function IXITransactDashboardHeader({
-  entityPassportId="",
-  entityLabel = "ENTITY REQUIRED",
-  entityOptions=[],
-  onEntityChange,
-  accountingPeriod = "",
-  periodOptions=[],
-  onPeriodChange,
-  locationPassportId="",
-  locationLabel = "ALL LOCATIONS",
-  locationOptions=[],
-  onLocationChange,
-  scopeStatus="idle",
-  freshness = { label: "UNVERIFIED", state: "unknown" },
-  generatedAt = "",
-  attentionCount = 0,
-  onRefresh,
-  onSearch,
-  searchValue = "",
-  onSearchChange
+  entityPassportId="",entityLabel="ENTITY REQUIRED",entityOptions=[],onEntityChange,
+  accountingPeriod="",periodOptions=[],onPeriodChange,
+  locationPassportId="",locationLabel="ALL LOCATIONS",locationOptions=[],onLocationChange,
+  scopeStatus="idle",freshness={label:"UNVERIFIED",state:"unknown"},generatedAt="",attentionCount=0,onRefresh,onSearch,searchValue="",onSearchChange
 }) {
   const loadingScope=scopeStatus==="loading";
-  return (
-    <header className="td-header">
-      <div className="td-scope">
-        <ScopeSelect label="ENTITY" value={entityPassportId} displayValue={entityLabel} options={entityOptions} onChange={onEntityChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT ENTITY"}/>
-        <ScopeSelect label="PERIOD" value={accountingPeriod} displayValue={accountingPeriod||"SELECT PERIOD"} options={periodOptions} onChange={onPeriodChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT PERIOD"}/>
-        <ScopeSelect label="LOCATION" value={locationPassportId} displayValue={locationLabel} options={[{id:"",label:"ALL LOCATIONS"},...arr(locationOptions)]} onChange={onLocationChange} disabled={loadingScope} emptyLabel="ALL LOCATIONS"/>
-      </div>
-
-      <div className="td-command-search">
-        <span>⌘K</span>
-        <input
-          value={searchValue}
-          onChange={event => onSearchChange?.(event.target.value)}
-          onKeyDown={event => { if (event.key === "Enter") onSearch?.(event.currentTarget.value); }}
-          placeholder="SEARCH RECORD, PASSPORT, CUSTOMER, VENDOR, WO, JE..."
-          aria-label="Search IXI TRAN$ACT"
-        />
-      </div>
-
-      <div className="td-header-actions">
-        <button type="button" className="td-status" data-state={freshness.state} onClick={onRefresh}>
-          <span className="td-live-dot" />
-          <b>{freshness.label}</b>
-          <small>{clean(generatedAt) ? new Date(generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "NO VERIFIED REFRESH"}</small>
-        </button>
-        <button type="button" className="td-attention-button">ATTENTION <b>{Number(attentionCount || 0)}</b></button>
-        <button type="button" className="td-user-button" aria-label="User and authority context">USER</button>
-      </div>
-    </header>
-  );
+  return <><header className="td-header">
+    <div className="td-scope">
+      <ScopeSelect label="ENTITY" value={entityPassportId} displayValue={entityLabel} options={entityOptions} onChange={onEntityChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT ENTITY"}/>
+      <ScopeSelect label="PERIOD" value={accountingPeriod} displayValue={accountingPeriod||"SELECT PERIOD"} options={periodOptions} onChange={onPeriodChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT PERIOD"}/>
+      <ScopeSelect label="LOCATION" value={locationPassportId} displayValue={locationLabel} options={[{id:"",label:"ALL LOCATIONS"},...arr(locationOptions)]} onChange={onLocationChange} disabled={loadingScope} emptyLabel="ALL LOCATIONS"/>
+    </div>
+    <div className="td-command-search"><span>⌘K</span><input value={searchValue} onChange={event=>onSearchChange?.(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")onSearch?.(event.currentTarget.value)}} placeholder="SEARCH RECORD, PASSPORT, CUSTOMER, VENDOR, WO, JE..." aria-label="Search IXI TRAN$ACT"/></div>
+    <div className="td-header-actions"><button type="button" className="td-status" data-state={freshness.state} onClick={onRefresh}><span className="td-live-dot"/><b>{freshness.label}</b><small>{clean(generatedAt)?new Date(generatedAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"NO VERIFIED REFRESH"}</small></button><button type="button" className="td-attention-button">ATTENTION <b>{Number(attentionCount||0)}</b></button><button type="button" className="td-user-button" aria-label="User and authority context">USER</button></div>
+  </header><IXITransactScopeStyles/></>;
 }
