@@ -13,6 +13,7 @@ async function importSource(relativePath) {
 const adapter = await importSource("components/ixi-transact-dashboard/data/IXITransactDesktopWorkspaceAdapter.js");
 const executiveAdapter = await importSource("components/ixi-transact-dashboard/data/IXITransactDashboardProjectionAdapter.js");
 const queryContract = await importSource("components/ixi-transact-dashboard/data/IXITransactDashboardQueryContract.js");
+const actionRegistry = await importSource("components/ixi-transact-dashboard/data/IXITransactRecordActionRegistry.js");
 
 const emptyExecutive = executiveAdapter.createIXIExecutiveDesktopModel({});
 assert.equal(emptyExecutive.kpis.revenue, null, "Missing Executive revenue must remain unknown, not fabricated zero.");
@@ -55,6 +56,20 @@ const balanced = adapter.createIXIReconciliationDesktopModel({
 });
 assert.equal(balanced.accounts[0].status, "reconciled");
 assert.equal(balanced.summary.reconciled, 1);
+
+const normalizedActions = actionRegistry.normalizeIXITransactRecordActions([
+  { id: "record-ar-payment", enabled: true },
+  { id: "record-ar-payment", enabled: true },
+  { id: "void-po", allowed: false, reason: "Closed period" },
+  { id: "server-injected-javascript", enabled: true }
+]);
+assert.deepEqual(normalizedActions.map(action => action.id), ["record-ar-payment", "void-po"], "Only known action IDs may reach desktop controls and duplicates are removed.");
+assert.equal(normalizedActions[0].requiresInput, true, "A/R payment must require structured input.");
+assert.equal(normalizedActions[1].enabled, false, "Server-disabled known action must remain disabled.");
+assert.equal(normalizedActions[1].dangerous, true, "Destructive action classification is owned by the client registry.");
+assert.deepEqual(actionRegistry.getUnknownIXITransactRecordActionIds([{id:"server-injected-javascript"}]), ["server-injected-javascript"], "Unknown server action IDs must be detectable and discarded.");
+assert.equal(actionRegistry.canExecuteIXITransactRecordAction({id:"issue-po",enabled:true}), true);
+assert.equal(actionRegistry.canExecuteIXITransactRecordAction({id:"record-ap-payment",enabled:true}), false, "Input-required financial mutation is never directly executable without an input workflow.");
 
 assert.deepEqual(queryContract.getIXITransactWorkspaceIncludes("reconciliation"), ["treasury", "attention"]);
 assert.deepEqual(queryContract.getIXITransactWorkspaceIncludes("purchase-orders"), ["purchase-orders", "attention"]);
