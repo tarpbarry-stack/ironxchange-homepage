@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ironxchange.com/schemas/ixi-face-data-capability.schema.json",
+  "title": "IXI Face Data Capability",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["capabilityId", "type", "exposure"],
+  "properties": {
+    "capabilityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exposure": {
+      "enum": [
+        "face-safe-now",
+        "face-safe-with-policy",
+        "needs-adapter",
+        "needs-projection",
+        "action-only",
+        "internal-do-not-expose"
+      ]
+    },
+    "source": {},
+    "readPath": {},
+    "write": {},
+    "permissionAware": {
+      "type": "boolean"
+    },
+    "permissionScopes": {
+      "type": "array",
+      "items": {"type":"string"},
+      "uniqueItems": true
+    },
+    "requiresCapabilities": {
+      "type": "array",
+      "items": {"type":"string"},
+      "uniqueItems": true
+    },
+    "requiresFields": {
+      "type": "array",
+      "items": {"type":"string"},
+      "uniqueItems": true
+    },
+    "requiresRelationships": {
+      "type": "array",
+      "items": {"type":"string"},
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
