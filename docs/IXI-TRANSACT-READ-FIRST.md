@@ -2,26 +2,42 @@
 
 **Future chats / engineers: start here before changing IXI TRAN$ACT financial code.**
 
-Read these files in order:
+The previous single master dossier was too large and was physically truncated mid-SOLD. The system doctrine is now intentionally split into smaller canonical volumes. **Read every volume in order. Do not rely on the old monolithic file body.**
 
-1. **System doctrine and complete financial handoff**  
+---
+
+# REQUIRED READING ORDER
+
+1. **Master financial-system index**  
    `docs/IXI-TRANSACT-FINANCIAL-SYSTEM-DOSSIER.md`
 
-2. **What is built vs what remains incomplete / integration-dependent**  
+2. **Volume I — Foundation, Runtime, V13, Work and Spend Operations**  
+   `docs/ixi-transact/IXI-TRANSACT-VOLUME-I-FOUNDATION-AND-OPERATIONS.md`
+
+3. **Volume II — Asset, Ownership, Rental and External Service Lifecycle**  
+   `docs/ixi-transact/IXI-TRANSACT-VOLUME-II-ASSET-OWNERSHIP-RENTAL-SERVICE.md`
+
+4. **Volume III — Settlement, A/R, A/P and Treasury**  
+   `docs/ixi-transact/IXI-TRANSACT-VOLUME-III-SETTLEMENT-AR-AP-TREASURY.md`
+
+5. **Volume IV — General Ledger, Reporting, AWS and Enterprise Rules**  
+   `docs/ixi-transact/IXI-TRANSACT-VOLUME-IV-GL-REPORTING-AWS-ENTERPRISE.md`
+
+6. **What is built vs what remains incomplete / integration-dependent**  
    `docs/IXI-TRANSACT-FINANCIAL-SYSTEM-COMPLETENESS-AUDIT.md`
 
-3. **Full-size IXI TRAN$ACT accounting dashboard product/architecture dossier**  
+7. **Full-size IXI TRAN$ACT accounting dashboard product/architecture dossier**  
    `docs/IXI-TRANSACT-ACCOUNTING-DASHBOARD-DOSSIER.md`
 
-4. **Full-size dashboard engineering implementation specification**  
+8. **Full-size dashboard engineering implementation specification**  
    `docs/IXI-TRANSACT-ACCOUNTING-DASHBOARD-ENGINEERING-BUILD-SPEC.md`
 
-5. **Full-size dashboard functionality / UX / workflow specification**  
+9. **Full-size dashboard functionality / UX / workflow specification**  
    `docs/IXI-TRANSACT-ACCOUNTING-DASHBOARD-FUNCTIONALITY-SPEC.md`
 
 ---
 
-## Core doctrine
+# CORE DOCTRINE
 
 ```text
 AOS / Passport = business context and relationships
@@ -36,3 +52,4 @@ Do not build a parallel frontend financial ledger.
 Do not rewrite card-domain equations separately in the dashboard.
 Do not bypass IXI Financial commands or authority controls.
 Do not treat Vercel-green alone as proof of end-to-end AWS completion.
+Do not claim the system has been read until all four canonical volumes and the relevant specs have actually been loaded.
