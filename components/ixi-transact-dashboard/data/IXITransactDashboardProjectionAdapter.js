@@ -1,7 +1,12 @@
 const clean = value => String(value ?? "").trim();
 const safeObject = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 const safeArray = value => Array.isArray(value) ? value : [];
-const finiteOrNull = value => Number.isFinite(Number(value)) ? Number(value) : null;
+const finiteOrNull = value => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string" && !value.trim()) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 function readNumber(source, candidates = []) {
   for (const key of candidates) {
