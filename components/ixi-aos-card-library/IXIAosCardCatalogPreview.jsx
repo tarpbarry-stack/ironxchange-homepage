@@ -12,6 +12,7 @@ import IXIAosCard009 from "../ixi-aos/cards/009/IXIAosCard009";
 import IXIAosCard010 from "../ixi-aos/cards/010/IXIAosCard010";
 import IXIAosCard011 from "../ixi-aos/cards/011/IXIAosCard011";
 import IXIAosCard012 from "../ixi-aos/cards/012/IXIAosCard012";
+import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
 
@@ -130,6 +131,45 @@ function card012Sample() {
   };
 }
 
+function card017Sample() {
+  return {
+    objectId: "preview-card-017", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
+    singularLabel: "GROUP", pluralLabel: "GROUPS", displayName: "EQUIPMENT", status: "active",
+    capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: {
+      directChildrenLabel: "DIRECT GROUPS",
+      descendantsLabel: "TOTAL BELOW",
+      totalDescendants: 131,
+      structureTitle: "STRUCTURE",
+      relationshipsTitle: "RELATIONSHIPS",
+      emptyContainerLabel: "READY TO RECEIVE",
+      sampleUse: "STRUCTURAL HIERARCHY / DIRECTORY"
+    },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "ID #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "region", label: "REGION", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "owner", label: "OWNER", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "notes", label: "NOTES", type: "text", fieldType: "text", editable: true, presentationOrder: 4 }
+    ],
+    fields: { businessIdentifier: "EQ-GROUP", status: "ACTIVE", region: "WEST TEXAS", owner: "FIELD OPERATIONS", notes: "CUSTOMER DEFINED STRUCTURE" },
+    relationships: [
+      { id: "c017-rel-1", displayLabel: "RESPONSIBLE GROUP", displayName: "FIELD OPERATIONS" },
+      { id: "c017-rel-2", displayLabel: "PRIMARY REGION", displayName: "WEST TEXAS" }
+    ],
+    media: [], metadata: { sampleUse: "STRUCTURAL HIERARCHY / DIRECTORY", nomenclature: { singular: "GROUP", plural: "GROUPS" } }
+  };
+}
+
+function card017Items() {
+  return [
+    { objectId: "c017-child-1", objectType: "customer-defined-container", singularLabel: "GROUP", displayName: "BULLDOZERS", presentation: { directChildCount: 18, structuralDescriptor: "GROUP" }, fields: {}, fieldDefinitions: [], relationships: [], media: [] },
+    { objectId: "c017-child-2", objectType: "customer-defined-container", singularLabel: "GROUP", displayName: "EXCAVATORS", presentation: { directChildCount: 32, structuralDescriptor: "GROUP" }, fields: {}, fieldDefinitions: [], relationships: [], media: [] },
+    { objectId: "c017-child-3", objectType: "customer-defined-container", singularLabel: "GROUP", displayName: "WHEEL LOADERS", presentation: { directChildCount: 21, structuralDescriptor: "GROUP" }, fields: {}, fieldDefinitions: [], relationships: [], media: [] },
+    { objectId: "c017-child-4", objectType: "customer-defined-container", singularLabel: "GROUP", displayName: "TRUCKS", presentation: { directChildCount: 60, structuralDescriptor: "GROUP" }, fields: {}, fieldDefinitions: [], relationships: [], media: [] }
+  ];
+}
+
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
@@ -139,6 +179,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 9) resolvedSample = card009Sample();
     else if (cardNumber === 11) resolvedSample = card011Sample();
     else if (cardNumber === 12) resolvedSample = card012Sample();
+    else if (cardNumber === 17) resolvedSample = card017Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
   const templateFieldSchema = Array.isArray(template?.fieldSchema) ? template.fieldSchema : [];
@@ -193,7 +234,9 @@ function getFaceLabel(object = {}, faceNumber = 1) {
 function getInitialPreviewItems(template = {}, directItems = []) {
   const items = Array.isArray(directItems) ? directItems : [];
   if (items.length) return items;
-  if (resolveCatalogCardNumber(template) === 7) return getUniversal007PreviewItems();
+  const cardNumber = resolveCatalogCardNumber(template);
+  if (cardNumber === 7) return getUniversal007PreviewItems();
+  if (cardNumber === 17) return card017Items();
   return [];
 }
 
@@ -249,7 +292,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 17: IXIAosCard017 };
 
   if (transactOpen) {
     return <div className="native-card-preview"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
@@ -261,7 +304,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
 
   const NumberedObjectCard = numberedObjectCards[cardNumber];
   if (NumberedObjectCard) {
-    return <div className="native-card-preview"><NumberedObjectCard object={object} children={previewItems} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
+    return <div className="native-card-preview"><NumberedObjectCard object={object} children={previewItems} projection={projection} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
   }
 
   if ([1,2,3].includes(cardNumber)) {
