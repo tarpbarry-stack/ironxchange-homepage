@@ -1,7 +1,7 @@
 {
   "catalogId": "ixi-face-data-catalog",
-  "version": 2,
-  "status": "runtime-authorized-manifest-enabled",
+  "version": 3,
+  "status": "company-face-library-runtime-enabled",
   "updatedAt": "2026-08-17",
   "doctrine": {
     "customerVocabularyAuthoritative": true,
@@ -16,7 +16,10 @@
     "facesMayMutateFinancialTruthDirectly": false,
     "effectivePermissionsRequired": true,
     "chatMayGrantPermissions": false,
-    "unauthorizedExternalProjectionsDeniedByDefault": true
+    "unauthorizedExternalProjectionsDeniedByDefault": true,
+    "publishedFaceVersionsImmutable": true,
+    "browserMayPersistFaceLibrary": false,
+    "faceAssignmentUsesStableIdentity": true
   },
   "exposureStates": [
     "face-safe-now",
@@ -32,6 +35,33 @@
     "exports": "components/ixi-aos/face-data-runtime/index.js",
     "manifestSchema": "schemas/authorized-face-data-manifest.schema.json",
     "faceAppSchema": "schemas/face-app-definition.schema.json"
+  },
+  "faceLibrary": {
+    "runtimeRoot": "components/ixi-aos/face-library",
+    "contract": "components/ixi-aos/face-library/IXIFaceLibraryContract.js",
+    "policyEngine": "components/ixi-aos/face-library/IXIFaceLibraryPolicyEngine.js",
+    "versionEngine": "components/ixi-aos/face-library/IXIFaceLibraryVersionEngine.js",
+    "assignmentEngine": "components/ixi-aos/face-library/IXIFaceLibraryAssignmentEngine.js",
+    "validationEngine": "components/ixi-aos/face-library/IXIFaceLibraryValidationEngine.js",
+    "runtimeResolver": "components/ixi-aos/face-library/IXIFaceLibraryRuntimeResolver.js",
+    "client": "components/ixi-aos/face-library/IXIFaceLibraryClient.js",
+    "proxy": "pages/api/ixi-face-library/[...path].js",
+    "documentation": "face-library/README.md",
+    "apiContract": "face-library/api-contract.json",
+    "recordSchema": "schemas/face-library-record.schema.json",
+    "assignmentSchema": "schemas/face-assignment.schema.json",
+    "guarantees": {
+      "publishedVersionsImmutable": true,
+      "draftsEditable": true,
+      "optimisticConcurrency": true,
+      "idempotentConsequentialWrites": true,
+      "serverAuthoritativePermissions": true,
+      "serverAuthoritativeTenantScope": true,
+      "noLocalStoragePersistence": true,
+      "stableAssignmentTargetsOnly": true,
+      "validationRequiredBeforePublish": true,
+      "runtimeReauthorization": true
+    }
   },
   "sources": [
     {
