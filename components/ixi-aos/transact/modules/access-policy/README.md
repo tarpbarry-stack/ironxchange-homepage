@@ -1,0 +1,1 @@
+TRAN$ACT Access / Policy is a 298 × 471 native TRAN$ACT application. It consumes same-origin `/api/ixi/authority/*` routes and never receives trusted server roles, ancestor chains, or entity ownership from the browser. Mutations remain server-authorized by `authority.manage`.
