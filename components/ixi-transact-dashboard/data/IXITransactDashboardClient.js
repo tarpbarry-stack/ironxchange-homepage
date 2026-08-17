@@ -22,6 +22,11 @@ export function getIXITransactDashboardEndpoint({ apiBaseUrl = "" } = {}) {
   return base ? `${base}/financial/dashboard` : "/api/ixi-financial/financial/dashboard";
 }
 
+export function getIXIFinancialHealthEndpoint({ apiBaseUrl = "" } = {}) {
+  const base = clean(apiBaseUrl).replace(/\/+$/, "");
+  return base ? `${base}/financial/health` : "/api/ixi-financial/financial/health";
+}
+
 export function normalizeIXITransactDashboardResponse(result = {}) {
   const source = safeObject(result);
   const data = safeObject(source.data || source);
@@ -51,6 +56,24 @@ export function normalizeIXITransactDashboardResponse(result = {}) {
     errors: safeArray(source.errors || data.errors),
     raw: result
   };
+}
+
+export async function checkIXIFinancialHealth({ apiBaseUrl = "", signal } = {}) {
+  const endpoint = getIXIFinancialHealthEndpoint({ apiBaseUrl });
+  try {
+    const response = await fetch(endpoint, { method: "GET", credentials: "include", headers: { "X-IXI-Source": "ixi-transact-dashboard-health" }, signal });
+    let result = null;
+    try { result = await response.json(); } catch { result = null; }
+    return {
+      ok: response.ok && (result?.ok === undefined || result?.ok === true),
+      status: response.status,
+      label: response.ok ? "ONLINE" : response.status === 401 || response.status === 403 ? "AUTH REQUIRED" : "DEGRADED",
+      result
+    };
+  } catch (error) {
+    if (error?.name === "AbortError") throw error;
+    return { ok: false, status: 0, label: "UNAVAILABLE", result: null };
+  }
 }
 
 export async function loadIXITransactDashboardProjection({
@@ -118,6 +141,8 @@ export async function loadIXITransactDashboardProjection({
 export default {
   IXITransactDashboardError,
   getIXITransactDashboardEndpoint,
+  getIXIFinancialHealthEndpoint,
   normalizeIXITransactDashboardResponse,
+  checkIXIFinancialHealth,
   loadIXITransactDashboardProjection
 };
