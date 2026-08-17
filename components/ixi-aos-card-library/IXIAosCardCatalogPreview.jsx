@@ -13,6 +13,7 @@ import IXIAosCard010 from "../ixi-aos/cards/010/IXIAosCard010";
 import IXIAosCard011 from "../ixi-aos/cards/011/IXIAosCard011";
 import IXIAosCard012 from "../ixi-aos/cards/012/IXIAosCard012";
 import IXIAosCard013 from "../ixi-aos/cards/013/IXIAosCard013";
+import IXIAosCard014 from "../ixi-aos/cards/014/IXIAosCard014";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -150,18 +151,7 @@ function card013Sample() {
       { fieldId: "classification", label: "CLASSIFICATION", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
       { fieldId: "revisionNote", label: "REVISION NOTE", type: "text", fieldType: "text", editable: true, presentationOrder: 9 }
     ],
-    fields: {
-      businessIdentifier: "SP-204-C",
-      documentType: "SITE PLAN",
-      version: "REV C",
-      status: "CURRENT",
-      effectiveDate: "2026-08-01",
-      expirationDate: "",
-      owner: "FACILITIES",
-      discipline: "CIVIL",
-      classification: "CONTROLLED",
-      revisionNote: "WEST ACCESS UPDATE"
-    },
+    fields: { businessIdentifier: "SP-204-C", documentType: "SITE PLAN", version: "REV C", status: "CURRENT", effectiveDate: "2026-08-01", expirationDate: "", owner: "FACILITIES", discipline: "CIVIL", classification: "CONTROLLED", revisionNote: "WEST ACCESS UPDATE" },
     relationships: [
       { id: "c013-rel-1", displayLabel: "APPLIES TO", displayName: "MIDLAND YARD" },
       { id: "c013-rel-2", displayLabel: "RESPONSIBLE GROUP", displayName: "FACILITIES" },
@@ -171,20 +161,41 @@ function card013Sample() {
   };
 }
 
+function card014Sample() {
+  return {
+    objectId: "preview-card-014", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
+    singularLabel: "INCIDENT", pluralLabel: "INCIDENTS", displayName: "HYDRAULIC LEAK · BAY 3", status: "active",
+    capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { conditionTitle: "CONDITION / EVENT", currentStateTitle: "CURRENT CONDITION", evidenceTitle: "EVIDENCE / SUPPORTING DATA", relationshipsTitle: "RELATIONSHIPS", sampleUse: "INCIDENT / CONDITION / EXCEPTION" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "INCIDENT #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "severity", label: "SEVERITY", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "condition", label: "CONDITION / EVENT", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "occurredAt", label: "WHEN", type: "datetime", fieldType: "datetime", editable: true, presentationOrder: 4 },
+      { fieldId: "location", label: "WHERE", type: "text", fieldType: "text", editable: true, presentationOrder: 5 },
+      { fieldId: "relatedObject", label: "RELATED OBJECT", type: "text", fieldType: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "owner", label: "OWNER", type: "text", fieldType: "text", editable: true, presentationOrder: 7 },
+      { fieldId: "currentCondition", label: "CURRENT CONDITION", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
+      { fieldId: "reportedBy", label: "REPORTED BY", type: "text", fieldType: "text", editable: true, presentationOrder: 9 },
+      { fieldId: "classification", label: "CLASSIFICATION", type: "text", fieldType: "text", editable: true, presentationOrder: 10 }
+    ],
+    fields: { businessIdentifier: "INC-2026-0418", severity: "HIGH", status: "OPEN", condition: "PRESSURIZED HYDRAULIC LEAK OBSERVED", occurredAt: "2026-08-16 14:32", location: "MIDLAND SHOP · BAY 3", relatedObject: "UNIT 142", owner: "SHOP OPERATIONS", currentCondition: "ISOLATED · AWAITING ASSESSMENT", reportedBy: "J. SMITH", classification: "SAFETY / EQUIPMENT" },
+    relationships: [
+      { id: "c014-rel-1", displayLabel: "APPLIES TO", displayName: "UNIT 142" },
+      { id: "c014-rel-2", displayLabel: "OCCURRED AT", displayName: "MIDLAND SHOP · BAY 3" },
+      { id: "c014-rel-3", displayLabel: "RESPONSIBLE GROUP", displayName: "SHOP OPERATIONS" }
+    ],
+    media: [], metadata: { sampleUse: "INCIDENT / CONDITION / EXCEPTION", nomenclature: { singular: "INCIDENT", plural: "INCIDENTS" } }
+  };
+}
+
 function card017Sample() {
   return {
     objectId: "preview-card-017", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
     singularLabel: "GROUP", pluralLabel: "GROUPS", displayName: "EQUIPMENT", status: "active",
     capabilities: { canContain: true, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
-    presentation: {
-      directChildrenLabel: "DIRECT GROUPS",
-      descendantsLabel: "TOTAL BELOW",
-      totalDescendants: 131,
-      structureTitle: "STRUCTURE",
-      relationshipsTitle: "RELATIONSHIPS",
-      emptyContainerLabel: "READY TO RECEIVE",
-      sampleUse: "STRUCTURAL HIERARCHY / DIRECTORY"
-    },
+    presentation: { directChildrenLabel: "DIRECT GROUPS", descendantsLabel: "TOTAL BELOW", totalDescendants: 131, structureTitle: "STRUCTURE", relationshipsTitle: "RELATIONSHIPS", emptyContainerLabel: "READY TO RECEIVE", sampleUse: "STRUCTURAL HIERARCHY / DIRECTORY" },
     fieldDefinitions: [
       { fieldId: "businessIdentifier", label: "ID #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
       { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
@@ -220,6 +231,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 11) resolvedSample = card011Sample();
     else if (cardNumber === 12) resolvedSample = card012Sample();
     else if (cardNumber === 13) resolvedSample = card013Sample();
+    else if (cardNumber === 14) resolvedSample = card014Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
@@ -333,7 +345,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 17: IXIAosCard017 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 17: IXIAosCard017 };
 
   if (transactOpen) {
     return <div className="native-card-preview"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
