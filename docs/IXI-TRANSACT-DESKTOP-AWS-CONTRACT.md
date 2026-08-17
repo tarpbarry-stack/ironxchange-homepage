@@ -132,6 +132,8 @@ Before dispatch, the desktop verifies:
 
 A passing preflight dispatches into the existing Collections, Payables, or Purchase Order command modules. Those modules remain the business-rule and persistence authority. The desktop does not duplicate their accounting logic.
 
+The dispatcher itself is production-gated in CI. No desktop financial action should be exposed as executable until the resolver payload, typed input workflow, canonical command dispatch, success handling, cache invalidation, and refreshed projection path are all wired together.
+
 ## 4. POST /financial/search
 
 Consumes `ixi-transact-record-search` version `1.0.0`. Search must be limited to trusted financial scope and should resolve canonical Financial Documents, TRAN$ACT records, Passports, Work Orders, customers, vendors, assets, and journal identifiers appropriate to the actor's authority.
