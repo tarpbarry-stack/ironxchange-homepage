@@ -3,12 +3,8 @@ export default function IXIAosLocationFace2V12VisualLock() {
     <style jsx global>{`
       /*
        * LOCATION FACE 2 — V12 VISUAL LOCK
-       *
-       * Presentation only. Do not change the Face 2 information architecture.
-       * This deliberately mirrors the Card 001 Location shell/UI grammar:
-       * 298×471 native chassis, 43px header, 13px outer radius, dark V12
-       * separators, Arial/Helvetica typography, 5px content shells, and the
-       * black-on-black micro scrollbar treatment.
+       * Presentation only. F2 information architecture/layout remains intact.
+       * Card 001 is the visual authority; do not modify Card 001 here.
        */
       .ixi-aos-location-f2,
       .ixi-aos-location-f2 * {
@@ -40,6 +36,8 @@ export default function IXIAosLocationFace2V12VisualLock() {
         box-shadow: inset 0 1px #ffffff12, 0 18px 40px #0008 !important;
       }
 
+      /* F2 is a continuous long-scroll app. Unlike F1, it must NOT draw a
+         full-width header/body rule; that rule was reading as the white seam. */
       .ixi-aos-location-f2 .ops-header {
         position: absolute !important;
         inset: 0 0 auto 0 !important;
@@ -48,16 +46,21 @@ export default function IXIAosLocationFace2V12VisualLock() {
         min-height: 43px !important;
         padding: 7px 10px !important;
         border: 0 !important;
-        border-bottom: 1px solid #303531 !important;
+        border-bottom: 0 !important;
         outline: 0 !important;
         background: linear-gradient(180deg, #171a18, #101210) !important;
+        box-shadow: none !important;
         z-index: 40 !important;
       }
 
       .ixi-aos-location-f2 .ops-header::before,
-      .ixi-aos-location-f2 .ops-header::after {
+      .ixi-aos-location-f2 .ops-header::after,
+      .ixi-aos-location-f2 .ops-scroll::before,
+      .ixi-aos-location-f2 .ops-scroll::after {
         display: none !important;
         content: none !important;
+        border: 0 !important;
+        box-shadow: none !important;
       }
 
       .ixi-aos-location-f2 .ops-identity {
@@ -110,9 +113,11 @@ export default function IXIAosLocationFace2V12VisualLock() {
         right: 7px !important;
         width: auto !important;
         margin: 0 !important;
+        padding-top: 5px !important;
         border: 0 !important;
         border-top: 0 !important;
         outline: 0 !important;
+        box-shadow: none !important;
         background: transparent !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
