@@ -9,6 +9,7 @@ import IXIAosCard005Personnel from "../ixi-aos/cards/005/IXIAosCard005Personnel"
 import IXIAosCard006Personnel from "../ixi-aos/cards/006/IXIAosCard006Personnel";
 import IXIAosCard007EmployeeApplication from "../ixi-aos/cards/007/IXIAosCard007EmployeeApplication";
 import IXIAosCard008Profile from "../ixi-aos/cards/008/IXIAosCard008Profile";
+import IXIAosCard009 from "../ixi-aos/cards/009/IXIAosCard009";
 
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -18,9 +19,7 @@ function clean(value) {
 }
 
 function safeObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? value
-    : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
 function resolveCatalogCardNumber(template = {}) {
@@ -83,11 +82,73 @@ function universal007Sample() {
   };
 }
 
+function card009Sample() {
+  return {
+    objectId: "preview-card-009",
+    entityId: "aos-card-preview-entity",
+    objectType: "customer-defined-object",
+    singularLabel: "EQUIPMENT",
+    pluralLabel: "EQUIPMENT",
+    displayName: "2023 KOMATSU WA475-10",
+    status: "active",
+    capabilities: {
+      canContain: false,
+      canCreate: true,
+      canTransact: true,
+      editable: true,
+      hasConsole: true,
+      hasRail: true,
+      hasRelationships: true
+    },
+    presentation: {
+      relationshipsTitle: "RELATIONSHIPS",
+      sampleUse: "POWERED / SERIALIZED EQUIPMENT"
+    },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "UNIT #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier" },
+      { fieldId: "year", label: "YEAR", type: "integer", fieldType: "integer", editable: true, presentationOrder: 1 },
+      { fieldId: "make", label: "MAKE", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "model", label: "MODEL", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "serialNumber", label: "SERIAL #", type: "text", fieldType: "text", editable: true, presentationOrder: 4 },
+      { fieldId: "primaryMeter", label: "HOURS", type: "number", fieldType: "number", editable: true, presentationOrder: 5 },
+      { fieldId: "operatingStatus", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 6 }
+    ],
+    fields: {
+      businessIdentifier: "142",
+      year: 2023,
+      make: "KOMATSU",
+      model: "WA475-10",
+      serialNumber: "KMTWA475XPA014821",
+      primaryMeter: 4989,
+      operatingStatus: "ACTIVE"
+    },
+    relationships: [
+      { id: "c009-rel-1", displayLabel: "HOME YARD", displayName: "MIDLAND" },
+      { id: "c009-rel-2", displayLabel: "ASSIGNED TO", displayName: "PROJECT 481" },
+      { id: "c009-rel-3", displayLabel: "RESPONSIBLE TEAM", displayName: "FIELD OPERATIONS" }
+    ],
+    media: [
+      {
+        url: "https://sharetribe.imgix.net/6992ef66-9ac6-4a5a-b4a1-59b1652b1c4f/69f80afb-1593-41dc-af50-781179cb9e00?auto=format&fit=clip&h=750&w=750&s=dbce55dde8d93f05df3dceeb6825d85d",
+        name: "2023 Komatsu WA475-10",
+        source: "face-lab-sample"
+      }
+    ],
+    metadata: {
+      sampleUse: "POWERED / SERIALIZED EQUIPMENT",
+      nomenclature: { singular: "EQUIPMENT", plural: "EQUIPMENT" }
+    }
+  };
+}
+
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
-  const resolvedSample = cardNumber === 7 && !Object.keys(safeObject(sample?.fields)).length
+  const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
+  const resolvedSample = cardNumber === 7 && !hasSampleFields
     ? universal007Sample()
-    : sample;
+    : cardNumber === 9 && !hasSampleFields
+      ? card009Sample()
+      : sample;
 
   const sampleFields = safeObject(resolvedSample?.fields);
   const templateFieldSchema = Array.isArray(template?.fieldSchema) ? template.fieldSchema : [];
@@ -136,11 +197,7 @@ function previewObject(template = {}, sample = {}) {
 function getFaceConfig(object = {}, faceNumber = 1) {
   const faces = object?.presentation?.faces;
   if (Array.isArray(faces)) {
-    return safeObject(
-      faces.find(item =>
-        Number(item?.face || item?.faceNumber || item?.index) === Number(faceNumber)
-      )
-    );
+    return safeObject(faces.find(item => Number(item?.face || item?.faceNumber || item?.index) === Number(faceNumber)));
   }
   if (faces && typeof faces === "object") {
     return safeObject(faces[String(faceNumber)] || faces[faceNumber]);
@@ -174,9 +231,7 @@ export default function IXIAosCardCatalogPreview({
   const [face, setFace] = useState(1);
   const [transactOpen, setTransactOpen] = useState(false);
   const [previewObjectOverride, setPreviewObjectOverride] = useState(null);
-  const [previewItems, setPreviewItems] = useState(() =>
-    getInitialPreviewItems(template || {}, directItems)
-  );
+  const [previewItems, setPreviewItems] = useState(() => getInitialPreviewItems(template || {}, directItems));
 
   const baseObject = useMemo(
     () => previewObject(template || {}, sampleData),
@@ -254,12 +309,7 @@ export default function IXIAosCardCatalogPreview({
   if (transactOpen) {
     return (
       <div className="native-card-preview">
-        <IXITransactObjectConsole
-          object={object}
-          ixiState={current}
-          onIxiStateChange={update}
-          onClose={() => setTransactOpen(false)}
-        />
+        <IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} />
         <style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style>
       </div>
     );
@@ -318,6 +368,23 @@ export default function IXIAosCardCatalogPreview({
     );
   }
 
+  if (cardNumber === 9) {
+    return (
+      <div className="native-card-preview">
+        <IXIAosCard009
+          object={object}
+          ixiState={current}
+          onIxiStateChange={update}
+          onSaveObject={savePreview}
+          onAddObject={addPreviewChild}
+          onOpenTransact={() => setTransactOpen(true)}
+          skinId="v12"
+        />
+        <style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style>
+      </div>
+    );
+  }
+
   if ([1, 2, 3].includes(cardNumber)) {
     const faceNumbers = [1, 2, 3, 4, 5];
     const consoleDepth = Math.max(1, Number(current?.consoleDepth || 1));
@@ -356,8 +423,7 @@ export default function IXIAosCardCatalogPreview({
           .numbered-container-preview{display:flex;flex-direction:column;gap:7px;overflow:visible}
           .face-switch{width:298px;height:35px;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;border:1px solid #292d2b;border-radius:8px;background:#0d0f0e}
           .face-switch button{height:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px 3px;border:1px solid transparent;border-radius:5px;background:transparent;color:#777}
-          .face-switch b{font-size:6px}
-          .face-switch small{max-width:100%;overflow:hidden;font-size:4.2px;font-weight:850;text-overflow:ellipsis;white-space:nowrap}
+          .face-switch b{font-size:6px}.face-switch small{max-width:100%;overflow:hidden;font-size:4.2px;font-weight:850;text-overflow:ellipsis;white-space:nowrap}
           .face-switch .active{border-color:rgba(255,196,0,.52);background:rgba(255,196,0,.07);color:#ffc400}
           .console-stage{position:relative;display:flex;width:298px;height:471px;overflow:visible}
         `}</style>
