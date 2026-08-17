@@ -3,9 +3,7 @@ import { useRouter } from "next/router";
 import IXITransactDashboardApp from "../../components/ixi-transact-dashboard/IXITransactDashboardApp";
 
 const clean = value => String(value ?? "").trim();
-const list = value => Array.isArray(value)
-  ? value.flatMap(item => String(item || "").split(","))
-  : String(value || "").split(",");
+const list = value => Array.isArray(value) ? value.flatMap(item => String(item || "").split(",")) : String(value || "").split(",");
 const FILTER_KEYS = ["q", "status", "sort", "direction", "cursor", "owner", "aging", "groupBy"];
 
 export default function IXITransactDesktopPage() {
@@ -16,18 +14,12 @@ export default function IXITransactDesktopPage() {
   const through = clean(router.query.through);
   const from = clean(router.query.from);
   const workspace = clean(router.query.workspace || "executive");
-  const workspaceFilters = FILTER_KEYS.reduce((out, key) => {
-    const value = clean(router.query[key]);
-    if (value) out[key] = value;
-    return out;
-  }, {});
+  const workspaceFilters = FILTER_KEYS.reduce((out, key) => { const value = clean(router.query[key]); if (value) out[key] = value; return out; }, {});
 
   const replaceQuery = patch => {
     if (!router.isReady) return;
     const nextQuery = { ...router.query, ...patch };
-    Object.keys(nextQuery).forEach(key => {
-      if (nextQuery[key] === "" || nextQuery[key] === null || nextQuery[key] === undefined) delete nextQuery[key];
-    });
+    Object.keys(nextQuery).forEach(key => { if (nextQuery[key] === "" || nextQuery[key] === null || nextQuery[key] === undefined) delete nextQuery[key]; });
     router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true, scroll: false });
   };
 
@@ -43,12 +35,26 @@ export default function IXITransactDesktopPage() {
     replaceQuery(patch);
   };
 
+  const handleScopeChange = nextScope => {
+    const entityPassportId = clean(nextScope?.entityPassportId);
+    const locationPassportId = clean(nextScope?.locationPassportId);
+    replaceQuery({
+      entity: entityPassportId || undefined,
+      entityPassportId: undefined,
+      entityLabel: clean(nextScope?.entityLabel) || undefined,
+      period: clean(nextScope?.accountingPeriod) || undefined,
+      from: clean(nextScope?.from) || undefined,
+      through: clean(nextScope?.through) || undefined,
+      location: locationPassportId || undefined,
+      locationPassportId: undefined,
+      locationLabel: locationPassportId ? clean(nextScope?.locationLabel) || undefined : undefined,
+      cursor: undefined
+    });
+  };
+
   return (
     <>
-      <Head>
-        <title>IXI TRAN$ACT</title>
-        <meta name="robots" content="noindex,nofollow" />
-      </Head>
+      <Head><title>IXI TRAN$ACT</title><meta name="robots" content="noindex,nofollow" /></Head>
       <IXITransactDashboardApp
         entityPassportIds={entityPassportIds}
         entityLabel={clean(router.query.entityLabel)}
@@ -62,6 +68,7 @@ export default function IXITransactDesktopPage() {
         workspaceFilters={workspaceFilters}
         onWorkspaceChange={handleWorkspaceChange}
         onWorkspaceFiltersChange={handleWorkspaceFiltersChange}
+        onScopeChange={handleScopeChange}
       />
     </>
   );
