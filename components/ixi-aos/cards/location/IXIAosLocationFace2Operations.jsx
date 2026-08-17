@@ -2,6 +2,7 @@ import IXIAosLocationFace2OperationsV12, {
   LOCATION_FACE2_SKINS,
   LOCATION_FACE2_V12_LOCK
 } from "./IXIAosLocationFace2OperationsV12";
+import IXIAosLocationFace2V12VisualLock from "./IXIAosLocationFace2V12VisualLock";
 
 export { LOCATION_FACE2_SKINS };
 
@@ -13,5 +14,10 @@ export const LOCATION_FACE2_GENERIC_LOCK = Object.freeze({
 });
 
 export default function IXIAosLocationFace2Operations(props) {
-  return <IXIAosLocationFace2OperationsV12 {...props} />;
+  return (
+    <>
+      <IXIAosLocationFace2OperationsV12 {...props} />
+      <IXIAosLocationFace2V12VisualLock />
+    </>
+  );
 }
