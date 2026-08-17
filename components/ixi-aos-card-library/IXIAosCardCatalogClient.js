@@ -174,6 +174,28 @@ function withLocalCardDrafts(templates = []) {
     });
   });
 
+  if (!source.some(template => clean(template?.templateSlug) === "aos-card-009b")) {
+    source.push({
+      templateNumber: 9,
+      templateSlug: "aos-card-009b",
+      label: "Card 009B · Vehicle",
+      librarySection: "AOS OBJECT LAYOUTS",
+      baseObjectType: "customer-defined-object",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "009",
+        cardVariant: "B",
+        visualLanguage: "v12",
+        renderer: "schema-driven-generic",
+        derivedFrom: "aos-card-009",
+        sampleUse: "VEHICLE / VIN / MILEAGE"
+      }
+    });
+  }
+
   if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 17)) {
     source.push({
       templateNumber: 17,
