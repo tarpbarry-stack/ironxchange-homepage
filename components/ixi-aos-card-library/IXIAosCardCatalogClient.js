@@ -45,7 +45,6 @@ function withLocalCardDrafts(templates = []) {
       };
     }
 
-    /* Existing persisted 007 profile template is now presentation recipe 008. */
     if (slug === "employee-basic-007") {
       return {
         ...template,
@@ -67,20 +66,15 @@ function withLocalCardDrafts(templates = []) {
     return template;
   });
 
-  const base001 = source.find(
-    template => clean(template?.templateSlug) === "location-standard"
-  );
+  const base001 = source.find(template => clean(template?.templateSlug) === "location-standard");
 
   if (base001) {
     [
       { templateNumber: 2, templateSlug: "location-standard-002" },
       { templateNumber: 3, templateSlug: "location-standard-003" }
     ].forEach(draft => {
-      const exists = source.some(
-        template => clean(template?.templateSlug) === draft.templateSlug
-      );
+      const exists = source.some(template => clean(template?.templateSlug) === draft.templateSlug);
       if (exists) return;
-
       source.push({
         ...base001,
         templateNumber: draft.templateNumber,
@@ -107,11 +101,8 @@ function withLocalCardDrafts(templates = []) {
     { templateNumber: 5, templateSlug: "personnel-container-005", variant: "analytic" },
     { templateNumber: 6, templateSlug: "personnel-container-006", variant: "dashboard" }
   ].forEach(draft => {
-    const exists = source.some(
-      template => clean(template?.templateSlug) === draft.templateSlug
-    );
+    const exists = source.some(template => clean(template?.templateSlug) === draft.templateSlug);
     if (exists) return;
-
     source.push({
       templateNumber: draft.templateNumber,
       templateSlug: draft.templateSlug,
@@ -131,11 +122,7 @@ function withLocalCardDrafts(templates = []) {
     });
   });
 
-  const universal007Exists = source.some(
-    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 7 || clean(template?.templateSlug) === "universal-object-007"
-  );
-
-  if (!universal007Exists) {
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 7 || clean(template?.templateSlug) === "universal-object-007")) {
     source.push({
       templateNumber: 7,
       templateSlug: "universal-object-007",
@@ -145,21 +132,11 @@ function withLocalCardDrafts(templates = []) {
       version: 12,
       fieldSchema: [],
       capabilities: genericContainerCapabilities({}),
-      metadata: {
-        localCardDraft: true,
-        cardNumber: "007",
-        visualLanguage: "v12",
-        renderer: "universal-object-card",
-        defaultCard: true
-      }
+      metadata: { localCardDraft: true, cardNumber: "007", visualLanguage: "v12", renderer: "universal-object-card", defaultCard: true }
     });
   }
 
-  const profile008Exists = source.some(
-    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 8
-  );
-
-  if (!profile008Exists) {
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 8)) {
     source.push({
       templateNumber: 8,
       templateSlug: "employee-basic-007",
@@ -169,21 +146,11 @@ function withLocalCardDrafts(templates = []) {
       version: 12,
       fieldSchema: [],
       capabilities: genericContainerCapabilities({}),
-      metadata: {
-        localCardDraft: true,
-        cardNumber: "008",
-        visualLanguage: "v12",
-        renderer: "schema-driven-generic-profile",
-        sampleUse: "personnel"
-      }
+      metadata: { localCardDraft: true, cardNumber: "008", visualLanguage: "v12", renderer: "schema-driven-generic-profile", sampleUse: "personnel" }
     });
   }
 
-  const card009Exists = source.some(
-    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 9
-  );
-
-  if (!card009Exists) {
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 9)) {
     source.push({
       templateNumber: 9,
       templateSlug: "aos-card-009",
@@ -193,39 +160,34 @@ function withLocalCardDrafts(templates = []) {
       version: 12,
       fieldSchema: [],
       capabilities: genericContainerCapabilities({}),
-      metadata: {
-        localCardDraft: true,
-        cardNumber: "009",
-        visualLanguage: "v12",
-        renderer: "schema-driven-generic",
-        sampleUse: "POWERED / SERIALIZED EQUIPMENT"
-      }
+      metadata: { localCardDraft: true, cardNumber: "009", visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse: "POWERED / SERIALIZED EQUIPMENT" }
+    });
+  }
+
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 10)) {
+    source.push({
+      templateNumber: 10,
+      templateSlug: "aos-card-010",
+      label: "Card 010",
+      librarySection: "AOS OBJECT LAYOUTS",
+      baseObjectType: "customer-defined-object",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: { localCardDraft: true, cardNumber: "010", visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse: "STRUCTURED / TECHNICAL RECORD" }
     });
   }
 
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 
-export async function loadAosCardCatalog({
-  entityId = null,
-  signal = null
-} = {}) {
+export async function loadAosCardCatalog({ entityId = null, signal = null } = {}) {
   const payload = await fetchMosCardTemplates({ entityId, signal });
   const templates = withLocalCardDrafts(payload?.templates || []);
   return { templates, count: templates.length };
 }
 
-export async function loadAosCardTemplate({
-  templateSlug,
-  version = null,
-  entityId = null,
-  signal = null
-}) {
-  const payload = await fetchMosCardTemplate({
-    templateSlug,
-    version,
-    entityId,
-    signal
-  });
+export async function loadAosCardTemplate({ templateSlug, version = null, entityId = null, signal = null }) {
+  const payload = await fetchMosCardTemplate({ templateSlug, version, entityId, signal });
   return payload?.template || null;
 }
