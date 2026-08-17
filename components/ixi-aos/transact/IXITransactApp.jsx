@@ -22,12 +22,13 @@ import IXIPayablesApp from "./modules/payables/IXIPayablesApp";
 import IXITreasuryApp from "./modules/treasury/IXITreasuryApp";
 import IXIGeneralLedgerApp from "./modules/general-ledger/IXIGeneralLedgerApp";
 import IXIFinancialReportingApp from "./modules/financial-reporting/IXIFinancialReportingApp";
+import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
 import { createIXICustomerServiceWorkOrderFromQuote } from "./modules/customer-service-work-order/IXICustomerServiceWorkOrderAdapter";
 import IXITransactStyles from "./IXITransactStyles";
 
 const clean = value => String(value ?? "").trim();
 
-export default function IXITransactApp({ object = {}, actor = {}, entity = {}, activeWorkOrder = null, permissions = [], onClose = null, onOpenModule = null, onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null }) {
+export default function IXITransactApp({ object = {}, actor = {}, entity = {}, authority = {}, activeWorkOrder = null, permissions = [], onClose = null, onOpenModule = null, onAuthorityPolicyChange = null, onIdentityChange = null, onSendFront = null, onSendBack = null, onCycleColor = null, onCycleOutline = null, armedDestination = "", onSendToArmedDestination = null }) {
   const context = useMemo(() => createIXITransactContext({ object, actor, entity, activeWorkOrder, permissions }), [object, actor, entity, activeWorkOrder, permissions]);
   const modules = useMemo(() => getIXITransactModules({ objectType: context.primary.objectType, permissions: context.permissions }), [context]);
   const [moduleId, setModuleId] = useState("");
@@ -44,6 +45,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   async function open(item) { setModuleId(item.id); await onOpenModule?.(item, context, {}); }
   async function change(id, label, group, documentType, key, record, changePayload = {}, sourceContext = context, extra = {}) { await onOpenModule?.({ id: `${id}-${changePayload.action || "change"}`, label, group, documentType }, sourceContext, { [key]: record, change: changePayload, originatingObject: sourceContext.primary, returnTo: id, ...extra }); }
 
+  if (moduleId === "access-policy") return <IXIAccessPolicyApp context={context} object={object} actor={actor} authority={authority} initialPolicy={object?.authorityPolicy || authority?.policy || null} onBack={back} onPolicyChange={onAuthorityPolicyChange} onIdentityChange={onIdentityChange} />;
   if (moduleId === "bill") return <IXIBillStandaloneApp context={context} object={object} authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}} onBack={back} onRecordChange={(record, changePayload) => change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload)} />;
 
   let body = null;

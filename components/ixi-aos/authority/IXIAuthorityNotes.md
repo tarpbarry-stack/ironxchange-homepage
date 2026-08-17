@@ -1,0 +1,5 @@
+- Default deny.
+- Server enforcement required.
+- Object labels never determine authority semantics.
+- Container inheritance is structural, not name-based.
+- Explicit target policy and ancestor policy must remain explainable.
