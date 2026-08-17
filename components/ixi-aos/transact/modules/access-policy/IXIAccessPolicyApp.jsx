@@ -6,13 +6,14 @@ import IXIAuthorityClient from "../../../authority/IXIAuthorityClient";
 const clean=v=>String(v??"").trim();
 const arr=v=>Array.isArray(v)?v:[];
 const obj=v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{};
+const unique=v=>Array.from(new Set(arr(v).map(clean).filter(Boolean)));
 const targetOf=(context,source)=>({passportId:clean(context?.primary?.passportId||source?.passportId||source?.ixiPassportId),objectId:clean(context?.primary?.objectId||source?.objectId||source?.id),objectType:clean(context?.primary?.objectType||source?.objectType||source?.type),label:clean(context?.primary?.label||source?.displayName||source?.name)||"AOS OBJECT"});
 const newRule=passportId=>({ruleId:`rule_${Date.now()}`,effect:"allow",subject:{type:"role",id:""},capabilities:["aos.view"],scope:{type:"target",passportId:clean(passportId)},conditions:{},limits:{},enabled:true,note:""});
 
 export default function IXIAccessPolicyApp({context={},object:sourceObject={},actor={},authority={},initialPolicy=null,onBack=null,onPolicyChange=null,onIdentityChange=null}){
   const target=useMemo(()=>targetOf(context,sourceObject),[context,sourceObject]);
   const actorPassportId=clean(context?.actor?.passportId||actor?.passportId||actor?.ixiPassportId);
-  const permissions=arr(context?.permissions||actor?.permissions||authority?.permissions);
+  const permissions=unique([...arr(context?.permissions),...arr(actor?.permissions),...arr(authority?.permissions)]);
   const canManage=authority?.canManage===true||permissions.includes("authority.manage")||permissions.includes("security.permissions.manage");
   const canInvite=canManage||permissions.includes("identity.invite")||permissions.includes("security.identity.invite");
   const principal=obj(sourceObject?.principal||sourceObject?.accessPrincipal||authority?.principal);
