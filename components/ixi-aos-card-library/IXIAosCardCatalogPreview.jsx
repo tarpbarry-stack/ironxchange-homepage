@@ -11,6 +11,7 @@ import IXIAosCard007EmployeeApplication from "../ixi-aos/cards/007/IXIAosCard007
 import IXIAosCard008Profile from "../ixi-aos/cards/008/IXIAosCard008Profile";
 import IXIAosCard009 from "../ixi-aos/cards/009/IXIAosCard009";
 import IXIAosCard010 from "../ixi-aos/cards/010/IXIAosCard010";
+import IXIAosCard011 from "../ixi-aos/cards/011/IXIAosCard011";
 
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -88,10 +89,48 @@ function card009Sample() {
   };
 }
 
+function card011Sample() {
+  return {
+    objectId: "preview-card-011",
+    entityId: "aos-card-preview-entity",
+    objectType: "customer-defined-object",
+    singularLabel: "MATERIAL",
+    pluralLabel: "MATERIALS",
+    displayName: "HYDRAULIC HOSE · 3/4 IN",
+    status: "active",
+    capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { detailsTitle: "STOCK PROFILE", relationshipsTitle: "RELATIONSHIPS", metricCaption: "AVAILABLE NOW", sampleUse: "INVENTORY / QUANTITY / CAPACITY" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "ITEM #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "available", label: "AVAILABLE", type: "number", fieldType: "number", editable: true, presentationOrder: 1 },
+      { fieldId: "onHand", label: "ON HAND", type: "number", fieldType: "number", editable: true, presentationOrder: 2 },
+      { fieldId: "committed", label: "COMMITTED", type: "number", fieldType: "number", editable: true, presentationOrder: 3 },
+      { fieldId: "reorderPoint", label: "REORDER POINT", type: "number", fieldType: "number", editable: true, presentationOrder: 4 },
+      { fieldId: "unitOfMeasure", label: "UOM", type: "text", fieldType: "text", editable: true, presentationOrder: 5 },
+      { fieldId: "bin", label: "BIN", type: "text", fieldType: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "category", label: "CATEGORY", type: "text", fieldType: "text", editable: true, presentationOrder: 7 },
+      { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 8 }
+    ],
+    fields: { businessIdentifier: "H-34019", available: 1842, onHand: 2264, committed: 422, reorderPoint: 600, unitOfMeasure: "FT", bin: "A-17-04", category: "HYDRAULICS", status: "ACTIVE" },
+    relationships: [
+      { id: "c011-rel-1", displayLabel: "WAREHOUSE", displayName: "MIDLAND PARTS" },
+      { id: "c011-rel-2", displayLabel: "PREFERRED SOURCE", displayName: "GULF INDUSTRIAL SUPPLY" }
+    ],
+    media: [],
+    metadata: { sampleUse: "INVENTORY / QUANTITY / CAPACITY", nomenclature: { singular: "MATERIAL", plural: "MATERIALS" } }
+  };
+}
+
 function previewObject(template = {}, sample = {}) {
   const cardNumber = resolveCatalogCardNumber(template);
   const hasSampleFields = Object.keys(safeObject(sample?.fields)).length > 0;
-  const resolvedSample = cardNumber === 7 && !hasSampleFields ? universal007Sample() : cardNumber === 9 && !hasSampleFields ? card009Sample() : sample;
+  const resolvedSample = cardNumber === 7 && !hasSampleFields
+    ? universal007Sample()
+    : cardNumber === 9 && !hasSampleFields
+      ? card009Sample()
+      : cardNumber === 11 && !hasSampleFields
+        ? card011Sample()
+        : sample;
   const sampleFields = safeObject(resolvedSample?.fields);
   const templateFieldSchema = Array.isArray(template?.fieldSchema) ? template.fieldSchema : [];
   const sampleFieldDefinitions = Array.isArray(resolvedSample?.fieldDefinitions) ? resolvedSample.fieldDefinitions : [];
@@ -166,6 +205,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   if (cardNumber === 8) return <div className="native-card-preview"><IXIAosCard008Profile object={object} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
   if (cardNumber === 9) return <div className="native-card-preview"><IXIAosCard009 object={object} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
   if (cardNumber === 10) return <div className="native-card-preview"><IXIAosCard010 object={object} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
+  if (cardNumber === 11) return <div className="native-card-preview"><IXIAosCard011 object={object} ixiState={current} onIxiStateChange={update} onSaveObject={savePreview} onAddObject={addPreviewChild} onOpenTransact={() => setTransactOpen(true)} skinId="v12" /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
 
   if ([1,2,3].includes(cardNumber)) {
     const faceNumbers = [1,2,3,4,5];
