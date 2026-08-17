@@ -10,6 +10,7 @@ on:
       - "scripts/verifyTransactActionExecutionContracts.mjs"
       - "next.config.js"
       - "package.json"
+      - "package-lock.json"
       - ".github/workflows/transact-dashboard-ci.yml"
   push:
     branches:
@@ -22,6 +23,7 @@ on:
       - "scripts/verifyTransactActionExecutionContracts.mjs"
       - "next.config.js"
       - "package.json"
+      - "package-lock.json"
       - ".github/workflows/transact-dashboard-ci.yml"
 
 permissions:
@@ -49,6 +51,12 @@ jobs:
           cache-dependency-path: package.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Capture generated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: transact-v13-package-lock
+          path: package-lock.json
+          retention-days: 1
       - name: Verify TRAN$ACT dashboard contracts
         run: npm run verify-transact-dashboard
       - name: Verify canonical action execution contracts
