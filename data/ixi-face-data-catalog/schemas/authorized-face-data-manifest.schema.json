@@ -3,7 +3,7 @@
   "$id": "https://ironxchange.com/schemas/ixi-authorized-face-data-manifest.schema.json",
   "title": "IXI Authorized Face Data Manifest",
   "type": "object",
-  "required": ["schema", "generatedAt", "authorized", "object", "capabilities"],
+  "required": ["schema", "generatedAt", "authorized", "object"],
   "properties": {
     "schema": {"const": "ixi-authorized-face-data-manifest-v1"},
     "generatedAt": {"type": "string"},
@@ -13,7 +13,19 @@
     "object": {"type": "object", "additionalProperties": true},
     "permissions": {"type": "object", "additionalProperties": true},
     "objectCapabilities": {"type": "object", "additionalProperties": true},
-    "data": {"type": "object", "additionalProperties": true},
+    "data": {
+      "type": "object",
+      "properties": {
+        "fields": {"type": "array"},
+        "relationships": {"type": "array"},
+        "aggregates": {"type": "array"},
+        "media": {"type": "object"},
+        "financial": {"type": "array"},
+        "externalProjections": {"type": "array"},
+        "platformCapabilities": {"type": "array"}
+      },
+      "additionalProperties": true
+    },
     "transact": {"type": "object", "additionalProperties": true},
     "faceAuthoring": {"type": "object", "additionalProperties": true},
     "capabilities": {"type": "array"}
