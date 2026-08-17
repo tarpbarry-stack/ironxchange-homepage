@@ -6,6 +6,7 @@ const clean = value => String(value ?? "").trim();
 const list = value => Array.isArray(value)
   ? value.flatMap(item => String(item || "").split(","))
   : String(value || "").split(",");
+const FILTER_KEYS = ["q", "status", "sort", "direction", "cursor", "owner", "aging", "groupBy"];
 
 export default function IXITransactDesktopPage() {
   const router = useRouter();
@@ -15,11 +16,31 @@ export default function IXITransactDesktopPage() {
   const through = clean(router.query.through);
   const from = clean(router.query.from);
   const workspace = clean(router.query.workspace || "executive");
+  const workspaceFilters = FILTER_KEYS.reduce((out, key) => {
+    const value = clean(router.query[key]);
+    if (value) out[key] = value;
+    return out;
+  }, {});
+
+  const replaceQuery = patch => {
+    if (!router.isReady) return;
+    const nextQuery = { ...router.query, ...patch };
+    Object.keys(nextQuery).forEach(key => {
+      if (nextQuery[key] === "" || nextQuery[key] === null || nextQuery[key] === undefined) delete nextQuery[key];
+    });
+    router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true, scroll: false });
+  };
 
   const handleWorkspaceChange = nextWorkspace => {
     const next = clean(nextWorkspace || "executive");
     if (!router.isReady || next === workspace) return;
-    router.replace({ pathname: router.pathname, query: { ...router.query, workspace: next } }, undefined, { shallow: true, scroll: false });
+    const reset = FILTER_KEYS.reduce((out, key) => ({ ...out, [key]: undefined }), {});
+    replaceQuery({ ...reset, workspace: next });
+  };
+
+  const handleWorkspaceFiltersChange = nextFilters => {
+    const patch = FILTER_KEYS.reduce((out, key) => ({ ...out, [key]: clean(nextFilters?.[key]) || undefined }), {});
+    replaceQuery(patch);
   };
 
   return (
@@ -38,7 +59,9 @@ export default function IXITransactDesktopPage() {
         locationLabel={clean(router.query.locationLabel || "ALL LOCATIONS")}
         currency={clean(router.query.currency || "USD")}
         initialWorkspace={workspace}
+        workspaceFilters={workspaceFilters}
         onWorkspaceChange={handleWorkspaceChange}
+        onWorkspaceFiltersChange={handleWorkspaceFiltersChange}
       />
     </>
   );
