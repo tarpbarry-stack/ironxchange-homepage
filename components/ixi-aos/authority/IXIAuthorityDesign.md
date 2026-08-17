@@ -1,0 +1,1 @@
+Authority is attached to stable objects and Passports, never inferred from customer labels. TRAN$ACT ACCESS / POLICY is the administration surface; IX-Core is the enforcement boundary.
