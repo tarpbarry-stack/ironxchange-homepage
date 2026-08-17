@@ -19,7 +19,8 @@ import {
 
 const W = 298;
 const H = 471;
-const MIN_FIELDS = 6;
+const MIN_FIELDS = 7;
+const INTERNAL_ID_FIELD_ID = "customerInternalId";
 
 function inputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
@@ -52,14 +53,46 @@ function createBlankDefinition(index) {
   };
 }
 
+function internalIdDefinition() {
+  return {
+    fieldId: INTERNAL_ID_FIELD_ID,
+    label: "ID #",
+    type: "text",
+    fieldType: "text",
+    semanticRole: "customer-internal-id",
+    presentationRole: "customer-internal-id",
+    editable: true,
+    presentationOrder: 0
+  };
+}
+
+function hasInternalIdDefinition(definitions = []) {
+  return definitions.some(definition => {
+    const fieldId = clean(definition?.fieldId || definition?.field).toLowerCase();
+    const role = clean(
+      definition?.semanticRole ||
+      definition?.presentationRole ||
+      definition?.role
+    ).toLowerCase();
+    return fieldId === INTERNAL_ID_FIELD_ID.toLowerCase() || role === "customer-internal-id";
+  });
+}
+
 function editableDefinitionsFor(object = {}) {
-  const existing = getFieldDefinitions(object).map((definition, index) => ({
+  let existing = getFieldDefinitions(object).map((definition, index) => ({
     ...definition,
     fieldId: clean(definition?.fieldId || definition?.field || `field_${index + 1}`),
     label: clean(definition?.label || definition?.displayLabel) || `FIELD ${index + 1}`,
     fieldType: clean(definition?.fieldType || definition?.type || "text") || "text",
     editable: definition?.editable !== false
   }));
+
+  if (!hasInternalIdDefinition(existing)) {
+    existing = [internalIdDefinition(), ...existing].map((definition, index) => ({
+      ...definition,
+      presentationOrder: index
+    }));
+  }
 
   if (existing.length >= MIN_FIELDS) return existing;
 
@@ -71,7 +104,7 @@ function editableDefinitionsFor(object = {}) {
     const blank = createBlankDefinition(index++);
     if (used.has(blank.fieldId)) continue;
     used.add(blank.fieldId);
-    output.push(blank);
+    output.push({ ...blank, presentationOrder: output.length });
   }
 
   return output;
@@ -122,6 +155,7 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
   }
 
   function removeField(fieldId) {
+    if (fieldId === INTERNAL_ID_FIELD_ID) return;
     setDefinitions(current => current.filter(item => item.fieldId !== fieldId));
     setDraft(current => {
       const next = { ...current };
@@ -195,7 +229,7 @@ function Card009Editor({ object, saving, onCancel, onSave }) {
                 value={draft[definition.fieldId] ?? ""}
                 onChange={event => setDraft(current => ({ ...current, [definition.fieldId]: event.target.value }))}
               />
-              <button type="button" onClick={() => removeField(definition.fieldId)}>×</button>
+              <button type="button" disabled={definition.fieldId === INTERNAL_ID_FIELD_ID} onClick={() => removeField(definition.fieldId)}>×</button>
             </div>
           ))}
           <button className="c009-add-field" type="button" onClick={addField}>+ ADD FIELD</button>
@@ -237,17 +271,28 @@ export default function IXIAosGenericMediaDominant009({
 
   const actions = getObjectActionCapabilities(runtimeObject);
   const presentation = getObjectPresentation(runtimeObject);
-  const definitions = getFieldDefinitions(runtimeObject);
+  const rawDefinitions = getFieldDefinitions(runtimeObject);
+  const definitions = hasInternalIdDefinition(rawDefinitions)
+    ? rawDefinitions
+    : [internalIdDefinition(), ...rawDefinitions.map((definition, index) => ({ ...definition, presentationOrder: index + 1 }))];
   const fields = getObjectFields(runtimeObject);
   const relationships = getObjectRelationships(runtimeObject);
   const image = getPrimaryImage(runtimeObject);
 
-  const populatedFields = definitions
-    .map(definition => ({ definition, value: inputValue(fields?.[definition.fieldId]) }))
-    .filter(item => clean(item.value));
+  const populatedFields = definitions.map(definition => ({
+    definition,
+    value: inputValue(fields?.[definition.fieldId])
+  }));
 
-  const primaryFields = populatedFields.slice(0, 4);
-  const secondaryFields = populatedFields.slice(4, 7);
+  const internalIdField = populatedFields.find(item => {
+    const fieldId = clean(item?.definition?.fieldId).toLowerCase();
+    const role = clean(item?.definition?.semanticRole || item?.definition?.presentationRole).toLowerCase();
+    return fieldId === INTERNAL_ID_FIELD_ID.toLowerCase() || role === "customer-internal-id";
+  }) || { definition: internalIdDefinition(), value: "" };
+
+  const businessFields = populatedFields.filter(item => item.definition.fieldId !== internalIdField.definition.fieldId && clean(item.value));
+  const primaryFields = businessFields.slice(0, 3);
+  const secondaryFields = businessFields.slice(3, 6);
   const sampleUse = clean(runtimeObject?.metadata?.sampleUse || presentation?.sampleUse);
 
   async function save(nextObject) {
@@ -321,8 +366,8 @@ export default function IXIAosGenericMediaDominant009({
           )}
           <div className="c009-media-shade" />
           <div className="c009-media-id">
-            <span>{primaryFields[0]?.definition?.label || "IDENTITY"}</span>
-            <strong>{primaryFields[0]?.value || getObjectDisplayName(runtimeObject)}</strong>
+            <span>{internalIdField.definition.label || "ID #"}</span>
+            <strong>{clean(internalIdField.value) || "—"}</strong>
           </div>
           {actions.canEdit ? (
             <button className="c009-photo-action" type="button" disabled={saving} onClick={event => {
@@ -337,13 +382,13 @@ export default function IXIAosGenericMediaDominant009({
         </section>
 
         <section className="c009-primary-grid">
-          {primaryFields.slice(1, 4).map(({ definition, value }) => (
+          {primaryFields.map(({ definition, value }) => (
             <div className="c009-field-block" key={definition.fieldId}>
               <span>{definition.label}</span>
               <strong>{value}</strong>
             </div>
           ))}
-          {!primaryFields.slice(1, 4).length ? (
+          {!primaryFields.length ? (
             <div className="c009-field-block c009-field-empty"><span>DETAILS</span><strong>—</strong></div>
           ) : null}
         </section>
@@ -406,12 +451,12 @@ export default function IXIAosGenericMediaDominant009({
         .c009-header{position:absolute;inset:0 0 auto;height:48px;padding:7px 10px;border-bottom:1px solid #303531;background:linear-gradient(180deg,#181b19,#101210);z-index:30}
         .c009-identity{max-width:188px}.c009-identity>span{display:block;overflow:hidden;color:var(--y);font-size:6px;font-weight:950;letter-spacing:.08em;text-overflow:ellipsis;white-space:nowrap}.c009-identity h2{margin:3px 0 0;overflow:hidden;color:#f7f8f7;font-size:13px;font-weight:950;line-height:1;text-overflow:ellipsis;white-space:nowrap}.c009-identity small{display:block;margin-top:4px;overflow:hidden;color:#6f7771;font-size:4.8px;font-weight:900;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}
         .c009-body{position:absolute;top:48px;left:7px;right:7px;bottom:51px;display:flex;flex-direction:column;gap:5px;padding:5px 0;overflow:hidden}
-        .c009-media{position:relative;flex:0 0 172px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:#0a0c0b;box-shadow:inset 0 1px #ffffff0c}.c009-media img{width:100%;height:100%;display:block;object-fit:cover}.c009-media-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#666d68;background:linear-gradient(135deg,#101310,#090b0a)}.c009-media-empty b{font-size:24px}.c009-media-empty span{font-size:5px;font-weight:900;letter-spacing:.08em}.c009-media-shade{position:absolute;inset:auto 0 0;height:52px;background:linear-gradient(180deg,transparent,#050706e8);pointer-events:none}.c009-media-id{position:absolute;left:8px;right:86px;bottom:7px;min-width:0}.c009-media-id span{display:block;color:#a2aaa4;font-size:5px;font-weight:900;letter-spacing:.05em}.c009-media-id strong{display:block;margin-top:2px;overflow:hidden;color:#fff;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.c009-photo-action{position:absolute;right:7px;bottom:7px;height:21px;padding:0 7px;border:1px solid #ffffff1a;border-radius:4px;background:#0b0e0cdd;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.04em}.c009-file-input{display:none}
+        .c009-media{position:relative;flex:0 0 172px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:#0a0c0b;box-shadow:inset 0 1px #ffffff0c}.c009-media img{width:100%;height:100%;display:block;object-fit:cover}.c009-media-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#666d68;background:linear-gradient(135deg,#101310,#090b0a)}.c009-media-empty b{font-size:24px}.c009-media-empty span{font-size:5px;font-weight:900;letter-spacing:.08em}.c009-media-shade{position:absolute;inset:auto 0 0;height:52px;background:linear-gradient(180deg,transparent,#050706e8);pointer-events:none}.c009-media-id{position:absolute;left:8px;right:86px;bottom:7px;min-width:0}.c009-media-id span{display:block;color:var(--y);font-size:5px;font-weight:950;letter-spacing:.06em}.c009-media-id strong{display:block;margin-top:2px;overflow:hidden;color:#fff;font-size:10px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.c009-photo-action{position:absolute;right:7px;bottom:7px;height:21px;padding:0 7px;border:1px solid #ffffff1a;border-radius:4px;background:#0b0e0cdd;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.04em}.c009-file-input{display:none}
         .c009-primary-grid{flex:0 0 48px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.c009-field-block{min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 7px;border:1px solid var(--line);border-radius:5px;background:linear-gradient(180deg,#141714,#101310)}.c009-field-block span{overflow:hidden;color:#8f9791;font-size:4.8px;font-weight:900;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}.c009-field-block strong{margin-top:4px;overflow:hidden;color:#eef1ef;font-size:8px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}.c009-field-empty{grid-column:1/-1}
         .c009-detail-strip{flex:0 0 39px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.c009-detail{min-width:0;padding:6px 7px;border:1px solid #2d322e;border-radius:5px;background:#0f120f}.c009-detail span{display:block;overflow:hidden;color:#78807a;font-size:4.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-detail strong{display:block;margin-top:3px;overflow:hidden;color:#dce0dd;font-size:6.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
-        .c009-relations{min-height:0;flex:1;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0e110f}.c009-section-title{height:18px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#141714;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.05em}.c009-rel-scroll{height:calc(100% - 18px);overflow-y:auto}.c009-rel-scroll button{width:100%;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border:0;border-bottom:1px solid #222723;background:transparent;color:#e8ebe8;text-align:left}.c009-rel-scroll button span{min-width:0}.c009-rel-scroll small{display:block;color:#7f8781;font-size:4.5px;font-weight:900}.c009-rel-scroll strong{display:block;margin-top:2px;overflow:hidden;font-size:6.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-rel-scroll button>b{color:var(--y);font-size:10px}.c009-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#59605b;font-size:5px;font-weight:900}
+        .c009-relations{min-height:0;flex:1;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:#0e110f}.c009-section-title{height:18px;display:flex;align-items:center;padding:0 7px;border-bottom:1px solid var(--soft);background:#141714;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.05em}.c009-rel-scroll{height:calc(100% - 18px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}.c009-rel-scroll::-webkit-scrollbar,.c009-editor-scroll::-webkit-scrollbar{width:3px}.c009-rel-scroll::-webkit-scrollbar-track,.c009-editor-scroll::-webkit-scrollbar-track{background:transparent}.c009-rel-scroll::-webkit-scrollbar-thumb,.c009-editor-scroll::-webkit-scrollbar-thumb{border-radius:999px;background:rgba(255,255,255,.18)}.c009-rel-scroll::-webkit-scrollbar-thumb:hover,.c009-editor-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,196,0,.46)}.c009-rel-scroll button{width:100%;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;border:0;border-bottom:1px solid #222723;background:transparent;color:#e8ebe8;text-align:left}.c009-rel-scroll button span{min-width:0}.c009-rel-scroll small{display:block;color:#7f8781;font-size:4.5px;font-weight:900}.c009-rel-scroll strong{display:block;margin-top:2px;overflow:hidden;font-size:6.5px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.c009-rel-scroll button>b{color:var(--y);font-size:10px}.c009-empty{height:100%;display:flex;align-items:center;justify-content:center;color:#59605b;font-size:5px;font-weight:900}
         .c009-commands{position:absolute;left:7px;right:7px;bottom:23px;height:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px 0}.c009-commands button{border:1px solid #2c312d;border-radius:4px;background:linear-gradient(180deg,#131613,#0d100e);color:#8b938d;font-size:7px;font-weight:900}.c009-commands button b{margin-left:3px;color:#d7dbd8;font-size:5.5px;letter-spacing:.04em}
-        .c009-editor{position:absolute;inset:0;z-index:200;background:#0b0d0c;color:#f3f5f3}.c009-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.c009-editor-head small{display:block;color:var(--y);font-size:5px;font-weight:950}.c009-editor-head strong{display:block;margin-top:3px;font-size:10px}.c009-editor-head nav{display:flex;gap:4px}.c009-editor-head button{height:22px;padding:0 8px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.c009-editor-head nav button:first-child{color:var(--y)}.c009-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto}.c009-editor-scroll section{margin-top:8px;padding:7px;border:1px solid #2b302c;border-radius:6px;background:#101310}.c009-editor-title{margin-bottom:6px;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.06em}.c009-editor-scroll label{display:block}.c009-editor-scroll label span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.c009-editor-scroll input{width:100%;height:25px;padding:0 7px;border:1px solid #333934;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.c009-editor-row{display:grid;grid-template-columns:.85fr 1.25fr 24px;gap:4px;margin-bottom:4px}.c009-editor-row button,.c009-add-field{border:1px solid #333934;border-radius:4px;background:#111411;color:#9da49f;font-weight:950}.c009-editor-row button{font-size:12px}.c009-add-field{width:100%;height:25px;color:var(--y);font-size:6px;letter-spacing:.05em}
+        .c009-editor{position:absolute;inset:0;z-index:200;background:#0b0d0c;color:#f3f5f3}.c009-editor-head{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 9px;border-bottom:1px solid #303531;background:#151815}.c009-editor-head small{display:block;color:var(--y);font-size:5px;font-weight:950}.c009-editor-head strong{display:block;margin-top:3px;font-size:10px}.c009-editor-head nav{display:flex;gap:4px}.c009-editor-head button{height:22px;padding:0 8px;border:1px solid #ffffff16;border-radius:4px;background:#111411;color:#dce0dd;font-size:6px;font-weight:950}.c009-editor-head nav button:first-child{color:var(--y)}.c009-editor-scroll{position:absolute;top:43px;left:0;right:0;bottom:0;padding:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}.c009-editor-scroll section{margin-top:8px;padding:7px;border:1px solid #2b302c;border-radius:6px;background:#101310}.c009-editor-title{margin-bottom:6px;color:var(--y);font-size:5.5px;font-weight:950;letter-spacing:.06em}.c009-editor-scroll label{display:block}.c009-editor-scroll label span{display:block;margin-bottom:4px;color:#8d958f;font-size:5px;font-weight:900}.c009-editor-scroll input{width:100%;height:25px;padding:0 7px;border:1px solid #333934;border-radius:4px;background:#090b0a;color:#edf0ee;font-size:7px;font-weight:850;outline:none}.c009-editor-row{display:grid;grid-template-columns:.85fr 1.25fr 24px;gap:4px;margin-bottom:4px}.c009-editor-row button,.c009-add-field{border:1px solid #333934;border-radius:4px;background:#111411;color:#9da49f;font-weight:950}.c009-editor-row button{font-size:12px}.c009-editor-row button:disabled{color:#3f4541;cursor:not-allowed}.c009-add-field{width:100%;height:25px;color:var(--y);font-size:6px;letter-spacing:.05em}
       `}</style>
     </article>
   );
