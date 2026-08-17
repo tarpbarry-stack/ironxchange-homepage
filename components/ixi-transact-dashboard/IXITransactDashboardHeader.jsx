@@ -1,9 +1,25 @@
 const clean = value => String(value ?? "").trim();
+const arr = value => Array.isArray(value) ? value : [];
+
+function ScopeSelect({label,value,displayValue,options=[],onChange,disabled=false,emptyLabel="SELECT"}){
+  const rows=arr(options);
+  if(!rows.length||typeof onChange!=="function")return <div className="td-scope-block"><span>{label}</span><strong>{displayValue||emptyLabel}</strong></div>;
+  return <label className="td-scope-block td-scope-select"><span>{label}</span><select value={clean(value)} disabled={disabled} onChange={event=>onChange(event.target.value)} aria-label={`Select ${label.toLowerCase()}`}><option value="">{emptyLabel}</option>{rows.map(option=><option key={option.id||option.passportId||option.accountingPeriod} value={option.id||option.passportId||option.accountingPeriod}>{option.label||option.name||option.id||option.passportId||option.accountingPeriod}</option>)}</select></label>;
+}
 
 export default function IXITransactDashboardHeader({
+  entityPassportId="",
   entityLabel = "ENTITY REQUIRED",
+  entityOptions=[],
+  onEntityChange,
   accountingPeriod = "",
+  periodOptions=[],
+  onPeriodChange,
+  locationPassportId="",
   locationLabel = "ALL LOCATIONS",
+  locationOptions=[],
+  onLocationChange,
+  scopeStatus="idle",
   freshness = { label: "UNVERIFIED", state: "unknown" },
   generatedAt = "",
   attentionCount = 0,
@@ -12,21 +28,13 @@ export default function IXITransactDashboardHeader({
   searchValue = "",
   onSearchChange
 }) {
+  const loadingScope=scopeStatus==="loading";
   return (
     <header className="td-header">
       <div className="td-scope">
-        <div className="td-scope-block">
-          <span>ENTITY</span>
-          <strong>{entityLabel}</strong>
-        </div>
-        <div className="td-scope-block">
-          <span>PERIOD</span>
-          <strong>{accountingPeriod || "SELECT PERIOD"}</strong>
-        </div>
-        <div className="td-scope-block td-scope-location">
-          <span>LOCATION</span>
-          <strong>{locationLabel}</strong>
-        </div>
+        <ScopeSelect label="ENTITY" value={entityPassportId} displayValue={entityLabel} options={entityOptions} onChange={onEntityChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT ENTITY"}/>
+        <ScopeSelect label="PERIOD" value={accountingPeriod} displayValue={accountingPeriod||"SELECT PERIOD"} options={periodOptions} onChange={onPeriodChange} disabled={loadingScope} emptyLabel={loadingScope?"RESOLVING...":"SELECT PERIOD"}/>
+        <ScopeSelect label="LOCATION" value={locationPassportId} displayValue={locationLabel} options={[{id:"",label:"ALL LOCATIONS"},...arr(locationOptions)]} onChange={onLocationChange} disabled={loadingScope} emptyLabel="ALL LOCATIONS"/>
       </div>
 
       <div className="td-command-search">
@@ -34,9 +42,7 @@ export default function IXITransactDashboardHeader({
         <input
           value={searchValue}
           onChange={event => onSearchChange?.(event.target.value)}
-          onKeyDown={event => {
-            if (event.key === "Enter") onSearch?.(event.currentTarget.value);
-          }}
+          onKeyDown={event => { if (event.key === "Enter") onSearch?.(event.currentTarget.value); }}
           placeholder="SEARCH RECORD, PASSPORT, CUSTOMER, VENDOR, WO, JE..."
           aria-label="Search IXI TRAN$ACT"
         />
@@ -48,9 +54,7 @@ export default function IXITransactDashboardHeader({
           <b>{freshness.label}</b>
           <small>{clean(generatedAt) ? new Date(generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "NO VERIFIED REFRESH"}</small>
         </button>
-        <button type="button" className="td-attention-button">
-          ATTENTION <b>{Number(attentionCount || 0)}</b>
-        </button>
+        <button type="button" className="td-attention-button">ATTENTION <b>{Number(attentionCount || 0)}</b></button>
         <button type="button" className="td-user-button" aria-label="User and authority context">USER</button>
       </div>
     </header>
