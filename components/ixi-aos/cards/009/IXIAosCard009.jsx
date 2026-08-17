@@ -13,7 +13,7 @@ export const CARD_009 = Object.freeze({
 
 export default function IXIAosCard009(props) {
   return (
-    <IXIAosDataContractCardAdapter {...props} minimumCustomFields={6}>
+    <IXIAosDataContractCardAdapter {...props} minimumCustomFields={7}>
       {contractProps => <IXIAosGenericMediaDominant009 {...contractProps} />}
     </IXIAosDataContractCardAdapter>
   );
