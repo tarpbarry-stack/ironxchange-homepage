@@ -1,0 +1,59 @@
+name: IXI TRANSACT V13 CI
+
+on:
+  pull_request:
+    paths:
+      - "components/ixi-transact-dashboard/**"
+      - "pages/transact/**"
+      - "pages/api/ixi-financial/**"
+      - "scripts/verifyTransactDashboardContracts.mjs"
+      - "scripts/verifyTransactActionExecutionContracts.mjs"
+      - "next.config.js"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/transact-dashboard-ci.yml"
+  push:
+    branches:
+      - agent/transact-dashboard-v13
+    paths:
+      - "components/ixi-transact-dashboard/**"
+      - "pages/transact/**"
+      - "pages/api/ixi-financial/**"
+      - "scripts/verifyTransactDashboardContracts.mjs"
+      - "scripts/verifyTransactActionExecutionContracts.mjs"
+      - "next.config.js"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/transact-dashboard-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: transact-v13-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: "ixi-ci-build-placeholder"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify TRAN$ACT dashboard contracts
+        run: npm run verify-transact-dashboard
+      - name: Verify canonical action execution contracts
+        run: node scripts/verifyTransactActionExecutionContracts.mjs
+      - name: Build Next production application
+        run: npm run build
