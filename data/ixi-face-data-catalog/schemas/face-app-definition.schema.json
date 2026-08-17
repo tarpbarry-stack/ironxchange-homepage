@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ironxchange.com/schemas/ixi-face-app-definition.schema.json",
+  "title": "IXI Face App Definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "faceAppId",
+    "version",
+    "label",
+    "rendererKind",
+    "status",
+    "dataCapabilities",
+    "permissionScopes"
+  ],
+  "properties": {
+    "faceAppId": {"type":"string","minLength":1},
+    "version": {"type":"integer","minimum":1},
+    "label": {"type":"string","minLength":1},
+    "description": {"type":"string"},
+    "rendererKind": {
+      "enum": ["declarative","trusted-hardcoded"]
+    },
+    "libraryScope": {
+      "enum": ["ixi-system","industry-package","company","personal-draft"]
+    },
+    "status": {
+      "enum": ["draft","active","retired"]
+    },
+    "heightBehavior": {
+      "enum": ["bounded","scroll"]
+    },
+    "requiredCapabilities": {
+      "type":"array",
+      "items":{"type":"string"},
+      "uniqueItems":true
+    },
+    "optionalCapabilities": {
+      "type":"array",
+      "items":{"type":"string"},
+      "uniqueItems":true
+    },
+    "dataCapabilities": {
+      "type":"array",
+      "items":{"type":"string"},
+      "uniqueItems":true
+    },
+    "permissionScopes": {
+      "type":"array",
+      "items":{"type":"string"},
+      "uniqueItems":true
+    },
+    "compatibleObjectCapabilities": {
+      "type":"array",
+      "items":{"type":"string"},
+      "uniqueItems":true
+    },
+    "definition": {
+      "type":"object",
+      "additionalProperties":true
+    },
+    "trustedRendererId": {
+      "type":"string"
+    },
+    "audit": {
+      "type":"object",
+      "additionalProperties":false,
+      "properties": {
+        "createdBy":{"type":"string"},
+        "createdAt":{"type":"string"},
+        "modifiedBy":{"type":"string"},
+        "modifiedAt":{"type":"string"},
+        "publishedBy":{"type":"string"},
+        "publishedAt":{"type":"string"},
+        "changeReason":{"type":"string"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"rendererKind":{"const":"trusted-hardcoded"}}
+      },
+      "then": {
+        "required": ["trustedRendererId"]
+      }
+    },
+    {
+      "if": {
+        "properties": {"rendererKind":{"const":"declarative"}}
+      },
+      "then": {
+        "required": ["definition"]
+      }
+    }
+  ]
+}
