@@ -179,6 +179,30 @@ function withLocalCardDrafts(templates = []) {
     });
   }
 
+  const card009Exists = source.some(
+    template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 9
+  );
+
+  if (!card009Exists) {
+    source.push({
+      templateNumber: 9,
+      templateSlug: "aos-card-009",
+      label: "Card 009",
+      librarySection: "AOS OBJECT LAYOUTS",
+      baseObjectType: "customer-defined-object",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "009",
+        visualLanguage: "v12",
+        renderer: "schema-driven-generic",
+        sampleUse: "POWERED / SERIALIZED EQUIPMENT"
+      }
+    });
+  }
+
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 
