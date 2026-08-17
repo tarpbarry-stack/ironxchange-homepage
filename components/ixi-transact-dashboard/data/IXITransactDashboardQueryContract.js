@@ -11,8 +11,35 @@ export const IXI_TRANSACT_DASHBOARD_INCLUDES = Object.freeze([
   "gl-controls",
   "reporting",
   "operations",
-  "work-orders"
+  "work-orders",
+  "purchase-orders"
 ]);
+
+const WORKSPACE_INCLUDES = Object.freeze({
+  executive: ["executive", "attention", "ar", "ap", "treasury", "gl-controls", "reporting"],
+  ar: ["ar", "attention"],
+  invoices: ["ar"],
+  sales: ["reporting"],
+  ap: ["ap", "attention"],
+  bills: ["ap", "attention"],
+  "purchase-orders": ["purchase-orders", "attention"],
+  treasury: ["treasury", "attention"],
+  reconciliation: ["treasury", "attention"],
+  gl: ["gl-controls", "attention"],
+  close: ["gl-controls", "attention"],
+  reporting: ["reporting"],
+  profitability: ["reporting"],
+  "work-orders": ["operations", "work-orders", "attention"],
+  assets: ["operations", "reporting"],
+  service: ["operations", "work-orders"],
+  rental: ["operations", "reporting"]
+});
+
+export function getIXITransactWorkspaceIncludes(workspace = "executive") {
+  const key = clean(workspace || "executive");
+  const includes = WORKSPACE_INCLUDES[key] || WORKSPACE_INCLUDES.executive;
+  return Array.from(new Set(includes));
+}
 
 export function normalizeIXITransactDashboardScope(scope = {}) {
   const source = safeObject(scope);
@@ -50,7 +77,7 @@ export function createIXITransactDashboardQuery({
 
   return {
     contract: "ixi-transact-dashboard-query",
-    contractVersion: "1.1.0",
+    contractVersion: "1.2.0",
     scope: normalizeIXITransactDashboardScope(scope),
     period: normalizeIXITransactDashboardPeriod(period),
     currency: /^[A-Z]{3}$/.test(clean(currency).toUpperCase()) ? clean(currency).toUpperCase() : "USD",
@@ -73,6 +100,7 @@ export function validateIXITransactDashboardQuery(query = {}) {
 
 export default {
   IXI_TRANSACT_DASHBOARD_INCLUDES,
+  getIXITransactWorkspaceIncludes,
   normalizeIXITransactDashboardScope,
   normalizeIXITransactDashboardPeriod,
   createIXITransactDashboardQuery,
