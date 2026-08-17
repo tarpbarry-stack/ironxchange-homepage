@@ -1,9 +1,12 @@
 import crypto from "crypto";
 
 import {
-  commitExternalAosObject,
   IXI_AOS_OBJECT_COMMIT_VERSION
 } from "../../../lib/mos/ixiAosObjectCommit";
+
+import {
+  commitTrustedAosObject
+} from "../../../lib/server/aos/commitTrustedAosObject";
 
 
 export const config = {
@@ -255,7 +258,7 @@ export default async function handler(
     }
 
     const result =
-      await commitExternalAosObject(
+      await commitTrustedAosObject(
         body
       );
 
