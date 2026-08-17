@@ -14,6 +14,7 @@ import IXIAosCard011 from "../ixi-aos/cards/011/IXIAosCard011";
 import IXIAosCard012 from "../ixi-aos/cards/012/IXIAosCard012";
 import IXIAosCard013 from "../ixi-aos/cards/013/IXIAosCard013";
 import IXIAosCard014 from "../ixi-aos/cards/014/IXIAosCard014";
+import IXIAosCard015 from "../ixi-aos/cards/015/IXIAosCard015";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -190,6 +191,36 @@ function card014Sample() {
   };
 }
 
+function card015Sample() {
+  return {
+    objectId: "preview-card-015", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
+    singularLabel: "AGREEMENT", pluralLabel: "AGREEMENTS", displayName: "MIDLAND FACILITY SERVICE AGREEMENT", status: "active",
+    capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { obligationTitle: "OBLIGATION / COVERAGE", relationshipsTitle: "RELATIONSHIPS", sampleUse: "AGREEMENT / OBLIGATION / EXPIRY" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "AGREEMENT #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "state", label: "STATE", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "party", label: "PARTY", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "counterparty", label: "COUNTERPARTY", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "effectiveDate", label: "EFFECTIVE", type: "date", fieldType: "date", editable: true, presentationOrder: 4 },
+      { fieldId: "expirationDate", label: "EXPIRES", type: "date", fieldType: "date", editable: true, presentationOrder: 5 },
+      { fieldId: "renewalDate", label: "RENEWAL", type: "date", fieldType: "date", editable: true, presentationOrder: 6 },
+      { fieldId: "noticeDate", label: "NOTICE DATE", type: "date", fieldType: "date", editable: true, presentationOrder: 7 },
+      { fieldId: "obligation", label: "OBLIGATION / COVERAGE", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
+      { fieldId: "owner", label: "OWNER", type: "text", fieldType: "text", editable: true, presentationOrder: 9 },
+      { fieldId: "classification", label: "CLASSIFICATION", type: "text", fieldType: "text", editable: true, presentationOrder: 10 },
+      { fieldId: "renewalType", label: "RENEWAL TYPE", type: "text", fieldType: "text", editable: true, presentationOrder: 11 }
+    ],
+    fields: { businessIdentifier: "SA-2048", state: "ACTIVE", party: "WEST TEXAS OPERATIONS", counterparty: "GULF INDUSTRIAL SERVICES", effectiveDate: "2026-01-01", expirationDate: "2026-12-31", renewalDate: "2027-01-01", noticeDate: "2026-11-30", obligation: "PREVENTIVE SERVICE COVERAGE FOR DESIGNATED FACILITY SYSTEMS", owner: "FACILITIES", classification: "SERVICE AGREEMENT", renewalType: "ANNUAL" },
+    relationships: [
+      { id: "c015-rel-1", displayLabel: "APPLIES TO", displayName: "MIDLAND FACILITY" },
+      { id: "c015-rel-2", displayLabel: "RESPONSIBLE GROUP", displayName: "FACILITIES" },
+      { id: "c015-rel-3", displayLabel: "COUNTERPARTY", displayName: "GULF INDUSTRIAL SERVICES" }
+    ],
+    media: [], metadata: { sampleUse: "AGREEMENT / OBLIGATION / EXPIRY", nomenclature: { singular: "AGREEMENT", plural: "AGREEMENTS" } }
+  };
+}
+
 function card017Sample() {
   return {
     objectId: "preview-card-017", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
@@ -232,6 +263,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 12) resolvedSample = card012Sample();
     else if (cardNumber === 13) resolvedSample = card013Sample();
     else if (cardNumber === 14) resolvedSample = card014Sample();
+    else if (cardNumber === 15) resolvedSample = card015Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
@@ -345,7 +377,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 17: IXIAosCard017 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 17: IXIAosCard017 };
 
   if (transactOpen) {
     return <div className="native-card-preview"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
