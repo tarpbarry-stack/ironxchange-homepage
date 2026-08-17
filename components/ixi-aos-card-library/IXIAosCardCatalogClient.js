@@ -150,47 +150,25 @@ function withLocalCardDrafts(templates = []) {
     });
   }
 
-  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 9)) {
+  [
+    [9, "POWERED / SERIALIZED EQUIPMENT"],
+    [10, "STRUCTURED / TECHNICAL RECORD"],
+    [11, "INVENTORY / QUANTITY / CAPACITY"],
+    [12, "PROJECT / LIFECYCLE / PROGRESS"]
+  ].forEach(([number, sampleUse]) => {
+    if (source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === number)) return;
     source.push({
-      templateNumber: 9,
-      templateSlug: "aos-card-009",
-      label: "Card 009",
+      templateNumber: number,
+      templateSlug: `aos-card-${String(number).padStart(3, "0")}`,
+      label: `Card ${String(number).padStart(3, "0")}`,
       librarySection: "AOS OBJECT LAYOUTS",
       baseObjectType: "customer-defined-object",
       version: 12,
       fieldSchema: [],
       capabilities: genericContainerCapabilities({}),
-      metadata: { localCardDraft: true, cardNumber: "009", visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse: "POWERED / SERIALIZED EQUIPMENT" }
+      metadata: { localCardDraft: true, cardNumber: String(number).padStart(3, "0"), visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse }
     });
-  }
-
-  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 10)) {
-    source.push({
-      templateNumber: 10,
-      templateSlug: "aos-card-010",
-      label: "Card 010",
-      librarySection: "AOS OBJECT LAYOUTS",
-      baseObjectType: "customer-defined-object",
-      version: 12,
-      fieldSchema: [],
-      capabilities: genericContainerCapabilities({}),
-      metadata: { localCardDraft: true, cardNumber: "010", visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse: "STRUCTURED / TECHNICAL RECORD" }
-    });
-  }
-
-  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 11)) {
-    source.push({
-      templateNumber: 11,
-      templateSlug: "aos-card-011",
-      label: "Card 011",
-      librarySection: "AOS OBJECT LAYOUTS",
-      baseObjectType: "customer-defined-object",
-      version: 12,
-      fieldSchema: [],
-      capabilities: genericContainerCapabilities({}),
-      metadata: { localCardDraft: true, cardNumber: "011", visualLanguage: "v12", renderer: "schema-driven-generic", sampleUse: "INVENTORY / QUANTITY / CAPACITY" }
-    });
-  }
+  });
 
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
