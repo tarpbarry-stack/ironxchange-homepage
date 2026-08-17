@@ -44,7 +44,8 @@ export function validateIXITransactDashboardProjectionPayload(result = {}, inclu
     "gl-controls": data.gl !== undefined,
     reporting: data.reporting !== undefined || data.reports !== undefined,
     operations: data.operations !== undefined,
-    "work-orders": data.workOrders !== undefined || data.operations?.workOrders !== undefined
+    "work-orders": data.workOrders !== undefined || data.operations?.workOrders !== undefined,
+    "purchase-orders": data.purchaseOrders !== undefined || data.operations?.purchaseOrders !== undefined
   };
   const missing = requested.filter(section => presence[section] === false);
   return {
@@ -78,6 +79,9 @@ export function normalizeIXITransactDashboardResponse(result = {}) {
     reports: reporting,
     operations: safeObject(data.operations),
     workOrders: safeArray(data.workOrders || data.operations?.workOrders),
+    purchaseOrders: safeArray(data.purchaseOrders || data.operations?.purchaseOrders),
+    purchaseOrderSummary: safeObject(data.purchaseOrderSummary || data.operations?.purchaseOrderSummary),
+    purchaseOrderPagination: safeObject(data.purchaseOrderPagination || data.operations?.purchaseOrderPagination),
     attention: safeArray(data.attention),
     permissions: safeObject(data.permissions),
     lineageVersion: clean(data.lineageVersion),
