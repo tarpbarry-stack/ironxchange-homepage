@@ -37,7 +37,7 @@ export async function executeIXITransactDesktopFinancialCommand({
   commandId = "",
   idempotencyKey = "",
   metadata = {},
-  apiBaseUrl = "",
+  apiBaseUrl = "/api/ixi-financial",
   signal = undefined
 } = {}) {
   if (!clean(documentType)) {
