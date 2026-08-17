@@ -33,6 +33,7 @@ jobs:
     timeout-minutes: 15
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: "ixi-ci-build-placeholder"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
