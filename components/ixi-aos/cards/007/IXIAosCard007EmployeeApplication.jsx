@@ -2,14 +2,15 @@ import { useState } from "react";
 
 import IXIAosGenericUniversalLayout007 from "../generic/IXIAosGenericUniversalLayout007";
 import IXIAosGenericUniversalLayout007B from "../generic/IXIAosGenericUniversalLayout007B";
+import IXIAosGenericUniversalLayout007C from "../generic/IXIAosGenericUniversalLayout007C";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 
 /*
  * Compatibility export for existing Face Lab/runtime imports.
  * Card 007 is the universal AOS card. The legacy filename carries no business meaning.
  *
- * Face Lab preview objects expose 007A / 007B so both geometries can be compared
- * without changing the production/runtime default, which remains 007A.
+ * Face Lab preview objects expose 007A / 007B / 007C so all three geometries can be
+ * compared without changing the production/runtime default, which remains 007A.
  */
 export default function IXIAosCard007EmployeeApplication(props) {
   const [faceLabVariant, setFaceLabVariant] = useState("007A");
@@ -21,10 +22,15 @@ export default function IXIAosCard007EmployeeApplication(props) {
   return (
     <IXIAosDataContractCardAdapter {...props} minimumCustomFields={8}>
       {contractProps => {
-        const CardLayout =
-          isFaceLabPreview && faceLabVariant === "007B"
-            ? IXIAosGenericUniversalLayout007B
-            : IXIAosGenericUniversalLayout007;
+        let CardLayout = IXIAosGenericUniversalLayout007;
+
+        if (isFaceLabPreview && faceLabVariant === "007B") {
+          CardLayout = IXIAosGenericUniversalLayout007B;
+        }
+
+        if (isFaceLabPreview && faceLabVariant === "007C") {
+          CardLayout = IXIAosGenericUniversalLayout007C;
+        }
 
         return (
           <div className="u007-face-lab-variant-shell">
@@ -44,6 +50,14 @@ export default function IXIAosCard007EmployeeApplication(props) {
                   onClick={() => setFaceLabVariant("007B")}
                 >
                   007B
+                </button>
+
+                <button
+                  type="button"
+                  className={faceLabVariant === "007C" ? "active" : ""}
+                  onClick={() => setFaceLabVariant("007C")}
+                >
+                  007C
                 </button>
               </div>
             ) : null}
