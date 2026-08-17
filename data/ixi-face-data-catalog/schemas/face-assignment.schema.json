@@ -1,0 +1,34 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://ironxchange.com/schemas/ixi-face-assignment.schema.json",
+  "title":"IXI Face Assignment",
+  "type":"object",
+  "required":["schema","assignmentId","companyId","faceAppId","target","active","audit"],
+  "properties":{
+    "schema":{"const":"ixi-face-assignment-v1"},
+    "assignmentId":{"type":"string","minLength":1},
+    "companyId":{"type":"string","minLength":1},
+    "faceAppId":{"type":"string","minLength":1},
+    "version":{"type":["integer","null"],"minimum":1},
+    "slot":{"type":["integer","null"],"minimum":2},
+    "active":{"type":"boolean"},
+    "target":{
+      "type":"object",
+      "required":["objectDefinitionIds","requiredCapabilities","objectIds"],
+      "properties":{
+        "objectDefinitionIds":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},
+        "requiredCapabilities":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},
+        "objectIds":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}
+      },
+      "anyOf":[
+        {"properties":{"objectDefinitionIds":{"minItems":1}}},
+        {"properties":{"requiredCapabilities":{"minItems":1}}},
+        {"properties":{"objectIds":{"minItems":1}}}
+      ],
+      "additionalProperties":false
+    },
+    "permissions":{"type":"object","additionalProperties":true},
+    "audit":{"type":"object","additionalProperties":true}
+  },
+  "additionalProperties":true
+}
