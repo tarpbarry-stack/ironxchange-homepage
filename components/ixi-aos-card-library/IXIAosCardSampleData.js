@@ -76,7 +76,6 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     { fieldId: "electric", label: "ELECTRIC", type: "text", presentationFace: 2, editable: true },
     { fieldId: "air", label: "AIR", type: "text", presentationFace: 2, editable: true },
     { fieldId: "water", label: "WATER", type: "text", presentationFace: 2, editable: true },
-
     { fieldId: "ownership", label: "OWNERSHIP STATUS", type: "text", presentationFace: 3, editable: true },
     { fieldId: "acquired", label: "ACQUIRED", type: "text", presentationFace: 3, editable: true },
     { fieldId: "propertyOwner", label: "PROPERTY OWNER", type: "text", presentationFace: 3, editable: true },
@@ -89,7 +88,6 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     { fieldId: "waterCost", label: "WATER / MO", type: "money", presentationFace: 3, editable: true },
     { fieldId: "insuranceCost", label: "INSURANCE / MO", type: "money", presentationFace: 3, editable: true },
     { fieldId: "taxCost", label: "PROPERTY TAX / MO", type: "money", presentationFace: 3, editable: true },
-
     { fieldId: "nextObligation", label: "NEXT OBLIGATION", type: "text", presentationFace: 4, editable: true },
     { fieldId: "nextAmount", label: "NEXT AMOUNT", type: "money", presentationFace: 4, editable: true },
     { fieldId: "due30", label: "DUE 30 DAYS", type: "money", presentationFace: 4, editable: true },
@@ -97,7 +95,6 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     { fieldId: "utilityAccount", label: "UTILITY ACCOUNT", type: "text", presentationFace: 4, editable: true },
     { fieldId: "insurancePolicy", label: "INSURANCE POLICY", type: "text", presentationFace: 4, editable: true },
     { fieldId: "taxAccount", label: "PROPERTY TAX ACCOUNT", type: "text", presentationFace: 4, editable: true },
-
     { fieldId: "healthScore", label: "HEALTH SCORE", type: "number", presentationFace: 5, editable: true },
     { fieldId: "openWorkOrders", label: "OPEN WORK ORDERS", type: "number", presentationFace: 5, editable: true },
     { fieldId: "pmCompliance", label: "PM COMPLIANCE", type: "number", presentationFace: 5, editable: true },
@@ -111,48 +108,10 @@ const SAMPLE_LOCATION_OBJECT = Object.freeze({
     { fieldId: "downtime", label: "DOWNTIME YTD", type: "text", presentationFace: 5, editable: true }
   ],
   fields: {
-    gateCode: "4821",
-    gps: "32.899110, -97.040339",
-    contact: "JOHN CARTER · 432-555-0186",
-    hours: "MON–SAT 6:00 AM–6:00 PM",
-    semiAccess: "YES",
-    trailerAccess: "YES",
-    gateWidth: "32 FT",
-    clearance: "OPEN",
-    forklift: "15,000 LB",
-    electric: "120 / 240 / 480",
-    air: "120 PSI",
-    water: "YES",
-    ownership: "OWNED",
-    acquired: "MAR 12, 2018",
-    propertyOwner: "IRONXCHANGE HOLDINGS LLC",
-    propertyManager: "JOHN CARTER",
-    landValue: 2750000,
-    improvementValue: 6000000,
-    currentValue: 8750000,
-    lastAppraised: "AUG 12, 2024",
-    electricCost: 4250,
-    waterCost: 1150,
-    insuranceCost: 1450,
-    taxCost: 2980,
-    nextObligation: "ELECTRIC",
-    nextAmount: 4250,
-    due30: 11540,
-    ytdPaid: 321600,
-    utilityAccount: "DFW-UTIL-22014",
-    insurancePolicy: "IXI-PROP-8842",
-    taxAccount: "TARRANT-77104",
-    healthScore: 87,
-    openWorkOrders: 5,
-    pmCompliance: 94,
-    maintenanceCost: 48720,
-    nextWorkOrder: "WO-1044 · FUEL TANK 01",
-    nextDue: "AUG 18, 2026",
-    nextIssue: "CONTAINMENT INSPECTION",
-    serviceContracts: 5,
-    inspections: 5,
-    criticalIssues: 1,
-    downtime: "14 HRS"
+    gateCode: "4821", gps: "32.899110, -97.040339", contact: "JOHN CARTER · 432-555-0186", hours: "MON–SAT 6:00 AM–6:00 PM", semiAccess: "YES", trailerAccess: "YES", gateWidth: "32 FT", clearance: "OPEN", forklift: "15,000 LB", electric: "120 / 240 / 480", air: "120 PSI", water: "YES",
+    ownership: "OWNED", acquired: "MAR 12, 2018", propertyOwner: "IRONXCHANGE HOLDINGS LLC", propertyManager: "JOHN CARTER", landValue: 2750000, improvementValue: 6000000, currentValue: 8750000, lastAppraised: "AUG 12, 2024", electricCost: 4250, waterCost: 1150, insuranceCost: 1450, taxCost: 2980,
+    nextObligation: "ELECTRIC", nextAmount: 4250, due30: 11540, ytdPaid: 321600, utilityAccount: "DFW-UTIL-22014", insurancePolicy: "IXI-PROP-8842", taxAccount: "TARRANT-77104",
+    healthScore: 87, openWorkOrders: 5, pmCompliance: 94, maintenanceCost: 48720, nextWorkOrder: "WO-1044 · FUEL TANK 01", nextDue: "AUG 18, 2026", nextIssue: "CONTAINMENT INSPECTION", serviceContracts: 5, inspections: 5, criticalIssues: 1, downtime: "14 HRS"
   },
   relationships: [
     { id: "rel-equipment", label: "EQUIPMENT", value: "47 ASSETS" },
@@ -176,7 +135,6 @@ const SAMPLE_LOCATION_ITEMS = Object.freeze([
 ]);
 
 const SAMPLE_LOCATION_PROJECTION = Object.freeze({ directChildCount: 3 });
-
 const PERSONNEL_ID = "aos-card-preview-personnel-004";
 
 const SAMPLE_PERSONNEL_OBJECT = Object.freeze({
@@ -293,6 +251,43 @@ const SAMPLE_OBJECT_007 = Object.freeze({
   metadata: { nomenclature: { singular: "EMPLOYEE", plural: "EMPLOYEES" } }
 });
 
+const SAMPLE_VEHICLE_009B = Object.freeze({
+  objectId: "preview-card-009b",
+  entityId: "aos-card-preview-entity",
+  objectType: "customer-defined-object",
+  singularLabel: "VEHICLE",
+  pluralLabel: "VEHICLES",
+  displayName: "2024 FORD F-350 LARIAT",
+  status: "active",
+  capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+  presentation: { relationshipsTitle: "RELATIONSHIPS", sampleUse: "VEHICLE / VIN / MILEAGE" },
+  fieldDefinitions: [
+    { fieldId: "businessIdentifier", label: "UNIT #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+    { fieldId: "year", label: "YEAR", type: "integer", fieldType: "integer", editable: true, presentationOrder: 1 },
+    { fieldId: "make", label: "MAKE", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+    { fieldId: "model", label: "MODEL", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+    { fieldId: "vin", label: "VIN #", type: "text", fieldType: "text", editable: true, presentationOrder: 4 },
+    { fieldId: "miles", label: "MILES", type: "number", fieldType: "number", editable: true, presentationOrder: 5 },
+    { fieldId: "operatingStatus", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 6 }
+  ],
+  fields: {
+    businessIdentifier: "TRK-214",
+    year: 2024,
+    make: "FORD",
+    model: "F-350 LARIAT",
+    vin: "1FT8W3BT7REC21418",
+    miles: 38412,
+    operatingStatus: "ACTIVE"
+  },
+  relationships: [
+    { id: "c009b-rel-1", displayLabel: "HOME LOCATION", displayName: "MIDLAND YARD" },
+    { id: "c009b-rel-2", displayLabel: "ASSIGNED TO", displayName: "FIELD OPERATIONS" },
+    { id: "c009b-rel-3", displayLabel: "PRIMARY DRIVER", displayName: "J. CARTER" }
+  ],
+  media: [],
+  metadata: { sampleUse: "VEHICLE / VIN / MILEAGE", nomenclature: { singular: "VEHICLE", plural: "VEHICLES" } }
+});
+
 export function getAosCardSampleData(templateSlug = "") {
   const slug = String(templateSlug || "").trim();
 
@@ -306,6 +301,10 @@ export function getAosCardSampleData(templateSlug = "") {
 
   if (slug === "employee-basic-007") {
     return { sampleData: SAMPLE_OBJECT_007, projection: null, directItems: [] };
+  }
+
+  if (slug === "aos-card-009b") {
+    return { sampleData: SAMPLE_VEHICLE_009B, projection: null, directItems: [] };
   }
 
   return {
