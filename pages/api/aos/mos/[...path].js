@@ -120,8 +120,13 @@ function buildQuery(req, entityId, path) {
       });
     });
 
+  /*
+   * Every query-scoped customer resource is pinned to the
+   * authenticated Entity. A browser-supplied entityId is ignored.
+   */
   if (
     /^\/imports\/jobs(?:\/|$)/.test(path) ||
+    /^\/card-templates(?:\/|$)/.test(path) ||
     path === "/events"
   ) {
     params.set("entityId", entityId);
