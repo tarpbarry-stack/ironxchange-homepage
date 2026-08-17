@@ -15,6 +15,7 @@ import IXIAosCard012 from "../ixi-aos/cards/012/IXIAosCard012";
 import IXIAosCard013 from "../ixi-aos/cards/013/IXIAosCard013";
 import IXIAosCard014 from "../ixi-aos/cards/014/IXIAosCard014";
 import IXIAosCard015 from "../ixi-aos/cards/015/IXIAosCard015";
+import IXIAosCard016 from "../ixi-aos/cards/016/IXIAosCard016";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -221,6 +222,36 @@ function card015Sample() {
   };
 }
 
+function card016Sample() {
+  return {
+    objectId: "preview-card-016", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
+    singularLabel: "TRIP", pluralLabel: "TRIPS", displayName: "MIDLAND → ODESSA · RUN 184", status: "active",
+    capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { sequenceTitle: "ROUTE / SEQUENCE", relationshipsTitle: "RELATIONSHIPS", sampleUse: "TIME / SEQUENCE / MOVEMENT" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "RUN #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "state", label: "STATE", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "date", label: "DATE", type: "date", fieldType: "date", editable: true, presentationOrder: 2 },
+      { fieldId: "startTime", label: "START", type: "time", fieldType: "time", editable: true, presentationOrder: 3 },
+      { fieldId: "endTime", label: "TARGET", type: "time", fieldType: "time", editable: true, presentationOrder: 4 },
+      { fieldId: "origin", label: "ORIGIN", type: "text", fieldType: "text", editable: true, presentationOrder: 5 },
+      { fieldId: "destination", label: "DESTINATION", type: "text", fieldType: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "stepOne", label: "STOP 1", type: "text", fieldType: "text", editable: true, presentationOrder: 7 },
+      { fieldId: "stepTwo", label: "STOP 2", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
+      { fieldId: "assigned", label: "ASSIGNED TO", type: "text", fieldType: "text", editable: true, presentationOrder: 9 },
+      { fieldId: "related", label: "RELATED OBJECT", type: "text", fieldType: "text", editable: true, presentationOrder: 10 },
+      { fieldId: "priority", label: "PRIORITY", type: "text", fieldType: "text", editable: true, presentationOrder: 11 }
+    ],
+    fields: { businessIdentifier: "184", state: "SCHEDULED", date: "2026-08-18", startTime: "07:00", endTime: "11:30", origin: "MIDLAND YARD", destination: "ODESSA SITE 12", stepOne: "WEST TERMINAL", stepTwo: "NORTH STAGING", assigned: "CREW 18", related: "UNIT 142", priority: "STANDARD" },
+    relationships: [
+      { id: "c016-rel-1", displayLabel: "ASSIGNED CREW", displayName: "CREW 18" },
+      { id: "c016-rel-2", displayLabel: "RELATED UNIT", displayName: "UNIT 142" },
+      { id: "c016-rel-3", displayLabel: "DESTINATION", displayName: "ODESSA SITE 12" }
+    ],
+    media: [], metadata: { sampleUse: "TIME / SEQUENCE / MOVEMENT", nomenclature: { singular: "TRIP", plural: "TRIPS" } }
+  };
+}
+
 function card017Sample() {
   return {
     objectId: "preview-card-017", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
@@ -264,6 +295,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 13) resolvedSample = card013Sample();
     else if (cardNumber === 14) resolvedSample = card014Sample();
     else if (cardNumber === 15) resolvedSample = card015Sample();
+    else if (cardNumber === 16) resolvedSample = card016Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
@@ -377,7 +409,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 17: IXIAosCard017 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 14: IXIAosCard014, 15: IXIAosCard015, 16: IXIAosCard016, 17: IXIAosCard017 };
 
   if (transactOpen) {
     return <div className="native-card-preview"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
