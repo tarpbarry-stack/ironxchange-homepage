@@ -5,6 +5,7 @@ const ROUTES=new Map([
  ["POST /financial/commands/create",true],
  ["POST /financial/records/resolve",true],
  ["POST /financial/search",true],
+ ["GET /financial/access-context",true],
  ["GET /financial/health",true]
 ]);
 
