@@ -7,6 +7,7 @@ on:
       - "pages/transact/**"
       - "pages/api/ixi-financial/**"
       - "scripts/verifyTransactDashboardContracts.mjs"
+      - "scripts/verifyTransactActionExecutionContracts.mjs"
       - "next.config.js"
       - "package.json"
       - ".github/workflows/transact-dashboard-ci.yml"
@@ -18,6 +19,7 @@ on:
       - "pages/transact/**"
       - "pages/api/ixi-financial/**"
       - "scripts/verifyTransactDashboardContracts.mjs"
+      - "scripts/verifyTransactActionExecutionContracts.mjs"
       - "next.config.js"
       - "package.json"
       - ".github/workflows/transact-dashboard-ci.yml"
@@ -49,5 +51,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verify TRAN$ACT dashboard contracts
         run: npm run verify-transact-dashboard
+      - name: Verify canonical action execution contracts
+        run: node scripts/verifyTransactActionExecutionContracts.mjs
       - name: Build Next production application
         run: npm run build
