@@ -1,3 +1,4 @@
+import IXIAosBusinessIdentifierSlot from "./modules/IXIAosBusinessIdentifierSlot";
 import {
   AOS_OBJECT_DATA_CONTRACT_VERSION,
   BUSINESS_IDENTIFIER_FIELD_ID,
@@ -13,10 +14,16 @@ import {
  * It does NOT decide what the object is and it does NOT inherit business meaning
  * from a parent/container. It only guarantees that every card reads/writes the
  * same portable object shape used by manual create, Excel/CSV, API and AWS.
+ *
+ * HARD CONTRACT:
+ * Every numbered card exposes the customer's durable business identifier in a
+ * dedicated visible slot. The label remains customer-defined (ID, UNIT #,
+ * ASSET #, EMPLOYEE #, etc.). IXI never derives business meaning from that label.
  */
 export default function IXIAosDataContractCardAdapter({
   children,
   minimumCustomFields = 0,
+  showBusinessIdentifier = true,
   ...props
 }) {
   const sourceObject = props?.object || {};
@@ -106,5 +113,32 @@ export default function IXIAosDataContractCardAdapter({
     aosDataContractVersion: AOS_OBJECT_DATA_CONTRACT_VERSION
   };
 
-  return typeof children === "function" ? children(contractProps) : null;
+  const rendered = typeof children === "function" ? children(contractProps) : null;
+
+  if (!showBusinessIdentifier) return rendered;
+
+  return (
+    <div className="ixi-aos-data-contract-card-shell">
+      {rendered}
+      <div className="ixi-aos-data-contract-business-id">
+        <IXIAosBusinessIdentifierSlot object={object} compact />
+      </div>
+
+      <style jsx>{`
+        .ixi-aos-data-contract-card-shell {
+          position: relative;
+          width: 298px;
+          height: 471px;
+        }
+        .ixi-aos-data-contract-business-id {
+          position: absolute;
+          top: 46px;
+          right: 9px;
+          z-index: 75;
+          width: 76px;
+          pointer-events: none;
+        }
+      `}</style>
+    </div>
+  );
 }
