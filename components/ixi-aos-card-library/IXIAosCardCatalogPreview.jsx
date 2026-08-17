@@ -12,6 +12,7 @@ import IXIAosCard009 from "../ixi-aos/cards/009/IXIAosCard009";
 import IXIAosCard010 from "../ixi-aos/cards/010/IXIAosCard010";
 import IXIAosCard011 from "../ixi-aos/cards/011/IXIAosCard011";
 import IXIAosCard012 from "../ixi-aos/cards/012/IXIAosCard012";
+import IXIAosCard013 from "../ixi-aos/cards/013/IXIAosCard013";
 import IXIAosCard017 from "../ixi-aos/cards/017/IXIAosCard017";
 import { adaptAosCardTemplate } from "../ixi-aos/card-runtime/IXIAosCardTemplateAdapter";
 import { getUniversal007PreviewItems } from "./IXIAosUniversal007PreviewData";
@@ -131,6 +132,45 @@ function card012Sample() {
   };
 }
 
+function card013Sample() {
+  return {
+    objectId: "preview-card-013", entityId: "aos-card-preview-entity", objectType: "customer-defined-object",
+    singularLabel: "DOCUMENT", pluralLabel: "DOCUMENTS", displayName: "MIDLAND YARD · SITE PLAN REV C", status: "active",
+    capabilities: { canContain: false, canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { contentTitle: "PRIMARY CONTENT", relationshipsTitle: "RELATIONSHIPS", sampleUse: "DOCUMENT / DRAWING / KNOWLEDGE RECORD" },
+    fieldDefinitions: [
+      { fieldId: "businessIdentifier", label: "DOC #", type: "text", fieldType: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
+      { fieldId: "documentType", label: "TYPE", type: "text", fieldType: "text", editable: true, presentationOrder: 1 },
+      { fieldId: "version", label: "VERSION", type: "text", fieldType: "text", editable: true, presentationOrder: 2 },
+      { fieldId: "status", label: "STATUS", type: "text", fieldType: "text", editable: true, presentationOrder: 3 },
+      { fieldId: "effectiveDate", label: "EFFECTIVE", type: "date", fieldType: "date", editable: true, presentationOrder: 4 },
+      { fieldId: "expirationDate", label: "EXPIRES", type: "date", fieldType: "date", editable: true, presentationOrder: 5 },
+      { fieldId: "owner", label: "OWNER", type: "text", fieldType: "text", editable: true, presentationOrder: 6 },
+      { fieldId: "discipline", label: "DISCIPLINE", type: "text", fieldType: "text", editable: true, presentationOrder: 7 },
+      { fieldId: "classification", label: "CLASSIFICATION", type: "text", fieldType: "text", editable: true, presentationOrder: 8 },
+      { fieldId: "revisionNote", label: "REVISION NOTE", type: "text", fieldType: "text", editable: true, presentationOrder: 9 }
+    ],
+    fields: {
+      businessIdentifier: "SP-204-C",
+      documentType: "SITE PLAN",
+      version: "REV C",
+      status: "CURRENT",
+      effectiveDate: "2026-08-01",
+      expirationDate: "",
+      owner: "FACILITIES",
+      discipline: "CIVIL",
+      classification: "CONTROLLED",
+      revisionNote: "WEST ACCESS UPDATE"
+    },
+    relationships: [
+      { id: "c013-rel-1", displayLabel: "APPLIES TO", displayName: "MIDLAND YARD" },
+      { id: "c013-rel-2", displayLabel: "RESPONSIBLE GROUP", displayName: "FACILITIES" },
+      { id: "c013-rel-3", displayLabel: "RELATED PROJECT", displayName: "WEST YARD EXPANSION" }
+    ],
+    media: [], metadata: { sampleUse: "DOCUMENT / DRAWING / KNOWLEDGE RECORD", nomenclature: { singular: "DOCUMENT", plural: "DOCUMENTS" } }
+  };
+}
+
 function card017Sample() {
   return {
     objectId: "preview-card-017", entityId: "aos-card-preview-entity", objectType: "customer-defined-container",
@@ -179,6 +219,7 @@ function previewObject(template = {}, sample = {}) {
     else if (cardNumber === 9) resolvedSample = card009Sample();
     else if (cardNumber === 11) resolvedSample = card011Sample();
     else if (cardNumber === 12) resolvedSample = card012Sample();
+    else if (cardNumber === 13) resolvedSample = card013Sample();
     else if (cardNumber === 17) resolvedSample = card017Sample();
   }
   const sampleFields = safeObject(resolvedSample?.fields);
@@ -292,7 +333,7 @@ export default function IXIAosCardCatalogPreview({ template = null, sampleData =
   const current = state[object.objectId] || {};
   const cardNumber = resolveCatalogCardNumber(template);
   const ContainerCard = cardNumber === 4 ? IXIAosCard004Personnel : cardNumber === 5 ? IXIAosCard005Personnel : cardNumber === 6 ? IXIAosCard006Personnel : null;
-  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 17: IXIAosCard017 };
+  const numberedObjectCards = { 7: IXIAosCard007EmployeeApplication, 8: IXIAosCard008Profile, 9: IXIAosCard009, 10: IXIAosCard010, 11: IXIAosCard011, 12: IXIAosCard012, 13: IXIAosCard013, 17: IXIAosCard017 };
 
   if (transactOpen) {
     return <div className="native-card-preview"><IXITransactObjectConsole object={object} ixiState={current} onIxiStateChange={update} onClose={() => setTransactOpen(false)} /><style jsx>{`.native-card-preview{position:relative;width:298px;height:471px}`}</style></div>;
