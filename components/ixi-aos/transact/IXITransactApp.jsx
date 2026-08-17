@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import IXIMachineRail from "../../IXIMachineRail";
 import { createIXITransactContext } from "./IXITransactContext";
 import { getIXITransactModules } from "./IXITransactModuleRegistry";
+import IXIAccessPolicyApp from "./modules/access-policy/IXIAccessPolicyApp";
 import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
@@ -44,6 +45,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
   async function open(item) { setModuleId(item.id); await onOpenModule?.(item, context, {}); }
   async function change(id, label, group, documentType, key, record, changePayload = {}, sourceContext = context, extra = {}) { await onOpenModule?.({ id: `${id}-${changePayload.action || "change"}`, label, group, documentType }, sourceContext, { [key]: record, change: changePayload, originatingObject: sourceContext.primary, returnTo: id, ...extra }); }
 
+  if (moduleId === "access-policy") return <IXIAccessPolicyApp context={context} object={object} onBack={back} onRecordChange={(record, changePayload, sourceContext) => change("access-policy", "ACCESS / POLICY UPDATE", "security", "authority-policy", "authorityPolicy", record, changePayload, sourceContext || context)} />;
   if (moduleId === "bill") return <IXIBillStandaloneApp context={context} object={object} authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}} onBack={back} onRecordChange={(record, changePayload) => change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload)} />;
 
   let body = null;
