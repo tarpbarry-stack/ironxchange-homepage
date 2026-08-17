@@ -19,7 +19,7 @@ const WORKSPACE_INCLUDES = Object.freeze({
   executive: ["executive", "attention", "ar", "ap", "treasury", "gl-controls", "reporting"],
   ar: ["ar", "attention"],
   invoices: ["ar"],
-  sales: ["reporting"],
+  sales: ["ar", "reporting"],
   ap: ["ap", "attention"],
   bills: ["ap", "attention"],
   "purchase-orders": ["purchase-orders", "attention"],
