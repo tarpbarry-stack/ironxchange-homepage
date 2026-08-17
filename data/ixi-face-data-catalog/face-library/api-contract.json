@@ -1,0 +1,60 @@
+{
+  "schema": "ixi-face-library-api-contract-v1",
+  "basePath": "/aos/face-library",
+  "transport": {
+    "browserPath": "/api/ixi-face-library",
+    "proxy": "private-same-origin-explicit-allowlist",
+    "cache": "no-store",
+    "timeoutMs": 30000,
+    "maxBodyBytes": 1048576,
+    "optimisticConcurrency": "ETag/If-Match",
+    "idempotency": "Idempotency-Key"
+  },
+  "authority": {
+    "authentication": "IX-Core/server",
+    "tenantResolution": "IX-Core/server",
+    "effectivePermissions": "IX-Core/server",
+    "authorizedFaceDataManifest": "IX-Core/server",
+    "durablePersistence": "IX-Core/server",
+    "publishedVersionImmutability": "IX-Core/server",
+    "audit": "IX-Core/server"
+  },
+  "routes": [
+    {"method":"GET","path":"/faces","action":"library.view"},
+    {"method":"GET","path":"/faces/:faceAppId","action":"library.view"},
+    {"method":"POST","path":"/drafts","action":"face.create","idempotent":true},
+    {"method":"POST","path":"/drafts/clone","action":"face.clone","idempotent":true},
+    {"method":"PATCH","path":"/drafts/:faceAppId","action":"face.edit","requiresIfMatch":true},
+    {"method":"POST","path":"/drafts/:faceAppId/validate","action":"face.edit"},
+    {"method":"POST","path":"/drafts/:faceAppId/publish","action":"face.publish","requiresIfMatch":true,"requiresValidationToken":true,"idempotent":true},
+    {"method":"POST","path":"/faces/:faceAppId/retire","action":"face.retire","requiresIfMatch":true,"idempotent":true},
+    {"method":"PUT","path":"/faces/:faceAppId/permissions","action":"face.permissions.manage","requiresIfMatch":true,"idempotent":true},
+    {"method":"GET","path":"/assignments","action":"library.view"},
+    {"method":"POST","path":"/assignments","action":"face.assign","idempotent":true},
+    {"method":"DELETE","path":"/assignments/:assignmentId","action":"face.unassign","requiresIfMatch":true,"idempotent":true},
+    {"method":"GET","path":"/resolve","action":"library.view","description":"Return server-authorized active Face Apps for an object context."}
+  ],
+  "publishRequirements": [
+    "authenticated actor resolved server-side",
+    "company/entity scope resolved server-side",
+    "face.publish permission granted",
+    "draft version exists and is mutable",
+    "If-Match revision/etag succeeds",
+    "Face App structure valid",
+    "all required data capabilities exist",
+    "all required permission scopes granted",
+    "target object definition compatibility proven",
+    "server-authorized Face Data Manifests used for validation",
+    "published payload checksum recorded",
+    "published version made immutable",
+    "audit event recorded"
+  ],
+  "recommendedPersistence": {
+    "records": "face_library_faces",
+    "versions": "face_library_versions",
+    "assignments": "face_library_assignments",
+    "audit": "face_library_audit",
+    "idempotency": "face_library_idempotency",
+    "note": "Physical storage may be DynamoDB/PostgreSQL according to authoritative IX-Core architecture; logical guarantees are mandatory."
+  }
+}
