@@ -72,13 +72,14 @@ export default function IXITransactDashboardApp({
   const [searchValue, setSearchValue] = useState("");
   const requestRef = useRef(null);
 
+  const queryKey = JSON.stringify({ entityPassportIds, locationPassportIds, from, through, accountingPeriod, currency });
   const query = useMemo(() => createIXITransactDashboardQuery({
     scope: { entityPassportIds, locationPassportIds },
     period: { from, through, accountingPeriod },
     currency,
     filters: {},
     include: ["executive", "attention", "ar", "ap", "treasury", "gl-controls", "reporting"]
-  }), [entityPassportIds, locationPassportIds, from, through, accountingPeriod, currency]);
+  }), [queryKey]);
 
   const hasEntityScope = entityPassportIds.some(Boolean);
   const hasPeriod = Boolean(clean(accountingPeriod || through));
@@ -88,7 +89,7 @@ export default function IXITransactDashboardApp({
     requestRef.current?.abort?.();
     const controller = new AbortController();
     requestRef.current = controller;
-    setStatus(current => projection ? "refreshing" : "loading");
+    setStatus(current => current === "idle" ? "loading" : "refreshing");
     setError("");
     try {
       const result = await loadIXITransactDashboardProjection({ query, apiBaseUrl, signal: controller.signal });
@@ -99,7 +100,7 @@ export default function IXITransactDashboardApp({
       setError(cause?.message || "IXI Financial projection unavailable.");
       setStatus("error");
     }
-  }, [hasEntityScope, hasPeriod, query, apiBaseUrl, projection]);
+  }, [hasEntityScope, hasPeriod, query, apiBaseUrl]);
 
   useEffect(() => {
     if (!initialProjection) loadProjection();
@@ -130,7 +131,7 @@ export default function IXITransactDashboardApp({
     content = <div className="td-empty-state"><span>FINANCIAL SCOPE REQUIRED</span><strong>SELECT AN AUTHORIZED ENTITY</strong><p>IXI TRAN$ACT will not show company financial numbers until an authorized entity Passport has been resolved.</p></div>;
   } else if (!hasPeriod) {
     content = <div className="td-empty-state"><span>ACCOUNTING PERIOD REQUIRED</span><strong>SELECT PERIOD / AS-OF DATE</strong><p>Reporting semantics are period-aware. The dashboard will not invent a default reporting period when none is supplied.</p></div>;
-  } else if (!projection && status === "loading") {
+  } else if (!projection && (status === "loading" || status === "refreshing")) {
     content = <div className="td-empty-state"><span>IXI FINANCIAL</span><strong>LOADING VERIFIED PROJECTION</strong><p>Entity, period and financial control projections are being requested from AWS IXI Financial.</p></div>;
   } else if (status === "error" && !projection) {
     content = <div className="td-empty-state"><span>PROJECTION UNAVAILABLE</span><strong>NO FINANCIAL TRUTH DISPLAYED</strong><p>{error || "IXI Financial dashboard projection is unavailable."}</p><button type="button" onClick={loadProjection}>RETRY IXI FINANCIAL</button></div>;
