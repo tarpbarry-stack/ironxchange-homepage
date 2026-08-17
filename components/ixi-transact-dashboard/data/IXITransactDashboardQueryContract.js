@@ -9,7 +9,9 @@ export const IXI_TRANSACT_DASHBOARD_INCLUDES = Object.freeze([
   "ap",
   "treasury",
   "gl-controls",
-  "reporting"
+  "reporting",
+  "operations",
+  "work-orders"
 ]);
 
 export function normalizeIXITransactDashboardScope(scope = {}) {
@@ -48,7 +50,7 @@ export function createIXITransactDashboardQuery({
 
   return {
     contract: "ixi-transact-dashboard-query",
-    contractVersion: "1.0.0",
+    contractVersion: "1.1.0",
     scope: normalizeIXITransactDashboardScope(scope),
     period: normalizeIXITransactDashboardPeriod(period),
     currency: /^[A-Z]{3}$/.test(clean(currency).toUpperCase()) ? clean(currency).toUpperCase() : "USD",
