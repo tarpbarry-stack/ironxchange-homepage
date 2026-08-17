@@ -16,32 +16,39 @@ export default function IXIObjectStudioHeader({
   studio
 }) {
 
-  const [
-    launching,
-    setLaunching
-  ] = useState(false);
+  const [launching, setLaunching] =
+    useState(false);
 
-  const [
-    launchError,
-    setLaunchError
-  ] = useState("");
+  const [launchError, setLaunchError] =
+    useState("");
 
-  const [
-    launchIdentity,
-    setLaunchIdentity
-  ] = useState(null);
+  const [launchIdentity, setLaunchIdentity] =
+    useState(null);
 
 
   const objectName =
-    studio
-      ?.objectDraft
-      ?.displayName ||
+    studio?.objectDraft?.displayName ||
     "UNTITLED OBJECT";
+
+  const untouchedProofFixture =
+    studio?.objectDraft?.objectId ===
+      "studio:proof-object" &&
+    String(objectName).trim().toUpperCase() ===
+      "2020 FORD F350";
+
+  const customerNameReady =
+    Boolean(String(objectName).trim()) &&
+    ![
+      "UNTITLED OBJECT",
+      "NEW OBJECT"
+    ].includes(
+      String(objectName).trim().toUpperCase()
+    ) &&
+    !untouchedProofFixture;
 
 
   const status =
-    launchIdentity &&
-    !studio?.dirty
+    launchIdentity && !studio?.dirty
       ? "COMMITTED"
       : studio?.dirty
         ? "DRAFT"
@@ -53,23 +60,27 @@ export default function IXIObjectStudioHeader({
       return;
     }
 
+    if (!customerNameReady) {
+      setLaunchError(
+        "Name the Object before permanent creation."
+      );
+      return;
+    }
+
     setLaunching(true);
     setLaunchError("");
 
     try {
       const result =
-        studio
-          ?.buildLaunchPayload?.();
+        studio?.buildLaunchPayload?.();
 
       if (!result?.ok) {
         const error = new Error(
           result?.errors?.[0] ||
           "Object Studio validation failed."
         );
-
         error.code =
           "AOS_STUDIO_VALIDATION_FAILED";
-
         throw error;
       }
 
@@ -82,10 +93,8 @@ export default function IXIObjectStudioHeader({
         const error = new Error(
           "Sign in before permanently creating an AOS Object."
         );
-
         error.code =
           "AOS_STUDIO_AUTH_REQUIRED";
-
         throw error;
       }
 
@@ -96,10 +105,8 @@ export default function IXIObjectStudioHeader({
         const error = new Error(
           "Object Studio could not resolve the active AOS Entity."
         );
-
         error.code =
           "AOS_STUDIO_ENTITY_REQUIRED";
-
         throw error;
       }
 
@@ -107,12 +114,9 @@ export default function IXIObjectStudioHeader({
         await commitAosStudioLaunch({
           launchPayload:
             result.payload,
-
           entityId,
-
           actorId:
-            environment?.userId ||
-            null
+            environment?.userId || null
         });
 
       if (
@@ -123,10 +127,8 @@ export default function IXIObjectStudioHeader({
         const error = new Error(
           "Object Studio could not verify the permanent Object + Passport + TRAN$ACT identity."
         );
-
         error.code =
           "AOS_STUDIO_COMMIT_UNVERIFIED";
-
         throw error;
       }
 
@@ -163,14 +165,11 @@ export default function IXIObjectStudioHeader({
     <header className="studio-header">
 
       <div className="header-left">
-
         <span className="eyebrow">
           IXI OBJECT STUDIO
         </span>
 
-        <strong>
-          {objectName}
-        </strong>
+        <strong>{objectName}</strong>
 
         {launchIdentity ? (
           <span className="identity-line">
@@ -181,47 +180,37 @@ export default function IXIObjectStudioHeader({
             {launchError}
           </span>
         ) : null}
-
       </div>
 
 
       <div className="header-status">
-
         <span
           className={
-            launchIdentity &&
-            !studio?.dirty
+            launchIdentity && !studio?.dirty
               ? "committed"
               : studio?.dirty
                 ? "dirty"
                 : "ready"
           }
         />
-
         {status}
-
       </div>
 
 
       <div className="header-actions">
-
-        <button
-          type="button"
-        >
+        <button type="button">
           SAVE DESIGN
         </button>
-
 
         <button
           type="button"
           className="launch"
           disabled={
             !studio?.valid ||
+            !customerNameReady ||
             launching
           }
-          onClick={
-            handleLaunch
-          }
+          onClick={handleLaunch}
         >
           {launching
             ? "COMMITTING…"
@@ -229,12 +218,10 @@ export default function IXIObjectStudioHeader({
               ? "SAVE OBJECT"
               : "OBJECT LAUNCH"}
         </button>
-
       </div>
 
 
       <style jsx>{`
-
         .studio-header {
           min-height: 58px;
           display: grid;
@@ -348,9 +335,7 @@ export default function IXIObjectStudioHeader({
           opacity: .35;
           cursor: default;
         }
-
       `}</style>
-
     </header>
   );
 }
