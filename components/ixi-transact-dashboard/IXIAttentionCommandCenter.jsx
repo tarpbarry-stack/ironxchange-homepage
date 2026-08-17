@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import IXIEnterpriseDataTable from "./components/IXIEnterpriseDataTable";
+import IXIAttentionRecordInspector from "./IXIAttentionRecordInspector";
 import {createIXITransactDashboardQuery} from "./data/IXITransactDashboardQueryContract";
 import {loadIXITransactDashboardProjection} from "./data/IXITransactDashboardClient";
 
@@ -7,119 +8,16 @@ const clean=value=>String(value??"").trim();
 const rows=value=>Array.isArray(value)?value:[];
 const severityRank={critical:0,warning:1,attention:2,info:3};
 
-function normalizeAttention(items=[]){
-  return rows(items).map((item,index)=>({
-    ...item,
-    _key:clean(item.alertId||item.sourceRecordId||item.recordId||item.financialDocumentId)||`attention-${index}`,
-    severity:clean(item.severity||"attention").toLowerCase()
-  })).sort((a,b)=>(severityRank[a.severity]??9)-(severityRank[b.severity]??9));
-}
+function normalizeAttention(items=[]){return rows(items).map((item,index)=>({...item,_key:clean(item.alertId||item.sourceRecordId||item.recordId||item.financialDocumentId)||`attention-${index}`,severity:clean(item.severity||"attention").toLowerCase()})).sort((a,b)=>(severityRank[a.severity]??9)-(severityRank[b.severity]??9));}
+function formatAmount(item={}){if(item.amount===null||item.amount===undefined||item.amount==="")return "—";const amount=Number(item.amount);if(!Number.isFinite(amount))return "—";const currency=/^[A-Z]{3}$/.test(clean(item.currency).toUpperCase())?clean(item.currency).toUpperCase():"USD";return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0}).format(amount);}
 
-function formatAmount(item={}){
-  if(item.amount===null||item.amount===undefined||item.amount==="")return "—";
-  const amount=Number(item.amount);
-  if(!Number.isFinite(amount))return "—";
-  const currency=/^[A-Z]{3}$/.test(clean(item.currency).toUpperCase())?clean(item.currency).toUpperCase():"USD";
-  return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0}).format(amount);
-}
-
-function safeHref(value){
-  const href=clean(value);
-  return href.startsWith("/")&&!href.startsWith("//")?href:"";
-}
-
-export default function IXIAttentionCommandCenter({
-  open=false,
-  entityPassportId="",
-  accountingPeriod="",
-  locationPassportId="",
-  onClose=null,
-  onOpenRecord=null
-}){
-  const[status,setStatus]=useState("idle");
-  const[projection,setProjection]=useState(null);
-  const[error,setError]=useState("");
-  const requestRef=useRef(null);
-  const query=useMemo(()=>createIXITransactDashboardQuery({
-    scope:{
-      entityPassportIds:clean(entityPassportId)?[clean(entityPassportId)]:[],
-      locationPassportIds:clean(locationPassportId)?[clean(locationPassportId)]:[]
-    },
-    period:{accountingPeriod:clean(accountingPeriod)},
-    include:["attention"],
-    filters:{workspace:"attention"}
-  }),[entityPassportId,accountingPeriod,locationPassportId]);
-
-  useEffect(()=>{
-    if(!open)return undefined;
-    if(!clean(entityPassportId)||!clean(accountingPeriod)){
-      setProjection(null);
-      setStatus("scope-required");
-      setError("");
-      return undefined;
-    }
-    requestRef.current?.abort?.();
-    const controller=new AbortController();
-    requestRef.current=controller;
-    setStatus("loading");
-    setError("");
-    loadIXITransactDashboardProjection({query,signal:controller.signal,bypassCache:true})
-      .then(result=>{
-        if(controller.signal.aborted)return;
-        setProjection(result);
-        setStatus(result.status==="partial"?"partial":"current");
-      })
-      .catch(cause=>{
-        if(cause?.name==="AbortError")return;
-        setProjection(null);
-        setStatus("error");
-        setError(clean(cause?.message)||"IXI Financial Attention projection is unavailable.");
-      });
-    return()=>controller.abort();
-  },[open,query,entityPassportId,accountingPeriod]);
-
-  if(!open)return null;
-  const attention=normalizeAttention(projection?.attention);
-  const critical=attention.filter(item=>item.severity==="critical").length;
-  const warnings=attention.filter(item=>item.severity==="warning").length;
-  const columns=[
-    {key:"severity",label:"SEVERITY",width:"110px",render:item=><span className={`td-status-pill ${item.severity==="critical"||item.severity==="warning"?"bad":""}`}>{item.severity.toUpperCase()}</span>},
-    {key:"title",label:"ATTENTION",width:"minmax(190px,1.2fr)",render:item=><strong>{item.title||item.type||"ATTENTION ITEM"}</strong>},
-    {key:"detail",label:"DETAIL",width:"minmax(280px,2fr)",render:item=>item.detail||item.description||"—"},
-    {key:"sourceRecordId",label:"SOURCE",width:"minmax(150px,1fr)",render:item=>item.sourceRecordId||item.recordId||item.financialDocumentId||"—"},
-    {key:"amount",label:"EXPOSURE",width:"140px",render:formatAmount},
-    {key:"actionLabel",label:"NEXT ACTION",width:"150px",render:item=>item.actionLabel||"OPEN SOURCE"}
-  ];
-  const openRecord=item=>{
-    if(typeof onOpenRecord==="function")return onOpenRecord(item);
-    const href=safeHref(item.canonicalHref||item.sourceHref);
-    if(href&&typeof window!=="undefined")window.location.assign(href);
-  };
-
-  return <div className="td-attention-command-layer" role="dialog" aria-modal="true" aria-label="IXI TRAN$ACT Attention Center">
-    <button type="button" className="td-attention-command-backdrop" aria-label="Close Attention Center" onClick={onClose}/>
-    <section className="td-attention-command-center">
-      <header className="td-attention-command-head">
-        <div><span>IXI TRAN$ACT · CONTROL QUEUE</span><strong>ATTENTION CENTER</strong><small>AUTHORIZED SERVER PROJECTION · {clean(accountingPeriod)||"PERIOD REQUIRED"}</small></div>
-        <button type="button" onClick={onClose}>CLOSE</button>
-      </header>
-      <div className="td-attention-command-kpis">
-        <div><span>OPEN ITEMS</span><strong>{status==="current"||status==="partial"?attention.length:"—"}</strong></div>
-        <div><span>CRITICAL</span><strong>{status==="current"||status==="partial"?critical:"—"}</strong></div>
-        <div><span>WARNINGS</span><strong>{status==="current"||status==="partial"?warnings:"—"}</strong></div>
-        <div><span>PROJECTION</span><strong>{status.toUpperCase()}</strong></div>
-      </div>
-      <div className="td-attention-command-body">
-        {status==="scope-required"?<div className="td-empty-state"><span>FINANCIAL SCOPE REQUIRED</span><strong>SELECT ENTITY + ACCOUNTING PERIOD</strong><p>Attention never invents a default financial scope.</p></div>:null}
-        {status==="loading"?<div className="td-empty-state"><span>IXI FINANCIAL</span><strong>LOADING VERIFIED ATTENTION QUEUE</strong></div>:null}
-        {status==="error"?<div className="td-empty-state"><span>ATTENTION PROJECTION UNAVAILABLE</span><strong>NO CONTROL QUEUE DISPLAYED</strong><p>{error}</p></div>:null}
-        {(status==="current"||status==="partial")&&attention.length?<IXIEnterpriseDataTable rows={attention} columns={columns} rowKey={item=>item._key} onRowOpen={openRecord} emptyLabel="NO ACTIVE ATTENTION ITEMS" ariaLabel="IXI TRAN$ACT Attention queue"/>:null}
-        {(status==="current"||status==="partial")&&!attention.length?<div className="td-empty-state"><span>CONTROL QUEUE</span><strong>NO ACTIVE ATTENTION ITEMS</strong><p>No server-projected exceptions exist in the selected authorized scope.</p></div>:null}
-        {status==="partial"?<div className="td-drawer-note">PARTIAL ATTENTION PROJECTION · Missing server sections are never treated as zero or healthy state.</div>:null}
-      </div>
-    </section>
-    <style jsx global>{`
-      .td-attention-command-layer{position:fixed;inset:0;z-index:1200;display:flex;align-items:stretch;justify-content:flex-end;font-family:Arial,Helvetica,sans-serif}.td-attention-command-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.72);cursor:default}.td-attention-command-center{position:relative;width:min(1500px,92vw);height:100vh;background:#090b0c;border-left:1px solid #34393c;box-shadow:-20px 0 60px rgba(0,0,0,.55);display:flex;flex-direction:column;color:#edf0f2}.td-attention-command-head{height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #303432;background:linear-gradient(180deg,#171a1c,#0c0e0f)}.td-attention-command-head div{display:grid;gap:4px}.td-attention-command-head span,.td-attention-command-head small{font-size:9px;letter-spacing:1.5px;color:#8e969a}.td-attention-command-head strong{font-size:20px;letter-spacing:1px;color:#ffc400}.td-attention-command-head button{border:1px solid #42484c;background:#111416;color:#dfe4e6;padding:9px 15px;font-size:10px;font-weight:800;letter-spacing:1px}.td-attention-command-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid #303432}.td-attention-command-kpis>div{min-height:76px;padding:13px 18px;border-right:1px solid #25292b;display:grid;align-content:center;gap:5px}.td-attention-command-kpis span{font-size:8px;letter-spacing:1.4px;color:#80888c}.td-attention-command-kpis strong{font-size:19px;letter-spacing:.5px}.td-attention-command-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 28px}.td-attention-command-body .td-enterprise-table{min-height:420px}@media(max-width:1200px){.td-attention-command-center{width:100vw}.td-attention-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    `}</style>
-  </div>;
+export default function IXIAttentionCommandCenter({open=false,entityPassportId="",accountingPeriod="",locationPassportId="",onClose=null,onOpenRecord=null}){
+ const[status,setStatus]=useState("idle"),[projection,setProjection]=useState(null),[error,setError]=useState(""),[selectedRecord,setSelectedRecord]=useState(null);const requestRef=useRef(null);
+ const query=useMemo(()=>createIXITransactDashboardQuery({scope:{entityPassportIds:clean(entityPassportId)?[clean(entityPassportId)]:[],locationPassportIds:clean(locationPassportId)?[clean(locationPassportId)]:[]},period:{accountingPeriod:clean(accountingPeriod)},include:["attention"],filters:{workspace:"attention"}}),[entityPassportId,accountingPeriod,locationPassportId]);
+ useEffect(()=>{if(!open){setSelectedRecord(null);return undefined}if(!clean(entityPassportId)||!clean(accountingPeriod)){setProjection(null);setStatus("scope-required");setError("");return undefined}requestRef.current?.abort?.();const controller=new AbortController();requestRef.current=controller;setStatus("loading");setError("");loadIXITransactDashboardProjection({query,signal:controller.signal,bypassCache:true}).then(result=>{if(controller.signal.aborted)return;setProjection(result);setStatus(result.status==="partial"?"partial":"current")}).catch(cause=>{if(cause?.name==="AbortError")return;setProjection(null);setStatus("error");setError(clean(cause?.message)||"IXI Financial Attention projection is unavailable.")});return()=>controller.abort()},[open,query,entityPassportId,accountingPeriod]);
+ if(!open)return null;
+ const attention=normalizeAttention(projection?.attention),critical=attention.filter(item=>item.severity==="critical").length,warnings=attention.filter(item=>item.severity==="warning").length;
+ const columns=[{key:"severity",label:"SEVERITY",width:"110px",render:item=><span className={`td-status-pill ${item.severity==="critical"||item.severity==="warning"?"bad":""}`}>{item.severity.toUpperCase()}</span>},{key:"title",label:"ATTENTION",width:"minmax(190px,1.2fr)",render:item=><strong>{item.title||item.type||"ATTENTION ITEM"}</strong>},{key:"detail",label:"DETAIL",width:"minmax(280px,2fr)",render:item=>item.detail||item.description||"—"},{key:"sourceRecordId",label:"SOURCE",width:"minmax(150px,1fr)",render:item=>item.sourceRecordId||item.recordId||item.financialDocumentId||"—"},{key:"amount",label:"EXPOSURE",width:"140px",render:formatAmount},{key:"actionLabel",label:"NEXT ACTION",width:"150px",render:item=>item.actionLabel||"OPEN SOURCE"}];
+ const openRecord=item=>{if(typeof onOpenRecord==="function")return onOpenRecord(item);setSelectedRecord(item)};
+ return <div className="td-attention-command-layer" role="dialog" aria-modal="true" aria-label="IXI TRAN$ACT Attention Center"><button type="button" className="td-attention-command-backdrop" aria-label="Close Attention Center" onClick={onClose}/><section className="td-attention-command-center"><header className="td-attention-command-head"><div><span>IXI TRAN$ACT · CONTROL QUEUE</span><strong>ATTENTION CENTER</strong><small>AUTHORIZED SERVER PROJECTION · {clean(accountingPeriod)||"PERIOD REQUIRED"}</small></div><button type="button" onClick={onClose}>CLOSE</button></header><div className="td-attention-command-kpis"><div><span>OPEN ITEMS</span><strong>{status==="current"||status==="partial"?attention.length:"—"}</strong></div><div><span>CRITICAL</span><strong>{status==="current"||status==="partial"?critical:"—"}</strong></div><div><span>WARNINGS</span><strong>{status==="current"||status==="partial"?warnings:"—"}</strong></div><div><span>PROJECTION</span><strong>{status.toUpperCase()}</strong></div></div><div className="td-attention-command-body">{status==="scope-required"?<div className="td-empty-state"><span>FINANCIAL SCOPE REQUIRED</span><strong>SELECT ENTITY + ACCOUNTING PERIOD</strong><p>Attention never invents a default financial scope.</p></div>:null}{status==="loading"?<div className="td-empty-state"><span>IXI FINANCIAL</span><strong>LOADING VERIFIED ATTENTION QUEUE</strong></div>:null}{status==="error"?<div className="td-empty-state"><span>ATTENTION PROJECTION UNAVAILABLE</span><strong>NO CONTROL QUEUE DISPLAYED</strong><p>{error}</p></div>:null}{(status==="current"||status==="partial")&&attention.length?<IXIEnterpriseDataTable rows={attention} columns={columns} rowKey={item=>item._key} onRowOpen={openRecord} emptyLabel="NO ACTIVE ATTENTION ITEMS" ariaLabel="IXI TRAN$ACT Attention queue"/>:null}{(status==="current"||status==="partial")&&!attention.length?<div className="td-empty-state"><span>CONTROL QUEUE</span><strong>NO ACTIVE ATTENTION ITEMS</strong><p>No server-projected exceptions exist in the selected authorized scope.</p></div>:null}{status==="partial"?<div className="td-drawer-note">PARTIAL ATTENTION PROJECTION · Missing server sections are never treated as zero or healthy state.</div>:null}</div></section><IXIAttentionRecordInspector record={selectedRecord} entityPassportId={entityPassportId} accountingPeriod={accountingPeriod} locationPassportId={locationPassportId} onClose={()=>setSelectedRecord(null)}/><style jsx global>{`.td-attention-command-layer{position:fixed;inset:0;z-index:1200;display:flex;align-items:stretch;justify-content:flex-end;font-family:Arial,Helvetica,sans-serif}.td-attention-command-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.72);cursor:default}.td-attention-command-center{position:relative;width:min(1500px,92vw);height:100vh;background:#090b0c;border-left:1px solid #34393c;box-shadow:-20px 0 60px rgba(0,0,0,.55);display:flex;flex-direction:column;color:#edf0f2}.td-attention-command-head{height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #303432;background:linear-gradient(180deg,#171a1c,#0c0e0f)}.td-attention-command-head div{display:grid;gap:4px}.td-attention-command-head span,.td-attention-command-head small{font-size:9px;letter-spacing:1.5px;color:#8e969a}.td-attention-command-head strong{font-size:20px;letter-spacing:1px;color:#ffc400}.td-attention-command-head button{border:1px solid #42484c;background:#111416;color:#dfe4e6;padding:9px 15px;font-size:10px;font-weight:800;letter-spacing:1px}.td-attention-command-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid #303432}.td-attention-command-kpis>div{min-height:76px;padding:13px 18px;border-right:1px solid #25292b;display:grid;align-content:center;gap:5px}.td-attention-command-kpis span{font-size:8px;letter-spacing:1.4px;color:#80888c}.td-attention-command-kpis strong{font-size:19px;letter-spacing:.5px}.td-attention-command-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 28px}.td-attention-command-body .td-enterprise-table{min-height:420px}@media(max-width:1200px){.td-attention-command-center{width:100vw}.td-attention-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}`}</style></div>;
 }
