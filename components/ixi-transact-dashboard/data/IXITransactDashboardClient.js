@@ -2,6 +2,10 @@ import {
   createIXITransactDashboardQuery,
   validateIXITransactDashboardQuery
 } from "./IXITransactDashboardQueryContract";
+import {
+  getIXITransactDashboardCache,
+  setIXITransactDashboardCache
+} from "./IXITransactDashboardCache";
 
 const clean = value => String(value ?? "").trim();
 const safeArray = value => Array.isArray(value) ? value : [];
@@ -80,7 +84,9 @@ export async function loadIXITransactDashboardProjection({
   query = {},
   apiBaseUrl = "",
   headers = {},
-  signal = undefined
+  signal = undefined,
+  bypassCache = false,
+  cacheTtlMs = 60000
 } = {}) {
   const normalizedQuery = createIXITransactDashboardQuery(query);
   const validation = validateIXITransactDashboardQuery(normalizedQuery);
@@ -89,6 +95,11 @@ export async function loadIXITransactDashboardProjection({
       code: validation.errors[0]?.code || "invalid-dashboard-query",
       result: validation
     });
+  }
+
+  if (!bypassCache) {
+    const cached = getIXITransactDashboardCache(normalizedQuery, cacheTtlMs);
+    if (cached) return cached;
   }
 
   const endpoint = getIXITransactDashboardEndpoint({ apiBaseUrl });
@@ -135,6 +146,7 @@ export async function loadIXITransactDashboardProjection({
     );
   }
 
+  setIXITransactDashboardCache(normalizedQuery, result);
   return result;
 }
 
