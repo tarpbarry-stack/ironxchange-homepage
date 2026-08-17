@@ -170,6 +170,26 @@ function withLocalCardDrafts(templates = []) {
     });
   });
 
+  if (!source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === 17)) {
+    source.push({
+      templateNumber: 17,
+      templateSlug: "aos-card-017",
+      label: "Card 017",
+      librarySection: "AOS CONTAINER LAYOUTS",
+      baseObjectType: "customer-defined-container",
+      version: 12,
+      fieldSchema: [],
+      capabilities: genericContainerCapabilities({}),
+      metadata: {
+        localCardDraft: true,
+        cardNumber: "017",
+        visualLanguage: "v12",
+        renderer: "schema-driven-generic-structural-container",
+        sampleUse: "STRUCTURAL HIERARCHY / DIRECTORY"
+      }
+    });
+  }
+
   return source.sort((a, b) => Number(a?.templateNumber || 999) - Number(b?.templateNumber || 999));
 }
 
