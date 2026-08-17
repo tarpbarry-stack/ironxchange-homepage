@@ -1,10 +1,21 @@
 import {
-  createMosObject,
+  useRef
+} from "react";
+
+import {
   placeMosObject,
-  createMosCommandId,
   updateMosObject,
   deleteMosObject
 } from "../../../lib/mos/ixiMosClient";
+
+import {
+  provisionAosObject
+} from "../../../lib/mos/ixiAosProvisioningClient";
+
+import {
+  createAosDraftId,
+  isAosDraftId
+} from "../../../lib/mos/ixiAosProvisioningContract";
 
 import {
   loadIXIMosEnvironment
@@ -17,6 +28,9 @@ import {
 
 const IXI_SYSTEM_INDEX_TEMPLATE_ID =
   "ixi-system-index-v1";
+
+const DRAFT_DISPLAY_NAME =
+  "NEW OBJECT";
 
 
 function clean(value) {
@@ -44,11 +58,58 @@ function safeObject(value) {
 }
 
 
+function safeArray(value) {
+  return Array.isArray(value)
+    ? value
+    : [];
+}
+
+
+function replaceWorkspaceObjectId(
+  placements,
+  fromObjectId,
+  toObjectId
+) {
+  const fromId = clean(fromObjectId);
+  const toId = clean(toObjectId);
+
+  if (!fromId || !toId) {
+    return placements || {};
+  }
+
+  const next = {};
+
+  Object.entries(
+    placements || {}
+  ).forEach(
+    ([surfaceId, objectIds]) => {
+      const ids =
+        Array.isArray(objectIds)
+          ? objectIds
+          : [];
+
+      const replaced =
+        ids.map(objectId =>
+          String(objectId) === fromId
+            ? toId
+            : String(objectId)
+        );
+
+      next[surfaceId] = [
+        ...new Set(replaced)
+      ];
+    }
+  );
+
+  return next;
+}
+
+
 /*
  * Child-creation semantics are persisted configuration.
  *
- * We never derive a child definition from the parent's name.
- * The customer can call a container anything they want.
+ * We never derive child meaning from the parent's name.
+ * Customer vocabulary remains customer data.
  */
 function getPersistedChildDefaults(
   container = {}
@@ -103,11 +164,9 @@ function getPersistedChildDefaults(
       ),
 
     businessIdentifiers:
-      Array.isArray(
+      safeArray(
         creation?.defaultBusinessIdentifiers
-      )
-        ? creation.defaultBusinessIdentifiers
-        : [],
+      ),
 
     fields:
       safeObject(
@@ -133,6 +192,14 @@ export default function useIXIMosObjectCreation({
   setSystemIndexes,
   onObjectNotice = null
 }) {
+  /*
+   * Drafts live in browser memory only.
+   * They are deliberately absent from MOS,
+   * Passport, TRAN$ACT and persistent indexes.
+   */
+  const draftObjectsRef =
+    useRef(new Map());
+
 
   async function reloadMosEnvironment() {
     const environment =
@@ -162,8 +229,7 @@ export default function useIXIMosObjectCreation({
       position
     } = {}
   ) {
-    const id =
-      clean(objectId);
+    const id = clean(objectId);
 
     if (!id) {
       return workspacePlacements;
@@ -197,29 +263,192 @@ export default function useIXIMosObjectCreation({
   }
 
 
-  /* =========================================================
-     ROOT SYSTEM INDEX CREATION
+  function createClientOnlyDraft({
+    container,
+    definitionId = null,
+    definitionKey = null,
+    objectType = null,
+    cardTemplateSlug = null,
+    cardTemplateVersion = null,
+    businessIdentifiers = [],
+    fields = {},
+    metadata = {},
+    exposeToBoard = true
+  }) {
+    const destinationContainerId =
+      getMosObjectId(container);
 
-     System Index is an explicit IXI technical presentation role.
-     The customer-supplied displayName remains unrestricted data.
+    const draftId =
+      createAosDraftId();
 
-     We intentionally DO NOT search by displayName and silently
-     reuse another container. Names are presentation, not identity.
-     ========================================================= */
-  async function createRootSystemIndexByName(
-    rawDisplayName
-  ) {
-    const displayName =
-      clean(rawDisplayName);
+    const timestamp =
+      new Date().toISOString();
 
+    const draftObject = {
+      objectId:
+        draftId,
+
+      entityId:
+        clean(entityId),
+
+      definitionId:
+        clean(definitionId) || null,
+
+      definitionKey:
+        clean(definitionKey) || null,
+
+      objectType:
+        clean(objectType) || "generic",
+
+      displayName:
+        DRAFT_DISPLAY_NAME,
+
+      businessIdentifiers:
+        safeArray(businessIdentifiers),
+
+      fields:
+        safeObject(fields),
+
+      media: [],
+
+      cardTemplateSlug:
+        clean(cardTemplateSlug) || null,
+
+      cardTemplateVersion:
+        cardTemplateVersion ?? null,
+
+      directContainerId:
+        destinationContainerId || null,
+
+      status:
+        "draft",
+
+      source:
+        "aos-client-draft",
+
+      capabilities: {
+        canMove: true
+      },
+
+      metadata: {
+        ...safeObject(metadata),
+
+        draftOnly: true,
+        creationState: "naming",
+        destinationContainerId
+      },
+
+      createdAt:
+        timestamp,
+
+      updatedAt:
+        timestamp
+    };
+
+    draftObjectsRef.current.set(
+      draftId,
+      draftObject
+    );
+
+    setAosObjects?.(current => [
+      ...(Array.isArray(current)
+        ? current
+        : []),
+      draftObject
+    ]);
+
+    if (exposeToBoard) {
+      const nextPlacements =
+        moveObjectToWorkspaceSurface({
+          placements:
+            workspacePlacements,
+          objectId:
+            draftId,
+          targetSurface:
+            "board"
+        });
+
+      setWorkspacePlacements?.(
+        nextPlacements
+      );
+
+      /*
+       * Draft placement is intentionally not
+       * persisted. Only permanent object IDs
+       * belong in durable workspace layout.
+       */
+    }
+
+    return {
+      draft: true,
+      created: false,
+      object:
+        draftObject,
+      objectId:
+        draftId,
+      parentObjectId:
+        destinationContainerId
+    };
+  }
+
+
+  async function placeProvisionedObject({
+    objectId,
+    destinationContainerId,
+    draftId,
+    metadata = {}
+  }) {
+    if (!destinationContainerId) {
+      return null;
+    }
+
+    return placeMosObject({
+      objectId,
+      destinationContainerId,
+      actorId:
+        userId || null,
+
+      /*
+       * Stable across a retry of this draft.
+       * Container placement therefore follows
+       * the same idempotent commit intent.
+       */
+      commandId:
+        `aos-place:${draftId}`,
+
+      metadata: {
+        source:
+          "aos-container",
+        parentObjectId:
+          destinationContainerId,
+        provisioningDraftId:
+          draftId,
+        ...safeObject(metadata)
+      }
+    });
+  }
+
+
+  async function provisionPermanentObject({
+    draftId,
+    destinationContainerId = null,
+    definitionId = null,
+    definitionKey = null,
+    objectType = null,
+    displayName,
+    businessIdentifiers = [],
+    fields = {},
+    media = [],
+    cardTemplateSlug = null,
+    cardTemplateVersion = null,
+    source = "manual",
+    metadata = {}
+  }) {
     const resolvedEntityId =
       clean(entityId);
 
-    if (!displayName) {
-      throw new Error(
-        "Index name is required."
-      );
-    }
+    const name =
+      clean(displayName);
 
     if (!resolvedEntityId) {
       throw new Error(
@@ -227,53 +456,47 @@ export default function useIXIMosObjectCreation({
       );
     }
 
+    if (!name) {
+      throw new Error(
+        "Object name is required before permanent creation."
+      );
+    }
+
+    const resolvedDraftId =
+      clean(draftId) ||
+      createAosDraftId();
+
     const response =
-      await createMosObject({
+      await provisionAosObject({
         entityId:
           resolvedEntityId,
-
-        /*
-         * Technical migration path only.
-         * This does not encode customer business meaning.
-         */
-        objectType:
-          "system-index",
-
-        cardTemplateSlug:
-          IXI_SYSTEM_INDEX_TEMPLATE_ID,
-
-        displayName,
-
-        fields: {
-          parentSystemIndexId:
-            null
-        },
-
-        source:
-          "manual",
-
+        definitionId,
+        definitionKey,
+        objectType,
+        displayName:
+          name,
+        businessIdentifiers:
+          safeArray(businessIdentifiers),
+        fields:
+          safeObject(fields),
+        media:
+          safeArray(media),
+        cardTemplateSlug,
+        cardTemplateVersion,
+        source,
         actorId:
           userId || null,
-
+        draftId:
+          resolvedDraftId,
         metadata: {
-          createdFrom:
-            "aos-work",
-
-          systemIndex:
-            true,
-
-          systemIndexPresentation:
-            true,
-
-          hierarchyRole:
-            "index"
+          ...safeObject(metadata),
+          creationState:
+            "complete"
         }
       });
 
     const createdObject =
-      response?.object ||
-      response?.data ||
-      response;
+      response?.object;
 
     const createdObjectId =
       getMosObjectId(
@@ -282,9 +505,88 @@ export default function useIXIMosObjectCreation({
 
     if (!createdObjectId) {
       throw new Error(
-        "MOS created the Index but returned no objectId."
+        "IX-Core provisioned the object but returned no objectId."
       );
     }
+
+    if (
+      !clean(
+        response?.identity?.passportId
+      )
+    ) {
+      throw new Error(
+        "IX-Core provisioned the object without verified Passport identity."
+      );
+    }
+
+    await placeProvisionedObject({
+      objectId:
+        createdObjectId,
+      destinationContainerId,
+      draftId:
+        resolvedDraftId,
+      metadata
+    });
+
+    return {
+      response,
+      createdObject,
+      createdObjectId,
+      draftId:
+        resolvedDraftId
+    };
+  }
+
+
+  /* =========================================================
+     ROOT SYSTEM INDEX CREATION
+
+     System Index is an IXI technical presentation role.
+     Customer displayName remains unrestricted customer data.
+     ========================================================= */
+  async function createRootSystemIndexByName(
+    rawDisplayName
+  ) {
+    const displayName =
+      clean(rawDisplayName);
+
+    if (!displayName) {
+      throw new Error(
+        "Index name is required."
+      );
+    }
+
+    const draftId =
+      createAosDraftId();
+
+    const {
+      response,
+      createdObject,
+      createdObjectId
+    } = await provisionPermanentObject({
+      draftId,
+      objectType:
+        "system-index",
+      cardTemplateSlug:
+        IXI_SYSTEM_INDEX_TEMPLATE_ID,
+      displayName,
+      fields: {
+        parentSystemIndexId:
+          null
+      },
+      source:
+        "manual",
+      metadata: {
+        createdFrom:
+          "aos-work",
+        systemIndex:
+          true,
+        systemIndexPresentation:
+          true,
+        hierarchyRole:
+          "index"
+      }
+    });
 
     const environment =
       await reloadMosEnvironment();
@@ -296,8 +598,16 @@ export default function useIXIMosObjectCreation({
     return {
       created: true,
       existing: false,
-      object: createdObject,
-      objectId: createdObjectId,
+      object:
+        createdObject,
+      objectId:
+        createdObjectId,
+      passport:
+        response.passport,
+      identity:
+        response.identity,
+      transact:
+        response.transact,
       environment
     };
   }
@@ -306,46 +616,34 @@ export default function useIXIMosObjectCreation({
   /* =========================================================
      UNIVERSAL CHILD CREATION
 
-     Preferred path:
-       definitionId / definitionKey
+     + begins a browser-only draft when the
+     caller has not supplied a real name yet.
 
-     Universal fallback:
-       generic technical object
-
-     Never:
-       infer child meaning from the container's name.
+     No MOS object, Passport or TRAN$ACT
+     identity exists until save.
      ========================================================= */
   async function createObjectInContainer({
     container,
-
     definitionId:
       rawDefinitionId = null,
-
     definitionKey:
       rawDefinitionKey = null,
-
+    objectType:
+      rawObjectType = null,
     cardTemplateSlug:
       rawCardTemplateSlug = null,
-
     cardTemplateVersion = null,
-
     displayName:
       rawDisplayName,
-
     businessIdentifiers = null,
-
     fields = {},
     metadata = {},
-
-    exposeToBoard = true
+    exposeToBoard = true,
+    draftId:
+      suppliedDraftId = null
   }) {
     const destinationContainerId =
-      getMosObjectId(
-        container
-      );
-
-    const resolvedEntityId =
-      clean(entityId);
+      getMosObjectId(container);
 
     if (!destinationContainerId) {
       throw new Error(
@@ -353,7 +651,7 @@ export default function useIXIMosObjectCreation({
       );
     }
 
-    if (!resolvedEntityId) {
+    if (!clean(entityId)) {
       throw new Error(
         "AOS Entity is not available."
       );
@@ -385,6 +683,14 @@ export default function useIXIMosObjectCreation({
         defaults.definitionKey
       ) || null;
 
+    const objectType =
+      clean(rawObjectType) ||
+      (
+        definitionId || definitionKey
+          ? null
+          : "generic"
+      );
+
     const cardTemplateSlug =
       clean(
         rawCardTemplateSlug ||
@@ -394,108 +700,87 @@ export default function useIXIMosObjectCreation({
     const displayName =
       clean(
         rawDisplayName ||
-        defaults.displayName ||
-        "NEW OBJECT"
+        defaults.displayName
       );
 
     const resolvedBusinessIdentifiers =
-      Array.isArray(
-        businessIdentifiers
-      )
+      Array.isArray(businessIdentifiers)
         ? businessIdentifiers
         : defaults.businessIdentifiers;
 
-    const createResponse =
-      await createMosObject({
-        entityId:
-          resolvedEntityId,
+    const resolvedFields = {
+      ...defaults.fields,
+      ...safeObject(fields)
+    };
 
+    const resolvedMetadata = {
+      ...defaults.metadata,
+      createdFrom:
+        "aos-container",
+      createdInsideContainerId:
+        destinationContainerId,
+      ...safeObject(metadata)
+    };
+
+    /*
+     * The old flow persisted "NEW OBJECT".
+     * It is now treated strictly as a draft
+     * placeholder and never sent to IX-Core.
+     */
+    if (
+      !displayName ||
+      displayName === DRAFT_DISPLAY_NAME ||
+      resolvedMetadata.creationState ===
+        "naming"
+    ) {
+      return createClientOnlyDraft({
+        container,
         definitionId,
         definitionKey,
-
-        /*
-         * If no definition is selected yet, this remains a
-         * technically generic MOS Object. No business meaning
-         * is attached to the word generic.
-         */
-        objectType:
-          definitionId || definitionKey
-            ? null
-            : "generic",
-
-        displayName,
-
-        businessIdentifiers:
-          resolvedBusinessIdentifiers,
-
+        objectType,
         cardTemplateSlug,
-
         cardTemplateVersion:
           cardTemplateVersion ??
           defaults.cardTemplateVersion ??
           null,
-
-        fields: {
-          ...defaults.fields,
-          ...safeObject(fields)
-        },
-
-        source:
-          "manual",
-
-        actorId:
-          userId || null,
-
-        metadata: {
-          ...defaults.metadata,
-
-          createdFrom:
-            "aos-container",
-
-          createdInsideContainerId:
-            destinationContainerId,
-
-          ...safeObject(metadata)
-        }
+        businessIdentifiers:
+          resolvedBusinessIdentifiers,
+        fields:
+          resolvedFields,
+        metadata:
+          resolvedMetadata,
+        exposeToBoard
       });
-
-    const createdObject =
-      createResponse?.object ||
-      createResponse?.data ||
-      createResponse;
-
-    const createdObjectId =
-      getMosObjectId(
-        createdObject
-      );
-
-    if (!createdObjectId) {
-      throw new Error(
-        "MOS created the object but returned no objectId."
-      );
     }
 
-    await placeMosObject({
-      objectId:
-        createdObjectId,
+    const draftId =
+      clean(suppliedDraftId) ||
+      createAosDraftId();
 
+    const {
+      response,
+      createdObject,
+      createdObjectId
+    } = await provisionPermanentObject({
+      draftId,
       destinationContainerId,
-
-      actorId:
-        userId || null,
-
-      commandId:
-        createMosCommandId(
-          "container-add"
-        ),
-
-      metadata: {
-        source:
-          "aos-container",
-
-        parentObjectId:
-          destinationContainerId
-      }
+      definitionId,
+      definitionKey,
+      objectType,
+      displayName,
+      businessIdentifiers:
+        resolvedBusinessIdentifiers,
+      fields:
+        resolvedFields,
+      cardTemplateSlug,
+      cardTemplateVersion:
+        cardTemplateVersion ??
+        defaults.cardTemplateVersion ??
+        null,
+      source:
+        "manual",
+      metadata:
+        resolvedMetadata
     });
 
     if (exposeToBoard) {
@@ -508,10 +793,18 @@ export default function useIXIMosObjectCreation({
       await reloadMosEnvironment();
 
     return {
-      object: createdObject,
-      objectId: createdObjectId,
+      object:
+        createdObject,
+      objectId:
+        createdObjectId,
       parentObjectId:
         destinationContainerId,
+      passport:
+        response.passport,
+      identity:
+        response.identity,
+      transact:
+        response.transact,
       environment
     };
   }
@@ -541,21 +834,132 @@ export default function useIXIMosObjectCreation({
       );
     }
 
+    /* =====================================================
+       DRAFT COMMIT
+       ===================================================== */
+    if (isAosDraftId(id)) {
+      const draft =
+        draftObjectsRef.current.get(id);
+
+      if (!draft) {
+        throw new Error(
+          "AOS draft is no longer available. Re-open creation and try again."
+        );
+      }
+
+      const destinationContainerId =
+        clean(
+          draft?.metadata
+            ?.destinationContainerId ||
+          draft?.directContainerId
+        ) || null;
+
+      const {
+        response,
+        createdObject,
+        createdObjectId
+      } = await provisionPermanentObject({
+        draftId:
+          id,
+        destinationContainerId,
+        definitionId:
+          draft.definitionId,
+        definitionKey:
+          draft.definitionKey,
+        objectType:
+          draft.objectType,
+        displayName:
+          name,
+        businessIdentifiers:
+          draft.businessIdentifiers,
+        fields: {
+          ...safeObject(draft.fields),
+          ...safeObject(fields)
+        },
+        media:
+          draft.media,
+        cardTemplateSlug:
+          draft.cardTemplateSlug,
+        cardTemplateVersion:
+          draft.cardTemplateVersion,
+        source:
+          "manual",
+        metadata: {
+          ...safeObject(draft.metadata),
+          ...safeObject(metadata),
+          draftOnly:
+            false,
+          creationState:
+            "complete"
+        }
+      });
+
+      /*
+       * Do not mutate/remove the draft until
+       * Object + Passport + containment have
+       * all succeeded. If any step fails, the
+       * same draftId can safely retry.
+       */
+      const nextPlacements =
+        replaceWorkspaceObjectId(
+          workspacePlacements,
+          id,
+          createdObjectId
+        );
+
+      setWorkspacePlacements?.(
+        nextPlacements
+      );
+
+      await saveWorkspaceLayout?.(
+        nextPlacements
+      );
+
+      draftObjectsRef.current.delete(id);
+
+      const environment =
+        await reloadMosEnvironment();
+
+      onObjectNotice?.({
+        objectId:
+          createdObjectId,
+        message:
+          `${name} SAVED`,
+        tone:
+          "success"
+      });
+
+      return {
+        object:
+          createdObject,
+        objectId:
+          createdObjectId,
+        passport:
+          response.passport,
+        identity:
+          response.identity,
+        transact:
+          response.transact,
+        environment
+      };
+    }
+
+    /* =====================================================
+       PERMANENT OBJECT EDIT
+
+       Editing never provisions a new Passport.
+       ===================================================== */
     const response =
       await updateMosObject({
         objectId:
           id,
-
         displayName:
           name,
-
         ...(fields !== undefined
           ? { fields }
           : {}),
-
         actorId:
           userId || null,
-
         metadata: {
           ...safeObject(metadata),
           creationState:
@@ -573,17 +977,17 @@ export default function useIXIMosObjectCreation({
     onObjectNotice?.({
       objectId:
         id,
-
       message:
         `${name} SAVED`,
-
       tone:
         "success"
     });
 
     return {
-      object: updatedObject,
-      objectId: id
+      object:
+        updatedObject,
+      objectId:
+        id
     };
   }
 
@@ -592,14 +996,60 @@ export default function useIXIMosObjectCreation({
     object
   ) {
     const objectId =
-      getMosObjectId(
-        object
-      );
+      getMosObjectId(object);
 
     if (!objectId) {
       throw new Error(
         "Object ID is required."
       );
+    }
+
+    /*
+     * Canceling an unsaved draft has no
+     * server-side identity to delete.
+     */
+    if (isAosDraftId(objectId)) {
+      draftObjectsRef.current.delete(
+        objectId
+      );
+
+      setAosObjects?.(current =>
+        (Array.isArray(current)
+          ? current
+          : []
+        ).filter(
+          item =>
+            getMosObjectId(item) !==
+            objectId
+        )
+      );
+
+      const nextPlacements = {};
+
+      Object.entries(
+        workspacePlacements || {}
+      ).forEach(
+        ([surfaceId, objectIds]) => {
+          nextPlacements[surfaceId] =
+            Array.isArray(objectIds)
+              ? objectIds.filter(
+                  id =>
+                    String(id) !==
+                    objectId
+                )
+              : [];
+        }
+      );
+
+      setWorkspacePlacements?.(
+        nextPlacements
+      );
+
+      return {
+        deleted: true,
+        draft: true,
+        objectId
+      };
     }
 
     await deleteMosObject({
