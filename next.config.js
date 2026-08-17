@@ -2,6 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  async rewrites() {
+    return [
+      {
+        source: "/financial/:path*",
+        destination: "/api/ixi/financial/:path*"
+      }
+    ];
+  },
+
   webpack(config, { isServer }) {
     /*
      * ExcelJS publishes a browser bundle specifically for client use.
