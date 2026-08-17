@@ -1,0 +1,152 @@
+{
+  "sourceId": "aos-object-contract",
+  "version": 1,
+  "sourceTruth": [
+    "components/ixi-aos/card-runtime/IXIAosObjectDataContract.js",
+    "components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js"
+  ],
+  "capabilities": [
+    {
+      "capabilityId": "aos.object.identity.objectId",
+      "type": "identity",
+      "exposure": "face-safe-now",
+      "readPath": "object.objectId|object.id",
+      "notes": "Stable IXI object identity. Do not substitute customer labels."
+    },
+    {
+      "capabilityId": "aos.object.identity.displayName",
+      "type": "identity",
+      "exposure": "face-safe-now",
+      "readPath": "displayName/label/name/title/fields",
+      "notes": "Customer-facing object name resolved by semantic presentation adapter."
+    },
+    {
+      "capabilityId": "aos.object.identity.businessIdentifiers",
+      "type": "identity",
+      "exposure": "face-safe-now",
+      "dataContractVersion": 2,
+      "canonicalPersistedPath": "object.businessIdentifiers[]",
+      "syntheticEditorField": "businessIdentifier",
+      "semanticRole": "business-identifier",
+      "importable": true,
+      "exportable": true,
+      "apiAddressable": true,
+      "notes": "Company/customer identifier is distinct from IXI objectId, Passport, serial or VIN."
+    },
+    {
+      "capabilityId": "aos.object.fields.definitions",
+      "type": "schema",
+      "exposure": "face-safe-now",
+      "properties": [
+        "fieldId",
+        "label",
+        "fieldType",
+        "presentationRole",
+        "presentationOrder",
+        "editable",
+        "importable",
+        "exportable",
+        "apiAddressable",
+        "importAliases",
+        "aggregate"
+      ],
+      "notes": "Customer labels are presentation truth; fieldId/role are machine truth."
+    },
+    {
+      "capabilityId": "aos.object.fields.values",
+      "type": "data",
+      "exposure": "face-safe-now",
+      "readPath": "object.fields[fieldId]",
+      "write": "only through approved AOS save/mutation contract and effective permissions"
+    },
+    {
+      "capabilityId": "aos.object.relationships",
+      "type": "relationship",
+      "exposure": "face-safe-now",
+      "readPath": "object.relationships[]",
+      "properties": [
+        "relationshipId/id",
+        "displayLabel/label",
+        "displayName/value/targetDisplayName",
+        "secondary",
+        "raw relationship metadata"
+      ],
+      "permissionAware": true,
+      "notes": "Relationship visibility is filtered by effective permissions. Face compilers must use persisted relationship roles/metadata rather than infer semantics from labels."
+    },
+    {
+      "capabilityId": "aos.object.capabilities",
+      "type": "capability",
+      "exposure": "face-safe-now",
+      "readSources": [
+        "definition.capabilities",
+        "metadata.capabilities",
+        "fields.capabilities",
+        "object.capabilities"
+      ],
+      "notes": "Capabilities, not object nouns, govern behavior."
+    },
+    {
+      "capabilityId": "aos.object.actionCapabilities",
+      "type": "authorization",
+      "exposure": "face-safe-now",
+      "actions": [
+        "canView",
+        "canCreate",
+        "canEdit",
+        "canTransact",
+        "canOpenConsole",
+        "canDelete",
+        "canHide"
+      ],
+      "permissionAware": true,
+      "notes": "Resolved from capabilities plus effective permissions; explicit denial wins."
+    },
+    {
+      "capabilityId": "aos.object.media.primaryImage",
+      "type": "media",
+      "exposure": "face-safe-now",
+      "readSources": [
+        "object.media[]",
+        "primaryImageUrl",
+        "presentation.primaryImageUrl"
+      ],
+      "permissionAware": true
+    },
+    {
+      "capabilityId": "aos.container.childAggregates",
+      "type": "aggregate",
+      "exposure": "face-safe-now",
+      "supportedModes": [
+        "count-each-value",
+        "count-by-value"
+      ],
+      "source": "persisted child field aggregate metadata",
+      "notes": "Direct visible children are aggregated by persisted definitions. Never infer aggregate meaning from container names."
+    },
+    {
+      "capabilityId": "aos.container.directChildren",
+      "type": "containment",
+      "exposure": "face-safe-now",
+      "notes": "Container/card runtime can operate on supplied direct children. Direct count must not be confused with descendants."
+    },
+    {
+      "capabilityId": "aos.container.totalDescendants",
+      "type": "containment",
+      "exposure": "needs-projection",
+      "notes": "Must be explicitly supplied by AWS/object projection. Face runtime must never invent recursive descendant count."
+    },
+    {
+      "capabilityId": "aos.object.customFields",
+      "type": "schema-extension",
+      "exposure": "face-safe-now",
+      "notes": "Stable custom field IDs can be created through the object data contract and remain import/export/API addressable."
+    }
+  ],
+  "authoritativeDoctrine": {
+    "onePersistedContractForManualImportApiAndCards": true,
+    "customerLabelsAuthoritative": true,
+    "semanticMeaningDerivedFromLabels": false,
+    "permissionsResolvedByServerPreferred": true
+  }
+}
