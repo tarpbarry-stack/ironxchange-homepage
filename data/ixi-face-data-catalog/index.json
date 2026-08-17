@@ -1,0 +1,87 @@
+{
+  "catalogId": "ixi-face-data-catalog",
+  "version": 1,
+  "status": "foundation-repository-derived",
+  "updatedAt": "2026-08-17",
+  "doctrine": {
+    "customerVocabularyAuthoritative": true,
+    "stableSemanticIdsRequired": true,
+    "inferBusinessMeaningFromLabels": false,
+    "faceIsApplicationModule": true,
+    "face1PrimaryBounded": true,
+    "secondaryFacesAreApplications": true,
+    "transactIsSingleUniversalModule": true,
+    "marketplaceHasTransact": false,
+    "facesMayReadTransactProjections": true,
+    "facesMayMutateFinancialTruthDirectly": false,
+    "effectivePermissionsRequired": true
+  },
+  "exposureStates": [
+    "face-safe-now",
+    "face-safe-with-policy",
+    "needs-adapter",
+    "needs-projection",
+    "action-only",
+    "internal-do-not-expose"
+  ],
+  "sources": [
+    {
+      "sourceId": "aos-object-contract",
+      "kind": "object-data",
+      "manifest": "sources/aos.json",
+      "authoritativePaths": [
+        "components/ixi-aos/card-runtime/IXIAosObjectDataContract.js",
+        "components/ixi-aos/card-runtime/IXIAosSemanticObjectPresentation.js",
+        "components/ixi-aos/card-runtime/IXICardDefinitionEngine.js"
+      ]
+    },
+    {
+      "sourceId": "aos-face-runtime",
+      "kind": "face-runtime",
+      "manifest": "face-apps/registry.json",
+      "authoritativePaths": [
+        "components/ixi-aos/face-runtime/IXIAosFaceDefinitionEngine.js",
+        "components/ixi-aos/face-runtime/IXIAosFaceRuntime.jsx",
+        "components/ixi-aos/face-runtime/IXIAosFaceModuleRuntime.jsx",
+        "components/ixi-aos/console-runtime/IXIAosObjectConsole.jsx"
+      ]
+    },
+    {
+      "sourceId": "ixi-transact",
+      "kind": "transaction-and-financial",
+      "manifest": "sources/transact.json",
+      "authoritativePaths": [
+        "components/ixi-aos/transact/IXITransactModuleRegistry.js",
+        "components/ixi-aos/transact/IXITransactContext.js",
+        "components/ixi-aos/transact/IXITransactApp.jsx",
+        "components/ixi-aos/financial-runtime/IXIAosFinancialSnapshotRuntime.js"
+      ]
+    },
+    {
+      "sourceId": "ixi-platform",
+      "kind": "platform",
+      "manifest": "sources/platform.json",
+      "authoritativePaths": [
+        "components/ixi-object-system",
+        "components/machine-media",
+        "components/passport",
+        "components/ixi-chassis/IXIObjectConsoleEngine.js"
+      ]
+    }
+  ],
+  "policyManifest": "permissions/permissions.json",
+  "gapReport": "GAP-REPORT.md",
+  "humanInventory": "SYSTEM-CAPABILITY-INVENTORY.md",
+  "futureAuthorizedManifest": {
+    "inputs": [
+      "systemCatalog",
+      "customerObjectDefinitions",
+      "customerFieldDefinitions",
+      "customerRelationships",
+      "customerCapabilities",
+      "transactReadProjections",
+      "currentActorEffectivePermissions"
+    ],
+    "output": "authorized-face-data-manifest"
+  }
+}
