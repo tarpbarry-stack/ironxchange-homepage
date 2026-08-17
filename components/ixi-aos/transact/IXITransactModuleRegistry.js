@@ -1,4 +1,5 @@
 export const IXI_TRANSACT_MODULES = Object.freeze([
+  Object.freeze({ id: "access-policy", label: "ACCESS / POLICY", group: "security", documentType: "authority-policy" }),
   Object.freeze({ id: "work-order", label: "WORK ORDER", group: "work", documentType: "work-order" }),
   Object.freeze({ id: "expense", label: "EXPENSE", group: "spend", documentType: "expense" }),
   Object.freeze({ id: "technology-work", label: "TECH WORK ORDER", group: "work", documentType: "technology-work-order", specializedWorkOrder: true }),
@@ -22,8 +23,8 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice" }),
   Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement" })
 ]);
-const MACHINE_ORDER=Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","sold","collections","settlement","quote","invoice"]);
-const LOCATION_ORDER=Object.freeze(["work-order","expense","purchase-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice"]);
+const MACHINE_ORDER=Object.freeze(["access-policy","work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","sold","collections","settlement","quote","invoice"]);
+const LOCATION_ORDER=Object.freeze(["access-policy","work-order","expense","purchase-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice"]);
 function sortByOrder(items,order){const rank=new Map(order.map((id,index)=>[id,index]));return[...items].sort((l,r)=>(rank.has(l.id)?rank.get(l.id):999)-(rank.has(r.id)?rank.get(r.id):999));}
 function deniedModuleIds(permissions=[]){return new Set((Array.isArray(permissions)?permissions:[]).map(v=>String(v||"").trim()).filter(v=>v.startsWith("deny:")).map(v=>v.slice(5)).filter(Boolean));}
 export function getIXITransactModules({objectType="",permissions=[]}={}){const type=String(objectType||"").trim().toLowerCase(),denied=deniedModuleIds(permissions);let preferred=IXI_TRANSACT_MODULES;if(["machine","equipment","vehicle","truck","trailer"].includes(type))preferred=sortByOrder(IXI_TRANSACT_MODULES,MACHINE_ORDER);else if(["location","yard","shop"].includes(type))preferred=sortByOrder(IXI_TRANSACT_MODULES,LOCATION_ORDER);return preferred.filter(item=>!denied.has(item.id));}
