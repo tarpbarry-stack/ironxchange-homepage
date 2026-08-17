@@ -1,0 +1,145 @@
+{
+  "sourceId": "ixi-transact",
+  "version": 1,
+  "sourceTruth": [
+    "components/ixi-aos/transact/IXITransactModuleRegistry.js",
+    "components/ixi-aos/transact/IXITransactContext.js",
+    "components/ixi-aos/transact/IXITransactApp.jsx",
+    "components/ixi-aos/financial-runtime/IXIAosFinancialSnapshotRuntime.js"
+  ],
+  "doctrine": {
+    "singleUniversalTransactModule": true,
+    "facesConsumeReadProjections": true,
+    "facesDoNotOwnFinancialTruth": true,
+    "facesDoNotRecalculateFinancialEngineValues": true,
+    "transactionActionsRemainInTransact": true
+  },
+  "context": {
+    "schema": "ixi-transact-context-v1",
+    "source": "aos-object-toolbar-dollar",
+    "fields": [
+      "primary.passportId",
+      "primary.objectId",
+      "primary.objectType",
+      "primary.label",
+      "entity.passportId",
+      "entity.label",
+      "location.passportId",
+      "location.label",
+      "actor.passportId",
+      "actor.userId",
+      "actor.employeeId",
+      "actor.label",
+      "activeWorkOrder",
+      "permissions",
+      "references"
+    ]
+  },
+  "transactionModules": [
+    {"id":"work-order","group":"work","documentType":"work-order","exposure":"action-only"},
+    {"id":"expense","group":"spend","documentType":"expense","exposure":"action-only"},
+    {"id":"technology-work","group":"work","documentType":"technology-work-order","exposure":"action-only"},
+    {"id":"time","group":"work","documentType":"time-entry","exposure":"action-only"},
+    {"id":"material","group":"work","documentType":"material-usage","exposure":"action-only"},
+    {"id":"asset-acquisition","group":"asset","documentType":"asset-acquisition","exposure":"action-only"},
+    {"id":"rental-expense","group":"rent","documentType":"rental","exposure":"action-only"},
+    {"id":"rental-income","group":"rent","documentType":"rental","exposure":"action-only"},
+    {"id":"service-quote","group":"sell","documentType":"quote","exposure":"action-only"},
+    {"id":"service-invoice","group":"sell","documentType":"invoice","exposure":"action-only"},
+    {"id":"sold","group":"sell","documentType":"invoice","exposure":"action-only"},
+    {"id":"collections","group":"collect","documentType":"collection","exposure":"action-only"},
+    {"id":"payables","group":"pay","documentType":"bill","exposure":"action-only"},
+    {"id":"treasury","group":"cash","documentType":"payment","exposure":"action-only"},
+    {"id":"general-ledger","group":"account","documentType":"journal-entry","exposure":"action-only"},
+    {"id":"financial-reporting","group":"report","documentType":"financial-report","exposure":"action-only"},
+    {"id":"bill","group":"spend","documentType":"bill","exposure":"action-only"},
+    {"id":"receipt","group":"spend","documentType":"receipt","exposure":"action-only"},
+    {"id":"purchase-order","group":"buy","documentType":"purchase-order","exposure":"action-only"},
+    {"id":"quote","group":"sell","documentType":"quote","exposure":"action-only"},
+    {"id":"invoice","group":"sell","documentType":"invoice","exposure":"action-only"},
+    {"id":"settlement","group":"settle","documentType":"settlement","exposure":"action-only"}
+  ],
+  "canonicalFinancialReadModel": {
+    "capabilityId": "transact.financial.snapshot",
+    "exposure": "face-safe-with-policy",
+    "adapter": "createIXIAosFinancialViewModel",
+    "scope": [
+      "passportId",
+      "rootPassportId",
+      "scopePassportIds"
+    ],
+    "lifecycleValues": [
+      "commitment",
+      "remainingCommitment",
+      "incurredCost",
+      "paid",
+      "unpaid",
+      "projectedOutflow",
+      "revenue",
+      "collected",
+      "receivable",
+      "operatingNet"
+    ],
+    "movementValues": [
+      "inflow",
+      "outflow",
+      "neutral",
+      "net"
+    ],
+    "counts": [
+      "factCount",
+      "documentCount"
+    ],
+    "breakdowns": [
+      "byFinancialState",
+      "byLineType",
+      "byDocumentType"
+    ],
+    "detail": [
+      "recentActivity",
+      "facts"
+    ],
+    "rule": "Face Apps consume this read model or future approved source-owned projections. They must not independently calculate financial lifecycle truth."
+  },
+  "projectionBacklog": [
+    {
+      "projectionId": "transact.asset.maintenanceSpendYtd",
+      "status": "needs-projection",
+      "reason": "Underlying financial facts exist, but a canonical source-owned asset maintenance projection is not yet registered in the Face Data Catalog."
+    },
+    {
+      "projectionId": "transact.asset.lifetimeMaintenanceCost",
+      "status": "needs-projection"
+    },
+    {
+      "projectionId": "transact.asset.costPerHour",
+      "status": "needs-projection",
+      "reason": "Must combine approved financial cost scope with approved meter denominator; Face must not invent formula semantics."
+    },
+    {
+      "projectionId": "transact.project.costToDate",
+      "status": "needs-projection"
+    },
+    {
+      "projectionId": "transact.project.laborCost",
+      "status": "needs-projection"
+    },
+    {
+      "projectionId": "transact.project.materialCost",
+      "status": "needs-projection"
+    },
+    {
+      "projectionId": "transact.project.committedCost",
+      "status": "needs-projection"
+    },
+    {
+      "projectionId": "transact.project.projectedMargin",
+      "status": "needs-projection"
+    }
+  ],
+  "currentPermissionMechanism": {
+    "moduleDenySyntax": "deny:<moduleId>",
+    "status": "existing-but-too-coarse-for-enterprise-face-policy",
+    "notes": "TRAN$ACT registry filters denied module IDs. Face-level financial projection scopes still require a formal permission registry."
+  }
+}
