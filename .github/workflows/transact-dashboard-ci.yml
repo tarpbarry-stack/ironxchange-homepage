@@ -6,6 +6,7 @@ on:
       - "components/ixi-transact-dashboard/**"
       - "pages/transact/**"
       - "pages/api/ixi-financial/**"
+      - "scripts/verifyTransactDashboardContracts.mjs"
       - "next.config.js"
       - "package.json"
       - ".github/workflows/transact-dashboard-ci.yml"
@@ -16,6 +17,7 @@ on:
       - "components/ixi-transact-dashboard/**"
       - "pages/transact/**"
       - "pages/api/ixi-financial/**"
+      - "scripts/verifyTransactDashboardContracts.mjs"
       - "next.config.js"
       - "package.json"
       - ".github/workflows/transact-dashboard-ci.yml"
@@ -45,5 +47,7 @@ jobs:
           cache-dependency-path: package.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Verify TRAN$ACT dashboard contracts
+        run: npm run verify-transact-dashboard
       - name: Build Next production application
         run: npm run build
