@@ -1,0 +1,21 @@
+import {useMemo} from "react";
+import IXIEnterpriseDataTable from "../components/IXIEnterpriseDataTable";
+import useIXIWorkspaceFilters from "../hooks/useIXIWorkspaceFilters";
+const clean=v=>String(v??"").trim();
+const money=(v,c="USD")=>v===null||v===undefined?"—":new Intl.NumberFormat("en-US",{style:"currency",currency:c,maximumFractionDigits:0}).format(Number(v));
+export default function IXIBillsDesktop({model={},onOpenRecord,filters={},onFiltersChange}){
+ const f=useIXIWorkspaceFilters({filters,onFiltersChange,defaultStatus:"all",defaultSort:"due",defaultDirection:"asc"});
+ const rows=useMemo(()=>{const q=f.search.toLowerCase();return(model.payables||[]).filter(r=>{const approval=clean(r.approvalStatus).toLowerCase(),match=clean(r.matchStatus).toLowerCase(),payment=clean(r.paymentStatus||r.status).toLowerCase();const stateOk=f.status==="all"||(f.status==="approval"&&["pending","needs-approval","required"].includes(approval))||(f.status==="match-exception"&&["exception","match-exception","unmatched"].includes(match))||(f.status==="unpaid"&&payment!=="paid")||(f.status===payment);return stateOk&&(!q||[r.vendorLabel,r.billNumber,r.billId,r.invoiceNumber].some(v=>clean(v).toLowerCase().includes(q)))})},[model.payables,f.search,f.status]);
+ const columns=useMemo(()=>[
+  {key:"vendor",label:"VENDOR",width:"1.25fr",sortable:true,value:r=>r.vendorLabel,render:r=><strong>{r.vendorLabel||"VENDOR"}</strong>},
+  {key:"bill",label:"BILL / INVOICE",width:"1fr",sortable:true,value:r=>r.billNumber||r.invoiceNumber||r.billId},
+  {key:"amount",label:"AMOUNT",width:".8fr",sortable:true,value:r=>r.originalAmount??r.amount,render:r=>money(r.originalAmount??r.amount,model.currency)},
+  {key:"open",label:"OPEN",width:".8fr",sortable:true,value:r=>r.balance,render:r=><b>{money(r.balance,model.currency)}</b>},
+  {key:"due",label:"DUE",width:".82fr",sortable:true,value:r=>r.dueDate},
+  {key:"match",label:"PO MATCH",width:".9fr",sortable:true,value:r=>r.matchStatus,render:r=><span className={["exception","match-exception","unmatched"].includes(clean(r.matchStatus).toLowerCase())?"td-red":""}>{clean(r.matchStatus).toUpperCase()||"N/A"}</span>},
+  {key:"approval",label:"APPROVAL",width:".9fr",sortable:true,value:r=>r.approvalStatus,render:r=><span>{clean(r.approvalStatus).toUpperCase()||"—"}</span>},
+  {key:"payment",label:"PAYMENT",width:".85fr",sortable:true,value:r=>r.paymentStatus||r.status,render:r=><span className={clean(r.paymentStatus||r.status).toLowerCase()==="overdue"?"td-red":""}>{clean(r.paymentStatus||r.status).toUpperCase()||"UNPAID"}</span>}
+ ],[model.currency]);
+ const open=r=>onOpenRecord?.({...r,title:r.billNumber||r.invoiceNumber||"BILL",sourceRecordId:r.billId||r.billNumber,sourceRecordType:"bill",financialDocumentId:r.billDocumentId||r.financialDocumentId,passportId:r.vendorPassportId,workspace:"bills",detail:`${r.vendorLabel||"Vendor"} · ${r.approvalStatus||"approval unknown"} · ${r.matchStatus||"match n/a"}`});
+ return <section className="td-workspace"><div className="td-workspace-title"><div><span>MONEY OUT · DOCUMENT CONTROL</span><h1>BILLS / APPROVALS</h1><p>Canonical vendor bills, approval authority, PO match and payment state.</p></div><input className="td-workspace-search" value={f.search} onChange={e=>f.setSearch(e.target.value)} onBlur={f.flushSearch} onKeyDown={e=>{if(e.key==="Enter")f.flushSearch()}} placeholder="VENDOR / BILL / INVOICE"/></div><div className="td-toolbar">{[["all","ALL"],["approval","NEEDS APPROVAL"],["match-exception","MATCH EXCEPTION"],["unpaid","UNPAID"],["overdue","OVERDUE"]].map(([id,label])=><button type="button" key={id} className={f.status===id?"on":""} onClick={()=>f.setStatus(id)}>{label}</button>)}</div><IXIEnterpriseDataTable columns={columns} rows={rows} rowKey={r=>r.billId||r.billNumber||r.invoiceNumber} onRowOpen={open} sortKey={f.sort} sortDirection={f.direction} onSort={f.setSort} cursor={f.cursor||null} hasNext={Boolean(model.pagination?.hasNext)} hasPrevious={Boolean(model.pagination?.hasPrevious)} onNext={()=>f.setCursor(model.pagination?.nextCursor||"")} onPrevious={()=>f.setCursor(model.pagination?.previousCursor||"")} emptyLabel="NO BILLS RETURNED FOR THIS AUTHORIZED SCOPE." ariaLabel="IXI bills and approvals"/></section>;
+}
