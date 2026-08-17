@@ -1,0 +1,23 @@
+import {useMemo} from "react";
+import IXIEnterpriseDataTable from "../components/IXIEnterpriseDataTable";
+import useIXIWorkspaceFilters from "../hooks/useIXIWorkspaceFilters";
+const clean=v=>String(v??"").trim();
+const money=(v,c="USD")=>v===null||v===undefined?"—":new Intl.NumberFormat("en-US",{style:"currency",currency:c,maximumFractionDigits:0}).format(Number(v));
+function Metric({label,value,tone=""}){return <div className={`tdw-metric ${tone}`}><span>{label}</span><strong>{value}</strong></div>}
+export default function IXIPurchaseOrdersDesktop({model={},onOpenRecord,filters={},onFiltersChange}){
+ const f=useIXIWorkspaceFilters({filters,onFiltersChange,defaultStatus:"all",defaultSort:"neededBy",defaultDirection:"asc"});
+ const rows=useMemo(()=>{const q=f.search.toLowerCase();return(model.purchaseOrders||[]).filter(r=>{const status=clean(r.status).toLowerCase(),approval=clean(r.approvalStatus).toLowerCase();const stateOk=f.status==="all"||status===f.status||(f.status==="pending-approval"&&["pending","pending-approval"].includes(approval))||(f.status==="open"&&!["closed","cancelled"].includes(status));return stateOk&&(!q||[r.poNumber,r.purchaseOrderRecordId,r.sourceRequestNumber,r.vendorLabel,r.workOrderNumber,r.shipToLabel].some(v=>clean(v).toLowerCase().includes(q)))})},[model.purchaseOrders,f.search,f.status]);
+ const columns=useMemo(()=>[
+  {key:"po",label:"PO",width:".9fr",sortable:true,value:r=>r.poNumber||r.purchaseOrderRecordId,render:r=><strong>{r.poNumber||r.purchaseOrderRecordId||"DRAFT"}</strong>},
+  {key:"vendor",label:"VENDOR",width:"1.2fr",sortable:true,value:r=>r.vendorLabel},
+  {key:"neededBy",label:"NEEDED BY",width:".82fr",sortable:true,value:r=>r.neededByDate},
+  {key:"shipTo",label:"SHIP TO",width:"1fr",sortable:true,value:r=>r.shipToLabel},
+  {key:"workOrder",label:"WORK ORDER",width:".85fr",sortable:true,value:r=>r.workOrderNumber},
+  {key:"committed",label:"COMMITTED",width:".82fr",sortable:true,value:r=>r.committed,render:r=><b>{money(r.committed,model.currency)}</b>},
+  {key:"received",label:"RECEIVED",width:".72fr",sortable:true,value:r=>r.percentReceived,render:r=>`${r.percentReceived??0}%`},
+  {key:"approval",label:"APPROVAL",width:".85fr",sortable:true,value:r=>r.approvalStatus,render:r=>clean(r.approvalStatus).toUpperCase()||"—"},
+  {key:"status",label:"STATUS",width:".9fr",sortable:true,value:r=>r.status,render:r=><span className={["denied","returned","cancelled"].includes(clean(r.status).toLowerCase())?"td-red":"td-green"}>{clean(r.status).toUpperCase()||"DRAFT"}</span>}
+ ],[model.currency]);
+ const s=model.summary||{};const open=r=>onOpenRecord?.({...r,title:r.poNumber||r.purchaseOrderRecordId||"PURCHASE ORDER",sourceRecordId:r.purchaseOrderRecordId||r.poDocumentId||r.poNumber,sourceRecordType:"purchase-order",financialDocumentId:r.poDocumentId,passportId:r.vendorPassportId,workspace:"purchase-orders",detail:`${r.vendorLabel||"Vendor"} · ${r.percentReceived??0}% received · ${r.status||"draft"}`});
+ return <section className="td-workspace"><div className="td-workspace-title"><div><span>MONEY OUT · COMMITMENT CONTROL</span><h1>PURCHASE ORDERS</h1><p>Approval, committed cost, receiving, bill match and Work Order relationship.</p></div><input className="td-workspace-search" value={f.search} onChange={e=>f.setSearch(e.target.value)} onBlur={f.flushSearch} onKeyDown={e=>{if(e.key==="Enter")f.flushSearch()}} placeholder="PO / VENDOR / WORK ORDER"/></div><div className="tdw-metrics"><Metric label="OPEN" value={s.open??"—"}/><Metric label="PENDING APPROVAL" value={s.pendingApproval??"—"}/><Metric label="ISSUED" value={s.issued??"—"}/><Metric label="PARTIAL RECEIPT" value={s.partiallyReceived??"—"}/><Metric label="RECEIVED" value={s.received??"—"}/><Metric label="COMMITTED" value={money(s.committed,model.currency)}/></div><div className="td-toolbar">{[["all","ALL"],["open","OPEN"],["pending-approval","PENDING APPROVAL"],["po-issued","ISSUED"],["partially-received","PARTIAL"],["received","RECEIVED"]].map(([id,label])=><button type="button" key={id} className={f.status===id?"on":""} onClick={()=>f.setStatus(id)}>{label}</button>)}</div><IXIEnterpriseDataTable columns={columns} rows={rows} rowKey={r=>r.purchaseOrderRecordId||r.poDocumentId||r.poNumber} onRowOpen={open} sortKey={f.sort} sortDirection={f.direction} onSort={f.setSort} cursor={f.cursor||null} hasNext={Boolean(model.pagination?.hasNext)} hasPrevious={Boolean(model.pagination?.hasPrevious)} onNext={()=>f.setCursor(model.pagination?.nextCursor||"")} onPrevious={()=>f.setCursor(model.pagination?.previousCursor||"")} emptyLabel="NO PURCHASE ORDERS RETURNED FOR THIS AUTHORIZED SCOPE." ariaLabel="IXI purchase orders"/></section>;
+}
