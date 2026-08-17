@@ -24,6 +24,7 @@ import {
 import IXIAosCard001Location from "../cards/001/IXIAosCard001Location";
 import IXIAosCard002Location from "../cards/002/IXIAosCard002Location";
 import IXIAosCard003Location from "../cards/003/IXIAosCard003Location";
+import IXIAosLocationFace2Operations from "../cards/location/IXIAosLocationFace2Operations";
 import IXIAosGenericConfiguredFaceV12 from "../cards/generic/IXIAosGenericConfiguredFaceV12";
 
 const PANEL_WIDTH = 298;
@@ -52,6 +53,7 @@ function getConfiguredFace(object = {}, faceNumber = 2) {
 }
 
 function getFaceLabel(object = {}, faceNumber = 2) {
+  if (Number(faceNumber) === 2) return "OPERATIONS";
   const config = getConfiguredFace(object, faceNumber);
   return clean(config?.shortLabel || config?.title || config?.label) || `FACE ${faceNumber}`;
 }
@@ -171,6 +173,21 @@ export default function IXIAosLocationObjectConsole({
   function renderFace(faceNumber) {
     const resolved = Math.min(5, Math.max(1, Number(faceNumber) || 1));
     if (resolved === 1) return <Card {...shared} />;
+
+    /*
+     * Face 2 is a real trusted V12 application, not a generic field face.
+     * Cards 001 / 002 / 003 deliberately share this same Location
+     * Operations application so the information contract and edit behavior
+     * cannot drift between the three primary-card geometries.
+     */
+    if (resolved === 2) {
+      return (
+        <IXIAosLocationFace2Operations
+          {...shared}
+          skinId="v12"
+        />
+      );
+    }
 
     const runtimeData = resolved === 3 || resolved === 4
       ? financialSnapshot
