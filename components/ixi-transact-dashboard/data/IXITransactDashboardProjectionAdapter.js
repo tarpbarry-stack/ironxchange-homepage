@@ -25,6 +25,8 @@ export function createIXIExecutiveDesktopModel(projection = {}) {
     generatedAt: clean(source.generatedAt),
     projectionVersion: clean(source.projectionVersion),
     status: clean(source.status || "current"),
+    warnings: safeArray(source.warnings),
+    missingSections: safeArray(source.missingSections),
     kpis: {
       revenue: readNumber(executive, ["revenue", "current.revenue", "income.revenue", "totalRevenue"]),
       netIncome: readNumber(executive, ["netIncome", "current.netIncome", "income.netIncome"]),
@@ -72,6 +74,7 @@ export function createIXIExecutiveDesktopModel(projection = {}) {
 }
 
 export function getIXIProjectionFreshness(model = {}) {
+  if (clean(model.status).toLowerCase() === "partial") return { label: "PARTIAL", state: "aging" };
   const generatedAt = clean(model.generatedAt);
   if (!generatedAt) return { label: "UNVERIFIED", state: "unknown" };
   const timestamp = new Date(generatedAt).getTime();
