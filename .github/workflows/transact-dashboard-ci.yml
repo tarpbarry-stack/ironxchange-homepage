@@ -1,0 +1,48 @@
+name: IXI TRANSACT V13 CI
+
+on:
+  pull_request:
+    paths:
+      - "components/ixi-transact-dashboard/**"
+      - "pages/transact/**"
+      - "pages/api/ixi-financial/**"
+      - "next.config.js"
+      - "package.json"
+      - ".github/workflows/transact-dashboard-ci.yml"
+  push:
+    branches:
+      - agent/transact-dashboard-v13
+    paths:
+      - "components/ixi-transact-dashboard/**"
+      - "pages/transact/**"
+      - "pages/api/ixi-financial/**"
+      - "next.config.js"
+      - "package.json"
+      - ".github/workflows/transact-dashboard-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: transact-v13-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build Next production application
+        run: npm run build
