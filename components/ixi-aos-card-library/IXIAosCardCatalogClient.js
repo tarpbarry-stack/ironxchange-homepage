@@ -154,7 +154,8 @@ function withLocalCardDrafts(templates = []) {
     [9, "POWERED / SERIALIZED EQUIPMENT"],
     [10, "STRUCTURED / TECHNICAL RECORD"],
     [11, "INVENTORY / QUANTITY / CAPACITY"],
-    [12, "PROJECT / LIFECYCLE / PROGRESS"]
+    [12, "PROJECT / LIFECYCLE / PROGRESS"],
+    [13, "DOCUMENT / DRAWING / KNOWLEDGE RECORD"]
   ].forEach(([number, sampleUse]) => {
     if (source.some(template => Number(template?.templateNumber || template?.metadata?.cardNumber) === number)) return;
     source.push({
