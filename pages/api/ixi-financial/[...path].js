@@ -3,6 +3,8 @@ const FORWARD_HEADERS=["authorization","cookie","x-request-id","x-ixi-source","x
 const ROUTES=new Map([
  ["POST /financial/dashboard",true],
  ["POST /financial/commands/create",true],
+ ["POST /financial/records/resolve",true],
+ ["POST /financial/search",true],
  ["GET /financial/health",true]
 ]);
 
