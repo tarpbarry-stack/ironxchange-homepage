@@ -31,6 +31,33 @@ export function getIXIFinancialHealthEndpoint({ apiBaseUrl = "" } = {}) {
   return base ? `${base}/financial/health` : "/api/ixi-financial/financial/health";
 }
 
+export function validateIXITransactDashboardProjectionPayload(result = {}, include = []) {
+  const source = safeObject(result);
+  const data = safeObject(source.data || source);
+  const requested = safeArray(include);
+  const presence = {
+    executive: data.executive !== undefined,
+    attention: data.attention !== undefined,
+    ar: data.ar !== undefined,
+    ap: data.ap !== undefined,
+    treasury: data.treasury !== undefined,
+    "gl-controls": data.gl !== undefined,
+    reporting: data.reporting !== undefined || data.reports !== undefined,
+    operations: data.operations !== undefined,
+    "work-orders": data.workOrders !== undefined || data.operations?.workOrders !== undefined
+  };
+  const missing = requested.filter(section => presence[section] === false);
+  return {
+    ok: missing.length === 0,
+    missing,
+    warnings: missing.map(section => ({
+      code: "projection-section-missing",
+      section,
+      message: `IXI Financial projection omitted requested section: ${section}.`
+    }))
+  };
+}
+
 export function normalizeIXITransactDashboardResponse(result = {}) {
   const source = safeObject(result);
   const data = safeObject(source.data || source);
@@ -146,14 +173,22 @@ export async function loadIXITransactDashboardProjection({
     );
   }
 
-  setIXITransactDashboardCache(normalizedQuery, result);
-  return result;
+  const completeness = validateIXITransactDashboardProjectionPayload(raw, normalizedQuery.include);
+  const completed = {
+    ...result,
+    status: completeness.ok ? result.status : "partial",
+    warnings: [...safeArray(result.warnings), ...completeness.warnings],
+    missingSections: completeness.missing
+  };
+  setIXITransactDashboardCache(normalizedQuery, completed);
+  return completed;
 }
 
 export default {
   IXITransactDashboardError,
   getIXITransactDashboardEndpoint,
   getIXIFinancialHealthEndpoint,
+  validateIXITransactDashboardProjectionPayload,
   normalizeIXITransactDashboardResponse,
   checkIXIFinancialHealth,
   loadIXITransactDashboardProjection
