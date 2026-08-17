@@ -1,0 +1,98 @@
+{
+  "sourceId": "ixi-platform",
+  "version": 1,
+  "capabilities": [
+    {
+      "capabilityId": "platform.passport.presentation",
+      "source": "components/passport/PassportPresentationCard.jsx",
+      "exposure": "needs-adapter",
+      "notes": "Passport presentation exists, but a universal Face-facing Passport read contract should be formalized separately from card presentation."
+    },
+    {
+      "capabilityId": "platform.machineMedia",
+      "source": "components/machine-media",
+      "exposure": "needs-adapter",
+      "availableInfrastructure": [
+        "MachineMediaWorkbench",
+        "createMachineMediaModel",
+        "machineMediaIdentity",
+        "machineMediaVerification",
+        "machineMediaSharetribeAdapter"
+      ],
+      "notes": "IXI Media is substantial and machine-specific today. A universal object-media/document capability should not silently migrate legacy Sharetribe galleries."
+    },
+    {
+      "capabilityId": "platform.object.lineage",
+      "source": "components/ixi-object-system/IXILineageEngine.js",
+      "exposure": "needs-adapter",
+      "notes": "Lineage engine exists; Face-safe lineage/history view model still needs an explicit contract."
+    },
+    {
+      "capabilityId": "platform.object.container",
+      "source": "components/ixi-object-system/IXIContainerEngine.js",
+      "exposure": "face-safe-with-policy",
+      "notes": "Container behavior exists in shared object system and should be surfaced through capability/relationship truth, not nouns."
+    },
+    {
+      "capabilityId": "platform.object.collectionDeck",
+      "source": "components/ixi-object-system/IXICollectionDeckEngine.js",
+      "exposure": "face-safe-with-policy"
+    },
+    {
+      "capabilityId": "platform.object.transactionEngine",
+      "source": "components/ixi-object-system/IXIObjectTransactionEngine.js",
+      "exposure": "internal-do-not-expose",
+      "notes": "Command/transaction infrastructure is not a Face data source. Expose source-owned read models instead."
+    },
+    {
+      "capabilityId": "platform.object.commandBus",
+      "source": "components/ixi-object-system/IXICommandBus.js",
+      "exposure": "internal-do-not-expose"
+    },
+    {
+      "capabilityId": "platform.object.mutation",
+      "source": [
+        "components/ixi-object-system/IXIMachineMutationEngine.js",
+        "components/ixi-object-system/IXIMachineMutationCommandBus.js"
+      ],
+      "exposure": "internal-do-not-expose",
+      "notes": "Faces may invoke approved user actions through controlled runtime commands, but Chat-built Face definitions must never receive arbitrary mutation access."
+    },
+    {
+      "capabilityId": "platform.object.actionNotices",
+      "source": "components/ixi-object-system/IXIActionNoticeEngine.js",
+      "exposure": "face-safe-with-policy",
+      "notes": "Useful presentation/lifecycle feedback capability, not business data."
+    },
+    {
+      "capabilityId": "platform.object.rail",
+      "source": "components/ixi-object-system/IXIObjectRail.jsx",
+      "exposure": "face-safe-with-policy",
+      "notes": "Object operating rail remains a Face 1/chassis capability rather than a customer-authored data module."
+    },
+    {
+      "capabilityId": "platform.console.slots",
+      "source": "components/ixi-chassis/IXIObjectConsoleEngine.js",
+      "exposure": "face-safe-with-policy",
+      "constraints": {
+        "minDepth": 1,
+        "maxDepth": 5,
+        "listingSlotPermanent": true,
+        "listingFace": 1
+      },
+      "notes": "Shared console is the correct attachment point for future universal TRAN$ACT beside visible Face 1."
+    },
+    {
+      "capabilityId": "platform.aos.maintenance.location",
+      "source": "components/ixi-aos/maintenance-runtime/IXIAosLocationMaintenanceRuntime.js",
+      "exposure": "needs-adapter",
+      "notes": "Location maintenance read logic exists but is not yet represented as a general Face Data Catalog contract."
+    },
+    {
+      "capabilityId": "platform.aos.financial.location",
+      "source": "components/ixi-aos/financial-runtime/IXIAosLocationFinancialRuntime.js",
+      "exposure": "needs-adapter",
+      "notes": "Location-scoped financial logic exists; should converge on approved financial projection contracts."
+    }
+  ]
+}
