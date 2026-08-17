@@ -11,7 +11,13 @@ async function importSource(relativePath) {
 }
 
 const adapter = await importSource("components/ixi-transact-dashboard/data/IXITransactDesktopWorkspaceAdapter.js");
+const executiveAdapter = await importSource("components/ixi-transact-dashboard/data/IXITransactDashboardProjectionAdapter.js");
 const queryContract = await importSource("components/ixi-transact-dashboard/data/IXITransactDashboardQueryContract.js");
+
+const emptyExecutive = executiveAdapter.createIXIExecutiveDesktopModel({});
+assert.equal(emptyExecutive.kpis.revenue, null, "Missing Executive revenue must remain unknown, not fabricated zero.");
+assert.equal(emptyExecutive.kpis.cash, null, "Missing Executive cash must remain unknown, not fabricated zero.");
+assert.equal(emptyExecutive.financialPosition.assets, null, "Missing balance-sheet truth must remain unknown.");
 
 const emptyAR = adapter.createIXIARDesktopModel({});
 assert.deepEqual(emptyAR.receivables, [], "A/R must render empty records safely.");
