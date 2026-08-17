@@ -1,0 +1,85 @@
+{
+  "policyId": "ixi-face-library-permissions",
+  "version": 1,
+  "status": "required-foundation-not-fully-implemented",
+  "existingRuntimePermissionSources": [
+    "object.effectivePermissions",
+    "object.permissions",
+    "object.authorization.permissions",
+    "object.access.permissions",
+    "metadata.effectivePermissions",
+    "definition.permissions"
+  ],
+  "existingRules": {
+    "explicitDenialWins": true,
+    "fieldVisibilityMayBePermissionFiltered": true,
+    "fieldEditabilityMayBePermissionFiltered": true,
+    "relationshipVisibilityMayBePermissionFiltered": true,
+    "objectActionsMayBePermissionFiltered": true,
+    "transactModuleDenySyntax": "deny:<moduleId>"
+  },
+  "requiredFaceLibraryActions": [
+    "face.read",
+    "face.use",
+    "face.createDraft",
+    "face.editDraft",
+    "face.clone",
+    "face.publish",
+    "face.retire",
+    "face.assign",
+    "face.managePermissions"
+  ],
+  "requiredRuntimeDimensions": [
+    {
+      "dimension": "face-definition",
+      "question": "May this actor see/use this Face App definition?"
+    },
+    {
+      "dimension": "object-instance",
+      "question": "May this actor see the specific object the Face is bound to?"
+    },
+    {
+      "dimension": "data-capability",
+      "question": "May this actor read the specific source field/relationship/projection used by the Face?"
+    },
+    {
+      "dimension": "face-section",
+      "question": "Should a sensitive portion of a Face be omitted for this actor?"
+    },
+    {
+      "dimension": "transact-action",
+      "question": "May this actor execute a TRAN$ACT action? Read permission never implies write/action permission."
+    }
+  ],
+  "recommendedAuthoringRoles": [
+    "face-author",
+    "face-editor",
+    "face-publisher",
+    "face-assigner",
+    "face-admin"
+  ],
+  "securityRules": [
+    "Runtime authorization is authoritative; designer visibility is not security.",
+    "Unauthorized sensitive sections should be omitted rather than replaced by revealing access-denied placeholders when the section existence is sensitive.",
+    "Chat/AI compiler receives only an authorized Face Data Manifest for the current actor/company/object definition.",
+    "No raw AWS credentials, unrestricted database access, arbitrary SQL, or arbitrary mutation API is exposed to the Face compiler.",
+    "Face read access never implies TRAN$ACT execution permission.",
+    "Published Face definitions must be versioned and auditable."
+  ],
+  "futureServerContract": {
+    "preferredOwner": "IX-Core/AWS authorization layer",
+    "input": [
+      "actor",
+      "entity/company",
+      "objectDefinition",
+      "faceDefinition",
+      "requestedDataCapabilities"
+    ],
+    "output": [
+      "effectiveFaceActions",
+      "authorizedDataCapabilities",
+      "authorizedTransactProjections",
+      "authorizedTransactActions"
+    ]
+  }
+}
