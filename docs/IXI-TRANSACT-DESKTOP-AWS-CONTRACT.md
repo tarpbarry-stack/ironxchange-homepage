@@ -16,48 +16,11 @@ Client-supplied actor/entity/roles/permissions are never authority.
 
 Returns only financial entities, locations, accounting periods, and permissions available to the authenticated actor.
 
-Expected response shape:
-
-```json
-{
-  "ok": true,
-  "data": {
-    "actor": { "passportId": "passport:employee:...", "label": "User" },
-    "entities": [{ "passportId": "passport:entity:...", "label": "IRONXCHANGE LLC", "isDefault": true }],
-    "locations": [{ "passportId": "passport:location:...", "label": "MIDLAND", "isDefault": false }],
-    "periods": [{ "accountingPeriod": "2026-08", "label": "AUG 2026", "from": "2026-08-01", "through": "2026-08-31", "status": "open", "isDefault": true }],
-    "defaultEntityPassportId": "passport:entity:...",
-    "defaultLocationPassportId": "",
-    "defaultAccountingPeriod": "2026-08",
-    "permissions": {},
-    "generatedAt": "2026-08-17T00:00:00.000Z"
-  }
-}
-```
-
 The desktop may persist a selected allowed scope in the URL for navigation/bookmarking. IX-Core must still re-authorize every subsequent request. A multi-entity/location request is authorized only when every requested member is allowed.
 
 ## 2. POST /financial/dashboard
 
 Consumes contract `ixi-transact-dashboard-query` version `1.3.0`.
-
-```json
-{
-  "contract": "ixi-transact-dashboard-query",
-  "contractVersion": "1.3.0",
-  "scope": {
-    "entityPassportIds": ["passport:entity:..."],
-    "locationPassportIds": [],
-    "assetPassportIds": [],
-    "customerPassportIds": [],
-    "vendorPassportIds": []
-  },
-  "period": { "from": "", "through": "", "accountingPeriod": "2026-08" },
-  "currency": "USD",
-  "filters": { "workspace": "executive" },
-  "include": ["executive", "attention", "ar", "ap", "treasury", "gl-controls", "reporting"]
-}
-```
 
 Supported include sections:
 - `executive`
@@ -73,7 +36,7 @@ Supported include sections:
 - `assets`
 - `rental`
 
-The endpoint should return only requested sections plus shared envelope/lineage metadata. If a requested section cannot be produced, omit it or return a warning; the desktop will mark the projection `PARTIAL` and will not fabricate zeros.
+If a requested section cannot be produced, omit it or return a warning; the desktop will mark the projection `PARTIAL` and will not fabricate zeros.
 
 ### Truth semantics
 
@@ -89,33 +52,85 @@ Operational commitments must remain distinct from posted economic events:
 
 Consumes `ixi-transact-record-resolve` version `1.0.0`.
 
+The result may include canonical `record`, `permissions`, `lineage`, and authorized `actions`. The desktop accepts only action IDs in its closed IXI action registry. Unknown server action IDs are discarded.
+
+For an action to become executable, the canonical resolver must also return execution context sufficient for the existing TRAN$ACT command module. Normalize that context onto the resolved record under `_ixiExecution`.
+
+### Implemented desktop command paths
+
+The desktop dispatcher currently supports only these existing canonical command paths:
+
+- `record-ar-payment`
+- `record-ar-credit`
+- `record-ap-payment`
+- `record-vendor-credit`
+- `issue-po`
+- `match-bill`
+
+Server authorization is necessary but not sufficient. The action must also be implemented in the closed desktop registry and must pass the typed execution preflight.
+
+### `_ixiExecution` shape
+
 ```json
 {
-  "contract": "ixi-transact-record-resolve",
-  "contractVersion": "1.0.0",
-  "identifier": {
-    "recordType": "invoice",
-    "recordId": "...",
-    "financialDocumentId": "...",
-    "passportId": "..."
+  "record": {
+    "_ixiExecution": {
+      "object": {
+        "passportId": "passport:machine:...",
+        "objectId": "..."
+      },
+      "context": {
+        "entity": { "passportId": "passport:entity:..." },
+        "location": { "passportId": "passport:location:..." },
+        "actor": { "passportId": "passport:employee:..." }
+      },
+      "receivable": {
+        "invoiceId": "...",
+        "balance": 10000,
+        "currency": "USD"
+      },
+      "payable": {
+        "billId": "...",
+        "balance": 8000,
+        "currency": "USD"
+      },
+      "purchaseOrder": {
+        "identity": { "purchaseOrderRecordId": "..." },
+        "order": { "lines": [] },
+        "costs": { "estimated": 0 }
+      },
+      "collection": {},
+      "metadata": {}
+    }
   },
-  "scope": {},
-  "period": {}
+  "actions": [
+    {
+      "id": "record-ar-payment",
+      "enabled": true,
+      "requiresInput": true,
+      "inputContract": "ixi-ar-payment-input-v1"
+    }
+  ]
 }
 ```
 
-Expected result may include canonical `record`, `permissions`, `lineage`, and authorized `actions`. Example action:
+Projection rows without canonical resolver execution context must never mutate financial truth.
 
-```json
-{
-  "id": "record-ar-payment",
-  "enabled": true,
-  "requiresInput": true,
-  "inputContract": "ixi-ar-payment-input-v1"
-}
-```
+### Desktop execution preflight
 
-The desktop accepts only action IDs in its closed IXI action registry. Unknown server action IDs are discarded. IX-Core still owns state/permission authorization; the client registry owns which UI behavior exists and which actions are destructive/input-required.
+Before dispatch, the desktop verifies:
+
+- action ID is known and implemented;
+- server action remains enabled;
+- canonical object identity exists;
+- trusted entity execution context exists;
+- A/R commands have canonical Invoice identity and cannot exceed open receivable balance;
+- A/P commands have canonical Bill identity and cannot exceed open payable balance;
+- A/R and vendor credit commands have required reasons;
+- PO issue has canonical PO record identity and lines;
+- PO Bill match has PO identity plus vendor invoice number/date/positive amount.
+
+A passing preflight dispatches into the existing Collections, Payables, or Purchase Order command modules. Those modules remain the business-rule and persistence authority. The desktop does not duplicate their accounting logic.
 
 ## 4. POST /financial/search
 
