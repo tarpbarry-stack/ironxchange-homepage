@@ -1,0 +1,92 @@
+{
+  "registryId": "ixi-face-app-registry",
+  "version": 1,
+  "status": "seed-from-current-repository",
+  "faceDoctrine": {
+    "faceIsAppModule": true,
+    "face1Role": "primary-object",
+    "secondaryFaceRole": "application",
+    "secondaryFacesMayScroll": true,
+    "secondaryFacesCarryObjectRail": false,
+    "transactConsumesFaceNumber": false,
+    "transactAttachment": "universal console module beside Face 1 for non-marketplace objects"
+  },
+  "primaryCardGeometryLibrary": {
+    "path": "components/ixi-aos/cards",
+    "knownIds": [
+      "001","002","003","004","005","006","007","008","009","010","011","012","013","014","015","016","017"
+    ],
+    "notes": "These are neutral V12 primary card/object geometries. Variants such as 007A/B/C and 009 vehicle configuration are not separate business ontologies."
+  },
+  "faceRuntime": {
+    "definitionEngine": "components/ixi-aos/face-runtime/IXIAosFaceDefinitionEngine.js",
+    "runtime": "components/ixi-aos/face-runtime/IXIAosFaceRuntime.jsx",
+    "moduleRuntime": "components/ixi-aos/face-runtime/IXIAosFaceModuleRuntime.jsx",
+    "currentBuiltInPrimitives": [
+      "field",
+      "object-field",
+      "summary",
+      "metric",
+      "relationships",
+      "notes",
+      "section"
+    ],
+    "specializedRendererHook": "renderModule"
+  },
+  "existingFaceLabApplicationSurfaces": [
+    {"id":"asset-acquisition","path":"pages/facelab/asset-acquisition.js","classification":"transact-application-surface"},
+    {"id":"bill","path":"pages/facelab/bill.js","classification":"transact-application-surface"},
+    {"id":"collections","path":"pages/facelab/collections.js","classification":"transact-application-surface"},
+    {"id":"documents","path":"pages/facelab/documents.js","classification":"document-application-surface"},
+    {"id":"financial-reporting","path":"pages/facelab/financial-reporting.js","classification":"transact-application-surface"},
+    {"id":"general-ledger","path":"pages/facelab/general-ledger.js","classification":"transact-application-surface"},
+    {"id":"material","path":"pages/facelab/material.js","classification":"transact-application-surface"},
+    {"id":"note","path":"pages/facelab/note.js","classification":"utility-application-surface"},
+    {"id":"payables","path":"pages/facelab/payables.js","classification":"transact-application-surface"},
+    {"id":"photo","path":"pages/facelab/photo.js","classification":"media-application-surface"},
+    {"id":"purchase","path":"pages/facelab/purchase.js","classification":"transact-application-surface"},
+    {"id":"rental-expense","path":"pages/facelab/rental-expense.js","classification":"transact-application-surface"}
+  ],
+  "futureRegistryContract": {
+    "requiredProperties": [
+      "faceAppId",
+      "version",
+      "label",
+      "description",
+      "rendererKind",
+      "requiredCapabilities",
+      "optionalCapabilities",
+      "dataCapabilities",
+      "permissionScopes",
+      "compatibleObjectCapabilities",
+      "heightBehavior",
+      "status"
+    ],
+    "rendererKinds": [
+      "declarative",
+      "trusted-hardcoded"
+    ],
+    "statusValues": [
+      "draft",
+      "active",
+      "retired"
+    ]
+  },
+  "libraryScopes": [
+    "ixi-system",
+    "industry-package",
+    "company",
+    "personal-draft"
+  ],
+  "chatCompilerActions": [
+    "discover-compatible-face-apps",
+    "create-face-draft",
+    "clone-face-app",
+    "configure-face-app",
+    "validate-face-app",
+    "preview-face-app",
+    "publish-face-app",
+    "assign-face-app",
+    "retire-face-version"
+  ]
+}
