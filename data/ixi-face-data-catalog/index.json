@@ -1,7 +1,7 @@
 {
   "catalogId": "ixi-face-data-catalog",
-  "version": 1,
-  "status": "foundation-repository-derived",
+  "version": 2,
+  "status": "runtime-authorized-manifest-enabled",
   "updatedAt": "2026-08-17",
   "doctrine": {
     "customerVocabularyAuthoritative": true,
@@ -14,7 +14,9 @@
     "marketplaceHasTransact": false,
     "facesMayReadTransactProjections": true,
     "facesMayMutateFinancialTruthDirectly": false,
-    "effectivePermissionsRequired": true
+    "effectivePermissionsRequired": true,
+    "chatMayGrantPermissions": false,
+    "unauthorizedExternalProjectionsDeniedByDefault": true
   },
   "exposureStates": [
     "face-safe-now",
@@ -24,6 +26,13 @@
     "action-only",
     "internal-do-not-expose"
   ],
+  "runtime": {
+    "authorizedManifest": "components/ixi-aos/face-data-runtime/IXIAuthorizedFaceDataManifest.js",
+    "faceAuthorization": "components/ixi-aos/face-data-runtime/IXIFaceAppAuthorizationEngine.js",
+    "exports": "components/ixi-aos/face-data-runtime/index.js",
+    "manifestSchema": "schemas/authorized-face-data-manifest.schema.json",
+    "faceAppSchema": "schemas/face-app-definition.schema.json"
+  },
   "sources": [
     {
       "sourceId": "aos-object-contract",
@@ -72,16 +81,28 @@
   "policyManifest": "permissions/permissions.json",
   "gapReport": "GAP-REPORT.md",
   "humanInventory": "SYSTEM-CAPABILITY-INVENTORY.md",
-  "futureAuthorizedManifest": {
+  "authorizedManifest": {
     "inputs": [
-      "systemCatalog",
-      "customerObjectDefinitions",
+      "customerObject",
       "customerFieldDefinitions",
       "customerRelationships",
       "customerCapabilities",
-      "transactReadProjections",
-      "currentActorEffectivePermissions"
+      "childrenForAuthorizedAggregates",
+      "canonicalFinancialSnapshot",
+      "upstreamAuthorizedExternalProjections",
+      "upstreamAuthorizedPlatformCapabilities",
+      "currentActor",
+      "currentEntity",
+      "effectivePermissions"
     ],
-    "output": "authorized-face-data-manifest"
+    "output": "ixi-authorized-face-data-manifest-v1",
+    "security": {
+      "objectViewDeniedReturnsEmptyManifest": true,
+      "fieldAndRelationshipVisibilityUsesEffectivePermissions": true,
+      "financialProjectionReadRequiresFinancialAuthorization": true,
+      "externalProjectionRequiresAuthorizedTrue": true,
+      "platformCapabilityRequiresAuthorizedTrue": true,
+      "chatCannotElevateScope": true
+    }
   }
 }
