@@ -4,6 +4,9 @@ import IXILocationObjectFace1
 import IXIAosLocationFace2Operations
   from "../ixi-aos/cards/location/IXIAosLocationFace2Operations";
 
+import IXIAosLocationFace3Financial
+  from "../ixi-aos/cards/location/IXIAosLocationFace3Financial";
+
 
 const AOS_FACE_RENDERERS = Object.freeze({
   "location-face-1":
@@ -16,7 +19,16 @@ const AOS_FACE_RENDERERS = Object.freeze({
     IXIAosLocationFace2Operations,
 
   "location-operations-v12":
-    IXIAosLocationFace2Operations
+    IXIAosLocationFace2Operations,
+
+  "location-face-3":
+    IXIAosLocationFace3Financial,
+
+  "location-financial":
+    IXIAosLocationFace3Financial,
+
+  "location-financial-v12":
+    IXIAosLocationFace3Financial
 });
 
 
