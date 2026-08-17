@@ -1,7 +1,7 @@
 const clean=value=>String(value??"").trim();
 const obj=value=>value&&typeof value==="object"&&!Array.isArray(value)?value:{};
 const arr=value=>Array.isArray(value)?value:[];
-const num=value=>Number.isFinite(Number(value))?Number(value):null;
+const num=value=>{if(value===null||value===undefined)return null;if(typeof value==="string"&&!value.trim())return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;};
 const firstNumber=(source,keys=[])=>{for(const key of keys){const value=key.split(".").reduce((x,p)=>x?.[p],source);const n=num(value);if(n!==null)return n;}return null;};
 const sumKnown=(...values)=>values.some(v=>v!==null)?values.reduce((sum,v)=>sum+(v||0),0):null;
 const pagination=source=>{const root=obj(source);const p=obj(root.pagination||root.page||root);return{cursor:clean(p.cursor),nextCursor:clean(p.nextCursor),previousCursor:clean(p.previousCursor||p.prevCursor),hasNext:p.hasNext===true||Boolean(clean(p.nextCursor)),hasPrevious:p.hasPrevious===true||Boolean(clean(p.previousCursor||p.prevCursor)),totalCount:firstNumber(p,["totalCount","count"])};};
