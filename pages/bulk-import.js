@@ -14,11 +14,15 @@ import {
   getImportableDefinitionFields,
   createDefaultBulkMapping,
   validateBulkRow,
-  createBulkImportLedger,
-  loadBulkImportLedger,
-  summarizeBulkLedger,
-  executeBulkImport
+  buildBulkProvisioningInput
 } from "../lib/mos/ixiAosBulkImportEngine";
+
+import {
+  findAosImportJobByFingerprint,
+  createAosImportJob,
+  executeAosImportJob,
+  summarizeAosImportJob
+} from "../lib/mos/ixiAosImportJobClient";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -32,6 +36,65 @@ function safeObject(value) {
   )
     ? value
     : {};
+}
+
+function buildServerRows({
+  fileRecord,
+  entityId,
+  actorId,
+  definition,
+  mapping
+}) {
+  return fileRecord.rows.map(row => {
+    const validation =
+      validateBulkRow({
+        row,
+        entityId,
+        definition,
+        mapping
+      });
+
+    const built =
+      validation.valid
+        ? buildBulkProvisioningInput({
+            importRecord:
+              fileRecord,
+            row,
+            entityId,
+            actorId,
+            definition,
+            mapping
+          })
+        : null;
+
+    return {
+      rowNumber:
+        row.rowNumber,
+
+      rowKey:
+        `row:${row.rowNumber}`,
+
+      values:
+        safeObject(row.values),
+
+      normalizedInput:
+        built?.valid
+          ? built.input
+          : {},
+
+      validation: {
+        valid:
+          validation.valid,
+        errors:
+          validation.errors || []
+      },
+
+      status:
+        validation.valid
+          ? "ready"
+          : "invalid"
+    };
+  });
 }
 
 export default function BulkImportPage() {
@@ -197,9 +260,27 @@ export default function BulkImportPage() {
 
   const summary =
     useMemo(() =>
-      summarizeBulkLedger(ledger),
+      summarizeAosImportJob(ledger),
     [ledger]
   );
+
+  const serverRowsByNumber =
+    useMemo(() => {
+      const map = new Map();
+
+      (
+        Array.isArray(ledger?.rows)
+          ? ledger.rows
+          : []
+      ).forEach(row => {
+        map.set(
+          String(row?.rowNumber),
+          row
+        );
+      });
+
+      return map;
+    }, [ledger]);
 
   async function handleFile(file) {
     if (!file) {
@@ -216,10 +297,17 @@ export default function BulkImportPage() {
 
       setFileRecord(parsed);
 
+      const entityId =
+        environment?.entity?.entityId;
+
       const existing =
-        loadBulkImportLedger(
-          parsed.importId
-        );
+        entityId
+          ? await findAosImportJobByFingerprint({
+              entityId,
+              fingerprint:
+                parsed.fileHash
+            })
+          : null;
 
       setLedger(existing);
 
@@ -233,11 +321,13 @@ export default function BulkImportPage() {
         setSelectedDefinitionId(
           existing.definitionId
         );
+
         setMapping(
           safeObject(existing.mapping)
         );
+
         setNotice(
-          "Existing import ledger restored. Completed rows will not be recreated."
+          "Existing AWS import job restored. Created rows retain their permanent Object and Passport identities."
         );
       } else {
         setMapping(
@@ -248,8 +338,9 @@ export default function BulkImportPage() {
               selectedDefinition
           })
         );
+
         setNotice(
-          `${parsed.rows.length} rows loaded from ${parsed.sheetName}.`
+          `${parsed.rows.length} rows loaded from ${parsed.sheetName}. No existing AWS import job was found for this file.`
         );
       }
     } catch (fileError) {
@@ -280,7 +371,7 @@ export default function BulkImportPage() {
       clean(ledger.definitionId) !== clean(value)
     ) {
       setError(
-        "This file already has a durable import ledger under another definition. Resume that ledger instead of remapping completed rows."
+        "This file already has a durable AWS import job under another definition. Resume that job instead of remapping permanent rows."
       );
       setSelectedDefinitionId(
         ledger.definitionId
@@ -312,7 +403,7 @@ export default function BulkImportPage() {
   ) {
     if (ledger) {
       setError(
-        "Mapping is locked after an import ledger exists. Resume the existing import."
+        "Mapping is locked after the AWS import job exists. Resume the existing job."
       );
       return;
     }
@@ -327,6 +418,57 @@ export default function BulkImportPage() {
     }));
   }
 
+  async function executeUntilSettled(job) {
+    let current = job;
+    let guard = 0;
+
+    while (
+      current &&
+      (
+        Number(current?.summary?.ready || 0) > 0 ||
+        Number(current?.summary?.failedRetryable || 0) > 0
+      ) &&
+      guard < 500
+    ) {
+      const response =
+        await executeAosImportJob({
+          entityId:
+            environment?.entity?.entityId,
+          jobId:
+            current.jobId,
+          actorId:
+            environment?.userId,
+          limit: 20
+        });
+
+      current =
+        response?.job ||
+        current;
+
+      setLedger(current);
+      guard += 1;
+
+      const retryable =
+        Number(
+          current?.summary?.failedRetryable || 0
+        );
+
+      const ready =
+        Number(
+          current?.summary?.ready || 0
+        );
+
+      if (
+        ready === 0 &&
+        retryable > 0
+      ) {
+        break;
+      }
+    }
+
+    return current;
+  }
+
   async function startImport() {
     if (
       !fileRecord ||
@@ -337,55 +479,100 @@ export default function BulkImportPage() {
 
     setBusy(true);
     setError("");
-    setNotice("Provisioning validated rows…");
+    setNotice(
+      ledger
+        ? "Resuming AWS import job…"
+        : "Creating authoritative AWS import job…"
+    );
 
     try {
-      const activeLedger =
-        ledger ||
-        createBulkImportLedger({
-          importRecord:
-            fileRecord,
-          entityId:
-            environment?.entity?.entityId,
-          definition:
-            selectedDefinition,
-          mapping
-        });
+      let activeJob = ledger;
 
-      setLedger(activeLedger);
+      if (!activeJob) {
+        const entityId =
+          environment?.entity?.entityId;
+
+        const actorId =
+          environment?.userId;
+
+        const rows =
+          buildServerRows({
+            fileRecord,
+            entityId,
+            actorId,
+            definition:
+              selectedDefinition,
+            mapping
+          });
+
+        const created =
+          await createAosImportJob({
+            entityId,
+            actorId,
+
+            sourceFile: {
+              name:
+                fileRecord.filename,
+              size:
+                fileRecord.size,
+              type:
+                fileRecord.extension === "csv"
+                  ? "text/csv"
+                  : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              fingerprint:
+                fileRecord.fileHash
+            },
+
+            definitionId:
+              selectedDefinition.definitionId,
+            definitionKey:
+              selectedDefinition.definitionKey ||
+              null,
+            mapping,
+            rows,
+
+            metadata: {
+              source:
+                "aos-bulk-import",
+              importContract:
+                fileRecord.contractVersion,
+              importId:
+                fileRecord.importId,
+              sheetName:
+                fileRecord.sheetName
+            }
+          });
+
+        activeJob =
+          created?.job;
+
+        if (!activeJob?.jobId) {
+          throw new Error(
+            "IX-Core did not return a valid import job."
+          );
+        }
+
+        setLedger(activeJob);
+      }
+
+      setNotice(
+        "Provisioning AWS import rows through the durable Object + Passport boundary…"
+      );
 
       const finished =
-        await executeBulkImport({
-          importRecord:
-            fileRecord,
-          entityId:
-            environment?.entity?.entityId,
-          actorId:
-            environment?.userId,
-          definition:
-            selectedDefinition,
-          mapping:
-            activeLedger.mapping || mapping,
-          ledger:
-            activeLedger,
-          concurrency: 4,
-          onProgress: ({ ledger: nextLedger }) => {
-            setLedger({
-              ...nextLedger,
-              rows: {
-                ...safeObject(nextLedger.rows)
-              }
-            });
-          }
-        });
+        await executeUntilSettled(
+          activeJob
+        );
 
       setLedger(finished);
 
       const result =
-        summarizeBulkLedger(finished);
+        summarizeAosImportJob(
+          finished
+        );
 
       setNotice(
-        `${result.created} objects provisioned with Passport identity. ${result.invalid} invalid rows. ${result.failed} failed rows.`
+        `${result.created} objects provisioned with Passport identity. ${result.invalid} invalid rows. ${result.failed} failed rows. AWS job ${finished?.status || "updated"}.`
       );
     } catch (importError) {
       setError(
@@ -473,7 +660,7 @@ export default function BulkImportPage() {
                   Choose CSV or XLSX
                 </strong>
                 <small>
-                  The file is SHA-256 fingerprinted. Re-selecting the same file restores its local row ledger.
+                  The file is SHA-256 fingerprinted. Re-selecting the same file restores its authoritative AWS import job from any browser.
                 </small>
               </label>
 
@@ -482,7 +669,7 @@ export default function BulkImportPage() {
                   <div><b>FILE</b><span>{fileRecord.filename}</span></div>
                   <div><b>SHEET</b><span>{fileRecord.sheetName}</span></div>
                   <div><b>ROWS</b><span>{fileRecord.rows.length}</span></div>
-                  <div><b>IMPORT</b><span>{fileRecord.importId}</span></div>
+                  <div><b>IMPORT</b><span>{ledger?.jobId || fileRecord.importId}</span></div>
                 </div>
               ) : null}
             </section>
@@ -647,11 +834,11 @@ export default function BulkImportPage() {
                 <div>
                   <strong>
                     {ledger
-                      ? `LEDGER ${ledger.status}`
+                      ? `AWS JOB ${String(ledger.status || "").toUpperCase()}`
                       : "PREFLIGHT READY"}
                   </strong>
                   <span>
-                    Created rows are immutable in this import ledger and will not be created again on retry.
+                    AWS owns row state and permanent Object + Passport identity. Created rows are terminal and are not recreated on resume.
                   </span>
                 </div>
 
@@ -668,7 +855,7 @@ export default function BulkImportPage() {
                   {busy
                     ? "PROCESSING…"
                     : ledger
-                      ? "RESUME / RETRY"
+                      ? "RESUME / RETRY AWS JOB"
                       : `PROVISION ${preview.valid} VALID ROWS`}
                 </button>
               </div>
@@ -688,22 +875,39 @@ export default function BulkImportPage() {
                   <tbody>
                     {preview.rows.map(({ row, validation }) => {
                       const rowState =
-                        ledger?.rows?.[String(row.rowNumber)];
+                        serverRowsByNumber.get(
+                          String(row.rowNumber)
+                        );
+
+                      const status =
+                        clean(
+                          rowState?.status ||
+                          (validation.valid
+                            ? "ready"
+                            : "invalid")
+                        ).toLowerCase();
 
                       return (
                         <tr key={row.rowNumber}>
                           <td>{row.rowNumber}</td>
                           <td>{validation.displayName || "—"}</td>
                           <td>
-                            <span className={`status ${clean(rowState?.status || (validation.valid ? "READY" : "INVALID")).toLowerCase()}`}>
-                              {rowState?.status || (validation.valid ? "READY" : "INVALID")}
+                            <span className={`status ${status}`}>
+                              {status.toUpperCase()}
                             </span>
                           </td>
                           <td>{rowState?.objectId || "—"}</td>
                           <td>{rowState?.passportId || "—"}</td>
                           <td>
-                            {(rowState?.errors || validation.errors || [])
-                              .map(item => item.message)
+                            {(
+                              rowState?.error
+                                ? [rowState.error]
+                                : rowState?.validation?.errors ||
+                                  validation.errors ||
+                                  []
+                            )
+                              .map(item => item?.message)
+                              .filter(Boolean)
                               .join(" · ") || "READY"}
                           </td>
                         </tr>
@@ -715,7 +919,7 @@ export default function BulkImportPage() {
 
               {fileRecord.rows.length > 100 ? (
                 <div className="tableNote">
-                  Preview shows first 100 rows. Preflight and execution cover all {fileRecord.rows.length} rows.
+                  Preview shows first 100 rows. Preflight and AWS execution cover all {fileRecord.rows.length} rows.
                 </div>
               ) : null}
             </section>
@@ -779,7 +983,7 @@ export default function BulkImportPage() {
         td { color: rgba(255,255,255,.7); }
         .status { display: inline-block; padding: 3px 6px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
         .status.created { color: #9fffc5; border-color: rgba(120,255,170,.25); }
-        .status.invalid, .status.failed, .status.failed_retryable { color: #ffadad; border-color: rgba(255,90,90,.25); }
+        .status.invalid, .status.failed, .status.failed-retryable { color: #ffadad; border-color: rgba(255,90,90,.25); }
         .status.processing { color: #ffe392; border-color: rgba(255,210,80,.25); }
         .tableNote { margin-top: 8px; color: rgba(255,255,255,.36); font-size: 9px; }
         @media (max-width: 980px) {
