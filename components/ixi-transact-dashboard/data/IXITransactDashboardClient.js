@@ -19,24 +19,29 @@ export class IXITransactDashboardError extends Error {
 
 export function getIXITransactDashboardEndpoint({ apiBaseUrl = "" } = {}) {
   const base = clean(apiBaseUrl).replace(/\/+$/, "");
-  return base ? `${base}/financial/dashboard` : "/financial/dashboard";
+  return base ? `${base}/financial/dashboard` : "/api/ixi-financial/financial/dashboard";
 }
 
 export function normalizeIXITransactDashboardResponse(result = {}) {
   const source = safeObject(result);
   const data = safeObject(source.data || source);
+  const reporting = safeObject(data.reporting || data.reports);
   return {
     ok: source.ok === undefined ? true : source.ok === true,
     generatedAt: clean(data.generatedAt || source.generatedAt),
     scope: safeObject(data.scope),
     period: safeObject(data.period),
+    accountingPeriod: clean(data.accountingPeriod || data.period?.accountingPeriod || data.period?.period),
     currency: clean(data.currency || "USD").toUpperCase(),
     executive: safeObject(data.executive),
     ar: safeObject(data.ar),
     ap: safeObject(data.ap),
     treasury: safeObject(data.treasury),
     gl: safeObject(data.gl),
-    reports: safeObject(data.reports),
+    reporting,
+    reports: reporting,
+    operations: safeObject(data.operations),
+    workOrders: safeArray(data.workOrders || data.operations?.workOrders),
     attention: safeArray(data.attention),
     permissions: safeObject(data.permissions),
     lineageVersion: clean(data.lineageVersion),
