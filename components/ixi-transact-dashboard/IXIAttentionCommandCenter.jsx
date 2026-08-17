@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import IXIEnterpriseFinancialTable from "./IXIEnterpriseFinancialTable";
+import IXIEnterpriseDataTable from "./components/IXIEnterpriseDataTable";
 import {createIXITransactDashboardQuery} from "./data/IXITransactDashboardQueryContract";
 import {loadIXITransactDashboardProjection} from "./data/IXITransactDashboardClient";
 
@@ -83,12 +83,12 @@ export default function IXIAttentionCommandCenter({
   const critical=attention.filter(item=>item.severity==="critical").length;
   const warnings=attention.filter(item=>item.severity==="warning").length;
   const columns=[
-    {key:"severity",label:"SEVERITY",render:item=><span className={`td-status-pill ${item.severity==="critical"||item.severity==="warning"?"bad":""}`}>{item.severity.toUpperCase()}</span>},
-    {key:"title",label:"ATTENTION",render:item=><strong>{item.title||item.type||"ATTENTION ITEM"}</strong>},
-    {key:"detail",label:"DETAIL",render:item=>item.detail||item.description||"—"},
-    {key:"sourceRecordId",label:"SOURCE",render:item=>item.sourceRecordId||item.recordId||item.financialDocumentId||"—"},
-    {key:"amount",label:"EXPOSURE",align:"right",render:formatAmount},
-    {key:"actionLabel",label:"NEXT ACTION",render:item=>item.actionLabel||"OPEN SOURCE"}
+    {key:"severity",label:"SEVERITY",width:"110px",render:item=><span className={`td-status-pill ${item.severity==="critical"||item.severity==="warning"?"bad":""}`}>{item.severity.toUpperCase()}</span>},
+    {key:"title",label:"ATTENTION",width:"minmax(190px,1.2fr)",render:item=><strong>{item.title||item.type||"ATTENTION ITEM"}</strong>},
+    {key:"detail",label:"DETAIL",width:"minmax(280px,2fr)",render:item=>item.detail||item.description||"—"},
+    {key:"sourceRecordId",label:"SOURCE",width:"minmax(150px,1fr)",render:item=>item.sourceRecordId||item.recordId||item.financialDocumentId||"—"},
+    {key:"amount",label:"EXPOSURE",width:"140px",render:formatAmount},
+    {key:"actionLabel",label:"NEXT ACTION",width:"150px",render:item=>item.actionLabel||"OPEN SOURCE"}
   ];
   const openRecord=item=>{
     if(typeof onOpenRecord==="function")return onOpenRecord(item);
@@ -113,13 +113,13 @@ export default function IXIAttentionCommandCenter({
         {status==="scope-required"?<div className="td-empty-state"><span>FINANCIAL SCOPE REQUIRED</span><strong>SELECT ENTITY + ACCOUNTING PERIOD</strong><p>Attention never invents a default financial scope.</p></div>:null}
         {status==="loading"?<div className="td-empty-state"><span>IXI FINANCIAL</span><strong>LOADING VERIFIED ATTENTION QUEUE</strong></div>:null}
         {status==="error"?<div className="td-empty-state"><span>ATTENTION PROJECTION UNAVAILABLE</span><strong>NO CONTROL QUEUE DISPLAYED</strong><p>{error}</p></div>:null}
-        {(status==="current"||status==="partial")&&attention.length?<IXIEnterpriseFinancialTable rows={attention} columns={columns} getRowKey={item=>item._key} onRowSelect={openRecord}/>:null}
+        {(status==="current"||status==="partial")&&attention.length?<IXIEnterpriseDataTable rows={attention} columns={columns} rowKey={item=>item._key} onRowOpen={openRecord} emptyLabel="NO ACTIVE ATTENTION ITEMS" ariaLabel="IXI TRAN$ACT Attention queue"/>:null}
         {(status==="current"||status==="partial")&&!attention.length?<div className="td-empty-state"><span>CONTROL QUEUE</span><strong>NO ACTIVE ATTENTION ITEMS</strong><p>No server-projected exceptions exist in the selected authorized scope.</p></div>:null}
         {status==="partial"?<div className="td-drawer-note">PARTIAL ATTENTION PROJECTION · Missing server sections are never treated as zero or healthy state.</div>:null}
       </div>
     </section>
     <style jsx global>{`
-      .td-attention-command-layer{position:fixed;inset:0;z-index:1200;display:flex;align-items:stretch;justify-content:flex-end;font-family:Arial,Helvetica,sans-serif}.td-attention-command-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.72);cursor:default}.td-attention-command-center{position:relative;width:min(1500px,92vw);height:100vh;background:#090b0c;border-left:1px solid #34393c;box-shadow:-20px 0 60px rgba(0,0,0,.55);display:flex;flex-direction:column;color:#edf0f2}.td-attention-command-head{height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #303432;background:linear-gradient(180deg,#171a1c,#0c0e0f)}.td-attention-command-head div{display:grid;gap:4px}.td-attention-command-head span,.td-attention-command-head small{font-size:9px;letter-spacing:1.5px;color:#8e969a}.td-attention-command-head strong{font-size:20px;letter-spacing:1px;color:#ffc400}.td-attention-command-head button{border:1px solid #42484c;background:#111416;color:#dfe4e6;padding:9px 15px;font-size:10px;font-weight:800;letter-spacing:1px}.td-attention-command-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid #303432}.td-attention-command-kpis>div{min-height:76px;padding:13px 18px;border-right:1px solid #25292b;display:grid;align-content:center;gap:5px}.td-attention-command-kpis span{font-size:8px;letter-spacing:1.4px;color:#80888c}.td-attention-command-kpis strong{font-size:19px;letter-spacing:.5px}.td-attention-command-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 28px}.td-attention-command-body .td-enterprise-table-wrap{min-height:420px}@media(max-width:1200px){.td-attention-command-center{width:100vw}.td-attention-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      .td-attention-command-layer{position:fixed;inset:0;z-index:1200;display:flex;align-items:stretch;justify-content:flex-end;font-family:Arial,Helvetica,sans-serif}.td-attention-command-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.72);cursor:default}.td-attention-command-center{position:relative;width:min(1500px,92vw);height:100vh;background:#090b0c;border-left:1px solid #34393c;box-shadow:-20px 0 60px rgba(0,0,0,.55);display:flex;flex-direction:column;color:#edf0f2}.td-attention-command-head{height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #303432;background:linear-gradient(180deg,#171a1c,#0c0e0f)}.td-attention-command-head div{display:grid;gap:4px}.td-attention-command-head span,.td-attention-command-head small{font-size:9px;letter-spacing:1.5px;color:#8e969a}.td-attention-command-head strong{font-size:20px;letter-spacing:1px;color:#ffc400}.td-attention-command-head button{border:1px solid #42484c;background:#111416;color:#dfe4e6;padding:9px 15px;font-size:10px;font-weight:800;letter-spacing:1px}.td-attention-command-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid #303432}.td-attention-command-kpis>div{min-height:76px;padding:13px 18px;border-right:1px solid #25292b;display:grid;align-content:center;gap:5px}.td-attention-command-kpis span{font-size:8px;letter-spacing:1.4px;color:#80888c}.td-attention-command-kpis strong{font-size:19px;letter-spacing:.5px}.td-attention-command-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 28px}.td-attention-command-body .td-enterprise-table{min-height:420px}@media(max-width:1200px){.td-attention-command-center{width:100vw}.td-attention-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
     `}</style>
   </div>;
 }
