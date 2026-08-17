@@ -142,11 +142,7 @@ Before dispatch, the desktop verifies:
 
 A passing preflight dispatches into the existing Collections, Payables, or Purchase Order command modules. Those modules remain the business-rule and persistence authority. The desktop does not duplicate their accounting logic.
 
-No desktop financial action should be exposed as executable until the resolver payload, typed input workflow, canonical command dispatch, success handling, cache invalidation, and refreshed projection path are all wired together.
-
-### Current live-enable boundary
-
-The canonical dispatcher and its preflight contracts are implemented and CI-proven. The record drawer still intentionally leaves money-moving controls non-executable until the UI input panel and post-command refresh lifecycle are wired. This prevents a partially integrated command path from becoming a production control.
+The canonical dispatcher and its preflight contracts are implemented and CI-proven. The record drawer still intentionally leaves money-moving controls non-executable until the typed UI input panel and post-command refresh lifecycle are wired. This prevents a partially integrated command path from becoming a production financial control.
 
 ## 4. POST /financial/search
 
