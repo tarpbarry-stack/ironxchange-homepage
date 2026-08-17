@@ -43,6 +43,10 @@
 
 
 import {
+  getAosPassportId
+} from "../../../lib/mos/ixiAosProvisioningContract";
+
+import {
   createIXIFinancialDocument
 } from "./IXIAosFinancialCommandClient";
 
@@ -91,13 +95,16 @@ function safeObject(
    ========================================================= */
 
 /*
- * We deliberately support several existing
- * Object shapes here.
+ * Canonical AOS Passport identity wins.
  *
- * This adapter is the compatibility seam.
+ * The compatibility fallbacks below remain
+ * intentionally because legacy listing and
+ * pre-provisioning records may still expose
+ * Passport identity through older shapes.
  *
- * Financial Faces should not care where the
- * Passport ID physically lives.
+ * New durable AOS Objects, Object Studio,
+ * Bulk, Chat/API, TRAN$ACT and Authority all
+ * converge on getAosPassportId().
  */
 
 export function getIXIAosFinancialPassportId(
@@ -109,17 +116,22 @@ export function getIXIAosFinancialPassportId(
     );
 
 
-  const candidates = [
-    source.passportId,
+  const canonicalPassportId =
+    clean(
+      getAosPassportId(
+        source
+      )
+    );
 
-    source.ixiPassportId,
 
-    source.passport
-      ?.passportId,
+  if (
+    canonicalPassportId
+  ) {
+    return canonicalPassportId;
+  }
 
-    source.passport
-      ?.id,
 
+  const legacyCandidates = [
     source.identity
       ?.passportId,
 
@@ -141,7 +153,7 @@ export function getIXIAosFinancialPassportId(
 
   for (
     const candidate of
-      candidates
+      legacyCandidates
   ) {
 
     const value =
