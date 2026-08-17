@@ -16,6 +16,12 @@ export default function IXITransactDesktopPage() {
   const from = clean(router.query.from);
   const workspace = clean(router.query.workspace || "executive");
 
+  const handleWorkspaceChange = nextWorkspace => {
+    const next = clean(nextWorkspace || "executive");
+    if (!router.isReady || next === workspace) return;
+    router.replace({ pathname: router.pathname, query: { ...router.query, workspace: next } }, undefined, { shallow: true, scroll: false });
+  };
+
   return (
     <>
       <Head>
@@ -32,7 +38,7 @@ export default function IXITransactDesktopPage() {
         locationLabel={clean(router.query.locationLabel || "ALL LOCATIONS")}
         currency={clean(router.query.currency || "USD")}
         initialWorkspace={workspace}
-        apiBaseUrl={clean(process.env.NEXT_PUBLIC_IXI_CORE_URL)}
+        onWorkspaceChange={handleWorkspaceChange}
       />
     </>
   );
