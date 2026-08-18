@@ -24,6 +24,27 @@ function firstErrorMessage(payload, fallback) {
   );
 }
 
+function throwForBadResponse(response, payload, fallback, fallbackCode) {
+  if (response.ok && payload?.ok === true) {
+    return;
+  }
+
+  const error = new Error(
+    firstErrorMessage(payload, fallback)
+  );
+
+  error.code = clean(
+    payload?.errors?.[0]?.code ||
+    payload?.errors?.[0]?.name ||
+    payload?.error?.code ||
+    fallbackCode
+  );
+
+  error.status = response.status;
+  error.payload = payload;
+  throw error;
+}
+
 export async function loadIXIFinancialAccessContext({ signal } = {}) {
   const response = await fetch(
     "/api/ixi/financial/access-context",
@@ -37,15 +58,12 @@ export async function loadIXIFinancialAccessContext({ signal } = {}) {
 
   const payload = await readJson(response);
 
-  if (!response.ok || payload?.ok !== true) {
-    const error = new Error(
-      firstErrorMessage(payload, "IXI Financial access context could not be loaded.")
-    );
-    error.code = clean(payload?.errors?.[0]?.code || payload?.error?.code || "IXI_FINANCIAL_ACCESS_FAILED");
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
-  }
+  throwForBadResponse(
+    response,
+    payload,
+    "IXI Financial access context could not be loaded.",
+    "IXI_FINANCIAL_ACCESS_FAILED"
+  );
 
   return payload;
 }
@@ -67,15 +85,109 @@ export async function loadIXITransactDashboard({ query, signal } = {}) {
 
   const payload = await readJson(response);
 
-  if (!response.ok || payload?.ok !== true) {
-    const error = new Error(
-      firstErrorMessage(payload, "IXI Financial dashboard projection could not be loaded.")
-    );
-    error.code = clean(payload?.errors?.[0]?.code || payload?.error?.code || "IXI_FINANCIAL_DASHBOARD_FAILED");
-    error.status = response.status;
-    error.payload = payload;
+  throwForBadResponse(
+    response,
+    payload,
+    "IXI Financial dashboard projection could not be loaded.",
+    "IXI_FINANCIAL_DASHBOARD_FAILED"
+  );
+
+  return payload;
+}
+
+export async function loadIXITransactGL({
+  period = "",
+  currency = "USD",
+  signal
+} = {}) {
+  const params = new URLSearchParams();
+
+  if (clean(period)) {
+    params.set("period", clean(period));
+  }
+
+  params.set(
+    "currency",
+    clean(currency || "USD").toUpperCase()
+  );
+
+  const response = await fetch(
+    `/api/ixi/financial/gl?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+      signal
+    }
+  );
+
+  const payload = await readJson(response);
+
+  throwForBadResponse(
+    response,
+    payload,
+    "IXI General Ledger could not be loaded.",
+    "IXI_FINANCIAL_GL_FAILED"
+  );
+
+  return payload;
+}
+
+export async function createIXITransactDesktopDocument({
+  documentType = "",
+  input = {},
+  commandId = "",
+  idempotencyKey = "",
+  metadata = {},
+  snapshot = {},
+  signal
+} = {}) {
+  const resolvedDocumentType = clean(documentType).toLowerCase();
+
+  if (!resolvedDocumentType) {
+    const error = new Error("TRAN$ACT Desktop documentType is required.");
+    error.code = "IXI_FINANCIAL_DOCUMENT_TYPE_REQUIRED";
     throw error;
   }
 
+  const response = await fetch(
+    "/api/ixi/financial/commands/desktop/create",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-IXI-Source": "ixi-transact-desktop"
+      },
+      body: JSON.stringify({
+        documentType: resolvedDocumentType,
+        input: input && typeof input === "object" && !Array.isArray(input) ? input : {},
+        commandId: clean(commandId),
+        idempotencyKey: clean(idempotencyKey),
+        metadata: metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {},
+        snapshot: snapshot && typeof snapshot === "object" && !Array.isArray(snapshot) ? snapshot : {}
+      }),
+      signal
+    }
+  );
+
+  const payload = await readJson(response);
+
+  throwForBadResponse(
+    response,
+    payload,
+    "TRAN$ACT Desktop document could not be created.",
+    "IXI_FINANCIAL_DESKTOP_CREATE_FAILED"
+  );
+
   return payload;
+}
+
+export async function createIXITransactJournalEntry(input, options = {}) {
+  return createIXITransactDesktopDocument({
+    ...(options && typeof options === "object" && !Array.isArray(options) ? options : {}),
+    documentType: "journal-entry",
+    input: input && typeof input === "object" && !Array.isArray(input) ? input : {}
+  });
 }
