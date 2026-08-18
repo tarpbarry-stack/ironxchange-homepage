@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { initPostHog, captureIXEvent } from "../lib/posthog";
+import { IXITicketProvider } from "../components/ixi-tickets/IXITicketProvider";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function App({ Component, pageProps }) {
   }, [router.isReady, router.pathname, router.asPath, router.events]);
 
   return (
-    <>
+    <IXITicketProvider>
       <Head>
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -47,6 +48,6 @@ export default function App({ Component, pageProps }) {
       </Head>
 
       <Component {...pageProps} />
-    </>
+    </IXITicketProvider>
   );
 }
