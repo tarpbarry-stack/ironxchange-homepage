@@ -1,27 +1,27 @@
-const { getIXIAccessToken, getIXICoreBaseUrl } = require("../../../lib/ixi-authority/ixiAuthorityProxy");
+import { resolveAosBrowserSession } from "../../../lib/server/aos/resolveAosBrowserSession";
+import { requestIxCoreMos, resolveIxCoreAosContext } from "../../../lib/server/aos/ixiMosInternalClient";
 const { buildAttentionSummary } = require("../../../lib/admin-daddy/AdminDaddyAttentionEngine");
 
-async function fetchUpstreamEvents(accessToken) {
-  const candidates = [
-    "/admin-daddy/events",
-    "/operations/events"
-  ];
-
-  for (const path of candidates) {
-    try {
-      const response = await fetch(`${getIXICoreBaseUrl()}${path}`, {
-        headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` }
-      });
-      if (!response.ok) continue;
-      const payload = await response.json();
-      const events = Array.isArray(payload) ? payload : Array.isArray(payload?.events) ? payload.events : null;
-      if (events) return { available: true, source: path, events };
-    } catch {
-      // Try the next compatible IX-Core projection path.
-    }
-  }
-
-  return { available: false, source: null, events: [] };
+function normalizeMosEvent(event = {}) {
+  const severity = String(event.severity || event.level || event.priority || "info").toLowerCase();
+  return {
+    eventId: event.eventId || event.id,
+    sourceSystem: event.sourceSystem || event.system || "aos",
+    sourceComponent: event.sourceComponent || event.component || "mos-events",
+    eventType: event.eventType || event.type || "mos-event",
+    severity: ["info", "watch", "action", "critical"].includes(severity) ? severity : "info",
+    title: event.title || event.eventType || event.type || "AOS event",
+    detail: event.detail || event.message || "",
+    targetType: event.targetType || event.objectType || (event.objectId ? "object" : ""),
+    targetId: event.targetId || event.objectId || "",
+    entityPassportId: event.entityPassportId || "",
+    occurredAt: event.occurredAt || event.createdAt || event.timestamp,
+    correlationId: event.correlationId || event.commandId || "",
+    metrics: event.metrics || {},
+    evidence: event.evidence || event.metadata || {},
+    actionable: Boolean(event.actionable || severity === "critical" || severity === "action"),
+    suggestedCommand: event.suggestedCommand || null
+  };
 }
 
 export default async function handler(req, res) {
@@ -30,19 +30,32 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: { code: "METHOD_NOT_ALLOWED", message: "GET required." } });
   }
 
-  const accessToken = getIXIAccessToken(req);
-  if (!accessToken) {
-    return res.status(401).json({ ok: false, error: { code: "IXI_AUTHENTICATION_REQUIRED", message: "IXI authenticated session is required." } });
+  try {
+    const session = await resolveAosBrowserSession(req, res);
+    const context = await resolveIxCoreAosContext({ session });
+    const payload = await requestIxCoreMos({
+      path: `/events?entityId=${encodeURIComponent(context.entityId)}`,
+      principalId: context.userId,
+      entityId: context.entityId
+    });
+    const rawEvents = Array.isArray(payload?.events) ? payload.events : [];
+    const summary = buildAttentionSummary(rawEvents.map(normalizeMosEvent));
+
+    return res.status(200).json({
+      ok: true,
+      live: true,
+      source: "/mos/v1/events",
+      entityId: context.entityId,
+      ...summary
+    });
+  } catch (error) {
+    return res.status(Number(error?.status || 500)).json({
+      ok: false,
+      live: false,
+      error: {
+        code: error?.code || "ADMIN_DADDY_ATTENTION_FAILED",
+        message: error?.message || "Admin Daddy could not load the MOS event stream."
+      }
+    });
   }
-
-  const upstream = await fetchUpstreamEvents(accessToken);
-  const summary = buildAttentionSummary(upstream.events);
-
-  return res.status(200).json({
-    ok: true,
-    live: upstream.available,
-    source: upstream.source,
-    ...summary,
-    notice: upstream.available ? null : "IX-Core attention event projection is not registered yet."
-  });
 }
