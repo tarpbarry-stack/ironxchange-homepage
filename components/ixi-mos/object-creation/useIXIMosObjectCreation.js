@@ -88,15 +88,14 @@ function replaceWorkspaceObjectId(
           ? objectIds
           : [];
 
-      const replaced =
-        ids.map(objectId =>
-          String(objectId) === fromId
-            ? toId
-            : String(objectId)
-        );
-
       next[surfaceId] = [
-        ...new Set(replaced)
+        ...new Set(
+          ids.map(objectId =>
+            String(objectId) === fromId
+              ? toId
+              : String(objectId)
+          )
+        )
       ];
     }
   );
@@ -105,11 +104,38 @@ function replaceWorkspaceObjectId(
 }
 
 
+function removeWorkspaceObjectId(
+  placements,
+  objectId
+) {
+  const id = clean(objectId);
+  const next = {};
+
+  Object.entries(
+    placements || {}
+  ).forEach(
+    ([surfaceId, objectIds]) => {
+      next[surfaceId] =
+        Array.isArray(objectIds)
+          ? objectIds.filter(
+              candidate =>
+                String(candidate) !== id
+            )
+          : [];
+    }
+  );
+
+  return next;
+}
+
+
 /*
- * Child-creation semantics are persisted configuration.
+ * Child creation semantics come only from
+ * persisted definition/capability metadata.
  *
- * We never derive child meaning from the parent's name.
- * Customer vocabulary remains customer data.
+ * No customer-facing noun, container name,
+ * category label or business term is used to
+ * infer what the child means.
  */
 function getPersistedChildDefaults(
   container = {}
@@ -157,12 +183,6 @@ function getPersistedChildDefaults(
       creation?.defaultTemplateVersion ??
       null,
 
-    displayName:
-      clean(
-        creation?.defaultDisplayName ||
-        creation?.placeholderName
-      ),
-
     businessIdentifiers:
       safeArray(
         creation?.defaultBusinessIdentifiers
@@ -184,7 +204,6 @@ function getPersistedChildDefaults(
 export default function useIXIMosObjectCreation({
   entityId,
   userId,
-  workspaceSystemIndexes,
   workspacePlacements,
   setWorkspacePlacements,
   saveWorkspaceLayout,
@@ -193,11 +212,25 @@ export default function useIXIMosObjectCreation({
   onObjectNotice = null
 }) {
   /*
-   * Drafts live in browser memory only.
-   * They are deliberately absent from MOS,
-   * Passport, TRAN$ACT and persistent indexes.
+   * DRAFT LAW
+   *
+   * A container + action creates only one
+   * browser-memory draft. It has no MOS
+   * identity, no Passport and no TRAN$ACT
+   * identity until SAVE commits it.
    */
   const draftObjectsRef =
+    useRef(new Map());
+
+  /*
+   * One in-flight commit per draft. This is
+   * an additional browser-side guard on top
+   * of IX-Core idempotency. Double clicks,
+   * repeated callbacks and network timing
+   * cannot create parallel commit attempts
+   * for the same draft.
+   */
+  const draftCommitPromisesRef =
     useRef(new Map());
 
 
@@ -239,13 +272,10 @@ export default function useIXIMosObjectCreation({
       moveObjectToWorkspaceSurface({
         placements:
           workspacePlacements,
-
         objectId:
           id,
-
         targetSurface:
           "board",
-
         ...(position
           ? { position }
           : {})
@@ -275,8 +305,23 @@ export default function useIXIMosObjectCreation({
     metadata = {},
     exposeToBoard = true
   }) {
+    const resolvedEntityId =
+      clean(entityId);
+
     const destinationContainerId =
       getMosObjectId(container);
+
+    if (!resolvedEntityId) {
+      throw new Error(
+        "AOS Entity is not available."
+      );
+    }
+
+    if (!destinationContainerId) {
+      throw new Error(
+        "Destination container is missing objectId."
+      );
+    }
 
     const draftId =
       createAosDraftId();
@@ -289,7 +334,7 @@ export default function useIXIMosObjectCreation({
         draftId,
 
       entityId:
-        clean(entityId),
+        resolvedEntityId,
 
       definitionId:
         clean(definitionId) || null,
@@ -318,7 +363,7 @@ export default function useIXIMosObjectCreation({
         cardTemplateVersion ?? null,
 
       directContainerId:
-        destinationContainerId || null,
+        destinationContainerId,
 
       status:
         "draft",
@@ -332,9 +377,9 @@ export default function useIXIMosObjectCreation({
 
       metadata: {
         ...safeObject(metadata),
-
         draftOnly: true,
         creationState: "naming",
+        persistenceState: "client-only",
         destinationContainerId
       },
 
@@ -373,15 +418,16 @@ export default function useIXIMosObjectCreation({
       );
 
       /*
-       * Draft placement is intentionally not
-       * persisted. Only permanent object IDs
-       * belong in durable workspace layout.
+       * Never persist a draft ID into the
+       * durable workspace layout. A reload
+       * therefore cannot resurrect a draft.
        */
     }
 
     return {
       draft: true,
       created: false,
+      persisted: false,
       object:
         draftObject,
       objectId:
@@ -407,15 +453,8 @@ export default function useIXIMosObjectCreation({
       destinationContainerId,
       actorId:
         userId || null,
-
-      /*
-       * Stable across a retry of this draft.
-       * Container placement therefore follows
-       * the same idempotent commit intent.
-       */
       commandId:
         `aos-place:${draftId}`,
-
       metadata: {
         source:
           "aos-container",
@@ -450,6 +489,9 @@ export default function useIXIMosObjectCreation({
     const name =
       clean(displayName);
 
+    const resolvedDraftId =
+      clean(draftId);
+
     if (!resolvedEntityId) {
       throw new Error(
         "AOS Entity is not available."
@@ -462,9 +504,11 @@ export default function useIXIMosObjectCreation({
       );
     }
 
-    const resolvedDraftId =
-      clean(draftId) ||
-      createAosDraftId();
+    if (!resolvedDraftId) {
+      throw new Error(
+        "AOS draft identity is required for permanent creation."
+      );
+    }
 
     const response =
       await provisionAosObject({
@@ -490,8 +534,11 @@ export default function useIXIMosObjectCreation({
           resolvedDraftId,
         metadata: {
           ...safeObject(metadata),
+          draftOnly: false,
           creationState:
-            "complete"
+            "complete",
+          persistenceState:
+            "permanent"
         }
       });
 
@@ -519,6 +566,14 @@ export default function useIXIMosObjectCreation({
       );
     }
 
+    if (
+      response?.transact?.eligible !== true
+    ) {
+      throw new Error(
+        "IX-Core provisioned the object without verified TRAN$ACT eligibility."
+      );
+    }
+
     await placeProvisionedObject({
       objectId:
         createdObjectId,
@@ -541,8 +596,10 @@ export default function useIXIMosObjectCreation({
   /* =========================================================
      ROOT SYSTEM INDEX CREATION
 
-     System Index is an IXI technical presentation role.
-     Customer displayName remains unrestricted customer data.
+     This operation receives the customer's
+     completed name before provisioning. The
+     technical System Index presentation role
+     never supplies customer business meaning.
      ========================================================= */
   async function createRootSystemIndexByName(
     rawDisplayName
@@ -616,11 +673,12 @@ export default function useIXIMosObjectCreation({
   /* =========================================================
      UNIVERSAL CHILD CREATION
 
-     + begins a browser-only draft when the
-     caller has not supplied a real name yet.
+     HARD BOUNDARY:
 
-     No MOS object, Passport or TRAN$ACT
-     identity exists until save.
+     This function NEVER provisions a permanent
+     object. Container + means "open a draft".
+     SAVE is the only transition to permanent
+     Object + Passport + TRAN$ACT identity.
      ========================================================= */
   async function createObjectInContainer({
     container,
@@ -633,14 +691,10 @@ export default function useIXIMosObjectCreation({
     cardTemplateSlug:
       rawCardTemplateSlug = null,
     cardTemplateVersion = null,
-    displayName:
-      rawDisplayName,
     businessIdentifiers = null,
     fields = {},
     metadata = {},
-    exposeToBoard = true,
-    draftId:
-      suppliedDraftId = null
+    exposeToBoard = true
   }) {
     const destinationContainerId =
       getMosObjectId(container);
@@ -697,12 +751,6 @@ export default function useIXIMosObjectCreation({
         defaults.cardTemplateSlug
       ) || null;
 
-    const displayName =
-      clean(
-        rawDisplayName ||
-        defaults.displayName
-      );
-
     const resolvedBusinessIdentifiers =
       Array.isArray(businessIdentifiers)
         ? businessIdentifiers
@@ -715,90 +763,148 @@ export default function useIXIMosObjectCreation({
 
     const resolvedMetadata = {
       ...defaults.metadata,
+      ...safeObject(metadata),
       createdFrom:
-        "aos-container",
+        clean(metadata?.createdFrom) ||
+        "aos-container-plus",
       createdInsideContainerId:
         destinationContainerId,
-      ...safeObject(metadata)
+      creationState:
+        "naming",
+      persistenceState:
+        "client-only"
     };
 
-    /*
-     * The old flow persisted "NEW OBJECT".
-     * It is now treated strictly as a draft
-     * placeholder and never sent to IX-Core.
-     */
-    if (
-      !displayName ||
-      displayName === DRAFT_DISPLAY_NAME ||
-      resolvedMetadata.creationState ===
-        "naming"
-    ) {
-      return createClientOnlyDraft({
-        container,
-        definitionId,
-        definitionKey,
-        objectType,
-        cardTemplateSlug,
-        cardTemplateVersion:
-          cardTemplateVersion ??
-          defaults.cardTemplateVersion ??
-          null,
-        businessIdentifiers:
-          resolvedBusinessIdentifiers,
-        fields:
-          resolvedFields,
-        metadata:
-          resolvedMetadata,
-        exposeToBoard
-      });
+    return createClientOnlyDraft({
+      container,
+      definitionId,
+      definitionKey,
+      objectType,
+      cardTemplateSlug,
+      cardTemplateVersion:
+        cardTemplateVersion ??
+        defaults.cardTemplateVersion ??
+        null,
+      businessIdentifiers:
+        resolvedBusinessIdentifiers,
+      fields:
+        resolvedFields,
+      metadata:
+        resolvedMetadata,
+      exposeToBoard
+    });
+  }
+
+
+  async function commitDraftObject({
+    id,
+    name,
+    fields,
+    metadata
+  }) {
+    const draft =
+      draftObjectsRef.current.get(id);
+
+    if (!draft) {
+      throw new Error(
+        "AOS draft is no longer available. Re-open creation and try again."
+      );
     }
 
-    const draftId =
-      clean(suppliedDraftId) ||
-      createAosDraftId();
+    const destinationContainerId =
+      clean(
+        draft?.metadata
+          ?.destinationContainerId ||
+        draft?.directContainerId
+      ) || null;
 
     const {
       response,
       createdObject,
       createdObjectId
     } = await provisionPermanentObject({
-      draftId,
+      draftId:
+        id,
       destinationContainerId,
-      definitionId,
-      definitionKey,
-      objectType,
-      displayName,
+      definitionId:
+        draft.definitionId,
+      definitionKey:
+        draft.definitionKey,
+      objectType:
+        draft.objectType,
+      displayName:
+        name,
       businessIdentifiers:
-        resolvedBusinessIdentifiers,
-      fields:
-        resolvedFields,
-      cardTemplateSlug,
+        draft.businessIdentifiers,
+      fields: {
+        ...safeObject(draft.fields),
+        ...safeObject(fields)
+      },
+      media:
+        draft.media,
+      cardTemplateSlug:
+        draft.cardTemplateSlug,
       cardTemplateVersion:
-        cardTemplateVersion ??
-        defaults.cardTemplateVersion ??
-        null,
+        draft.cardTemplateVersion,
       source:
         "manual",
-      metadata:
-        resolvedMetadata
+      metadata: {
+        ...safeObject(draft.metadata),
+        ...safeObject(metadata),
+        draftOnly:
+          false,
+        creationState:
+          "complete",
+        persistenceState:
+          "permanent"
+      }
     });
 
-    if (exposeToBoard) {
-      await exposeObjectToBoard(
+    /*
+     * The draft remains intact until the
+     * Object, Passport, TRAN$ACT identity,
+     * canonical containment and durable
+     * workspace-ID replacement all succeed.
+     *
+     * A failure before this point can safely
+     * retry the same draft/idempotency keys.
+     */
+    const nextPlacements =
+      replaceWorkspaceObjectId(
+        workspacePlacements,
+        id,
         createdObjectId
       );
-    }
+
+    setWorkspacePlacements?.(
+      nextPlacements
+    );
+
+    await saveWorkspaceLayout?.(
+      nextPlacements
+    );
+
+    draftObjectsRef.current.delete(id);
 
     const environment =
       await reloadMosEnvironment();
 
+    onObjectNotice?.({
+      objectId:
+        createdObjectId,
+      message:
+        `${name} SAVED`,
+      tone:
+        "success"
+    });
+
     return {
+      created: true,
+      draft: false,
       object:
         createdObject,
       objectId:
         createdObjectId,
-      parentObjectId:
-        destinationContainerId,
       passport:
         response.passport,
       identity:
@@ -835,119 +941,46 @@ export default function useIXIMosObjectCreation({
     }
 
     /* =====================================================
-       DRAFT COMMIT
+       DRAFT -> PERMANENT COMMIT
        ===================================================== */
     if (isAosDraftId(id)) {
-      const draft =
-        draftObjectsRef.current.get(id);
+      const existingCommit =
+        draftCommitPromisesRef.current.get(id);
 
-      if (!draft) {
-        throw new Error(
-          "AOS draft is no longer available. Re-open creation and try again."
-        );
+      if (existingCommit) {
+        return existingCommit;
       }
 
-      const destinationContainerId =
-        clean(
-          draft?.metadata
-            ?.destinationContainerId ||
-          draft?.directContainerId
-        ) || null;
-
-      const {
-        response,
-        createdObject,
-        createdObjectId
-      } = await provisionPermanentObject({
-        draftId:
+      const commitPromise =
+        commitDraftObject({
           id,
-        destinationContainerId,
-        definitionId:
-          draft.definitionId,
-        definitionKey:
-          draft.definitionKey,
-        objectType:
-          draft.objectType,
-        displayName:
           name,
-        businessIdentifiers:
-          draft.businessIdentifiers,
-        fields: {
-          ...safeObject(draft.fields),
-          ...safeObject(fields)
-        },
-        media:
-          draft.media,
-        cardTemplateSlug:
-          draft.cardTemplateSlug,
-        cardTemplateVersion:
-          draft.cardTemplateVersion,
-        source:
-          "manual",
-        metadata: {
-          ...safeObject(draft.metadata),
-          ...safeObject(metadata),
-          draftOnly:
-            false,
-          creationState:
-            "complete"
+          fields,
+          metadata
+        });
+
+      draftCommitPromisesRef.current.set(
+        id,
+        commitPromise
+      );
+
+      try {
+        return await commitPromise;
+      } finally {
+        if (
+          draftCommitPromisesRef.current.get(id) ===
+          commitPromise
+        ) {
+          draftCommitPromisesRef.current.delete(id);
         }
-      });
-
-      /*
-       * Do not mutate/remove the draft until
-       * Object + Passport + containment have
-       * all succeeded. If any step fails, the
-       * same draftId can safely retry.
-       */
-      const nextPlacements =
-        replaceWorkspaceObjectId(
-          workspacePlacements,
-          id,
-          createdObjectId
-        );
-
-      setWorkspacePlacements?.(
-        nextPlacements
-      );
-
-      await saveWorkspaceLayout?.(
-        nextPlacements
-      );
-
-      draftObjectsRef.current.delete(id);
-
-      const environment =
-        await reloadMosEnvironment();
-
-      onObjectNotice?.({
-        objectId:
-          createdObjectId,
-        message:
-          `${name} SAVED`,
-        tone:
-          "success"
-      });
-
-      return {
-        object:
-          createdObject,
-        objectId:
-          createdObjectId,
-        passport:
-          response.passport,
-        identity:
-          response.identity,
-        transact:
-          response.transact,
-        environment
-      };
+      }
     }
 
     /* =====================================================
        PERMANENT OBJECT EDIT
 
-       Editing never provisions a new Passport.
+       Editing a durable object never creates
+       another Object or another Passport.
        ===================================================== */
     const response =
       await updateMosObject({
@@ -963,7 +996,9 @@ export default function useIXIMosObjectCreation({
         metadata: {
           ...safeObject(metadata),
           creationState:
-            "complete"
+            "complete",
+          persistenceState:
+            "permanent"
         }
       });
 
@@ -1005,10 +1040,21 @@ export default function useIXIMosObjectCreation({
     }
 
     /*
-     * Canceling an unsaved draft has no
-     * server-side identity to delete.
+     * Canceling a draft deletes browser state
+     * only. There is intentionally no server
+     * identity to delete.
      */
     if (isAosDraftId(objectId)) {
+      if (
+        draftCommitPromisesRef.current.has(
+          objectId
+        )
+      ) {
+        throw new Error(
+          "This object is currently being saved. Wait for the save to finish before deleting it."
+        );
+      }
+
       draftObjectsRef.current.delete(
         objectId
       );
@@ -1024,22 +1070,11 @@ export default function useIXIMosObjectCreation({
         )
       );
 
-      const nextPlacements = {};
-
-      Object.entries(
-        workspacePlacements || {}
-      ).forEach(
-        ([surfaceId, objectIds]) => {
-          nextPlacements[surfaceId] =
-            Array.isArray(objectIds)
-              ? objectIds.filter(
-                  id =>
-                    String(id) !==
-                    objectId
-                )
-              : [];
-        }
-      );
+      const nextPlacements =
+        removeWorkspaceObjectId(
+          workspacePlacements,
+          objectId
+        );
 
       setWorkspacePlacements?.(
         nextPlacements
@@ -1058,22 +1093,11 @@ export default function useIXIMosObjectCreation({
         userId || null
     });
 
-    const nextPlacements = {};
-
-    Object.entries(
-      workspacePlacements || {}
-    ).forEach(
-      ([surfaceId, objectIds]) => {
-        nextPlacements[surfaceId] =
-          Array.isArray(objectIds)
-            ? objectIds.filter(
-                id =>
-                  String(id) !==
-                  objectId
-              )
-            : [];
-      }
-    );
+    const nextPlacements =
+      removeWorkspaceObjectId(
+        workspacePlacements,
+        objectId
+      );
 
     setWorkspacePlacements?.(
       nextPlacements
