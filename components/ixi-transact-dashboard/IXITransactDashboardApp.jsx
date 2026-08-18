@@ -14,6 +14,9 @@ import {
   normalizeIXITransactDashboardProjection
 } from "./data/IXITransactDashboardProjectionAdapter";
 
+import IXITransactGLWorkspace from "./IXITransactGLWorkspace";
+
+
 const WORKSPACES = [
   ["executive", "EXECUTIVE"],
   ["ar", "A/R"],
@@ -22,6 +25,7 @@ const WORKSPACES = [
   ["gl", "GL / CLOSE"],
   ["reporting", "REPORTING"]
 ];
+
 
 function money(value, currency = "USD") {
   if (value === null || value === undefined || !Number.isFinite(Number(value))) {
@@ -35,6 +39,7 @@ function money(value, currency = "USD") {
   }).format(Number(value));
 }
 
+
 function Metric({ label, value, currency, text = false }) {
   return (
     <div className="metric">
@@ -43,6 +48,7 @@ function Metric({ label, value, currency, text = false }) {
     </div>
   );
 }
+
 
 function GenericRecordTable({ title, records, currency }) {
   const rows = Array.isArray(records) ? records.slice(0, 50) : [];
@@ -97,6 +103,7 @@ function GenericRecordTable({ title, records, currency }) {
   );
 }
 
+
 function Executive({ projection }) {
   const e = projection.executive;
   const currency = projection.currency;
@@ -144,6 +151,7 @@ function Executive({ projection }) {
     </>
   );
 }
+
 
 export default function IXITransactDashboardApp() {
   const [workspace, setWorkspace] = useState("executive");
@@ -213,7 +221,14 @@ export default function IXITransactDashboardApp() {
   } else if (workspace === "treasury") {
     body = <GenericRecordTable title="TREASURY ACCOUNTS" records={projection.treasury.accounts} currency={projection.currency} />;
   } else if (workspace === "gl") {
-    body = <GenericRecordTable title="JOURNALS / CLOSE" records={projection.gl.journals} currency={projection.currency} />;
+    body = (
+      <IXITransactGLWorkspace
+        period={period}
+        currency={projection.currency || "USD"}
+        refreshKey={refreshKey}
+        onCommitted={() => setRefreshKey(value => value + 1)}
+      />
+    );
   } else {
     body = (
       <section className="workspace-panel">
