@@ -191,3 +191,52 @@ export async function createIXITransactJournalEntry(input, options = {}) {
     input: input && typeof input === "object" && !Array.isArray(input) ? input : {}
   });
 }
+
+export async function closeIXITransactAccountingPeriod({
+  period = "",
+  currency = "USD",
+  commandId = "",
+  idempotencyKey = "",
+  metadata = {},
+  signal
+} = {}) {
+  const resolvedPeriod = clean(period);
+
+  if (!/^\d{4}-\d{2}$/.test(resolvedPeriod)) {
+    const error = new Error("TRAN$ACT period close requires YYYY-MM accounting period.");
+    error.code = "IXI_FINANCIAL_PERIOD_REQUIRED";
+    throw error;
+  }
+
+  const response = await fetch(
+    "/api/ixi/financial/commands/desktop/close-period",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-IXI-Source": "ixi-transact-desktop"
+      },
+      body: JSON.stringify({
+        period: resolvedPeriod,
+        currency: clean(currency || "USD").toUpperCase(),
+        commandId: clean(commandId),
+        idempotencyKey: clean(idempotencyKey),
+        metadata: metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {}
+      }),
+      signal
+    }
+  );
+
+  const payload = await readJson(response);
+
+  throwForBadResponse(
+    response,
+    payload,
+    "TRAN$ACT accounting period could not be closed.",
+    "IXI_FINANCIAL_PERIOD_CLOSE_FAILED"
+  );
+
+  return payload;
+}
