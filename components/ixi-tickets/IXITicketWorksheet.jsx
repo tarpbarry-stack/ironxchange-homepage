@@ -8,7 +8,11 @@ import {
   createEditSection,
   isOriginalRequestLocked
 } from "../../lib/ixi-tickets/IXITicketContract";
-import { getTicketApiInfo, publishTicketToGithub } from "../../lib/ixi-tickets/ixiTicketClient";
+import {
+  ensureRemoteDraft,
+  getTicketApiInfo,
+  publishTicketToGithub
+} from "../../lib/ixi-tickets/ixiTicketClient";
 import styles from "./IXITicketWorksheet.module.css";
 
 function upper(value) {
@@ -38,11 +42,24 @@ export default function IXITicketWorksheet({
   const [publishing, setPublishing] = useState(false);
   const [position, setPosition] = useState({ x: 42, y: 82 });
   const dragRef = useRef(null);
+  const lastAutosaveFingerprint = useRef("");
 
   useEffect(() => setDraft(ticket), [ticket]);
 
   useEffect(() => {
     if (!draft?.ticketId) return;
+
+    const fingerprint = JSON.stringify({
+      ...draft,
+      audit: {
+        ...(draft.audit || {}),
+        updatedAt: ""
+      }
+    });
+
+    if (fingerprint === lastAutosaveFingerprint.current) return;
+    lastAutosaveFingerprint.current = fingerprint;
+
     const timer = window.setTimeout(() => onSave?.(draft), 350);
     return () => window.clearTimeout(timer);
   }, [draft, onSave]);
@@ -154,12 +171,32 @@ export default function IXITicketWorksheet({
 
     try {
       onSave?.(draft);
+
+      const syncedDraft = await ensureRemoteDraft({
+        ...draft,
+        status: IXI_TICKET_STATUS.DRAFT
+      });
+
+      if (syncedDraft?.ticketId) {
+        onSave?.({
+          ...draft,
+          ...syncedDraft,
+          syncState: "aws-synced"
+        });
+      }
+
       const result = await publishTicketToGithub(draft.ticketId);
       const remote = result?.ticket || result?.data?.ticket || result;
+
       if (remote && remote.ticketId) {
-        onSave?.(remote);
-        setDraft(remote);
+        const saved = {
+          ...remote,
+          syncState: "github-published"
+        };
+        onSave?.(saved);
+        setDraft(saved);
       }
+
       setNotice("Published to GitHub through IXI Ticket API.");
     } catch (error) {
       setNotice(`${error.message} Ticket remains safely preserved locally.`);
