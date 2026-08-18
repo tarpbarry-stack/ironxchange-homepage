@@ -21,3 +21,4 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: 'ci-build-client'
