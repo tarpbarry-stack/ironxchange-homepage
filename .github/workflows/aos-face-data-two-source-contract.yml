@@ -1,0 +1,25 @@
+name: AOS Face Data Two-Source Contract
+
+on:
+  pull_request:
+    paths:
+      - "components/ixi-aos/face-data-runtime/**"
+      - "data/ixi-face-data-catalog/**"
+      - "scripts/verify-aos-face-data-two-source-contract.js"
+      - ".github/workflows/aos-face-data-two-source-contract.yml"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify two-source Face data contract
+        run: node scripts/verify-aos-face-data-two-source-contract.js

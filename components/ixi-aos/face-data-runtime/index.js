@@ -6,6 +6,18 @@ export {
 } from "./IXIAuthorizedFaceDataManifest";
 
 export {
+  IXI_FACE_DATA_SOURCE_CONTRACT_VERSION,
+  IXI_FACE_DATA_SOURCE,
+  getIXIUserFaceFieldCapabilities,
+  getIXITransactFaceDataCapabilities,
+  getIXIFactualFaceDataCapabilities,
+  getIXIFactualFaceDataCapabilityIds,
+  getIXIFaceDataSourceForCapability,
+  canIXIActorEditUserFaceField,
+  createIXIFaceDataSourceView
+} from "./IXIFaceDataSourceContract";
+
+export {
   IXI_FACE_APP_AUTHORIZATION_SCHEMA,
   authorizeIXIFaceAppDefinition,
   assertIXIFaceAppAuthorized

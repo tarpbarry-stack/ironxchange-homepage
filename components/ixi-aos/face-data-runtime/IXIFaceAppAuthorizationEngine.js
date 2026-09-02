@@ -7,13 +7,29 @@ import {
   getIXIAuthorizedFaceCapabilityIds
 } from "./IXIAuthorizedFaceDataManifest";
 
+import {
+  getIXIFactualFaceDataCapabilityIds,
+  getIXIFaceDataSourceForCapability
+} from "./IXIFaceDataSourceContract";
+
 /*
  * IXI AOS — FACE APP AUTHORIZATION ENGINE
  *
  * Validates a Face App definition against the already-authorized
- * per-object Face Data Manifest. This engine does not resolve policy;
- * it verifies that the requested Face only consumes capabilities and
- * scopes the current authorization context has granted.
+ * per-object Face Data Manifest.
+ *
+ * HARD DATA DOCTRINE
+ * ------------------
+ *
+ * `dataCapabilities` are factual Face data and therefore may resolve
+ * only from the two canonical origins:
+ *
+ *   1. TRAN$ACT records / projections attached to the Object.
+ *   2. Permissioned user-maintained Object / Face fields.
+ *
+ * Relationships, media, platform capabilities, definitions, geometry
+ * and other context may still be expressed as required/optional
+ * capabilities, but they do not become a third factual data source.
  */
 
 export const IXI_FACE_APP_AUTHORIZATION_SCHEMA =
@@ -46,6 +62,10 @@ export function authorizeIXIFaceAppDefinition({
     getIXIAuthorizedFaceCapabilityIds(manifest)
   );
 
+  const factualDataCapabilities = normalizedSet(
+    getIXIFactualFaceDataCapabilityIds(manifest)
+  );
+
   const requestedDataCapabilities = asArray(faceApp?.dataCapabilities)
     .map(clean)
     .filter(Boolean);
@@ -59,19 +79,34 @@ export function authorizeIXIFaceAppDefinition({
     .filter(Boolean);
 
   const missingDataCapabilities = requestedDataCapabilities
-    .filter(capabilityId => !availableCapabilities.has(capabilityId));
+    .filter(capabilityId =>
+      !factualDataCapabilities.has(capabilityId)
+    );
 
   const missingRequiredCapabilities = requiredCapabilities
-    .filter(capabilityId => !availableCapabilities.has(capabilityId));
+    .filter(capabilityId =>
+      !availableCapabilities.has(capabilityId)
+    );
 
   const missingOptionalCapabilities = optionalCapabilities
-    .filter(capabilityId => !availableCapabilities.has(capabilityId));
+    .filter(capabilityId =>
+      !availableCapabilities.has(capabilityId)
+    );
 
   missingDataCapabilities.forEach(capabilityId => {
+    const existsAsContext =
+      availableCapabilities.has(capabilityId);
+
     errors.push({
-      code: "DATA_CAPABILITY_NOT_AUTHORIZED",
+      code:
+        existsAsContext
+          ? "FACE_DATA_SOURCE_INVALID"
+          : "DATA_CAPABILITY_NOT_AUTHORIZED",
       capabilityId,
-      message: `Face App requested unauthorized data capability: ${capabilityId}`
+      message:
+        existsAsContext
+          ? `Face App requested a contextual capability as factual data: ${capabilityId}. Factual Face data must originate from TRAN$ACT or a permissioned user-maintained field.`
+          : `Face App requested unauthorized data capability: ${capabilityId}`
     });
   });
 
@@ -116,7 +151,9 @@ export function authorizeIXIFaceAppDefinition({
   const objectCapabilities = manifest?.objectCapabilities || {};
 
   const incompatibleObjectCapabilities = compatibleObjectCapabilities
-    .filter(capability => objectCapabilities?.[capability] !== true);
+    .filter(capability =>
+      objectCapabilities?.[capability] !== true
+    );
 
   incompatibleObjectCapabilities.forEach(capability => {
     warnings.push({
@@ -139,6 +176,15 @@ export function authorizeIXIFaceAppDefinition({
     warnings,
     compatibility: {
       requestedDataCapabilities,
+      requestedDataSources:
+        requestedDataCapabilities.map(capabilityId => ({
+          capabilityId,
+          source:
+            getIXIFaceDataSourceForCapability(
+              manifest,
+              capabilityId
+            )
+        })),
       missingDataCapabilities,
       requiredCapabilities,
       missingRequiredCapabilities,
