@@ -576,9 +576,9 @@ onCycleMachineFace={onCycleMachineFace}
           line-height: normal;
           isolation: isolate;
 
-          height: 470px;
-min-height: 470px;
-max-height: 470px;
+          height: 475px;
+min-height: 475px;
+max-height: 475px;
 
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
@@ -901,9 +901,9 @@ max-height: 470px;
   display: flex;
   flex-direction: column;
 
-  height: 268px;
-  min-height: 268px;
-  max-height: 268px;
+  height: 273px;
+  min-height: 273px;
+  max-height: 273px;
 }
 
     

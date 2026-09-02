@@ -24,3 +24,27 @@ export function getMachineCardFamily(listing = {}) {
 
   return IXI_CARD_FAMILIES.MARKETPLACE;
 }
+
+export function getMachineCardGeometryFamily(
+  listing = {},
+  cardContext = "workspace"
+) {
+  if (
+    cardContext === "inventory" ||
+    cardContext === "enterprise"
+  ) {
+    return IXI_CARD_FAMILIES.PRIVATE;
+  }
+
+  const cardFamily =
+    getMachineCardFamily(listing);
+
+  if (
+    cardFamily ===
+    IXI_CARD_FAMILIES.AUCTION
+  ) {
+    return IXI_CARD_FAMILIES.AUCTION;
+  }
+
+  return IXI_CARD_FAMILIES.MARKETPLACE;
+}

@@ -1279,6 +1279,7 @@ export default function SellerYardV2Page() {
       <Navbar />
 
       <IXIDragEngine
+        cardContext="marketplace"
         sensors={sensors}
         workspaceCollisionDetection={workspaceCollisionDetection}
         handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -2735,6 +2736,5 @@ export default function SellerYardV2Page() {
     </>
   );
 }
-
 
 

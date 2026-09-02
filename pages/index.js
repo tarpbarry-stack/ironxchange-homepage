@@ -588,6 +588,7 @@ return (
 
 <section className="featured">
   <IXIDragEngine
+    cardContext="marketplace"
     sensors={sensors}
     workspaceCollisionDetection={undefined}
     handleWorkspaceDragStart={handleWorkspaceDragStart}

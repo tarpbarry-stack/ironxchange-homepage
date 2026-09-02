@@ -29,10 +29,10 @@ import {
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 
 const MARKETPLACE_NATIVE_PANEL_WIDTH =
-  298;
+  300;
 
 const MARKETPLACE_NATIVE_HEIGHT =
-  391;
+  400;
 
 const MARKETPLACE_SEAM_OVERLAP =
   0;

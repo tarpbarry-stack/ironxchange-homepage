@@ -816,9 +816,9 @@ style={getFrameStyle(currentImageObject, "card")}
           line-height: normal;
           isolation: isolate;
 
-          height: 391px;
-          min-height: 391px;
-          max-height: 391px;
+          height: 400px;
+          min-height: 400px;
+          max-height: 400px;
 
           border: 1px solid rgba(255,255,255,.06);
           outline: 1px solid rgba(255,255,255,.018);
@@ -1053,15 +1053,15 @@ style={getFrameStyle(currentImageObject, "card")}
         }
 
       .card.seller-mode {
-  height: 470px;
-  min-height: 470px;
-  max-height: 470px;
+  height: 475px;
+  min-height: 475px;
+  max-height: 475px;
 }
 
 .card.seller-mode .card-body {
-  height: 268px;
-  min-height: 268px;
-  max-height: 268px;
+  height: 273px;
+  min-height: 273px;
+  max-height: 273px;
 }
         .card.paused-card {
           opacity: .58;
@@ -1188,9 +1188,9 @@ style={getFrameStyle(currentImageObject, "card")}
   display: flex;
   flex-direction: column;
 
-  height: 171px;
-  min-height: 171px;
-  max-height: 171px;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
 }
 
      .title-row {

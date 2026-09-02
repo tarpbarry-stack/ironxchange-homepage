@@ -1179,6 +1179,7 @@ if (armedDestination === "stackBottom") {
 
     return (
   <IXIDragEngine
+    cardContext="marketplace"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -1307,6 +1308,7 @@ if (armedDestination === "stackBottom") {
 
               
 <IXIActiveStackZone
+  cardContext="marketplace"
   WorkspaceDropZone={WorkspaceDropZone}
   activeStacksOpen={activeStacksOpen}
   activeStackHover={activeStackHover}

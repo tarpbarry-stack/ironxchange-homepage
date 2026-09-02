@@ -25,7 +25,8 @@ export default function IXIActiveStackZone({
   sendListingToFront,
   sendListingToBack,
   sendMachineToArmedDestination,
-  cardScaleMode = "xl"
+  cardScaleMode = "xl",
+  cardContext = "workspace"
 }) {
   return (
   <section className="active-stack-zone">
@@ -214,6 +215,7 @@ export default function IXIActiveStackZone({
                 sendMachineToArmedDestination={sendMachineToArmedDestination}
                 enableCardScaling={true}
                 cardScaleMode={cardScaleMode}
+                cardContext={cardContext}
                 cycleMachineFace={cycleMachineFace}
               />
             </div>

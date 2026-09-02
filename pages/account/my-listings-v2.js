@@ -1285,6 +1285,7 @@ toggleSearchSurfaceRevealed
 
     return (
   <IXIDragEngine
+    cardContext="inventory"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -1412,6 +1413,7 @@ toggleSearchSurfaceRevealed
 
               
 <IXIActiveStackZone
+  cardContext="inventory"
   WorkspaceDropZone={WorkspaceDropZone}
   activeStacksOpen={activeStacksOpen}
   activeStackHover={activeStackHover}
