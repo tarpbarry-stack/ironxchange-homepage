@@ -1,5 +1,6 @@
 import AuctionListingCard from "./auction/AuctionListingCard";
 import PrivateListingCard from "./private/PrivateListingCard";
+import IXIOwnedPrivateListingRuntime from "./private/IXIOwnedPrivateListingRuntime";
 import MarketplaceListingCard
   from "./marketplace/MarketplaceListingCard";
 
@@ -52,6 +53,16 @@ export default function IXIMachineCard({
   }
 
   if (cardFamily === "private") {
+    if (presentation === "seller") {
+      return (
+        <IXIOwnedPrivateListingRuntime
+          {...props}
+          cardContext={cardContext}
+          presentation={presentation}
+        />
+      );
+    }
+
     return (
       <PrivateListingCard
         {...props}
