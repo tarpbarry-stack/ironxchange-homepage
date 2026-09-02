@@ -73,7 +73,9 @@ export default function IXIDragEngine({
 
   cardScaleMode = "xl",
 
-  cardContext = "workspace"
+  cardContext = "workspace",
+
+  listingOrigin = "saved"
 }) {
   const activeDndObject =
     typeof getActiveDndObject === "function"
@@ -216,7 +218,11 @@ export default function IXIDragEngine({
 
         onToggleSaved={() => {}}
 
-        from="saved"
+        from={listingOrigin}
+
+        suppressFamilyLog={
+          listingOrigin === "browse"
+        }
 
         ixiState={
           ixiCardState[

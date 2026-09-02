@@ -24,19 +24,22 @@ export default function IXIMachineCard({
       sellerMode: props.sellerMode
     });
 
- console.log("IXI MACHINE CARD FAMILY", {
-  listingId:
-    props.listing?.id?.uuid ||
-    props.listing?.id ||
-    "",
-
-  cardFamily,
-  cardContext,
-  presentation,
-
-  showMachineRail:
-    props.showMachineRail
-});
+  if (!props.suppressFamilyLog) {
+    console.log(
+      "IXI MACHINE CARD FAMILY",
+      {
+        listingId:
+          props.listing?.id?.uuid ||
+          props.listing?.id ||
+          "",
+        cardFamily,
+        cardContext,
+        presentation,
+        showMachineRail:
+          props.showMachineRail
+      }
+    );
+  }
 
   if (cardFamily === "auction") {
     return (

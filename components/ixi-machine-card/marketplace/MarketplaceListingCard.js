@@ -66,6 +66,9 @@ export default function MarketplaceListingCard({
   onToggleSaved,
   showSave = true,
   from = "browse",
+  imagePriority = false,
+  enableMarketplaceDistribution = false,
+  enableMarketplaceIntelligence = false,
 
   sellerMode = false,
   launchMode = false,
@@ -378,6 +381,10 @@ function getSellerState() {
 }
 
 function handleCardClick() {
+  if (enableMarketplaceIntelligence) {
+    return;
+  }
+
   captureIXEvent("marketplace_listing_card_clicked", {
     listingId: id,
     title: listing.title,
@@ -389,6 +396,24 @@ function handleCardClick() {
     from,
     cardContext
   });
+}
+
+function openMarketplaceDistribution(listingToShare) {
+  if (
+    !enableMarketplaceDistribution ||
+    typeof window === "undefined"
+  ) {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(
+      "ixi:marketplace-distribution-open",
+      {
+        detail: { listing: listingToShare }
+      }
+    )
+  );
 }
 
   function getSmartPhotoFit(photoUrl) {
@@ -419,7 +444,26 @@ function handlePhotoLoad(e, photoUrl) {
   return (
   <div
     data-listing-card-id={id}
-    className={`card marketplace-listing-card console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
+    data-marketplace-intelligence={
+      enableMarketplaceIntelligence
+        ? "true"
+        : undefined
+    }
+    data-marketplace-card-face={
+      enableMarketplaceIntelligence
+        ? Number(machineFace || 1)
+        : undefined
+    }
+    data-marketplace-photo-index={
+      enableMarketplaceIntelligence
+        ? photoIndex
+        : undefined
+    }
+    className={`card marketplace-listing-card ${
+      enableMarketplaceIntelligence
+        ? "ph-no-capture ph-mask"
+        : ""
+    } console-actuator-${consoleActuatorVariant} board-color-${boardColor} board-outline-${boardOutline} ${
       isBoardDragging ? "board-dragging" : ""
     } ${isBoardDraggingCard ? "grid-drag-source" : ""} ${
       isGhostTarget ? "grid-ghost-target" : ""
@@ -521,7 +565,16 @@ function handlePhotoLoad(e, photoUrl) {
  className={`card-photo-img photo-fit-${getSmartPhotoFit(currentPhoto)} ${getFrameClass(currentImageObject, "card")}`}
 style={getFrameStyle(currentImageObject, "card")}
   onLoad={e => handlePhotoLoad(e, currentPhoto)}
-  loading="lazy"
+  loading={
+    imagePriority
+      ? "eager"
+      : "lazy"
+  }
+  fetchPriority={
+    imagePriority
+      ? "high"
+      : "auto"
+  }
 />
 
     {sellerMode ? (
@@ -800,6 +853,11 @@ style={getFrameStyle(currentImageObject, "card")}
   onCycleColor={cycleBoardColor}
   onCycleOutline={cycleBoardOutline}
   onToggleSaved={onToggleSaved}
+  onRailSend={
+    enableMarketplaceDistribution
+      ? openMarketplaceDistribution
+      : undefined
+  }
   armedDestination={armedDestination}
   onSendToArmedDestination={onSendToArmedDestination}
 />

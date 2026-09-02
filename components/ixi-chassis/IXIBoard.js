@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { SortableContext } from "@dnd-kit/sortable";
 import { rectSortingStrategy } from "@dnd-kit/sortable";
 
@@ -12,9 +14,18 @@ import {
   getMachineCardFamily
 } from "../ixi-machine-card/getMachineCardFamily";
 
+const IXI_INITIAL_BOARD_CARD_COUNT = 24;
+const IXI_BOARD_CARD_BATCH_SIZE = 24;
+
 export default function IXIBoard({
   items = [],
-  cardContext = "workspace",  
+  cardContext = "workspace",
+  listingOrigin = "saved",
+  marketplaceBrowsePerformance = false,
+  enableMarketplaceDistribution = false,
+  enableMarketplaceIntelligence = false,
+  ConsoleRouterComponent =
+    IXIObjectConsoleRouter,
   getListingId,
   savedIds = [],
   ixiCardState = {},
@@ -44,6 +55,10 @@ getCustomItemNativeSize,
 consolePanelWidth,
 consolePanelGap,
 }) {
+  const [renderLimit, setRenderLimit] = useState(
+    IXI_INITIAL_BOARD_CARD_COUNT
+  );
+  const loadMoreRef = useRef(null);
   
   function resolveBoardItemId(item) {
     if (
@@ -119,6 +134,98 @@ function resolveBoardItemFamily(
 
   return "machine";
 }
+
+const sortableItemIds = useMemo(
+  () => items.map(item =>
+    resolveBoardItemId(item)
+  ),
+  [
+    items,
+    getListingId,
+    getCustomItemId
+  ]
+);
+
+const renderedItems = useMemo(
+  () =>
+    marketplaceBrowsePerformance
+      ? items.slice(0, renderLimit)
+      : items,
+  [
+    items,
+    renderLimit,
+    marketplaceBrowsePerformance
+  ]
+);
+
+useEffect(() => {
+  if (!marketplaceBrowsePerformance) {
+    return;
+  }
+
+  setRenderLimit(current =>
+    Math.min(
+      Math.max(
+        current,
+        IXI_INITIAL_BOARD_CARD_COUNT
+      ),
+      Math.max(
+        items.length,
+        IXI_INITIAL_BOARD_CARD_COUNT
+      )
+    )
+  );
+}, [
+  items.length,
+  marketplaceBrowsePerformance
+]);
+
+useEffect(() => {
+  if (!marketplaceBrowsePerformance) {
+    return undefined;
+  }
+
+  const target = loadMoreRef.current;
+
+  if (
+    !target ||
+    renderLimit >= items.length
+  ) {
+    return undefined;
+  }
+
+  const observer = new IntersectionObserver(
+    entries => {
+      if (
+        !entries.some(
+          entry => entry.isIntersecting
+        )
+      ) {
+        return;
+      }
+
+      setRenderLimit(current =>
+        Math.min(
+          current +
+            IXI_BOARD_CARD_BATCH_SIZE,
+          items.length
+        )
+      );
+    },
+    {
+      rootMargin: "900px 0px"
+    }
+  );
+
+  observer.observe(target);
+
+  return () =>
+    observer.disconnect();
+}, [
+  items.length,
+  renderLimit,
+  marketplaceBrowsePerformance
+]);
   
 const resolvedConsolePanelWidth =
   Number(
@@ -137,12 +244,10 @@ const resolvedConsolePanelGap =
   return (
 <SortableContext
   id="board"
-  items={items.map(item =>
-  resolveBoardItemId(item)
-)}
+  items={sortableItemIds}
   strategy={rectSortingStrategy}
 >
-    {items.map(item => {
+    {renderedItems.map((item, itemIndex) => {
         const id =
   resolveBoardItemId(item);
 
@@ -347,7 +452,7 @@ return (
           />
         </IXIScaledCardShell>
       ) : (
-        <IXIObjectConsoleRouter
+        <ConsoleRouterComponent
   cardFamily={cardFamily}
   cardContext={cardContext}
 
@@ -431,7 +536,24 @@ consoleActuatorVariant={
                 toggleSave(item)
               }
 
-              from="saved"
+              from={listingOrigin}
+
+              imagePriority={
+                marketplaceBrowsePerformance &&
+                itemIndex < 2
+              }
+
+              suppressFamilyLog={
+                marketplaceBrowsePerformance
+              }
+
+              enableMarketplaceDistribution={
+                enableMarketplaceDistribution
+              }
+
+              enableMarketplaceIntelligence={
+                enableMarketplaceIntelligence
+              }
 
               {...sellerCardProps}
 
@@ -498,6 +620,26 @@ consoleActuatorVariant={
   </IXISortableMachineCard>
 );
 })}
+{marketplaceBrowsePerformance &&
+renderLimit < items.length ? (
+  <div
+    ref={loadMoreRef}
+    className="ixi-board-load-boundary"
+    data-rendered-card-count={
+      renderedItems.length
+    }
+    data-total-card-count={
+      items.length
+    }
+    aria-hidden="true"
+    style={{
+      flex: "0 0 100%",
+      width: "100%",
+      height: 1,
+      pointerEvents: "none"
+    }}
+  />
+) : null}
 </SortableContext>
 );
 }

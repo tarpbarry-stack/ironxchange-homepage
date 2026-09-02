@@ -4,6 +4,7 @@ import {
 
 export default function IXIBoardSurface({
   scaleMode = "xl",
+  centerRows = false,
 
   columnGap,
   rowGap,
@@ -35,6 +36,9 @@ const resolvedRowGap =
     <section
       className={[
         "ixi-board-surface",
+        centerRows
+          ? "ixi-board-surface-centered"
+          : "",
         className
       ]
         .filter(Boolean)
@@ -73,6 +77,10 @@ const resolvedRowGap =
             var(
               --ixi-board-row-gap
             );
+        }
+
+        .ixi-board-surface-centered {
+          justify-content: center;
         }
 
         .ixi-board-surface

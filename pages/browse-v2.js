@@ -27,7 +27,9 @@ import {
   saveIxiMachinePatch,
 } from "../lib/ixiMachineStateClient";
 
-import { captureIXEvent } from "../lib/posthog";
+import {
+  captureMarketplaceIntelligence
+} from "../lib/marketplace/cardIntelligence";
 
 import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
@@ -35,6 +37,12 @@ import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
   from "../components/ixi-chassis/IXIBoardSurface";
+import IXIBrowseObjectConsoleRouter
+  from "../components/ixi-marketplace/IXIBrowseObjectConsoleRouter";
+import ListingShareProvider
+  from "../components/ixi-marketplace/ListingShareProvider";
+import MarketplaceCardIntelligence
+  from "../components/ixi-marketplace/MarketplaceCardIntelligence";
 import IXIChassisControls from "../components/ixi-chassis/IXIChassisControls";
 import IXIPocketL1 from "../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../components/ixi-chassis/IXIPocketL2";
@@ -104,6 +112,13 @@ import {
 
 export default function BrowseV2() {
   const [listings, setListings] = useState([]);
+  const [
+    inventoryRequestState,
+    setInventoryRequestState
+  ] = useState({
+    status: "loading",
+    error: ""
+  });
   
   const [savedIds, setSavedIds] = useState([]);
   const [sdk, setSdk] = useState(null);
@@ -187,6 +202,7 @@ const [
 ] = useState("xl");
   
   const hasAppliedRemoteLayoutRef = useRef(false);
+  const inventoryRequestIdRef = useRef(0);
   
   const [activeDndId, setActiveDndId] = useState("");
 
@@ -277,17 +293,49 @@ const sensors = useSensors(
 );
 
   useEffect(() => {
-    captureIXEvent("browse_v2_viewed", {
-  page: "browse-v2"
-});
+    captureMarketplaceIntelligence(
+      "marketplace_inventory_requested",
+      { result: "page_opened" }
+    );
   }, []);
 
- useEffect(() => {
-  async function loadBrowseEnvironment() {
+async function loadBrowseEnvironment({
+  retry = false
+} = {}) {
+  const requestId =
+    inventoryRequestIdRef.current + 1;
+
+  inventoryRequestIdRef.current =
+    requestId;
+
+  setInventoryRequestState({
+    status:
+      retry
+        ? "retrying"
+        : "loading",
+    error: ""
+  });
+
+  try {
     const environment =
       await loadIXIListingsEnvironment({
-        includePrivateState: true
+        includePrivateState: true,
+        marketplaceBrowsePerformance:
+          true
       });
+
+    if (
+      inventoryRequestIdRef.current !==
+        requestId
+    ) {
+      return;
+    }
+
+    if (
+      environment.errors.publicListings
+    ) {
+      throw environment.errors.publicListings;
+    }
 
     setListings(environment.listings);
     setSdk(environment.sdk);
@@ -298,13 +346,8 @@ const sensors = useSensors(
     const loadedWorkspaceSettings =
   environment.workspaceSettings || {};
 
-setWorkspaceSettings(
-  loadedWorkspaceSettings
-);
-
-    console.log(
-      "IXI WORKSPACE LAYOUT LOADED",
-      environment.workspaceLayout
+    setWorkspaceSettings(
+      loadedWorkspaceSettings
     );
 
     if (
@@ -328,9 +371,55 @@ setWorkspaceSettings(
         environment.errors.privateState
       );
     }
-  }
 
+    setInventoryRequestState({
+      status: "ready",
+      error: ""
+    });
+
+    captureMarketplaceIntelligence(
+      "marketplace_inventory_ready",
+      {
+        result: "ready",
+        total_count: environment.listings.length
+      }
+    );
+  } catch (error) {
+    if (
+      inventoryRequestIdRef.current !==
+        requestId
+    ) {
+      return;
+    }
+
+    console.error(
+      "BROWSE PUBLIC LISTINGS FAILED:",
+      error
+    );
+
+    setInventoryRequestState({
+      status: "error",
+      error:
+        error?.message ||
+        "Marketplace inventory could not be loaded."
+    });
+
+    captureMarketplaceIntelligence(
+      "marketplace_inventory_failed",
+      {
+        result: retry ? "retry_failed" : "failed",
+        error_code: "public_inventory_failed"
+      }
+    );
+  }
+}
+
+useEffect(() => {
   loadBrowseEnvironment();
+
+  return () => {
+    inventoryRequestIdRef.current += 1;
+  };
 }, []);
   
   const savedListings = useMemo(() => {
@@ -809,7 +898,20 @@ function sendListingToBack(listing) {
   executeIXITransaction(result);
 }
   async function toggleSave(listing) {
+    const listingId = String(getListingId(listing));
+
+    captureMarketplaceIntelligence("listing_save_requested", {
+      listing_id: listingId,
+      saved: !savedIds.includes(listingId),
+      result: "requested"
+    });
+
     if (!sdk) {
+      captureMarketplaceIntelligence("listing_save_failed", {
+        listing_id: listingId,
+        result: "authentication_required",
+        error_code: "authentication_required"
+      });
       window.location.href = "/login";
       return;
     }
@@ -822,6 +924,12 @@ function sendListingToBack(listing) {
 
       setSavedIds(result.savedIds);
 
+      captureMarketplaceIntelligence("listing_save_succeeded", {
+        listing_id: listingId,
+        saved: result.savedIds.includes(listingId),
+        result: "completed"
+      });
+
       setSavedBoardListings(current =>
         current.filter(
           item =>
@@ -831,6 +939,11 @@ function sendListingToBack(listing) {
       );
     } catch (err) {
       console.error("Save failed", err);
+      captureMarketplaceIntelligence("listing_save_failed", {
+        listing_id: listingId,
+        result: "failed",
+        error_code: "save_failed"
+      });
     }
   }
 
@@ -1070,7 +1183,8 @@ function cycleCardScaleMode() {
 }
   
   return (
-    <>
+    <ListingShareProvider>
+      <MarketplaceCardIntelligence />
       <Head>
         <title>IXI Marketplace | IronXchange</title>
 
@@ -1180,6 +1294,7 @@ if (armedDestination === "stackBottom") {
     return (
   <IXIDragEngine
     cardContext="marketplace"
+    listingOrigin="browse"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -1191,7 +1306,11 @@ if (armedDestination === "stackBottom") {
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
-    <main>
+    <main
+      data-marketplace-armed-destination={
+        armedDestination || ""
+      }
+    >
   <section className="saved-environment-shell">
     <IXIEnvironmentRail
   activeEnvironment="IXI MARKETPLACE"
@@ -1309,6 +1428,9 @@ if (armedDestination === "stackBottom") {
               
 <IXIActiveStackZone
   cardContext="marketplace"
+  listingOrigin="browse"
+  enableMarketplaceDistribution={true}
+  enableMarketplaceIntelligence={true}
   WorkspaceDropZone={WorkspaceDropZone}
   activeStacksOpen={activeStacksOpen}
   activeStackHover={activeStackHover}
@@ -1338,9 +1460,17 @@ if (armedDestination === "stackBottom") {
               
     <IXIBoardSurface
   scaleMode={cardScaleMode}
+  centerRows={true}
 >
 <IXIBoard
   cardContext="marketplace"
+  listingOrigin="browse"
+  marketplaceBrowsePerformance={true}
+  enableMarketplaceDistribution={true}
+  enableMarketplaceIntelligence={true}
+  ConsoleRouterComponent={
+    IXIBrowseObjectConsoleRouter
+  }
   items={visibleBrowseListings}
   getListingId={getListingId}
   savedIds={savedIds}
@@ -1382,11 +1512,66 @@ if (armedDestination === "stackBottom") {
   SCALE: {cardScaleMode.toUpperCase()}
 </button>
 
-        {visibleBrowseListings.length === 0 && (
+{inventoryRequestState.status !==
+  "ready" ? (
+  <section
+    className={`inventory-state inventory-state-${inventoryRequestState.status}`}
+    role={
+      inventoryRequestState.status ===
+        "error"
+        ? "alert"
+        : "status"
+    }
+    aria-live="polite"
+  >
+    <strong>
+      {inventoryRequestState.status ===
+        "loading"
+        ? "LOADING MARKETPLACE INVENTORY"
+        : inventoryRequestState.status ===
+            "retrying"
+          ? "RETRYING MARKETPLACE INVENTORY"
+          : "MARKETPLACE INVENTORY UNAVAILABLE"}
+    </strong>
+
+    {inventoryRequestState.status ===
+    "error" ? (
+      <>
+        <p>
+          {inventoryRequestState.error}
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            loadBrowseEnvironment({
+              retry: true
+            })
+          }
+        >
+          RETRY
+        </button>
+      </>
+    ) : (
+      <p>
+        Connecting to live Marketplace inventory.
+      </p>
+    )}
+  </section>
+) : null}
+
+        {inventoryRequestState.status ===
+          "ready" &&
+        visibleBrowseListings.length === 0 && (
   <div className="empty">
-    <h3>HELP US BUILD OUR MARKETPLACE</h3>
+    <h3>
+      {marketplaceListings.length
+        ? "NO MACHINES MATCH YOUR CURRENT VIEW"
+        : "MARKETPLACE INVENTORY IS EMPTY"}
+    </h3>
     <p>
-      Touch a machine. Create a relationship. Machines will appear here.
+      {marketplaceListings.length
+        ? "Clear or change the active search and relationship filters."
+        : "No live Marketplace machines are currently available."}
     </p>
   </div>
 )}
@@ -1418,6 +1603,53 @@ if (armedDestination === "stackBottom") {
             radial-gradient(circle at 50% 0%, rgba(255,196,0,.05), transparent 34%),
             linear-gradient(180deg, rgba(255,255,255,.014), rgba(255,255,255,0)),
             #0b0b0b;
+        }
+
+        .inventory-state {
+          width: min(100%, 760px);
+          margin: 28px auto;
+          padding: 22px 24px;
+          border: 1px solid
+            rgba(255, 196, 0, .32);
+          border-radius: 10px;
+          background:
+            rgba(12, 12, 12, .96);
+          text-align: center;
+          box-shadow:
+            0 16px 48px
+            rgba(0, 0, 0, .28);
+        }
+
+        .inventory-state strong {
+          display: block;
+          color: #ffc400;
+          font-size: 13px;
+          letter-spacing: .1em;
+        }
+
+        .inventory-state p {
+          margin: 10px 0 0;
+          color: #bdbdbd;
+          font-size: 12px;
+        }
+
+        .inventory-state button {
+          min-width: 118px;
+          min-height: 40px;
+          margin-top: 16px;
+          border: 1px solid #ffc400;
+          border-radius: 7px;
+          background: #ffc400;
+          color: #111;
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: .08em;
+          cursor: pointer;
+        }
+
+        .inventory-state-error {
+          border-color:
+            rgba(255, 93, 93, .58);
         }
 
        .saved-environment-shell {
@@ -2905,6 +3137,6 @@ outline: none;
 }
        
       `}</style>
-    </>
+    </ListingShareProvider>
   );
 }
