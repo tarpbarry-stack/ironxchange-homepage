@@ -27,7 +27,16 @@ function nonEmpty(items) {
 }
 
 export default function IXITicketCommand() {
-  const { tickets, createTicket, openTicket, saveTicket, popOutTicket } = useIXITickets();
+  const {
+    tickets,
+    createTicket,
+    openTicket,
+    popOutTicket,
+    approveTicket,
+    reopenTicketRemote,
+    refreshRemoteTickets,
+    remoteState
+  } = useIXITickets();
   const [selectedId, setSelectedId] = useState("");
   const [status, setStatus] = useState("all");
   const [repository, setRepository] = useState("all");
@@ -35,6 +44,8 @@ export default function IXITicketCommand() {
   const [priority, setPriority] = useState("all");
   const [search, setSearch] = useState("");
   const [verifyNote, setVerifyNote] = useState("");
+  const [actionNotice, setActionNotice] = useState("");
+  const [actionBusy, setActionBusy] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -75,46 +86,39 @@ export default function IXITicketCommand() {
     high: tickets.filter(ticket => ticket.priority === "high" || ticket.priority === "critical").length
   }), [tickets]);
 
-  function approveAndClose() {
-    if (!selected) return;
-    const now = new Date().toISOString();
-    saveTicket({
-      ...selected,
-      status: IXI_TICKET_STATUS.CLOSED,
-      verification: {
-        ...(selected.verification || {}),
-        approvedAt: now,
-        notes: [
-          ...(selected.verification?.notes || []),
-          ...(verifyNote.trim() ? [{ at: now, type: "approval", note: verifyNote.trim() }] : [])
-        ]
-      },
-      audit: {
-        ...(selected.audit || {}),
-        updatedAt: now,
-        closedAt: now
-      }
-    });
-    setVerifyNote("");
+  async function approveAndClose() {
+    if (!selected || actionBusy) return;
+    setActionBusy(true);
+    setActionNotice("");
+    try {
+      await approveTicket(selected, verifyNote.trim());
+      setVerifyNote("");
+      setActionNotice("Ticket approved and closed in IXI Ticket Command.");
+      await refreshRemoteTickets();
+    } catch (error) {
+      setActionNotice(error.message || "Ticket approval failed.");
+    } finally {
+      setActionBusy(false);
+    }
   }
 
-  function reopen() {
-    if (!selected) return;
-    const now = new Date().toISOString();
-    saveTicket({
-      ...selected,
-      status: IXI_TICKET_STATUS.REOPENED,
-      verification: {
-        ...(selected.verification || {}),
-        reopenedAt: now,
-        notes: [
-          ...(selected.verification?.notes || []),
-          { at: now, type: "reopen", note: verifyNote.trim() || "Reopened from IXI Ticket Command." }
-        ]
-      },
-      audit: { ...(selected.audit || {}), updatedAt: now }
-    });
-    setVerifyNote("");
+  async function reopen() {
+    if (!selected || actionBusy) return;
+    setActionBusy(true);
+    setActionNotice("");
+    try {
+      await reopenTicketRemote(
+        selected,
+        verifyNote.trim() || "Reopened from IXI Ticket Command."
+      );
+      setVerifyNote("");
+      setActionNotice("Ticket reopened in IXI Ticket Command.");
+      await refreshRemoteTickets();
+    } catch (error) {
+      setActionNotice(error.message || "Ticket reopen failed.");
+    } finally {
+      setActionBusy(false);
+    }
   }
 
   return (
@@ -124,12 +128,22 @@ export default function IXITicketCommand() {
           <div className={styles.eyebrow}>IXI ADMIN / ENGINEERING</div>
           <h1>IXI TICKET COMMAND</h1>
           <p>Capture · queue · work · audit · verify</p>
+          <p>
+            AWS: {upper(remoteState.status)}
+            {remoteState.lastSyncedAt ? ` · ${formatDate(remoteState.lastSyncedAt)}` : ""}
+          </p>
         </div>
         <div className={styles.headerButtons}>
+          <button onClick={() => refreshRemoteTickets()} disabled={remoteState.status === "loading"}>
+            {remoteState.status === "loading" ? "SYNCING..." : "REFRESH AWS"}
+          </button>
           <button onClick={() => createTicket({ mode: "floating" })}>+ CHAT TICKET</button>
           <a href="/account">DASHBOARD</a>
         </div>
       </header>
+
+      {remoteState.error ? <div className={styles.empty}>{remoteState.error}</div> : null}
+      {actionNotice ? <div className={styles.empty}>{actionNotice}</div> : null}
 
       <section className={styles.scoreboard}>
         <button onClick={() => setStatus("ready-for-chat")}><span>READY FOR CHAT</span><strong>{counts.ready}</strong></button>
@@ -198,6 +212,7 @@ export default function IXITicketCommand() {
                   <div className={styles.ticketIdLine}>{selected.displayNumber} · {upper(selected.status)}</div>
                   <h2>{selected.headline || "UNTITLED CHAT TICKET"}</h2>
                   <p>{selected.repository} · {upper(selected.type)} · {upper(selected.priority)} · {upper(selected.executionClass)}</p>
+                  <p>REV {Number.isInteger(selected.revision) ? selected.revision : "LOCAL"} · {upper(selected.syncState)}</p>
                 </div>
                 <div className={styles.detailActions}>
                   <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
@@ -229,11 +244,11 @@ export default function IXITicketCommand() {
 
               <section className={styles.auditBlock}>
                 <div className={styles.blockHeading}>
-                  <h4>GITHUB / DELIVERY</h4>
-                  <span>{upper(selected.github?.state || "not-published")}</span>
+                  <h4>ENGINEERING DELIVERY</h4>
+                  <span>{upper(selected.github?.state || "github-disabled")}</span>
                 </div>
                 <div className={styles.githubLine}>
-                  <strong>{selected.github?.issueNumber ? `ISSUE #${selected.github.issueNumber}` : "NO GITHUB ISSUE YET"}</strong>
+                  <strong>{selected.github?.issueNumber ? `ISSUE #${selected.github.issueNumber}` : "AWS IS SYSTEM OF RECORD"}</strong>
                   {selected.github?.issueUrl ? <a href={selected.github.issueUrl} target="_blank" rel="noreferrer">OPEN ISSUE ↗</a> : null}
                   {nonEmpty(selected.closeout?.prs).map((pr, index) => (
                     pr.url ? <a key={pr.url} href={pr.url} target="_blank" rel="noreferrer">PR {pr.number || index + 1} ↗</a> : null
@@ -265,8 +280,8 @@ export default function IXITicketCommand() {
                   <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What still needs work, or what you verified..." />
                 </label>
                 <div>
-                  <button className={styles.reopenButton} onClick={reopen}>REOPEN TICKET</button>
-                  <button className={styles.approveButton} onClick={approveAndClose}>APPROVE & CLOSE</button>
+                  <button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={reopen}>REOPEN TICKET</button>
+                  <button className={styles.approveButton} disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={approveAndClose}>APPROVE & CLOSE</button>
                 </div>
               </section>
 

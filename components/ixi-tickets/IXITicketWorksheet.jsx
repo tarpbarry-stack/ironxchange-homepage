@@ -8,7 +8,11 @@ import {
   createEditSection,
   isOriginalRequestLocked
 } from "../../lib/ixi-tickets/IXITicketContract";
-import { getTicketApiInfo, publishTicketToGithub } from "../../lib/ixi-tickets/ixiTicketClient";
+import {
+  ensureRemoteDraft,
+  getTicketApiInfo,
+  setRemoteTicketReady
+} from "../../lib/ixi-tickets/ixiTicketClient";
 import styles from "./IXITicketWorksheet.module.css";
 
 function upper(value) {
@@ -24,6 +28,14 @@ function fieldLabel(label, children) {
   );
 }
 
+function canonicalTicket(local, remote, syncState) {
+  return {
+    ...local,
+    ...(remote || {}),
+    syncState
+  };
+}
+
 export default function IXITicketWorksheet({
   ticket,
   mode = "floating",
@@ -35,14 +47,27 @@ export default function IXITicketWorksheet({
 }) {
   const [draft, setDraft] = useState(ticket);
   const [notice, setNotice] = useState("");
-  const [publishing, setPublishing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [position, setPosition] = useState({ x: 42, y: 82 });
   const dragRef = useRef(null);
+  const lastAutosaveFingerprint = useRef("");
 
   useEffect(() => setDraft(ticket), [ticket]);
 
   useEffect(() => {
     if (!draft?.ticketId) return;
+
+    const fingerprint = JSON.stringify({
+      ...draft,
+      audit: {
+        ...(draft.audit || {}),
+        updatedAt: ""
+      }
+    });
+
+    if (fingerprint === lastAutosaveFingerprint.current) return;
+    lastAutosaveFingerprint.current = fingerprint;
+
     const timer = window.setTimeout(() => onSave?.(draft), 350);
     return () => window.clearTimeout(timer);
   }, [draft, onSave]);
@@ -110,61 +135,86 @@ export default function IXITicketWorksheet({
     const metadata = files.map(file => ({
       attachmentId: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: file.name,
+      contentType: file.type,
       type: file.type,
       size: file.size,
       state: "local-metadata-only"
     }));
 
     patch({ attachments: [...(draft.attachments || []), ...metadata] });
-    setNotice("Attachment names captured locally. File upload activates when the AWS Ticket API is connected.");
+    setNotice("Attachment metadata captured. Binary upload remains disabled until the Ticket attachment endpoint is available.");
     event.target.value = "";
   }
 
-  function markReadyLocal() {
+  function validateReady() {
     const request = String(draft.originalRequest || "").trim();
     const edits = (draft.editSections || []).filter(edit => String(edit.description || "").trim());
 
     if (!request && !edits.length) {
       setNotice("Describe what is wrong before making this ticket READY FOR CHAT.");
-      return;
+      return null;
     }
 
-    patch({
-      status: IXI_TICKET_STATUS.READY_FOR_CHAT,
-      syncState: "awaiting-backend",
-      originalRequest: request || edits[0]?.description || "",
-      audit: {
-        ...(draft.audit || {}),
-        updatedAt: new Date().toISOString()
-      }
-    });
-    setNotice("Ticket is READY FOR CHAT locally. GitHub publication still requires the AWS Ticket API.");
+    return {
+      ...draft,
+      originalRequest: request || edits[0]?.description || ""
+    };
   }
 
-  async function sendToGithub() {
+  async function syncDraft() {
+    if (!draft?.ticketId || syncing) return;
     if (!apiInfo.configured) {
-      markReadyLocal();
-      setNotice("AWS Ticket API is not connected yet. Ticket preserved locally; GitHub was NOT called.");
+      setNotice("IXI Ticket API is disabled. Draft remains preserved locally.");
       return;
     }
 
-    if (!draft.ticketId) return;
-    setPublishing(true);
+    setSyncing(true);
     setNotice("");
 
     try {
       onSave?.(draft);
-      const result = await publishTicketToGithub(draft.ticketId);
-      const remote = result?.ticket || result?.data?.ticket || result;
-      if (remote && remote.ticketId) {
-        onSave?.(remote);
-        setDraft(remote);
-      }
-      setNotice("Published to GitHub through IXI Ticket API.");
+      const remote = await ensureRemoteDraft({ ...draft, status: IXI_TICKET_STATUS.DRAFT });
+      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a canonical Ticket.");
+      const saved = canonicalTicket(draft, remote, "aws-synced");
+      onSave?.(saved);
+      setDraft(saved);
+      setNotice("Draft synchronized to IXI Ticket Command.");
     } catch (error) {
-      setNotice(`${error.message} Ticket remains safely preserved locally.`);
+      setNotice(`${error.message} Local draft was preserved.`);
     } finally {
-      setPublishing(false);
+      setSyncing(false);
+    }
+  }
+
+  async function markReady() {
+    const readyDraft = validateReady();
+    if (!readyDraft || syncing) return;
+
+    if (!apiInfo.configured) {
+      const localReady = canonicalTicket(readyDraft, {
+        status: IXI_TICKET_STATUS.READY_FOR_CHAT
+      }, "awaiting-backend");
+      onSave?.(localReady);
+      setDraft(localReady);
+      setNotice("Ticket marked READY FOR CHAT locally; IXI Ticket API is disabled.");
+      return;
+    }
+
+    setSyncing(true);
+    setNotice("");
+
+    try {
+      onSave?.(readyDraft);
+      const remote = await setRemoteTicketReady(readyDraft);
+      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a canonical READY ticket.");
+      const saved = canonicalTicket(readyDraft, remote, "aws-synced");
+      onSave?.(saved);
+      setDraft(saved);
+      setNotice("READY FOR CHAT — stored in AWS and visible to Ticket Command.");
+    } catch (error) {
+      setNotice(`${error.message} Ticket remains safely preserved as a local draft.`);
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -316,11 +366,9 @@ export default function IXITicketWorksheet({
       </div>
 
       <footer className={styles.footer}>
-        <button type="button" className={styles.secondary} onClick={() => onSave?.(draft)}>SAVE DRAFT</button>
-        {!locked ? <button type="button" className={styles.readyButton} onClick={markReadyLocal}>READY FOR CHAT</button> : null}
-        <button type="button" className={styles.primary} disabled={publishing} onClick={sendToGithub}>
-          {publishing ? "PUBLISHING..." : "SEND TO GITHUB"}
-        </button>
+        <button type="button" className={styles.secondary} onClick={() => onSave?.(draft)}>SAVE LOCAL</button>
+        {!locked ? <button type="button" className={styles.secondary} disabled={syncing} onClick={syncDraft}>{syncing ? "SYNCING..." : "SYNC AWS"}</button> : null}
+        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>READY FOR CHAT</button> : null}
       </footer>
     </section>
   );
