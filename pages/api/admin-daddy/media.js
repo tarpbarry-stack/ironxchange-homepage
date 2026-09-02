@@ -1,5 +1,5 @@
 const { getIXIAccessToken, getIXICoreBaseUrl } = require("../../../lib/ixi-authority/ixiAuthorityProxy");
-const { summarizeMediaHealth } = require("../../../lib/admin-daddy/AdminDaddyMediaHealth");
+const { summarizeMediaJobs } = require("../../../lib/admin-daddy/AdminDaddyMediaHealth");
 
 async function readJson(response) {
   const text = await response.text();
@@ -24,11 +24,11 @@ export default async function handler(req, res) {
       if (!response.ok) continue;
       const payload = await readJson(response);
       const jobs = Array.isArray(payload) ? payload : Array.isArray(payload?.jobs) ? payload.jobs : [];
-      return res.status(200).json({ ok:true, live:true, source:path, summary:summarizeMediaHealth(jobs), jobs });
+      return res.status(200).json({ ok:true, live:true, source:path, ...summarizeMediaJobs(jobs), jobs });
     } catch {
       // Try the next compatible IX-Core media projection.
     }
   }
 
-  return res.status(200).json({ ok:true, live:false, source:null, summary:summarizeMediaHealth([]), jobs:[], notice:"IX-Core media list/health projection is not exposed yet; existing per-job media APIs remain unchanged." });
+  return res.status(200).json({ ok:true, live:false, source:null, ...summarizeMediaJobs([]), jobs:[], notice:"IX-Core media list/health projection is not exposed yet; existing per-job media APIs remain unchanged." });
 }
