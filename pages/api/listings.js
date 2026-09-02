@@ -3,6 +3,10 @@ import {
   normalizeMachineChannel
 } from "../../lib/machine-access/IXIMachineAccess";
 
+let accessTokenCache = null;
+let accessTokenExpiresAt = 0;
+let accessTokenPromise = null;
+
 async function safeJson(response) {
   const text = await response.text();
 
@@ -15,7 +19,39 @@ async function safeJson(response) {
   }
 }
 
-async function getAccessToken() {
+async function getAccessToken({
+  useCache = false
+} = {}) {
+  if (!useCache) {
+    return requestAccessToken();
+  }
+
+  if (
+    accessTokenCache &&
+    Date.now() < accessTokenExpiresAt
+  ) {
+    return accessTokenCache;
+  }
+
+  if (accessTokenPromise) {
+    return accessTokenPromise;
+  }
+
+  accessTokenPromise =
+    requestAccessToken({
+      cacheResult: true
+    });
+
+  try {
+    return await accessTokenPromise;
+  } finally {
+    accessTokenPromise = null;
+  }
+}
+
+async function requestAccessToken({
+  cacheResult = false
+} = {}) {
   const response = await fetch("https://flex-api.sharetribe.com/v1/auth/token", {
     method: "POST",
     headers: {
@@ -36,7 +72,50 @@ async function getAccessToken() {
     throw new Error(`Auth failed: ${JSON.stringify(data)}`);
   }
 
+  if (cacheResult) {
+    accessTokenCache =
+      data.access_token;
+
+    accessTokenExpiresAt =
+      Date.now() +
+      Math.max(
+        (
+          Number(data.expires_in) ||
+          300
+        ) * 1000 - 30000,
+        30000
+      );
+  }
+
   return data.access_token;
+}
+
+async function fetchListingsPage(
+  token,
+  page
+) {
+  const response = await fetch(
+    `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&page=${page}&include=images,author,author.profileImage`,
+    {
+      method: "GET",
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+        Accept: "application/json"
+      }
+    }
+  );
+
+  const pageData =
+    await safeJson(response);
+
+  if (!response.ok) {
+    throw new Error(
+      `Listings failed on page ${page}: ${JSON.stringify(pageData)}`
+    );
+  }
+
+  return pageData;
 }
 
 function getId(value) {
@@ -259,43 +338,74 @@ function buildSlug(attrs = {}, id = "") {
 
 export default async function handler(req, res) {
   try {
-    const token = await getAccessToken();
+    const marketplaceBrowsePerformance =
+      req.query.surface ===
+        "browse-v2";
 
-    const allData = [];
-    const allIncluded = [];
-    let page = 1;
-    let totalPages = 1;
+    const token = await getAccessToken({
+      useCache:
+        marketplaceBrowsePerformance
+    });
 
-    do {
-      const response = await fetch(
-        `https://flex-integ-api.sharetribe.com/v1/integration_api/listings/query?per_page=100&page=${page}&include=images,author,author.profileImage`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json"
-          }
-        }
+    const firstPage =
+      await fetchListingsPage(
+        token,
+        1
       );
 
-      const pageData = await safeJson(response);
+    const totalPages = Number(
+      firstPage.meta?.totalPages ||
+      firstPage.meta?.total_pages ||
+      1
+    );
 
-      if (!response.ok) {
-        throw new Error(
-          `Listings failed on page ${page}: ${JSON.stringify(pageData)}`
+    const remainingPages = [];
+
+    if (totalPages > 1) {
+      if (marketplaceBrowsePerformance) {
+        remainingPages.push(
+          ...await Promise.all(
+            Array.from(
+              {
+                length:
+                  totalPages - 1
+              },
+              (_, index) =>
+                fetchListingsPage(
+                  token,
+                  index + 2
+                )
+            )
+          )
         );
+      } else {
+        for (
+          let page = 2;
+          page <= totalPages;
+          page += 1
+        ) {
+          remainingPages.push(
+            await fetchListingsPage(
+              token,
+              page
+            )
+          );
+        }
       }
+    }
 
-      allData.push(...(pageData.data || []));
-      allIncluded.push(...(pageData.included || []));
+    const pages = [
+      firstPage,
+      ...remainingPages
+    ];
 
-      totalPages =
-        pageData.meta?.totalPages ||
-        pageData.meta?.total_pages ||
-        page;
+    const allData = pages.flatMap(
+      page => page.data || []
+    );
 
-      page += 1;
-    } while (page <= totalPages);
+    const allIncluded = pages.flatMap(
+      page => page.included || []
+    );
 
     console.log("IX LISTINGS FETCHED:", allData.length);
 

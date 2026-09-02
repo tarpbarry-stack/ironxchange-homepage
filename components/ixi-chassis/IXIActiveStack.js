@@ -35,7 +35,10 @@ export default function IXIActiveStack({
   sendMachineToArmedDestination,
   enableCardScaling = false,
   cardScaleMode = "xl",
-  cardContext = "workspace"
+  cardContext = "workspace",
+  listingOrigin = "saved",
+  enableMarketplaceDistribution = false,
+  enableMarketplaceIntelligence = false
 }) {
   const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
 
@@ -96,7 +99,16 @@ export default function IXIActiveStack({
                 cardContext={cardContext}
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(machine)}
-                from="saved"
+                from={listingOrigin}
+                suppressFamilyLog={
+                  listingOrigin === "browse"
+                }
+                enableMarketplaceDistribution={
+                  enableMarketplaceDistribution
+                }
+                enableMarketplaceIntelligence={
+                  enableMarketplaceIntelligence
+                }
                 ixiState={
                   ixiCardState[id] || {
                     color: "none",
@@ -122,7 +134,16 @@ export default function IXIActiveStack({
       cardContext={cardContext}
       saved={savedIds.includes(id)}
       onToggleSaved={() => toggleSave(machine)}
-      from="saved"
+      from={listingOrigin}
+      suppressFamilyLog={
+        listingOrigin === "browse"
+      }
+      enableMarketplaceDistribution={
+        enableMarketplaceDistribution
+      }
+      enableMarketplaceIntelligence={
+        enableMarketplaceIntelligence
+      }
       ixiState={
         ixiCardState[id] || {
           color: "none",

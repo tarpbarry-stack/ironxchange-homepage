@@ -26,7 +26,10 @@ export default function IXIActiveStackZone({
   sendListingToBack,
   sendMachineToArmedDestination,
   cardScaleMode = "xl",
-  cardContext = "workspace"
+  cardContext = "workspace",
+  listingOrigin = "saved",
+  enableMarketplaceDistribution = false,
+  enableMarketplaceIntelligence = false
 }) {
   return (
   <section className="active-stack-zone">
@@ -216,6 +219,15 @@ export default function IXIActiveStackZone({
                 enableCardScaling={true}
                 cardScaleMode={cardScaleMode}
                 cardContext={cardContext}
+                listingOrigin={
+                  listingOrigin
+                }
+                enableMarketplaceDistribution={
+                  enableMarketplaceDistribution
+                }
+                enableMarketplaceIntelligence={
+                  enableMarketplaceIntelligence
+                }
                 cycleMachineFace={cycleMachineFace}
               />
             </div>
