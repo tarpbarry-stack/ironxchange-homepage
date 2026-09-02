@@ -27,10 +27,11 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           client = Path('lib/ixi-tickets/ixiTicketClient.js')
           s = client.read_text()
-          marker = '''export async function submitTicketCloseout(ticketId, expectedRevision, closeout = {}) {'''
+          marker = 'export async function submitTicketCloseout(ticketId, expectedRevision, closeout = {}) {'
           insert = '''export async function startRemoteTicket(ticket) {
             if (!ticket?.ticketId) throw new Error("Ticket ID is required to start work.");
             if (!Number.isInteger(ticket.revision) || ticket.revision < 1) {
@@ -55,18 +56,13 @@ jobs:
           cmd = Path('components/ixi-tickets/IXITicketCommand.jsx')
           s = cmd.read_text()
 
-          old_import = '''import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";
-          import { useIXITickets } from "./IXITicketProvider";'''
-          new_import = '''import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";
-          import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";
-          import { useIXITickets } from "./IXITicketProvider";'''
-          if old_import not in s and 'startRemoteTicket' not in s:
-              raise SystemExit('command import marker not found')
-          if 'startRemoteTicket' not in s:
-              s = s.replace(old_import, new_import, 1)
+          if 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";' not in s:
+              target = 'import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";\n'
+              if target not in s:
+                  raise SystemExit('command import marker not found')
+              s = s.replace(target, target + 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";\n', 1)
 
-          marker = '''  async function submitCloseout() {
-          '''
+          marker = '  async function submitCloseout() {\n'
           start_fn = '''  async function startWork() {
             if (!selected || actionBusy) return;
             setActionBusy(true);
@@ -88,21 +84,20 @@ jobs:
                   raise SystemExit('startWork insertion marker not found')
               s = s.replace(marker, start_fn + marker, 1)
 
-          old_actions = '''                <div className={styles.detailActions}>
-                  <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
-                  <button onClick={() => popOutTicket(selected.ticketId)}>POP OUT ↗</button>
-                </div>'''
-          new_actions = '''                <div className={styles.detailActions}>
-                  {[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
-                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={startWork}>START WORK ON TICKET</button>
-                  ) : null}
-                  <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
-                  <button onClick={() => popOutTicket(selected.ticketId)}>POP OUT ↗</button>
-                </div>'''
           if 'START WORK ON TICKET' not in s:
-              if old_actions not in s:
+              pattern = re.compile(r'(?P<i>\s*)<div className=\{styles\.detailActions\}>\s*<button onClick=\{\(\) => openTicket\(selected\.ticketId, "floating"\)\}>OPEN WORKSHEET</button>\s*<button onClick=\{\(\) => popOutTicket\(selected\.ticketId\)\}>POP OUT ↗</button>\s*</div>')
+              def repl(m):
+                  i = m.group('i')
+                  return f'''{i}<div className={{styles.detailActions}}>
+{i}  {{[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+{i}    <button disabled={{actionBusy || !Number.isInteger(selected.revision)}} onClick={{startWork}}>START WORK ON TICKET</button>
+{i}  ) : null}}
+{i}  <button onClick={{() => openTicket(selected.ticketId, "floating")}}>OPEN WORKSHEET</button>
+{i}  <button onClick={{() => popOutTicket(selected.ticketId)}}>POP OUT ↗</button>
+{i}</div>'''
+              s, n = pattern.subn(repl, s, count=1)
+              if n != 1:
                   raise SystemExit('detail actions marker not found')
-              s = s.replace(old_actions, new_actions, 1)
 
           old_close = '''                    <button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>
                       {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}
@@ -126,9 +121,10 @@ jobs:
                           ? "SUBMIT COMPLETED WORK FOR VERIFICATION"
                           : "START WORK BEFORE CLOSEOUT"}
                     </button>'''
-          if old_close not in s:
-              raise SystemExit('closeout button marker not found')
-          s = s.replace(old_close, new_close, 1)
+          if 'START WORK BEFORE CLOSEOUT' not in s:
+              if old_close not in s:
+                  raise SystemExit('closeout button marker not found')
+              s = s.replace(old_close, new_close, 1)
 
           cmd.write_text(s)
           PY
