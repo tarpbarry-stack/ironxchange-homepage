@@ -1,4 +1,4 @@
-name: Audit live IX-Core Ticket auth boundary
+name: Audit live IX-Core Ticket single-user boundary
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Capture Ticket auth source only
+      - name: Capture Ticket dependency source
         shell: bash
         run: |
           set -euo pipefail
@@ -41,32 +41,29 @@ jobs:
           remote_file() {
             local remote_path="$1"
             local local_path="$2"
-            local parameters command_id encoded
-            parameters="$(jq -cn --arg command "set -eu; test -f '$remote_path'; base64 -w0 '$remote_path'" '{commands:[$command]}')"
-            command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket auth source" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+            local parameters command_id
+            parameters="$(jq -cn --arg command "set -eu; test -f '$remote_path'; cat '$remote_path'" '{commands:[$command]}')"
+            command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket single-user source" --parameters "$parameters" --query 'Command.CommandId' --output text)"
             aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
-            encoded="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text)"
-            test -n "$encoded"
-            printf '%s' "$encoded" | base64 -d > "$local_path"
+            aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text > "$local_path"
+            test -s "$local_path"
           }
 
           remote_file /var/www/ix-core/tickets/routes/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketAuthenticatedRequest.js
           remote_file /var/www/ix-core/tickets/routes/ticketAuthorization.js audit/ix-core-ticket/ticketAuthorization.js
           remote_file /var/www/ix-core/tickets/routes/ticketRouter.js audit/ix-core-ticket/ticketRouter.js
-          remote_file /var/www/ix-core/index.js audit/ix-core-ticket/index.js
+          remote_file /var/www/ix-core/tickets/services/ticketService.js audit/ix-core-ticket/ticketService.js
+          remote_file /var/www/ix-core/tickets/storage/ticketDynamoStore.js audit/ix-core-ticket/ticketDynamoStore.js
 
-          node --check audit/ix-core-ticket/ticketAuthenticatedRequest.js
-          node --check audit/ix-core-ticket/ticketAuthorization.js
-          node --check audit/ix-core-ticket/ticketRouter.js
-          node --check audit/ix-core-ticket/index.js
+          for file in audit/ix-core-ticket/*.js; do node --check "$file"; done
 
-      - name: Commit sanitized Ticket source snapshot
+      - name: Commit Ticket source snapshot
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audit/ix-core-ticket/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketAuthorization.js audit/ix-core-ticket/ticketRouter.js audit/ix-core-ticket/index.js
+          git add audit/ix-core-ticket/*.js
           git diff --cached --quiet && exit 0
-          git commit -m "Expand live IX-Core Ticket auth source snapshot"
+          git commit -m "Capture Ticket single-user dependency source"
           git push origin HEAD:ticket/commercial-aws-completion-v1
