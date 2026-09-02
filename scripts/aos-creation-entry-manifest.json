@@ -1,0 +1,43 @@
+{
+  "contractVersion": "ixi-aos-creation-entry-manifest-v1",
+  "permanentProvisioningContract": "ixi-aos-object-provision-v1",
+  "receiptContract": "ixi-aos-creation-boundary-v1",
+  "entries": [
+    {
+      "channel": "container-plus",
+      "entry": "components/ixi-mos/object-creation/useIXIMosObjectCreation.js",
+      "draftOnlyUntilSave": true,
+      "permanentBoundary": "provisionAosObject"
+    },
+    {
+      "channel": "object-studio",
+      "entry": "lib/mos/ixiAosObjectCommit.js",
+      "draftOnlyUntilSave": true,
+      "permanentBoundary": "provisionAosObject"
+    },
+    {
+      "channel": "bulk-import",
+      "entry": "pages/bulk-import.js",
+      "durableJob": true,
+      "permanentBoundary": "IX-Core import execution -> provisionAosObject"
+    },
+    {
+      "channel": "api",
+      "entry": "pages/api/aos/object-commit.js",
+      "signed": true,
+      "permanentBoundary": "IX-Core /objects/provision"
+    },
+    {
+      "channel": "chat",
+      "entry": "pages/api/aos/object-commit.js",
+      "signed": true,
+      "permanentBoundary": "IX-Core /objects/provision"
+    }
+  ],
+  "requiredReceipt": [
+    "entityId",
+    "objectId",
+    "passportId",
+    "transact.eligible"
+  ]
+}
