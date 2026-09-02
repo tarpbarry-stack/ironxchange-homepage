@@ -63,6 +63,29 @@ test("deferred closed Consoles preserve the Marketplace scale shell", () => {
   assert.match(card, /\.card \{\s*box-sizing: border-box;/u);
 });
 
+test("Browse V2 card sizing uses a monotonic non-wrapping scale control", () => {
+  const browse = read("pages/browse-v2.js");
+
+  assert.match(
+    browse,
+    /"micro",\s*"compact",\s*"medium",\s*"large",\s*"xl",\s*"work",\s*"focus"/u
+  );
+  assert.match(browse, /stepCardScaleMode\(direction\)/u);
+  assert.match(browse, /selectCardScaleIndex\(value\)/u);
+  assert.match(browse, /Math\.min\(/u);
+  assert.match(browse, /Math\.max\(/u);
+  assert.match(browse, /aria-label="Make Marketplace cards larger"/u);
+  assert.match(browse, /aria-label="Make Marketplace cards smaller"/u);
+  assert.match(browse, /type="range"/u);
+  assert.match(browse, /direction: rtl/u);
+  assert.ok(
+    browse.indexOf('aria-label="Make Marketplace cards larger"') <
+      browse.indexOf('aria-label="Make Marketplace cards smaller"')
+  );
+  assert.doesNotMatch(browse, /cycleCardScaleMode/u);
+  assert.doesNotMatch(browse, /getNextCardScaleMode/u);
+});
+
 test("distribution endpoint is anonymous and has no ownership or channel gate", () => {
   const route = read("pages/api/marketplace/share-email.js");
   const loader = read("lib/marketplace/loadDistributionListing.mjs");
