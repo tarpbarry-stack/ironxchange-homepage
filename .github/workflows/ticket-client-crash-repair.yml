@@ -1,0 +1,111 @@
+name: Repair Ticket client create crash
+
+on:
+  push:
+    branches:
+      - ticket/commercial-aws-completion-v1
+    paths:
+      - .github/workflows/ticket-client-crash-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair-ticket-client-crash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-aws-completion-v1
+          fetch-depth: 0
+
+      - name: Repair worksheet handler wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('components/ixi-tickets/IXITicketWorksheet.jsx')
+          s = p.read_text()
+
+          old = '''import {
+  ensureRemoteDraft,
+  getTicketApiInfo,
+  setRemoteTicketReady
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          new = '''import {
+  ensureRemoteDraft,
+  getTicketApiInfo,
+  setRemoteTicketReady,
+  startRemoteTicket
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          if 'startRemoteTicket\n} from "../../lib/ixi-tickets/ixiTicketClient";' not in s:
+              if old not in s:
+                  raise SystemExit('Ticket client import marker not found')
+              s = s.replace(old, new, 1)
+
+          marker = '''  function beginDrag(event) {'''
+          fn = '''  async function sendToAgentNow() {
+    const readyDraft = validateReady();
+    if (!readyDraft || syncing) return;
+
+    if (!apiInfo.configured) {
+      setNotice("IXI Ticket API is disabled. Ticket remains preserved locally.");
+      return;
+    }
+
+    setSyncing(true);
+    setNotice("");
+
+    try {
+      onSave?.(readyDraft);
+      const remote = await startRemoteTicket(readyDraft, {
+        assignedTo: "chat",
+        source: "send-now"
+      });
+      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a working Ticket.");
+      const saved = canonicalTicket(readyDraft, remote, "aws-synced");
+      onSave?.(saved);
+      setDraft(saved);
+      setNotice("SENT TO AGENT — Ticket is WORKING now.");
+    } catch (error) {
+      setNotice(`${error.message} Ticket remains safely preserved.`);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+'''
+          if 'async function sendToAgentNow()' not in s:
+              if marker not in s:
+                  raise SystemExit('sendToAgentNow insertion marker not found')
+              s = s.replace(marker, fn + marker, 1)
+
+          p.write_text(s)
+          PY
+
+      - name: Validate Ticket handlers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'async function sendToAgentNow()' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'startRemoteTicket' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'onClick={sendToAgentNow}' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'async function startAllReady()' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'async function startWork' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'async function submitCloseout()' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'async function approveAndClose()' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'async function reopen()' components/ixi-tickets/IXITicketCommand.jsx
+
+      - name: Commit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/ixi-tickets/IXITicketWorksheet.jsx
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix Ticket create worksheet client crash"
+          git push origin HEAD:ticket/commercial-aws-completion-v1
