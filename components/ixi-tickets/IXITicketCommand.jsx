@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";
+import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";
 import { useIXITickets } from "./IXITicketProvider";
 import styles from "./IXITicketCommand.module.css";
 
@@ -64,6 +65,10 @@ export default function IXITicketCommand() {
   const [priority, setPriority] = useState("all");
   const [search, setSearch] = useState("");
   const [verifyNote, setVerifyNote] = useState("");
+  const [userScore, setUserScore] = useState("");
+  const [agentScore, setAgentScore] = useState("");
+  const [agentConfidence, setAgentConfidence] = useState("");
+  const [agentRatingNote, setAgentRatingNote] = useState("");
   const [closeoutDraft, setCloseoutDraft] = useState(closeoutForm(null));
   const [actionNotice, setActionNotice] = useState("");
   const [actionBusy, setActionBusy] = useState(false);
@@ -102,7 +107,11 @@ export default function IXITicketCommand() {
 
   useEffect(() => {
     setCloseoutDraft(closeoutForm(selected));
-    setVerifyNote("");
+    setVerifyNote(selected?.metadata?.userReview?.note || "");
+    setUserScore(selected?.metadata?.userReview?.score ? String(selected.metadata.userReview.score) : "");
+    setAgentScore(selected?.closeout?.agentRating?.score ? String(selected.closeout.agentRating.score) : "");
+    setAgentConfidence(selected?.closeout?.agentRating?.confidence ? String(selected.closeout.agentRating.confidence) : "");
+    setAgentRatingNote(selected?.closeout?.agentRating?.note || "");
     setActionNotice("");
   }, [selected?.ticketId, selected?.revision]);
 
@@ -115,6 +124,50 @@ export default function IXITicketCommand() {
 
   function patchCloseout(field, value) {
     setCloseoutDraft(current => ({ ...current, [field]: value }));
+  }
+
+  async function startWork(ticket = selected, source = "single-ticket") {
+    if (!ticket || actionBusy) return;
+    setActionBusy(true);
+    setActionNotice("");
+    try {
+      await startRemoteTicket(ticket, { assignedTo: "chat", source });
+      setActionNotice(`STARTED ${ticket.displayNumber} — status is now WORKING.`);
+      await refreshRemoteTickets();
+    } catch (error) {
+      setActionNotice(error.message || "Ticket could not be started.");
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  async function startAllReady() {
+    if (actionBusy) return;
+    const ready = tickets.filter(ticket => [IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(ticket.status));
+    if (!ready.length) {
+      setActionNotice("No Tickets are waiting in the Ready queue.");
+      return;
+    }
+    setActionBusy(true);
+    setActionNotice("");
+    const failures = [];
+    let started = 0;
+    try {
+      for (const ticket of ready) {
+        try {
+          await startRemoteTicket(ticket, { assignedTo: "chat", source: "ready-queue" });
+          started += 1;
+        } catch (error) {
+          failures.push(`${ticket.displayNumber}: ${error.message}`);
+        }
+      }
+      await refreshRemoteTickets();
+      setActionNotice(failures.length
+        ? `Started ${started} Ticket(s). ${failures.length} failed: ${failures.join(" | ")}`
+        : `Started all ${started} Ready Ticket(s).`);
+    } finally {
+      setActionBusy(false);
+    }
   }
 
   async function submitCloseout() {
@@ -141,7 +194,12 @@ export default function IXITicketCommand() {
           result: edit.result || "completed",
           status: edit.status === "open" ? "completed" : edit.status
         })),
-        prs: nonEmpty(selected.closeout?.prs)
+        prs: nonEmpty(selected.closeout?.prs),
+        agentRating: {
+          score: agentScore ? Number(agentScore) : null,
+          confidence: agentConfidence ? Number(agentConfidence) : null,
+          note: agentRatingNote.trim()
+        }
       });
       setActionNotice("Engineering closeout stored in AWS and advanced for verification.");
       await refreshRemoteTickets();
@@ -157,7 +215,11 @@ export default function IXITicketCommand() {
     setActionBusy(true);
     setActionNotice("");
     try {
-      await approveTicket(selected, verifyNote.trim());
+      if (!userScore) {
+        setActionNotice("Rate the completed Ticket from 1 to 5 before closing it.");
+        return;
+      }
+      await approveTicket(selected, { score: Number(userScore), note: verifyNote.trim() });
       setVerifyNote("");
       setActionNotice("Ticket approved and closed in IXI Ticket Command.");
       await refreshRemoteTickets();
@@ -204,6 +266,7 @@ export default function IXITicketCommand() {
             {remoteState.status === "loading" ? "REFRESHING..." : "REFRESH FROM AWS"}
           </button>
           <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
+          <button onClick={startAllReady} disabled={actionBusy || counts.ready === 0}>{actionBusy ? "WORKING..." : `WORK READY QUEUE (${counts.ready})`}</button>
           <a href="/account">DASHBOARD</a>
         </div>
       </header>
@@ -279,8 +342,12 @@ export default function IXITicketCommand() {
                   <h2>{selected.headline || "UNTITLED CHAT TICKET"}</h2>
                   <p>{selected.repository} · {upper(selected.type)} · {upper(selected.priority)} · {upper(selected.executionClass)}</p>
                   <p>REV {Number.isInteger(selected.revision) ? selected.revision : "LOCAL"} · {upper(selected.syncState)}</p>
+                  <p>STATUS: {upper(selected.status)}{selected.metadata?.execution?.assignedTo ? ` · ASSIGNED: ${upper(selected.metadata.execution.assignedTo)}` : ""}</p>
                 </div>
                 <div className={styles.detailActions}>
+                  {[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>START WORK ON THIS TICKET</button>
+                  ) : null}
                   <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
                   <button onClick={() => popOutTicket(selected.ticketId)}>POP OUT ↗</button>
                 </div>
@@ -339,9 +406,18 @@ export default function IXITicketCommand() {
                     <label><span>FILES CHANGED — ONE PER LINE</span><textarea value={closeoutDraft.filesChanged} onChange={event => patchCloseout("filesChanged", event.target.value)} /></label>
                     <label><span>TESTS — ONE PER LINE</span><textarea value={closeoutDraft.tests} onChange={event => patchCloseout("tests", event.target.value)} /></label>
                   </div>
+                  <div className={styles.closeoutEditorGrid}>
+                    <label><span>AGENT RESULT — 1 TO 5</span><select value={agentScore} onChange={event => setAgentScore(event.target.value)}><option value="">NOT RATED</option>{[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}</select></label>
+                    <label><span>AGENT CONFIDENCE — 1 TO 5</span><select value={agentConfidence} onChange={event => setAgentConfidence(event.target.value)}><option value="">NOT RATED</option>{[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}</select></label>
+                    <label><span>AGENT CLOSEOUT NOTE</span><textarea value={agentRatingNote} onChange={event => setAgentRatingNote(event.target.value)} placeholder="Agent assessment of result, completeness, or remaining risk" /></label>
+                  </div>
                   <div className={styles.closeoutActions}>
-                    <button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>
-                      {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}
+                    <button
+                      disabled={actionBusy || !Number.isInteger(selected.revision) || ![IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)}
+                      onClick={submitCloseout}
+                      title={[IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "Submit completed work for verification" : "Ticket must be WORKING before closeout"}
+                    >
+                      {actionBusy ? "SUBMITTING..." : [IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "SUBMIT COMPLETED WORK FOR VERIFICATION" : "START WORK BEFORE CLOSEOUT"}
                     </button>
                   </div>
                 </div>
@@ -361,8 +437,15 @@ export default function IXITicketCommand() {
 
               <section className={styles.verification}>
                 <label>
-                  <span>VERIFICATION / REOPEN NOTE</span>
-                  <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What still needs work, or what you verified..." />
+                  <span>YOUR RESULT RATING — 1 TO 5</span>
+                  <select value={userScore} onChange={event => setUserScore(event.target.value)} disabled={selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY}>
+                    <option value="">RATE RESULT</option>
+                    {[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>YOUR VERIFICATION / REOPEN NOTE</span>
+                  <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What you verified, or what still needs work..." />
                 </label>
                 <div>
                   <button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.CLOSED} onClick={reopen}>REOPEN CLOSED TICKET</button>

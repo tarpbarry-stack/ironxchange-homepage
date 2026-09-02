@@ -368,7 +368,8 @@ export default function IXITicketWorksheet({
       <footer className={styles.footer}>
         <button type="button" className={styles.secondary} onClick={() => onSave?.(draft)}>SAVE DRAFT LOCALLY</button>
         {!locked ? <button type="button" className={styles.secondary} disabled={syncing} onClick={syncDraft}>{syncing ? "SAVING TO AWS..." : "SAVE DRAFT TO AWS"}</button> : null}
-        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>SUBMIT TO CHAT QUEUE</button> : null}
+        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>ADD TO READY QUEUE</button> : null}
+        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={sendToAgentNow}>SEND TO AGENT NOW</button> : null}
       </footer>
     </section>
   );

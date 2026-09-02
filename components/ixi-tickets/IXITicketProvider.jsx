@@ -14,6 +14,7 @@ import {
   extractTickets,
   getTicketApiInfo,
   listRemoteTickets,
+  rateRemoteTicket,
   reopenTicket,
   submitTicketCloseout,
   verifyTicket
@@ -168,13 +169,17 @@ export function IXITicketProvider({ children }) {
     return acceptRemoteTicket(await submitTicketCloseout(ticket.ticketId, ticket.revision, closeout));
   }, [acceptRemoteTicket]);
 
-  const approveTicket = useCallback(async (ticket, note = "") => {
+  const approveTicket = useCallback(async (ticket, review = {}) => {
     if (!ticket?.ticketId) throw new Error("Ticket is required for approval.");
     if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before approval.");
-    return acceptRemoteTicket(await verifyTicket(ticket.ticketId, {
-      expectedRevision: ticket.revision,
+    let current = ticket;
+    if (review?.score) {
+      current = acceptRemoteTicket(await rateRemoteTicket(current, review));
+    }
+    return acceptRemoteTicket(await verifyTicket(current.ticketId, {
+      expectedRevision: current.revision,
       decision: "approve",
-      note
+      note: review?.note || ""
     }));
   }, [acceptRemoteTicket]);
 
