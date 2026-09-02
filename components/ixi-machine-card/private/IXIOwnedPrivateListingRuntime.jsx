@@ -265,6 +265,12 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
           cursor:default!important;
         }
 
+        .owned-private-runtime .private-listing-card .price-input{
+          font-size:17.25px!important;
+          font-weight:850!important;
+          letter-spacing:-.12px!important;
+        }
+
         .owned-private-runtime.read-mode .private-listing-card .seller-bio-count{display:none!important}
 
         .owned-private-runtime.editing .private-listing-card .hours-input,
