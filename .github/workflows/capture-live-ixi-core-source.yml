@@ -2,6 +2,11 @@ name: Capture live IX-Core source
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/capture-live-ixi-core-source.yml
 
 permissions:
   contents: read
