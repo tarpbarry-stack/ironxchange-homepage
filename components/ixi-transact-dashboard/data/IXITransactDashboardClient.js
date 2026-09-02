@@ -133,6 +133,29 @@ export async function loadIXITransactGL({
   return payload;
 }
 
+export async function loadIXITransactChartOfAccounts({ signal } = {}) {
+  const response = await fetch(
+    "/api/ixi/financial/accounts",
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+      signal
+    }
+  );
+
+  const payload = await readJson(response);
+
+  throwForBadResponse(
+    response,
+    payload,
+    "TRAN$ACT Chart of Accounts could not be loaded.",
+    "IXI_FINANCIAL_COA_FAILED"
+  );
+
+  return payload;
+}
+
 export async function createIXITransactDesktopDocument({
   documentType = "",
   input = {},
