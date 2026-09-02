@@ -1,4 +1,4 @@
-name: Audit live IX-Core Ticket single-user boundary
+name: Audit IX-Core Ticket single-user runtime
 
 on:
   push:
@@ -8,23 +8,17 @@ on:
       - .github/workflows/ticket-single-user-audit.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  audit-ticket-auth:
+  audit-ticket-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
 
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-        with:
-          ref: ticket/commercial-aws-completion-v1
-          fetch-depth: 0
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -32,38 +26,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Capture Ticket dependency source
+      - name: Inspect Ticket entity keys
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p audit/ix-core-ticket
+          echo "Distinct Ticket entity IDs / partition keys:"
+          aws dynamodb scan \
+            --region "$AWS_REGION" \
+            --table-name IXITickets \
+            --projection-expression "entityId,pk" \
+            --output json \
+            | jq -r '.Items[] | [(.entityId.S // ""), (.pk.S // "")] | @tsv' \
+            | sort -u
 
-          remote_file() {
-            local remote_path="$1"
-            local local_path="$2"
-            local parameters command_id
-            parameters="$(jq -cn --arg command "set -eu; test -f '$remote_path'; cat '$remote_path'" '{commands:[$command]}')"
-            command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket single-user source" --parameters "$parameters" --query 'Command.CommandId' --output text)"
-            aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
-            aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text > "$local_path"
-            test -s "$local_path"
-          }
-
-          remote_file /var/www/ix-core/tickets/routes/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketAuthenticatedRequest.js
-          remote_file /var/www/ix-core/tickets/routes/ticketAuthorization.js audit/ix-core-ticket/ticketAuthorization.js
-          remote_file /var/www/ix-core/tickets/routes/ticketRouter.js audit/ix-core-ticket/ticketRouter.js
-          remote_file /var/www/ix-core/tickets/services/ticketService.js audit/ix-core-ticket/ticketService.js
-          remote_file /var/www/ix-core/tickets/storage/ticketDynamoStore.js audit/ix-core-ticket/ticketDynamoStore.js
-
-          for file in audit/ix-core-ticket/*.js; do node --check "$file"; done
-
-      - name: Commit Ticket source snapshot
+      - name: Inspect IX-Core process
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audit/ix-core-ticket/*.js
-          git diff --cached --quiet && exit 0
-          git commit -m "Capture Ticket single-user dependency source"
-          git push origin HEAD:ticket/commercial-aws-completion-v1
+          parameters="$(jq -cn --arg command "set -eu; (pm2 jlist 2>/dev/null || true) | node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{for(const p of JSON.parse(s||\"[]\")) console.log([p.name,p.pm2_env?.status,p.pid].join(\"\\t\"))}catch{}})' ; curl -fsS http://127.0.0.1:4100/health | head -c 500" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket runtime" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
+          aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text
