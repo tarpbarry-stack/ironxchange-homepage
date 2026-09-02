@@ -99,6 +99,9 @@ onHoursKeyDown,
   onLocationKeyDown,
   
   onEdit,
+  onAddObject,
+  onOpenTransact,
+  onOpenActions,
   onPause,
   onReactivate,
   onDelete,
@@ -744,10 +747,11 @@ onMachinePlacementChange ? (
       </div>
     ) : null}
 
-    <div className="seller-stats">
-      <span>Age: {listing.age ?? "—"}</span>
-      <span>Views: {listing.views || "—"}</span>
-      <span>States: {listing.states || listing.saves || "—"}</span>
+    <div className="seller-owner-toolbar" aria-label="Owner object controls">
+      <button type="button" className="owner-action add" title="Add" onClick={e => { stopCardClick(e); onAddObject?.(listing); }}>+</button>
+      <button type="button" className="owner-action edit" title="Edit" onClick={e => { stopCardClick(e); onEdit?.(listing); }}>EDIT</button>
+      <button type="button" className="owner-action transact" title="TRAN$ACT" onClick={e => { stopCardClick(e); onOpenTransact?.(listing); }}>$</button>
+      <button type="button" className="owner-action menu" title="Actions" onClick={e => { stopCardClick(e); onOpenActions?.(listing); }}>:</button>
     </div>
   </div>
 ) : null}
@@ -1584,22 +1588,56 @@ text-align: right;
   border-top: 1px solid rgba(255,255,255,.045);
 }
 
-.seller-stats {
+.seller-owner-toolbar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-
-  gap: 9px;
-
   min-width: 0;
   margin-left: auto;
+}
 
-  color: rgba(255,255,255,.38);
+.owner-action {
+  height: 20px;
+  min-width: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,.055);
+  background: transparent;
+  color: rgba(255,255,255,.54);
+  font-size: 7px;
+  font-weight: 950;
+  line-height: 1;
+  cursor: pointer;
+}
 
-  font-size: 8.5px;
-  font-weight: 850;
+.owner-action:first-child {
+  border-left: 0;
+}
 
-  white-space: nowrap;
+.owner-action.add,
+.owner-action.transact {
+  color: #FFC400;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.owner-action.edit {
+  min-width: 36px;
+  color: rgba(255,255,255,.64);
+}
+
+.owner-action.menu {
+  min-width: 23px;
+  color: rgba(255,255,255,.56);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.owner-action:hover {
+  color: #FFC400;
+  background: rgba(255,255,255,.02);
 }
 
                @media (max-width: 850px) {
