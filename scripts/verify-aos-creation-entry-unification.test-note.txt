@@ -1,0 +1,5 @@
+Verification is intentionally structural and business-neutral.
+
+It proves that each supported creation entry terminates at the canonical permanent provisioning boundary and that browser/server callers share the permanent creation receipt invariant.
+
+Runtime IX-Core provisioning and integrity monitoring remain separately protected by the already-deployed backend control plane.
