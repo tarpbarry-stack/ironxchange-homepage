@@ -60,36 +60,47 @@ test("deferred closed Consoles preserve the Marketplace scale shell", () => {
   assert.match(router, /cardScaleMode = "xl"/u);
   assert.match(router, /size=\{cardScaleMode\}/u);
   assert.match(router, /objectFamily="marketplace"/u);
+  assert.match(
+    router,
+    /<IXIMarketplaceObjectConsole[\s\S]*?enableCardScaling=\{\s*enableCardScaling\s*\}[\s\S]*?cardScaleMode=\{\s*cardScaleMode\s*\}/u
+  );
   assert.match(card, /\.card \{\s*box-sizing: border-box;/u);
 });
 
 test("Browse V2 card sizing uses a monotonic non-wrapping scale control", () => {
   const browse = read("pages/browse-v2.js");
+  const control = read(
+    "components/ixi-chassis/IXICardScaleControl.jsx"
+  );
+  const engine = read(
+    "components/ixi-chassis/IXIScaleEngine.js"
+  );
 
   assert.match(
-    browse,
+    engine,
     /"micro",\s*"compact",\s*"medium",\s*"large",\s*"xl",\s*"work",\s*"focus"/u
   );
-  assert.match(browse, /stepCardScaleMode\(direction\)/u);
-  assert.match(browse, /selectCardScaleIndex\(value\)/u);
-  assert.match(browse, /Math\.min\(/u);
-  assert.match(browse, /Math\.max\(/u);
-  assert.match(browse, /aria-label="Make Marketplace cards larger"/u);
-  assert.match(browse, /aria-label="Make Marketplace cards smaller"/u);
-  assert.match(browse, /type="range"/u);
-  assert.match(browse, /direction: rtl/u);
+  assert.match(engine, /stepCardScaleMode/u);
+  assert.match(engine, /Math\.min\(/u);
+  assert.match(engine, /Math\.max\(/u);
+  assert.match(control, /Make \$\{surfaceLabel\} cards larger/u);
+  assert.match(control, /Make \$\{surfaceLabel\} cards smaller/u);
+  assert.match(control, /type="range"/u);
+  assert.match(control, /direction: rtl/u);
   assert.match(
-    browse,
-    /\.marketplace-scale-control \{[\s\S]*?border: 1px solid rgba\(255, 196, 0, \.55\);[\s\S]*?border-radius: 8px;[\s\S]*?background: #111;[\s\S]*?color: #ffc400;/u
+    control,
+    /\.ixi-card-scale-control \{[\s\S]*?border: 1px solid rgba\(255, 196, 0, \.55\);[\s\S]*?border-radius: 8px;[\s\S]*?background: #111;[\s\S]*?color: #ffc400;/u
   );
   assert.match(
-    browse,
-    /\.marketplace-scale-step-button \{[\s\S]*?border: 0;[\s\S]*?background: transparent;[\s\S]*?color: #ffc400;/u
+    control,
+    /\.ixi-card-scale-step-button \{[\s\S]*?border: 0;[\s\S]*?background: transparent;[\s\S]*?color: #ffc400;/u
   );
   assert.ok(
-    browse.indexOf('aria-label="Make Marketplace cards larger"') <
-      browse.indexOf('aria-label="Make Marketplace cards smaller"')
+    control.indexOf("cards larger") <
+      control.indexOf("cards smaller")
   );
+  assert.match(browse, /<IXICardScaleControl/u);
+  assert.match(browse, /surfaceLabel="Marketplace"/u);
   assert.doesNotMatch(browse, /cycleCardScaleMode/u);
   assert.doesNotMatch(browse, /getNextCardScaleMode/u);
 });

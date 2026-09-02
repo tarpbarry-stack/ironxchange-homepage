@@ -20,7 +20,13 @@ import {
 
 import IXIDragEngine from "../components/ixi-chassis/IXIDragEngine";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
+import IXIBoardSurface from "../components/ixi-chassis/IXIBoardSurface";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+import IXICardScaleControl from "../components/ixi-chassis/IXICardScaleControl";
+import {
+  readSitewideCardScaleMode,
+  writeSitewideCardScaleMode
+} from "../components/ixi-chassis/IXIScaleEngine";
 
 import {
   fetchIxiMachineState,
@@ -33,7 +39,6 @@ import {
   toggleSavedListing
 } from "../lib/savedListings";
 
-import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
 const BRAND_YELLOW = "#FFC400";
 
 const categories = [
@@ -99,7 +104,14 @@ export default function Home() {
   const [ixiUserId, setIxiUserId] = useState("guest");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+
+  useEffect(() => {
+    const savedMode = readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setCardScaleMode(savedMode);
+    }
+  }, []);
 
   const [activeDndId, setActiveDndId] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -128,6 +140,12 @@ function getActiveDndListing() {
     item =>
       String(getListingId(item)) ===
       String(activeDndId)
+  );
+}
+
+function updateCardScaleMode(nextMode) {
+  setCardScaleMode(
+    writeSitewideCardScaleMode(nextMode)
   );
 }
 
@@ -600,18 +618,11 @@ return (
     ixiCardState={ixiCardState}
     cardScaleMode={cardScaleMode}
   >
-    <div
+    <IXIBoardSurface
       data-board-target="board"
-      className={`cards ${
-        visibleListings.length === 1 ? "single-card" : ""
-      }`}
-      style={{
-        gridTemplateColumns:
-          visibleListings.length === 1
-            ? `${cardScaleMetrics.width}px`
-            : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-        gap: `${cardScaleMetrics.gap}px`
-      }}
+      scaleMode={cardScaleMode}
+      centerRows={true}
+      style={{ minHeight: "560px" }}
     >
       <IXIBoard
         items={visibleListings}
@@ -631,7 +642,12 @@ return (
         enableCardScaling={true}
         cardScaleMode={cardScaleMode}
       />
-    </div>
+    </IXIBoardSurface>
+    <IXICardScaleControl
+      value={cardScaleMode}
+      onChange={updateCardScaleMode}
+      surfaceLabel="Marketplace"
+    />
   </IXIDragEngine>
 </section>
 

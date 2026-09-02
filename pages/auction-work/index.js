@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import IXIBoardSurface
   from "../../components/ixi-chassis/IXIBoardSurface";
+import IXICardScaleControl
+  from "../../components/ixi-chassis/IXICardScaleControl";
 
 import useIXIAuctionObjectOps
   from "../../components/ixi-auction-object/useIXIAuctionObjectOps";
@@ -88,7 +90,9 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
-  getNextCardScaleMode
+  readSitewideCardScaleMode,
+  resolveSitewideCardScaleMode,
+  writeSitewideCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
 
 import {
@@ -208,6 +212,14 @@ const DIRECT_CONTAINER_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
+
+  useEffect(() => {
+    const savedMode = readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setCardScaleMode(savedMode);
+    }
+  }, []);
   
   const cardScaleMetrics = getIXIAuctionCardScalePreset(cardScaleMode);
   const hasAppliedRemoteLayoutRef = useRef(false);
@@ -490,11 +502,11 @@ const sensors = useSensors(
       loadedWorkspaceLayout
     );
 
-    if (loadedWorkspaceSettings.cardScaleMode) {
-      setCardScaleMode(
+    setCardScaleMode(
+      resolveSitewideCardScaleMode(
         loadedWorkspaceSettings.cardScaleMode
-      );
-    }
+      )
+    );
 
     if (!environment.isAuthenticated) {
       setListings([]);
@@ -1479,9 +1491,14 @@ function saveWorkspaceLayout(nextContainers = machineContainers) {
   });
 }
   
-function cycleCardScaleMode() {
+function updateCardScaleMode(nextMode) {
   setCardScaleMode(current => {
-    const next = getNextCardScaleMode(current);
+    if (nextMode === current) {
+      return current;
+    }
+
+    const next =
+      writeSitewideCardScaleMode(nextMode);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
@@ -1852,6 +1869,7 @@ if (armedDestination === "stackTop") {
               
    <IXIBoardSurface
   scaleMode={cardScaleMode}
+  centerRows={true}
 >
   <IXIBoard
     items={visibleSavedListings}
@@ -1897,27 +1915,11 @@ if (armedDestination === "stackTop") {
   />
 </IXIBoardSurface>
 
-<button
-  type="button"
-  onClick={cycleCardScaleMode}
-  style={{
-    position: "fixed",
-    right: "24px",
-    bottom: "24px",
-    zIndex: 9999,
-    background: "#111",
-    color: "#FFC400",
-    border: "1px solid rgba(255,196,0,.55)",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    fontSize: "11px",
-    fontWeight: 900,
-    letterSpacing: ".08em",
-    cursor: "pointer"
-  }}
->
-  SCALE: {cardScaleMode.toUpperCase()}
-</button>
+<IXICardScaleControl
+  value={cardScaleMode}
+  onChange={updateCardScaleMode}
+  surfaceLabel="Auction Work"
+/>
 
         {visibleSavedListings.length === 0 && (
   <div className="empty">
