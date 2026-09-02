@@ -26,24 +26,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Inspect Ticket entity keys
+      - name: Inspect Ticket runtime on IX-Core host
         shell: bash
         run: |
           set -euo pipefail
-          echo "Distinct Ticket entity IDs / partition keys:"
-          aws dynamodb scan \
-            --region "$AWS_REGION" \
-            --table-name IXITickets \
-            --projection-expression "entityId,pk" \
-            --output json \
-            | jq -r '.Items[] | [(.entityId.S // ""), (.pk.S // "")] | @tsv' \
-            | sort -u
-
-      - name: Inspect IX-Core process
-        shell: bash
-        run: |
-          set -euo pipefail
-          parameters="$(jq -cn --arg command "set -eu; (pm2 jlist 2>/dev/null || true) | node -e 'let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{for(const p of JSON.parse(s||\"[]\")) console.log([p.name,p.pm2_env?.status,p.pid].join(\"\\t\"))}catch{}})' ; curl -fsS http://127.0.0.1:4100/health | head -c 500" '{commands:[$command]}')"
+          remote='set -eu; echo "TICKET_ENTITY_KEYS"; aws dynamodb scan --region us-east-2 --table-name IXITickets --projection-expression "entityId,pk" --output json | jq -r '\'' .Items[] | [(.entityId.S // ""), (.pk.S // "")] | @tsv '\'' | sort -u; echo "PM2"; (pm2 jlist 2>/dev/null || true) | node -e '\''let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{for(const p of JSON.parse(s||"[]")) console.log([p.name,p.pm2_env?.status,p.pid].join("\t"))}catch{}})'\''; echo "HEALTH"; curl -fsS http://127.0.0.1:4100/health | head -c 500'
+          parameters="$(jq -cn --arg command "$remote" '{commands:[$command]}')"
           command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket runtime" --parameters "$parameters" --query 'Command.CommandId' --output text)"
           aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
           aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text
