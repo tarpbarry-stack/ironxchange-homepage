@@ -65,8 +65,7 @@ export default function IXIMachinePlacementControl({
       aria-label="Machine placement"
     >
       {PLACEMENT_OPTIONS.map(option => {
-        const active =
-          option.key === activeKey;
+        const active = option.key === activeKey;
 
         return (
           <button
@@ -94,20 +93,17 @@ export default function IXIMachinePlacementControl({
       })}
 
       <style jsx>{`
-       .ixi-machine-placement-control {
-  width: 100%;
+        .ixi-machine-placement-control {
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 3px;
+        }
 
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 3px;
-}
         button {
           height: 17px;
-
           border: 1px solid rgba(255,255,255,.08);
           border-radius: 4px;
-
           background:
             linear-gradient(
               180deg,
@@ -115,15 +111,11 @@ export default function IXIMachinePlacementControl({
               rgba(255,255,255,0)
             ),
             #101010;
-
           color: rgba(255,255,255,.48);
-
           font-size: 6px;
           font-weight: 950;
           letter-spacing: .38px;
-
           cursor: pointer;
-
           transition:
             color .14s ease,
             border-color .14s ease,
@@ -131,43 +123,44 @@ export default function IXIMachinePlacementControl({
             transform .14s ease;
         }
 
-       button:hover:not(:disabled):not(.active) {
-  transform: translateY(-1px);
-
-  color: rgba(255,255,255,.72);
-  border-color: rgba(255,255,255,.16);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.028),
-      rgba(255,255,255,0)
-    ),
-    #141414;
-}
+        button:hover:not(:disabled):not(.active) {
+          transform: translateY(-1px);
+          color: rgba(255,255,255,.72);
+          border-color: rgba(255,255,255,.16);
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,.028),
+              rgba(255,255,255,0)
+            ),
+            #141414;
+        }
 
         button.active {
-  color: #FFC400;
-
-  border-color: rgba(255,196,0,.58);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,196,0,.055),
-      rgba(255,196,0,.008)
-    ),
-    #101010;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 0 0 1px rgba(255,196,0,.035),
-    0 0 8px rgba(255,196,0,.08);
-}
+          color: #FFC400;
+          border-color: rgba(255,196,0,.58);
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255,196,0,.055),
+              rgba(255,196,0,.008)
+            ),
+            #101010;
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.035),
+            0 0 0 1px rgba(255,196,0,.035),
+            0 0 8px rgba(255,196,0,.08);
+        }
 
         button:disabled {
           cursor: wait;
           opacity: .46;
+        }
+      `}</style>
+
+      <style jsx global>{`
+        .private-listing-card .seller-actions {
+          display: none !important;
         }
       `}</style>
     </div>
