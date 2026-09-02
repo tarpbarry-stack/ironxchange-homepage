@@ -2694,6 +2694,7 @@ return;
 
     return (
   <IXIDragEngine
+    cardContext="inventory"
     sensors={sensors}
    workspaceCollisionDetection={
   universalWorkspaceCollisionDetection

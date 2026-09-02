@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:card-geometry": "node tests/ixi-card-geometry-contract.test.mjs",
     "generate-taxonomy": "node scripts/generateConfigCategories.js",
     "build-aws-taxonomy-master": "node scripts/buildAwsTaxonomyMaster.js"
   },

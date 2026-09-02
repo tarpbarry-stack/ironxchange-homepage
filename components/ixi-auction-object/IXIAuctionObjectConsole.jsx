@@ -21,10 +21,10 @@ import {
 } from "../ixi-chassis/IXIObjectConsoleEngine";
 
 const AUCTION_NATIVE_PANEL_WIDTH =
-  298;
+  300;
 
 const AUCTION_NATIVE_HEIGHT =
-  471;
+  475;
 
 const AUCTION_SEAM_OVERLAP =
   0;

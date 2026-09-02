@@ -1797,6 +1797,7 @@ if (
 
     return (
   <IXIDragEngine
+    cardContext="marketplace"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -1955,6 +1956,7 @@ if (
 
               
 <IXIActiveStackZone
+  cardContext="marketplace"
   WorkspaceDropZone={WorkspaceDropZone}
   activeStacksOpen={activeStacksOpen}
   activeStackHover={activeStackHover}

@@ -8,9 +8,13 @@ import {
 import IXIScaledCardShell
   from "../ixi-machine-object/IXIScaledCardShell";
 
+import {
+  getMachineCardGeometryFamily
+} from "../ixi-machine-card/getMachineCardFamily";
 
-const IXI_DRAG_NATIVE_WIDTH = 298;
-const IXI_DRAG_NATIVE_HEIGHT = 471;
+
+const IXI_AOS_DRAG_NATIVE_WIDTH = 298;
+const IXI_AOS_DRAG_NATIVE_HEIGHT = 471;
 
 
 export default function IXIDragEngine({
@@ -67,7 +71,9 @@ export default function IXIDragEngine({
 
   ixiCardState = {},
 
-  cardScaleMode = "xl"
+  cardScaleMode = "xl",
+
+  cardContext = "workspace"
 }) {
   const activeDndObject =
     typeof getActiveDndObject === "function"
@@ -75,6 +81,37 @@ export default function IXIDragEngine({
       : typeof getActiveDndListing === "function"
         ? getActiveDndListing()
         : null;
+
+  const activeObjectType =
+    String(
+      activeDndObject?.objectType ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const usesAosNativeGeometry =
+    typeof renderActiveDndObject ===
+      "function" &&
+    (
+      activeObjectType ===
+        "system-index" ||
+      (
+        activeDndObject?.objectId &&
+        activeObjectType !== "machine"
+      )
+    );
+
+  const overlayObjectFamily =
+    usesAosNativeGeometry
+      ? "default"
+      : activeDndObject?.type ===
+          "SELLER OBJECT"
+        ? "seller"
+        : getMachineCardGeometryFamily(
+            activeDndObject || {},
+            cardContext
+          );
 
 
   function renderOverlayObject() {
@@ -163,6 +200,10 @@ export default function IXIDragEngine({
       <IXIMachineCard
         listing={
           activeDndObject
+        }
+
+        cardContext={
+          cardContext
         }
 
         saved={
@@ -255,12 +296,20 @@ export default function IXIDragEngine({
                 cardScaleMode
               }
 
+              objectFamily={
+                overlayObjectFamily
+              }
+
               nativeWidth={
-                IXI_DRAG_NATIVE_WIDTH
+                usesAosNativeGeometry
+                  ? IXI_AOS_DRAG_NATIVE_WIDTH
+                  : undefined
               }
 
               nativeHeight={
-                IXI_DRAG_NATIVE_HEIGHT
+                usesAosNativeGeometry
+                  ? IXI_AOS_DRAG_NATIVE_HEIGHT
+                  : undefined
               }
 
               tight

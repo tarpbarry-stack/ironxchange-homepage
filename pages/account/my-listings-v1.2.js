@@ -1081,6 +1081,7 @@ export default function MyListingsV2() {
       <Navbar />
 
       <IXIDragEngine
+        cardContext="inventory"
         sensors={sensors}
         workspaceCollisionDetection={workspaceCollisionDetection}
         handleWorkspaceDragStart={handleWorkspaceDragStart}

@@ -1365,6 +1365,7 @@ toggleSearchSurfaceRevealed
 }
     return (
   <IXIDragEngine
+    cardContext="marketplace"
     sensors={sensors}
     workspaceCollisionDetection={workspaceCollisionDetection}
     handleWorkspaceDragStart={handleWorkspaceDragStart}
@@ -1525,6 +1526,7 @@ toggleSearchSurfaceRevealed={toggleSearchSurfaceRevealed}
 
               
 <IXIActiveStackZone
+  cardContext="marketplace"
   WorkspaceDropZone={WorkspaceDropZone}
   activeStacksOpen={activeStacksOpen}
   activeStackHover={activeStackHover}

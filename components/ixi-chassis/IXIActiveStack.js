@@ -9,7 +9,13 @@ import { rectSortingStrategy } from "@dnd-kit/sortable";
 
 import IXIScaledCardShell from "../ixi-machine-object/IXIScaledCardShell";
 
-import { getIXICardScalePreset } from "../../lib/ixiCardScalePresets";
+import {
+  getIXIObjectFootprint
+} from "../../lib/ixiObjectGeometry";
+
+import {
+  getMachineCardGeometryFamily
+} from "../ixi-machine-card/getMachineCardFamily";
 
 export default function IXIActiveStack({
   stackKey,
@@ -28,11 +34,10 @@ export default function IXIActiveStack({
   armedDestination,
   sendMachineToArmedDestination,
   enableCardScaling = false,
-  cardScaleMode = "xl"
+  cardScaleMode = "xl",
+  cardContext = "workspace"
 }) {
   const containerId = stackKey === "top" ? "stackTop" : "stackBottom";
-
-  const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
 
   const strategy =
     activeStackLayouts[stackKey] === "vertical"
@@ -52,6 +57,18 @@ export default function IXIActiveStack({
 
         const id = String(getListingId(machine));
 
+        const objectFamily =
+          getMachineCardGeometryFamily(
+            machine,
+            cardContext
+          );
+
+        const cardFootprint =
+          getIXIObjectFootprint({
+            scaleMode: cardScaleMode,
+            objectFamily
+          });
+
         return (
           <IXISortableMachineCard
   key={`stack-card-${id}`}
@@ -61,18 +78,22 @@ export default function IXIActiveStack({
   style={
     enableCardScaling
       ? {
-          width: `${cardScaleMetrics.width}px`,
-          maxWidth: `${cardScaleMetrics.width}px`,
-          minWidth: `${cardScaleMetrics.width}px`
+          width: `${cardFootprint.renderedWidth}px`,
+          maxWidth: `${cardFootprint.renderedWidth}px`,
+          minWidth: `${cardFootprint.renderedWidth}px`
         }
       : undefined
   }
 >
           {({ dragHandleProps }) => (
   enableCardScaling ? (
-    <IXIScaledCardShell size={cardScaleMode}>
+    <IXIScaledCardShell
+      size={cardScaleMode}
+      objectFamily={objectFamily}
+    >
       <IXIMachineCard
                 listing={machine}
+                cardContext={cardContext}
                 saved={savedIds.includes(id)}
                 onToggleSaved={() => toggleSave(machine)}
                 from="saved"
@@ -98,6 +119,7 @@ export default function IXIActiveStack({
   ) : (
     <IXIMachineCard
       listing={machine}
+      cardContext={cardContext}
       saved={savedIds.includes(id)}
       onToggleSaved={() => toggleSave(machine)}
       from="saved"
