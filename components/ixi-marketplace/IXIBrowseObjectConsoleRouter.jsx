@@ -1,5 +1,8 @@
 import dynamic from "next/dynamic";
 
+import IXIScaledCardShell
+  from "../ixi-machine-object/IXIScaledCardShell";
+
 import {
   IXI_CONSOLE_SLOT_TYPES,
   createConsoleSlot,
@@ -48,6 +51,8 @@ export default function IXIBrowseObjectConsoleRouter({
   objectId,
   ixiCardState = {},
   updateIxiCardState,
+  enableCardScaling = false,
+  cardScaleMode = "xl",
   renderParentCard,
   ...props
 }) {
@@ -120,7 +125,7 @@ export default function IXIBrowseObjectConsoleRouter({
     );
   }
 
-  return renderParentCard({
+  const parentCard = renderParentCard({
     consoleDepth: 1,
     consoleLeftOpen: false,
     consoleRightOpen: false,
@@ -129,4 +134,15 @@ export default function IXIBrowseObjectConsoleRouter({
     onExpandConsoleRight: event =>
       openConsole("right", event)
   });
+
+  return enableCardScaling ? (
+    <IXIScaledCardShell
+      size={cardScaleMode}
+      objectFamily="marketplace"
+    >
+      {parentCard}
+    </IXIScaledCardShell>
+  ) : (
+    parentCard
+  );
 }
