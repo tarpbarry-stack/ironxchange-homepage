@@ -1,0 +1,75 @@
+name: Clarify Ticket action controls
+
+on:
+  push:
+    branches:
+      - ticket/commercial-aws-completion-v1
+    paths:
+      - .github/workflows/ticket-ui-action-labels.yml
+
+permissions:
+  contents: write
+
+jobs:
+  clarify-ticket-controls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-aws-completion-v1
+          fetch-depth: 0
+
+      - name: Separate status labels from actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new):
+              p = Path(path)
+              s = p.read_text()
+              if old not in s:
+                  raise SystemExit(f"Expected text not found in {path}: {old!r}")
+              p.write_text(s.replace(old, new))
+
+          worksheet = "components/ixi-tickets/IXITicketWorksheet.jsx"
+          replace(worksheet,
+              '<strong>{upper(draft.status)}</strong>\n        <span>{upper(draft.syncState)}</span>',
+              '<strong>STATUS: {upper(draft.status)}</strong>\n        <span>STORAGE: {upper(draft.syncState)}</span>')
+          replace(worksheet, 'Draft synchronized to IXI Ticket Command.', 'DRAFT SAVED TO AWS — you can continue editing or submit it to the Chat queue.')
+          replace(worksheet, 'READY FOR CHAT — stored in AWS and visible to Ticket Command.', 'SUBMITTED TO CHAT QUEUE — request is now locked and ready for work.')
+          replace(worksheet, '>SAVE LOCAL</button>', '>SAVE DRAFT LOCALLY</button>')
+          replace(worksheet, '{syncing ? "SYNCING..." : "SYNC AWS"}', '{syncing ? "SAVING TO AWS..." : "SAVE DRAFT TO AWS"}')
+          replace(worksheet, '>READY FOR CHAT</button>', '>SUBMIT TO CHAT QUEUE</button>')
+
+          command = "components/ixi-tickets/IXITicketCommand.jsx"
+          replace(command, '{remoteState.status === "loading" ? "SYNCING..." : "REFRESH AWS"}', '{remoteState.status === "loading" ? "REFRESHING..." : "REFRESH FROM AWS"}')
+          replace(command, '>+ CHAT TICKET</button>', '>+ CREATE TICKET</button>')
+          replace(command, '<button onClick={() => setStatus("ready-for-chat")}><span>READY FOR CHAT</span><strong>{counts.ready}</strong></button>', '<button onClick={() => setStatus("ready-for-chat")}><span>SHOW READY QUEUE</span><strong>{counts.ready}</strong></button>')
+          replace(command, '<button onClick={() => setStatus("working")}><span>WORKING / PR</span><strong>{counts.working}</strong></button>', '<button onClick={() => setStatus("working")}><span>SHOW WORKING QUEUE</span><strong>{counts.working}</strong></button>')
+          replace(command, '<button onClick={() => setStatus("ready-to-verify")}><span>READY TO VERIFY</span><strong>{counts.verify}</strong></button>', '<button onClick={() => setStatus("ready-to-verify")}><span>SHOW VERIFY QUEUE</span><strong>{counts.verify}</strong></button>')
+          replace(command, '<button onClick={() => { setStatus("all"); setPriority("high"); }}><span>HIGH PRIORITY</span><strong>{counts.high}</strong></button>', '<button onClick={() => { setStatus("all"); setPriority("high"); }}><span>SHOW HIGH PRIORITY</span><strong>{counts.high}</strong></button>')
+          replace(command, '{actionBusy ? "SUBMITTING..." : "SUBMIT CLOSEOUT TO AWS"}', '{actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}')
+          replace(command,
+              '<button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={reopen}>REOPEN TICKET</button>',
+              '<button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.CLOSED} onClick={reopen}>REOPEN CLOSED TICKET</button>')
+          replace(command,
+              '<button className={styles.approveButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY} onClick={approveAndClose}>APPROVE & CLOSE</button>',
+              '<button className={styles.approveButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY} onClick={approveAndClose}>VERIFY & CLOSE TICKET</button>')
+          replace(command, '<span>VERIFICATION NOTE</span>', '<span>VERIFICATION / REOPEN NOTE</span>')
+          PY
+
+          git diff --check
+          git diff -- components/ixi-tickets/IXITicketWorksheet.jsx components/ixi-tickets/IXITicketCommand.jsx
+
+      - name: Commit clarified controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/ixi-tickets/IXITicketWorksheet.jsx components/ixi-tickets/IXITicketCommand.jsx
+          git diff --cached --quiet && exit 0
+          git commit -m "Make Ticket actions explicit and lifecycle-safe"
+          git push origin HEAD:ticket/commercial-aws-completion-v1
