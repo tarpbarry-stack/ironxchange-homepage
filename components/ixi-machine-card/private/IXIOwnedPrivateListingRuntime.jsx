@@ -211,6 +211,18 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     );
   }
 
+  const listingForCard = {
+    ...runtimeListing,
+    __ixiOwnerActions: {
+      add: handleAdd,
+      edit: handleEditButton,
+      transact: () => !saving && setTransactOpen(true),
+      actions: () => !saving && setMenuOpen(value => !value),
+      editing,
+      saving
+    }
+  };
+
   return (
     <div
       className={`owned-private-runtime ${editing ? "editing" : "read-mode"} ${saving ? "saving" : ""}`}
@@ -221,7 +233,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     >
       <PrivateListingCard
         {...props}
-        listing={runtimeListing}
+        listing={listingForCard}
         cardContext={cardContext}
         presentation={presentation}
         actionNotice={actionNotice || props.actionNotice}
