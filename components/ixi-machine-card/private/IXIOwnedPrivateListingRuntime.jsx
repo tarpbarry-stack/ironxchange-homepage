@@ -93,6 +93,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState(() => factsOf(props.listing || {}));
+  const draftRef = useRef(factsOf(props.listing || {}));
   const [actionNotice, setActionNotice] = useState(null);
   const [transactOpen, setTransactOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -103,7 +104,9 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   useEffect(() => {
     setRuntimeListing(props.listing || {});
     if (!editing && !saving) {
-      setDraft(factsOf(props.listing || {}));
+      const nextDraft = factsOf(props.listing || {});
+      draftRef.current = nextDraft;
+      setDraft(nextDraft);
     }
   }, [props.listing, editing, saving]);
 
@@ -120,13 +123,17 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   }
 
   function patchDraft(name, value) {
-    setDraft(current => ({ ...current, [name]: value }));
+    const nextDraft = { ...draftRef.current, [name]: value };
+    draftRef.current = nextDraft;
+    setDraft(nextDraft);
   }
 
   function beginEdit() {
     if (saving) return;
     setMenuOpen(false);
-    setDraft(factsOf(runtimeListing));
+    const nextDraft = factsOf(runtimeListing);
+    draftRef.current = nextDraft;
+    setDraft(nextDraft);
     setEditing(true);
   }
 
@@ -163,8 +170,10 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
             }
           };
 
+      const nextDraft = factsOf(nextListing);
       setRuntimeListing(nextListing);
-      setDraft(factsOf(nextListing));
+      draftRef.current = nextDraft;
+      setDraft(nextDraft);
       if (closeFace1Edit) setEditing(false);
       props.onOwnedObjectSaved?.(nextListing, result);
       showNotice("SAVED", "success");
@@ -178,13 +187,16 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   }
 
   async function saveEdit() {
-    return persistFacts(draft, "owned-private-card-inline-editor", true);
+    return persistFacts(draftRef.current, "owned-private-card-inline-editor", true);
   }
 
   async function saveDescription(exactDescription) {
+    const description = exactDescription === undefined
+      ? draftRef.current.description
+      : String(exactDescription ?? "");
     const after = {
       ...factsOf(runtimeListing),
-      description: String(exactDescription ?? "")
+      description
     };
     return persistFacts(after, "owned-private-face2-description-editor", false);
   }
