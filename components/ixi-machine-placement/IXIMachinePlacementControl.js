@@ -162,6 +162,31 @@ export default function IXIMachinePlacementControl({
         .private-listing-card .seller-actions {
           display: none !important;
         }
+
+        /*
+         * Private Face 1 lower control stack.
+         * IXI rail is 16px tall at bottom:-1px. Keep the placement/owner
+         * control row exactly 15px clear of the rail, then preserve the
+         * existing 1px vertical relationship between that row and Price /
+         * City / State. The yellow/grey rules travel with .price-row.
+         */
+        .private-listing-card.seller-mode .seller-meta-row {
+          position: absolute !important;
+          left: 13px;
+          right: 13px;
+          bottom: 31px;
+          z-index: 24;
+          margin-top: 0 !important;
+        }
+
+        .private-listing-card.seller-mode .price-row {
+          position: absolute !important;
+          left: 13px;
+          right: 13px;
+          bottom: 58px;
+          z-index: 23;
+          margin-top: 0 !important;
+        }
       `}</style>
     </div>
   );
