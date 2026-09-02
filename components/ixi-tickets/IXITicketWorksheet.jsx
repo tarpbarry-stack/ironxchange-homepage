@@ -178,7 +178,7 @@ export default function IXITicketWorksheet({
       const saved = canonicalTicket(draft, remote, "aws-synced");
       onSave?.(saved);
       setDraft(saved);
-      setNotice("Draft synchronized to IXI Ticket Command.");
+      setNotice("DRAFT SAVED TO AWS — you can continue editing or submit it to the Chat queue.");
     } catch (error) {
       setNotice(`${error.message} Local draft was preserved.`);
     } finally {
@@ -210,7 +210,7 @@ export default function IXITicketWorksheet({
       const saved = canonicalTicket(readyDraft, remote, "aws-synced");
       onSave?.(saved);
       setDraft(saved);
-      setNotice("READY FOR CHAT — stored in AWS and visible to Ticket Command.");
+      setNotice("SUBMITTED TO CHAT QUEUE — request is now locked and ready for work.");
     } catch (error) {
       setNotice(`${error.message} Ticket remains safely preserved as a local draft.`);
     } finally {
@@ -264,8 +264,8 @@ export default function IXITicketWorksheet({
 
       <div className={styles.statusBar}>
         <span className={`${styles.statusDot} ${styles[draft.status] || ""}`} />
-        <strong>{upper(draft.status)}</strong>
-        <span>{upper(draft.syncState)}</span>
+        <strong>STATUS: {upper(draft.status)}</strong>
+        <span>STORAGE: {upper(draft.syncState)}</span>
       </div>
 
       <div className={styles.body}>
@@ -366,9 +366,9 @@ export default function IXITicketWorksheet({
       </div>
 
       <footer className={styles.footer}>
-        <button type="button" className={styles.secondary} onClick={() => onSave?.(draft)}>SAVE LOCAL</button>
-        {!locked ? <button type="button" className={styles.secondary} disabled={syncing} onClick={syncDraft}>{syncing ? "SYNCING..." : "SYNC AWS"}</button> : null}
-        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>READY FOR CHAT</button> : null}
+        <button type="button" className={styles.secondary} onClick={() => onSave?.(draft)}>SAVE DRAFT LOCALLY</button>
+        {!locked ? <button type="button" className={styles.secondary} disabled={syncing} onClick={syncDraft}>{syncing ? "SAVING TO AWS..." : "SAVE DRAFT TO AWS"}</button> : null}
+        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>SUBMIT TO CHAT QUEUE</button> : null}
       </footer>
     </section>
   );

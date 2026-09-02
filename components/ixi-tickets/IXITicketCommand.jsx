@@ -201,9 +201,9 @@ export default function IXITicketCommand() {
         </div>
         <div className={styles.headerButtons}>
           <button onClick={() => refreshRemoteTickets()} disabled={remoteState.status === "loading"}>
-            {remoteState.status === "loading" ? "SYNCING..." : "REFRESH AWS"}
+            {remoteState.status === "loading" ? "REFRESHING..." : "REFRESH FROM AWS"}
           </button>
-          <button onClick={() => createTicket({ mode: "floating" })}>+ CHAT TICKET</button>
+          <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
           <a href="/account">DASHBOARD</a>
         </div>
       </header>
@@ -212,10 +212,10 @@ export default function IXITicketCommand() {
       {actionNotice ? <div className={styles.empty}>{actionNotice}</div> : null}
 
       <section className={styles.scoreboard}>
-        <button onClick={() => setStatus("ready-for-chat")}><span>READY FOR CHAT</span><strong>{counts.ready}</strong></button>
-        <button onClick={() => setStatus("working")}><span>WORKING / PR</span><strong>{counts.working}</strong></button>
-        <button onClick={() => setStatus("ready-to-verify")}><span>READY TO VERIFY</span><strong>{counts.verify}</strong></button>
-        <button onClick={() => { setStatus("all"); setPriority("high"); }}><span>HIGH PRIORITY</span><strong>{counts.high}</strong></button>
+        <button onClick={() => setStatus("ready-for-chat")}><span>SHOW READY QUEUE</span><strong>{counts.ready}</strong></button>
+        <button onClick={() => setStatus("working")}><span>SHOW WORKING QUEUE</span><strong>{counts.working}</strong></button>
+        <button onClick={() => setStatus("ready-to-verify")}><span>SHOW VERIFY QUEUE</span><strong>{counts.verify}</strong></button>
+        <button onClick={() => { setStatus("all"); setPriority("high"); }}><span>SHOW HIGH PRIORITY</span><strong>{counts.high}</strong></button>
       </section>
 
       <section className={styles.filters}>
@@ -341,7 +341,7 @@ export default function IXITicketCommand() {
                   </div>
                   <div className={styles.closeoutActions}>
                     <button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>
-                      {actionBusy ? "SUBMITTING..." : "SUBMIT CLOSEOUT TO AWS"}
+                      {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}
                     </button>
                   </div>
                 </div>
@@ -361,12 +361,12 @@ export default function IXITicketCommand() {
 
               <section className={styles.verification}>
                 <label>
-                  <span>VERIFICATION NOTE</span>
+                  <span>VERIFICATION / REOPEN NOTE</span>
                   <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What still needs work, or what you verified..." />
                 </label>
                 <div>
-                  <button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={reopen}>REOPEN TICKET</button>
-                  <button className={styles.approveButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY} onClick={approveAndClose}>APPROVE & CLOSE</button>
+                  <button className={styles.reopenButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.CLOSED} onClick={reopen}>REOPEN CLOSED TICKET</button>
+                  <button className={styles.approveButton} disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY} onClick={approveAndClose}>VERIFY & CLOSE TICKET</button>
                 </div>
               </section>
 
@@ -383,7 +383,7 @@ export default function IXITicketCommand() {
             <div className={styles.noSelection}>
               <h2>NO TICKETS YET</h2>
               <p>Create the first Chat Ticket from the header or here.</p>
-              <button onClick={() => createTicket({ mode: "floating" })}>+ CHAT TICKET</button>
+              <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
             </div>
           )}
         </article>
