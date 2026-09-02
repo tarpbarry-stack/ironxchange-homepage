@@ -66,6 +66,12 @@ export default function IXIBrowseObjectConsoleRouter({
       <IXIMarketplaceObjectConsole
         objectId={objectId}
         ixiCardState={ixiCardState}
+        enableCardScaling={
+          enableCardScaling
+        }
+        cardScaleMode={
+          cardScaleMode
+        }
         updateIxiCardState={
           updateIxiCardState
         }

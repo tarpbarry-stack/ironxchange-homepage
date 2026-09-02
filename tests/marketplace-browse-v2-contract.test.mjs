@@ -60,6 +60,10 @@ test("deferred closed Consoles preserve the Marketplace scale shell", () => {
   assert.match(router, /cardScaleMode = "xl"/u);
   assert.match(router, /size=\{cardScaleMode\}/u);
   assert.match(router, /objectFamily="marketplace"/u);
+  assert.match(
+    router,
+    /<IXIMarketplaceObjectConsole[\s\S]*?enableCardScaling=\{\s*enableCardScaling\s*\}[\s\S]*?cardScaleMode=\{\s*cardScaleMode\s*\}/u
+  );
   assert.match(card, /\.card \{\s*box-sizing: border-box;/u);
 });
 
