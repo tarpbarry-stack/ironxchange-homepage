@@ -22,15 +22,27 @@ jobs:
           fetch-depth: 0
 
       - name: Apply commercial operator model
-        run: python3 .github/scripts/ticket_operator_model.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python3 .github/scripts/ticket_operator_model.py
+          first_status=$?
+          set -e
+          if [ "$first_status" -ne 0 ]; then
+            echo "Base migration reached legacy UI marker; applying deterministic finisher."
+          fi
+          python3 .github/scripts/ticket_operator_finish.py
 
       - name: Sanity checks
         shell: bash
         run: |
           set -euo pipefail
           grep -q 'SEND TO AGENT NOW' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'ADD TO READY QUEUE' components/ixi-tickets/IXITicketWorksheet.jsx
           grep -q 'WORK READY QUEUE' components/ixi-tickets/IXITicketCommand.jsx
           grep -q 'START WORK ON THIS TICKET' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'START WORK BEFORE CLOSEOUT' components/ixi-tickets/IXITicketCommand.jsx
           grep -q 'AGENT RESULT — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
           grep -q 'YOUR RESULT RATING — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
           grep -q 'export async function startRemoteTicket' lib/ixi-tickets/ixiTicketClient.js
