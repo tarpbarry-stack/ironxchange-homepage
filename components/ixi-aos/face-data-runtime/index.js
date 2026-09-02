@@ -18,6 +18,12 @@ export {
 } from "./IXIFaceDataSourceContract";
 
 export {
+  IXI_CARD_FACE_MANIFEST_SCHEMA,
+  createIXICardFaceManifest,
+  assertIXICardFaceManifest
+} from "./IXICardFaceManifestRuntime";
+
+export {
   IXI_FACE_APP_AUTHORIZATION_SCHEMA,
   authorizeIXIFaceAppDefinition,
   assertIXIFaceAppAuthorized
