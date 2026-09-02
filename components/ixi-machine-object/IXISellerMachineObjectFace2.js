@@ -1,4 +1,5 @@
-import { formatHours, getListingHref, cleanMachineTitle } from "../../lib/listingFormatters";
+import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
+import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
 
 export default function IXISellerMachineObjectFace2({
   listing = {},
@@ -35,7 +36,14 @@ export default function IXISellerMachineObjectFace2({
 
   function runOwnerAction(event, action) {
     stop(event);
-    ownerActions?.[action]?.();
+    const direct = ownerActions?.[action];
+    if (typeof direct === "function") {
+      direct();
+      return;
+    }
+
+    const bridged = getOwnedPrivateActions(getListingId(listing));
+    bridged?.[action]?.();
   }
 
   function viewListing(event) {
