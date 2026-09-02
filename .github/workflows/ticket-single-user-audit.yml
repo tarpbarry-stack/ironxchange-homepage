@@ -1,4 +1,4 @@
-name: Audit IX-Core Ticket entity keys
+name: Audit IX-Core Ticket mount chain
 
 on:
   push:
@@ -26,12 +26,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Read only Ticket entity keys on IX-Core host
+      - name: Inspect Ticket mount chain
         shell: bash
         run: |
           set -euo pipefail
-          remote="cd /var/www/ix-core && node -e 'const {DynamoDBClient}=require(\"@aws-sdk/client-dynamodb\");const {DynamoDBDocumentClient,ScanCommand}=require(\"@aws-sdk/lib-dynamodb\");(async()=>{const d=DynamoDBDocumentClient.from(new DynamoDBClient({region:process.env.AWS_REGION||\"us-east-2\"}));const r=await d.send(new ScanCommand({TableName:process.env.IXI_TICKET_TABLE||\"IXITickets\",ProjectionExpression:\"entityId,pk\"}));for(const x of r.Items||[]) console.log([x.entityId||\"\",x.pk||\"\"].join(\"\\t\"))})().catch(e=>{console.error(e.name,e.message);process.exit(1)})'"
+          remote='set -eu; echo "INDEX_TICKET_MOUNTS"; grep -n -C 12 -E "ticketRouter|ticketAuthenticatedRequest|/tickets/v1|ixiTicket" /var/www/ix-core/index.js || true; echo "ROUTER_EXPORTS"; tail -n 35 /var/www/ix-core/tickets/routes/ticketRouter.js'
           parameters="$(jq -cn --arg command "$remote" '{commands:[$command]}')"
-          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Read IX-Core Ticket entity keys" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket mount" --parameters "$parameters" --query 'Command.CommandId' --output text)"
           aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
           aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" --query 'StandardOutputContent' --output text
