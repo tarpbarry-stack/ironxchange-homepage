@@ -865,6 +865,7 @@ style={getFrameStyle(currentImageObject, "card")}
       <style jsx>{`
 
         .card {
+          box-sizing: border-box;
           position: relative;
           text-decoration: none;
           color: inherit;

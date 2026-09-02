@@ -47,6 +47,22 @@ test("Browse V2 keeps all sortable IDs while rendering inventory in 24-card batc
   assert.match(board, /IntersectionObserver/u);
 });
 
+test("deferred closed Consoles preserve the Marketplace scale shell", () => {
+  const router = read(
+    "components/ixi-marketplace/IXIBrowseObjectConsoleRouter.jsx"
+  );
+  const card = read(
+    "components/ixi-machine-card/marketplace/MarketplaceListingCard.js"
+  );
+
+  assert.match(router, /IXIScaledCardShell/u);
+  assert.match(router, /enableCardScaling = false/u);
+  assert.match(router, /cardScaleMode = "xl"/u);
+  assert.match(router, /size=\{cardScaleMode\}/u);
+  assert.match(router, /objectFamily="marketplace"/u);
+  assert.match(card, /\.card \{\s*box-sizing: border-box;/u);
+});
+
 test("distribution endpoint is anonymous and has no ownership or channel gate", () => {
   const route = read("pages/api/marketplace/share-email.js");
   const loader = read("lib/marketplace/loadDistributionListing.mjs");
