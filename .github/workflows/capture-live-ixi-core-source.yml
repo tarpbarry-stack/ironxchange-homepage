@@ -1,0 +1,133 @@
+name: Capture live IX-Core source
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      REMOTE_ARCHIVE: /tmp/ixi-core-source-${{ github.run_id }}.tgz
+      LOCAL_ARCHIVE: ixi-core-source-${{ github.run_id }}.tgz
+      CHUNK_SIZE: "15000"
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Capture source through Systems Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          run_remote() {
+            local command="$1"
+            local parameters
+            local command_id
+
+            parameters="$(jq -cn --arg command "$command" '{commands:[$command]}')"
+            command_id="$(aws ssm send-command \
+              --region "$AWS_REGION" \
+              --instance-ids "$AWS_INSTANCE_ID" \
+              --document-name AWS-RunShellScript \
+              --comment "GitHub controlled IX-Core source capture" \
+              --parameters "$parameters" \
+              --query 'Command.CommandId' \
+              --output text)"
+
+            aws ssm wait command-executed \
+              --region "$AWS_REGION" \
+              --command-id "$command_id" \
+              --instance-id "$AWS_INSTANCE_ID"
+
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$command_id" \
+              --instance-id "$AWS_INSTANCE_ID" \
+              --query 'StandardOutputContent' \
+              --output text
+          }
+
+          capture_command="set -euo pipefail; cd /var/www; tar \
+            --exclude='ix-core/.git' \
+            --exclude='ix-core/node_modules' \
+            --exclude='ix-core/.env' \
+            --exclude='ix-core/.env.*' \
+            --exclude='*/data' \
+            --exclude='*/data/*' \
+            --exclude='*/generated' \
+            --exclude='*/generated/*' \
+            --exclude='*/logs' \
+            --exclude='*/logs/*' \
+            --exclude='*.log' \
+            --exclude='*.pem' \
+            --exclude='*.key' \
+            --exclude='*.p12' \
+            --exclude='*.pfx' \
+            --exclude='*.crt' \
+            --exclude='*.before-*' \
+            --exclude='*.BACKUP*' \
+            -czf '$REMOTE_ARCHIVE' ix-core; \
+            stat -c '%s' '$REMOTE_ARCHIVE'; \
+            sha256sum '$REMOTE_ARCHIVE'"
+
+          metadata="$(run_remote "$capture_command")"
+          archive_size="$(printf '%s\n' "$metadata" | sed -n '1p')"
+          remote_sha="$(printf '%s\n' "$metadata" | sed -n '2p' | awk '{print $1}')"
+
+          if ! [[ "$archive_size" =~ ^[0-9]+$ ]] || [ "$archive_size" -le 0 ]; then
+            echo "Invalid remote archive size: $archive_size" >&2
+            exit 1
+          fi
+
+          chunks="$(( (archive_size + CHUNK_SIZE - 1) / CHUNK_SIZE ))"
+          : > "$LOCAL_ARCHIVE"
+
+          for (( index=0; index<chunks; index++ )); do
+            encoded="$(run_remote "dd if='$REMOTE_ARCHIVE' bs=$CHUNK_SIZE skip=$index count=1 status=none | base64 -w0")"
+
+            if [ -z "$encoded" ]; then
+              echo "Empty archive chunk $index of $chunks" >&2
+              exit 1
+            fi
+
+            printf '%s' "$encoded" | base64 -d >> "$LOCAL_ARCHIVE"
+          done
+
+          local_sha="$(sha256sum "$LOCAL_ARCHIVE" | awk '{print $1}')"
+
+          if [ "$local_sha" != "$remote_sha" ]; then
+            echo "Archive SHA-256 mismatch" >&2
+            exit 1
+          fi
+
+          tar -tzf "$LOCAL_ARCHIVE" > captured-files.txt
+
+          if rg -i '(^|/)(\.env($|\.)|data/|generated/|.*\.(pem|key|p12|pfx|crt)$)' captured-files.txt; then
+            echo "Capture contains a forbidden credential or runtime-data path" >&2
+            exit 1
+          fi
+
+          printf '%s  %s\n' "$local_sha" "$LOCAL_ARCHIVE" > SHA256SUMS
+          run_remote "rm -f '$REMOTE_ARCHIVE'" >/dev/null
+
+      - name: Upload verified source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ixi-core-live-source-${{ github.run_id }}
+          path: |
+            ${{ env.LOCAL_ARCHIVE }}
+            SHA256SUMS
+            captured-files.txt
+          if-no-files-found: error
+          retention-days: 14
