@@ -1,0 +1,85 @@
+.private-listing-card .mof2 .mof2-owner-toolbar {
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  bottom: 5px !important;
+  height: 25px !important;
+  display: block !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-actuator-gap {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;
+  width: 58px !important;
+  height: 25px !important;
+  transform: translateX(-50%) !important;
+  pointer-events: none !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-left,
+.private-listing-card .mof2 .mof2-owner-right {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+  pointer-events: auto !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-left {
+  right: 77px !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-toolbar button {
+  height: 20px !important;
+  min-height: 20px !important;
+  min-width: 24px !important;
+  padding: 0 6px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.54) !important;
+  font-size: 7px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-toolbar .owner-edit {
+  min-width: 42px !important;
+  color: rgba(255,255,255,.64) !important;
+  border-left: 0 !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-toolbar .owner-transact {
+  width: auto !important;
+  min-width: 34px !important;
+  color: #FFC400 !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-toolbar .owner-actions {
+  width: auto !important;
+  min-width: 23px !important;
+  color: rgba(255,255,255,.56) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.private-listing-card .mof2 .mof2-owner-toolbar button:hover {
+  color: #FFC400 !important;
+  background: rgba(255,255,255,.02) !important;
+}
