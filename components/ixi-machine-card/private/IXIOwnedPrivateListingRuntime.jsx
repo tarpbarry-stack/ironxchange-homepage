@@ -132,7 +132,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
 
   async function saveEdit() {
     const listingId = clean(getListingId(runtimeListing));
-    if (!listingId || saving) return;
+    if (!listingId || saving) return false;
 
     setSaving(true);
 
@@ -168,8 +168,10 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       setEditing(false);
       props.onOwnedObjectSaved?.(nextListing, result);
       showNotice("SAVED", "success");
+      return true;
     } catch (error) {
       showNotice("NOT SAVED", "error");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -201,6 +203,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     registerOwnedPrivateActions(ownerActionBridgeKey, {
       add: handleAdd,
       edit: handleEditButton,
+      saveDescription: saveEdit,
       transact: () => !saving && setTransactOpen(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
@@ -208,7 +211,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     });
 
     return () => unregisterOwnedPrivateActions(ownerActionBridgeKey);
-  }, [ownerActionBridgeKey, editing, saving, runtimeListing]);
+  }, [ownerActionBridgeKey, editing, saving, runtimeListing, draft]);
 
   if (transactOpen) {
     return (
@@ -234,6 +237,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     __ixiOwnerActions: {
       add: handleAdd,
       edit: handleEditButton,
+      saveDescription: saveEdit,
       transact: () => !saving && setTransactOpen(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
@@ -246,7 +250,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       className={`owned-private-runtime ${editing ? "editing" : "read-mode"} ${saving ? "saving" : ""}`}
       data-owned-card-skin={skinId}
       onFocusCapture={event => {
-        if (!editing && event.target?.matches?.("input,textarea")) event.target.blur();
+        if (!editing && event.target?.matches?.("input,textarea") && !event.target?.closest?.(".mof2-bio")) event.target.blur();
       }}
     >
       <PrivateListingCard
@@ -262,7 +266,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
         onPriceChange={value => editing && patchDraft("price", value)}
         onHoursChange={value => editing && patchDraft("hours", String(value ?? "").replace(/[^0-9]/g, ""))}
         onLocationChange={value => editing && patchDraft("location", value)}
-        onDescriptionChange={value => editing && patchDraft("description", value)}
+        onDescriptionChange={value => patchDraft("description", value)}
         onAddObject={handleAdd}
         onEdit={handleEditButton}
         onOpenTransact={() => !saving && setTransactOpen(true)}
@@ -293,6 +297,9 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
           background:transparent!important;
           box-shadow:none!important;
           cursor:default!important;
+        }
+        .owned-private-runtime.read-mode .private-listing-card .mof2-bio textarea{
+          pointer-events:auto!important;
         }
 
         .owned-private-runtime .private-listing-card .price-input{
