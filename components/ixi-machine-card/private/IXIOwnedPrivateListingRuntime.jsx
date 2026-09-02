@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import PrivateListingCard from "./PrivateListingCard";
+import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
 import IXITransactObjectConsole from "../../ixi-aos/transact/IXITransactObjectConsole";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
 import { updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
@@ -191,6 +192,23 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     setMenuNotice("ADD IS AVAILABLE WHEN THIS OBJECT HAS A CANONICAL CONTAINER/CHILD-CREATION COMMAND.");
     setMenuOpen(true);
   }
+
+  const ownerActionBridgeKey = clean(getListingId(runtimeListing));
+
+  useEffect(() => {
+    if (!ownerActionBridgeKey) return undefined;
+
+    registerOwnedPrivateActions(ownerActionBridgeKey, {
+      add: handleAdd,
+      edit: handleEditButton,
+      transact: () => !saving && setTransactOpen(true),
+      actions: () => !saving && setMenuOpen(value => !value),
+      editing,
+      saving
+    });
+
+    return () => unregisterOwnedPrivateActions(ownerActionBridgeKey);
+  }, [ownerActionBridgeKey, editing, saving, runtimeListing]);
 
   if (transactOpen) {
     return (
