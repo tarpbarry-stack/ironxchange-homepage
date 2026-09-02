@@ -20,6 +20,7 @@ import IXINoteApp from "../note/IXINoteApp";
 import IXIPhotoApp from "../photo/IXIPhotoApp";
 import IXIWorkOrderDocumentsApp from "../documents/IXIWorkOrderDocumentsApp";
 import { createIXITimeEntry } from "../time/IXITimeEntryCommands";
+import { createIXITechWorkOrder } from "./IXITechWorkOrderCommands";
 import {
   getIXIActiveTimeSession,
   getIXITimeSessionElapsedMs,
@@ -341,12 +342,13 @@ export default function IXITechWorkOrderApp({
     if (busy) return;
 
     const now = Date.now();
+    const clientRequestId = globalThis.crypto?.randomUUID?.() || `techwo-${now}`;
     const resolvedDescription = clean(description) || "Technology work order";
     const draft = createIXITechWorkOrderDraft({
       context,
       input: {
-        techWorkOrderId: `TECHWO-${now}`,
-        number: `TECHWO-${String(now).slice(-6)}`,
+        techWorkOrderId: clientRequestId,
+        clientRequestId,
         title: resolvedDescription.slice(0, 80),
         description: resolvedDescription,
         type,
@@ -369,18 +371,18 @@ export default function IXITechWorkOrderApp({
       note: resolvedDescription
     }];
 
-    setRecord(draft);
-    setTab("work");
-    setSubmodule("");
-    setCompletionOpen(false);
-    setError("");
-    setNotice(`TECHWO ${draft.identity.number} CREATED`);
-
     setBusy(true);
     try {
-      await onCreate?.(draft, context);
+      const saved = await createIXITechWorkOrder({ object: context.primary, context, record: draft });
+      setRecord(saved.record);
+      setTab("work");
+      setSubmodule("");
+      setCompletionOpen(false);
+      setError("");
+      setNotice(`TECHWO ${saved.record.identity.number} CREATED`);
+      await onCreate?.(saved.record, context, saved.response);
     } catch (err) {
-      setError(clean(err?.message) || "TECHWO CREATE PERSISTENCE FAILED");
+      setError(clean(err?.message) || "TECHWO WAS NOT CREATED");
     } finally {
       setBusy(false);
     }

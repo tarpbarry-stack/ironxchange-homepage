@@ -77,6 +77,8 @@ export default function IXITransactObjectConsole({
   actor = {},
   entity = {},
   activeWorkOrder = null,
+  financialRecords = [],
+  onFinancialRecordsChange = null,
   permissions = [],
   ixiState = {},
   onIxiStateChange = null,
@@ -224,6 +226,8 @@ export default function IXITransactObjectConsole({
                     actor={actor}
                     entity={entity}
                     activeWorkOrder={activeWorkOrder}
+                    financialRecords={financialRecords}
+                    onFinancialRecordsChange={onFinancialRecordsChange}
                     permissions={permissions}
                     onClose={onClose}
                     onOpenModule={handleOpenModule}

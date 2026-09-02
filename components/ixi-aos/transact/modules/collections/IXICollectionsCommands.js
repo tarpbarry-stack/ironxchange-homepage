@@ -54,7 +54,7 @@ export async function createIXICollectionCaseCommand({ object = {}, context = {}
           amount: money(receivable.balance),
           description: `Collections · ${receivable.customerLabel || "Customer"} · ${receivable.invoiceNumber || receivable.invoiceId}`,
           status: "open",
-          financialState: "collections",
+          financialState: "receivable",
           relatedInvoiceId: clean(receivable.invoiceId),
           collectionCase: draft,
           references
@@ -137,7 +137,7 @@ export async function recordIXICollectionCredit({ object = {}, context = {}, rec
       amount,
       description: clean(input.description || input.reason || `A/R credit · ${receivable.invoiceNumber || receivable.invoiceId}`),
       status: "posted",
-      financialState: "receivable-credit",
+      financialState: "credited",
       direction: "out",
       reason: clean(input.reason),
       relatedInvoiceId: clean(receivable.invoiceId),

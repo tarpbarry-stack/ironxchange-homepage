@@ -778,6 +778,10 @@ export async function createIXIAosObjectFinancialDocument({
         metadata
       ),
 
+      transactContractVersion: "1.0.0",
+      transactDocumentType: clean(documentType).toLowerCase(),
+      transactInput: { ...financialInput },
+
       aosObjectPassportId:
         getIXIAosFinancialPassportId(
           object

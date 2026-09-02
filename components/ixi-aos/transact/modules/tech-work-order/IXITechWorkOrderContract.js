@@ -46,7 +46,8 @@ export function createIXITechWorkOrderDraft({ context = {}, input = {} } = {}) {
       // Compatibility alias consumed by the existing shared Time/Expense/Material/Service/Purchase modules.
       // The schema remains TECHWO and no ordinary Work Order record is created by this alias.
       workOrderId: techWorkOrderId,
-      number: clean(sourceInput.number)
+      number: clean(sourceInput.number),
+      clientRequestId: clean(sourceInput.clientRequestId)
     },
     context: {
       entityPassportId: clean(sourceInput.entityPassportId || entity.passportId),

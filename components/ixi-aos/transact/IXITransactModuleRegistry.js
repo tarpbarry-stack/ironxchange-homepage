@@ -20,12 +20,13 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "purchase-order", label: "PURCHASE ORDER", group: "buy", documentType: "purchase-order" }),
   Object.freeze({ id: "quote", label: "QUOTE", group: "sell", documentType: "quote" }),
   Object.freeze({ id: "invoice", label: "INVOICE", group: "sell", documentType: "invoice" }),
+  Object.freeze({ id: "freight-order", label: "FREIGHT ORDER", group: "logistics", documentType: "freight-order" }),
   Object.freeze({ id: "settlement", label: "SETTLEMENT", group: "settle", documentType: "settlement" }),
   Object.freeze({ id: "access-policy", label: "ACCESS / POLICY", group: "security", documentType: "authority-policy", enterpriseSecurity: true })
 ]);
 
-const MACHINE_ORDER = Object.freeze(["work-order","expense","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","sold","collections","settlement","quote","invoice","access-policy"]);
-const LOCATION_ORDER = Object.freeze(["work-order","expense","purchase-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice","access-policy"]);
+const MACHINE_ORDER = Object.freeze(["work-order","expense","technology-work","time","material","freight-order","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","purchase-order","receipt","bill","payables","treasury","general-ledger","financial-reporting","sold","collections","settlement","quote","invoice","access-policy"]);
+const LOCATION_ORDER = Object.freeze(["work-order","expense","purchase-order","freight-order","bill","payables","treasury","general-ledger","financial-reporting","receipt","technology-work","time","material","asset-acquisition","rental-expense","rental-income","service-quote","service-invoice","sold","collections","settlement","quote","invoice","access-policy"]);
 
 function sortByOrder(items, order) {
   const rank = new Map(order.map((id, index) => [id, index]));

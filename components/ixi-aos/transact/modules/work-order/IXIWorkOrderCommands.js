@@ -13,8 +13,13 @@ export function createIXIWorkOrderCommand(type,{workOrder={},actor={},patch={},m
 
 export async function createIXIWorkOrder({object={},context={},input={},commandId="",idempotencyKey="",metadata={},apiBaseUrl="",headers={},signal}={}){
   const draft=createIXIWorkOrderDraft({context,input});
-  const response=await createIXIAosWorkOrder({object,input:{currency:"USD",amount:0,description:draft.work.description||draft.work.title||"Work Order",status:draft.work.status,workOrder:draft,references:context.references||[]},commandId,idempotencyKey,metadata:{...obj(metadata),transactModule:"work-order",workOrderSchema:draft.schema},apiBaseUrl,headers,signal});
-  return {draft,response};
+  const resolvedCommandId=clean(commandId||draft.identity.clientRequestId);
+  if(!resolvedCommandId){const error=new Error("A stable work-order request ID is required.");error.code="IXI_WORK_ORDER_COMMAND_ID_REQUIRED";throw error;}
+  const response=await createIXIAosWorkOrder({object,input:{currency:"USD",amount:0,description:draft.work.description||draft.work.title||"Work Order",status:draft.work.status,documentNumber:draft.identity.number,workOrder:draft,references:context.references||[]},commandId:resolvedCommandId,idempotencyKey:clean(idempotencyKey)||resolvedCommandId,metadata:{...obj(metadata),transactModule:"work-order",workOrderSchema:draft.schema},apiBaseUrl,headers,signal});
+  const document=response?.financialDocument||response?.record?.financialDocument||{};
+  const financialDocumentId=clean(document.financialDocumentId);
+  const canonical={...draft,identity:{...draft.identity,clientRequestId:resolvedCommandId,workOrderId:financialDocumentId||draft.identity.workOrderId,number:clean(document.documentNumber)||financialDocumentId||draft.identity.number},financialBinding:{financialDocumentId,revision:Number(response?.record?.server?.revision||response?.record?.revision||1)}};
+  return {draft:canonical,response};
 }
 
 export function startIXIWorkOrder(workOrder,actor={}){return createIXIWorkOrderCommand(IXI_WORK_ORDER_COMMANDS.START,{workOrder,actor,patch:{work:{status:"in-progress"},dates:{startedAt:new Date().toISOString()}}})}

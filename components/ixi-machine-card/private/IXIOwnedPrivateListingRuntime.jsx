@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import PrivateListingCard from "./PrivateListingCard";
 import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
-import IXITransactObjectConsole from "../../ixi-aos/transact/IXITransactObjectConsole";
+import IXIOwnedPrivateTransactRuntime from "./IXIOwnedPrivateTransactRuntime";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
 import { updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
 import { getListingId } from "../../../lib/listingFormatters";
@@ -37,57 +37,6 @@ function factsOf(listing = {}) {
   };
 }
 
-function transactObjectFromListing(listing = {}) {
-  const publicData = publicDataOf(listing);
-  const passportId = clean(
-    listing?.passportId ||
-    publicData?.passportId ||
-    listing?.ixiMedia?.passportId ||
-    publicData?.ixiMedia?.passportId
-  );
-  const objectId = clean(
-    listing?.objectId ||
-    publicData?.objectId ||
-    listing?.mosObjectId ||
-    publicData?.mosObjectId ||
-    getListingId(listing)
-  );
-  const entityPassportId = clean(
-    listing?.entityPassportId ||
-    publicData?.entityPassportId ||
-    listing?.entity?.passportId ||
-    publicData?.entity?.passportId
-  );
-
-  return {
-    ...listing,
-    objectId,
-    id: objectId,
-    objectType: clean(listing?.objectType || publicData?.objectType) || "machine",
-    displayName: clean(listing?.title || listing?.attributes?.title) || "EQUIPMENT",
-    passportId,
-    entityPassportId,
-    fields: {
-      ...(listing?.fields || {}),
-      entityPassportId,
-      location: clean(listing?.location || publicData?.location || publicData?.city),
-      serialNumber: clean(listing?.serialNumber || publicData?.serialNumber),
-      stockNumber: clean(listing?.stockNumber || publicData?.stockNumber),
-      year: listing?.year ?? publicData?.year ?? "",
-      make: listing?.make ?? publicData?.make ?? "",
-      model: listing?.model ?? publicData?.model ?? "",
-      primaryMeter: listing?.hours ?? publicData?.hours ?? ""
-    },
-    capabilities: {
-      ...(listing?.capabilities || {}),
-      canCreate: true,
-      canTransact: true,
-      editable: true,
-      hasConsole: true
-    }
-  };
-}
-
 export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory", presentation = "seller", ...props }) {
   const [runtimeListing, setRuntimeListing] = useState(props.listing || {});
   const [editing, setEditing] = useState(false);
@@ -113,8 +62,6 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   useEffect(() => () => {
     if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
   }, []);
-
-  const transactObject = useMemo(() => transactObjectFromListing(runtimeListing), [runtimeListing]);
 
   function showNotice(message, tone) {
     if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
@@ -240,9 +187,8 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   if (transactOpen) {
     return (
       <div className="owned-private-runtime transact-runtime">
-        <IXITransactObjectConsole
-          object={transactObject}
-          entity={{ passportId: transactObject.entityPassportId, displayName: transactObject.entityName || "" }}
+        <IXIOwnedPrivateTransactRuntime
+          listing={runtimeListing}
           ixiState={props.ixiState || {}}
           onIxiStateChange={props.onIxiStateChange}
           onClose={() => setTransactOpen(false)}
