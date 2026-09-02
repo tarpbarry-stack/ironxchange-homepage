@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { initPostHog, captureIXEvent } from "../lib/posthog";
 import { IXITicketProvider } from "../components/ixi-tickets/IXITicketProvider";
-import "../styles/ixi-face2-owner-toolbar.css";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
