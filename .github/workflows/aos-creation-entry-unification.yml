@@ -1,0 +1,43 @@
+name: AOS Creation Entry Unification
+
+on:
+  pull_request:
+    paths:
+      - "components/ixi-mos/object-creation/**"
+      - "lib/mos/ixiAosCreationBoundary.js"
+      - "lib/mos/ixiAosObjectCommit.js"
+      - "lib/mos/ixiAosProvisioningClient.js"
+      - "lib/mos/ixiAosImportJobClient.js"
+      - "lib/server/aos/commitTrustedAosObject.js"
+      - "pages/bulk-import.js"
+      - "pages/api/aos/object-commit.js"
+      - "scripts/verify-aos-creation-entry-unification.js"
+      - ".github/workflows/aos-creation-entry-unification.yml"
+  push:
+    branches: [main]
+    paths:
+      - "components/ixi-mos/object-creation/**"
+      - "lib/mos/ixiAosCreationBoundary.js"
+      - "lib/mos/ixiAosObjectCommit.js"
+      - "lib/mos/ixiAosProvisioningClient.js"
+      - "lib/mos/ixiAosImportJobClient.js"
+      - "lib/server/aos/commitTrustedAosObject.js"
+      - "pages/bulk-import.js"
+      - "pages/api/aos/object-commit.js"
+      - "scripts/verify-aos-creation-entry-unification.js"
+      - ".github/workflows/aos-creation-entry-unification.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify one permanent AOS birth boundary
+        run: node scripts/verify-aos-creation-entry-unification.js
