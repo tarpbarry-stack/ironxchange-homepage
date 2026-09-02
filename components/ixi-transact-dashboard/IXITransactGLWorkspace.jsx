@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   closeIXITransactAccountingPeriod,
   createIXITransactJournalEntry,
+  loadIXITransactChartOfAccounts,
   loadIXITransactGL
 } from "./data/IXITransactDashboardClient";
 
@@ -69,13 +70,15 @@ function todayForPeriod(period = "") {
 }
 
 
-function createBlankLine(side = "debit") {
+function createBlankLine() {
   return {
     accountCode: "",
     accountName: "",
+    accountType: "",
+    control: "",
     description: "",
-    debit: side === "debit" ? "" : "",
-    credit: side === "credit" ? "" : ""
+    debit: "",
+    credit: ""
   };
 }
 
@@ -104,6 +107,30 @@ function normalizeGLPayload(payload) {
       balanceSheet: projection?.balanceSheet || {},
       controls: projection?.controls || {}
     }
+  };
+}
+
+
+function normalizeAccountsPayload(payload) {
+  const data = payload?.data || {};
+  const accounts = safeArray(data?.activeAccounts?.length ? data.activeAccounts : data.accounts)
+    .filter(account => account?.active === true)
+    .map(account => ({
+      accountCode: clean(account?.accountCode),
+      accountName: clean(account?.accountName),
+      accountType: clean(account?.accountType),
+      control: clean(account?.control),
+      active: account?.active === true,
+      system: account?.system === true
+    }))
+    .filter(account => account.accountCode && account.accountName)
+    .sort((a, b) => a.accountCode.localeCompare(b.accountCode));
+
+  return {
+    entityPassportId: clean(data?.entityPassportId),
+    storageProvider: clean(data?.storageProvider),
+    counts: data?.counts || {},
+    accounts
   };
 }
 
@@ -237,13 +264,13 @@ function JournalRegister({ journals, currency }) {
 }
 
 
-function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
+function JournalComposer({ period, currency, closed, accounts, accountsLoading, accountsError, onCancel, onCommitted }) {
   const [documentNumber, setDocumentNumber] = useState("");
   const [documentDate, setDocumentDate] = useState(() => todayForPeriod(period));
   const [description, setDescription] = useState("");
   const [lines, setLines] = useState([
-    createBlankLine("debit"),
-    createBlankLine("credit")
+    createBlankLine(),
+    createBlankLine()
   ]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -251,6 +278,12 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
   useEffect(() => {
     setDocumentDate(todayForPeriod(period));
   }, [period]);
+
+  const accountMap = useMemo(() => {
+    return new Map(
+      safeArray(accounts).map(account => [clean(account.accountCode), account])
+    );
+  }, [accounts]);
 
   const totals = useMemo(() => {
     const debit = lines.reduce((sum, line) => sum + number(line.debit), 0);
@@ -263,6 +296,32 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
       balanced: debit > 0 && credit > 0 && Math.abs(debit - credit) < EPSILON
     };
   }, [lines]);
+
+  function selectAccount(index, accountCode) {
+    const account = accountMap.get(clean(accountCode));
+
+    setLines(current => current.map((line, lineIndex) => {
+      if (lineIndex !== index) return line;
+
+      if (!account) {
+        return {
+          ...line,
+          accountCode: "",
+          accountName: "",
+          accountType: "",
+          control: ""
+        };
+      }
+
+      return {
+        ...line,
+        accountCode: account.accountCode,
+        accountName: account.accountName,
+        accountType: account.accountType,
+        control: account.control
+      };
+    }));
+  }
 
   function updateLine(index, field, value) {
     setLines(current => current.map((line, lineIndex) => {
@@ -302,6 +361,11 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
       return;
     }
 
+    if (accountsLoading || accountsError || !safeArray(accounts).length) {
+      setError(new Error("The authoritative Entity Chart of Accounts is not available. Journal posting is disabled."));
+      return;
+    }
+
     if (!/^\d{4}-\d{2}$/.test(clean(period))) {
       setError(new Error("A valid accounting period is required."));
       return;
@@ -327,10 +391,20 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
       return;
     }
 
+    const invalidAccount = normalizedLines.find(line => {
+      const account = accountMap.get(line.accountCode);
+      return !account || account.accountName !== line.accountName;
+    });
+
+    if (invalidAccount) {
+      setError(new Error("Every journal line must use an active account from the authoritative Entity Chart of Accounts."));
+      return;
+    }
+
     const incomplete = normalizedLines.find(line => !line.accountCode || !line.accountName || (line.debit <= 0 && line.credit <= 0));
 
     if (incomplete) {
-      setError(new Error("Every journal line requires an account code, account name, and a debit or credit amount."));
+      setError(new Error("Every journal line requires a canonical account and a debit or credit amount."));
       return;
     }
 
@@ -366,7 +440,8 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
           })),
           metadata: {
             transactSurface: "desktop",
-            accountingScope: "entity"
+            accountingScope: "entity",
+            chartOfAccountsAuthority: "ixi-financial-dynamodb"
           }
         },
         {
@@ -374,7 +449,8 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
           idempotencyKey: commandId,
           metadata: {
             transactSurface: "desktop",
-            accountingScope: "entity"
+            accountingScope: "entity",
+            chartOfAccountsAuthority: "ixi-financial-dynamodb"
           }
         }
       );
@@ -394,7 +470,7 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
           <div>
             <span>ENTITY-SCOPED ACCOUNTING COMMAND</span>
             <strong>NEW JOURNAL ENTRY</strong>
-            <small>Posting writes canonical Financial truth to AWS. Object Passport references are optional on Desktop.</small>
+            <small>Accounts are selected from the authoritative Entity Chart of Accounts. IX-Core revalidates every account before persistence.</small>
           </div>
           <button type="button" className="ghost-button" onClick={onCancel} disabled={busy}>CANCEL</button>
         </header>
@@ -403,6 +479,13 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
           <div className="closed-warning">
             <strong>PERIOD CLOSED</strong>
             <span>{period} is closed. Posting is disabled.</span>
+          </div>
+        ) : null}
+
+        {accountsError ? (
+          <div className="composer-error">
+            <strong>{accountsError.code || "CHART OF ACCOUNTS UNAVAILABLE"}</strong>
+            <span>{accountsError.message}</span>
           </div>
         ) : null}
 
@@ -428,12 +511,18 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
           </label>
         </div>
 
+        <div className="coa-authority-strip">
+          <span>CHART AUTHORITY</span>
+          <strong>{accountsLoading ? "LOADING ENTITY ACCOUNTS…" : `${safeArray(accounts).length} ACTIVE ENTITY ACCOUNTS`}</strong>
+          <small>Account code, name and classification are server-owned. Freehand account identity is disabled.</small>
+        </div>
+
         <div className="entry-grid-wrap">
           <table className="entry-grid">
             <thead>
               <tr>
-                <th>ACCOUNT CODE</th>
-                <th>ACCOUNT NAME</th>
+                <th>ACCOUNT</th>
+                <th>CANONICAL IDENTITY</th>
                 <th>LINE DESCRIPTION</th>
                 <th className="num">DEBIT</th>
                 <th className="num">CREDIT</th>
@@ -443,12 +532,31 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
             <tbody>
               {lines.map((line, index) => (
                 <tr key={index}>
-                  <td><input value={line.accountCode} onChange={event => updateLine(index, "accountCode", event.target.value)} placeholder="1010" /></td>
-                  <td><input value={line.accountName} onChange={event => updateLine(index, "accountName", event.target.value)} placeholder="Account name" /></td>
+                  <td>
+                    <select
+                      value={line.accountCode}
+                      onChange={event => selectAccount(index, event.target.value)}
+                      disabled={busy || closed || accountsLoading || !!accountsError}
+                      aria-label={`Journal line ${index + 1} account`}
+                    >
+                      <option value="">SELECT ACCOUNT</option>
+                      {safeArray(accounts).map(account => (
+                        <option key={account.accountCode} value={account.accountCode}>
+                          {account.accountCode} — {account.accountName}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <div className="account-identity">
+                      <strong>{line.accountName || "—"}</strong>
+                      <small>{line.accountCode ? `${clean(line.accountType).toUpperCase()} · ${clean(line.control).toUpperCase()}` : "ENTITY COA"}</small>
+                    </div>
+                  </td>
                   <td><input value={line.description} onChange={event => updateLine(index, "description", event.target.value)} placeholder="Optional line memo" /></td>
                   <td><input className="amount-input" inputMode="decimal" value={line.debit} onChange={event => updateLine(index, "debit", event.target.value)} placeholder="0.00" /></td>
                   <td><input className="amount-input" inputMode="decimal" value={line.credit} onChange={event => updateLine(index, "credit", event.target.value)} placeholder="0.00" /></td>
-                  <td><button type="button" className="line-remove" onClick={() => removeLine(index)} disabled={lines.length <= 2}>×</button></td>
+                  <td><button type="button" className="line-remove" onClick={() => removeLine(index)} disabled={lines.length <= 2 || busy}>×</button></td>
                 </tr>
               ))}
             </tbody>
@@ -456,7 +564,7 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
         </div>
 
         <div className="composer-footer">
-          <button type="button" className="ghost-button" onClick={addLine} disabled={busy}>+ ADD LINE</button>
+          <button type="button" className="ghost-button" onClick={addLine} disabled={busy || accountsLoading || !!accountsError}>+ ADD LINE</button>
 
           <div className="journal-totals">
             <span>DEBITS <b>{money(totals.debit, currency)}</b></span>
@@ -466,7 +574,7 @@ function JournalComposer({ period, currency, closed, onCancel, onCommitted }) {
             </span>
           </div>
 
-          <button type="submit" className="post-button" disabled={busy || closed || !totals.balanced}>
+          <button type="submit" className="post-button" disabled={busy || closed || accountsLoading || !!accountsError || !safeArray(accounts).length || !totals.balanced}>
             {busy ? "POSTING…" : "POST JOURNAL"}
           </button>
         </div>
@@ -483,8 +591,11 @@ export default function IXITransactGLWorkspace({
   onCommitted
 }) {
   const [payload, setPayload] = useState(null);
+  const [accountsPayload, setAccountsPayload] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [accountsLoading, setAccountsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [accountsError, setAccountsError] = useState(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [localRefresh, setLocalRefresh] = useState(0);
   const [closeBusy, setCloseBusy] = useState(false);
@@ -496,27 +607,31 @@ export default function IXITransactGLWorkspace({
 
     async function load() {
       setLoading(true);
+      setAccountsLoading(true);
       setError(null);
+      setAccountsError(null);
 
-      try {
-        const result = await loadIXITransactGL({
-          period,
-          currency,
-          signal: controller.signal
-        });
+      const [glResult, accountsResult] = await Promise.allSettled([
+        loadIXITransactGL({ period, currency, signal: controller.signal }),
+        loadIXITransactChartOfAccounts({ signal: controller.signal })
+      ]);
 
-        if (!controller.signal.aborted) {
-          setPayload(result);
-        }
-      } catch (loadError) {
-        if (loadError?.name !== "AbortError" && !controller.signal.aborted) {
-          setError(loadError);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+      if (controller.signal.aborted) return;
+
+      if (glResult.status === "fulfilled") {
+        setPayload(glResult.value);
+      } else if (glResult.reason?.name !== "AbortError") {
+        setError(glResult.reason);
       }
+
+      if (accountsResult.status === "fulfilled") {
+        setAccountsPayload(accountsResult.value);
+      } else if (accountsResult.reason?.name !== "AbortError") {
+        setAccountsError(accountsResult.reason);
+      }
+
+      setLoading(false);
+      setAccountsLoading(false);
     }
 
     load();
@@ -530,6 +645,7 @@ export default function IXITransactGLWorkspace({
   }, [period, currency]);
 
   const gl = useMemo(() => normalizeGLPayload(payload), [payload]);
+  const coa = useMemo(() => normalizeAccountsPayload(accountsPayload), [accountsPayload]);
   const projection = gl.projection;
   const periodState = projection.period || {};
   const counts = projection.counts || {};
@@ -542,6 +658,7 @@ export default function IXITransactGLWorkspace({
   const resolvedCurrency = projection.currency || clean(currency || "USD").toUpperCase();
   const periodIsClosed = periodState.closed === true;
   const periodIsValid = /^\d{4}-\d{2}$/.test(clean(period));
+  const coaReady = coa.accounts.length > 0 && !accountsLoading && !accountsError;
   const closeReady = Boolean(
     payload &&
     periodIsValid &&
@@ -657,6 +774,9 @@ export default function IXITransactGLWorkspace({
           <StatusPill good={controls.ready === true} neutral={!payload}>
             {controls.ready === true ? "CONTROLS READY" : "CONTROL REVIEW"}
           </StatusPill>
+          <StatusPill good={coaReady} neutral={accountsLoading}>
+            {accountsLoading ? "COA LOADING" : coaReady ? `${coa.accounts.length} COA ACTIVE` : "COA UNAVAILABLE"}
+          </StatusPill>
           <button
             type="button"
             className="close-period-button"
@@ -670,7 +790,7 @@ export default function IXITransactGLWorkspace({
             type="button"
             className="new-journal-button"
             onClick={() => setComposerOpen(true)}
-            disabled={loading || closeBusy || periodIsClosed}
+            disabled={loading || closeBusy || periodIsClosed || !coaReady}
           >
             + NEW JOURNAL ENTRY
           </button>
@@ -685,24 +805,20 @@ export default function IXITransactGLWorkspace({
         </div>
       ) : null}
 
+      {accountsError ? (
+        <div className="coa-error">
+          <strong>{accountsError.code || "CHART OF ACCOUNTS UNAVAILABLE"}</strong>
+          <span>{accountsError.message}</span>
+          <small>Journal posting is disabled until the authoritative Entity Chart of Accounts is available.</small>
+        </div>
+      ) : null}
+
       {periodIsClosed ? (
         <div className="close-evidence">
-          <div>
-            <span>PERIOD CONTROL</span>
-            <strong>{period} CLOSED</strong>
-          </div>
-          <div>
-            <span>CLOSE DOCUMENT</span>
-            <strong>{effectiveCloseDocumentId || "SERVER CONFIRMED"}</strong>
-          </div>
-          <div>
-            <span>CLOSED AT</span>
-            <strong>{effectiveClosedAt || "—"}</strong>
-          </div>
-          <div>
-            <span>CLOSED BY</span>
-            <strong>{effectiveClosedBy || "—"}</strong>
-          </div>
+          <div><span>PERIOD CONTROL</span><strong>{period} CLOSED</strong></div>
+          <div><span>CLOSE DOCUMENT</span><strong>{effectiveCloseDocumentId || "SERVER CONFIRMED"}</strong></div>
+          <div><span>CLOSED AT</span><strong>{effectiveClosedAt || "—"}</strong></div>
+          <div><span>CLOSED BY</span><strong>{effectiveClosedBy || "—"}</strong></div>
         </div>
       ) : null}
 
@@ -719,6 +835,9 @@ export default function IXITransactGLWorkspace({
           period={period}
           currency={resolvedCurrency}
           closed={periodIsClosed}
+          accounts={coa.accounts}
+          accountsLoading={accountsLoading}
+          accountsError={accountsError}
           onCancel={() => setComposerOpen(false)}
           onCommitted={handleCommitted}
         />
@@ -746,25 +865,13 @@ export default function IXITransactGLWorkspace({
         <JournalRegister journals={projection.journal} currency={resolvedCurrency} />
 
         <div className="ledger-columns">
-          <LedgerTable
-            title="PERIOD TRIAL BALANCE"
-            subtitle="CURRENT-PERIOD ACTIVITY"
-            rows={periodTB.rows}
-            currency={resolvedCurrency}
-          />
-          <LedgerTable
-            title="ENDING TRIAL BALANCE"
-            subtitle="AS-OF PERIOD END"
-            rows={endingTB.rows}
-            currency={resolvedCurrency}
-          />
+          <LedgerTable title="PERIOD TRIAL BALANCE" subtitle="CURRENT-PERIOD ACTIVITY" rows={periodTB.rows} currency={resolvedCurrency} />
+          <LedgerTable title="ENDING TRIAL BALANCE" subtitle="AS-OF PERIOD END" rows={endingTB.rows} currency={resolvedCurrency} />
         </div>
 
         <div className="statement-columns">
           <section className="gl-panel statement-panel">
-            <header className="panel-head">
-              <div><span>PERIOD PERFORMANCE</span><strong>PROFIT & LOSS</strong></div>
-            </header>
+            <header className="panel-head"><div><span>PERIOD PERFORMANCE</span><strong>PROFIT & LOSS</strong></div></header>
             <div className="statement-body">
               <StatementRow label="Revenue" value={pnl.revenue} currency={resolvedCurrency} />
               <StatementRow label="Cost of Goods Sold" value={pnl.cogs} currency={resolvedCurrency} />
@@ -775,10 +882,7 @@ export default function IXITransactGLWorkspace({
           </section>
 
           <section className="gl-panel statement-panel">
-            <header className="panel-head">
-              <div><span>ENDING POSITION</span><strong>BALANCE SHEET</strong></div>
-              <b>{balanceSheet.balanced ? "BALANCED" : "REVIEW"}</b>
-            </header>
+            <header className="panel-head"><div><span>ENDING POSITION</span><strong>BALANCE SHEET</strong></div><b>{balanceSheet.balanced ? "BALANCED" : "REVIEW"}</b></header>
             <div className="statement-body">
               <StatementRow label="Assets" value={balanceSheet.assets} currency={resolvedCurrency} />
               <StatementRow label="Liabilities" value={balanceSheet.liabilities} currency={resolvedCurrency} />
@@ -796,7 +900,7 @@ export default function IXITransactGLWorkspace({
         .gl-workspace { display: grid; gap: 14px; color: #f2f4f5; }
         .gl-commandbar { min-height: 68px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; background: linear-gradient(180deg,#111313,#0c0e0e); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
         .gl-commandbar > div:first-child { display: grid; gap: 3px; }
-        .gl-commandbar span, .panel-head span, .gl-metric span, .control-strip span, label span, .close-evidence span { color: rgba(255,255,255,.4); font-size: 8px; font-weight: 900; letter-spacing: .1em; }
+        .gl-commandbar span, .panel-head span, .gl-metric span, .control-strip span, label span, .close-evidence span, .coa-authority-strip span { color: rgba(255,255,255,.4); font-size: 8px; font-weight: 900; letter-spacing: .1em; }
         .gl-commandbar strong { font-size: 17px; }
         .gl-commandbar small { color: rgba(255,255,255,.38); font-size: 9px; }
         .command-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -807,15 +911,13 @@ export default function IXITransactGLWorkspace({
         .new-journal-button, .post-button, .close-period-button { min-height: 32px; padding: 0 12px; border-radius: 5px; font-size: 8px; font-weight: 950; letter-spacing: .05em; cursor: pointer; }
         .new-journal-button, .post-button { border: 1px solid #ffc400; background: #ffc400; color: #090909; }
         .close-period-button { border: 1px solid rgba(255,141,141,.5); background: rgba(255,91,91,.08); color: #ff9c9c; }
-        .close-period-button:not(:disabled):hover { border-color: #ff8d8d; background: rgba(255,91,91,.14); }
         button:disabled { opacity: .4; cursor: not-allowed; }
-        .gl-error, .composer-error, .closed-warning, .close-error { padding: 11px 13px; border-radius: 7px; display: grid; gap: 3px; }
-        .gl-error, .composer-error, .close-error { border: 1px solid rgba(255,91,91,.25); background: rgba(255,91,91,.055); }
+        .gl-error, .composer-error, .closed-warning, .close-error, .coa-error { padding: 11px 13px; border-radius: 7px; display: grid; gap: 3px; }
+        .gl-error, .composer-error, .close-error, .coa-error { border: 1px solid rgba(255,91,91,.25); background: rgba(255,91,91,.055); }
         .closed-warning { border: 1px solid rgba(255,196,0,.24); background: rgba(255,196,0,.06); }
-        .gl-error strong, .composer-error strong, .close-error strong { color: #ff8d8d; font-size: 9px; }
-        .closed-warning strong { color: #ffc400; font-size: 9px; }
-        .gl-error span, .composer-error span, .closed-warning span, .close-error span { font-size: 11px; }
-        .gl-error small, .close-error small { color: rgba(255,255,255,.4); font-size: 9px; }
+        .gl-error strong, .composer-error strong, .close-error strong, .coa-error strong { color: #ff8d8d; font-size: 9px; }
+        .gl-error span, .composer-error span, .closed-warning span, .close-error span, .coa-error span { font-size: 11px; }
+        .gl-error small, .close-error small, .coa-error small { color: rgba(255,255,255,.4); font-size: 9px; }
         .close-evidence { min-height: 58px; padding: 10px 13px; border: 1px solid rgba(101,232,148,.2); border-radius: 7px; background: rgba(101,232,148,.045); display: grid; grid-template-columns: 1fr 1.6fr 1.4fr 1fr; gap: 12px; align-items: center; }
         .close-evidence > div { min-width: 0; display: grid; gap: 3px; }
         .close-evidence strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #dfffea; font-size: 9px; }
@@ -860,16 +962,22 @@ export default function IXITransactGLWorkspace({
         .composer-error, .closed-warning { margin: 10px 12px 0; }
         .journal-header-grid { padding: 12px; display: grid; grid-template-columns: 190px 160px minmax(260px,1fr); gap: 10px; }
         label { min-width: 0; display: grid; gap: 5px; }
-        input { width: 100%; height: 33px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 5px; background: #101212; color: white; padding: 0 8px; outline: none; font: inherit; font-size: 10px; }
-        input:focus { border-color: rgba(255,196,0,.55); box-shadow: 0 0 0 2px rgba(255,196,0,.05); }
+        input, select { width: 100%; height: 33px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 5px; background: #101212; color: white; padding: 0 8px; outline: none; font: inherit; font-size: 10px; }
+        input:focus, select:focus { border-color: rgba(255,196,0,.55); box-shadow: 0 0 0 2px rgba(255,196,0,.05); }
+        .coa-authority-strip { margin: 0 12px 12px; min-height: 42px; padding: 8px 10px; box-sizing: border-box; border: 1px solid rgba(101,232,148,.15); border-radius: 6px; background: rgba(101,232,148,.035); display: grid; grid-template-columns: 120px 190px 1fr; align-items: center; gap: 10px; }
+        .coa-authority-strip strong { color: #bff8d0; font-size: 9px; }
+        .coa-authority-strip small { color: rgba(255,255,255,.42); font-size: 8px; }
         .entry-grid-wrap { overflow-x: auto; border-top: 1px solid rgba(255,255,255,.055); border-bottom: 1px solid rgba(255,255,255,.055); }
-        .entry-grid { min-width: 900px; }
-        .entry-grid th:nth-child(1) { width: 110px; }
+        .entry-grid { min-width: 980px; }
+        .entry-grid th:nth-child(1) { width: 260px; }
         .entry-grid th:nth-child(2) { width: 210px; }
         .entry-grid th:nth-child(4), .entry-grid th:nth-child(5) { width: 130px; }
         .entry-grid th:last-child { width: 34px; }
         .entry-grid td { padding: 6px; }
-        .entry-grid input { border-color: rgba(255,255,255,.075); background: #0a0c0c; }
+        .entry-grid input, .entry-grid select { border-color: rgba(255,255,255,.075); background: #0a0c0c; }
+        .account-identity { min-height: 33px; display: grid; align-content: center; gap: 2px; padding: 0 4px; }
+        .account-identity strong { font-size: 9px; }
+        .account-identity small { color: rgba(255,255,255,.35); font-size: 7px; letter-spacing: .05em; }
         .amount-input { text-align: right; font-variant-numeric: tabular-nums; }
         .line-remove { width: 26px; height: 26px; border: 0; border-radius: 4px; background: rgba(255,255,255,.05); color: rgba(255,255,255,.45); cursor: pointer; }
         .composer-footer { min-height: 58px; padding: 8px 12px; display: flex; align-items: center; gap: 12px; }
@@ -879,7 +987,7 @@ export default function IXITransactGLWorkspace({
         .journal-totals .balanced b { color: #65e894; }
         .journal-totals .unbalanced b { color: #ff8d8d; }
         @media (max-width: 1500px) { .gl-metrics { grid-template-columns: repeat(3,minmax(0,1fr)); } .control-strip { grid-template-columns: repeat(3,minmax(0,1fr)); row-gap: 8px; padding: 9px 12px; } .control-strip > div:nth-child(3) { border-right: 0; } }
-        @media (max-width: 1100px) { .gl-commandbar { align-items: flex-start; flex-direction: column; } .command-actions { justify-content: flex-start; } .close-evidence { grid-template-columns: 1fr 1fr; } .ledger-columns, .statement-columns { grid-template-columns: 1fr; } .journal-header-grid { grid-template-columns: 1fr; } .journal-totals { width: 100%; margin-left: 0; order: 3; justify-content: space-between; } .composer-footer { flex-wrap: wrap; } }
+        @media (max-width: 1100px) { .gl-commandbar { align-items: flex-start; flex-direction: column; } .command-actions { justify-content: flex-start; } .close-evidence { grid-template-columns: 1fr 1fr; } .coa-authority-strip { grid-template-columns: 1fr; } .ledger-columns, .statement-columns { grid-template-columns: 1fr; } .journal-header-grid { grid-template-columns: 1fr; } .journal-totals { width: 100%; margin-left: 0; order: 3; justify-content: space-between; } .composer-footer { flex-wrap: wrap; } }
       `}</style>
     </div>
   );
