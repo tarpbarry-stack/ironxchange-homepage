@@ -15,6 +15,7 @@ import {
   getTicketApiInfo,
   listRemoteTickets,
   reopenTicket,
+  submitTicketCloseout,
   verifyTicket
 } from "../../lib/ixi-tickets/ixiTicketClient";
 import IXITicketWorksheet from "./IXITicketWorksheet";
@@ -157,6 +158,15 @@ export function IXITicketProvider({ children }) {
     return saved;
   }, []);
 
+  const submitCloseoutRemote = useCallback(async (ticket, closeout = {}) => {
+    if (!ticket?.ticketId) throw new Error("Ticket is required for closeout.");
+    if (!Number.isInteger(ticket.revision)) {
+      throw new Error("Synchronize this Ticket to AWS before closeout.");
+    }
+    const payload = await submitTicketCloseout(ticket.ticketId, ticket.revision, closeout);
+    return acceptRemoteTicket(payload);
+  }, [acceptRemoteTicket]);
+
   const approveTicket = useCallback(async (ticket, note = "") => {
     if (!ticket?.ticketId) throw new Error("Ticket is required for approval.");
     if (!Number.isInteger(ticket.revision)) {
@@ -206,6 +216,7 @@ export function IXITicketProvider({ children }) {
     openTicket,
     saveTicket,
     acceptRemoteTicket,
+    submitCloseoutRemote,
     approveTicket,
     reopenTicketRemote,
     closeWorksheet,
@@ -223,6 +234,7 @@ export function IXITicketProvider({ children }) {
     openTicket,
     saveTicket,
     acceptRemoteTicket,
+    submitCloseoutRemote,
     approveTicket,
     reopenTicketRemote,
     closeWorksheet,
