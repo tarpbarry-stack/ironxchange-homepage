@@ -1,0 +1,41 @@
+name: AOS Card Face Manifest Commercial Contract
+
+on:
+  pull_request:
+    paths:
+      - "components/ixi-aos/face-data-runtime/**"
+      - "components/ixi-aos/card-runtime/**"
+      - "components/ixi-aos/cards/**"
+      - "docs/aos/AOS_CARD_FACE_MANIFEST_CONTRACT.md"
+      - ".github/workflows/aos-card-face-manifest-commercial.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "components/ixi-aos/face-data-runtime/**"
+      - "components/ixi-aos/card-runtime/**"
+      - "components/ixi-aos/cards/**"
+      - "docs/aos/AOS_CARD_FACE_MANIFEST_CONTRACT.md"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify two-source Face data contract
+        run: node components/ixi-aos/face-data-runtime/IXICardFaceManifestRuntime.test.js
+      - name: Verify Card library remains present
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 17); do
+            n="$(printf '%03d' "$i")"
+            test -d "components/ixi-aos/cards/$n" || {
+              echo "Missing AOS Card directory: $n"
+              exit 1
+            }
+          done
+          echo "AOS CARD 001-017 LIBRARY PRESENT"
