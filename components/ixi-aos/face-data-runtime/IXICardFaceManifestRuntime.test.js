@@ -27,7 +27,8 @@ assert.match(source, /USER_FIELD:\s*"permissioned-user-field"/);
 assert.match(source, /TRANSACT:\s*"transact"/);
 assert.match(source, /canIXIActorEditUserFaceField/);
 
-assert.match(auth, /availableDataCapabilities/);
+assert.match(auth, /factualDataCapabilities/);
+assert.match(auth, /FACE_DATA_SOURCE_INVALID/);
 assert.match(auth, /DATA_CAPABILITY_NOT_AUTHORIZED/);
 
 console.log("CARD FACE MANIFEST TWO-SOURCE CONTRACT GREEN");
