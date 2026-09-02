@@ -164,4 +164,17 @@ test("intelligence contract excludes recipient, message, title, price, and locat
   assert.match(source, /PROPERTY_NAMES/u);
   assert.match(source, /listing_id/u);
   assert.match(source, /error_code/u);
+  assert.doesNotMatch(source, /from "\.\.\/posthog"/u);
+});
+
+test("distribution uses the canonical Marketplace origin", () => {
+  const provider = read(
+    "components/ixi-marketplace/ListingShareProvider.jsx"
+  );
+  const route = read("pages/api/marketplace/share-email.js");
+
+  assert.match(provider, /NEXT_PUBLIC_MARKETPLACE_CANONICAL_ORIGIN/u);
+  assert.match(provider, /https:\/\/preview\.ironxchange\.com/u);
+  assert.match(route, /MARKETPLACE_CANONICAL_ORIGIN/u);
+  assert.match(route, /https:\/\/preview\.ironxchange\.com/u);
 });

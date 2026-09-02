@@ -205,7 +205,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const baseUrl = assertSameOrigin(req);
+    assertSameOrigin(req);
+    const baseUrl = String(
+      process.env.MARKETPLACE_CANONICAL_ORIGIN ||
+        process.env.NEXT_PUBLIC_MARKETPLACE_CANONICAL_ORIGIN ||
+        "https://preview.ironxchange.com"
+    ).replace(/\/+$/u, "");
     const recipients = validateRecipients(req.body?.recipients);
     const message = sanitizeMessage(req.body?.message);
     const idempotencyKey = validateIdempotencyKey(

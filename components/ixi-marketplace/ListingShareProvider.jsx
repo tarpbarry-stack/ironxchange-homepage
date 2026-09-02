@@ -135,7 +135,8 @@ export default function ListingShareProvider({ children }) {
     if (!composer || typeof window === "undefined") return "";
     return getMarketplaceDistributionUrl(
       composer,
-      window.location.origin
+      process.env.NEXT_PUBLIC_MARKETPLACE_CANONICAL_ORIGIN ||
+        "https://preview.ironxchange.com"
     );
   }, [composer]);
 
