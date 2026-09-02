@@ -3,6 +3,7 @@ import AdminDaddyApp from "../../components/admin-daddy-v2/AdminDaddyApp";
 import AdminDaddyTaskCenter from "../../components/admin-daddy-v2/AdminDaddyTaskCenter";
 import AdminDaddyRecoveryCenter from "../../components/admin-daddy-v2/AdminDaddyRecoveryCenter";
 import AdminDaddyCustomer360 from "../../components/admin-daddy-v2/AdminDaddyCustomer360";
+import AdminDaddyAuctionOps from "../../components/admin-daddy-v2/AdminDaddyAuctionOps";
 import AdminDaddyOperationsDeck from "../../components/admin-daddy-v2/AdminDaddyOperationsDeck";
 import AdminDaddyEnterpriseDeck from "../../components/admin-daddy-v2/AdminDaddyEnterpriseDeck";
 import AdminDaddyMobileCommand from "../../components/admin-daddy-v2/AdminDaddyMobileCommand";
@@ -20,6 +21,7 @@ export default function AdminDaddyV2Page() {
       <AdminDaddyTaskCenter />
       <AdminDaddyRecoveryCenter />
       <AdminDaddyCustomer360 />
+      <AdminDaddyAuctionOps />
       <AdminDaddyOperationsDeck />
       <AdminDaddyEnterpriseDeck />
     </>
