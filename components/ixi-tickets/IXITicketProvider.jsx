@@ -21,6 +21,7 @@ import {
 import IXITicketWorksheet from "./IXITicketWorksheet";
 
 const TicketContext = createContext(null);
+const TICKET_REPOSITORIES = Object.freeze(["ironxchange-homepage", "ixi-core", "other"]);
 
 function revisionOf(ticket) {
   const value = Number(ticket?.revision);
@@ -53,11 +54,7 @@ export function IXITicketProvider({ children }) {
   const [mode, setMode] = useState("floating");
   const [open, setOpen] = useState(false);
   const [publishedContext, setPublishedContext] = useState({});
-  const [remoteState, setRemoteState] = useState({
-    status: "idle",
-    lastSyncedAt: "",
-    error: ""
-  });
+  const [remoteState, setRemoteState] = useState({ status: "idle", lastSyncedAt: "", error: "" });
 
   const apiInfo = useMemo(() => getTicketApiInfo(), []);
 
@@ -70,20 +67,28 @@ export function IXITicketProvider({ children }) {
     setRemoteState(current => ({ ...current, status: "loading", error: "" }));
 
     try {
-      const payload = await listRemoteTickets({ limit: 250 });
-      const remoteTickets = extractTickets(payload).map(normalizeIXITicket);
+      const payloads = await Promise.all(
+        TICKET_REPOSITORIES.map(repository => listRemoteTickets({ repository, limit: 250 }))
+      );
+
+      const byId = new Map();
+      payloads
+        .flatMap(extractTickets)
+        .map(normalizeIXITicket)
+        .forEach(ticket => {
+          if (!ticket?.ticketId) return;
+          const current = byId.get(ticket.ticketId);
+          if (!current || revisionOf(ticket) >= revisionOf(current)) byId.set(ticket.ticketId, ticket);
+        });
+
+      const remoteTickets = Array.from(byId.values());
       remoteTickets.forEach(persistCanonicalRemote);
-      const current = listLocalTickets();
-      setTickets(current);
-      setRemoteState({
-        status: "ready",
-        lastSyncedAt: new Date().toISOString(),
-        error: ""
-      });
+      setTickets(listLocalTickets());
+      setRemoteState({ status: "ready", lastSyncedAt: new Date().toISOString(), error: "" });
       return remoteTickets;
     } catch (error) {
       setRemoteState({
-        status: error.status === 401 ? "authentication-required" : "error",
+        status: "error",
         lastSyncedAt: "",
         error: error.message || "Ticket Command synchronization failed."
       });
@@ -102,7 +107,6 @@ export function IXITicketProvider({ children }) {
     function onContext(event) {
       setPublishedContext(event?.detail && typeof event.detail === "object" ? event.detail : {});
     }
-
     window.addEventListener("ixi-ticket-context", onContext);
     return () => window.removeEventListener("ixi-ticket-context", onContext);
   }, []);
@@ -160,46 +164,35 @@ export function IXITicketProvider({ children }) {
 
   const submitCloseoutRemote = useCallback(async (ticket, closeout = {}) => {
     if (!ticket?.ticketId) throw new Error("Ticket is required for closeout.");
-    if (!Number.isInteger(ticket.revision)) {
-      throw new Error("Synchronize this Ticket to AWS before closeout.");
-    }
-    const payload = await submitTicketCloseout(ticket.ticketId, ticket.revision, closeout);
-    return acceptRemoteTicket(payload);
+    if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before closeout.");
+    return acceptRemoteTicket(await submitTicketCloseout(ticket.ticketId, ticket.revision, closeout));
   }, [acceptRemoteTicket]);
 
   const approveTicket = useCallback(async (ticket, note = "") => {
     if (!ticket?.ticketId) throw new Error("Ticket is required for approval.");
-    if (!Number.isInteger(ticket.revision)) {
-      throw new Error("Synchronize this Ticket to AWS before approval.");
-    }
-    const payload = await verifyTicket(ticket.ticketId, {
+    if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before approval.");
+    return acceptRemoteTicket(await verifyTicket(ticket.ticketId, {
       expectedRevision: ticket.revision,
       decision: "approve",
       note
-    });
-    return acceptRemoteTicket(payload);
+    }));
   }, [acceptRemoteTicket]);
 
   const reopenTicketRemote = useCallback(async (ticket, note = "") => {
     if (!ticket?.ticketId) throw new Error("Ticket is required to reopen.");
-    if (!Number.isInteger(ticket.revision)) {
-      throw new Error("Synchronize this Ticket to AWS before reopening.");
-    }
-    const payload = await reopenTicket(ticket.ticketId, {
+    if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before reopening.");
+    return acceptRemoteTicket(await reopenTicket(ticket.ticketId, {
       expectedRevision: ticket.revision,
       note
-    });
-    return acceptRemoteTicket(payload);
+    }));
   }, [acceptRemoteTicket]);
 
   const closeWorksheet = useCallback(() => setOpen(false), []);
 
   const popOutTicket = useCallback(ticketId => {
     if (typeof window === "undefined" || !ticketId) return;
-
-    const url = `/tickets/popout?ticketId=${encodeURIComponent(ticketId)}`;
     window.open(
-      url,
+      `/tickets/popout?ticketId=${encodeURIComponent(ticketId)}`,
       `ixi-ticket-${ticketId}`,
       "popup=yes,width=760,height=900,resizable=yes,scrollbars=yes"
     );
