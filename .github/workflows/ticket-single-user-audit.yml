@@ -51,10 +51,14 @@ jobs:
           }
 
           remote_file /var/www/ix-core/tickets/routes/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketAuthenticatedRequest.js
+          remote_file /var/www/ix-core/tickets/routes/ticketAuthorization.js audit/ix-core-ticket/ticketAuthorization.js
           remote_file /var/www/ix-core/tickets/routes/ticketRouter.js audit/ix-core-ticket/ticketRouter.js
+          remote_file /var/www/ix-core/index.js audit/ix-core-ticket/index.js
 
           node --check audit/ix-core-ticket/ticketAuthenticatedRequest.js
+          node --check audit/ix-core-ticket/ticketAuthorization.js
           node --check audit/ix-core-ticket/ticketRouter.js
+          node --check audit/ix-core-ticket/index.js
 
       - name: Commit sanitized Ticket source snapshot
         shell: bash
@@ -62,7 +66,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audit/ix-core-ticket/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketRouter.js
+          git add audit/ix-core-ticket/ticketAuthenticatedRequest.js audit/ix-core-ticket/ticketAuthorization.js audit/ix-core-ticket/ticketRouter.js audit/ix-core-ticket/index.js
           git diff --cached --quiet && exit 0
-          git commit -m "Capture live IX-Core Ticket auth source"
+          git commit -m "Expand live IX-Core Ticket auth source snapshot"
           git push origin HEAD:ticket/commercial-aws-completion-v1
