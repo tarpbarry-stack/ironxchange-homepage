@@ -6,6 +6,10 @@ import {
   loadIXITransactChartOfAccounts,
   loadIXITransactGL
 } from "./data/IXITransactDashboardClient";
+import {
+  makeChartIntegrityError,
+  normalizePostingAccounts
+} from "./domain/chartOfAccountsPolicy.mjs";
 
 
 const EPSILON = 0.005;
@@ -112,26 +116,7 @@ function normalizeGLPayload(payload) {
 
 
 function normalizeAccountsPayload(payload) {
-  const data = payload?.data || {};
-  const accounts = safeArray(data?.activeAccounts?.length ? data.activeAccounts : data.accounts)
-    .filter(account => account?.active === true)
-    .map(account => ({
-      accountCode: clean(account?.accountCode),
-      accountName: clean(account?.accountName),
-      accountType: clean(account?.accountType),
-      control: clean(account?.control),
-      active: account?.active === true,
-      system: account?.system === true
-    }))
-    .filter(account => account.accountCode && account.accountName)
-    .sort((a, b) => a.accountCode.localeCompare(b.accountCode));
-
-  return {
-    entityPassportId: clean(data?.entityPassportId),
-    storageProvider: clean(data?.storageProvider),
-    counts: data?.counts || {},
-    accounts
-  };
+  return normalizePostingAccounts(payload);
 }
 
 
@@ -658,7 +643,12 @@ export default function IXITransactGLWorkspace({
   const resolvedCurrency = projection.currency || clean(currency || "USD").toUpperCase();
   const periodIsClosed = periodState.closed === true;
   const periodIsValid = /^\d{4}-\d{2}$/.test(clean(period));
-  const coaReady = coa.accounts.length > 0 && !accountsLoading && !accountsError;
+  const coaIntegrityError = useMemo(
+    () => makeChartIntegrityError(coa.integrityErrors),
+    [coa.integrityErrors]
+  );
+  const effectiveAccountsError = accountsError || coaIntegrityError;
+  const coaReady = coa.accounts.length > 0 && !accountsLoading && !effectiveAccountsError;
   const closeReady = Boolean(
     payload &&
     periodIsValid &&
@@ -805,10 +795,10 @@ export default function IXITransactGLWorkspace({
         </div>
       ) : null}
 
-      {accountsError ? (
+      {effectiveAccountsError ? (
         <div className="coa-error">
-          <strong>{accountsError.code || "CHART OF ACCOUNTS UNAVAILABLE"}</strong>
-          <span>{accountsError.message}</span>
+          <strong>{effectiveAccountsError.code || "CHART OF ACCOUNTS UNAVAILABLE"}</strong>
+          <span>{effectiveAccountsError.message}</span>
           <small>Journal posting is disabled until the authoritative Entity Chart of Accounts is available.</small>
         </div>
       ) : null}
@@ -837,7 +827,7 @@ export default function IXITransactGLWorkspace({
           closed={periodIsClosed}
           accounts={coa.accounts}
           accountsLoading={accountsLoading}
-          accountsError={accountsError}
+          accountsError={effectiveAccountsError}
           onCancel={() => setComposerOpen(false)}
           onCommitted={handleCommitted}
         />
