@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          remote='set -eu; echo "TICKET_ENTITY_KEYS"; aws dynamodb scan --region us-east-2 --table-name IXITickets --projection-expression "entityId,pk" --output json | jq -r '\'' .Items[] | [(.entityId.S // ""), (.pk.S // "")] | @tsv '\'' | sort -u; echo "PM2"; (pm2 jlist 2>/dev/null || true) | node -e '\''let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{for(const p of JSON.parse(s||"[]")) console.log([p.name,p.pm2_env?.status,p.pid].join("\t"))}catch{}})'\''; echo "HEALTH"; curl -fsS http://127.0.0.1:4100/health | head -c 500'
+          remote='echo "TICKET_KEYS"; aws dynamodb scan --region us-east-2 --table-name IXITickets --projection-expression "entityId,pk" --query "Items[*].[entityId.S,pk.S]" --output text 2>&1 || true; echo "PORT4100"; (lsof -nP -iTCP:4100 -sTCP:LISTEN 2>&1 || true); echo "PROCESSES"; (ps -ef | grep -E "[n]ode.*ix-core|[P]M2|[p]m2" || true); echo "UBUNTU_PM2"; (sudo -u ubuntu pm2 jlist 2>/dev/null | node -e '\''let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{for(const p of JSON.parse(s||"[]")) console.log([p.name,p.pm2_env?.status,p.pid].join("\t"))}catch{}})'\'' || true); echo "HEALTH"; curl -fsS http://127.0.0.1:4100/health | head -c 500'
           parameters="$(jq -cn --arg command "$remote" '{commands:[$command]}')"
           command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Audit IX-Core Ticket runtime" --parameters "$parameters" --query 'Command.CommandId' --output text)"
           aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID"
