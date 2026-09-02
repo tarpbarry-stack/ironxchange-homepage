@@ -130,7 +130,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     setEditing(true);
   }
 
-  async function saveEdit() {
+  async function persistFacts(after, context = "owned-private-card-inline-editor", closeFace1Edit = true) {
     const listingId = clean(getListingId(runtimeListing));
     if (!listingId || saving) return false;
 
@@ -143,29 +143,29 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
         listingId,
         title: clean(runtimeListing?.title || runtimeListing?.attributes?.title),
         before,
-        after: draft,
-        context: "owned-private-card-inline-editor"
+        after,
+        context
       });
 
       const nextListing = result?.listing && typeof result.listing === "object"
         ? result.listing
         : {
             ...runtimeListing,
-            ...draft,
+            ...after,
             publicData: {
               ...publicDataOf(runtimeListing),
-              price: draft.price,
-              hours: draft.hours,
-              location: draft.location,
-              description: draft.description,
-              details: draft.description,
-              keywords: draft.keywords
+              price: after.price,
+              hours: after.hours,
+              location: after.location,
+              description: after.description,
+              details: after.description,
+              keywords: after.keywords
             }
           };
 
       setRuntimeListing(nextListing);
       setDraft(factsOf(nextListing));
-      setEditing(false);
+      if (closeFace1Edit) setEditing(false);
       props.onOwnedObjectSaved?.(nextListing, result);
       showNotice("SAVED", "success");
       return true;
@@ -175,6 +175,18 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     } finally {
       setSaving(false);
     }
+  }
+
+  async function saveEdit() {
+    return persistFacts(draft, "owned-private-card-inline-editor", true);
+  }
+
+  async function saveDescription(exactDescription) {
+    const after = {
+      ...factsOf(runtimeListing),
+      description: String(exactDescription ?? "")
+    };
+    return persistFacts(after, "owned-private-face2-description-editor", false);
   }
 
   function handleEditButton() {
@@ -203,7 +215,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     registerOwnedPrivateActions(ownerActionBridgeKey, {
       add: handleAdd,
       edit: handleEditButton,
-      saveDescription: saveEdit,
+      saveDescription,
       transact: () => !saving && setTransactOpen(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
@@ -237,7 +249,7 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
     __ixiOwnerActions: {
       add: handleAdd,
       edit: handleEditButton,
-      saveDescription: saveEdit,
+      saveDescription,
       transact: () => !saving && setTransactOpen(true),
       actions: () => !saving && setMenuOpen(value => !value),
       editing,
