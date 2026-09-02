@@ -78,6 +78,14 @@ test("Browse V2 card sizing uses a monotonic non-wrapping scale control", () => 
   assert.match(browse, /aria-label="Make Marketplace cards smaller"/u);
   assert.match(browse, /type="range"/u);
   assert.match(browse, /direction: rtl/u);
+  assert.match(
+    browse,
+    /\.marketplace-scale-control \{[\s\S]*?border: 1px solid rgba\(255, 196, 0, \.55\);[\s\S]*?border-radius: 8px;[\s\S]*?background: #111;[\s\S]*?color: #ffc400;/u
+  );
+  assert.match(
+    browse,
+    /\.marketplace-scale-step-button \{[\s\S]*?border: 0;[\s\S]*?background: transparent;[\s\S]*?color: #ffc400;/u
+  );
   assert.ok(
     browse.indexOf('aria-label="Make Marketplace cards larger"') <
       browse.indexOf('aria-label="Make Marketplace cards smaller"')
