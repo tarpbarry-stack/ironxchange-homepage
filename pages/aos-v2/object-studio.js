@@ -1,8 +1,8 @@
 import Head
   from "next/head";
 
-import IXIObjectStudio
-  from "../../components/ixi-aos/object-studio/IXIObjectStudio";
+import IXIObjectStudioCommercial
+  from "../../components/ixi-aos/object-studio/IXIObjectStudioCommercial";
 
 
 export default function IXIObjectStudioPage() {
@@ -14,7 +14,7 @@ export default function IXIObjectStudioPage() {
         </title>
       </Head>
 
-      <IXIObjectStudio />
+      <IXIObjectStudioCommercial />
     </>
   );
 }
