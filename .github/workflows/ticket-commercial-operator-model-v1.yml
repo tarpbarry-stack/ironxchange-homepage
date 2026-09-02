@@ -1,0 +1,522 @@
+name: Build commercial Ticket operator workflow
+
+on:
+  push:
+    branches:
+      - ticket/commercial-aws-completion-v1
+    paths:
+      - .github/workflows/ticket-commercial-operator-model-v1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-ticket-operator-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-aws-completion-v1
+          fetch-depth: 0
+
+      - name: Implement operator workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f"{label} marker not found")
+              return text.replace(old, new, 1)
+
+          # ---------------------------------------------------------
+          # CLIENT: queue, direct assignment, ratings
+          # ---------------------------------------------------------
+          p = Path('lib/ixi-tickets/ixiTicketClient.js')
+          s = p.read_text()
+
+          old = '''export async function setRemoteTicketReady(ticket) {
+  const remote = await ensureRemoteDraft(ticket);
+  if (!remote?.ticketId) throw new Error("AWS did not return the synchronized Ticket.");
+  if (remote.status !== "draft") return remote;
+
+  return extractTicket(await updateRemoteTicket(
+    remote.ticketId,
+    { status: "ready-for-chat" },
+    remote.revision
+  ));
+}
+
+export async function submitTicketCloseout'''
+          new = '''export async function setRemoteTicketReady(ticket) {
+  const remote = await ensureRemoteDraft(ticket);
+  if (!remote?.ticketId) throw new Error("AWS did not return the synchronized Ticket.");
+  if (remote.status !== "draft") return remote;
+
+  const queuedAt = new Date().toISOString();
+  return extractTicket(await updateRemoteTicket(
+    remote.ticketId,
+    {
+      status: "ready-for-chat",
+      metadata: {
+        ...(remote.metadata || {}),
+        execution: {
+          ...(remote.metadata?.execution || {}),
+          queuedAt
+        }
+      }
+    },
+    remote.revision
+  ));
+}
+
+export async function startRemoteTicket(ticket, options = {}) {
+  if (!ticket?.ticketId) throw new Error("Ticket ID is required to start work.");
+
+  let remote = ticket;
+  if (remote.status === "draft" || !Number.isInteger(remote.revision)) {
+    remote = await setRemoteTicketReady(remote);
+  }
+
+  if (!["ready-for-chat", "reopened"].includes(remote.status)) return remote;
+
+  const startedAt = new Date().toISOString();
+  const assignedTo = clean(options.assignedTo) || "chat";
+  const source = clean(options.source) || "manual";
+
+  return extractTicket(await updateRemoteTicket(
+    remote.ticketId,
+    {
+      status: "working",
+      metadata: {
+        ...(remote.metadata || {}),
+        execution: {
+          ...(remote.metadata?.execution || {}),
+          assignedTo,
+          claimedAt: remote.metadata?.execution?.claimedAt || startedAt,
+          startedAt,
+          source
+        }
+      }
+    },
+    remote.revision
+  ));
+}
+
+export async function rateRemoteTicket(ticket, review = {}) {
+  if (!ticket?.ticketId) throw new Error("Ticket ID is required for rating.");
+  if (!Number.isInteger(ticket.revision) || ticket.revision < 1) {
+    throw new Error("A synchronized Ticket revision is required for rating.");
+  }
+
+  const score = Number(review.score);
+  if (!Number.isInteger(score) || score < 1 || score > 5) {
+    throw new Error("Ticket rating must be from 1 to 5.");
+  }
+
+  return extractTicket(await updateRemoteTicket(
+    ticket.ticketId,
+    {
+      metadata: {
+        ...(ticket.metadata || {}),
+        userReview: {
+          score,
+          note: clean(review.note),
+          ratedAt: new Date().toISOString()
+        }
+      }
+    },
+    ticket.revision
+  ));
+}
+
+export async function submitTicketCloseout'''
+          if 'export async function startRemoteTicket' not in s:
+              s = replace_once(s, old, new, 'client operator functions')
+          p.write_text(s)
+
+          # ---------------------------------------------------------
+          # CONTRACT: execution + ratings become first-class data
+          # ---------------------------------------------------------
+          p = Path('lib/ixi-tickets/IXITicketContract.js')
+          s = p.read_text()
+          old = '''    attachments: [],
+    github: {'''
+          new = '''    attachments: [],
+    metadata: {
+      execution: {
+        queuedAt: "",
+        assignedTo: "",
+        claimedAt: "",
+        startedAt: "",
+        source: ""
+      },
+      userReview: {
+        score: null,
+        note: "",
+        ratedAt: ""
+      }
+    },
+    github: {'''
+          if 'userReview:' not in s:
+              s = replace_once(s, old, new, 'contract metadata')
+
+          old = '''      notes: "",
+      prs: [],
+      completedAt: ""
+    },'''
+          new = '''      notes: "",
+      prs: [],
+      agentRating: {
+        score: null,
+        confidence: null,
+        note: ""
+      },
+      completedAt: ""
+    },'''
+          if 'agentRating:' not in s:
+              s = replace_once(s, old, new, 'contract agent rating')
+
+          old = '''    closeout: { ...base.closeout, ...(ticket.closeout || {}) },
+    verification: { ...base.verification, ...(ticket.verification || {}) },'''
+          new = '''    metadata: {
+      ...base.metadata,
+      ...(ticket.metadata || {}),
+      execution: { ...base.metadata.execution, ...(ticket.metadata?.execution || {}) },
+      userReview: { ...base.metadata.userReview, ...(ticket.metadata?.userReview || {}) }
+    },
+    closeout: {
+      ...base.closeout,
+      ...(ticket.closeout || {}),
+      agentRating: { ...base.closeout.agentRating, ...(ticket.closeout?.agentRating || {}) }
+    },
+    verification: { ...base.verification, ...(ticket.verification || {}) },'''
+          if 'execution: { ...base.metadata.execution' not in s:
+              s = replace_once(s, old, new, 'contract normalization')
+          p.write_text(s)
+
+          # ---------------------------------------------------------
+          # PROVIDER: persist user rating before authoritative close
+          # ---------------------------------------------------------
+          p = Path('components/ixi-tickets/IXITicketProvider.jsx')
+          s = p.read_text()
+          old = '''  listRemoteTickets,
+  reopenTicket,
+  submitTicketCloseout,
+  verifyTicket
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          new = '''  listRemoteTickets,
+  rateRemoteTicket,
+  reopenTicket,
+  submitTicketCloseout,
+  verifyTicket
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          if 'rateRemoteTicket,' not in s:
+              s = replace_once(s, old, new, 'provider rate import')
+
+          old = '''  const approveTicket = useCallback(async (ticket, note = "") => {
+    if (!ticket?.ticketId) throw new Error("Ticket is required for approval.");
+    if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before approval.");
+    return acceptRemoteTicket(await verifyTicket(ticket.ticketId, {
+      expectedRevision: ticket.revision,
+      decision: "approve",
+      note
+    }));
+  }, [acceptRemoteTicket]);'''
+          new = '''  const approveTicket = useCallback(async (ticket, review = {}) => {
+    if (!ticket?.ticketId) throw new Error("Ticket is required for approval.");
+    if (!Number.isInteger(ticket.revision)) throw new Error("Synchronize this Ticket to AWS before approval.");
+
+    let current = ticket;
+    if (review?.score) {
+      current = acceptRemoteTicket(await rateRemoteTicket(current, review));
+    }
+
+    return acceptRemoteTicket(await verifyTicket(current.ticketId, {
+      expectedRevision: current.revision,
+      decision: "approve",
+      note: review?.note || ""
+    }));
+  }, [acceptRemoteTicket]);'''
+          if 'let current = ticket;' not in s:
+              s = replace_once(s, old, new, 'provider approve review')
+          p.write_text(s)
+
+          # ---------------------------------------------------------
+          # WORKSHEET: park, queue, or send straight to agent
+          # ---------------------------------------------------------
+          p = Path('components/ixi-tickets/IXITicketWorksheet.jsx')
+          s = p.read_text()
+          old = '''  ensureRemoteDraft,
+  getTicketApiInfo,
+  setRemoteTicketReady
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          new = '''  ensureRemoteDraft,
+  getTicketApiInfo,
+  setRemoteTicketReady,
+  startRemoteTicket
+} from "../../lib/ixi-tickets/ixiTicketClient";'''
+          if 'startRemoteTicket' not in s:
+              s = replace_once(s, old, new, 'worksheet start import')
+
+          marker = '''  function beginDrag(event) {'''
+          fn = '''  async function sendToAgentNow() {
+    const readyDraft = validateReady();
+    if (!readyDraft || syncing) return;
+
+    if (!apiInfo.configured) {
+      setNotice("IXI Ticket API is disabled. Ticket remains preserved locally.");
+      return;
+    }
+
+    setSyncing(true);
+    setNotice("");
+    try {
+      onSave?.(readyDraft);
+      const remote = await startRemoteTicket(readyDraft, {
+        assignedTo: "chat",
+        source: "send-now"
+      });
+      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a working Ticket.");
+      const saved = canonicalTicket(readyDraft, remote, "aws-synced");
+      onSave?.(saved);
+      setDraft(saved);
+      setNotice("SENT TO AGENT — Ticket is WORKING now.");
+    } catch (error) {
+      setNotice(`${error.message} Ticket remains safely preserved.`);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+'''
+          if 'async function sendToAgentNow()' not in s:
+              s = replace_once(s, marker, fn + marker, 'worksheet send now function')
+
+          s = s.replace('Draft synchronized to IXI Ticket Command.', 'Draft saved to AWS. It remains parked until you queue or send it.')
+          s = s.replace('READY FOR CHAT — stored in AWS and visible to Ticket Command.', 'ADDED TO READY QUEUE — waiting for Chat to claim it.')
+          s = s.replace('{syncing ? "SYNCING..." : "SYNC AWS"}', '{syncing ? "SAVING..." : "SAVE DRAFT TO AWS"}')
+          s = s.replace('>SAVE LOCAL</button>', '>SAVE DRAFT LOCALLY</button>')
+          s = s.replace('onClick={markReady}>READY FOR CHAT</button>', 'onClick={markReady}>ADD TO READY QUEUE</button>')
+
+          old = '''        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>ADD TO READY QUEUE</button> : null}
+      </footer>'''
+          new = '''        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={markReady}>ADD TO READY QUEUE</button> : null}
+        {!locked ? <button type="button" className={styles.readyButton} disabled={syncing} onClick={sendToAgentNow}>SEND TO AGENT NOW</button> : null}
+      </footer>'''
+          if 'SEND TO AGENT NOW' not in s:
+              s = replace_once(s, old, new, 'worksheet send now button')
+          p.write_text(s)
+
+          # ---------------------------------------------------------
+          # COMMAND: work queue + ratings + lifecycle-safe actions
+          # ---------------------------------------------------------
+          p = Path('components/ixi-tickets/IXITicketCommand.jsx')
+          s = p.read_text()
+          target = 'import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";\n'
+          imp = 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";\n'
+          if imp not in s:
+              s = replace_once(s, target, target + imp, 'command start import')
+
+          old = '''  const [verifyNote, setVerifyNote] = useState("");
+  const [closeoutDraft, setCloseoutDraft] = useState(closeoutForm(null));'''
+          new = '''  const [verifyNote, setVerifyNote] = useState("");
+  const [userScore, setUserScore] = useState("");
+  const [agentScore, setAgentScore] = useState("");
+  const [agentConfidence, setAgentConfidence] = useState("");
+  const [agentRatingNote, setAgentRatingNote] = useState("");
+  const [closeoutDraft, setCloseoutDraft] = useState(closeoutForm(null));'''
+          if 'const [userScore' not in s:
+              s = replace_once(s, old, new, 'command rating state')
+
+          old = '''    setVerifyNote("");
+    setActionNotice("");
+  }, [selected?.ticketId, selected?.revision]);'''
+          new = '''    setVerifyNote(selected?.metadata?.userReview?.note || "");
+    setUserScore(selected?.metadata?.userReview?.score ? String(selected.metadata.userReview.score) : "");
+    setAgentScore(selected?.closeout?.agentRating?.score ? String(selected.closeout.agentRating.score) : "");
+    setAgentConfidence(selected?.closeout?.agentRating?.confidence ? String(selected.closeout.agentRating.confidence) : "");
+    setAgentRatingNote(selected?.closeout?.agentRating?.note || "");
+    setActionNotice("");
+  }, [selected?.ticketId, selected?.revision]);'''
+          if 'setUserScore(selected?' not in s:
+              s = replace_once(s, old, new, 'command rating hydration')
+
+          marker = '''  async function submitCloseout() {'''
+          fn = '''  async function startWork(ticket = selected, source = "single-ticket") {
+    if (!ticket || actionBusy) return;
+    setActionBusy(true);
+    setActionNotice("");
+    try {
+      await startRemoteTicket(ticket, { assignedTo: "chat", source });
+      setActionNotice(`STARTED ${ticket.displayNumber} — status is now WORKING.`);
+      await refreshRemoteTickets();
+    } catch (error) {
+      setActionNotice(error.message || "Ticket could not be started.");
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  async function startAllReady() {
+    if (actionBusy) return;
+    const ready = tickets.filter(ticket => [IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(ticket.status));
+    if (!ready.length) {
+      setActionNotice("No Tickets are waiting in the Ready queue.");
+      return;
+    }
+
+    setActionBusy(true);
+    setActionNotice("");
+    const failures = [];
+    let started = 0;
+    try {
+      for (const ticket of ready) {
+        try {
+          await startRemoteTicket(ticket, { assignedTo: "chat", source: "ready-queue" });
+          started += 1;
+        } catch (error) {
+          failures.push(`${ticket.displayNumber}: ${error.message}`);
+        }
+      }
+      await refreshRemoteTickets();
+      setActionNotice(failures.length
+        ? `Started ${started} Ticket(s). ${failures.length} failed: ${failures.join(" | ")}`
+        : `Started all ${started} Ready Ticket(s).`);
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+'''
+          if 'async function startAllReady()' not in s:
+              s = replace_once(s, marker, fn + marker, 'command queue functions')
+
+          old = '''        prs: nonEmpty(selected.closeout?.prs)
+      });'''
+          new = '''        prs: nonEmpty(selected.closeout?.prs),
+        agentRating: {
+          score: agentScore ? Number(agentScore) : null,
+          confidence: agentConfidence ? Number(agentConfidence) : null,
+          note: agentRatingNote.trim()
+        }
+      });'''
+          if 'agentRating: {' not in s:
+              s = replace_once(s, old, new, 'command agent rating submit')
+
+          old = '''      await approveTicket(selected, verifyNote.trim());'''
+          new = '''      if (!userScore) {
+        setActionNotice("Rate the completed Ticket from 1 to 5 before closing it.");
+        return;
+      }
+      await approveTicket(selected, {
+        score: Number(userScore),
+        note: verifyNote.trim()
+      });'''
+          if 'Rate the completed Ticket' not in s:
+              s = replace_once(s, old, new, 'command user rating approval')
+
+          old = '''          <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
+          <a href="/account">DASHBOARD</a>'''
+          new = '''          <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
+          <button onClick={startAllReady} disabled={actionBusy || counts.ready === 0}>{actionBusy ? "WORKING..." : `WORK READY QUEUE (${counts.ready})`}</button>
+          <a href="/account">DASHBOARD</a>'''
+          if 'WORK READY QUEUE' not in s:
+              s = replace_once(s, old, new, 'command work ready queue button')
+
+          anchor = '<button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>'
+          if 'START WORK ON THIS TICKET' not in s:
+              add = '''{[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>START WORK ON THIS TICKET</button>
+                  ) : null}
+                  ''' + anchor
+              s = replace_once(s, anchor, add, 'command single start button')
+
+          old = '''                    <button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>
+                      {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}
+                    </button>'''
+          new = '''                    <button
+                      disabled={actionBusy || !Number.isInteger(selected.revision) || ![IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)}
+                      onClick={submitCloseout}
+                      title={[IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "Submit completed work for verification" : "Ticket must be WORKING before closeout"}
+                    >
+                      {actionBusy ? "SUBMITTING..." : [IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status) ? "SUBMIT COMPLETED WORK FOR VERIFICATION" : "START WORK BEFORE CLOSEOUT"}
+                    </button>'''
+          if 'START WORK BEFORE CLOSEOUT' not in s:
+              s = replace_once(s, old, new, 'command closeout lifecycle button')
+
+          old = '''                  <div className={styles.closeoutEditorGrid}>
+                    <label><span>FILES CHANGED — ONE PER LINE</span><textarea value={closeoutDraft.filesChanged} onChange={event => patchCloseout("filesChanged", event.target.value)} /></label>
+                    <label><span>TESTS — ONE PER LINE</span><textarea value={closeoutDraft.tests} onChange={event => patchCloseout("tests", event.target.value)} /></label>
+                  </div>'''
+          new = '''                  <div className={styles.closeoutEditorGrid}>
+                    <label><span>FILES CHANGED — ONE PER LINE</span><textarea value={closeoutDraft.filesChanged} onChange={event => patchCloseout("filesChanged", event.target.value)} /></label>
+                    <label><span>TESTS — ONE PER LINE</span><textarea value={closeoutDraft.tests} onChange={event => patchCloseout("tests", event.target.value)} /></label>
+                  </div>
+                  <div className={styles.closeoutEditorGrid}>
+                    <label><span>AGENT RESULT — 1 TO 5</span><select value={agentScore} onChange={event => setAgentScore(event.target.value)}><option value="">NOT RATED</option>{[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}</select></label>
+                    <label><span>AGENT CONFIDENCE — 1 TO 5</span><select value={agentConfidence} onChange={event => setAgentConfidence(event.target.value)}><option value="">NOT RATED</option>{[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}</select></label>
+                    <label><span>AGENT CLOSEOUT NOTE</span><textarea value={agentRatingNote} onChange={event => setAgentRatingNote(event.target.value)} placeholder="Agent assessment of result, completeness, or remaining risk" /></label>
+                  </div>'''
+          if 'AGENT RESULT — 1 TO 5' not in s:
+              s = replace_once(s, old, new, 'command agent rating fields')
+
+          old = '''              <section className={styles.verification}>
+                <label>
+                  <span>VERIFICATION / REOPEN NOTE</span>
+                  <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What still needs work, or what you verified..." />
+                </label>'''
+          new = '''              <section className={styles.verification}>
+                <label>
+                  <span>YOUR RESULT RATING — 1 TO 5</span>
+                  <select value={userScore} onChange={event => setUserScore(event.target.value)} disabled={selected.status !== IXI_TICKET_STATUS.READY_TO_VERIFY}>
+                    <option value="">RATE RESULT</option>
+                    {[1,2,3,4,5].map(value => <option key={value} value={value}>{value} / 5</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>YOUR VERIFICATION / REOPEN NOTE</span>
+                  <textarea value={verifyNote} onChange={event => setVerifyNote(event.target.value)} placeholder="What you verified, or what still needs work..." />
+                </label>'''
+          if 'YOUR RESULT RATING' not in s:
+              s = replace_once(s, old, new, 'command user rating fields')
+
+          old = '''                  <p>REV {Number.isInteger(selected.revision) ? selected.revision : "LOCAL"} · {upper(selected.syncState)}</p>'''
+          new = '''                  <p>REV {Number.isInteger(selected.revision) ? selected.revision : "LOCAL"} · {upper(selected.syncState)}</p>
+                  <p>STATUS: {upper(selected.status)}{selected.metadata?.execution?.assignedTo ? ` · ASSIGNED: ${upper(selected.metadata.execution.assignedTo)}` : ""}</p>'''
+          if 'ASSIGNED:' not in s:
+              s = replace_once(s, old, new, 'command execution status')
+
+          p.write_text(s)
+          PY
+
+      - name: Sanity checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'SEND TO AGENT NOW' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'WORK READY QUEUE' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'START WORK ON THIS TICKET' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'AGENT RESULT — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'YOUR RESULT RATING — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'export async function startRemoteTicket' lib/ixi-tickets/ixiTicketClient.js
+          grep -q 'export async function rateRemoteTicket' lib/ixi-tickets/ixiTicketClient.js
+
+      - name: Commit commercial operator model
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            lib/ixi-tickets/ixiTicketClient.js \
+            lib/ixi-tickets/IXITicketContract.js \
+            components/ixi-tickets/IXITicketProvider.jsx \
+            components/ixi-tickets/IXITicketWorksheet.jsx \
+            components/ixi-tickets/IXITicketCommand.jsx
+          git diff --cached --quiet && exit 0
+          git commit -m "Commercialize Ticket queue execution and dual ratings"
+          git push origin HEAD:ticket/commercial-aws-completion-v1
