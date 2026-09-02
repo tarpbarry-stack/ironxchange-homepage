@@ -11,7 +11,8 @@ import {
 import {
   ensureRemoteDraft,
   getTicketApiInfo,
-  setRemoteTicketReady
+  setRemoteTicketReady,
+  startRemoteTicket
 } from "../../lib/ixi-tickets/ixiTicketClient";
 import styles from "./IXITicketWorksheet.module.css";
 
@@ -213,6 +214,36 @@ export default function IXITicketWorksheet({
       setNotice("SUBMITTED TO CHAT QUEUE — request is now locked and ready for work.");
     } catch (error) {
       setNotice(`${error.message} Ticket remains safely preserved as a local draft.`);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function sendToAgentNow() {
+    const readyDraft = validateReady();
+    if (!readyDraft || syncing) return;
+
+    if (!apiInfo.configured) {
+      setNotice("IXI Ticket API is disabled. Ticket remains preserved locally.");
+      return;
+    }
+
+    setSyncing(true);
+    setNotice("");
+
+    try {
+      onSave?.(readyDraft);
+      const remote = await startRemoteTicket(readyDraft, {
+        assignedTo: "chat",
+        source: "send-now"
+      });
+      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a working Ticket.");
+      const saved = canonicalTicket(readyDraft, remote, "aws-synced");
+      onSave?.(saved);
+      setDraft(saved);
+      setNotice("SENT TO AGENT — Ticket is WORKING now.");
+    } catch (error) {
+      setNotice(`${error.message} Ticket remains safely preserved.`);
     } finally {
       setSyncing(false);
     }
