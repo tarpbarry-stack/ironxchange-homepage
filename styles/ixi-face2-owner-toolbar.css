@@ -1,38 +1,33 @@
 .private-listing-card .mof2 .mof2-owner-toolbar {
   position: absolute !important;
-  left: 14px !important;
+  left: auto !important;
   right: 14px !important;
   bottom: 5px !important;
+  width: auto !important;
   height: 25px !important;
-  display: block !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
   z-index: 5 !important;
-  pointer-events: none !important;
+  pointer-events: auto !important;
 }
 
 .private-listing-card .mof2 .mof2-owner-actuator-gap {
-  position: absolute !important;
-  left: 50% !important;
-  bottom: 0 !important;
-  width: 58px !important;
-  height: 25px !important;
-  transform: translateX(-50%) !important;
-  pointer-events: none !important;
+  display: none !important;
 }
 
 .private-listing-card .mof2 .mof2-owner-left,
 .private-listing-card .mof2 .mof2-owner-right {
-  position: absolute !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  position: static !important;
+  inset: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
   gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   pointer-events: auto !important;
-}
-
-.private-listing-card .mof2 .mof2-owner-left {
-  right: 77px !important;
 }
 
 .private-listing-card .mof2 .mof2-owner-toolbar button {
