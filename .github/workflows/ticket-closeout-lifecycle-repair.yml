@@ -21,118 +21,20 @@ jobs:
           ref: ticket/commercial-aws-completion-v1
           fetch-depth: 0
 
-      - name: Patch explicit start-work lifecycle
+      - name: Apply commercial operator model
+        run: python3 .github/scripts/ticket_operator_model.py
+
+      - name: Sanity checks
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          client = Path('lib/ixi-tickets/ixiTicketClient.js')
-          s = client.read_text()
-          marker = 'export async function submitTicketCloseout(ticketId, expectedRevision, closeout = {}) {'
-          insert = '''export async function startRemoteTicket(ticket) {
-            if (!ticket?.ticketId) throw new Error("Ticket ID is required to start work.");
-            if (!Number.isInteger(ticket.revision) || ticket.revision < 1) {
-              throw new Error("Synchronize this Ticket to AWS before starting work.");
-            }
-            if (!["ready-for-chat", "reopened"].includes(ticket.status)) return ticket;
-
-            return extractTicket(await updateRemoteTicket(
-              ticket.ticketId,
-              { status: "working" },
-              ticket.revision
-            ));
-          }
-
-          '''
-          if 'export async function startRemoteTicket' not in s:
-              if marker not in s:
-                  raise SystemExit('client insertion marker not found')
-              s = s.replace(marker, insert + marker, 1)
-              client.write_text(s)
-
-          cmd = Path('components/ixi-tickets/IXITicketCommand.jsx')
-          s = cmd.read_text()
-
-          if 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";' not in s:
-              target = 'import { IXI_TICKET_STATUS } from "../../lib/ixi-tickets/IXITicketContract";\n'
-              if target not in s:
-                  raise SystemExit('command import marker not found')
-              s = s.replace(target, target + 'import { startRemoteTicket } from "../../lib/ixi-tickets/ixiTicketClient";\n', 1)
-
-          marker = '  async function submitCloseout() {\n'
-          start_fn = '''  async function startWork() {
-            if (!selected || actionBusy) return;
-            setActionBusy(true);
-            setActionNotice("");
-            try {
-              await startRemoteTicket(selected);
-              setActionNotice("Work started. Ticket is now WORKING and can be closed out when the work is complete.");
-              await refreshRemoteTickets();
-            } catch (error) {
-              setActionNotice(error.message || "Ticket could not be moved to WORKING.");
-            } finally {
-              setActionBusy(false);
-            }
-          }
-
-          '''
-          if 'async function startWork()' not in s:
-              if marker not in s:
-                  raise SystemExit('startWork insertion marker not found')
-              s = s.replace(marker, start_fn + marker, 1)
-
-          if 'START WORK ON TICKET' not in s:
-              pattern = re.compile(r'(?P<i>\s*)<div className=\{styles\.detailActions\}>\s*<button onClick=\{\(\) => openTicket\(selected\.ticketId, "floating"\)\}>OPEN WORKSHEET</button>\s*<button onClick=\{\(\) => popOutTicket\(selected\.ticketId\)\}>POP OUT ↗</button>\s*</div>')
-              def repl(m):
-                  i = m.group('i')
-                  return f'''{i}<div className={{styles.detailActions}}>
-{i}  {{[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
-{i}    <button disabled={{actionBusy || !Number.isInteger(selected.revision)}} onClick={{startWork}}>START WORK ON TICKET</button>
-{i}  ) : null}}
-{i}  <button onClick={{() => openTicket(selected.ticketId, "floating")}}>OPEN WORKSHEET</button>
-{i}  <button onClick={{() => popOutTicket(selected.ticketId)}}>POP OUT ↗</button>
-{i}</div>'''
-              s, n = pattern.subn(repl, s, count=1)
-              if n != 1:
-                  raise SystemExit('detail actions marker not found')
-
-          old_close = '''                    <button disabled={actionBusy || !Number.isInteger(selected.revision) || selected.status === IXI_TICKET_STATUS.CLOSED} onClick={submitCloseout}>
-                      {actionBusy ? "SUBMITTING..." : "SUBMIT WORK FOR VERIFICATION"}
-                    </button>'''
-          new_close = '''                    <button
-                      disabled={
-                        actionBusy ||
-                        !Number.isInteger(selected.revision) ||
-                        ![IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)
-                      }
-                      onClick={submitCloseout}
-                      title={
-                        [IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)
-                          ? "Submit completed work for verification"
-                          : "Start work on this Ticket before submitting closeout"
-                      }
-                    >
-                      {actionBusy
-                        ? "SUBMITTING..."
-                        : [IXI_TICKET_STATUS.WORKING, IXI_TICKET_STATUS.PR_OPEN].includes(selected.status)
-                          ? "SUBMIT COMPLETED WORK FOR VERIFICATION"
-                          : "START WORK BEFORE CLOSEOUT"}
-                    </button>'''
-          if 'START WORK BEFORE CLOSEOUT' not in s:
-              if old_close not in s:
-                  raise SystemExit('closeout button marker not found')
-              s = s.replace(old_close, new_close, 1)
-
-          cmd.write_text(s)
-          PY
-
-      - name: Build
-        run: |
-          npm install
-          npm run build
+          grep -q 'SEND TO AGENT NOW' components/ixi-tickets/IXITicketWorksheet.jsx
+          grep -q 'WORK READY QUEUE' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'START WORK ON THIS TICKET' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'AGENT RESULT — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'YOUR RESULT RATING — 1 TO 5' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'export async function startRemoteTicket' lib/ixi-tickets/ixiTicketClient.js
+          grep -q 'export async function rateRemoteTicket' lib/ixi-tickets/ixiTicketClient.js
 
       - name: Commit repair
         shell: bash
@@ -140,7 +42,12 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/ixi-tickets/ixiTicketClient.js components/ixi-tickets/IXITicketCommand.jsx
+          git add \
+            lib/ixi-tickets/ixiTicketClient.js \
+            lib/ixi-tickets/IXITicketContract.js \
+            components/ixi-tickets/IXITicketProvider.jsx \
+            components/ixi-tickets/IXITicketWorksheet.jsx \
+            components/ixi-tickets/IXITicketCommand.jsx
           git diff --cached --quiet && exit 0
-          git commit -m "Make Ticket start-work and closeout lifecycle explicit"
+          git commit -m "Commercialize Ticket queue execution and dual ratings"
           git push origin HEAD:ticket/commercial-aws-completion-v1
