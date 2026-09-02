@@ -1,5 +1,62 @@
+import { useState } from "react";
 import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
 import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
+import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
+
+function clean(value) {
+  return String(value ?? "").trim();
+}
+
+function transactObjectFromListing(listing = {}) {
+  const publicData = listing.publicData || listing.attributes?.publicData || {};
+  const passportId = clean(
+    listing?.passportId ||
+    publicData?.passportId ||
+    listing?.ixiMedia?.passportId ||
+    publicData?.ixiMedia?.passportId
+  );
+  const objectId = clean(
+    listing?.objectId ||
+    publicData?.objectId ||
+    listing?.mosObjectId ||
+    publicData?.mosObjectId ||
+    getListingId(listing)
+  );
+  const entityPassportId = clean(
+    listing?.entityPassportId ||
+    publicData?.entityPassportId ||
+    listing?.entity?.passportId ||
+    publicData?.entity?.passportId
+  );
+
+  return {
+    ...listing,
+    objectId,
+    id: objectId,
+    objectType: clean(listing?.objectType || publicData?.objectType) || "machine",
+    displayName: clean(listing?.title || listing?.attributes?.title) || "EQUIPMENT",
+    passportId,
+    entityPassportId,
+    fields: {
+      ...(listing?.fields || {}),
+      entityPassportId,
+      location: clean(listing?.location || publicData?.location || publicData?.city),
+      serialNumber: clean(listing?.serialNumber || publicData?.serialNumber),
+      stockNumber: clean(listing?.stockNumber || publicData?.stockNumber),
+      year: listing?.year ?? publicData?.year ?? "",
+      make: listing?.make ?? publicData?.make ?? "",
+      model: listing?.model ?? publicData?.model ?? "",
+      primaryMeter: listing?.hours ?? publicData?.hours ?? ""
+    },
+    capabilities: {
+      ...(listing?.capabilities || {}),
+      canCreate: true,
+      canTransact: true,
+      editable: true,
+      hasConsole: true
+    }
+  };
+}
 
 export default function IXISellerMachineObjectFace2({
   listing = {},
@@ -9,6 +66,7 @@ export default function IXISellerMachineObjectFace2({
   onDescriptionKeyDown,
   savingDescription = false
 }) {
+  const [consoleTransactOpen, setConsoleTransactOpen] = useState(false);
   const publicData = listing.publicData || listing.attributes?.publicData || {};
 
   const passportId = listing.passportId || publicData.passportId || "";
@@ -35,7 +93,17 @@ export default function IXISellerMachineObjectFace2({
   }
 
   function runOwnerAction(event, action) {
+    const isConsoleSlot = Boolean(
+      event?.currentTarget?.closest?.(".ixi-private-console-module-slot")
+    );
+
     stop(event);
+
+    if (action === "transact" && isConsoleSlot) {
+      setConsoleTransactOpen(true);
+      return;
+    }
+
     const direct = ownerActions?.[action];
     if (typeof direct === "function") {
       direct();
@@ -97,6 +165,35 @@ export default function IXISellerMachineObjectFace2({
     } catch (error) {
       alert(`Delete failed: ${error.message}`);
     }
+  }
+
+  if (consoleTransactOpen) {
+    const transactObject = transactObjectFromListing(listing);
+
+    return (
+      <div className="mof2-console-transact-slot">
+        <IXITransactObjectConsole
+          object={transactObject}
+          entity={{
+            passportId: transactObject.entityPassportId,
+            displayName: transactObject.entityName || ""
+          }}
+          onClose={() => setConsoleTransactOpen(false)}
+        />
+        <style jsx>{`
+          .mof2-console-transact-slot{
+            position:relative;
+            width:298px;
+            min-width:298px;
+            max-width:298px;
+            height:471px;
+            min-height:471px;
+            max-height:471px;
+            overflow:visible;
+          }
+        `}</style>
+      </div>
+    );
   }
 
   return (
