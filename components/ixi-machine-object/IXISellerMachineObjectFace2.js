@@ -83,9 +83,7 @@ export default function IXISellerMachineObjectFace2({
   const listingStatus = String(listing.listingStatus || publicData.listingStatus || "").toLowerCase();
   const isPaused = listingStatus === "paused";
   const ownerActions = listing.__ixiOwnerActions || {};
-
-  const DESCRIPTION_LIMIT = 200;
-  const sellerDescription = String(descriptionValue ?? description ?? "").slice(0, DESCRIPTION_LIMIT);
+  const sellerDescription = String(descriptionValue ?? description ?? "");
 
   function stop(event) {
     event?.preventDefault?.();
@@ -236,29 +234,20 @@ export default function IXISellerMachineObjectFace2({
 
       <div className="mof2-price">{price}</div>
 
-      <div className="mof2-bio seller-bio-editor">
+      <div className={`mof2-bio seller-bio-editor ${ownerActions.editing ? "is-editing" : "is-readonly"}`}>
         <textarea
           {...(onDescriptionChange
             ? {
                 value: sellerDescription,
-                onChange: e => onDescriptionChange(e.target.value.slice(0, DESCRIPTION_LIMIT), listing)
+                onChange: e => onDescriptionChange(e.target.value, listing)
               }
             : { defaultValue: sellerDescription })}
           onKeyDown={e => onDescriptionKeyDown?.(e, listing)}
-          maxLength={DESCRIPTION_LIMIT}
           spellCheck={true}
-          disabled={savingDescription}
+          readOnly={!ownerActions.editing}
+          disabled={savingDescription || ownerActions.saving}
+          aria-label="Machine description"
         />
-        <div className="seller-bio-count">{sellerDescription.length} / {DESCRIPTION_LIMIT}</div>
-      </div>
-
-      <div className="mof2-owner-toolbar" aria-label="Owner object controls" onPointerDown={event => event.stopPropagation()}>
-        <button type="button" title="Add" onClick={event => runOwnerAction(event, "add")}>+</button>
-        <button type="button" className="owner-edit" title={ownerActions.editing ? "Save" : "Edit"} onClick={event => runOwnerAction(event, "edit")}>
-          {ownerActions.saving ? "SAVING" : ownerActions.editing ? "SAVE" : "EDIT"}
-        </button>
-        <button type="button" title="TRAN$ACT" onClick={event => runOwnerAction(event, "transact")}>$</button>
-        <button type="button" title="Actions" onClick={event => runOwnerAction(event, "actions")}>:</button>
       </div>
 
       <div className="mof2-action-row mof2-contact-row" onPointerDown={event => event.stopPropagation()}>
@@ -274,6 +263,19 @@ export default function IXISellerMachineObjectFace2({
         <button type="button" className="danger" onClick={deleteListing}>DELETE</button>
       </div>
 
+      <div className="mof2-owner-toolbar" aria-label="Owner object controls" onPointerDown={event => event.stopPropagation()}>
+        <div className="mof2-owner-left">
+          <button type="button" className="owner-edit" title={ownerActions.editing ? "Save" : "Edit"} onClick={event => runOwnerAction(event, "edit")}>
+            {ownerActions.saving ? "SAVING" : ownerActions.editing ? "SAVE" : "EDIT"}
+          </button>
+        </div>
+        <div className="mof2-owner-actuator-gap" aria-hidden="true" />
+        <div className="mof2-owner-right">
+          <button type="button" className="owner-transact" title="TRAN$ACT" onClick={event => runOwnerAction(event, "transact")}>$</button>
+          <button type="button" className="owner-actions" title="Actions" onClick={event => runOwnerAction(event, "actions")}>:</button>
+        </div>
+      </div>
+
       <style jsx>{`
         .mof2{box-sizing:border-box;width:100%;max-width:100%;height:459px;min-height:459px;max-height:459px;position:relative;padding:10px 14px 10px;display:flex;flex-direction:column;align-items:center;text-align:center;background:radial-gradient(circle at top,rgba(255,196,0,.05),transparent 42%),linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,0)),#141414;color:#f2f2f2}
         .mof2-passport-wrap{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 7px;padding:0 1px 6px;border-bottom:1px solid rgba(255,255,255,.055)}
@@ -287,14 +289,31 @@ export default function IXISellerMachineObjectFace2({
         .mof2-plate{width:100%;min-height:52px;padding:8px 10px;margin-bottom:13px;display:flex;justify-content:center;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.12);border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.10),rgba(255,255,255,.025)),#1b1b1b;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.38)}
         .mof2-tag{flex:1;min-width:0;text-align:center}.mof2-tag-label{font-size:9px;font-weight:950;letter-spacing:.22em;color:rgba(255,255,255,.48);text-transform:uppercase;text-align:center;margin-bottom:6px}.mof2-tag-value{width:100%;min-width:0;color:rgba(255,255,255,.94);font-family:"Roboto Condensed","Arial Narrow",sans-serif;font-size:clamp(8px,2.2vw,12px);font-weight:950;line-height:1.1;letter-spacing:.06em;text-align:center;white-space:nowrap;overflow:visible}.mof2-tag-serial{flex:1.65}.mof2-tag-stock{flex:.85}
         h2{margin:0;max-width:100%;color:#f2f2f2;font-size:14px;font-weight:950;line-height:1.05;letter-spacing:-.15px;text-transform:uppercase}.mof2-title-row{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px}.mof2-title-row h2{text-align:left;flex:1}.mof2-hours{white-space:nowrap;margin-top:5px;color:rgba(255,255,255,.52);font-size:11px;font-weight:850;letter-spacing:.38px;position:relative;top:-2px}.mof2-price{margin-top:9px;color:#FFC400;font-size:18px;font-weight:950;letter-spacing:-.25px}
-        .mof2-bio{width:100%;flex:1;min-height:48px;margin:10px 0 112px;padding:0;overflow:hidden;color:rgba(255,255,255,.70);font-size:11px;font-weight:700;line-height:1.38;text-align:left;border-top:1px solid rgba(255,255,255,.055);border-bottom:1px solid rgba(255,255,255,.055)}.seller-bio-editor{position:relative}.seller-bio-editor textarea{width:100%;height:100%;min-height:100%;padding:8px 10px 16px;resize:none;outline:none;color:rgba(255,255,255,.72);font-size:11px;font-weight:700;line-height:1.38;text-align:left;border:0;background:transparent;font-family:inherit}.seller-bio-count{position:absolute;right:8px;bottom:4px;color:rgba(255,255,255,.32);font-size:7px;font-weight:900;letter-spacing:.08em}
-        .mof2-owner-toolbar,.mof2-action-row{position:absolute;left:14px;right:14px;width:auto;display:grid;gap:8px;z-index:3}
-        .mof2-owner-toolbar{bottom:76px;grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.09)}
-        .mof2-contact-row{bottom:41px;grid-template-columns:repeat(3,minmax(0,1fr))}
-        .mof2-lifecycle-row{bottom:15px;grid-template-columns:repeat(4,minmax(0,1fr))}
-        .mof2-owner-toolbar button,.mof2-action-row button{height:20px;min-height:20px;padding:0 8px;border:1px solid rgba(255,255,255,.10);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),rgba(8,8,8,.90);color:rgba(255,255,255,.60);font-size:6.7px;font-weight:950;line-height:1;letter-spacing:.55px;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);transition:border-color .12s ease,background .12s ease,color .12s ease,transform .08s ease;cursor:pointer}
-        .mof2-owner-toolbar button:hover,.mof2-action-row button:hover{border-color:rgba(255,196,0,.42);background:linear-gradient(180deg,rgba(255,196,0,.08),rgba(255,196,0,.02)),rgba(10,10,10,.95);color:#FFC400}.mof2-owner-toolbar button:active,.mof2-action-row button:active{transform:translateY(1px)}.mof2-action-row button.danger:hover{border-color:rgba(229,62,62,.45);color:#E53E3E;background:linear-gradient(180deg,rgba(229,62,62,.08),rgba(229,62,62,.02)),rgba(10,10,10,.95)}
-        .mof2-owner-toolbar .owner-edit{color:${ownerActions.editing ? "#FFC400" : "rgba(255,255,255,.60)"}}
+        .mof2-bio{width:100%;flex:1;min-height:48px;margin:10px 0 112px;padding:0;overflow:hidden;color:rgba(255,255,255,.70);font-size:11px;font-weight:700;line-height:1.38;text-align:left;border-top:1px solid rgba(255,255,255,.055);border-bottom:1px solid rgba(255,255,255,.055)}
+        .seller-bio-editor{position:relative}
+        .seller-bio-editor textarea{box-sizing:border-box;width:100%;height:100%;min-height:100%;padding:8px 8px 8px 10px;resize:none;outline:none;overflow-y:auto;overflow-x:hidden;color:rgba(255,255,255,.72);font-size:11px;font-weight:700;line-height:1.38;text-align:left;border:0;background:transparent;font-family:inherit;scrollbar-width:thin;scrollbar-color:#080808 transparent}
+        .seller-bio-editor textarea::-webkit-scrollbar{width:4px}
+        .seller-bio-editor textarea::-webkit-scrollbar-track{background:transparent}
+        .seller-bio-editor textarea::-webkit-scrollbar-thumb{background:#080808;border-radius:4px}
+        .seller-bio-editor textarea::-webkit-scrollbar-thumb:hover{background:#161616}
+        .seller-bio-editor.is-readonly textarea{cursor:default}
+        .seller-bio-editor.is-editing textarea{cursor:text}
+        .mof2-action-row{position:absolute;left:14px;right:14px;width:auto;display:grid;gap:8px;z-index:3}
+        .mof2-contact-row{bottom:67px;grid-template-columns:repeat(3,minmax(0,1fr))}
+        .mof2-lifecycle-row{bottom:41px;grid-template-columns:repeat(4,minmax(0,1fr))}
+        .mof2-action-row button{height:20px;min-height:20px;padding:0 8px;border:1px solid rgba(255,255,255,.10);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),rgba(8,8,8,.90);color:rgba(255,255,255,.60);font-size:6.7px;font-weight:950;line-height:1;letter-spacing:.55px;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);transition:border-color .12s ease,background .12s ease,color .12s ease,transform .08s ease;cursor:pointer}
+        .mof2-action-row button:hover{border-color:rgba(255,196,0,.42);background:linear-gradient(180deg,rgba(255,196,0,.08),rgba(255,196,0,.02)),rgba(10,10,10,.95);color:#FFC400}.mof2-action-row button:active{transform:translateY(1px)}.mof2-action-row button.danger:hover{border-color:rgba(229,62,62,.45);color:#E53E3E;background:linear-gradient(180deg,rgba(229,62,62,.08),rgba(229,62,62,.02)),rgba(10,10,10,.95)}
+        .mof2-owner-toolbar{position:absolute;left:14px;right:14px;bottom:5px;height:25px;display:grid;grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);align-items:end;z-index:5;pointer-events:none}
+        .mof2-owner-left,.mof2-owner-right{display:flex;align-items:end;gap:6px;pointer-events:auto}
+        .mof2-owner-left{justify-content:flex-start}
+        .mof2-owner-right{justify-content:flex-end}
+        .mof2-owner-actuator-gap{width:58px;height:25px;pointer-events:none}
+        .mof2-owner-toolbar button{height:20px;min-height:20px;padding:0 10px;border:1px solid rgba(255,255,255,.10);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),rgba(8,8,8,.92);color:rgba(255,255,255,.62);font-size:7px;font-weight:950;line-height:1;letter-spacing:.5px;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);cursor:pointer;pointer-events:auto}
+        .mof2-owner-toolbar button:hover{border-color:rgba(255,196,0,.42);color:#FFC400}
+        .mof2-owner-toolbar .owner-edit{min-width:72px;color:${ownerActions.editing ? "#FFC400" : "rgba(255,255,255,.66)"}}
+        .mof2-owner-toolbar .owner-transact{width:54px;min-width:54px;height:23px;min-height:23px;padding:0;border-color:rgba(255,196,0,.52);background:linear-gradient(180deg,rgba(255,196,0,.22),rgba(255,196,0,.06)),rgba(8,8,8,.96);color:#FFC400;font-size:15px;font-weight:1000;line-height:1;text-shadow:0 0 8px rgba(255,196,0,.20);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 10px rgba(255,196,0,.08)}
+        .mof2-owner-toolbar .owner-transact:hover{border-color:rgba(255,196,0,.82);background:linear-gradient(180deg,rgba(255,196,0,.30),rgba(255,196,0,.10)),rgba(8,8,8,.98);box-shadow:0 0 12px rgba(255,196,0,.18)}
+        .mof2-owner-toolbar .owner-actions{width:32px;min-width:32px;padding:0;font-size:11px}
       `}</style>
     </section>
   );
