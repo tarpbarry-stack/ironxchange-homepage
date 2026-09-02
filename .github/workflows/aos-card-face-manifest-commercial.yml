@@ -31,7 +31,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for n in $(seq -w 1 17); do
+          for i in $(seq 1 17); do
+            n="$(printf '%03d' "$i")"
             test -d "components/ixi-aos/cards/$n" || {
               echo "Missing AOS Card directory: $n"
               exit 1
