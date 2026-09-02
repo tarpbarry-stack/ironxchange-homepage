@@ -1,6 +1,7 @@
 import Head from "next/head";
 import AdminDaddyApp from "../../components/admin-daddy-v2/AdminDaddyApp";
 import AdminDaddyOperationsDeck from "../../components/admin-daddy-v2/AdminDaddyOperationsDeck";
+import AdminDaddyEnterpriseDeck from "../../components/admin-daddy-v2/AdminDaddyEnterpriseDeck";
 
 export default function AdminDaddyV2Page() {
   return (
@@ -11,6 +12,7 @@ export default function AdminDaddyV2Page() {
       </Head>
       <AdminDaddyApp />
       <AdminDaddyOperationsDeck />
+      <AdminDaddyEnterpriseDeck />
     </>
   );
 }
