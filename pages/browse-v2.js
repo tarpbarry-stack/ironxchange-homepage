@@ -108,6 +108,7 @@ import {
   IXI_COMMANDS
 } from "../components/ixi-object-system/IXICommandBus";
 import {
+  readSitewideCardScaleMode,
   resolveSitewideCardScaleMode,
   writeSitewideCardScaleMode
 } from "../components/ixi-chassis/IXIScaleEngine";
@@ -202,6 +203,14 @@ const [
   cardScaleMode,
   setCardScaleMode
 ] = useState("xl");
+
+useEffect(() => {
+  const savedMode = readSitewideCardScaleMode();
+
+  if (savedMode) {
+    setCardScaleMode(savedMode);
+  }
+}, []);
   
   const hasAppliedRemoteLayoutRef = useRef(false);
   const inventoryRequestIdRef = useRef(0);

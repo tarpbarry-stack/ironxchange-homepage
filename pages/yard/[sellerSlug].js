@@ -86,6 +86,7 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
+  readSitewideCardScaleMode,
   resolveSitewideCardScaleMode,
   writeSitewideCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
@@ -192,6 +193,14 @@ const DIRECT_CONTAINER_TARGETS = [
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
+
+  useEffect(() => {
+    const savedMode = readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setCardScaleMode(savedMode);
+    }
+  }, []);
 
   const hasAppliedRemoteLayoutRef = useRef(false);
   

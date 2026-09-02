@@ -90,6 +90,7 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
+  readSitewideCardScaleMode,
   resolveSitewideCardScaleMode,
   writeSitewideCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
@@ -211,6 +212,14 @@ const DIRECT_CONTAINER_TARGETS = [
   const [pocketThumbSize, setPocketThumbSize] = useState("medium");
 
   const [cardScaleMode, setCardScaleMode] = useState("xl");
+
+  useEffect(() => {
+    const savedMode = readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setCardScaleMode(savedMode);
+    }
+  }, []);
   
   const cardScaleMetrics = getIXIAuctionCardScalePreset(cardScaleMode);
   const hasAppliedRemoteLayoutRef = useRef(false);

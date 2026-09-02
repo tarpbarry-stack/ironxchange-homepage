@@ -34,6 +34,11 @@ test("active desktop card surfaces use the shared V12 scale control", () => {
       /writeSitewideCardScaleMode/u,
       `${path} must publish scale changes site-wide`
     );
+    assert.match(
+      source,
+      /readSitewideCardScaleMode/u,
+      `${path} must hydrate the site-wide scale before data access`
+    );
   }
 });
 
