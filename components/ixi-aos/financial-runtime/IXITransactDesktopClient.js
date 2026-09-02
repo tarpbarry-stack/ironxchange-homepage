@@ -168,6 +168,59 @@ export async function createIXITransactJournalEntry(
   });
 }
 
+export async function postIXITransactJournalEntry({
+  financialDocumentId = "",
+  expectedRevision = null,
+  commandId = "",
+  idempotencyKey = "",
+  metadata = {},
+  signal
+} = {}) {
+  const resolvedId = clean(financialDocumentId);
+  const resolvedRevision = Number(expectedRevision);
+
+  if (!resolvedId) {
+    throw new IXITransactDesktopError(
+      "TRAN$ACT journal financialDocumentId is required.",
+      { operation: "financial.journal.post" }
+    );
+  }
+
+  if (!Number.isInteger(resolvedRevision) || resolvedRevision < 1) {
+    throw new IXITransactDesktopError(
+      "TRAN$ACT journal expectedRevision is required.",
+      { operation: "financial.journal.post" }
+    );
+  }
+
+  const response = await fetch(
+    `/api/ixi/financial/commands/desktop/journals/${encodeURIComponent(resolvedId)}/post`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-IXI-Source": "ixi-transact-desktop"
+      },
+      body: JSON.stringify({
+        expectedRevision: resolvedRevision,
+        commandId: clean(commandId),
+        idempotencyKey: clean(idempotencyKey),
+        metadata: {
+          ...safeObject(metadata),
+          transactSurface: "desktop"
+        }
+      }),
+      signal
+    }
+  );
+
+  return readJsonResponse(
+    response,
+    "financial.journal.post"
+  );
+}
+
 export function getIXITransactGLProjection(result) {
   return result?.data?.projection || null;
 }
@@ -180,6 +233,7 @@ export default {
   loadIXITransactGL,
   createIXITransactDesktopDocument,
   createIXITransactJournalEntry,
+  postIXITransactJournalEntry,
   getIXITransactGLProjection,
   getIXITransactGLScope
 };
