@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  closeIXITransactAccountingPeriod,
   createIXITransactJournalEntry,
   loadIXITransactGL
 } from "./data/IXITransactDashboardClient";
@@ -486,6 +487,9 @@ export default function IXITransactGLWorkspace({
   const [error, setError] = useState(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [localRefresh, setLocalRefresh] = useState(0);
+  const [closeBusy, setCloseBusy] = useState(false);
+  const [closeError, setCloseError] = useState(null);
+  const [closeResult, setCloseResult] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -519,6 +523,12 @@ export default function IXITransactGLWorkspace({
     return () => controller.abort();
   }, [period, currency, refreshKey, localRefresh]);
 
+  useEffect(() => {
+    setCloseError(null);
+    setCloseResult(null);
+    setComposerOpen(false);
+  }, [period, currency]);
+
   const gl = useMemo(() => normalizeGLPayload(payload), [payload]);
   const projection = gl.projection;
   const periodState = projection.period || {};
@@ -530,12 +540,106 @@ export default function IXITransactGLWorkspace({
   const balanceSheet = projection.balanceSheet || {};
   const controls = projection.controls || {};
   const resolvedCurrency = projection.currency || clean(currency || "USD").toUpperCase();
+  const periodIsClosed = periodState.closed === true;
+  const periodIsValid = /^\d{4}-\d{2}$/.test(clean(period));
+  const closeReady = Boolean(
+    payload &&
+    periodIsValid &&
+    !periodIsClosed &&
+    controls.ready === true &&
+    periodTB.balanced === true &&
+    endingTB.balanced === true &&
+    balanceSheet.balanced === true &&
+    Number(controls.postingExceptions || 0) === 0 &&
+    Number(controls.endingPostingExceptions || 0) === 0
+  );
 
   async function handleCommitted(result) {
     setComposerOpen(false);
     setLocalRefresh(value => value + 1);
     await onCommitted?.(result);
   }
+
+  async function handleClosePeriod() {
+    setCloseError(null);
+    setCloseResult(null);
+
+    if (!periodIsValid) {
+      const validationError = new Error("A valid YYYY-MM accounting period is required before close.");
+      validationError.code = "IXI_FINANCIAL_PERIOD_REQUIRED";
+      setCloseError(validationError);
+      return;
+    }
+
+    if (periodIsClosed) {
+      const validationError = new Error(`${period} is already closed.`);
+      validationError.code = "IXI_FINANCIAL_PERIOD_ALREADY_CLOSED";
+      setCloseError(validationError);
+      return;
+    }
+
+    if (!closeReady) {
+      const validationError = new Error("Server-returned GL controls are not ready for close. Resolve all balance and posting exceptions first.");
+      validationError.code = "IXI_FINANCIAL_CLOSE_NOT_READY";
+      setCloseError(validationError);
+      return;
+    }
+
+    const confirmed = typeof window !== "undefined"
+      ? window.confirm(
+          `Close accounting period ${period} in ${resolvedCurrency}?\n\nIX-Core will re-run authoritative close controls and, if they pass, persist the period-close control document. New postings to this period will then be rejected server-side.`
+        )
+      : false;
+
+    if (!confirmed) {
+      return;
+    }
+
+    const commandId = makeCommandId(`ixi-close-${period}`);
+
+    try {
+      setCloseBusy(true);
+
+      const result = await closeIXITransactAccountingPeriod({
+        period,
+        currency: resolvedCurrency,
+        commandId,
+        idempotencyKey: commandId,
+        metadata: {
+          transactSurface: "desktop",
+          accountingScope: "entity",
+          periodControl: "close"
+        }
+      });
+
+      setCloseResult(result);
+      setComposerOpen(false);
+      setLocalRefresh(value => value + 1);
+      await onCommitted?.(result);
+    } catch (closeFailure) {
+      setCloseError(closeFailure);
+    } finally {
+      setCloseBusy(false);
+    }
+  }
+
+  const effectiveCloseDocumentId = clean(
+    periodState.closeDocumentId ||
+    closeResult?.closeDocumentId ||
+    closeResult?.financialDocument?.financialDocumentId
+  );
+
+  const effectiveClosedAt = clean(
+    periodState.closedAt ||
+    closeResult?.period?.closedAt ||
+    closeResult?.financialDocument?.closedAt
+  );
+
+  const effectiveClosedBy = clean(
+    periodState.closedBy ||
+    closeResult?.period?.closedBy ||
+    closeResult?.financialDocument?.closedBy
+  );
 
   return (
     <div className="gl-workspace">
@@ -547,22 +651,60 @@ export default function IXITransactGLWorkspace({
         </div>
 
         <div className="command-actions">
-          <StatusPill good={!periodState.closed} neutral={!payload}>
-            {periodState.closed ? "CLOSED" : "OPEN"}
+          <StatusPill good={!periodIsClosed} neutral={!payload}>
+            {periodIsClosed ? "CLOSED" : "OPEN"}
           </StatusPill>
           <StatusPill good={controls.ready === true} neutral={!payload}>
             {controls.ready === true ? "CONTROLS READY" : "CONTROL REVIEW"}
           </StatusPill>
           <button
             type="button"
+            className="close-period-button"
+            onClick={handleClosePeriod}
+            disabled={loading || closeBusy || periodIsClosed || !closeReady}
+            title={closeReady ? `Close ${period}` : "Close is enabled only when authoritative GL controls are ready."}
+          >
+            {closeBusy ? "CLOSING…" : periodIsClosed ? "PERIOD CLOSED" : "CLOSE PERIOD"}
+          </button>
+          <button
+            type="button"
             className="new-journal-button"
             onClick={() => setComposerOpen(true)}
-            disabled={loading || periodState.closed === true}
+            disabled={loading || closeBusy || periodIsClosed}
           >
             + NEW JOURNAL ENTRY
           </button>
         </div>
       </div>
+
+      {closeError ? (
+        <div className="close-error">
+          <strong>{closeError.code || "PERIOD NOT CLOSED"}</strong>
+          <span>{closeError.message}</span>
+          <small>IX-Core remains authoritative. No close state is assumed unless the server confirms it.</small>
+        </div>
+      ) : null}
+
+      {periodIsClosed ? (
+        <div className="close-evidence">
+          <div>
+            <span>PERIOD CONTROL</span>
+            <strong>{period} CLOSED</strong>
+          </div>
+          <div>
+            <span>CLOSE DOCUMENT</span>
+            <strong>{effectiveCloseDocumentId || "SERVER CONFIRMED"}</strong>
+          </div>
+          <div>
+            <span>CLOSED AT</span>
+            <strong>{effectiveClosedAt || "—"}</strong>
+          </div>
+          <div>
+            <span>CLOSED BY</span>
+            <strong>{effectiveClosedBy || "—"}</strong>
+          </div>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="gl-error">
@@ -576,7 +718,7 @@ export default function IXITransactGLWorkspace({
         <JournalComposer
           period={period}
           currency={resolvedCurrency}
-          closed={periodState.closed === true}
+          closed={periodIsClosed}
           onCancel={() => setComposerOpen(false)}
           onCommitted={handleCommitted}
         />
@@ -654,7 +796,7 @@ export default function IXITransactGLWorkspace({
         .gl-workspace { display: grid; gap: 14px; color: #f2f4f5; }
         .gl-commandbar { min-height: 68px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; background: linear-gradient(180deg,#111313,#0c0e0e); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
         .gl-commandbar > div:first-child { display: grid; gap: 3px; }
-        .gl-commandbar span, .panel-head span, .gl-metric span, .control-strip span, label span { color: rgba(255,255,255,.4); font-size: 8px; font-weight: 900; letter-spacing: .1em; }
+        .gl-commandbar span, .panel-head span, .gl-metric span, .control-strip span, label span, .close-evidence span { color: rgba(255,255,255,.4); font-size: 8px; font-weight: 900; letter-spacing: .1em; }
         .gl-commandbar strong { font-size: 17px; }
         .gl-commandbar small { color: rgba(255,255,255,.38); font-size: 9px; }
         .command-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -662,15 +804,21 @@ export default function IXITransactGLWorkspace({
         :global(.status-pill.good) { color: #65e894; border-color: rgba(101,232,148,.25); background: rgba(101,232,148,.07); }
         :global(.status-pill.bad) { color: #ff8d8d; border-color: rgba(255,141,141,.25); background: rgba(255,141,141,.07); }
         :global(.status-pill.neutral) { color: rgba(255,255,255,.55); }
-        .new-journal-button, .post-button { min-height: 32px; padding: 0 12px; border: 1px solid #ffc400; border-radius: 5px; background: #ffc400; color: #090909; font-size: 8px; font-weight: 950; letter-spacing: .05em; cursor: pointer; }
+        .new-journal-button, .post-button, .close-period-button { min-height: 32px; padding: 0 12px; border-radius: 5px; font-size: 8px; font-weight: 950; letter-spacing: .05em; cursor: pointer; }
+        .new-journal-button, .post-button { border: 1px solid #ffc400; background: #ffc400; color: #090909; }
+        .close-period-button { border: 1px solid rgba(255,141,141,.5); background: rgba(255,91,91,.08); color: #ff9c9c; }
+        .close-period-button:not(:disabled):hover { border-color: #ff8d8d; background: rgba(255,91,91,.14); }
         button:disabled { opacity: .4; cursor: not-allowed; }
-        .gl-error, .composer-error, .closed-warning { padding: 11px 13px; border-radius: 7px; display: grid; gap: 3px; }
-        .gl-error, .composer-error { border: 1px solid rgba(255,91,91,.25); background: rgba(255,91,91,.055); }
+        .gl-error, .composer-error, .closed-warning, .close-error { padding: 11px 13px; border-radius: 7px; display: grid; gap: 3px; }
+        .gl-error, .composer-error, .close-error { border: 1px solid rgba(255,91,91,.25); background: rgba(255,91,91,.055); }
         .closed-warning { border: 1px solid rgba(255,196,0,.24); background: rgba(255,196,0,.06); }
-        .gl-error strong, .composer-error strong { color: #ff8d8d; font-size: 9px; }
+        .gl-error strong, .composer-error strong, .close-error strong { color: #ff8d8d; font-size: 9px; }
         .closed-warning strong { color: #ffc400; font-size: 9px; }
-        .gl-error span, .composer-error span, .closed-warning span { font-size: 11px; }
-        .gl-error small { color: rgba(255,255,255,.4); font-size: 9px; }
+        .gl-error span, .composer-error span, .closed-warning span, .close-error span { font-size: 11px; }
+        .gl-error small, .close-error small { color: rgba(255,255,255,.4); font-size: 9px; }
+        .close-evidence { min-height: 58px; padding: 10px 13px; border: 1px solid rgba(101,232,148,.2); border-radius: 7px; background: rgba(101,232,148,.045); display: grid; grid-template-columns: 1fr 1.6fr 1.4fr 1fr; gap: 12px; align-items: center; }
+        .close-evidence > div { min-width: 0; display: grid; gap: 3px; }
+        .close-evidence strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #dfffea; font-size: 9px; }
         .gl-body { display: grid; gap: 14px; }
         .gl-body.loading { opacity: .45; pointer-events: none; }
         .gl-metrics { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 8px; }
@@ -731,7 +879,7 @@ export default function IXITransactGLWorkspace({
         .journal-totals .balanced b { color: #65e894; }
         .journal-totals .unbalanced b { color: #ff8d8d; }
         @media (max-width: 1500px) { .gl-metrics { grid-template-columns: repeat(3,minmax(0,1fr)); } .control-strip { grid-template-columns: repeat(3,minmax(0,1fr)); row-gap: 8px; padding: 9px 12px; } .control-strip > div:nth-child(3) { border-right: 0; } }
-        @media (max-width: 1100px) { .gl-commandbar { align-items: flex-start; flex-direction: column; } .command-actions { justify-content: flex-start; } .ledger-columns, .statement-columns { grid-template-columns: 1fr; } .journal-header-grid { grid-template-columns: 1fr; } .journal-totals { width: 100%; margin-left: 0; order: 3; justify-content: space-between; } .composer-footer { flex-wrap: wrap; } }
+        @media (max-width: 1100px) { .gl-commandbar { align-items: flex-start; flex-direction: column; } .command-actions { justify-content: flex-start; } .close-evidence { grid-template-columns: 1fr 1fr; } .ledger-columns, .statement-columns { grid-template-columns: 1fr; } .journal-header-grid { grid-template-columns: 1fr; } .journal-totals { width: 100%; margin-left: 0; order: 3; justify-content: space-between; } .composer-footer { flex-wrap: wrap; } }
       `}</style>
     </div>
   );
