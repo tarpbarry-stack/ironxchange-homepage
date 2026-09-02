@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
 import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
 import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
@@ -83,11 +83,27 @@ export default function IXISellerMachineObjectFace2({
   const listingStatus = String(listing.listingStatus || publicData.listingStatus || "").toLowerCase();
   const isPaused = listingStatus === "paused";
   const ownerActions = listing.__ixiOwnerActions || {};
-  const sellerDescription = String(descriptionValue ?? description ?? "");
+  const incomingDescription = String(descriptionValue ?? description ?? "");
+  const [descriptionEditing, setDescriptionEditing] = useState(false);
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
+  const [localDescription, setLocalDescription] = useState(incomingDescription);
+  const [descriptionNotice, setDescriptionNotice] = useState(null);
+
+  useEffect(() => {
+    if (!descriptionEditing && !descriptionSaving) {
+      setLocalDescription(incomingDescription);
+    }
+  }, [incomingDescription, descriptionEditing, descriptionSaving]);
 
   function stop(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+  }
+
+  function resolvedOwnerActions() {
+    const direct = listing.__ixiOwnerActions || {};
+    const bridged = getOwnedPrivateActions(getListingId(listing)) || {};
+    return { ...bridged, ...direct };
   }
 
   function runOwnerAction(event, action) {
@@ -102,14 +118,55 @@ export default function IXISellerMachineObjectFace2({
       return;
     }
 
-    const direct = ownerActions?.[action];
-    if (typeof direct === "function") {
-      direct();
+    const actions = resolvedOwnerActions();
+    actions?.[action]?.();
+  }
+
+  function beginDescriptionEdit(event) {
+    stop(event);
+    if (descriptionSaving) return;
+    setLocalDescription(incomingDescription);
+    setDescriptionNotice(null);
+    setDescriptionEditing(true);
+  }
+
+  async function saveDescription(event) {
+    stop(event);
+    if (descriptionSaving) return;
+
+    const actions = resolvedOwnerActions();
+    if (typeof actions.saveDescription !== "function") {
+      setDescriptionNotice({ message: "NOT SAVED", tone: "error" });
+      setTimeout(() => setDescriptionNotice(null), 1450);
       return;
     }
 
-    const bridged = getOwnedPrivateActions(getListingId(listing));
-    bridged?.[action]?.();
+    setDescriptionSaving(true);
+    try {
+      onDescriptionChange?.(localDescription, listing);
+      const saved = await actions.saveDescription();
+      if (saved === false) {
+        setDescriptionNotice({ message: "NOT SAVED", tone: "error" });
+        setTimeout(() => setDescriptionNotice(null), 1450);
+        return;
+      }
+      setDescriptionEditing(false);
+      setDescriptionNotice({ message: "SAVED", tone: "success" });
+      setTimeout(() => setDescriptionNotice(null), 1450);
+    } catch (error) {
+      setDescriptionNotice({ message: "NOT SAVED", tone: "error" });
+      setTimeout(() => setDescriptionNotice(null), 1450);
+    } finally {
+      setDescriptionSaving(false);
+    }
+  }
+
+  function handleDescriptionButton(event) {
+    if (descriptionEditing) {
+      saveDescription(event);
+      return;
+    }
+    beginDescriptionEdit(event);
   }
 
   function viewListing(event) {
@@ -234,21 +291,27 @@ export default function IXISellerMachineObjectFace2({
 
       <div className="mof2-price">{price}</div>
 
-      <div className={`mof2-bio seller-bio-editor ${ownerActions.editing ? "is-editing" : "is-readonly"}`}>
+      <div className={`mof2-bio seller-bio-editor ${descriptionEditing ? "is-editing" : "is-readonly"}`}>
         <textarea
-          {...(onDescriptionChange
-            ? {
-                value: sellerDescription,
-                onChange: e => onDescriptionChange(e.target.value, listing)
-              }
-            : { defaultValue: sellerDescription })}
-          onKeyDown={e => onDescriptionKeyDown?.(e, listing)}
+          value={localDescription}
+          onChange={event => {
+            const value = event.target.value;
+            setLocalDescription(value);
+            onDescriptionChange?.(value, listing);
+          }}
+          onKeyDown={event => onDescriptionKeyDown?.(event, listing)}
           spellCheck={true}
-          readOnly={!ownerActions.editing}
-          disabled={savingDescription || ownerActions.saving}
+          readOnly={!descriptionEditing}
+          disabled={savingDescription || descriptionSaving}
           aria-label="Machine description"
         />
       </div>
+
+      {descriptionNotice ? (
+        <div className={`mof2-save-notice ${descriptionNotice.tone}`}>
+          {descriptionNotice.message}
+        </div>
+      ) : null}
 
       <div className="mof2-action-row mof2-contact-row" onPointerDown={event => event.stopPropagation()}>
         <button type="button">EMAIL</button>
@@ -265,8 +328,8 @@ export default function IXISellerMachineObjectFace2({
 
       <div className="mof2-owner-toolbar" aria-label="Owner object controls" onPointerDown={event => event.stopPropagation()}>
         <div className="mof2-owner-left">
-          <button type="button" className="owner-edit" title={ownerActions.editing ? "Save" : "Edit"} onClick={event => runOwnerAction(event, "edit")}>
-            {ownerActions.saving ? "SAVING" : ownerActions.editing ? "SAVE" : "EDIT"}
+          <button type="button" className="owner-edit" title={descriptionEditing ? "Save description" : "Edit description"} onClick={handleDescriptionButton}>
+            {descriptionSaving ? "SAVING" : descriptionEditing ? "SAVE" : "EDIT"}
           </button>
         </div>
         <div className="mof2-owner-actuator-gap" aria-hidden="true" />
@@ -297,7 +360,10 @@ export default function IXISellerMachineObjectFace2({
         .seller-bio-editor textarea::-webkit-scrollbar-thumb{background:#080808;border-radius:4px}
         .seller-bio-editor textarea::-webkit-scrollbar-thumb:hover{background:#161616}
         .seller-bio-editor.is-readonly textarea{cursor:default}
-        .seller-bio-editor.is-editing textarea{cursor:text}
+        .seller-bio-editor.is-editing textarea{cursor:text;border:1px solid rgba(255,196,0,.34);background:rgba(10,10,10,.82)}
+        .mof2-save-notice{position:absolute;left:50%;top:255px;transform:translateX(-50%);z-index:40;min-width:92px;padding:6px 10px;border:1px solid;border-radius:4px;font-size:7px;font-weight:950;letter-spacing:.7px;text-align:center}
+        .mof2-save-notice.success{background:rgba(0,18,28,.88);color:#6FE8FF;border-color:rgba(0,194,255,.86);box-shadow:0 0 18px rgba(0,194,255,.34),inset 0 0 22px rgba(0,194,255,.10)}
+        .mof2-save-notice.error{background:rgba(28,0,0,.88);color:#FF7B7B;border-color:rgba(229,62,62,.88);box-shadow:0 0 18px rgba(229,62,62,.34),inset 0 0 22px rgba(229,62,62,.10)}
         .mof2-action-row{position:absolute;left:14px;right:14px;width:auto;display:grid;gap:8px;z-index:3}
         .mof2-contact-row{bottom:67px;grid-template-columns:repeat(3,minmax(0,1fr))}
         .mof2-lifecycle-row{bottom:41px;grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -310,7 +376,7 @@ export default function IXISellerMachineObjectFace2({
         .mof2-owner-actuator-gap{width:58px;height:25px;pointer-events:none}
         .mof2-owner-toolbar button{height:20px;min-height:20px;padding:0 10px;border:1px solid rgba(255,255,255,.10);border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),rgba(8,8,8,.92);color:rgba(255,255,255,.62);font-size:7px;font-weight:950;line-height:1;letter-spacing:.5px;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);cursor:pointer;pointer-events:auto}
         .mof2-owner-toolbar button:hover{border-color:rgba(255,196,0,.42);color:#FFC400}
-        .mof2-owner-toolbar .owner-edit{min-width:72px;color:${ownerActions.editing ? "#FFC400" : "rgba(255,255,255,.66)"}}
+        .mof2-owner-toolbar .owner-edit{min-width:72px;color:${descriptionEditing ? "#FFC400" : "rgba(255,255,255,.66)"}}
         .mof2-owner-toolbar .owner-transact{width:54px;min-width:54px;height:23px;min-height:23px;padding:0;border-color:rgba(255,196,0,.52);background:linear-gradient(180deg,rgba(255,196,0,.22),rgba(255,196,0,.06)),rgba(8,8,8,.96);color:#FFC400;font-size:15px;font-weight:1000;line-height:1;text-shadow:0 0 8px rgba(255,196,0,.20);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 10px rgba(255,196,0,.08)}
         .mof2-owner-toolbar .owner-transact:hover{border-color:rgba(255,196,0,.82);background:linear-gradient(180deg,rgba(255,196,0,.30),rgba(255,196,0,.10)),rgba(8,8,8,.98);box-shadow:0 0 12px rgba(255,196,0,.18)}
         .mof2-owner-toolbar .owner-actions{width:32px;min-width:32px;padding:0;font-size:11px}
