@@ -81,8 +81,13 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
-  getNextCardScaleMode
+  resolveSitewideCardScaleMode,
+  writeSitewideCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
+import IXICardScaleControl
+  from "../../components/ixi-chassis/IXICardScaleControl";
+import IXIBoardSurface
+  from "../../components/ixi-chassis/IXIBoardSurface";
 
 import {
   workspaceCollisionDetection,
@@ -446,11 +451,11 @@ setWorkspaceSettings(
 const workspaceLayout =
   environment.workspaceLayout || {};
 
-if (loadedWorkspaceSettings.cardScaleMode) {
-  setCardScaleMode(
+setCardScaleMode(
+  resolveSitewideCardScaleMode(
     loadedWorkspaceSettings.cardScaleMode
-  );
-}
+  )
+);
 
 if (workspaceLayout.activeStackLayouts) {
   setActiveStackLayouts(current => ({
@@ -1569,9 +1574,14 @@ if (!ixiUserId) {
   });
 }
   
-function cycleCardScaleMode() {
+function updateCardScaleMode(nextMode) {
   setCardScaleMode(current => {
-    const next = getNextCardScaleMode(current);
+    if (nextMode === current) {
+      return current;
+    }
+
+    const next =
+      writeSitewideCardScaleMode(nextMode);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
@@ -1975,18 +1985,10 @@ if (
   cardScaleMode={cardScaleMode}
 />
               
-    <section
+    <IXIBoardSurface
   data-board-target="board"
-  className={`cards ${
-    visibleSellerListings.length === 1 ? "single-card" : ""
-  }`}
-  style={{
-  gridTemplateColumns:
-    visibleSellerListings.length === 1
-      ? `${cardScaleMetrics.width}px`
-      : `repeat(auto-fill, ${cardScaleMetrics.width}px)`,
-  gap: `${cardScaleMetrics.gap}px`
-}}
+  scaleMode={cardScaleMode}
+  centerRows={true}
 >
 
 {console.log(
@@ -2016,29 +2018,13 @@ if (
   cardScaleMode={cardScaleMode}
   cardScaleMetrics={cardScaleMetrics}
     />
-        </section>
+        </IXIBoardSurface>
 
-<button
-  type="button"
-  onClick={cycleCardScaleMode}
-  style={{
-    position: "fixed",
-    right: "24px",
-    bottom: "24px",
-    zIndex: 9999,
-    background: "#111",
-    color: "#FFC400",
-    border: "1px solid rgba(255,196,0,.55)",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    fontSize: "11px",
-    fontWeight: 900,
-    letterSpacing: ".08em",
-    cursor: "pointer"
-  }}
->
-  SCALE: {cardScaleMode.toUpperCase()}
-</button>
+<IXICardScaleControl
+  value={cardScaleMode}
+  onChange={updateCardScaleMode}
+  surfaceLabel="Auction Market"
+/>
 
         {visibleSellerListings.length === 0 && (
   <div className="empty">

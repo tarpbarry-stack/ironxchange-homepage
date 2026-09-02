@@ -37,6 +37,8 @@ import IXIActiveStack from "../components/ixi-chassis/IXIActiveStack";
 import IXIBoard from "../components/ixi-chassis/IXIBoard";
 import IXIBoardSurface
   from "../components/ixi-chassis/IXIBoardSurface";
+import IXICardScaleControl
+  from "../components/ixi-chassis/IXICardScaleControl";
 import IXIBrowseObjectConsoleRouter
   from "../components/ixi-marketplace/IXIBrowseObjectConsoleRouter";
 import ListingShareProvider
@@ -105,26 +107,10 @@ import {
 import {
   IXI_COMMANDS
 } from "../components/ixi-object-system/IXICommandBus";
-
-const MARKETPLACE_CARD_SCALE_STEPS = Object.freeze([
-  "micro",
-  "compact",
-  "medium",
-  "large",
-  "xl",
-  "work",
-  "focus"
-]);
-
-const MARKETPLACE_CARD_SCALE_LABELS = Object.freeze({
-  micro: "MICRO",
-  compact: "COMPACT",
-  medium: "MEDIUM",
-  large: "LARGE",
-  xl: "XL",
-  work: "WORK",
-  focus: "FOCUS"
-});
+import {
+  resolveSitewideCardScaleMode,
+  writeSitewideCardScaleMode
+} from "../components/ixi-chassis/IXIScaleEngine";
 
 export default function BrowseV2() {
   const [listings, setListings] = useState([]);
@@ -366,13 +352,11 @@ async function loadBrowseEnvironment({
       loadedWorkspaceSettings
     );
 
-    if (
-      environment.workspaceSettings?.cardScaleMode
-    ) {
-      setCardScaleMode(
-        environment.workspaceSettings.cardScaleMode
-      );
-    }
+    setCardScaleMode(
+      resolveSitewideCardScaleMode(
+        environment.workspaceSettings?.cardScaleMode
+      )
+    );
 
     if (environment.errors.publicListings) {
       console.error(
@@ -1181,18 +1165,14 @@ function saveWorkspaceLayout(nextContainers = machineContainers) {
   });
 }
   
-function updateCardScaleMode(resolveNext) {
+function updateCardScaleMode(nextMode) {
   setCardScaleMode(current => {
-    const next = typeof resolveNext === "function"
-      ? resolveNext(current)
-      : resolveNext;
-
-    if (
-      next === current ||
-      !MARKETPLACE_CARD_SCALE_STEPS.includes(next)
-    ) {
+    if (nextMode === current) {
       return current;
     }
+
+    const next =
+      writeSitewideCardScaleMode(nextMode);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
@@ -1206,43 +1186,6 @@ function updateCardScaleMode(resolveNext) {
     return next;
   });
 }
-
-function stepCardScaleMode(direction) {
-  updateCardScaleMode(current => {
-    const currentIndex = Math.max(
-      0,
-      MARKETPLACE_CARD_SCALE_STEPS.indexOf(current)
-    );
-    const nextIndex = Math.max(
-      0,
-      Math.min(
-        MARKETPLACE_CARD_SCALE_STEPS.length - 1,
-        currentIndex + direction
-      )
-    );
-
-    return MARKETPLACE_CARD_SCALE_STEPS[nextIndex];
-  });
-}
-
-function selectCardScaleIndex(value) {
-  const nextIndex = Math.max(
-    0,
-    Math.min(
-      MARKETPLACE_CARD_SCALE_STEPS.length - 1,
-      Math.round(Number(value) || 0)
-    )
-  );
-
-  updateCardScaleMode(
-    MARKETPLACE_CARD_SCALE_STEPS[nextIndex]
-  );
-}
-
-const cardScaleIndex = Math.max(
-  0,
-  MARKETPLACE_CARD_SCALE_STEPS.indexOf(cardScaleMode)
-);
   
   return (
     <ListingShareProvider>
@@ -1552,75 +1495,11 @@ if (armedDestination === "stackBottom") {
     />
         </IXIBoardSurface>
 
-<div
-  className="marketplace-scale-control"
-  role="group"
-  aria-label="Marketplace card size"
-  data-marketplace-scale-control="true"
-  data-marketplace-scale-mode={cardScaleMode}
->
-  <button
-    type="button"
-    className="marketplace-scale-step-button"
-    aria-label="Make Marketplace cards larger"
-    onClick={() => stepCardScaleMode(1)}
-    disabled={
-      cardScaleIndex ===
-      MARKETPLACE_CARD_SCALE_STEPS.length - 1
-    }
-  >
-    +
-  </button>
-
-  <label
-    className="marketplace-scale-meter"
-  >
-    <span className="marketplace-scale-bars" aria-hidden="true">
-      {[...MARKETPLACE_CARD_SCALE_STEPS]
-        .reverse()
-        .map(mode => {
-          const index =
-            MARKETPLACE_CARD_SCALE_STEPS.indexOf(mode);
-
-          return (
-            <i
-              key={mode}
-              data-lit={index <= cardScaleIndex ? "true" : "false"}
-              data-current={index === cardScaleIndex ? "true" : "false"}
-              style={{ height: `${10 + index * 2}px` }}
-            />
-          );
-        })}
-    </span>
-
-    <input
-      type="range"
-      min="0"
-      max={MARKETPLACE_CARD_SCALE_STEPS.length - 1}
-      step="1"
-      value={cardScaleIndex}
-      onChange={event => selectCardScaleIndex(event.target.value)}
-      aria-label="Marketplace card scale"
-      aria-valuetext={
-        MARKETPLACE_CARD_SCALE_LABELS[cardScaleMode] || "XL"
-      }
-    />
-  </label>
-
-  <button
-    type="button"
-    className="marketplace-scale-step-button"
-    aria-label="Make Marketplace cards smaller"
-    onClick={() => stepCardScaleMode(-1)}
-    disabled={cardScaleIndex === 0}
-  >
-    −
-  </button>
-
-  <strong className="marketplace-scale-label">
-    {MARKETPLACE_CARD_SCALE_LABELS[cardScaleMode] || "XL"}
-  </strong>
-</div>
+<IXICardScaleControl
+  value={cardScaleMode}
+  onChange={updateCardScaleMode}
+  surfaceLabel="Marketplace"
+/>
 
 {inventoryRequestState.status !==
   "ready" ? (
@@ -1728,137 +1607,6 @@ if (armedDestination === "stackBottom") {
           box-shadow:
             0 16px 48px
             rgba(0, 0, 0, .28);
-        }
-
-        .marketplace-scale-control {
-          position: fixed;
-          right: 24px;
-          bottom: 24px;
-          z-index: 9999;
-          min-width: 224px;
-          min-height: 50px;
-          display: grid;
-          grid-template-columns: 40px minmax(92px, 1fr) 40px;
-          grid-template-rows: 34px 12px;
-          align-items: center;
-          gap: 0 8px;
-          padding: 7px 8px 5px;
-          border: 1px solid rgba(255, 196, 0, .55);
-          border-radius: 8px;
-          background: #111;
-          color: #ffc400;
-          box-shadow:
-            0 14px 34px rgba(0, 0, 0, .42),
-            inset 0 1px 0 rgba(255, 255, 255, .06);
-          backdrop-filter: blur(14px);
-        }
-
-        .marketplace-scale-step-button {
-          width: 40px;
-          height: 34px;
-          display: grid;
-          place-items: center;
-          padding: 0;
-          border: 0;
-          border-radius: 6px;
-          background: transparent;
-          color: #ffc400;
-          font-size: 22px;
-          font-weight: 650;
-          line-height: 1;
-          cursor: pointer;
-        }
-
-        .marketplace-scale-step-button:hover:not(:disabled),
-        .marketplace-scale-step-button:focus-visible {
-          background: rgba(255, 196, 0, .10);
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(255, 196, 0, .12);
-        }
-
-        .marketplace-scale-step-button:disabled {
-          color: rgba(255, 255, 255, .18);
-          cursor: default;
-          opacity: .7;
-        }
-
-        .marketplace-scale-meter {
-          height: 28px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 3px;
-          border-radius: 7px;
-        }
-
-        .marketplace-scale-bars {
-          width: 100%;
-          height: 28px;
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          gap: 5px;
-          pointer-events: none;
-        }
-
-        .marketplace-scale-bars i {
-          width: 3px;
-          flex: 0 0 3px;
-          display: block;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, .16);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-          transition:
-            background .16s ease,
-            box-shadow .16s ease,
-            transform .16s ease;
-        }
-
-        .marketplace-scale-bars i[data-lit="true"] {
-          background: rgba(255, 196, 0, .76);
-          box-shadow: 0 0 7px rgba(255, 196, 0, .24);
-        }
-
-        .marketplace-scale-bars i[data-current="true"] {
-          background: #ffc400;
-          box-shadow: 0 0 10px rgba(255, 196, 0, .64);
-          transform: scaleX(1.45);
-        }
-
-        .marketplace-scale-meter input {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          opacity: 0;
-          cursor: ew-resize;
-          direction: rtl;
-        }
-
-        .marketplace-scale-meter:focus-within {
-          outline: 2px solid rgba(255, 196, 0, .72);
-          outline-offset: 2px;
-          box-shadow: 0 0 0 4px rgba(255, 196, 0, .10);
-        }
-
-        .marketplace-scale-label {
-          grid-column: 1 / -1;
-          color: rgba(255, 255, 255, .54);
-          font-size: 9px;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: .12em;
-          text-align: center;
-        }
-
-        @media (max-width: 850px) {
-          .marketplace-scale-control {
-            right: 12px;
-            bottom: 12px;
-            min-width: 210px;
-          }
         }
 
         .inventory-state strong {

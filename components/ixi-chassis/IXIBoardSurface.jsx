@@ -10,8 +10,10 @@ export default function IXIBoardSurface({
   rowGap,
 
   className = "",
+  style = {},
 
-  children
+  children,
+  ...surfaceProps
 }) {
   const preset =
     getIXIScalePreset(
@@ -34,6 +36,7 @@ const resolvedRowGap =
 
   return (
     <section
+      {...surfaceProps}
       className={[
         "ixi-board-surface",
         centerRows
@@ -44,6 +47,7 @@ const resolvedRowGap =
         .filter(Boolean)
         .join(" ")}
       style={{
+        ...style,
         "--ixi-board-column-gap":
           `${resolvedColumnGap}px`,
 
