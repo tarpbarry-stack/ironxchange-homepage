@@ -6,7 +6,7 @@ export const IXI_TRANSACT_MODULES = Object.freeze([
   Object.freeze({ id: "material", label: "PART / MATERIAL", group: "work", documentType: "material-usage" }),
   Object.freeze({ id: "asset-acquisition", label: "ASSET ACQUISITION", group: "asset", documentType: "asset-acquisition" }),
   Object.freeze({ id: "rental-expense", label: "RENTAL EXPENSE", group: "rent", documentType: "rental-expense" }),
-  Object.freeze({ id: "rental-income", label: "RENTAL INCOME", group: "rent", documentType: "rental" }),
+  Object.freeze({ id: "rental-income", label: "RENTAL INCOME", group: "rent", documentType: "rental-income" }),
   Object.freeze({ id: "service-quote", label: "SERVICE QUOTE", group: "sell", documentType: "quote" }),
   Object.freeze({ id: "service-invoice", label: "SERVICE INVOICE", group: "sell", documentType: "invoice" }),
   Object.freeze({ id: "sold", label: "SOLD", group: "sell", documentType: "invoice" }),
