@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { createIXIRentalExpense } from "./IXIRentalExpenseCommands";
+import { createIXIRentalExpense, updateIXIRentalExpense } from "./IXIRentalExpenseCommands";
 import { createIXIRentalExpenseDraft, validateIXIRentalExpense } from "./IXIRentalExpenseContract";
 import {
   applyIXIRentalExpenseEconomics,
@@ -205,6 +205,10 @@ export default function IXIRentalExpenseApp({
   const [conditionOut, setConditionOut] = useState("");
   const [returnReference, setReturnReference] = useState("");
 
+  useEffect(() => {
+    setRecord(initialRecord || null);
+  }, [initialRecord]);
+
   const input = useMemo(() => ({
     vendorName,
     agreementNumber,
@@ -239,7 +243,7 @@ export default function IXIRentalExpenseApp({
     notes
   }), [vendorName, agreementNumber, assetDescription, assetType, serialNumber, startDate, expectedReturnDate, baseRate, rateUnit, includedUsage, includedUsageUnit, overageRate, useLocationLabel, purpose, responsibleEmployeeLabel, meterType, startMeter, fuelOut, conditionIn, deliveryCharge, pickupCharge, damageWaiver, insurance, deposit, environmentalFee, taxesEstimate, fuelReturnRequirement, otherTerms, charges, documents, notes]);
 
-  const preview = useMemo(() => createIXIRentalExpenseDraft({ context, input }), [context, input]);
+  const preview = useMemo(() => applyIXIRentalExpenseEconomics(createIXIRentalExpenseDraft({ context, input }), [], input.expectedReturnDate), [context, input]);
   const liveRecord = useMemo(() => record ? applyIXIRentalExpenseEconomics(record, relatedTransactions) : null, [record, relatedTransactions]);
 
   function changeLang(next) {
@@ -285,41 +289,58 @@ export default function IXIRentalExpenseApp({
       setRecord(next);
       setNewExpectedReturn(next.period?.expectedReturnDate || "");
       await onRecordChange?.(next, { action: "create", response: result.response }, context);
+    } catch (error) {
+      setErrors({ save: error.message });
     } finally {
       setSaving(false);
     }
   }
 
   async function saveExtension() {
+    setSaving(true);
     try {
-      const next = applyIXIRentalExpenseEconomics(extendIXIRentalExpense(record, { expectedReturnDate: newExpectedReturn, notes: extensionNotes }, actor), relatedTransactions);
+      const changed = applyIXIRentalExpenseEconomics(extendIXIRentalExpense(record, { expectedReturnDate: newExpectedReturn, notes: extensionNotes }, actor), relatedTransactions);
+      const result = await updateIXIRentalExpense({ record: changed, action: "extend" });
+      const next = applyIXIRentalExpenseEconomics(result.record, relatedTransactions);
       setRecord(next);
       setExtendOpen(false);
       setExtensionNotes("");
-      await onRecordChange?.(next, { action: "extend", expectedReturnDate: newExpectedReturn }, context);
+      await onRecordChange?.(next, { action: "extend", expectedReturnDate: newExpectedReturn, response: result.response }, context);
     } catch (error) {
       setErrors({ extension: error.message });
+    } finally {
+      setSaving(false);
     }
   }
 
   async function completeOffRent() {
+    setSaving(true);
     try {
-      const next = applyIXIRentalExpenseEconomics(offRentIXIRentalExpense(record, { actualOffRentDate, endMeter, fuelIn, conditionOut, returnReference }, actor), relatedTransactions, actualOffRentDate);
+      const changed = applyIXIRentalExpenseEconomics(offRentIXIRentalExpense(record, { actualOffRentDate, endMeter, fuelIn, conditionOut, returnReference }, actor), relatedTransactions, actualOffRentDate);
+      const result = await updateIXIRentalExpense({ record: changed, action: "off-rent" });
+      const next = applyIXIRentalExpenseEconomics(result.record, relatedTransactions, actualOffRentDate);
       setRecord(next);
       setOffRentOpen(false);
-      await onRecordChange?.(next, { action: "off-rent", actualOffRentDate }, context);
+      await onRecordChange?.(next, { action: "off-rent", actualOffRentDate, response: result.response }, context);
     } catch (error) {
       setErrors({ offRent: error.message });
+    } finally {
+      setSaving(false);
     }
   }
 
   async function closeRental() {
+    setSaving(true);
     try {
-      const next = applyIXIRentalExpenseEconomics(closeIXIRentalExpense(record, actor), relatedTransactions, record?.period?.actualOffRentDate);
+      const changed = applyIXIRentalExpenseEconomics(closeIXIRentalExpense(record, actor), relatedTransactions, record?.period?.actualOffRentDate);
+      const result = await updateIXIRentalExpense({ record: changed, action: "close" });
+      const next = applyIXIRentalExpenseEconomics(result.record, relatedTransactions, record?.period?.actualOffRentDate);
       setRecord(next);
-      await onRecordChange?.(next, { action: "close" }, context);
+      await onRecordChange?.(next, { action: "close", response: result.response }, context);
     } catch (error) {
       setErrors({ close: error.message });
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -375,10 +396,10 @@ export default function IXIRentalExpenseApp({
       <div className="rent-row"><div className="rent-row-top"><strong>RESPONSIBLE</strong><b>{r.custody?.responsibleEmployeeLabel || "—"}</b></div><small>{r.custody?.purpose || r.context?.primaryLabel}</small></div>
 
       {!isOffRent ? <>
-        <div className="rent-action-grid"><button className="rent-secondary" onClick={() => { setNewExpectedReturn(r.period?.expectedReturnDate || ""); setExtendOpen(value => !value); }}>{t.extend}</button><button className="rent-primary" onClick={() => setOffRentOpen(value => !value)}>{t.offRent}</button></div>
-        {extendOpen ? <div className="rent-row"><Field label={t.newExpected}><input type="date" value={newExpectedReturn} onChange={event => setNewExpectedReturn(event.target.value)} /></Field><Field label="EXTENSION NOTE"><Input value={extensionNotes} onChange={setExtensionNotes} /></Field><button className="rent-primary" onClick={saveExtension}>{t.saveExtension}</button></div> : null}
-        {offRentOpen ? <div className="rent-row"><Field label={t.actualOffRent}><input type="date" value={actualOffRentDate} onChange={event => setActualOffRentDate(event.target.value)} /></Field><div className="rent-grid2"><Field label={t.endMeter}><Input value={endMeter} onChange={setEndMeter} inputMode="decimal" /></Field><Field label={t.fuelIn}><Input value={fuelIn} onChange={setFuelIn} /></Field></div><Field label={t.conditionOut}><textarea value={conditionOut} onChange={event => setConditionOut(event.target.value)} /></Field><Field label={t.returnRef}><Input value={returnReference} onChange={setReturnReference} /></Field><button className="rent-primary" onClick={completeOffRent}>{t.completeOffRent}</button></div> : null}
-      </> : !isClosed ? <button className="rent-primary" onClick={closeRental}>{t.close}</button> : null}
+        <div className="rent-action-grid"><button className="rent-secondary" disabled={saving} onClick={() => { setNewExpectedReturn(r.period?.expectedReturnDate || ""); setExtendOpen(value => !value); }}>{t.extend}</button><button className="rent-primary" disabled={saving} onClick={() => setOffRentOpen(value => !value)}>{t.offRent}</button></div>
+        {extendOpen ? <div className="rent-row"><Field label={t.newExpected}><input type="date" value={newExpectedReturn} onChange={event => setNewExpectedReturn(event.target.value)} /></Field><Field label="EXTENSION NOTE"><Input value={extensionNotes} onChange={setExtensionNotes} /></Field><button className="rent-primary" disabled={saving} onClick={saveExtension}>{saving ? "SAVING..." : t.saveExtension}</button></div> : null}
+        {offRentOpen ? <div className="rent-row"><Field label={t.actualOffRent}><input type="date" value={actualOffRentDate} onChange={event => setActualOffRentDate(event.target.value)} /></Field><div className="rent-grid2"><Field label={t.endMeter}><Input value={endMeter} onChange={setEndMeter} inputMode="decimal" /></Field><Field label={t.fuelIn}><Input value={fuelIn} onChange={setFuelIn} /></Field></div><Field label={t.conditionOut}><textarea value={conditionOut} onChange={event => setConditionOut(event.target.value)} /></Field><Field label={t.returnRef}><Input value={returnReference} onChange={setReturnReference} /></Field><button className="rent-primary" disabled={saving} onClick={completeOffRent}>{saving ? "SAVING..." : t.completeOffRent}</button></div> : null}
+      </> : !isClosed ? <button className="rent-primary" disabled={saving} onClick={closeRental}>{saving ? "SAVING..." : t.close}</button> : null}
 
       <div className="rent-section">{t.history}</div>
       <div className="rent-history">{(r.activity || []).slice().reverse().map(item => <div className="rent-row" key={item.eventId}><div className="rent-row-top"><strong>{clean(item.type).replace(/-/g, " ").toUpperCase()}</strong><b>{clean(item.nextExpectedReturnDate || item.actualOffRentDate || "")}</b></div><small>{item.actorLabel || r.audit?.createdByLabel} · {item.occurredAt}</small></div>)}</div>
@@ -428,7 +449,7 @@ export default function IXIRentalExpenseApp({
     {charges.map((charge, index) => <div className="rent-row" key={index}><div className="rent-grid2"><Field label="TYPE"><select value={charge.type} onChange={event => updateCharge(index, "type", event.target.value)}><option value="other">OTHER</option><option value="delivery">DELIVERY</option><option value="pickup">PICKUP</option><option value="fuel">FUEL</option><option value="waiver">DAMAGE WAIVER</option><option value="environmental">ENVIRONMENTAL</option></select></Field><Field label="AMOUNT"><Input value={charge.amount} onChange={value => updateCharge(index, "amount", value)} inputMode="decimal" /></Field></div><Field label="LABEL"><Input value={charge.label} onChange={value => updateCharge(index, "label", value)} /></Field><div className="rent-grid2"><Field label="RECURRENCE"><select value={charge.recurrence} onChange={event => updateCharge(index, "recurrence", event.target.value)}><option value="one-time">ONE TIME</option><option value="per-period">PER PERIOD</option></select></Field><button className="rent-secondary" onClick={() => setCharges(list => list.filter((_, itemIndex) => itemIndex !== index))}>REMOVE</button></div></div>)}
     <button className="rent-secondary" onClick={() => setCharges(list => [...list, emptyCharge()])}>{t.addCharge}</button>
 
-    <div className="rent-total"><span>STARTING PROJECTED COMMITMENT</span><strong>{money(Number(baseRate || 0) + Number(deliveryCharge || 0) + Number(pickupCharge || 0) + Number(damageWaiver || 0) + Number(insurance || 0) + Number(environmentalFee || 0) + Number(taxesEstimate || 0))}</strong></div>
+    <div className="rent-total"><span>STARTING PROJECTED COMMITMENT</span><strong>{money(preview.economics?.projectedTotal)}</strong></div>
 
     <div className="rent-section">{t.docs}</div>
     <div className="rent-docs">
@@ -437,10 +458,10 @@ export default function IXIRentalExpenseApp({
       <label><input type="file" accept="application/pdf,image/*" hidden multiple onChange={event => addDocs(event.target.files, "delivery-ticket")} /><button type="button" onClick={event => event.currentTarget.parentElement.querySelector("input").click()}>+ DELIVERY TICKET</button></label>
       <label><input type="file" accept="application/pdf,image/*" hidden multiple onChange={event => addDocs(event.target.files, "other")} /><button type="button" onClick={event => event.currentTarget.parentElement.querySelector("input").click()}>+ OTHER</button></label>
     </div>
-    {documents.length ? <div className="rent-row"><small>{documents.length} document(s) staged for canonical attachment.</small></div> : null}
+    {documents.length ? <div className="rent-row"><small>{documents.length} file(s) selected. Secure upload must finish before this Rental Expense can be recorded.</small></div> : null}
 
     <Field label={t.notes}><textarea value={notes} onChange={event => setNotes(event.target.value)} /></Field>
-    {Object.keys(errors).length ? <div className="rent-error">RENTED FROM, ASSET, START DATE, EXPECTED RETURN AND RATE ARE REQUIRED.</div> : null}
+    {Object.keys(errors).length ? <div className="rent-error">{errors.save || (errors.documents && "SECURE DOCUMENT UPLOAD IS REQUIRED BEFORE SAVE.") || "AOS ENTITY / ACTOR, RENTED FROM, ASSET, START DATE, EXPECTED RETURN AND A POSITIVE RATE ARE REQUIRED."}</div> : null}
     <button className="rent-primary" onClick={startRental} disabled={saving}>{saving ? "STARTING..." : t.startRental}<small style={{ display: "block", fontSize: 5 }}>{t.startSub}</small></button>
     <button className="rent-secondary" onClick={() => onBack?.()}>{t.back}</button>
     <div className="rent-foot">RNTEXP records temporary custody of somebody else's asset. It creates a rental commitment, not a vendor Bill and not a payment.</div>
