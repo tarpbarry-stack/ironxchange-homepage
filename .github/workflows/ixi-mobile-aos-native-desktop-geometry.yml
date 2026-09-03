@@ -1,0 +1,34 @@
+name: IXI Mobile AOS Native Desktop Geometry Certification
+
+on:
+  push:
+    branches:
+      - mobile/commercial-aos-v1-native-desktop-geometry
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install repository dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Run AOS native desktop geometry contract
+        run: node --test tests/ixi-mobile-aos-native-desktop-geometry.test.mjs
+
+      - name: Build production application
+        env:
+          NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-mobile-native-geometry-placeholder
+        run: npm run build
