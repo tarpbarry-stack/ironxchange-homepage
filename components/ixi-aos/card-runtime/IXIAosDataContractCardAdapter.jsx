@@ -21,6 +21,7 @@ import {
  * 2) In AOS/Work only, a real runtime parent name replaces the stock top-line
  *    noun in the exact existing visual slot. FaceLab has no real parent and is
  *    therefore left visually untouched.
+ * 3) A real AOS parent is rendered in the canonical IXI yellow identity treatment.
  */
 export default function IXIAosDataContractCardAdapter({
   children,
@@ -55,46 +56,18 @@ export default function IXIAosDataContractCardAdapter({
     }
   };
 
-  const parentDisplayName = getAosParentDisplayName(
-    object,
-    props?.parentLabel
-  );
+  const parentDisplayName = getAosParentDisplayName(object, props?.parentLabel);
 
   async function onSaveObject(payload = {}) {
     const incomingObject = payload?.object || {};
-
     const nextObject = {
       ...object,
       ...incomingObject,
-
-      displayName:
-        payload?.displayName ??
-        incomingObject?.displayName ??
-        object?.displayName,
-
-      businessIdentifiers:
-        payload?.businessIdentifiers ??
-        incomingObject?.businessIdentifiers ??
-        object?.businessIdentifiers ??
-        [],
-
-      fields:
-        payload?.fields ||
-        incomingObject?.fields ||
-        object?.fields ||
-        {},
-
-      media:
-        payload?.media ||
-        incomingObject?.media ||
-        object?.media ||
-        [],
-
-      fieldDefinitions:
-        payload?.fieldDefinitions ||
-        incomingObject?.fieldDefinitions ||
-        fieldDefinitions,
-
+      displayName: payload?.displayName ?? incomingObject?.displayName ?? object?.displayName,
+      businessIdentifiers: payload?.businessIdentifiers ?? incomingObject?.businessIdentifiers ?? object?.businessIdentifiers ?? [],
+      fields: payload?.fields || incomingObject?.fields || object?.fields || {},
+      media: payload?.media || incomingObject?.media || object?.media || [],
+      fieldDefinitions: payload?.fieldDefinitions || incomingObject?.fieldDefinitions || fieldDefinitions,
       metadata: {
         ...(object?.metadata || {}),
         ...(incomingObject?.metadata || {}),
@@ -102,15 +75,8 @@ export default function IXIAosDataContractCardAdapter({
       }
     };
 
-    const contractPayload = buildAosObjectSavePayload(
-      nextObject,
-      nextObject.fieldDefinitions
-    );
-
-    return props?.onSaveObject?.({
-      ...payload,
-      ...contractPayload
-    });
+    const contractPayload = buildAosObjectSavePayload(nextObject, nextObject.fieldDefinitions);
+    return props?.onSaveObject?.({ ...payload, ...contractPayload });
   }
 
   const contractProps = {
@@ -121,24 +87,14 @@ export default function IXIAosDataContractCardAdapter({
   };
 
   const rendered = typeof children === "function" ? children(contractProps) : null;
-
   if (!showBusinessIdentifier && !parentDisplayName) return rendered;
 
   return (
-    <div
-      className={[
-        "ixi-aos-data-contract-card-shell",
-        parentDisplayName ? "has-real-parent" : ""
-      ].filter(Boolean).join(" ")}
-    >
+    <div className={["ixi-aos-data-contract-card-shell", parentDisplayName ? "has-real-parent" : ""].filter(Boolean).join(" ")}>
       {rendered}
 
       {parentDisplayName ? (
-        <div
-          className="ixi-aos-runtime-parent-line"
-          aria-label="Parent"
-          title={parentDisplayName}
-        >
+        <div className="ixi-aos-runtime-parent-line" aria-label="Parent" title={parentDisplayName}>
           {parentDisplayName}
         </div>
       ) : null}
@@ -156,18 +112,22 @@ export default function IXIAosDataContractCardAdapter({
           height: 471px;
         }
 
+        /*
+         * Canonical AOS parent identity. This value exists only when the runtime
+         * supplies a real parent relationship; FaceLab stock remains untouched.
+         */
         .ixi-aos-runtime-parent-line {
           position: absolute;
           top: 7px;
           left: 10px;
-          z-index: 95;
+          z-index: 195;
           max-width: 176px;
           overflow: hidden;
-          color: rgba(255,255,255,.58);
+          color: #ffc400;
           font-size: 6px;
           font-weight: 950;
           line-height: 1;
-          letter-spacing: .06em;
+          letter-spacing: .08em;
           text-overflow: ellipsis;
           text-transform: uppercase;
           white-space: nowrap;
@@ -179,11 +139,6 @@ export default function IXIAosDataContractCardAdapter({
           visibility: hidden !important;
         }
 
-        /*
-         * Customer business identity belongs in the card body, not in a floating
-         * badge. Keep it readable, quiet and clear of the universal parent/title
-         * header while preserving the durable identifier contract underneath.
-         */
         .ixi-aos-data-contract-business-id {
           position: absolute;
           top: 49px;
