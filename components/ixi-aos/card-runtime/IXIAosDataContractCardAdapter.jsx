@@ -174,22 +174,23 @@ export default function IXIAosDataContractCardAdapter({
           pointer-events: none;
         }
 
-        /*
-         * Replace only the existing top-line stock noun while a real AOS parent
-         * exists. No rule fires in FaceLab, so its current card-stock labels stay
-         * exactly as designed.
-         */
         .ixi-aos-data-contract-card-shell.has-real-parent article > header > div:first-child > span:first-child,
         .ixi-aos-data-contract-card-shell.has-real-parent .location-face1-heading > span:first-child {
           visibility: hidden !important;
         }
 
+        /*
+         * Customer business identity belongs in the card body, not in a floating
+         * badge. Keep it readable, quiet and clear of the universal parent/title
+         * header while preserving the durable identifier contract underneath.
+         */
         .ixi-aos-data-contract-business-id {
           position: absolute;
-          top: 46px;
-          right: 9px;
+          top: 49px;
+          right: 10px;
           z-index: 75;
-          width: 76px;
+          width: 136px;
+          max-width: calc(100% - 20px);
           pointer-events: none;
         }
       `}</style>
