@@ -8,6 +8,7 @@
     "start": "next start",
     "test:transact-coa": "node --test tests/ixi-transact-coa-policy.test.mjs",
     "test:asset-acquisition": "node --test tests/ixi-asset-acquisition-contract.test.mjs",
+    "test:rental-expense": "node --test tests/ixi-rental-expense-contract.test.mjs",
     "test:card-geometry": "node tests/ixi-card-geometry-contract.test.mjs",
     "generate-taxonomy": "node scripts/generateConfigCategories.js",
     "build-aws-taxonomy-master": "node scripts/buildAwsTaxonomyMaster.js"
