@@ -78,7 +78,7 @@ export default function IXIAosCard001Location(props) {
                 <IXIAosLocationOverviewCard {...contractProps} object={object} variant="001" />
 
                 {ixiIdentity ? (
-                  <span className="aos-card001-ixi-identity ixi-v12-object-id" title={ixiIdentity}>
+                  <span className="aos-card001-ixi-identity" title={ixiIdentity}>
                     {ixiIdentity}
                   </span>
                 ) : null}
@@ -107,6 +107,10 @@ export default function IXIAosCard001Location(props) {
                     max-width: 122px;
                     overflow: hidden;
                     color: rgba(255,255,255,.50);
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 6px;
+                    font-weight: 950;
+                    letter-spacing: .08em;
                     text-overflow: ellipsis;
                     text-transform: uppercase;
                     white-space: nowrap;
