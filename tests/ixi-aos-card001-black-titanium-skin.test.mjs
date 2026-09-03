@@ -16,7 +16,7 @@ const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedComm
 const texturePath = path.join(root, "public/ixi/skins/black-titanium-grain.svg");
 const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-grain.svg");
 const forgedAssets = [
-  "public/ixi/skins/forged-command-shell-v2.webp",
+  "public/ixi/skins/forged-command-shell-v3.webp",
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
 ].map(file => path.join(root, file));
@@ -81,7 +81,9 @@ test("Forged Command uses compact photographic materials without changing card o
 
   assert.match(forgedCommand, /\.board-command-rail/);
   assert.match(forgedCommand, /pointer-events:\s*none/);
-  assert.match(forgedCommand, /forged-command-shell-v2\.webp/);
+  assert.match(forgedCommand, /forged-command-shell-v3\.webp/);
+  assert.match(forgedCommand, /clip-path:\s*inset\(0 round 13px\)/);
+  assert.match(forgedCommand, /\.skin-forged-command \.board-command-rail[\s\S]*?z-index:\s*190\s*!important/);
   assert.match(forgedCommand, /forged-command-leather\.webp/);
   assert.match(forgedCommand, /forged-command-steel\.webp/);
 

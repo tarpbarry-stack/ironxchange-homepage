@@ -65,7 +65,8 @@ export default function IXIAosCard001ForgedCommandStyles() {
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        background: url("/ixi/skins/forged-command-shell-v2.webp") center / 100% 100% no-repeat;
+        background: url("/ixi/skins/forged-command-shell-v3.webp") center / 100% 100% no-repeat;
+        clip-path: inset(0 round 13px);
         pointer-events: none;
         z-index: 170;
       }
@@ -294,6 +295,7 @@ export default function IXIAosCard001ForgedCommandStyles() {
 
       .skin-forged-command .board-command-rail {
         border-top-color: #a47b4d !important;
+        border-radius: 0 0 12px 12px !important;
         background-color: var(--fc-leather) !important;
         background-image:
           linear-gradient(180deg, rgba(255,232,194,.17), transparent 38%),
@@ -306,6 +308,8 @@ export default function IXIAosCard001ForgedCommandStyles() {
           inset 0 1px 0 rgba(255,235,202,.17),
           inset 0 -1px 0 rgba(0,0,0,.88),
           0 -3px 10px rgba(0,0,0,.66) !important;
+        overflow: hidden !important;
+        z-index: 190 !important;
       }
 
       .skin-forged-command .board-command-rail .rail-zone {
@@ -332,6 +336,13 @@ export default function IXIAosCard001ForgedCommandStyles() {
       .aos-card001-v12-identity-shell.skin-forged-command .aos-card001-ixi-identity,
       .aos-card001-v12-identity-shell.skin-forged-command .ixi-v12-customer-identity-label {
         color: var(--fc-muted) !important;
+      }
+
+      .aos-card001-v12-identity-shell.skin-forged-command .aos-card001-ixi-identity {
+        background: rgba(7,7,6,.82) !important;
+        box-shadow: 0 0 5px 4px rgba(7,7,6,.82) !important;
+        color: var(--fc-brass-hot) !important;
+        text-shadow: 0 1px 0 #000 !important;
       }
 
       .aos-card001-v12-identity-shell.skin-forged-command .ixi-v12-customer-identity-value {
