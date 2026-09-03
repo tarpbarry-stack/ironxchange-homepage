@@ -1,0 +1,173 @@
+name: Deploy IX-Core Service Quote
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Service Quote release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-service-quote-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-service-quote-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/service-quote-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialLifecycleEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialServiceQuoteFactory.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              rm -f "$APP/financial/IXIFinancialServiceQuoteFactory.js"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '0086ff827c728e385750dbb35cd050e5c5d4246a98dd39b8edb72bdc6baee602' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            'b3bfc03d830e8d0c4a5cc20d65b68ea6723d0e95265343ca70a50a03862b41af' 'financial/IXIFinancialValidationBridge.js' \
+            '676c559eaa7935cb2881e5789116045184917cc23c45ea1d5de4e798005dbbbf' 'financial/IXIFinancialLifecycleEngine.js' \
+            '7ef2bd8f7abbbd5de44d7d8190a6ddf215e46a6a56e2381218576acd32227011' 'financial/IXIFinancialCommandEngine.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialLifecycleEngine.js financial/IXIFinancialCommandEngine.js
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const { createFinancialDocumentByType } = require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const { createFinancialLifecycleSnapshot } = require('./financial/IXIFinancialLifecycleEngine');
+          const { isNonEconomicOperationalCapture } = require('./financial/IXIFinancialCommandEngine');
+          const base = {
+            financialDocumentId: 'ifd_service_quote_deploy_probe',
+            documentNumber: 'SQ-PROBE',
+            references: [
+              { passportId: 'passport:asset:probe', role: 'asset' },
+              { passportId: 'passport:entity:probe', role: 'entity' },
+              { passportId: 'passport:employee:probe', role: 'employee' }
+            ],
+            serviceQuote: {
+              schema: 'ixi-service-quote-v2', identity: { revision: 1 },
+              context: { primaryPassportId: 'passport:asset:probe', entityPassportId: 'passport:entity:probe', actorPassportId: 'passport:employee:probe' },
+              customer: { name: 'Deploy Probe Customer' }, asset: { passportId: 'passport:asset:probe', label: 'Deploy Probe Excavator' },
+              request: { problem: 'Deploy probe', customerScope: 'Validate Service Quote contract' },
+              commercial: { pricingType: 'fixed-price', quoteDate: '2026-09-01', validThrough: '2026-09-30', taxAmount: 825 },
+              economics: { quotedServiceRevenue: 10000, customerQuoteTotal: 10825, authorizedServiceRevenue: 0, authorizedTax: 0, authorizedCustomerTotal: 0 },
+              acceptance: { status: 'pending' }, status: 'sent'
+            }
+          };
+          const offer = createFinancialDocumentByType({ documentType: 'service-quote', input: base });
+          const acceptedInput = JSON.parse(JSON.stringify(base));
+          acceptedInput.financialState = 'committed';
+          Object.assign(acceptedInput.serviceQuote, { status: 'accepted', acceptance: { status: 'accepted', acceptedRevision: 1, acceptedBy: 'Probe Customer', method: 'digital', acceptedAt: '2026-09-02T12:00:00.000Z' } });
+          Object.assign(acceptedInput.serviceQuote.economics, { authorizedServiceRevenue: 10000, authorizedTax: 825, authorizedCustomerTotal: 10825 });
+          const accepted = createFinancialDocumentByType({ documentType: 'service-quote', input: acceptedInput });
+          const offerValidation = validateFinancialDocument(offer);
+          const acceptedValidation = validateFinancialDocument(accepted);
+          const offerLifecycle = createFinancialLifecycleSnapshot({ documents: [offer] });
+          const acceptedLifecycle = createFinancialLifecycleSnapshot({ documents: [accepted] });
+          if (!offerValidation.ok || !acceptedValidation.ok || !isNonEconomicOperationalCapture(offer) || isNonEconomicOperationalCapture(accepted) || offerLifecycle.contractedRevenue !== 0 || acceptedLifecycle.contractedRevenue !== 10000 || accepted.totals.tax !== 825 || accepted.totals.customerTotal !== 10825 || accepted.accountingTreatment.createsReceivable !== false) {
+            console.error(offerValidation.errors, acceptedValidation.errors, offerLifecycle, acceptedLifecycle);
+            throw new Error('Service Quote deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/service-quote-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"service-quote","input":{}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/service-quote-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Service Quote %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Service Quote $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record Service Quote release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Service Quote release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- Financial tests: passed'
+            echo '- Offer, acceptance, tax-separation, lifecycle, and non-duplication probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Service Quote route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
