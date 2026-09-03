@@ -1,5 +1,6 @@
 import IXIAosGenericAgreement015 from "../generic/IXIAosGenericAgreement015";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 export const CARD_015 = Object.freeze({
   cardNumber: 15,
@@ -14,7 +15,11 @@ export const CARD_015 = Object.freeze({
 export default function IXIAosCard015(props) {
   return (
     <IXIAosDataContractCardAdapter {...props} minimumCustomFields={11}>
-      {contractProps => <IXIAosGenericAgreement015 {...contractProps} />}
+      {contractProps => (
+        <IXIAosCommercialEditorBridge {...contractProps} object={contractProps.object} minimumCustomFields={11} mediaEnabled>
+          {({ object: runtimeObject }) => <IXIAosGenericAgreement015 {...contractProps} object={runtimeObject} />}
+        </IXIAosCommercialEditorBridge>
+      )}
     </IXIAosDataContractCardAdapter>
   );
 }

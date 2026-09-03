@@ -1,5 +1,6 @@
 import IXIAosGenericDataDominant010 from "../generic/IXIAosGenericDataDominant010";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 export const CARD_010 = Object.freeze({
   cardNumber: 10,
@@ -21,21 +22,8 @@ function withFaceLabSample(object = {}) {
     singularLabel: "RECORD",
     pluralLabel: "RECORDS",
     displayName: "PLANT 4 · COMPRESSOR A-17",
-    capabilities: {
-      ...(object?.capabilities || {}),
-      canCreate: true,
-      canTransact: true,
-      editable: true,
-      hasConsole: true,
-      hasRail: true,
-      hasRelationships: true
-    },
-    presentation: {
-      ...(object?.presentation || {}),
-      detailsTitle: "TECHNICAL DATA",
-      relationshipsTitle: "RELATIONSHIPS",
-      sampleUse: "STRUCTURED / TECHNICAL RECORD"
-    },
+    capabilities: { ...(object?.capabilities || {}), canCreate: true, canTransact: true, editable: true, hasConsole: true, hasRail: true, hasRelationships: true },
+    presentation: { ...(object?.presentation || {}), detailsTitle: "TECHNICAL DATA", relationshipsTitle: "RELATIONSHIPS", sampleUse: "STRUCTURED / TECHNICAL RECORD" },
     fieldDefinitions: [
       { fieldId: "businessIdentifier", label: "ID #", type: "text", editable: true, presentationOrder: 0, semanticRole: "business-identifier", presentationRole: "business-identifier" },
       { fieldId: "classification", label: "CLASSIFICATION", type: "text", editable: true, presentationOrder: 1 },
@@ -66,11 +54,7 @@ function withFaceLabSample(object = {}) {
       { id: "c010-rel-3", displayLabel: "RELATED SYSTEM", displayName: "AIR SYSTEM 04" }
     ],
     media: [],
-    metadata: {
-      ...(object?.metadata || {}),
-      sampleUse: "STRUCTURED / TECHNICAL RECORD",
-      nomenclature: { singular: "RECORD", plural: "RECORDS" }
-    }
+    metadata: { ...(object?.metadata || {}), sampleUse: "STRUCTURED / TECHNICAL RECORD", nomenclature: { singular: "RECORD", plural: "RECORDS" } }
   };
 }
 
@@ -78,7 +62,11 @@ export default function IXIAosCard010(props) {
   const object = withFaceLabSample(props?.object || {});
   return (
     <IXIAosDataContractCardAdapter {...props} object={object} minimumCustomFields={9}>
-      {contractProps => <IXIAosGenericDataDominant010 {...contractProps} />}
+      {contractProps => (
+        <IXIAosCommercialEditorBridge {...contractProps} object={contractProps.object} minimumCustomFields={9} mediaEnabled>
+          {({ object: runtimeObject }) => <IXIAosGenericDataDominant010 {...contractProps} object={runtimeObject} />}
+        </IXIAosCommercialEditorBridge>
+      )}
     </IXIAosDataContractCardAdapter>
   );
 }
