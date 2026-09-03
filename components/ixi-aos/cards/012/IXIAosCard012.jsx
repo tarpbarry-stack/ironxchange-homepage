@@ -1,6 +1,6 @@
 import IXIAosGenericLifecycle012 from "../generic/IXIAosGenericLifecycle012";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
-import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
+import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 
 export const CARD_012 = Object.freeze({
   cardNumber: 12,
@@ -16,9 +16,9 @@ export default function IXIAosCard012(props) {
   return (
     <IXIAosDataContractCardAdapter {...props} minimumCustomFields={10}>
       {contractProps => (
-        <IXIAosCommercialEditorBridge {...contractProps} object={contractProps.object} minimumCustomFields={10} mediaEnabled>
-          {({ object: runtimeObject }) => <IXIAosGenericLifecycle012 {...contractProps} object={runtimeObject} />}
-        </IXIAosCommercialEditorBridge>
+        <IXIAosFace1CardRuntime object={contractProps.object} onSaveObject={contractProps.onSaveObject} maxFields={10}>
+          {face1 => <IXIAosGenericLifecycle012 {...contractProps} object={face1.object} onSaveObject={face1.onSaveObject} />}
+        </IXIAosFace1CardRuntime>
       )}
     </IXIAosDataContractCardAdapter>
   );
