@@ -1,12 +1,152 @@
 import IXITransactFaceLabFrame from "../../components/ixi-face-studio/IXITransactFaceLabFrame";
 import IXIPayablesApp from "../../components/ixi-aos/transact/modules/payables/IXIPayablesApp";
 
-const context={primary:{objectId:"ENTITY-IXI",passportId:"PASS-IXI",objectType:"entity",label:"IRONXCHANGE LLC"},entity:{objectId:"ENTITY-IXI",passportId:"PASS-IXI",objectType:"entity",label:"IRONXCHANGE LLC"},location:{objectId:"LOC-MIDLAND",passportId:"PASS-MIDLAND",objectType:"location",label:"MIDLAND YARD"},actor:{employeeId:"EMP-SARAH",passportId:"PASS-SARAH",displayName:"SARAH JONES",label:"SARAH JONES"},permissions:[]};
-const object={objectId:"ENTITY-IXI",passportId:"PASS-IXI",objectType:"entity",label:"IRONXCHANGE LLC"};
-const bills=[
-{documentType:"bill",documentId:"BILL-19482",input:{vendorName:"TXU ENERGY",documentNumber:"884921",documentDate:"2026-07-12",dueDate:"2026-07-28",currency:"USD",total:4250,status:"open",financialState:"billed",references:[{role:"vendor",externalId:"V-TXU",label:"TXU ENERGY",objectType:"vendor"},{role:"entity",passportId:"PASS-IXI",label:"IRONXCHANGE LLC"},{role:"location",passportId:"PASS-MIDLAND",label:"MIDLAND YARD"}]},approval:{status:"approved"},purchaseMatch:{status:"n/a"}},
-{documentType:"bill",documentId:"BILL-19483",input:{vendorName:"HYDRAULIC SUPPLY",documentNumber:"INV-78451",documentDate:"2026-08-01",dueDate:"2026-08-20",currency:"USD",total:9482.17,status:"open",financialState:"billed",references:[{role:"vendor",externalId:"V-HYD",label:"HYDRAULIC SUPPLY",objectType:"vendor"},{role:"entity",passportId:"PASS-IXI",label:"IRONXCHANGE LLC"},{role:"purchase-order",externalId:"PO-2048",label:"PO-2048",objectType:"purchase-order"}]},approval:{status:"pending"},purchaseMatch:{status:"exception"}},
-{documentType:"bill",documentId:"BILL-19484",input:{vendorName:"RITCHIE BROS",documentNumber:"RB-51042",documentDate:"2026-08-10",dueDate:"2026-08-17",currency:"USD",total:18500,status:"open",financialState:"billed",references:[{role:"vendor",externalId:"V-RB",label:"RITCHIE BROS",objectType:"vendor"},{role:"entity",passportId:"PASS-IXI",label:"IRONXCHANGE LLC"}]},approval:{status:"approved"},purchaseMatch:{status:"matched"}},
-{documentType:"payment",documentId:"PAY-9001",input:{total:2500,direction:"out",financialState:"paid",relatedBillId:"BILL-19482",references:[{role:"bill",externalId:"BILL-19482",label:"884921"}]}}
+const context = {
+  primary: {
+    objectId: "ENTITY-IXI",
+    passportId: "PASS-IXI",
+    objectType: "entity",
+    label: "IRONXCHANGE LLC",
+  },
+  entity: {
+    objectId: "ENTITY-IXI",
+    passportId: "PASS-IXI",
+    objectType: "entity",
+    label: "IRONXCHANGE LLC",
+  },
+  location: {
+    objectId: "LOC-MIDLAND",
+    passportId: "PASS-MIDLAND",
+    objectType: "location",
+    label: "MIDLAND YARD",
+  },
+  actor: {
+    employeeId: "EMP-SARAH",
+    passportId: "PASS-SARAH",
+    displayName: "SARAH JONES",
+    label: "SARAH JONES",
+  },
+  permissions: [
+    "financial.document.create",
+    "financial.document.patch",
+    "financial.payment.create",
+    "financial.vendor-credit.apply",
+    "financial.payment.schedule",
+    "financial.payables.manage",
+  ],
+};
+const object = {
+  objectId: "ENTITY-IXI",
+  passportId: "PASS-IXI",
+  objectType: "entity",
+  label: "IRONXCHANGE LLC",
+};
+const bills = [
+  {
+    documentType: "bill",
+    documentId: "BILL-19482",
+    input: {
+      vendorName: "TXU ENERGY",
+      documentNumber: "884921",
+      documentDate: "2026-07-12",
+      dueDate: "2026-07-28",
+      currency: "USD",
+      total: 4250,
+      status: "open",
+      financialState: "billed",
+      references: [
+        {
+          role: "vendor",
+          externalId: "V-TXU",
+          label: "TXU ENERGY",
+          objectType: "vendor",
+        },
+        { role: "entity", passportId: "PASS-IXI", label: "IRONXCHANGE LLC" },
+        { role: "location", passportId: "PASS-MIDLAND", label: "MIDLAND YARD" },
+      ],
+    },
+    approval: { status: "approved" },
+    purchaseMatch: { status: "n/a" },
+  },
+  {
+    documentType: "bill",
+    documentId: "BILL-19483",
+    input: {
+      vendorName: "HYDRAULIC SUPPLY",
+      documentNumber: "INV-78451",
+      documentDate: "2026-08-01",
+      dueDate: "2026-08-20",
+      currency: "USD",
+      total: 9482.17,
+      status: "open",
+      financialState: "billed",
+      references: [
+        {
+          role: "vendor",
+          externalId: "V-HYD",
+          label: "HYDRAULIC SUPPLY",
+          objectType: "vendor",
+        },
+        { role: "entity", passportId: "PASS-IXI", label: "IRONXCHANGE LLC" },
+        {
+          role: "purchase-order",
+          externalId: "PO-2048",
+          label: "PO-2048",
+          objectType: "purchase-order",
+        },
+      ],
+    },
+    approval: { status: "pending" },
+    purchaseMatch: { status: "exception" },
+  },
+  {
+    documentType: "bill",
+    documentId: "BILL-19484",
+    input: {
+      vendorName: "RITCHIE BROS",
+      documentNumber: "RB-51042",
+      documentDate: "2026-08-10",
+      dueDate: "2026-08-17",
+      currency: "USD",
+      total: 18500,
+      status: "open",
+      financialState: "billed",
+      references: [
+        {
+          role: "vendor",
+          externalId: "V-RB",
+          label: "RITCHIE BROS",
+          objectType: "vendor",
+        },
+        { role: "entity", passportId: "PASS-IXI", label: "IRONXCHANGE LLC" },
+      ],
+    },
+    approval: { status: "approved" },
+    purchaseMatch: { status: "matched" },
+  },
+  {
+    documentType: "payment",
+    documentId: "PAY-9001",
+    input: {
+      total: 2500,
+      paymentDirection: "outflow",
+      financialState: "paid",
+      sourceFinancialDocumentId: "BILL-19482",
+      references: [{ role: "bill", externalId: "BILL-19482", label: "884921" }],
+    },
+  },
 ];
-export default function PayablesFaceLabPage(){return <IXITransactFaceLabFrame title="PAYABLES / A/P" route="/facelab/payables"><IXIPayablesApp context={context} object={object} financialRecords={bills} initialCases={[]} onBack={()=>{}} onRecordChange={async()=>{}}/></IXITransactFaceLabFrame>}
+export default function PayablesFaceLabPage() {
+  return (
+    <IXITransactFaceLabFrame title="PAYABLES / A/P" route="/facelab/payables">
+      <IXIPayablesApp
+        context={context}
+        object={object}
+        financialRecords={bills}
+        initialCases={[]}
+        onBack={() => {}}
+        onRecordChange={async () => {}}
+      />
+    </IXITransactFaceLabFrame>
+  );
+}
