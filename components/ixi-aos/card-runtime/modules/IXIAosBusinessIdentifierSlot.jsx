@@ -4,6 +4,13 @@ import {
   getBusinessIdentifierValue
 } from "../IXIAosObjectDataContract";
 
+/*
+ * Customer business identifier presentation.
+ *
+ * This is operational identity owned by the customer: UNIT #, ASSET #, JOB #,
+ * EMPLOYEE #, PROPERTY #, etc. It is intentionally NOT a badge, pill or status
+ * chip. The underlying identifier contract remains unchanged and searchable.
+ */
 export default function IXIAosBusinessIdentifierSlot({
   object = {},
   className = "",
@@ -28,44 +35,49 @@ export default function IXIAosBusinessIdentifierSlot({
       <style jsx>{`
         .ixi-aos-business-id-slot {
           min-width: 0;
-          height: 30px;
+          min-height: 18px;
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 4px 7px;
-          border: 1px solid rgba(255,255,255,.10);
-          border-radius: 5px;
-          background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.008)), #0f120f;
-          box-shadow: inset 0 1px rgba(255,255,255,.025);
+          align-items: baseline;
+          justify-content: flex-end;
+          gap: 5px;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
           overflow: hidden;
+          text-align: right;
+          white-space: nowrap;
         }
         .ixi-aos-business-id-slot span {
-          display: block;
+          min-width: 0;
           overflow: hidden;
-          color: rgba(255,196,0,.78);
-          font-size: 4.7px;
-          font-weight: 950;
+          color: rgba(255,255,255,.48);
+          font-size: 5.4px;
+          font-weight: 900;
           letter-spacing: .055em;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
         .ixi-aos-business-id-slot strong {
-          display: block;
-          margin-top: 3px;
+          min-width: 0;
           overflow: hidden;
-          color: rgba(255,255,255,.92);
-          font-size: 7.2px;
+          color: rgba(255,255,255,.94);
+          font-size: 8.2px;
           font-weight: 950;
           line-height: 1;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
         .ixi-aos-business-id-slot.compact {
-          height: 24px;
-          padding: 3px 6px;
+          min-height: 15px;
         }
-        .ixi-aos-business-id-slot.compact span { font-size: 4.2px; }
-        .ixi-aos-business-id-slot.compact strong { margin-top: 2px; font-size: 6.5px; }
+        .ixi-aos-business-id-slot.compact span {
+          font-size: 5px;
+        }
+        .ixi-aos-business-id-slot.compact strong {
+          font-size: 7.5px;
+        }
       `}</style>
     </div>
   );
