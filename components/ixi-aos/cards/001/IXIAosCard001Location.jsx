@@ -16,7 +16,12 @@ export const CARD_001_LOCATION = Object.freeze({
   renderer: "schema-driven-generic"
 });
 
+const FACELAB_IXI_ID_PREVIEW = "IXI 482917";
+
 function formatIxiIdentity(object = {}) {
+  const isFaceLabPreview = clean(object?.metadata?.source) === "aos-card-catalog-preview";
+  if (isFaceLabPreview) return FACELAB_IXI_ID_PREVIEW;
+
   const id = clean(getObjectId(object) || object?.uuid || object?.passportId);
   if (!id) return "";
   return /^IXI(?:\s|[-#])/i.test(id) ? id.toUpperCase() : `IXI ${id}`;
@@ -51,7 +56,7 @@ export default function IXIAosCard001Location(props) {
                     position: absolute;
                     top: 7px;
                     right: 10px;
-                    z-index: 190;
+                    z-index: 240;
                     max-width: 122px;
                     overflow: hidden;
                     color: rgba(255,255,255,.42);
@@ -65,7 +70,7 @@ export default function IXIAosCard001Location(props) {
                     pointer-events: none;
                   }
                   .aos-card001-v12-identity-shell .gov-001 .ixi-aos-card-header-controls {
-                    top: 18px;
+                    top: 19px !important;
                   }
                 `}</style>
               </div>
