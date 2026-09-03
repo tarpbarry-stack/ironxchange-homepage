@@ -4,8 +4,8 @@ import IXIAosLocationFace3LeasedV12 from "./IXIAosLocationFace3LeasedV12";
 export const LOCATION_FACE_3_FINANCIAL = Object.freeze({
   faceNumber: 3,
   version: 12,
-  nativeWidth: 298,
-  nativeHeight: 471,
+  nativeWidth: 300,
+  nativeHeight: 475,
   renderer: "location-financial-v12",
   variants: Object.freeze([
     "owned",

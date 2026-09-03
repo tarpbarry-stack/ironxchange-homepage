@@ -108,8 +108,8 @@ export default function IXIAosDataContractCardAdapter({
       <style jsx global>{`
         .ixi-aos-data-contract-card-shell {
           position: relative;
-          width: 298px;
-          height: 471px;
+          width: 300px;
+          height: 475px;
         }
 
         /*

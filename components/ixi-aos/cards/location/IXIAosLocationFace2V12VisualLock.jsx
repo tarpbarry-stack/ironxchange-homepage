@@ -21,12 +21,12 @@ export default function IXIAosLocationFace2V12VisualLock() {
         --text: #f4f5f4 !important;
         --muted: #969d98 !important;
         position: relative !important;
-        width: 298px !important;
-        min-width: 298px !important;
-        max-width: 298px !important;
-        height: 471px !important;
-        min-height: 471px !important;
-        max-height: 471px !important;
+        width: 300px !important;
+        min-width: 300px !important;
+        max-width: 300px !important;
+        height: 475px !important;
+        min-height: 475px !important;
+        max-height: 475px !important;
         overflow: hidden !important;
         border: 1px solid #454b47 !important;
         border-radius: 13px !important;

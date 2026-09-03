@@ -4,8 +4,8 @@ export const LOCATION_FACE3_OWNED_V12 = Object.freeze({
   faceNumber: 3,
   variant: "owned",
   version: 12,
-  nativeWidth: 298,
-  nativeHeight: 471,
+  nativeWidth: 300,
+  nativeHeight: 475,
   renderer: "location-financial-owned-v12"
 });
 

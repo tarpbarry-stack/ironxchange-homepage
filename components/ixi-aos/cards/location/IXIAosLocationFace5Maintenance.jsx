@@ -3,8 +3,8 @@ import IXIAosGenericConfiguredFaceV12 from "../generic/IXIAosGenericConfiguredFa
 export const LOCATION_FACE_5_MAINTENANCE = Object.freeze({
   faceNumber: 5,
   version: 12,
-  nativeWidth: 298,
-  nativeHeight: 471,
+  nativeWidth: 300,
+  nativeHeight: 475,
   renderer: "schema-driven-generic"
 });
 

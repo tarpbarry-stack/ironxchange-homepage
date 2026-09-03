@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import IXIObjectRail from "../../../ixi-object-system/IXIObjectRail";
 import IXIAosCardHeaderControls from "../../card-runtime/modules/IXIAosCardHeaderControls";
 
-const W = 298;
-const H = 471;
+const W = 300;
+const H = 475;
 const HEADER = 43;
 const COMMANDS = 24;
 const RAIL = 19;

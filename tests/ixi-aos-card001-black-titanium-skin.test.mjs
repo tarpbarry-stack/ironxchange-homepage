@@ -10,6 +10,18 @@ const header = read("components/ixi-aos/card-runtime/modules/IXIAosCardHeaderCon
 const consoleSource = read("components/ixi-aos/console-runtime/IXIAosLocationObjectConsole.jsx");
 const card001Source = read("components/ixi-aos/cards/001/IXIAosCard001Location.jsx");
 const locationOverviewSource = read("components/ixi-aos/cards/location/IXIAosLocationOverviewCard.jsx");
+const activeCard001Faces = [
+  "components/ixi-aos/card-runtime/IXIAosDataContractCardAdapter.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace2OperationsV12.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace2V12VisualLock.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace3Financial.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace3OwnedV12.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace3LeasedV12.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace3V12.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace4Obligations.jsx",
+  "components/ixi-aos/cards/location/IXIAosLocationFace5Maintenance.jsx",
+  "components/ixi-aos/cards/generic/IXIAosGenericConfiguredFaceV12.jsx"
+].map(read);
 const skin = read("components/ixi-aos/cards/001/IXIAosCard001BlackTitaniumStyles.jsx");
 const saddleSteel = read("components/ixi-aos/cards/001/IXIAosCard001SaddleSteelStyles.jsx");
 const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedCommandStyles.jsx");
@@ -49,6 +61,8 @@ test("Card 001 has one 300 by 475 Natural chassis and inherits scaled modes", ()
   assert.match(card001Source, /nativeHeight: 475/);
   assert.match(locationOverviewSource, /const W = 300;/);
   assert.match(locationOverviewSource, /const H = 475;/);
+  activeCard001Faces.forEach(source => assert.doesNotMatch(source, /\b(?:298|471)(?:px)?\b/));
+  assert.doesNotMatch(consoleSource, /aos-generic-console-slot>:is/);
   assert.doesNotMatch(consoleSource, /(?:WORK|FOCUS).*?(?:width|height)/s);
 });
 

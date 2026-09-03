@@ -7,8 +7,8 @@ import {
   getObjectRelationships
 } from "../../card-runtime/IXIAosSemanticObjectPresentation";
 
-const W = 298;
-const H = 471;
+const W = 300;
+const H = 475;
 const RAIL = 19;
 const HEADER = 43;
 
