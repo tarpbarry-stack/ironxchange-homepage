@@ -253,7 +253,7 @@ export default function MobileTouchDndCertificationPage() {
             getActiveDndObject={() => activeListing}
             activeDndId={activeDndId}
             ixiCardState={{}}
-            cardScaleMode="natural"
+            cardScaleMode="xl"
             cardContext="inventory"
             listingOrigin="aos-work"
           >
