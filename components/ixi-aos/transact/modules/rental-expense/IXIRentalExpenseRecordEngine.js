@@ -14,7 +14,10 @@ function calendarDays(startValue, endValue) {
 
 function projectedPeriods(record = {}, asOfDate = "") {
   const start = dateOnly(record.period?.startDate);
-  const end = dateOnly(record.period?.actualOffRentDate || asOfDate || new Date().toISOString());
+  const today = dateOnly(new Date().toISOString());
+  const expected = dateOnly(record.period?.expectedReturnDate);
+  const projectedEnd = expected && expected > today ? expected : today;
+  const end = dateOnly(record.period?.actualOffRentDate || asOfDate || projectedEnd);
   const unit = clean(record.rate?.unit || "month");
   const days = calendarDays(start, end);
   const minimum = Math.max(0, num(record.rate?.minimumPeriods || 1));
@@ -30,22 +33,37 @@ function projectedPeriods(record = {}, asOfDate = "") {
 }
 
 function relatedToRental(item = {}, record = {}) {
+  const document = item?.financialDocument || item?.record?.financialDocument || item;
   const rentalId = clean(record.identity?.rentalExpenseId || record.identity?.number);
-  const refs = arr(item.references || item.additionalReferences || item.financial?.references);
-  return clean(item.rentalExpenseId) === rentalId || clean(item.rentalId) === rentalId || refs.some(ref => clean(ref.externalId) === rentalId || clean(ref.label) === rentalId);
+  const refs = arr(document.references || document.additionalReferences);
+  const relatedIds = arr(document.relatedFinancialDocumentIds).map(clean);
+  return clean(document.rentalExpenseId) === rentalId || clean(document.rentalId) === rentalId || clean(document.sourceFinancialDocumentId) === rentalId || relatedIds.includes(rentalId) || refs.some(ref => clean(ref.externalId) === rentalId || clean(ref.label) === rentalId);
+}
+
+function financialDocument(item = {}) {
+  return item?.financialDocument || item?.record?.financialDocument || item;
 }
 
 export function applyIXIRentalExpenseEconomics(record = {}, relatedTransactions = [], asOfDate = "") {
   const periods = projectedPeriods(record, asOfDate);
   const base = round(periods * num(record.rate?.baseRate));
   const projectedOverage = round(record.usage?.projectedOverage);
-  const ancillary = round(record.economics?.projectedAncillaryCost);
+  const fixedAncillary = round(
+    num(record.terms?.oneTimeCharges) +
+    num(record.terms?.damageWaiver) +
+    num(record.terms?.insurance) +
+    num(record.terms?.deliveryCharge) +
+    num(record.terms?.pickupCharge) +
+    num(record.terms?.environmentalFee) +
+    num(record.terms?.taxesEstimate)
+  );
+  const ancillary = round(fixedAncillary + periods * num(record.terms?.recurringCharges));
   const projectedTotal = round(base + projectedOverage + ancillary);
   const related = arr(relatedTransactions).filter(item => relatedToRental(item, record));
-  const bills = related.filter(item => ["bill", "supplier-invoice"].includes(clean(item.documentType || item.type || item.financial?.documentType)));
-  const payments = related.filter(item => ["payment", "bill-payment"].includes(clean(item.documentType || item.type || item.financial?.documentType)) || clean(item.paymentStatus) === "paid");
-  const billedTotal = round(bills.reduce((sum, item) => sum + num(item.amount || item.total || item.financial?.amount), 0));
-  const paidTotal = round(payments.reduce((sum, item) => sum + num(item.amount || item.total || item.financial?.amount), 0));
+  const bills = related.map(financialDocument).filter(item => ["bill", "supplier-invoice"].includes(clean(item.documentType || item.type)));
+  const payments = related.map(financialDocument).filter(item => ["payment", "bill-payment"].includes(clean(item.documentType || item.type)) || clean(item.paymentStatus) === "paid");
+  const billedTotal = round(bills.reduce((sum, item) => sum + num(item.amount || item.total || item.totals?.total), 0));
+  const paidTotal = round(payments.reduce((sum, item) => sum + num(item.amount || item.total || item.totals?.total), 0));
   return {
     ...record,
     economics: {
