@@ -25,8 +25,10 @@ const activeCard001Faces = [
 const skin = read("components/ixi-aos/cards/001/IXIAosCard001BlackTitaniumStyles.jsx");
 const saddleSteel = read("components/ixi-aos/cards/001/IXIAosCard001SaddleSteelStyles.jsx");
 const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedCommandStyles.jsx");
+const aerospaceCarbon = read("components/ixi-aos/cards/001/IXIAosCard001AerospaceCarbonStyles.jsx");
 const texturePath = path.join(root, "public/ixi/skins/black-titanium-pvd.webp");
 const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-leather.webp");
+const aerospaceCarbonPath = path.join(root, "public/ixi/skins/aerospace-carbon.webp");
 const forgedAssets = [
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
@@ -44,12 +46,14 @@ test("Card 001 controls one skin across Faces 1 through 5", () => {
   assert.match(consoleSource, /id: "black-titanium", label: "BLACK TITANIUM"/);
   assert.match(consoleSource, /id: "saddle-steel", label: "SADDLE STEEL"/);
   assert.match(consoleSource, /id: "forged-command", label: "FORGED COMMAND"/);
+  assert.match(consoleSource, /id: "aerospace-carbon", label: "AEROSPACE CARBON"/);
   assert.match(consoleSource, /const \[skinId, setSkinId\] = useState\("v12"\)/);
   assert.match(consoleSource, /skinOptions = Number\(cardNumber\) === 1/);
   assert.match(consoleSource, /onSkinChange: setSkinId/);
   assert.match(consoleSource, /<IXIAosCard001BlackTitaniumStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001SaddleSteelStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001ForgedCommandStyles \/>/);
+  assert.match(consoleSource, /<IXIAosCard001AerospaceCarbonStyles \/>/);
 });
 
 test("Card 001 has one 300 by 475 Natural chassis and inherits scaled modes", () => {
@@ -101,4 +105,15 @@ test("Forged Command uses compact photographic materials without changing card o
   forgedAssets.forEach(file => assert.equal(fs.existsSync(file), true));
   const totalBytes = forgedAssets.reduce((sum, file) => sum + fs.statSync(file).size, 0);
   assert.ok(totalBytes < 64 * 1024, `photographic skin assets must stay under 64 KiB; received ${totalBytes}`);
+});
+
+test("Aerospace Carbon uses one compact forged-composite asset without changing geometry", () => {
+  const forbiddenGeometry = /(?:^|\n)\s*(?:width|height|min-width|max-width|min-height|max-height|padding|margin|gap|grid-template|position|inset|top|right|bottom|left|transform)\s*:/;
+  const withoutCustomProperties = aerospaceCarbon.replace(/--[\w-]+\s*:[^;]+;/g, "");
+  assert.doesNotMatch(withoutCustomProperties, forbiddenGeometry);
+  assert.match(aerospaceCarbon, /aerospace-carbon\.webp/);
+  assert.match(aerospaceCarbon, /aos-generic-console-slot:has\(\.skin-aerospace-carbon\)/);
+  assert.match(aerospaceCarbon, /\.board-command-rail/);
+  assert.equal(fs.existsSync(aerospaceCarbonPath), true);
+  assert.ok(fs.statSync(aerospaceCarbonPath).size < 12 * 1024);
 });
