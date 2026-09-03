@@ -1,4 +1,5 @@
 import { createIXIAosObjectFinancialDocument, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
+import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 import { runIXIActionNoticeLifecycle } from "../../../../ixi-object-system/IXIActionNoticeEngine";
 import { createIXIRentalIncomeDraft, validateIXIRentalIncome } from "./IXIRentalIncomeContract";
 import { applyIXIRentalIncomeEconomics } from "./IXIRentalIncomeRecordEngine";
@@ -11,8 +12,45 @@ function pushUnique(refs, reference) {
   if (!refs.some(item => [item.passportId, item.externalId, item.role, item.label].map(clean).join("|") === key)) refs.push(reference);
 }
 
+function responseRecord(response = {}) {
+  return response?.data?.record || response?.record || {};
+}
+
+function canonicalize(draft, response) {
+  const stored = responseRecord(response);
+  const document = stored?.financialDocument || response?.financialDocument || {};
+  const financialDocumentId = clean(document.financialDocumentId);
+  if (!financialDocumentId) {
+    const error = new Error("IXI Financial did not return a canonical Rental Income identity.");
+    error.code = "IXI_RENTAL_INCOME_IDENTITY_MISSING";
+    throw error;
+  }
+  const canonical = document.rentalIncome || draft;
+  return {
+    ...canonical,
+    identity: {
+      ...(canonical.identity || draft.identity),
+      clientRequestId: clean(draft.identity?.clientRequestId),
+      rentalIncomeId: financialDocumentId,
+      financialDocumentId,
+      number: clean(document.documentNumber) || financialDocumentId
+    },
+    financialBinding: {
+      financialDocumentId,
+      revision: Number(stored?.server?.revision || stored?.revision || 1),
+      financialLineId: clean(document?.lines?.[0]?.financialLineId),
+      line: document?.lines?.[0] || null
+    }
+  };
+}
+
+function canonicalRecord(record = {}) {
+  const { financialBinding: _binding, ...canonical } = record;
+  return canonical;
+}
+
 export async function createIXIRentalIncome({ object = {}, context = {}, input = {}, commandId = "", idempotencyKey = "", metadata = {}, apiBaseUrl = "", headers = {}, signal } = {}) {
-  const draft = applyIXIRentalIncomeEconomics(createIXIRentalIncomeDraft({ context, input }), [], input.startDate);
+  const draft = applyIXIRentalIncomeEconomics(createIXIRentalIncomeDraft({ context, input }), [], input.expectedReturnDate);
   const validation = validateIXIRentalIncome(draft);
   if (!validation.valid) { const error = new Error("Rental Income is incomplete"); error.validation = validation; throw error; }
 
@@ -43,13 +81,13 @@ export async function createIXIRentalIncome({ object = {}, context = {}, input =
 
       const response = await createIXIAosObjectFinancialDocument({
         object: resolvedObject,
-        documentType: "rental",
+        documentType: "rental-income",
         input: {
           currency: "USD",
-          amount: 0,
+          occurredAt: `${draft.period.startDate}T12:00:00.000Z`,
+          expectedAt: `${draft.period.expectedReturnDate}T12:00:00.000Z`,
           description: `Rental Income · ${draft.ownedAsset.label} · ${draft.customer.name}`,
-          status: "open",
-          financialState: "planned",
+          financialState: "committed",
           rentalIncome: draft,
           references: refs,
           attachments: draft.documents
@@ -70,21 +108,49 @@ export async function createIXIRentalIncome({ object = {}, context = {}, input =
         apiBaseUrl, headers, signal
       });
 
-      const rentalIncomeId = clean(response?.document?.documentId || response?.financialDocument?.documentId || response?.documentId || resolvedCommandId);
-      const number = clean(response?.document?.documentNumber || response?.financialDocument?.documentNumber) || `RNTINC-${rentalIncomeId.replace(/^RNTINC-/i, "").slice(-6).toUpperCase()}`;
-      const occurredAt = new Date().toISOString();
-      const record = {
-        ...draft,
-        identity: { ...draft.identity, rentalIncomeId, number },
-        status: "active",
-        period: { ...draft.period, status: "active" },
-        ownedAsset: { ...draft.ownedAsset, custodyState: "customer-custody", ownershipState: "owned" },
-        activity: [{ eventId: `RINC-START-${Date.now()}`, type: "rental-started", occurredAt, actorId: draft.context.actorId, actorLabel: draft.context.actorLabel }],
-        audit: { ...draft.audit, updatedAt: occurredAt }
-      };
-      return { record, response };
+      return { record: canonicalize(draft, response), response };
     }
   });
 }
 
-export default { createIXIRentalIncome };
+export async function updateIXIRentalIncome({ record = {}, action = "update", metadata = {}, signal } = {}) {
+  const financialDocumentId = clean(record?.financialBinding?.financialDocumentId || record?.identity?.financialDocumentId || record?.identity?.rentalIncomeId);
+  const expectedRevision = Number(record?.financialBinding?.revision);
+  const storedLine = record?.financialBinding?.line;
+  if (!financialDocumentId || !Number.isInteger(expectedRevision) || expectedRevision < 1 || !storedLine) {
+    const error = new Error("Rental Income is not bound to a current IXI Financial revision.");
+    error.code = "IXI_RENTAL_INCOME_BINDING_REQUIRED";
+    throw error;
+  }
+  const canonical = canonicalRecord(record);
+  const projectedRevenue = Number(canonical?.economics?.projectedRevenue || 0);
+  const commandId = globalThis.crypto?.randomUUID?.() || `rental-income-update-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const response = await patchIXIAosFinancialDocument({
+    financialDocumentId,
+    expectedRevision,
+    commandId,
+    idempotencyKey: `ixi-rental-income:${action}:${commandId}`,
+    patch: {
+      rentalIncome: canonical,
+      expectedAt: canonical?.period?.actualOffRentDate || canonical?.period?.expectedReturnDate
+        ? `${canonical.period.actualOffRentDate || canonical.period.expectedReturnDate}T12:00:00.000Z`
+        : "",
+      financialState: canonical.status === "cancelled" ? "void" : "committed",
+      lines: [{ ...storedLine, amount: projectedRevenue, quantity: 1, rate: projectedRevenue }],
+      totals: {
+        projectedRevenue,
+        projectedTax: Number(canonical?.economics?.projectedTax || 0),
+        refundableDeposit: Number(canonical?.economics?.projectedDeposit || 0),
+        projectedInvoiceTotal: Number(canonical?.economics?.projectedInvoiceTotal || 0),
+        subtotal: projectedRevenue,
+        total: projectedRevenue
+      },
+      attachments: canonical.documents || []
+    },
+    metadata: { ...metadata, transactModule: "rental-income", action },
+    signal
+  });
+  return { record: canonicalize(canonical, response), response };
+}
+
+export default { createIXIRentalIncome, updateIXIRentalIncome };
