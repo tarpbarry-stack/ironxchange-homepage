@@ -458,9 +458,11 @@ export default function IXIWorkOrderApp({
 
   function saveMaterial(draft, input, response) {
     const id =
-      clean(draft?.identity?.materialUsageId) ||
-      clean(draft?.identity?.clientRequestId) ||
-      `MAT-${Date.now()}`;
+      clean(draft?.identity?.materialUsageId);
+
+    if (!id || !draft?.financialBinding?.financialDocumentId) {
+      throw new Error("MATERIAL IS NOT BOUND TO IXI FINANCIAL");
+    }
 
     let next = addReferenceToWorkOrder(workOrder || {}, {
       key: "materialRecordIds",
