@@ -94,6 +94,11 @@ export default function IXIObjectCardActuator({
               );
         }
 
+        :global(.marketplace-listing-card) .ixi-object-card-actuator {
+          top: 335px;
+          height: 34px;
+        }
+
         .ixi-object-card-actuator.right {
           right: -1px;
 
