@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const page = fs.readFileSync("pages/aos/mobile-dnd.js", "utf8");
+const dragEngine = fs.readFileSync("components/ixi-chassis/IXIDragEngine.js", "utf8");
 const dndHelpers = fs.readFileSync("components/ixi-chassis/IXIDndEngineHelpers.js", "utf8");
 const placementEngine = fs.readFileSync("components/ixi-chassis/IXIWorkspacePlacementEngine.js", "utf8");
 const sortableMachine = fs.readFileSync("components/ixi-chassis/IXISortableMachineCard.js", "utf8");
@@ -24,12 +25,25 @@ test("touch activation requires an intentional hold and preserves normal swipe s
   assert.doesNotMatch(page, /touch-action:\s*none/);
 });
 
-test("drop reorder uses the existing workspace placement engine", () => {
+test("drop reorder uses existing placement engine and ignores the active row as a collision target", () => {
   assert.match(page, /reorderObjectWithinWorkspaceSurface/);
   assert.match(page, /moveObjectToWorkspacePosition/);
   assert.match(page, /moveObjectToWorkspaceSurface/);
+  assert.match(page, /mobileWorkspaceCollisionDetection/);
+  assert.match(page, /String\(collision\?\.id \|\| ""\) !== activeId/);
+  assert.match(page, /pointerWithin\(args\)/);
+  assert.match(page, /closestCenter\(args\)/);
   assert.match(dndHelpers, /moveMachineWithinContainer/);
   assert.match(placementEngine, /export function reorderObjectWithinWorkspaceSurface/);
+});
+
+test("drag overlay renders the exact measured mobile presentation instead of desktop XL shell", () => {
+  assert.match(dragEngine, /renderActiveDndOverlay/);
+  assert.match(page, /activeOverlayWidth/);
+  assert.match(page, /event\?\.active\?\.rect\?\.current\?\.initial\?\.width/);
+  assert.match(page, /renderExactMobileOverlay/);
+  assert.match(page, /renderActiveDndOverlay=\{renderExactMobileOverlay\}/);
+  assert.match(page, /horizontalPadding=\{0\}/);
 });
 
 test("mobile DnD preserves real private 300x475 cards and I-II board modes", () => {
