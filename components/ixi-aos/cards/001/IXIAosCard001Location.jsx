@@ -78,7 +78,7 @@ export default function IXIAosCard001Location(props) {
                     pointer-events: none;
                   }
                   .aos-card001-v12-identity-shell .gov-001 .ixi-aos-card-header-controls {
-                    top: 19px !important;
+                    top: 17px !important;
                   }
                 `}</style>
               </div>
