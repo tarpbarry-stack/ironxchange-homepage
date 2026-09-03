@@ -1,50 +1,1036 @@
-import {useMemo,useState} from "react";
-import {createIXIAssetAcquisition} from "./IXIAssetAcquisitionCommands";
-import {createIXIAssetAcquisitionDraft,validateIXIAssetAcquisition} from "./IXIAssetAcquisitionContract";
-import {applyIXIAcquisitionActuals,addIXIOwnershipCapitalEvent,putIXIAssetInService} from "./IXIAssetAcquisitionRecordEngine";
+import { useEffect, useMemo, useState } from "react";
+import { createIXIAssetAcquisition, updateIXIAssetAcquisition } from "./IXIAssetAcquisitionCommands";
+import { createIXIAssetAcquisitionDraft, validateIXIAssetAcquisition } from "./IXIAssetAcquisitionContract";
+import { applyIXIAcquisitionActuals, addIXIOwnershipCapitalEvent, putIXIAssetInService } from "./IXIAssetAcquisitionRecordEngine";
 import IXIAssetAcquisitionStyles from "./IXIAssetAcquisitionStyles";
 
-const clean=v=>String(v??"").trim();
-const money=v=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(v||0));
-const today=()=>new Date().toISOString().slice(0,10);
-const emptyPayment=()=>({date:today(),amount:"",method:"wire",payerLabel:"",reference:"",documentId:"",notes:""});
-const emptyOwner=()=>({partyLabel:"",legalOwnershipPercent:"",settlementSharePercent:"",initialContribution:"",contributionDate:today(),contributionReference:"",settlementPriority:"pro-rata",notes:""});
-const emptyCost=()=>({category:"freight",label:"Freight / Hauling",estimatedAmount:"",notes:""});
-
-const COPY={
- en:{title:"ASSET ACQUISITION",deal:"ACQUISITION",seller:"SELLER / ACQUIRED FROM",purchaseDate:"PURCHASE DATE",type:"ACQUISITION TYPE",source:"SOURCE",sourceRef:"SOURCE / AUCTION REF",invoice:"SELLER / AUCTION INVOICE #",invoiceDate:"INVOICE DATE",agreement:"BILL OF SALE / AGREEMENT #",price:"PURCHASE PRICE",premium:"BUYER PREMIUM / AUCTION FEE",tax:"SALES / USE TAX",titleFees:"TITLE / REGISTRATION FEES",broker:"BROKER / FINDER FEE",otherFees:"OTHER ACQUISITION COST",direct:"DIRECT ACQUISITION COST",owners:"OWNERSHIP / PARTNERS",addOwner:"+ ADD OWNER / PARTNER",legal:"LEGAL OWNERSHIP %",settle:"SETTLEMENT SHARE %",capital:"INITIAL CAPITAL",funding:"PAYMENTS / FUNDING",addPayment:"+ ADD PAYMENT / WIRE",paymentDate:"WIRE / PAYMENT DATE",amount:"AMOUNT",method:"METHOD",payer:"PAID BY",reference:"REFERENCE",makeReady:"ACQUISITION / MAKE-READY PLAN",addCost:"+ ADD ESTIMATED COST",projected:"PROJECTED READY COST",titleLien:"TITLE / LIEN",titleRequired:"TITLE REQUIRED",titleStatus:"TITLE STATUS",lien:"LIEN STATUS",clearTitle:"SELLER REPRESENTS CLEAR TITLE",condition:"CONDITION AT ACQUISITION",hours:"HOURS AT ACQUISITION",issues:"KNOWN ISSUES",logistics:"LOGISTICS",purchaseLocation:"PURCHASE LOCATION",deliver:"DELIVER TO",freightResp:"FREIGHT RESPONSIBILITY",pickup:"PICKUP DATE",expected:"EXPECTED DELIVERY",documents:"DOCUMENTS / EVIDENCE",settlement:"SETTLEMENT TERMS",returnCapital:"RETURN CAPITAL BEFORE PROFIT DISTRIBUTION",notes:"NOTES",save:"RECORD ACQUISITION",saveSub:"Create ACQ record + opening asset economics",ownershipErr:"Ownership and settlement shares must each total 100%.",record:"ACQUISITION RECORD",actuals:"MAKE-READY ACTUALS",inService:"ACQUISITION / MAKE-READY",putService:"PUT ASSET IN SERVICE",serviceDate:"IN SERVICE DATE",complete:"ACQUISITION COMPLETE",completeSub:"Acquisition / Make-Ready closed as of this date.",correctService:"CORRECT IN-SERVICE DATE",readyCost:"ACTUAL READY COST",routingNote:"Costs after this date route to normal Asset Economics. Source TRAN$ACT records are not changed.",ownershipHistory:"OWNERSHIP & CAPITAL HISTORY",addEvent:"+ OWNERSHIP / CAPITAL CHANGE",eventType:"CHANGE TYPE",eventParty:"PARTY",eventAmount:"MONEY IN / OUT",eventPct:"OWNERSHIP % CHANGE",eventSettle:"SETTLEMENT % CHANGE",eventRef:"REFERENCE",saveEvent:"SAVE CHANGE",back:"‹ TRAN$ACT"},
- es:{title:"ADQUISICIÓN DE ACTIVO",deal:"ADQUISICIÓN",seller:"VENDEDOR / ADQUIRIDO DE",purchaseDate:"FECHA DE COMPRA",type:"TIPO DE ADQUISICIÓN",source:"FUENTE",sourceRef:"REFERENCIA / SUBASTA",invoice:"FACTURA DEL VENDEDOR / SUBASTA #",invoiceDate:"FECHA DE FACTURA",agreement:"CONTRATO / BILL OF SALE #",price:"PRECIO DE COMPRA",premium:"PRIMA / CARGO DE SUBASTA",tax:"IMPUESTO",titleFees:"CARGOS DE TÍTULO / REGISTRO",broker:"CARGO DE CORREDOR",otherFees:"OTRO COSTO DE ADQUISICIÓN",direct:"COSTO DIRECTO DE ADQUISICIÓN",owners:"PROPIEDAD / SOCIOS",addOwner:"+ AGREGAR SOCIO",legal:"PROPIEDAD LEGAL %",settle:"PARTICIPACIÓN DE LIQUIDACIÓN %",capital:"CAPITAL INICIAL",funding:"PAGOS / FONDOS",addPayment:"+ AGREGAR PAGO / TRANSFERENCIA",paymentDate:"FECHA DE PAGO",amount:"MONTO",method:"MÉTODO",payer:"PAGADO POR",reference:"REFERENCIA",makeReady:"PLAN DE ADQUISICIÓN / PREPARACIÓN",addCost:"+ AGREGAR COSTO ESTIMADO",projected:"COSTO PROYECTADO LISTO",titleLien:"TÍTULO / GRAVAMEN",titleRequired:"REQUIERE TÍTULO",titleStatus:"ESTADO DEL TÍTULO",lien:"ESTADO DEL GRAVAMEN",clearTitle:"VENDEDOR DECLARA TÍTULO LIBRE",condition:"CONDICIÓN AL ADQUIRIR",hours:"HORAS AL ADQUIRIR",issues:"PROBLEMAS CONOCIDOS",logistics:"LOGÍSTICA",purchaseLocation:"UBICACIÓN DE COMPRA",deliver:"ENTREGAR A",freightResp:"RESPONSABLE DEL FLETE",pickup:"FECHA DE RECOGIDA",expected:"ENTREGA ESPERADA",documents:"DOCUMENTOS / EVIDENCIA",settlement:"TÉRMINOS DE LIQUIDACIÓN",returnCapital:"DEVOLVER CAPITAL ANTES DE DISTRIBUIR GANANCIAS",notes:"NOTAS",save:"REGISTRAR ADQUISICIÓN",saveSub:"Crear ACQ + economía inicial",ownershipErr:"Propiedad y participación de liquidación deben sumar 100%.",record:"REGISTRO DE ADQUISICIÓN",actuals:"COSTOS REALES DE PREPARACIÓN",inService:"ADQUISICIÓN / PREPARACIÓN",putService:"PONER ACTIVO EN SERVICIO",serviceDate:"FECHA EN SERVICIO",complete:"ADQUISICIÓN COMPLETA",completeSub:"Adquisición / preparación cerrada a partir de esta fecha.",correctService:"CORREGIR FECHA EN SERVICIO",readyCost:"COSTO REAL LISTO",routingNote:"Los costos posteriores a esta fecha pasan a la economía normal del activo. Los registros TRAN$ACT originales no cambian.",ownershipHistory:"HISTORIAL DE PROPIEDAD Y CAPITAL",addEvent:"+ CAMBIO DE PROPIEDAD / CAPITAL",eventType:"TIPO DE CAMBIO",eventParty:"PARTE",eventAmount:"DINERO ENTRANTE / SALIENTE",eventPct:"CAMBIO % PROPIEDAD",eventSettle:"CAMBIO % LIQUIDACIÓN",eventRef:"REFERENCIA",saveEvent:"GUARDAR CAMBIO",back:"‹ TRAN$ACT"}
+const clean = (v) => String(v ?? "").trim();
+const money = (v) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v || 0));
+const today = () => new Date().toISOString().slice(0, 10);
+const emptyPayment = () => ({
+  date: today(),
+  amount: "",
+  method: "wire",
+  payerLabel: "",
+  reference: "",
+  documentId: "",
+  notes: "",
+});
+const emptyOwner = () => ({
+  partyLabel: "",
+  legalOwnershipPercent: "",
+  settlementSharePercent: "",
+  initialContribution: "",
+  contributionDate: today(),
+  contributionReference: "",
+  settlementPriority: "pro-rata",
+  notes: "",
+});
+const emptyCost = () => ({
+  category: "freight",
+  label: "Freight / Hauling",
+  estimatedAmount: "",
+  notes: "",
+});
+const startingValue = (object) => {
+  const candidates = [object?.financial?.acquisitionValue, object?.lifecycle?.acquisitionCost, object?.acquisitionCost, object?.assetValue, object?.value];
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isFinite(value) && value > 0) return String(value);
+  }
+  return "";
 };
 
-function Field({label,children}){return <div className="acq-field"><label>{label}</label>{children}</div>}
-function Input({value,onChange,...props}){return <input value={value} onChange={e=>onChange(e.target.value)} {...props}/>}
+const COPY = {
+  en: {
+    title: "ASSET ACQUISITION",
+    deal: "ACQUISITION",
+    seller: "SELLER / ACQUIRED FROM",
+    purchaseDate: "PURCHASE DATE",
+    type: "ACQUISITION TYPE",
+    source: "SOURCE",
+    sourceRef: "SOURCE / AUCTION REF",
+    invoice: "SELLER / AUCTION INVOICE #",
+    invoiceDate: "INVOICE DATE",
+    agreement: "BILL OF SALE / AGREEMENT #",
+    price: "PURCHASE PRICE",
+    premium: "BUYER PREMIUM / AUCTION FEE",
+    tax: "SALES / USE TAX",
+    titleFees: "TITLE / REGISTRATION FEES",
+    broker: "BROKER / FINDER FEE",
+    otherFees: "OTHER ACQUISITION COST",
+    direct: "DIRECT ACQUISITION COST",
+    owners: "OWNERSHIP / PARTNERS",
+    addOwner: "+ ADD OWNER / PARTNER",
+    legal: "LEGAL OWNERSHIP %",
+    settle: "SETTLEMENT SHARE %",
+    capital: "INITIAL CAPITAL",
+    funding: "PAYMENTS / FUNDING",
+    addPayment: "+ ADD PAYMENT / WIRE",
+    paymentDate: "WIRE / PAYMENT DATE",
+    amount: "AMOUNT",
+    method: "METHOD",
+    payer: "PAID BY",
+    reference: "REFERENCE",
+    makeReady: "ACQUISITION / MAKE-READY PLAN",
+    addCost: "+ ADD ESTIMATED COST",
+    projected: "PROJECTED READY COST",
+    titleLien: "TITLE / LIEN",
+    titleRequired: "TITLE REQUIRED",
+    titleStatus: "TITLE STATUS",
+    lien: "LIEN STATUS",
+    clearTitle: "SELLER REPRESENTS CLEAR TITLE",
+    condition: "CONDITION AT ACQUISITION",
+    hours: "HOURS AT ACQUISITION",
+    issues: "KNOWN ISSUES",
+    logistics: "LOGISTICS",
+    purchaseLocation: "PURCHASE LOCATION",
+    deliver: "DELIVER TO",
+    freightResp: "FREIGHT RESPONSIBILITY",
+    pickup: "PICKUP DATE",
+    expected: "EXPECTED DELIVERY",
+    documents: "DOCUMENTS / EVIDENCE",
+    settlement: "SETTLEMENT TERMS",
+    returnCapital: "RETURN CAPITAL BEFORE PROFIT DISTRIBUTION",
+    notes: "NOTES",
+    save: "RECORD ACQUISITION",
+    saveSub: "Create ACQ record + opening asset economics",
+    ownershipErr: "Ownership and settlement shares must each total 100%.",
+    record: "ACQUISITION RECORD",
+    actuals: "MAKE-READY ACTUALS",
+    inService: "ACQUISITION / MAKE-READY",
+    putService: "PUT ASSET IN SERVICE",
+    serviceDate: "IN SERVICE DATE",
+    complete: "ACQUISITION COMPLETE",
+    completeSub: "Acquisition / Make-Ready closed as of this date.",
+    correctService: "CORRECT IN-SERVICE DATE",
+    readyCost: "ACTUAL READY COST",
+    routingNote: "Costs after this date route to normal Asset Economics. Source TRAN$ACT records are not changed.",
+    ownershipHistory: "OWNERSHIP & CAPITAL HISTORY",
+    addEvent: "+ OWNERSHIP / CAPITAL CHANGE",
+    eventType: "CHANGE TYPE",
+    eventParty: "PARTY",
+    eventAmount: "MONEY IN / OUT",
+    eventPct: "OWNERSHIP % CHANGE",
+    eventSettle: "SETTLEMENT % CHANGE",
+    eventRef: "REFERENCE",
+    saveEvent: "SAVE CHANGE",
+    back: "‹ TRAN$ACT",
+  },
+  es: {
+    title: "ADQUISICIÓN DE ACTIVO",
+    deal: "ADQUISICIÓN",
+    seller: "VENDEDOR / ADQUIRIDO DE",
+    purchaseDate: "FECHA DE COMPRA",
+    type: "TIPO DE ADQUISICIÓN",
+    source: "FUENTE",
+    sourceRef: "REFERENCIA / SUBASTA",
+    invoice: "FACTURA DEL VENDEDOR / SUBASTA #",
+    invoiceDate: "FECHA DE FACTURA",
+    agreement: "CONTRATO / BILL OF SALE #",
+    price: "PRECIO DE COMPRA",
+    premium: "PRIMA / CARGO DE SUBASTA",
+    tax: "IMPUESTO",
+    titleFees: "CARGOS DE TÍTULO / REGISTRO",
+    broker: "CARGO DE CORREDOR",
+    otherFees: "OTRO COSTO DE ADQUISICIÓN",
+    direct: "COSTO DIRECTO DE ADQUISICIÓN",
+    owners: "PROPIEDAD / SOCIOS",
+    addOwner: "+ AGREGAR SOCIO",
+    legal: "PROPIEDAD LEGAL %",
+    settle: "PARTICIPACIÓN DE LIQUIDACIÓN %",
+    capital: "CAPITAL INICIAL",
+    funding: "PAGOS / FONDOS",
+    addPayment: "+ AGREGAR PAGO / TRANSFERENCIA",
+    paymentDate: "FECHA DE PAGO",
+    amount: "MONTO",
+    method: "MÉTODO",
+    payer: "PAGADO POR",
+    reference: "REFERENCIA",
+    makeReady: "PLAN DE ADQUISICIÓN / PREPARACIÓN",
+    addCost: "+ AGREGAR COSTO ESTIMADO",
+    projected: "COSTO PROYECTADO LISTO",
+    titleLien: "TÍTULO / GRAVAMEN",
+    titleRequired: "REQUIERE TÍTULO",
+    titleStatus: "ESTADO DEL TÍTULO",
+    lien: "ESTADO DEL GRAVAMEN",
+    clearTitle: "VENDEDOR DECLARA TÍTULO LIBRE",
+    condition: "CONDICIÓN AL ADQUIRIR",
+    hours: "HORAS AL ADQUIRIR",
+    issues: "PROBLEMAS CONOCIDOS",
+    logistics: "LOGÍSTICA",
+    purchaseLocation: "UBICACIÓN DE COMPRA",
+    deliver: "ENTREGAR A",
+    freightResp: "RESPONSABLE DEL FLETE",
+    pickup: "FECHA DE RECOGIDA",
+    expected: "ENTREGA ESPERADA",
+    documents: "DOCUMENTOS / EVIDENCIA",
+    settlement: "TÉRMINOS DE LIQUIDACIÓN",
+    returnCapital: "DEVOLVER CAPITAL ANTES DE DISTRIBUIR GANANCIAS",
+    notes: "NOTAS",
+    save: "REGISTRAR ADQUISICIÓN",
+    saveSub: "Crear ACQ + economía inicial",
+    ownershipErr: "Propiedad y participación de liquidación deben sumar 100%.",
+    record: "REGISTRO DE ADQUISICIÓN",
+    actuals: "COSTOS REALES DE PREPARACIÓN",
+    inService: "ADQUISICIÓN / PREPARACIÓN",
+    putService: "PONER ACTIVO EN SERVICIO",
+    serviceDate: "FECHA EN SERVICIO",
+    complete: "ADQUISICIÓN COMPLETA",
+    completeSub: "Adquisición / preparación cerrada a partir de esta fecha.",
+    correctService: "CORREGIR FECHA EN SERVICIO",
+    readyCost: "COSTO REAL LISTO",
+    routingNote: "Los costos posteriores a esta fecha pasan a la economía normal del activo. Los registros TRAN$ACT originales no cambian.",
+    ownershipHistory: "HISTORIAL DE PROPIEDAD Y CAPITAL",
+    addEvent: "+ CAMBIO DE PROPIEDAD / CAPITAL",
+    eventType: "TIPO DE CAMBIO",
+    eventParty: "PARTE",
+    eventAmount: "DINERO ENTRANTE / SALIENTE",
+    eventPct: "CAMBIO % PROPIEDAD",
+    eventSettle: "CAMBIO % LIQUIDACIÓN",
+    eventRef: "REFERENCIA",
+    saveEvent: "GUARDAR CAMBIO",
+    back: "‹ TRAN$ACT",
+  },
+};
 
-export default function IXIAssetAcquisitionApp({context={},object={},initialRecord=null,relatedTransactions=[],language="en",onLanguageChange=null,onBack=null,onRecordChange=null}){
- const primary=context.primary||{};const entity=context.entity||{};const location=context.location||{};const actor=context.actor||{};
- const[lang,setLang]=useState(language==="es"?"es":"en");const t=COPY[lang];
- const[record,setRecord]=useState(initialRecord);const[saving,setSaving]=useState(false);const[errors,setErrors]=useState({});
- const[acquisitionType,setAcquisitionType]=useState("direct-purchase"),[sellerLabel,setSellerLabel]=useState(""),[sourceLabel,setSourceLabel]=useState(""),[sourceReference,setSourceReference]=useState(""),[purchaseDate,setPurchaseDate]=useState(today()),[invoiceNumber,setInvoiceNumber]=useState(""),[invoiceDate,setInvoiceDate]=useState(today()),[agreementNumber,setAgreementNumber]=useState(""),[dueDate,setDueDate]=useState("");
- const[purchasePrice,setPurchasePrice]=useState(""),[buyerPremium,setBuyerPremium]=useState(""),[tax,setTax]=useState(""),[titleFees,setTitleFees]=useState(""),[brokerFees,setBrokerFees]=useState(""),[otherFees,setOtherFees]=useState("");
- const[owners,setOwners]=useState([{...emptyOwner(),partyLabel:clean(entity.label)||"COMPANY",legalOwnershipPercent:"100",settlementSharePercent:"100"}]);const[payments,setPayments]=useState([]);const[costs,setCosts]=useState([emptyCost(),{...emptyCost(),category:"initial-repairs",label:"Initial Repairs / Make-Ready"}]);
- const[titleRequired,setTitleRequired]=useState(true),[titleStatus,setTitleStatus]=useState("pending"),[lienStatus,setLienStatus]=useState("none-known"),[clearTitle,setClearTitle]=useState("unknown"),[titleNumber,setTitleNumber]=useState("");
- const[condition,setCondition]=useState("running"),[hours,setHours]=useState(""),[knownIssues,setKnownIssues]=useState("");
- const[purchaseLocation,setPurchaseLocation]=useState(""),[deliverTo,setDeliverTo]=useState(clean(location.label)),[freightResponsibility,setFreightResponsibility]=useState("buyer"),[pickupDate,setPickupDate]=useState(""),[expectedDeliveryDate,setExpectedDeliveryDate]=useState("");
- const[financed,setFinanced]=useState(false),[lenderLabel,setLenderLabel]=useState(""),[settlementNotes,setSettlementNotes]=useState(""),[notes,setNotes]=useState("");const[documents,setDocuments]=useState([]);
- const[inServiceDate,setInServiceDate]=useState("");const[eventOpen,setEventOpen]=useState(false);const[eventType,setEventType]=useState("capital-contribution"),[eventParty,setEventParty]=useState(""),[eventAmount,setEventAmount]=useState(""),[eventPct,setEventPct]=useState(""),[eventSettlePct,setEventSettlePct]=useState(""),[eventRef,setEventRef]=useState("");
+function Field({ label, children }) {
+  return (
+    <div className="acq-field">
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+function Input({ value, onChange, ...props }) {
+  return <input value={value} onChange={(e) => onChange(e.target.value)} {...props} />;
+}
 
- const input=useMemo(()=>({acquisitionType,sellerLabel,sourceLabel,sourceReference,purchaseDate,invoiceNumber,invoiceDate,invoiceAmount:purchasePrice,agreementNumber,dueDate,purchasePrice,buyerPremium,tax,titleFees,brokerFees,otherAcquisitionFees:otherFees,owners,payments,makeReadyEstimates:costs,titleRequired,titleStatus,lienStatus,sellerRepresentsClearTitle:clearTitle,titleNumber,condition,hoursAtAcquisition:hours,knownIssues,purchaseLocation,deliverToLabel:deliverTo,freightResponsibility,pickupDate,expectedDeliveryDate,financed,lenderLabel,documents,settlementTermsNotes:settlementNotes,notes}),[acquisitionType,sellerLabel,sourceLabel,sourceReference,purchaseDate,invoiceNumber,invoiceDate,agreementNumber,dueDate,purchasePrice,buyerPremium,tax,titleFees,brokerFees,otherFees,owners,payments,costs,titleRequired,titleStatus,lienStatus,clearTitle,titleNumber,condition,hours,knownIssues,purchaseLocation,deliverTo,freightResponsibility,pickupDate,expectedDeliveryDate,financed,lenderLabel,documents,settlementNotes,notes]);
- const preview=useMemo(()=>createIXIAssetAcquisitionDraft({context,input}),[context,input]);
- const liveRecord=useMemo(()=>record?applyIXIAcquisitionActuals(record,relatedTransactions):null,[record,relatedTransactions]);
- function changeLang(next){setLang(next);onLanguageChange?.(next)}
- function updateOwner(i,key,value){setOwners(list=>list.map((item,index)=>index===i?{...item,[key]:value}:item))}
- function updatePayment(i,key,value){setPayments(list=>list.map((item,index)=>index===i?{...item,[key]:value}:item))}
- function updateCost(i,key,value){setCosts(list=>list.map((item,index)=>index===i?{...item,[key]:value}:item))}
- async function save(){const check=validateIXIAssetAcquisition(preview);setErrors(check.errors);if(!check.valid)return;setSaving(true);try{const result=await createIXIAssetAcquisition({object:{...object,passportId:primary.passportId,objectId:primary.objectId,objectType:primary.objectType,label:primary.label},context,input,metadata:{source:"ixi-transact-asset-acquisition"}});setRecord(result.record);setInServiceDate(result.record.makeReady?.inServiceDate||"");await onRecordChange?.(result.record,{action:"create",response:result.response},context)}finally{setSaving(false)}}
- async function putService(){if(!record)return;try{const wasClosed=record.makeReady?.status==="closed";const next=applyIXIAcquisitionActuals(putIXIAssetInService(record,inServiceDate,actor),relatedTransactions);setRecord(next);setErrors(current=>({...current,inService:""}));await onRecordChange?.(next,{action:wasClosed?"correct-in-service-date":"put-in-service",inServiceDate,previousInServiceDate:record.makeReady?.inServiceDate||""},context)}catch(error){setErrors({inService:error.message})}}
- async function saveEvent(){if(!record||!clean(eventParty))return;const next=addIXIOwnershipCapitalEvent(record,{type:eventType,partyLabel:eventParty,amount:eventAmount,ownershipPercentChange:eventPct,settlementSharePercentChange:eventSettlePct,reference:eventRef},actor);setRecord(next);setEventOpen(false);setEventAmount("");setEventPct("");setEventSettlePct("");setEventRef("");await onRecordChange?.(next,{action:"ownership-capital-change",event:next.ownership.events.at(-1)},context)}
- function addDocs(files){const next=Array.from(files||[]).map((file,index)=>({documentId:`ACQ-DOC-${Date.now()}-${index}`,fileName:file.name,mimeType:file.type,size:file.size,status:"local-pending-upload",type:file.type?.startsWith("image/")?"photo":"document"}));setDocuments(current=>[...current,...next])}
+export default function IXIAssetAcquisitionApp({ context = {}, object = {}, initialRecord = null, relatedTransactions = [], language = "en", onLanguageChange = null, onBack = null, onRecordChange = null }) {
+  const primary = context.primary || {};
+  const entity = context.entity || {};
+  const location = context.location || {};
+  const actor = context.actor || {};
+  const [lang, setLang] = useState(language === "es" ? "es" : "en");
+  const t = COPY[lang];
+  const [record, setRecord] = useState(initialRecord);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [clientRequestId] = useState(() => globalThis.crypto?.randomUUID?.() || `ACQ-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const [acquisitionType, setAcquisitionType] = useState("direct-purchase"),
+    [sellerLabel, setSellerLabel] = useState(""),
+    [sourceLabel, setSourceLabel] = useState(""),
+    [sourceReference, setSourceReference] = useState(""),
+    [purchaseDate, setPurchaseDate] = useState(today()),
+    [invoiceNumber, setInvoiceNumber] = useState(""),
+    [invoiceDate, setInvoiceDate] = useState(today()),
+    [agreementNumber, setAgreementNumber] = useState(""),
+    [dueDate, setDueDate] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState(() => startingValue(object)),
+    [buyerPremium, setBuyerPremium] = useState(""),
+    [tax, setTax] = useState(""),
+    [titleFees, setTitleFees] = useState(""),
+    [brokerFees, setBrokerFees] = useState(""),
+    [otherFees, setOtherFees] = useState("");
+  const [owners, setOwners] = useState([
+    {
+      ...emptyOwner(),
+      partyLabel: clean(entity.label) || "COMPANY",
+      legalOwnershipPercent: "100",
+      settlementSharePercent: "100",
+    },
+  ]);
+  const [payments, setPayments] = useState([]);
+  const [costs, setCosts] = useState([
+    emptyCost(),
+    {
+      ...emptyCost(),
+      category: "initial-repairs",
+      label: "Initial Repairs / Make-Ready",
+    },
+  ]);
+  const [titleRequired, setTitleRequired] = useState(true),
+    [titleStatus, setTitleStatus] = useState("pending"),
+    [lienStatus, setLienStatus] = useState("none-known"),
+    [clearTitle, setClearTitle] = useState("unknown"),
+    [titleNumber, setTitleNumber] = useState("");
+  const [condition, setCondition] = useState("running"),
+    [hours, setHours] = useState(""),
+    [knownIssues, setKnownIssues] = useState("");
+  const [purchaseLocation, setPurchaseLocation] = useState(""),
+    [deliverTo, setDeliverTo] = useState(clean(location.label)),
+    [freightResponsibility, setFreightResponsibility] = useState("buyer"),
+    [pickupDate, setPickupDate] = useState(""),
+    [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
+  const [financed, setFinanced] = useState(false),
+    [lenderLabel, setLenderLabel] = useState(""),
+    [settlementNotes, setSettlementNotes] = useState(""),
+    [notes, setNotes] = useState("");
+  const [documents, setDocuments] = useState([]);
+  const [inServiceDate, setInServiceDate] = useState("");
+  const [eventOpen, setEventOpen] = useState(false);
+  const [eventType, setEventType] = useState("capital-contribution"),
+    [eventParty, setEventParty] = useState(""),
+    [eventCounterparty, setEventCounterparty] = useState(""),
+    [eventAmount, setEventAmount] = useState(""),
+    [eventPct, setEventPct] = useState(""),
+    [eventSettlePct, setEventSettlePct] = useState(""),
+    [eventRef, setEventRef] = useState("");
 
- if(liveRecord){const r=liveRecord;const ownerEvents=r.ownership?.events||[];const direct=r.acquisition?.directAcquisitionCost||0;const actual=r.makeReady?.actualTotal||0;const acquisitionClosed=r.makeReady?.status==="closed"&&clean(r.makeReady?.inServiceDate);const readyCost=direct+actual;return <div className="ixi-acq"><div className="acq-top"><div><div className="acq-kicker">IXI TRAN$ACT</div><div className="acq-title">{t.record}</div><div className="acq-id">{r.identity?.number||r.identity?.acquisitionId}</div></div><div className="acq-lang"><button onClick={()=>changeLang("en")} className={lang==="en"?"on":""}>ENG</button><button onClick={()=>changeLang("es")} className={lang==="es"?"on":""}>ESP</button></div></div><div className="acq-context"><strong>{r.context?.primaryLabel}</strong><small>{r.context?.primaryObjectType||"ASSET"} · {r.context?.locationLabel||"NO LOCATION"}</small></div><div className="acq-status-grid"><div className="acq-status"><span>OWNERSHIP</span><b className="ok">{r.ownership?.legalOwnershipTotal?.toFixed?.(2)||r.ownership?.legalOwnershipTotal}% ALLOCATED</b></div><div className="acq-status"><span>PAYMENT</span><b className={r.funding?.balanceDue>0?"warn":"ok"}>{r.funding?.balanceDue>0?`${money(r.funding.balanceDue)} DUE`:"PAID / FUNDED"}</b></div><div className="acq-status"><span>TITLE</span><b className={r.title?.titleStatus==="received"?"ok":"warn"}>{clean(r.title?.titleStatus).toUpperCase()}</b></div><div className="acq-status"><span>ACQUISITION</span><b className={acquisitionClosed?"ok":"warn"}>{acquisitionClosed?`COMPLETE ${r.makeReady.inServiceDate}`:"MAKE-READY OPEN"}</b></div></div><div className="acq-section">{t.deal}</div><div className="acq-money"><span>Purchase Price</span><b>{money(r.acquisition?.purchasePrice)}</b></div><div className="acq-money"><span>Buyer Premium / Fees</span><b>{money((r.acquisition?.buyerPremium||0)+(r.acquisition?.tax||0)+(r.acquisition?.titleFees||0)+(r.acquisition?.brokerFees||0)+(r.acquisition?.otherAcquisitionFees||0))}</b></div><div className="acq-total"><span>{t.direct}</span><strong>{money(direct)}</strong></div><div className="acq-section">{t.actuals}</div>{(r.makeReady?.estimates||[]).map(item=>{const found=(r.makeReady?.actuals||[]).find(a=>a.category===item.category);return <div className="acq-row" key={item.costId}><div className="acq-row-top"><strong>{item.label||item.category}</strong><b>{money(found?.actualAmount||0)}</b></div><small>EST {money(item.estimatedAmount)} · VAR {money((found?.actualAmount||0)-Number(item.estimatedAmount||0))}</small></div>})}<div className="acq-total"><span>LANDED / MAKE-READY ACTUAL</span><strong>{money(readyCost)}</strong></div><div className="acq-section">{t.owners}</div><div className="acq-list">{(r.ownership?.owners||[]).map(owner=><div className="acq-row" key={owner.ownerId}><div className="acq-row-top"><strong>{owner.partyLabel}</strong><b className="yellow">{owner.legalOwnershipPercent}%</b></div><small>SETTLEMENT {owner.settlementSharePercent}% · INITIAL CAPITAL {money(owner.initialContribution)}</small></div>)}</div><div className="acq-section">{t.ownershipHistory}</div>{ownerEvents.length?ownerEvents.slice().reverse().map(event=><div className="acq-row" key={event.eventId}><div className="acq-row-top"><strong>{clean(event.type).replace(/-/g," ").toUpperCase()}</strong><b>{money(event.amount)}</b></div><small>{event.partyLabel} · OWN {event.ownershipPercentChange>=0?"+":""}{event.ownershipPercentChange}% · {event.reference||event.occurredAt}</small></div>):<div className="acq-row"><small>Original ownership only. No later capital or ownership changes.</small></div>}<button className="acq-secondary" onClick={()=>setEventOpen(v=>!v)}>{t.addEvent}</button>{eventOpen?<div className="acq-event-edit"><Field label={t.eventType}><select value={eventType} onChange={e=>setEventType(e.target.value)}><option value="capital-contribution">CAPITAL CONTRIBUTION</option><option value="reimbursement">REIMBURSEMENT</option><option value="distribution">DISTRIBUTION</option><option value="partner-buyout">PARTNER BUYOUT</option><option value="ownership-transfer">OWNERSHIP TRANSFER</option><option value="ownership-adjustment">OWNERSHIP ADJUSTMENT</option></select></Field><Field label={t.eventParty}><Input value={eventParty} onChange={setEventParty}/></Field><div className="acq-grid2"><Field label={t.eventAmount}><Input value={eventAmount} onChange={setEventAmount} inputMode="decimal"/></Field><Field label={t.eventPct}><Input value={eventPct} onChange={setEventPct} inputMode="decimal"/></Field></div><Field label={t.eventSettle}><Input value={eventSettlePct} onChange={setEventSettlePct} inputMode="decimal"/></Field><Field label={t.eventRef}><Input value={eventRef} onChange={setEventRef}/></Field><button className="acq-primary" onClick={saveEvent}>{t.saveEvent}</button></div>:null}<div className="acq-section">{t.inService}</div><div className={`acq-service ${acquisitionClosed?"":"open"}`}>{acquisitionClosed?<><div className="acq-service-head"><strong>✓ {t.complete}</strong><b>{r.makeReady.inServiceDate}</b></div><div className="acq-total"><span>{t.readyCost}</span><strong>{money(readyCost)}</strong></div><small>{t.completeSub}</small><Field label={t.serviceDate}><input type="date" value={inServiceDate} onChange={e=>setInServiceDate(e.target.value)}/></Field><button className="acq-secondary" onClick={putService}>{t.correctService}</button><small>{t.routingNote}</small></>:<><div className="acq-service-head"><strong>MAKE-READY OPEN</strong><b>{money(readyCost)}</b></div><small>Set the real date this asset became operational / sale-ready / rental-ready. This date closes the Acquisition / Make-Ready chapter.</small><Field label={t.serviceDate}><input type="date" value={inServiceDate} onChange={e=>setInServiceDate(e.target.value)}/></Field><button className="acq-primary" onClick={putService}>{t.putService}<small style={{display:"block",fontSize:5}}>CLOSE ACQUISITION / MAKE-READY</small></button><small>{t.routingNote}</small></>}{errors.inService?<div className="acq-error">{errors.inService}</div>:null}</div><button className="acq-secondary" onClick={()=>onBack?.()}>{t.back}</button><div className="acq-foot">ACQ is the opening ownership/capital chapter. Source transactions remain canonical and settlement consumes this history later.</div><IXIAssetAcquisitionStyles/></div>}
+  const input = useMemo(
+    () => ({
+      clientRequestId,
+      acquisitionType,
+      sellerLabel,
+      sourceLabel,
+      sourceReference,
+      purchaseDate,
+      invoiceNumber,
+      invoiceDate,
+      invoiceAmount: purchasePrice,
+      agreementNumber,
+      dueDate,
+      purchasePrice,
+      buyerPremium,
+      tax,
+      titleFees,
+      brokerFees,
+      otherAcquisitionFees: otherFees,
+      owners,
+      payments,
+      makeReadyEstimates: costs,
+      titleRequired,
+      titleStatus,
+      lienStatus,
+      sellerRepresentsClearTitle: clearTitle,
+      titleNumber,
+      condition,
+      hoursAtAcquisition: hours,
+      knownIssues,
+      purchaseLocation,
+      deliverToLabel: deliverTo,
+      freightResponsibility,
+      pickupDate,
+      expectedDeliveryDate,
+      financed,
+      lenderLabel,
+      documents,
+      settlementTermsNotes: settlementNotes,
+      notes,
+    }),
+    [clientRequestId, acquisitionType, sellerLabel, sourceLabel, sourceReference, purchaseDate, invoiceNumber, invoiceDate, agreementNumber, dueDate, purchasePrice, buyerPremium, tax, titleFees, brokerFees, otherFees, owners, payments, costs, titleRequired, titleStatus, lienStatus, clearTitle, titleNumber, condition, hours, knownIssues, purchaseLocation, deliverTo, freightResponsibility, pickupDate, expectedDeliveryDate, financed, lenderLabel, documents, settlementNotes, notes],
+  );
+  const preview = useMemo(() => createIXIAssetAcquisitionDraft({ context, input }), [context, input]);
+  const liveRecord = useMemo(() => (record ? applyIXIAcquisitionActuals(record, relatedTransactions) : null), [record, relatedTransactions]);
+  useEffect(() => {
+    setRecord(initialRecord || null);
+  }, [initialRecord]);
+  function changeLang(next) {
+    setLang(next);
+    onLanguageChange?.(next);
+  }
+  function updateOwner(i, key, value) {
+    setOwners((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
+  }
+  function updatePayment(i, key, value) {
+    setPayments((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
+  }
+  function updateCost(i, key, value) {
+    setCosts((list) => list.map((item, index) => (index === i ? { ...item, [key]: value } : item)));
+  }
+  async function save() {
+    const check = validateIXIAssetAcquisition(preview);
+    setErrors(check.errors);
+    if (!check.valid) return;
+    setSaving(true);
+    try {
+      const result = await createIXIAssetAcquisition({
+        object: {
+          ...object,
+          passportId: primary.passportId,
+          objectId: primary.objectId,
+          objectType: primary.objectType,
+          label: primary.label,
+        },
+        context,
+        input,
+        metadata: { source: "ixi-transact-asset-acquisition" },
+      });
+      setRecord(result.record);
+      setInServiceDate(result.record.makeReady?.inServiceDate || "");
+      setErrors({});
+      await onRecordChange?.(result.record, { action: "create", response: result.response }, context);
+    } catch (error) {
+      setErrors({
+        ...error?.validation?.errors,
+        save: clean(error?.message) || "Asset Acquisition could not be recorded.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function putService() {
+    if (!record) return;
+    setSaving(true);
+    try {
+      const wasClosed = record.makeReady?.status === "closed";
+      const candidate = applyIXIAcquisitionActuals(putIXIAssetInService(record, inServiceDate, actor), relatedTransactions);
+      const result = await updateIXIAssetAcquisition({
+        record: candidate,
+        action: wasClosed ? "correct-in-service-date" : "put-in-service",
+      });
+      setRecord(result.record);
+      setErrors({});
+      await onRecordChange?.(
+        result.record,
+        {
+          action: wasClosed ? "correct-in-service-date" : "put-in-service",
+          inServiceDate,
+          previousInServiceDate: record.makeReady?.inServiceDate || "",
+          response: result.response,
+        },
+        context,
+      );
+    } catch (error) {
+      setErrors({ inService: error.message });
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function saveEvent() {
+    if (!record || !clean(eventParty)) return;
+    setSaving(true);
+    try {
+      const candidate = addIXIOwnershipCapitalEvent(
+        record,
+        {
+          type: eventType,
+          partyLabel: eventParty,
+          counterpartyLabel: eventCounterparty,
+          amount: eventAmount,
+          ownershipPercentChange: eventPct,
+          settlementSharePercentChange: eventSettlePct,
+          reference: eventRef,
+        },
+        actor,
+      );
+      const validation = validateIXIAssetAcquisition(candidate);
+      if (!validation.valid) {
+        const error = new Error("Ownership change must preserve valid 100% allocations.");
+        error.validation = validation;
+        throw error;
+      }
+      const result = await updateIXIAssetAcquisition({
+        record: candidate,
+        action: "ownership-capital-change",
+      });
+      setRecord(result.record);
+      setEventOpen(false);
+      setEventAmount("");
+      setEventCounterparty("");
+      setEventPct("");
+      setEventSettlePct("");
+      setEventRef("");
+      setErrors({});
+      await onRecordChange?.(
+        result.record,
+        {
+          action: "ownership-capital-change",
+          event: result.record.ownership?.events?.at(-1),
+          response: result.response,
+        },
+        context,
+      );
+    } catch (error) {
+      setErrors({
+        event: clean(error?.message) || "Ownership change could not be saved.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+  function addDocs(files) {
+    const next = Array.from(files || []).map((file, index) => ({
+      documentId: `ACQ-DOC-${Date.now()}-${index}`,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      status: "local-pending-upload",
+      type: file.type?.startsWith("image/") ? "photo" : "document",
+    }));
+    setDocuments((current) => [...current, ...next]);
+  }
 
- return <div className="ixi-acq"><div className="acq-top"><div><div className="acq-kicker">IXI TRAN$ACT</div><div className="acq-title">{t.title}</div></div><div className="acq-lang"><button onClick={()=>changeLang("en")} className={lang==="en"?"on":""}>ENG</button><button onClick={()=>changeLang("es")} className={lang==="es"?"on":""}>ESP</button></div></div><div className="acq-context"><strong>{primary.label||"SELECT ASSET"}</strong><small>{primary.objectType||"AOS ASSET"} · {location.label||"NO LOCATION"}</small></div><div className="acq-section">{t.deal}</div><div className="acq-grid2"><Field label={t.type}><select value={acquisitionType} onChange={e=>setAcquisitionType(e.target.value)}><option value="direct-purchase">DIRECT PURCHASE</option><option value="auction">AUCTION</option><option value="trade-in">TRADE-IN</option><option value="dealer">DEALER</option><option value="private-seller">PRIVATE SELLER</option><option value="entity-transfer">ENTITY TRANSFER</option><option value="other">OTHER</option></select></Field><Field label={t.purchaseDate}><input type="date" value={purchaseDate} onChange={e=>setPurchaseDate(e.target.value)}/></Field></div><Field label={t.seller}><Input value={sellerLabel} onChange={setSellerLabel}/></Field><div className="acq-grid2"><Field label={t.source}><Input value={sourceLabel} onChange={setSourceLabel}/></Field><Field label={t.sourceRef}><Input value={sourceReference} onChange={setSourceReference}/></Field></div><div className="acq-grid2"><Field label={t.invoice}><Input value={invoiceNumber} onChange={setInvoiceNumber}/></Field><Field label={t.invoiceDate}><input type="date" value={invoiceDate} onChange={e=>setInvoiceDate(e.target.value)}/></Field></div><div className="acq-grid2"><Field label={t.agreement}><Input value={agreementNumber} onChange={setAgreementNumber}/></Field><Field label="PAYMENT DUE DATE"><input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)}/></Field></div><div className="acq-section">PURCHASE ECONOMICS</div><Field label={t.price}><Input value={purchasePrice} onChange={setPurchasePrice} inputMode="decimal"/></Field><div className="acq-grid2"><Field label={t.premium}><Input value={buyerPremium} onChange={setBuyerPremium} inputMode="decimal"/></Field><Field label={t.tax}><Input value={tax} onChange={setTax} inputMode="decimal"/></Field><Field label={t.titleFees}><Input value={titleFees} onChange={setTitleFees} inputMode="decimal"/></Field><Field label={t.broker}><Input value={brokerFees} onChange={setBrokerFees} inputMode="decimal"/></Field></div><Field label={t.otherFees}><Input value={otherFees} onChange={setOtherFees} inputMode="decimal"/></Field><div className="acq-total"><span>{t.direct}</span><strong>{money(preview.acquisition.directAcquisitionCost)}</strong></div><div className="acq-section">{t.owners}</div>{owners.map((owner,i)=><div className="acq-owner-edit" key={i}><Field label="OWNER / PARTNER"><Input value={owner.partyLabel} onChange={v=>updateOwner(i,"partyLabel",v)}/></Field><div className="acq-grid2"><Field label={t.legal}><Input value={owner.legalOwnershipPercent} onChange={v=>updateOwner(i,"legalOwnershipPercent",v)} inputMode="decimal"/></Field><Field label={t.settle}><Input value={owner.settlementSharePercent} onChange={v=>updateOwner(i,"settlementSharePercent",v)} inputMode="decimal"/></Field></div><div className="acq-grid2"><Field label={t.capital}><Input value={owner.initialContribution} onChange={v=>updateOwner(i,"initialContribution",v)} inputMode="decimal"/></Field><Field label="CONTRIBUTION DATE"><input type="date" value={owner.contributionDate} onChange={e=>updateOwner(i,"contributionDate",e.target.value)}/></Field></div><Field label="CONTRIBUTION / WIRE REF"><Input value={owner.contributionReference} onChange={v=>updateOwner(i,"contributionReference",v)}/></Field>{owners.length>1?<button className="acq-secondary" onClick={()=>setOwners(list=>list.filter((_,index)=>index!==i))}>REMOVE OWNER</button>:null}</div>)}<button className="acq-secondary" onClick={()=>setOwners(list=>[...list,emptyOwner()])}>{t.addOwner}</button><div className="acq-money"><span>LEGAL OWNERSHIP TOTAL</span><b>{preview.ownership.legalOwnershipTotal.toFixed(2)}%</b></div><div className="acq-money"><span>SETTLEMENT SHARE TOTAL</span><b>{preview.ownership.settlementShareTotal.toFixed(2)}%</b></div><div className="acq-section">{t.funding}</div>{payments.map((payment,i)=><div className="acq-payment-edit" key={i}><div className="acq-grid2"><Field label={t.paymentDate}><input type="date" value={payment.date} onChange={e=>updatePayment(i,"date",e.target.value)}/></Field><Field label={t.amount}><Input value={payment.amount} onChange={v=>updatePayment(i,"amount",v)} inputMode="decimal"/></Field></div><div className="acq-grid2"><Field label={t.method}><select value={payment.method} onChange={e=>updatePayment(i,"method",e.target.value)}><option value="wire">WIRE</option><option value="ach">ACH</option><option value="check">CHECK</option><option value="cash">CASH</option><option value="financing">FINANCING</option><option value="other">OTHER</option></select></Field><Field label={t.payer}><Input value={payment.payerLabel} onChange={v=>updatePayment(i,"payerLabel",v)}/></Field></div><Field label={t.reference}><Input value={payment.reference} onChange={v=>updatePayment(i,"reference",v)}/></Field><button className="acq-secondary" onClick={()=>setPayments(list=>list.filter((_,index)=>index!==i))}>REMOVE PAYMENT</button></div>)}<button className="acq-secondary" onClick={()=>setPayments(list=>[...list,emptyPayment()])}>{t.addPayment}</button><div className="acq-money"><span>AMOUNT PAID / FUNDED</span><b>{money(preview.funding.amountPaid)}</b></div><div className="acq-money"><span>BALANCE DUE</span><b>{money(preview.funding.balanceDue)}</b></div><label className="acq-row"><input type="checkbox" checked={financed} onChange={e=>setFinanced(e.target.checked)}/> FINANCED / LENDER INVOLVED</label>{financed?<Field label="LENDER"><Input value={lenderLabel} onChange={setLenderLabel}/></Field>:null}<div className="acq-section">{t.makeReady}</div>{costs.map((cost,i)=><div className="acq-cost-edit" key={i}><div className="acq-grid2"><Field label="CATEGORY"><select value={cost.category} onChange={e=>updateCost(i,"category",e.target.value)}><option value="freight">FREIGHT</option><option value="inspection">INSPECTION</option><option value="initial-repairs">INITIAL REPAIRS</option><option value="parts">INITIAL PARTS</option><option value="technology">TECHNOLOGY</option><option value="cleaning-detail">CLEANING / DETAIL</option><option value="other">OTHER</option></select></Field><Field label="ESTIMATED"><Input value={cost.estimatedAmount} onChange={v=>updateCost(i,"estimatedAmount",v)} inputMode="decimal"/></Field></div><Field label="LABEL"><Input value={cost.label} onChange={v=>updateCost(i,"label",v)}/></Field></div>)}<button className="acq-secondary" onClick={()=>setCosts(list=>[...list,emptyCost()])}>{t.addCost}</button><div className="acq-total"><span>{t.projected}</span><strong>{money(preview.acquisition.projectedReadyCost)}</strong></div><div className="acq-section">{t.titleLien}</div><div className="acq-grid2"><Field label={t.titleRequired}><select value={titleRequired?"yes":"no"} onChange={e=>setTitleRequired(e.target.value==="yes")}><option value="yes">YES</option><option value="no">NO</option></select></Field><Field label={t.titleStatus}><select value={titleStatus} onChange={e=>setTitleStatus(e.target.value)}><option value="pending">PENDING</option><option value="received">RECEIVED</option><option value="not-required">NOT REQUIRED</option><option value="issue">ISSUE</option></select></Field></div><div className="acq-grid2"><Field label={t.lien}><select value={lienStatus} onChange={e=>setLienStatus(e.target.value)}><option value="none-known">NONE KNOWN</option><option value="disclosed">DISCLOSED</option><option value="release-pending">RELEASE PENDING</option><option value="released">RELEASED</option><option value="disputed">DISPUTED</option></select></Field><Field label={t.clearTitle}><select value={clearTitle} onChange={e=>setClearTitle(e.target.value)}><option value="yes">YES</option><option value="no">NO</option><option value="unknown">UNKNOWN</option></select></Field></div><Field label="TITLE / DOCUMENT #"><Input value={titleNumber} onChange={setTitleNumber}/></Field><div className="acq-section">{t.condition}</div><div className="acq-grid2"><Field label="CONDITION"><select value={condition} onChange={e=>setCondition(e.target.value)}><option value="running">RUNNING</option><option value="needs-repair">NEEDS REPAIR</option><option value="salvage">SALVAGE</option><option value="unknown">UNKNOWN</option></select></Field><Field label={t.hours}><Input value={hours} onChange={setHours} inputMode="decimal"/></Field></div><Field label={t.issues}><textarea value={knownIssues} onChange={e=>setKnownIssues(e.target.value)}/></Field><div className="acq-section">{t.logistics}</div><div className="acq-grid2"><Field label={t.purchaseLocation}><Input value={purchaseLocation} onChange={setPurchaseLocation}/></Field><Field label={t.deliver}><Input value={deliverTo} onChange={setDeliverTo}/></Field></div><div className="acq-grid2"><Field label={t.freightResp}><select value={freightResponsibility} onChange={e=>setFreightResponsibility(e.target.value)}><option value="buyer">BUYER</option><option value="seller">SELLER</option><option value="third-party">THIRD PARTY</option></select></Field><Field label={t.pickup}><input type="date" value={pickupDate} onChange={e=>setPickupDate(e.target.value)}/></Field></div><Field label={t.expected}><input type="date" value={expectedDeliveryDate} onChange={e=>setExpectedDeliveryDate(e.target.value)}/></Field><div className="acq-section">{t.documents}</div><div className="acq-docs"><label><input type="file" accept="application/pdf,image/*" multiple hidden onChange={e=>addDocs(e.target.files)}/><button type="button" onClick={e=>e.currentTarget.parentElement.querySelector('input').click()}>+ BILL OF SALE / INVOICE</button></label><label><input type="file" accept="application/pdf,image/*" multiple hidden onChange={e=>addDocs(e.target.files)}/><button type="button" onClick={e=>e.currentTarget.parentElement.querySelector('input').click()}>+ TITLE / LIEN RELEASE</button></label><label><input type="file" accept="application/pdf,image/*" multiple hidden onChange={e=>addDocs(e.target.files)}/><button type="button" onClick={e=>e.currentTarget.parentElement.querySelector('input').click()}>+ WIRE / PAYMENT PROOF</button></label><label><input type="file" accept="application/pdf,image/*" multiple hidden onChange={e=>addDocs(e.target.files)}/><button type="button" onClick={e=>e.currentTarget.parentElement.querySelector('input').click()}>+ OTHER DOCUMENT</button></label></div>{documents.length?<div className="acq-row"><small>{documents.length} document(s) staged for canonical attachment.</small></div>:null}<div className="acq-section">{t.settlement}</div><label className="acq-row"><input type="checkbox" defaultChecked/> {t.returnCapital}</label><Field label="ADVANCED SETTLEMENT TERMS"><textarea value={settlementNotes} onChange={e=>setSettlementNotes(e.target.value)}/></Field><Field label={t.notes}><textarea value={notes} onChange={e=>setNotes(e.target.value)}/></Field>{Object.keys(errors).length?<div className="acq-error">{errors.ownership||errors.settlement?t.ownershipErr:"ASSET, SELLER, PURCHASE DATE AND VALID ECONOMICS ARE REQUIRED."}</div>:null}<button className="acq-primary" onClick={save} disabled={saving}>{saving?"RECORDING...":t.save}<small style={{display:"block",fontSize:5}}>{t.saveSub}</small></button><button className="acq-secondary" onClick={()=>onBack?.()}>{t.back}</button><div className="acq-foot">Actual freight, repairs, parts, labor and technology remain canonical TRAN$ACT records and project into Acquisition until the In Service cutoff.</div><IXIAssetAcquisitionStyles/></div>
+  if (liveRecord) {
+    const r = liveRecord;
+    const ownerEvents = r.ownership?.events || [];
+    const direct = r.acquisition?.directAcquisitionCost || 0;
+    const actual = r.makeReady?.actualTotal || 0;
+    const acquisitionClosed = r.makeReady?.status === "closed" && clean(r.makeReady?.inServiceDate);
+    const readyCost = direct + actual;
+    return (
+      <div className="ixi-acq">
+        <div className="acq-top">
+          <div>
+            <div className="acq-kicker">IXI TRAN$ACT</div>
+            <div className="acq-title">{t.record}</div>
+            <div className="acq-id">{r.identity?.number || r.identity?.acquisitionId}</div>
+          </div>
+          <div className="acq-lang">
+            <button onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""}>
+              ENG
+            </button>
+            <button onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""}>
+              ESP
+            </button>
+          </div>
+        </div>
+        <div className="acq-context">
+          <strong>{r.context?.primaryLabel}</strong>
+          <small>
+            {r.context?.primaryObjectType || "ASSET"} · {r.context?.locationLabel || "NO LOCATION"}
+          </small>
+        </div>
+        <div className="acq-status-grid">
+          <div className="acq-status">
+            <span>OWNERSHIP</span>
+            <b className="ok">{r.ownership?.legalOwnershipTotal?.toFixed?.(2) || r.ownership?.legalOwnershipTotal}% ALLOCATED</b>
+          </div>
+          <div className="acq-status">
+            <span>PAYMENT</span>
+            <b className={r.funding?.balanceDue > 0 ? "warn" : "ok"}>{r.funding?.balanceDue > 0 ? `${money(r.funding.balanceDue)} DUE` : "PAID / FUNDED"}</b>
+          </div>
+          <div className="acq-status">
+            <span>TITLE</span>
+            <b className={r.title?.titleStatus === "received" ? "ok" : "warn"}>{clean(r.title?.titleStatus).toUpperCase()}</b>
+          </div>
+          <div className="acq-status">
+            <span>ACQUISITION</span>
+            <b className={acquisitionClosed ? "ok" : "warn"}>{acquisitionClosed ? `COMPLETE ${r.makeReady.inServiceDate}` : "MAKE-READY OPEN"}</b>
+          </div>
+        </div>
+        <div className="acq-section">{t.deal}</div>
+        <div className="acq-money">
+          <span>Purchase Price</span>
+          <b>{money(r.acquisition?.purchasePrice)}</b>
+        </div>
+        <div className="acq-money">
+          <span>Buyer Premium / Fees</span>
+          <b>{money((r.acquisition?.buyerPremium || 0) + (r.acquisition?.tax || 0) + (r.acquisition?.titleFees || 0) + (r.acquisition?.brokerFees || 0) + (r.acquisition?.otherAcquisitionFees || 0))}</b>
+        </div>
+        <div className="acq-total">
+          <span>{t.direct}</span>
+          <strong>{money(direct)}</strong>
+        </div>
+        <div className="acq-section">{t.actuals}</div>
+        {(r.makeReady?.estimates || []).map((item) => {
+          const found = (r.makeReady?.actuals || []).find((a) => a.category === item.category);
+          return (
+            <div className="acq-row" key={item.costId}>
+              <div className="acq-row-top">
+                <strong>{item.label || item.category}</strong>
+                <b>{money(found?.actualAmount || 0)}</b>
+              </div>
+              <small>
+                EST {money(item.estimatedAmount)} · VAR {money((found?.actualAmount || 0) - Number(item.estimatedAmount || 0))}
+              </small>
+            </div>
+          );
+        })}
+        <div className="acq-total">
+          <span>LANDED / MAKE-READY ACTUAL</span>
+          <strong>{money(readyCost)}</strong>
+        </div>
+        <div className="acq-section">{t.owners}</div>
+        <div className="acq-list">
+          {(r.ownership?.owners || []).map((owner) => (
+            <div className="acq-row" key={owner.ownerId}>
+              <div className="acq-row-top">
+                <strong>{owner.partyLabel}</strong>
+                <b className="yellow">{owner.legalOwnershipPercent}%</b>
+              </div>
+              <small>
+                SETTLEMENT {owner.settlementSharePercent}% · INITIAL CAPITAL {money(owner.initialContribution)}
+              </small>
+            </div>
+          ))}
+        </div>
+        <div className="acq-section">{t.ownershipHistory}</div>
+        {ownerEvents.length ? (
+          ownerEvents
+            .slice()
+            .reverse()
+            .map((event) => (
+              <div className="acq-row" key={event.eventId}>
+                <div className="acq-row-top">
+                  <strong>{clean(event.type).replace(/-/g, " ").toUpperCase()}</strong>
+                  <b>{money(event.amount)}</b>
+                </div>
+                <small>
+                  {event.partyLabel} · OWN {event.ownershipPercentChange >= 0 ? "+" : ""}
+                  {event.ownershipPercentChange}% · {event.reference || event.occurredAt}
+                </small>
+              </div>
+            ))
+        ) : (
+          <div className="acq-row">
+            <small>Original ownership only. No later capital or ownership changes.</small>
+          </div>
+        )}
+        <button className="acq-secondary" onClick={() => setEventOpen((v) => !v)}>
+          {t.addEvent}
+        </button>
+        {eventOpen ? (
+          <div className="acq-event-edit">
+            <Field label={t.eventType}>
+              <select value={eventType} onChange={(e) => setEventType(e.target.value)}>
+                <option value="capital-contribution">CAPITAL CONTRIBUTION</option>
+                <option value="reimbursement">REIMBURSEMENT</option>
+                <option value="distribution">DISTRIBUTION</option>
+                <option value="partner-buyout">PARTNER BUYOUT</option>
+                <option value="ownership-transfer">OWNERSHIP TRANSFER</option>
+                <option value="ownership-adjustment">OWNERSHIP ADJUSTMENT</option>
+              </select>
+            </Field>
+            <Field label={t.eventParty}>
+              <Input value={eventParty} onChange={setEventParty} />
+            </Field>
+            {Number(eventPct) !== 0 || Number(eventSettlePct) !== 0 ? (
+              <Field label="TRANSFER FROM EXISTING OWNER">
+                <select value={eventCounterparty} onChange={(e) => setEventCounterparty(e.target.value)}>
+                  <option value="">SELECT OWNER</option>
+                  {(record.ownership?.owners || []).map((owner) => (
+                    <option key={owner.ownerId} value={owner.partyLabel}>
+                      {owner.partyLabel}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : null}
+            <div className="acq-grid2">
+              <Field label={t.eventAmount}>
+                <Input value={eventAmount} onChange={setEventAmount} inputMode="decimal" />
+              </Field>
+              <Field label={t.eventPct}>
+                <Input value={eventPct} onChange={setEventPct} inputMode="decimal" />
+              </Field>
+            </div>
+            <Field label={t.eventSettle}>
+              <Input value={eventSettlePct} onChange={setEventSettlePct} inputMode="decimal" />
+            </Field>
+            <Field label={t.eventRef}>
+              <Input value={eventRef} onChange={setEventRef} />
+            </Field>
+            <button className="acq-primary" onClick={saveEvent} disabled={saving}>
+              {saving ? "SAVING..." : t.saveEvent}
+            </button>
+            {errors.event ? <div className="acq-error">{errors.event}</div> : null}
+          </div>
+        ) : null}
+        <div className="acq-section">{t.inService}</div>
+        <div className={`acq-service ${acquisitionClosed ? "" : "open"}`}>
+          {acquisitionClosed ? (
+            <>
+              <div className="acq-service-head">
+                <strong>✓ {t.complete}</strong>
+                <b>{r.makeReady.inServiceDate}</b>
+              </div>
+              <div className="acq-total">
+                <span>{t.readyCost}</span>
+                <strong>{money(readyCost)}</strong>
+              </div>
+              <small>{t.completeSub}</small>
+              <Field label={t.serviceDate}>
+                <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
+              </Field>
+              <button className="acq-secondary" onClick={putService} disabled={saving}>
+                {saving ? "SAVING..." : t.correctService}
+              </button>
+              <small>{t.routingNote}</small>
+            </>
+          ) : (
+            <>
+              <div className="acq-service-head">
+                <strong>MAKE-READY OPEN</strong>
+                <b>{money(readyCost)}</b>
+              </div>
+              <small>Set the real date this asset became operational / sale-ready / rental-ready. This date closes the Acquisition / Make-Ready chapter.</small>
+              <Field label={t.serviceDate}>
+                <input type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
+              </Field>
+              <button className="acq-primary" onClick={putService} disabled={saving}>
+                {saving ? "SAVING..." : t.putService}
+                <small style={{ display: "block", fontSize: 5 }}>CLOSE ACQUISITION / MAKE-READY</small>
+              </button>
+              <small>{t.routingNote}</small>
+            </>
+          )}
+          {errors.inService ? <div className="acq-error">{errors.inService}</div> : null}
+        </div>
+        <button className="acq-secondary" onClick={() => onBack?.()}>
+          {t.back}
+        </button>
+        <div className="acq-foot">ACQ is the opening ownership/capital chapter. Source transactions remain canonical and settlement consumes this history later.</div>
+        <IXIAssetAcquisitionStyles />
+      </div>
+    );
+  }
+
+  return (
+    <div className="ixi-acq">
+      <div className="acq-top">
+        <div>
+          <div className="acq-kicker">IXI TRAN$ACT</div>
+          <div className="acq-title">{t.title}</div>
+        </div>
+        <div className="acq-lang">
+          <button onClick={() => changeLang("en")} className={lang === "en" ? "on" : ""}>
+            ENG
+          </button>
+          <button onClick={() => changeLang("es")} className={lang === "es" ? "on" : ""}>
+            ESP
+          </button>
+        </div>
+      </div>
+      <div className="acq-context">
+        <strong>{primary.label || "SELECT ASSET"}</strong>
+        <small>
+          {primary.objectType || "AOS ASSET"} · {location.label || "NO LOCATION"}
+        </small>
+      </div>
+      <div className="acq-section">{t.deal}</div>
+      <div className="acq-grid2">
+        <Field label={t.type}>
+          <select value={acquisitionType} onChange={(e) => setAcquisitionType(e.target.value)}>
+            <option value="direct-purchase">DIRECT PURCHASE</option>
+            <option value="auction">AUCTION</option>
+            <option value="trade-in">TRADE-IN</option>
+            <option value="dealer">DEALER</option>
+            <option value="private-seller">PRIVATE SELLER</option>
+            <option value="entity-transfer">ENTITY TRANSFER</option>
+            <option value="other">OTHER</option>
+          </select>
+        </Field>
+        <Field label={t.purchaseDate}>
+          <input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+        </Field>
+      </div>
+      <Field label={t.seller}>
+        <Input value={sellerLabel} onChange={setSellerLabel} />
+      </Field>
+      <div className="acq-grid2">
+        <Field label={t.source}>
+          <Input value={sourceLabel} onChange={setSourceLabel} />
+        </Field>
+        <Field label={t.sourceRef}>
+          <Input value={sourceReference} onChange={setSourceReference} />
+        </Field>
+      </div>
+      <div className="acq-grid2">
+        <Field label={t.invoice}>
+          <Input value={invoiceNumber} onChange={setInvoiceNumber} />
+        </Field>
+        <Field label={t.invoiceDate}>
+          <input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+        </Field>
+      </div>
+      <div className="acq-grid2">
+        <Field label={t.agreement}>
+          <Input value={agreementNumber} onChange={setAgreementNumber} />
+        </Field>
+        <Field label="PAYMENT DUE DATE">
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        </Field>
+      </div>
+      <div className="acq-section">PURCHASE ECONOMICS</div>
+      <Field label={t.price}>
+        <Input value={purchasePrice} onChange={setPurchasePrice} inputMode="decimal" />
+      </Field>
+      <div className="acq-grid2">
+        <Field label={t.premium}>
+          <Input value={buyerPremium} onChange={setBuyerPremium} inputMode="decimal" />
+        </Field>
+        <Field label={t.tax}>
+          <Input value={tax} onChange={setTax} inputMode="decimal" />
+        </Field>
+        <Field label={t.titleFees}>
+          <Input value={titleFees} onChange={setTitleFees} inputMode="decimal" />
+        </Field>
+        <Field label={t.broker}>
+          <Input value={brokerFees} onChange={setBrokerFees} inputMode="decimal" />
+        </Field>
+      </div>
+      <Field label={t.otherFees}>
+        <Input value={otherFees} onChange={setOtherFees} inputMode="decimal" />
+      </Field>
+      <div className="acq-total">
+        <span>{t.direct}</span>
+        <strong>{money(preview.acquisition.directAcquisitionCost)}</strong>
+      </div>
+      <div className="acq-section">{t.owners}</div>
+      {owners.map((owner, i) => (
+        <div className="acq-owner-edit" key={i}>
+          <Field label="OWNER / PARTNER">
+            <Input value={owner.partyLabel} onChange={(v) => updateOwner(i, "partyLabel", v)} />
+          </Field>
+          <div className="acq-grid2">
+            <Field label={t.legal}>
+              <Input value={owner.legalOwnershipPercent} onChange={(v) => updateOwner(i, "legalOwnershipPercent", v)} inputMode="decimal" />
+            </Field>
+            <Field label={t.settle}>
+              <Input value={owner.settlementSharePercent} onChange={(v) => updateOwner(i, "settlementSharePercent", v)} inputMode="decimal" />
+            </Field>
+          </div>
+          <div className="acq-grid2">
+            <Field label={t.capital}>
+              <Input value={owner.initialContribution} onChange={(v) => updateOwner(i, "initialContribution", v)} inputMode="decimal" />
+            </Field>
+            <Field label="CONTRIBUTION DATE">
+              <input type="date" value={owner.contributionDate} onChange={(e) => updateOwner(i, "contributionDate", e.target.value)} />
+            </Field>
+          </div>
+          <Field label="CONTRIBUTION / WIRE REF">
+            <Input value={owner.contributionReference} onChange={(v) => updateOwner(i, "contributionReference", v)} />
+          </Field>
+          {owners.length > 1 ? (
+            <button className="acq-secondary" onClick={() => setOwners((list) => list.filter((_, index) => index !== i))}>
+              REMOVE OWNER
+            </button>
+          ) : null}
+        </div>
+      ))}
+      <button className="acq-secondary" onClick={() => setOwners((list) => [...list, emptyOwner()])}>
+        {t.addOwner}
+      </button>
+      <div className="acq-money">
+        <span>LEGAL OWNERSHIP TOTAL</span>
+        <b>{preview.ownership.legalOwnershipTotal.toFixed(2)}%</b>
+      </div>
+      <div className="acq-money">
+        <span>SETTLEMENT SHARE TOTAL</span>
+        <b>{preview.ownership.settlementShareTotal.toFixed(2)}%</b>
+      </div>
+      <div className="acq-section">{t.funding}</div>
+      {payments.map((payment, i) => (
+        <div className="acq-payment-edit" key={i}>
+          <div className="acq-grid2">
+            <Field label={t.paymentDate}>
+              <input type="date" value={payment.date} onChange={(e) => updatePayment(i, "date", e.target.value)} />
+            </Field>
+            <Field label={t.amount}>
+              <Input value={payment.amount} onChange={(v) => updatePayment(i, "amount", v)} inputMode="decimal" />
+            </Field>
+          </div>
+          <div className="acq-grid2">
+            <Field label={t.method}>
+              <select value={payment.method} onChange={(e) => updatePayment(i, "method", e.target.value)}>
+                <option value="wire">WIRE</option>
+                <option value="ach">ACH</option>
+                <option value="check">CHECK</option>
+                <option value="cash">CASH</option>
+                <option value="financing">FINANCING</option>
+                <option value="other">OTHER</option>
+              </select>
+            </Field>
+            <Field label={t.payer}>
+              <Input value={payment.payerLabel} onChange={(v) => updatePayment(i, "payerLabel", v)} />
+            </Field>
+          </div>
+          <Field label={t.reference}>
+            <Input value={payment.reference} onChange={(v) => updatePayment(i, "reference", v)} />
+          </Field>
+          <button className="acq-secondary" onClick={() => setPayments((list) => list.filter((_, index) => index !== i))}>
+            REMOVE PAYMENT
+          </button>
+        </div>
+      ))}
+      <button className="acq-secondary" onClick={() => setPayments((list) => [...list, emptyPayment()])}>
+        {t.addPayment}
+      </button>
+      <div className="acq-money">
+        <span>AMOUNT PAID / FUNDED</span>
+        <b>{money(preview.funding.amountPaid)}</b>
+      </div>
+      <div className="acq-money">
+        <span>BALANCE DUE</span>
+        <b>{money(preview.funding.balanceDue)}</b>
+      </div>
+      <div className="acq-row">
+        <small>Funding here documents the deal. Bank payments and vendor bills remain separate TRAN$ACT records, so the obligation is never counted twice.</small>
+      </div>
+      <label className="acq-row">
+        <input type="checkbox" checked={financed} onChange={(e) => setFinanced(e.target.checked)} /> FINANCED / LENDER INVOLVED
+      </label>
+      {financed ? (
+        <Field label="LENDER">
+          <Input value={lenderLabel} onChange={setLenderLabel} />
+        </Field>
+      ) : null}
+      <div className="acq-section">{t.makeReady}</div>
+      {costs.map((cost, i) => (
+        <div className="acq-cost-edit" key={i}>
+          <div className="acq-grid2">
+            <Field label="CATEGORY">
+              <select value={cost.category} onChange={(e) => updateCost(i, "category", e.target.value)}>
+                <option value="freight">FREIGHT</option>
+                <option value="inspection">INSPECTION</option>
+                <option value="initial-repairs">INITIAL REPAIRS</option>
+                <option value="parts">INITIAL PARTS</option>
+                <option value="technology">TECHNOLOGY</option>
+                <option value="cleaning-detail">CLEANING / DETAIL</option>
+                <option value="other">OTHER</option>
+              </select>
+            </Field>
+            <Field label="ESTIMATED">
+              <Input value={cost.estimatedAmount} onChange={(v) => updateCost(i, "estimatedAmount", v)} inputMode="decimal" />
+            </Field>
+          </div>
+          <Field label="LABEL">
+            <Input value={cost.label} onChange={(v) => updateCost(i, "label", v)} />
+          </Field>
+        </div>
+      ))}
+      <button className="acq-secondary" onClick={() => setCosts((list) => [...list, emptyCost()])}>
+        {t.addCost}
+      </button>
+      <div className="acq-total">
+        <span>{t.projected}</span>
+        <strong>{money(preview.acquisition.projectedReadyCost)}</strong>
+      </div>
+      <div className="acq-section">{t.titleLien}</div>
+      <div className="acq-grid2">
+        <Field label={t.titleRequired}>
+          <select value={titleRequired ? "yes" : "no"} onChange={(e) => setTitleRequired(e.target.value === "yes")}>
+            <option value="yes">YES</option>
+            <option value="no">NO</option>
+          </select>
+        </Field>
+        <Field label={t.titleStatus}>
+          <select value={titleStatus} onChange={(e) => setTitleStatus(e.target.value)}>
+            <option value="pending">PENDING</option>
+            <option value="received">RECEIVED</option>
+            <option value="not-required">NOT REQUIRED</option>
+            <option value="issue">ISSUE</option>
+          </select>
+        </Field>
+      </div>
+      <div className="acq-grid2">
+        <Field label={t.lien}>
+          <select value={lienStatus} onChange={(e) => setLienStatus(e.target.value)}>
+            <option value="none-known">NONE KNOWN</option>
+            <option value="disclosed">DISCLOSED</option>
+            <option value="release-pending">RELEASE PENDING</option>
+            <option value="released">RELEASED</option>
+            <option value="disputed">DISPUTED</option>
+          </select>
+        </Field>
+        <Field label={t.clearTitle}>
+          <select value={clearTitle} onChange={(e) => setClearTitle(e.target.value)}>
+            <option value="yes">YES</option>
+            <option value="no">NO</option>
+            <option value="unknown">UNKNOWN</option>
+          </select>
+        </Field>
+      </div>
+      <Field label="TITLE / DOCUMENT #">
+        <Input value={titleNumber} onChange={setTitleNumber} />
+      </Field>
+      <div className="acq-section">{t.condition}</div>
+      <div className="acq-grid2">
+        <Field label="CONDITION">
+          <select value={condition} onChange={(e) => setCondition(e.target.value)}>
+            <option value="running">RUNNING</option>
+            <option value="needs-repair">NEEDS REPAIR</option>
+            <option value="salvage">SALVAGE</option>
+            <option value="unknown">UNKNOWN</option>
+          </select>
+        </Field>
+        <Field label={t.hours}>
+          <Input value={hours} onChange={setHours} inputMode="decimal" />
+        </Field>
+      </div>
+      <Field label={t.issues}>
+        <textarea value={knownIssues} onChange={(e) => setKnownIssues(e.target.value)} />
+      </Field>
+      <div className="acq-section">{t.logistics}</div>
+      <div className="acq-grid2">
+        <Field label={t.purchaseLocation}>
+          <Input value={purchaseLocation} onChange={setPurchaseLocation} />
+        </Field>
+        <Field label={t.deliver}>
+          <Input value={deliverTo} onChange={setDeliverTo} />
+        </Field>
+      </div>
+      <div className="acq-grid2">
+        <Field label={t.freightResp}>
+          <select value={freightResponsibility} onChange={(e) => setFreightResponsibility(e.target.value)}>
+            <option value="buyer">BUYER</option>
+            <option value="seller">SELLER</option>
+            <option value="third-party">THIRD PARTY</option>
+          </select>
+        </Field>
+        <Field label={t.pickup}>
+          <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} />
+        </Field>
+      </div>
+      <Field label={t.expected}>
+        <input type="date" value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
+      </Field>
+      <div className="acq-section">{t.documents}</div>
+      <div className="acq-docs">
+        <label>
+          <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
+          <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
+            + BILL OF SALE / INVOICE
+          </button>
+        </label>
+        <label>
+          <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
+          <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
+            + TITLE / LIEN RELEASE
+          </button>
+        </label>
+        <label>
+          <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
+          <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
+            + WIRE / PAYMENT PROOF
+          </button>
+        </label>
+        <label>
+          <input type="file" accept="application/pdf,image/*" multiple hidden onChange={(e) => addDocs(e.target.files)} />
+          <button type="button" onClick={(e) => e.currentTarget.parentElement.querySelector("input").click()}>
+            + OTHER DOCUMENT
+          </button>
+        </label>
+      </div>
+      {documents.length ? (
+        <div className="acq-row">
+          <small>{documents.length} file(s) selected. Secure upload must finish before this acquisition can be recorded.</small>
+          <button className="acq-secondary" onClick={() => setDocuments([])}>
+            CLEAR SELECTED FILES
+          </button>
+        </div>
+      ) : null}
+      <div className="acq-section">{t.settlement}</div>
+      <label className="acq-row">
+        <input type="checkbox" defaultChecked /> {t.returnCapital}
+      </label>
+      <Field label="ADVANCED SETTLEMENT TERMS">
+        <textarea value={settlementNotes} onChange={(e) => setSettlementNotes(e.target.value)} />
+      </Field>
+      <Field label={t.notes}>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </Field>
+      {Object.keys(errors).length ? <div className="acq-error">{errors.save || (errors.documents && "SECURE DOCUMENT UPLOAD IS REQUIRED BEFORE SAVE.") || (errors.ownership || errors.settlement ? t.ownershipErr : "ASSET PASSPORT, ENTITY, ACTOR, SELLER, PURCHASE DATE AND A POSITIVE VALUE ARE REQUIRED.")}</div> : null}
+      <button className="acq-primary" onClick={save} disabled={saving}>
+        {saving ? "RECORDING..." : t.save}
+        <small style={{ display: "block", fontSize: 5 }}>{t.saveSub}</small>
+      </button>
+      <button className="acq-secondary" onClick={() => onBack?.()}>
+        {t.back}
+      </button>
+      <div className="acq-foot">This record establishes the asset's user-entered opening basis. IXI does not price the asset. Actual freight, repairs, parts, labor and technology remain canonical TRAN$ACT records and project here until the In Service cutoff.</div>
+      <IXIAssetAcquisitionStyles />
+    </div>
+  );
 }
