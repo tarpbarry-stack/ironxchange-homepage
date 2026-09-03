@@ -77,6 +77,7 @@ export default function IXITransactObjectConsole({
   actor = {},
   entity = {},
   activeWorkOrder = null,
+  activeTechWorkOrder = null,
   financialRecords = [],
   onFinancialRecordsChange = null,
   permissions = [],
@@ -226,6 +227,7 @@ export default function IXITransactObjectConsole({
                     actor={actor}
                     entity={entity}
                     activeWorkOrder={activeWorkOrder}
+                    activeTechWorkOrder={activeTechWorkOrder}
                     financialRecords={financialRecords}
                     onFinancialRecordsChange={onFinancialRecordsChange}
                     permissions={permissions}
