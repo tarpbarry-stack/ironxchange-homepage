@@ -165,15 +165,15 @@ export default function IXIFaceFrame({
         }
 
         .ixi-face-frame-tall {
-          height: 451px;
-          min-height: 451px;
-          max-height: 451px;
+          height: 456px;
+          min-height: 456px;
+          max-height: 456px;
         }
 
         .ixi-face-frame-compact {
-          height: 372px;
-          min-height: 372px;
-          max-height: 372px;
+          height: 381px;
+          min-height: 381px;
+          max-height: 381px;
 
           --ixi-face-font-display: 16px;
           --ixi-face-font-title: 12px;
