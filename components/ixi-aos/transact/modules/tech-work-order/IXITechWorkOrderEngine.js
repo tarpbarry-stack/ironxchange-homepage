@@ -81,6 +81,10 @@ export function applyIXITechWorkOrderAction({ record = {}, action = "", actor = 
 
   if (action === IXI_TECHWO_ACTIONS.COMPLETE) {
     if (["closed", "canceled"].includes(status)) throw new Error("Closed or canceled TECHWO cannot be completed.");
+    const workPerformed = clean(payload.workPerformed || current.result?.workPerformed);
+    const validation = clean(payload.validation || current.technology?.validation);
+    if (!workPerformed) throw new Error("Work performed is required before TECHWO completion.");
+    if (!validation) throw new Error("Completion validation is required before TECHWO completion.");
     const disposition = clean(payload.disposition || "fully-functioning");
     return withAudit(current, {
       work: { ...current.work, status: "complete" },
@@ -89,7 +93,7 @@ export function applyIXITechWorkOrderAction({ record = {}, action = "", actor = 
       result: {
         ...current.result,
         disposition,
-        workPerformed: clean(payload.workPerformed || current.result?.workPerformed),
+        workPerformed,
         recommendations: clean(payload.recommendations || current.result?.recommendations),
         finalImpact: clean(payload.finalImpact || "normal")
       },
@@ -97,7 +101,7 @@ export function applyIXITechWorkOrderAction({ record = {}, action = "", actor = 
         ...current.technology,
         rootCause: clean(payload.rootCause || current.technology?.rootCause),
         resolution: clean(payload.resolution || current.technology?.resolution),
-        validation: clean(payload.validation || current.technology?.validation)
+        validation
       },
       activityProjection: activity(current, "tech-work-completed", actorLabel, disposition)
     });
