@@ -1,0 +1,139 @@
+name: Deploy IX-Core General Ledger
+
+"on":
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+        default: 876ef79b35ea232382dc8e6b46715ed077838e8b
+  push:
+    branches: [main]
+    paths: ['.github/workflows/deploy-ixi-core-general-ledger.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '876ef79b35ea232382dc8e6b46715ed077838e8b' }}
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded General Ledger release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/general-ledger-pre-__IXI_CORE_SHA__.tgz
+          CHANGED='financial/IXIFinancialCommandRoutes.js financial/IXIFinancialGLProjectionEngine.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js'
+          SUCCESS=0
+
+          run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '533cfe49cb4cc7231f0fc50db6a15eeda61fd802998b1fad8fc7c62e41a0fbaa' 'financial/IXIFinancialCommandRoutes.js' \
+            '1ae14deff8b2b4705f6a661cb6ff3f335f09856e3cab8b31c8a3a9595bfa4d41' 'financial/IXIFinancialGLProjectionEngine.js' \
+            'abb292c4462f271701048ae060538f17d5d9a812208b03ada38a30993eedb8c6' 'financial/IXIFinancialPermissionEngine.js' \
+            'cea8a6a2d15baa7494abf2b508afe16a976db002ccdea7d1b2e827c0174c9f06' 'financial/IXIFinancialRoutes.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" $CHANGED
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=low
+          npm test
+          for file in $CHANGED; do node --check "$file"; done
+          node - <<'NODE'
+          const {buildFinancialGLProjection}=require('./financial/IXIFinancialGLProjectionEngine');
+          const {IXI_FINANCIAL_ACTIONS,getEffectiveFinancialPermissions}=require('./financial/IXIFinancialPermissionEngine');
+          const journal={financialDocumentId:'ifd_gl_probe',documentType:'journal-entry',financialState:'posted',status:'posted',currency:'USD',period:'2026-09',occurredAt:'2026-09-03',accounting:{balanced:true},lines:[{accountCode:'1010',debit:100,credit:0},{accountCode:'4100',debit:0,credit:100}]};
+          const projection=buildFinancialGLProjection({records:[journal],period:'2026-09',currency:'USD'});
+          const accounting=getEffectiveFinancialPermissions({roles:['financial-accounting']});
+          const controller=getEffectiveFinancialPermissions({roles:['financial-controller']});
+          if(projection.schema!=='ixi-financial-gl-projection-v2'||projection.chart.source!=='ixi-core'||!projection.trialBalance.balanced||!projection.balanceSheet.balanced||!accounting.includes(IXI_FINANCIAL_ACTIONS.POST_JOURNAL)||accounting.includes(IXI_FINANCIAL_ACTIONS.CLOSE_PERIOD)||!controller.includes(IXI_FINANCIAL_ACTIONS.CLOSE_PERIOD)) throw new Error('General Ledger deploy probe failed.');
+          NODE
+
+          cd "$APP"
+          for file in $CHANGED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do attempt=$((attempt + 1)); [ "$attempt" -lt 15 ] || exit 1; sleep 2; done
+          gl_status="$(curl -sS -o "$STAGE/gl-route.json" -w '%{http_code}' http://127.0.0.1:4100/financial/gl?period=2026-09)"
+          close_status="$(curl -sS -o "$STAGE/close-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"period":"2026-09","currency":"USD"}' http://127.0.0.1:4100/financial/commands/desktop/close-period)"
+          case "$gl_status" in 401|403) ;; *) cat "$STAGE/gl-route.json" >&2; exit 1 ;; esac
+          case "$close_status" in 401|403) ;; *) cat "$STAGE/close-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core General Ledger %s deployed; health=200; gl=%s; close=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status"
+          REMOTE_SCRIPT
+          )"
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core General Ledger $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record General Ledger release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core General Ledger release'
+            echo "- Commit: `$IXI_CORE_SHA`"
+            echo '- 60+ Financial tests and GL invariants: passed'
+            echo '- Production dependency audit: passed'
+            echo '- Health and protected GL / close routes: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
