@@ -1,7 +1,6 @@
 import IXIAosGenericMediaDominant009 from "../generic/IXIAosGenericMediaDominant009";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
-import IXIAosV12LibraryReadability from "../../card-runtime/modules/IXIAosV12LibraryReadability";
-import IXIAosV12Face1EditPatch from "../../card-runtime/modules/IXIAosV12Face1EditPatch";
+import IXIAosFace1CardRuntime from "../../card-runtime/modules/IXIAosFace1CardRuntime";
 
 export const CARD_009 = Object.freeze({
   cardNumber: 9,
@@ -17,11 +16,9 @@ export default function IXIAosCard009(props) {
   return (
     <IXIAosDataContractCardAdapter {...props} minimumCustomFields={7}>
       {contractProps => (
-        <div className="ixi-v12-library-readable ixi-v12-face1-edit" style={{ width: 298, height: 471 }}>
-          <IXIAosGenericMediaDominant009 {...contractProps} />
-          <IXIAosV12LibraryReadability />
-          <IXIAosV12Face1EditPatch />
-        </div>
+        <IXIAosFace1CardRuntime object={contractProps.object} onSaveObject={contractProps.onSaveObject} maxFields={6}>
+          {face1 => <IXIAosGenericMediaDominant009 {...contractProps} object={face1.object} onSaveObject={face1.onSaveObject} />}
+        </IXIAosFace1CardRuntime>
       )}
     </IXIAosDataContractCardAdapter>
   );
