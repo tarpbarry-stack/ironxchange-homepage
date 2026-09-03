@@ -433,6 +433,18 @@ Treasury can project:
 
 Forecast partially paid receivables/payables using the remaining balance, not original gross amount.
 
+## Production implementation contract
+
+Treasury writes cross the authenticated Financial Command boundary and persist in IX-Core/DynamoDB as:
+
+- `treasury-account` / `ixi-treasury-account-v2` — Entity-bound, non-economic account control.
+- `payment.treasuryMovement` / `ixi-treasury-movement-v2` — immutable opening, adjustment, or transfer event with canonical account IDs.
+- `treasury-reconciliation` / `ixi-treasury-reconciliation-v2` — immutable statement comparison using the server-verifiable book balance.
+
+IX-Core enforces trusted Entity and actor lineage, Treasury-specific permissions, same-Entity and same-currency account checks, one opening event per account, negative-cash policy, idempotency, and immutable event history. DynamoDB writes the financial document, balance projection, opening lock, and both transfer legs in one transaction; reconciliation condition-checks the submitted book balance in that same atomic boundary. The generic document write routes reject Treasury records so callers cannot bypass the controlled command path.
+
+The browser derives balances only from canonical IX-Core records. A command response may be displayed immediately, but it is de-duplicated by `financialDocumentId` and followed by a full financial-record refresh. No browser-local record can establish production cash truth.
+
 ---
 
 # 5. FINANCIAL CONTROL INVARIANTS
