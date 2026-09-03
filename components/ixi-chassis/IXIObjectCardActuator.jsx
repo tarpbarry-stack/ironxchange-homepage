@@ -9,18 +9,13 @@ export default function IXIObjectCardActuator({
   const isTall =
     variant === "tall";
 
-  const isMarketplaceFull =
-    variant === "marketplace-full";
-
   const actuatorTop =
     isTall
       ? 402
-      : isMarketplaceFull
-        ? 335
-        : 352;
+      : 352;
 
   const actuatorHeight =
-    isTall || isMarketplaceFull
+    isTall
       ? 34
       : 17;
 
@@ -97,6 +92,11 @@ export default function IXIObjectCardActuator({
                 0,
                 .32
               );
+        }
+
+        :global(.marketplace-listing-card) .ixi-object-card-actuator {
+          top: 335px;
+          height: 34px;
         }
 
         .ixi-object-card-actuator.right {
