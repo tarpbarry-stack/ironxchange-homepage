@@ -1,0 +1,170 @@
+name: Deploy IX-Core Rental Income
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Rental Income release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-rental-income-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-rental-income-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/rental-income-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialLifecycleEngine.js financial/IXIFinancialRentalIncomeFactory.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              rm -f "$APP/financial/IXIFinancialRentalIncomeFactory.js"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '9355fc2d67f355f7092ac6e4dab3355c580193e333c299919a3b983d05500fc4' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '6fb7a822f6c0e134f44197712167622bf372943f484512d28d4ba2a1a436ee1d' 'financial/IXIFinancialValidationBridge.js' \
+            '0b5706c7789e0e2332328f1e354cb791eedc71caa6a1a170715da8c9906ffe6f' 'financial/IXIFinancialLifecycleEngine.js' \
+            '7ef2bd8f7abbbd5de44d7d8190a6ddf215e46a6a56e2381218576acd32227011' 'financial/IXIFinancialCommandEngine.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialLifecycleEngine.js
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const { createFinancialDocumentByType } = require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const { createInvoiceDocument } = require('./financial/IXIFinancialInvoiceFactory');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const { createFinancialLifecycleSnapshot } = require('./financial/IXIFinancialLifecycleEngine');
+          const rental = createFinancialDocumentByType({
+            documentType: 'rental-income',
+            input: {
+              financialDocumentId: 'ifd_rental_income_deploy_probe',
+              references: [
+                { passportId: 'passport:asset:probe', role: 'asset' },
+                { passportId: 'passport:entity:probe', role: 'entity' },
+                { passportId: 'passport:employee:probe', role: 'employee' }
+              ],
+              rentalIncome: {
+                schema: 'ixi-rental-income-v2',
+                context: { primaryPassportId: 'passport:asset:probe', entityPassportId: 'passport:entity:probe', actorPassportId: 'passport:employee:probe' },
+                customer: { name: 'Deploy Probe Customer', rentalAgreementNumber: 'PROBE-1' },
+                ownedAsset: { passportId: 'passport:asset:probe', label: 'Deploy Probe Excavator', ownershipState: 'owned', custodyState: 'customer-custody' },
+                period: { startDate: '2026-09-01', expectedReturnDate: '2026-09-30', status: 'active' },
+                rate: { baseRate: 7000, unit: 'month', minimumPeriods: 1 },
+                economics: { projectedRevenue: 8250, projectedTax: 660, projectedDeposit: 2000, projectedInvoiceTotal: 10910 },
+                documents: [],
+                status: 'active'
+              }
+            }
+          });
+          const invoice = createInvoiceDocument({ financialDocumentId: 'ifd_invoice_deploy_probe', financialState: 'billed', amount: 8000, sourceFinancialDocumentId: rental.financialDocumentId });
+          const validation = validateFinancialDocument(rental);
+          const lifecycle = createFinancialLifecycleSnapshot({ documents: [rental, invoice] });
+          if (!validation.ok || rental.documentType !== 'rental-income' || rental.totals.total !== 8250 || rental.accountingTreatment.createsBilledRevenue !== false || lifecycle.contractedRevenue !== 8250 || lifecycle.revenue !== 8000 || lifecycle.remainingContractedRevenue !== 250 || lifecycle.projectedInflow !== 8250) {
+            console.error(validation.errors, lifecycle);
+            throw new Error('Rental Income deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/rental-income-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"rental-income","input":{}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/rental-income-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Rental Income %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Rental Income $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record Rental Income release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Rental Income release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- Financial tests: passed'
+            echo '- Rental contract, validation, Invoice-consumption, and non-duplication probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Rental Income route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
