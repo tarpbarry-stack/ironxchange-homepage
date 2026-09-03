@@ -1,0 +1,104 @@
+name: Finalize agent-owned Ticket UI boundaries
+
+on:
+  push:
+    branches:
+      - ticket/commercial-agent-bridge-v1
+    paths:
+      - .github/workflows/agent-bridge-ui-finalize-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ticket/commercial-agent-bridge-v1
+          fetch-depth: 0
+      - name: Apply UI truth boundary
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          client = Path('lib/ixi-tickets/ixiTicketClient.js')
+          s = client.read_text()
+          old = '''  if (!["ready-for-chat", "reopened"].includes(remote.status)) return remote;
+
+  const response = await fetch("/api/ixi-agent/worker/launch", {'''
+          new = '''  const leaseExpiry = Date.parse(remote.metadata?.execution?.leaseExpiresAt || "");
+  const recovery = remote.status === "working" && (!Number.isFinite(leaseExpiry) || leaseExpiry <= Date.now());
+  if (!["ready-for-chat", "reopened"].includes(remote.status) && !recovery) return remote;
+
+  const response = await fetch("/api/ixi-agent/worker/launch", {'''
+          if old not in s: raise SystemExit('client recovery marker not found')
+          s = s.replace(old, new, 1)
+          old = '''      expectedRevision: remote.revision,
+      source: clean(options.source) || "ticket-command"
+    })'''
+          new = '''      expectedRevision: remote.revision,
+      source: clean(options.source) || "ticket-command",
+      recovery
+    })'''
+          if old not in s: raise SystemExit('client recovery body marker not found')
+          client.write_text(s.replace(old, new, 1))
+
+          cmd = Path('components/ixi-tickets/IXITicketCommand.jsx')
+          s = cmd.read_text()
+          marker = '''function closeoutForm(ticket) {'''
+          helper = '''function ticketLeaseExpired(ticket) {
+  if (ticket?.status !== IXI_TICKET_STATUS.WORKING) return false;
+  const expiresAt = Date.parse(ticket?.metadata?.execution?.leaseExpiresAt || "");
+  return !Number.isFinite(expiresAt) || expiresAt <= Date.now();
+}
+
+'''
+          if helper.strip() not in s:
+              if marker not in s: raise SystemExit('command helper marker not found')
+              s = s.replace(marker, helper + marker, 1)
+
+          old = '''      await startRemoteTicket(ticket, { assignedTo: "chat", source });
+      setActionNotice(`DISPATCH REQUESTED FOR ${ticket.displayNumber} — it remains READY until a real agent claims the full work packet.`);'''
+          new = '''      const recovery = ticketLeaseExpired(ticket);
+      await startRemoteTicket(ticket, { assignedTo: "chat", source: recovery ? "expired-lease-recovery" : source });
+      setActionNotice(recovery
+        ? `RECOVERY WORKER REQUESTED FOR ${ticket.displayNumber} — the abandoned lease will be replaced only after a successful agent reclaim.`
+        : `DISPATCH REQUESTED FOR ${ticket.displayNumber} — it remains READY until a real agent claims the full work packet.`);'''
+          if old not in s: raise SystemExit('command start notice marker not found')
+          s = s.replace(old, new, 1)
+
+          old = '''                  {[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>DISPATCH THIS TICKET TO AGENT</button>
+                  ) : null}
+                  <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>'''
+          new = '''                  {[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>DISPATCH THIS TICKET TO AGENT</button>
+                  ) : null}
+                  {ticketLeaseExpired(selected) ? (
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected, "expired-lease-recovery")}>RECOVER ABANDONED TICKET</button>
+                  ) : null}
+                  <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>'''
+          if old not in s: raise SystemExit('command recovery button marker not found')
+          s = s.replace(old, new, 1)
+
+          start = s.find('                <div className={styles.closeoutEditor}>')
+          end = s.find('                <div className={styles.closeoutGrid}>', start)
+          if start < 0 or end < 0: raise SystemExit('closeout editor block not found')
+          replacement = '''                <div className={styles.empty}>
+                  AGENT CLOSEOUT IS LEASE-BOUND. The claimed worker writes engineering closeout through the IXI Agent Bridge; this operator surface is read-only until owner verification.
+                </div>\n\n'''
+          s = s[:start] + replacement + s[end:]
+          cmd.write_text(s)
+          PY
+          grep -q 'recovery' lib/ixi-tickets/ixiTicketClient.js
+          grep -q 'RECOVER ABANDONED TICKET' components/ixi-tickets/IXITicketCommand.jsx
+          grep -q 'AGENT CLOSEOUT IS LEASE-BOUND' components/ixi-tickets/IXITicketCommand.jsx
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/ixi-tickets/ixiTicketClient.js components/ixi-tickets/IXITicketCommand.jsx
+          git commit -m "Make Ticket recovery and closeout agent-owned"
+          git push origin HEAD:ticket/commercial-agent-bridge-v1
