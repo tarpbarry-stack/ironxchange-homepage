@@ -1,4 +1,4 @@
-name: Deploy IX-Core General Ledger
+name: Deploy IX-Core Financial Controls
 
 "on":
   workflow_dispatch:
@@ -6,10 +6,10 @@ name: Deploy IX-Core General Ledger
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 932fe0602bba36f8e970bb0fb96d669ce7d840c8
+        default: 6033aa4581650780e9f074f799d42b8ef870ed37
   push:
     branches: [main]
-    paths: ['.github/workflows/deploy-ixi-core-general-ledger.yml']
+    paths: [".github/workflows/deploy-ixi-core-general-ledger.yml"]
 
 permissions:
   contents: read
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '932fe0602bba36f8e970bb0fb96d669ce7d840c8' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '6033aa4581650780e9f074f799d42b8ef870ed37' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,8 +53,8 @@ jobs:
           STAGE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/general-ledger-pre-__IXI_CORE_SHA__.tgz
-          CHANGED='financial/IXIFinancialAccountingControlFactory.js financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialGLProjectionEngine.js financial/IXIFinancialValidationBridge.js'
-          EXISTING='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialGLProjectionEngine.js financial/IXIFinancialValidationBridge.js'
+          CHANGED='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialOperationalControlFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          EXISTING='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           SUCCESS=0
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
@@ -75,11 +75,13 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            '8da2104bb4cc2857996be0d2400a3c8d3810d603fc83e043846440ed31afbb6a' 'financial/IXIFinancialCommandEngine.js' \
-            '7edb833e305a7b5cc5e988bd83b30c5018d218362b80fa47dea77f6a2342db38' 'financial/IXIFinancialCommandRoutes.js' \
-            '9d49d553b25563da56a0eae15f45cd2c9fc1596b3a67380d7de1d359a5dacba1' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
-            '5834a6d4de9a1a16b409dbcf3e876c11e0b27619fbf50628017a5bb8b6935290' 'financial/IXIFinancialGLProjectionEngine.js' \
-            '1bbaaf73349fed329f49f4c0903a9d995152991bed4d071b0c13b1ce307f9fef' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+            '16b7f831eb0702cd4e80dd690781466a829100cac1deb6850e687ad3de57e436' 'financial/IXIFinancialCloseControlEngine.js' \
+            'fd008484b5b1bf06ae45f023e70c4bdc19e13d1da09832d98c457c2fb2a20844' 'financial/IXIFinancialCommandEngine.js' \
+            '370b81328fcf0302a1c299f96fd952f7ce3a2203ef3855c5a9cbffa3154314ed' 'financial/IXIFinancialCommandRoutes.js' \
+            '4739482ba21e1d3f080f2cbd140e844acb564bfd6b2607dac0e5e65eb81d7cf5' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '63ba7308b12bc8d1d0d6c7968e78125d08b58fced6f96b6e24d970a35e272629' 'financial/IXIFinancialPermissionEngine.js' \
+            '1eb89f04e09569b285a9aa8d045bb1845d6cd3bec6b565d63937c40179e4895a' 'financial/IXIFinancialRoutes.js' \
+            '5a66779634db25cc94853467c03f12c46c47e64440bb0e9bae62522a2250a3d6' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
           tar -czf "$BACKUP" $EXISTING
@@ -98,6 +100,10 @@ jobs:
           const journal={financialDocumentId:'ifd_gl_probe',documentType:'journal-entry',financialState:'posted',status:'posted',currency:'USD',period:'2026-09',occurredAt:'2026-09-03',accounting:{balanced:true},lines:[{accountCode:'1010',debit:100,credit:0},{accountCode:'4100',debit:0,credit:100}]};
           const projection=buildFinancialGLProjection({records:[journal],period:'2026-09',currency:'USD'});
           if(projection.schema!=='ixi-financial-gl-projection-v2'||projection.chart.source!=='ixi-core'||projection.postingRules.source!=='ixi-core-dynamodb'||projection.controls.closeCertification.browserCalculated!==false||!projection.trialBalance.balanced||!projection.balanceSheet.balanced) throw new Error('General Ledger deploy probe failed.');
+          const {createCollectionDocument,createSettlementDocument}=require('./financial/IXIFinancialOperationalControlFactory');
+          const collection=createCollectionDocument({sourceFinancialDocumentId:'ifd_invoice_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe',references:[{role:'entity',passportId:'pass_entity_probe'}],collectionCase:{receivable:{invoiceId:'ifd_invoice_probe',originalAmount:100,openBalance:100},customer:{label:'Probe'},status:'open'}});
+          const settlement=createSettlementDocument({sourceFinancialDocumentId:'ifd_sale_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe',references:[{role:'entity',passportId:'pass_entity_probe'}],assetSettlement:{context:{assetPassportId:'pass_asset_probe'},references:{saleId:'ifd_sale_probe'},waterfall:{shareTotal:100,balanced:true,totalFinalDue:100,owners:[{ownerId:'owner_probe',label:'Probe Owner',finalDue:100,balanceDue:100}]},controls:{approvalNote:'deployment probe'},status:'ready',paymentStatus:'unpaid'}});
+          if(collection.documentType!=='collection'||settlement.documentType!=='settlement'||collection.accountingTreatment.economicEvent!==false||settlement.accountingTreatment.economicEvent!==false) throw new Error('Operational controls deploy probe failed.');
           NODE
 
           cd "$APP"
@@ -109,16 +115,20 @@ jobs:
           close_status="$(curl -sS -o "$STAGE/close-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"period":"2026-09","currency":"USD"}' http://127.0.0.1:4100/financial/commands/desktop/close-period)"
           reopen_status="$(curl -sS -o "$STAGE/reopen-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"period":"2026-09","currency":"USD","reopenReason":"deployment authorization probe"}' http://127.0.0.1:4100/financial/commands/desktop/reopen-period)"
           rule_status="$(curl -sS -o "$STAGE/rule-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"postingRule":{}}' http://127.0.0.1:4100/financial/commands/desktop/posting-rules)"
+          collection_status="$(curl -sS -o "$STAGE/collection-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"collection","input":{"sourceFinancialDocumentId":"ifd_invoice_probe","collectionCase":{"receivable":{"invoiceId":"ifd_invoice_probe","originalAmount":100,"openBalance":100},"customer":{"label":"Probe"}}}}' http://127.0.0.1:4100/financial/commands/create)"
+          settlement_status="$(curl -sS -o "$STAGE/settlement-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"settlement","input":{"sourceFinancialDocumentId":"ifd_sale_probe","assetSettlement":{"context":{"assetPassportId":"pass_asset_probe"},"references":{"saleId":"ifd_sale_probe"},"waterfall":{"shareTotal":100,"balanced":true,"totalFinalDue":100,"owners":[{"ownerId":"owner_probe","label":"Probe Owner","finalDue":100,"balanceDue":100}]},"controls":{"approvalNote":"deployment probe"},"status":"ready","paymentStatus":"unpaid"}}}' http://127.0.0.1:4100/financial/commands/create)"
           case "$gl_status" in 401|403) ;; *) cat "$STAGE/gl-route.json" >&2; exit 1 ;; esac
           case "$close_status" in 401|403) ;; *) cat "$STAGE/close-route.json" >&2; exit 1 ;; esac
           case "$reopen_status" in 401|403) ;; *) cat "$STAGE/reopen-route.json" >&2; exit 1 ;; esac
           case "$rule_status" in 401|403) ;; *) cat "$STAGE/rule-route.json" >&2; exit 1 ;; esac
+          case "$collection_status" in 401|403) ;; *) cat "$STAGE/collection-route.json" >&2; exit 1 ;; esac
+          case "$settlement_status" in 401|403) ;; *) cat "$STAGE/settlement-route.json" >&2; exit 1 ;; esac
 
           SUCCESS=1
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core General Ledger %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status"
+          printf 'IX-Core Financial Controls %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s; collections=%s; settlement=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status" "$collection_status" "$settlement_status"
           REMOTE_SCRIPT
           )"
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
@@ -134,9 +144,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## IX-Core General Ledger release'
+            echo '## IX-Core Financial Controls release'
             echo "- Commit: `$IXI_CORE_SHA`"
-            echo '- 69 Financial tests and close-control invariants: passed'
+            echo '- 73 Financial tests and operational-control invariants: passed'
             echo '- Production dependency audit: passed'
-            echo '- Health and protected GL / close / reopen / posting-rule routes: passed'
+            echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement routes: passed'
           } >> "$GITHUB_STEP_SUMMARY"
