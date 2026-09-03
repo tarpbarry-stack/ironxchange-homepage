@@ -76,11 +76,10 @@ export async function patchIXIAosFinancialDocument({
       }),
       signal
     },
-    "The Work Order could not be updated."
+    "The financial record could not be updated."
   );
 }
 
 export function getIXIFinancialDocument(record = {}) {
   return record?.financialDocument || record?.record?.financialDocument || null;
 }
-
