@@ -311,6 +311,15 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
       <style jsx global>{`
         .owned-private-runtime{position:relative;width:100%;height:100%;overflow:visible}
 
+        /*
+         * Owned/private Face 1 contract.
+         * Lifecycle operations were moved to seller Face 2. Keep the legacy
+         * Face 1 seller-actions row out of the owned inventory/AOS runtime.
+         */
+        .owned-private-runtime .private-listing-card .seller-actions{
+          display:none!important;
+        }
+
         .owned-private-runtime.read-mode .private-listing-card .hours-input,
         .owned-private-runtime.read-mode .private-listing-card .price-input,
         .owned-private-runtime.read-mode .private-listing-card .location-input,
