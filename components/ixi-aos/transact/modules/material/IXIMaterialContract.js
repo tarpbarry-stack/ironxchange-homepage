@@ -1,46 +1,86 @@
-const clean = value => String(value ?? "").trim();
-const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const obj = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+const clean = (value) => String(value ?? "").trim();
+const obj = (value) =>
+  value && typeof value === "object" && !Array.isArray(value) ? value : {};
+const finite = (value) =>
+  value !== "" &&
+  value !== null &&
+  value !== undefined &&
+  Number.isFinite(Number(value));
+const roundMoney = (value) =>
+  Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 
+export const IXI_MATERIAL_SCHEMA = "ixi-material-usage-v2";
 export const IXI_MATERIAL_SOURCE = Object.freeze([
   "inventory",
+  "manual",
   "purchase-order",
   "existing-supply",
-  "manual"
 ]);
-
 export const IXI_MATERIAL_UNITS = Object.freeze([
-  "EA", "FT", "YD", "GAL", "QT", "LB", "OZ", "SET", "BOX", "ROLL", "LOT"
+  "EA",
+  "FT",
+  "YD",
+  "GAL",
+  "QT",
+  "LB",
+  "OZ",
+  "SET",
+  "BOX",
+  "ROLL",
+  "LOT",
 ]);
-
 export const IXI_MATERIAL_CONDITIONS = Object.freeze([
-  "good", "used", "reconditioned", "damaged", "other"
+  "good",
+  "used",
+  "reconditioned",
+  "damaged",
+  "other",
 ]);
 
 export function normalizeIXIMaterialSource(value = "") {
   const source = clean(value).toLowerCase();
-  if (source === "manual") return "existing-supply";
-  return IXI_MATERIAL_SOURCE.includes(source) ? source : "existing-supply";
+  return IXI_MATERIAL_SOURCE.includes(source) ? source : "manual";
 }
 
-export function createIXIMaterialDraft({ context = {}, workOrder = {}, input = {} } = {}) {
+export function createIXIMaterialDraft({
+  context = {},
+  workOrder = {},
+  input = {},
+} = {}) {
   const source = obj(input);
-  const quantity = Math.max(0, num(source.quantity));
-  const unitCost = Math.max(0, num(source.unitCost));
-  const extendedCost = Math.round(quantity * unitCost * 100) / 100;
+  const quantityProvided = finite(source.quantity);
+  const unitCostProvided = finite(source.unitCost);
+  const quantity = quantityProvided ? Number(source.quantity) : null;
+  const unitCost = unitCostProvided ? Number(source.unitCost) : null;
+  const extendedCost =
+    quantityProvided && unitCostProvided
+      ? roundMoney(quantity * unitCost)
+      : null;
   const sourceType = normalizeIXIMaterialSource(source.source);
-  const unitCandidate = clean(source.unit).toUpperCase();
-  const unit = IXI_MATERIAL_UNITS.includes(unitCandidate) ? unitCandidate : "EA";
   const primary = obj(context.primary);
   const location = obj(context.location);
   const actor = obj(context.actor);
   const entity = obj(context.entity);
+  const unitCandidate = clean(source.unit).toUpperCase();
+  const unit = IXI_MATERIAL_UNITS.includes(unitCandidate)
+    ? unitCandidate
+    : "EA";
+  const availableQuantity = finite(source.availableQuantity)
+    ? Number(source.availableQuantity)
+    : null;
+  const workOrderId = clean(
+    workOrder?.financialBinding?.financialDocumentId ||
+      workOrder?.identity?.workOrderId ||
+      workOrder?.identity?.techWorkOrderId ||
+      workOrder?.financialDocumentId,
+  );
 
   return {
-    schema: "ixi-material-usage-v1",
+    schema: IXI_MATERIAL_SCHEMA,
     identity: {
       materialUsageId: clean(source.materialUsageId),
-      clientRequestId: clean(source.clientRequestId)
+      clientRequestId: clean(source.clientRequestId),
+      number: clean(source.number),
     },
     context: {
       primaryPassportId: clean(primary.passportId),
@@ -52,12 +92,17 @@ export function createIXIMaterialDraft({ context = {}, workOrder = {}, input = {
       locationPassportId: clean(location.passportId),
       locationObjectId: clean(location.objectId),
       locationLabel: clean(location.label),
-      employeePassportId: clean(actor.passportId),
-      employeeId: clean(actor.employeeId || actor.userId),
+      employeePassportId: clean(source.employeePassportId || actor.passportId),
+      employeeId: clean(
+        source.employeeId || actor.employeeId || actor.userId || actor.id,
+      ),
       employeeLabel: clean(actor.displayName || actor.name || actor.label),
-      workOrderId: clean(workOrder?.identity?.workOrderId),
-      techWorkOrderId: clean(workOrder?.identity?.techWorkOrderId),
-      workOrderNumber: clean(workOrder?.identity?.number || workOrder?.workOrderNumber || workOrder?.number)
+      workOrderId,
+      workOrderNumber: clean(
+        workOrder?.identity?.number ||
+          workOrder?.workOrderNumber ||
+          workOrder?.number,
+      ),
     },
     material: {
       source: sourceType,
@@ -73,74 +118,97 @@ export function createIXIMaterialDraft({ context = {}, workOrder = {}, input = {
       unit,
       unitCost,
       extendedCost,
-      availableQuantity: Math.max(0, num(source.availableQuantity)),
+      availableQuantity,
       sourceLocationId: clean(source.sourceLocationId),
       sourceLocationLabel: clean(source.sourceLocationLabel),
       dateUsed: clean(source.dateUsed),
-      condition: IXI_MATERIAL_CONDITIONS.includes(clean(source.condition)) ? clean(source.condition) : "good",
+      condition: IXI_MATERIAL_CONDITIONS.includes(clean(source.condition))
+        ? clean(source.condition)
+        : "good",
       referenceNotes: clean(source.referenceNotes),
-      notes: clean(source.notes)
+      notes: clean(source.notes),
     },
     costAttribution: {
       amount: extendedCost,
-      currency: clean(source.currency || "USD") || "USD",
+      currency: clean(source.currency || "USD").toUpperCase(),
       economicEvent: false,
-      sourceDocumentType:
-        sourceType === "purchase-order" ? "purchase-order" :
-        sourceType === "inventory" ? "inventory" :
-        "existing-supply",
-      note: "Material cost is attributed to the originating AOS context; this record does not create a second cash-spend event."
+      sourceDocumentType: sourceType,
+      note: "Physical cost attribution only; this record does not create a second cash-spend event.",
     },
     attachments: Array.isArray(source.attachments) ? source.attachments : [],
-    inventoryAdjustment: sourceType === "inventory" ? {
-      required: true,
-      direction: "decrement",
-      inventoryItemId: clean(source.inventoryItemId),
-      inventoryPassportId: clean(source.inventoryPassportId),
-      quantity,
-      unit,
-      sourceLocationId: clean(source.sourceLocationId),
-      status: "pending-inventory-service"
-    } : {
-      required: false,
-      status: "not-required"
-    },
-    receivingConsumption: sourceType === "purchase-order" ? {
-      required: true,
-      purchaseOrderId: clean(source.purchaseOrderId),
-      purchaseOrderNumber: clean(source.purchaseOrderNumber),
-      purchaseOrderLineId: clean(source.purchaseOrderLineId),
-      receivingRecordId: clean(source.receivingRecordId),
-      quantity,
-      unit,
-      status: "pending-purchase-record-service"
-    } : {
-      required: false,
-      status: "not-required"
-    },
+    inventoryAdjustment:
+      sourceType === "inventory"
+        ? {
+            required: true,
+            direction: "decrement",
+            inventoryItemId: clean(source.inventoryItemId),
+            inventoryPassportId: clean(source.inventoryPassportId),
+            quantity,
+            unit,
+            sourceLocationId: clean(source.sourceLocationId),
+            status: "pending",
+          }
+        : { required: false, status: "not-required" },
+    receivingConsumption:
+      sourceType === "purchase-order"
+        ? {
+            required: true,
+            purchaseOrderId: clean(source.purchaseOrderId),
+            purchaseOrderNumber: clean(source.purchaseOrderNumber),
+            purchaseOrderLineId: clean(source.purchaseOrderLineId),
+            receivingRecordId: clean(source.receivingRecordId),
+            quantity,
+            unit,
+            status: "pending",
+          }
+        : { required: false, status: "not-required" },
     status: "draft",
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 }
 
-export function validateIXIMaterial(material = {}) {
-  const m = obj(material.material);
+export function validateIXIMaterial(usage = {}) {
+  const m = obj(usage.material);
   const errors = {};
+  if (!clean(usage.context?.primaryPassportId))
+    errors.primary = "passport-required";
+  if (!clean(usage.context?.employeePassportId || usage.context?.employeeId))
+    errors.employee = "required";
   if (!clean(m.description)) errors.description = "required";
-  if (!(num(m.quantity) > 0)) errors.quantity = "required";
-  if (!(num(m.unitCost) >= 0)) errors.unitCost = "required";
+  if (!finite(m.quantity) || !(Number(m.quantity) > 0))
+    errors.quantity = "required";
+  if (!finite(m.unitCost) || Number(m.unitCost) < 0)
+    errors.unitCost = "required";
   if (!clean(m.dateUsed)) errors.dateUsed = "required";
-  if (clean(m.source) === "inventory" && !clean(m.sourceLocationLabel) && !clean(m.sourceLocationId)) errors.sourceLocation = "required";
-  if (clean(m.source) === "purchase-order" && !clean(m.purchaseOrderId || m.purchaseOrderNumber)) errors.purchaseOrder = "required";
-  if (clean(m.source) === "purchase-order" && m.availableQuantity > 0 && num(m.quantity) > num(m.availableQuantity)) errors.quantity = "exceeds-available";
+  if (m.source === "inventory") {
+    if (!clean(m.inventoryItemId || m.inventoryPassportId))
+      errors.inventoryItem = "required";
+    if (!clean(m.sourceLocationLabel || m.sourceLocationId))
+      errors.sourceLocation = "required";
+    if (
+      !finite(m.availableQuantity) ||
+      Number(m.quantity) > Number(m.availableQuantity)
+    )
+      errors.quantity = "exceeds-available";
+  }
+  if (m.source === "purchase-order") {
+    if (!clean(m.purchaseOrderId || m.purchaseOrderNumber))
+      errors.purchaseOrder = "required";
+    if (
+      !finite(m.availableQuantity) ||
+      Number(m.quantity) > Number(m.availableQuantity)
+    )
+      errors.quantity = "exceeds-available";
+  }
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
 export default {
+  IXI_MATERIAL_SCHEMA,
   createIXIMaterialDraft,
   validateIXIMaterial,
   normalizeIXIMaterialSource,
   IXI_MATERIAL_SOURCE,
   IXI_MATERIAL_UNITS,
-  IXI_MATERIAL_CONDITIONS
+  IXI_MATERIAL_CONDITIONS,
 };
