@@ -1,0 +1,186 @@
+name: Deploy IX-Core Asset Acquisition
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Asset Acquisition release
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-asset-acquisition-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-asset-acquisition-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/asset-acquisition-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialAssetAcquisitionFactory.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              rm -f "$APP/financial/IXIFinancialAssetAcquisitionFactory.js"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '8a30ae302bbcc3133eda8312b5dd994ccc391a909217f26b51aa068b8f51cb04' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '2b6ada5a3871765af773b7df5f86285ff834ece014f7d79b6e6aceaa32195e10' 'financial/IXIFinancialValidationBridge.js' \
+            '7ef2bd8f7abbbd5de44d7d8190a6ddf215e46a6a56e2381218576acd32227011' 'financial/IXIFinancialCommandEngine.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const { createFinancialDocumentByType } = require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const document = createFinancialDocumentByType({
+            documentType: 'asset-acquisition',
+            input: {
+              financialDocumentId: 'ifd_acquisition_deploy_probe',
+              references: [
+                { passportId: 'passport:machine:probe', role: 'asset' },
+                { passportId: 'passport:entity:probe', role: 'entity' },
+                { passportId: 'passport:employee:probe', role: 'employee' }
+              ],
+              assetAcquisition: {
+                schema: 'ixi-asset-acquisition-v2',
+                context: {
+                  primaryPassportId: 'passport:machine:probe',
+                  primaryLabel: 'Deploy Probe Asset',
+                  entityPassportId: 'passport:entity:probe',
+                  actorPassportId: 'passport:employee:probe'
+                },
+                acquisition: {
+                  type: 'direct-purchase',
+                  sellerLabel: 'Deploy Probe Seller',
+                  purchaseDate: '2026-09-03',
+                  purchasePrice: 100000,
+                  buyerPremium: 2500,
+                  tax: 500,
+                  titleFees: 100,
+                  brokerFees: 0,
+                  otherAcquisitionFees: 400,
+                  directAcquisitionCost: 103500
+                },
+                ownership: {
+                  owners: [{ partyLabel: 'Probe Entity', legalOwnershipPercent: 100, settlementSharePercent: 100 }],
+                  legalOwnershipTotal: 100,
+                  settlementShareTotal: 100
+                },
+                funding: { payments: [], amountPaid: 0, balanceDue: 103500, financed: false },
+                title: { titleRequired: true, titleStatus: 'pending', lienStatus: 'none-known' },
+                makeReady: { status: 'open' }
+              }
+            }
+          });
+          const validation = validateFinancialDocument(document);
+          if (!validation.ok || document.documentType !== 'asset-acquisition' || document.totals.acquisitionBasis !== 103500 || document.accountingTreatment.nonExpense !== true || document.accountingTreatment.createsObligation !== false) {
+            console.error(validation.errors);
+            throw new Error('Asset Acquisition deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/asset-acquisition-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"asset-acquisition","input":{}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/asset-acquisition-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Asset Acquisition %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Asset Acquisition $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record Asset Acquisition release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Asset Acquisition release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- Financial tests: passed'
+            echo '- Asset Acquisition validation and basis probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Asset Acquisition route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
