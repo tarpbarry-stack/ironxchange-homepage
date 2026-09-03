@@ -11,6 +11,7 @@ import {
 import {
   attachIXIPurchaseOrderFinancialIdentity
 } from "./IXIPurchaseOrderRecordEngine";
+import { patchIXIAosFinancialDocument } from "../../../financial-runtime/IXIAosFinancialReadClient";
 
 const clean = value => String(value ?? "").trim();
 const numeric = value => {
@@ -20,14 +21,31 @@ const numeric = value => {
 
 function getDocumentId(response = {}) {
   return clean(
+    response.financialDocument?.financialDocumentId ||
     response.financialDocument?.documentId ||
     response.financialDocument?.id ||
+    response.record?.financialDocument?.financialDocumentId ||
+    response.record?.financialDocumentId ||
     response.record?.documentId ||
     response.record?.id ||
     response.document?.documentId ||
     response.document?.id ||
     response.id
   );
+}
+
+function getRevision(response = {}) {
+  return Number(
+    response.record?.server?.revision ||
+    response.data?.record?.server?.revision ||
+    response.server?.revision ||
+    0
+  );
+}
+
+function canonicalRecord(record = {}) {
+  const { financialBinding: _binding, ...stored } = record;
+  return stored;
 }
 
 function getPoNumber(response = {}, fallback = "") {
@@ -134,6 +152,7 @@ export async function issueIXIPurchaseOrder({
           financialState: "committed",
           description: clean(record?.order?.description) || lines.map(line => line.description).filter(Boolean).join(", "),
           notes: clean(record?.order?.businessReason),
+          purchaseOrderRecord: canonicalRecord(record),
           lines: lines.map(line => ({
             lineType: "item",
             lineId: line.lineId,
@@ -167,11 +186,61 @@ export async function issueIXIPurchaseOrder({
         ? clean(record.identity.sourceRequestNumber).replace(/^PR-/i, "PO-")
         : `PO-${Date.now().toString().slice(-6)}`;
       const poNumber = getPoNumber(response, fallbackNumber);
-      const nextRecord = attachIXIPurchaseOrderFinancialIdentity(record, { documentId, poNumber });
+      const nextRecord = attachIXIPurchaseOrderFinancialIdentity(record, {
+        documentId,
+        poNumber,
+        revision: getRevision(response)
+      });
 
       return { response, record: nextRecord };
     }
   });
+}
+
+export async function updateIXIPurchaseOrder({
+  record = {},
+  action = "update",
+  metadata = {},
+  signal = undefined
+} = {}) {
+  const financialDocumentId = clean(
+    record?.financialBinding?.financialDocumentId || record?.identity?.poDocumentId
+  );
+  const expectedRevision = Number(record?.financialBinding?.revision || 0);
+  if (!financialDocumentId || !expectedRevision) {
+    const error = new Error("Purchase Order is not bound to a revision-controlled IXI Financial document.");
+    error.code = "IXI_PO_FINANCIAL_BINDING_REQUIRED";
+    throw error;
+  }
+  const commandId = globalThis.crypto?.randomUUID?.() || `po-update-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const status = clean(record?.status).toLowerCase();
+  const response = await patchIXIAosFinancialDocument({
+    financialDocumentId,
+    expectedRevision,
+    commandId,
+    idempotencyKey: `ixi-po:${action}:${commandId}`,
+    patch: {
+      purchaseOrderRecord: canonicalRecord(record),
+      financialState: ["cancelled", "void"].includes(status)
+        ? "void"
+        : status === "closed"
+          ? "closed"
+          : "committed"
+    },
+    metadata: { ...metadata, transactModule: "purchase-order", action, purchaseOrderStatus: status },
+    signal
+  });
+  const envelope = response?.data?.record || response?.record || {};
+  const document = envelope?.financialDocument || {};
+  const stored = document?.purchaseOrderRecord || canonicalRecord(record);
+  return {
+    response,
+    record: attachIXIPurchaseOrderFinancialIdentity(stored, {
+      documentId: financialDocumentId,
+      poNumber: clean(document.documentNumber || record?.identity?.poNumber),
+      revision: Number(envelope?.server?.revision || expectedRevision)
+    })
+  };
 }
 
 export async function matchIXIPurchaseOrderBill({
@@ -264,5 +333,6 @@ export async function matchIXIPurchaseOrderBill({
 
 export default {
   issueIXIPurchaseOrder,
+  updateIXIPurchaseOrder,
   matchIXIPurchaseOrderBill
 };

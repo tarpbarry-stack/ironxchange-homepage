@@ -13,6 +13,7 @@ import {
 } from "./IXIPurchaseOrderRecordEngine";
 import {
   issueIXIPurchaseOrder,
+  updateIXIPurchaseOrder,
   matchIXIPurchaseOrderBill
 } from "./IXIPurchaseOrderCommands";
 import IXIPurchaseOrderStyles from "./IXIPurchaseOrderStyles";
@@ -114,8 +115,18 @@ export default function IXIPurchaseOrderApp({
   }
 
   async function commit(nextRecord, change) {
-    await onRecordChange?.(nextRecord, change);
-    setRecord(nextRecord);
+    let canonical = nextRecord;
+    if (clean(nextRecord?.financialBinding?.financialDocumentId)) {
+      const saved = await updateIXIPurchaseOrder({
+        record: nextRecord,
+        action: clean(change?.action || "update"),
+        metadata: { source: "ixi-transact-standalone-po" }
+      });
+      canonical = saved.record;
+      change = { ...change, financialResponse: saved.response };
+    }
+    await onRecordChange?.(canonical, change);
+    setRecord(canonical);
   }
 
   async function runAction(action, payload = {}) {
@@ -129,14 +140,14 @@ export default function IXIPurchaseOrderApp({
         const issued = await issueIXIPurchaseOrder({ object:originObject, context, record, metadata:{source:"ixi-transact-standalone-po"} });
         working = issued.record;
         const next = applyIXIPurchaseOrderAction({ record:working, action, context, policy:resolvedPolicy, authority, actor, payload:{committedAmount:working.costs?.estimated} });
-        await commit(next, { action, financialResponse:issued.response, previous:record });
+        await commit(next, { action, issueResponse:issued.response, previous:record });
         return;
       }
 
       if (action === IXI_PO_ACTIONS.MATCH_BILL) {
         const matched = await matchIXIPurchaseOrderBill({ object:originObject, context, record, input:billForm, metadata:{source:"ixi-transact-standalone-po"} });
         const next = applyIXIPurchaseOrderAction({ record, action, context, policy:resolvedPolicy, authority, actor, payload:matched.bill });
-        await commit(next, { action, financialResponse:matched.response, previous:record });
+        await commit(next, { action, billResponse:matched.response, previous:record });
         setBillForm({ invoiceNumber:"", invoiceDate:"", amount:"" });
         return;
       }
