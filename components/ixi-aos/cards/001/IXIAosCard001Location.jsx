@@ -14,8 +14,8 @@ import {
 export const CARD_001_LOCATION = Object.freeze({
   cardNumber: 1,
   templateSlug: "location-standard",
-  nativeWidth: 298,
-  nativeHeight: 471,
+  nativeWidth: 300,
+  nativeHeight: 475,
   railReserve: 19,
   label: "Container Layout 001",
   section: "AOS CONTAINER LAYOUTS",
@@ -101,8 +101,8 @@ export default function IXIAosCard001Location({
                 <style jsx global>{`
                   .aos-card001-v12-identity-shell {
                     position: relative;
-                    width: 298px;
-                    height: 471px;
+                    width: 300px;
+                    height: 475px;
                   }
                   .aos-card001-ixi-identity {
                     position: absolute;

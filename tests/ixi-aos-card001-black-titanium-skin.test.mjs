@@ -8,13 +8,15 @@ const read = file => fs.readFileSync(path.join(root, file), "utf8");
 
 const header = read("components/ixi-aos/card-runtime/modules/IXIAosCardHeaderControls.jsx");
 const consoleSource = read("components/ixi-aos/console-runtime/IXIAosLocationObjectConsole.jsx");
+const card001Source = read("components/ixi-aos/cards/001/IXIAosCard001Location.jsx");
+const locationOverviewSource = read("components/ixi-aos/cards/location/IXIAosLocationOverviewCard.jsx");
 const skin = read("components/ixi-aos/cards/001/IXIAosCard001BlackTitaniumStyles.jsx");
 const saddleSteel = read("components/ixi-aos/cards/001/IXIAosCard001SaddleSteelStyles.jsx");
 const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedCommandStyles.jsx");
 const texturePath = path.join(root, "public/ixi/skins/black-titanium-grain.svg");
 const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-grain.svg");
 const forgedAssets = [
-  "public/ixi/skins/forged-command-shell.webp",
+  "public/ixi/skins/forged-command-shell-v2.webp",
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
 ].map(file => path.join(root, file));
@@ -37,6 +39,17 @@ test("Card 001 controls one skin across Faces 1 through 5", () => {
   assert.match(consoleSource, /<IXIAosCard001BlackTitaniumStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001SaddleSteelStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001ForgedCommandStyles \/>/);
+});
+
+test("Card 001 has one 300 by 475 Natural chassis and inherits scaled modes", () => {
+  assert.match(consoleSource, /const PANEL_WIDTH = 300;/);
+  assert.match(consoleSource, /const PANEL_HEIGHT = 475;/);
+  assert.match(consoleSource, /consoleSlots\.length \* PANEL_WIDTH/);
+  assert.match(card001Source, /nativeWidth: 300/);
+  assert.match(card001Source, /nativeHeight: 475/);
+  assert.match(locationOverviewSource, /const W = 300;/);
+  assert.match(locationOverviewSource, /const H = 475;/);
+  assert.doesNotMatch(consoleSource, /(?:WORK|FOCUS).*?(?:width|height)/s);
 });
 
 test("Black Titanium is appearance-only and uses one lightweight material asset", () => {
@@ -68,7 +81,7 @@ test("Forged Command uses compact photographic materials without changing card o
 
   assert.match(forgedCommand, /\.board-command-rail/);
   assert.match(forgedCommand, /pointer-events:\s*none/);
-  assert.match(forgedCommand, /forged-command-shell\.webp/);
+  assert.match(forgedCommand, /forged-command-shell-v2\.webp/);
   assert.match(forgedCommand, /forged-command-leather\.webp/);
   assert.match(forgedCommand, /forged-command-steel\.webp/);
 

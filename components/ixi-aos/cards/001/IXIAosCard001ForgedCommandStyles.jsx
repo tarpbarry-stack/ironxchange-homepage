@@ -1,6 +1,7 @@
 /*
  * Card 001 — FORGED COMMAND
- * Asset-assisted physical skin. Paint only: the chassis box model is untouched.
+ * Asset-assisted physical skin authored on the canonical 300 × 475 chassis.
+ * Work and Focus are inherited from the sitewide scale engine.
  */
 export default function IXIAosCard001ForgedCommandStyles() {
   return (
@@ -39,12 +40,14 @@ export default function IXIAosCard001ForgedCommandStyles() {
         background-color: var(--fc-black) !important;
         background-image:
           radial-gradient(circle at 15% -5%, rgba(255,239,207,.22), transparent 28%),
+          radial-gradient(circle at 88% 18%, rgba(117,183,174,.055), transparent 25%),
+          repeating-linear-gradient(92deg, rgba(255,255,255,.012) 0 1px, transparent 1px 7px),
           linear-gradient(111deg, transparent 0 34%, rgba(255,255,255,.045) 45%, transparent 56%),
           linear-gradient(180deg, rgba(30,31,29,.26), rgba(5,5,4,.76)),
           url("/ixi/skins/forged-command-steel.webp") !important;
         background-position: center !important;
         background-size: cover !important;
-        background-blend-mode: screen, soft-light, multiply, normal !important;
+        background-blend-mode: screen, screen, soft-light, soft-light, multiply, normal !important;
         color: var(--fc-ivory) !important;
         box-shadow:
           inset 0 1px 0 rgba(255,238,204,.26),
@@ -62,7 +65,7 @@ export default function IXIAosCard001ForgedCommandStyles() {
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        background: url("/ixi/skins/forged-command-shell.webp") center / 100% 100% no-repeat;
+        background: url("/ixi/skins/forged-command-shell-v2.webp") center / 100% 100% no-repeat;
         pointer-events: none;
         z-index: 170;
       }
@@ -81,6 +84,17 @@ export default function IXIAosCard001ForgedCommandStyles() {
           inset 0 1px 0 rgba(255,229,185,.23),
           inset 0 -1px 0 rgba(0,0,0,.90),
           0 3px 9px rgba(0,0,0,.58) !important;
+      }
+
+      .skin-forged-command :is(.gov-body,.ops-scroll,.f3-scroll,.gfv12-scroll) {
+        background-color: rgba(7,7,6,.38) !important;
+        background-image:
+          radial-gradient(circle at 76% 8%, rgba(225,189,120,.055), transparent 29%),
+          linear-gradient(118deg, rgba(255,255,255,.018), transparent 31%, rgba(0,0,0,.10)),
+          url("/ixi/skins/forged-command-steel.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, soft-light, multiply !important;
       }
 
       .skin-forged-command :is(.gov-identity,.ops-identity,.f3-identity,.gfv12-ident) > span,
@@ -199,11 +213,40 @@ export default function IXIAosCard001ForgedCommandStyles() {
       .skin-forged-command :is(.gov-media,.gov-thumbs) {
         border-color: #746146 !important;
         background-color: #060605 !important;
-        box-shadow: inset 0 0 18px rgba(0,0,0,.82), 0 1px 0 rgba(255,232,196,.07) !important;
+        background-image:
+          linear-gradient(145deg, rgba(225,189,120,.07), transparent 24%),
+          url("/ixi/skins/forged-command-steel.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply !important;
+        box-shadow: inset 0 0 18px rgba(0,0,0,.82), inset 0 1px 0 rgba(255,232,196,.11), 0 1px 0 rgba(255,232,196,.07) !important;
       }
 
       .skin-forged-command .gov-media img {
         filter: saturate(.88) sepia(.045) contrast(1.08) brightness(.94);
+      }
+
+      .skin-forged-command .ixi-collection-thumb-rail {
+        border-color: #68563f !important;
+        background-color: #0c0d0b !important;
+        background-image:
+          linear-gradient(180deg, rgba(255,235,201,.075), transparent 36%),
+          url("/ixi/skins/forged-command-steel.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply !important;
+        box-shadow: inset 0 1px 0 rgba(255,235,201,.09), inset 0 -1px 0 rgba(0,0,0,.82) !important;
+      }
+
+      .skin-forged-command .ixi-collection-thumb {
+        border-color: rgba(120,101,73,.50) !important;
+        background: linear-gradient(160deg, rgba(255,235,201,.055), rgba(0,0,0,.35)) !important;
+        box-shadow: inset 0 1px 0 rgba(255,237,207,.055), 0 2px 4px rgba(0,0,0,.58) !important;
+      }
+
+      .skin-forged-command .ixi-collection-thumb.active {
+        border-color: var(--fc-brass-hot) !important;
+        box-shadow: inset 0 0 12px rgba(225,189,120,.075), 0 0 7px rgba(225,189,120,.16) !important;
       }
 
       .skin-forged-command .ixi-aos-card-header-controls {
@@ -267,6 +310,12 @@ export default function IXIAosCard001ForgedCommandStyles() {
 
       .skin-forged-command .board-command-rail .rail-zone {
         border-right-color: rgba(225,189,120,.13) !important;
+        background-image: linear-gradient(180deg, rgba(255,237,207,.035), rgba(0,0,0,.24)) !important;
+      }
+
+      .skin-forged-command .board-command-rail .rail-zone:hover {
+        background-image: linear-gradient(180deg, rgba(225,189,120,.13), rgba(0,0,0,.18)) !important;
+        box-shadow: inset 0 0 8px rgba(225,189,120,.08) !important;
       }
 
       .skin-forged-command .board-command-rail .rail-zone::after {

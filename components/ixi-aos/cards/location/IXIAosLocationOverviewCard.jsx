@@ -21,8 +21,8 @@ import {
   getPrimaryImage
 } from "../../card-runtime/IXIAosSemanticObjectPresentation";
 
-const W = 298;
-const H = 471;
+const W = 300;
+const H = 475;
 
 function fieldInputValue(value) {
   if (Array.isArray(value)) return value.join(", ");
