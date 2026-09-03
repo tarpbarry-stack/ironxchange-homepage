@@ -1,5 +1,6 @@
 import IXIAosGenericDataDominant010 from "../generic/IXIAosGenericDataDominant010";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 export const CARD_010 = Object.freeze({
   cardNumber: 10,
@@ -78,7 +79,17 @@ export default function IXIAosCard010(props) {
   const object = withFaceLabSample(props?.object || {});
   return (
     <IXIAosDataContractCardAdapter {...props} object={object} minimumCustomFields={9}>
-      {contractProps => <IXIAosGenericDataDominant010 {...contractProps} />}
+      {contractProps => (
+        <IXIAosCommercialEditorBridge
+          object={contractProps.object}
+          onSaveObject={contractProps.onSaveObject}
+          minimumCustomFields={9}
+        >
+          {({ object: runtimeObject }) => (
+            <IXIAosGenericDataDominant010 {...contractProps} object={runtimeObject} />
+          )}
+        </IXIAosCommercialEditorBridge>
+      )}
     </IXIAosDataContractCardAdapter>
   );
 }
