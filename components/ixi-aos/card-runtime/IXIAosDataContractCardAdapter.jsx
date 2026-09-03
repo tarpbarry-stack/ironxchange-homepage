@@ -1,4 +1,5 @@
 import IXIAosBusinessIdentifierSlot from "./modules/IXIAosBusinessIdentifierSlot";
+import { getAosParentDisplayName } from "./IXIAosParentIdentity";
 import {
   AOS_OBJECT_DATA_CONTRACT_VERSION,
   BUSINESS_IDENTIFIER_FIELD_ID,
@@ -15,10 +16,11 @@ import {
  * from a parent/container. It only guarantees that every card reads/writes the
  * same portable object shape used by manual create, Excel/CSV, API and AWS.
  *
- * HARD CONTRACT:
- * Every numbered card exposes the customer's durable business identifier in a
- * dedicated visible slot. The label remains customer-defined (ID, UNIT #,
- * ASSET #, EMPLOYEE #, etc.). IXI never derives business meaning from that label.
+ * HARD CONTRACTS:
+ * 1) Every numbered card exposes the customer's durable business identifier.
+ * 2) In AOS/Work only, a real runtime parent name replaces the stock top-line
+ *    noun in the exact existing visual slot. FaceLab has no real parent and is
+ *    therefore left visually untouched.
  */
 export default function IXIAosDataContractCardAdapter({
   children,
@@ -52,6 +54,11 @@ export default function IXIAosDataContractCardAdapter({
       fieldDefinitions
     }
   };
+
+  const parentDisplayName = getAosParentDisplayName(
+    object,
+    props?.parentLabel
+  );
 
   async function onSaveObject(payload = {}) {
     const incomingObject = payload?.object || {};
@@ -115,21 +122,68 @@ export default function IXIAosDataContractCardAdapter({
 
   const rendered = typeof children === "function" ? children(contractProps) : null;
 
-  if (!showBusinessIdentifier) return rendered;
+  if (!showBusinessIdentifier && !parentDisplayName) return rendered;
 
   return (
-    <div className="ixi-aos-data-contract-card-shell">
+    <div
+      className={[
+        "ixi-aos-data-contract-card-shell",
+        parentDisplayName ? "has-real-parent" : ""
+      ].filter(Boolean).join(" ")}
+    >
       {rendered}
-      <div className="ixi-aos-data-contract-business-id">
-        <IXIAosBusinessIdentifierSlot object={object} compact />
-      </div>
 
-      <style jsx>{`
+      {parentDisplayName ? (
+        <div
+          className="ixi-aos-runtime-parent-line"
+          aria-label="Parent"
+          title={parentDisplayName}
+        >
+          {parentDisplayName}
+        </div>
+      ) : null}
+
+      {showBusinessIdentifier ? (
+        <div className="ixi-aos-data-contract-business-id">
+          <IXIAosBusinessIdentifierSlot object={object} compact />
+        </div>
+      ) : null}
+
+      <style jsx global>{`
         .ixi-aos-data-contract-card-shell {
           position: relative;
           width: 298px;
           height: 471px;
         }
+
+        .ixi-aos-runtime-parent-line {
+          position: absolute;
+          top: 7px;
+          left: 10px;
+          z-index: 95;
+          max-width: 176px;
+          overflow: hidden;
+          color: rgba(255,255,255,.58);
+          font-size: 6px;
+          font-weight: 950;
+          line-height: 1;
+          letter-spacing: .06em;
+          text-overflow: ellipsis;
+          text-transform: uppercase;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+
+        /*
+         * Replace only the existing top-line stock noun while a real AOS parent
+         * exists. No rule fires in FaceLab, so its current card-stock labels stay
+         * exactly as designed.
+         */
+        .ixi-aos-data-contract-card-shell.has-real-parent article > header > div:first-child > span:first-child,
+        .ixi-aos-data-contract-card-shell.has-real-parent .location-face1-heading > span:first-child {
+          visibility: hidden !important;
+        }
+
         .ixi-aos-data-contract-business-id {
           position: absolute;
           top: 46px;
