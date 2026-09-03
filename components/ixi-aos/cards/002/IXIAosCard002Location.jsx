@@ -1,4 +1,5 @@
 import IXIAosLocationOverviewCard from "../location/IXIAosLocationOverviewCard";
+import IXIV12ReadabilityFoundation from "../../card-runtime/modules/IXIV12ReadabilityFoundation";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
 import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 import {
@@ -51,15 +52,18 @@ export default function IXIAosCard002Location(props) {
             const [addressLineOne, addressLineTwo] = getAddressLines(object);
 
             return (
-              <div className="aos-card002-customer-id-shell">
+              <div className="aos-card002-customer-id-shell ixi-v12-readable-card">
                 <IXIAosLocationOverviewCard {...contractProps} object={object} variant="002" />
 
                 <div className="aos-card002-customer-identity" aria-label="Customer yard identity">
-                  <small>{customerIdLine}</small>
-                  <strong>{addressLineOne}</strong>
-                  {addressLineTwo ? <strong>{addressLineTwo}</strong> : null}
+                  <small className="ixi-v12-customer-identity-label">{customerIdLine}</small>
+                  <strong className="ixi-v12-customer-identity-value">{addressLineOne}</strong>
+                  {addressLineTwo ? (
+                    <strong className="ixi-v12-customer-identity-value">{addressLineTwo}</strong>
+                  ) : null}
                 </div>
 
+                <IXIV12ReadabilityFoundation />
                 <style jsx global>{`
                   .aos-card002-customer-id-shell {
                     position: relative;
@@ -90,31 +94,6 @@ export default function IXIAosCard002Location(props) {
                     background: transparent;
                     text-align: center;
                     pointer-events: none;
-                  }
-                  .aos-card002-customer-identity small {
-                    display: block;
-                    max-width: 94%;
-                    margin-bottom: 4px;
-                    overflow: hidden;
-                    color: #969d98;
-                    font-size: 6px;
-                    font-weight: 900;
-                    line-height: 1;
-                    text-overflow: ellipsis;
-                    text-transform: uppercase;
-                    white-space: nowrap;
-                  }
-                  .aos-card002-customer-identity strong {
-                    display: block;
-                    max-width: 94%;
-                    overflow: hidden;
-                    color: #eef1ef;
-                    font-size: 8px;
-                    font-weight: 900;
-                    line-height: 1.18;
-                    text-overflow: ellipsis;
-                    text-transform: uppercase;
-                    white-space: nowrap;
                   }
                 `}</style>
               </div>
