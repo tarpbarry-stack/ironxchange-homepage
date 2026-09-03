@@ -6,7 +6,7 @@ name: Deploy IX-Core Financial Controls
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: 6033aa4581650780e9f074f799d42b8ef870ed37
+        default: 940562de7a24f547e3d30a72c4381c942f39d4ae
   push:
     branches: [main]
     paths: [".github/workflows/deploy-ixi-core-general-ledger.yml"]
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || '6033aa4581650780e9f074f799d42b8ef870ed37' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || '940562de7a24f547e3d30a72c4381c942f39d4ae' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,8 +53,8 @@ jobs:
           STAGE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-general-ledger-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/general-ledger-pre-__IXI_CORE_SHA__.tgz
-          CHANGED='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialOperationalControlFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
-          EXISTING='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          CHANGED='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialOperationalControlFactory.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          EXISTING='financial/IXIFinancialCloseControlEngine.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialPurchaseOrderFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           SUCCESS=0
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
@@ -80,6 +80,7 @@ jobs:
             '370b81328fcf0302a1c299f96fd952f7ce3a2203ef3855c5a9cbffa3154314ed' 'financial/IXIFinancialCommandRoutes.js' \
             '4739482ba21e1d3f080f2cbd140e844acb564bfd6b2607dac0e5e65eb81d7cf5' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
             '63ba7308b12bc8d1d0d6c7968e78125d08b58fced6f96b6e24d970a35e272629' 'financial/IXIFinancialPermissionEngine.js' \
+            'a12c8f461780fe618c96aecdbad9ae17fa177bba51b679925376eb8be39ffa98' 'financial/IXIFinancialPurchaseOrderFactory.js' \
             '1eb89f04e09569b285a9aa8d045bb1845d6cd3bec6b565d63937c40179e4895a' 'financial/IXIFinancialRoutes.js' \
             '5a66779634db25cc94853467c03f12c46c47e64440bb0e9bae62522a2250a3d6' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
 
@@ -104,6 +105,9 @@ jobs:
           const collection=createCollectionDocument({sourceFinancialDocumentId:'ifd_invoice_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe',references:[{role:'entity',passportId:'pass_entity_probe'}],collectionCase:{receivable:{invoiceId:'ifd_invoice_probe',originalAmount:100,openBalance:100},customer:{label:'Probe'},status:'open'}});
           const settlement=createSettlementDocument({sourceFinancialDocumentId:'ifd_sale_probe',entityPassportId:'pass_entity_probe',actorPassportId:'pass_actor_probe',references:[{role:'entity',passportId:'pass_entity_probe'}],assetSettlement:{context:{assetPassportId:'pass_asset_probe'},references:{saleId:'ifd_sale_probe'},waterfall:{shareTotal:100,balanced:true,totalFinalDue:100,owners:[{ownerId:'owner_probe',label:'Probe Owner',finalDue:100,balanceDue:100}]},controls:{approvalNote:'deployment probe'},status:'ready',paymentStatus:'unpaid'}});
           if(collection.documentType!=='collection'||settlement.documentType!=='settlement'||collection.accountingTreatment.economicEvent!==false||settlement.accountingTreatment.economicEvent!==false) throw new Error('Operational controls deploy probe failed.');
+          const {createPurchaseOrderDocument}=require('./financial/IXIFinancialPurchaseOrderFactory');
+          const purchaseOrder=createPurchaseOrderDocument({financialDocumentId:'ifd_po_probe',purchaseOrderRecord:{schema:'ixi-purchase-order-record-v1',identity:{purchaseOrderRecordId:'POREC-PROBE'},status:'sent'},amount:100});
+          if(purchaseOrder.purchaseOrderRecord.status!=='sent'||purchaseOrder.purchaseOrderRecord.identity.purchaseOrderRecordId!=='POREC-PROBE') throw new Error('Purchase Order control deploy probe failed.');
           NODE
 
           cd "$APP"
@@ -117,18 +121,20 @@ jobs:
           rule_status="$(curl -sS -o "$STAGE/rule-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"postingRule":{}}' http://127.0.0.1:4100/financial/commands/desktop/posting-rules)"
           collection_status="$(curl -sS -o "$STAGE/collection-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"collection","input":{"sourceFinancialDocumentId":"ifd_invoice_probe","collectionCase":{"receivable":{"invoiceId":"ifd_invoice_probe","originalAmount":100,"openBalance":100},"customer":{"label":"Probe"}}}}' http://127.0.0.1:4100/financial/commands/create)"
           settlement_status="$(curl -sS -o "$STAGE/settlement-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"settlement","input":{"sourceFinancialDocumentId":"ifd_sale_probe","assetSettlement":{"context":{"assetPassportId":"pass_asset_probe"},"references":{"saleId":"ifd_sale_probe"},"waterfall":{"shareTotal":100,"balanced":true,"totalFinalDue":100,"owners":[{"ownerId":"owner_probe","label":"Probe Owner","finalDue":100,"balanceDue":100}]},"controls":{"approvalNote":"deployment probe"},"status":"ready","paymentStatus":"unpaid"}}}' http://127.0.0.1:4100/financial/commands/create)"
+          purchase_order_status="$(curl -sS -o "$STAGE/purchase-order-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"purchase-order","input":{"amount":100,"purchaseOrderRecord":{"schema":"ixi-purchase-order-record-v1","identity":{"purchaseOrderRecordId":"POREC-PROBE"},"status":"sent"}}}' http://127.0.0.1:4100/financial/commands/create)"
           case "$gl_status" in 401|403) ;; *) cat "$STAGE/gl-route.json" >&2; exit 1 ;; esac
           case "$close_status" in 401|403) ;; *) cat "$STAGE/close-route.json" >&2; exit 1 ;; esac
           case "$reopen_status" in 401|403) ;; *) cat "$STAGE/reopen-route.json" >&2; exit 1 ;; esac
           case "$rule_status" in 401|403) ;; *) cat "$STAGE/rule-route.json" >&2; exit 1 ;; esac
           case "$collection_status" in 401|403) ;; *) cat "$STAGE/collection-route.json" >&2; exit 1 ;; esac
           case "$settlement_status" in 401|403) ;; *) cat "$STAGE/settlement-route.json" >&2; exit 1 ;; esac
+          case "$purchase_order_status" in 401|403) ;; *) cat "$STAGE/purchase-order-route.json" >&2; exit 1 ;; esac
 
           SUCCESS=1
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core Financial Controls %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s; collections=%s; settlement=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status" "$collection_status" "$settlement_status"
+          printf 'IX-Core Financial Controls %s deployed; health=200; gl=%s; close=%s; reopen=%s; rules=%s; collections=%s; settlement=%s; purchase-order=%s\n' "$RELEASE_SHA" "$gl_status" "$close_status" "$reopen_status" "$rule_status" "$collection_status" "$settlement_status" "$purchase_order_status"
           REMOTE_SCRIPT
           )"
           remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
@@ -146,7 +152,7 @@ jobs:
           {
             echo '## IX-Core Financial Controls release'
             echo "- Commit: `$IXI_CORE_SHA`"
-            echo '- 73 Financial tests and operational-control invariants: passed'
+            echo '- 75 Financial tests and operational-control invariants: passed'
             echo '- Production dependency audit: passed'
-            echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement routes: passed'
+            echo '- Health and protected GL / close / reopen / posting-rule / Collections / Settlement / Purchase Order routes: passed'
           } >> "$GITHUB_STEP_SUMMARY"

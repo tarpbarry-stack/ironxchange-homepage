@@ -199,7 +199,7 @@ export function createIXIPurchaseOrderRecord({
   };
 }
 
-export function attachIXIPurchaseOrderFinancialIdentity(record = {}, { documentId = "", poNumber = "" } = {}) {
+export function attachIXIPurchaseOrderFinancialIdentity(record = {}, { documentId = "", poNumber = "", revision = 0 } = {}) {
   return {
     ...record,
     identity: {
@@ -207,9 +207,28 @@ export function attachIXIPurchaseOrderFinancialIdentity(record = {}, { documentI
       poDocumentId: clean(documentId),
       poNumber: clean(poNumber) || clean(record.identity?.poNumber)
     },
+    financialBinding: {
+      financialDocumentId: clean(documentId),
+      revision: Number(revision || record?.financialBinding?.revision || 0)
+    },
     updatedAt: nowIso(),
     version: Number(record.version || 0) + 1
   };
+}
+
+export function hydrateIXIPurchaseOrderRecord(financialRecord = {}) {
+  const envelope = financialRecord?.record || financialRecord || {};
+  const document = envelope?.financialDocument || financialRecord?.financialDocument || envelope;
+  if (clean(document?.documentType).toLowerCase() !== "purchase-order") return null;
+  const stored = document?.purchaseOrderRecord;
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return null;
+  const financialDocumentId = clean(document.financialDocumentId);
+  if (!financialDocumentId) return null;
+  return attachIXIPurchaseOrderFinancialIdentity(stored, {
+    documentId: financialDocumentId,
+    poNumber: clean(document.documentNumber || stored?.identity?.poNumber),
+    revision: Number(envelope?.server?.revision || financialRecord?.server?.revision || 0)
+  });
 }
 
 export function addIXIPurchaseOrderRelated(record = {}, related = {}) {
@@ -405,6 +424,7 @@ export function getIXIPurchaseOrderDisplayNumber(record = {}) {
 export default {
   createIXIPurchaseOrderRecord,
   attachIXIPurchaseOrderFinancialIdentity,
+  hydrateIXIPurchaseOrderRecord,
   addIXIPurchaseOrderRelated,
   applyIXIPurchaseOrderAction,
   getIXIPurchaseOrderDisplayNumber

@@ -7,6 +7,7 @@ import IXIWorkOrderApp from "./modules/work-order/IXIWorkOrderApp";
 import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
+import { hydrateIXIPurchaseOrderRecord } from "./modules/purchase-order/IXIPurchaseOrderRecordEngine";
 import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
 import { hydrateIXIBillRecord } from "./modules/bill/IXIBillContract";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
@@ -280,6 +281,19 @@ export default function IXITransactApp({
         [];
     return candidates.map(hydrateIXIBillRecord).filter(Boolean);
   }, [object, financialRecords]);
+  const purchaseOrderSnapshot = useMemo(() => {
+    const candidates = financialRecords.length
+      ? financialRecords
+      : object?.purchaseOrderFinancialRecords ||
+        object?.assetFinancialTransactions ||
+        object?.relatedFinancialRecords ||
+        object?.financialRecords ||
+        [];
+    const records = candidates.map(hydrateIXIPurchaseOrderRecord).filter(Boolean);
+    return records.sort((left, right) =>
+      String(right?.updatedAt || "").localeCompare(String(left?.updatedAt || ""))
+    )[0] || null;
+  }, [object, financialRecords]);
 
   useEffect(() => {
     setWorkOrderSnapshot(activeWorkOrder || null);
@@ -451,6 +465,7 @@ export default function IXITransactApp({
     body = (
       <IXIPurchaseOrderApp
         context={context}
+        initialPurchaseOrder={purchaseOrderSnapshot}
         onBack={back}
         onRecordChange={(record, changePayload) =>
           change(
@@ -1043,11 +1058,8 @@ export default function IXITransactApp({
             sourceContext,
             { workOrder: nextWorkOrder, ...payload },
           );
-          if (
-            id === "complete" &&
-            nextWorkOrder?.work?.customerService === true
-          )
-            setModuleId("service-invoice");
+          // Service Invoice remains intentionally gated until the sales workflow
+          // persists issue, payment, void, and canonical readback end to end.
         }}
       />
     );
