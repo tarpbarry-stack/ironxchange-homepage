@@ -1,20 +1,12 @@
-const clean = value => String(value ?? "").trim();
-const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const obj = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
-const arr = value => Array.isArray(value) ? value : [];
-const roundMoney = value => Math.round(num(value) * 100) / 100;
+const clean = (value) => String(value ?? "").trim();
+const num = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+const obj = (value) => (value && typeof value === "object" && !Array.isArray(value) ? value : {});
+const arr = (value) => (Array.isArray(value) ? value : []);
+const roundMoney = (value) => Math.round(num(value) * 100) / 100;
 
-export const IXI_ASSET_ACQUISITION_SCHEMA = "ixi-asset-acquisition-v1";
+export const IXI_ASSET_ACQUISITION_SCHEMA = "ixi-asset-acquisition-v2";
 
-export const IXI_ACQUISITION_TYPES = Object.freeze([
-  "direct-purchase",
-  "auction",
-  "trade-in",
-  "dealer",
-  "private-seller",
-  "entity-transfer",
-  "other"
-]);
+export const IXI_ACQUISITION_TYPES = Object.freeze(["direct-purchase", "auction", "trade-in", "dealer", "private-seller", "entity-transfer", "other"]);
 
 export const IXI_TITLE_STATUSES = Object.freeze(["not-required", "pending", "received", "issue"]);
 export const IXI_LIEN_STATUSES = Object.freeze(["none-known", "disclosed", "release-pending", "released", "disputed"]);
@@ -28,14 +20,12 @@ function normalizeOwner(owner = {}, index = 0) {
     partyId: clean(source.partyId),
     partyLabel: clean(source.partyLabel),
     legalOwnershipPercent: num(source.legalOwnershipPercent),
-    settlementSharePercent: source.settlementSharePercent === "" || source.settlementSharePercent == null
-      ? num(source.legalOwnershipPercent)
-      : num(source.settlementSharePercent),
+    settlementSharePercent: source.settlementSharePercent === "" || source.settlementSharePercent == null ? num(source.legalOwnershipPercent) : num(source.settlementSharePercent),
     initialContribution: roundMoney(source.initialContribution),
     contributionDate: clean(source.contributionDate),
     contributionReference: clean(source.contributionReference),
     settlementPriority: clean(source.settlementPriority || "pro-rata"),
-    notes: clean(source.notes)
+    notes: clean(source.notes),
   };
 }
 
@@ -49,7 +39,7 @@ function normalizePayment(payment = {}, index = 0) {
     payerLabel: clean(source.payerLabel),
     reference: clean(source.reference),
     documentId: clean(source.documentId),
-    notes: clean(source.notes)
+    notes: clean(source.notes),
   };
 }
 
@@ -60,7 +50,7 @@ function normalizeEstimate(cost = {}, index = 0) {
     category: clean(source.category || "other"),
     label: clean(source.label),
     estimatedAmount: roundMoney(source.estimatedAmount),
-    notes: clean(source.notes)
+    notes: clean(source.notes),
   };
 }
 
@@ -87,7 +77,7 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
     identity: {
       acquisitionId: clean(source.acquisitionId),
       number: clean(source.number),
-      clientRequestId
+      clientRequestId,
     },
     context: {
       primaryPassportId: clean(primary.passportId),
@@ -100,7 +90,7 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       locationLabel: clean(context.location?.label),
       actorPassportId: clean(context.actor?.passportId),
       actorId: clean(context.actor?.employeeId || context.actor?.userId),
-      actorLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label)
+      actorLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
     },
     acquisition: {
       type: IXI_ACQUISITION_TYPES.includes(clean(source.acquisitionType)) ? clean(source.acquisitionType) : "direct-purchase",
@@ -123,14 +113,14 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       otherAcquisitionFees,
       directAcquisitionCost,
       estimatedMakeReady,
-      projectedReadyCost: roundMoney(directAcquisitionCost + estimatedMakeReady)
+      projectedReadyCost: roundMoney(directAcquisitionCost + estimatedMakeReady),
     },
     ownership: {
       owners,
       legalOwnershipTotal: roundMoney(owners.reduce((sum, item) => sum + num(item.legalOwnershipPercent), 0)),
       settlementShareTotal: roundMoney(owners.reduce((sum, item) => sum + num(item.settlementSharePercent), 0)),
       initialCapitalTotal: roundMoney(owners.reduce((sum, item) => sum + num(item.initialContribution), 0)),
-      events: []
+      events: [],
     },
     funding: {
       payments,
@@ -138,20 +128,20 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       balanceDue: roundMoney(Math.max(0, directAcquisitionCost - amountPaid)),
       financed: Boolean(source.financed),
       lenderLabel: clean(source.lenderLabel),
-      financingReference: clean(source.financingReference)
+      financingReference: clean(source.financingReference),
     },
     title: {
       titleRequired: source.titleRequired !== false,
-      titleStatus: IXI_TITLE_STATUSES.includes(clean(source.titleStatus)) ? clean(source.titleStatus) : "pending",
+      titleStatus: source.titleRequired === false ? "not-required" : IXI_TITLE_STATUSES.includes(clean(source.titleStatus)) ? clean(source.titleStatus) : "pending",
       lienStatus: IXI_LIEN_STATUSES.includes(clean(source.lienStatus)) ? clean(source.lienStatus) : "none-known",
       sellerRepresentsClearTitle: clean(source.sellerRepresentsClearTitle || "unknown"),
-      titleNumber: clean(source.titleNumber)
+      titleNumber: clean(source.titleNumber),
     },
     condition: {
       hoursAtAcquisition: num(source.hoursAtAcquisition),
       milesAtAcquisition: num(source.milesAtAcquisition),
       condition: clean(source.condition || "running"),
-      knownIssues: clean(source.knownIssues)
+      knownIssues: clean(source.knownIssues),
     },
     logistics: {
       purchaseLocation: clean(source.purchaseLocation),
@@ -161,7 +151,7 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       pickupDate: clean(source.pickupDate),
       expectedDeliveryDate: clean(source.expectedDeliveryDate),
       receivedDate: clean(source.receivedDate),
-      deliveryStatus: IXI_DELIVERY_STATUSES.includes(clean(source.deliveryStatus)) ? clean(source.deliveryStatus) : "not-picked-up"
+      deliveryStatus: IXI_DELIVERY_STATUSES.includes(clean(source.deliveryStatus)) ? clean(source.deliveryStatus) : "not-picked-up",
     },
     makeReady: {
       estimates: makeReadyEstimates,
@@ -171,12 +161,12 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       inServiceDate: clean(source.inServiceDate),
       inServiceAt: "",
       inServiceBy: "",
-      status: clean(source.inServiceDate) ? "closed" : "open"
+      status: clean(source.inServiceDate) ? "closed" : "open",
     },
     documents: arr(source.documents),
     settlementTerms: {
       returnCapitalFirst: source.returnCapitalFirst !== false,
-      notes: clean(source.settlementTermsNotes)
+      notes: clean(source.settlementTermsNotes),
     },
     notes: clean(source.notes),
     status: "draft",
@@ -184,25 +174,35 @@ export function createIXIAssetAcquisitionDraft({ context = {}, input = {} } = {}
       createdAt,
       createdBy: clean(context.actor?.passportId || context.actor?.employeeId || context.actor?.userId),
       createdByLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
-      updatedAt: createdAt
-    }
+      updatedAt: createdAt,
+    },
   };
 }
 
 export function validateIXIAssetAcquisition(record = {}) {
   const source = obj(record);
   const errors = {};
-  if (!clean(source.context?.primaryPassportId || source.context?.primaryObjectId)) errors.asset = "required";
+  const acquisition = obj(source.acquisition);
+  const funding = obj(source.funding);
+  if (!clean(source.context?.primaryPassportId)) errors.asset = "passport-required";
+  if (!clean(source.context?.entityPassportId)) errors.entity = "passport-required";
+  if (!clean(source.context?.actorPassportId || source.context?.actorId)) errors.actor = "identity-required";
   if (!clean(source.acquisition?.sellerLabel)) errors.seller = "required";
   if (!clean(source.acquisition?.purchaseDate)) errors.purchaseDate = "required";
-  if (!(num(source.acquisition?.purchasePrice) >= 0)) errors.purchasePrice = "required";
+  if (!(num(acquisition.purchasePrice) > 0)) errors.purchasePrice = "greater-than-zero";
+  if (["buyerPremium", "tax", "titleFees", "brokerFees", "otherAcquisitionFees"].some((field) => num(acquisition[field]) < 0)) errors.costs = "non-negative";
   if (Math.abs(num(source.ownership?.legalOwnershipTotal) - 100) > 0.01) errors.ownership = "must-total-100";
   if (Math.abs(num(source.ownership?.settlementShareTotal) - 100) > 0.01) errors.settlement = "must-total-100";
+  if (!arr(source.ownership?.owners).length || arr(source.ownership?.owners).some((owner) => !clean(owner?.partyLabel))) errors.owner = "named-owner-required";
+  if (arr(funding.payments).some((payment) => !clean(payment?.date) || !(num(payment?.amount) > 0))) errors.payments = "valid-date-and-positive-amount-required";
+  if (num(funding.amountPaid) > num(acquisition.directAcquisitionCost) + 0.005) errors.overpayment = "funding-exceeds-basis";
+  if (funding.financed && !clean(funding.lenderLabel)) errors.lender = "required";
+  if (arr(source.documents).some((document) => !clean(document?.storageKey || document?.key) || !["uploaded", "available", "verified"].includes(clean(document?.status).toLowerCase()))) errors.documents = "secure-upload-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
 export default {
   createIXIAssetAcquisitionDraft,
   validateIXIAssetAcquisition,
-  IXI_ASSET_ACQUISITION_SCHEMA
+  IXI_ASSET_ACQUISITION_SCHEMA,
 };
