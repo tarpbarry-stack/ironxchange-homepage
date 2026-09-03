@@ -89,7 +89,7 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            '6ffb5a230465fd35f2ef531772ac2d3bfdbb124febbc7b66296079e9e9628efd' \
+            '252b85a4515f6131fbf786890e2f385c663749865631b341739256e499049c05' \
             "$TARGET_FACTORY" | sha256sum -c -
           printf '%s  %s\n' \
             'ccafb5f20574c7f7e7aa82cf18ea5c8ad6b41b2d1fb864b432ee686494dd63b3' \
