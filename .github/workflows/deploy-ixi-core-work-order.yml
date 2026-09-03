@@ -85,7 +85,7 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            '17a3d4c266898f1314b3bf6f716dc56c1b87810d6db0273f8443250a19edba67' \
+            '6ffb5a230465fd35f2ef531772ac2d3bfdbb124febbc7b66296079e9e9628efd' \
             "$TARGET" | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
