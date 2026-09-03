@@ -37,7 +37,7 @@ function formatIxiIdentity(object = {}) {
 
 export default function IXIAosCard001Location(props) {
   return (
-    <IXIAosDataContractCardAdapter {...props}>
+    <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>
       {contractProps => (
         <IXIAosCommercialEditorBridge
           object={contractProps.object}
