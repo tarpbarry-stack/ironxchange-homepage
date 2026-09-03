@@ -1,0 +1,44 @@
+name: IXI Mobile Foundation Certification
+
+on:
+  push:
+    branches:
+      - mobile/commercial-aos-v1-foundation
+    paths:
+      - "pages/mobile-foundation.js"
+      - "lib/ixi-mobile/**"
+      - "tests/ixi-mobile-foundation-contract.test.mjs"
+      - "docs/mobile/IRONXCHANGE_MOBILE_FOUNDATION_CONTRACT.md"
+      - ".github/workflows/ixi-mobile-foundation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-mobile-foundation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run mobile foundation contract
+        run: node --test tests/ixi-mobile-foundation-contract.test.mjs
+
+      - name: Build production application
+        run: npm run build
