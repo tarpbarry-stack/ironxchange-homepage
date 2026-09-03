@@ -22,21 +22,13 @@ const object = {
 
 export default function RentalExpenseFaceLabPage() {
   const [record, setRecord] = useState(null);
-  const relatedTransactions = record ? [
-    {
-      documentId: "BILL-2055",
-      documentType: "bill",
-      amount: 9184.27,
-      references: [{ externalId: record.identity?.rentalExpenseId || record.identity?.number, role: "related" }]
-    }
-  ] : [];
 
   return <IXITransactFaceLabFrame title="RENTAL EXPENSE · RNTEXP-#####" route="/facelab/rental-expense">
     <IXIRentalExpenseApp
       context={context}
       object={object}
       initialRecord={record}
-      relatedTransactions={relatedTransactions}
+      relatedTransactions={[]}
       onBack={() => {}}
       onRecordChange={async next => setRecord(next)}
     />
