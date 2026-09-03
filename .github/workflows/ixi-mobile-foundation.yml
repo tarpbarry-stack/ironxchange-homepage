@@ -40,4 +40,6 @@ jobs:
         run: node --test tests/ixi-mobile-foundation-contract.test.mjs
 
       - name: Build production application
+        env:
+          NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: mobile-foundation-ci-placeholder
         run: npm run build
