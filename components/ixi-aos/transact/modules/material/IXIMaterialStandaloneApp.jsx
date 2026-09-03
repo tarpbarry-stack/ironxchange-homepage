@@ -457,7 +457,8 @@ export default function IXIMaterialStandaloneApp({
         ? t.poPolicy
         : t.supplyPolicy;
   const quantityTooHigh =
-    ["inventory", "purchase-order"].includes(source) &&
+    ((source === "inventory" && Boolean(inventoryId)) ||
+      (source === "purchase-order" && Boolean(poLineId))) &&
     num(quantity) > availableQuantity;
 
   return (
