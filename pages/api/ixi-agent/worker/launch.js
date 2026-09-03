@@ -1,4 +1,8 @@
-const { launchTicketWorker, recoverTicketWorker } = require("../../../../lib/ixi-agent/ixiAgentWorker");
+const {
+  getTicket,
+  leaseExpired,
+  requestDispatch
+} = require("../../../../lib/ixi-agent/ixiAgentBridge");
 
 export const config = {
   api: { bodyParser: { sizeLimit: "256kb" } }
@@ -21,20 +25,15 @@ function sameOrigin(req) {
 }
 
 function readiness() {
-  const checks = {
-    openai: Boolean(clean(process.env.OPENAI_API_KEY)),
-    ticketMcpUrl: Boolean(clean(process.env.IXI_AGENT_MCP_PUBLIC_URL)),
-    ticketMcpAuth: Boolean(clean(process.env.IXI_AGENT_BRIDGE_SECRET)),
-    executionMcpUrl: Boolean(clean(process.env.IXI_EXECUTION_MCP_URL)),
-    executionMcpAuth: Boolean(clean(process.env.IXI_EXECUTION_MCP_TOKEN))
-  };
   return {
     ok: true,
-    service: "ixi-agent-worker",
-    contractVersion: "1.1.0",
-    readyForReviewResearch: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth,
-    readyForExecution: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth && checks.executionMcpUrl,
-    checks
+    service: "ixi-connected-chat-dispatch",
+    contractVersion: "1.0.0",
+    mode: "connected-chat",
+    readyForExecution: true,
+    requiresNewGithubCredentials: false,
+    requiresOpenAIWorkerCredentials: false,
+    intakeRoute: "/api/ixi-agent/chat/next"
   };
 }
 
@@ -48,31 +47,52 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: { code: "IXI_AGENT_METHOD_NOT_ALLOWED", message: "GET or POST required." } });
   }
   if (!sameOrigin(req)) {
-    return res.status(403).json({ ok: false, error: { code: "IXI_AGENT_ORIGIN_DENIED", message: "Cross-origin worker launch denied." } });
+    return res.status(403).json({ ok: false, error: { code: "IXI_AGENT_ORIGIN_DENIED", message: "Cross-origin Ticket dispatch denied." } });
   }
 
   const ticketId = clean(req.body?.ticketId);
   const expectedRevision = Number(req.body?.expectedRevision);
   if (!ticketId || !Number.isInteger(expectedRevision) || expectedRevision < 1) {
-    return res.status(400).json({ ok: false, error: { code: "IXI_AGENT_LAUNCH_INPUT_INVALID", message: "ticketId and expectedRevision are required." } });
+    return res.status(400).json({ ok: false, error: { code: "IXI_AGENT_DISPATCH_INPUT_INVALID", message: "ticketId and expectedRevision are required." } });
   }
 
   try {
     const recovery = req.body?.recovery === true;
-    const result = recovery
-      ? await recoverTicketWorker({ ticketId, expectedRevision })
-      : await launchTicketWorker({
-          ticketId,
-          expectedRevision,
-          source: clean(req.body?.source) || "ticket-command"
-        });
-    return res.status(202).json(result);
+    if (recovery) {
+      const ticket = await getTicket(ticketId);
+      if (Number(ticket.revision) !== expectedRevision) {
+        return res.status(409).json({ ok: false, error: { code: "IXI_AGENT_RECOVERY_REVISION_CONFLICT", message: "Ticket revision changed before recovery dispatch." } });
+      }
+      if (!leaseExpired(ticket)) {
+        return res.status(409).json({ ok: false, error: { code: "IXI_AGENT_RECOVERY_NOT_AVAILABLE", message: "Ticket has an active execution lease and cannot be recovered." } });
+      }
+      return res.status(202).json({
+        ok: true,
+        ticket,
+        mode: "connected-chat-recovery",
+        message: "Recoverable Ticket is available to connected Chat and remains WORKING until Chat reclaims it."
+      });
+    }
+
+    const result = await requestDispatch({
+      ticketId,
+      expectedRevision,
+      requestedBy: "owner",
+      source: clean(req.body?.source) || "ticket-command"
+    });
+
+    return res.status(202).json({
+      ok: true,
+      ...result,
+      mode: "connected-chat",
+      message: "Ticket queued for connected Chat. It remains READY until Chat claims it."
+    });
   } catch (error) {
     return res.status(Number(error.status) || 500).json({
       ok: false,
       error: {
-        code: error.code || "IXI_AGENT_WORKER_LAUNCH_FAILED",
-        message: error.message || "IXI Agent Worker launch failed.",
+        code: error.code || "IXI_AGENT_DISPATCH_FAILED",
+        message: error.message || "IXI connected Chat dispatch failed.",
         details: error.details || null
       }
     });
