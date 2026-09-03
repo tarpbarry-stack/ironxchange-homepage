@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import IXIAosCommercialObjectEditor from "./IXIAosCommercialObjectEditor";
-import { runIXIActionNoticeLifecycle } from "../../ixi-object-system/IXIActionNoticeEngine";
+import { runIXIActionNoticeLifecycle } from "../../../ixi-object-system/IXIActionNoticeEngine";
 
 function clean(value) {
   return String(value ?? "").trim();
