@@ -87,7 +87,7 @@ test("GL close and reporting use authoritative IX Core routes", async () => {
   assert.match(client, /commands\/desktop\/close-period/u);
   assert.doesNotMatch(app, /auto-reverse-requested|ADD VERSIONED RULE|setMapping/u);
   assert.match(app, /BROWSER RULE MUTATION IS[\\s\\S]*DISABLED/u);
-  assert.doesNotMatch(reports, /POSTED \\/ UNREVERSED JOURNALS/u);
+  assert.doesNotMatch(reports, /POSTED \/ UNREVERSED JOURNALS/u);
 });
 
 test("public FaceLab contains no synthetic ledger or reporting fixtures", async () => {
