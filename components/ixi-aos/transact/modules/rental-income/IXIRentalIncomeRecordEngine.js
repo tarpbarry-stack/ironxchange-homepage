@@ -14,7 +14,10 @@ function calendarDays(startValue, endValue) {
 
 function projectedPeriods(record = {}, asOfDate = "") {
   const start = dateOnly(record.period?.startDate);
-  const end = dateOnly(record.period?.actualOffRentDate || asOfDate || new Date().toISOString());
+  const expected = dateOnly(record.period?.expectedReturnDate);
+  const asOf = dateOnly(asOfDate);
+  const activeProjectionEnd = asOf && expected ? (asOf > expected ? asOf : expected) : (asOf || expected || new Date().toISOString());
+  const end = dateOnly(record.period?.actualOffRentDate || activeProjectionEnd);
   const unit = clean(record.rate?.unit || "month");
   const days = calendarDays(start, end);
   const minimum = Math.max(0, num(record.rate?.minimumPeriods || 1));
@@ -29,11 +32,27 @@ function projectedPeriods(record = {}, asOfDate = "") {
   return Math.max(minimum, 1);
 }
 
+function sourceId(item = {}) {
+  return clean(item.sourceFinancialDocumentId || item.financial?.sourceFinancialDocumentId || item.financialDocument?.sourceFinancialDocumentId);
+}
+
+function documentId(item = {}) {
+  return clean(item.financialDocumentId || item.documentId || item.id || item.financial?.financialDocumentId || item.financialDocument?.financialDocumentId);
+}
+
+function documentType(item = {}) {
+  return clean(item.documentType || item.type || item.financial?.documentType || item.financialDocument?.documentType);
+}
+
+function financialAmount(item = {}) {
+  return num(item.amount ?? item.total ?? item.totals?.total ?? item.financial?.amount ?? item.financial?.totals?.total ?? item.financialDocument?.totals?.total);
+}
+
 function relatedToRental(item = {}, record = {}) {
   const rentalId = clean(record.identity?.rentalIncomeId || record.identity?.number);
-  const assetPassportId = clean(record.ownedAsset?.passportId);
   const refs = arr(item.references || item.additionalReferences || item.financial?.references);
-  return clean(item.rentalIncomeId) === rentalId || clean(item.rentalId) === rentalId || refs.some(ref => clean(ref.externalId) === rentalId || clean(ref.label) === rentalId || (assetPassportId && clean(ref.passportId) === assetPassportId && clean(ref.role) === "asset"));
+  const relatedIds = arr(item.relatedFinancialDocumentIds || item.financial?.relatedFinancialDocumentIds || item.financialDocument?.relatedFinancialDocumentIds).map(clean);
+  return clean(item.rentalIncomeId) === rentalId || clean(item.rentalId) === rentalId || sourceId(item) === rentalId || relatedIds.includes(rentalId) || refs.some(ref => clean(ref.externalId) === rentalId);
 }
 
 export function applyIXIRentalIncomeEconomics(record = {}, relatedTransactions = [], asOfDate = "") {
@@ -41,12 +60,16 @@ export function applyIXIRentalIncomeEconomics(record = {}, relatedTransactions =
   const baseRevenue = round(periods * num(record.rate?.baseRate));
   const projectedOverageRevenue = round(record.usage?.projectedOverageRevenue);
   const ancillaryRevenue = round(record.economics?.projectedAncillaryRevenue);
-  const projectedRevenue = round(baseRevenue + projectedOverageRevenue + ancillaryRevenue);
-  const related = arr(relatedTransactions).filter(item => relatedToRental(item, record));
-  const invoices = related.filter(item => ["invoice", "sales-invoice", "service-invoice"].includes(clean(item.documentType || item.type || item.financial?.documentType)));
-  const payments = related.filter(item => ["customer-payment", "payment", "receipt"].includes(clean(item.documentType || item.type || item.financial?.documentType)) || clean(item.paymentStatus) === "paid");
-  const invoicedRevenue = round(invoices.reduce((sum, item) => sum + num(item.amount || item.total || item.financial?.amount), 0));
-  const receivedRevenue = round(payments.reduce((sum, item) => sum + num(item.amount || item.total || item.financial?.amount), 0));
+  const recurringRevenue = round(periods * num(record.economics?.recurringRevenuePerPeriod));
+  const projectedRevenue = round(baseRevenue + projectedOverageRevenue + ancillaryRevenue + recurringRevenue);
+  const projectedTax = round(record.economics?.projectedTax);
+  const projectedDeposit = round(record.economics?.projectedDeposit);
+  const transactions = arr(relatedTransactions);
+  const invoices = transactions.filter(item => ["invoice", "sales-invoice", "service-invoice"].includes(documentType(item)) && relatedToRental(item, record));
+  const invoiceIds = invoices.map(documentId).filter(Boolean);
+  const payments = transactions.filter(item => (["customer-payment", "payment", "receipt"].includes(documentType(item)) || clean(item.paymentStatus) === "paid") && (relatedToRental(item, record) || invoiceIds.includes(sourceId(item))));
+  const invoicedRevenue = round(invoices.reduce((sum, item) => sum + financialAmount(item), 0));
+  const receivedRevenue = round(payments.reduce((sum, item) => sum + financialAmount(item), 0));
   return {
     ...record,
     economics: {
@@ -54,13 +77,17 @@ export function applyIXIRentalIncomeEconomics(record = {}, relatedTransactions =
       projectedPeriods: periods,
       projectedBaseRevenue: baseRevenue,
       projectedOverageRevenue,
+      projectedRecurringRevenue: recurringRevenue,
       projectedRevenue,
+      projectedTax,
+      projectedDeposit,
+      projectedInvoiceTotal: round(projectedRevenue + projectedTax + projectedDeposit),
       invoicedRevenue,
       receivedRevenue,
       outstandingReceivable: round(Math.max(0, invoicedRevenue - receivedRevenue)),
       varianceToInvoiced: round(invoicedRevenue - projectedRevenue),
-      invoiceIds: invoices.map(item => clean(item.documentId || item.identity?.number || item.id)).filter(Boolean),
-      paymentIds: payments.map(item => clean(item.documentId || item.identity?.number || item.id)).filter(Boolean)
+      invoiceIds,
+      paymentIds: payments.map(documentId).filter(Boolean)
     },
     audit: { ...(record.audit || {}), updatedAt: clean(record.audit?.updatedAt) || iso() }
   };

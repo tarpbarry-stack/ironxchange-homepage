@@ -3,7 +3,7 @@ const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const arr = value => Array.isArray(value) ? value : [];
 const roundMoney = value => Math.round(num(value) * 100) / 100;
 
-export const IXI_RENTAL_INCOME_SCHEMA = "ixi-rental-income-v1";
+export const IXI_RENTAL_INCOME_SCHEMA = "ixi-rental-income-v2";
 export const IXI_RENTAL_INCOME_RATE_UNITS = Object.freeze(["hour", "day", "week", "month"]);
 export const IXI_RENTAL_INCOME_STATUSES = Object.freeze(["draft", "active", "off-rent", "closed", "cancelled"]);
 
@@ -136,10 +136,16 @@ export function createIXIRentalIncomeDraft({ context = {}, input = {} } = {}) {
     },
     economics: {
       projectionType: "rental-revenue",
-      economicEvent: false,
+      economicEvent: true,
+      recognitionState: "contracted-not-billed",
       projectedBaseRevenue: 0,
       projectedOverageRevenue,
-      projectedAncillaryRevenue: roundMoney(oneTimeCharges + recurringCharges + num(input.deliveryCharge) + num(input.pickupCharge) + num(input.damageWaiverCharge) + num(input.insuranceCharge) + num(input.environmentalFee) + num(input.taxesEstimate)),
+      projectedAncillaryRevenue: roundMoney(oneTimeCharges + num(input.deliveryCharge) + num(input.pickupCharge) + num(input.damageWaiverCharge) + num(input.insuranceCharge) + num(input.environmentalFee)),
+      recurringRevenuePerPeriod: recurringCharges,
+      projectedRecurringRevenue: 0,
+      projectedTax: roundMoney(input.taxesEstimate),
+      projectedDeposit: roundMoney(input.deposit),
+      projectedInvoiceTotal: 0,
       projectedRevenue: 0,
       invoicedRevenue: 0,
       receivedRevenue: 0,
@@ -157,18 +163,27 @@ export function createIXIRentalIncomeDraft({ context = {}, input = {} } = {}) {
       createdByLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
       updatedAt: now
     },
-    activity: []
+    activity: [{
+      eventId: `RINC-START-${clientRequestId}`,
+      type: "rental-started",
+      occurredAt: now,
+      actorId: clean(context.actor?.passportId || context.actor?.employeeId || context.actor?.userId || context.actor?.id),
+      actorLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label)
+    }]
   };
 }
 
 export function validateIXIRentalIncome(record = {}) {
   const errors = {};
   if (!clean(record.context?.primaryPassportId || record.context?.primaryObjectId)) errors.asset = "required";
+  if (!clean(record.context?.entityPassportId)) errors.entity = "required";
+  if (!clean(record.context?.actorPassportId || record.context?.actorId)) errors.actor = "required";
   if (!clean(record.customer?.name)) errors.customer = "required";
   if (!clean(record.period?.startDate)) errors.startDate = "required";
   if (!clean(record.period?.expectedReturnDate)) errors.expectedReturnDate = "required";
   if (record.period?.expectedReturnDate && record.period?.startDate && record.period.expectedReturnDate < record.period.startDate) errors.expectedReturnDate = "before-start";
-  if (!(num(record.rate?.baseRate) >= 0)) errors.rate = "required";
+  if (!(num(record.rate?.baseRate) > 0)) errors.rate = "required";
+  if (arr(record.documents).some(item => !clean(item.storageKey || item.key) || !["uploaded", "available", "verified"].includes(clean(item.status).toLowerCase()))) errors.documents = "upload-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
