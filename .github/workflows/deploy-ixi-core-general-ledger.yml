@@ -75,14 +75,14 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            '16b7f831eb0702cd4e80dd690781466a829100cac1deb6850e687ad3de57e436' 'financial/IXIFinancialCloseControlEngine.js' \
-            'fd008484b5b1bf06ae45f023e70c4bdc19e13d1da09832d98c457c2fb2a20844' 'financial/IXIFinancialCommandEngine.js' \
-            '370b81328fcf0302a1c299f96fd952f7ce3a2203ef3855c5a9cbffa3154314ed' 'financial/IXIFinancialCommandRoutes.js' \
-            '4739482ba21e1d3f080f2cbd140e844acb564bfd6b2607dac0e5e65eb81d7cf5' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
-            '63ba7308b12bc8d1d0d6c7968e78125d08b58fced6f96b6e24d970a35e272629' 'financial/IXIFinancialPermissionEngine.js' \
+            'c4762c2516054ca56e04242c9c0e6476767731e9318081cf713af17161d82317' 'financial/IXIFinancialCloseControlEngine.js' \
+            '4b491ae930825053e3c0d6576e6f66224cb15efa2da008d55215e5c44923f85f' 'financial/IXIFinancialCommandEngine.js' \
+            '3a096f7724e5ff0db598325b8df17e6f0504212dde39c2e9e9f1120ce2196692' 'financial/IXIFinancialCommandRoutes.js' \
+            '84f859c1389df54932082c4ac0e479a0b7e1daa6c5411fc6009ec9d4ffe74a91' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '6df438ef2aa73bc39335b7d7875a804794fa84751e6cde452a1a31804db21251' 'financial/IXIFinancialPermissionEngine.js' \
             'a12c8f461780fe618c96aecdbad9ae17fa177bba51b679925376eb8be39ffa98' 'financial/IXIFinancialPurchaseOrderFactory.js' \
-            '1eb89f04e09569b285a9aa8d045bb1845d6cd3bec6b565d63937c40179e4895a' 'financial/IXIFinancialRoutes.js' \
-            '5a66779634db25cc94853467c03f12c46c47e64440bb0e9bae62522a2250a3d6' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+            'a6f8bb84a12938ef47add50878701faf44764764cedc64f696e58c8ba940e843' 'financial/IXIFinancialRoutes.js' \
+            'b93a7cd55d54c345d8c7ebddc37ed3f24b3fd112d6ab9b3684669df70222004b' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
           tar -czf "$BACKUP" $EXISTING
