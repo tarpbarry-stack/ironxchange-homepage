@@ -18,11 +18,6 @@ import {
   getIXIObjectFootprint
 } from "../../lib/ixiObjectGeometry";
 
-const FACE_LAB_SHELL_WIDTH = 300;
-const FACE_LAB_SHELL_HEIGHT = 475;
-const FACE_LAB_DATUM_WIDTH = 298;
-const FACE_LAB_DATUM_HEIGHT = 471;
-
 function formatDimension(value) {
   const number = Number(value);
 
@@ -37,34 +32,66 @@ function formatDimension(value) {
 
 export default function IXIFaceLabScaledCard({
   children,
-  surfaceLabel = "Face Lab"
+  surfaceLabel = "Face Lab",
+  objectFamily = "private",
+  scaleMode: controlledScaleMode,
+  onScaleModeChange,
+  showScaleControl = true
 }) {
+  const geometryFamily =
+    objectFamily === "marketplace"
+      ? "marketplace"
+      : "private";
+
   const [
-    scaleMode,
-    setScaleMode
+    localScaleMode,
+    setLocalScaleMode
   ] = useState("xl");
 
+  const scaleMode =
+    controlledScaleMode ||
+    localScaleMode;
+
   useEffect(() => {
+    if (controlledScaleMode) {
+      return;
+    }
+
     const savedMode =
       readSitewideCardScaleMode();
 
     if (savedMode) {
-      setScaleMode(savedMode);
+      setLocalScaleMode(savedMode);
     }
-  }, []);
+  }, [controlledScaleMode]);
 
   const footprint =
     getIXIObjectFootprint({
       scaleMode,
-      objectFamily: "private"
+      objectFamily: geometryFamily
     });
 
+  const nativeWidth =
+    footprint.nativePanelWidth;
+
+  const nativeHeight =
+    footprint.nativeHeight;
+
   function updateScaleMode(nextMode) {
-    setScaleMode(
+    const savedMode =
       writeSitewideCardScaleMode(
         nextMode
-      )
-    );
+      );
+
+    if (
+      typeof onScaleModeChange ===
+      "function"
+    ) {
+      onScaleModeChange(savedMode);
+      return;
+    }
+
+    setLocalScaleMode(savedMode);
   }
 
   return (
@@ -77,6 +104,15 @@ export default function IXIFaceLabScaledCard({
       data-ixi-face-lab-rendered-height={
         footprint.renderedHeight
       }
+      data-ixi-face-lab-native-width={
+        nativeWidth
+      }
+      data-ixi-face-lab-native-height={
+        nativeHeight
+      }
+      data-ixi-face-lab-object-family={
+        geometryFamily
+      }
     >
       <div className="ixi-face-lab-size-label">
         {footprint.label} CARD ·{
@@ -86,17 +122,21 @@ export default function IXIFaceLabScaledCard({
           footprint.renderedWidth
         )} × {formatDimension(
           footprint.renderedHeight
-        )} · DATUM 298 × 471
+        )} · NATIVE {formatDimension(
+          nativeWidth
+        )} × {formatDimension(
+          nativeHeight
+        )}
       </div>
 
       <IXIScaledCardShell
         size={scaleMode}
-        objectFamily="private"
+        objectFamily={geometryFamily}
         nativeWidth={
-          FACE_LAB_SHELL_WIDTH
+          nativeWidth
         }
         nativeHeight={
-          FACE_LAB_SHELL_HEIGHT
+          nativeHeight
         }
         className="ixi-face-lab-footprint"
       >
@@ -107,11 +147,13 @@ export default function IXIFaceLabScaledCard({
         </div>
       </IXIScaledCardShell>
 
-      <IXICardScaleControl
-        value={scaleMode}
-        onChange={updateScaleMode}
-        surfaceLabel={surfaceLabel}
-      />
+      {showScaleControl ? (
+        <IXICardScaleControl
+          value={scaleMode}
+          onChange={updateScaleMode}
+          surfaceLabel={surfaceLabel}
+        />
+      ) : null}
 
       <style jsx>{`
         .ixi-face-lab-scaled-preview {
@@ -138,8 +180,8 @@ export default function IXIFaceLabScaledCard({
         .ixi-face-lab-card-shell {
           box-sizing: border-box;
 
-          width: ${FACE_LAB_SHELL_WIDTH}px;
-          height: ${FACE_LAB_SHELL_HEIGHT}px;
+          width: ${nativeWidth}px;
+          height: ${nativeHeight}px;
 
           display: flex;
           align-items: center;
@@ -151,18 +193,28 @@ export default function IXIFaceLabScaledCard({
         .ixi-face-lab-card-datum {
           position: relative;
 
-          width: ${FACE_LAB_DATUM_WIDTH}px;
-          min-width: ${FACE_LAB_DATUM_WIDTH}px;
-          max-width: ${FACE_LAB_DATUM_WIDTH}px;
+          width: ${nativeWidth}px;
+          min-width: ${nativeWidth}px;
+          max-width: ${nativeWidth}px;
 
-          height: ${FACE_LAB_DATUM_HEIGHT}px;
-          min-height: ${FACE_LAB_DATUM_HEIGHT}px;
-          max-height: ${FACE_LAB_DATUM_HEIGHT}px;
+          height: ${nativeHeight}px;
+          min-height: ${nativeHeight}px;
+          max-height: ${nativeHeight}px;
 
           overflow: visible;
         }
 
         .ixi-face-lab-card-datum > :global(*) {
+          box-sizing: border-box;
+
+          width: 100% !important;
+          min-width: 100% !important;
+          max-width: 100% !important;
+
+          height: 100% !important;
+          min-height: 100% !important;
+          max-height: 100% !important;
+
           margin: 0;
         }
       `}</style>

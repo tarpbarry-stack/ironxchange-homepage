@@ -28,8 +28,9 @@ import IXIEntityObjectFace1
 import IXIMachineRail
   from "../IXIMachineRail";
 
-const COMPACT_CARD_HEIGHT = 391;
-const TALL_CARD_HEIGHT = 470;
+const CARD_WIDTH = 300;
+const COMPACT_CARD_HEIGHT = 400;
+const TALL_CARD_HEIGHT = 475;
 const MACHINE_RAIL_HEIGHT = 19;
 
 const previewListing = {
@@ -864,9 +865,9 @@ if (face === "EOF1") {
 
           position: relative;
 
-          width: 298px;
-          min-width: 298px;
-          max-width: 298px;
+          width: ${CARD_WIDTH}px;
+          min-width: ${CARD_WIDTH}px;
+          max-width: ${CARD_WIDTH}px;
 
           display: flex;
           flex-direction: column;

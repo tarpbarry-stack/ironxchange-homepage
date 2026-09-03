@@ -114,9 +114,21 @@ test("mobile lab stays frozen while AOS and Theater join the site-wide control",
   );
 });
 
-test("Face Lab uses the shared V12 scale engine around the protected native datum", () => {
+test("Face Lab scales both exact V12 native card families", () => {
   const scaledPreview = read(
     "components/ixi-face-studio/IXIFaceLabScaledCard.jsx"
+  );
+  const faceStudio = read(
+    "components/ixi-face-studio/IXIFaceStudio.jsx"
+  );
+  const facePreview = read(
+    "components/ixi-face-studio/IXIFacePreview.jsx"
+  );
+  const referenceOverlay = read(
+    "components/ixi-face-studio/IXIFaceReferenceOverlay.jsx"
+  );
+  const aosPreview = read(
+    "components/ixi-face-studio/IXIAosCardPreview.jsx"
   );
 
   assert.match(
@@ -137,19 +149,79 @@ test("Face Lab uses the shared V12 scale engine around the protected native datu
   );
   assert.match(
     scaledPreview,
-    /FACE_LAB_SHELL_WIDTH = 300/u
+    /objectFamily === "marketplace"/u
   );
   assert.match(
     scaledPreview,
-    /FACE_LAB_SHELL_HEIGHT = 475/u
+    /data-ixi-face-lab-native-width/u
   );
   assert.match(
     scaledPreview,
-    /FACE_LAB_DATUM_WIDTH = 298/u
+    /data-ixi-face-lab-native-height/u
   );
   assert.match(
     scaledPreview,
-    /FACE_LAB_DATUM_HEIGHT = 471/u
+    /NATIVE \{formatDimension/u
+  );
+  assert.doesNotMatch(
+    scaledPreview,
+    /298|391|470|471/u
+  );
+
+  assert.match(
+    faceStudio,
+    /objectFamily="marketplace"/u
+  );
+  assert.match(
+    faceStudio,
+    /objectFamily="private"/u
+  );
+  assert.match(
+    faceStudio,
+    /preview-shell-marketplace[\s\S]*?height: 400px/u
+  );
+  assert.match(
+    faceStudio,
+    /preview-shell-operating[\s\S]*?height: 475px/u
+  );
+  assert.match(
+    faceStudio,
+    /surfaceLabel="Face Lab Faces"/u
+  );
+  assert.equal(
+    (
+      faceStudio.match(
+        /showScaleControl=\{false\}/gu
+      ) || []
+    ).length,
+    2
+  );
+
+  assert.match(
+    facePreview,
+    /CARD_WIDTH = 300/u
+  );
+  assert.match(
+    facePreview,
+    /COMPACT_CARD_HEIGHT = 400/u
+  );
+  assert.match(
+    facePreview,
+    /TALL_CARD_HEIGHT = 475/u
+  );
+
+  assert.match(
+    referenceOverlay,
+    /\? 400\s*: 475/u
+  );
+
+  assert.match(
+    aosPreview,
+    /width: 300px/u
+  );
+  assert.match(
+    aosPreview,
+    /height: 475px/u
   );
 
   const consumers = [

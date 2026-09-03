@@ -7,8 +7,8 @@ export default function IXIFaceReferenceOverlay({
 
   const cardHeight =
     isCompact
-      ? 391
-      : 470;
+      ? 400
+      : 475;
 
   const contentHeight =
     cardHeight - railHeight;
