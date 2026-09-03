@@ -3,6 +3,7 @@ name: Ticket Agent Contract
 on:
   pull_request:
     paths:
+      - ".github/workflows/ticket-agent-contract.yml"
       - "lib/ixi-agent/**"
       - "lib/ixi-tickets/**"
       - "components/ixi-tickets/**"
@@ -13,6 +14,7 @@ on:
     branches:
       - ticket/commercial-agent-bridge-v1
     paths:
+      - ".github/workflows/ticket-agent-contract.yml"
       - "lib/ixi-agent/**"
       - "lib/ixi-tickets/**"
       - "components/ixi-tickets/**"
@@ -31,7 +33,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
-      - run: npm ci --ignore-scripts
+          node-version: "24"
+      - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run test:ticket-agent
