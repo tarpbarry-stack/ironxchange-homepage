@@ -4,6 +4,7 @@ const {
   getTicket,
   heartbeatTicket,
   listReadyTickets,
+  listRecoverableTickets,
   submitAgentCloseout
 } = require("../../../lib/ixi-agent/ixiAgentBridge");
 
@@ -72,18 +73,27 @@ function toolError(error) {
   };
 }
 
+const listInput = {
+  type: "object",
+  properties: {
+    repository: { type: "string", description: "Optional repository filter." },
+    limit: { type: "integer", minimum: 1, maximum: 250, default: 250 }
+  },
+  additionalProperties: false
+};
+
 const TOOLS = [
   {
     name: "list_ready_tickets",
-    description: "List IXI Tickets that are approved and waiting for an agent. Returns full Ticket records and current revisions.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        repository: { type: "string", description: "Optional repository filter." },
-        limit: { type: "integer", minimum: 1, maximum: 250, default: 250 }
-      },
-      additionalProperties: false
-    }
+    description: "List IXI Tickets approved and waiting for a new agent claim. Returns authoritative current revisions.",
+    inputSchema: listInput,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true }
+  },
+  {
+    name: "list_recoverable_tickets",
+    description: "List WORKING IXI Tickets whose execution lease has expired and may be safely reclaimed by a new agent run.",
+    inputSchema: listInput,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true }
   },
   {
     name: "get_ticket",
@@ -93,11 +103,12 @@ const TOOLS = [
       properties: { ticketId: { type: "string" } },
       required: ["ticketId"],
       additionalProperties: false
-    }
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true }
   },
   {
     name: "claim_ticket",
-    description: "Atomically claim a READY/REOPENED Ticket. Only a successful claim changes the Ticket to WORKING. Returns the full work packet and active lease.",
+    description: "Atomically claim a READY/REOPENED Ticket, or reclaim a WORKING Ticket only after its lease expired. A successful claim is the only path that establishes the active WORKING lease.",
     inputSchema: {
       type: "object",
       properties: {
@@ -109,11 +120,12 @@ const TOOLS = [
       },
       required: ["ticketId", "expectedRevision", "agentId", "runId"],
       additionalProperties: false
-    }
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
   },
   {
     name: "heartbeat_ticket",
-    description: "Renew the active execution lease for a WORKING Ticket. The agentId and runId must match the active claim.",
+    description: "Renew the active execution lease for a WORKING Ticket. The revision, agentId, runId and unexpired lease must match.",
     inputSchema: {
       type: "object",
       properties: {
@@ -125,11 +137,12 @@ const TOOLS = [
       },
       required: ["ticketId", "expectedRevision", "agentId", "runId"],
       additionalProperties: false
-    }
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
   },
   {
     name: "submit_ticket_closeout",
-    description: "Submit the assigned agent's structured closeout for a WORKING Ticket. Advances the same Ticket to READY TO VERIFY when accepted.",
+    description: "Submit the assigned agent's structured closeout for a WORKING Ticket under the active unexpired lease. Advances the same Ticket to READY TO VERIFY when accepted.",
     inputSchema: {
       type: "object",
       properties: {
@@ -165,7 +178,8 @@ const TOOLS = [
       },
       required: ["ticketId", "expectedRevision", "agentId", "runId", "closeout"],
       additionalProperties: false
-    }
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
   }
 ];
 
@@ -173,6 +187,10 @@ async function callTool(name, args) {
   switch (name) {
     case "list_ready_tickets": {
       const tickets = await listReadyTickets(args || {});
+      return { ok: true, count: tickets.length, tickets };
+    }
+    case "list_recoverable_tickets": {
+      const tickets = await listRecoverableTickets(args || {});
       return { ok: true, count: tickets.length, tickets };
     }
     case "get_ticket": {
@@ -201,7 +219,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       service: "ixi-agent-gateway",
-      contractVersion: "1.0.0",
+      contractVersion: "1.1.0",
       configured: Boolean(clean(process.env.IXI_AGENT_BRIDGE_SECRET)),
       protocol: "mcp-streamable-http-jsonrpc",
       tools: TOOLS.map(tool => tool.name)
@@ -224,16 +242,14 @@ export default async function handler(req, res) {
       return res.status(200).json(jsonRpc(id, {
         protocolVersion: "2025-03-26",
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "ixi-agent-gateway", version: "1.0.0" },
-        instructions: "IXI Ticket is the authoritative work-order system. Never claim a Ticket unless you intend to execute it. WORKING means a successful atomic claim exists."
+        serverInfo: { name: "ixi-agent-gateway", version: "1.1.0" },
+        instructions: "IXI Ticket is the authoritative work-order system. Never perform Ticket work before an atomic claim. Never continue after lease expiry without a successful reclaim."
       }));
     }
 
     if (message.method === "notifications/initialized") return res.status(202).end();
 
-    if (message.method === "tools/list") {
-      return res.status(200).json(jsonRpc(id, { tools: TOOLS }));
-    }
+    if (message.method === "tools/list") return res.status(200).json(jsonRpc(id, { tools: TOOLS }));
 
     if (message.method === "tools/call") {
       const name = clean(message.params?.name);
