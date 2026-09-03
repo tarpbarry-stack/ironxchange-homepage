@@ -12,7 +12,7 @@ export const DEFAULT_IXI_BILL_POLICY = Object.freeze({
     Object.freeze({ max: Infinity, role: "owner-cfo", label: "Owner / CFO" })
   ]),
   poAutoApproval: Object.freeze({ enabled: true, maxVariance: 50 }),
-  nonPoApprovalRequiredAbove: 1000,
+  nonPoApprovalRequiredAbove: 0,
   paymentRoles: Object.freeze(["accounting", "ap", "controller", "cfo", "owner"]),
   voidRoles: Object.freeze(["accounting-manager", "controller", "cfo", "owner", "admin"]),
   varianceAuthority: Object.freeze([
@@ -39,7 +39,7 @@ export function getIXIBillApprovalRequirement(record = {}, policy = DEFAULT_IXI_
   const match = record?.purchaseMatch || {};
   const hasPo = Boolean(match.purchaseOrderNumber);
   const variance = Math.abs(numeric(match.variance));
-  const exactPoMatch = hasPo && match.receivedComplete && variance <= numeric(policy.poAutoApproval?.maxVariance);
+  const exactPoMatch = hasPo && match.receivedComplete && clean(match.status) === "matched" && variance <= numeric(policy.poAutoApproval?.maxVariance);
 
   if (policy.poAutoApproval?.enabled && exactPoMatch) {
     return { required: false, reason: "matched-po", amount, role: "", label: "", authority: 0 };
@@ -114,7 +114,7 @@ export function getIXIBillAvailableActions({ record = {}, actor = {}, authority 
 
   if (status === "void") return actions;
 
-  if (status === "open" && approval === "pending") {
+  if (["open", "submitted"].includes(status) && approval === "pending" && match !== "exception") {
     if (canIXIActorApproveBill({ record, actor, authority, policy })) {
       actions.add("approve");
       actions.add("return");
@@ -133,7 +133,7 @@ export function getIXIBillAvailableActions({ record = {}, actor = {}, authority 
 
   if (payment === "scheduled" && canIXIActorPayBill({ actor, authority, policy })) actions.add("record-payment");
   if (status !== "void" && payment !== "paid" && canIXIActorVoidBill({ actor, authority, policy })) actions.add("void");
-  actions.add("edit");
+  if (["open", "submitted"].includes(status) && ["pending", "returned"].includes(approval) && payment === "unpaid") actions.add("edit");
   return actions;
 }
 

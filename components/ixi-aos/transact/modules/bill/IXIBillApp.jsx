@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { validateIXITransactFile, createIXIPendingAttachment } from "../../IXITransactFilePolicy";
-import { createIXIBill, createIXIBillPayment } from "./IXIBillCommands";
+import { createIXIBill, createIXIBillPayment, updateIXIBill } from "./IXIBillCommands";
 import { applyIXIBillAction } from "./IXIBillRecordEngine";
 import IXIBillCard from "./IXIBillCard";
 import IXIBillStyles from "./IXIBillStyles";
@@ -152,6 +152,10 @@ export default function IXIBillApp({
     [records, selectedId]
   );
 
+  useEffect(() => {
+    setRecords(Array.isArray(initialRecords) ? initialRecords : []);
+  }, [initialRecords]);
+
   const summary = useMemo(() => {
     let overdue = 0;
     let overdueAmount = 0;
@@ -197,8 +201,13 @@ export default function IXIBillApp({
     if (!clean(input.description)) nextErrors.description = true;
     if (!(Number(input.amount) > 0)) nextErrors.amount = true;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(clean(input.invoiceDate))) nextErrors.invoiceDate = true;
+    if (clean(input.dueDate) && clean(input.dueDate) < clean(input.invoiceDate)) nextErrors.dueDate = true;
+    if ((input.attachments || []).some(item => !clean(item?.storageKey || item?.key) || !["uploaded", "available", "verified"].includes(clean(item?.status).toLowerCase()))) nextErrors.attachments = true;
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
+    if (Object.keys(nextErrors).length) {
+      if (nextErrors.attachments) setError("The invoice file must finish secure upload before this Bill can be saved. Remove it or retry after upload completes.");
+      return;
+    }
 
     setBusy(true);
     setError("");
@@ -227,8 +236,10 @@ export default function IXIBillApp({
         const persisted = await createIXIBillPayment({ object: originObject, context, record: selected, input: payload, metadata: { source: "ixi-transact-bill-card" } });
         paymentResponse = persisted.response;
       }
-      const next = applyIXIBillAction({ record: selected, action, actor: context.actor || {}, authority, policy, payload });
-      await onRecordChange?.(next, { action, paymentResponse, payload });
+      const local = applyIXIBillAction({ record: selected, action, actor: context.actor || {}, authority, policy, payload });
+      const persisted = await updateIXIBill({ record: local, action, metadata: { source: "ixi-transact-bill-card", paymentFinancialDocumentId: clean(paymentResponse?.data?.record?.financialDocument?.financialDocumentId || paymentResponse?.financialDocument?.financialDocumentId) } });
+      const next = persisted.record;
+      await onRecordChange?.(next, { action, paymentResponse, response: persisted.response, payload });
       setRecords(current => current.map(item => clean(item?.identity?.billRecordId || item?.identity?.billDocumentId) === selectedId ? next : item));
     } catch (err) {
       setError(clean(err?.message) || "Bill action failed.");

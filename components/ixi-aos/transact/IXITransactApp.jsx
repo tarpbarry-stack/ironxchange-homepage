@@ -8,6 +8,7 @@ import IXITechWorkOrderApp from "./modules/tech-work-order/IXITechWorkOrderApp";
 import IXIExpenseApp from "./modules/expense/IXIExpenseApp";
 import IXIPurchaseOrderApp from "./modules/purchase-order/IXIPurchaseOrderApp";
 import IXIBillStandaloneApp from "./modules/bill/IXIBillStandaloneApp";
+import { hydrateIXIBillRecord } from "./modules/bill/IXIBillContract";
 import IXITimeStandaloneApp from "./modules/time/IXITimeStandaloneApp";
 import IXIMaterialStandaloneApp from "./modules/material/IXIMaterialStandaloneApp";
 import IXIAssetAcquisitionApp from "./modules/asset-acquisition/IXIAssetAcquisitionApp";
@@ -104,6 +105,10 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
     }
     return null;
   }, [object, financialRecords]);
+  const billRecords = useMemo(() => {
+    const candidates = financialRecords.length ? financialRecords : object?.billFinancialRecords || object?.payableFinancialRecords || object?.assetFinancialTransactions || object?.relatedFinancialRecords || object?.financialRecords || [];
+    return candidates.map(hydrateIXIBillRecord).filter(Boolean);
+  }, [object, financialRecords]);
 
   useEffect(() => {
     setWorkOrderSnapshot(activeWorkOrder || null);
@@ -149,7 +154,7 @@ export default function IXITransactApp({ object = {}, actor = {}, entity = {}, a
     return canonical;
   }
 
-  if (moduleId === "bill") return <IXIBillStandaloneApp context={context} object={object} authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}} onBack={back} onRecordChange={(record, changePayload) => change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload)} />;
+  if (moduleId === "bill") return <IXIBillStandaloneApp context={context} object={object} initialRecords={billRecords} authority={actor?.billAuthority || actor?.financialAuthority || actor?.purchasingAuthority || {}} onBack={back} onRecordChange={async (record, changePayload) => { await onFinancialRecordsChange?.(); await change("bill", "BILL / INVOICE UPDATE", "spend", "bill", "billRecord", record, changePayload); }} />;
 
   let body = null;
   if (moduleId === "expense") body = <IXIExpenseApp context={context} workOrder={workOrderSnapshot} onCancel={back} onSave={async (record, input, response) => { await onOpenModule?.({ id: "expense-save", label: "SAVE EXPENSE", group: "spend", documentType: "expense" }, context, { expense: record, input, response }); await onFinancialRecordsChange?.(); back(); }} />;

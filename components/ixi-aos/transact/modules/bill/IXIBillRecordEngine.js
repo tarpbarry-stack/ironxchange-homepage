@@ -55,6 +55,7 @@ export function initializeIXIBillApproval(record = {}, policy = DEFAULT_IXI_BILL
         autoApproved: true,
         autoApprovalReason: requirement.reason,
         approvedAt: new Date().toISOString(),
+        approvedById: "ixi-policy",
         approvedByLabel: "IXI Policy"
       }
     };
@@ -106,8 +107,14 @@ export function applyIXIBillAction({
       })
     };
   } else if (resolvedAction === "return") {
+    if (!clean(payload.reason)) {
+      const error = new Error("A correction reason is required.");
+      error.code = "IXI_BILL_RETURN_REASON_REQUIRED";
+      throw error;
+    }
     next = {
       ...next,
+      status: "submitted",
       approval: {
         ...(next.approval || {}),
         status: "returned",
@@ -126,6 +133,11 @@ export function applyIXIBillAction({
       })
     };
   } else if (resolvedAction === "reject") {
+    if (!clean(payload.reason)) {
+      const error = new Error("A rejection reason is required.");
+      error.code = "IXI_BILL_REJECT_REASON_REQUIRED";
+      throw error;
+    }
     next = {
       ...next,
       status: "void",
@@ -194,12 +206,13 @@ export function applyIXIBillAction({
     const amount = money(payload.amount || next.bill?.amount);
     const method = clean(payload.method);
     const reference = clean(payload.reference);
-    if (!(amount > 0) || !method) {
-      const error = new Error("Payment amount and method are required.");
+    const total = money(next.bill?.amount);
+    const remaining = money(total - numeric(next.payment?.amountPaid));
+    if (!(amount > 0) || amount > remaining + 0.005 || !method || !reference) {
+      const error = new Error("Payment amount, method, and transaction reference are required and cannot exceed the remaining balance.");
       error.code = "IXI_BILL_PAYMENT_INVALID";
       throw error;
     }
-    const total = money(next.bill?.amount);
     const paidTotal = money(numeric(next.payment?.amountPaid) + amount);
     const fullyPaid = paidTotal + 0.005 >= total;
     next = {
@@ -224,6 +237,11 @@ export function applyIXIBillAction({
       })
     };
   } else if (resolvedAction === "void") {
+    if (!clean(payload.reason)) {
+      const error = new Error("A void reason is required.");
+      error.code = "IXI_BILL_VOID_REASON_REQUIRED";
+      throw error;
+    }
     next = {
       ...next,
       status: "void",
@@ -237,12 +255,20 @@ export function applyIXIBillAction({
       })
     };
   } else if (resolvedAction === "edit") {
+    const bill = { ...(next.bill || {}), ...(payload.bill || {}) };
+    const invoiceNumber = clean(payload?.identity?.invoiceNumber || next?.identity?.invoiceNumber);
+    if (!clean(bill.vendorLabel) || !invoiceNumber || !clean(bill.description) || !(money(bill.amount) > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(clean(bill.invoiceDate)) || (clean(bill.dueDate) && clean(bill.dueDate) < clean(bill.invoiceDate))) {
+      const error = new Error("Vendor, invoice number, description, positive amount, and valid dates are required.");
+      error.code = "IXI_BILL_EDIT_INVALID";
+      throw error;
+    }
+    const hasPo = Boolean(clean(next?.purchaseMatch?.purchaseOrderNumber));
+    const variance = hasPo ? money(bill.amount - numeric(next?.purchaseMatch?.poCommittedAmount)) : 0;
     next = {
       ...next,
-      bill: {
-        ...(next.bill || {}),
-        ...(payload.bill || {})
-      },
+      identity: { ...(next.identity || {}), invoiceNumber },
+      bill,
+      purchaseMatch: { ...(next.purchaseMatch || {}), billedAmount: money(bill.amount), variance, status: hasPo ? (next?.purchaseMatch?.receivedComplete && Math.abs(variance) < 0.005 ? "matched" : "exception") : "n/a", varianceApproval: null },
       timeline: appendTimeline(next, {
         activityId: `ACT-EDIT-${now}`,
         type: "bill-edited",

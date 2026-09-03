@@ -5,10 +5,20 @@ const number = value => {
 };
 const money = value => Math.round(number(value) * 100) / 100;
 
-export const IXI_BILL_SCHEMA = "ixi-bill-record-v1";
-export const IXI_BILL_STATUSES = Object.freeze(["draft", "open", "approved", "void"]);
+export const IXI_BILL_SCHEMA = "ixi-bill-record-v2";
+export const IXI_BILL_STATUSES = Object.freeze(["draft", "submitted", "approved", "void"]);
 export const IXI_BILL_MATCH_STATUSES = Object.freeze(["n/a", "unmatched", "matched", "exception"]);
 export const IXI_BILL_PAYMENT_STATUSES = Object.freeze(["unpaid", "scheduled", "partial", "paid", "overdue"]);
+
+export function normalizeIXIBillFingerprintPart(value) {
+  return clean(value).normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 96);
+}
+
+export function createIXIBillInvoiceFingerprint({ entityPassportId = "", vendorPassportId = "", vendorId = "", vendorLabel = "", invoiceNumber = "" } = {}) {
+  return [entityPassportId, vendorPassportId || vendorId || vendorLabel, invoiceNumber]
+    .map(normalizeIXIBillFingerprintPart)
+    .join("|");
+}
 
 export function createIXIBillRecord({ context = {}, input = {}, financialDocument = null } = {}) {
   const now = clean(input.createdAt) || new Date().toISOString();
@@ -32,6 +42,7 @@ export function createIXIBillRecord({ context = {}, input = {}, financialDocumen
     identity: {
       billRecordId: clean(input.billRecordId || input.clientRequestId),
       billDocumentId: clean(financialDocument?.documentId || financialDocument?.id || input.billDocumentId),
+      financialDocumentId: clean(financialDocument?.documentId || financialDocument?.id || input.billDocumentId),
       billNumber: clean(financialDocument?.documentNumber || financialDocument?.number || input.billNumber),
       invoiceNumber: clean(input.invoiceNumber),
       clientRequestId: clean(input.clientRequestId)
@@ -42,6 +53,7 @@ export function createIXIBillRecord({ context = {}, input = {}, financialDocumen
       primaryObjectType: clean(primary.objectType),
       primaryObjectLabel: clean(primary.label),
       entityPassportId: clean(context.entity?.passportId),
+      entityLabel: clean(context.entity?.label),
       locationPassportId: clean(location.passportId),
       locationObjectId: clean(location.objectId || location.id),
       locationLabel: clean(location.label),
@@ -97,7 +109,7 @@ export function createIXIBillRecord({ context = {}, input = {}, financialDocumen
       paidById: "",
       paidByLabel: ""
     },
-    status: "open",
+    status: "submitted",
     documents: Array.isArray(input.attachments) ? input.attachments : [],
     related: [
       clean(primary.objectId || primary.passportId) ? { id: clean(primary.objectId || primary.passportId), label: clean(primary.label), type: clean(primary.objectType || "object") } : null,
@@ -131,8 +143,33 @@ export function validateIXIBillInput(input = {}) {
   if (!(amount > 0)) errors.amount = "invalid";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(clean(input.invoiceDate))) errors.invoiceDate = "invalid";
   if (clean(input.dueDate) && !/^\d{4}-\d{2}-\d{2}$/.test(clean(input.dueDate))) errors.dueDate = "invalid";
+  if (clean(input.dueDate) && clean(input.invoiceDate) && clean(input.dueDate) < clean(input.invoiceDate)) errors.dueDate = "before-invoice-date";
   if (!/^[A-Z]{3}$/.test(clean(input.currency || "USD").toUpperCase())) errors.currency = "invalid";
+  if ((Array.isArray(input.attachments) ? input.attachments : []).some(item => !clean(item?.storageKey || item?.key) || !["uploaded", "available", "verified"].includes(clean(item?.status).toLowerCase()))) errors.attachments = "upload-incomplete";
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
-export default { createIXIBillRecord, validateIXIBillInput };
+export function hydrateIXIBillRecord(financialRecord = {}) {
+  const stored = financialRecord?.record || financialRecord;
+  const document = stored?.financialDocument || financialRecord?.financialDocument || financialRecord;
+  if (!document || !["bill", "supplier-invoice"].includes(clean(document.documentType).toLowerCase()) || !document.billRecord) return null;
+  const record = document.billRecord;
+  return {
+    ...record,
+    identity: {
+      ...(record.identity || {}),
+      billDocumentId: clean(document.financialDocumentId),
+      financialDocumentId: clean(document.financialDocumentId),
+      billNumber: clean(record?.identity?.billNumber) || `BILL-${clean(document.financialDocumentId).slice(-8).toUpperCase()}`,
+      invoiceNumber: clean(record?.identity?.invoiceNumber || document.invoiceNumber || document.documentNumber)
+    },
+    financialBinding: {
+      financialDocumentId: clean(document.financialDocumentId),
+      revision: Number(stored?.server?.revision || financialRecord?.server?.revision || 1),
+      financialLineId: clean(document?.lines?.[0]?.financialLineId),
+      line: document?.lines?.[0] || null
+    }
+  };
+}
+
+export default { createIXIBillRecord, validateIXIBillInput, hydrateIXIBillRecord, createIXIBillInvoiceFingerprint };

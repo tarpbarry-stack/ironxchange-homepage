@@ -154,6 +154,10 @@ export default function IXIBillCard({
 }) {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [reasonAction, setReasonAction] = useState("");
+  const [reason, setReason] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editDraft, setEditDraft] = useState({ vendorLabel: record?.bill?.vendorLabel || "", invoiceNumber: record?.identity?.invoiceNumber || "", description: record?.bill?.description || "", amount: record?.bill?.amount || "", invoiceDate: record?.bill?.invoiceDate || "", dueDate: record?.bill?.dueDate || "", category: record?.bill?.category || "", notes: record?.bill?.notes || "" });
   const [paymentDraft, setPaymentDraft] = useState({ amount: record?.bill?.amount || "", method: "ACH", reference: "", paidDate: new Date().toISOString().slice(0, 10) });
   const [scheduleDate, setScheduleDate] = useState(record?.bill?.dueDate || "");
   const t = COPY[language === "es" ? "es" : "en"];
@@ -222,7 +226,7 @@ export default function IXIBillCard({
           {approvalPending ? (
             <div className="action-needed">
               <small>{t.actionNeeded}</small>
-              {actions.has("approve") ? <><div className="approval-actions"><button className="approve" onClick={() => act("approve")}>✓ {t.approve}</button><button onClick={() => act("return")}>↶ {t.return}</button></div><button className="reject" onClick={() => act("reject")}>× {t.reject}</button></> : <strong>{t.waiting}: {record?.approval?.currentApproverLabel || record?.approval?.requiredRoleLabel || "APPROVER"}</strong>}
+              {actions.has("approve") ? <><div className="approval-actions"><button className="approve" onClick={() => act("approve")}>✓ {t.approve}</button><button onClick={() => { setReasonAction("return"); setReason(""); }}>↶ {t.return}</button></div><button className="reject" onClick={() => { setReasonAction("reject"); setReason(""); }}>× {t.reject}</button></> : <strong>{t.waiting}: {record?.approval?.currentApproverLabel || record?.approval?.requiredRoleLabel || "APPROVER"}</strong>}
             </div>
           ) : null}
         </section>
@@ -243,10 +247,14 @@ export default function IXIBillCard({
         <section className="bill-section"><h3>{t.notes}</h3><div className="notes-row">{record?.bill?.notes || "—"}</div></section>
         <section className="bill-section"><h3>{t.activity}</h3>{latest ? <div className="activity-row"><span>●</span><div><strong>{latest.label}</strong><small>{latest.actorLabel || ""} · {latest.occurredAt ? new Date(latest.occurredAt).toLocaleString(language === "es" ? "es-MX" : "en-US") : ""}</small></div></div> : <div className="empty-row">—</div>}</section>
 
+        {reasonAction ? <section className="bill-section inline-form payment-form"><strong>{reasonAction === "void" ? "VOID REASON" : reasonAction === "reject" ? "REJECTION REASON" : "CORRECTION NEEDED"}</strong><textarea autoFocus value={reason} onChange={event => setReason(event.target.value)} /><button disabled={!clean(reason)} onClick={() => { act(reasonAction, { reason }); setReasonAction(""); setReason(""); }}>CONFIRM</button><button onClick={() => { setReasonAction(""); setReason(""); }}>CANCEL</button></section> : null}
+
+        {editOpen ? <section className="bill-section inline-form payment-form"><strong>EDIT BILL — REAPPROVAL REQUIRED</strong><input value={editDraft.vendorLabel} onChange={event => setEditDraft(current => ({ ...current, vendorLabel: event.target.value }))} placeholder="Vendor" /><input value={editDraft.invoiceNumber} onChange={event => setEditDraft(current => ({ ...current, invoiceNumber: event.target.value }))} placeholder="Invoice #" /><textarea value={editDraft.description} onChange={event => setEditDraft(current => ({ ...current, description: event.target.value }))} placeholder="Description" /><input inputMode="decimal" value={editDraft.amount} onChange={event => setEditDraft(current => ({ ...current, amount: event.target.value }))} placeholder="Amount" /><input type="date" value={editDraft.invoiceDate} onChange={event => setEditDraft(current => ({ ...current, invoiceDate: event.target.value }))} /><input type="date" value={editDraft.dueDate} onChange={event => setEditDraft(current => ({ ...current, dueDate: event.target.value }))} /><input value={editDraft.category} onChange={event => setEditDraft(current => ({ ...current, category: event.target.value }))} placeholder="Category" /><textarea value={editDraft.notes} onChange={event => setEditDraft(current => ({ ...current, notes: event.target.value }))} placeholder="Notes" /><button onClick={() => { const { invoiceNumber, ...bill } = editDraft; act("edit", { identity: { invoiceNumber }, bill: { ...bill, amount: Number(bill.amount) } }); setEditOpen(false); }}>SAVE CORRECTION</button><button onClick={() => setEditOpen(false)}>CANCEL</button></section> : null}
+
         {error ? <div className="bill-error" role="alert">{error}</div> : null}
       </div>
 
-      <div className="bill-footer-actions"><button onClick={() => act("edit")}>✎ {t.edit}</button>{actions.has("void") ? <button onClick={() => act("void")}>⊘ {t.void}</button> : null}<button onClick={() => window?.print?.()}>▣ {t.print}</button><button type="button">⌯ {t.share}</button></div>
+      <div className="bill-footer-actions">{actions.has("edit") ? <button onClick={() => setEditOpen(value => !value)}>✎ {t.edit}</button> : null}{actions.has("void") ? <button onClick={() => { setReasonAction("void"); setReason(""); }}>⊘ {t.void}</button> : null}<button onClick={() => window?.print?.()}>▣ {t.print}</button><button type="button">⌯ {t.share}</button></div>
       <IXIBillStyles />
     </div>
   );
