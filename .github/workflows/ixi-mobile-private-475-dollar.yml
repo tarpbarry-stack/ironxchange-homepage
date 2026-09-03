@@ -1,0 +1,44 @@
+name: IXI Mobile Private 300x475 Dollar Certification
+
+on:
+  push:
+    branches:
+      - mobile/commercial-aos-v1-private-475-dollar
+    paths:
+      - "lib/ixi-mobile/IXIMobileRuntime.mjs"
+      - "pages/mobile-aos-foundation.js"
+      - "tests/ixi-mobile-private-475-dollar-contract.test.mjs"
+      - ".github/workflows/ixi-mobile-private-475-dollar.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-mobile-private-475-dollar-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-placeholder
+
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run private 300x475 dollar launcher contract
+        run: node --test tests/ixi-mobile-private-475-dollar-contract.test.mjs
+
+      - name: Build production application
+        run: npm run build
