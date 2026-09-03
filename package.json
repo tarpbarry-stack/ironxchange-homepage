@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test:card-geometry": "node tests/ixi-card-geometry-contract.test.mjs",
+    "test:ticket-agent": "node --test tests/ixi-ticket-agent-bridge-contract.test.mjs",
     "generate-taxonomy": "node scripts/generateConfigCategories.js",
     "build-aws-taxonomy-master": "node scripts/buildAwsTaxonomyMaster.js"
   },
