@@ -294,6 +294,7 @@ export default function IXIAosGenericConfiguredFaceV12({
   onOpenConsole = null,
   onOpenTransact = null,
   skinId = "v12",
+  skinOptions = [],
   onSkinChange = null,
   onSendFront = null,
   onSendBack = null,
@@ -397,6 +398,7 @@ export default function IXIAosGenericConfiguredFaceV12({
             onDelete={onDeleteObject}
             onOpenConsole={actions.canOpenConsole ? onOpenConsole : null}
             skinId={skinId}
+            skinOptions={skinOptions}
             onSkinChange={onSkinChange}
           />
         ) : null}

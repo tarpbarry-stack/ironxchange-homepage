@@ -60,7 +60,12 @@ function getAddressLines(object = {}) {
   return [raw, ""];
 }
 
-export default function IXIAosCard001Location(props) {
+export default function IXIAosCard001Location({
+  skinId = "v12",
+  skinOptions = [],
+  onSkinChange = null,
+  ...props
+}) {
   return (
     <IXIAosDataContractCardAdapter {...props} showBusinessIdentifier={false}>
       {contractProps => (
@@ -74,8 +79,8 @@ export default function IXIAosCard001Location(props) {
             const [addressLineOne, addressLineTwo] = getAddressLines(object);
 
             return (
-              <div className="aos-card001-v12-identity-shell ixi-v12-readable-card">
-                <IXIAosLocationOverviewCard {...contractProps} object={object} variant="001" />
+              <div className={`aos-card001-v12-identity-shell ixi-v12-readable-card skin-${skinId}`} data-card-skin={skinId}>
+                <IXIAosLocationOverviewCard {...contractProps} object={object} variant="001" skinId={skinId} skinOptions={skinOptions} onSkinChange={onSkinChange} />
 
                 {ixiIdentity ? (
                   <span className="aos-card001-ixi-identity" title={ixiIdentity}>

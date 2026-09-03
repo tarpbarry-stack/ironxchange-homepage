@@ -1,19 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIXIAosCardCommands } from "../IXIAosCardCommandContext";
 import { getObjectActionCapabilities } from "../IXIAosSemanticObjectPresentation";
 import IXIAosOfficeSkinCompatibilityStyles from "./IXIAosOfficeSkinCompatibilityStyles";
 import IXIAosLocationVisualCorrections from "./IXIAosLocationVisualCorrections";
 import IXIAosTransactContrastPass from "./IXIAosTransactContrastPass";
-import IXIAosCardSkinSystemStyles from "./IXIAosCardSkinSystemStyles";
-import IXIAosExpandedSkinStyles from "./IXIAosExpandedSkinStyles";
 
 const DEFAULT_SKINS = [
-  { id: "v12", label: "V12" }, { id: "default", label: "DEFAULT" },
-  { id: "steel", label: "STEEL" }, { id: "blueprint", label: "BLUE" },
-  { id: "industrial", label: "INDUSTRIAL" }, { id: "ledger", label: "LEDGER" },
-  { id: "foundry", label: "FOUNDRY" }, { id: "stock", label: "STOCK CERTIFICATE" },
-  { id: "bond", label: "BOND CERTIFICATE" }, { id: "modern-money", label: "MODERN MONEY" },
-  { id: "old-currency", label: "OLD CURRENCY" }
+  { id: "v12", label: "V12 · NATURAL" }
 ];
 
 export default function IXIAosCardHeaderControls({
@@ -38,7 +31,11 @@ export default function IXIAosCardHeaderControls({
   const hasRuntimeObject = Boolean(runtimeObject && typeof runtimeObject === "object");
   const effective = hasRuntimeObject ? getObjectActionCapabilities(runtimeObject) : null;
   const [menuOpen, setMenuOpen] = useState(false);
-  const [localSkinId, setLocalSkinId] = useState("v12");
+  const [localSkinId, setLocalSkinId] = useState(() => String(skinId || "v12").trim());
+
+  useEffect(() => {
+    setLocalSkinId(String(skinId || "v12").trim());
+  }, [skinId]);
 
   const resolvedOnTransact = typeof onTransact === "function"
     ? onTransact
@@ -68,7 +65,7 @@ export default function IXIAosCardHeaderControls({
     new Map([...DEFAULT_SKINS, ...supplied].map(option => [String(option.id || "").trim(), option])).values()
   );
 
-  const resolvedSkinId = String(skinId || localSkinId || "v12").trim();
+  const resolvedSkinId = String(localSkinId || skinId || "v12").trim();
 
   function chooseSkin(event, id) {
     stop(event);
@@ -84,7 +81,7 @@ export default function IXIAosCardHeaderControls({
       {showTransact ? <button type="button" className="header-action transact" onClick={event => { stop(event); resolvedOnTransact(); }}>$</button> : null}
 
       <div className="menu-shell">
-        <button type="button" className="header-action menu" onClick={event => { stop(event); setMenuOpen(value => !value); }}>⋮</button>
+        <button type="button" className="header-action menu" aria-label="Card menu and skins" aria-expanded={menuOpen} onClick={event => { stop(event); setMenuOpen(value => !value); }}>⋮</button>
         {menuOpen ? (
           <div className="header-menu" onClick={event => event.stopPropagation()}>
             <div className="skin-menu-group">
@@ -112,8 +109,6 @@ export default function IXIAosCardHeaderControls({
       <IXIAosOfficeSkinCompatibilityStyles />
       <IXIAosLocationVisualCorrections />
       <IXIAosTransactContrastPass />
-      <IXIAosCardSkinSystemStyles />
-      <IXIAosExpandedSkinStyles />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import IXIObjectCardActuator from "../../ixi-chassis/IXIObjectCardActuator";
 import {
@@ -27,10 +27,14 @@ import IXIAosCard003Location from "../cards/003/IXIAosCard003Location";
 import IXIAosLocationFace2Operations from "../cards/location/IXIAosLocationFace2Operations";
 import IXIAosLocationFace3Financial from "../cards/location/IXIAosLocationFace3Financial";
 import IXIAosGenericConfiguredFaceV12 from "../cards/generic/IXIAosGenericConfiguredFaceV12";
+import IXIAosCard001BlackTitaniumStyles from "../cards/001/IXIAosCard001BlackTitaniumStyles";
 
 const PANEL_WIDTH = 298;
 const PANEL_HEIGHT = 471;
 const AVAILABLE_FACES = Object.freeze([2, 3, 4, 5]);
+const CARD_001_SKINS = Object.freeze([
+  Object.freeze({ id: "black-titanium", label: "BLACK TITANIUM" })
+]);
 
 function initialSlots() {
   return [createConsoleSlot({ type: IXI_CONSOLE_SLOT_TYPES.LISTING })];
@@ -88,6 +92,8 @@ export default function IXIAosLocationObjectConsole({
   maintenanceSnapshot = {}
 }) {
   const objectId = clean(object?.objectId || object?.id);
+  const [skinId, setSkinId] = useState("v12");
+  const skinOptions = Number(cardNumber) === 1 ? CARD_001_SKINS : [];
 
   const consoleSlots = useMemo(
     () => normalizeConsoleSlots(
@@ -169,7 +175,10 @@ export default function IXIAosLocationObjectConsole({
     onBoard,
     onReturn,
     onExposeObject,
-    onOpenTransact
+    onOpenTransact,
+    skinId,
+    skinOptions,
+    onSkinChange: setSkinId
   };
 
   function renderFace(faceNumber) {
@@ -184,7 +193,9 @@ export default function IXIAosLocationObjectConsole({
       return (
         <IXIAosLocationFace2Operations
           {...shared}
-          skinId="v12"
+          skinId={skinId}
+          skinOptions={skinOptions}
+          onSkinChange={setSkinId}
         />
       );
     }
@@ -195,7 +206,9 @@ export default function IXIAosLocationObjectConsole({
           {...shared}
           runtimeData={financialSnapshot}
           financialSnapshot={financialSnapshot}
-          skinId="v12"
+          skinId={skinId}
+          skinOptions={skinOptions}
+          onSkinChange={setSkinId}
         />
       );
     }
@@ -211,6 +224,9 @@ export default function IXIAosLocationObjectConsole({
         {...shared}
         faceNumber={resolved}
         runtimeData={runtimeData}
+        skinId={skinId}
+        skinOptions={skinOptions}
+        onSkinChange={setSkinId}
       />
     );
   }
@@ -285,6 +301,7 @@ export default function IXIAosLocationObjectConsole({
           .aos-generic-object-console,.aos-generic-object-console *{box-sizing:border-box}.aos-generic-object-console{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:0;overflow:visible}.aos-generic-console-slot{position:relative;flex:0 0 ${PANEL_WIDTH}px;width:${PANEL_WIDTH}px;height:${PANEL_HEIGHT}px;overflow:visible}.aos-generic-console-slot.empty-slot{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),#141414}.aos-face-picker{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:8px}.aos-face-picker>strong{color:#ffc400;font-size:12px;font-weight:950;letter-spacing:.08em}.aos-face-picker>span{max-width:190px;margin-bottom:8px;overflow:hidden;color:rgba(255,255,255,.4);font-size:6px;font-weight:900;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}.aos-face-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}.aos-face-grid button{height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 9px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.68);cursor:pointer}.aos-face-grid button:hover{border-color:rgba(255,196,0,.35);background:rgba(255,196,0,.06)}.aos-face-grid b{color:#ffc400;font-size:9px;font-weight:950}.aos-face-grid span{max-width:100%;overflow:hidden;font-size:5.5px;font-weight:950;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}.aos-face-id{position:absolute;left:50%;bottom:-1px;width:34px;height:7px;transform:translateX(-50%);padding:0;border:0;border-radius:3px 3px 1px 1px;background:rgba(255,196,0,.92);color:#080808;font-size:4.5px;font-weight:950;cursor:pointer;z-index:180}
         `}</style>
       </div>
+      {Number(cardNumber) === 1 ? <IXIAosCard001BlackTitaniumStyles /> : null}
     </IXIAosCardCommandProvider>
   );
 }

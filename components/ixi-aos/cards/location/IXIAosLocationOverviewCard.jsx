@@ -120,7 +120,10 @@ export default function IXIAosLocationOverviewCard({
   onCycleColor = null,
   onCycleOutline = null,
   armedDestination = "",
-  onSendToArmedDestination = null
+  onSendToArmedDestination = null,
+  skinId = "v12",
+  skinOptions = [],
+  onSkinChange = null
 }) {
   const [runtimeObject, setRuntimeObject] = useState(object);
   const [editing, setEditing] = useState(false);
@@ -170,10 +173,10 @@ export default function IXIAosLocationOverviewCard({
   const descriptorNode = <div className="gov-descriptor"><span className="gov-mark">◆</span><div><strong>{descriptorOne || getObjectLabel(runtimeObject)}</strong><small>{descriptorTwo || ""}</small></div></div>;
 
   return (
-    <article className={`ixi-generic-overview gov-${variant}`} data-card-number={variant}>
+    <article className={`ixi-generic-overview gov-${variant} skin-${skinId}`} data-card-number={variant} data-card-skin={skinId}>
       <header className="gov-head">
         <div className="gov-identity"><span>{getObjectLabel(runtimeObject)}</span><strong>{getObjectDisplayName(runtimeObject)}</strong></div>
-        {!editing ? <IXIAosCardHeaderControls canAdd={actions.canCreate && typeof onAddObject === "function"} canEdit={actions.canEdit} canTransact={actions.canTransact && typeof onOpenTransact === "function"} onAdd={() => onAddObject?.(runtimeObject)} onToggleEdit={() => setEditing(true)} onTransact={() => onOpenTransact?.(runtimeObject)} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={actions.canOpenConsole ? onOpenConsole : null}/> : null}
+        {!editing ? <IXIAosCardHeaderControls canAdd={actions.canCreate && typeof onAddObject === "function"} canEdit={actions.canEdit} canTransact={actions.canTransact && typeof onOpenTransact === "function"} onAdd={() => onAddObject?.(runtimeObject)} onToggleEdit={() => setEditing(true)} onTransact={() => onOpenTransact?.(runtimeObject)} onHide={onHideObject} onDelete={onDeleteObject} onOpenConsole={actions.canOpenConsole ? onOpenConsole : null} skinId={skinId} skinOptions={skinOptions} onSkinChange={onSkinChange}/> : null}
       </header>
 
       <main className="gov-body">

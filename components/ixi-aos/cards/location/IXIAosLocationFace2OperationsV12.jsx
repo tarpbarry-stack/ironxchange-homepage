@@ -239,7 +239,8 @@ export default function IXIAosLocationFace2OperationsV12({
   onCycleColor = null,
   onCycleOutline = null,
   armedDestination = "",
-  onSendToArmedDestination = null
+  onSendToArmedDestination = null,
+  skinOptions = []
 }) {
   const objectId = clean(object?.objectId || object?.id);
   const persistedFields = useMemo(() => ({
@@ -337,7 +338,7 @@ export default function IXIAosLocationFace2OperationsV12({
             onDelete={onDeleteObject}
             onOpenConsole={onOpenConsole}
             skinId={skinId}
-            skinOptions={LOCATION_FACE2_SKINS}
+            skinOptions={skinOptions}
             onSkinChange={onSkinChange}
           />
         )}

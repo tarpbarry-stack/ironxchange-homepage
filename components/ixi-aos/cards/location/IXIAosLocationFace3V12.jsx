@@ -153,7 +153,10 @@ export default function IXIAosLocationFace3V12({
   onCycleColor = null,
   onCycleOutline = null,
   armedDestination = "",
-  onSendToArmedDestination = null
+  onSendToArmedDestination = null,
+  skinId = "v12",
+  skinOptions = [],
+  onSkinChange = null
 }) {
   const leased = mode === "leased";
   const objectId = clean(object?.objectId || object?.id);
@@ -222,7 +225,7 @@ export default function IXIAosLocationFace3V12({
   }
 
   return (
-    <article className={`ixi-location-f3-v12 mode-${mode}`}>
+    <article className={`ixi-location-f3-v12 mode-${mode} skin-${skinId}`} data-card-skin={skinId}>
       <header className="f3-head">
         <div className="f3-identity">
           <span>LOCATIONS & FACILITIES</span>
@@ -244,7 +247,9 @@ export default function IXIAosLocationFace3V12({
             onHide={onHideObject}
             onDelete={onDeleteObject}
             onOpenConsole={onOpenConsole}
-            skinId="v12"
+            skinId={skinId}
+            skinOptions={skinOptions}
+            onSkinChange={onSkinChange}
           />
         )}
       </header>
