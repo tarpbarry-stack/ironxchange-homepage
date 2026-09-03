@@ -1,0 +1,44 @@
+name: IXI Slug Media Gallery Certification
+
+on:
+  push:
+    branches:
+      - repair/slug-ixi-media-gallery-v1
+    paths:
+      - "pages/api/machines/by-passport/[passportId].js"
+      - "lib/machines/IXIMachineFileAdapter.js"
+      - "tests/ixi-slug-media-manifest-contract.test.mjs"
+      - ".github/workflows/ixi-slug-media-gallery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-slug-media-gallery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-placeholder
+
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run slug media manifest contract
+        run: node --test tests/ixi-slug-media-manifest-contract.test.mjs
+
+      - name: Build production application
+        run: npm run build
