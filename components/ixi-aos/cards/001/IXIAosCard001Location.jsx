@@ -16,15 +16,23 @@ export const CARD_001_LOCATION = Object.freeze({
   renderer: "schema-driven-generic"
 });
 
-const FACELAB_IXI_ID_PREVIEW = "IXI 482917";
+const FACELAB_IXI_ID_PREVIEW = "IXI - 482917";
 
 function formatIxiIdentity(object = {}) {
-  const isFaceLabPreview = clean(object?.metadata?.source) === "aos-card-catalog-preview";
-  if (isFaceLabPreview) return FACELAB_IXI_ID_PREVIEW;
+  const rawId = clean(getObjectId(object) || object?.uuid || object?.passportId);
+  const isFaceLabPreview =
+    clean(object?.metadata?.source) === "aos-card-catalog-preview" ||
+    /^aos-card-(?:catalog-)?preview/i.test(rawId) ||
+    /^preview-/i.test(rawId);
 
-  const id = clean(getObjectId(object) || object?.uuid || object?.passportId);
-  if (!id) return "";
-  return /^IXI(?:\s|[-#])/i.test(id) ? id.toUpperCase() : `IXI ${id}`;
+  if (isFaceLabPreview) return FACELAB_IXI_ID_PREVIEW;
+  if (!rawId) return "";
+
+  const normalizedId = rawId
+    .replace(/^IXI\s*[-#:]?\s*/i, "")
+    .trim();
+
+  return normalizedId ? `IXI - ${normalizedId.toUpperCase()}` : "";
 }
 
 export default function IXIAosCard001Location(props) {
@@ -70,7 +78,7 @@ export default function IXIAosCard001Location(props) {
                     pointer-events: none;
                   }
                   .aos-card001-v12-identity-shell .gov-001 .ixi-aos-card-header-controls {
-                    top: 19px !important;
+                    top: 17px !important;
                   }
                 `}</style>
               </div>
