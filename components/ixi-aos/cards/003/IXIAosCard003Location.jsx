@@ -115,13 +115,17 @@ export default function IXIAosCard003Location(props) {
                     top: 17px !important;
                   }
 
-                  /* Text replacement only. Preserve Card 003's original V12 address shell,
-                     border, fill, geometry, yellow marker and all sizing exactly. */
-                  .aos-card003-customer-id-shell .gov-003 .gov-descriptor > div {
+                  /* Display overlay only. During EDIT the real descriptor shell becomes
+                     the editor, so nothing is allowed to cover it. */
+                  .aos-card003-customer-id-shell .gov-003[data-editing="false"] .gov-descriptor > div {
                     visibility: hidden !important;
                   }
                   .aos-card003-customer-id-shell .gov-003 .gov-mark {
                     visibility: visible !important;
+                  }
+                  .aos-card003-customer-id-shell .gov-003[data-editing="true"] ~ .aos-card003-customer-identity,
+                  .aos-card003-customer-id-shell .gov-003[data-editing="true"] ~ .aos-card003-ixi-identity {
+                    display: none !important;
                   }
                   .aos-card003-customer-identity {
                     position: absolute;
