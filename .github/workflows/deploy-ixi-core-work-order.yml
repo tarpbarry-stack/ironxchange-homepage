@@ -58,6 +58,7 @@ jobs:
           TARGET_FACTORY=financial/IXIFinancialWorkOrderFactory.js
           TARGET_INDEX=index.js
           TARGET_GATEWAY=identity/IXIInternalFinancialRequest.js
+          PATCHED_INDEX="$STAGE/index.live-patched.js"
           GATEWAY_EXISTED=0
           SUCCESS=0
 
@@ -92,7 +93,7 @@ jobs:
             '252b85a4515f6131fbf786890e2f385c663749865631b341739256e499049c05' \
             "$TARGET_FACTORY" | sha256sum -c -
           printf '%s  %s\n' \
-            'ccafb5f20574c7f7e7aa82cf18ea5c8ad6b41b2d1fb864b432ee686494dd63b3' \
+            '5bf4a592205173f7c59cb63fb8159261c7ff9319fa3929492eb69e724b20dc26' \
             "$TARGET_INDEX" | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
@@ -113,6 +114,21 @@ jobs:
           node --check "$TARGET_FACTORY"
           node --check "$TARGET_INDEX"
           node --check "$TARGET_GATEWAY"
+          cp "$APP/$TARGET_INDEX" "$PATCHED_INDEX"
+          node - "$PATCHED_INDEX" <<'PATCH_INDEX'
+          const fs = require('fs');
+          const file = process.argv[2];
+          let source = fs.readFileSync(file, 'utf8');
+          const requireAnchor = `const {\n  ixiOptionalMosAuthorityRequest\n} = require(\n  "./authority/IXIAuthorityMosRequest"\n);`;
+          const internalRequire = `const {\n  ixiInternalFinancialRequest\n} = require(\n  "./identity/IXIInternalFinancialRequest"\n);\n\n`;
+          const mountAnchor = `app.use(\n  "/financial",\n  ixiAuthenticatedFinancialRequest,\n  financialRoutes\n);`;
+          const patchedMount = `app.use(\n  "/financial",\n  ixiInternalFinancialRequest,\n  ixiAuthenticatedFinancialRequest,\n  financialRoutes\n);`;
+          if (source.includes('ixiInternalFinancialRequest')) throw new Error('Financial internal middleware already mounted');
+          if (!source.includes(requireAnchor) || !source.includes(mountAnchor)) throw new Error('Live index patch anchors do not match');
+          source = source.replace(requireAnchor, internalRequire + requireAnchor).replace(mountAnchor, patchedMount);
+          fs.writeFileSync(file, source);
+          PATCH_INDEX
+          node --check "$PATCHED_INDEX"
           node - <<'NODE'
           const { createWorkOrderDocument } = require('./financial/IXIFinancialWorkOrderFactory');
           const document = createWorkOrderDocument({
@@ -126,7 +142,7 @@ jobs:
           NODE
 
           install -D -m 0644 "$STAGE/$TARGET_FACTORY" "$APP/$TARGET_FACTORY"
-          install -D -m 0644 "$STAGE/$TARGET_INDEX" "$APP/$TARGET_INDEX"
+          install -D -m 0644 "$PATCHED_INDEX" "$APP/$TARGET_INDEX"
           install -D -m 0644 "$STAGE/$TARGET_GATEWAY" "$APP/$TARGET_GATEWAY"
           run_pm2 reload IX-Core --update-env
 
