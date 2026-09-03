@@ -1,7 +1,37 @@
 {
-  "requestId": "ixi-chat-request-20260903-0251-claim",
-  "action": "claim",
+  "requestId": "ixi-chat-request-20260903-0300-closeout",
+  "action": "closeout",
   "ticketId": "ticket-15ff9794-0e44-4e2c-ad92-06f910ad64d0",
-  "expectedRevision": 3,
-  "runId": "ixi-chat-20260903-marketplace-actuators"
+  "expectedRevision": 4,
+  "runId": "ixi-chat-20260903-marketplace-actuators",
+  "closeout": {
+    "summary": "Marketplace listing-card side actuators now match the normal 34px actuator height while preserving the existing bottom edge and console behavior.",
+    "before": "Marketplace actuators were 17px high from top 352px to bottom 369px.",
+    "after": "Marketplace actuators are 34px high from top 335px to the same bottom 369px; all added size extends upward toward the photo.",
+    "risks": "PR remains unmerged pending owner visual verification.",
+    "notes": "PR #55 is mergeable against current main. Vercel preview build for application source commit 0b1c1b6ccd51b22689678c5764ced53152462998 is READY. One-shot Node geometry contract passed and was removed after execution.",
+    "filesChanged": [
+      "components/ixi-chassis/IXIObjectCardActuator.jsx",
+      "tests/ixi-ticket-marketplace-actuator-contract.test.mjs"
+    ],
+    "tests": [
+      "Vercel Next.js production build: READY",
+      "CT-260903-000001 actuator geometry contract: PASS",
+      "Bottom invariant: 352+17 = 335+34 = 369",
+      "Left/right offsets and onClick behavior unchanged by contract"
+    ],
+    "editResults": [],
+    "prs": [
+      {
+        "number": 55,
+        "url": "https://github.com/tarpbarry-stack/ironxchange-homepage/pull/55",
+        "state": "draft"
+      }
+    ],
+    "agentRating": {
+      "score": 5,
+      "confidence": 5,
+      "note": "Minimal scoped geometry change; build and invariant contract pass. Owner visual verification remains before merge."
+    }
+  }
 }
