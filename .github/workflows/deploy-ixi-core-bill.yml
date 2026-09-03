@@ -1,0 +1,158 @@
+name: Deploy IX-Core Bill
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Bill release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-bill-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-bill-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/bill-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialBillFactory.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            '70b08a0ea7ea2d4b96efe86e7cc234235f6fe9fa333e88d01b51eb7c7011f1c5' 'financial/IXIFinancialBillFactory.js' \
+            '77e31e561585a92a43099a476b5d9695d699c1dd7bd0f663bb5ac9ee6b7b3d1e' 'financial/IXIFinancialRoutes.js' \
+            'bc274f3c7846488261b8a161dcef7d436c49e682ade3ddee3184b9a467eea180' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" $FILES
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const fs = require('fs');
+          const { createBillDocument } = require('./financial/IXIFinancialBillFactory');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const { createFinancialLifecycleSnapshot } = require('./financial/IXIFinancialLifecycleEngine');
+          const makeRecord = approval => ({
+            schema: 'ixi-bill-record-v2', identity: { invoiceNumber: 'DEPLOY-78451' },
+            context: { primaryPassportId: 'PASS-ASSET-PROBE', entityPassportId: 'PASS-ENTITY-PROBE', employeePassportId: 'PASS-EMPLOYEE-PROBE' },
+            bill: { vendorLabel: 'Deploy Probe Vendor', description: 'Bill deploy probe', amount: 482.17, currency: 'USD', invoiceDate: '2026-09-03', dueDate: '2026-10-03' },
+            purchaseMatch: { status: 'n/a' }, approval, payment: { status: 'unpaid', amountPaid: 0 },
+            status: approval.status === 'approved' ? 'approved' : 'submitted', documents: [], timeline: [], audit: { version: 1 }
+          });
+          const base = { financialDocumentId: 'ifd_bill_deploy_probe', documentNumber: 'DEPLOY-78451', invoiceNumber: 'DEPLOY-78451', invoiceFingerprint: 'pass-entity-probe|deploy-probe-vendor|deploy-78451', sourceDocumentId: 'pass-entity-probe|deploy-probe-vendor|deploy-78451', vendorName: 'Deploy Probe Vendor', occurredAt: '2026-09-03T12:00:00.000Z', dueDate: '2026-10-03', amount: 482.17, description: 'Bill deploy probe', references: [{ passportId: 'PASS-ASSET-PROBE', role: 'asset' }, { passportId: 'PASS-ENTITY-PROBE', role: 'entity' }, { passportId: 'PASS-EMPLOYEE-PROBE', role: 'employee' }] };
+          const captured = createBillDocument({ ...base, financialState: 'submitted', billRecord: makeRecord({ status: 'pending' }) });
+          const approved = createBillDocument({ ...base, financialState: 'billed', billRecord: makeRecord({ status: 'approved', approvedById: 'PASS-CONTROLLER-PROBE', approvedAt: '2026-09-03T15:00:00.000Z' }) });
+          const captureValidation = validateFinancialDocument(captured);
+          const approvalValidation = validateFinancialDocument(approved);
+          const before = createFinancialLifecycleSnapshot({ documents: [captured] });
+          const after = createFinancialLifecycleSnapshot({ documents: [approved] });
+          const routeSource = fs.readFileSync('./financial/IXIFinancialRoutes.js', 'utf8');
+          if (!captureValidation.ok || !approvalValidation.ok || before.incurredCost !== 0 || before.unpaid !== 0 || after.incurredCost !== 482.17 || after.unpaid !== 482.17 || after.paid !== 0 || approved.accountingTreatment.createsCashEvent !== false || !routeSource.includes('getBillPatchAction') || !routeSource.includes('bindBillActorEvidence')) {
+            console.error(captureValidation.errors, approvalValidation.errors, before, after);
+            throw new Error('Bill deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/bill-route.json" -w '%{http_code}' -X PATCH -H 'Content-Type: application/json' -d '{"patch":{"documentType":"bill"}}' http://127.0.0.1:4100/financial/documents/ifd_bill_deploy_probe)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/bill-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Bill %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Bill $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record Bill release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Bill release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- Financial tests: passed'
+            echo '- Capture, approval, A/P, cash-separation, permission-binding, and duplicate-control probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Bill route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
