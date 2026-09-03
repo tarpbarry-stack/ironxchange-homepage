@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 
 const require = createRequire(import.meta.url);
 const {
@@ -58,8 +59,8 @@ test("work packet freezes authoritative Ticket scope and execution identity", ()
     metadata: {
       dispatch: { state: "claimed", runId: "run-1" },
       execution: {
-        assignedTo: "ixi-openai-worker",
-        agentId: "ixi-openai-worker",
+        assignedTo: "chatgpt-connected-github",
+        agentId: "chatgpt-connected-github",
         runId: "run-1",
         claimedAt: "2026-09-03T00:00:00.000Z",
         startedAt: "2026-09-03T00:00:00.000Z",
@@ -79,7 +80,31 @@ test("work packet freezes authoritative Ticket scope and execution identity", ()
   assert.deepEqual(packet.editSections, ticket.editSections);
   assert.deepEqual(packet.attachments, ticket.attachments);
   assert.deepEqual(packet.context, ticket.context);
-  assert.equal(packet.execution.agentId, "ixi-openai-worker");
+  assert.equal(packet.execution.agentId, "chatgpt-connected-github");
   assert.equal(packet.execution.runId, "run-1");
   assert.equal(packet.execution.leaseExpired, false);
+});
+
+test("connected Chat is the live Ticket dispatch path and needs no new GitHub credential", () => {
+  const launch = readFileSync(new URL("../pages/api/ixi-agent/worker/launch.js", import.meta.url), "utf8");
+  assert.match(launch, /mode: "connected-chat"/);
+  assert.match(launch, /requiresNewGithubCredentials: false/);
+  assert.match(launch, /requestDispatch/);
+  assert.doesNotMatch(launch, /launchTicketWorker/);
+});
+
+test("connected Chat bridge exposes intake, claim, heartbeat and closeout import", () => {
+  const next = readFileSync(new URL("../pages/api/ixi-agent/chat/next.js", import.meta.url), "utf8");
+  const claim = readFileSync(new URL("../pages/api/ixi-agent/chat/claim.js", import.meta.url), "utf8");
+  const heartbeat = readFileSync(new URL("../pages/api/ixi-agent/chat/heartbeat.js", import.meta.url), "utf8");
+  const closeout = readFileSync(new URL("../pages/api/ixi-agent/chat/import-closeout.js", import.meta.url), "utf8");
+
+  assert.match(next, /listRecoverableTickets/);
+  assert.match(next, /listReadyTickets/);
+  assert.match(claim, /chatgpt-connected-github/);
+  assert.match(claim, /leaseSeconds: 3600/);
+  assert.match(heartbeat, /heartbeatTicket/);
+  assert.match(closeout, /sourceArtifact/);
+  assert.match(closeout, /raw\.githubusercontent\.com/);
+  assert.match(closeout, /submitAgentCloseout/);
 });
