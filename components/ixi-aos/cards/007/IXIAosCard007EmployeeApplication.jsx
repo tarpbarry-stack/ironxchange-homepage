@@ -4,14 +4,9 @@ import IXIAosGenericUniversalLayout007 from "../generic/IXIAosGenericUniversalLa
 import IXIAosGenericUniversalLayout007B from "../generic/IXIAosGenericUniversalLayout007B";
 import IXIAosGenericUniversalLayout007C from "../generic/IXIAosGenericUniversalLayout007C";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosV12LibraryReadability from "../../card-runtime/modules/IXIAosV12LibraryReadability";
+import IXIAosV12Face1EditPatch from "../../card-runtime/modules/IXIAosV12Face1EditPatch";
 
-/*
- * Compatibility export for existing Face Lab/runtime imports.
- * Card 007 is the universal AOS card. The legacy filename carries no business meaning.
- *
- * Face Lab preview objects expose 007A / 007B / 007C so all three geometries can be
- * compared without changing the production/runtime default, which remains 007A.
- */
 export default function IXIAosCard007EmployeeApplication(props) {
   const [faceLabVariant, setFaceLabVariant] = useState("007A");
 
@@ -23,46 +18,33 @@ export default function IXIAosCard007EmployeeApplication(props) {
     <IXIAosDataContractCardAdapter {...props} minimumCustomFields={8}>
       {contractProps => {
         let CardLayout = IXIAosGenericUniversalLayout007;
-
-        if (isFaceLabPreview && faceLabVariant === "007B") {
-          CardLayout = IXIAosGenericUniversalLayout007B;
-        }
-
-        if (isFaceLabPreview && faceLabVariant === "007C") {
-          CardLayout = IXIAosGenericUniversalLayout007C;
-        }
+        if (isFaceLabPreview && faceLabVariant === "007B") CardLayout = IXIAosGenericUniversalLayout007B;
+        if (isFaceLabPreview && faceLabVariant === "007C") CardLayout = IXIAosGenericUniversalLayout007C;
 
         return (
-          <div className="u007-face-lab-variant-shell">
+          <div className="u007-face-lab-variant-shell ixi-v12-library-readable ixi-v12-face1-edit">
             {isFaceLabPreview ? (
               <div className="u007-face-lab-variant-picker">
-                <button
-                  type="button"
-                  className={faceLabVariant === "007A" ? "active" : ""}
-                  onClick={() => setFaceLabVariant("007A")}
-                >
-                  007A
-                </button>
-
-                <button
-                  type="button"
-                  className={faceLabVariant === "007B" ? "active" : ""}
-                  onClick={() => setFaceLabVariant("007B")}
-                >
-                  007B
-                </button>
-
-                <button
-                  type="button"
-                  className={faceLabVariant === "007C" ? "active" : ""}
-                  onClick={() => setFaceLabVariant("007C")}
-                >
-                  007C
-                </button>
+                {[
+                  "007A",
+                  "007B",
+                  "007C"
+                ].map(variant => (
+                  <button
+                    key={variant}
+                    type="button"
+                    className={faceLabVariant === variant ? "active" : ""}
+                    onClick={() => setFaceLabVariant(variant)}
+                  >
+                    {variant}
+                  </button>
+                ))}
               </div>
             ) : null}
 
             <CardLayout {...contractProps} />
+            <IXIAosV12LibraryReadability />
+            <IXIAosV12Face1EditPatch />
 
             <style jsx>{`
               .u007-face-lab-variant-shell {
@@ -70,38 +52,28 @@ export default function IXIAosCard007EmployeeApplication(props) {
                 width: 298px;
                 height: 471px;
               }
-
               .u007-face-lab-variant-picker {
                 position: absolute;
                 left: 50%;
                 top: -31px;
                 z-index: 500;
-
                 display: flex;
                 gap: 4px;
-
                 transform: translateX(-50%);
               }
-
               .u007-face-lab-variant-picker button {
                 height: 23px;
                 min-width: 49px;
-
                 padding: 0 8px;
-
                 border: 1px solid rgba(255,255,255,.10);
                 border-radius: 4px;
-
                 background: #111411;
                 color: rgba(255,255,255,.46);
-
-                font-size: 7px;
-                font-weight: 950;
-                letter-spacing: .05em;
-
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: .03em;
                 cursor: pointer;
               }
-
               .u007-face-lab-variant-picker button.active {
                 border-color: rgba(255,196,0,.55);
                 background: rgba(255,196,0,.10);
