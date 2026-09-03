@@ -32,6 +32,13 @@ import {
 
 import IXIEnvironmentRail from "../components/IXIEnvironmentRail";
 import IXISortableMachineCard from "../components/ixi-chassis/IXISortableMachineCard";
+import IXICardScaleControl from "../components/ixi-chassis/IXICardScaleControl";
+import { getIXICardScalePreset } from "../lib/ixiCardScalePresets";
+
+import {
+  readSitewideCardScaleMode,
+  writeSitewideCardScaleMode
+} from "../components/ixi-chassis/IXIScaleEngine";
 
 import {
   IXI_THEATER_COMMANDS
@@ -141,6 +148,27 @@ const [screenFactModes, setScreenFactModes] = useState(["off", "off", "off", "of
 ]);
 
 const [zoomSyncOn, setZoomSyncOn] = useState(false);
+const [cardScaleMode, setCardScaleMode] = useState("xl");
+const theaterCardScale =
+  getIXICardScalePreset(cardScaleMode).scale;
+
+useEffect(() => {
+  const savedMode = readSitewideCardScaleMode();
+
+  if (savedMode) {
+    setCardScaleMode(savedMode);
+  }
+}, []);
+
+function updateCardScaleMode(nextMode) {
+  setCardScaleMode(current => {
+    if (nextMode === current) {
+      return current;
+    }
+
+    return writeSitewideCardScaleMode(nextMode);
+  });
+}
 
 function cycleScreenFactMode(screenIndex) {
   setScreenFactModes(current => {
@@ -605,7 +633,18 @@ function prevPhotoForMachine(machine) {
     setActiveDragId("");
   }}
 >
-  <main>
+  <main
+    data-ixi-card-scale-mode={cardScaleMode}
+    style={{
+      "--theater-card-size-scale": theaterCardScale,
+      "--theater-card-presentation-scale":
+        0.6 * theaterCardScale,
+      "--theater-card-width":
+        `${171 * theaterCardScale}px`,
+      "--theater-card-height":
+        `${235 * theaterCardScale}px`
+    }}
+  >
     {!entered && (
           <section className="theater-lobby">
             <div className="lobby-card">
@@ -1001,6 +1040,12 @@ return (
     </div>
   ) : null}
 </DragOverlay>
+
+<IXICardScaleControl
+  value={cardScaleMode}
+  onChange={updateCardScaleMode}
+  surfaceLabel="Theater"
+/>
 
 </main>
 </DndContext>
@@ -1424,9 +1469,9 @@ margin-top: -25px;
 }
 
     :global(.loaded-card) {
-  flex: 0 0 171px;
-  width: 171px;
-  height: 235px;
+  flex: 0 0 var(--theater-card-width);
+  width: var(--theater-card-width);
+  height: var(--theater-card-height);
 
   position: relative;
 
@@ -1445,15 +1490,15 @@ margin-top: -25px;
   width: 285px;
   height: 391px;
 
-  transform: scale(.60);
+  transform: scale(var(--theater-card-presentation-scale));
   transform-origin: top left;
 
   margin-bottom: -18px;
 }
 
 :global(.theater-drag-overlay-card) {
-  width: 171px;
-  height: 235px;
+  width: var(--theater-card-width);
+  height: var(--theater-card-height);
   pointer-events: none;
   overflow: visible;
   opacity: .98;

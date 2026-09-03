@@ -198,6 +198,7 @@ export default function IXIAosWorkspaceBoard({
   return (
     <IXIBoardSurface
       scaleMode={cardScaleMode}
+      centerRows={true}
     >
       <IXIBoard
         items={items}

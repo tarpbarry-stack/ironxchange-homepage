@@ -1,10 +1,10 @@
-name: Deploy IX-Core Work Order
+name: Deploy IX-Core Work Order Command Engine
 
 on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Immutable IX-Core Work Order commit SHA
+        description: Immutable IX-Core commit SHA
         required: true
 
 permissions:
@@ -42,7 +42,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy guarded Work Order release
+      - name: Deploy guarded command engine release
         id: deploy
         shell: bash
         run: |
@@ -52,14 +52,10 @@ jobs:
           set -eu
           APP=/var/www/ix-core
           RELEASE_SHA=__IXI_CORE_SHA__
-          STAGE=/tmp/ixi-core-work-order-__IXI_CORE_SHA__
-          ARCHIVE=/tmp/ixi-core-work-order-__IXI_CORE_SHA__.tgz
-          BACKUP=/var/backups/ixi-core-releases/work-order-pre-__IXI_CORE_SHA__.tgz
-          TARGET_FACTORY=financial/IXIFinancialWorkOrderFactory.js
-          TARGET_INDEX=index.js
-          TARGET_GATEWAY=identity/IXIInternalFinancialRequest.js
-          PATCHED_INDEX="$STAGE/index.live-patched.js"
-          GATEWAY_EXISTED=0
+          STAGE=/tmp/ixi-core-command-engine-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-command-engine-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/command-engine-pre-__IXI_CORE_SHA__.tgz
+          TARGET=financial/IXIFinancialCommandEngine.js
           SUCCESS=0
 
           run_pm2() {
@@ -68,17 +64,16 @@ jobs:
 
           rollback() {
             if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
-              echo 'Deployment failed; restoring the previous Work Order release.' >&2
+              echo 'Deployment failed; restoring the previous Financial Command Engine.' >&2
               cd "$APP"
               tar -xzf "$BACKUP"
-              if [ "$GATEWAY_EXISTED" -eq 0 ]; then rm -f "$TARGET_GATEWAY"; fi
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
           }
           trap rollback EXIT
 
           test -d "$APP"
-          test -f "$APP/index.js"
+          test -f "$APP/$TARGET"
           if pm2 describe IX-Core >/dev/null 2>&1; then
             PM2_USER=root
           elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
@@ -90,19 +85,11 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            '252b85a4515f6131fbf786890e2f385c663749865631b341739256e499049c05' \
-            "$TARGET_FACTORY" | sha256sum -c -
-          printf '%s  %s\n' \
-            '5bf4a592205173f7c59cb63fb8159261c7ff9319fa3929492eb69e724b20dc26' \
-            "$TARGET_INDEX" | sha256sum -c -
+            '1f350ff0c8e231ee738cc0c2396072cbd9a14502cda8b6d9d1bb91cafaac1adf' \
+            "$TARGET" | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
-          if [ -f "$TARGET_GATEWAY" ]; then
-            GATEWAY_EXISTED=1
-            tar -czf "$BACKUP" "$TARGET_FACTORY" "$TARGET_INDEX" "$TARGET_GATEWAY"
-          else
-            tar -czf "$BACKUP" "$TARGET_FACTORY" "$TARGET_INDEX"
-          fi
+          tar -czf "$BACKUP" "$TARGET"
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
@@ -111,39 +98,23 @@ jobs:
           cd "$STAGE"
           npm ci --ignore-scripts
           npm test
-          node --check "$TARGET_FACTORY"
-          node --check "$TARGET_INDEX"
-          node --check "$TARGET_GATEWAY"
-          cp "$APP/$TARGET_INDEX" "$PATCHED_INDEX"
-          node - "$PATCHED_INDEX" <<'PATCH_INDEX'
-          const fs = require('fs');
-          const file = process.argv[2];
-          let source = fs.readFileSync(file, 'utf8');
-          const requireAnchor = `const {\n  ixiOptionalMosAuthorityRequest\n} = require(\n  "./authority/IXIAuthorityMosRequest"\n);`;
-          const internalRequire = `const {\n  ixiInternalFinancialRequest\n} = require(\n  "./identity/IXIInternalFinancialRequest"\n);\n\n`;
-          const mountAnchor = `app.use(\n  "/financial",\n  ixiAuthenticatedFinancialRequest,\n  financialRoutes\n);`;
-          const patchedMount = `app.use(\n  "/financial",\n  ixiInternalFinancialRequest,\n  ixiAuthenticatedFinancialRequest,\n  financialRoutes\n);`;
-          if (source.includes('ixiInternalFinancialRequest')) throw new Error('Financial internal middleware already mounted');
-          if (!source.includes(requireAnchor) || !source.includes(mountAnchor)) throw new Error('Live index patch anchors do not match');
-          source = source.replace(requireAnchor, internalRequire + requireAnchor).replace(mountAnchor, patchedMount);
-          fs.writeFileSync(file, source);
-          PATCH_INDEX
-          node --check "$PATCHED_INDEX"
+          node --check "$TARGET"
           node - <<'NODE'
-          const { createWorkOrderDocument } = require('./financial/IXIFinancialWorkOrderFactory');
-          const document = createWorkOrderDocument({
-            financialDocumentId: 'ifd_deploy_probe',
-            machinePassportId: 'passport:machine:deploy-probe',
-            workOrder: { identity: {}, work: { status: 'in-progress' } }
-          });
-          if (document.documentNumber !== 'WO-OY_PROBE' || document.workOrder.identity.workOrderId !== 'ifd_deploy_probe') {
-            throw new Error('Work Order factory deploy probe failed.');
+          const {
+            hasEconomicValue,
+            isNonEconomicOperationalWorkOrder
+          } = require('./financial/IXIFinancialCommandEngine');
+          const shell = {
+            documentType: 'work-order',
+            lines: [],
+            totals: { total: 0 }
+          };
+          if (hasEconomicValue(shell) || !isNonEconomicOperationalWorkOrder(shell)) {
+            throw new Error('Operational Work Order period-boundary probe failed.');
           }
           NODE
 
-          install -D -m 0644 "$STAGE/$TARGET_FACTORY" "$APP/$TARGET_FACTORY"
-          install -D -m 0644 "$PATCHED_INDEX" "$APP/$TARGET_INDEX"
-          install -D -m 0644 "$STAGE/$TARGET_GATEWAY" "$APP/$TARGET_GATEWAY"
+          install -D -m 0644 "$STAGE/$TARGET" "$APP/$TARGET"
           run_pm2 reload IX-Core --update-env
 
           attempt=0
@@ -163,7 +134,7 @@ jobs:
           trap - EXIT
           rm -rf "$STAGE"
           rm -f "$ARCHIVE"
-          printf 'IX-Core Work Order %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          printf 'IX-Core command engine %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
           REMOTE_SCRIPT
           )"
 
@@ -173,7 +144,7 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$AWS_INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment "Deploy IX-Core Work Order $IXI_CORE_SHA" \
+            --comment "Deploy IX-Core command engine $IXI_CORE_SHA" \
             --parameters "$parameters" \
             --query 'Command.CommandId' \
             --output text)"
@@ -195,9 +166,11 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## IX-Core Work Order production release'
+            echo '## IX-Core Work Order command-engine release'
             echo "- Commit: \`$IXI_CORE_SHA\`"
             echo "- SSM command: \`${{ steps.deploy.outputs.command_id }}\`"
+            echo '- Financial tests: passed'
+            echo '- Operational Work Order boundary: passed'
             echo '- Health: passed'
             echo '- Protected Work Order route: passed'
           } >> "$GITHUB_STEP_SUMMARY"

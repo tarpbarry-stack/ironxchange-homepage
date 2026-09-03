@@ -1,0 +1,63 @@
+name: Capture live IX-Core Work Order
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Capture verified Work Order factory
+        shell: bash
+        run: |
+          set -euo pipefail
+          parameters="$(jq -cn --arg command \
+            "cd /var/www/ix-core && sha256sum index.js && gzip -c index.js | base64 -w0" \
+            '{commands:[$command]}')"
+          command_id="$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment 'Capture live IX-Core Work Order factory' \
+            --parameters "$parameters" \
+            --query 'Command.CommandId' \
+            --output text)"
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID"
+          output="$(aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$command_id" \
+            --instance-id "$AWS_INSTANCE_ID" \
+            --query 'StandardOutputContent' \
+            --output text)"
+          index_sha="$(printf '%s\n' "$output" | sed -n '1p' | awk '{print $1}')"
+          printf '%s\n' "$output" | sed -n '2p' | base64 -d | gzip -d > index.js
+          test "$(sha256sum index.js | awk '{print $1}')" = "$index_sha"
+          printf '%s  %s\n' "$index_sha" index.js > SHA256SUMS
+
+      - name: Upload verified Work Order source
+        uses: actions/upload-artifact@v4
+        with:
+          name: ixi-core-live-work-order-${{ github.run_id }}
+          path: |
+            index.js
+            SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7

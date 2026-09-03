@@ -17,7 +17,9 @@ const sharedControlPages = [
   "pages/yard/index.js",
   "pages/yard/[sellerSlug].js",
   "pages/auction-work/index.js",
-  "pages/auction-market/index.js"
+  "pages/auction-market/index.js",
+  "pages/aos/work.js",
+  "pages/theater.js"
 ];
 
 test("active desktop card surfaces use the shared V12 scale control", () => {
@@ -51,7 +53,8 @@ test("standard boards center complete rows using scaled footprints", () => {
     "pages/yard/[sellerSlug].js",
     "pages/auction-work/index.js",
     "pages/auction-market/index.js",
-    "pages/index.js"
+    "pages/index.js",
+    "components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx"
   ];
 
   for (const path of centeredBoardPages) {
@@ -88,23 +91,25 @@ test("the shared V12 control is monotonic, clamped, and directly selectable", ()
   );
 });
 
-test("access-only AOS, mobile lab, and contained Theater geometry stay outside the public site-wide control", () => {
+test("mobile lab stays frozen while AOS and Theater join the site-wide control", () => {
   assert.equal(
     fs.existsSync(
       new URL("../pages/mobile-lab.js", import.meta.url)
     ),
     false
   );
-  assert.doesNotMatch(
-    read("pages/theater.js"),
-    /IXICardScaleControl/u
+  const theater = read("pages/theater.js");
+
+  assert.match(
+    theater,
+    /--theater-card-presentation-scale/u
+  );
+  assert.match(
+    theater,
+    /transform: scale\(var\(--theater-card-presentation-scale\)\)/u
   );
   assert.doesNotMatch(
-    read("pages/aos/work.js"),
-    /IXICardScaleControl/u
-  );
-  assert.doesNotMatch(
-    read("components/ixi-mos/workspace/IXIAosWorkspaceBoard.jsx"),
-    /centerRows=\{true\}/u
+    theater,
+    /transform: scale\(\.60\)/u
   );
 });
