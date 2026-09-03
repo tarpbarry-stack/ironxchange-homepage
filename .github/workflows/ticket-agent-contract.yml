@@ -1,0 +1,38 @@
+name: Ticket Agent Contract
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ticket-agent-contract.yml"
+      - "lib/ixi-agent/**"
+      - "lib/ixi-tickets/**"
+      - "components/ixi-tickets/**"
+      - "pages/api/ixi-agent/**"
+      - "tests/ixi-ticket-agent-bridge-contract.test.mjs"
+      - "package.json"
+  push:
+    branches:
+      - ticket/commercial-agent-bridge-v1
+    paths:
+      - ".github/workflows/ticket-agent-contract.yml"
+      - "lib/ixi-agent/**"
+      - "lib/ixi-tickets/**"
+      - "components/ixi-tickets/**"
+      - "pages/api/ixi-agent/**"
+      - "tests/ixi-ticket-agent-bridge-contract.test.mjs"
+      - "package.json"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm run test:ticket-agent
