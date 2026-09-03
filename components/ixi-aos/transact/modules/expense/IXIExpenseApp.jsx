@@ -375,7 +375,7 @@ export default function IXIExpenseApp({
           expenseId: canonicalId,
           number: clean(result?.identity?.number) || canonicalId
         },
-        status: "posted"
+        status: "incurred"
       };
 
       setSaved({
