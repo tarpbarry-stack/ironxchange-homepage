@@ -1,0 +1,169 @@
+name: Deploy IX-Core TIME
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded TIME release
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-time-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-time-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/time-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialTimeEntryFactory.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialDynamoStore.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous TIME source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=root
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then
+            PM2_USER=ubuntu
+          else
+            echo 'PM2 process IX-Core was not found.' >&2
+            exit 1
+          fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            'e23bd99060f7a603f6bd4251b5af729ab6a7ed697f2d53ad45f9edb21546614e' 'financial/IXIFinancialTimeEntryFactory.js' \
+            '1c70a50134fccfcea0d370391c4dbefc3e7fe788c4daccc6bf08569728d5a2c4' 'financial/IXIFinancialValidationBridge.js' \
+            '5ad1e007357cc1e93f1c2c5567737b3c918dc35e29a1d66034f7508b09dd72ef' 'financial/IXIFinancialCommandEngine.js' \
+            'f2dfb2e2190aacb8a098ef5709f4e6c52aef1cfc7748e76e6b07f97e3ddc9ef0' 'financial/IXIFinancialDynamoStore.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" $FILES
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const { createTimeEntryDocument } = require('./financial/IXIFinancialTimeEntryFactory');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const { activeTimeEmployeeKey, createActiveTimeLockPut } = require('./financial/IXIFinancialDynamoStore');
+          const document = createTimeEntryDocument({
+            financialDocumentId: 'ifd_time_deploy_probe',
+            references: [
+              { passportId: 'passport:machine:probe', role: 'origin' },
+              { passportId: 'passport:employee:probe', role: 'employee' }
+            ],
+            employeePassportId: 'passport:employee:probe',
+            description: 'TIME deploy probe',
+            hours: 0,
+            timeEntry: {
+              schema: 'ixi-time-entry-v2',
+              context: { primaryPassportId: 'passport:machine:probe', employeePassportId: 'passport:employee:probe' },
+              time: { mode: 'live', workType: 'inspection', date: '2026-09-03', hours: 0, description: 'TIME deploy probe' },
+              status: 'running'
+            }
+          });
+          const record = { financialDocument: document };
+          const lock = createActiveTimeLockPut({ employeeKey: activeTimeEmployeeKey(record), financialDocumentId: document.financialDocumentId });
+          if (!validateFinancialDocument(document).ok || !document.documentNumber.startsWith('TIME-') || lock.Put.ConditionExpression !== 'attribute_not_exists(PK)') {
+            throw new Error('TIME deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/time-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"time-entry","input":{"hours":0}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/time-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core TIME %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core TIME $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core TIME release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo "- SSM command: \`${{ steps.deploy.outputs.command_id }}\`"
+            echo '- Financial tests: passed'
+            echo '- TIME validation and lock probe: passed'
+            echo '- Health: passed'
+            echo '- Protected TIME route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
