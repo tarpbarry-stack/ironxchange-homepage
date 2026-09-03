@@ -68,26 +68,26 @@ export default function IXIAosCard001FoundryGreenStyles() {
       }
 
       .skin-foundry-green :is(.gov-body,.ops-scroll,.gfv12-scroll) {
-        background-color: rgba(5,15,9,.46) !important;
+        background-color: #c3c4a2 !important;
         background-image:
-          radial-gradient(circle at 82% 8%, rgba(211,179,99,.07), transparent 25%),
-          linear-gradient(180deg, rgba(5,18,11,.90), rgba(4,13,8,.96)),
+          linear-gradient(rgba(202,203,169,.87), rgba(174,181,145,.90)),
           url("/ixi/skins/foundry-green-guilloche.svg"),
           url("/ixi/skins/foundry-green-paper.webp") !important;
-        background-size: cover, cover, 240px 120px, 192px 192px !important;
-        background-blend-mode: screen, normal, soft-light, multiply !important;
+        background-size: cover, 240px 120px, 192px 192px !important;
+        background-blend-mode: multiply, soft-light, normal !important;
+        box-shadow: inset 0 0 0 1px rgba(239,235,196,.34), inset 0 0 22px rgba(24,53,38,.28) !important;
       }
 
       .ixi-generic-face-v12.skin-foundry-green .gfv12-scroll {
         background-image:
-          linear-gradient(180deg, rgba(4,17,10,.92), rgba(3,12,7,.96)),
+          linear-gradient(rgba(202,203,169,.86), rgba(174,181,145,.89)),
           url("/ixi/skins/foundry-green-ixi-seal.svg"),
           url("/ixi/skins/foundry-green-guilloche.svg"),
           url("/ixi/skins/foundry-green-paper.webp") !important;
         background-position: center, center 96%, center, center !important;
         background-repeat: no-repeat, no-repeat, repeat, repeat !important;
         background-size: cover, 176px 176px, 240px 120px, 192px 192px !important;
-        background-blend-mode: normal, soft-light, soft-light, multiply !important;
+        background-blend-mode: multiply, multiply, soft-light, normal !important;
       }
 
       .skin-foundry-green :is(.gov-identity,.ops-identity,.f3-identity,.gfv12-ident) > span,
@@ -99,49 +99,79 @@ export default function IXIAosCard001FoundryGreenStyles() {
 
       .skin-foundry-green :is(.gov-identity,.ops-identity,.f3-identity,.gfv12-ident) > strong,
       .skin-foundry-green :is(.gov-descriptor,.gov-preview,.gov-metric,.gate-code,.ops-section,.gfv12-banner,.gfv12-section) strong {
+        color: #103322 !important;
+        text-shadow: 0 1px rgba(255,255,232,.52);
+      }
+
+      .skin-foundry-green :is(.gov-identity,.ops-identity,.f3-identity,.gfv12-ident) > strong {
         color: var(--fg-text) !important;
-        text-shadow: 0 1px 1px rgba(0,0,0,.92);
+        text-shadow: 0 1px 1px rgba(0,0,0,.92) !important;
       }
 
       .skin-foundry-green :is(.gov-descriptor,.gov-preview,.gov-metric,.gov-relations,.gate-code,.ops-section,.gfv12-banner,.gfv12-section) {
-        border-color: #385847 !important;
-        background-color: #0d2118 !important;
+        border-color: rgba(25,67,47,.66) !important;
+        background-color: rgba(205,205,169,.48) !important;
         background-image:
-          linear-gradient(145deg, rgba(239,236,208,.065), transparent 37%),
-          url("/ixi/skins/foundry-green-guilloche.svg"),
-          linear-gradient(180deg, rgba(24,52,39,.94), rgba(6,17,11,.98)),
+          linear-gradient(145deg, rgba(255,254,224,.30), transparent 38%),
+          linear-gradient(180deg, rgba(215,213,176,.28), rgba(165,176,140,.18)),
           url("/ixi/skins/foundry-green-paper.webp") !important;
-        background-size: cover, 240px 120px, cover, 192px 192px !important;
-        background-blend-mode: screen, soft-light, normal, multiply !important;
-        box-shadow: inset 0 1px 0 rgba(239,236,208,.08), inset 0 -1px 0 rgba(0,0,0,.74), 0 2px 3px rgba(0,0,0,.46) !important;
+        background-size: cover, cover, 192px 192px !important;
+        background-blend-mode: screen, multiply, normal !important;
+        box-shadow: inset 0 0 0 1px rgba(244,240,201,.28), inset 0 0 8px rgba(31,72,50,.11), 0 2px 4px rgba(7,25,16,.18) !important;
       }
 
       .skin-foundry-green :is(.gov-relations,.ops-section,.gfv12-section) > h3 {
-        border-bottom-color: #5e5a31 !important;
+        border-bottom-color: rgba(25,67,47,.58) !important;
         background-image:
-          linear-gradient(90deg, rgba(211,179,99,.13), transparent 55%),
-          linear-gradient(180deg, #294434, #10241a) !important;
-        box-shadow: inset 0 1px 0 rgba(239,236,208,.06) !important;
+          linear-gradient(90deg, rgba(19,62,43,.29), transparent 62%),
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          linear-gradient(180deg, rgba(210,210,174,.86), rgba(167,178,141,.88)) !important;
+        background-size: cover, 240px 120px, cover !important;
+        color: #123b2a !important;
+        text-shadow: 0 1px rgba(247,243,205,.68) !important;
+        box-shadow: inset 0 1px rgba(247,243,205,.34), inset 0 -1px rgba(22,62,43,.16) !important;
       }
 
       .skin-foundry-green :is(.gov-descriptor small,.gov-preview span,.gov-metric span,.gov-relation-scroll small,.gov-relation-scroll em,.ops-label,.rel-label,.gfv12-value small,.gfv12-value em,.gfv12-relations small,.gfv12-relations em) {
-        color: var(--fg-muted) !important;
+        color: #405f4d !important;
+        text-shadow: 0 1px rgba(255,255,236,.40) !important;
       }
 
       .skin-foundry-green :is(.gov-preview button,.gov-mark,.ops-icon,.gate-mark,.instruction-icon,.gfv12-relations button > b) {
-        color: #88c7ae !important;
-        text-shadow: 0 0 6px rgba(136,199,174,.22);
+        color: #16583d !important;
+        text-shadow: 0 1px rgba(255,255,232,.40);
       }
 
       .skin-foundry-green :is(.gov-relation-scroll button,.ops-row,.ops-relationship,.gfv12-value,.gfv12-relations button) {
-        border-color: rgba(83,112,91,.39) !important;
-        background-color: rgba(4,13,8,.16) !important;
-        box-shadow: inset 0 1px 0 rgba(239,236,208,.025) !important;
+        border-color: rgba(25,67,47,.30) !important;
+        background-color: rgba(239,236,208,.10) !important;
+        color: #103322 !important;
+        box-shadow: inset 0 1px rgba(255,255,232,.16) !important;
       }
 
       .skin-foundry-green :is(.gov-relation-scroll button,.ops-relationship,.gfv12-relations button):hover {
         border-color: rgba(211,179,99,.48) !important;
-        background-color: rgba(136,199,174,.06) !important;
+        background-color: rgba(255,247,205,.24) !important;
+      }
+
+      .skin-foundry-green :is(.gov-relation-scroll,.ops-section .ops-section-body,.gfv12-section) {
+        background-color: transparent !important;
+      }
+
+      .skin-foundry-green :is(.gate-code,.gfv12-banner) {
+        border-color: rgba(198,178,108,.42) !important;
+        background-image:
+          radial-gradient(circle at 12% 50%, rgba(226,212,151,.13), transparent 29%),
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          linear-gradient(90deg, rgba(18,56,39,.94), rgba(8,31,20,.97)) !important;
+        background-size: cover, 240px 120px, cover !important;
+        background-blend-mode: screen, soft-light, normal !important;
+        box-shadow: inset 0 0 0 1px rgba(218,201,137,.16), 0 2px 4px rgba(7,25,16,.24) !important;
+      }
+
+      .skin-foundry-green :is(.gate-code,.gfv12-banner) :is(strong,span,b) {
+        color: var(--fg-text) !important;
+        text-shadow: 0 1px 0 #000 !important;
       }
 
       /* Financial face reads as one engraved reserve certificate, not paper tiles. */
