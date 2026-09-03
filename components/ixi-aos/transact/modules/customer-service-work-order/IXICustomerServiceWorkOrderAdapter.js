@@ -1,4 +1,5 @@
 import { createIXIWorkOrderDraft } from "../work-order/IXIWorkOrderContract";
+import { createIXIAosWorkOrder, createIXIAosFinancialObjectReference } from "../../../financial-runtime/IXIAosFinancialRuntimeAdapter";
 
 const clean = value => String(value ?? "").trim();
 const arr = value => Array.isArray(value) ? value : [];
@@ -65,9 +66,9 @@ export function createIXICustomerServiceWorkOrderFromQuote({ quote = {}, context
     serviceQuoteNumber: clean(quote.identity?.number),
     acceptedRevision: num(quote.acceptance?.acceptedRevision || quote.identity?.revision),
     pricingType: clean(quote.commercial?.pricingType || "estimate"),
-    originalAuthorizedRevenue: num(quote.economics?.authorizedRevenue),
+    originalAuthorizedRevenue: num(quote.economics?.authorizedServiceRevenue),
     approvedChangeOrderRevenue: num(quote.economics?.changeOrderAuthorized),
-    totalAuthorizedRevenue: num(quote.economics?.authorizedRevenue),
+    totalAuthorizedRevenue: num(quote.economics?.authorizedServiceRevenue),
     customerPoNumber: clean(quote.acceptance?.customerPoNumber || quote.customer?.poNumber),
     acceptedAt: clean(quote.acceptance?.acceptedAt),
     acceptedBy: clean(quote.acceptance?.acceptedBy),
@@ -82,9 +83,9 @@ export function createIXICustomerServiceWorkOrderFromQuote({ quote = {}, context
       revision: num(quote.identity?.revision),
       customerScope: clean(quote.request?.customerScope),
       pricingType: clean(quote.commercial?.pricingType),
-      quotedRevenue: num(quote.economics?.quotedRevenue),
+      quotedRevenue: num(quote.economics?.quotedServiceRevenue),
       estimatedInternalCost: num(quote.economics?.estimatedInternalCost),
-      authorizedRevenue: num(quote.economics?.authorizedRevenue),
+      authorizedRevenue: num(quote.economics?.authorizedServiceRevenue),
       options
     }
   };
@@ -96,8 +97,8 @@ export function createIXICustomerServiceWorkOrderFromQuote({ quote = {}, context
   draft.financial = {
     ...(draft.financial || {}),
     estimated: num(quote.economics?.estimatedInternalCost),
-    authorizedRevenue: num(quote.economics?.authorizedRevenue),
-    quotedRevenue: num(quote.economics?.quotedRevenue),
+    authorizedRevenue: num(quote.economics?.authorizedServiceRevenue),
+    quotedRevenue: num(quote.economics?.quotedServiceRevenue),
     invoiceableRevenue: 0,
     invoicedRevenue: 0,
     receivedRevenue: 0,
@@ -109,7 +110,7 @@ export function createIXICustomerServiceWorkOrderFromQuote({ quote = {}, context
     serviceQuoteId: clean(quote.identity?.serviceQuoteId),
     serviceQuoteNumber: clean(quote.identity?.number),
     quoteRevision: num(quote.identity?.revision),
-    authorizedRevenue: num(quote.economics?.authorizedRevenue),
+    authorizedRevenue: num(quote.economics?.authorizedServiceRevenue),
     occurredAt: new Date().toISOString(),
     actorLabel: clean(sourceContext.actor?.displayName || sourceContext.actor?.name || sourceContext.actor?.label)
   }];
@@ -117,9 +118,39 @@ export function createIXICustomerServiceWorkOrderFromQuote({ quote = {}, context
   return draft;
 }
 
+export async function createIXICustomerServiceWorkOrder({ quote = {}, context = {}, object = {}, actor = {}, signal } = {}) {
+  const draft = createIXICustomerServiceWorkOrderFromQuote({ quote, context, actor });
+  const quoteId = clean(quote?.financialBinding?.financialDocumentId || quote?.identity?.financialDocumentId || quote?.identity?.serviceQuoteId);
+  if (!quoteId) throw new Error("Accepted Service Quote is not bound to IXI Financial.");
+  const refs = [
+    createIXIAosFinancialObjectReference({ object: context.primary || object, role: "asset" }),
+    createIXIAosFinancialObjectReference({ object: context.entity || {}, role: "entity" }),
+    createIXIAosFinancialObjectReference({ object: context.location || {}, role: "location" }),
+    createIXIAosFinancialObjectReference({ object: context.actor || actor || {}, role: "employee" })
+  ].filter(Boolean);
+  if (clean(quote.customer?.passportId)) refs.push({ passportId: clean(quote.customer.passportId), role: "customer", label: clean(quote.customer.name), objectType: "entity" });
+  const commandId = `service-quote:${quoteId}:work-order`;
+  const persistedDraft = { ...draft, identity: { ...(draft.identity || {}), workOrderId: "", number: "", clientRequestId: commandId } };
+  const response = await createIXIAosWorkOrder({
+    object: { ...object, passportId: clean(object.passportId || context.primary?.passportId), objectId: clean(object.objectId || context.primary?.objectId), objectType: clean(object.objectType || context.primary?.objectType), label: clean(object.label || context.primary?.label) },
+    input: { currency: "USD", financialState: "draft", description: draft.work.description || draft.work.title, workOrderType: "customer-service", workOrder: persistedDraft, sourceFinancialDocumentId: quoteId, relatedFinancialDocumentIds: [quoteId], references: refs },
+    additionalReferences: refs,
+    commandId,
+    idempotencyKey: commandId,
+    metadata: { transactModule: "work-order", sourceModule: "service-quote", serviceQuoteId: quoteId, quoteRevision: quote.identity?.revision },
+    signal
+  });
+  const stored = response?.data?.record || response?.record || {};
+  const document = stored?.financialDocument || response?.financialDocument || {};
+  const financialDocumentId = clean(document.financialDocumentId);
+  if (!financialDocumentId) throw new Error("IXI Financial did not return a canonical Work Order identity.");
+  const canonical = document.workOrder || persistedDraft;
+  return { ...canonical, identity: { ...(canonical.identity || {}), workOrderId: financialDocumentId, number: clean(document.documentNumber) || financialDocumentId }, financialBinding: { financialDocumentId, revision: Number(stored?.server?.revision || stored?.revision || 1) }, sourceFinancialDocumentId: quoteId };
+}
+
 export function applyIXIServiceQuoteAuthorizationToWorkOrder(workOrder = {}, quote = {}) {
   const acceptedChanges = arr(quote.changeOrders).filter(item => item.status === "accepted");
-  const authorizedRevenue = num(quote.economics?.authorizedRevenue);
+  const authorizedRevenue = num(quote.economics?.authorizedServiceRevenue);
   return {
     ...workOrder,
     commercial: {
@@ -141,5 +172,6 @@ export function applyIXIServiceQuoteAuthorizationToWorkOrder(workOrder = {}, quo
 
 export default {
   createIXICustomerServiceWorkOrderFromQuote,
+  createIXICustomerServiceWorkOrder,
   applyIXIServiceQuoteAuthorizationToWorkOrder
 };
