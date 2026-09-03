@@ -3,7 +3,6 @@ export default function IXIAosV12LibraryReadability() {
     <style jsx global>{`
       .ixi-v12-library-readable {
         --ixi-v12-font-ui: "Inter Variable", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-family: var(--ixi-v12-font-ui) !important;
         font-optical-sizing: auto;
         font-synthesis: none;
         font-variant-numeric: tabular-nums lining-nums;
@@ -16,26 +15,18 @@ export default function IXIAosV12LibraryReadability() {
         font-family: var(--ixi-v12-font-ui) !important;
       }
 
-      /* Identity and section labels only; no icon or media selectors. */
-      .ixi-v12-library-readable [class*="-identity"] > span,
-      .ixi-v12-library-readable [class$="-title"],
+      /*
+       * HEADER FIREWALL
+       * 001-003 established the numbered-card header contract. The shared
+       * readability layer must never alter the yellow parent line, card heading,
+       * header font family, weight, size, line-height, spacing or geometry.
+       * Header/identity selectors are intentionally absent from this module.
+       */
+
+      /* Body section labels only. */
       .ixi-v12-library-readable [class*="-section-title"] {
         font-size: 10px !important;
         line-height: 12px !important;
-      }
-      .ixi-v12-library-readable [class*="-identity"] h2,
-      .ixi-v12-library-readable [class*="-identity-copy"] h2 {
-        font-size: 15px !important;
-        line-height: 17px !important;
-        font-weight: 750 !important;
-      }
-      .ixi-v12-library-readable [class*="-identity"] small {
-        font-size: 9px !important;
-        line-height: 11px !important;
-      }
-      .ixi-v12-library-readable [class*="-identity-copy"] p {
-        font-size: 11px !important;
-        line-height: 14px !important;
       }
 
       /* Dense operational text roles. */
