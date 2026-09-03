@@ -4,9 +4,7 @@ import {
   useState
 } from "react";
 
-import {
-  createIXIWorkOrderDraft
-} from "./IXIWorkOrderContract";
+import { createIXIWorkOrder } from "./IXIWorkOrderCommands";
 
 import {
   getIXIWorkOrderActuals
@@ -321,6 +319,7 @@ export default function IXIWorkOrderApp({
   const [timerSession, setTimerSession] = useState(null);
   const [timerTick, setTimerTick] = useState(0);
   const [notice, setNotice] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const t = COPY[lang];
   const actuals = useMemo(
@@ -360,8 +359,18 @@ export default function IXIWorkOrderApp({
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  function emitAction(actionId, nextWorkOrder, payload = {}) {
-    onAction?.(actionId, nextWorkOrder, context, payload);
+  useEffect(() => {
+    setWorkOrder(initialWorkOrder || null);
+  }, [initialWorkOrder]);
+
+  async function emitAction(actionId, nextWorkOrder, payload = {}) {
+    try {
+      await onAction?.(actionId, nextWorkOrder, context, payload);
+      return true;
+    } catch (error) {
+      setNotice(clean(error?.message) || "WORK ORDER NOT SAVED");
+      return false;
+    }
   }
 
   function act(actionId) {
@@ -380,24 +389,36 @@ export default function IXIWorkOrderApp({
     emitAction(actionId, workOrder);
   }
 
-  function create() {
-    const draft = createIXIWorkOrderDraft({
-      context,
-      input: {
-        title: clean(description).slice(0, 80) || "Work order",
-        description,
-        type,
-        priority,
-        machineCondition: condition,
-        assignedTo: [context.actor || {}]
-      }
-    });
-
-    // Demo/preview number until the canonical Work Order command supplies identity.
-    draft.identity.number = "WO-1058";
-    draft.work.status = "in-progress";
-    setWorkOrder(draft);
-    onCreate?.(draft, context);
+  async function create() {
+    if (saving) return;
+    setSaving(true);
+    setNotice("");
+    const requestId = globalThis.crypto?.randomUUID?.()
+      || `wo-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    try {
+      const { draft } = await createIXIWorkOrder({
+        object: context.primary,
+        context,
+        commandId: requestId,
+        idempotencyKey: requestId,
+        input: {
+          clientRequestId: requestId,
+          title: clean(description).slice(0, 80) || "Work order",
+          description,
+          type,
+          priority,
+          machineCondition: condition,
+          status: "in-progress",
+          assignedTo: [context.actor || {}]
+        }
+      });
+      setWorkOrder(draft);
+      await onCreate?.(draft, context);
+    } catch (error) {
+      setNotice(clean(error?.message) || "WORK ORDER NOT CREATED");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function saveExpense(draft, input, response) {
@@ -769,6 +790,7 @@ export default function IXIWorkOrderApp({
       }
     };
 
+    const previous = workOrder;
     setWorkOrder(next);
     refreshTimer();
 
@@ -783,13 +805,14 @@ export default function IXIWorkOrderApp({
       `${t.workPaused}${duration ? ` · ${t.timeRecorded} — ${duration}` : ""}`
     );
 
-    emitAction("work-paused", next, {
+    const saved = await emitAction("work-paused", next, {
       session: activeSession,
       recorded
     });
+    if (!saved) setWorkOrder(previous);
   }
 
-  function handleResumeWork() {
+  async function handleResumeWork() {
     let session = getIXIActiveTimeSession(context);
 
     if (session?.status === "paused") {
@@ -811,10 +834,12 @@ export default function IXIWorkOrderApp({
       }
     };
 
+    const previous = workOrder;
     setWorkOrder(next);
     refreshTimer();
     setNotice(t.workResumed);
-    emitAction("work-resumed", next, { session });
+    const saved = await emitAction("work-resumed", next, { session });
+    if (!saved) setWorkOrder(previous);
   }
 
   async function handleStopTimer() {
@@ -984,10 +1009,12 @@ export default function IXIWorkOrderApp({
           <span>⌄</span>
         </div>
 
-        <button className="wo-create" onClick={create}>
+        <button className="wo-create" onClick={create} disabled={saving}>
           <CreateIcon size={19} />
-          <span><b>{t.create}</b><small>{t.createSub}</small></span>
+          <span><b>{saving ? "CREATING..." : t.create}</b><small>{t.createSub}</small></span>
         </button>
+
+        {notice ? <div className="wo-notice">{notice}</div> : null}
 
         <IXIWorkOrderStyles />
       </div>
@@ -995,7 +1022,7 @@ export default function IXIWorkOrderApp({
   }
 
   const workDescription = clean(workOrder.work?.description);
-  const number = workOrder.identity?.number || "WO-1058";
+  const number = workOrder.identity?.number || workOrder.identity?.workOrderId || "WORK ORDER";
   const isPaused =
     clean(workOrder.work?.status) === "paused" ||
     timerSession?.status === "paused";

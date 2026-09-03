@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import PrivateListingCard from "./PrivateListingCard";
 import { registerOwnedPrivateActions, unregisterOwnedPrivateActions } from "./IXIOwnedPrivateActionBridge";
-import IXITransactObjectConsole from "../../ixi-aos/transact/IXITransactObjectConsole";
+import IXIOwnedPrivateTransactRuntime from "./IXIOwnedPrivateTransactRuntime";
 import { IXI_MACHINE_MUTATION_COMMANDS } from "../../ixi-object-system/IXIMachineMutationCommandBus";
 import { updateMachineFacts } from "../../ixi-object-system/IXIMachineMutationEngine";
 import { getListingId } from "../../../lib/listingFormatters";
@@ -240,9 +240,8 @@ export default function IXIOwnedPrivateListingRuntime({ cardContext = "inventory
   if (transactOpen) {
     return (
       <div className="owned-private-runtime transact-runtime">
-        <IXITransactObjectConsole
+        <IXIOwnedPrivateTransactRuntime
           object={transactObject}
-          entity={{ passportId: transactObject.entityPassportId, displayName: transactObject.entityName || "" }}
           ixiState={props.ixiState || {}}
           onIxiStateChange={props.onIxiStateChange}
           onClose={() => setTransactOpen(false)}

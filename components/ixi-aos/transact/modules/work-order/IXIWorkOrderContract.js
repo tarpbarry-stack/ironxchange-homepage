@@ -70,7 +70,8 @@ export function createIXIWorkOrderDraft({ context = {}, input = {} } = {}) {
     schema: IXI_WORK_ORDER_SCHEMA,
     identity: {
       workOrderId: clean(sourceInput.workOrderId),
-      number: clean(sourceInput.number)
+      number: clean(sourceInput.number),
+      clientRequestId: clean(sourceInput.clientRequestId)
     },
     context: {
       entityPassportId: clean(sourceInput.entityPassportId || entity.passportId),
