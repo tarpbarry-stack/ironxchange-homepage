@@ -1,0 +1,161 @@
+name: Deploy IX-Core Material
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Immutable IX-Core commit SHA
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ixi-core-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha }}
+
+    steps:
+      - name: Validate immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IXI_CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved_sha="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/tarpbarry-stack/ixi-core/commits/$IXI_CORE_SHA" | jq -r '.sha')"
+          test "$resolved_sha" = "$IXI_CORE_SHA"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy guarded Material release
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_script="$(cat <<'REMOTE_SCRIPT'
+          set -eu
+          APP=/var/www/ix-core
+          RELEASE_SHA=__IXI_CORE_SHA__
+          STAGE=/tmp/ixi-core-material-__IXI_CORE_SHA__
+          ARCHIVE=/tmp/ixi-core-material-__IXI_CORE_SHA__.tgz
+          BACKUP=/var/backups/ixi-core-releases/material-pre-__IXI_CORE_SHA__.tgz
+          FILES='financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialCommandEngine.js financial/IXIFinancialMaterialUsageFactory.js'
+          SUCCESS=0
+
+          run_pm2() {
+            if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi
+          }
+
+          rollback() {
+            if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
+              echo 'Deployment failed; restoring previous IX-Core source.' >&2
+              cd "$APP"
+              tar -xzf "$BACKUP"
+              run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
+            fi
+          }
+          trap rollback EXIT
+
+          test -d "$APP"
+          if pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=root;
+          elif sudo -u ubuntu -H pm2 describe IX-Core >/dev/null 2>&1; then PM2_USER=ubuntu;
+          else echo 'PM2 process IX-Core was not found.' >&2; exit 1; fi
+
+          cd "$APP"
+          printf '%s  %s\n' \
+            'e705a8078fefa3d3c5c95da7aeb61abfbb37ea14eaa27590b6f1901b2d9d2a60' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '956881fa78f0f243b284d5cadb0d6da8f03c7c6719aa820df24120760547c554' 'financial/IXIFinancialValidationBridge.js' \
+            '1b95eff96da908c3a1e886d23f0f957dfdcaa2760d971024b07de753637f2ea8' 'financial/IXIFinancialCommandEngine.js' | sha256sum -c -
+
+          mkdir -p /var/backups/ixi-core-releases
+          tar -czf "$BACKUP" financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialValidationBridge.js financial/IXIFinancialCommandEngine.js
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
+          tar -xzf "$ARCHIVE" --strip-components=1 -C "$STAGE"
+
+          cd "$STAGE"
+          npm ci --ignore-scripts
+          npm test
+          for file in $FILES; do node --check "$file"; done
+          node - <<'NODE'
+          const { createFinancialDocumentByType } = require('./financial/IXIFinancialDocumentFactoryRegistry');
+          const { validateFinancialDocument } = require('./financial/IXIFinancialValidationBridge');
+          const document = createFinancialDocumentByType({
+            documentType: 'material-usage',
+            input: {
+              financialDocumentId: 'ifd_material_deploy_probe',
+              references: [
+                { passportId: 'passport:machine:probe', role: 'origin' },
+                { passportId: 'passport:employee:probe', role: 'employee' }
+              ],
+              materialUsage: {
+                schema: 'ixi-material-usage-v2',
+                context: { primaryPassportId: 'passport:machine:probe', employeePassportId: 'passport:employee:probe' },
+                material: { source: 'manual', description: 'Deploy probe', quantity: 1, unit: 'EA', unitCost: 0, extendedCost: 0, availableQuantity: null, dateUsed: '2026-09-03' },
+                costAttribution: { amount: 0, currency: 'USD', economicEvent: false },
+                inventoryAdjustment: { required: false, status: 'not-required' },
+                receivingConsumption: { required: false, status: 'not-required' }
+              }
+            }
+          });
+          if (!validateFinancialDocument(document).ok || document.documentType !== 'material-usage' || document.costAttribution.economicEvent !== false) {
+            throw new Error('Material deploy probe failed.');
+          }
+          NODE
+
+          for file in $FILES; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          run_pm2 reload IX-Core --update-env
+
+          attempt=0
+          until curl -fsS http://127.0.0.1:4100/health >/dev/null; do
+            attempt=$((attempt + 1))
+            [ "$attempt" -lt 15 ] || exit 1
+            sleep 2
+          done
+
+          route_status="$(curl -sS -o "$STAGE/material-route.json" -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"documentType":"material-usage","input":{}}' http://127.0.0.1:4100/financial/commands/create)"
+          case "$route_status" in 401|403) ;; *) cat "$STAGE/material-route.json" >&2; exit 1 ;; esac
+
+          SUCCESS=1
+          trap - EXIT
+          rm -rf "$STAGE"
+          rm -f "$ARCHIVE"
+          printf 'IX-Core Material %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
+          REMOTE_SCRIPT
+          )"
+
+          remote_script="${remote_script//__IXI_CORE_SHA__/$IXI_CORE_SHA}"
+          parameters="$(jq -cn --arg command "$remote_script" '{commands:[$command]}')"
+          command_id="$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$AWS_INSTANCE_ID" --document-name AWS-RunShellScript --comment "Deploy IX-Core Material $IXI_CORE_SHA" --parameters "$parameters" --query 'Command.CommandId' --output text)"
+          echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
+
+          aws ssm wait command-executed --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID" || true
+          invocation="$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$command_id" --instance-id "$AWS_INSTANCE_ID")"
+          printf '%s' "$invocation" | jq -r '.StandardOutputContent'
+          printf '%s' "$invocation" | jq -r '.StandardErrorContent' >&2
+          test "$(printf '%s' "$invocation" | jq -r '.Status')" = Success
+
+      - name: Record release
+        shell: bash
+        run: |
+          {
+            echo '## IX-Core Material release'
+            echo "- Commit: \`$IXI_CORE_SHA\`"
+            echo '- Financial tests: passed'
+            echo '- Material validation probe: passed'
+            echo '- Health: passed'
+            echo '- Protected Material route: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
