@@ -36,7 +36,8 @@ const forgedAssets = [
 ].map(file => path.join(root, file));
 const foundryAssets = [
   "public/ixi/skins/foundry-green-paper.webp",
-  "public/ixi/skins/foundry-green-guilloche.svg"
+  "public/ixi/skins/foundry-green-guilloche.svg",
+  "public/ixi/skins/foundry-green-medallion.webp"
 ].map(file => path.join(root, file));
 
 test("AOS active skin menu retains V12 Natural and archives legacy choices", () => {
@@ -132,9 +133,10 @@ test("Foundry Green adapts currency material by face without changing geometry",
   assert.match(foundryGreen, /\.ixi-location-f3-v12\.skin-foundry-green/);
   assert.match(foundryGreen, /foundry-green-paper\.webp/);
   assert.match(foundryGreen, /foundry-green-guilloche\.svg/);
+  assert.match(foundryGreen, /foundry-green-medallion\.webp/);
   assert.match(foundryGreen, /\.board-command-rail/);
   assert.match(foundryGreen, /aos-generic-console-slot:has\(\.skin-foundry-green\)/);
   foundryAssets.forEach(file => assert.equal(fs.existsSync(file), true));
   const totalBytes = foundryAssets.reduce((sum, file) => sum + fs.statSync(file).size, 0);
-  assert.ok(totalBytes < 24 * 1024, `Foundry Green assets must stay under 24 KiB; received ${totalBytes}`);
+  assert.ok(totalBytes < 72 * 1024, `Foundry Green assets must stay under 72 KiB; received ${totalBytes}`);
 });

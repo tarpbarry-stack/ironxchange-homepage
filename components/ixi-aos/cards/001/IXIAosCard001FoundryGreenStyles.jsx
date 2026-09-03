@@ -70,9 +70,24 @@ export default function IXIAosCard001FoundryGreenStyles() {
       .skin-foundry-green :is(.gov-body,.ops-scroll,.gfv12-scroll) {
         background-color: rgba(5,15,9,.46) !important;
         background-image:
-          radial-gradient(circle at 82% 8%, rgba(211,179,99,.055), transparent 25%),
-          url("/ixi/skins/foundry-green-guilloche.svg") !important;
-        background-blend-mode: screen, soft-light !important;
+          radial-gradient(circle at 82% 8%, rgba(211,179,99,.07), transparent 25%),
+          linear-gradient(180deg, rgba(5,18,11,.90), rgba(4,13,8,.96)),
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          url("/ixi/skins/foundry-green-paper.webp") !important;
+        background-size: cover, cover, 240px 120px, 192px 192px !important;
+        background-blend-mode: screen, normal, soft-light, multiply !important;
+      }
+
+      .ixi-generic-face-v12.skin-foundry-green .gfv12-scroll {
+        background-image:
+          linear-gradient(180deg, rgba(4,17,10,.92), rgba(3,12,7,.96)),
+          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          url("/ixi/skins/foundry-green-paper.webp") !important;
+        background-position: center, center 96%, center, center !important;
+        background-repeat: no-repeat, no-repeat, repeat, repeat !important;
+        background-size: cover, 176px 176px, 240px 120px, 192px 192px !important;
+        background-blend-mode: normal, soft-light, soft-light, multiply !important;
       }
 
       .skin-foundry-green :is(.gov-identity,.ops-identity,.f3-identity,.gfv12-ident) > span,
@@ -93,7 +108,11 @@ export default function IXIAosCard001FoundryGreenStyles() {
         background-color: #0d2118 !important;
         background-image:
           linear-gradient(145deg, rgba(239,236,208,.065), transparent 37%),
-          linear-gradient(180deg, rgba(24,52,39,.94), rgba(6,17,11,.98)) !important;
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          linear-gradient(180deg, rgba(24,52,39,.94), rgba(6,17,11,.98)),
+          url("/ixi/skins/foundry-green-paper.webp") !important;
+        background-size: cover, 240px 120px, cover, 192px 192px !important;
+        background-blend-mode: screen, soft-light, normal, multiply !important;
         box-shadow: inset 0 1px 0 rgba(239,236,208,.08), inset 0 -1px 0 rgba(0,0,0,.74), 0 2px 3px rgba(0,0,0,.46) !important;
       }
 
@@ -125,66 +144,102 @@ export default function IXIAosCard001FoundryGreenStyles() {
         background-color: rgba(136,199,174,.06) !important;
       }
 
-      /* Financial face becomes the security-paper showpiece. */
+      /* Financial face reads as one engraved reserve certificate, not paper tiles. */
       .ixi-location-f3-v12.skin-foundry-green {
-        border-color: #6f7655 !important;
-        background-color: #10251a !important;
+        border-color: #877849 !important;
+        background-color: #0b2015 !important;
         background-image:
-          radial-gradient(ellipse at 50% 18%, rgba(239,236,208,.10), transparent 33%),
+          radial-gradient(ellipse at 50% 18%, rgba(239,236,208,.15), transparent 34%),
           url("/ixi/skins/foundry-green-guilloche.svg"),
-          linear-gradient(180deg, #1c3b2b, #09170f) !important;
-        background-size: cover, 180px 96px, cover !important;
+          linear-gradient(180deg, #244a36, #09170f) !important;
+        background-size: cover, 240px 120px, cover !important;
         background-blend-mode: screen, soft-light, normal !important;
+        box-shadow:
+          inset 0 0 0 1px rgba(5,18,10,.98),
+          inset 0 0 0 2px rgba(210,191,125,.46),
+          inset 0 0 0 4px rgba(11,35,22,.98),
+          inset 0 0 16px rgba(0,0,0,.72),
+          0 20px 44px rgba(0,0,0,.76) !important;
       }
 
       .skin-foundry-green .f3-scroll {
-        background-color: var(--fg-paper-low) !important;
+        background-color: #c3c4a2 !important;
         background-image:
-          linear-gradient(rgba(216,216,185,.92), rgba(180,187,151,.91)),
+          linear-gradient(rgba(202,203,169,.87), rgba(174,181,145,.90)),
           url("/ixi/skins/foundry-green-guilloche.svg"),
           url("/ixi/skins/foundry-green-paper.webp") !important;
-        background-size: cover, 180px 96px, 192px 192px !important;
-        background-blend-mode: multiply, multiply, normal !important;
-        box-shadow: inset 0 0 20px rgba(30,57,41,.26) !important;
-        scrollbar-color: #315b46 #b7bc99 !important;
+        background-size: cover, 240px 120px, 192px 192px !important;
+        background-blend-mode: multiply, soft-light, normal !important;
+        box-shadow: inset 0 0 0 1px rgba(239,235,196,.42), inset 0 0 24px rgba(24,53,38,.36) !important;
+        scrollbar-color: #28513c #a9ad8b !important;
       }
 
       .skin-foundry-green :is(.f3-section,.f3-contact,.f3-value-card,.f3-lease-ytd,.f3-summary) {
-        border-color: rgba(29,70,51,.58) !important;
-        background-color: rgba(224,223,191,.86) !important;
+        border-color: rgba(25,67,47,.66) !important;
+        background-color: rgba(205,205,169,.45) !important;
         background-image:
-          linear-gradient(145deg, rgba(255,255,238,.46), transparent 38%),
-          url("/ixi/skins/foundry-green-guilloche.svg"),
+          linear-gradient(145deg, rgba(255,254,224,.32), transparent 38%),
+          linear-gradient(180deg, rgba(215,213,176,.30), rgba(165,176,140,.20)),
           url("/ixi/skins/foundry-green-paper.webp") !important;
-        background-size: cover, 180px 96px, 192px 192px !important;
+        background-size: cover, cover, 192px 192px !important;
         background-blend-mode: screen, multiply, normal !important;
-        box-shadow: inset 0 0 0 1px rgba(247,244,210,.32), inset 0 -1px 0 rgba(20,56,40,.18), 0 2px 4px rgba(7,25,16,.20) !important;
+        box-shadow: inset 0 0 0 1px rgba(244,240,201,.30), inset 0 0 8px rgba(31,72,50,.12), 0 2px 4px rgba(7,25,16,.18) !important;
       }
 
+      .skin-foundry-green .f3-section-body { background: transparent !important; }
+
       .skin-foundry-green .f3-section > h3 {
-        border-bottom-color: rgba(29,70,51,.48) !important;
+        border-bottom-color: rgba(25,67,47,.58) !important;
         background-image:
-          linear-gradient(90deg, rgba(24,65,47,.22), transparent 62%),
+          linear-gradient(90deg, rgba(19,62,43,.30), transparent 62%),
           url("/ixi/skins/foundry-green-guilloche.svg"),
-          linear-gradient(180deg, rgba(224,223,190,.94), rgba(177,185,149,.94)) !important;
-        color: var(--fg-ink-dark) !important;
-        text-shadow: 0 1px rgba(255,255,235,.65) !important;
+          linear-gradient(180deg, rgba(210,210,174,.86), rgba(167,178,141,.88)) !important;
+        background-size: cover, 240px 120px, cover !important;
+        color: #123b2a !important;
+        text-shadow: 0 1px rgba(247,243,205,.68) !important;
+        box-shadow: inset 0 1px rgba(247,243,205,.36), inset 0 -1px rgba(22,62,43,.16) !important;
       }
 
       .skin-foundry-green :is(.f3-section,.f3-contact,.f3-value-card,.f3-lease-ytd,.f3-summary) strong,
       .skin-foundry-green .f3-status-main :is(b,strong) {
-        color: #102f23 !important;
+        color: #0d3021 !important;
         text-shadow: 0 1px rgba(255,255,236,.55) !important;
       }
 
-      .skin-foundry-green :is(.f3-row-label,.f3-contact span,.f3-contact small,.f3-summary span) {
-        color: #496554 !important;
+      .skin-foundry-green :is(.f3-row-label,.f3-contact span,.f3-contact small,.f3-summary span,.f3-status-date span,.f3-value-card span) {
+        color: #405f4d !important;
         text-shadow: 0 1px rgba(255,255,236,.42) !important;
       }
 
       .skin-foundry-green :is(.f3-row,.f3-relationship) {
-        border-color: rgba(33,73,54,.30) !important;
-        background-color: rgba(239,236,208,.15) !important;
+        border-color: rgba(25,67,47,.31) !important;
+        background-color: rgba(236,232,194,.10) !important;
+      }
+
+      .skin-foundry-green .f3-status-banner {
+        background-image:
+          radial-gradient(circle at 12% 50%, rgba(226,212,151,.15), transparent 28%),
+          url("/ixi/skins/foundry-green-guilloche.svg"),
+          linear-gradient(90deg, rgba(18,56,39,.92), rgba(9,34,22,.96)) !important;
+        background-size: cover, 240px 120px, cover !important;
+        background-blend-mode: screen, soft-light, normal !important;
+        box-shadow: inset 0 0 0 1px rgba(218,201,137,.18) !important;
+      }
+
+      .skin-foundry-green .f3-status-banner :is(strong,small,span) {
+        color: var(--fg-text) !important;
+        text-shadow: 0 1px 0 #000 !important;
+      }
+
+      .skin-foundry-green .f3-value-card {
+        background-image:
+          linear-gradient(90deg, rgba(204,204,167,.92), rgba(196,198,160,.68)),
+          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-paper.webp") !important;
+        background-position: center, 108% 62%, center !important;
+        background-repeat: no-repeat, no-repeat, repeat !important;
+        background-size: cover, 128px 128px, 192px 192px !important;
+        background-blend-mode: normal, multiply, normal !important;
       }
 
       .skin-foundry-green :is(.f3-row-icon,.f3-relationship i) {
@@ -193,7 +248,7 @@ export default function IXIAosCard001FoundryGreenStyles() {
 
       .skin-foundry-green .f3-summary.tone-positive strong,
       .skin-foundry-green:not(.mode-leased) .f3-status-main :is(b,strong) {
-        color: #165d39 !important;
+        color: #0b6a3b !important;
       }
 
       .skin-foundry-green .f3-summary.tone-negative strong { color: #8c3429 !important; }
@@ -237,7 +292,14 @@ export default function IXIAosCard001FoundryGreenStyles() {
       .skin-foundry-green :is(.gov-media,.gov-thumbs) {
         border-color: #55705b !important;
         background-color: #061009 !important;
-        background-image: linear-gradient(145deg, rgba(215,214,183,.045), transparent 28%) !important;
+        background-image:
+          linear-gradient(180deg, rgba(3,13,7,.64), rgba(2,8,5,.86)),
+          url("/ixi/skins/foundry-green-medallion.webp"),
+          url("/ixi/skins/foundry-green-guilloche.svg") !important;
+        background-position: center, center, center !important;
+        background-repeat: no-repeat, no-repeat, repeat !important;
+        background-size: cover, 150px 150px, 240px 120px !important;
+        background-blend-mode: normal, soft-light, soft-light !important;
         box-shadow: inset 0 0 17px rgba(0,0,0,.82), inset 0 1px 0 rgba(239,236,208,.08) !important;
       }
 
