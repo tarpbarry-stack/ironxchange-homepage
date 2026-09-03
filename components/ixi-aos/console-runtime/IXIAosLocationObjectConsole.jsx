@@ -30,6 +30,7 @@ import IXIAosGenericConfiguredFaceV12 from "../cards/generic/IXIAosGenericConfig
 import IXIAosCard001BlackTitaniumStyles from "../cards/001/IXIAosCard001BlackTitaniumStyles";
 import IXIAosCard001SaddleSteelStyles from "../cards/001/IXIAosCard001SaddleSteelStyles";
 import IXIAosCard001ForgedCommandStyles from "../cards/001/IXIAosCard001ForgedCommandStyles";
+import IXIAosCard001FoundryGreenStyles from "../cards/001/IXIAosCard001FoundryGreenStyles";
 
 const PANEL_WIDTH = 300;
 const PANEL_HEIGHT = 475;
@@ -37,7 +38,8 @@ const AVAILABLE_FACES = Object.freeze([2, 3, 4, 5]);
 const CARD_001_SKINS = Object.freeze([
   Object.freeze({ id: "black-titanium", label: "BLACK TITANIUM" }),
   Object.freeze({ id: "saddle-steel", label: "SADDLE STEEL" }),
-  Object.freeze({ id: "forged-command", label: "FORGED COMMAND" })
+  Object.freeze({ id: "forged-command", label: "FORGED COMMAND" }),
+  Object.freeze({ id: "foundry-green", label: "FOUNDRY GREEN" })
 ]);
 
 function initialSlots() {
@@ -308,6 +310,7 @@ export default function IXIAosLocationObjectConsole({
       {Number(cardNumber) === 1 ? <IXIAosCard001BlackTitaniumStyles /> : null}
       {Number(cardNumber) === 1 ? <IXIAosCard001SaddleSteelStyles /> : null}
       {Number(cardNumber) === 1 ? <IXIAosCard001ForgedCommandStyles /> : null}
+      {Number(cardNumber) === 1 ? <IXIAosCard001FoundryGreenStyles /> : null}
     </IXIAosCardCommandProvider>
   );
 }

@@ -25,6 +25,7 @@ const activeCard001Faces = [
 const skin = read("components/ixi-aos/cards/001/IXIAosCard001BlackTitaniumStyles.jsx");
 const saddleSteel = read("components/ixi-aos/cards/001/IXIAosCard001SaddleSteelStyles.jsx");
 const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedCommandStyles.jsx");
+const foundryGreen = read("components/ixi-aos/cards/001/IXIAosCard001FoundryGreenStyles.jsx");
 const aerospaceCarbon = read("components/ixi-aos/cards/001/IXIAosCard001AerospaceCarbonStyles.jsx");
 const texturePath = path.join(root, "public/ixi/skins/black-titanium-pvd.webp");
 const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-leather.webp");
@@ -32,6 +33,10 @@ const aerospaceCarbonPath = path.join(root, "public/ixi/skins/aerospace-carbon.w
 const forgedAssets = [
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
+].map(file => path.join(root, file));
+const foundryAssets = [
+  "public/ixi/skins/foundry-green-paper.webp",
+  "public/ixi/skins/foundry-green-guilloche.svg"
 ].map(file => path.join(root, file));
 
 test("AOS active skin menu retains V12 Natural and archives legacy choices", () => {
@@ -46,6 +51,7 @@ test("Card 001 controls one skin across Faces 1 through 5", () => {
   assert.match(consoleSource, /id: "black-titanium", label: "BLACK TITANIUM"/);
   assert.match(consoleSource, /id: "saddle-steel", label: "SADDLE STEEL"/);
   assert.match(consoleSource, /id: "forged-command", label: "FORGED COMMAND"/);
+  assert.match(consoleSource, /id: "foundry-green", label: "FOUNDRY GREEN"/);
   assert.doesNotMatch(consoleSource, /id: "aerospace-carbon", label: "AEROSPACE CARBON"/);
   assert.match(consoleSource, /const \[skinId, setSkinId\] = useState\("v12"\)/);
   assert.match(consoleSource, /skinOptions = Number\(cardNumber\) === 1/);
@@ -53,6 +59,7 @@ test("Card 001 controls one skin across Faces 1 through 5", () => {
   assert.match(consoleSource, /<IXIAosCard001BlackTitaniumStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001SaddleSteelStyles \/>/);
   assert.match(consoleSource, /<IXIAosCard001ForgedCommandStyles \/>/);
+  assert.match(consoleSource, /<IXIAosCard001FoundryGreenStyles \/>/);
   assert.doesNotMatch(consoleSource, /<IXIAosCard001AerospaceCarbonStyles \/>/);
 });
 
@@ -116,4 +123,18 @@ test("Archived Aerospace Carbon experiment remains isolated and geometry-safe", 
   assert.match(aerospaceCarbon, /\.board-command-rail/);
   assert.equal(fs.existsSync(aerospaceCarbonPath), true);
   assert.ok(fs.statSync(aerospaceCarbonPath).size < 12 * 1024);
+});
+
+test("Foundry Green adapts currency material by face without changing geometry", () => {
+  const forbiddenGeometry = /(?:^|\n)\s*(?:width|height|min-width|max-width|min-height|max-height|padding|margin|gap|grid-template|position|inset|top|right|bottom|left|transform)\s*:/;
+  const withoutCustomProperties = foundryGreen.replace(/--[\w-]+\s*:[^;]+;/g, "");
+  assert.doesNotMatch(withoutCustomProperties, forbiddenGeometry);
+  assert.match(foundryGreen, /\.ixi-location-f3-v12\.skin-foundry-green/);
+  assert.match(foundryGreen, /foundry-green-paper\.webp/);
+  assert.match(foundryGreen, /foundry-green-guilloche\.svg/);
+  assert.match(foundryGreen, /\.board-command-rail/);
+  assert.match(foundryGreen, /aos-generic-console-slot:has\(\.skin-foundry-green\)/);
+  foundryAssets.forEach(file => assert.equal(fs.existsSync(file), true));
+  const totalBytes = foundryAssets.reduce((sum, file) => sum + fs.statSync(file).size, 0);
+  assert.ok(totalBytes < 24 * 1024, `Foundry Green assets must stay under 24 KiB; received ${totalBytes}`);
 });
