@@ -101,7 +101,9 @@ jobs:
           npm ci --ignore-scripts
           npm audit --omit=dev --audit-level=low
           npm test
-          for file in $CHANGED $ADDED; do node --check "$file"; done
+          for file in $CHANGED $ADDED; do
+            case "$file" in *.js) node --check "$file" ;; esac
+          done
           node - <<'NODE'
           const {createPayablesControlDocument}=require('./financial/IXIFinancialPayablesControlFactory');
           const {validateFinancialDocument}=require('./financial/IXIFinancialValidationBridge');
