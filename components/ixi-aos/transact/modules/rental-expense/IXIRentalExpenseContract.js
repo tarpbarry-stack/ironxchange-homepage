@@ -3,7 +3,7 @@ const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const arr = value => Array.isArray(value) ? value : [];
 const roundMoney = value => Math.round(num(value) * 100) / 100;
 
-export const IXI_RENTAL_EXPENSE_SCHEMA = "ixi-rental-expense-v1";
+export const IXI_RENTAL_EXPENSE_SCHEMA = "ixi-rental-expense-v2";
 export const IXI_RENTAL_RATE_UNITS = Object.freeze(["hour", "day", "week", "month"]);
 export const IXI_RENTAL_ASSET_TYPES = Object.freeze(["machine", "equipment", "vehicle", "truck", "trailer", "tool", "technology", "facility", "storage", "other"]);
 export const IXI_RENTAL_STATUSES = Object.freeze(["draft", "active", "off-rent", "closed", "cancelled"]);
@@ -69,7 +69,8 @@ export function createIXIRentalExpenseDraft({ context = {}, input = {} } = {}) {
       locationLabel: clean(context.location?.label),
       actorPassportId: clean(context.actor?.passportId),
       actorId: clean(context.actor?.employeeId || context.actor?.userId || context.actor?.id),
-      actorLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label)
+      actorLabel: clean(context.actor?.displayName || context.actor?.name || context.actor?.label),
+      workOrderFinancialDocumentId: clean(input.workOrderFinancialDocumentId || context.activeWorkOrder?.financialBinding?.financialDocumentId || context.activeWorkOrder?.identity?.workOrderId)
     },
     vendor: {
       passportId: clean(input.vendorPassportId),
@@ -166,12 +167,15 @@ export function createIXIRentalExpenseDraft({ context = {}, input = {} } = {}) {
 export function validateIXIRentalExpense(record = {}) {
   const errors = {};
   if (!clean(record.context?.primaryPassportId || record.context?.primaryObjectId)) errors.context = "required";
+  if (!clean(record.context?.entityPassportId)) errors.entity = "passport-required";
+  if (!clean(record.context?.actorPassportId || record.context?.actorId)) errors.actor = "identity-required";
   if (!clean(record.vendor?.name)) errors.vendor = "required";
   if (!clean(record.rentedAsset?.description)) errors.asset = "required";
   if (!clean(record.period?.startDate)) errors.startDate = "required";
-  if (!(num(record.rate?.baseRate) >= 0)) errors.rate = "required";
+  if (!(num(record.rate?.baseRate) > 0)) errors.rate = "greater-than-zero";
   if (!clean(record.period?.expectedReturnDate)) errors.expectedReturnDate = "required";
   if (record.period?.expectedReturnDate && record.period?.startDate && record.period.expectedReturnDate < record.period.startDate) errors.expectedReturnDate = "before-start";
+  if (arr(record.documents).some(document => !clean(document?.storageKey || document?.key) || !["uploaded", "available", "verified"].includes(clean(document?.status).toLowerCase()))) errors.documents = "secure-upload-required";
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
