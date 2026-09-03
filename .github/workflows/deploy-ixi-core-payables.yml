@@ -6,7 +6,7 @@ name: Deploy IX-Core Payables
       commit_sha:
         description: Immutable IX-Core commit SHA
         required: true
-        default: da60db77484dc9074449be9e111b9b80c5921eeb
+        default: a9417a5d83fb1313052c03eed77d2157ee7d0948
   push:
     branches: [main]
     paths: ['.github/workflows/deploy-ixi-core-payables.yml']
@@ -25,7 +25,7 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
-      IXI_CORE_SHA: ${{ inputs.commit_sha || 'da60db77484dc9074449be9e111b9b80c5921eeb' }}
+      IXI_CORE_SHA: ${{ inputs.commit_sha || 'a9417a5d83fb1313052c03eed77d2157ee7d0948' }}
     steps:
       - name: Validate immutable release
         shell: bash
@@ -53,9 +53,11 @@ jobs:
           STAGE=/tmp/ixi-core-payables-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-payables-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/payables-pre-__IXI_CORE_SHA__.tgz
-          CHANGED='financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
+          DEPS_BACKUP=/var/backups/ixi-core-releases/node_modules-pre-__IXI_CORE_SHA__
+          CHANGED='package-lock.json financial/IXIFinancialCommandEngine.js financial/IXIFinancialCommandRoutes.js financial/IXIFinancialDocumentFactoryRegistry.js financial/IXIFinancialPermissionEngine.js financial/IXIFinancialRoutes.js financial/IXIFinancialValidationBridge.js'
           ADDED='financial/IXIFinancialPayablesControlFactory.js'
           SUCCESS=0
+          DEPS_SWAPPED=0
 
           run_pm2() { if [ "$PM2_USER" = root ]; then pm2 "$@"; else sudo -u ubuntu -H pm2 "$@"; fi; }
           rollback() {
@@ -64,6 +66,10 @@ jobs:
               cd "$APP"
               rm -f $ADDED
               tar -xzf "$BACKUP"
+              if [ "$DEPS_SWAPPED" -eq 1 ] && [ -d "$DEPS_BACKUP" ]; then
+                rm -rf "$APP/node_modules"
+                mv "$DEPS_BACKUP" "$APP/node_modules"
+              fi
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
           }
@@ -76,12 +82,13 @@ jobs:
 
           cd "$APP"
           printf '%s  %s\n' \
-            'b33a02ae8eeb0bca7d6fced50c745280efee08caae1aa180a9262aa5011f639f' 'financial/IXIFinancialCommandEngine.js' \
-            '46500769905e90bc68608bb836871c727fe098af5f1db937f893292b11905f56' 'financial/IXIFinancialCommandRoutes.js' \
-            '89f7e93d28ee26da997b3654dded7a1e0b165521e48e9fdcdc055a221bd5b4e2' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
-            'cca2fc909ffd33982938f77b62317a886d2cb96fd3f594c49c4772ade29b5255' 'financial/IXIFinancialPermissionEngine.js' \
-            '4cb135644a1e507d8d14301e81ab9335c102cd61ef2a2e34ed183ad0c1a5787d' 'financial/IXIFinancialRoutes.js' \
-            '8a39ffa16bb5fbbf417eaf592b901784c47c0a6f417d2107dacae2c5405fb48d' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
+            '9e3b6adcd0d2d447bdfd070d681fef6ed448e9f2d729a145fb6500c2e06aa120' 'package-lock.json' \
+            'f4fbeea6270271e4518be2709b974beb43c583580df36ded7efb4d922de89057' 'financial/IXIFinancialCommandEngine.js' \
+            '2115ff5736ecd8adaa3e0ec1f564ab446412dc32ec7481bbdc7873cac7007e46' 'financial/IXIFinancialCommandRoutes.js' \
+            'e2c8c69cc42ded24c6463d09f50a7903556766eda00877e183cf34c1ef8b5fe3' 'financial/IXIFinancialDocumentFactoryRegistry.js' \
+            '3bf786bb0da8a3d91706bd8aeefe613bd49ce2d35650657e414a3cd25a0247b8' 'financial/IXIFinancialPermissionEngine.js' \
+            '42c15631fcb267a6859621ba76c257e1b6cb8abfc2c5fd7709443e9bd4266f18' 'financial/IXIFinancialRoutes.js' \
+            '49db06658042f53f2103d66ae9f062d3407b140431aebbd23fce8d9aaef3bcc0' 'financial/IXIFinancialValidationBridge.js' | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
           tar -czf "$BACKUP" $CHANGED
@@ -92,6 +99,7 @@ jobs:
 
           cd "$STAGE"
           npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=low
           npm test
           for file in $CHANGED $ADDED; do node --check "$file"; done
           node - <<'NODE'
@@ -106,6 +114,11 @@ jobs:
 
           cd "$APP"
           for file in $CHANGED $ADDED; do install -D -m 0644 "$STAGE/$file" "$APP/$file"; done
+          test -d "$APP/node_modules"
+          rm -rf "$DEPS_BACKUP"
+          mv "$APP/node_modules" "$DEPS_BACKUP"
+          DEPS_SWAPPED=1
+          cp -a "$STAGE/node_modules" "$APP/node_modules"
           run_pm2 reload IX-Core --update-env
           attempt=0
           until curl -fsS http://127.0.0.1:4100/health >/dev/null; do attempt=$((attempt + 1)); [ "$attempt" -lt 15 ] || exit 1; sleep 2; done
@@ -114,6 +127,7 @@ jobs:
 
           SUCCESS=1
           trap - EXIT
+          rm -rf "$DEPS_BACKUP"
           rm -rf "$STAGE" "$ARCHIVE"
           printf 'IX-Core Payables %s deployed; health=200; protected-route=%s\n' "$RELEASE_SHA" "$route_status"
           REMOTE_SCRIPT
