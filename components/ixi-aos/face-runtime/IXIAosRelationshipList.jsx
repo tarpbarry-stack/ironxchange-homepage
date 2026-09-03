@@ -134,17 +134,17 @@ export default function IXIAosRelationshipList({
                 relationshipId
               }
 
-              className="
+              className={`
                 relationship-row
-              "
+              `}
             >
 
               <button
                 type="button"
 
-                className="
+                className={`
                   relationship-main
-                "
+                `}
 
                 onClick={
                   event => {
@@ -176,9 +176,9 @@ export default function IXIAosRelationshipList({
                 <button
                   type="button"
 
-                  className="
+                  className={`
                     relationship-menu-button
-                  "
+                  `}
 
                   aria-label={
                     `Relationship actions for ${label}`

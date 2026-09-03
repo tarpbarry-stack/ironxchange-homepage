@@ -34,10 +34,10 @@ export default function IXIAosFaceReferenceOverlay({
     <div className="ixi-aos-face-reference-overlay">
 
       <div
-        className="
+        className={`
           reference-line
           content-bottom
-        "
+        `}
 
         style={{
           top:

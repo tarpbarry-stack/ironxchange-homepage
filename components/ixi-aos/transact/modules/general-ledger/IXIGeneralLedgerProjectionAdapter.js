@@ -108,6 +108,12 @@ export function hydrateIXIGLProjection(result = {}) {
         closedAt: clean(period.closedAt),
         closedBy: clean(period.closedBy),
         closedByLabel: clean(period.closedBy)
+      },
+      reopen: {
+        financialDocumentId: clean(period.reopenDocumentId),
+        reopenedAt: clean(period.reopenedAt),
+        reopenedBy: clean(period.reopenedBy),
+        priorCloseDocumentId: clean(period.closeDocumentId)
       }
     },
     trialBalance: projection.trialBalance || { rows: [], debits: 0, credits: 0, difference: 0, balanced: true },
@@ -115,6 +121,21 @@ export function hydrateIXIGLProjection(result = {}) {
     profitAndLoss: projection.profitAndLoss || {},
     cumulativeProfitAndLoss: projection.cumulativeProfitAndLoss || {},
     balanceSheet,
+    postingRules: {
+      schema: clean(projection.postingRules?.schema || "ixi-financial-posting-rules-v1"),
+      source: clean(projection.postingRules?.source || "ixi-core-dynamodb"),
+      rules: arr(projection.postingRules?.rules).map(rule => ({
+        ...rule,
+        ruleId: clean(rule?.identity?.ruleId),
+        version: num(rule?.identity?.version),
+        active: rule?.control?.active !== false,
+        documentType: clean(rule?.match?.documentType),
+        categoryContains: clean(rule?.match?.categoryContains),
+        debitAccount: clean(rule?.posting?.debitAccountCode),
+        creditAccount: clean(rule?.posting?.creditAccountCode),
+        memo: clean(rule?.posting?.memo)
+      }))
+    },
     controls: projection.controls || {},
     counts: projection.counts || {},
     lineage: result?.data?.lineage || {}

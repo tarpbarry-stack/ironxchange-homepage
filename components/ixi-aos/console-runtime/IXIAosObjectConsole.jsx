@@ -655,10 +655,10 @@ export default function IXIAosObjectConsole({
             slot.slotId
           }
 
-          className="
+          className={`
             ixi-aos-console-slot
             empty-slot
-          "
+          `}
         >
 
           <IXIObjectCardActuator
@@ -731,9 +731,9 @@ export default function IXIAosObjectConsole({
           <button
             type="button"
 
-            className="
+            className={`
               ixi-aos-empty-face-create
-            "
+            `}
 
             onPointerDown={
               event => {
@@ -771,9 +771,9 @@ export default function IXIAosObjectConsole({
             slot.slotId
           ) ? (
             <div
-              className="
+              className={`
                 ixi-aos-face-create-menu
-              "
+              `}
               onPointerDown={
                 event =>
                   event.stopPropagation()
@@ -967,9 +967,9 @@ export default function IXIAosObjectConsole({
               <button
                 type="button"
 
-                className="
+                className={`
                   cancel
-                "
+                `}
 
                 onClick={
                   event => {
@@ -1003,10 +1003,10 @@ export default function IXIAosObjectConsole({
             slot.slotId
           }
 
-          className="
+          className={`
             ixi-aos-console-slot
             primary-slot
-          "
+          `}
         >
 
           {!atCapacity &&
@@ -1071,10 +1071,10 @@ export default function IXIAosObjectConsole({
           slot.slotId
         }
 
-        className="
+        className={`
           ixi-aos-console-slot
           module-slot
-        "
+        `}
       >
 
         <IXIObjectCardActuator

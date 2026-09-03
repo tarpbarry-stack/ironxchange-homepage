@@ -1046,9 +1046,9 @@ export default function IXIMosObjectCard({
               workspaceDropSurface
             }
 
-            className="
+            className={`
               aos-object-drop-on-zone
-            "
+            `}
 
             onDropStateChange={({
               accepting
@@ -1108,9 +1108,9 @@ export default function IXIMosObjectCard({
 
                 {isNaming ? (
                   <div
-                    className="
+                    className={`
                       aos-name-editor
-                    "
+                    `}
                     onPointerDown={
                       event =>
                         event
@@ -1200,9 +1200,9 @@ export default function IXIMosObjectCard({
                   <button
                     type="button"
 
-                    className="
+                    className={`
                       aos-add-button
-                    "
+                    `}
 
                     title="
                       Add child object
@@ -1228,9 +1228,9 @@ export default function IXIMosObjectCard({
                   <button
                     type="button"
 
-                    className="
+                    className={`
                       aos-delete-button
-                    "
+                    `}
 
                     title="
                       Delete object
@@ -1302,9 +1302,9 @@ export default function IXIMosObjectCard({
                         }
                       />
                     ) : (
-                      <div className="
+                      <div className={`
                         aos-preview-photo-empty
-                      ">
+                      `}>
                         {getObjectName(
                           previewItem
                         )}
@@ -1312,9 +1312,9 @@ export default function IXIMosObjectCard({
                     )}
 
 
-                    <div className="
+                    <div className={`
                       aos-preview-position
-                    ">
+                    `}>
                       {previewItemIndex + 1}
                       {" / "}
                       {directItems.length}
@@ -1328,9 +1328,9 @@ export default function IXIMosObjectCard({
                     <button
                       type="button"
 
-                      className="
+                      className={`
                         aos-preview-arrow
-                      "
+                      `}
 
                       onPointerDown={
                         event =>
@@ -1380,9 +1380,9 @@ export default function IXIMosObjectCard({
                     <button
                       type="button"
 
-                      className="
+                      className={`
                         aos-preview-pull
-                      "
+                      `}
 
                       onPointerDown={
                         event => {
@@ -1422,9 +1422,9 @@ export default function IXIMosObjectCard({
                     <button
                       type="button"
 
-                      className="
+                      className={`
                         aos-preview-arrow
-                      "
+                      `}
 
                       onPointerDown={
                         event =>
@@ -1511,9 +1511,9 @@ export default function IXIMosObjectCard({
 
 
               {isContainer ? (
-                <div className="
+                <div className={`
                   aos-content-actions
-                ">
+                `}>
 
                   <button
                     type="button"
@@ -1561,9 +1561,9 @@ export default function IXIMosObjectCard({
                 </div>
               ) : (
 
-                <div className="
+                <div className={`
                   aos-object-actions
-                ">
+                `}>
 
                   <button
                     type="button"
@@ -1660,9 +1660,9 @@ export default function IXIMosObjectCard({
                   }
                 />
               ) : (
-                <div className="
+                <div className={`
                   aos-child-empty
-                ">
+                `}>
                   {getObjectName(
                     activeItem
                   )}

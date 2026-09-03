@@ -883,10 +883,10 @@ export default function IXIAuctionObjectFace3({
 
   return (
     <IXIFaceFrame
-      className="
+      className={`
         aof3
         aof3-certificate
-      "
+      `}
       contentClassName="
         aof3-content
       "
@@ -963,11 +963,11 @@ export default function IXIAuctionObjectFace3({
             ================================================ */}
 
         <section
-          className="
+          className={`
             ledger-panel
             ledger-panel-major
             aof3-sale-section
-          "
+          `}
         >
 
           <div className="aof3-sale-title">
@@ -1048,10 +1048,10 @@ export default function IXIAuctionObjectFace3({
         <div className="aof3-cost-grid">
 
           <section
-            className="
+            className={`
               aof3-cost-panel
               ledger-panel
-            "
+            `}
           >
 
             <LedgerRow
@@ -1115,10 +1115,10 @@ export default function IXIAuctionObjectFace3({
 
 
           <section
-            className="
+            className={`
               aof3-cost-panel
               ledger-panel
-            "
+            `}
           >
 
             <LedgerRow
@@ -1205,10 +1205,10 @@ export default function IXIAuctionObjectFace3({
             ================================================ */}
 
         <section
-          className="
+          className={`
             aof3-total-grid
             ledger-panel
-          "
+          `}
         >
 
           <LedgerSummary
@@ -1256,10 +1256,10 @@ export default function IXIAuctionObjectFace3({
             ================================================ */}
 
         <section
-          className="
+          className={`
             aof3-bid-pack
             ledger-panel
-          "
+          `}
         >
 
           <div className="aof3-bid-pack-title">

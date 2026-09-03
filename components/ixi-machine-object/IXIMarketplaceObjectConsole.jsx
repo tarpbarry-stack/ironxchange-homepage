@@ -396,15 +396,15 @@ export default function IXIMarketplaceObjectConsole({
       <div
         key={slot.slotId}
 
-        className="
+        className={`
           ixi-marketplace-console-slot
           ixi-marketplace-console-module-slot
-        "
+        `}
       >
         <div
-          className="
+          className={`
             ixi-marketplace-console-module-card
-          "
+          `}
         >
           <IXIObjectCardActuator
             side={
@@ -476,9 +476,9 @@ export default function IXIMarketplaceObjectConsole({
           <button
             type="button"
 
-            className="
+            className={`
               ixi-marketplace-console-face-button
-            "
+            `}
 
             aria-label={
               `Change marketplace face ${slot.face}`
@@ -577,10 +577,10 @@ export default function IXIMarketplaceObjectConsole({
       <div
         key={slot.slotId}
 
-        className="
+        className={`
           ixi-marketplace-console-slot
           ixi-marketplace-console-listing-slot
-        "
+        `}
       >
         {parentCard}
       </div>
@@ -589,9 +589,9 @@ export default function IXIMarketplaceObjectConsole({
 
   const assembledConsole = (
     <div
-      className="
+      className={`
         ixi-marketplace-object-console
-      "
+      `}
 
       style={{
         width:

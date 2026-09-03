@@ -423,10 +423,10 @@ renderSystemIndexCard
         key={
           slot.slotId
         }
-        className="
+        className={`
           ixi-system-index-console-slot
           ixi-system-index-console-module-slot
-        "
+        `}
       >
         <div className="ixi-system-index-console-module-card">
 
@@ -495,9 +495,9 @@ renderSystemIndexCard
           <button
             type="button"
 
-            className="
+            className={`
               ixi-system-index-console-face-button
-            "
+            `}
 
             aria-label={
               `Change System Index face ${slot.face}`
@@ -568,10 +568,10 @@ renderSystemIndexCard
         slot.slotId
       }
 
-      className="
+      className={`
         ixi-system-index-console-slot
         ixi-system-index-console-listing-slot
-      "
+      `}
     >
 
       {canExpandLeft ? (
@@ -627,9 +627,9 @@ renderSystemIndexCard
 
   const assembledConsole = (
     <div
-      className="
+      className={`
         ixi-system-index-object-console
-      "
+      `}
 
       style={{
         width:
