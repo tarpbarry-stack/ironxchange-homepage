@@ -120,13 +120,17 @@ export default function IXIAosCard001Location(props) {
                     top: 17px !important;
                   }
 
-                  /* Text replacement only. Preserve the original V12 descriptor shell,
-                     outline, yellow diamond, geometry and sizing exactly. */
-                  .aos-card001-v12-identity-shell .gov-001 .gov-descriptor > div {
+                  /* Display overlay only. During EDIT the real descriptor shell becomes
+                     the editor, so nothing is allowed to cover it. */
+                  .aos-card001-v12-identity-shell .gov-001[data-editing="false"] .gov-descriptor > div {
                     visibility: hidden !important;
                   }
                   .aos-card001-v12-identity-shell .gov-001 .gov-mark {
                     visibility: visible !important;
+                  }
+                  .aos-card001-v12-identity-shell .gov-001[data-editing="true"] ~ .aos-card001-customer-identity,
+                  .aos-card001-v12-identity-shell .gov-001[data-editing="true"] ~ .aos-card001-ixi-identity {
+                    display: none !important;
                   }
                   .aos-card001-customer-identity {
                     position: absolute;
