@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           parameters="$(jq -cn --arg command \
-            "cd /var/www/ix-core && sha256sum financial/IXIFinancialWorkOrderFactory.js && base64 -w0 financial/IXIFinancialWorkOrderFactory.js" \
+            "cd /var/www/ix-core && sha256sum financial/IXIFinancialWorkOrderFactory.js index.js && base64 -w0 financial/IXIFinancialWorkOrderFactory.js && printf '\\n' && base64 -w0 index.js" \
             '{commands:[$command]}')"
           command_id="$(aws ssm send-command \
             --region "$AWS_REGION" \
@@ -47,11 +47,13 @@ jobs:
             --instance-id "$AWS_INSTANCE_ID" \
             --query 'StandardOutputContent' \
             --output text)"
-          expected_sha="$(printf '%s\n' "$output" | sed -n '1p' | awk '{print $1}')"
-          printf '%s\n' "$output" | sed -n '2p' | base64 -d > IXIFinancialWorkOrderFactory.js
-          actual_sha="$(sha256sum IXIFinancialWorkOrderFactory.js | awk '{print $1}')"
-          test "$actual_sha" = "$expected_sha"
-          printf '%s  %s\n' "$actual_sha" IXIFinancialWorkOrderFactory.js > SHA256SUMS
+          factory_sha="$(printf '%s\n' "$output" | sed -n '1p' | awk '{print $1}')"
+          index_sha="$(printf '%s\n' "$output" | sed -n '2p' | awk '{print $1}')"
+          printf '%s\n' "$output" | sed -n '3p' | base64 -d > IXIFinancialWorkOrderFactory.js
+          printf '%s\n' "$output" | sed -n '4p' | base64 -d > index.js
+          test "$(sha256sum IXIFinancialWorkOrderFactory.js | awk '{print $1}')" = "$factory_sha"
+          test "$(sha256sum index.js | awk '{print $1}')" = "$index_sha"
+          printf '%s  %s\n%s  %s\n' "$factory_sha" IXIFinancialWorkOrderFactory.js "$index_sha" index.js > SHA256SUMS
 
       - name: Upload verified Work Order source
         uses: actions/upload-artifact@v4
@@ -59,6 +61,7 @@ jobs:
           name: ixi-core-live-work-order-${{ github.run_id }}
           path: |
             IXIFinancialWorkOrderFactory.js
+            index.js
             SHA256SUMS
           if-no-files-found: error
           retention-days: 7
