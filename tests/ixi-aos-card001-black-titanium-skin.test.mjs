@@ -25,8 +25,8 @@ const activeCard001Faces = [
 const skin = read("components/ixi-aos/cards/001/IXIAosCard001BlackTitaniumStyles.jsx");
 const saddleSteel = read("components/ixi-aos/cards/001/IXIAosCard001SaddleSteelStyles.jsx");
 const forgedCommand = read("components/ixi-aos/cards/001/IXIAosCard001ForgedCommandStyles.jsx");
-const texturePath = path.join(root, "public/ixi/skins/black-titanium-grain.svg");
-const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-grain.svg");
+const texturePath = path.join(root, "public/ixi/skins/black-titanium-pvd.webp");
+const saddleTexturePath = path.join(root, "public/ixi/skins/saddle-steel-leather.webp");
 const forgedAssets = [
   "public/ixi/skins/forged-command-leather.webp",
   "public/ixi/skins/forged-command-steel.webp"
@@ -65,22 +65,25 @@ test("Card 001 has one 300 by 475 Natural chassis and inherits scaled modes", ()
   assert.doesNotMatch(consoleSource, /(?:WORK|FOCUS).*?(?:width|height)/s);
 });
 
-test("Black Titanium is appearance-only and uses one lightweight material asset", () => {
+test("Black Titanium is body-first and uses one compact PVD material asset", () => {
   const forbiddenGeometry = /(?:^|\n)\s*(?:width|height|min-width|max-width|min-height|max-height|padding|margin|gap|grid-template|position|inset|top|right|bottom|left|transform)\s*:/;
   const skinWithoutCustomProperties = skin.replace(/--[\w-]+\s*:[^;]+;/g, "");
   assert.doesNotMatch(skinWithoutCustomProperties, forbiddenGeometry);
-  assert.match(skin, /black-titanium-grain\.svg/);
+  assert.match(skin, /black-titanium-pvd\.webp/);
+  assert.match(skin, /aos-generic-console-slot:has\(\.skin-black-titanium\)/);
   assert.equal(fs.existsSync(texturePath), true);
-  assert.ok(fs.statSync(texturePath).size < 2048);
+  assert.ok(fs.statSync(texturePath).size < 8 * 1024);
 });
 
-test("Saddle Steel is appearance-only and uses one lightweight material asset", () => {
+test("Saddle Steel is body-first and uses compact leather and steel materials", () => {
   const forbiddenGeometry = /(?:^|\n)\s*(?:width|height|min-width|max-width|min-height|max-height|padding|margin|gap|grid-template|position|inset|top|right|bottom|left|transform)\s*:/;
   const skinWithoutCustomProperties = saddleSteel.replace(/--[\w-]+\s*:[^;]+;/g, "");
   assert.doesNotMatch(skinWithoutCustomProperties, forbiddenGeometry);
+  assert.match(saddleSteel, /saddle-steel-leather\.webp/);
   assert.match(saddleSteel, /saddle-steel-grain\.svg/);
+  assert.match(saddleSteel, /aos-generic-console-slot:has\(\.skin-saddle-steel\)/);
   assert.equal(fs.existsSync(saddleTexturePath), true);
-  assert.ok(fs.statSync(saddleTexturePath).size < 2048);
+  assert.ok(fs.statSync(saddleTexturePath).size < 12 * 1024);
 });
 
 test("Forged Command uses compact photographic materials without changing card or rail geometry", () => {

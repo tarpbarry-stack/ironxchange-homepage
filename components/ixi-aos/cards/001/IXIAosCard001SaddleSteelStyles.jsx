@@ -1,6 +1,6 @@
 /*
  * Card 001 — SADDLE STEEL
- * Appearance only. No geometry, layout, scale, data, or behavior rules belong here.
+ * Body-first bridle leather and machined steel finish. Native structure stays authoritative.
  */
 export default function IXIAosCard001SaddleSteelStyles() {
   return (
@@ -44,12 +44,18 @@ export default function IXIAosCard001SaddleSteelStyles() {
           linear-gradient(115deg, transparent 0 36%, rgba(255,220,164,.035) 46%, transparent 57%),
           linear-gradient(180deg, rgba(50,46,38,.94), rgba(14,14,12,.98) 23%, rgba(7,7,6,.99)),
           url("/ixi/skins/saddle-steel-grain.svg") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, soft-light, multiply, normal !important;
+        background-clip: padding-box !important;
         color: var(--ss-ivory) !important;
         box-shadow:
-          inset 0 1px 0 rgba(255,232,190,.28),
-          inset 1px 0 0 rgba(255,214,145,.07),
-          inset -1px 0 0 rgba(0,0,0,.78),
-          inset 0 -1px 0 rgba(0,0,0,.94),
+          inset 0 0 0 1px rgba(8,5,3,.98),
+          inset 0 0 0 2px rgba(221,181,109,.34),
+          inset 0 0 0 4px rgba(16,14,11,.94),
+          inset 0 0 14px rgba(0,0,0,.84),
+          inset 0 1px 0 rgba(255,232,190,.30),
+          0 1px 0 rgba(221,181,109,.16),
           0 18px 42px rgba(0,0,0,.76) !important;
       }
 
@@ -57,8 +63,11 @@ export default function IXIAosCard001SaddleSteelStyles() {
         border-bottom-color: #86623c !important;
         background:
           linear-gradient(105deg, rgba(255,224,171,.10), transparent 23%, rgba(0,0,0,.20) 62%),
-          linear-gradient(180deg, rgba(91,52,33,.98), rgba(48,25,17,.99) 55%, rgba(25,13,9,.99)),
-          url("/ixi/skins/saddle-steel-grain.svg") !important;
+          linear-gradient(180deg, rgba(91,52,33,.48), rgba(31,15,10,.78)),
+          url("/ixi/skins/saddle-steel-leather.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply, normal !important;
         box-shadow:
           inset 0 1px 0 rgba(255,224,171,.22),
           inset 0 -1px 0 rgba(0,0,0,.86),
@@ -136,8 +145,11 @@ export default function IXIAosCard001SaddleSteelStyles() {
         border-color: #735439 !important;
         background:
           linear-gradient(180deg, rgba(255,224,171,.075), transparent 34%),
-          linear-gradient(180deg, rgba(77,44,29,.99), rgba(31,17,12,.99)),
-          url("/ixi/skins/saddle-steel-grain.svg") !important;
+          linear-gradient(180deg, rgba(77,44,29,.42), rgba(25,12,8,.78)),
+          url("/ixi/skins/saddle-steel-leather.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply, normal !important;
         box-shadow: inset 0 1px 0 rgba(255,226,180,.12), inset 0 -1px 0 rgba(0,0,0,.80) !important;
       }
 
@@ -215,8 +227,11 @@ export default function IXIAosCard001SaddleSteelStyles() {
         background:
           linear-gradient(180deg, rgba(255,226,179,.11), transparent 40%),
           linear-gradient(90deg, rgba(117,184,175,.07), transparent 24%, transparent 74%, rgba(221,181,109,.08)),
-          linear-gradient(180deg, #3e2418, #1b0f0a),
-          url("/ixi/skins/saddle-steel-grain.svg") !important;
+          linear-gradient(180deg, rgba(62,36,24,.42), rgba(20,9,6,.76)),
+          url("/ixi/skins/saddle-steel-leather.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, soft-light, multiply, normal !important;
         box-shadow:
           inset 0 1px 0 rgba(255,229,186,.15),
           inset 0 -1px 0 rgba(0,0,0,.80),
@@ -236,6 +251,21 @@ export default function IXIAosCard001SaddleSteelStyles() {
       .skin-saddle-steel .board-command-rail .destination-armed::after {
         background: var(--ss-brass-hot) !important;
         box-shadow: 0 0 8px rgba(221,181,109,.36) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-saddle-steel) > .ixi-object-card-actuator {
+        background-color: #28241e !important;
+        background-image:
+          linear-gradient(90deg, rgba(255,232,190,.16), transparent 40%, rgba(0,0,0,.42)),
+          url("/ixi/skins/saddle-steel-grain.svg") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        box-shadow: inset 1px 0 0 rgba(255,226,180,.17), inset -1px 0 0 rgba(0,0,0,.74), 0 1px 4px rgba(0,0,0,.62) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-saddle-steel) > .ixi-object-card-actuator:hover {
+        background-color: var(--ss-brass) !important;
+        box-shadow: 0 0 8px rgba(221,181,109,.34) !important;
       }
 
       .aos-card001-v12-identity-shell.skin-saddle-steel .aos-card001-ixi-identity,

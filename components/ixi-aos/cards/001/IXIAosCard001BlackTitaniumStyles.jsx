@@ -1,6 +1,6 @@
 /*
  * Card 001 — BLACK TITANIUM
- * Appearance only. No geometry, layout, scale, data, or behavior rules belong here.
+ * Body-first PVD instrument finish. The native chassis, rail and actuators remain authoritative.
  */
 export default function IXIAosCard001BlackTitaniumStyles() {
   return (
@@ -41,22 +41,33 @@ export default function IXIAosCard001BlackTitaniumStyles() {
           radial-gradient(circle at 18% -4%, rgba(255,255,255,.16), transparent 30%),
           radial-gradient(circle at 92% 12%, rgba(114,213,235,.09), transparent 28%),
           linear-gradient(112deg, transparent 0 35%, rgba(255,255,255,.035) 46%, transparent 57%),
-          linear-gradient(180deg, rgba(41,48,54,.88), rgba(10,13,16,.96) 24%, rgba(5,7,9,.99)),
-          url("/ixi/skins/black-titanium-grain.svg") !important;
+          linear-gradient(180deg, rgba(34,39,43,.68), rgba(8,10,12,.92) 24%, rgba(4,6,8,.97)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, screen, soft-light, multiply, normal !important;
+        background-clip: padding-box !important;
         color: var(--bt-text) !important;
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.30),
-          inset 1px 0 0 rgba(255,255,255,.055),
-          inset -1px 0 0 rgba(0,0,0,.72),
-          inset 0 -1px 0 rgba(0,0,0,.92),
+          inset 0 0 0 1px rgba(1,3,5,.98),
+          inset 0 0 0 2px rgba(160,176,186,.38),
+          inset 0 0 0 4px rgba(7,10,12,.94),
+          inset 0 0 14px rgba(0,0,0,.82),
+          inset 0 1px 0 rgba(255,255,255,.34),
+          0 1px 0 rgba(114,213,235,.13),
           0 18px 40px rgba(0,0,0,.70) !important;
       }
 
       .skin-black-titanium :is(.gov-head,.ops-header,.f3-head,.gfv12-head) {
         border-bottom-color: #56616a !important;
-        background:
+        background-color: #111519 !important;
+        background-image:
           linear-gradient(90deg, rgba(227,182,84,.09), transparent 32%, rgba(114,213,235,.055)),
-          linear-gradient(180deg, #2a3035, #12171b 58%, #0b0e11) !important;
+          linear-gradient(180deg, rgba(50,57,62,.50), rgba(12,16,19,.90)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply, normal !important;
         box-shadow:
           inset 0 1px 0 rgba(255,255,255,.20),
           inset 0 -1px 0 rgba(0,0,0,.82),
@@ -92,12 +103,18 @@ export default function IXIAosCard001BlackTitaniumStyles() {
 
       .skin-black-titanium :is(.gov-descriptor,.gov-preview,.gov-metric,.gov-relations,.gate-code,.ops-section,.f3-section,.f3-contact,.f3-value-card,.f3-lease-ytd,.f3-summary,.gfv12-banner,.gfv12-section) {
         border-color: var(--bt-line) !important;
-        background:
+        background-color: #0c1013 !important;
+        background-image:
           linear-gradient(145deg, rgba(255,255,255,.045), transparent 36%),
-          linear-gradient(180deg, rgba(27,33,38,.98), rgba(11,15,18,.99)) !important;
+          linear-gradient(180deg, rgba(27,33,38,.58), rgba(7,10,12,.82)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply, normal !important;
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.07),
-          inset 0 -1px 0 rgba(0,0,0,.60) !important;
+          inset 0 1px 0 rgba(255,255,255,.09),
+          inset 0 -1px 0 rgba(0,0,0,.70),
+          0 2px 3px rgba(0,0,0,.42) !important;
       }
 
       .skin-black-titanium :is(.gov-relations,.ops-section,.f3-section,.gfv12-section) > h3 {
@@ -127,9 +144,14 @@ export default function IXIAosCard001BlackTitaniumStyles() {
 
       .skin-black-titanium :is(.gov-commands,.ops-commands,.f3-commands) {
         border-color: var(--bt-line) !important;
-        background:
-          linear-gradient(180deg, rgba(35,42,47,.98), rgba(9,12,15,.99)) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+        background-color: #0b0f12 !important;
+        background-image:
+          linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.38)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, normal !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.78) !important;
       }
 
       .skin-black-titanium :is(.gov-commands,.ops-commands,.f3-commands) button {
@@ -159,7 +181,13 @@ export default function IXIAosCard001BlackTitaniumStyles() {
       .skin-black-titanium :is(.gov-media,.gov-thumbs) {
         border-color: #4c565e !important;
         background-color: #07090b !important;
-        box-shadow: inset 0 0 14px rgba(0,0,0,.72) !important;
+        background-image:
+          linear-gradient(145deg, rgba(114,213,235,.035), transparent 28%),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, multiply !important;
+        box-shadow: inset 0 0 16px rgba(0,0,0,.80), inset 0 1px 0 rgba(255,255,255,.07) !important;
       }
 
       .skin-black-titanium .gov-media img {
@@ -168,7 +196,13 @@ export default function IXIAosCard001BlackTitaniumStyles() {
 
       .skin-black-titanium .ixi-aos-card-header-controls {
         border-color: #59646d !important;
-        background: linear-gradient(180deg, #2b3237, #11161a) !important;
+        background-color: #11161a !important;
+        background-image:
+          linear-gradient(180deg, rgba(255,255,255,.15), rgba(0,0,0,.40)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, normal !important;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 9px rgba(0,0,0,.48) !important;
       }
 
@@ -200,10 +234,14 @@ export default function IXIAosCard001BlackTitaniumStyles() {
 
       .skin-black-titanium .board-command-rail {
         border-top-color: rgba(114,213,235,.42) !important;
-        background:
+        background-color: #080c0f !important;
+        background-image:
           linear-gradient(180deg, rgba(255,255,255,.10), transparent 45%),
           linear-gradient(90deg, rgba(114,213,235,.10), transparent 23%, transparent 76%, rgba(227,182,84,.09)),
-          #0a0e11 !important;
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        background-blend-mode: screen, screen, normal !important;
         box-shadow:
           inset 0 1px 0 rgba(255,255,255,.14),
           inset 0 -1px 0 rgba(0,0,0,.72),
@@ -223,6 +261,21 @@ export default function IXIAosCard001BlackTitaniumStyles() {
       .skin-black-titanium .board-command-rail .destination-armed::after {
         background: var(--bt-gold-hot) !important;
         box-shadow: 0 0 8px rgba(227,182,84,.40) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-black-titanium) > .ixi-object-card-actuator {
+        background-color: #171c20 !important;
+        background-image:
+          linear-gradient(90deg, rgba(255,255,255,.18), transparent 42%, rgba(0,0,0,.42)),
+          url("/ixi/skins/black-titanium-pvd.webp") !important;
+        background-position: center !important;
+        background-size: cover !important;
+        box-shadow: inset 1px 0 0 rgba(255,255,255,.18), inset -1px 0 0 rgba(0,0,0,.72), 0 1px 4px rgba(0,0,0,.60) !important;
+      }
+
+      .aos-generic-console-slot:has(.skin-black-titanium) > .ixi-object-card-actuator:hover {
+        background-color: var(--bt-gold) !important;
+        box-shadow: 0 0 8px rgba(227,182,84,.36) !important;
       }
 
       .aos-card001-v12-identity-shell.skin-black-titanium .aos-card001-ixi-identity,
