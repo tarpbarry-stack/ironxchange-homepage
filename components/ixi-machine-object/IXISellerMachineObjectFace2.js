@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatHours, getListingHref, cleanMachineTitle, getListingId } from "../../lib/listingFormatters";
 import { getOwnedPrivateActions } from "../ixi-machine-card/private/IXIOwnedPrivateActionBridge";
-import IXITransactObjectConsole from "../ixi-aos/transact/IXITransactObjectConsole";
+import IXIOwnedPrivateTransactRuntime from "../ixi-machine-card/private/IXIOwnedPrivateTransactRuntime";
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -227,12 +227,8 @@ export default function IXISellerMachineObjectFace2({
 
     return (
       <div className="mof2-console-transact-slot">
-        <IXITransactObjectConsole
+        <IXIOwnedPrivateTransactRuntime
           object={transactObject}
-          entity={{
-            passportId: transactObject.entityPassportId,
-            displayName: transactObject.entityName || ""
-          }}
           onClose={() => setConsoleTransactOpen(false)}
         />
         <style jsx>{`
