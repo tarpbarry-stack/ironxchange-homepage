@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { createIXIServiceQuote } from "./IXIServiceQuoteCommands";
+import { createIXIServiceQuote, updateIXIServiceQuote } from "./IXIServiceQuoteCommands";
 import {
   createIXIServiceQuoteDraft,
   validateIXIServiceQuote
@@ -101,12 +101,14 @@ export default function IXIServiceQuoteApp({
   language = "en",
   onBack = null,
   onRecordChange = null,
-  onCreateServiceWorkOrder = null
+  onCreateServiceWorkOrder = null,
+  onOpenServiceWorkOrder = null
 }) {
   const primary = context.primary || {};
   const actor = context.actor || {};
 
   const [lang, setLang] = useState(language === "es" ? "es" : "en");
+  const [clientRequestId] = useState(() => globalThis.crypto?.randomUUID?.() || `SQ-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const t = COPY[lang];
   const [record, setRecord] = useState(initialRecord);
   const [saving, setSaving] = useState(false);
@@ -139,9 +141,14 @@ export default function IXIServiceQuoteApp({
   const [changeDescription, setChangeDescription] = useState("");
   const [changeAmount, setChangeAmount] = useState("");
 
+  useEffect(() => {
+    setRecord(initialRecord || null);
+  }, [initialRecord]);
+
   const input = useMemo(
     () => ({
       customerName,
+      clientRequestId,
       customerContactName,
       customerEmail,
       customerPhone,
@@ -167,6 +174,7 @@ export default function IXIServiceQuoteApp({
     }),
     [
       customerName,
+      clientRequestId,
       customerContactName,
       customerEmail,
       customerPhone,
@@ -254,15 +262,29 @@ export default function IXIServiceQuoteApp({
         { action: "create", response: result.response },
         context
       );
+    } catch (error) {
+      setErrors(error?.validation?.errors || { command: error?.message || "Service Quote save failed" });
     } finally {
       setSaving(false);
     }
   }
 
   async function mutate(factory, change) {
-    const next = factory();
-    setRecord(next);
-    await onRecordChange?.(next, change, context);
+    if (saving) return null;
+    setSaving(true);
+    setErrors({});
+    try {
+      const next = factory();
+      const result = await updateIXIServiceQuote({ record: next, action: change.action });
+      setRecord(result.record);
+      await onRecordChange?.(result.record, { ...change, response: result.response }, context);
+      return result.record;
+    } catch (error) {
+      setErrors({ command: error?.message || "Service Quote update failed" });
+      return null;
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (record) {
@@ -294,7 +316,7 @@ export default function IXIServiceQuoteApp({
             <strong className={accepted ? "sq-ok" : record.status === "declined" ? "sq-bad" : ""}>
               {clean(record.status).replace(/-/g, " ").toUpperCase()}
             </strong>
-            <b>{money(record.economics?.quotedRevenue)}</b>
+            <b>{money(record.economics?.customerQuoteTotal)}</b>
           </div>
           <small>
             {clean(record.commercial?.pricingType).toUpperCase()} · VALID {record.commercial?.validThrough}
@@ -302,7 +324,9 @@ export default function IXIServiceQuoteApp({
         </div>
 
         <div className="sq-section">COMMERCIAL</div>
-        <div className="sq-money"><span>QUOTED REVENUE</span><b>{money(record.economics?.quotedRevenue)}</b></div>
+        <div className="sq-money"><span>SERVICE SUBTOTAL</span><b>{money(record.economics?.quotedServiceRevenue)}</b></div>
+        <div className="sq-money"><span>EST. SALES TAX</span><b>{money(record.commercial?.taxAmount)}</b></div>
+        <div className="sq-money"><span>CUSTOMER QUOTE TOTAL</span><b>{money(record.economics?.customerQuoteTotal)}</b></div>
         <div className="sq-money"><span>EST. INTERNAL COST</span><b>{money(record.economics?.estimatedInternalCost)}</b></div>
         <div className="sq-money"><span>PROJECTED GROSS PROFIT</span><b>{money(record.economics?.projectedGrossProfit)}</b></div>
         <div className="sq-money"><span>PROJECTED MARGIN</span><b>{record.economics?.projectedMarginPercent}%</b></div>
@@ -333,11 +357,11 @@ export default function IXIServiceQuoteApp({
               </button>
             ) : null}
 
-            <Field label="CUSTOMER RESPONSE / CHANGE REQUEST">
+            {["sent", "viewed", "changes-requested"].includes(record.status) ? <Field label="CUSTOMER RESPONSE / CHANGE REQUEST">
               <textarea value={responseText} onChange={event => setResponseText(event.target.value)} />
-            </Field>
+            </Field> : null}
 
-            <div className="sq-actions">
+            {["sent", "viewed", "changes-requested"].includes(record.status) ? <div className="sq-actions">
               <button
                 className="sq-secondary"
                 onClick={() =>
@@ -360,9 +384,9 @@ export default function IXIServiceQuoteApp({
               >
                 DECLINE
               </button>
-            </div>
+            </div> : null}
 
-            <Field label="ACCEPTED BY">
+            {["sent", "viewed"].includes(record.status) ? <><Field label="ACCEPTED BY">
               <TextInput value={acceptedBy} onChange={setAcceptedBy} />
             </Field>
             <div className="sq-grid2">
@@ -400,6 +424,7 @@ export default function IXIServiceQuoteApp({
 
             <button
               className="sq-primary"
+              disabled={saving}
               onClick={() =>
                 mutate(
                   () =>
@@ -419,12 +444,13 @@ export default function IXIServiceQuoteApp({
             >
               RECORD CUSTOMER ACCEPTANCE
             </button>
+            </> : null}
           </>
         ) : (
           <>
             <div className="sq-total">
               <span>AUTHORIZED CUSTOMER VALUE</span>
-              <strong>{money(record.economics?.authorizedRevenue)}</strong>
+              <strong>{money(record.economics?.authorizedCustomerTotal)}</strong>
             </div>
             <div className="sq-row">
               <div className="sq-rowhead">
@@ -439,21 +465,24 @@ export default function IXIServiceQuoteApp({
             {record.status === "accepted" ? (
               <button
                 className="sq-primary"
+                disabled={saving || !onCreateServiceWorkOrder}
                 onClick={async () => {
+                  if (saving) return;
                   const workOrder = await onCreateServiceWorkOrder?.(record, context);
                   const workOrderId = clean(
                     workOrder?.identity?.workOrderId ||
                       workOrder?.identity?.number ||
                       workOrder?.workOrderId ||
                       workOrder?.number
-                  ) || `CSWO-${Date.now()}`;
-                  await mutate(
+                  );
+                  const converted = await mutate(
                     () => convertIXIServiceQuoteToWorkOrder(record, workOrderId, actor),
                     { action: "create-service-work-order", workOrderId, workOrder: workOrder || null }
                   );
+                  if (converted) await onOpenServiceWorkOrder?.(workOrder, converted, context);
                 }}
               >
-                CREATE CUSTOMER SERVICE WORK ORDER
+                {onCreateServiceWorkOrder ? "CREATE CUSTOMER SERVICE WORK ORDER" : "WORK ORDER CONVERSION REQUIRES AOS"}
               </button>
             ) : (
               <div className="sq-callout">
@@ -542,6 +571,8 @@ export default function IXIServiceQuoteApp({
             </div>
           ))}
         </div>
+
+        {Object.keys(errors).length ? <div className="sq-callout sq-bad">{Object.values(errors).join(" · ")}</div> : null}
 
         <button className="sq-secondary" onClick={() => onBack?.()}>‹ TRAN$ACT</button>
         <div className="sq-foot">
@@ -690,7 +721,7 @@ export default function IXIServiceQuoteApp({
 
       <div className="sq-total">
         <span>QUOTE TOTAL</span>
-        <strong>{money(preview.economics?.quotedRevenue)}</strong>
+        <strong>{money(preview.economics?.customerQuoteTotal)}</strong>
       </div>
       <div className="sq-money"><span>EST. INTERNAL COST</span><b>{money(preview.economics?.estimatedInternalCost)}</b></div>
       <div className="sq-money"><span>PROJECTED GP</span><b>{money(preview.economics?.projectedGrossProfit)}</b></div>
@@ -712,7 +743,7 @@ export default function IXIServiceQuoteApp({
         <Field label="DEPOSIT TYPE">
           <select value={depositType} onChange={event => setDepositType(event.target.value)}>
             <option value="none">NONE</option>
-            <option value="amount">DOLLAR AMOUNT</option>
+            <option value="fixed">DOLLAR AMOUNT</option>
             <option value="percent">PERCENT</option>
           </select>
         </Field>
@@ -750,7 +781,7 @@ export default function IXIServiceQuoteApp({
 
       {Object.keys(errors).length ? (
         <div className="sq-error">
-          REQUIRED: {Object.keys(errors).join(" · ").toUpperCase()}
+          {Object.values(errors).join(" · ").toUpperCase()}
         </div>
       ) : null}
 

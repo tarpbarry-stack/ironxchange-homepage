@@ -51,15 +51,6 @@ export default function ServiceQuoteFaceLabPage() {
         object={object}
         onBack={() => {}}
         onRecordChange={async () => {}}
-        onCreateServiceWorkOrder={async quote => ({
-          identity: {
-            workOrderId: "CSWO-1058",
-            number: "CSWO-1058"
-          },
-          customer: quote.customer,
-          asset: quote.asset,
-          quote: quote.identity
-        })}
       />
     </IXITransactFaceLabFrame>
   );
