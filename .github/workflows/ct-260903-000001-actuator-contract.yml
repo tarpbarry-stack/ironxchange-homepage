@@ -1,0 +1,22 @@
+name: CT-260903-000001 Actuator Contract
+
+on:
+  push:
+    branches:
+      - ticket/ct-260903-000001-marketplace-actuators
+    paths:
+      - ".github/workflows/ct-260903-000001-actuator-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: node --test tests/ixi-ticket-marketplace-actuator-contract.test.mjs
