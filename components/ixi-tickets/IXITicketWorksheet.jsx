@@ -237,11 +237,11 @@ export default function IXITicketWorksheet({
         assignedTo: "chat",
         source: "send-now"
       });
-      if (!remote?.ticketId) throw new Error("IXI Ticket API did not return a working Ticket.");
+      if (!remote?.ticketId) throw new Error("IXI Agent Gateway did not return the dispatched Ticket.");
       const saved = canonicalTicket(readyDraft, remote, "aws-synced");
       onSave?.(saved);
       setDraft(saved);
-      setNotice("SENT TO AGENT — Ticket is WORKING now.");
+      setNotice("DISPATCH REQUESTED — Ticket remains READY until an agent claims the complete work packet.");
     } catch (error) {
       setNotice(`${error.message} Ticket remains safely preserved.`);
     } finally {
