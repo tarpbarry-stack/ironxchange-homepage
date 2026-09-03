@@ -55,7 +55,10 @@ jobs:
           STAGE=/tmp/ixi-core-work-order-__IXI_CORE_SHA__
           ARCHIVE=/tmp/ixi-core-work-order-__IXI_CORE_SHA__.tgz
           BACKUP=/var/backups/ixi-core-releases/work-order-pre-__IXI_CORE_SHA__.tgz
-          TARGET=financial/IXIFinancialWorkOrderFactory.js
+          TARGET_FACTORY=financial/IXIFinancialWorkOrderFactory.js
+          TARGET_INDEX=index.js
+          TARGET_GATEWAY=identity/IXIInternalFinancialRequest.js
+          GATEWAY_EXISTED=0
           SUCCESS=0
 
           run_pm2() {
@@ -64,9 +67,10 @@ jobs:
 
           rollback() {
             if [ "$SUCCESS" -eq 0 ] && [ -f "$BACKUP" ]; then
-              echo 'Deployment failed; restoring the previous Work Order factory.' >&2
+              echo 'Deployment failed; restoring the previous Work Order release.' >&2
               cd "$APP"
               tar -xzf "$BACKUP"
+              if [ "$GATEWAY_EXISTED" -eq 0 ]; then rm -f "$TARGET_GATEWAY"; fi
               run_pm2 reload IX-Core --update-env || run_pm2 restart IX-Core --update-env || true
             fi
           }
@@ -86,10 +90,18 @@ jobs:
           cd "$APP"
           printf '%s  %s\n' \
             '6ffb5a230465fd35f2ef531772ac2d3bfdbb124febbc7b66296079e9e9628efd' \
-            "$TARGET" | sha256sum -c -
+            "$TARGET_FACTORY" | sha256sum -c -
+          printf '%s  %s\n' \
+            'ccafb5f20574c7f7e7aa82cf18ea5c8ad6b41b2d1fb864b432ee686494dd63b3' \
+            "$TARGET_INDEX" | sha256sum -c -
 
           mkdir -p /var/backups/ixi-core-releases
-          tar -czf "$BACKUP" "$TARGET"
+          if [ -f "$TARGET_GATEWAY" ]; then
+            GATEWAY_EXISTED=1
+            tar -czf "$BACKUP" "$TARGET_FACTORY" "$TARGET_INDEX" "$TARGET_GATEWAY"
+          else
+            tar -czf "$BACKUP" "$TARGET_FACTORY" "$TARGET_INDEX"
+          fi
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           curl -fsSL "https://github.com/tarpbarry-stack/ixi-core/archive/$RELEASE_SHA.tar.gz" -o "$ARCHIVE"
@@ -98,7 +110,9 @@ jobs:
           cd "$STAGE"
           npm ci --ignore-scripts
           npm test
-          node --check "$TARGET"
+          node --check "$TARGET_FACTORY"
+          node --check "$TARGET_INDEX"
+          node --check "$TARGET_GATEWAY"
           node - <<'NODE'
           const { createWorkOrderDocument } = require('./financial/IXIFinancialWorkOrderFactory');
           const document = createWorkOrderDocument({
@@ -111,7 +125,9 @@ jobs:
           }
           NODE
 
-          install -D -m 0644 "$STAGE/$TARGET" "$APP/$TARGET"
+          install -D -m 0644 "$STAGE/$TARGET_FACTORY" "$APP/$TARGET_FACTORY"
+          install -D -m 0644 "$STAGE/$TARGET_INDEX" "$APP/$TARGET_INDEX"
+          install -D -m 0644 "$STAGE/$TARGET_GATEWAY" "$APP/$TARGET_GATEWAY"
           run_pm2 reload IX-Core --update-env
 
           attempt=0
