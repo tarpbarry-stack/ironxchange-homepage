@@ -221,6 +221,49 @@ export async function postIXITransactJournalEntry({
   );
 }
 
+export async function closeIXITransactPeriod({
+  period = "",
+  currency = "USD",
+  commandId = "",
+  idempotencyKey = "",
+  metadata = {},
+  signal
+} = {}) {
+  const resolvedPeriod = clean(period);
+
+  if (!/^\d{4}-\d{2}$/.test(resolvedPeriod)) {
+    throw new IXITransactDesktopError(
+      "TRAN$ACT close period must use YYYY-MM.",
+      { operation: "financial.period.close" }
+    );
+  }
+
+  const response = await fetch(
+    "/api/ixi/financial/commands/desktop/close-period",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-IXI-Source": "ixi-transact-desktop"
+      },
+      body: JSON.stringify({
+        period: resolvedPeriod,
+        currency: clean(currency || "USD").toUpperCase(),
+        commandId: clean(commandId),
+        idempotencyKey: clean(idempotencyKey),
+        metadata: {
+          ...safeObject(metadata),
+          transactSurface: "desktop"
+        }
+      }),
+      signal
+    }
+  );
+
+  return readJsonResponse(response, "financial.period.close");
+}
+
 export function getIXITransactGLProjection(result) {
   return result?.data?.projection || null;
 }
@@ -234,6 +277,7 @@ export default {
   createIXITransactDesktopDocument,
   createIXITransactJournalEntry,
   postIXITransactJournalEntry,
+  closeIXITransactPeriod,
   getIXITransactGLProjection,
   getIXITransactGLScope
 };
