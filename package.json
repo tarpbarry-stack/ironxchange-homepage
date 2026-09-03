@@ -10,6 +10,7 @@
     "test:asset-acquisition": "node --test tests/ixi-asset-acquisition-contract.test.mjs",
     "test:rental-expense": "node --test tests/ixi-rental-expense-contract.test.mjs",
     "test:rental-income": "node --test tests/ixi-rental-income-contract.test.mjs",
+    "test:service-quote": "node --test tests/ixi-service-quote-contract.test.mjs",
     "test:card-geometry": "node tests/ixi-card-geometry-contract.test.mjs",
     "generate-taxonomy": "node scripts/generateConfigCategories.js",
     "build-aws-taxonomy-master": "node scripts/buildAwsTaxonomyMaster.js"
