@@ -2,6 +2,7 @@ import IXIAosGenericContainerLayoutV12 from "../generic/IXIAosGenericContainerLa
 import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
 import IXIAosV12CardPolish from "../../card-runtime/modules/IXIAosV12CardPolish";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 export const AOS_CARD_004_PERSONNEL = Object.freeze({
   cardNumber: 4,
@@ -16,12 +17,16 @@ export default function IXIAosCard004Personnel(props) {
   return (
     <IXIAosDataContractCardAdapter {...props}>
       {contractProps => (
-        <>
-          <IXIAosGenericCardRailShell object={contractProps.object} {...contractProps} face={1}>
-            <IXIAosGenericContainerLayoutV12 {...contractProps} variant={1} />
-          </IXIAosGenericCardRailShell>
-          <IXIAosV12CardPolish />
-        </>
+        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject}>
+          {({ object }) => (
+            <>
+              <IXIAosGenericCardRailShell {...contractProps} object={object} face={1}>
+                <IXIAosGenericContainerLayoutV12 {...contractProps} object={object} variant={1} />
+              </IXIAosGenericCardRailShell>
+              <IXIAosV12CardPolish />
+            </>
+          )}
+        </IXIAosCommercialEditorBridge>
       )}
     </IXIAosDataContractCardAdapter>
   );

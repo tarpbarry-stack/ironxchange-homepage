@@ -1,5 +1,6 @@
 import IXIAosLocationOverviewCard from "../location/IXIAosLocationOverviewCard";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 export const CARD_003_LOCATION = Object.freeze({
   cardNumber: 3,
@@ -16,7 +17,11 @@ export const CARD_003_LOCATION = Object.freeze({
 export default function IXIAosCard003Location(props) {
   return (
     <IXIAosDataContractCardAdapter {...props}>
-      {contractProps => <IXIAosLocationOverviewCard {...contractProps} variant="003" />}
+      {contractProps => (
+        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject}>
+          {({ object }) => <IXIAosLocationOverviewCard {...contractProps} object={object} variant="003" />}
+        </IXIAosCommercialEditorBridge>
+      )}
     </IXIAosDataContractCardAdapter>
   );
 }

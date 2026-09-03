@@ -1,6 +1,7 @@
 import IXIAosGenericObjectLayout007 from "../generic/IXIAosGenericObjectLayout007";
 import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
+import IXIAosCommercialEditorBridge from "../../card-runtime/modules/IXIAosCommercialEditorBridge";
 
 /*
  * Card 008 — profile / identity presentation recipe.
@@ -11,9 +12,13 @@ export default function IXIAosCard008Profile(props) {
   return (
     <IXIAosDataContractCardAdapter {...props}>
       {contractProps => (
-        <IXIAosGenericCardRailShell object={contractProps.object} {...contractProps} face={1}>
-          <IXIAosGenericObjectLayout007 {...contractProps} />
-        </IXIAosGenericCardRailShell>
+        <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject}>
+          {({ object }) => (
+            <IXIAosGenericCardRailShell {...contractProps} object={object} face={1}>
+              <IXIAosGenericObjectLayout007 {...contractProps} object={object} />
+            </IXIAosGenericCardRailShell>
+          )}
+        </IXIAosCommercialEditorBridge>
       )}
     </IXIAosDataContractCardAdapter>
   );
