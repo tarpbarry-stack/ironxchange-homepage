@@ -115,14 +115,20 @@ export default function IXIAosCard001Location(props) {
                   .aos-card001-v12-identity-shell .gov-001 .ixi-aos-card-header-controls {
                     top: 17px !important;
                   }
-                  .aos-card001-v12-identity-shell .gov-001 .gov-descriptor > * {
+
+                  /* Preserve the original V12 descriptor shell, outline and yellow diamond.
+                     Replace text only; never cover or repaint the shell. */
+                  .aos-card001-v12-identity-shell .gov-001 .gov-descriptor > div {
                     visibility: hidden !important;
+                  }
+                  .aos-card001-v12-identity-shell .gov-001 .gov-mark {
+                    visibility: visible !important;
                   }
                   .aos-card001-customer-identity {
                     position: absolute;
                     top: 166px;
-                    left: 8px;
-                    right: 8px;
+                    left: 31px;
+                    right: 10px;
                     height: 52px;
                     z-index: 70;
                     display: flex;
@@ -130,7 +136,7 @@ export default function IXIAosCard001Location(props) {
                     align-items: center;
                     justify-content: center;
                     overflow: hidden;
-                    background: #111411;
+                    background: transparent;
                     text-align: center;
                     pointer-events: none;
                   }
