@@ -11,13 +11,13 @@ export default function IXIAosCardPreview({
 
           position: relative;
 
-          width: 298px;
-          min-width: 298px;
-          max-width: 298px;
+          width: 300px;
+          min-width: 300px;
+          max-width: 300px;
 
-          height: 471px;
-          min-height: 471px;
-          max-height: 471px;
+          height: 475px;
+          min-height: 475px;
+          max-height: 475px;
 
           overflow: hidden;
         }

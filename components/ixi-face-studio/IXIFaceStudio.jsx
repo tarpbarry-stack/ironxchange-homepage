@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 
 import IXIFacePreview
   from "./IXIFacePreview";
@@ -14,6 +17,14 @@ import IXIAosCardCatalogBench
 
 import IXILocationObjectFace1
   from "../ixi-mos/location/IXILocationObjectFace1";
+
+import IXICardScaleControl
+  from "../ixi-chassis/IXICardScaleControl";
+
+import {
+  readSitewideCardScaleMode,
+  writeSitewideCardScaleMode
+} from "../ixi-chassis/IXIScaleEngine";
 
 
 const FACE_TREE = [
@@ -60,9 +71,36 @@ export default function IXIFaceStudio() {
 ] = useState("faces");
 
   const [
+  previewSize,
+  setPreviewSize
+] = useState("both");
+
+  const [
   referenceOverlayVisible,
   setReferenceOverlayVisible
 ] = useState(true);
+
+  const [
+    faceScaleMode,
+    setFaceScaleMode
+  ] = useState("xl");
+
+  useEffect(() => {
+    const savedMode =
+      readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setFaceScaleMode(savedMode);
+    }
+  }, []);
+
+  function updateFaceScaleMode(nextMode) {
+    setFaceScaleMode(
+      writeSitewideCardScaleMode(
+        nextMode
+      )
+    );
+  }
 
   function cycleSelectedFace() {
     const activeGroup =
@@ -288,6 +326,48 @@ if (
       <button
         type="button"
         className={
+          previewSize === "both"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("both")
+        }
+      >
+        BOTH
+      </button>
+
+      <button
+        type="button"
+        className={
+          previewSize === "compact"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("compact")
+        }
+      >
+        MARKETPLACE
+      </button>
+
+      <button
+        type="button"
+        className={
+          previewSize === "tall"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setPreviewSize("tall")
+        }
+      >
+        OPERATING
+      </button>
+
+      <button
+        type="button"
+        className={
           referenceOverlayVisible
             ? "active"
             : ""
@@ -304,28 +384,79 @@ if (
   </div>
 
   <div className="preview-stage">
-    <div className="preview-shells">
-      <IXIFaceLabScaledCard
-        surfaceLabel="Face Lab Faces"
-      >
-        <div className="preview-shell">
-          <IXIFacePreview
-            face={selectedFace}
-            previewSize="tall"
-            onCycleFace={
-              cycleSelectedFace
-            }
-          />
+    <div
+      className={[
+        "preview-shells",
 
-          {referenceOverlayVisible ? (
-            <IXIFaceReferenceOverlay
-              previewSize="tall"
-              railHeight={19}
+        previewSize === "both"
+          ? "show-both"
+          : "show-single"
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {previewSize === "both" ||
+      previewSize === "compact" ? (
+        <IXIFaceLabScaledCard
+          objectFamily="marketplace"
+          surfaceLabel="Face Lab Marketplace Faces"
+          scaleMode={faceScaleMode}
+          onScaleModeChange={updateFaceScaleMode}
+          showScaleControl={false}
+        >
+          <div className="preview-shell preview-shell-marketplace">
+            <IXIFacePreview
+              face={selectedFace}
+              previewSize="compact"
+              onCycleFace={
+                cycleSelectedFace
+              }
             />
-          ) : null}
-        </div>
-      </IXIFaceLabScaledCard>
+
+            {referenceOverlayVisible ? (
+              <IXIFaceReferenceOverlay
+                previewSize="compact"
+                railHeight={19}
+              />
+            ) : null}
+          </div>
+        </IXIFaceLabScaledCard>
+      ) : null}
+
+      {previewSize === "both" ||
+      previewSize === "tall" ? (
+        <IXIFaceLabScaledCard
+          objectFamily="private"
+          surfaceLabel="Face Lab Operating Faces"
+          scaleMode={faceScaleMode}
+          onScaleModeChange={updateFaceScaleMode}
+          showScaleControl={false}
+        >
+          <div className="preview-shell preview-shell-operating">
+            <IXIFacePreview
+              face={selectedFace}
+              previewSize="tall"
+              onCycleFace={
+                cycleSelectedFace
+              }
+            />
+
+            {referenceOverlayVisible ? (
+              <IXIFaceReferenceOverlay
+                previewSize="tall"
+                railHeight={19}
+              />
+            ) : null}
+          </div>
+        </IXIFaceLabScaledCard>
+      ) : null}
     </div>
+
+    <IXICardScaleControl
+      value={faceScaleMode}
+      onChange={updateFaceScaleMode}
+      surfaceLabel="Face Lab Faces"
+    />
   </div>
 </section>
       <aside className="face-inspector">
@@ -482,12 +613,16 @@ if (
   overflow: auto;
 }
 
+.preview-shells.show-single {
+  justify-content: center;
+}
+
 .preview-shell{
  position: relative;
 
-width: 298px;
-  min-height: 470px;
-  height: 470px;
+width: 300px;
+  min-height: 0;
+  height: auto;
   
   display:flex;
   align-items:flex-start;
@@ -502,6 +637,14 @@ overflow: visible;
   box-shadow:
     0 18px 40px
     rgba(0,0,0,.42);
+}
+
+.preview-shell-marketplace {
+  height: 400px;
+}
+
+.preview-shell-operating {
+  height: 475px;
 }
 
 .preview-title {

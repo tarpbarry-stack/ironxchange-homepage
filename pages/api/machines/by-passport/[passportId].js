@@ -154,6 +154,63 @@ async function loadMachineListing(
   };
 }
 
+function getMachineMediaKey({
+  listing,
+  passport
+}) {
+  const publicData =
+    listing?.attributes?.publicData ||
+    {};
+
+  return clean(
+    publicData?.ixiMedia?.machineKey ||
+    publicData?.ixiMediaMachineKey ||
+    publicData?.machineKey ||
+    passport?.passportId ||
+    passport?.sourceId
+  );
+}
+
+async function loadMachineMediaManifest(
+  machineKey
+) {
+  if (!machineKey) {
+    return null;
+  }
+
+  try {
+    const response =
+      await fetch(
+        `${getIXCoreBase()}/media/machines/${encodeURIComponent(
+          machineKey
+        )}`
+      );
+
+    const payload =
+      await readJsonResponse(
+        response
+      );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (
+      payload?.manifest ||
+      payload?.machine ||
+      null
+    );
+  } catch (error) {
+    console.warn(
+      "MACHINE FILE MEDIA MANIFEST UNAVAILABLE:",
+      machineKey,
+      error?.message || error
+    );
+
+    return null;
+  }
+}
+
 export default async function handler(
   req,
   res
@@ -225,6 +282,25 @@ export default async function handler(
         listingId
       );
 
+    /*
+     * 3. Resolve IXI Media independently.
+     *
+     * Machine identity remains Passport-authoritative.
+     * Sharetribe remains the listing source.
+     * IXI Media is the preferred photo manifest when present.
+     * Failure to load media is non-fatal; Sharetribe images remain fallback.
+     */
+    const mediaMachineKey =
+      getMachineMediaKey({
+        listing,
+        passport
+      });
+
+    const mediaManifest =
+      await loadMachineMediaManifest(
+        mediaMachineKey
+      );
+
     return res
       .status(200)
       .json({
@@ -237,7 +313,10 @@ export default async function handler(
           passport,
 
           listing,
-          included
+          included,
+
+          mediaMachineKey,
+          mediaManifest
         }
       });
   } catch (error) {
