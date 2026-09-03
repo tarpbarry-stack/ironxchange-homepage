@@ -20,7 +20,7 @@ export default function IXIAosCard004Personnel(props) {
         <IXIAosCommercialEditorBridge object={contractProps.object} onSaveObject={contractProps.onSaveObject}>
           {({ object }) => (
             <>
-              <IXIAosGenericCardRailShell object={object} {...contractProps} face={1}>
+              <IXIAosGenericCardRailShell {...contractProps} object={object} face={1}>
                 <IXIAosGenericContainerLayoutV12 {...contractProps} object={object} variant={1} />
               </IXIAosGenericCardRailShell>
               <IXIAosV12CardPolish />
