@@ -43,6 +43,25 @@ export default function IXIAosLocationVisualCorrections() {
 
       /* 001-003/other V12 card shell helpers */
       .ixi-generic-overview .gov-relation-scroll,.ixi-generic-container-v12 .gcv12-section-scroll,.ixi-universal-card-007 .u007-section-scroll{scrollbar-width:thin;scrollbar-color:#555c57 #101310}
+
+      /* Card 009 machine identity: use the same visual hierarchy as the yellow parent line.
+         This is intentionally scoped to Card 009 only. The machine shell/body/media remain frozen. */
+      .ixi-card-009 .c009-header::after{
+        content:"IXI - XXXXXX";
+        position:absolute;
+        top:7px;
+        right:9px;
+        z-index:210;
+        color:#858c87;
+        font-family:Arial,Helvetica,sans-serif;
+        font-size:6px;
+        font-weight:950;
+        line-height:1;
+        letter-spacing:.08em;
+        white-space:nowrap;
+        pointer-events:none;
+      }
+      .ixi-card-009 .ixi-aos-card-header-controls{top:17px!important}
     `}</style>
   );
 }
