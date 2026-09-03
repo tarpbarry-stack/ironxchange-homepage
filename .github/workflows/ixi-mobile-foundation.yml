@@ -32,10 +32,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
 
-      - name: Install locked dependencies
-        run: npm ci
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
 
       - name: Run mobile foundation contract
         run: node --test tests/ixi-mobile-foundation-contract.test.mjs
