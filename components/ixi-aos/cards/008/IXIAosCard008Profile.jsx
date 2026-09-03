@@ -1,21 +1,7 @@
 import IXIAosGenericObjectLayout007 from "../generic/IXIAosGenericObjectLayout007";
 import IXIAosGenericCardRailShell from "../generic/IXIAosGenericCardRailShell";
 import IXIAosDataContractCardAdapter from "../../card-runtime/IXIAosDataContractCardAdapter";
-
-function clean(value) {
-  return String(value ?? "").trim();
-}
-
-function getParentDisplayName(object = {}, explicitParentLabel = "") {
-  return clean(
-    explicitParentLabel ||
-    object?.parentDisplayName ||
-    object?.parent?.displayName ||
-    object?.parent?.name ||
-    object?.parent?.label ||
-    object?.metadata?.parentDisplayName
-  );
-}
+import { getAosParentDisplayName } from "../../card-runtime/IXIAosParentIdentity";
 
 /*
  * Card 008 — profile / identity presentation recipe.
@@ -28,7 +14,7 @@ export default function IXIAosCard008Profile(props) {
   return (
     <IXIAosDataContractCardAdapter {...props}>
       {contractProps => {
-        const parentDisplayName = getParentDisplayName(
+        const parentDisplayName = getAosParentDisplayName(
           contractProps.object,
           contractProps.parentLabel
         );
