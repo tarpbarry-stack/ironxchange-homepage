@@ -1,4 +1,4 @@
-const { launchTicketWorker } = require("../../../../lib/ixi-agent/ixiAgentWorker");
+const { launchTicketWorker, recoverTicketWorker } = require("../../../../lib/ixi-agent/ixiAgentWorker");
 
 export const config = {
   api: { bodyParser: { sizeLimit: "256kb" } }
@@ -31,7 +31,7 @@ function readiness() {
   return {
     ok: true,
     service: "ixi-agent-worker",
-    contractVersion: "1.0.0",
+    contractVersion: "1.1.0",
     readyForReviewResearch: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth,
     readyForExecution: checks.openai && checks.ticketMcpUrl && checks.ticketMcpAuth && checks.executionMcpUrl,
     checks
@@ -58,11 +58,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await launchTicketWorker({
-      ticketId,
-      expectedRevision,
-      source: clean(req.body?.source) || "ticket-command"
-    });
+    const recovery = req.body?.recovery === true;
+    const result = recovery
+      ? await recoverTicketWorker({ ticketId, expectedRevision })
+      : await launchTicketWorker({
+          ticketId,
+          expectedRevision,
+          source: clean(req.body?.source) || "ticket-command"
+        });
     return res.status(202).json(result);
   } catch (error) {
     return res.status(Number(error.status) || 500).json({
