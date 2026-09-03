@@ -1,0 +1,25 @@
+name: IXI Mobile Card-Native DnD Certification
+
+on:
+  push:
+    branches:
+      - mobile/commercial-aos-v1-natural-dnd-source-surface
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run card-native mobile DnD contract
+        run: node --test tests/ixi-mobile-card-native-dnd-contract.test.mjs
+      - name: Build production application
+        env:
+          NEXT_PUBLIC_SHARETRIBE_CLIENT_ID: ci-mobile-card-native-dnd-placeholder
+        run: npm run build
