@@ -1,0 +1,35 @@
+name: Ticket Connected Chat Bridge
+
+on:
+  push:
+    branches:
+      - ticket/commercial-agent-bridge-v1
+    paths:
+      - ".ixi/chat-bridge/request.json"
+
+permissions:
+  contents: read
+
+env:
+  IXI_CHAT_REQUEST_PATH: .ixi/chat-bridge/request.json
+  IXI_CHAT_RESPONSE_PATH: /tmp/ixi-chat-bridge-response.json
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Execute IXI connected Chat request
+        run: node .github/scripts/ixi-connected-chat-bridge.mjs
+      - name: Upload private response artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ixi-connected-chat-${{ github.sha }}
+          path: /tmp/ixi-chat-bridge-response.json
+          if-no-files-found: error
+          retention-days: 1
