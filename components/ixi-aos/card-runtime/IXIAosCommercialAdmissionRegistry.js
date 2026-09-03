@@ -14,42 +14,15 @@
  */
 
 export const IXI_AOS_COMMERCIAL_ADMISSION = Object.freeze({
-  "001": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "002": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "003": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "004": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "005": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "006": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "007": Object.freeze({
-    status: "ready-for-runtime-qa",
-    blockers: []
-  }),
-  "008": Object.freeze({
-    status: "repair-required",
-    blockers: ["field-label-edit", "field-add", "field-delete"]
-  }),
-  "009": Object.freeze({
-    status: "ready-for-runtime-qa",
-    blockers: []
-  }),
+  "001": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "002": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "003": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "004": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "005": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "006": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "007": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "008": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
+  "009": Object.freeze({ status: "ready-for-runtime-qa", blockers: [] }),
   "009B": Object.freeze({
     status: "unverified",
     blockers: ["active-runtime-registration"]
