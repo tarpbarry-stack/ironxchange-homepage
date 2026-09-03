@@ -9,13 +9,18 @@ export default function IXIObjectCardActuator({
   const isTall =
     variant === "tall";
 
+  const isMarketplaceFull =
+    variant === "marketplace-full";
+
   const actuatorTop =
     isTall
       ? 402
-      : 352;
+      : isMarketplaceFull
+        ? 335
+        : 352;
 
   const actuatorHeight =
-    isTall
+    isTall || isMarketplaceFull
       ? 34
       : 17;
 
