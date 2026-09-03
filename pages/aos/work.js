@@ -64,6 +64,8 @@ import { captureIXEvent } from "../../lib/posthog";
 import IXIDragEngine from "../../components/ixi-chassis/IXIDragEngine";
 import IXIEnvironmentRail from "../../components/IXIEnvironmentRail";
 import IXIChassisControls from "../../components/ixi-chassis/IXIChassisControls";
+import IXICardScaleControl
+  from "../../components/ixi-chassis/IXICardScaleControl";
 import IXIPocketL1 from "../../components/ixi-chassis/IXIPocketL1";
 import IXIPocketL2 from "../../components/ixi-chassis/IXIPocketL2";
 import IXIPocketR1 from "../../components/ixi-chassis/IXIPocketR1";
@@ -114,7 +116,9 @@ import {
 } from "../../components/ixi-chassis/IXIPocketEngine";
 
 import {
-  getNextCardScaleMode
+  readSitewideCardScaleMode,
+  resolveSitewideCardScaleMode,
+  writeSitewideCardScaleMode
 } from "../../components/ixi-chassis/IXIScaleEngine";
 
 import {
@@ -240,6 +244,14 @@ const POCKET_TARGETS = [
   const [cardScaleMode, setCardScaleMode] = useState("xl");
   const cardScaleMetrics = getIXICardScalePreset(cardScaleMode);
 
+  useEffect(() => {
+    const savedMode = readSitewideCardScaleMode();
+
+    if (savedMode) {
+      setCardScaleMode(savedMode);
+    }
+  }, []);
+
   const hasAppliedRemoteLayoutRef = useRef(false);
   
   const [activeDndId, setActiveDndId] = useState("");
@@ -322,9 +334,11 @@ console.log("IXI WORKSPACE LAYOUT LOADED", workspaceLayout);
 
 setIxiCardState(remoteIxiState);
 
-if (workspaceSettings.cardScaleMode) {
-  setCardScaleMode(workspaceSettings.cardScaleMode);
-}
+setCardScaleMode(
+  resolveSitewideCardScaleMode(
+    workspaceSettings.cardScaleMode
+  )
+);
         
 setSavedIds(
   getSavedListingIdsFromUser(currentUser)
@@ -2118,9 +2132,14 @@ const {
 });
 
   
-function cycleCardScaleMode() {
+function updateCardScaleMode(nextMode) {
   setCardScaleMode(current => {
-    const next = getNextCardScaleMode(current);
+    if (nextMode === current) {
+      return current;
+    }
+
+    const next =
+      writeSitewideCardScaleMode(nextMode);
 
     saveIxiMachinePatch({
       userId: ixiUserId,
@@ -3117,27 +3136,11 @@ onCreateObjectChild={
   }
 />
     
-<button
-  type="button"
-  onClick={cycleCardScaleMode}
-  style={{
-    position: "fixed",
-    right: "24px",
-    bottom: "24px",
-    zIndex: 9999,
-    background: "#111",
-    color: "#FFC400",
-    border: "1px solid rgba(255,196,0,.55)",
-    borderRadius: "8px",
-    padding: "8px 10px",
-    fontSize: "11px",
-    fontWeight: 900,
-    letterSpacing: ".08em",
-    cursor: "pointer"
-  }}
->
-  SCALE: {cardScaleMode.toUpperCase()}
-</button>
+<IXICardScaleControl
+  value={cardScaleMode}
+  onChange={updateCardScaleMode}
+  surfaceLabel="AOS Work"
+/>
 
         {visibleSavedListings.length === 0 && (
   <div className="empty">
