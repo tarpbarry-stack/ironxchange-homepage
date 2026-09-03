@@ -264,6 +264,25 @@ export async function closeIXITransactPeriod({
   return readJsonResponse(response, "financial.period.close");
 }
 
+export async function reopenIXITransactPeriod({ period = "", currency = "USD", reopenReason = "", commandId = "", idempotencyKey = "", metadata = {}, signal } = {}) {
+  const resolvedPeriod = clean(period);
+  if (!/^\d{4}-\d{2}$/.test(resolvedPeriod)) throw new IXITransactDesktopError("TRAN$ACT reopen period must use YYYY-MM.", { operation: "financial.period.reopen" });
+  if (clean(reopenReason).length < 10) throw new IXITransactDesktopError("A specific reopen reason of at least 10 characters is required.", { operation: "financial.period.reopen" });
+  const response = await fetch("/api/ixi/financial/commands/desktop/reopen-period", {
+    method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-IXI-Source": "ixi-transact-desktop" },
+    body: JSON.stringify({ period: resolvedPeriod, currency: clean(currency || "USD").toUpperCase(), reopenReason: clean(reopenReason), commandId: clean(commandId), idempotencyKey: clean(idempotencyKey), metadata: { ...safeObject(metadata), transactSurface: "desktop" } }), signal
+  });
+  return readJsonResponse(response, "financial.period.reopen");
+}
+
+export async function createIXITransactPostingRule({ postingRule = {}, currency = "USD", commandId = "", idempotencyKey = "", metadata = {}, signal } = {}) {
+  const response = await fetch("/api/ixi/financial/commands/desktop/posting-rules", {
+    method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-IXI-Source": "ixi-transact-desktop" },
+    body: JSON.stringify({ postingRule: safeObject(postingRule), currency: clean(currency || "USD").toUpperCase(), commandId: clean(commandId), idempotencyKey: clean(idempotencyKey), metadata: { ...safeObject(metadata), transactSurface: "desktop" } }), signal
+  });
+  return readJsonResponse(response, "financial.posting-rules.create");
+}
+
 export function getIXITransactGLProjection(result) {
   return result?.data?.projection || null;
 }
@@ -278,6 +297,8 @@ export default {
   createIXITransactJournalEntry,
   postIXITransactJournalEntry,
   closeIXITransactPeriod,
+  reopenIXITransactPeriod,
+  createIXITransactPostingRule,
   getIXITransactGLProjection,
   getIXITransactGLScope
 };

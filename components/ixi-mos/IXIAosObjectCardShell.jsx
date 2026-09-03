@@ -120,9 +120,9 @@ export default function IXIAosObjectCardShell({
           <button
             type="button"
 
-            className="
+            className={`
               ixi-aos-add-child
-            "
+            `}
 
             title="Add child object"
 
@@ -177,9 +177,9 @@ export default function IXIAosObjectCardShell({
           =============================== */}
 
       <div
-        className="
+        className={`
           ixi-aos-face-window
-        "
+        `}
       >
         {children}
       </div>

@@ -293,9 +293,9 @@ export default function IXIDragEngine({
       >
         {activeDndObject ? (
           <div
-            className="
+            className={`
               ixi-drag-overlay-card
-            "
+            `}
           >
             <IXIScaledCardShell
               size={

@@ -83,10 +83,10 @@ export default function IXIObjectStudioFaceOrderBench({
         <button
           type="button"
 
-          className="
+          className={`
             face-tile
             add-face
-          "
+          `}
 
           onClick={
             () =>

@@ -784,9 +784,9 @@ export default function IXIAosFinancialFace2({
                           item.id
                         }
 
-                        className="
+                        className={`
                           activity-row
-                        "
+                        `}
                       >
 
                         <div className="activity-copy">
@@ -937,9 +937,9 @@ export default function IXIAosFinancialFace2({
           <button
             type="button"
 
-            className="
+            className={`
               workbook-button
-            "
+            `}
 
             onClick={
               onOpenWorkbook

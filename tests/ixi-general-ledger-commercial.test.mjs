@@ -20,6 +20,7 @@ test("canonical IX Core journals hydrate without inventing economic amounts", ()
         schema: "ixi-financial-gl-projection-v2",
         chart: { source: "ixi-core", accounts: [{ code: "1010", name: "Cash", type: "asset", active: true }] },
         period: { period: "2026-09", status: "open", closed: false },
+        postingRules: { source: "ixi-core-dynamodb", rules: [{ identity: { ruleId: "invoice-us", version: 2 }, match: { documentType: "invoice" }, posting: { debitAccountCode: "1100", creditAccountCode: "4100" }, control: { active: true } }] },
         journal: [{
           financialDocumentId: "ifd-je-1", documentType: "journal-entry",
           documentNumber: "JE-1", financialState: "posted", status: "posted",
@@ -40,6 +41,9 @@ test("canonical IX Core journals hydrate without inventing economic amounts", ()
   assert.equal(result.journals[0].source.financialDocumentId, "ifd-invoice-1");
   assert.equal(result.journals[0].totals.debits, 125);
   assert.equal(result.journals[0].totals.credits, 125);
+  assert.equal(result.postingRules.rules[0].ruleId, "invoice-us");
+  assert.equal(result.postingRules.rules[0].version, 2);
+  assert.equal(result.postingRules.rules[0].debitAccount, "1100");
 });
 
 test("reversal has unique original-journal lineage and opposite accounting", () => {
@@ -81,12 +85,16 @@ test("GL close and reporting use authoritative IX Core routes", async () => {
   const client = await readFile(new URL("../components/ixi-aos/financial-runtime/IXITransactDesktopClient.js", import.meta.url), "utf8");
   assert.match(app, /loadIXITransactGL/u);
   assert.match(app, /closeIXITransactPeriod/u);
+  assert.match(app, /reopenIXITransactPeriod/u);
+  assert.match(app, /createIXITransactPostingRule/u);
   assert.doesNotMatch(app, /closeIXIAccountingPeriod/u);
   assert.match(reports, /loadIXITransactGL/u);
   assert.match(reports, /SERVER CALCULATED · BROWSER CALCULATED: NO/u);
   assert.match(client, /commands\/desktop\/close-period/u);
-  assert.doesNotMatch(app, /auto-reverse-requested|ADD VERSIONED RULE|setMapping/u);
-  assert.match(app, /BROWSER RULE MUTATION IS[\s\S]*DISABLED/u);
+  assert.match(client, /commands\/desktop\/reopen-period/u);
+  assert.match(client, /commands\/desktop\/posting-rules/u);
+  assert.doesNotMatch(app, /auto-reverse-requested|setMapping/u);
+  assert.match(app, /CREATE AUDITED RULE VERSION/u);
   assert.doesNotMatch(reports, /POSTED \/ UNREVERSED JOURNALS/u);
 });
 

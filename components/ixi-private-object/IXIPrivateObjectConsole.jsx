@@ -287,10 +287,10 @@ export default function IXIPrivateObjectConsole({
       <div
         key={slot.slotId}
 
-        className="
+        className={`
           ixi-private-console-slot
           ixi-private-console-module-slot
-        "
+        `}
       >
         <div className="ixi-private-console-module-card">
          <IXIObjectCardActuator
@@ -462,9 +462,9 @@ export default function IXIPrivateObjectConsole({
           <button
             type="button"
 
-            className="
+            className={`
               ixi-private-console-face-button
-            "
+            `}
 
             aria-label={
               `Change private face ${slot.face}`
@@ -560,10 +560,10 @@ export default function IXIPrivateObjectConsole({
       <div
         key={slot.slotId}
 
-        className="
+        className={`
           ixi-private-console-slot
           ixi-private-console-listing-slot
-        "
+        `}
       >
         {parentCard}
       </div>
@@ -572,9 +572,9 @@ export default function IXIPrivateObjectConsole({
 
   const assembledConsole = (
     <div
-      className="
+      className={`
         ixi-private-object-console
-      "
+      `}
 
       style={{
         width:

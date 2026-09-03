@@ -283,10 +283,10 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
-        className="
+        className={`
           ixi-auction-console-slot
           ixi-auction-console-module-slot
-        "
+        `}
       >
         <div className="ixi-auction-console-module-card">
          <IXIObjectCardActuator
@@ -427,9 +427,9 @@ export default function IXIAuctionObjectConsole({
           <button
             type="button"
 
-            className="
+            className={`
               ixi-auction-console-face-button
-            "
+            `}
 
             aria-label={
               `Change auction face ${slot.face}`
@@ -523,10 +523,10 @@ export default function IXIAuctionObjectConsole({
     return (
       <div
         key={slot.slotId}
-        className="
+        className={`
           ixi-auction-console-slot
           ixi-auction-console-listing-slot
-        "
+        `}
       >
         {parentCard}
       </div>
@@ -535,9 +535,9 @@ export default function IXIAuctionObjectConsole({
 
   const assembledConsole = (
     <div
-      className="
+      className={`
         ixi-auction-object-console
-      "
+      `}
 
       style={{
         width:
