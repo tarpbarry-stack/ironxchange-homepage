@@ -1,0 +1,6 @@
+function clean(value){return String(value??"").trim();}
+export default function handler(req,res){
+ if(req.method!=="GET"){res.setHeader("Allow","GET");return res.status(405).json({ok:false,error:{code:"METHOD_NOT_ALLOWED",message:"GET required."}});}
+ const commitSha=clean(process.env.VERCEL_GIT_COMMIT_SHA);const commitRef=clean(process.env.VERCEL_GIT_COMMIT_REF);const deploymentId=clean(process.env.VERCEL_DEPLOYMENT_ID);const env=clean(process.env.VERCEL_ENV||process.env.NODE_ENV);const region=clean(process.env.VERCEL_REGION||process.env.AWS_REGION||process.env.AWS_DEFAULT_REGION);const ixCoreBase=clean(process.env.IX_CORE_BASE_URL);
+ return res.status(200).json({ok:true,generatedAt:new Date().toISOString(),frontend:{environment:env,commitSha,commitRef,deploymentId,region},services:{ixCore:{configured:Boolean(ixCoreBase),baseHost:ixCoreBase?(()=>{try{return new URL(ixCoreBase).host}catch{return "configured"}})():""}},versions:{taxonomy:clean(process.env.IXI_TAXONOMY_VERSION),parser:clean(process.env.IXI_ACQUISITION_VERSION),financial:clean(process.env.IXI_FINANCIAL_VERSION),schema:clean(process.env.IXI_SCHEMA_VERSION)},notice:"Release projection reports configured deployment metadata only; rollback remains outside Admin Daddy until an audited deployment command adapter is authorized."});
+}
