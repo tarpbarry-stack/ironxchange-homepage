@@ -1,10 +1,13 @@
 import IXIAosGenericUniversalLayout007B from "../generic/IXIAosGenericUniversalLayout007B";
+import IXIAosV12LibraryReadability from "../../card-runtime/modules/IXIAosV12LibraryReadability";
+import IXIAosV12Face1EditPatch from "../../card-runtime/modules/IXIAosV12Face1EditPatch";
 
-/*
- * 007B — universal AOS card without the bottom child/photo thumbnail rail.
- * All object semantics, editing, relationships, commands, skins and rail behavior
- * remain owned by the shared universal 007 implementation.
- */
 export default function IXIAosCard007B(props) {
-  return <IXIAosGenericUniversalLayout007B {...props} />;
+  return (
+    <div className="ixi-v12-library-readable ixi-v12-face1-edit" style={{ width: 298, height: 471 }}>
+      <IXIAosGenericUniversalLayout007B {...props} />
+      <IXIAosV12LibraryReadability />
+      <IXIAosV12Face1EditPatch />
+    </div>
+  );
 }
