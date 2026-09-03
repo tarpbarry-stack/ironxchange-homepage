@@ -75,6 +75,14 @@ export async function createIXIExpense({
 
   const additionalReferences = [];
 
+  const entityReference = createIXIAosFinancialObjectReference({
+    object: context.entity || {},
+    role: "entity"
+  });
+  if (entityReference) {
+    additionalReferences.push(entityReference);
+  }
+
   const locationReference = createIXIAosFinancialObjectReference({
     object: context.location || {},
     role: "location"
@@ -107,13 +115,17 @@ export async function createIXIExpense({
         currency: draft.expense.currency,
         amount: draft.expense.amount,
         description: draft.expense.description,
-        status: "posted",
+        financialState: "incurred",
+        occurredAt: `${draft.expense.expenseDate}T00:00:00.000Z`,
         vendor: draft.expense.vendor,
         category: draft.expense.category,
         expenseDate: draft.expense.expenseDate,
         paymentMethod: draft.expense.paymentMethod,
         referenceNumber: draft.expense.referenceNumber,
+        externalReference: draft.expense.referenceNumber,
         notes: draft.expense.notes,
+        memo: draft.expense.notes,
+        receiptRequired: draft.expense.receiptRequired,
         attachments: draft.attachments,
         references: additionalReferences,
         relationships: {
@@ -122,7 +134,8 @@ export async function createIXIExpense({
           reimbursementRequired: draft.reimbursement.required,
           reimbursementEmployeePassportId: draft.reimbursement.employeePassportId,
           reimbursementEmployeeId: draft.reimbursement.employeeId
-        }
+        },
+        reimbursement: draft.reimbursement
       },
       additionalReferences,
       commandId: stableId,
@@ -157,7 +170,7 @@ export async function createIXIExpense({
         expenseId,
         number: clean(draft.identity.number) || expenseId
       },
-      status: "posted"
+      status: "incurred"
     },
     response
   };
