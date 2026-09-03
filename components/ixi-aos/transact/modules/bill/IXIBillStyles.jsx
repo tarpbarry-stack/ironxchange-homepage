@@ -338,7 +338,8 @@ export default function IXIBillStyles() {
       }
 
       .inline-form input,
-      .inline-form select {
+      .inline-form select,
+      .inline-form textarea {
         min-width: 0;
         height: 27px;
         padding: 0 6px;
@@ -347,6 +348,18 @@ export default function IXIBillStyles() {
         background: #090b0a;
         color: #f4f4f4;
         font-size: 6px;
+      }
+
+      .inline-form textarea {
+        min-height: 42px;
+        height: auto;
+        padding: 6px;
+        resize: vertical;
+      }
+
+      .inline-form.payment-form > strong,
+      .inline-form.payment-form > textarea {
+        grid-column: 1 / -1;
       }
 
       .inline-form button {
@@ -370,7 +383,7 @@ export default function IXIBillStyles() {
         bottom: 0;
         height: 28px;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
         border-top: 1px solid rgba(255,255,255,.08);
         background: #0a0c0b;
       }
