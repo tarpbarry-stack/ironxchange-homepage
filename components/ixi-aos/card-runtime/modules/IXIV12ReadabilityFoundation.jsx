@@ -98,6 +98,8 @@ export default function IXIV12ReadabilityFoundation() {
          retain only placement geometry; typography lives here from now on. */
       .ixi-v12-readable-card .ixi-v12-customer-identity-label {
         display: block;
+        width: 100%;
+        min-width: 0;
         max-width: 96%;
         margin-bottom: 2px;
         overflow: hidden;
@@ -114,6 +116,8 @@ export default function IXIV12ReadabilityFoundation() {
 
       .ixi-v12-readable-card .ixi-v12-customer-identity-value {
         display: block;
+        width: 100%;
+        min-width: 0;
         max-width: 96%;
         overflow: hidden;
         color: #f2f4f2;
@@ -127,12 +131,101 @@ export default function IXIV12ReadabilityFoundation() {
         white-space: nowrap;
       }
 
+      /* Card 003 keeps the exact native right-side address shell. Its half-width
+         composition gets a narrow-shell text-fit rule rather than changing geometry. */
+      .ixi-v12-readable-card.aos-card003-customer-id-shell .aos-card003-customer-identity {
+        min-width: 0;
+        overflow: hidden;
+        padding: 0 2px;
+      }
+      .ixi-v12-readable-card.aos-card003-customer-id-shell .ixi-v12-customer-identity-label,
+      .ixi-v12-readable-card.aos-card003-customer-id-shell .ixi-v12-customer-identity-value {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .ixi-v12-readable-card.aos-card003-customer-id-shell .ixi-v12-customer-identity-label {
+        letter-spacing: 0;
+        line-height: 11px !important;
+      }
+      .ixi-v12-readable-card.aos-card003-customer-id-shell .ixi-v12-customer-identity-value {
+        font-size: var(--ixi-v12-type-micro) !important;
+        line-height: 11px !important;
+        letter-spacing: 0;
+      }
+
       .ixi-v12-readable-card .ixi-v12-object-id {
         font-family: var(--ixi-v12-font-ui) !important;
         font-size: var(--ixi-v12-type-micro) !important;
         font-weight: var(--ixi-v12-weight-micro) !important;
         line-height: var(--ixi-v12-leading-micro) !important;
         letter-spacing: .025em !important;
+      }
+
+      /* Shared relationship infrastructure: meaningful operational text must not
+         remain at the legacy 5-7px sizes. The outer relationship shell is frozen;
+         rows grow internally and the existing scroll region handles density. */
+      .ixi-v12-readable-card .gov-relations h3 {
+        height: 22px !important;
+        padding: 0 8px !important;
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-micro) !important;
+        font-weight: var(--ixi-v12-weight-control) !important;
+        line-height: 12px !important;
+        letter-spacing: .02em;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll {
+        height: calc(100% - 22px) !important;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll button {
+        min-height: 38px !important;
+        padding: 5px 6px 5px 8px !important;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll button > span {
+        min-width: 0;
+        overflow: hidden;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll small {
+        overflow: hidden;
+        color: #aeb5b0 !important;
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-micro) !important;
+        font-weight: var(--ixi-v12-weight-micro) !important;
+        line-height: 11px !important;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll strong {
+        overflow: hidden;
+        margin-top: 2px !important;
+        color: #f2f4f2;
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-label) !important;
+        font-weight: 700 !important;
+        line-height: 13px !important;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .ixi-v12-readable-card .gov-relation-scroll em {
+        overflow: hidden;
+        margin-top: 1px;
+        color: #8f9892 !important;
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-micro) !important;
+        font-weight: var(--ixi-v12-weight-micro) !important;
+        line-height: 11px !important;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .ixi-v12-readable-card .gov-empty {
+        padding: 14px 8px !important;
+        font-family: var(--ixi-v12-font-ui) !important;
+        font-size: var(--ixi-v12-type-micro) !important;
+        font-weight: var(--ixi-v12-weight-micro) !important;
+        line-height: var(--ixi-v12-leading-micro) !important;
       }
 
       /*
