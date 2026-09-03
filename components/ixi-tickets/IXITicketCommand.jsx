@@ -132,10 +132,10 @@ export default function IXITicketCommand() {
     setActionNotice("");
     try {
       await startRemoteTicket(ticket, { assignedTo: "chat", source });
-      setActionNotice(`STARTED ${ticket.displayNumber} — status is now WORKING.`);
+      setActionNotice(`DISPATCH REQUESTED FOR ${ticket.displayNumber} — it remains READY until a real agent claims the full work packet.`);
       await refreshRemoteTickets();
     } catch (error) {
-      setActionNotice(error.message || "Ticket could not be started.");
+      setActionNotice(error.message || "Ticket could not be dispatched.");
     } finally {
       setActionBusy(false);
     }
@@ -151,20 +151,20 @@ export default function IXITicketCommand() {
     setActionBusy(true);
     setActionNotice("");
     const failures = [];
-    let started = 0;
+    let dispatched = 0;
     try {
       for (const ticket of ready) {
         try {
           await startRemoteTicket(ticket, { assignedTo: "chat", source: "ready-queue" });
-          started += 1;
+          dispatched += 1;
         } catch (error) {
           failures.push(`${ticket.displayNumber}: ${error.message}`);
         }
       }
       await refreshRemoteTickets();
       setActionNotice(failures.length
-        ? `Started ${started} Ticket(s). ${failures.length} failed: ${failures.join(" | ")}`
-        : `Started all ${started} Ready Ticket(s).`);
+        ? `Dispatch requested for ${dispatched} Ticket(s). ${failures.length} failed: ${failures.join(" | ")}`
+        : `Dispatch requested for all ${dispatched} Ready Ticket(s). They remain READY until claimed by an agent.`);
     } finally {
       setActionBusy(false);
     }
@@ -266,7 +266,7 @@ export default function IXITicketCommand() {
             {remoteState.status === "loading" ? "REFRESHING..." : "REFRESH FROM AWS"}
           </button>
           <button onClick={() => createTicket({ mode: "floating" })}>+ CREATE TICKET</button>
-          <button onClick={startAllReady} disabled={actionBusy || counts.ready === 0}>{actionBusy ? "WORKING..." : `WORK READY QUEUE (${counts.ready})`}</button>
+          <button onClick={startAllReady} disabled={actionBusy || counts.ready === 0}>{actionBusy ? "DISPATCHING..." : `DISPATCH READY QUEUE (${counts.ready})`}</button>
           <a href="/account">DASHBOARD</a>
         </div>
       </header>
@@ -346,7 +346,7 @@ export default function IXITicketCommand() {
                 </div>
                 <div className={styles.detailActions}>
                   {[IXI_TICKET_STATUS.READY_FOR_CHAT, IXI_TICKET_STATUS.REOPENED].includes(selected.status) ? (
-                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>START WORK ON THIS TICKET</button>
+                    <button disabled={actionBusy || !Number.isInteger(selected.revision)} onClick={() => startWork(selected)}>DISPATCH THIS TICKET TO AGENT</button>
                   ) : null}
                   <button onClick={() => openTicket(selected.ticketId, "floating")}>OPEN WORKSHEET</button>
                   <button onClick={() => popOutTicket(selected.ticketId)}>POP OUT ↗</button>
